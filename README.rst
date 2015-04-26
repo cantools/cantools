@@ -6,7 +6,7 @@ About
 This module is intended to have a similar interface as the python struct module, but
 working on bits instead of normal datatypes (char, int, ...).
 
-Homepage: https://github.com/eerimoq/archive/blob/master/python/bitstruct
+Homepage: https://github.com/eerimoq/bitstruct
 
 
 Installation
@@ -20,7 +20,7 @@ Installation
 Example usage
 =============
 
-See the test suite: https://github.com/eerimoq/archive/blob/master/python/bitstruct/tests/test_bitstruct.py
+See the test suite: https://github.com/eerimoq/bitstruct/blob/master/tests/test_bitstruct.py
 
 A basic example of packing/unpacking four integers:
 

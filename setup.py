@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='bitstruct',
-      version='0.7.1',
+      version='0.7.2',
       description=('This module performs conversions between Python values '
                    'and C bit field structs represented as Python '
                    'bytearrays.'),
@@ -17,6 +17,6 @@ setup(name='bitstruct',
           'Programming Language :: Python :: 3',
       ],
       keywords=['bit field', 'bit parsing', 'bit unpack', 'bit pack'],
-      url='https://github.com/eerimoq/archive/tree/master/python/bitstruct',
+      url='https://github.com/eerimoq/bitstruct',
       py_modules=['bitstruct'],
       test_suite="tests")

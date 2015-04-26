@@ -71,8 +71,8 @@ def pack(fmt, *args):
     :param args: Variable argument list of values to pack.
     :returns: Bytearray of packed values.
     
-    `fmt` is a string of type-length pairs. There are three
-    types; 'u', 's' and 'p'. Length is the number of bits to pack 
+    `fmt` is a string of type-length pairs. There are five
+    types; 'u', 's', 'f', 'b' and 'p'. Length is the number of bits to pack 
     the value into.
     
     - 'u' -- unsigned integer

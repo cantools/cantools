@@ -6,7 +6,7 @@ About
 This module is intended to have a similar interface as the python struct module, but
 working on bits instead of normal datatypes (char, int, ...).
 
-Homepage: https://github.com/eerimoq/bitstruct
+Documentation: http://bitstruct.readthedocs.org/en/latest
 
 
 Installation

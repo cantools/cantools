@@ -1,0 +1,1178 @@
+VERSION ""
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+
+BS_:
+
+BU_: Vector__XXX
+
+BO_ 156795682 RT_SB_INS_Vel_Body_Axes: 8 Vector__XXX
+ SG_ INS_Vel_Sideways_2D : 40|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ INS_Vel_Forwards_2D : 16|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Accuracy_INS_Vel_Body : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Vel_Sideways : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Vel_Forwards : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 155876388 RT_DL1MK3_Speed: 8 Vector__XXX
+ SG_ Speed : 16|32@1- (1e-05,0) [-20000|20000] "m/s" Vector__XXX
+ SG_ Accuracy_Speed : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_Speed : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 156658980 RT_DL1MK3_GPS_Time: 8 Vector__XXX
+ SG_ GPS_Week : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ GPS_Time : 16|32@1+ (0.001,0) [0|604800] "s" Vector__XXX
+ SG_ Accuracy_GPS_Time : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Week : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Time : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156659492 RT_DL1MK3_GPS_Pos_LLH_2: 8 Vector__XXX
+ SG_ GPS_Pos_LLH_Altitude : 32|32@1- (0.001,0) [-1000|100000] "m" Vector__XXX
+ SG_ GPS_Pos_LLH_Longitude : 0|32@1- (1e-07,0) [-180|180] "degrees" Vector__XXX
+
+BO_ 156659236 RT_DL1MK3_GPS_Pos_LLH_1: 8 Vector__XXX
+ SG_ GPS_Pos_LLH_Latitude : 32|32@1- (1e-07,0) [-90|90] "degrees" Vector__XXX
+ SG_ Accuracy_GPS_Pos_LLH_Altitude : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Pos_LLH_Longitude : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Pos_LLH_Latitude : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Pos_LLH_Altitude : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Pos_LLH_Longitude : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Pos_LLH_Latitude : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156662820 RT_DL1MK3_GPS_Speed: 8 Vector__XXX
+ SG_ GPS_Speed_3D : 40|24@1+ (0.0001,0) [0|1675] "m/s" Vector__XXX
+ SG_ GPS_Speed_2D : 16|24@1+ (0.0001,0) [0|1675] "m/s" Vector__XXX
+ SG_ Accuracy_GPS_Speed : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Speed_3D : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Speed_2D : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156988197 RT_IRTemp_Temp_7: 2 Vector__XXX
+ SG_ IR_Temperature_7 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157447205 RT_IRTemp_Temp_RR_2: 8 Vector__XXX
+ SG_ IR_Temperature_32 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_31 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_30 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_29 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157446693 RT_IRTemp_Temp_RL_2: 8 Vector__XXX
+ SG_ IR_Temperature_24 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_23 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_22 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_21 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157446181 RT_IRTemp_Temp_FR_2: 8 Vector__XXX
+ SG_ IR_Temperature_16 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_15 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_14 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_13 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157445669 RT_IRTemp_Temp_FL_2: 8 Vector__XXX
+ SG_ IR_Temperature_8 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_7 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_6 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_5 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157446949 RT_IRTemp_Temp_RR_1: 8 Vector__XXX
+ SG_ IR_Temperature_28 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_27 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_26 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_25 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157446437 RT_IRTemp_Temp_RL_1: 8 Vector__XXX
+ SG_ IR_Temperature_20 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_19 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_18 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_17 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157445925 RT_IRTemp_Temp_FR_1: 8 Vector__XXX
+ SG_ IR_Temperature_12 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_11 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_10 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_9 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157445413 RT_IRTemp_Temp_FL_1: 8 Vector__XXX
+ SG_ IR_Temperature_4 : 48|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_3 : 32|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_2 : 16|16@1- (0.1,0) [0|0] "" Vector__XXX
+ SG_ IR_Temperature_1 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156994597 RT_IRTemp_Temp_32: 2 Vector__XXX
+ SG_ IR_Temperature_32 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156994341 RT_IRTemp_Temp_31: 2 Vector__XXX
+ SG_ IR_Temperature_31 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156994085 RT_IRTemp_Temp_30: 2 Vector__XXX
+ SG_ IR_Temperature_30 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156993829 RT_IRTemp_Temp_29: 2 Vector__XXX
+ SG_ IR_Temperature_29 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156993573 RT_IRTemp_Temp_28: 2 Vector__XXX
+ SG_ IR_Temperature_28 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156993317 RT_IRTemp_Temp_27: 2 Vector__XXX
+ SG_ IR_Temperature_27 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156993061 RT_IRTemp_Temp_26: 2 Vector__XXX
+ SG_ IR_Temperature_26 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992805 RT_IRTemp_Temp_25: 2 Vector__XXX
+ SG_ IR_Temperature_25 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992549 RT_IRTemp_Temp_24: 2 Vector__XXX
+ SG_ IR_Temperature_24 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992037 RT_IRTemp_Temp_22: 2 Vector__XXX
+ SG_ IR_Temperature_22 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992293 RT_IRTemp_Temp_23: 2 Vector__XXX
+ SG_ IR_Temperature_23 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991781 RT_IRTemp_Temp_21: 2 Vector__XXX
+ SG_ IR_Temperature_21 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991525 RT_IRTemp_Temp_20: 2 Vector__XXX
+ SG_ IR_Temperature_20 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991269 RT_IRTemp_Temp_19: 2 Vector__XXX
+ SG_ IR_Temperature_19 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991013 RT_IRTemp_Temp_18: 2 Vector__XXX
+ SG_ IR_Temperature_18 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156990501 RT_IRTemp_Temp_16: 2 Vector__XXX
+ SG_ IR_Temperature_16 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156990245 RT_IRTemp_Temp_15: 2 Vector__XXX
+ SG_ IR_Temperature_15 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989989 RT_IRTemp_Temp_14: 2 Vector__XXX
+ SG_ IR_Temperature_14 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989733 RT_IRTemp_Temp_13: 2 Vector__XXX
+ SG_ IR_Temperature_13 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989477 RT_IRTemp_Temp_12: 2 Vector__XXX
+ SG_ IR_Temperature_12 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989221 RT_IRTemp_Temp_11: 2 Vector__XXX
+ SG_ IR_Temperature_11 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156988965 RT_IRTemp_Temp_10: 2 Vector__XXX
+ SG_ IR_Temperature_10 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156988453 RT_IRTemp_Temp_8: 2 Vector__XXX
+ SG_ IR_Temperature_8 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156988709 RT_IRTemp_Temp_9: 2 Vector__XXX
+ SG_ IR_Temperature_9 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156990757 RT_IRTemp_Temp_17: 2 Vector__XXX
+ SG_ IR_Temperature_17 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987941 RT_IRTemp_Temp_6: 2 Vector__XXX
+ SG_ IR_Temperature_6 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987685 RT_IRTemp_Temp_5: 2 Vector__XXX
+ SG_ IR_Temperature_5 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987429 RT_IRTemp_Temp_4: 2 Vector__XXX
+ SG_ IR_Temperature_4 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987173 RT_IRTemp_Temp_3: 2 Vector__XXX
+ SG_ IR_Temperature_3 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156986917 RT_IRTemp_Temp_2: 2 Vector__XXX
+ SG_ IR_Temperature_2 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156986661 RT_IRTemp_Temp_1: 2 Vector__XXX
+ SG_ IR_Temperature_1 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156726050 RT_SB_Trig_Final_Condition: 8 Vector__XXX
+ SG_ Final_Speed : 8|24@1+ (0.0001,0) [0|1675] "m/s" Vector__XXX
+ SG_ Validity_Final_Speed : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156725794 RT_SB_Trig_Initial_Condition: 8 Vector__XXX
+ SG_ MFDD_End_Threshold : 56|8@1+ (1,0) [0|100] "%" Vector__XXX
+ SG_ MFDD_Start_Threshold : 48|8@1+ (1,0) [0|100] "%" Vector__XXX
+ SG_ Initial_Heading : 32|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Initial_Speed : 8|24@1+ (0.0001,0) [0|1675] "m/s" Vector__XXX
+ SG_ Validity_Initial_Heading : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Initial_Speed : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156725538 RT_SB_Trig_Direct_Dist: 8 Vector__XXX
+ SG_ Path_Distance_2D : 32|32@1+ (0.001,0) [0|4294967] "m" Vector__XXX
+ SG_ Direct_Distance : 0|32@1+ (0.001,0) [0|4294967] "m" Vector__XXX
+
+BO_ 156725282 RT_SB_Trig_Forward_Dist: 8 Vector__XXX
+ SG_ Deviation_Distance : 32|32@1- (0.001,0) [-2147483.648|2147483.647] "m" Vector__XXX
+ SG_ Forward_Distance : 0|32@1- (0.001,0) [-2147483.648|2147483.647] "m" Vector__XXX
+
+BO_ 156725026 RT_SB_Trig_Path_Dist: 8 Vector__XXX
+ SG_ Path_Distance_3D : 0|32@1+ (0.001,0) [0|4294967] "m" Vector__XXX
+
+BO_ 156724770 RT_SB_Trig_Accel: 8 Vector__XXX
+ SG_ Triggered_Time : 40|24@1+ (0.01,0) [0|167772] "s" Vector__XXX
+ SG_ Average_Accel : 24|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ MFDD : 8|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Validity_Triggered_Time : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Average_Accel : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_MFDD : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157317156 RT_DL1MK3_Measure_Time_12: 2 Vector__XXX
+ SG_ Measured_Time_12 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157316900 RT_DL1MK3_Measure_Time_11: 2 Vector__XXX
+ SG_ Measured_Time_11 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157316644 RT_DL1MK3_Measure_Time_10: 2 Vector__XXX
+ SG_ Measured_Time_10 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157316388 RT_DL1MK3_Measure_Time_9: 2 Vector__XXX
+ SG_ Measured_Time_9 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157316132 RT_DL1MK3_Measure_Time_8: 2 Vector__XXX
+ SG_ Measured_Time_8 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157315876 RT_DL1MK3_Measure_Time_7: 2 Vector__XXX
+ SG_ Measured_Time_7 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157315620 RT_DL1MK3_Measure_Time_6: 2 Vector__XXX
+ SG_ Measured_Time_6 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157315364 RT_DL1MK3_Measure_Time_5: 2 Vector__XXX
+ SG_ Measured_Time_5 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157315108 RT_DL1MK3_Measure_Time_4: 2 Vector__XXX
+ SG_ Measured_Time_4 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157314852 RT_DL1MK3_Measure_Time_3: 2 Vector__XXX
+ SG_ Measured_Time_3 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157314596 RT_DL1MK3_Measure_Time_2: 2 Vector__XXX
+ SG_ Measured_Time_2 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157314340 RT_DL1MK3_Measure_Time_1: 2 Vector__XXX
+ SG_ Measured_Time_1 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157251620 RT_DL1MK3_RPM: 2 Vector__XXX
+ SG_ RPM : 0|16@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 157251364 RT_DL1MK3_Freq_4: 2 Vector__XXX
+ SG_ Frequency_4 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157251108 RT_DL1MK3_Freq_3: 2 Vector__XXX
+ SG_ Frequency_3 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157250852 RT_DL1MK3_Freq_2: 2 Vector__XXX
+ SG_ Frequency_2 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157380388 RT_DL1MK3_Misc_3: 2 Vector__XXX
+ SG_ Misc_3 : 0|16@1+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 157380132 RT_DL1MK3_Misc_2: 2 Vector__XXX
+ SG_ Misc_2 : 0|16@1+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 157379876 RT_DL1MK3_Misc_1: 2 Vector__XXX
+ SG_ Misc_1 : 0|16@1+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 157190948 RT_DL1MK3_Aux_31: 2 Vector__XXX
+ SG_ AUX_31 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157190692 RT_DL1MK3_Aux_30: 2 Vector__XXX
+ SG_ AUX_30 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157190436 RT_DL1MK3_Aux_29: 2 Vector__XXX
+ SG_ AUX_29 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157190180 RT_DL1MK3_Aux_28: 2 Vector__XXX
+ SG_ AUX_28 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157189924 RT_DL1MK3_Aux_27: 2 Vector__XXX
+ SG_ AUX_27 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157189668 RT_DL1MK3_Aux_26: 2 Vector__XXX
+ SG_ AUX_26 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157189412 RT_DL1MK3_Aux_25: 2 Vector__XXX
+ SG_ AUX_25 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157189156 RT_DL1MK3_Aux_24: 2 Vector__XXX
+ SG_ AUX_24 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157188900 RT_DL1MK3_Aux_23: 2 Vector__XXX
+ SG_ AUX_23 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157188644 RT_DL1MK3_Aux_22: 2 Vector__XXX
+ SG_ AUX_22 : 0|16@1+ (10,0) [0|0] "" Vector__XXX
+
+BO_ 157188388 RT_DL1MK3_Aux_21: 2 Vector__XXX
+ SG_ AUX_21 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157188132 RT_DL1MK3_Aux_20: 2 Vector__XXX
+ SG_ AUX_20 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157187876 RT_DL1MK3_Aux_19: 2 Vector__XXX
+ SG_ AUX_19 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157187620 RT_DL1MK3_Aux_18: 2 Vector__XXX
+ SG_ AUX_18 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157187364 RT_DL1MK3_Aux_17: 2 Vector__XXX
+ SG_ AUX_17 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157187108 RT_DL1MK3_Aux_16: 2 Vector__XXX
+ SG_ AUX_16 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157186852 RT_DL1MK3_Aux_15: 2 Vector__XXX
+ SG_ AUX_15 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157186596 RT_DL1MK3_Aux_14: 2 Vector__XXX
+ SG_ AUX_14 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157186340 RT_DL1MK3_Aux_13: 2 Vector__XXX
+ SG_ AUX_13 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157186084 RT_DL1MK3_Aux_12: 2 Vector__XXX
+ SG_ AUX_12 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157185828 RT_DL1MK3_Aux_11: 2 Vector__XXX
+ SG_ AUX_11 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157185316 RT_DL1MK3_Aux_9: 2 Vector__XXX
+ SG_ AUX_9 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157185572 RT_DL1MK3_Aux_10: 2 Vector__XXX
+ SG_ AUX_10 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157185060 RT_DL1MK3_Aux_8: 2 Vector__XXX
+ SG_ AUX_8 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157184804 RT_DL1MK3_Aux_7: 2 Vector__XXX
+ SG_ AUX_7 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157184548 RT_DL1MK3_Aux_6: 2 Vector__XXX
+ SG_ AUX_6 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157184292 RT_DL1MK3_Aux_5: 2 Vector__XXX
+ SG_ AUX_5 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157184036 RT_DL1MK3_Aux_4: 2 Vector__XXX
+ SG_ AUX_4 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157183780 RT_DL1MK3_Aux_3: 2 Vector__XXX
+ SG_ AUX_3 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157183524 RT_DL1MK3_Aux_2: 2 Vector__XXX
+ SG_ AUX_2 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157183268 RT_DL1MK3_Aux_1: 2 Vector__XXX
+ SG_ AUX_1 : 0|16@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156922148 RT_DL1MK3_Pressure_5: 3 Vector__XXX
+ SG_ Pressure_5 : 0|24@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156921892 RT_DL1MK3_Pressure_4: 3 Vector__XXX
+ SG_ Pressure_4 : 0|24@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156921636 RT_DL1MK3_Pressure_3: 3 Vector__XXX
+ SG_ Pressure_3 : 0|24@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156921380 RT_DL1MK3_Pressure_2: 3 Vector__XXX
+ SG_ Pressure_2 : 0|24@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156921124 RT_DL1MK3_Pressure_1: 3 Vector__XXX
+ SG_ Pressure_1 : 0|24@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157052708 RT_DL1MK3_Angle_3: 2 Vector__XXX
+ SG_ Angle_3 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157052452 RT_DL1MK3_Angle_2: 2 Vector__XXX
+ SG_ Angle_2 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 157052196 RT_DL1MK3_Angle_1: 2 Vector__XXX
+ SG_ Angle_1 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992804 RT_DL1MK3_Temp_25: 2 Vector__XXX
+ SG_ Temperature_25 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992548 RT_DL1MK3_Temp_24: 2 Vector__XXX
+ SG_ Temperature_24 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992292 RT_DL1MK3_Temp_23: 2 Vector__XXX
+ SG_ Temperature_23 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156992036 RT_DL1MK3_Temp_22: 2 Vector__XXX
+ SG_ Temperature_22 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991780 RT_DL1MK3_Temp_21: 2 Vector__XXX
+ SG_ Temperature_21 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991524 RT_DL1MK3_Temp_20: 2 Vector__XXX
+ SG_ Temperature_20 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991268 RT_DL1MK3_Temp_19: 2 Vector__XXX
+ SG_ Temperature_19 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156991012 RT_DL1MK3_Temp_18: 2 Vector__XXX
+ SG_ Temperature_18 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156990756 RT_DL1MK3_Temp_17: 2 Vector__XXX
+ SG_ Temperature_17 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156990500 RT_DL1MK3_Temp_16: 2 Vector__XXX
+ SG_ Temperature_16 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156990244 RT_DL1MK3_Temp_15: 2 Vector__XXX
+ SG_ Temperature_15 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989988 RT_DL1MK3_Temp_14: 2 Vector__XXX
+ SG_ Temperature_14 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989732 RT_DL1MK3_Temp_13: 2 Vector__XXX
+ SG_ Temperature_13 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989476 RT_DL1MK3_Temp_12: 2 Vector__XXX
+ SG_ Temperature_12 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156989220 RT_DL1MK3_Temp_11: 2 Vector__XXX
+ SG_ Temperature_11 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156988964 RT_DL1MK3_Temp_10: 2 Vector__XXX
+ SG_ Temperature_10 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156988708 RT_DL1MK3_Temp_9: 2 Vector__XXX
+ SG_ Temperature_9 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156988452 RT_DL1MK3_Temp_8: 2 Vector__XXX
+ SG_ Temperature_8 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156988196 RT_DL1MK3_Temp_7: 2 Vector__XXX
+ SG_ Temperature_7 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987940 RT_DL1MK3_Temp_6: 2 Vector__XXX
+ SG_ Temperature_6 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987684 RT_DL1MK3_Temp_5: 2 Vector__XXX
+ SG_ Temperature_5 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987428 RT_DL1MK3_Temp_4: 2 Vector__XXX
+ SG_ Temperature_4 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156987172 RT_DL1MK3_Temp_3: 2 Vector__XXX
+ SG_ Temperature_3 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156986916 RT_DL1MK3_Temp_2: 2 Vector__XXX
+ SG_ Temperature_2 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156986660 RT_DL1MK3_Temp_1: 2 Vector__XXX
+ SG_ Temperature_1 : 0|16@1- (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 156011300 RT_DL1MK3_Analog_32: 2 Vector__XXX
+ SG_ Analog_32 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156011044 RT_DL1MK3_Analog_31: 2 Vector__XXX
+ SG_ Analog_31 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156010788 RT_DL1MK3_Analog_30: 2 Vector__XXX
+ SG_ Analog_30 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156010532 RT_DL1MK3_Analog_29: 2 Vector__XXX
+ SG_ Analog_29 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156010276 RT_DL1MK3_Analog_28: 2 Vector__XXX
+ SG_ Analog_28 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156010020 RT_DL1MK3_Analog_27: 2 Vector__XXX
+ SG_ Analog_27 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156009764 RT_DL1MK3_Analog_26: 2 Vector__XXX
+ SG_ Analog_26 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156009508 RT_DL1MK3_Analog_25: 2 Vector__XXX
+ SG_ Analog_25 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156006948 RT_DL1MK3_Analog_15: 2 Vector__XXX
+ SG_ Analog_15 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156006692 RT_DL1MK3_Analog_14: 2 Vector__XXX
+ SG_ Analog_14 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156007460 RT_DL1MK3_Analog_17: 2 Vector__XXX
+ SG_ Analog_17 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156009252 RT_DL1MK3_Analog_24: 2 Vector__XXX
+ SG_ Analog_24 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156008996 RT_DL1MK3_Analog_23: 2 Vector__XXX
+ SG_ Analog_23 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156008740 RT_DL1MK3_Analog_22: 2 Vector__XXX
+ SG_ Analog_22 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156008484 RT_DL1MK3_Analog_21: 2 Vector__XXX
+ SG_ Analog_21 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156008228 RT_DL1MK3_Analog_20: 2 Vector__XXX
+ SG_ Analog_20 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156007972 RT_DL1MK3_Analog_19: 2 Vector__XXX
+ SG_ Analog_19 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156007204 RT_DL1MK3_Analog_16: 2 Vector__XXX
+ SG_ Analog_16 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156007716 RT_DL1MK3_Analog_18: 2 Vector__XXX
+ SG_ Analog_18 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156006180 RT_DL1MK3_Analog_12: 2 Vector__XXX
+ SG_ Analog_12 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156005924 RT_DL1MK3_Analog_11: 2 Vector__XXX
+ SG_ Analog_11 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156005668 RT_DL1MK3_Analog_10: 2 Vector__XXX
+ SG_ Analog_10 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156005412 RT_DL1MK3_Analog_9: 2 Vector__XXX
+ SG_ Analog_9 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156005156 RT_DL1MK3_Analog_8: 2 Vector__XXX
+ SG_ Analog_8 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156004900 RT_DL1MK3_Analog_7: 2 Vector__XXX
+ SG_ Analog_7 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156004644 RT_DL1MK3_Analog_6: 2 Vector__XXX
+ SG_ Analog_6 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156004388 RT_DL1MK3_Analog_5: 2 Vector__XXX
+ SG_ Analog_5 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156004132 RT_DL1MK3_Analog_4: 2 Vector__XXX
+ SG_ Analog_4 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156003876 RT_DL1MK3_Analog_3: 2 Vector__XXX
+ SG_ Analog_3 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156003620 RT_DL1MK3_Analog_2: 2 Vector__XXX
+ SG_ Analog_2 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 156003364 RT_DL1MK3_Analog_1: 2 Vector__XXX
+ SG_ Analog_1 : 7|16@0+ (0.001,0) [0|0] "" Vector__XXX
+
+BO_ 155872292 RT_DL1MK3_Accel: 8 Vector__XXX
+ SG_ Accel_Vertical : 48|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Lateral : 32|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Longitudinal : 16|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accuracy_Accel : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_Accel_Vertical : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Accel_Lateral : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Accel_Longitudinal : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 156868130 RT_SB_INS_Vpt_4_Vel_NED_2: 8 Vector__XXX
+ SG_ Virtual_4_Slip : 48|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_4_Heading : 32|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_4_Vel_NED_D : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156867874 RT_SB_INS_Vpt_4_Vel_NED_1: 8 Vector__XXX
+ SG_ Virtual_4_Vel_NED_E : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Virtual_4_Vel_NED_N : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156867618 RT_SB_INS_Vpt_4_Offset: 8 Vector__XXX
+ SG_ Virtual_4_Offset_Z : 32|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_4_Offset_Y : 16|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_4_Offset_X : 0|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+
+BO_ 156864034 RT_SB_INS_Vpt_3_Vel_NED_2: 8 Vector__XXX
+ SG_ Virtual_3_Slip : 48|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_3_Heading : 32|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_3_Vel_NED_D : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156863778 RT_SB_INS_Vpt_3_Vel_NED_1: 8 Vector__XXX
+ SG_ Virtual_3_Vel_NED_E : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Virtual_3_Vel_NED_N : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156863522 RT_SB_INS_Vpt_3_Offset: 8 Vector__XXX
+ SG_ Virtual_3_Offset_Z : 32|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_3_Offset_Y : 16|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_3_Offset_X : 0|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+
+BO_ 156859938 RT_SB_INS_Vpt_2_Vel_NED_2: 8 Vector__XXX
+ SG_ Virtual_2_Slip : 48|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_2_Heading : 32|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_2_Vel_NED_D : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156859682 RT_SB_INS_Vpt_2_Vel_NED_1: 8 Vector__XXX
+ SG_ Virtual_2_Vel_NED_E : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Virtual_2_Vel_NED_N : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156859426 RT_SB_INS_Vpt_2_Offset: 8 Vector__XXX
+ SG_ Virtual_2_Offset_Z : 32|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_2_Offset_Y : 16|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_2_Offset_X : 0|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+
+BO_ 156855842 RT_SB_INS_Vpt_1_Vel_NED_2: 8 Vector__XXX
+ SG_ Virtual_1_Slip : 48|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_1_Heading : 32|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Virtual_1_Vel_NED_D : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156855586 RT_SB_INS_Vpt_1_Vel_NED_1: 8 Vector__XXX
+ SG_ Virtual_1_Vel_NED_E : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Virtual_1_Vel_NED_N : 0|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+
+BO_ 156855330 RT_SB_INS_Vpt_1_Offset: 8 Vector__XXX
+ SG_ Virtual_1_Offset_Z : 32|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_1_Offset_Y : 16|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+ SG_ Virtual_1_Offset_X : 0|16@1- (0.001,0) [-32.768|32.767] "m" Vector__XXX
+
+BO_ 156795426 RT_SB_INS_Slip: 8 Vector__XXX
+ SG_ INS_Squat : 40|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ Accuracy_INS_Squat : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ INS_Slip : 16|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ Accuracy_INS_Slip : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Squat : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Slip : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156794658 RT_SB_INS_Vel_ECEF_2: 8 Vector__XXX
+ SG_ INS_Vel_ECEF_Z : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ INS_Vel_ECEF_Y : 8|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Validity_INS_Vel_ECEF_Z : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Vel_ECEF_Y : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156794402 RT_SB_INS_Vel_ECEF_1: 8 Vector__XXX
+ SG_ INS_Vel_ECEF_X : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Accuracy_INS_Vel_ECEF_Z : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_INS_Vel_ECEF_Y : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_INS_Vel_ECEF_X : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Vel_ECEF_X : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156794146 RT_SB_INS_Vel_NED_2: 8 Vector__XXX
+ SG_ INS_Vel_NED_D : 16|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Accuracy_INS_Vel_D : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Vel_NED_D : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156793890 RT_SB_INS_Vel_NED_1: 8 Vector__XXX
+ SG_ INS_Vel_NED_E : 40|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ INS_Vel_NED_N : 16|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Accuracy_INS_Vel_NE : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Vel_NED_E : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Vel_NED_N : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156791074 RT_SB_INS_Pos_ECEF_2: 8 Vector__XXX
+ SG_ INS_Pos_ECEF_Z : 32|32@1- (0.01,0) [-10000000|10000000] "m" Vector__XXX
+ SG_ INS_Pos_ECEF_Y : 0|32@1- (0.01,0) [-10000000|10000000] "m" Vector__XXX
+
+BO_ 156790818 RT_SB_INS_Pos_ECEF_1: 8 Vector__XXX
+ SG_ INS_Pos_ECEF_X : 32|32@1- (0.01,0) [-10000000|10000000] "m" Vector__XXX
+ SG_ Accuracy_INS_Pos_ECEF_Z : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_INS_Pos_ECEF_Y : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_INS_Pos_ECEF_X : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Pos_ECEF_Z : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Pos_ECEF_Y : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Pos_ECEF_X : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156790562 RT_SB_INS_Pos_LLH_2: 8 Vector__XXX
+ SG_ INS_Pos_LLH_Altitude : 32|32@1- (0.001,0) [-1000|100000] "m" Vector__XXX
+ SG_ INS_Pos_LLH_Longitude : 0|32@1- (1e-07,0) [-180|180] "degrees" Vector__XXX
+
+BO_ 156790306 RT_SB_INS_Pos_LLH_1: 8 Vector__XXX
+ SG_ INS_Pos_LLH_Latitude : 32|32@1- (1e-07,0) [-90|90] "degrees" Vector__XXX
+ SG_ Accuracy_INS_Pos_LLH_Altitude : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_INS_Pos_LLH_Longitude : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_INS_Pos_LLH_Latitude : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Pos_LLH_Altitude : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Pos_LLH_Longitude : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Pos_LLH_Latitude : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156795170 RT_SB_INS_Heading_Gradient_2: 8 Vector__XXX
+ SG_ INS_Gradient : 40|16@1- (0.01,0) [-90|90] "degrees" Vector__XXX
+ SG_ Accuracy_INS_Gradient : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ INS_Heading_2 : 16|16@1+ (0.01,0) [0|360] "degrees" Vector__XXX
+ SG_ Accuracy_INS_Heading : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Gradient : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Heading : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156794914 RT_SB_INS_Heading_Gradient: 8 Vector__XXX
+ SG_ INS_Gradient : 40|16@1- (0.01,0) [-90|90] "degrees" Vector__XXX
+ SG_ Accuracy_INS_Gradient : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ INS_Heading : 16|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Accuracy_INS_Heading : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_INS_Gradient : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_INS_Heading : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156789794 RT_SB_INS_Status: 8 Vector__XXX
+ SG_ INS_Status : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 156790050 RT_SB_INS_Attitude: 8 Vector__XXX
+ SG_ Attitude_Roll : 48|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ Attitude_Pitch : 32|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ Attitude_Yaw : 16|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ Accuracy_Attitude : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_Roll : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Pitch : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Yaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156724514 RT_SB_Output_Status: 8 Vector__XXX
+ SG_ GPS_Time : 32|32@1+ (0.001,0) [0|604800] "s" Vector__XXX
+ SG_ Status_Trigger : 15|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status_Serial_Output_2 : 14|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status_Serial_Output_1 : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status_Pulse_Output : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status_Analogue_4 : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status_Analogue_3 : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status_Analogue_2 : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status_Analogue_1 : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Status_Timestamp : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 156664354 RT_SB_GPS_Heading_Gradient_2: 8 Vector__XXX
+ SG_ GPS_Gradient : 40|16@1- (0.01,0) [-90|90] "degrees" Vector__XXX
+ SG_ Accuracy_GPS_Gradient : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ GPS_Heading_2 : 16|16@1+ (0.01,0) [0|360] "degrees" Vector__XXX
+ SG_ Accuracy_GPS_Heading : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Gradient : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Heading : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 155880738 RT_SB_Cumulative_Distance_2: 8 Vector__XXX
+ SG_ Cumulative_Distance : 32|32@1+ (0.001,0) [0|4294967] "m" Vector__XXX
+ SG_ Cumulative_Time : 8|24@1+ (0.01,0) [0|167772] "s" Vector__XXX
+ SG_ Validity_Cumulative_Distance : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Cumulative_Time : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 155880482 RT_SB_Cumulative_Distance_1: 8 Vector__XXX
+ SG_ Cumulative_Distance : 32|32@1+ (0.001,0) [0|4294967] "m" Vector__XXX
+ SG_ Cumulative_Time : 8|24@1+ (0.01,0) [0|167772] "s" Vector__XXX
+ SG_ Validity_Cumulative_Distance : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Cumulative_Time : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 156724258 RT_SB_Trigger_Timestamp: 8 Vector__XXX
+ SG_ GPS_High_Resolution_Time : 24|40@1+ (1e-06,0) [0|604800] "s" Vector__XXX
+ SG_ Trigger_Timestamp_Type : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Trigger_Number : 16|7@1+ (1,1) [0|128] "" Vector__XXX
+ SG_ Accuracy_Trigger_Timestamp : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_Trigger_Timestamp : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 155872545 RT_IMU06_Gyro_Rates: 8 Vector__XXX
+ SG_ Gyro_Rate_Roll : 48|16@1- (0.01,0) [-327|327] "degrees/s" Vector__XXX
+ SG_ Gyro_Rate_Pitch : 32|16@1- (0.01,0) [-327|327] "degrees/s" Vector__XXX
+ SG_ Gyro_Rate_Yaw : 16|16@1- (0.01,0) [-327|327] "degrees/s" Vector__XXX
+ SG_ Accuracy_Gyro_Rates : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Gyro_Rate_Roll : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Gyro_Rate_Pitch : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Gyro_Rate_Yaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 155872289 RT_IMU06_Accel: 8 Vector__XXX
+ SG_ Accel_Vertical : 48|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Lateral : 32|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Longitudinal : 16|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accuracy_Accel : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_Accel_Vertical : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Accel_Lateral : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Accel_Longitudinal : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 155876386 RT_SB_Speed: 8 Vector__XXX
+ SG_ Speed : 16|32@1- (1e-05,0) [-20000|20000] "m/s" Vector__XXX
+ SG_ Accuracy_Speed : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_Speed : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 156667170 RT_SB_RTK_Slip: 8 Vector__XXX
+ SG_ RTK_Baseline : 48|16@1+ (1,0) [0|65535] "mm" Vector__XXX
+ SG_ RTK_Squat : 32|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ RTK_Slip : 16|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ Accuracy_RTK_Baseline : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_RTK_Baseline : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_RTK_Squat : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_RTK_Slip : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156666914 RT_SB_RTK_Attitude: 8 Vector__XXX
+ SG_ RTK_Attitude_Roll : 48|16@1- (0.01,0) [-90|90] "degrees" Vector__XXX
+ SG_ RTK_Attitude_Pitch : 32|16@1- (0.01,0) [-90|90] "degrees" Vector__XXX
+ SG_ RTK_Attitude_Yaw : 16|16@1- (0.01,0) [-360|360] "degrees" Vector__XXX
+ SG_ Accuracy_RTK_Attitude : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_RTK_Roll : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_RTK_Pitch : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_RTK_Yaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156671010 RT_SB_GPS_Mcycle_Lean: 8 Vector__XXX
+ SG_ GPS_Mcycle_Lean_Angle : 32|16@1- (0.01,0) [-90|90] "degrees" Vector__XXX
+ SG_ GPS_Lateral_Accel : 16|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accuracy_GPS_Lateral_Accel : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Mcycle_Lean : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Lateral_Accel : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156658722 RT_SB_GPS_Status: 8 Vector__XXX
+ SG_ RTK_Status : 56|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ GPS_nSv_RTK : 48|8@1+ (1,0) [0|16] "" Vector__XXX
+ SG_ GPS_nSv_2 : 40|8@1+ (1,0) [0|16] "" Vector__XXX
+ SG_ GPS_nSv : 32|8@1+ (1,0) [0|16] "" Vector__XXX
+ SG_ Firmware_Version_Minor : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Firmware_Version_Intermediate : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Firmware_Version_Major : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ GPS_Status : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 156660002 RT_SB_GPS_Pos_ECEF_2: 8 Vector__XXX
+ SG_ GPS_Pos_ECEF_Z : 32|32@1- (0.01,0) [-10000000|10000000] "m" Vector__XXX
+ SG_ GPS_Pos_ECEF_Y : 0|32@1- (0.01,0) [-10000000|10000000] "m" Vector__XXX
+
+BO_ 156659746 RT_SB_GPS_Pos_ECEF_1: 8 Vector__XXX
+ SG_ GPS_Pos_ECEF_X : 32|32@1- (0.01,0) [-10000000|10000000] "m" Vector__XXX
+ SG_ Accuracy_GPS_Pos_ECEF_Z : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Pos_ECEF_Y : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Pos_ECEF_X : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Pos_ECEF_Z : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Pos_ECEF_Y : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Pos_ECEF_X : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156659490 RT_SB_GPS_Pos_LLH_2: 8 Vector__XXX
+ SG_ GPS_Pos_LLH_Altitude : 32|32@1- (0.001,0) [-1000|100000] "m" Vector__XXX
+ SG_ GPS_Pos_LLH_Longitude : 0|32@1- (1e-07,0) [-180|180] "degrees" Vector__XXX
+
+BO_ 156659234 RT_SB_GPS_Pos_LLH_1: 8 Vector__XXX
+ SG_ GPS_Pos_LLH_Latitude : 32|32@1- (1e-07,0) [-90|90] "degrees" Vector__XXX
+ SG_ Accuracy_GPS_Pos_LLH_Altitude : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Pos_LLH_Longitude : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Pos_LLH_Latitude : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Pos_LLH_Altitude : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Pos_LLH_Longitude : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Pos_LLH_Latitude : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156664098 RT_SB_GPS_Heading_Gradient: 8 Vector__XXX
+ SG_ GPS_Gradient : 40|16@1- (0.01,0) [-90|90] "degrees" Vector__XXX
+ SG_ Accuracy_GPS_Gradient : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ GPS_Heading : 16|16@1- (0.01,0) [-180|180] "degrees" Vector__XXX
+ SG_ Accuracy_GPS_Heading : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Gradient : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Heading : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156663842 RT_SB_GPS_Vel_ECEF_2: 8 Vector__XXX
+ SG_ GPS_Vel_ECEF_Z : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ GPS_Vel_ECEF_Y : 8|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Validity_GPS_Vel_ECEF_Z : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Vel_ECEF_Y : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156663586 RT_SB_GPS_Vel_ECEF_1: 8 Vector__XXX
+ SG_ GPS_Vel_ECEF_X : 32|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Accuracy_GPS_Vel_ECEF_Z : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Vel_ECEF_Y : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Accuracy_GPS_Vel_ECEF_X : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Vel_ECEF_X : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156663330 RT_SB_GPS_Vel_NED_2: 8 Vector__XXX
+ SG_ GPS_Vel_NED_D : 16|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Accuracy_GPS_Vel_D : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Vel_NED_D : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156663074 RT_SB_GPS_Vel_NED_1: 8 Vector__XXX
+ SG_ GPS_Vel_NED_E : 40|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ GPS_Vel_NED_N : 16|24@1- (0.0001,0) [-838|838] "m/s" Vector__XXX
+ SG_ Accuracy_GPS_Vel_NE : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Vel_NED_E : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Vel_NED_N : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156662818 RT_SB_GPS_Speed: 8 Vector__XXX
+ SG_ GPS_Speed_3D : 40|24@1+ (0.0001,0) [0|1675] "m/s" Vector__XXX
+ SG_ GPS_Speed_2D : 16|24@1+ (0.0001,0) [0|1675] "m/s" Vector__XXX
+ SG_ Accuracy_GPS_Speed : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Speed_3D : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Speed_2D : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 156658978 RT_SB_GPS_Time: 8 Vector__XXX
+ SG_ GPS_Week : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ GPS_Time : 16|32@1+ (0.001,0) [0|604800] "s" Vector__XXX
+ SG_ Accuracy_GPS_Time : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_GPS_Week : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_GPS_Time : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 155872290 RT_SB_Accel: 8 Vector__XXX
+ SG_ Accel_Vertical : 48|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Lateral : 32|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Longitudinal : 16|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accuracy_Accel : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Validity_Accel_Vertical : 2|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Accel_Lateral : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Accel_Longitudinal : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 155872546 RT_SB_Gyro_Rates: 8 Vector__XXX
+ SG_ Gyro_Rate_Roll : 48|16@1- (0.01,0) [-327|327] "degrees/s" Vector__XXX
+ SG_ Gyro_Rate_Pitch : 32|16@1- (0.01,0) [-327|327] "degrees/s" Vector__XXX
+ SG_ Gyro_Rate_Yaw : 16|16@1- (0.01,0) [-327|327] "degrees/s" Vector__XXX
+ SG_ Accuracy_Gyro_Rates : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Validity_Gyro_Rate_Roll : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Gyro_Rate_Pitch : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Validity_Gyro_Rate_Yaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+CM_ SG_ 156795682 INS_Vel_Sideways_2D "Sideways Velocity in the vehicle body axes, 2D (no vertical component) .  +ve for motion to the vehicle RHS.";
+CM_ SG_ 156795682 INS_Vel_Forwards_2D "Forwards Velocity in the vehicle body axes, 2D (no vertical component) .";
+CM_ SG_ 156795682 Accuracy_INS_Vel_Body "Accuracy of INS body axis velocities (forward velocity and sideways velocity)";
+CM_ SG_ 156795682 Validity_INS_Vel_Sideways "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156795682 Validity_INS_Vel_Forwards "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155876388 Accuracy_Speed "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 155876388 Validity_Speed "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156658980 GPS_Time "GPS time is the time in seconds since midnight GMT on Saturday night.";
+CM_ SG_ 156658980 Validity_GPS_Week "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156658980 Validity_GPS_Time "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659236 Accuracy_GPS_Pos_LLH_Altitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156659236 Accuracy_GPS_Pos_LLH_Longitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156659236 Accuracy_GPS_Pos_LLH_Latitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156659236 Validity_GPS_Pos_LLH_Altitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659236 Validity_GPS_Pos_LLH_Longitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659236 Validity_GPS_Pos_LLH_Latitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156662820 GPS_Speed_3D "This is GPS scalar 3D speed - scalar speed with the local Z axis component included.";
+CM_ SG_ 156662820 GPS_Speed_2D "This is GPS scalar 2D speed - scalar speed with no local Z axis component included.";
+CM_ SG_ 156662820 Accuracy_GPS_Speed "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156662820 Validity_GPS_Speed_3D "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156662820 Validity_GPS_Speed_2D "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156726050 Final_Speed "Speed at end of triggered test";
+CM_ SG_ 156726050 Validity_Final_Speed "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156725794 Initial_Heading "Heading (track) at start of triggered test";
+CM_ SG_ 156725794 Initial_Speed "Speed at start of triggered test";
+CM_ SG_ 156725794 Validity_Initial_Heading "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156725794 Validity_Initial_Speed "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156725538 Path_Distance_2D "2D path distance (horizontal components only)";
+CM_ SG_ 156725538 Direct_Distance "Direct distance from start of test to current position";
+CM_ SG_ 156725282 Deviation_Distance "Current deviation distance from a line projected along the initial heading at start of test, +ve for deviation to the right.";
+CM_ SG_ 156725282 Forward_Distance "Current forward distance from start of test in direction of initial heading at start of test";
+CM_ SG_ 156725026 Path_Distance_3D "3D path distance";
+CM_ SG_ 156724770 Triggered_Time "Cumulative time from start of triggered test to current time.";
+CM_ SG_ 156724770 Average_Accel "Average acceleration from start of triggered test to current time.";
+CM_ SG_ 156724770 MFDD "Mean fully-developed decelleration of triggered test.  Thresholds used are as set in the logger configuration.";
+CM_ SG_ 156724770 Validity_Triggered_Time "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156724770 Validity_Average_Accel "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156724770 Validity_MFDD "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872292 Accel_Vertical "Vertical acceleration.  This is positive when the vehicle accelerates in an upwards direction, e.g. when travelling through a dip.";
+CM_ SG_ 155872292 Accel_Lateral "Lateral acceleration.  This is positive when the vehicle accelerates towards the right, e.g. when cornering around a right-hand bend.";
+CM_ SG_ 155872292 Accel_Longitudinal "Longitudinal acceleration.  This is positive when the vehicle accelerates in a forwards direction.";
+CM_ SG_ 155872292 Accuracy_Accel "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 155872292 Validity_Accel_Vertical "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872292 Validity_Accel_Lateral "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872292 Validity_Accel_Longitudinal "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156868130 Virtual_4_Slip "Slip is defined as the difference between yaw and heading.";
+CM_ SG_ 156868130 Virtual_4_Heading "This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156868130 Virtual_4_Vel_NED_D "VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.";
+CM_ SG_ 156867874 Virtual_4_Vel_NED_E "VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.";
+CM_ SG_ 156867874 Virtual_4_Vel_NED_N "VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.";
+CM_ SG_ 156867618 Virtual_4_Offset_Z "Z offset (+ve downwards) of the virtual point in the vehicle body frame.";
+CM_ SG_ 156867618 Virtual_4_Offset_Y "Y offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156867618 Virtual_4_Offset_X "X offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156864034 Virtual_3_Slip "Slip is defined as the difference between yaw and heading.";
+CM_ SG_ 156864034 Virtual_3_Heading "This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156864034 Virtual_3_Vel_NED_D "VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.";
+CM_ SG_ 156863778 Virtual_3_Vel_NED_E "VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.";
+CM_ SG_ 156863778 Virtual_3_Vel_NED_N "VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.";
+CM_ SG_ 156863522 Virtual_3_Offset_Z "Z offset (+ve downwards) of the virtual point in the vehicle body frame.";
+CM_ SG_ 156863522 Virtual_3_Offset_Y "Y offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156863522 Virtual_3_Offset_X "X offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156859938 Virtual_2_Slip "Slip is defined as the difference between yaw and heading.";
+CM_ SG_ 156859938 Virtual_2_Heading "This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156859938 Virtual_2_Vel_NED_D "VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.";
+CM_ SG_ 156859682 Virtual_2_Vel_NED_E "VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.";
+CM_ SG_ 156859682 Virtual_2_Vel_NED_N "VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.";
+CM_ SG_ 156859426 Virtual_2_Offset_Z "Z offset (+ve downwards) of the virtual point in the vehicle body frame.";
+CM_ SG_ 156859426 Virtual_2_Offset_Y "Y offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156859426 Virtual_2_Offset_X "X offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156855842 Virtual_1_Slip "Slip is defined as the difference between yaw and heading.";
+CM_ SG_ 156855842 Virtual_1_Heading "This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156855842 Virtual_1_Vel_NED_D "VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.";
+CM_ SG_ 156855586 Virtual_1_Vel_NED_E "VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.";
+CM_ SG_ 156855586 Virtual_1_Vel_NED_N "VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.";
+CM_ SG_ 156855330 Virtual_1_Offset_Z "Z offset (+ve downwards) of the virtual point in the vehicle body frame.";
+CM_ SG_ 156855330 Virtual_1_Offset_Y "Y offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156855330 Virtual_1_Offset_X "X offset of the virtual point in the vehicle body frame.";
+CM_ SG_ 156795426 INS_Squat "Squat is defined as the difference between pitch and gradient";
+CM_ SG_ 156795426 Accuracy_INS_Squat "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156795426 INS_Slip "Slip is defined as the difference between yaw and heading";
+CM_ SG_ 156795426 Accuracy_INS_Slip "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156794658 INS_Vel_ECEF_Z "ECEF Z velocity.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.";
+CM_ SG_ 156794658 INS_Vel_ECEF_Y "ECEF Y velocity.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.";
+CM_ SG_ 156794658 Validity_INS_Vel_ECEF_Z "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156794658 Validity_INS_Vel_ECEF_Y "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156794402 INS_Vel_ECEF_X "ECEF X velocity.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).";
+CM_ SG_ 156794402 Validity_INS_Vel_ECEF_X "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156794146 INS_Vel_NED_D "VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.";
+CM_ SG_ 156794146 Validity_INS_Vel_NED_D "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156793890 INS_Vel_NED_E "VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.";
+CM_ SG_ 156793890 INS_Vel_NED_N "VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.";
+CM_ SG_ 156793890 Validity_INS_Vel_NED_E "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156793890 Validity_INS_Vel_NED_N "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156791074 INS_Pos_ECEF_Z "ECEF Z position.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.";
+CM_ SG_ 156791074 INS_Pos_ECEF_Y "ECEF Y position.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.";
+CM_ SG_ 156790818 INS_Pos_ECEF_X "ECEF X position.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).";
+CM_ SG_ 156790818 Accuracy_INS_Pos_ECEF_Z "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156790818 Accuracy_INS_Pos_ECEF_Y "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156790818 Accuracy_INS_Pos_ECEF_X "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156790818 Validity_INS_Pos_ECEF_Z "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156790818 Validity_INS_Pos_ECEF_Y "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156790818 Validity_INS_Pos_ECEF_X "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156790306 Accuracy_INS_Pos_LLH_Altitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156790306 Accuracy_INS_Pos_LLH_Longitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156790306 Accuracy_INS_Pos_LLH_Latitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156790306 Validity_INS_Pos_LLH_Altitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156790306 Validity_INS_Pos_LLH_Longitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156790306 Validity_INS_Pos_LLH_Latitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156795170 INS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
+CM_ SG_ 156795170 Accuracy_INS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156795170 INS_Heading_2 "This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156795170 Accuracy_INS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156795170 Validity_INS_Gradient "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156795170 Validity_INS_Heading "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156794914 INS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
+CM_ SG_ 156794914 Accuracy_INS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156794914 INS_Heading "This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156794914 Accuracy_INS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156794914 Validity_INS_Gradient "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156794914 Validity_INS_Heading "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156724514 GPS_Time "GPS time is the time in seconds since midnight GMT on Saturday night.";
+CM_ SG_ 156724514 Status_Trigger "Status of the trigger input";
+CM_ SG_ 156724514 Status_Serial_Output_2 "Status output of serial port 1";
+CM_ SG_ 156724514 Status_Serial_Output_1 "Status output of serial port 1";
+CM_ SG_ 156724514 Status_Pulse_Output "Pulse output activity status";
+CM_ SG_ 156724514 Status_Analogue_4 "Analogue output status for channel 4.";
+CM_ SG_ 156724514 Status_Analogue_3 "Analogue output status for channel 3.";
+CM_ SG_ 156724514 Status_Analogue_2 "Analogue output status for channel 1.  ";
+CM_ SG_ 156724514 Status_Analogue_1 "Analogue output status for channel 1.  ";
+CM_ SG_ 156724514 Validity_Status_Timestamp "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156664354 GPS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
+CM_ SG_ 156664354 Accuracy_GPS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156664354 GPS_Heading_2 "This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156664354 Accuracy_GPS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156664354 Validity_GPS_Gradient "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156664354 Validity_GPS_Heading "Valid when bit is set, invalid when bit is clear.";
+CM_ BO_ 155880738 "This cumulative distance calculation is updated when the trigger is active.";
+CM_ SG_ 155880738 Validity_Cumulative_Distance "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155880738 Validity_Cumulative_Time "Valid when bit is set, invalid when bit is clear.";
+CM_ BO_ 155880482 "This cumulative distance calculation is updated continuously once the first good GPS lock is obtained.";
+CM_ SG_ 155880482 Validity_Cumulative_Distance "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155880482 Validity_Cumulative_Time "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156724258 GPS_High_Resolution_Time "GPS time of week to micro-second resolution.";
+CM_ SG_ 156724258 Trigger_Number "This is the ID of the trigger that generated the event, as marked on the case of the logger";
+CM_ SG_ 156724258 Accuracy_Trigger_Timestamp "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156724258 Validity_Trigger_Timestamp "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872545 Gyro_Rate_Roll "Roll rate is positive for clockwise rotation when looking at the rear of the vehicle from behind the vehicle.";
+CM_ SG_ 155872545 Gyro_Rate_Pitch "Pitch rate is positive for clockwise rotation when looking at the left hand side of the vehicle from the left of the vehicle.";
+CM_ SG_ 155872545 Gyro_Rate_Yaw "Yaw rate is positive for clockwise rotation when looking down on the vehicle from above.";
+CM_ SG_ 155872545 Accuracy_Gyro_Rates "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 155872545 Validity_Gyro_Rate_Roll "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872545 Validity_Gyro_Rate_Pitch "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872545 Validity_Gyro_Rate_Yaw "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872289 Accel_Vertical "Vertical acceleration.  This is positive when the vehicle accelerates in an upwards direction, e.g. when travelling through a dip.";
+CM_ SG_ 155872289 Accel_Lateral "Lateral acceleration.  This is positive when the vehicle accelerates towards the right, e.g. when cornering around a right-hand bend.";
+CM_ SG_ 155872289 Accel_Longitudinal "Longitudinal acceleration.  This is positive when the vehicle accelerates in a forwards direction.";
+CM_ SG_ 155872289 Accuracy_Accel "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 155872289 Validity_Accel_Vertical "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872289 Validity_Accel_Lateral "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872289 Validity_Accel_Longitudinal "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155876386 Accuracy_Speed "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 155876386 Validity_Speed "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156667170 RTK_Baseline "This is the estimated baseline length calculated by the RTK solution.";
+CM_ SG_ 156667170 RTK_Squat "Squat is defined as the difference between pitch and gradient.";
+CM_ SG_ 156667170 RTK_Slip "Slip is defined as the difference between yaw and heading.";
+CM_ SG_ 156667170 Validity_RTK_Baseline "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156667170 Validity_RTK_Squat "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156667170 Validity_RTK_Slip "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156666914 RTK_Attitude_Roll "RTK attitude is determined from the MB-RTK solution only.  Roll is positive for a clockwise rotational displacement relative to the local horizontal plane when looking at the vehicle from the rear of it.";
+CM_ SG_ 156666914 RTK_Attitude_Pitch "RTK attitude is determined from the MB-RTK solution only.  Pitch is positive for a clockwise rotational displacement from the local horizontal plane when looking at the vehicle from the left hand side of it.";
+CM_ SG_ 156666914 RTK_Attitude_Yaw "RTK attitude is determined from the MB-RTK solution only.  Yaw is positive for a clockwise rotational displacement from due North, looking down on the vehicle from above.";
+CM_ SG_ 156666914 Accuracy_RTK_Attitude "Note that RTK yaw is typically up to about 4 times more accurate than RTK pitch or roll.";
+CM_ SG_ 156666914 Validity_RTK_Roll "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156666914 Validity_RTK_Pitch "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156666914 Validity_RTK_Yaw "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156671010 GPS_Mcycle_Lean_Angle "Motorcycle lean angle, derived from rate of change of heading from GPS.  This is the lean angle of the centre of mass of the combined bike + rider.";
+CM_ SG_ 156671010 GPS_Lateral_Accel "GPS-derived lateral acceleration.  This is derived by differentiating GPS heading - it is much more noisy than lateral accel from the accelerometers, but useful for m/cycle applications.";
+CM_ SG_ 156671010 Accuracy_GPS_Lateral_Accel "This accuracy value applies to both GPS-derived lateral acceleration and motorcycle lean angle, since both are derived from the rate of change of GPS heading.";
+CM_ SG_ 156671010 Validity_GPS_Mcycle_Lean "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156671010 Validity_GPS_Lateral_Accel "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156658722 GPS_nSv_RTK "Number of common satellites available to RTK solution";
+CM_ SG_ 156658722 GPS_nSv_2 "Number of satellites used in GPS solution by module 2 on RTK units.";
+CM_ SG_ 156658722 GPS_nSv "Number of satellites used in GPS solution";
+CM_ SG_ 156660002 GPS_Pos_ECEF_Z "ECEF Z position.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.";
+CM_ SG_ 156660002 GPS_Pos_ECEF_Y "ECEF Y position.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.";
+CM_ SG_ 156659746 GPS_Pos_ECEF_X "ECEF X position.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).";
+CM_ SG_ 156659746 Accuracy_GPS_Pos_ECEF_Z "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156659746 Accuracy_GPS_Pos_ECEF_Y "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156659746 Accuracy_GPS_Pos_ECEF_X "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156659746 Validity_GPS_Pos_ECEF_Z "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659746 Validity_GPS_Pos_ECEF_Y "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659746 Validity_GPS_Pos_ECEF_X "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659234 Accuracy_GPS_Pos_LLH_Altitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156659234 Accuracy_GPS_Pos_LLH_Longitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156659234 Accuracy_GPS_Pos_LLH_Latitude "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156659234 Validity_GPS_Pos_LLH_Altitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659234 Validity_GPS_Pos_LLH_Longitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156659234 Validity_GPS_Pos_LLH_Latitude "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156664098 GPS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
+CM_ SG_ 156664098 Accuracy_GPS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156664098 GPS_Heading "This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 156664098 Accuracy_GPS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 156664098 Validity_GPS_Gradient "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156664098 Validity_GPS_Heading "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156663842 GPS_Vel_ECEF_Z "ECEF Z velocity.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.";
+CM_ SG_ 156663842 GPS_Vel_ECEF_Y "ECEF Y velocity.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.";
+CM_ SG_ 156663842 Validity_GPS_Vel_ECEF_Z "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156663842 Validity_GPS_Vel_ECEF_Y "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156663586 GPS_Vel_ECEF_X "ECEF X velocity.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).";
+CM_ SG_ 156663586 Validity_GPS_Vel_ECEF_X "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156663330 GPS_Vel_NED_D "VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.";
+CM_ SG_ 156663330 Validity_GPS_Vel_NED_D "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156663074 GPS_Vel_NED_E "VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.";
+CM_ SG_ 156663074 GPS_Vel_NED_N "VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.";
+CM_ SG_ 156663074 Validity_GPS_Vel_NED_E "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156663074 Validity_GPS_Vel_NED_N "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156662818 GPS_Speed_3D "This is GPS scalar 3D speed - scalar speed with the local Z axis component included.";
+CM_ SG_ 156662818 GPS_Speed_2D "This is GPS scalar 2D speed - scalar speed with no local Z axis component included.";
+CM_ SG_ 156662818 Accuracy_GPS_Speed "This accuracy value applies to both 2D and 3D GPS speed.";
+CM_ SG_ 156662818 Validity_GPS_Speed_3D "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156662818 Validity_GPS_Speed_2D "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156658978 GPS_Time "GPS time is the time in seconds since midnight GMT on Saturday night.";
+CM_ SG_ 156658978 Validity_GPS_Week "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 156658978 Validity_GPS_Time "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872290 Accel_Vertical "Vertical acceleration.  This is positive when the vehicle accelerates in an upwards direction, e.g. when travelling through a dip.";
+CM_ SG_ 155872290 Accel_Lateral "Lateral acceleration.  This is positive when the vehicle accelerates towards the right, e.g. when cornering around a right-hand bend.";
+CM_ SG_ 155872290 Accel_Longitudinal "Longitudinal acceleration.  This is positive when the vehicle accelerates in a forwards direction.";
+CM_ SG_ 155872290 Accuracy_Accel "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 155872290 Validity_Accel_Vertical "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872290 Validity_Accel_Lateral "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872290 Validity_Accel_Longitudinal "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872546 Gyro_Rate_Roll "Roll rate is positive for clockwise rotation when looking at the rear of the vehicle from behind the vehicle.";
+CM_ SG_ 155872546 Gyro_Rate_Pitch "Pitch rate is positive for clockwise rotation when looking at the left hand side of the vehicle from the left of the vehicle.";
+CM_ SG_ 155872546 Gyro_Rate_Yaw "Yaw rate is positive for clockwise rotation when looking down on the vehicle from above.";
+CM_ SG_ 155872546 Accuracy_Gyro_Rates "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
+CM_ SG_ 155872546 Validity_Gyro_Rate_Roll "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872546 Validity_Gyro_Rate_Pitch "Valid when bit is set, invalid when bit is clear.";
+CM_ SG_ 155872546 Validity_Gyro_Rate_Yaw "Valid when bit is set, invalid when bit is clear.";
+
+VAL_ 156789794 INS_Status 2 "Converged" 1 "Initialised" 0 "Uninitialised" ;
+VAL_ 156790050 Validity_Roll 1 "Valid" 0 "Invalid" ;
+VAL_ 156790050 Validity_Pitch 1 "Valid" 0 "Invalid" ;
+VAL_ 156790050 Validity_Yaw 1 "Valid" 0 "Invalid" ;
+VAL_ 156724514 Status_Trigger 1 "Active" 0 "Inactive" ;
+VAL_ 156724514 Status_Serial_Output_2 1 "Active" 0 "Inactive" ;
+VAL_ 156724514 Status_Serial_Output_1 1 "Active" 0 "Inactive" ;
+VAL_ 156724514 Status_Pulse_Output 1 "Active" 0 "Inactive" ;
+VAL_ 156724514 Status_Analogue_4 1 "Active" 0 "Inactive" ;
+VAL_ 156724514 Status_Analogue_3 1 "Active" 0 "Inactive" ;
+VAL_ 156724514 Status_Analogue_2 1 "Active" 0 "Inactive" ;
+VAL_ 156724514 Status_Analogue_1 1 "Active" 0 "Inactive" ;
+VAL_ 156724258 Trigger_Timestamp_Type 1 "Rising edge" 0 "Falling edge" ;
+VAL_ 156658722 RTK_Status 4 "Multiple RTK solutions found" 3 "RTK solution OK" 2 "RTK solution failed" 1 "Not enough common satellites" 0 "Not attempting RTK solution" ;
+VAL_ 156658722 GPS_Status 12 "Lock: Carrier speed and position" 11 "Lock: Doppler speed and position" 10 "Lock: Position but no speed" 9 "Unused" 8 "Unused" 7 "Unused" 6 "Unused" 5 "Exceeded max. speed or alt." 4 "Solution failed" 3 "Solution aborted" 2 "Insufficient satellites" 1 "Searching for satellites" 0 "GPS module not detected" ;

@@ -18,11 +18,3 @@ Functions
 .. autofunction:: bitstruct.unpack
 .. autofunction:: bitstruct.calcsize
 .. autofunction:: bitstruct.byteswap
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

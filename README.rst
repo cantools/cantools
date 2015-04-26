@@ -83,5 +83,5 @@ Change endianess of data and then unpack it:
     >>> unpack('u1u3u4s16', byteswap('12', packed))
     (1, 2, 3, 256)
 
-.. |buildstatus| image:: https://travis-ci.org/eerimoq/archive.svg
-.. _buildstatus: https://travis-ci.org/eerimoq/archive
+.. |buildstatus| image:: https://travis-ci.org/eerimoq/bitstruct.svg
+.. _buildstatus: https://travis-ci.org/eerimoq/bitstruct

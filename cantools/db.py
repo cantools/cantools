@@ -89,7 +89,7 @@ def create_dbc_grammar():
     discard = Suppress(Keyword('BS_') + colon)
     ecu = Group(Keyword('BU_') +
                 colon +
-                Optional(word))
+                ZeroOrMore(Word(printables).setWhitespaceChars(' \t')))
     signal = Group(Keyword(SIGNAL) +
                    word +
                    colon +

@@ -17,5 +17,6 @@ setup(name='cantools',
       keywords=['CAN BUS', 'candb', 'cantools'],
       url='https://github.com/eerimoq/cantools',
       packages=['cantools'],
-      install_requires=['bitstruct>=0.7.1'],
+      install_requires=['bitstruct>=0.7.1',
+                        'pyparsing>=2.0.3'],
       test_suite="tests")

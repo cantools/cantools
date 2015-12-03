@@ -21,7 +21,7 @@ def _pack_float(size, arg):
     elif size == 64:
         value = struct.pack('>d', arg)
     else:
-        raise ValueError('Bad float size {}. Must be 32 or 64.'.format(size))
+        raise ValueError('Bad float size {}. Must be 32 or 64 bits.'.format(size))
     return ''.join('{:08b}'.format(b)
                    for b in bytearray(value))
 
@@ -47,7 +47,7 @@ def _unpack_float(size, bits):
     elif size == 64:
         value = struct.unpack('>d', packed)[0]
     else:
-        raise ValueError('Bad float size {}. Must be 32 or 64.'.format(size))
+        raise ValueError('Bad float size {}. Must be 32 or 64 bits.'.format(size))
     return value
 
 def _unpack_bytearray(size, bits):
@@ -61,11 +61,10 @@ def _unpack_bytearray(size, bits):
 
 
 def pack(fmt, *args):
-    '''
-    Return a bytearray containing the values v1, v2, ... packed according
-    to the given format. The arguments must match the values required by
-    the format exactly. If the total number of bits are not a multiple
-    of 8, padding will be added at the end of the last byte.
+    """Return a bytearray containing the values v1, v2, ... packed
+    according to the given format. If the total number of bits are not
+    a multiple of 8, padding will be added at the end of the last
+    byte.
 
     :param fmt: Bitstruct format string.
     :param args: Variable argument list of values to pack.
@@ -82,7 +81,8 @@ def pack(fmt, *args):
     - 'p' -- padding, ignore
 
     Example format string: 'u1u3p7s16'
-    '''
+
+    """
     bits = ''
     infos = _parse_format(fmt)
     i = 0
@@ -110,15 +110,15 @@ def pack(fmt, *args):
 
 
 def unpack(fmt, data):
-    '''
-    Unpack the bytearray (presumably packed by pack(fmt, ...)) according
-    to the given format. The result is a tuple even if it contains exactly
-    one item.
+    """Unpack the bytearray (presumably packed by pack(fmt, ...))
+    according to the given format. The result is a tuple even if it
+    contains exactly one item.
 
     :param fmt: Bitstruct format string.
     :param data: Bytearray of values to unpack.
     :returns: Tuple of unpacked values.
-    '''
+
+    """
     bits = ''.join(['{:08b}'.format(b) for b in data])
     infos = _parse_format(fmt)
     res = []
@@ -139,27 +139,29 @@ def unpack(fmt, data):
 
 
 def calcsize(fmt):
-    '''
-    Return the size of the bitstruct (and hence of the bytearray) corresponding
-    to the given format.
+    """Return the size of the bitstruct (and hence of the bytearray)
+    corresponding to the given format.
 
     :param fmt: Bitstruct format string.
     :returns: Number of bits in format string.
-    '''
+
+    """
     return sum([size for _, size in _parse_format(fmt)])
 
 
 def byteswap(fmt, data, offset = 0):
-    '''
-    In place swap bytes in `data` according to `fmt`, starting at
-    byte `offset`. `fmt` must be an iterable, iterating over
-    number of bytes to swap.
+    """In place swap bytes in `data` according to `fmt`, starting at byte
+    `offset`. `fmt` must be an iterable, iterating over number of
+    bytes to swap. For example, the format string "24" applied to the
+    bytearray "\x00\x11\x22\x33\x44\x55" will produce the result
+    "\x11\x00\x55\x44\x33\x22".
 
     :param fmt: Swap format string.
     :param data: Bytearray of data to swap.
     :param offset: Start offset into `data`.
     :returns: Bytearray of swapped bytes.
-    '''
+
+    """
     i = offset
     for f in fmt:
         length = int(f)

@@ -3,8 +3,9 @@
 About
 =====
 
-This module is intended to have a similar interface as the python struct module, but
-working on bits instead of normal datatypes (char, int, ...).
+This module is intended to have a similar interface as the python
+struct module, but working on bits instead of primitive data types
+(char, int, ...).
 
 Documentation: http://bitstruct.readthedocs.org/en/latest
 
@@ -34,7 +35,8 @@ A basic example of packing/unpacking four integers:
     >>> calcsize('u1u3u4s16')
     24
 
-Unpacked fields can be named by assigning them to variables or by wrapping the result in a named tuple:
+The unpacked fields can be named by assigning them to variables or by
+wrapping the result in a named tuple:
 
 .. code-block:: python
 
@@ -48,7 +50,8 @@ Unpacked fields can be named by assigning them to variables or by wrapping the r
     >>> myname.c
     3
 
-An example of packing/unpacking a unsinged integer, a signed integer, a float and a bytearray:
+An example of packing/unpacking a unsinged integer, a signed integer,
+a float and a bytearray:
 
 .. code-block:: python
 
@@ -60,7 +63,7 @@ An example of packing/unpacking a unsinged integer, a signed integer, a float an
     >>> calcsize('u5s5f32b13')
     55
 
-An example of unpacking from a hexstring and a binary file:
+An example of unpacking values from a hexstring and a binary file:
 
 .. code-block:: python
 
@@ -74,7 +77,8 @@ An example of unpacking from a hexstring and a binary file:
     ... 
     (582, -3751, bytearray(b'\xe2j\xf3'))
 
-Change endianess of data and then unpack it:
+Change endianness of the data with byteswap(), and then unpack the
+values:
 
 .. code-block:: python
 

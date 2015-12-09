@@ -3,12 +3,12 @@
 from setuptools import setup
 
 setup(name='bitstruct',
-      version='1.0.1',
+      version='1.1.0',
       description=('This module performs conversions between Python values '
                    'and C bit field structs represented as Python '
                    'bytearrays.'),
       long_description=open('README.rst', 'r').read(),
-      author='Erik Moqvist',
+      author='Erik Moqvist, Ilya Petukhov',
       author_email='erik.moqvist@gmail.com',
       license='MIT',
       classifiers=[

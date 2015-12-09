@@ -3,7 +3,7 @@ import struct
 
 
 def _parse_format(fmt):
-    types = re.findall(r'[a-zA-Z]+', fmt)
+    types = re.findall(r'[a-zA-Z?]+', fmt)
     sizes = map(lambda size: int(size),
                 re.findall(r'\d+', fmt))
     return zip(types, sizes)
@@ -13,6 +13,10 @@ def _pack_integer(size, arg):
     if arg < 0:
         arg = ((1 << size) + arg)
     return '{{:0{}b}}'.format(size).format(arg)
+
+
+def _pack_boolean(size, arg):
+    return _pack_integer(size, int(arg))
 
 
 def _pack_float(size, arg):
@@ -38,6 +42,11 @@ def _unpack_integer(type, bits):
         if bits[0] == '1':
             value -= (1 << len(bits))
     return value
+
+
+def _unpack_boolean(bits):
+    value = _unpack_integer('u', bits)
+    return bool(value)
 
 
 def _unpack_float(size, bits):
@@ -71,13 +80,14 @@ def pack(fmt, *args):
     :returns: Bytearray of packed values.
     
     `fmt` is a string of type-length pairs. There are five
-    types; 'u', 's', 'f', 'b' and 'p'. Length is the number of bits to pack 
+    types; 'u', 's', 'f', 'b', '?' and 'p'. Length is the number of bits to pack
     the value into.
     
     - 'u' -- unsigned integer
     - 's' -- signed integer
     - 'f' -- floating point number of 32 or 64 bits
     - 'b' -- bytearray
+    - '?' -- boolean
     - 'p' -- padding, ignore
 
     Example format string: 'u1u3p7s16'
@@ -96,6 +106,8 @@ def pack(fmt, *args):
                 bits += _pack_float(size, args[i])
             elif type == 'b':
                 bits += _pack_bytearray(size, args[i])
+            elif type == '?':
+                bits += _pack_boolean(size, args[i])
             else:
                 raise ValueError("bad type '{}' in format".format(type))
             i += 1
@@ -133,6 +145,8 @@ def unpack(fmt, data):
                 value = _unpack_float(size, bits[i:i+size])
             elif type == 'b':
                 value = _unpack_bytearray(size, bits[i:i+size])
+            elif type == '?':
+                value = _unpack_boolean(bits[i:i+size])
             res.append(value)
         i += size
     return tuple(res)

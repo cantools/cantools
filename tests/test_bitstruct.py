@@ -27,6 +27,15 @@ class BitStructTest(unittest.TestCase):
         packed = pack('u1s6f32b43', 0, -2, 3.75, bytearray(b'\x00\xff\x00\xff\x00\xff'))
         self.assertEqual(packed, bytearray(b'\x7c\x80\xe0\x00\x00\x01\xfe\x01\xfe\x01\xc0'))
 
+        packed = pack('?1', True)
+        self.assertEqual(packed, bytearray(b'\x80'))
+
+        packed = pack('?1p6?1', True, True)
+        self.assertEqual(packed, bytearray(b'\x81'))
+
+        packed = pack('u5?2u1', -1, False, 1)
+        self.assertEqual(packed, bytearray(b'\xf9'))
+
     def test_unpack(self):
         '''
         Unpack values.
@@ -52,6 +61,22 @@ class BitStructTest(unittest.TestCase):
         packed = bytearray(b'\x7c\x80\xe0\x00\x00\x01\xfe\x01\xfe\x01\xc0')
         unpacked = unpack('u1s6f32b43', packed)
         self.assertEqual(unpacked, (0, -2, 3.75, bytearray(b'\x00\xff\x00\xff\x00\xe0')))
+
+        packed = bytearray(b'\x80')
+        unpacked = unpack('?1', packed)
+        self.assertEqual(unpacked, (True,))
+
+        packed = bytearray(b'\x80')
+        unpacked = unpack('?1p6?1', packed)
+        self.assertEqual(unpacked, (True, False))
+
+        packed = bytearray(b'\x06')
+        unpacked = unpack('u5?2u1', packed)
+        self.assertEqual(unpacked, (0, True, 0))
+
+        packed = bytearray(b'\x04')
+        unpacked = unpack('u5?2u1', packed)
+        self.assertEqual(unpacked, (0, True, 0))
 
         # bad float size
         try:
@@ -84,10 +109,13 @@ class BitStructTest(unittest.TestCase):
         size = calcsize('u1s6u7u9')
         self.assertEqual(size, 23)
 
+        size = calcsize('?1s6u7u9')
+        self.assertEqual(size, 23)
+
     def test_byteswap(self):
         '''
         Byte swap.
-        '''        
+        '''
         res = bytearray(b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a')
         ref = bytearray(b'\x01\x03\x02\x04\x08\x07\x06\x05\x0a\x09')
         self.assertEqual(byteswap('12142', ref), res)

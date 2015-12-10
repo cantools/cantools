@@ -3,15 +3,17 @@ import struct
 
 
 def _parse_format(fmt):
-    types = re.findall(r'[a-zA-Z?]+', fmt)
+    types = re.findall(r'[a-zA-Z]+', fmt)
     sizes = map(lambda size: int(size),
                 re.findall(r'\d+', fmt))
+
     return zip(types, sizes)
 
 
 def _pack_integer(size, arg):
     if arg < 0:
         arg = ((1 << size) + arg)
+
     return '{{:0{}b}}'.format(size).format(arg)
 
 
@@ -33,30 +35,36 @@ def _pack_float(size, arg):
 def _pack_bytearray(size, arg):
     bits = ''.join('{:08b}'.format(b)
                    for b in arg)
+
     return bits[0:size]
 
 
 def _unpack_integer(type, bits):
     value = int(bits, 2)
+
     if type == 's':
         if bits[0] == '1':
             value -= (1 << len(bits))
+
     return value
 
 
 def _unpack_boolean(bits):
     value = _unpack_integer('u', bits)
+
     return bool(value)
 
 
 def _unpack_float(size, bits):
     packed = _unpack_bytearray(size, bits)
+
     if size == 32:
         value = struct.unpack('>f', packed)[0]
     elif size == 64:
         value = struct.unpack('>d', packed)[0]
     else:
         raise ValueError('Bad float size {}. Must be 32 or 64 bits.'.format(size))
+
     return value
 
 def _unpack_bytearray(size, bits):
@@ -79,23 +87,25 @@ def pack(fmt, *args):
     :param args: Variable argument list of values to pack.
     :returns: Bytearray of packed values.
     
-    `fmt` is a string of type-length pairs. There are five
-    types; 'u', 's', 'f', 'b', '?' and 'p'. Length is the number of bits to pack
+    `fmt` is a string of type-length pairs. There are five types; 'u',
+    's', 'f', 'b', 'r' and 'p'. Length is the number of bits to pack
     the value into.
     
     - 'u' -- unsigned integer
     - 's' -- signed integer
     - 'f' -- floating point number of 32 or 64 bits
-    - 'b' -- bytearray
-    - '?' -- boolean
+    - 'b' -- boolean
+    - 'r' -- raw, bytearray
     - 'p' -- padding, ignore
 
     Example format string: 'u1u3p7s16'
 
     """
+
     bits = ''
     infos = _parse_format(fmt)
     i = 0
+
     for type, size in infos:
         if type == 'p':
             bits += size * '0'
@@ -105,9 +115,9 @@ def pack(fmt, *args):
             elif type == 'f':
                 bits += _pack_float(size, args[i])
             elif type == 'b':
-                bits += _pack_bytearray(size, args[i])
-            elif type == '?':
                 bits += _pack_boolean(size, args[i])
+            elif type == 'r':
+                bits += _pack_bytearray(size, args[i])
             else:
                 raise ValueError("bad type '{}' in format".format(type))
             i += 1
@@ -131,10 +141,12 @@ def unpack(fmt, data):
     :returns: Tuple of unpacked values.
 
     """
+
     bits = ''.join(['{:08b}'.format(b) for b in data])
     infos = _parse_format(fmt)
     res = []
     i = 0
+
     for type, size in infos:
         if type == 'p':
             pass
@@ -144,11 +156,14 @@ def unpack(fmt, data):
             elif type == 'f':
                 value = _unpack_float(size, bits[i:i+size])
             elif type == 'b':
-                value = _unpack_bytearray(size, bits[i:i+size])
-            elif type == '?':
                 value = _unpack_boolean(bits[i:i+size])
+            elif type == 'r':
+                value = _unpack_bytearray(size, bits[i:i+size])
+            else:
+                raise ValueError("bad type '{}' in format".format(type))
             res.append(value)
         i += size
+
     return tuple(res)
 
 
@@ -160,6 +175,7 @@ def calcsize(fmt):
     :returns: Number of bits in format string.
 
     """
+
     return sum([size for _, size in _parse_format(fmt)])
 
 
@@ -176,11 +192,14 @@ def byteswap(fmt, data, offset = 0):
     :returns: Bytearray of swapped bytes.
 
     """
+
     i = offset
+
     for f in fmt:
         length = int(f)
         value = data[i:i+length]
         value.reverse()
         data[i:i+length] = value
         i += length
+
     return data

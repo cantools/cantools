@@ -51,17 +51,17 @@ wrapping the result in a named tuple:
     3
 
 An example of packing/unpacking a unsinged integer, a signed integer,
-a float and a bytearray:
+a float, a boolean and a bytearray:
 
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> pack('u5s5f32b13', 1, -1, 3.75, bytearray(b'\xff\xff'))
-    bytearray(b'\x0f\xd0\x1c\x00\x00?\xfe')
-    >>> unpack('u5s5f32b13', bytearray(b'\x0f\xd0\x1c\x00\x00?\xfe'))
-    (1, -1, 3.75, bytearray(b'\xff\xf8'))
-    >>> calcsize('u5s5f32b13')
-    55
+    >>> pack('u5s5f32b1r13', 1, -1, 3.75, True, bytearray(b'\xff\xff'))
+    bytearray(b'\x0f\xd0\x1c\x00\x00?\xff')
+    >>> unpack('u5s5f32b1r13', bytearray(b'\x0f\xd0\x1c\x00\x00?\xff'))
+    (1, -1, 3.75, True, bytearray(b'\xff\xf8'))
+    >>> calcsize('u5s5f32b1r13')
+    56
 
 An example of unpacking values from a hexstring and a binary file:
 
@@ -69,10 +69,10 @@ An example of unpacking values from a hexstring and a binary file:
 
     >>> from bitstruct import *
     >>> from binascii import *
-    >>> unpack('s17s13b24', bytearray(unhexlify('0123456789abcdef')))
+    >>> unpack('s17s13r24', bytearray(unhexlify('0123456789abcdef')))
     (582, -3751, bytearray(b'\xe2j\xf3'))
     >>> with open("test.bin", "rb") as fin:
-    ...     unpack('s17s13b24', bytearray(fin.read(8)))
+    ...     unpack('s17s13r24', bytearray(fin.read(8)))
     ...     
     ... 
     (582, -3751, bytearray(b'\xe2j\xf3'))

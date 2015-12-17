@@ -87,7 +87,7 @@ def pack(fmt, *args):
     :param args: Variable argument list of values to pack.
     :returns: Bytearray of packed values.
     
-    `fmt` is a string of type-length pairs. There are five types; 'u',
+    `fmt` is a string of type-length pairs. There are six types; 'u',
     's', 'f', 'b', 'r' and 'p'. Length is the number of bits to pack
     the value into.
     
@@ -136,7 +136,7 @@ def unpack(fmt, data):
     according to the given format. The result is a tuple even if it
     contains exactly one item.
 
-    :param fmt: Bitstruct format string.
+    :param fmt: Bitstruct format string. See pack() for details.
     :param data: Bytearray of values to unpack.
     :returns: Tuple of unpacked values.
 

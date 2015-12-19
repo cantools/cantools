@@ -1,8 +1,5 @@
 # CAN database.
 
-import sys
-import json
-import struct
 import bitstruct
 from collections import namedtuple
 from pyparsing import Word, Literal, Keyword, Optional, Suppress, Group, QuotedString
@@ -18,7 +15,7 @@ MESSAGE = 'BO_'
 SIGNAL  = 'SG_'
 CHOICE  = 'VAL_'
 
-dbc_fmt = '''VERSION "{version}"
+dbc_fmt = """VERSION "{version}"
 
 NS_ :
 \tNS_DESC_
@@ -51,20 +48,25 @@ BU_: {bu}
 {cm}
 
 {val}
-'''
+"""
 
 def num(s):
+    """Convert a string to an integer or a float.
+
+    """
+
     try:
         return int(s)
-    except:
+    except ValueError:
         return float(s)
     else:
         raise ValueError('Expected integer or floating point number.')
 
 def create_dbc_grammar():
-    '''
-    Create DBC grammar.
-    '''
+    """Create DBC grammar.
+
+    """
+
     # DBC file grammar
     word = Word(printables)
     integer = Optional(Literal('-')) + Word(nums)
@@ -138,9 +140,10 @@ def create_dbc_grammar():
     return grammar
 
 def as_dbc(db):
-    '''
-    Format database in DBC file format.
-    '''
+    """Format database in DBC file format.
+
+    """
+
     # messages
     bo = []
     for message in db.messages:
@@ -151,17 +154,17 @@ def as_dbc(db):
                               length=message.length,
                               ecu=db.ecu))
         for signal in message.signals:
-            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{type} ({scale},{offset})'
-                   ' [{min}|{max}] "{unit}" Vector__XXX')
+            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{_type} ({scale},{offset})'
+                   ' [{_min}|{_max}] "{unit}" Vector__XXX')
             msg.append(fmt.format(name=signal.name,
                                   start=signal.start,
                                   length=signal.length,
                                   byte_order=(0 if signal.byte_order == 'big_endian' else 1),
-                                  type=('-' if signal.type == 'signed' else '+'),
+                                  _type=('-' if signal.type == 'signed' else '+'),
                                   scale=signal.scale,
                                   offset=signal.offset,
-                                  min=signal.min,
-                                  max=signal.max,
+                                  _min=signal.min,
+                                  _max=signal.max,
                                   unit=signal.unit))
         bo.append('\n'.join(msg))
 
@@ -200,20 +203,20 @@ def as_dbc(db):
                           val='\n'.join(val))
 
 class Signal(object):
-    '''
-    CAN signal.
-    '''
+    """CAN signal.
+
+    """
 
     def __init__(self,
                  name,
                  start,
                  length,
                  byte_order,
-                 type,
+                 _type,
                  scale,
                  offset,
-                 min,
-                 max,
+                 _min,
+                 _max,
                  unit,
                  choices,
                  comment):
@@ -221,11 +224,11 @@ class Signal(object):
         self.start = start
         self.length = length
         self.byte_order = byte_order
-        self.type = type
+        self.type = _type
         self.scale = scale
         self.offset = offset
-        self.min = min
-        self.max = max
+        self.min = _min
+        self.max = _max
         self.unit = unit
         self.choices = choices
         self.comment = comment
@@ -247,9 +250,9 @@ class Signal(object):
 
 
 class Message(object):
-    '''
-    CAN message.
-    '''
+    """CAN message.
+
+    """
 
     def __init__(self,
                  frame_id,
@@ -275,25 +278,27 @@ class Message(object):
             end = signal.start
 
     def decode(self, data):
-        return self.Decoded(*map(lambda v: (v[0].scale * v[1] + v[0].offset),
-                                 zip(self.signals,
-                                     bitstruct.unpack(self.fmt, data))))
+        return self.Decoded(*[v[0].scale * v[1] + v[0].offset
+                              for v in zip(self.signals,
+                                           bitstruct.unpack(self.fmt, data))])
 
 
 class File(object):
-    '''
-    CAN database file.
-    '''
+    """CAN database file.
+
+    """
 
     def __init__(self, messages=None):
         self.messages = messages if messages else []
         self.grammar = create_dbc_grammar()
         self.frame_id_to_message = {}
+        self.version = None
+        self.ecu = None
 
     def add_dbc(self, dbc):
-        '''
-        Add information from dbc io stream.
-        '''
+        """Add information from dbc io stream.
+
+        """
 
         tokens = self.grammar.parseString(dbc.read())
 
@@ -320,34 +325,34 @@ class File(object):
                                                  for v in choice[3] ]
 
         def get_comment(frame_id, signal=None):
-            '''
-            Get comment for given message or signal.
-            '''
+            """Get comment for given message or signal.
+
+            """
 
             try:
                 if signal == None:
                     return comments[frame_id]['message']
                 else:
                     return comments[frame_id]['signals'][signal]
-            except:
+            except KeyError:
                 return None
 
         def get_choices(frame_id, signal):
-            '''
-            Get choices for given signal.
-            '''
+            """Get choices for given signal.
+
+            """
 
             try:
                 return choices[frame_id][signal]
-            except:
+            except KeyError:
                 return None
 
-        self.version = [ token[1]
-                         for token in tokens
-                         if token[0] == VERSION ][0]
-        self.ecu = [ token[1]
-                     for token in tokens
-                     if token[0] == ECU ][0]
+        self.version = [token[1]
+                        for token in tokens
+                        if token[0] == VERSION][0]
+        self.ecu = [token[1]
+                    for token in tokens
+                    if token[0] == ECU][0]
 
         for message in tokens:
             if message[0] != MESSAGE:
@@ -361,13 +366,13 @@ class File(object):
                                                byte_order=('big_endian'
                                                            if signal[2][2] == '0'
                                                            else 'little_endian'),
-                                               type=('signed'
+                                               _type=('signed'
                                                      if signal[2][3] == '-'
                                                      else 'unsigned'),
                                                scale=num(signal[3][0]),
                                                offset=num(signal[3][1]),
-                                               min=num(signal[4][0]),
-                                               max=num(signal[4][1]),
+                                               _min=num(signal[4][0]),
+                                               _max=num(signal[4][1]),
                                                unit=signal[5],
                                                choices=get_choices(int(message[1]),
                                                                    signal[1]),
@@ -382,14 +387,16 @@ class File(object):
         self.frame_id_to_message[message.frame_id] = message
 
     def as_dbc(self):
-        '''
-        Return database in dbc file format.
-        '''
+        """Return database in dbc file format.
+
+        """
+
         return as_dbc(self)
 
     def decode_message(self, frame_id, data):
-        '''
-        Decode a message.
-        '''
+        """Decode a message.
+
+        """
+
         message = self.frame_id_to_message[frame_id]
         return message.decode(data)

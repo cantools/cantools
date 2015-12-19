@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='cantools',
-      version='0.2.2',
+      version='1.0.0',
       description='CAN BUS tools.',
       long_description=open('README.rst', 'r').read(),
       author='Erik Moqvist',

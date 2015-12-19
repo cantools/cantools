@@ -63,6 +63,20 @@ a float, a boolean and a bytearray:
     >>> calcsize('u5s5f32b1r13')
     56
 
+The same format and values as in the previous example, but using LSB
+(Least Significant Bit) first instead of the default MSB (Most
+Significant Bit) first:
+
+.. code-block:: python
+
+    >>> from bitstruct import *
+    >>> pack('<u5s5f32b1r13', 1, -1, 3.75, True, bytearray(b'\xff\xff'))
+    bytearray(b'\x87\xc0\x00\x03\x80\xbf\xff')
+    >>> unpack('<u5s5f32b1r13', bytearray(b'\x87\xc0\x00\x03\x80\xbf\xff'))
+    (1, -1, 3.75, True, bytearray(b'\xff\xf8'))
+    >>> calcsize('<u5s5f32b1r13')
+    56
+
 An example of unpacking values from a hexstring and a binary file:
 
 .. code-block:: python

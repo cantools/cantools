@@ -82,8 +82,7 @@ An example of unpacking values from a hexstring and a binary file:
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> from binascii import *
-    >>> unpack('s17s13r24', bytearray(unhexlify('0123456789abcdef')))
+    >>> unpack('s17s13r24', bytearray('0123456789abcdef'.decode('hex')))
     (582, -3751, bytearray(b'\xe2j\xf3'))
     >>> with open("test.bin", "rb") as fin:
     ...     unpack('s17s13r24', bytearray(fin.read(8)))

@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='bitstruct',
-      version='2.1.1',
+      version='2.1.2',
       description=('This module performs conversions between Python values '
                    'and C bit field structs represented as Python '
                    'bytearrays.'),

@@ -6,6 +6,7 @@ class BitStructTest(unittest.TestCase):
 
     def test_pack(self):
         """Pack values.
+
         """
 
         packed = pack('u1u1s6u7u9', 0, 0, -2, 65, 22)
@@ -38,6 +39,7 @@ class BitStructTest(unittest.TestCase):
 
     def test_unpack(self):
         """Unpack values.
+
         """
 
         unpacked = unpack('u1u1s6u7u9', bytearray(b'\x3e\x82\x16'))
@@ -87,6 +89,7 @@ class BitStructTest(unittest.TestCase):
 
     def test_pack_unpack(self):
         """Pack and unpack values.
+
         """
 
         packed = pack('u1u1s6u7u9', 0, 0, -2, 65, 22)
@@ -99,6 +102,7 @@ class BitStructTest(unittest.TestCase):
 
     def test_calcsize(self):
         """Calculate size.
+
         """
 
         size = calcsize('u1u1s6u7u9')
@@ -118,6 +122,7 @@ class BitStructTest(unittest.TestCase):
 
     def test_byteswap(self):
         """Byte swap.
+
         """
 
         res = bytearray(b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a')
@@ -127,6 +132,46 @@ class BitStructTest(unittest.TestCase):
         packed = pack('u1u5u2u16', 1, 2, 3, 4)
         unpacked = unpack('u1u5u2u16', byteswap('12', packed))
         self.assertEqual(unpacked, (1, 2, 3, 1024))
+
+    def test_endianness(self):
+        """Test pack/unpack with endianness information in the format string.
+
+        """
+
+        # big endian
+        ref = b"\x02\x46\x9a\xfe\x00\x00\x00"
+        packed = pack(">u19s3f32", 0x1234, -2, -1.0)
+        self.assertEqual(packed, ref)
+        unpacked = unpack(">u19s3f32", packed)
+        self.assertEqual(unpacked, (0x1234, -2, -1.0))
+        
+        # little endian
+        ref = b"\x2c\x48\x0c\x00\x00\x07\xf4"
+        packed = pack("<u19s3f32", 0x1234, -2, -1.0)
+        self.assertEqual(packed, ref)
+        unpacked = unpack("<u19s3f32", packed)
+        self.assertEqual(unpacked, (0x1234, -2, -1.0))
+
+        # mixed endianness
+        ref = b"\x00\x00\x2f\x3f\xf0\x00\x00\x00\x00\x00\x00\x80"
+        packed = pack(">u19<s5>f64r3p4", 1, -2, 1.0, bytearray(b"\x80"))
+        self.assertEqual(packed, ref)
+        unpacked = unpack(">u19<s5>f64r3p4", packed)
+        self.assertEqual(unpacked, (1, -2, 1.0, bytearray(b"\x80")))
+
+        # opposite endianness of the "mixed endianness" test
+        ref = b"\x80\x00\x1e\x00\x00\x00\x00\x00\x00\x0f\xfc\x20"
+        packed = pack("<u19>s5<f64r3p4", 1, -2, 1.0, bytearray(b"\x80"))
+        self.assertEqual(packed, ref)
+        unpacked = unpack("<u19>s5<f64r3p4", packed)
+        self.assertEqual(unpacked, (1, -2, 1.0, bytearray(b"\x80")))
+
+        # pack as big endian, unpack as little endian
+        ref = b"\x40"
+        packed = pack("u2", 1)
+        self.assertEqual(packed, ref)
+        unpacked = unpack("<u2", packed)
+        self.assertEqual(unpacked, (2, ))
 
 if __name__ == '__main__':
     unittest.main()

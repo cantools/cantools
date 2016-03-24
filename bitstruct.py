@@ -23,6 +23,7 @@ def _pack_integer(size, arg):
 
     return '{{:0{}b}}'.format(size).format(arg)
 
+
 def _pack_boolean(size, arg):
     return _pack_integer(size, int(arg))
 

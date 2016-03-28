@@ -1,7 +1,7 @@
 import re
 import struct
 
-__version__ = "2.1.4"
+__version__ = "3.0.0"
 
 
 def _parse_format(fmt):
@@ -76,6 +76,7 @@ def _unpack_float(size, bits):
 
     return value
 
+
 def _unpack_bytearray(size, bits):
     value = bytearray()
     for i in range(size // 8):
@@ -87,14 +88,14 @@ def _unpack_bytearray(size, bits):
 
 
 def pack(fmt, *args):
-    """Return a bytearray containing the values v1, v2, ... packed
+    """Return a byte string containing the values v1, v2, ... packed
     according to the given format. If the total number of bits are not
     a multiple of 8, padding will be added at the end of the last
     byte.
 
     :param fmt: Bitstruct format string. See format description below.
     :param args: Variable argument list of values to pack.
-    :returns: A bytearray of the packed values.
+    :returns: A byte string of the packed values.
 
     `fmt` is a string of bitorder-type-length groups. Bitorder may be
     omitted.
@@ -110,7 +111,7 @@ def pack(fmt, *args):
     - 's' -- signed integer
     - 'f' -- floating point number of 32 or 64 bits
     - 'b' -- boolean
-    - 'r' -- raw, bytearray
+    - 'r' -- raw, bytes
     - 'p' -- padding, ignore
 
     Length is the number of bits to pack the value into.
@@ -134,7 +135,7 @@ def pack(fmt, *args):
             elif _type == 'b':
                 value_bits = _pack_boolean(size, args[i])
             elif _type == 'r':
-                value_bits = _pack_bytearray(size, args[i])
+                value_bits = _pack_bytearray(size, bytearray(args[i]))
             else:
                 raise ValueError("bad type '{}' in format".format(_type))
 
@@ -150,22 +151,22 @@ def pack(fmt, *args):
     if tail != 0:
         bits += (8 - tail) * '0'
 
-    return bytearray([int(''.join(bits[i:i+8]), 2)
-                      for i in range(0, len(bits), 8)])
+    return bytes(bytearray([int(''.join(bits[i:i+8]), 2)
+                            for i in range(0, len(bits), 8)]))
 
 
 def unpack(fmt, data):
-    """Unpack the bytearray (presumably packed by pack(fmt, ...))
+    """Unpack the byte string (presumably packed by pack(fmt, ...))
     according to the given format. The result is a tuple even if it
     contains exactly one item.
 
     :param fmt: Bitstruct format string. See pack() for details.
-    :param data: Bytearray of values to unpack.
+    :param data: Byte string of values to unpack.
     :returns: A tuple of the unpacked values.
 
     """
 
-    bits = ''.join(['{:08b}'.format(b) for b in data])
+    bits = ''.join(['{:08b}'.format(b) for b in bytearray(data)])
     infos = _parse_format(fmt)
     res = []
     i = 0
@@ -187,7 +188,7 @@ def unpack(fmt, data):
             elif _type == 'b':
                 value = _unpack_boolean(value_bits)
             elif _type == 'r':
-                value = _unpack_bytearray(size, value_bits)
+                value = bytes(_unpack_bytearray(size, value_bits))
             else:
                 raise ValueError("bad type '{}' in format".format(_type))
             res.append(value)
@@ -197,8 +198,7 @@ def unpack(fmt, data):
 
 
 def calcsize(fmt):
-    """Return the size of the bitstruct (and hence of the bytearray)
-    corresponding to the given format.
+    """Calculate the number of bits in given format.
 
     :param fmt: Bitstruct format string.
     :returns: Number of bits in format string.
@@ -209,26 +209,26 @@ def calcsize(fmt):
 
 
 def byteswap(fmt, data, offset = 0):
-    """In place swap bytes in `data` according to `fmt`, starting at byte
+    """Swap bytes in `data` according to `fmt`, starting at byte
     `offset`. `fmt` must be an iterable, iterating over number of
     bytes to swap. For example, the format string "24" applied to the
-    bytearray "\x00\x11\x22\x33\x44\x55" will produce the result
-    "\x11\x00\x55\x44\x33\x22".
+    byte string b'\x00\x11\x22\x33\x44\x55' will produce the result
+    b'\x11\x00\x55\x44\x33\x22'.
 
     :param fmt: Swap format string.
-    :param data: Bytearray of data to swap.
+    :param data: Byte string of data to swap.
     :param offset: Start offset into `data`.
-    :returns: Bytearray of swapped bytes.
+    :returns: Byte string of swapped bytes.
 
     """
 
     i = offset
+    data_swapped = b''
 
     for f in fmt:
         length = int(f)
         value = data[i:i+length]
-        value.reverse()
-        data[i:i+length] = value
+        data_swapped += value[::-1]
         i += length
 
-    return data
+    return data_swapped

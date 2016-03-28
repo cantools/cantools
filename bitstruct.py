@@ -1,6 +1,8 @@
 import re
 import struct
 
+__version__ = "2.1.4"
+
 
 def _parse_format(fmt):
     parsed_infos = re.findall(r'([<>]?)([a-zA-Z])(\d+)', fmt)

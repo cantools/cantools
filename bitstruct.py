@@ -156,7 +156,7 @@ def pack(fmt, *args):
 
 
 def unpack(fmt, data):
-    """Unpack the byte string (presumably packed by pack(fmt, ...))
+    """Unpack `data` (byte string, bytearray or list of integers)
     according to the given format. The result is a tuple even if it
     contains exactly one item.
 

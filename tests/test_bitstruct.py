@@ -45,7 +45,7 @@ class BitStructTest(unittest.TestCase):
         unpacked = unpack('u1u1s6u7u9', b'\x3e\x82\x16')
         self.assertEqual(unpacked, (0, 0, -2, 65, 22))
 
-        unpacked = unpack('u1', b'\x80')
+        unpacked = unpack('u1', bytearray(b'\x80'))
         self.assertEqual(unpacked, (1,))
 
         packed = b'\x00\x80\x00\x00\x00\x00\x08\x00\x00\x00'
@@ -64,7 +64,7 @@ class BitStructTest(unittest.TestCase):
         unpacked = unpack('u1s6f32r43', packed)
         self.assertEqual(unpacked, (0, -2, 3.75, b'\x00\xff\x00\xff\x00\xe0'))
 
-        packed = b'\x80'
+        packed = [0x80]
         unpacked = unpack('b1', packed)
         self.assertEqual(unpacked, (True,))
 

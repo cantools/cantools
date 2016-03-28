@@ -87,6 +87,26 @@ class BitStructTest(unittest.TestCase):
         except ValueError:
             pass
 
+        # gcc packed struct with bitfields
+        #
+        # struct foo_t {
+        #     int a;
+        #     char b;
+        #     uint32_t c : 7;
+        #     uint32_t d : 25;
+        # } foo;
+        #
+        # foo.a = 1;
+        # foo.b = 1;
+        # foo.c = 0x67;
+        # foo.d = 0x12345;
+        unpacked = unpack("s32s8u25u7",
+                          byteswap("414",
+                                   bytearray(b'\x01\x00\x00\x00\x01\xe7\xa2\x91\x00')))
+        self.assertEqual(unpacked, (1, 1, 0x12345, 0x67))
+
+
+
     def test_pack_unpack(self):
         """Pack and unpack values.
 
@@ -172,6 +192,7 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(packed, ref)
         unpacked = unpack("<u2", packed)
         self.assertEqual(unpacked, (2, ))
+
 
 if __name__ == '__main__':
     unittest.main()

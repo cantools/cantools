@@ -1,7 +1,7 @@
 import re
 import struct
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 
 
 def _parse_format(fmt):

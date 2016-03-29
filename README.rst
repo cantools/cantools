@@ -29,8 +29,8 @@ A basic example of packing/unpacking four integers:
 
     >>> from bitstruct import *
     >>> pack('u1u3u4s16', 1, 2, 3, -4)
-    bytearray(b'\xa3\xff\xfc')
-    >>> unpack('u1u3u4s16', bytearray(b'\xa3\xff\xfc'))
+    b'\xa3\xff\xfc'
+    >>> unpack('u1u3u4s16', b'\xa3\xff\xfc')
     (1, 2, 3, -4)
     >>> calcsize('u1u3u4s16')
     24
@@ -43,7 +43,7 @@ wrapping the result in a named tuple:
     >>> from bitstruct import *
     >>> from collections import namedtuple
     >>> MyName = namedtuple('myname', [ 'a', 'b', 'c', 'd' ])
-    >>> unpacked = unpack('u1u3u4s16', bytearray(b'\xa3\xff\xfc'))
+    >>> unpacked = unpack('u1u3u4s16', b'\xa3\xff\xfc')
     >>> myname = MyName(*unpacked)
     >>> myname
     myname(a=1, b=2, c=3, d=-4)
@@ -51,15 +51,15 @@ wrapping the result in a named tuple:
     3
 
 An example of packing/unpacking a unsinged integer, a signed integer,
-a float, a boolean and a bytearray:
+a float, a boolean and a byte string:
 
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> pack('u5s5f32b1r13', 1, -1, 3.75, True, bytearray(b'\xff\xff'))
-    bytearray(b'\x0f\xd0\x1c\x00\x00?\xff')
-    >>> unpack('u5s5f32b1r13', bytearray(b'\x0f\xd0\x1c\x00\x00?\xff'))
-    (1, -1, 3.75, True, bytearray(b'\xff\xf8'))
+    >>> pack('u5s5f32b1r13', 1, -1, 3.75, True, b'\xff\xff')
+    b'\x0f\xd0\x1c\x00\x00?\xff'
+    >>> unpack('u5s5f32b1r13', b'\x0f\xd0\x1c\x00\x00?\xff')
+    (1, -1, 3.75, True, b'\xff\xf8')
     >>> calcsize('u5s5f32b1r13')
     56
 
@@ -70,10 +70,10 @@ Significant Bit) first:
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> pack('<u5s5f32b1r13', 1, -1, 3.75, True, bytearray(b'\xff\xff'))
-    bytearray(b'\x87\xc0\x00\x03\x80\xbf\xff')
-    >>> unpack('<u5s5f32b1r13', bytearray(b'\x87\xc0\x00\x03\x80\xbf\xff'))
-    (1, -1, 3.75, True, bytearray(b'\xff\xf8'))
+    >>> pack('<u5s5f32b1r13', 1, -1, 3.75, True, b'\xff\xff')
+    b'\x87\xc0\x00\x03\x80\xbf\xff'
+    >>> unpack('<u5s5f32b1r13', b'\x87\xc0\x00\x03\x80\xbf\xff')
+    (1, -1, 3.75, True, b'\xff\xf8')
     >>> calcsize('<u5s5f32b1r13')
     56
 
@@ -82,13 +82,13 @@ An example of unpacking values from a hexstring and a binary file:
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> unpack('s17s13r24', bytearray('0123456789abcdef'.decode('hex')))
-    (582, -3751, bytearray(b'\xe2j\xf3'))
+    >>> unpack('s17s13r24', '0123456789abcdef'.decode('hex'))
+    (582, -3751, b'\xe2j\xf3')
     >>> with open("test.bin", "rb") as fin:
-    ...     unpack('s17s13r24', bytearray(fin.read(8)))
+    ...     unpack('s17s13r24', fin.read(8))
     ...     
     ... 
-    (582, -3751, bytearray(b'\xe2j\xf3'))
+    (582, -3751, b'\xe2j\xf3')
 
 Change endianness of the data with byteswap(), and then unpack the
 values:

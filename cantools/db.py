@@ -2,20 +2,22 @@
 
 import bitstruct
 from collections import namedtuple
-from pyparsing import Word, Literal, Keyword, Optional, Suppress, Group, QuotedString
-from pyparsing import printables, nums, alphas, LineEnd, ZeroOrMore, OneOrMore
+from pyparsing import Word, Literal, Keyword, Optional, Suppress
+from pyparsing import Group, QuotedString
+from pyparsing import printables, nums, alphas, LineEnd
+from pyparsing import ZeroOrMore, OneOrMore
 
 __author__ = 'Erik Moqvist'
 
 # DBC section types
 VERSION = 'VERSION'
-ECU     = 'BU_'
+ECU = 'BU_'
 COMMENT = 'CM_'
 MESSAGE = 'BO_'
-SIGNAL  = 'SG_'
-CHOICE  = 'VAL_'
+SIGNAL = 'SG_'
+CHOICE = 'VAL_'
 
-dbc_fmt = """VERSION "{version}"
+DBC_FMT = """VERSION "{version}"
 
 NS_ :
 \tNS_DESC_
@@ -50,17 +52,19 @@ BU_: {bu}
 {val}
 """
 
-def num(s):
-    """Convert a string to an integer or a float.
+
+def num(number_as_string):
+    """Convert given string to an integer or a float.
 
     """
 
     try:
-        return int(s)
+        return int(number_as_string)
     except ValueError:
-        return float(s)
+        return float(number_as_string)
     else:
         raise ValueError('Expected integer or floating point number.')
+
 
 def create_dbc_grammar():
     """Create DBC grammar.
@@ -132,52 +136,62 @@ def create_dbc_grammar():
     choice = Group(Keyword(CHOICE) +
                    integer +
                    word +
-                   Group(OneOrMore(Group(integer + QuotedString('"', multiline=True)))) +
+                   Group(OneOrMore(Group(
+                       integer + QuotedString('"', multiline=True)))) +
                    scolon)
     entry = version | symbols | discard | ecu | message | comment | choice
     grammar = OneOrMore(entry)
 
     return grammar
 
-def as_dbc(db):
+
+def as_dbc(database):
     """Format database in DBC file format.
 
     """
 
     # messages
     bo = []
-    for message in db.messages:
+
+    for message in database.messages:
         msg = []
         fmt = 'BO_ {frame_id} {name}: {length} {ecu}'
         msg.append(fmt.format(frame_id=message.frame_id,
                               name=message.name,
                               length=message.length,
-                              ecu=db.ecu))
+                              ecu=database.ecu))
+
         for signal in message.signals:
-            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{_type} ({scale},{offset})'
+            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{_type}'
+                   ' ({scale},{offset})'
                    ' [{_min}|{_max}] "{unit}" Vector__XXX')
-            msg.append(fmt.format(name=signal.name,
-                                  start=signal.start,
-                                  length=signal.length,
-                                  byte_order=(0 if signal.byte_order == 'big_endian' else 1),
-                                  _type=('-' if signal.type == 'signed' else '+'),
-                                  scale=signal.scale,
-                                  offset=signal.offset,
-                                  _min=signal.min,
-                                  _max=signal.max,
-                                  unit=signal.unit))
+            msg.append(fmt.format(
+                name=signal.name,
+                start=signal.start,
+                length=signal.length,
+                byte_order=(0 if signal.byte_order == 'big_endian' else 1),
+                _type=('-' if signal.type == 'signed' else '+'),
+                scale=signal.scale,
+                offset=signal.offset,
+                _min=signal.min,
+                _max=signal.max,
+                unit=signal.unit))
+
         bo.append('\n'.join(msg))
 
     # comments
     cm = []
-    for message in db.messages:
+
+    for message in database.messages:
         if message.comment != None:
             fmt = 'CM_ BO_ {frame_id} "{comment}";'
             cm.append(fmt.format(frame_id=message.frame_id,
                                  comment=message.comment))
+
         for signal in message.signals:
             if signal.comment == None:
                 continue
+
             fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
             cm.append(fmt.format(frame_id=message.frame_id,
                                  name=signal.name,
@@ -185,25 +199,27 @@ def as_dbc(db):
 
     # choices
     val = []
-    for message in db.messages:
+    for message in database.messages:
         for signal in message.signals:
             if signal.choices == None:
                 continue
-            fmt = 'VAL_ {frame_id} {name} {choices} ;'
-            val.append(fmt.format(frame_id=message.frame_id,
-                                  name=signal.name,
-                                  choices=' '.join([ '{value} "{text}"'.format(value=choice[0],
-                                                                               text=choice[1])
-                                                       for choice in signal.choices ])))
 
-    return dbc_fmt.format(version=db.version,
-                          bu=db.ecu,
+            fmt = 'VAL_ {frame_id} {name} {choices} ;'
+            val.append(fmt.format(
+                frame_id=message.frame_id,
+                name=signal.name,
+                choices=' '.join(['{value} "{text}"'.format(value=choice[0],
+                                                            text=choice[1])
+                                  for choice in signal.choices])))
+
+    return DBC_FMT.format(version=database.version,
+                          bu=database.ecu,
                           bo='\n\n'.join(bo),
                           cm='\n'.join(cm),
                           val='\n'.join(val))
 
 class Signal(object):
-    """CAN signal.
+    """A CAN signal.
 
     """
 
@@ -235,6 +251,7 @@ class Signal(object):
 
     def __repr__(self):
         fmt = 'signal(' + ', '.join(12 * ['{}']) + ')'
+
         return fmt.format(self.name,
                           self.start,
                           self.length,
@@ -267,18 +284,25 @@ class Message(object):
         self.signals.sort(key=lambda s: s.start)
         self.signals.reverse()
         self.comment = comment
-        self.Decoded = namedtuple(name, [signal.name for signal in signals])
+        self.decoded = namedtuple(name, [signal.name for signal in signals])
         self.fmt = ''
         end = 64
+
         for signal in signals:
             padding = end - (signal.start + signal.length)
+
             if padding > 0:
                 self.fmt += 'p{}'.format(padding)
+
             self.fmt += '{}{}'.format(signal.type[0], signal.length)
             end = signal.start
 
     def decode(self, data):
-        return self.Decoded(*[v[0].scale * v[1] + v[0].offset
+        """Decode given data as a message of this type.
+
+        """
+
+        return self.decoded(*[v[0].scale * v[1] + v[0].offset
                               for v in zip(self.signals,
                                            bitstruct.unpack(self.fmt, data))])
 
@@ -296,7 +320,7 @@ class File(object):
         self.ecu = None
 
     def add_dbc(self, dbc):
-        """Add information from dbc io stream.
+        """Add information from dbc iostream.
 
         """
 
@@ -306,23 +330,30 @@ class File(object):
         for comment in tokens:
             if comment[0] == COMMENT:
                 frame_id = int(comment[2])
+
                 if frame_id not in comments:
                     comments[frame_id] = {}
+
                 if comment[1] == MESSAGE:
                     comments[frame_id]['message'] = comment[3]
+
                 if comment[1] == SIGNAL:
                     if 'signals' not in comments[frame_id]:
                         comments[frame_id]['signals'] = {}
+
                     comments[frame_id]['signals'][comment[3]] = comment[4]
 
         choices = {}
+
         for choice in tokens:
             if choice[0] == CHOICE:
                 frame_id = int(choice[1])
+
                 if frame_id not in choices:
                     choices[frame_id] = {}
-                choices[frame_id][choice[2]] = [ (int(v[0]), v[1])
-                                                 for v in choice[3] ]
+
+                choices[frame_id][choice[2]] = [(int(v[0]), v[1])
+                                                for v in choice[3]]
 
         def get_comment(frame_id, signal=None):
             """Get comment for given message or signal.
@@ -357,46 +388,54 @@ class File(object):
         for message in tokens:
             if message[0] != MESSAGE:
                 continue
-            message = Message(frame_id=int(message[1]),
-                              name=message[2][0:-1],
-                              length=int(message[3], 0),
-                              signals=[ Signal(name=signal[1],
-                                               start=int(signal[2][0]),
-                                               length=int(signal[2][1]),
-                                               byte_order=('big_endian'
-                                                           if signal[2][2] == '0'
-                                                           else 'little_endian'),
-                                               _type=('signed'
-                                                     if signal[2][3] == '-'
-                                                     else 'unsigned'),
-                                               scale=num(signal[3][0]),
-                                               offset=num(signal[3][1]),
-                                               _min=num(signal[4][0]),
-                                               _max=num(signal[4][1]),
-                                               unit=signal[5],
-                                               choices=get_choices(int(message[1]),
-                                                                   signal[1]),
-                                               comment=get_comment(int(message[1]),
-                                                                   signal[1]))
-                                        for signal in message[5] ],
-                              comment=get_comment(int(message[1])))
+
+            message = Message(
+                frame_id=int(message[1]),
+                name=message[2][0:-1],
+                length=int(message[3], 0),
+                signals=[Signal(name=signal[1],
+                                start=int(signal[2][0]),
+                                length=int(signal[2][1]),
+                                byte_order=('big_endian'
+                                            if signal[2][2] == '0'
+                                            else 'little_endian'),
+                                _type=('signed'
+                                       if signal[2][3] == '-'
+                                       else 'unsigned'),
+                                scale=num(signal[3][0]),
+                                offset=num(signal[3][1]),
+                                _min=num(signal[4][0]),
+                                _max=num(signal[4][1]),
+                                unit=signal[5],
+                                choices=get_choices(int(message[1]),
+                                                    signal[1]),
+                                comment=get_comment(int(message[1]),
+                                                    signal[1]))
+                         for signal in message[5]],
+                comment=get_comment(int(message[1])))
+
             self.add_message(message)
 
     def add_message(self, message):
+        """Add given message to the database.
+
+        """
+
         self.messages.append(message)
         self.frame_id_to_message[message.frame_id] = message
 
     def as_dbc(self):
-        """Return database in dbc file format.
+        """Return a string of the database in dbc file format.
 
         """
 
         return as_dbc(self)
 
     def decode_message(self, frame_id, data):
-        """Decode a message.
+        """Decode given `data` as the message of given `frame_id`.
 
         """
 
         message = self.frame_id_to_message[frame_id]
+
         return message.decode(data)

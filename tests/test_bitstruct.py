@@ -1,4 +1,5 @@
 import unittest
+import timeit
 from bitstruct import *
 
 
@@ -115,8 +116,6 @@ class BitStructTest(unittest.TestCase):
                                    b'\x01\x00\x00\x00\x01\xe7\xa2\x91\x00'))
         self.assertEqual(unpacked, (1, 1, 0x12345, 0x67))
 
-
-
     def test_pack_unpack(self):
         """Pack and unpack values.
 
@@ -174,7 +173,7 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(packed, ref)
         unpacked = unpack('>u19s3f32', packed)
         self.assertEqual(unpacked, (0x1234, -2, -1.0))
-        
+
         # little endian
         ref = b'\x2c\x48\x0c\x00\x00\x07\xf4'
         packed = pack('<u19s3f32', 0x1234, -2, -1.0)
@@ -204,5 +203,28 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(unpacked, (2, ))
 
 
+    def test_performance(self):
+        """Test pack/unpack performance.
+
+        """
+
+        time = timeit.timeit("pack('s6u7r40b1t152', "
+                             "-2, 22, b'\x01\x01\x03\x04\x05', "
+                             "True, u'foo fie bar gom gum')",
+                             setup="from bitstruct import pack",
+                             number=50000)
+        print("pack time: {} s ({} s/pack)".format(time, time / 50000))
+
+        time = timeit.timeit("unpack('s6u7r40b1t152', "
+                             "b'\\xf8\\xb0\\x08\\x08\\x18 "
+                             "-\\x99\\xbd\\xbc\\x81\\x99"
+                             "\\xa5\\x94\\x81\\x89\\x85"
+                             "\\xc8\\x81\\x9d\\xbd\\xb4"
+                             "\\x81\\x9d\\xd5\\xb4')",
+                             setup="from bitstruct import unpack",
+                             number=50000)
+        print("unpack time: {} s ({} s/unpack)".format(time, time / 50000))
+
+        
 if __name__ == '__main__':
     unittest.main()

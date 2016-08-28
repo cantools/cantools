@@ -1,7 +1,7 @@
 import re
 import struct
 
-__version__ = "3.1.0"
+__version__ = "3.2.0"
 
 
 def _parse_format(fmt):
@@ -48,6 +48,10 @@ def _pack_bytearray(size, arg):
     return bits[0:size]
 
 
+def _pack_text(size, arg):
+    return _pack_bytearray(size, bytearray(arg.encode('utf-8')))
+
+
 def _unpack_integer(_type, bits):
     value = int(bits, 2)
 
@@ -87,6 +91,10 @@ def _unpack_bytearray(size, bits):
     return value
 
 
+def _unpack_text(size, bits):
+    return _unpack_bytearray(size, bits).decode('utf-8')
+
+
 def pack(fmt, *args):
     """Return a byte string containing the values v1, v2, ... packed
     according to the given format. If the total number of bits are not
@@ -105,12 +113,13 @@ def pack(fmt, *args):
     bitorder is used for the current value. For example, in the format
     string "u1<u2u3" u1 is MSB first and both u2 and u3 are LSB first.
 
-    There are six types; 'u', 's', 'f', 'b', 'r' and 'p'.
+    There are seven types; 'u', 's', 'f', 'b', 't', 'r' and 'p'.
 
     - 'u' -- unsigned integer
     - 's' -- signed integer
     - 'f' -- floating point number of 32 or 64 bits
     - 'b' -- boolean
+    - 't' -- text (ascii or utf-8)
     - 'r' -- raw, bytes
     - 'p' -- padding, ignore
 
@@ -134,6 +143,8 @@ def pack(fmt, *args):
                 value_bits = _pack_float(size, args[i])
             elif _type == 'b':
                 value_bits = _pack_boolean(size, args[i])
+            elif _type == 't':
+                value_bits = _pack_text(size, args[i])
             elif _type == 'r':
                 value_bits = _pack_bytearray(size, bytearray(args[i]))
             else:
@@ -187,6 +198,8 @@ def unpack(fmt, data):
                 value = _unpack_float(size, value_bits)
             elif _type == 'b':
                 value = _unpack_boolean(value_bits)
+            elif _type == 't':
+                value = _unpack_text(size, value_bits)
             elif _type == 'r':
                 value = bytes(_unpack_bytearray(size, value_bits))
             else:

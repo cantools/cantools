@@ -51,17 +51,17 @@ wrapping the result in a named tuple:
     3
 
 An example of packing/unpacking a unsinged integer, a signed integer,
-a float, a boolean and a byte string:
+a float, a boolean, a byte string and a string:
 
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> pack('u5s5f32b1r13', 1, -1, 3.75, True, b'\xff\xff')
-    b'\x0f\xd0\x1c\x00\x00?\xff'
-    >>> unpack('u5s5f32b1r13', b'\x0f\xd0\x1c\x00\x00?\xff')
-    (1, -1, 3.75, True, b'\xff\xf8')
-    >>> calcsize('u5s5f32b1r13')
-    56
+    >>> pack('u5s5f32b1r13t40', 1, -1, 3.75, True, b'\xff\xff', u'hello')
+    b'\x0f\xd0\x1c\x00\x00?\xffhello'
+    >>> unpack('u5s5f32b1r13t40', b'\x0f\xd0\x1c\x00\x00?\xffhello')
+    (1, -1, 3.75, True, b'\xff\xf8', u'hello')
+    >>> calcsize('u5s5f32b1r13t24')
+    80
 
 The same format and values as in the previous example, but using LSB
 (Least Significant Bit) first instead of the default MSB (Most

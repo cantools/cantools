@@ -37,6 +37,12 @@ class BitStructTest(unittest.TestCase):
         packed = pack('u5b2u1', -1, False, 1)
         self.assertEqual(packed, b'\xf9')
 
+        packed = pack('b1t24', False, u"Hi!")
+        self.assertEqual(packed, b'$4\x90\x80')
+
+        packed = pack('b1t24', False, "Hi!")
+        self.assertEqual(packed, b'$4\x90\x80')
+
     def test_unpack(self):
         """Unpack values.
 
@@ -79,6 +85,10 @@ class BitStructTest(unittest.TestCase):
         packed = b'\x04'
         unpacked = unpack('u5b2u1', packed)
         self.assertEqual(unpacked, (0, True, 0))
+
+        packed = b'$4\x90\x80'
+        unpacked = unpack('b1t24', packed)
+        self.assertEqual(unpacked, (False, u"Hi!"))
 
         # bad float size
         try:
@@ -137,8 +147,8 @@ class BitStructTest(unittest.TestCase):
         size = calcsize('u1s6u7u9')
         self.assertEqual(size, 23)
 
-        size = calcsize('b1s6u7u9')
-        self.assertEqual(size, 23)
+        size = calcsize('b1s6u7u9p1t8')
+        self.assertEqual(size, 32)
 
     def test_byteswap(self):
         """Byte swap.

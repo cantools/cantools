@@ -1,7 +1,7 @@
 import re
 import struct
 
-__version__ = "3.2.0"
+__version__ = "3.3.0"
 
 
 def _parse_format(fmt):
@@ -15,47 +15,58 @@ def _parse_format(fmt):
         if info[0] != "":
             endianness = info[0]
         infos.append((info[1], int(info[2]), endianness))
-    
+
     return infos
 
 
 def _pack_integer(size, arg):
-    if arg < 0:
-        arg = ((1 << size) + arg)
+    value = int(arg)
 
-    return '{{:0{}b}}'.format(size).format(arg)
+    if value < 0:
+        value = ((1 << size) + value)
+
+    return '{{:0{}b}}'.format(size).format(value)
 
 
 def _pack_boolean(size, arg):
-    return _pack_integer(size, int(arg))
+    value = bool(arg)
+
+    return _pack_integer(size, int(value))
 
 
 def _pack_float(size, arg):
+    value = float(arg)
+
     if size == 32:
-        value = struct.pack('>f', arg)
+        value = struct.pack('>f', value)
     elif size == 64:
-        value = struct.pack('>d', arg)
+        value = struct.pack('>d', value)
     else:
-        raise ValueError('Bad float size {}. Must be 32 or 64 bits.'.format(size))
+        raise ValueError('expected float size of 32 of 64 bits (got {})'.format(
+            size))
+
     return ''.join('{:08b}'.format(b)
                    for b in bytearray(value))
 
 
 def _pack_bytearray(size, arg):
+    value = bytearray(arg)
     bits = ''.join('{:08b}'.format(b)
-                   for b in arg)
+                   for b in value)
 
     return bits[0:size]
 
 
 def _pack_text(size, arg):
-    return _pack_bytearray(size, bytearray(arg.encode('utf-8')))
+    value = arg.encode('utf-8')
+
+    return _pack_bytearray(size, bytearray(value))
 
 
-def _unpack_integer(_type, bits):
+def _unpack_integer(type_, bits):
     value = int(bits, 2)
 
-    if _type == 's':
+    if type_ == 's':
         if bits[0] == '1':
             value -= (1 << len(bits))
 
@@ -125,7 +136,7 @@ def pack(fmt, *args):
     - 'p' -- padding, ignore
 
     Length is the number of bits to pack the value into.
-    
+
     Example format string: 'u1u3p7s16'
 
     """
@@ -136,7 +147,7 @@ def pack(fmt, *args):
 
     # Sanity check of the number of arguments.
     number_of_arguments = 0
-    
+
     for info in infos:
         if info[0] != 'p':
             number_of_arguments += 1
@@ -145,22 +156,22 @@ def pack(fmt, *args):
         raise ValueError("pack expected {} item(s) for packing "
                          "(got {})".format(number_of_arguments, len(args)))
 
-    for _type, size, endianness in infos:
-        if _type == 'p':
+    for type_, size, endianness in infos:
+        if type_ == 'p':
             bits += size * '0'
         else:
-            if _type in 'us':
+            if type_ in 'us':
                 value_bits = _pack_integer(size, args[i])
-            elif _type == 'f':
+            elif type_ == 'f':
                 value_bits = _pack_float(size, args[i])
-            elif _type == 'b':
+            elif type_ == 'b':
                 value_bits = _pack_boolean(size, args[i])
-            elif _type == 't':
+            elif type_ == 't':
                 value_bits = _pack_text(size, args[i])
-            elif _type == 'r':
+            elif type_ == 'r':
                 value_bits = _pack_bytearray(size, bytearray(args[i]))
             else:
-                raise ValueError("bad type '{}' in format".format(_type))
+                raise ValueError("bad type '{}' in format".format(type_))
 
             # reverse the bit order in little endian values
             if endianness == "<":
@@ -199,12 +210,12 @@ def unpack(fmt, data):
         raise ValueError("unpack requires at least {} bits to unpack "
                          "(got {})".format(number_of_bits_to_unpack,
                                            len(bits)))
-    
+
     res = []
     i = 0
 
-    for _type, size, endianness in infos:
-        if _type == 'p':
+    for type_, size, endianness in infos:
+        if type_ == 'p':
             pass
         else:
             value_bits = bits[i:i+size]
@@ -213,19 +224,21 @@ def unpack(fmt, data):
             if endianness == "<":
                 value_bits = value_bits[::-1]
 
-            if _type in 'us':
-                value = _unpack_integer(_type, value_bits)
-            elif _type == 'f':
+            if type_ in 'us':
+                value = _unpack_integer(type_, value_bits)
+            elif type_ == 'f':
                 value = _unpack_float(size, value_bits)
-            elif _type == 'b':
+            elif type_ == 'b':
                 value = _unpack_boolean(value_bits)
-            elif _type == 't':
+            elif type_ == 't':
                 value = _unpack_text(size, value_bits)
-            elif _type == 'r':
+            elif type_ == 'r':
                 value = bytes(_unpack_bytearray(size, value_bits))
             else:
-                raise ValueError("bad type '{}' in format".format(_type))
+                raise ValueError("bad type '{}' in format".format(type_))
+
             res.append(value)
+
         i += size
 
     return tuple(res)

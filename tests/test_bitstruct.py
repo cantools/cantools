@@ -53,6 +53,42 @@ class BitStructTest(unittest.TestCase):
                 str(e),
                 'pack expected 2 item(s) for packing (got 1)')
 
+        # Cannot convert argument to integer.
+        try:
+            pack('u1', "foo")
+            self.fail()
+        except ValueError as e:
+            self.assertEqual(
+                str(e),
+                "invalid literal for int() with base 10: 'foo'")
+
+        # Cannot convert argument to float.
+        try:
+            pack('f32', "foo")
+            self.fail()
+        except ValueError as e:
+            self.assertEqual(
+                str(e),
+                'could not convert string to float: foo')
+
+        # Cannot convert argument to bytearray.
+        try:
+            pack('r5', 1.0)
+            self.fail()
+        except TypeError as e:
+            self.assertEqual(
+                str(e),
+                "'float' object is not iterable")
+
+        # Cannot encode argument as utf-8.
+        try:
+            pack('t8', 1.0)
+            self.fail()
+        except AttributeError as e:
+            self.assertEqual(
+                str(e),
+                "'float' object has no attribute 'encode'")
+
     def test_unpack(self):
         """Unpack values.
 
@@ -245,6 +281,6 @@ class BitStructTest(unittest.TestCase):
                              number=50000)
         print("unpack time: {} s ({} s/unpack)".format(time, time / 50000))
 
-        
+
 if __name__ == '__main__':
     unittest.main()

@@ -44,6 +44,15 @@ class BitStructTest(unittest.TestCase):
         packed = pack('b1t24', False, "Hi!")
         self.assertEqual(packed, b'$4\x90\x80')
 
+        # Too many values to pack.
+        try:
+            pack('b1t24', False)
+            self.fail()
+        except ValueError as e:
+            self.assertEqual(
+                str(e),
+                'pack expected 2 item(s) for packing (got 1)')
+
     def test_unpack(self):
         """Unpack values.
 
@@ -91,12 +100,23 @@ class BitStructTest(unittest.TestCase):
         unpacked = unpack('b1t24', packed)
         self.assertEqual(unpacked, (False, u"Hi!"))
 
-        # bad float size
+        # Bad float size.
         try:
             unpack('f33', b'\x00\x00\x00\x00\x00')
             self.fail()
-        except ValueError:
-            pass
+        except ValueError as e:
+            self.assertEqual(
+                str(e),
+                'expected float size of 32 of 64 bits (got 33)')
+
+        # Too many bits to unpack.
+        try:
+            unpack('u9', b'\x00')
+            self.fail()
+        except ValueError as e:
+            self.assertEqual(
+                str(e),
+                'unpack requires at least 9 bits to unpack (got 8)')
 
         # gcc packed struct with bitfields
         #

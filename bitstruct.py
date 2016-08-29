@@ -76,7 +76,8 @@ def _unpack_float(size, bits):
     elif size == 64:
         value = struct.unpack('>d', packed)[0]
     else:
-        raise ValueError('Bad float size {}. Must be 32 or 64 bits.'.format(size))
+        raise ValueError('expected float size of 32 of 64 bits (got {})'.format(
+            size))
 
     return value
 
@@ -133,6 +134,17 @@ def pack(fmt, *args):
     infos = _parse_format(fmt)
     i = 0
 
+    # Sanity check of the number of arguments.
+    number_of_arguments = 0
+    
+    for info in infos:
+        if info[0] != 'p':
+            number_of_arguments += 1
+
+    if number_of_arguments > len(args):
+        raise ValueError("pack expected {} item(s) for packing "
+                         "(got {})".format(number_of_arguments, len(args)))
+
     for _type, size, endianness in infos:
         if _type == 'p':
             bits += size * '0'
@@ -179,6 +191,15 @@ def unpack(fmt, data):
 
     bits = ''.join(['{:08b}'.format(b) for b in bytearray(data)])
     infos = _parse_format(fmt)
+
+    # Sanity check.
+    number_of_bits_to_unpack = sum([size for _, size, _ in infos])
+
+    if number_of_bits_to_unpack > len(bits):
+        raise ValueError("unpack requires at least {} bits to unpack "
+                         "(got {})".format(number_of_bits_to_unpack,
+                                           len(bits)))
+    
     res = []
     i = 0
 

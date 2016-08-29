@@ -1,5 +1,6 @@
 import unittest
 import timeit
+import sys
 from bitstruct import *
 
 
@@ -67,9 +68,14 @@ class BitStructTest(unittest.TestCase):
             pack('f32', "foo")
             self.fail()
         except ValueError as e:
-            self.assertEqual(
-                str(e),
-                'could not convert string to float: foo')
+            if sys.version_info[0] < 3:
+                self.assertEqual(
+                    str(e),
+                    'could not convert string to float: foo')
+            else:
+                self.assertEqual(
+                    str(e),
+                    "could not convert string to float: 'foo'")
 
         # Cannot convert argument to bytearray.
         try:

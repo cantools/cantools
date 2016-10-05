@@ -104,7 +104,7 @@ def create_dbc_grammar():
     discard = Suppress(Keyword('BS_') + colon)
     ecu = Group(Keyword('BU_') +
                 colon +
-                ZeroOrMore(Word(printables).setWhitespaceChars(' \t')))
+                ZeroOrMore(Word(printables).setWhitespaceChars(' ')))
     signal = Group(Keyword(SIGNAL) +
                    word +
                    colon +
@@ -196,7 +196,7 @@ def as_dbc(database):
         msg.append(fmt.format(frame_id=message.frame_id,
                               name=message.name,
                               length=message.length,
-                              ecu=database.ecu))
+                              ecu=message.ecu))
 
         for signal in message.signals:
             fmt = (' SG_ {name} : {start}|{length}@{byte_order}{_type}'
@@ -292,7 +292,7 @@ def as_dbc(database):
                                   for choice in signal.choices])))
 
     return DBC_FMT.format(version=database.version,
-                          bu=database.ecu,
+                          bu=' '.join(database.ecu),
                           bo='\n\n'.join(bo),
                           cm='\n'.join(cm),
                           ba_def='\n'.join(ba_def),
@@ -357,6 +357,7 @@ class Message(object):
                  frame_id,
                  name,
                  length,
+                 ecu,
                  send_type,
                  cycle_time,
                  signals,
@@ -364,6 +365,7 @@ class Message(object):
         self.frame_id = frame_id
         self.name = name
         self.length = length
+        self.ecu = ecu
         self.send_type = send_type
         self.cycle_time = cycle_time
         self.signals = signals
@@ -499,7 +501,6 @@ class File(object):
             try:
                 return msg_attributes[frame_id]['send_type']
             except KeyError:
-                print "Key error"
                 return default_attrs['GenMsgSendType']
 
         def get_cycle_time(frame_id):
@@ -525,7 +526,7 @@ class File(object):
         self.version = [token[1]
                         for token in tokens
                         if token[0] == VERSION][0]
-        self.ecu = [token[1]
+        self.ecu = [token[1:]
                     for token in tokens
                     if token[0] == ECU][0]
 
@@ -537,6 +538,7 @@ class File(object):
                 frame_id=int(message[1]),
                 name=message[2][0:-1],
                 length=int(message[3], 0),
+                ecu=message[4],
                 send_type=get_send_type(int(message[1])),
                 cycle_time=get_cycle_time(int(message[1])),
                 signals=[Signal(name=signal[1],

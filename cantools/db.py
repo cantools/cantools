@@ -22,6 +22,7 @@ ATTR_DEFINITION = 'BA_'
 
 DBC_FMT = """VERSION "{version}"
 
+
 NS_ :
 \tNS_DESC_
 \tCM_
@@ -43,10 +44,19 @@ NS_ :
 \tSIG_GROUP_
 \tSIG_VALTYPE_
 \tSIGTYPE_VALTYPE_
+\tBO_TX_BU_
+\tBA_DEF_REL_
+\tBA_REL_
+\tBA_DEF_DEF_REL_
+\tBU_SG_REL_
+\tBU_EV_REL_
+\tBU_BO_REL_
+\tSG_MUL_VAL_
 
 BS_:
 
 BU_: {bu}
+
 
 {bo}
 
@@ -201,11 +211,12 @@ def as_dbc(database):
         for signal in message.signals:
             fmt = (' SG_ {name} : {start}|{length}@{byte_order}{_type}'
                    ' ({scale},{offset})'
-                   ' [{_min}|{_max}] "{unit}" Vector__XXX')
+                   ' [{_min}|{_max}] "{unit}"  {ecu}')
             msg.append(fmt.format(
                 name=signal.name,
                 start=signal.start,
                 length=signal.length,
+                ecu=signal.ecu,
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
                 _type=('-' if signal.type == 'signed' else '+'),
                 scale=signal.scale,
@@ -309,6 +320,7 @@ class Signal(object):
                  name,
                  start,
                  length,
+                 ecu,
                  byte_order,
                  _type,
                  scale,
@@ -321,6 +333,7 @@ class Signal(object):
         self.name = name
         self.start = start
         self.length = length
+        self.ecu = ecu
         self.byte_order = byte_order
         self.type = _type
         self.scale = scale
@@ -544,6 +557,7 @@ class File(object):
                 signals=[Signal(name=signal[1],
                                 start=int(signal[2][0]),
                                 length=int(signal[2][1]),
+                                ecu=signal[6],
                                 byte_order=('big_endian'
                                             if signal[2][2] == '0'
                                             else 'little_endian'),

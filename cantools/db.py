@@ -278,9 +278,9 @@ def as_dbc(database):
     for default_attr in database.default_attrs:
         try:
             int(database.default_attrs[default_attr])
-            fmt = 'BA_DEF_DEF "{name}" {value};'
+            fmt = 'BA_DEF_DEF_ "{name}" {value};'
         except ValueError:
-            fmt = 'BA_DEF_DEF "{name}" "{value}";'
+            fmt = 'BA_DEF_DEF_ "{name}" "{value}";'
 
         ba_def_def.append(fmt.format(name=default_attr,
                                       value=database.default_attrs[default_attr]))

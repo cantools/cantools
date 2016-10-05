@@ -4,7 +4,7 @@ import bitstruct
 from collections import namedtuple
 from pyparsing import Word, Literal, Keyword, Optional, Suppress
 from pyparsing import Group, QuotedString
-from pyparsing import printables, nums, alphas, LineEnd
+from pyparsing import printables, nums, alphas, LineEnd, Empty
 from pyparsing import ZeroOrMore, OneOrMore
 
 __author__ = 'Erik Moqvist'
@@ -154,9 +154,8 @@ def create_dbc_grammar():
                         QuotedString('"', multiline=True))) +
                        word +
                        ((scolon) |
-                        (QuotedString('"', multiline=True) +
-                         Group(ZeroOrMore(Group(
-                            comma + QuotedString('"', multiline=True)))) +
+                        (Group(ZeroOrMore(Group(
+                         (comma | Empty()) + QuotedString('"', multiline=True)))) +
                          scolon) |
                          (Group(ZeroOrMore(integer)) +
                          scolon)))
@@ -235,7 +234,24 @@ def as_dbc(database):
                                  name=signal.name,
                                  comment=signal.comment))
     #attributes
-    ba_def = ['ba_def goes here']
+    ba_def = []
+
+    for attribute in database.attributes:
+        if attribute[1] == SIGNAL or attribute[1] == MESSAGE:
+            fmt = 'BA_DEF_ {kind} {name} {type} {choices};'
+            if attribute[3] == 'ENUM':
+                ba_def.append(fmt.format(kind=attribute[1],
+                                         name=attribute[2],
+                                         type=attribute[3],
+                                         choices=','.join(['"{text}"'.format(text=choice[0])
+                                                           for choice in attribute[4]])))
+            elif attribute[3] == 'INT':
+                ba_def.append(fmt.format(kind=attribute[1],
+                                         name=attribute[2],
+                                         type=attribute[3],
+                                         choices=' '.join(['{num}'.format(num=choice[0])
+                                                           for choice in attribute[4]])))
+
 
     #attribute defaults
     ba_def_def = ['ba_def_def goes here']
@@ -324,12 +340,14 @@ class Message(object):
                  frame_id,
                  name,
                  length,
+                 send_type,
                  cycle_time,
                  signals,
                  comment):
         self.frame_id = frame_id
         self.name = name
         self.length = length
+        self.send_type = send_type
         self.cycle_time = cycle_time
         self.signals = signals
         self.signals.sort(key=lambda s: s.start)
@@ -363,8 +381,13 @@ class File(object):
 
     """
 
-    def __init__(self, messages=None):
+    def __init__(self,
+                 messages=None,
+                 attributes=None,
+                 default_attrs=None):
         self.messages = messages if messages else []
+        self.attributes = attributes if attributes else []
+        self.default_attrs = default_attrs if default_attrs else []
         self.grammar = create_dbc_grammar()
         self.frame_id_to_message = {}
         self.version = None
@@ -395,16 +418,40 @@ class File(object):
 
                     comments[frame_id]['signals'][comment[3]] = comment[4]
 
+        attributes = []
+        for attribute in tokens:
+            if attribute[0] == ATTRIBUTE:
+                attributes.append(attribute)
+
+        self.attributes = attributes
+
+        default_attrs = {}
+        for default_attr in tokens:
+            if default_attr[0] == DEFAULT_ATTR:
+                default_attrs[default_attr[1]] = default_attr[2]
+
+        self.default_attrs = default_attrs
+
         msg_attributes = {}
         for attr_definition in tokens:
             if attr_definition[0] == ATTR_DEFINITION and \
                attr_definition[1] == "GenMsgCycleTime" and \
                attr_definition[2] == MESSAGE:
-                    frame_id = int(attr_definition[3])
-                    if frame_id not in attr_definition:
-                        msg_attributes[frame_id] = {}
-                    if 'cycle_time' not in attr_definition:
-                        msg_attributes[frame_id]['cycle_time'] = attr_definition[4]
+                frame_id = int(attr_definition[3])
+                if frame_id not in msg_attributes:
+                    msg_attributes[frame_id] = {}
+                if 'cycle_time' not in msg_attributes[frame_id]:
+                    msg_attributes[frame_id]['cycle_time'] = {}
+                msg_attributes[frame_id]['cycle_time'] = attr_definition[4]
+            if attr_definition[0] == ATTR_DEFINITION and \
+               attr_definition[1] == "GenMsgSendType" and \
+               attr_definition[2] == MESSAGE:
+                frame_id = int(attr_definition[3])
+                if frame_id not in msg_attributes:
+                    msg_attributes[frame_id] = {}
+                if 'send_type' not in msg_attributes[frame_id]:
+                    msg_attributes[frame_id]['send_type'] = {}
+                msg_attributes[frame_id]['send_type'] = attr_definition[4]
 
         choices = {}
 
@@ -431,6 +478,15 @@ class File(object):
             except KeyError:
                 return None
 
+        def get_send_type(frame_id):
+            """Get send type for a given message
+
+            """
+            try:
+                return msg_attributes[frame_id]['send_type']
+            except KeyError:
+                return default_attrs['GenMsgSendType']
+
         def get_cycle_time(frame_id):
             """Get cycle time for a given message
 
@@ -439,7 +495,7 @@ class File(object):
             try:
                 return msg_attributes[frame_id]['cycle_time']
             except KeyError:
-                return None
+                return default_atts['GenMsgCycleTime']
 
         def get_choices(frame_id, signal):
             """Get choices for given signal.
@@ -466,6 +522,7 @@ class File(object):
                 frame_id=int(message[1]),
                 name=message[2][0:-1],
                 length=int(message[3], 0),
+                send_type=get_send_type(message[1]),
                 cycle_time=get_cycle_time(int(message[1])),
                 signals=[Signal(name=signal[1],
                                 start=int(signal[2][0]),

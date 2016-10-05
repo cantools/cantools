@@ -16,6 +16,9 @@ COMMENT = 'CM_'
 MESSAGE = 'BO_'
 SIGNAL = 'SG_'
 CHOICE = 'VAL_'
+ATTRIBUTE = 'BA_DEF_'
+DEFAULT_ATTR = 'BA_DEF_DEF_'
+ATTR_DEFINITION = 'BA_'
 
 DBC_FMT = """VERSION "{version}"
 
@@ -48,6 +51,12 @@ BU_: {bu}
 {bo}
 
 {cm}
+
+{ba_def}
+
+{ba_def_def}
+
+{ba}
 
 {val}
 """
@@ -132,14 +141,43 @@ def create_dbc_grammar():
                       integer +
                       word +
                       QuotedString('"', multiline=True) +
+                      scolon) |
+                     (Keyword(ECU) +
+                      word +
+                      QuotedString('"', multiline=True) +
                       scolon)))
+    attribute = Group(Keyword(ATTRIBUTE) +
+                      ((QuotedString('"', multiline=True)) |
+                       (Keyword(SIGNAL) +
+                        QuotedString('"', multiline=True)) |
+                       (Keyword(MESSAGE) +
+                        QuotedString('"', multiline=True))) +
+                       word +
+                       ((scolon) |
+                        (QuotedString('"', multiline=True) +
+                         Group(ZeroOrMore(Group(
+                            comma + QuotedString('"', multiline=True)))) +
+                         scolon) |
+                         (Group(ZeroOrMore(integer)) +
+                         scolon)))
+    default_attr = Group(Keyword(DEFAULT_ATTR) +
+                         QuotedString('"', multiline=True) +
+                         (integer | QuotedString('"', multiline=True)) +
+                         scolon)
+    attr_definition = Group(Keyword(ATTR_DEFINITION) +
+                            QuotedString('"', multiline=True) +
+                            (Keyword(MESSAGE) | Keyword(SIGNAL)) +
+                            integer +
+                            integer +
+                            scolon)
     choice = Group(Keyword(CHOICE) +
                    integer +
                    word +
                    Group(OneOrMore(Group(
                        integer + QuotedString('"', multiline=True)))) +
                    scolon)
-    entry = version | symbols | discard | ecu | message | comment | choice
+    entry = version | symbols | discard | ecu | message | comment | \
+            attribute | default_attr | attr_definition | choice
     grammar = OneOrMore(entry)
 
     return grammar
@@ -196,6 +234,14 @@ def as_dbc(database):
             cm.append(fmt.format(frame_id=message.frame_id,
                                  name=signal.name,
                                  comment=signal.comment))
+    #attributes
+    ba_def = ['ba_def goes here']
+
+    #attribute defaults
+    ba_def_def = ['ba_def_def goes here']
+
+    #attribute definitions
+    ba = ['ba goes here']
 
     # choices
     val = []
@@ -216,6 +262,9 @@ def as_dbc(database):
                           bu=database.ecu,
                           bo='\n\n'.join(bo),
                           cm='\n'.join(cm),
+                          ba_def='\n'.join(ba_def),
+                          ba_def_def='\n'.join(ba_def_def),
+                          ba='\n'.join(ba),
                           val='\n'.join(val))
 
 class Signal(object):
@@ -275,11 +324,13 @@ class Message(object):
                  frame_id,
                  name,
                  length,
+                 cycle_time,
                  signals,
                  comment):
         self.frame_id = frame_id
         self.name = name
         self.length = length
+        self.cycle_time = cycle_time
         self.signals = signals
         self.signals.sort(key=lambda s: s.start)
         self.signals.reverse()
@@ -329,19 +380,31 @@ class File(object):
         comments = {}
         for comment in tokens:
             if comment[0] == COMMENT:
-                frame_id = int(comment[2])
-
-                if frame_id not in comments:
-                    comments[frame_id] = {}
-
                 if comment[1] == MESSAGE:
+                    frame_id = int(comment[2])
+                    if frame_id not in comments:
+                        comments[frame_id] = {}
                     comments[frame_id]['message'] = comment[3]
 
                 if comment[1] == SIGNAL:
+                    frame_id = int(comment[2])
+                    if frame_id not in comments:
+                        comments[frame_id] = {}
                     if 'signals' not in comments[frame_id]:
                         comments[frame_id]['signals'] = {}
 
                     comments[frame_id]['signals'][comment[3]] = comment[4]
+
+        msg_attributes = {}
+        for attr_definition in tokens:
+            if attr_definition[0] == ATTR_DEFINITION and \
+               attr_definition[1] == "GenMsgCycleTime" and \
+               attr_definition[2] == MESSAGE:
+                    frame_id = int(attr_definition[3])
+                    if frame_id not in attr_definition:
+                        msg_attributes[frame_id] = {}
+                    if 'cycle_time' not in attr_definition:
+                        msg_attributes[frame_id]['cycle_time'] = attr_definition[4]
 
         choices = {}
 
@@ -365,6 +428,16 @@ class File(object):
                     return comments[frame_id]['message']
                 else:
                     return comments[frame_id]['signals'][signal]
+            except KeyError:
+                return None
+
+        def get_cycle_time(frame_id):
+            """Get cycle time for a given message
+
+            """
+
+            try:
+                return msg_attributes[frame_id]['cycle_time']
             except KeyError:
                 return None
 
@@ -393,6 +466,7 @@ class File(object):
                 frame_id=int(message[1]),
                 name=message[2][0:-1],
                 length=int(message[3], 0),
+                cycle_time=get_cycle_time(int(message[1])),
                 signals=[Signal(name=signal[1],
                                 start=int(signal[2][0]),
                                 length=int(signal[2][1]),

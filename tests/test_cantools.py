@@ -8,7 +8,7 @@ class CanToolsTest(unittest.TestCase):
 
     def test_vehicle(self):
         f = cantools.db.File()
-        filename = os.path.join('tests', 'files', 'vehicle.dbc')
+        filename = os.path.join('files', 'vehicle.dbc')
         with open(filename, 'r') as fin:
             f.add_dbc(fin)
         self.assertEqual(len(f.messages), 217)
@@ -24,7 +24,7 @@ class CanToolsTest(unittest.TestCase):
 
     def test_motohawk(self):
         f = cantools.db.File()
-        filename = os.path.join('tests', 'files', 'motohawk.dbc')
+        filename = os.path.join('files', 'motohawk.dbc')
         with open(filename, 'r') as fin:
             f.add_dbc(fin)
         self.assertEqual(len(f.messages), 1)

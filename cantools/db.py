@@ -112,7 +112,7 @@ def create_dbc_grammar():
                     colon +
                     Group(ZeroOrMore(symbol)))
     discard = Suppress(Keyword('BS_') + colon)
-    ecu = Group(Keyword('BU_') +
+    ecu_list = Group(Keyword('BU_') +
                 colon +
                 ZeroOrMore(Word(printables).setWhitespaceChars(' ')))
     signal = Group(Keyword(SIGNAL) +
@@ -185,7 +185,7 @@ def create_dbc_grammar():
                    Group(OneOrMore(Group(
                        integer + QuotedString('"', multiline=True)))) +
                    scolon)
-    entry = version | symbols | discard | ecu | message | comment | \
+    entry = version | symbols | discard | ecu_list | message | comment | \
             attribute | default_attr | attr_definition | choice
     grammar = OneOrMore(entry)
 
@@ -196,6 +196,10 @@ def as_dbc(database):
     """Format database in DBC file format.
 
     """
+    #ecus
+    bu = []
+    for ecu in database.ecus:
+        bu.append(ecu.name)
 
     # messages
     bo = []
@@ -229,6 +233,12 @@ def as_dbc(database):
 
     # comments
     cm = []
+
+    for ecu in database.ecus:
+        if ecu.comment != "":
+            fmt = 'CM_ BU_ {name} "{comment}";'
+            cm.append(fmt.format(name=ecu.name,
+                                 comment=ecu.comment))
 
     for message in database.messages:
         if message.comment != None:
@@ -303,7 +313,7 @@ def as_dbc(database):
                                   for choice in signal.choices])))
 
     return DBC_FMT.format(version=database.version,
-                          bu=' '.join(database.ecu),
+                          bu=' '.join(bu),
                           bo='\n\n'.join(bo),
                           cm='\n'.join(cm),
                           ba_def='\n'.join(ba_def),
@@ -407,6 +417,17 @@ class Message(object):
                               for v in zip(self.signals,
                                            bitstruct.unpack(self.fmt, data))])
 
+class Ecu(object):
+    """ECU file
+
+    """
+
+    def __init__(self,
+                 name,
+                 comment):
+        self.name = name;
+        self.comment = comment;
+
 
 class File(object):
     """CAN database file.
@@ -414,9 +435,11 @@ class File(object):
     """
 
     def __init__(self,
+                 ecus=None,
                  messages=None,
                  attributes=None,
                  default_attrs=None):
+        self.ecus = ecus if ecus else []
         self.messages = messages if messages else []
         self.attributes = attributes if attributes else []
         self.default_attrs = default_attrs if default_attrs else []
@@ -435,6 +458,12 @@ class File(object):
         comments = {}
         for comment in tokens:
             if comment[0] == COMMENT:
+                if comment[1] == ECU:
+                    ecu_name = comment[2];
+                    if ecu_name not in comments:
+                        comments[ecu_name] = {};
+                    comments[ecu_name] = comment[3]
+
                 if comment[1] == MESSAGE:
                     frame_id = int(comment[2])
                     if frame_id not in comments:
@@ -507,6 +536,16 @@ class File(object):
             except KeyError:
                 return None
 
+        def get_ecu_comment(ecu_name):
+            """Get comment for a given ecu_name
+
+            """
+
+            try:
+                return comments[ecu_name]
+            except KeyError:
+                return None
+
         def get_send_type(frame_id):
             """Get send type for a given message
 
@@ -539,9 +578,13 @@ class File(object):
         self.version = [token[1]
                         for token in tokens
                         if token[0] == VERSION][0]
-        self.ecu = [token[1:]
-                    for token in tokens
-                    if token[0] == ECU][0]
+
+        for ecu_list in tokens:
+            if ecu_list[0] == ECU:
+                ecu = [Ecu(name=ecu,
+                          comment=get_ecu_comment(ecu))
+                          for ecu in ecu_list[1:]]
+                self.ecus = ecu;
 
         for message in tokens:
             if message[0] != MESSAGE:

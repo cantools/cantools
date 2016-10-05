@@ -235,7 +235,7 @@ def as_dbc(database):
     cm = []
 
     for ecu in database.ecus:
-        if ecu.comment != "":
+        if ecu.comment != None and ecu.comment != "":
             fmt = 'CM_ BU_ {name} "{comment}";'
             cm.append(fmt.format(name=ecu.name,
                                  comment=ecu.comment))
@@ -287,15 +287,19 @@ def as_dbc(database):
     #attribute definitions
     ba = []
     for message in database.messages:
-        fmt = 'BA_ "GenMsgCycleTime" BO_ {frame_id} {cycle_time};'
-        ba.append(fmt.format(frame_id=message.frame_id,
-                             cycle_time=message.cycle_time))
+        if message.cycle_time != None:
+            fmt = 'BA_ "GenMsgCycleTime" BO_ {frame_id} {cycle_time};'
+            ba.append(fmt.format(frame_id=message.frame_id,
+                                 cycle_time=message.cycle_time))
     ba.append('')
     for message in database.messages:
-        if message.send_type is not database.default_attrs['GenMsgSendType']:
-            fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} {send_type};'
-            ba.append(fmt.format(frame_id=message.frame_id,
-                                 send_type=message.send_type))
+        try:
+            if message.send_type is not database.default_attrs['GenMsgSendType']:
+                fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} {send_type};'
+                ba.append(fmt.format(frame_id=message.frame_id,
+                                     send_type=message.send_type))
+        except KeyError:
+            continue;
 
     # choices
     val = []
@@ -553,7 +557,10 @@ class File(object):
             try:
                 return msg_attributes[frame_id]['send_type']
             except KeyError:
-                return default_attrs['GenMsgSendType']
+                try:
+                    return default_attrs['GenMsgSendType']
+                except KeyError:
+                    return None
 
         def get_cycle_time(frame_id):
             """Get cycle time for a given message
@@ -563,7 +570,10 @@ class File(object):
             try:
                 return msg_attributes[frame_id]['cycle_time']
             except KeyError:
-                return default_atts['GenMsgCycleTime']
+                try:
+                    return default_attrs['GenMsgCycleTime']
+                except KeyError:
+                    return None
 
         def get_choices(frame_id, signal):
             """Get choices for given signal.

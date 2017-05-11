@@ -1,22 +1,32 @@
+from __future__ import print_function
+
 import re
 import struct
 
-__version__ = "3.3.1"
+__version__ = "3.4.0"
 
 
 def _parse_format(fmt):
+    if fmt[-1] in [">", "<"]:
+        byte_order = fmt[-1]
+        fmt = fmt[:-1]
+    else:
+        byte_order = ">"
+
     parsed_infos = re.findall(r'([<>]?)([a-zA-Z])(\d+)', fmt)
 
     # Use big endian as default and use the endianness of the previous
     # value if none is given for the current value.
     infos = []
     endianness = ">"
+
     for info in parsed_infos:
         if info[0] != "":
             endianness = info[0]
+
         infos.append((info[1], int(info[2]), endianness))
 
-    return infos
+    return infos, byte_order
 
 
 def _pack_integer(size, arg):
@@ -117,13 +127,18 @@ def pack(fmt, *args):
     :param args: Variable argument list of values to pack.
     :returns: A byte string of the packed values.
 
-    `fmt` is a string of bitorder-type-length groups. Bitorder may be
-    omitted.
+    `fmt` is a string of bitorder-type-length groups, and optionally a
+    byteorder identifier afer the groups. Bitorder and byteorder may
+    be omitted.
 
     Bitorder is either ">" or "<", where ">" means MSB first and "<"
     means LSB first. If bitorder is omitted, the previous values'
     bitorder is used for the current value. For example, in the format
     string "u1<u2u3" u1 is MSB first and both u2 and u3 are LSB first.
+
+    Byteorder is either ">" or "<", where ">" means most significant
+    byte first and "<" means least significant byte first. If
+    byteorder is omitted, most significant byte first is used.
 
     There are seven types; 'u', 's', 'f', 'b', 't', 'r' and 'p'.
 
@@ -137,12 +152,18 @@ def pack(fmt, *args):
 
     Length is the number of bits to pack the value into.
 
-    Example format string: 'u1u3p7s16'
+    Example format string with default bit and byte ordering: 'u1u3p7s16'
+
+    Same format string, but with least significant byte first:
+    'u1u3p7s16<'
+
+    Same format string, but with LSB first ('<' prefix) and least
+    significant byte first ('<' suffix): '<u1u3p7s16<'
 
     """
 
     bits = ''
-    infos = _parse_format(fmt)
+    infos, byte_order = _parse_format(fmt)
     i = 0
 
     # Sanity check of the number of arguments.
@@ -177,7 +198,19 @@ def pack(fmt, *args):
             if endianness == "<":
                 value_bits = value_bits[::-1]
 
-            bits += value_bits
+            # reverse bytes order for least significant byte first
+            if byte_order == ">":
+                bits += value_bits
+            else:
+                aligned_offset = len(value_bits) - (8 - (len(bits) % 8))
+
+                while aligned_offset > 0:
+                    bits += value_bits[aligned_offset:]
+                    value_bits = value_bits[:aligned_offset]
+                    aligned_offset -= 8
+
+                bits += value_bits
+
             i += 1
 
     # padding of last byte
@@ -201,7 +234,7 @@ def unpack(fmt, data):
     """
 
     bits = ''.join(['{:08b}'.format(b) for b in bytearray(data)])
-    infos = _parse_format(fmt)
+    infos, byte_order = _parse_format(fmt)
 
     # Sanity check.
     number_of_bits_to_unpack = sum([size for _, size, _ in infos])
@@ -212,13 +245,26 @@ def unpack(fmt, data):
                                            len(bits)))
 
     res = []
-    i = 0
+    offset = 0
 
     for type_, size, endianness in infos:
         if type_ == 'p':
             pass
         else:
-            value_bits = bits[i:i+size]
+            # reverse bytes order for least significant byte first
+            if byte_order == ">":
+                value_bits = bits[offset:offset+size]
+            else:
+                value_bits_tmp = bits[offset:offset+size]
+                aligned_offset = (size - ((offset + size) % 8))
+                value_bits = ''
+
+                while aligned_offset > 0:
+                    value_bits += value_bits_tmp[aligned_offset:aligned_offset+8]
+                    value_bits_tmp = value_bits_tmp[:aligned_offset]
+                    aligned_offset -= 8
+
+                value_bits += value_bits_tmp
 
             # reverse the bit order in little endian values
             if endianness == "<":
@@ -239,7 +285,7 @@ def unpack(fmt, data):
 
             res.append(value)
 
-        i += size
+        offset += size
 
     return tuple(res)
 
@@ -252,7 +298,7 @@ def calcsize(fmt):
 
     """
 
-    return sum([size for _, size, _ in _parse_format(fmt)])
+    return sum([size for _, size, _ in _parse_format(fmt)[0]])
 
 
 def byteswap(fmt, data, offset = 0):

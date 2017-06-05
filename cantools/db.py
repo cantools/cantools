@@ -381,9 +381,10 @@ class File(object):
         self.version = [token[1]
                         for token in tokens
                         if token[0] == VERSION][0]
-        self.ecu = [token[1]
-                    for token in tokens
-                    if token[0] == ECU][0]
+        ecus = [token[1]
+                for token in tokens
+                if token[0] == ECU and len(token) == 2]
+        self.ecu = ecu[0] if len(ecus) > 0 else None
 
         for message in tokens:
             if message[0] != MESSAGE:

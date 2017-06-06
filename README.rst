@@ -30,6 +30,8 @@ An example parsing and using a `small DBC-file`_:
            db.add_dbc(fin)
    >>> db.messages
    [ExampleMessage]
+   >>> db.messages[0].comment
+   'Example message used as template in MotoHawk models.'
    >>> db.messages[0].signals
    [Temperature, AverageRadius, Enable]
    >>> db.ecus

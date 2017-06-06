@@ -8,6 +8,7 @@ from pyparsing import printables, nums, alphas, LineEnd, Empty
 from pyparsing import ZeroOrMore, OneOrMore
 
 __author__ = 'Erik Moqvist'
+__version__ = '2.0.0'
 
 # DBC section types
 VERSION = 'VERSION'
@@ -21,7 +22,6 @@ DEFAULT_ATTR = 'BA_DEF_DEF_'
 ATTR_DEFINITION = 'BA_'
 
 DBC_FMT = """VERSION "{version}"
-
 
 NS_ :
 \tNS_DESC_
@@ -56,7 +56,6 @@ NS_ :
 BS_:
 
 BU_: {bu}
-
 
 {bo}
 
@@ -196,8 +195,10 @@ def as_dbc(database):
     """Format database in DBC file format.
 
     """
-    #ecus
+
+    # ecus
     bu = []
+
     for ecu in database.ecus:
         bu.append(ecu.name)
 
@@ -215,7 +216,7 @@ def as_dbc(database):
         for signal in message.signals:
             fmt = (' SG_ {name} : {start}|{length}@{byte_order}{_type}'
                    ' ({scale},{offset})'
-                   ' [{_min}|{_max}] "{unit}"  {ecu}')
+                   ' [{_min}|{_max}] "{unit}" {ecu}')
             msg.append(fmt.format(
                 name=signal.name,
                 start=signal.start,
@@ -254,7 +255,7 @@ def as_dbc(database):
             cm.append(fmt.format(frame_id=message.frame_id,
                                  name=signal.name,
                                  comment=signal.comment))
-    #attributes
+    # attributes
     ba_def = []
 
     for attribute in database.attributes:
@@ -272,7 +273,7 @@ def as_dbc(database):
                                          type=attribute[3],
                                          choices=' '.join(['{num}'.format(num=choice[0])
                                                            for choice in attribute[4]])))
-    #attribute defaults
+    # attribute defaults
     ba_def_def = []
 
     for default_attr in database.default_attrs:
@@ -283,15 +284,18 @@ def as_dbc(database):
             fmt = 'BA_DEF_DEF_ "{name}" "{value}";'
 
         ba_def_def.append(fmt.format(name=default_attr,
-                                      value=database.default_attrs[default_attr]))
-    #attribute definitions
+                                     value=database.default_attrs[default_attr]))
+
+    # attribute definitions
     ba = []
+
     for message in database.messages:
         if message.cycle_time != None:
             fmt = 'BA_ "GenMsgCycleTime" BO_ {frame_id} {cycle_time};'
             ba.append(fmt.format(frame_id=message.frame_id,
                                  cycle_time=message.cycle_time))
     ba.append('')
+
     for message in database.messages:
         try:
             if message.send_type is not database.default_attrs['GenMsgSendType']:
@@ -299,10 +303,11 @@ def as_dbc(database):
                 ba.append(fmt.format(frame_id=message.frame_id,
                                      send_type=message.send_type))
         except KeyError:
-            continue;
+            continue
 
     # choices
     val = []
+
     for message in database.messages:
         for signal in message.signals:
             if signal.choices == None:
@@ -334,7 +339,6 @@ class Signal(object):
                  name,
                  start,
                  length,
-                 ecu,
                  byte_order,
                  _type,
                  scale,
@@ -343,11 +347,11 @@ class Signal(object):
                  _max,
                  unit,
                  choices,
-                 comment):
+                 comment,
+                 ecu=None):
         self.name = name
         self.start = start
         self.length = length
-        self.ecu = ecu
         self.byte_order = byte_order
         self.type = _type
         self.scale = scale
@@ -357,6 +361,7 @@ class Signal(object):
         self.unit = unit
         self.choices = choices
         self.comment = comment
+        self.ecu = ecu
 
     def __repr__(self):
         fmt = 'signal(' + ', '.join(12 * ['{}']) + ')'
@@ -384,21 +389,21 @@ class Message(object):
                  frame_id,
                  name,
                  length,
-                 ecu,
-                 send_type,
-                 cycle_time,
                  signals,
-                 comment):
+                 comment,
+                 ecu=None,
+                 send_type=None,
+                 cycle_time=None):
         self.frame_id = frame_id
         self.name = name
         self.length = length
-        self.ecu = ecu
-        self.send_type = send_type
-        self.cycle_time = cycle_time
         self.signals = signals
         self.signals.sort(key=lambda s: s.start)
         self.signals.reverse()
         self.comment = comment
+        self.ecu = ecu
+        self.send_type = send_type
+        self.cycle_time = cycle_time
         self.decoded = namedtuple(name, [signal.name for signal in signals])
         self.fmt = ''
         end = 64
@@ -422,15 +427,15 @@ class Message(object):
                                            bitstruct.unpack(self.fmt, data))])
 
 class Ecu(object):
-    """ECU file
+    """An ECU on the CAN bus.
 
     """
 
     def __init__(self,
                  name,
                  comment):
-        self.name = name;
-        self.comment = comment;
+        self.name = name
+        self.comment = comment
 
 
 class File(object):
@@ -439,33 +444,33 @@ class File(object):
     """
 
     def __init__(self,
-                 ecus=None,
                  messages=None,
+                 ecus=None,
                  attributes=None,
                  default_attrs=None):
-        self.ecus = ecus if ecus else []
         self.messages = messages if messages else []
+        self.ecus = ecus if ecus else []
         self.attributes = attributes if attributes else []
         self.default_attrs = default_attrs if default_attrs else []
-        self.grammar = create_dbc_grammar()
         self.frame_id_to_message = {}
         self.version = None
-        self.ecu = None
+        self._grammar = create_dbc_grammar()
 
     def add_dbc(self, dbc):
         """Add information from dbc iostream.
 
         """
 
-        tokens = self.grammar.parseString(dbc.read())
+        tokens = self._grammar.parseString(dbc.read())
 
         comments = {}
+
         for comment in tokens:
             if comment[0] == COMMENT:
                 if comment[1] == ECU:
-                    ecu_name = comment[2];
+                    ecu_name = comment[2]
                     if ecu_name not in comments:
-                        comments[ecu_name] = {};
+                        comments[ecu_name] = {}
                     comments[ecu_name] = comment[3]
 
                 if comment[1] == MESSAGE:
@@ -484,18 +489,21 @@ class File(object):
                     comments[frame_id]['signals'][comment[3]] = comment[4]
 
         attributes = []
+
         for attribute in tokens:
             if attribute[0] == ATTRIBUTE:
                 attributes.append(attribute)
         self.attributes = attributes
 
         default_attrs = {}
+
         for default_attr in tokens:
             if default_attr[0] == DEFAULT_ATTR:
                 default_attrs[default_attr[1]] = default_attr[2]
         self.default_attrs = default_attrs
 
         msg_attributes = {}
+
         for attr_definition in tokens:
             if attr_definition[0] == ATTR_DEFINITION and \
                attr_definition[1] == "GenMsgCycleTime" and \
@@ -514,9 +522,10 @@ class File(object):
                     msg_attributes[frame_id] = {}
                 if 'send_type' not in msg_attributes[frame_id]:
                     msg_attributes[frame_id]['send_type'] = {}
-                msg_attributes[frame_id]['send_type'] = 1; #TODO
+                msg_attributes[frame_id]['send_type'] = 1 #TODO
 
         choices = {}
+
         for choice in tokens:
             if choice[0] == CHOICE:
                 frame_id = int(choice[1])
@@ -594,7 +603,7 @@ class File(object):
                 ecu = [Ecu(name=ecu,
                           comment=get_ecu_comment(ecu))
                           for ecu in ecu_list[1:]]
-                self.ecus = ecu;
+                self.ecus = ecu
 
         for message in tokens:
             if message[0] != MESSAGE:

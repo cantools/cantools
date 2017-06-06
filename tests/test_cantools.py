@@ -11,6 +11,8 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
         with open(filename, 'r') as fin:
             f.add_dbc(fin)
+        self.assertEqual(len(f.ecus), 1)
+        self.assertEqual(f.ecus[0].name, 'Vector__XXX')
         self.assertEqual(len(f.messages), 217)
         self.assertEqual(f.messages[216].frame_id, 155872546)
         i = 0
@@ -27,6 +29,8 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         with open(filename, 'r') as fin:
             f.add_dbc(fin)
+        self.assertEqual(len(f.ecus), 1)
+        self.assertEqual(f.ecus[0].name, 'PCM1')
         self.assertEqual(len(f.messages), 1)
         with open(filename, 'r') as fin:
             self.assertEqual(f.as_dbc(), fin.read())
@@ -50,6 +54,7 @@ class CanToolsTest(unittest.TestCase):
         signals = [cantools.db.Signal(name='signal',
                                       start=0,
                                       length=4,
+                                      ecu='foo',
                                       byte_order='big_endian',
                                       _type='unsigned',
                                       scale=1.0,
@@ -62,6 +67,7 @@ class CanToolsTest(unittest.TestCase):
         message = cantools.db.Message(frame_id=37,
                                       name='message',
                                       length=8,
+                                      ecu='bar',
                                       signals=signals,
                                       comment='')
         f.add_message(message)

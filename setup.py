@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+import cantools.db
 
 setup(name='cantools',
-      version='1.0.0',
+      version=cantools.db.__version__,
       description='CAN BUS tools.',
       long_description=open('README.rst', 'r').read(),
       author='Erik Moqvist',

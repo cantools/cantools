@@ -369,7 +369,7 @@ class Signal(object):
         self.ecu = ecu
 
     def __repr__(self):
-        return 'signal({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "{}")'.format(
+        return 'signal("{}", {}, {}, "{}", "{}", {}, {}, {}, {}, "{}", {}, {})'.format(
             self.name,
             self.start,
             self.length,
@@ -381,7 +381,7 @@ class Signal(object):
             self.max,
             self.unit,
             self.choices,
-            self.comment)
+            '"' + self.comment + '"' if self.comment is not None else None)
 
 
 class Message(object):
@@ -431,10 +431,11 @@ class Message(object):
                                            bitstruct.unpack(self.fmt, data))])
 
     def __repr__(self):
-        return 'message({}, 0x{:x}, {}, "{}")'.format(self.name,
-                                                      self.frame_id,
-                                                      self.length,
-                                                      self.comment)
+        return 'message("{}", 0x{:x}, {}, {})'.format(
+            self.name,
+            self.frame_id,
+            self.length,
+            '"' + self.comment + '"' if self.comment is not None else None)
 
 
 class Ecu(object):
@@ -449,8 +450,9 @@ class Ecu(object):
         self.comment = comment
 
     def __repr__(self):
-        return 'ecu({}, "{}")'.format(self.name,
-                                      self.comment)
+        return 'ecu("{}", {})'.format(
+            self.name,
+            '"' + self.comment + '"' if self.comment is not None else None)
 
 
 class File(object):

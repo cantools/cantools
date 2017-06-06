@@ -30,9 +30,10 @@ An example parsing and using a `small DBC-file`_:
    >>> db.add_dbc_file('tests/files/motohawk.dbc')
    >>> pprint(db.messages)
    [message("ExampleMessage", 0x1f0, 8, "Example message used as template in MotoHawk models.")]
-   >>> db.messages[0].comment
+   >>> example_message = db.messages[0]
+   >>> example_message.comment
    'Example message used as template in MotoHawk models.'
-   >>> pprint(db.messages[0].signals)
+   >>> pprint(example_message.signals)
    [signal("Temperature", 7, 12, "big_endian", "signed", 0.01, 250, 229.53, 270.47, "degK", None, None),
     signal("AverageRadius", 1, 6, "big_endian", "unsigned", 0.1, 0, 0.0, 5.0, "m", None, ""),
     signal("Enable", 0, 1, "big_endian", "unsigned", 1.0, 0, 0.0, 0.0, "-", None, None)]
@@ -40,6 +41,16 @@ An example parsing and using a `small DBC-file`_:
    [ecu("PCM1", None)]
    >>> db.version
    '1.0'
+   >>>
+
+The example continues encoding a message and sending it on a CAN bus
+using the `python-can`_ package.
+
+   >>> import can
+   >>> can_bus = can.interface.Bus()
+   >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})
+   >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
+   >>> can_bus.send(message)
    >>>
 
 Contributing
@@ -69,3 +80,5 @@ Contributing
 .. _coverage: https://coveralls.io/github/eerimoq/cantools
 
 .. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.dbc
+
+.. _python-can: https://python-can.readthedocs.io/en/latest/

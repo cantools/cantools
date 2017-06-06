@@ -39,19 +39,83 @@ class CanToolsTest(unittest.TestCase):
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc(), fin.read())
 
-        # decoode a raw message
-        frame_id = 496
+    def test_motohawk_encode(self):
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'motohawk.dbc')
+        db.add_dbc_file(filename)
+
+        # Encode signals into an ExampleMessage frame.
+        example_message_frame_id = 496
+
         temperature = 250.55
         average_radius = 3.2
         enable = 1
+
         data = bitstruct.pack('p45u12u6u1',
                               int((temperature - 250) / 0.01),
                               int(average_radius / 0.1),
                               enable)
-        decoded = db.decode_message(frame_id, data)
-        self.assertEqual(decoded.Temperature, 250.55)
-        self.assertEqual(decoded.AverageRadius, 3.2)
-        self.assertEqual(decoded.Enable, 1.0)
+
+        message = db.lookup_message(example_message_frame_id)
+        encoded = db.encode_message(example_message_frame_id,
+                                    message.Signals(temperature,
+                                                    average_radius,
+                                                    enable))
+
+        self.assertEqual(encoded, data)
+
+        encoded = db.encode_message(example_message_frame_id,
+                                    {'Temperature': temperature,
+                                     'AverageRadius': average_radius,
+                                     'Enable': enable})
+
+        self.assertEqual(encoded, data)
+
+    def test_motohawk_decode(self):
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'motohawk.dbc')
+        db.add_dbc_file(filename)
+
+        # Encode and decode the signals in an ExampleMessage frame.
+        example_message_frame_id = 496
+
+        temperature = 250.55
+        average_radius = 3.2
+        enable = 1
+
+        data = bitstruct.pack('p45u12u6u1',
+                              int((temperature - 250) / 0.01),
+                              int(average_radius / 0.1),
+                              enable)
+
+        decoded = db.decode_message(example_message_frame_id, data)
+
+        self.assertEqual(decoded.Temperature, temperature)
+        self.assertEqual(decoded.AverageRadius, average_radius)
+        self.assertEqual(decoded.Enable, enable)
+
+    def test_motohawk_encode_decode(self):
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'motohawk.dbc')
+        db.add_dbc_file(filename)
+
+        # Decode the signals in an ExampleMessage frame.
+        example_message_frame_id = 496
+
+        temperature = 250.55
+        average_radius = 3.2
+        enable = 1
+
+        encoded = db.encode_message(example_message_frame_id,
+                                    {'Temperature': temperature,
+                                     'AverageRadius': average_radius,
+                                     'Enable': enable})
+
+        decoded = db.decode_message(example_message_frame_id, encoded)
+
+        self.assertEqual(decoded.Temperature, temperature)
+        self.assertEqual(decoded.AverageRadius, average_radius)
+        self.assertEqual(decoded.Enable, enable)
 
     def test_add_message(self):
         db = cantools.db.File()

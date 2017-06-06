@@ -9,7 +9,7 @@ from pyparsing import ZeroOrMore, OneOrMore
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
 
 # DBC section types.
@@ -408,7 +408,7 @@ class Message(object):
         self.ecu = ecu
         self.send_type = send_type
         self.cycle_time = cycle_time
-        self.decoded = namedtuple(name, [signal.name for signal in signals])
+        self.Signals = namedtuple(name, [signal.name for signal in signals])
         self.fmt = ''
         end = 64
 
@@ -421,12 +421,24 @@ class Message(object):
             self.fmt += '{}{}'.format(signal.type[0], signal.length)
             end = signal.start
 
+    def encode(self, data):
+        """Encode given data as a message of this type.
+
+        """
+
+        if isinstance(data, dict):
+            data = self.Signals(**data)
+
+        return bitstruct.pack(self.fmt,
+                              *[int((v[1] - v[0].offset) / v[0].scale)
+                                for v in zip(self.signals, data)])
+
     def decode(self, data):
         """Decode given data as a message of this type.
 
         """
 
-        return self.decoded(*[v[0].scale * v[1] + v[0].offset
+        return self.Signals(*[v[0].scale * v[1] + v[0].offset
                               for v in zip(self.signals,
                                            bitstruct.unpack(self.fmt, data))])
 
@@ -469,7 +481,7 @@ class File(object):
         self.ecus = ecus if ecus else []
         self.attributes = attributes if attributes else []
         self.default_attrs = default_attrs if default_attrs else []
-        self.frame_id_to_message = {}
+        self._frame_id_to_message = {}
         self.version = None
         self._grammar = create_dbc_grammar()
 
@@ -678,20 +690,39 @@ class File(object):
         """
 
         self.messages.append(message)
-        self.frame_id_to_message[message.frame_id] = message
+        self._frame_id_to_message[message.frame_id] = message
 
     def as_dbc(self):
-        """Return a string of the database in dbc file format.
+        """Return a string of the database in DBC-file format.
 
         """
 
         return as_dbc(self)
 
-    def decode_message(self, frame_id, data):
-        """Decode given `data` as the message of given `frame_id`.
+    def lookup_message(self, frame_id):
+        """Find the message object for given frame id `frame_id`.
 
         """
 
-        message = self.frame_id_to_message[frame_id]
+        return self._frame_id_to_message[frame_id]
+
+    def encode_message(self, frame_id, data):
+        """Encode given signal data `data` as a message of given
+        `frame_id`. `data` can be a dictionary or a named tuple with
+        signal values.
+
+        """
+
+        message = self._frame_id_to_message[frame_id]
+
+        return message.encode(data)
+
+    def decode_message(self, frame_id, data):
+        """Decode given signal data `data` as a message of given frame id
+        `frame_id`.
+
+        """
+
+        message = self._frame_id_to_message[frame_id]
 
         return message.decode(data)

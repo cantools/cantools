@@ -75,8 +75,8 @@ Contributing
 
 #. Create a pull request.
 
-.. |buildstatus| image:: https://travis-ci.org/eerimoq/cantools.svg
-.. _buildstatus: https://travis-ci.org/eerimoq/cantools.svg?branch=master
+.. |buildstatus| image:: https://travis-ci.org/eerimoq/cantools.svg?branch=master
+.. _buildstatus: https://travis-ci.org/eerimoq/cantools
 
 .. |coverage| image:: https://coveralls.io/repos/github/eerimoq/cantools/badge.svg?branch=master
 .. _coverage: https://coveralls.io/github/eerimoq/cantools

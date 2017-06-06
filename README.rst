@@ -40,6 +40,26 @@ An example parsing and using a `small DBC-file`_:
    '1.0'
    >>>
 
+Contributing
+============
+
+#. Fork the repository.
+
+#. Implement the new feature or bug fix.
+
+#. Implement test case(s) to ensure that future changes do not break
+   legacy.
+
+#. Run the test suite for `Python 2` and `Python 3`. Make sure all
+   tests pass.
+
+   .. code-block:: text
+
+      python setup.py test
+      python3 setup.py test
+
+#. Create a pull request.
+
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/cantools.svg
 .. _buildstatus: https://travis-ci.org/eerimoq/cantools
 

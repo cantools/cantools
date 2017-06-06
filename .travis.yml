@@ -4,6 +4,7 @@ python:
   - "3.4"
 install:
   - pip install coveralls
+  - pip install --user -r requirements.txt
 script:
   coverage run --source=cantools.db setup.py test
 after_success:

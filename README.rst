@@ -46,6 +46,8 @@ An example parsing and using a `small DBC-file`_:
 The example continues encoding a message and sending it on a CAN bus
 using the `python-can`_ package.
 
+.. code-block:: python
+
    >>> import can
    >>> can_bus = can.interface.Bus()
    >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})

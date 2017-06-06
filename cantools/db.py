@@ -9,7 +9,7 @@ from pyparsing import ZeroOrMore, OneOrMore
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '2.3.0'
+__version__ = '2.4.0'
 
 
 # DBC section types.

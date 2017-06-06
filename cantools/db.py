@@ -7,10 +7,12 @@ from pyparsing import Group, QuotedString
 from pyparsing import printables, nums, alphas, LineEnd, Empty
 from pyparsing import ZeroOrMore, OneOrMore
 
-__author__ = 'Erik Moqvist'
-__version__ = '2.0.0'
 
-# DBC section types
+__author__ = 'Erik Moqvist'
+__version__ = '2.1.0'
+
+
+# DBC section types.
 VERSION = 'VERSION'
 ECU = 'BU_'
 COMMENT = 'CM_'
@@ -78,6 +80,7 @@ def num(number_as_string):
 
     try:
         return int(number_as_string)
+
     except ValueError:
         return float(number_as_string)
     else:
@@ -89,7 +92,7 @@ def create_dbc_grammar():
 
     """
 
-    # DBC file grammar
+    # DBC file grammar.
     word = Word(printables)
     integer = Optional(Literal('-')) + Word(nums)
     number = Word(nums + '.Ee-')
@@ -196,13 +199,13 @@ def as_dbc(database):
 
     """
 
-    # ecus
+    # Ecus.
     bu = []
 
     for ecu in database.ecus:
         bu.append(ecu.name)
 
-    # messages
+    # Messages.
     bo = []
 
     for message in database.messages:
@@ -232,30 +235,28 @@ def as_dbc(database):
 
         bo.append('\n'.join(msg))
 
-    # comments
+    # Comments.
     cm = []
 
     for ecu in database.ecus:
-        if ecu.comment != None and ecu.comment != "":
+        if ecu.comment is not None:
             fmt = 'CM_ BU_ {name} "{comment}";'
             cm.append(fmt.format(name=ecu.name,
                                  comment=ecu.comment))
 
     for message in database.messages:
-        if message.comment != None:
+        if message.comment is not None:
             fmt = 'CM_ BO_ {frame_id} "{comment}";'
             cm.append(fmt.format(frame_id=message.frame_id,
                                  comment=message.comment))
 
         for signal in message.signals:
-            if signal.comment == None:
-                continue
-
-            fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
-            cm.append(fmt.format(frame_id=message.frame_id,
-                                 name=signal.name,
-                                 comment=signal.comment))
-    # attributes
+            if signal.comment is not None:
+                fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
+                cm.append(fmt.format(frame_id=message.frame_id,
+                                     name=signal.name,
+                                     comment=signal.comment))
+    # Attributes.
     ba_def = []
 
     for attribute in database.attributes:
@@ -273,27 +274,29 @@ def as_dbc(database):
                                          type=attribute[3],
                                          choices=' '.join(['{num}'.format(num=choice[0])
                                                            for choice in attribute[4]])))
-    # attribute defaults
+    # Attribute defaults.
     ba_def_def = []
 
     for default_attr in database.default_attrs:
         try:
             int(database.default_attrs[default_attr])
             fmt = 'BA_DEF_DEF_ "{name}" {value};'
+
         except ValueError:
             fmt = 'BA_DEF_DEF_ "{name}" "{value}";'
 
         ba_def_def.append(fmt.format(name=default_attr,
                                      value=database.default_attrs[default_attr]))
 
-    # attribute definitions
+    # Attribute definitions.
     ba = []
 
     for message in database.messages:
-        if message.cycle_time != None:
+        if message.cycle_time is not None:
             fmt = 'BA_ "GenMsgCycleTime" BO_ {frame_id} {cycle_time};'
             ba.append(fmt.format(frame_id=message.frame_id,
                                  cycle_time=message.cycle_time))
+
     ba.append('')
 
     for message in database.messages:
@@ -302,10 +305,11 @@ def as_dbc(database):
                 fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} {send_type};'
                 ba.append(fmt.format(frame_id=message.frame_id,
                                      send_type=message.send_type))
+
         except KeyError:
             continue
 
-    # choices
+    # Choices.
     val = []
 
     for message in database.messages:
@@ -329,6 +333,7 @@ def as_dbc(database):
                           ba_def_def='\n'.join(ba_def_def),
                           ba='\n'.join(ba),
                           val='\n'.join(val))
+
 
 class Signal(object):
     """A CAN signal.
@@ -364,23 +369,19 @@ class Signal(object):
         self.ecu = ecu
 
     def __repr__(self):
-        fmt = 'signal(' + ', '.join(12 * ['{}']) + ')'
-
-        return fmt.format(self.name,
-                          self.start,
-                          self.length,
-                          self.byte_order,
-                          self.type,
-                          self.scale,
-                          self.offset,
-                          self.min,
-                          self.max,
-                          self.unit,
-                          self.choices,
-                          self.comment)
-
-    def __repr__(self):
-        return self.name
+        return 'signal({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "{}")'.format(
+            self.name,
+            self.start,
+            self.length,
+            self.byte_order,
+            self.type,
+            self.scale,
+            self.offset,
+            self.min,
+            self.max,
+            self.unit,
+            self.choices,
+            self.comment)
 
 
 class Message(object):
@@ -430,7 +431,10 @@ class Message(object):
                                            bitstruct.unpack(self.fmt, data))])
 
     def __repr__(self):
-        return self.name
+        return 'message({}, 0x{:x}, {}, "{}")'.format(self.name,
+                                                      self.frame_id,
+                                                      self.length,
+                                                      self.comment)
 
 
 class Ecu(object):
@@ -445,7 +449,8 @@ class Ecu(object):
         self.comment = comment
 
     def __repr__(self):
-        return self.name
+        return 'ecu({}, "{}")'.format(self.name,
+                                      self.comment)
 
 
 class File(object):
@@ -467,7 +472,7 @@ class File(object):
         self._grammar = create_dbc_grammar()
 
     def add_dbc(self, dbc):
-        """Add information from dbc iostream.
+        """Add information from given DBC iostream.
 
         """
 
@@ -556,6 +561,7 @@ class File(object):
                     return comments[frame_id]['message']
                 else:
                     return comments[frame_id]['signals'][signal]
+
             except KeyError:
                 return None
 
@@ -566,6 +572,7 @@ class File(object):
 
             try:
                 return comments[ecu_name]
+
             except KeyError:
                 return None
 
@@ -575,9 +582,11 @@ class File(object):
             """
             try:
                 return msg_attributes[frame_id]['send_type']
+
             except KeyError:
                 try:
                     return default_attrs['GenMsgSendType']
+
                 except KeyError:
                     return None
 
@@ -588,9 +597,11 @@ class File(object):
 
             try:
                 return msg_attributes[frame_id]['cycle_time']
+
             except KeyError:
                 try:
                     return default_attrs['GenMsgCycleTime']
+
                 except KeyError:
                     return None
 
@@ -601,6 +612,7 @@ class File(object):
 
             try:
                 return choices[frame_id][signal]
+
             except KeyError:
                 return None
 
@@ -649,6 +661,14 @@ class File(object):
                 comment=get_comment(int(message[1])))
 
             self.add_message(message)
+
+    def add_dbc_file(self, filename):
+        """Add information from given DBC-file.
+
+        """
+
+        with open(filename, 'r') as fin:
+            self.add_dbc(fin)
 
     def add_message(self, message):
         """Add given message to the database.

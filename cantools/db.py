@@ -379,6 +379,9 @@ class Signal(object):
                           self.choices,
                           self.comment)
 
+    def __repr__(self):
+        return self.name
+
 
 class Message(object):
     """CAN message.
@@ -426,6 +429,10 @@ class Message(object):
                               for v in zip(self.signals,
                                            bitstruct.unpack(self.fmt, data))])
 
+    def __repr__(self):
+        return self.name
+
+
 class Ecu(object):
     """An ECU on the CAN bus.
 
@@ -436,6 +443,9 @@ class Ecu(object):
                  comment):
         self.name = name
         self.comment = comment
+
+    def __repr__(self):
+        return self.name
 
 
 class File(object):

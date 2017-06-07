@@ -3,18 +3,18 @@
 import bitstruct
 from collections import namedtuple
 from pyparsing import Word, Literal, Keyword, Optional, Suppress
-from pyparsing import Group, QuotedString
+from pyparsing import Group, QuotedString, StringEnd
 from pyparsing import printables, nums, alphas, LineEnd, Empty
-from pyparsing import ZeroOrMore, OneOrMore
+from pyparsing import ZeroOrMore, OneOrMore, delimitedList
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '2.4.0'
+__version__ = '3.0.0'
 
 
 # DBC section types.
 VERSION = 'VERSION'
-ECU = 'BU_'
+ECUS = 'BU_'
 COMMENT = 'CM_'
 MESSAGE = 'BO_'
 SIGNAL = 'SG_'
@@ -22,6 +22,7 @@ CHOICE = 'VAL_'
 ATTRIBUTE = 'BA_DEF_'
 DEFAULT_ATTR = 'BA_DEF_DEF_'
 ATTR_DEFINITION = 'BA_'
+EVENT = 'EV_'
 
 DBC_FMT = """VERSION "{version}"
 
@@ -106,6 +107,7 @@ def create_dbc_grammar():
     lb = Suppress(Literal('['))
     rb = Suppress(Literal(']'))
     comma = Suppress(Literal(','))
+    ecu = Word(alphas + nums + '_-').setWhitespaceChars(' ')
 
     version = Group(Keyword('VERSION') +
                     QuotedString('"', multiline=True))
@@ -114,9 +116,9 @@ def create_dbc_grammar():
                     colon +
                     Group(ZeroOrMore(symbol)))
     discard = Suppress(Keyword('BS_') + colon)
-    ecu_list = Group(Keyword('BU_') +
-                colon +
-                ZeroOrMore(Word(printables).setWhitespaceChars(' ')))
+    ecus = Group(Keyword('BU_') +
+                 colon +
+                 Group(ZeroOrMore(ecu)))
     signal = Group(Keyword(SIGNAL) +
                    word +
                    colon +
@@ -137,13 +139,27 @@ def create_dbc_grammar():
                          number +
                          rb) +
                    QuotedString('"', multiline=True) +
-                   word)
+                   Group(delimitedList(ecu)))
     message = Group(Keyword(MESSAGE) +
                     integer +
                     word +
                     integer +
                     word +
                     Group(ZeroOrMore(signal)))
+    event = Suppress(Keyword(EVENT)
+                     + word
+                     + integer
+                     + lb
+                     + number
+                     + pipe
+                     + number
+                     + rb
+                     + QuotedString('"', multiline=True)
+                     + number
+                     + number
+                     + word
+                     + ecu
+                     + scolon)
     comment = Group(Keyword(COMMENT) +
                     ((Keyword(MESSAGE) +
                       integer +
@@ -154,7 +170,7 @@ def create_dbc_grammar():
                       word +
                       QuotedString('"', multiline=True) +
                       scolon) |
-                     (Keyword(ECU) +
+                     (Keyword(ECUS) +
                       word +
                       QuotedString('"', multiline=True) +
                       scolon)))
@@ -187,9 +203,9 @@ def create_dbc_grammar():
                    Group(OneOrMore(Group(
                        integer + QuotedString('"', multiline=True)))) +
                    scolon)
-    entry = version | symbols | discard | ecu_list | message | comment | \
-            attribute | default_attr | attr_definition | choice
-    grammar = OneOrMore(entry)
+    entry = version | symbols | discard | ecus | message | comment | \
+            attribute | default_attr | attr_definition | choice | event
+    grammar = OneOrMore(entry) + StringEnd()
 
     return grammar
 
@@ -210,27 +226,27 @@ def as_dbc(database):
 
     for message in database.messages:
         msg = []
-        fmt = 'BO_ {frame_id} {name}: {length} {ecu}'
+        fmt = 'BO_ {frame_id} {name}: {length} {ecus}'
         msg.append(fmt.format(frame_id=message.frame_id,
                               name=message.name,
                               length=message.length,
-                              ecu=message.ecu))
+                              ecus=message.ecus))
 
         for signal in message.signals:
-            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{_type}'
+            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
-                   ' [{_min}|{_max}] "{unit}" {ecu}')
+                   ' [{minimum}|{maximum}] "{unit}" {ecus}')
             msg.append(fmt.format(
                 name=signal.name,
                 start=signal.start,
                 length=signal.length,
-                ecu=signal.ecu,
+                ecus=', '.join(signal.ecus),
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
-                _type=('-' if signal.type == 'signed' else '+'),
+                sign=('-' if signal.is_signed else '+'),
                 scale=signal.scale,
                 offset=signal.offset,
-                _min=signal.min,
-                _max=signal.max,
+                minimum=signal.minimum,
+                maximum=signal.maximum,
                 unit=signal.unit))
 
         bo.append('\n'.join(msg))
@@ -261,17 +277,17 @@ def as_dbc(database):
 
     for attribute in database.attributes:
         if attribute[1] == SIGNAL or attribute[1] == MESSAGE:
-            fmt = 'BA_DEF_ {kind} "{name}" {type} {choices};'
+            fmt = 'BA_DEF_ {kind} "{name}" {type_} {choices};'
             if attribute[3] == 'ENUM':
                 ba_def.append(fmt.format(kind=attribute[1],
                                          name=attribute[2],
-                                         type=attribute[3],
+                                         type_=attribute[3],
                                          choices=','.join(['"{text}"'.format(text=choice[0])
                                                            for choice in attribute[4]])))
             elif attribute[3] == 'INT':
                 ba_def.append(fmt.format(kind=attribute[1],
                                          name=attribute[2],
-                                         type=attribute[3],
+                                         type_=attribute[3],
                                          choices=' '.join(['{num}'.format(num=choice[0])
                                                            for choice in attribute[4]])))
     # Attribute defaults.
@@ -345,28 +361,28 @@ class Signal(object):
                  start,
                  length,
                  byte_order,
-                 _type,
+                 is_signed,
                  scale,
                  offset,
-                 _min,
-                 _max,
+                 minimum,
+                 maximum,
                  unit,
                  choices,
                  comment,
-                 ecu=None):
+                 ecus=None):
         self.name = name
         self.start = start
         self.length = length
         self.byte_order = byte_order
-        self.type = _type
+        self.is_signed = is_signed
         self.scale = scale
         self.offset = offset
-        self.min = _min
-        self.max = _max
+        self.minimum = minimum
+        self.maximum = maximum
         self.unit = unit
         self.choices = choices
         self.comment = comment
-        self.ecu = ecu
+        self.ecus = ecus
 
     def __repr__(self):
         return 'signal("{}", {}, {}, "{}", "{}", {}, {}, {}, {}, "{}", {}, {})'.format(
@@ -374,11 +390,11 @@ class Signal(object):
             self.start,
             self.length,
             self.byte_order,
-            self.type,
+            self.is_signed,
             self.scale,
             self.offset,
-            self.min,
-            self.max,
+            self.minimum,
+            self.maximum,
             self.unit,
             self.choices,
             '"' + self.comment + '"' if self.comment is not None else None)
@@ -395,7 +411,7 @@ class Message(object):
                  length,
                  signals,
                  comment,
-                 ecu=None,
+                 ecus=None,
                  send_type=None,
                  cycle_time=None):
         self.frame_id = frame_id
@@ -405,7 +421,7 @@ class Message(object):
         self.signals.sort(key=lambda s: s.start)
         self.signals.reverse()
         self.comment = comment
-        self.ecu = ecu
+        self.ecus = ecus
         self.send_type = send_type
         self.cycle_time = cycle_time
         self.Signals = namedtuple(name, [signal.name for signal in signals])
@@ -418,7 +434,8 @@ class Message(object):
             if padding > 0:
                 self.fmt += 'p{}'.format(padding)
 
-            self.fmt += '{}{}'.format(signal.type[0], signal.length)
+            self.fmt += '{}{}'.format('s' if signal.is_signed else 'u',
+                                      signal.length)
             end = signal.start
 
     def encode(self, data):
@@ -430,17 +447,17 @@ class Message(object):
             data = self.Signals(**data)
 
         return bitstruct.pack(self.fmt,
-                              *[int((v[1] - v[0].offset) / v[0].scale)
-                                for v in zip(self.signals, data)])
+                              *[int((v - s.offset) / s.scale)
+                                for s, v in zip(self.signals, data)])
 
     def decode(self, data):
         """Decode given data as a message of this type.
 
         """
 
-        return self.Signals(*[v[0].scale * v[1] + v[0].offset
-                              for v in zip(self.signals,
-                                           bitstruct.unpack(self.fmt, data))])
+        return self.Signals(*[s.scale * v + s.offset
+                              for s, v in zip(self.signals,
+                                              bitstruct.unpack(self.fmt, data))])
 
     def __repr__(self):
         return 'message("{}", 0x{:x}, {}, {})'.format(
@@ -496,7 +513,7 @@ class File(object):
 
         for comment in tokens:
             if comment[0] == COMMENT:
-                if comment[1] == ECU:
+                if comment[1] == ECUS:
                     ecu_name = comment[2]
                     if ecu_name not in comments:
                         comments[ecu_name] = {}
@@ -633,13 +650,12 @@ class File(object):
         self.version = [token[1]
                         for token in tokens
                         if token[0] == VERSION][0]
-
-        for ecu_list in tokens:
-            if ecu_list[0] == ECU:
-                ecu = [Ecu(name=ecu,
-                          comment=get_ecu_comment(ecu))
-                          for ecu in ecu_list[1:]]
-                self.ecus = ecu
+         
+        for ecus in tokens:
+            if ecus[0] == ECUS:
+                self.ecus = [Ecu(name=ecu,
+                                 comment=get_ecu_comment(ecu))
+                             for ecu in ecus[1]]
 
         for message in tokens:
             if message[0] != MESSAGE:
@@ -649,23 +665,21 @@ class File(object):
                 frame_id=int(message[1]),
                 name=message[2][0:-1],
                 length=int(message[3], 0),
-                ecu=message[4],
+                ecus=message[4],
                 send_type=get_send_type(int(message[1])),
                 cycle_time=get_cycle_time(int(message[1])),
                 signals=[Signal(name=signal[1],
                                 start=int(signal[2][0]),
                                 length=int(signal[2][1]),
-                                ecu=signal[6],
+                                ecus=signal[6],
                                 byte_order=('big_endian'
                                             if signal[2][2] == '0'
                                             else 'little_endian'),
-                                _type=('signed'
-                                       if signal[2][3] == '-'
-                                       else 'unsigned'),
+                                is_signed=(signal[2][3] == '-'),
                                 scale=num(signal[3][0]),
                                 offset=num(signal[3][1]),
-                                _min=num(signal[4][0]),
-                                _max=num(signal[4][1]),
+                                minimum=num(signal[4][0]),
+                                maximum=num(signal[4][1]),
                                 unit=signal[5],
                                 choices=get_choices(int(message[1]),
                                                     signal[1]),

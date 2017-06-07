@@ -32,10 +32,10 @@ NS_ :
 
 BS_:
 
-BU_: PCM1
+BU_: PCM1 FOO
 
 BO_ 496 ExampleMessage: 8 PCM1
- SG_ Temperature : 7|12@0- (0.01,250) [229.53|270.47] "degK" Vector__XXX
+ SG_ Temperature : 7|12@0- (0.01,250) [229.53|270.47] "degK" Vector__XXX, FOO
  SG_ AverageRadius : 1|6@0+ (0.1,0) [0.0|5.0] "m" Vector__XXX
  SG_ Enable : 0|1@0+ (1.0,0) [0.0|0.0] "-" Vector__XXX
 

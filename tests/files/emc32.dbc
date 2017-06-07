@@ -1,0 +1,76 @@
+VERSION "HINBNYYYYYYYYYYYYYYYYYYYYYYYYYYYNNNNNNNNNN/4/%%%/4/'%**4NNN///"
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: EMV_Statusmeldungen
+
+BO_ 546 EMV_Stati: 8 EMV_Statusmeldungen
+ SG_ EMV_Aktion_Status_5 : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EMV_Aktion_Status_4 : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EMV_Aktion_Status_3 : 2|1@1+ (1,0) [0|1] ""  EMV_Statusmeldungen
+ SG_ EMV_Aktion_Status_2 : 6|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EMV_Aktion_Status_1 : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+
+EV_ EMC_TrdPower: 1 [0|20000] "W" 0 1 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Modulation: 0 [0|0] "" 0 2 DUMMY_NODE_VECTOR8000 Vector__XXX;
+
+EV_ EMC_NoGoInfo: 0 [0|0] "" 0 3 DUMMY_NODE_VECTOR8000 Vector__XXX;
+
+EV_ EMC_Test_Stop: 0 [0|1] "" 0 4 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Test_Start: 0 [0|1] "" 0 5 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Test_Clear: 0 [0|1] "" 0 6 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Synchronisation: 0 [0|1] "" 0 7 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Polarisation: 0 [0|0] "" 0 8 DUMMY_NODE_VECTOR8000 Vector__XXX;
+
+EV_ EMC_NoGo: 0 [0|1] "" 0 9 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Frequency: 1 [0|4000000000] "Hz" 0 10 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_TestLevel: 1 [0|600] "Level" 0 11 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Azimuth: 1 [-180|400] "deg" 0 12 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Action_5: 0 [0|1] "" 0 13 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Action_4: 0 [0|1] "" 0 14 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Action_3: 0 [0|1] "" 0 15 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Action_2: 0 [0|1] "" 0 16 DUMMY_NODE_VECTOR0 Vector__XXX;
+
+EV_ EMC_Action_1: 0 [0|1] "" 0 17 DUMMY_NODE_VECTOR0 Vector__XXX;

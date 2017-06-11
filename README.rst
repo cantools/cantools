@@ -8,7 +8,7 @@ CAN BUS tools.
 
 - DBC file mangling.
 
-- `candump` output decoder.
+- ``candump`` output decoder.
 
 Installation
 ============

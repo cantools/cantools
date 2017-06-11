@@ -8,10 +8,6 @@ from pyparsing import printables, nums, alphas, LineEnd, Empty
 from pyparsing import ZeroOrMore, OneOrMore, delimitedList
 
 
-__author__ = 'Erik Moqvist'
-__version__ = '3.0.0'
-
-
 # DBC section types.
 VERSION = 'VERSION'
 ECUS = 'BU_'
@@ -84,6 +80,7 @@ def num(number_as_string):
 
     except ValueError:
         return float(number_as_string)
+
     else:
         raise ValueError('Expected integer or floating point number.')
 
@@ -405,6 +402,29 @@ class Message(object):
 
     """
 
+    class Signals(object):
+
+        def __init__(self, message, *args, **kwargs):
+            self.message = message
+
+            if args:
+                for signal, value in zip(message.signals, args):
+                    setattr(self, signal.name, value)
+
+            self.__dict__.update(kwargs)
+
+        def __str__(self):
+            signals = []
+
+            for signal in self.message.signals:
+                unit = ' ' + signal.unit if signal.unit else ''
+                signals.append(
+                    '{name}: {value}{unit}'.format(name=signal.name,
+                                                   value=getattr(self, signal.name),
+                                                   unit=unit))
+
+            return '{}({})'.format(self.message.name, ', '.join(signals))
+
     def __init__(self,
                  frame_id,
                  name,
@@ -424,7 +444,6 @@ class Message(object):
         self.ecus = ecus
         self.send_type = send_type
         self.cycle_time = cycle_time
-        self.Signals = namedtuple(name, [signal.name for signal in signals])
         self.fmt = ''
         end = 64
 
@@ -444,20 +463,25 @@ class Message(object):
         """
 
         if isinstance(data, dict):
-            data = self.Signals(**data)
+            data = self.Signals(self, **data)
 
         return bitstruct.pack(self.fmt,
-                              *[int((v - s.offset) / s.scale)
-                                for s, v in zip(self.signals, data)])
+                              *[int((getattr(data, signal.name)
+                                     - signal.offset) / signal.scale)
+                                for signal in self.signals])[::-1]
 
     def decode(self, data):
         """Decode given data as a message of this type.
 
         """
 
-        return self.Signals(*[s.scale * v + s.offset
+        data += b'\x00' * (8 - len(data))
+
+        return self.Signals(self,
+                            *[s.scale * v + s.offset
                               for s, v in zip(self.signals,
-                                              bitstruct.unpack(self.fmt, data))])
+                                              bitstruct.unpack(self.fmt,
+                                                               data[::-1]))])
 
     def __repr__(self):
         return 'message("{}", 0x{:x}, {}, {})'.format(
@@ -650,7 +674,7 @@ class File(object):
         self.version = [token[1]
                         for token in tokens
                         if token[0] == VERSION][0]
-         
+
         for ecus in tokens:
             if ecus[0] == ECUS:
                 self.ecus = [Ecu(name=ecu,

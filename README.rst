@@ -18,6 +18,9 @@ Installation
 Example usage
 =============
 
+Scripting
+---------
+
 See the test suite: https://github.com/eerimoq/cantools/blob/master/tests/test_cantools.py
 
 An example parsing and using a `small DBC-file`_:
@@ -54,6 +57,19 @@ using the `python-can`_ package.
    >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
    >>> can_bus.send(message)
    >>>
+
+Command line tool
+-----------------
+
+Decode CAN frames captured with the Linux program ``candump``.
+
+.. code-block:: text
+
+   $ candump vcan0 | cantools decode motohawk.dbc
+     vcan0  000001F0   [7]  01 FA 0F 00 00 00 00 :: ExampleMessage(Temperature: 249.88 degK, AverageRadius: 0.0 m, Enable: 1.0 -)
+     vcan0  000001F0   [7]  01 FA 0F 00 00 00 00 :: ExampleMessage(Temperature: 249.88 degK, AverageRadius: 0.0 m, Enable: 1.0 -)
+     vcan0  000001F0   [7]  01 FA 0F 00 00 00 00 :: ExampleMessage(Temperature: 249.88 degK, AverageRadius: 0.0 m, Enable: 1.0 -)
+
 
 Contributing
 ============

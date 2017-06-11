@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-import cantools.db
+import cantools
 
 setup(name='cantools',
-      version=cantools.db.__version__,
+      version=cantools.__version__,
       description='CAN BUS tools.',
       long_description=open('README.rst', 'r').read(),
       author='Erik Moqvist',
@@ -20,4 +20,7 @@ setup(name='cantools',
       packages=['cantools'],
       install_requires=['bitstruct>=0.7.1',
                         'pyparsing>=2.0.3'],
-      test_suite="tests")
+      test_suite="tests",
+      entry_points = {
+          'console_scripts': ['cantools=cantools.__init__:main']
+      })

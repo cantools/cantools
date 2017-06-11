@@ -72,11 +72,12 @@ class CanToolsTest(unittest.TestCase):
         data = bitstruct.pack('p45u12u6u1',
                               int((temperature - 250) / 0.01),
                               int(average_radius / 0.1),
-                              enable)
+                              enable)[::-1]
 
         message = db.lookup_message(example_message_frame_id)
         encoded = db.encode_message(example_message_frame_id,
-                                    message.Signals(temperature,
+                                    message.Signals(message,
+                                                    temperature,
                                                     average_radius,
                                                     enable))
 
@@ -104,7 +105,7 @@ class CanToolsTest(unittest.TestCase):
         data = bitstruct.pack('p45u12u6u1',
                               int((temperature - 250) / 0.01),
                               int(average_radius / 0.1),
-                              enable)
+                              enable)[::-1]
 
         decoded = db.decode_message(example_message_frame_id, data)
 

@@ -14,6 +14,15 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.ecus[0].name, 'Vector__XXX')
         self.assertEqual(len(db.messages), 217)
         self.assertEqual(db.messages[216].frame_id, 155872546)
+        self.assertEqual(str(db.messages[0]),
+                         'message("RT_SB_INS_Vel_Body_Axes", 0x9588322, 8, None)')
+        self.assertEqual(repr(db.messages[0].signals[0]),
+                         'signal("INS_Vel_Sideways_2D", 40, 24, "little_endian", '
+                         '"True", 0.0001, 0, -838, 838, "m/s", None, '
+                         '"Sideways Velocity in the vehicle body axes, 2D (no '
+                         'vertical component) .  +ve for motion to the vehicle '
+                         'RHS.")')
+        self.assertEqual(repr(db.ecus[0]), 'ecu("Vector__XXX", None)')
         i = 0
 
         for message in db.messages:
@@ -112,6 +121,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(decoded.Temperature, temperature)
         self.assertEqual(decoded.AverageRadius, average_radius)
         self.assertEqual(decoded.Enable, enable)
+        self.assertEqual(str(decoded),
+                         'ExampleMessage(Temperature: 250.55 degK, '
+                         'AverageRadius: 3.2 m, Enable: 1.0 -)')
 
     def test_motohawk_encode_decode(self):
         db = cantools.db.File()

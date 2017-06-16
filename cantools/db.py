@@ -92,8 +92,9 @@ def create_dbc_grammar():
 
     # DBC file grammar.
     word = Word(printables)
-    integer = Optional(Literal('-')) + Word(nums)
-    number = Word(nums + '.Ee-')
+    integer = Group(Optional('-') + Word(nums))
+    positive_integer = Word(nums)
+    number = Word(nums + '.Ee-+')
     colon = Suppress(Literal(':'))
     scolon = Suppress(Literal(';'))
     pipe = Suppress(Literal('|'))
@@ -119,11 +120,11 @@ def create_dbc_grammar():
     signal = Group(Keyword(SIGNAL) +
                    word +
                    colon +
-                   Group(integer +
+                   Group(positive_integer +
                          pipe +
-                         integer +
+                         positive_integer +
                          at +
-                         integer +
+                         positive_integer +
                          sign) +
                    Group(lp +
                          number +
@@ -138,14 +139,14 @@ def create_dbc_grammar():
                    QuotedString('"', multiline=True) +
                    Group(delimitedList(ecu)))
     message = Group(Keyword(MESSAGE) +
-                    integer +
+                    positive_integer +
                     word +
-                    integer +
+                    positive_integer +
                     word +
                     Group(ZeroOrMore(signal)))
     event = Suppress(Keyword(EVENT)
                      + word
-                     + integer
+                     + positive_integer
                      + lb
                      + number
                      + pipe
@@ -159,15 +160,19 @@ def create_dbc_grammar():
                      + scolon)
     comment = Group(Keyword(COMMENT) +
                     ((Keyword(MESSAGE) +
-                      integer +
+                      positive_integer +
                       QuotedString('"', multiline=True) +
                       scolon) |
                      (Keyword(SIGNAL) +
-                      integer +
+                      positive_integer +
                       word +
                       QuotedString('"', multiline=True) +
                       scolon) |
                      (Keyword(ECUS) +
+                      word +
+                      QuotedString('"', multiline=True) +
+                      scolon) |
+                     (Keyword(EVENT) +
                       word +
                       QuotedString('"', multiline=True) +
                       scolon)))
@@ -176,26 +181,31 @@ def create_dbc_grammar():
                        (Keyword(SIGNAL) +
                         QuotedString('"', multiline=True)) |
                        (Keyword(MESSAGE) +
+                        QuotedString('"', multiline=True)) |
+                       (Keyword(EVENT) +
+                        QuotedString('"', multiline=True)) |
+                       (Keyword(ECUS) +
                         QuotedString('"', multiline=True))) +
                        word +
                        ((scolon) |
                         (Group(ZeroOrMore(Group(
                          (comma | Empty()) + QuotedString('"', multiline=True)))) +
                          scolon) |
-                         (Group(ZeroOrMore(integer)) +
+                         (Group(ZeroOrMore(number)) +
                          scolon)))
     default_attr = Group(Keyword(DEFAULT_ATTR) +
                          QuotedString('"', multiline=True) +
-                         (integer | QuotedString('"', multiline=True)) +
+                         (positive_integer | QuotedString('"', multiline=True)) +
                          scolon)
     attr_definition = Group(Keyword(ATTR_DEFINITION) +
                             QuotedString('"', multiline=True) +
-                            (Keyword(MESSAGE) | Keyword(SIGNAL)) +
-                            integer +
-                            integer +
+                            ((Keyword(MESSAGE) + positive_integer) |
+                             (Keyword(SIGNAL) + positive_integer + word) |
+                             (Keyword(ECUS) + word)) +
+                            (QuotedString('"', multiline=True) | positive_integer) +
                             scolon)
     choice = Group(Keyword(CHOICE) +
-                   integer +
+                   Optional(positive_integer) +
                    word +
                    Group(OneOrMore(Group(
                        integer + QuotedString('"', multiline=True)))) +
@@ -598,12 +608,16 @@ class File(object):
 
         for choice in tokens:
             if choice[0] == CHOICE:
-                frame_id = int(choice[1])
+                try:
+                    frame_id = int(choice[1])
+                except ValueError:
+                    print('warning: discarding tokens {}'.format(choice))
+                    continue
 
                 if frame_id not in choices:
                     choices[frame_id] = {}
 
-                choices[frame_id][choice[2]] = [(int(v[0]), v[1])
+                choices[frame_id][choice[2]] = [(int(''.join(v[0])), v[1])
                                                 for v in choice[3]]
 
         def get_comment(frame_id, signal=None):

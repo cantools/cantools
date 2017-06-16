@@ -66,6 +66,13 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 1)
         self.assertEqual(len(db.messages[0].signals[0].ecus), 1)
 
+    def test_foobar(self):
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'foobar.dbc')
+        db.add_dbc_file(filename)
+
+        self.assertEqual(len(db.ecus), 2)
+
     def test_motohawk_encode(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'motohawk.dbc')

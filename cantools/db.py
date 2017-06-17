@@ -778,3 +778,25 @@ class File(object):
         message = self._frame_id_to_message[frame_id]
 
         return message.decode(data)
+
+    def __repr__(self):
+        lines = []
+
+        lines.append('version("{}")'.format(self.version))
+        lines.append('')
+
+        if self.ecus:
+            for ecu in self.ecus:
+                lines.append(repr(ecu))
+
+            lines.append('')
+
+        for message in self.messages:
+            lines.append(repr(message))
+
+            for signal in message.signals:
+                lines.append('  ' + repr(signal))
+
+            lines.append('')
+
+        return '\n'.join(lines)

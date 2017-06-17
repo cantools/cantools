@@ -162,6 +162,8 @@ class CanToolsTest(unittest.TestCase):
                                      'AverageRadius': average_radius,
                                      'Enable': enable})
 
+        self.assertEqual(encoded, b'\xc1\x1b\x00\x00\x00\x00\x00\x00')
+
         decoded = db.decode_message(example_message_frame_id, encoded)
 
         self.assertEqual(decoded.Temperature, temperature)

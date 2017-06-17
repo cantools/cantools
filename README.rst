@@ -33,17 +33,28 @@ An example parsing and using a `small DBC-file`_:
    >>> from pprint import pprint
    >>> db = cantools.db.File()
    >>> db.add_dbc_file('tests/files/motohawk.dbc')
-   >>> pprint(db.messages)
+   >>> db
+   version("1.0")
+
+   ecu("PCM1", None)
+   ecu("FOO", None)
+
+   message("ExampleMessage", 0x1f0, 8, "Example message used as template in MotoHawk models.")
+     signal("Temperature", 7, 12, "big_endian", True, 0.01, 250, 229.53, 270.47, "degK", None, None)
+     signal("AverageRadius", 1, 6, "big_endian", False, 0.1, 0, 0.0, 5.0, "m", None, "")
+     signal("Enable", 0, 1, "big_endian", False, 1.0, 0, 0.0, 0.0, "-", None, None)
+
+   >>> db.messages
    [message("ExampleMessage", 0x1f0, 8, "Example message used as template in MotoHawk models.")]
    >>> example_message = db.messages[0]
    >>> example_message.comment
    'Example message used as template in MotoHawk models.'
    >>> pprint(example_message.signals)
-   [signal("Temperature", 7, 12, "big_endian", "signed", 0.01, 250, 229.53, 270.47, "degK", None, None),
-    signal("AverageRadius", 1, 6, "big_endian", "unsigned", 0.1, 0, 0.0, 5.0, "m", None, ""),
-    signal("Enable", 0, 1, "big_endian", "unsigned", 1.0, 0, 0.0, 0.0, "-", None, None)]
-   >>> pprint(db.ecus)
-   [ecu("PCM1", None)]
+   [signal("Temperature", 7, 12, "big_endian", True, 0.01, 250, 229.53, 270.47, "degK", None, None),
+    signal("AverageRadius", 1, 6, "big_endian", False, 0.1, 0, 0.0, 5.0, "m", None, ""),
+    signal("Enable", 0, 1, "big_endian", False, 1.0, 0, 0.0, 0.0, "-", None, None)]
+   >>> db.ecus
+   [ecu("PCM1", None), ecu("FOO", None)]
    >>> db.version
    '1.0'
    >>>

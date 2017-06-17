@@ -81,8 +81,8 @@ class CanToolsTest(unittest.TestCase):
                          "\n"
                          "message('Foo', 0x12331, True, 8, 'Foo.')\n"
                          "  signal('Foo', 7, 12, 'big_endian', True, 0.01, "
-                         "250, 229.53, 270.47, 'degK', [(-1, \'Foo\'), "
-                         "(-2, \'Fie\')], None)\n"
+                         "250, 229.53, 270.47, 'degK', {-1: \'Foo\', "
+                         "-2: \'Fie\'}, None)\n"
                          "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
                          "0, 1.0, 5.0, 'm', None, '')\n")
 
@@ -140,10 +140,10 @@ class CanToolsTest(unittest.TestCase):
 
         self.assertEqual(decoded.Temperature, temperature)
         self.assertEqual(decoded.AverageRadius, average_radius)
-        self.assertEqual(decoded.Enable, enable)
+        self.assertEqual(decoded.Enable, 'Enabled')
         self.assertEqual(str(decoded),
                          'ExampleMessage(Temperature: 250.55 degK, '
-                         'AverageRadius: 3.2 m, Enable: 1.0 -)')
+                         'AverageRadius: 3.2 m, Enable: Enabled -)')
 
     def test_motohawk_encode_decode(self):
         db = cantools.db.File()
@@ -168,7 +168,7 @@ class CanToolsTest(unittest.TestCase):
 
         self.assertEqual(decoded.Temperature, temperature)
         self.assertEqual(decoded.AverageRadius, average_radius)
-        self.assertEqual(decoded.Enable, enable)
+        self.assertEqual(decoded.Enable, 'Enabled')
 
     def test_add_message(self):
         db = cantools.db.File()

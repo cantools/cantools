@@ -1,7 +1,7 @@
 # CAN database.
 
 import bitstruct
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from pyparsing import Word, Literal, Keyword, Optional, Suppress
 from pyparsing import Group, QuotedString, StringEnd
 from pyparsing import printables, nums, alphas, LineEnd, Empty
@@ -344,9 +344,9 @@ def as_dbc(database):
             val.append(fmt.format(
                 frame_id=message.frame_id,
                 name=signal.name,
-                choices=' '.join(['{value} "{text}"'.format(value=choice[0],
-                                                            text=choice[1])
-                                  for choice in signal.choices])))
+                choices=' '.join(['{value} "{text}"'.format(value=value,
+                                                            text=text)
+                                  for value, text in signal.choices.items()])))
 
     return DBC_FMT.format(version=database.version,
                           bu=' '.join(bu),
@@ -392,6 +392,13 @@ class Signal(object):
         self.nodes = nodes
 
     def __repr__(self):
+        if self.choices is None:
+            choices = None
+        else:
+            choices = '{{{}}}'.format(', '.join(
+                ["{}: '{}'".format(value, text)
+                 for value, text in self.choices.items()]))
+
         return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, '{}', {}, {})".format(
             self.name,
             self.start,
@@ -403,7 +410,7 @@ class Signal(object):
             self.minimum,
             self.maximum,
             self.unit,
-            self.choices,
+            choices,
             "'" + self.comment + "'" if self.comment is not None else None)
 
 
@@ -428,9 +435,10 @@ class Message(object):
 
             for signal in self.message.signals:
                 unit = ' ' + signal.unit if signal.unit else ''
+                value = getattr(self, signal.name)
                 signals.append(
                     '{name}: {value}{unit}'.format(name=signal.name,
-                                                   value=getattr(self, signal.name),
+                                                   value=value,
                                                    unit=unit))
 
             return '{}({})'.format(self.message.name, ', '.join(signals))
@@ -488,12 +496,18 @@ class Message(object):
         """
 
         data += b'\x00' * (8 - len(data))
+        unpacked_data = bitstruct.unpack(self.fmt, data[::-1])
+        signals = []
 
-        return self.Signals(self,
-                            *[s.scale * v + s.offset
-                              for s, v in zip(self.signals,
-                                              bitstruct.unpack(self.fmt,
-                                                               data[::-1]))])
+        for signal, value in zip(self.signals, unpacked_data):
+            scaled_value = signal.scale * value + signal.offset
+
+            try:
+                signals.append(signal.choices[scaled_value])
+            except (KeyError, TypeError):
+                signals.append(scaled_value)
+
+        return self.Signals(self, *signals)
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(
@@ -620,8 +634,8 @@ class File(object):
                 if frame_id not in choices:
                     choices[frame_id] = {}
 
-                choices[frame_id][choice[2]] = [(int(''.join(v[0])), v[1])
-                                                for v in choice[3]]
+                choices[frame_id][choice[2]] = OrderedDict(
+                    (int(''.join(v[0])), v[1]) for v in choice[3])
 
         def get_comment(frame_id, signal=None):
             """Get comment for given message or signal.

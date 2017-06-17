@@ -48,4 +48,4 @@ CM_ SG_ 496 AverageRadius "";
 
 
 
-
+VAL_ 496 Enable 0 "Disabled" 1 "Enabled" ;

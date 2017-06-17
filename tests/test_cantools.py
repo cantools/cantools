@@ -10,8 +10,8 @@ class CanToolsTest(unittest.TestCase):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
         db.add_dbc_file(filename)
-        self.assertEqual(len(db.ecus), 1)
-        self.assertEqual(db.ecus[0].name, 'Vector__XXX')
+        self.assertEqual(len(db.nodes), 1)
+        self.assertEqual(db.nodes[0].name, 'Vector__XXX')
         self.assertEqual(len(db.messages), 217)
         self.assertEqual(db.messages[216].frame_id, 155872546)
         self.assertEqual(str(db.messages[0]),
@@ -22,7 +22,7 @@ class CanToolsTest(unittest.TestCase):
                          "'Sideways Velocity in the vehicle body axes, 2D (no "
                          "vertical component) .  +ve for motion to the vehicle "
                          "RHS.')")
-        self.assertEqual(repr(db.ecus[0]), "ecu('Vector__XXX', None)")
+        self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
         i = 0
 
         for message in db.messages:
@@ -42,14 +42,14 @@ class CanToolsTest(unittest.TestCase):
         with open(filename, 'r') as fin:
             db.add_dbc(fin)
 
-        self.assertEqual(len(db.ecus), 2)
-        self.assertEqual(db.ecus[0].name, 'PCM1')
-        self.assertEqual(db.ecus[1].name, 'FOO')
+        self.assertEqual(len(db.nodes), 2)
+        self.assertEqual(db.nodes[0].name, 'PCM1')
+        self.assertEqual(db.nodes[1].name, 'FOO')
         self.assertEqual(len(db.messages), 1)
-        self.assertEqual(len(db.messages[0].signals[0].ecus), 2)
-        self.assertEqual(db.messages[0].signals[0].ecus[0], 'Vector__XXX')
-        self.assertEqual(db.messages[0].signals[0].ecus[1], 'FOO')
-        self.assertEqual(db.messages[0].signals[1].ecus[0], 'Vector__XXX')
+        self.assertEqual(len(db.messages[0].signals[0].nodes), 2)
+        self.assertEqual(db.messages[0].signals[0].nodes[0], 'Vector__XXX')
+        self.assertEqual(db.messages[0].signals[0].nodes[1], 'FOO')
+        self.assertEqual(db.messages[0].signals[1].nodes[0], 'Vector__XXX')
         
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc(), fin.read())
@@ -61,23 +61,23 @@ class CanToolsTest(unittest.TestCase):
         with open(filename, 'r') as fin:
             db.add_dbc(fin)
 
-        self.assertEqual(len(db.ecus), 1)
-        self.assertEqual(db.ecus[0].name, 'EMV_Statusmeldungen')
+        self.assertEqual(len(db.nodes), 1)
+        self.assertEqual(db.nodes[0].name, 'EMV_Statusmeldungen')
         self.assertEqual(len(db.messages), 1)
-        self.assertEqual(len(db.messages[0].signals[0].ecus), 1)
+        self.assertEqual(len(db.messages[0].signals[0].nodes), 1)
 
     def test_foobar(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db.add_dbc_file(filename)
 
-        self.assertEqual(len(db.ecus), 2)
+        self.assertEqual(len(db.nodes), 2)
         self.assertEqual(db.version, '2.0')
         self.assertEqual(repr(db),
                          "version('2.0')\n"
                          "\n"
-                         "ecu('FOO', None)\n"
-                         "ecu('BAR', 'fam')\n"
+                         "node('FOO', None)\n"
+                         "node('BAR', 'fam')\n"
                          "\n"
                          "message('Foo', 0x1, 8, 'Foo.')\n"
                          "  signal('Foo', 7, 12, 'big_endian', True, 0.01, "
@@ -173,7 +173,7 @@ class CanToolsTest(unittest.TestCase):
         signals = [cantools.db.Signal(name='signal',
                                       start=0,
                                       length=4,
-                                      ecus=['foo'],
+                                      nodes=['foo'],
                                       byte_order='big_endian',
                                       is_signed=False,
                                       scale=1.0,
@@ -186,7 +186,7 @@ class CanToolsTest(unittest.TestCase):
         message = cantools.db.Message(frame_id=37,
                                       name='message',
                                       length=8,
-                                      ecus=['bar'],
+                                      nodes=['bar'],
                                       signals=signals,
                                       comment='')
         db.add_message(message)

@@ -10,7 +10,7 @@ from pyparsing import ZeroOrMore, OneOrMore, delimitedList
 
 # DBC section types.
 VERSION = 'VERSION'
-ECUS = 'BU_'
+NODES = 'BU_'
 COMMENT = 'CM_'
 MESSAGE = 'BO_'
 SIGNAL = 'SG_'
@@ -105,7 +105,7 @@ def create_dbc_grammar():
     lb = Suppress(Literal('['))
     rb = Suppress(Literal(']'))
     comma = Suppress(Literal(','))
-    ecu = Word(alphas + nums + '_-').setWhitespaceChars(' ')
+    node = Word(alphas + nums + '_-').setWhitespaceChars(' ')
 
     version = Group(Keyword('VERSION') +
                     QuotedString('"', multiline=True))
@@ -114,9 +114,9 @@ def create_dbc_grammar():
                     colon +
                     Group(ZeroOrMore(symbol)))
     discard = Suppress(Keyword('BS_') + colon)
-    ecus = Group(Keyword('BU_') +
+    nodes = Group(Keyword('BU_') +
                  colon +
-                 Group(ZeroOrMore(ecu)))
+                 Group(ZeroOrMore(node)))
     signal = Group(Keyword(SIGNAL) +
                    word +
                    colon +
@@ -137,7 +137,7 @@ def create_dbc_grammar():
                          number +
                          rb) +
                    QuotedString('"', multiline=True) +
-                   Group(delimitedList(ecu)))
+                   Group(delimitedList(node)))
     message = Group(Keyword(MESSAGE) +
                     positive_integer +
                     word +
@@ -156,7 +156,7 @@ def create_dbc_grammar():
                      + number
                      + number
                      + word
-                     + ecu
+                     + node
                      + scolon)
     comment = Group(Keyword(COMMENT) +
                     ((Keyword(MESSAGE) +
@@ -168,7 +168,7 @@ def create_dbc_grammar():
                       word +
                       QuotedString('"', multiline=True) +
                       scolon) |
-                     (Keyword(ECUS) +
+                     (Keyword(NODES) +
                       word +
                       QuotedString('"', multiline=True) +
                       scolon) |
@@ -184,7 +184,7 @@ def create_dbc_grammar():
                         QuotedString('"', multiline=True)) |
                        (Keyword(EVENT) +
                         QuotedString('"', multiline=True)) |
-                       (Keyword(ECUS) +
+                       (Keyword(NODES) +
                         QuotedString('"', multiline=True))) +
                        word +
                        ((scolon) |
@@ -201,7 +201,7 @@ def create_dbc_grammar():
                             QuotedString('"', multiline=True) +
                             ((Keyword(MESSAGE) + positive_integer) |
                              (Keyword(SIGNAL) + positive_integer + word) |
-                             (Keyword(ECUS) + word)) +
+                             (Keyword(NODES) + word)) +
                             (QuotedString('"', multiline=True) | positive_integer) +
                             scolon)
     choice = Group(Keyword(CHOICE) +
@@ -210,7 +210,7 @@ def create_dbc_grammar():
                    Group(OneOrMore(Group(
                        integer + QuotedString('"', multiline=True)))) +
                    scolon)
-    entry = version | symbols | discard | ecus | message | comment | \
+    entry = version | symbols | discard | nodes | message | comment | \
             attribute | default_attr | attr_definition | choice | event
     grammar = OneOrMore(entry) + StringEnd()
 
@@ -222,32 +222,32 @@ def as_dbc(database):
 
     """
 
-    # Ecus.
+    # Nodes.
     bu = []
 
-    for ecu in database.ecus:
-        bu.append(ecu.name)
+    for node in database.nodes:
+        bu.append(node.name)
 
     # Messages.
     bo = []
 
     for message in database.messages:
         msg = []
-        fmt = 'BO_ {frame_id} {name}: {length} {ecus}'
+        fmt = 'BO_ {frame_id} {name}: {length} {nodes}'
         msg.append(fmt.format(frame_id=message.frame_id,
                               name=message.name,
                               length=message.length,
-                              ecus=message.ecus))
+                              nodes=message.nodes))
 
         for signal in message.signals:
             fmt = (' SG_ {name} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
-                   ' [{minimum}|{maximum}] "{unit}" {ecus}')
+                   ' [{minimum}|{maximum}] "{unit}" {nodes}')
             msg.append(fmt.format(
                 name=signal.name,
                 start=signal.start,
                 length=signal.length,
-                ecus=', '.join(signal.ecus),
+                nodes=', '.join(signal.nodes),
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
                 sign=('-' if signal.is_signed else '+'),
                 scale=signal.scale,
@@ -261,11 +261,11 @@ def as_dbc(database):
     # Comments.
     cm = []
 
-    for ecu in database.ecus:
-        if ecu.comment is not None:
+    for node in database.nodes:
+        if node.comment is not None:
             fmt = 'CM_ BU_ {name} "{comment}";'
-            cm.append(fmt.format(name=ecu.name,
-                                 comment=ecu.comment))
+            cm.append(fmt.format(name=node.name,
+                                 comment=node.comment))
 
     for message in database.messages:
         if message.comment is not None:
@@ -376,7 +376,7 @@ class Signal(object):
                  unit,
                  choices,
                  comment,
-                 ecus=None):
+                 nodes=None):
         self.name = name
         self.start = start
         self.length = length
@@ -389,7 +389,7 @@ class Signal(object):
         self.unit = unit
         self.choices = choices
         self.comment = comment
-        self.ecus = ecus
+        self.nodes = nodes
 
     def __repr__(self):
         return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, '{}', {}, {})".format(
@@ -441,7 +441,7 @@ class Message(object):
                  length,
                  signals,
                  comment,
-                 ecus=None,
+                 nodes=None,
                  send_type=None,
                  cycle_time=None):
         self.frame_id = frame_id
@@ -451,7 +451,7 @@ class Message(object):
         self.signals.sort(key=lambda s: s.start)
         self.signals.reverse()
         self.comment = comment
-        self.ecus = ecus
+        self.nodes = nodes
         self.send_type = send_type
         self.cycle_time = cycle_time
         self.fmt = ''
@@ -501,8 +501,8 @@ class Message(object):
             "'" + self.comment + "'" if self.comment is not None else None)
 
 
-class Ecu(object):
-    """An ECU on the CAN bus.
+class Node(object):
+    """An NODE on the CAN bus.
 
     """
 
@@ -513,7 +513,7 @@ class Ecu(object):
         self.comment = comment
 
     def __repr__(self):
-        return "ecu('{}', {})".format(
+        return "node('{}', {})".format(
             self.name,
             "'" + self.comment + "'" if self.comment is not None else None)
 
@@ -525,11 +525,11 @@ class File(object):
 
     def __init__(self,
                  messages=None,
-                 ecus=None,
+                 nodes=None,
                  attributes=None,
                  default_attrs=None):
         self.messages = messages if messages else []
-        self.ecus = ecus if ecus else []
+        self.nodes = nodes if nodes else []
         self.attributes = attributes if attributes else []
         self.default_attrs = default_attrs if default_attrs else []
         self._frame_id_to_message = {}
@@ -547,11 +547,11 @@ class File(object):
 
         for comment in tokens:
             if comment[0] == COMMENT:
-                if comment[1] == ECUS:
-                    ecu_name = comment[2]
-                    if ecu_name not in comments:
-                        comments[ecu_name] = {}
-                    comments[ecu_name] = comment[3]
+                if comment[1] == NODES:
+                    node_name = comment[2]
+                    if node_name not in comments:
+                        comments[node_name] = {}
+                    comments[node_name] = comment[3]
 
                 if comment[1] == MESSAGE:
                     frame_id = int(comment[2])
@@ -634,13 +634,13 @@ class File(object):
             except KeyError:
                 return None
 
-        def get_ecu_comment(ecu_name):
-            """Get comment for a given ecu_name
+        def get_node_comment(node_name):
+            """Get comment for a given node_name
 
             """
 
             try:
-                return comments[ecu_name]
+                return comments[node_name]
 
             except KeyError:
                 return None
@@ -689,11 +689,11 @@ class File(object):
                         for token in tokens
                         if token[0] == VERSION][0]
 
-        for ecus in tokens:
-            if ecus[0] == ECUS:
-                self.ecus = [Ecu(name=ecu,
-                                 comment=get_ecu_comment(ecu))
-                             for ecu in ecus[1]]
+        for nodes in tokens:
+            if nodes[0] == NODES:
+                self.nodes = [Node(name=node,
+                                 comment=get_node_comment(node))
+                             for node in nodes[1]]
 
         for message in tokens:
             if message[0] != MESSAGE:
@@ -703,13 +703,13 @@ class File(object):
                 frame_id=int(message[1]),
                 name=message[2][0:-1],
                 length=int(message[3], 0),
-                ecus=message[4],
+                nodes=message[4],
                 send_type=get_send_type(int(message[1])),
                 cycle_time=get_cycle_time(int(message[1])),
                 signals=[Signal(name=signal[1],
                                 start=int(signal[2][0]),
                                 length=int(signal[2][1]),
-                                ecus=signal[6],
+                                nodes=signal[6],
                                 byte_order=('big_endian'
                                             if signal[2][2] == '0'
                                             else 'little_endian'),
@@ -785,9 +785,9 @@ class File(object):
         lines.append("version('{}')".format(self.version))
         lines.append('')
 
-        if self.ecus:
-            for ecu in self.ecus:
-                lines.append(repr(ecu))
+        if self.nodes:
+            for node in self.nodes:
+                lines.append(repr(node))
 
             lines.append('')
 

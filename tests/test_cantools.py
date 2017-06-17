@@ -18,7 +18,7 @@ class CanToolsTest(unittest.TestCase):
                          'message("RT_SB_INS_Vel_Body_Axes", 0x9588322, 8, None)')
         self.assertEqual(repr(db.messages[0].signals[0]),
                          'signal("INS_Vel_Sideways_2D", 40, 24, "little_endian", '
-                         '"True", 0.0001, 0, -838, 838, "m/s", None, '
+                         'True, 0.0001, 0, -838, 838, "m/s", None, '
                          '"Sideways Velocity in the vehicle body axes, 2D (no '
                          'vertical component) .  +ve for motion to the vehicle '
                          'RHS.")')
@@ -72,6 +72,19 @@ class CanToolsTest(unittest.TestCase):
         db.add_dbc_file(filename)
 
         self.assertEqual(len(db.ecus), 2)
+        self.assertEqual(db.version, '2.0')
+        self.assertEqual(repr(db),
+                         'version("2.0")\n'
+                         '\n'
+                         'ecu("FOO", None)\n'
+                         'ecu("BAR", "fam")\n'
+                         '\n'
+                         'message("Foo", 0x1, 8, "Foo.")\n'
+                         '  signal("Foo", 7, 12, "big_endian", True, 0.01, '
+                         '250, 229.53, 270.47, "degK", [(-1, \'Foo\'), '
+                         '(-2, \'Fie\')], None)\n'
+                         '  signal("Bar", 1, 6, "big_endian", False, 0.1, '
+                         '0, 1.0, 5.0, "m", None, "")\n')
 
     def test_motohawk_encode(self):
         db = cantools.db.File()

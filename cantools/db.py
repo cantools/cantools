@@ -392,7 +392,7 @@ class Signal(object):
         self.ecus = ecus
 
     def __repr__(self):
-        return 'signal("{}", {}, {}, "{}", "{}", {}, {}, {}, {}, "{}", {}, {})'.format(
+        return 'signal("{}", {}, {}, "{}", {}, {}, {}, {}, {}, "{}", {}, {})'.format(
             self.name,
             self.start,
             self.length,

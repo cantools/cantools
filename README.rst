@@ -23,8 +23,6 @@ Example usage
 Scripting
 ---------
 
-See the test suite: https://github.com/eerimoq/cantools/blob/master/tests/test_cantools.py
-
 An example parsing and using a `small DBC-file`_:
 
 .. code-block:: python
@@ -72,6 +70,8 @@ using the `python-can`_ package.
    >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
    >>> can_bus.send(message)
    >>>
+
+See the test suite for additional examples: https://github.com/eerimoq/cantools/blob/master/tests/test_cantools.py
 
 Command line tool
 -----------------

@@ -440,11 +440,13 @@ class Message(object):
                  name,
                  length,
                  signals,
-                 comment,
+                 comment=None,
                  nodes=None,
                  send_type=None,
-                 cycle_time=None):
+                 cycle_time=None,
+                 is_extended_frame=False):
         self.frame_id = frame_id
+        self.is_extended_frame = is_extended_frame
         self.name = name
         self.length = length
         self.signals = signals
@@ -494,9 +496,10 @@ class Message(object):
                                                                data[::-1]))])
 
     def __repr__(self):
-        return "message('{}', 0x{:x}, {}, {})".format(
+        return "message('{}', 0x{:x}, {}, {}, {})".format(
             self.name,
             self.frame_id,
+            self.is_extended_frame,
             self.length,
             "'" + self.comment + "'" if self.comment is not None else None)
 
@@ -699,8 +702,12 @@ class File(object):
             if message[0] != MESSAGE:
                 continue
 
+            frame_id = int(message[1]) & 0x7fffffff
+            is_extended_frame = (int(message[1]) & 0x80000000 != 0)
+
             message = Message(
-                frame_id=int(message[1]),
+                frame_id=frame_id,
+                is_extended_frame=is_extended_frame,
                 name=message[2][0:-1],
                 length=int(message[3], 0),
                 nodes=message[4],

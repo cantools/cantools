@@ -15,7 +15,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 217)
         self.assertEqual(db.messages[216].frame_id, 155872546)
         self.assertEqual(str(db.messages[0]),
-                         "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, 8, None)")
+                         "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, False, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('INS_Vel_Sideways_2D', 40, 24, 'little_endian', "
                          "True, 0.0001, 0, -838, 838, 'm/s', None, "
@@ -50,7 +50,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[0].nodes[0], 'Vector__XXX')
         self.assertEqual(db.messages[0].signals[0].nodes[1], 'FOO')
         self.assertEqual(db.messages[0].signals[1].nodes[0], 'Vector__XXX')
-        
+
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc(), fin.read())
 
@@ -79,7 +79,7 @@ class CanToolsTest(unittest.TestCase):
                          "node('FOO', None)\n"
                          "node('BAR', 'fam')\n"
                          "\n"
-                         "message('Foo', 0x1, 8, 'Foo.')\n"
+                         "message('Foo', 0x12331, True, 8, 'Foo.')\n"
                          "  signal('Foo', 7, 12, 'big_endian', True, 0.01, "
                          "250, 229.53, 270.47, 'degK', [(-1, \'Foo\'), "
                          "(-2, \'Fie\')], None)\n"

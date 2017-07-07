@@ -45,6 +45,9 @@ BA_ "BAR" BU_ FIE "FUM";
 
 VAL_ 2147558193 Foo -1 "Foo" -2 "Fie" ;
 
+BA_DEF_DEF_  "BusType" "CAN";
+BA_ "BusType" "CAN";
+BA_ "GenMsgCycleTime" BO_ 2147558193 1;
 
 
 

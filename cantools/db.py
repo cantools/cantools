@@ -1,7 +1,7 @@
 # CAN database.
 
 import bitstruct
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 from pyparsing import Word, Literal, Keyword, Optional, Suppress
 from pyparsing import Group, QuotedString, StringEnd
 from pyparsing import printables, nums, alphas, LineEnd, Empty
@@ -199,9 +199,9 @@ def create_dbc_grammar():
                          scolon)
     attr_definition = Group(Keyword(ATTR_DEFINITION) +
                             QuotedString('"', multiline=True) +
-                            ((Keyword(MESSAGE) + positive_integer) |
-                             (Keyword(SIGNAL) + positive_integer + word) |
-                             (Keyword(NODES) + word)) +
+                            Group(Optional((Keyword(MESSAGE) + positive_integer) |
+                                           (Keyword(SIGNAL) + positive_integer + word) |
+                                           (Keyword(NODES) + word))) +
                             (QuotedString('"', multiline=True) | positive_integer) +
                             scolon)
     choice = Group(Keyword(CHOICE) +
@@ -297,6 +297,7 @@ def as_dbc(database):
                                          type_=attribute[3],
                                          choices=' '.join(['{num}'.format(num=choice[0])
                                                            for choice in attribute[4]])))
+
     # Attribute defaults.
     ba_def_def = []
 

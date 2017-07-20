@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import cantools
 
 setup(name='cantools',
@@ -17,7 +17,7 @@ setup(name='cantools',
       ],
       keywords=['can', 'can bus', 'dbc'],
       url='https://github.com/eerimoq/cantools',
-      packages=['cantools'],
+      packages=find_packages(),
       install_requires=['bitstruct>=0.7.1',
                         'pyparsing>=2.0.3'],
       test_suite="tests",

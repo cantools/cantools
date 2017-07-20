@@ -5,9 +5,9 @@ from pyparsing import Word, Literal, Keyword, Optional, Suppress
 from pyparsing import Group, QuotedString, StringEnd
 from pyparsing import printables, nums, alphas, LineEnd, Empty
 from pyparsing import ZeroOrMore, OneOrMore, delimitedList
-from .signal import Signal
-from .message import Message
-from .node import Node
+from ..signal import Signal
+from ..message import Message
+from ..node import Node
 
 # DBC section types.
 VERSION = 'VERSION'

@@ -1,6 +1,6 @@
 # A CAN database file.
 
-from . import dbc
+from .formats import dbc
 
 
 class File(object):

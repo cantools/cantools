@@ -5,7 +5,6 @@ import binascii
 import struct
 from . import db
 
-
 __author__ = 'Erik Moqvist'
 __version__ = '4.0.1'
 

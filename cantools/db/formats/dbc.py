@@ -17,6 +17,7 @@ COMMENT = 'CM_'
 MESSAGE = 'BO_'
 SIGNAL = 'SG_'
 CHOICE = 'VAL_'
+VALUE_TABLE = 'VAL_TABLE_'
 ATTRIBUTE = 'BA_DEF_'
 DEFAULT_ATTR = 'BA_DEF_DEF_'
 ATTR_DEFINITION = 'BA_'
@@ -93,7 +94,7 @@ def _create_dbc_grammar():
     """
 
     # DBC file grammar.
-    word = Word(printables)
+    word = Word(printables.replace(';', ''))
     integer = Group(Optional('-') + Word(nums))
     positive_integer = Word(nums)
     number = Word(nums + '.Ee-+')
@@ -212,8 +213,23 @@ def _create_dbc_grammar():
                    Group(OneOrMore(Group(
                        integer + QuotedString('"', multiline=True)))) +
                    scolon)
-    entry = version | symbols | discard | nodes | message | comment | \
-            attribute | default_attr | attr_definition | choice | event
+    value_table = Group(Keyword(VALUE_TABLE) +
+                        word +
+                        Group(OneOrMore(Group(
+                            integer + QuotedString('"', multiline=True)))) +
+                        scolon)
+    entry = (version
+             | symbols
+             | discard
+             | nodes
+             | message
+             | comment
+             | attribute
+             | default_attr
+             | attr_definition
+             | choice
+             | value_table
+             | event)
     grammar = OneOrMore(entry) + StringEnd()
 
     return grammar

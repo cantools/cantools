@@ -8,6 +8,7 @@ from pyparsing import ZeroOrMore, OneOrMore, delimitedList
 from ..signal import Signal
 from ..message import Message
 from ..node import Node
+from ..database import Database
 
 # DBC section types.
 VERSION = 'VERSION'
@@ -635,4 +636,8 @@ def loads(string):
     nodes = _load_nodes(tokens, comments)
     version = _load_version(tokens)
 
-    return messages, nodes, attributes, default_attrs, version
+    return Database(messages,
+                    nodes,
+                    attributes,
+                    default_attrs,
+                    version)

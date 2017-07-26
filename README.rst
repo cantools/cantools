@@ -56,7 +56,6 @@ An example parsing and using a `small DBC-file`_:
    [node('PCM1', None), node('FOO', None)]
    >>> db.version
    '1.0'
-   >>>
 
 The example continues encoding a message and sending it on a CAN bus
 using the `python-can`_ package.
@@ -70,7 +69,6 @@ using the `python-can`_ package.
    >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})
    >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
    >>> can_bus.send(message)
-   >>>
 
 See the test suite for additional examples: https://github.com/eerimoq/cantools/blob/master/tests/test_cantools.py
 

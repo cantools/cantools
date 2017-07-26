@@ -6,7 +6,7 @@ import struct
 from . import db
 
 __author__ = 'Erik Moqvist'
-__version__ = '5.2.0'
+__version__ = '6.0.0'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -42,9 +42,9 @@ def _do_decode(args):
                 decoded_signals = message.decode(data)
 
                 if message.is_multiplexed():
-                    name = message.get_multiplex_selector_signal_name()
+                    name = message.get_multiplexer_signal_name()
                     mux = decoded_signals[name]
-                    signals = message.get_multiplexed_message_signals(mux)
+                    signals = message.get_signals_by_multiplexer_id(mux)
                 else:
                     signals = message.signals
 

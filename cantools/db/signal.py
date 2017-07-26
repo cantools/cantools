@@ -20,8 +20,8 @@ class Signal(object):
                  choices,
                  comment,
                  nodes=None,
-                 is_multiplex_selector=False,
-                 multiplex_id=None):
+                 is_multiplexer=False,
+                 multiplexer_id=None):
         self.name = name
         self.start = start
         self.length = length
@@ -35,8 +35,8 @@ class Signal(object):
         self.choices = choices
         self.comment = comment
         self.nodes = nodes
-        self.is_multiplex_selector = is_multiplex_selector
-        self.multiplex_id = multiplex_id
+        self.is_multiplexer = is_multiplexer
+        self.multiplexer_id = multiplexer_id
 
     def __repr__(self):
         if self.choices is None:
@@ -57,7 +57,7 @@ class Signal(object):
             self.minimum,
             self.maximum,
             self.unit,
-            self.is_multiplex_selector,
-            self.multiplex_id,
+            self.is_multiplexer,
+            self.multiplexer_id,
             choices,
             "'" + self.comment + "'" if self.comment is not None else None)

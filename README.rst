@@ -100,7 +100,7 @@ Contributing
 
    .. code-block:: text
 
-      python setup.py test
+      python2 setup.py test
       python3 setup.py test
 
 #. Create a pull request.

@@ -168,15 +168,15 @@ class CanToolsTest(unittest.TestCase):
         self.assertFalse(db.messages[0].is_multiplexed())
         self.assertTrue(sensor_sonars.is_multiplexed())
         self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_no_filt_rear')
-        self.assertEqual(sensor_sonars.signals[0].multiplex_id, 1)
+        self.assertEqual(sensor_sonars.signals[0].multiplexer_id, 1)
         self.assertEqual(sensor_sonars.signals[-3].name, 'SENSOR_SONARS_left')
-        self.assertEqual(sensor_sonars.signals[-3].multiplex_id, 0)
+        self.assertEqual(sensor_sonars.signals[-3].multiplexer_id, 0)
         self.assertEqual(sensor_sonars.signals[-1].name, 'SENSOR_SONARS_mux')
-        self.assertEqual(sensor_sonars.signals[-1].is_multiplex_selector, True)
+        self.assertEqual(sensor_sonars.signals[-1].is_multiplexer, True)
 
-        self.assertEqual(sensor_sonars.get_multiplex_selector_signal_name(),
+        self.assertEqual(sensor_sonars.get_multiplexer_signal_name(),
                          'SENSOR_SONARS_mux')
-        signals = sensor_sonars.get_multiplexed_message_signals(0)
+        signals = sensor_sonars.get_signals_by_multiplexer_id(0)
         self.assertEqual(len(signals), 6)
         self.assertEqual(signals[0].name, 'SENSOR_SONARS_rear')
 

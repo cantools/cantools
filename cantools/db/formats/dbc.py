@@ -574,12 +574,12 @@ def _load_messages(tokens,
                                                 signal[1][0]),
                             comment=get_comment(int(message[1]),
                                                 signal[1][0]),
-                            is_multiplex_selector=(signal[1][1] == 'M'
-                                                   if len(signal[1]) == 2
-                                                   else False),
-                            multiplex_id=(int(signal[1][1][1:])
-                                          if len(signal[1]) == 2 and signal[1][1] != 'M'
-                                          else None))
+                            is_multiplexer=(signal[1][1] == 'M'
+                                            if len(signal[1]) == 2
+                                            else False),
+                            multiplexer_id=(int(signal[1][1][1:])
+                                            if len(signal[1]) == 2 and signal[1][1] != 'M'
+                                            else None))
                      for signal in message[5]],
             comment=get_comment(int(message[1])))
 

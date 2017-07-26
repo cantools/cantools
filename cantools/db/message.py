@@ -52,41 +52,41 @@ class Message(object):
         self.fmt = _create_message_encode_decode_format(self.signals)
 
         # Is it a multiplexed message?
-        self.multiplex_selector = None
+        self.multiplexer = None
 
         for signal in self.signals:
-            if signal.is_multiplex_selector:
-                self.multiplex_selector = (signal,
-                                           _create_message_encode_decode_format(
-                                               [signal]))
+            if signal.is_multiplexer:
+                self.multiplexer = (signal,
+                                    _create_message_encode_decode_format(
+                                        [signal]))
                 break
 
         # Group signals for each multiplex id.
-        self.multiplexed_messages_by_id = {}
+        self.multiplexer_message_by_id = {}
 
         if self.is_multiplexed():
             # Append multiplexed signals.
             for signal in self.signals:
-                if signal.multiplex_id is not None:
-                    multiplex_id = signal.multiplex_id
+                if signal.multiplexer_id is not None:
+                    multiplexer_id = signal.multiplexer_id
 
-                    if multiplex_id not in self.multiplexed_messages_by_id:
-                        self.multiplexed_messages_by_id[multiplex_id] = {
+                    if multiplexer_id not in self.multiplexer_message_by_id:
+                        self.multiplexer_message_by_id[multiplexer_id] = {
                             'signals': [],
                             'fmt': None
                         }
 
-                    self.multiplexed_messages_by_id[multiplex_id]['signals'].append(
+                    self.multiplexer_message_by_id[multiplexer_id]['signals'].append(
                         signal)
 
             # Append common signals.
             for signal in self.signals:
-                if signal.multiplex_id is None:
-                    for multiplexed_message in self.multiplexed_messages_by_id.values():
-                        multiplexed_message['signals'].append(signal)
+                if signal.multiplexer_id is None:
+                    for message in self.multiplexer_message_by_id.values():
+                        message['signals'].append(signal)
 
             # Sort the signals and create the encode/decode format.
-            for message in self.multiplexed_messages_by_id.values():
+            for message in self.multiplexer_message_by_id.values():
                 message['signals'].sort(key=lambda s: s.start)
                 message['signals'].reverse()
                 message['fmt'] = _create_message_encode_decode_format(message['signals'])
@@ -97,7 +97,7 @@ class Message(object):
 
         """
 
-        return self.multiplex_selector is not None
+        return self.multiplexer is not None
 
     def encode(self, data):
         """Encode given data as a message of this type.
@@ -105,13 +105,13 @@ class Message(object):
         """
 
         if self.is_multiplexed():
-            mux = data[self.multiplex_selector[0].name]
+            mux = data[self.multiplexer[0].name]
 
-            if mux not in self.multiplexed_messages_by_id:
-                raise KeyError('Invalid message multiplex id {}.'.format(mux))
+            if mux not in self.multiplexer_message_by_id:
+                raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
-            signals = self.multiplexed_messages_by_id[mux]['signals']
-            fmt = self.multiplexed_messages_by_id[mux]['fmt']
+            signals = self.multiplexer_message_by_id[mux]['signals']
+            fmt = self.multiplexer_message_by_id[mux]['fmt']
         else:
             signals = self.signals
             fmt = self.fmt
@@ -140,14 +140,13 @@ class Message(object):
         data += b'\x00' * (8 - len(data))
 
         if self.is_multiplexed():
-            mux = bitstruct.unpack(self.multiplex_selector[1],
-                                   data[::-1])[0]
+            mux = bitstruct.unpack(self.multiplexer[1], data[::-1])[0]
 
-            if mux not in self.multiplexed_messages_by_id:
-                raise KeyError('Invalid message multiplex id {}.'.format(mux))
+            if mux not in self.multiplexer_message_by_id:
+                raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
-            signals = self.multiplexed_messages_by_id[mux]['signals']
-            fmt = self.multiplexed_messages_by_id[mux]['fmt']
+            signals = self.multiplexer_message_by_id[mux]['signals']
+            fmt = self.multiplexer_message_by_id[mux]['fmt']
         else:
             signals = self.signals
             fmt = self.fmt
@@ -165,19 +164,19 @@ class Message(object):
 
         return decoded_signals
 
-    def get_multiplex_selector_signal_name(self):
-        """Returns the message multiplex selector name.
+    def get_multiplexer_signal_name(self):
+        """Returns the message multiplexer name.
 
         """
 
-        return self.multiplex_selector[0].name
+        return self.multiplexer[0].name
 
-    def get_multiplexed_message_signals(self, mux):
-        """Returns the list of signals for given multiplexed message id.
+    def get_signals_by_multiplexer_id(self, multiplexer_id):
+        """Returns the list of signals for given multiplexer message id.
 
         """
 
-        return self.multiplexed_messages_by_id[mux]['signals']
+        return self.multiplexer_message_by_id[multiplexer_id]['signals']
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(

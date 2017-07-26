@@ -163,6 +163,21 @@ class Message(object):
 
         return decoded_signals
 
+    def get_multiplex_selector_signal_name(self):
+        """Returns the message multiplex selector name, or None if the message
+        is not multiplexed.
+
+        """
+
+        return self.multiplex_selector[0].name
+
+    def get_multiplexed_message_signals(self, mux):
+        """Returns the list of signals for given multiplexed message id.
+
+        """
+
+        return self.multiplexed_messages_by_id[mux]['signals']
+
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(
             self.name,

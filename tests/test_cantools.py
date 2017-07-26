@@ -1,7 +1,12 @@
 import os
 import unittest
-import bitstruct
 import cantools
+import sys
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 class CanToolsTest(unittest.TestCase):
@@ -86,6 +91,9 @@ class CanToolsTest(unittest.TestCase):
                          "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
                          "0, 1.0, 5.0, 'm', False, None, None, '')\n")
 
+        message = db.lookup_message(0x12331)
+        self.assertEqual(message.name, 'Foo')
+
     def test_motohawk_encode_decode(self):
         """Encode and decode the signals in a ExampleMessage frame.
 
@@ -125,16 +133,24 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
 
+        sensor_sonars = db.messages[-1]
+
         self.assertEqual(len(db.nodes), 5)
         self.assertEqual(db.version, '')
         self.assertFalse(db.messages[0].is_multiplexed())
-        self.assertTrue(db.messages[-1].is_multiplexed())
-        self.assertEqual(db.messages[-1].signals[0].name, 'SENSOR_SONARS_no_filt_rear')
-        self.assertEqual(db.messages[-1].signals[0].multiplex_id, 1)
-        self.assertEqual(db.messages[-1].signals[-3].name, 'SENSOR_SONARS_left')
-        self.assertEqual(db.messages[-1].signals[-3].multiplex_id, 0)
-        self.assertEqual(db.messages[-1].signals[-1].name, 'SENSOR_SONARS_mux')
-        self.assertEqual(db.messages[-1].signals[-1].is_multiplex_selector, True)
+        self.assertTrue(sensor_sonars.is_multiplexed())
+        self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_no_filt_rear')
+        self.assertEqual(sensor_sonars.signals[0].multiplex_id, 1)
+        self.assertEqual(sensor_sonars.signals[-3].name, 'SENSOR_SONARS_left')
+        self.assertEqual(sensor_sonars.signals[-3].multiplex_id, 0)
+        self.assertEqual(sensor_sonars.signals[-1].name, 'SENSOR_SONARS_mux')
+        self.assertEqual(sensor_sonars.signals[-1].is_multiplex_selector, True)
+
+        self.assertEqual(sensor_sonars.get_multiplex_selector_signal_name(),
+                         'SENSOR_SONARS_mux')
+        signals = sensor_sonars.get_multiplexed_message_signals(0)
+        self.assertEqual(len(signals), 6)
+        self.assertEqual(signals[0].name, 'SENSOR_SONARS_rear')
 
     def test_socialledge_encode_decode_mux_0(self):
         """Encode and decode the signals in a SENSOR_SONARS frame with mux 0.
@@ -209,6 +225,31 @@ class CanToolsTest(unittest.TestCase):
                                       comment='')
         db.add_message(message)
         self.assertEqual(len(db.messages), 1)
+
+    def test_command_line_decode(self):
+        argv = ['cantools', 'decode', 'tests/files/socialledge.dbc']
+        input_data = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
+  vcan0  064   [8]  F0 01 FF FF FF FF FF FF
+"""
+        expected_output = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 :: SENSOR_SONARS(SENSOR_SONARS_rear: 0.0 , SENSOR_SONARS_right: 0.0 , SENSOR_SONARS_middle: 0.0 , SENSOR_SONARS_left: 0.0 , SENSOR_SONARS_err_count: 15 , SENSOR_SONARS_mux: 0 )
+  vcan0  064   [8]  F0 01 FF FF FF FF FF FF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240 )
+"""
+
+        stdin = sys.stdin
+        stdout = sys.stdout
+        sys.argv = argv
+        sys.stdin = StringIO(input_data)
+        sys.stdout = StringIO()
+
+        try:
+            cantools._main()
+
+        finally:
+            actual_output = sys.stdout.getvalue()
+            sys.stdin = stdin
+            sys.stdout = stdout
+
+        self.assertEqual(actual_output, expected_output)
 
 
 if __name__ == '__main__':

@@ -6,14 +6,14 @@ import struct
 from . import db
 
 __author__ = 'Erik Moqvist'
-__version__ = '5.0.0'
+__version__ = '5.1.0'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
 RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d\]\s*([0-9A-F ]*)$')
 
 
-def do_decode(args):
+def _do_decode(args):
     dbf = db.File()
     dbf.add_dbc_file(args.dbfile)
 
@@ -38,14 +38,38 @@ def do_decode(args):
             line += ' :: '
 
             try:
-                line += str(dbf.decode_message(frame_id, data))
+                message = dbf.lookup_message(frame_id)
+                decoded_signals = message.decode(data)
+
+                if message.is_multiplexed():
+                    name = message.get_multiplex_selector_signal_name()
+                    mux = decoded_signals[name]
+                    signals = message.get_multiplexed_message_signals(mux)
+                else:
+                    signals = message.signals
+
+                formatted_signals = []
+
+                for signal in signals:
+                    value = decoded_signals[signal.name]
+
+                    if isinstance(value, str):
+                        value = "'" + value + "'"
+
+                    formatted_signals.append(
+                        '{}: {} {}'.format(signal.name,
+                                           value,
+                                           signal.unit))
+
+                line += '{}({})'.format(message.name,
+                                        ', '.join(formatted_signals))
             except KeyError:
                 pass
 
         print(line)
 
 
-def main():
+def _main():
     parser = argparse.ArgumentParser(
         description='Various CAN utilities.')
 
@@ -66,7 +90,7 @@ def main():
         description=('Decode "candump" CAN frames read from standard input '
                      'and print them in a human readable format.'))
     decode_parser.add_argument('dbfile', help='Database file (.dbc).')
-    decode_parser.set_defaults(func=do_decode)
+    decode_parser.set_defaults(func=_do_decode)
 
     args = parser.parse_args()
 

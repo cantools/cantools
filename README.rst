@@ -38,9 +38,9 @@ An example parsing and using a `small DBC-file`_:
    node('FOO', None)
 
    message('ExampleMessage', 0x1f0, 8, 'Example message used as template in MotoHawk models.')
-     signal('Temperature', 7, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', None, None)
-     signal('AverageRadius', 1, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', None, '')
-     signal('Enable', 0, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', None, None)
+     signal('Temperature', 7, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', False, None, None, None)
+     signal('AverageRadius', 1, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', False, None, None, '')
+     signal('Enable', 0, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', False, None, None, None)
 
    >>> db.messages
    [message('ExampleMessage', 0x1f0, 8, 'Example message used as template in MotoHawk models.')]
@@ -48,9 +48,9 @@ An example parsing and using a `small DBC-file`_:
    >>> example_message.comment
    'Example message used as template in MotoHawk models.'
    >>> pprint(example_message.signals)
-   [signal('Temperature', 7, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', None, None),
-    signal('AverageRadius', 1, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', None, ''),
-    signal('Enable', 0, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', None, None)]
+   [signal('Temperature', 7, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', False, None, None, None),
+    signal('AverageRadius', 1, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', False, None, None, ''),
+    signal('Enable', 0, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', False, None, None, None)]
    >>> db.nodes
    [node('PCM1', None), node('FOO', None)]
    >>> db.version

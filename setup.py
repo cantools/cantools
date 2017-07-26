@@ -22,5 +22,5 @@ setup(name='cantools',
                         'pyparsing>=2.0.3'],
       test_suite="tests",
       entry_points = {
-          'console_scripts': ['cantools=cantools.__init__:main']
+          'console_scripts': ['cantools=cantools.__init__:_main']
       })

@@ -10,6 +10,8 @@ CAN BUS tools.
 
 - ``candump`` output decoder.
 
+Documentation: http://cantools.readthedocs.org/en/latest
+
 Installation
 ============
 
@@ -29,8 +31,7 @@ An example parsing and using a `small DBC-file`_:
 
    >>> import cantools
    >>> from pprint import pprint
-   >>> db = cantools.db.File()
-   >>> db.add_dbc_file('tests/files/motohawk.dbc')
+   >>> db = cantools.db.load_file('tests/files/motohawk.dbc')
    >>> db
    version('1.0')
 

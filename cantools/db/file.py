@@ -3,7 +3,11 @@ from .database import Database
 
 
 class File(object):
-    """CAN database file.
+    """This class contains all messages, signals and definitions of a CAN
+    network.
+
+    The factory functions :func:`cantools.db.load()` and
+    :func:`cantools.db.load_file()` returns instances of this class.
 
     """
 
@@ -20,12 +24,13 @@ class File(object):
         self._frame_id_to_message = {}
         self.version = version
 
-    def add_dbc(self, iostream):
-        """Add information from given DBC iostream.
+    def add_dbc(self, fp):
+        """Read and parse DBC data from given file-like object and add the
+        parsed data to the database.
 
         """
 
-        f = dbc.loads(iostream.read())
+        f = dbc.loads(fp.read())
 
         for message in f.messages:
             self.add_message(message)
@@ -35,7 +40,8 @@ class File(object):
         self.version = f.version
 
     def add_dbc_file(self, filename):
-        """Add information from given DBC-file.
+        """Open, read and parse DBC data from given file and add the parsed
+        data to the database.
 
         """
 
@@ -51,7 +57,7 @@ class File(object):
         self._frame_id_to_message[message.frame_id] = message
 
     def as_dbc(self):
-        """Return a string of the database in DBC-file format.
+        """Return the database as a string formatted as a DBC file.
 
         """
 
@@ -70,8 +76,8 @@ class File(object):
 
     def encode_message(self, frame_id, data):
         """Encode given signal data `data` as a message of given
-        `frame_id`. `data` can be a dictionary or a named tuple with
-        signal values.
+        `frame_id`. `data` is a dictionary of signal name-value
+        entries.
 
         """
 
@@ -81,7 +87,7 @@ class File(object):
 
     def decode_message(self, frame_id, data):
         """Decode given signal data `data` as a message of given frame id
-        `frame_id`.
+        `frame_id`. Returns a dictionary of signal name-value entries.
 
         """
 

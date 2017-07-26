@@ -21,7 +21,8 @@ def _create_message_encode_decode_format(signals):
 
 
 class Message(object):
-    """CAN message.
+    """A CAN message with frame id, comment, signals and other
+    information.
 
     """
 
@@ -91,7 +92,8 @@ class Message(object):
                 message['fmt'] = _create_message_encode_decode_format(message['signals'])
 
     def is_multiplexed(self):
-        """Returns True if the message is multiplexed, otherwise False.
+        """Returns ``True`` if the message is multiplexed, otherwise
+        ``False``.
 
         """
 
@@ -164,8 +166,7 @@ class Message(object):
         return decoded_signals
 
     def get_multiplex_selector_signal_name(self):
-        """Returns the message multiplex selector name, or None if the message
-        is not multiplexed.
+        """Returns the message multiplex selector name.
 
         """
 

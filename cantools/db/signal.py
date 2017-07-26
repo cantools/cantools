@@ -1,7 +1,8 @@
 # A CAN signal.
 
 class Signal(object):
-    """A CAN signal.
+    """A CAN signal with position, size, unit and other information. A
+    signal is part of a message.
 
     """
 

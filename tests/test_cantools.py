@@ -12,9 +12,8 @@ except ImportError:
 class CanToolsTest(unittest.TestCase):
 
     def test_vehicle(self):
-        db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
-        db.add_dbc_file(filename)
+        db = cantools.db.load_file(filename)
         self.assertEqual(len(db.nodes), 1)
         self.assertEqual(db.nodes[0].name, 'Vector__XXX')
         self.assertEqual(len(db.messages), 217)
@@ -41,11 +40,10 @@ class CanToolsTest(unittest.TestCase):
             self.assertEqual(db.as_dbc(), fin.read())
 
     def test_motohawk(self):
-        db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
         with open(filename, 'r') as fin:
-            db.add_dbc(fin)
+            db = cantools.db.load(fin)
 
         self.assertEqual(len(db.nodes), 2)
         self.assertEqual(db.nodes[0].name, 'PCM1')
@@ -133,10 +131,40 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
 
-        sensor_sonars = db.messages[-1]
-
+        # Verify nodes.
         self.assertEqual(len(db.nodes), 5)
-        self.assertEqual(db.version, '')
+        self.assertEqual(db.nodes[0].name, 'DBG')
+        self.assertEqual(db.nodes[0].comment, None)
+        self.assertEqual(db.nodes[1].name, 'DRIVER')
+        self.assertEqual(db.nodes[1].comment,
+                         'The driver controller driving the car')
+        self.assertEqual(db.nodes[2].name, 'IO')
+        self.assertEqual(db.nodes[2].comment, None)
+        self.assertEqual(db.nodes[3].name, 'MOTOR')
+        self.assertEqual(db.nodes[3].comment,
+                         'The motor controller of the car')
+        self.assertEqual(db.nodes[4].name, 'SENSOR')
+        self.assertEqual(db.nodes[4].comment,
+                         'The sensor controller of the car')
+
+        # Verify messages and their signals.
+        self.assertEqual(len(db.messages), 5)
+        self.assertEqual(db.messages[0].name, 'DRIVER_HEARTBEAT')
+        self.assertEqual(db.messages[0].comment,
+                         'Sync message used to synchronize the controllers')
+        self.assertEqual(db.messages[0].signals[0].choices[0],
+                         'DRIVER_HEARTBEAT_cmd_NOOP')
+        self.assertEqual(db.messages[0].signals[0].choices[1],
+                         'DRIVER_HEARTBEAT_cmd_SYNC')
+        self.assertEqual(db.messages[0].signals[0].choices[2],
+                         'DRIVER_HEARTBEAT_cmd_REBOOT')
+        self.assertEqual(db.messages[1].name, 'IO_DEBUG')
+        self.assertEqual(db.messages[2].name, 'MOTOR_CMD')
+        self.assertEqual(db.messages[3].name, 'MOTOR_STATUS')
+        self.assertEqual(db.messages[4].name, 'SENSOR_SONARS')
+
+        sensor_sonars = db.messages[-1]
+        
         self.assertFalse(db.messages[0].is_multiplexed())
         self.assertTrue(sensor_sonars.is_multiplexed())
         self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_no_filt_rear')
@@ -151,6 +179,8 @@ class CanToolsTest(unittest.TestCase):
         signals = sensor_sonars.get_multiplexed_message_signals(0)
         self.assertEqual(len(signals), 6)
         self.assertEqual(signals[0].name, 'SENSOR_SONARS_rear')
+
+        self.assertEqual(db.version, '')
 
     def test_socialledge_encode_decode_mux_0(self):
         """Encode and decode the signals in a SENSOR_SONARS frame with mux 0.

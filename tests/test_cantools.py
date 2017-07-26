@@ -18,7 +18,7 @@ class CanToolsTest(unittest.TestCase):
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, False, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('INS_Vel_Sideways_2D', 40, 24, 'little_endian', "
-                         "True, 0.0001, 0, -838, 838, 'm/s', None, "
+                         "True, 0.0001, 0, -838, 838, 'm/s', False, None, None, "
                          "'Sideways Velocity in the vehicle body axes, 2D (no "
                          "vertical component) .  +ve for motion to the vehicle "
                          "RHS.')")
@@ -81,94 +81,110 @@ class CanToolsTest(unittest.TestCase):
                          "\n"
                          "message('Foo', 0x12331, True, 8, 'Foo.')\n"
                          "  signal('Foo', 7, 12, 'big_endian', True, 0.01, "
-                         "250, 229.53, 270.47, 'degK', {-1: \'Foo\', "
+                         "250, 229.53, 270.47, 'degK', False, None, {-1: \'Foo\', "
                          "-2: \'Fie\'}, None)\n"
                          "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
-                         "0, 1.0, 5.0, 'm', None, '')\n")
-
-    def test_motohawk_encode(self):
-        db = cantools.db.File()
-        filename = os.path.join('tests', 'files', 'motohawk.dbc')
-        db.add_dbc_file(filename)
-
-        # Encode signals into an ExampleMessage frame.
-        example_message_frame_id = 496
-
-        temperature = 250.55
-        average_radius = 3.2
-        enable = 1
-
-        data = bitstruct.pack('p45u12u6u1',
-                              int((temperature - 250) / 0.01),
-                              int(average_radius / 0.1),
-                              enable)[::-1]
-
-        message = db.lookup_message(example_message_frame_id)
-        encoded = db.encode_message(example_message_frame_id,
-                                    message.Signals(message,
-                                                    temperature,
-                                                    average_radius,
-                                                    enable))
-
-        self.assertEqual(encoded, data)
-
-        encoded = db.encode_message(example_message_frame_id,
-                                    {'Temperature': temperature,
-                                     'AverageRadius': average_radius,
-                                     'Enable': enable})
-
-        self.assertEqual(encoded, data)
-
-    def test_motohawk_decode(self):
-        db = cantools.db.File()
-        filename = os.path.join('tests', 'files', 'motohawk.dbc')
-        db.add_dbc_file(filename)
-
-        # Encode and decode the signals in an ExampleMessage frame.
-        example_message_frame_id = 496
-
-        temperature = 250.55
-        average_radius = 3.2
-        enable = 1
-
-        data = bitstruct.pack('p45u12u6u1',
-                              int((temperature - 250) / 0.01),
-                              int(average_radius / 0.1),
-                              enable)[::-1]
-
-        decoded = db.decode_message(example_message_frame_id, data)
-
-        self.assertEqual(decoded.Temperature, temperature)
-        self.assertEqual(decoded.AverageRadius, average_radius)
-        self.assertEqual(decoded.Enable, 'Enabled')
-        self.assertEqual(str(decoded),
-                         'ExampleMessage(Temperature: 250.55 degK, '
-                         'AverageRadius: 3.2 m, Enable: Enabled -)')
+                         "0, 1.0, 5.0, 'm', False, None, None, '')\n")
 
     def test_motohawk_encode_decode(self):
+        """Encode and decode the signals in a ExampleMessage frame.
+
+        """
+
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
-        # Decode the signals in an ExampleMessage frame.
         example_message_frame_id = 496
 
-        temperature = 250.55
-        average_radius = 3.2
-        enable = 1
+        # Encode with non-enumerated values.
+        data = {
+            'Temperature': 250.55,
+            'AverageRadius': 3.2,
+            'Enable': 1
+        }
 
-        encoded = db.encode_message(example_message_frame_id,
-                                    {'Temperature': temperature,
-                                     'AverageRadius': average_radius,
-                                     'Enable': enable})
+        encoded = db.encode_message(example_message_frame_id, data)
+        self.assertEqual(encoded, b'\xc1\x1b\x00\x00\x00\x00\x00\x00')
 
+        # Encode with enumerated values.
+        data = {
+            'Temperature': 250.55,
+            'AverageRadius': 3.2,
+            'Enable': 'Enabled'
+        }
+
+        encoded = db.encode_message(example_message_frame_id, data)
         self.assertEqual(encoded, b'\xc1\x1b\x00\x00\x00\x00\x00\x00')
 
         decoded = db.decode_message(example_message_frame_id, encoded)
+        self.assertEqual(decoded, data)
 
-        self.assertEqual(decoded.Temperature, temperature)
-        self.assertEqual(decoded.AverageRadius, average_radius)
-        self.assertEqual(decoded.Enable, 'Enabled')
+    def test_socialledge(self):
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'socialledge.dbc')
+        db.add_dbc_file(filename)
+
+        self.assertEqual(len(db.nodes), 5)
+        self.assertEqual(db.version, '')
+        self.assertFalse(db.messages[0].is_multiplexed())
+        self.assertTrue(db.messages[-1].is_multiplexed())
+        self.assertEqual(db.messages[-1].signals[0].name, 'SENSOR_SONARS_no_filt_rear')
+        self.assertEqual(db.messages[-1].signals[0].multiplex_id, 1)
+        self.assertEqual(db.messages[-1].signals[-3].name, 'SENSOR_SONARS_left')
+        self.assertEqual(db.messages[-1].signals[-3].multiplex_id, 0)
+        self.assertEqual(db.messages[-1].signals[-1].name, 'SENSOR_SONARS_mux')
+        self.assertEqual(db.messages[-1].signals[-1].is_multiplex_selector, True)
+
+    def test_socialledge_encode_decode_mux_0(self):
+        """Encode and decode the signals in a SENSOR_SONARS frame with mux 0.
+
+        """
+
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'socialledge.dbc')
+        db.add_dbc_file(filename)
+
+        frame_id = 200
+        data = {
+            'SENSOR_SONARS_mux': 0,
+            'SENSOR_SONARS_err_count': 1,
+            'SENSOR_SONARS_left': 2,
+            'SENSOR_SONARS_middle': 3,
+            'SENSOR_SONARS_right': 4,
+            'SENSOR_SONARS_rear': 5
+        }
+
+        encoded = db.encode_message(frame_id, data)
+        self.assertEqual(encoded, b'\x10\x00\x14\xe0\x01( \x03')
+
+        decoded = db.decode_message(frame_id, encoded)
+        self.assertEqual(decoded, data)
+
+    def test_socialledge_encode_decode_mux_1(self):
+        """Encode and decode the signals in a SENSOR_SONARS frame with mux 1.
+
+        """
+
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'socialledge.dbc')
+        db.add_dbc_file(filename)
+
+        frame_id = 200
+        data = {
+            'SENSOR_SONARS_mux': 1,
+            'SENSOR_SONARS_err_count': 2,
+            'SENSOR_SONARS_no_filt_left': 3,
+            'SENSOR_SONARS_no_filt_middle': 4,
+            'SENSOR_SONARS_no_filt_right': 5,
+            'SENSOR_SONARS_no_filt_rear': 6
+        }
+
+        encoded = db.encode_message(frame_id, data)
+        self.assertEqual(encoded, b'!\x00\x1e\x80\x022\xc0\x03')
+
+        decoded = db.decode_message(frame_id, encoded)
+        self.assertEqual(decoded, data)
 
     def test_add_message(self):
         db = cantools.db.File()

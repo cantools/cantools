@@ -94,7 +94,7 @@ def _create_dbc_grammar():
     """
 
     # DBC file grammar.
-    word = Word(printables.replace(';', ''))
+    word = Word(printables.replace(';', '').replace(':', ''))
     integer = Group(Optional('-') + Word(nums))
     positive_integer = Word(nums)
     number = Word(nums + '.Ee-+')
@@ -110,45 +110,47 @@ def _create_dbc_grammar():
     comma = Suppress(Literal(','))
     node = Word(alphas + nums + '_-').setWhitespaceChars(' ')
 
-    version = Group(Keyword('VERSION') +
-                    QuotedString('"', multiline=True))
+    version = Group(Keyword('VERSION')
+                    + QuotedString('"', multiline=True))
     symbol = Word(alphas + '_') + Suppress(LineEnd())
-    symbols = Group(Keyword('NS_') +
-                    colon +
-                    Group(ZeroOrMore(symbol)))
+    symbols = Group(Keyword('NS_')
+                    + colon
+                    + Group(ZeroOrMore(symbol)))
     discard = Suppress(Keyword('BS_') + colon)
-    nodes = Group(Keyword('BU_') +
-                 colon +
-                 Group(ZeroOrMore(node)))
-    signal = Group(Keyword(SIGNAL) +
-                   word +
-                   colon +
-                   Group(positive_integer +
-                         pipe +
-                         positive_integer +
-                         at +
-                         positive_integer +
-                         sign) +
-                   Group(lp +
-                         number +
-                         comma +
-                         number +
-                         rp) +
-                   Group(lb +
-                         number +
-                         pipe +
-                         number +
-                         rb) +
-                   QuotedString('"', multiline=True) +
-                   Group(delimitedList(node)))
-    message = Group(Keyword(MESSAGE) +
-                    positive_integer +
-                    word +
-                    positive_integer +
-                    word +
-                    Group(ZeroOrMore(signal)))
+    nodes = Group(Keyword('BU_')
+                  + colon
+                  + Group(ZeroOrMore(node)))
+    signal = Group(Keyword(SIGNAL)
+                   + Group(word + Optional(word))
+                   + colon
+                   + Group(positive_integer
+                           + pipe
+                           + positive_integer
+                           + at
+                           + positive_integer
+                           + sign)
+                   + Group(lp
+                           + number
+                           + comma
+                           + number
+                           + rp)
+                   + Group(lb
+                           + number
+                           + pipe
+                           + number
+                           + rb)
+                   + QuotedString('"', multiline=True)
+                   + Group(delimitedList(node)))
+    message = Group(Keyword(MESSAGE)
+                    + positive_integer
+                    + word
+                    + colon
+                    + positive_integer
+                    + word
+                    + Group(ZeroOrMore(signal)))
     event = Suppress(Keyword(EVENT)
                      + word
+                     + colon
                      + positive_integer
                      + lb
                      + number
@@ -161,63 +163,63 @@ def _create_dbc_grammar():
                      + word
                      + node
                      + scolon)
-    comment = Group(Keyword(COMMENT) +
-                    ((Keyword(MESSAGE) +
-                      positive_integer +
-                      QuotedString('"', multiline=True) +
-                      scolon) |
-                     (Keyword(SIGNAL) +
-                      positive_integer +
-                      word +
-                      QuotedString('"', multiline=True) +
-                      scolon) |
-                     (Keyword(NODES) +
-                      word +
-                      QuotedString('"', multiline=True) +
-                      scolon) |
-                     (Keyword(EVENT) +
-                      word +
-                      QuotedString('"', multiline=True) +
-                      scolon)))
-    attribute = Group(Keyword(ATTRIBUTE) +
-                      ((QuotedString('"', multiline=True)) |
-                       (Keyword(SIGNAL) +
-                        QuotedString('"', multiline=True)) |
-                       (Keyword(MESSAGE) +
-                        QuotedString('"', multiline=True)) |
-                       (Keyword(EVENT) +
-                        QuotedString('"', multiline=True)) |
-                       (Keyword(NODES) +
-                        QuotedString('"', multiline=True))) +
-                       word +
-                       ((scolon) |
-                        (Group(ZeroOrMore(Group(
-                         (comma | Empty()) + QuotedString('"', multiline=True)))) +
-                         scolon) |
-                         (Group(ZeroOrMore(number)) +
-                         scolon)))
-    default_attr = Group(Keyword(DEFAULT_ATTR) +
-                         QuotedString('"', multiline=True) +
-                         (positive_integer | QuotedString('"', multiline=True)) +
-                         scolon)
-    attr_definition = Group(Keyword(ATTR_DEFINITION) +
-                            QuotedString('"', multiline=True) +
-                            Group(Optional((Keyword(MESSAGE) + positive_integer) |
-                                           (Keyword(SIGNAL) + positive_integer + word) |
-                                           (Keyword(NODES) + word))) +
-                            (QuotedString('"', multiline=True) | positive_integer) +
-                            scolon)
-    choice = Group(Keyword(CHOICE) +
-                   Optional(positive_integer) +
-                   word +
-                   Group(OneOrMore(Group(
-                       integer + QuotedString('"', multiline=True)))) +
-                   scolon)
-    value_table = Group(Keyword(VALUE_TABLE) +
-                        word +
-                        Group(OneOrMore(Group(
-                            integer + QuotedString('"', multiline=True)))) +
-                        scolon)
+    comment = Group(Keyword(COMMENT)
+                    + ((Keyword(MESSAGE)
+                        + positive_integer
+                        + QuotedString('"', multiline=True)
+                        + scolon)
+                       | (Keyword(SIGNAL)
+                          + positive_integer
+                          + word
+                          + QuotedString('"', multiline=True)
+                          + scolon)
+                       | (Keyword(NODES)
+                          + word
+                          + QuotedString('"', multiline=True)
+                          + scolon)
+                       | (Keyword(EVENT)
+                          + word
+                          + QuotedString('"', multiline=True)
+                          + scolon)))
+    attribute = Group(Keyword(ATTRIBUTE)
+                      + ((QuotedString('"', multiline=True))
+                         | (Keyword(SIGNAL)
+                            + QuotedString('"', multiline=True))
+                         | (Keyword(MESSAGE)
+                            + QuotedString('"', multiline=True))
+                         | (Keyword(EVENT)
+                            + QuotedString('"', multiline=True))
+                         | (Keyword(NODES)
+                            + QuotedString('"', multiline=True)))
+                      + word
+                      + ((scolon)
+                         | (Group(ZeroOrMore(Group(
+                             (comma | Empty()) + QuotedString('"', multiline=True))))
+                            + scolon)
+                         | (Group(ZeroOrMore(number))
+                            + scolon)))
+    default_attr = Group(Keyword(DEFAULT_ATTR)
+                         + QuotedString('"', multiline=True)
+                         + (positive_integer | QuotedString('"', multiline=True))
+                         + scolon)
+    attr_definition = Group(Keyword(ATTR_DEFINITION)
+                            + QuotedString('"', multiline=True)
+                            + Group(Optional((Keyword(MESSAGE) + positive_integer)
+                                             | (Keyword(SIGNAL) + positive_integer + word)
+                                             | (Keyword(NODES) + word)))
+                            + (QuotedString('"', multiline=True) | positive_integer)
+                            + scolon)
+    choice = Group(Keyword(CHOICE)
+                   + Optional(positive_integer)
+                   + word
+                   + Group(OneOrMore(Group(
+                       integer + QuotedString('"', multiline=True))))
+                   + scolon)
+    value_table = Group(Keyword(VALUE_TABLE)
+                        + word
+                        + Group(OneOrMore(Group(
+                            integer + QuotedString('"', multiline=True))))
+                        + scolon)
     entry = (version
              | symbols
              | discard
@@ -550,12 +552,12 @@ def _load_messages(tokens,
         message = Message(
             frame_id=frame_id,
             is_extended_frame=is_extended_frame,
-            name=message[2][0:-1],
+            name=message[2],
             length=int(message[3], 0),
             nodes=message[4],
             send_type=get_send_type(int(message[1])),
             cycle_time=get_cycle_time(int(message[1])),
-            signals=[Signal(name=signal[1],
+            signals=[Signal(name=signal[1][0],
                             start=int(signal[2][0]),
                             length=int(signal[2][1]),
                             nodes=signal[6],
@@ -569,9 +571,15 @@ def _load_messages(tokens,
                             maximum=_num(signal[4][1]),
                             unit=signal[5],
                             choices=get_choices(int(message[1]),
-                                                signal[1]),
+                                                signal[1][0]),
                             comment=get_comment(int(message[1]),
-                                                signal[1]))
+                                                signal[1][0]),
+                            is_multiplex_selector=(signal[1][1] == 'M'
+                                                   if len(signal[1]) == 2
+                                                   else False),
+                            multiplex_id=(int(signal[1][1][1:])
+                                          if len(signal[1]) == 2 and signal[1][1] != 'M'
+                                          else None))
                      for signal in message[5]],
             comment=get_comment(int(message[1])))
 

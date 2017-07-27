@@ -58,14 +58,7 @@ class File(object):
 
         """
 
-        database = dbc.loads(fp.read())
-
-        for message in database.messages:
-            self.add_message(message)
-        self._nodes = database.nodes
-        self.attributes = database.attributes
-        self.default_attrs = database.default_attrs
-        self._version = database.version
+        self.add_dbc_string(fp.read())
 
     def add_dbc_file(self, filename):
         """Open, read and parse DBC data from given file and add the parsed
@@ -79,13 +72,17 @@ class File(object):
         with open(filename, 'r') as fin:
             self.add_dbc(fin)
 
-    def add_kcd(self, fp):
-        """Read and parse KCD data from given file-like object and add the
-        parsed data to the database.
+    def add_dbc_string(self, string):
+        """Parse given DBC data string and add the parsed data to the
+        database.
+
+        >>> db = cantools.db.File()
+        >>> with open ('foo.dbc', 'r') as fin:
+        ...     db.add_dbc_string(fin.read())
 
         """
 
-        database = kcd.loads(fp.read())
+        database = dbc.load_string(string)
 
         for message in database.messages:
             self.add_message(message)
@@ -93,6 +90,14 @@ class File(object):
         self.attributes = database.attributes
         self.default_attrs = database.default_attrs
         self._version = database.version
+
+    def add_kcd(self, fp):
+        """Read and parse KCD data from given file-like object and add the
+        parsed data to the database.
+
+        """
+
+        self.add_kcd_string(fp.read())
 
     def add_kcd_file(self, filename):
         """Open, read and parse KCD data from given file and add the parsed
@@ -103,6 +108,21 @@ class File(object):
         with open(filename, 'r') as fin:
             self.add_kcd(fin)
 
+    def add_kcd_string(self, string):
+        """Parse given KCD data string and add the parsed data to the
+        database.
+
+        """
+
+        database = kcd.load_string(string)
+
+        for message in database.messages:
+            self.add_message(message)
+        self._nodes = database.nodes
+        self.attributes = database.attributes
+        self.default_attrs = database.default_attrs
+        self._version = database.version
+
     def add_message(self, message):
         """Add given message to the database.
 
@@ -111,27 +131,27 @@ class File(object):
         self._messages.append(message)
         self._frame_id_to_message[message.frame_id] = message
 
-    def as_dbc(self):
+    def as_dbc_string(self):
         """Return the database as a string formatted as a DBC file.
 
         """
 
-        return dbc.dumps(Database(self._messages,
-                                  self._nodes,
-                                  self.attributes,
-                                  self.default_attrs,
-                                  self._version))
+        return dbc.dump_string(Database(self._messages,
+                                        self._nodes,
+                                        self.attributes,
+                                        self.default_attrs,
+                                        self._version))
 
-    def as_kcd(self):
+    def as_kcd_string(self):
         """Return the database as a string formatted as a KCD file.
 
         """
 
-        return kcd.dumps(Database(self.messages,
-                                  self.nodes,
-                                  self.attributes,
-                                  self.default_attrs,
-                                  self.version))
+        return kcd.dump_string(Database(self.messages,
+                                        self.nodes,
+                                        self.attributes,
+                                        self.default_attrs,
+                                        self.version))
 
     def lookup_message(self, frame_id):
         """Find the message object for given frame id `frame_id`.

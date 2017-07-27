@@ -605,7 +605,7 @@ def _load_nodes(tokens, comments):
     return nodes
 
 
-def dumps(database):
+def dump_string(database):
     """Format database in DBC file format.
 
     """
@@ -627,7 +627,7 @@ def dumps(database):
                           ba='\n'.join(ba),
                           val='\n'.join(val))
 
-def loads(string):
+def load_string(string):
     """Parse given string.
 
     """

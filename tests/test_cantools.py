@@ -37,7 +37,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(i, 15)
 
         with open(filename, 'r') as fin:
-            self.assertEqual(db.as_dbc(), fin.read())
+            self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_motohawk(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
@@ -55,7 +55,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[1].nodes[0], 'Vector__XXX')
 
         with open(filename, 'r') as fin:
-            self.assertEqual(db.as_dbc(), fin.read())
+            self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_emc32(self):
         db = cantools.db.File()

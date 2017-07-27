@@ -113,7 +113,7 @@ def _load_message_element(message):
                    comment=comment)
 
 
-def dumps(database):
+def dump_string(database):
     """Format given database in KCD file format.
 
     """
@@ -121,7 +121,7 @@ def dumps(database):
     return str(database)
 
 
-def loads(string):
+def load_string(string):
     """Parse given KCD format string.
 
     """

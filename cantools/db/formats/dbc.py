@@ -10,6 +10,9 @@ from ..message import Message
 from ..node import Node
 from ..database import Database
 
+from .utils import num
+
+
 # DBC section types.
 VERSION = 'VERSION'
 NODES = 'BU_'
@@ -71,21 +74,6 @@ BU_: {bu}
 
 {val}
 """
-
-
-def _num(number_as_string):
-    """Convert given string to an integer or a float.
-
-    """
-
-    try:
-        return int(number_as_string)
-
-    except ValueError:
-        return float(number_as_string)
-
-    else:
-        raise ValueError('Expected integer or floating point number.')
 
 
 def _create_dbc_grammar():
@@ -271,7 +259,7 @@ def _dump_messages(database):
                 offset=signal.offset,
                 minimum=signal.minimum,
                 maximum=signal.maximum,
-                unit=signal.unit))
+                unit='-' if signal.unit is None else signal.unit))
 
         bo.append('\n'.join(msg))
 
@@ -565,11 +553,11 @@ def _load_messages(tokens,
                                         if signal[2][2] == '0'
                                         else 'little_endian'),
                             is_signed=(signal[2][3] == '-'),
-                            scale=_num(signal[3][0]),
-                            offset=_num(signal[3][1]),
-                            minimum=_num(signal[4][0]),
-                            maximum=_num(signal[4][1]),
-                            unit=signal[5],
+                            scale=num(signal[3][0]),
+                            offset=num(signal[3][1]),
+                            minimum=num(signal[4][0]),
+                            maximum=num(signal[4][1]),
+                            unit=None if signal[5] == '-' else signal[5],
                             choices=get_choices(int(message[1]),
                                                 signal[1][0]),
                             comment=get_comment(int(message[1]),

@@ -2,21 +2,23 @@
 
 from xml.etree.ElementTree import fromstring
 
-from collections import OrderedDict
 from ..signal import Signal
 from ..message import Message
 from ..node import Node
 from ..database import Database
 
+from .utils import num
+
 
 _NAMESPACES = {'ns': 'http://kayak.2codeornot2code.org/1.0'}
+
 
 def dumps(database):
     """Format database in DBC file format.
 
     """
 
-    return ''
+    return str(database)
 
 
 def loads(string):
@@ -50,25 +52,25 @@ def loads(string):
 
             # Minimum.
             try:
-                minimum = value.attrib['min']
+                minimum = num(value.attrib['min'])
             except (AttributeError, KeyError):
                 minimum = None
 
             # Maximum.
             try:
-                maximum = value.attrib['max']
+                maximum = num(value.attrib['max'])
             except (AttributeError, KeyError):
                 maximum = None
 
             # Slope.
             try:
-                slope = value.attrib['slope']
+                slope = num(value.attrib['slope'])
             except (AttributeError, KeyError):
                 slope = 1
 
             # Intercept.
             try:
-                intercept = value.attrib['intercept']
+                intercept = num(value.attrib['intercept'])
             except (AttributeError, KeyError):
                 intercept = 0
 
@@ -76,7 +78,7 @@ def loads(string):
             try:
                 unit = value.attrib['unit']
             except (AttributeError, KeyError):
-                unit = '-'
+                unit = None
 
             # Notes.
             try:

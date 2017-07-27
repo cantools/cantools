@@ -290,9 +290,67 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.nodes[1].name, 'Motor alternative supplier')
         self.assertEqual(len(db.messages), 25)
         self.assertEqual(len(db.messages[0].signals), 8)
-        self.assertEqual(db.messages[0].signals[0].name, 'SeatConfiguration')
-        self.assertEqual(db.messages[0].signals[0].start, 16)
-        self.assertEqual(db.messages[0].signals[0].length, 8)
+
+        seat_configuration = db.messages[0].signals[0]
+
+        self.assertEqual(seat_configuration.name, 'SeatConfiguration')
+        self.assertEqual(seat_configuration.start, 16)
+        self.assertEqual(seat_configuration.length, 8)
+        self.assertEqual(seat_configuration.nodes, [])
+        self.assertEqual(seat_configuration.byte_order, 'big_endian')
+        self.assertEqual(seat_configuration.is_signed, False)
+        self.assertEqual(seat_configuration.scale, 1)
+        self.assertEqual(seat_configuration.offset, 0)
+        self.assertEqual(seat_configuration.minimum, None)
+        self.assertEqual(seat_configuration.maximum, None)
+        self.assertEqual(seat_configuration.unit, None)
+        self.assertEqual(seat_configuration.comment, None)
+
+        tank_temperature = db.messages[10].signals[1]
+
+        self.assertEqual(tank_temperature.name, 'TankTemperature')
+        self.assertEqual(tank_temperature.start, 16)
+        self.assertEqual(tank_temperature.length, 16)
+        self.assertEqual(tank_temperature.nodes, [])
+        self.assertEqual(tank_temperature.byte_order, 'big_endian')
+        self.assertEqual(tank_temperature.is_signed, True)
+        self.assertEqual(tank_temperature.scale, 1)
+        self.assertEqual(tank_temperature.offset, 0)
+        self.assertEqual(tank_temperature.minimum, None)
+        self.assertEqual(tank_temperature.maximum, None)
+        self.assertEqual(tank_temperature.unit, 'Cel')
+        self.assertEqual(tank_temperature.comment, None)
+
+        speed_km = db.messages[1].signals[1]
+
+        self.assertEqual(speed_km.name, 'SpeedKm')
+        self.assertEqual(speed_km.start, 30)
+        self.assertEqual(speed_km.length, 24)
+        self.assertEqual(speed_km.nodes, [])
+        self.assertEqual(speed_km.byte_order, 'big_endian')
+        self.assertEqual(speed_km.is_signed, False)
+        self.assertEqual(speed_km.scale, 0.2)
+        self.assertEqual(speed_km.offset, 0)
+        self.assertEqual(speed_km.minimum, None)
+        self.assertEqual(speed_km.maximum, None)
+        self.assertEqual(speed_km.unit, 'km/h')
+        self.assertEqual(speed_km.comment,
+                         'Middle speed of front wheels in kilometers per hour.')
+
+        outside_temp = db.messages[1].signals[2]
+
+        self.assertEqual(outside_temp.name, 'OutsideTemp')
+        self.assertEqual(outside_temp.start, 18)
+        self.assertEqual(outside_temp.length, 12)
+        self.assertEqual(outside_temp.nodes, [])
+        self.assertEqual(outside_temp.byte_order, 'little_endian')
+        self.assertEqual(outside_temp.is_signed, False)
+        self.assertEqual(outside_temp.scale, 0.05)
+        self.assertEqual(outside_temp.offset, -40)
+        self.assertEqual(outside_temp.minimum, 0)
+        self.assertEqual(outside_temp.maximum, 100)
+        self.assertEqual(outside_temp.unit, 'Cel')
+        self.assertEqual(outside_temp.comment, 'Outside temperature.')
 
     def test_load_bad_format(self):
         with self.assertRaises(ValueError) as cm:

@@ -18,48 +18,40 @@ def _load_signal_element(signal):
 
     """
 
-    # Length.
-    length = (int(signal.attrib['length'])
-              if 'length' in signal.attrib
-              else 1)
+    # Default values.
+    length = 1
+    byte_order = 'big_endian'
+    is_signed = False
+    minimum = None
+    maximum = None
+    slope = 1
+    intercept = 0
+    unit = None
 
-    # Byte order.
-    byte_order = (signal.attrib['endianess']
-                  if 'endianess' in signal.attrib
-                  else 'big')
-    byte_order += '_endian'
+    # Signal XML attributes.
+    for key, value in signal.attrib.items():
+        if key == 'length':
+            length = int(signal.attrib['length'])
+        elif key == 'endianess':
+            byte_order = '{}_endian'.format(signal.attrib['endianess'])
 
+    # Value XML element.
     value = signal.find('ns:Value', _NAMESPACES)
 
-    # Minimum.
-    try:
-        minimum = num(value.attrib['min'])
-    except (AttributeError, KeyError):
-        minimum = None
-
-    # Maximum.
-    try:
-        maximum = num(value.attrib['max'])
-    except (AttributeError, KeyError):
-        maximum = None
-
-    # Slope.
-    try:
-        slope = num(value.attrib['slope'])
-    except (AttributeError, KeyError):
-        slope = 1
-
-    # Intercept.
-    try:
-        intercept = num(value.attrib['intercept'])
-    except (AttributeError, KeyError):
-        intercept = 0
-
-    # Unit.
-    try:
-        unit = value.attrib['unit']
-    except (AttributeError, KeyError):
-        unit = None
+    if value is not None:
+        for key, value in value.attrib.items():
+            if key == 'min':
+                minimum = num(value)
+            elif key == 'max':
+                maximum = num(value)
+            elif key == 'slope':
+                slope = num(value)
+            elif key == 'intercept':
+                intercept = num(value)
+            elif key == 'unit':
+                unit = value
+            elif key == 'type':
+                is_signed = (value == 'signed')
 
     # Notes.
     try:
@@ -72,7 +64,7 @@ def _load_signal_element(signal):
                   length=length,
                   nodes=[],
                   byte_order=byte_order,
-                  is_signed=False,
+                  is_signed=is_signed,
                   scale=slope,
                   offset=intercept,
                   minimum=minimum,
@@ -122,7 +114,7 @@ def _load_message_element(message):
 
 
 def dumps(database):
-    """Format database in DBC file format.
+    """Format given database in KCD file format.
 
     """
 
@@ -130,7 +122,7 @@ def dumps(database):
 
 
 def loads(string):
-    """Parse given string.
+    """Parse given KCD format string.
 
     """
 

@@ -148,11 +148,11 @@ class File(object):
 
         """
 
-        return kcd.dump_string(Database(self.messages,
-                                        self.nodes,
+        return kcd.dump_string(Database(self._messages,
+                                        self._nodes,
                                         self.attributes,
                                         self.default_attrs,
-                                        self.version))
+                                        self._version))
 
     def lookup_message(self, frame_id):
         """Find the message object for given frame id `frame_id`.

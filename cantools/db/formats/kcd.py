@@ -1,4 +1,5 @@
 # Load and dump a CAN database in KCD format.
+import logging
 
 from xml.etree.ElementTree import fromstring
 
@@ -10,7 +11,11 @@ from ..database import Database
 from .utils import num
 
 
-_NAMESPACES = {'ns': 'http://kayak.2codeornot2code.org/1.0'}
+LOGGER = logging.getLogger(__name__)
+
+# The KCD XML namespace.
+NAMESPACE = 'http://kayak.2codeornot2code.org/1.0'
+NAMESPACES = {'ns': NAMESPACE}
 
 
 def _load_signal_element(signal):
@@ -19,6 +24,8 @@ def _load_signal_element(signal):
     """
 
     # Default values.
+    name = None
+    offset = None
     length = 1
     byte_order = 'big_endian'
     is_signed = False
@@ -27,16 +34,23 @@ def _load_signal_element(signal):
     slope = 1
     intercept = 0
     unit = None
+    notes = None
 
     # Signal XML attributes.
     for key, value in signal.attrib.items():
-        if key == 'length':
+        if key == 'name':
+            name = value
+        elif key == 'offset':
+            offset = int(value)
+        elif key == 'length':
             length = int(signal.attrib['length'])
         elif key == 'endianess':
             byte_order = '{}_endian'.format(signal.attrib['endianess'])
+        else:
+            LOGGER.debug("Ignoring unsupported signal attribute '%s'.", key)
 
     # Value XML element.
-    value = signal.find('ns:Value', _NAMESPACES)
+    value = signal.find('ns:Value', NAMESPACES)
 
     if value is not None:
         for key, value in value.attrib.items():
@@ -52,15 +66,18 @@ def _load_signal_element(signal):
                 unit = value
             elif key == 'type':
                 is_signed = (value == 'signed')
+            else:
+                LOGGER.debug("Ignoring unsupported signal value attribute '%s'.",
+                             key)
 
     # Notes.
     try:
-        notes = signal.find('ns:Notes', _NAMESPACES).text
+        notes = signal.find('ns:Notes', NAMESPACES).text
     except AttributeError:
-        notes = None
+        pass
 
-    return Signal(name=signal.attrib['name'],
-                  start=int(signal.attrib['offset']),
+    return Signal(name=name,
+                  start=offset,
                   length=length,
                   nodes=[],
                   byte_order=byte_order,
@@ -81,36 +98,44 @@ def _load_message_element(message):
 
     """
 
-    # Frame id.
-    frame_id = int(message.attrib['id'], 0)
+    # Default values.
+    name = None
+    frame_id = None
+    is_extended_frame = False
+    notes = None
 
-    # Extended format.
-    try:
-        is_extended_frame = (message.attrib['format'] == 'extended')
-    except KeyError:
-        is_extended_frame = False
+    # Message XML attributes.
+    for key, value in message.attrib.items():
+        if key == 'name':
+            name = value
+        elif key == 'id':
+            frame_id = int(value, 0)
+        elif key == 'format':
+            is_extended_frame = (value == 'extended')
+        else:
+            LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
 
     # Comment.
     try:
-        comment = message.find('ns:Notes', _NAMESPACES).text
+        notes = message.find('ns:Notes', NAMESPACES).text
     except AttributeError:
-        comment = None
+        pass
 
     # Find all signals in this message.
     signals = []
 
-    for signal in message.findall('ns:Signal', _NAMESPACES):
+    for signal in message.findall('ns:Signal', NAMESPACES):
         signals.append(_load_signal_element(signal))
 
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,
-                   name=message.attrib['name'],
+                   name=name,
                    length=8,
                    nodes=[],
                    send_type=None,
                    cycle_time=None,
                    signals=signals,
-                   comment=comment)
+                   comment=notes)
 
 
 def dump_string(database):
@@ -127,10 +152,10 @@ def load_string(string):
     """
 
     root = fromstring(string)
-    nodes = [node.attrib for node in root.findall('./ns:Node', _NAMESPACES)]
+    nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
     messages = []
 
-    for message in root.findall('./ns:Bus/ns:Message', _NAMESPACES):
+    for message in root.findall('./ns:Bus/ns:Message', NAMESPACES):
         messages.append(_load_message_element(message))
 
     return Database(messages,

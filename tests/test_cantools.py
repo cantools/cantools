@@ -1,7 +1,9 @@
 import os
 import unittest
-import cantools
 import sys
+import logging
+
+import cantools
 
 try:
     from StringIO import StringIO
@@ -357,6 +359,10 @@ class CanToolsTest(unittest.TestCase):
             cantools.db.load(StringIO(''))
 
         self.assertEqual(str(cm.exception), 'File format not supported.')
+
+# This file is not '__main__' when executed via 'python setup.py
+# test'.
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
     unittest.main()

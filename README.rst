@@ -6,7 +6,7 @@ About
 
 CAN BUS tools.
 
-- DBC and KCD file mangling.
+- `DBC`_ and `KCD`_ file mangling.
 
 - ``candump`` output decoder.
 
@@ -116,3 +116,7 @@ Contributing
 .. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.dbc
 
 .. _python-can: https://python-can.readthedocs.io/en/latest/
+
+.. _DBC: http://www.socialledge.com/sjsu/index.php?title=DBC_Format
+
+.. _KCD: https://github.com/julietkilo/kcd

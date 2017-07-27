@@ -6,8 +6,9 @@ class File(object):
     """This class contains all messages, signals and definitions of a CAN
     network.
 
-    The factory functions :func:`cantools.db.load()` and
-    :func:`cantools.db.load_file()` returns instances of this class.
+    The factory functions :func:`cantools.db.load()`,
+    :func:`cantools.db.load_file()` and
+    :func:`cantools.db.load_string()` returns instances of this class.
 
     """
 

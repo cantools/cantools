@@ -6,7 +6,7 @@ About
 
 CAN BUS tools.
 
-- DBC file mangling.
+- DBC and KCD file mangling.
 
 - ``candump`` output decoder.
 

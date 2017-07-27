@@ -16,20 +16,7 @@ Functions and classes
 
 .. autofunction:: cantools.db.load_file
 
-.. code-block:: python
-
-   >>> db = cantools.db.load_file('foo.dbc')
-   >>> db.version
-   '1.0'
-
 .. autofunction:: cantools.db.load
-
-.. code-block:: python
-
-   >>> with open('foo.dbc') as fin:
-   ...    db = cantools.db.load(fin.read())
-   >>> db.version
-   '1.0'
 
 .. autoclass:: cantools.db.File
     :members:

@@ -8,10 +8,26 @@ class Node(object):
     def __init__(self,
                  name,
                  comment):
-        self.name = name
-        self.comment = comment
+        self._name = name
+        self._comment = comment
+
+    @property
+    def name(self):
+        """The node name as a string.
+
+        """
+
+        return self._name
+
+    @property
+    def comment(self):
+        """The node comment, or ``None`` if no comment is available.
+
+        """
+
+        return self._comment
 
     def __repr__(self):
         return "node('{}', {})".format(
-            self.name,
-            "'" + self.comment + "'" if self.comment is not None else None)
+            self._name,
+            "'" + self._comment + "'" if self._comment is not None else None)

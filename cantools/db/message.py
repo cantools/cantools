@@ -36,85 +36,153 @@ class Message(object):
                  send_type=None,
                  cycle_time=None,
                  is_extended_frame=False):
-        self.frame_id = frame_id
-        self.is_extended_frame = is_extended_frame
-        self.name = name
-        self.length = length
-        self.signals = signals
-        self.signals.sort(key=lambda s: s.start)
-        self.signals.reverse()
-        self.comment = comment
-        self.nodes = nodes
-        self.send_type = send_type
-        self.cycle_time = cycle_time
+        self._frame_id = frame_id
+        self._is_extended_frame = is_extended_frame
+        self._name = name
+        self._length = length
+        self._signals = signals
+        self._signals.sort(key=lambda s: s.start)
+        self._signals.reverse()
+        self._comment = comment
+        self._nodes = nodes
+        self._send_type = send_type
+        self._cycle_time = cycle_time
 
         # Message encode/decode format.
-        self.fmt = _create_message_encode_decode_format(self.signals)
+        self._fmt = _create_message_encode_decode_format(self._signals)
 
         # Is it a multiplexed message?
-        self.multiplexer = None
+        self._multiplexer = None
 
-        for signal in self.signals:
+        for signal in self._signals:
             if signal.is_multiplexer:
-                self.multiplexer = (signal,
-                                    _create_message_encode_decode_format(
-                                        [signal]))
+                self._multiplexer = (signal,
+                                     _create_message_encode_decode_format(
+                                         [signal]))
                 break
 
         # Group signals for each multiplex id.
-        self.multiplexer_message_by_id = {}
+        self._multiplexer_message_by_id = {}
 
         if self.is_multiplexed():
             # Append multiplexed signals.
-            for signal in self.signals:
+            for signal in self._signals:
                 if signal.multiplexer_id is not None:
                     multiplexer_id = signal.multiplexer_id
 
-                    if multiplexer_id not in self.multiplexer_message_by_id:
-                        self.multiplexer_message_by_id[multiplexer_id] = {
+                    if multiplexer_id not in self._multiplexer_message_by_id:
+                        self._multiplexer_message_by_id[multiplexer_id] = {
                             'signals': [],
                             'fmt': None
                         }
 
-                    self.multiplexer_message_by_id[multiplexer_id]['signals'].append(
+                    self._multiplexer_message_by_id[multiplexer_id]['signals'].append(
                         signal)
 
             # Append common signals.
-            for signal in self.signals:
+            for signal in self._signals:
                 if signal.multiplexer_id is None:
-                    for message in self.multiplexer_message_by_id.values():
+                    for message in self._multiplexer_message_by_id.values():
                         message['signals'].append(signal)
 
             # Sort the signals and create the encode/decode format.
-            for message in self.multiplexer_message_by_id.values():
+            for message in self._multiplexer_message_by_id.values():
                 message['signals'].sort(key=lambda s: s.start)
                 message['signals'].reverse()
                 message['fmt'] = _create_message_encode_decode_format(message['signals'])
 
-    def is_multiplexed(self):
-        """Returns ``True`` if the message is multiplexed, otherwise
-        ``False``.
+    @property
+    def frame_id(self):
+        """The message frame id.
 
         """
 
-        return self.multiplexer is not None
+        return self._frame_id
+
+    @property
+    def is_extended_frame(self):
+        """``True`` if the message is an extended frame, ``False`` otherwise.
+
+        """
+
+        return self._is_extended_frame
+
+    @property
+    def name(self):
+        """The message name as a string.
+
+        """
+
+        return self._name
+
+    @property
+    def length(self):
+        """The message data length in bytes.
+
+        """
+
+        return self._length
+
+    @property
+    def signals(self):
+        """A list of all signals in the message.
+
+        """
+
+        return self._signals
+
+    @property
+    def comment(self):
+        """The message comment, or ``None`` if no comment is available.
+
+        """
+
+        return self._comment
+
+    @property
+    def nodes(self):
+        """A list of all message node names.
+
+        """
+
+        return self._nodes
+
+    @property
+    def send_type(self):
+        """The message send type.
+
+        """
+
+        return self._send_type
+
+    @property
+    def cycle_time(self):
+        """The message cycle time.
+
+        """
+
+        return self._cycle_time
 
     def encode(self, data):
         """Encode given data as a message of this type.
 
+        >>> foo = db.messages[0]
+        >>> foo.encode({'Bar': 1, 'Fum': 5.0})
+        b'\\x01\\x45\\x23\\x00\\x11'
+
         """
 
         if self.is_multiplexed():
-            mux = data[self.multiplexer[0].name]
+            mux = data[self._multiplexer[0].name]
 
-            if mux not in self.multiplexer_message_by_id:
+            if mux not in self._multiplexer_message_by_id:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
-            signals = self.multiplexer_message_by_id[mux]['signals']
-            fmt = self.multiplexer_message_by_id[mux]['fmt']
+            signals = self._multiplexer_message_by_id[mux]['signals']
+            fmt = self._multiplexer_message_by_id[mux]['fmt']
         else:
-            signals = self.signals
-            fmt = self.fmt
+            signals = self._signals
+            fmt = self._fmt
 
         decoded_data = []
 
@@ -135,21 +203,25 @@ class Message(object):
     def decode(self, data):
         """Decode given data as a message of this type.
 
+        >>> foo = db.messages[0]
+        >>> foo.decode(b'\\x01\\x45\\x23\\x00\\x11')
+        {'Bar': 1, 'Fum': 5.0}
+
         """
 
         data += b'\x00' * (8 - len(data))
 
         if self.is_multiplexed():
-            mux = bitstruct.unpack(self.multiplexer[1], data[::-1])[0]
+            mux = bitstruct.unpack(self._multiplexer[1], data[::-1])[0]
 
-            if mux not in self.multiplexer_message_by_id:
+            if mux not in self._multiplexer_message_by_id:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
-            signals = self.multiplexer_message_by_id[mux]['signals']
-            fmt = self.multiplexer_message_by_id[mux]['fmt']
+            signals = self._multiplexer_message_by_id[mux]['signals']
+            fmt = self._multiplexer_message_by_id[mux]['fmt']
         else:
-            signals = self.signals
-            fmt = self.fmt
+            signals = self._signals
+            fmt = self._fmt
 
         unpacked_data = bitstruct.unpack(fmt, data[::-1])
         decoded_signals = {}
@@ -164,24 +236,50 @@ class Message(object):
 
         return decoded_signals
 
-    def get_multiplexer_signal_name(self):
-        """Returns the message multiplexer name.
+    def is_multiplexed(self):
+        """Returns ``True`` if the message is multiplexed, otherwise
+        ``False``.
+
+        >>> foo = db.messages[0]
+        >>> foo.is_multiplexed()
+        False
+        >>> bar = db.messages[1]
+        >>> bar.is_multiplexed()
+        True
 
         """
 
-        return self.multiplexer[0].name
+        return self._multiplexer is not None
+
+    def get_multiplexer_signal_name(self):
+        """Returns the message multiplexer signal name, or raises an exception
+        if the message is not multiplexed.
+
+        >>> bar = db.messages[1]
+        >>> bar.get_multiplexer_signal_name()
+        'BarMux'
+
+        """
+
+        return self._multiplexer[0].name
 
     def get_signals_by_multiplexer_id(self, multiplexer_id):
-        """Returns the list of signals for given multiplexer message id.
+        """Returns a list of signals for given multiplexer message id, or
+        raises an exception if the message is not multiplexed or an
+        invalid multiplexer id is given.
+
+        >>> bar = db.messages[1]
+        >>> bar.get_signals_by_multiplexer_id(0)
+        [signal(...), signal(...), ...]
 
         """
 
-        return self.multiplexer_message_by_id[multiplexer_id]['signals']
+        return self._multiplexer_message_by_id[multiplexer_id]['signals']
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(
-            self.name,
-            self.frame_id,
-            self.is_extended_frame,
-            self.length,
-            "'" + self.comment + "'" if self.comment is not None else None)
+            self._name,
+            self._frame_id,
+            self._is_extended_frame,
+            self._length,
+            "'" + self._comment + "'" if self._comment is not None else None)

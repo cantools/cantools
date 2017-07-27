@@ -13,6 +13,114 @@ from .utils import num
 _NAMESPACES = {'ns': 'http://kayak.2codeornot2code.org/1.0'}
 
 
+def _load_signal_element(signal):
+    """Load given signal element and return a signal object.
+
+    """
+
+    # Length.
+    length = (int(signal.attrib['length'])
+              if 'length' in signal.attrib
+              else 1)
+
+    # Byte order.
+    byte_order = (signal.attrib['endianess']
+                  if 'endianess' in signal.attrib
+                  else 'big')
+    byte_order += '_endian'
+
+    value = signal.find('ns:Value', _NAMESPACES)
+
+    # Minimum.
+    try:
+        minimum = num(value.attrib['min'])
+    except (AttributeError, KeyError):
+        minimum = None
+
+    # Maximum.
+    try:
+        maximum = num(value.attrib['max'])
+    except (AttributeError, KeyError):
+        maximum = None
+
+    # Slope.
+    try:
+        slope = num(value.attrib['slope'])
+    except (AttributeError, KeyError):
+        slope = 1
+
+    # Intercept.
+    try:
+        intercept = num(value.attrib['intercept'])
+    except (AttributeError, KeyError):
+        intercept = 0
+
+    # Unit.
+    try:
+        unit = value.attrib['unit']
+    except (AttributeError, KeyError):
+        unit = None
+
+    # Notes.
+    try:
+        notes = signal.find('ns:Notes', _NAMESPACES).text
+    except AttributeError:
+        notes = None
+
+    return Signal(name=signal.attrib['name'],
+                  start=int(signal.attrib['offset']),
+                  length=length,
+                  nodes=[],
+                  byte_order=byte_order,
+                  is_signed=False,
+                  scale=slope,
+                  offset=intercept,
+                  minimum=minimum,
+                  maximum=maximum,
+                  unit=unit,
+                  choices=None,
+                  comment=notes,
+                  is_multiplexer=False,
+                  multiplexer_id=None)
+
+
+def _load_message_element(message):
+    """Load given message element and return a message object.
+
+    """
+
+    # Frame id.
+    frame_id = int(message.attrib['id'], 0)
+
+    # Extended format.
+    try:
+        is_extended_frame = (message.attrib['format'] == 'extended')
+    except KeyError:
+        is_extended_frame = False
+
+    # Comment.
+    try:
+        comment = message.find('ns:Notes', _NAMESPACES).text
+    except AttributeError:
+        comment = None
+
+    # Find all signals in this message.
+    signals = []
+
+    for signal in message.findall('ns:Signal', _NAMESPACES):
+        signals.append(_load_signal_element(signal))
+
+    return Message(frame_id=frame_id,
+                   is_extended_frame=is_extended_frame,
+                   name=message.attrib['name'],
+                   length=8,
+                   nodes=[],
+                   send_type=None,
+                   cycle_time=None,
+                   signals=signals,
+                   comment=comment)
+
+
 def dumps(database):
     """Format database in DBC file format.
 
@@ -27,107 +135,11 @@ def loads(string):
     """
 
     root = fromstring(string)
-
     nodes = [node.attrib for node in root.findall('./ns:Node', _NAMESPACES)]
-
     messages = []
 
     for message in root.findall('./ns:Bus/ns:Message', _NAMESPACES):
-        # Find all signals in this message.
-        signals = []
-
-        for signal in message.findall('ns:Signal', _NAMESPACES):
-            # Length.
-            length = (int(signal.attrib['length'])
-                      if 'length' in signal.attrib
-                      else 1)
-
-            # Byte order.
-            byte_order = (signal.attrib['endianess']
-                          if 'endianess' in signal.attrib
-                          else 'big')
-            byte_order += '_endian'
-
-            value = signal.find('ns:Value', _NAMESPACES)
-
-            # Minimum.
-            try:
-                minimum = num(value.attrib['min'])
-            except (AttributeError, KeyError):
-                minimum = None
-
-            # Maximum.
-            try:
-                maximum = num(value.attrib['max'])
-            except (AttributeError, KeyError):
-                maximum = None
-
-            # Slope.
-            try:
-                slope = num(value.attrib['slope'])
-            except (AttributeError, KeyError):
-                slope = 1
-
-            # Intercept.
-            try:
-                intercept = num(value.attrib['intercept'])
-            except (AttributeError, KeyError):
-                intercept = 0
-
-            # Unit.
-            try:
-                unit = value.attrib['unit']
-            except (AttributeError, KeyError):
-                unit = None
-
-            # Notes.
-            try:
-                notes = signal.find('ns:Notes', _NAMESPACES).text
-            except AttributeError:
-                notes = None
-
-            signals.append(Signal(name=signal.attrib['name'],
-                                  start=int(signal.attrib['offset']),
-                                  length=length,
-                                  nodes=[],
-                                  byte_order=byte_order,
-                                  is_signed=False,
-                                  scale=slope,
-                                  offset=intercept,
-                                  minimum=minimum,
-                                  maximum=maximum,
-                                  unit=unit,
-                                  choices=None,
-                                  comment=notes,
-                                  is_multiplexer=False,
-                                  multiplexer_id=None))
-
-        # Frame id.
-        frame_id = int(message.attrib['id'], 0)
-
-        # Extended format.
-        try:
-            is_extended_frame = (message.attrib['format'] == 'extended')
-        except KeyError:
-            is_extended_frame = False
-
-        # Comment.
-        try:
-            comment = message.findall('ns:Notes', _NAMESPACES)[0].text
-        except:
-            comment = None
-
-
-        messages.append(Message(
-            frame_id=frame_id,
-            is_extended_frame=is_extended_frame,
-            name=message.attrib['name'],
-            length=8,
-            nodes=[],
-            send_type=None,
-            cycle_time=None,
-            signals=signals,
-            comment=comment))
+        messages.append(_load_message_element(message))
 
     return Database(messages,
                     [Node(name=node['name'], comment=None) for node in nodes],

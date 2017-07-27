@@ -5,6 +5,7 @@ from .file import File
 from .message import Message
 from .signal import Signal
 
+
 def load(fp):
     """Read and parse given database file-like object and return a
     :class:`~cantools.db.File` object with its contents.

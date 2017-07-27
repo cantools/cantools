@@ -14,8 +14,7 @@ RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d\]\s*([0-9A-F ]*)$')
 
 
 def _do_decode(args):
-    dbf = db.File()
-    dbf.add_dbc_file(args.dbfile)
+    dbf = db.load_file(args.dbfile)
 
     while True:
         line = sys.stdin.readline()
@@ -57,9 +56,11 @@ def _do_decode(args):
                         value = "'" + value + "'"
 
                     formatted_signals.append(
-                        '{}: {} {}'.format(signal.name,
+                        '{}: {}{}'.format(signal.name,
                                            value,
-                                           signal.unit))
+                                          ''
+                                          if signal.unit is None
+                                          else ' ' + signal.unit))
 
                 line += '{}({})'.format(message.name,
                                         ', '.join(formatted_signals))

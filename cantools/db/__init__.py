@@ -11,7 +11,7 @@ def load(fp):
     :class:`~cantools.db.File` object with its contents.
 
     >>> with open('foo.dbc') as fin:
-    ...    db = cantools.db.load(fin.read())
+    ...    db = cantools.db.load(fin)
     >>> db.version
     '1.0'
 

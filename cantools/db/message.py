@@ -35,7 +35,8 @@ class Message(object):
                  nodes=None,
                  send_type=None,
                  cycle_time=None,
-                 is_extended_frame=False):
+                 is_extended_frame=False,
+                 bus_name=None):
         self._frame_id = frame_id
         self._is_extended_frame = is_extended_frame
         self._name = name
@@ -47,6 +48,7 @@ class Message(object):
         self._nodes = nodes
         self._send_type = send_type
         self._cycle_time = cycle_time
+        self._bus_name = bus_name
 
         # Message encode/decode format.
         self._fmt = _create_message_encode_decode_format(self._signals)
@@ -162,6 +164,14 @@ class Message(object):
         """
 
         return self._cycle_time
+
+    @property
+    def bus_name(self):
+        """The message bus name.
+
+        """
+
+        return self._bus_name
 
     def encode(self, data):
         """Encode given data as a message of this type.

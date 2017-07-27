@@ -1,5 +1,10 @@
+import logging
+
 from .formats import dbc, kcd
 from .database import Database
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class File(object):
@@ -130,6 +135,12 @@ class File(object):
         """
 
         self._messages.append(message)
+
+        if message.frame_id in self._frame_id_to_message:
+            LOGGER.warning('Overwriting message with frame id 0x%x in the '
+                           'message lookup table.',
+                           message.frame_id)
+
         self._frame_id_to_message[message.frame_id] = message
 
     def as_dbc_string(self):

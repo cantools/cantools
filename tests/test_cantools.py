@@ -89,10 +89,14 @@ class CanToolsTest(unittest.TestCase):
                          "250, 229.53, 270.47, 'degK', False, None, {-1: \'Foo\', "
                          "-2: \'Fie\'}, None)\n"
                          "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
-                         "0, 1.0, 5.0, 'm', False, None, None, '')\n")
+                         "0, 1.0, 5.0, 'm', False, None, None, '')\n"
+                         "\n"
+                         "message('Fum', 0x12331, True, 8, 'Foo.')\n"
+                         "  signal('Fum', 7, 12, 'big_endian', True, 1, 0, 0, 1, "
+                         "'None', False, None, None, None)\n")
 
         message = db.lookup_message(0x12331)
-        self.assertEqual(message.name, 'Foo')
+        self.assertEqual(message.name, 'Fum')
 
     def test_motohawk_encode_decode(self):
         """Encode and decode the signals in a ExampleMessage frame.

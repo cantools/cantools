@@ -10,6 +10,8 @@ CAN BUS tools.
 
 - ``candump`` output decoder.
 
+Project homepage: https://github.com/eerimoq/cantools
+
 Documentation: http://cantools.readthedocs.org/en/latest
 
 Installation

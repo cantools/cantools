@@ -1,0 +1,390 @@
+<!--
+     This file is part of Kayak.
+
+     Kayak is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     Kayak is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with Kayak.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<NetworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kayak.2codeornot2code.org/1.0" xsi:noNamespaceSchemaLocation="Definition.xsd">
+  <Document name="The Homer" version="1.23" author="Herbert Powell" company="Powell Motors" date="1991-02-16">
+    A car designed by Homer J. Simpson that the average american consumer would want to buy.
+    The Homer has two bubble domes: one in the front and one for quarreling kids.
+    The engine sound causes people to think "the world's coming to an end." There
+    are three horns, playing the song "La Cucaracha." The car also features
+    gigantic cupholders.
+  </Document>
+  <Node id="1" name="Motor ACME">
+    <Var name="MotorTempHouse">
+      <Notes>Engine housing temperature</Notes>
+      <Value type="unsigned" slope="0.05" intercept="-40" unit="Cel" min="-40" max="85"/>
+    </Var>
+    <Var name="BottomTemp">
+      <Value type="unsigned" slope="1" intercept="-40" unit="Cel" min="-40" max="85"/>
+    </Var>
+  </Node>
+  <Node id="17" name="Motor alternative supplier"/>
+  <Node id="2" name="Brake ACME"/>
+  <Node id="18" name="Brake alternative supplier"/>
+  <Node id="3" name="Gearbox"/>
+  <Node id="4" name="Crypto"/>
+  <Node id="5" name="CruiseControl"/>
+  <Node id="6" name="Steering"/>
+  <Node id="7" name="Fuel"/>
+  <Node id="8" name="Clock"/>
+  <Node id="9" name="Radio"/>
+  <Node id="10" name="Navigation"/>
+  <Node id="11" name="BodyControl"/>
+  <Node id="12" name="BodyComputer"/>
+  <Node id="13" name="DoorLocking"/>
+  <Node id="14" name="Seat"/>
+  <Node id="15" name="Climate"/>
+  <Node id="16" name="ParkDistance"/>
+
+  <Bus name="Motor">
+    <Message id="0x00A" name="Airbag">
+      <Producer>
+        <NodeRef id="2"/>
+      </Producer>
+      <Signal name="DriverAirbagFired" offset="0"/>
+      <Signal name="CodriverAirbagFired" offset="1"/>
+      <Signal name="DriverSeatOccupied" offset="2"/>
+      <Signal name="CodriverSeatOccupied" offset="3"/>
+      <Signal name="DriverSeatbeltLocked" offset="4"/>
+      <Signal name="CodriverSeatbeltLocked" offset="5"/>
+      <Signal name="AirbagConfiguration" offset="8" length="8"/>
+      <Signal name="SeatConfiguration" offset="16" length="8"/>
+    </Message>
+
+    <Message id="0x0B2" name="ABS" triggered="true" interval="100">
+      <Notes>Anti lock brake system</Notes>
+      <Producer>
+        <NodeRef id="2"/>
+        <NodeRef id="18"/>
+      </Producer>
+
+      <Multiplex name="ABS_InfoMux" offset="16" length="2">
+        <MuxGroup count="0">
+          <Signal name="Info0" offset="0" length="8"/>
+          <Signal name="Info1" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="1">
+          <Signal name="Info2" offset="0" length="8"/>
+          <Signal name="Info3" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="2">
+          <Signal name="Info4" offset="0" length="8"/>
+          <Signal name="Info5" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="3">
+          <Signal name="Info6" offset="0" length="8"/>
+          <Signal name="Info7" offset="8" length="8"/>
+        </MuxGroup>
+      </Multiplex>
+      <Signal name="OutsideTemp" offset="18" length="12" endianess="little">
+        <Notes>Outside temperature.</Notes>
+        <Consumer>
+          <NodeRef id="12"/>
+        </Consumer>
+        <Value type="unsigned" slope="0.05" intercept="-40" unit="Cel" min="0" max="100"/>
+        <LabelSet>
+          <Label name="init" value="0"/>
+          <LabelGroup type="error" name="Sensor error" from="4090" to="4095"/>
+        </LabelSet>
+      </Signal>
+      <Signal name="SpeedKm" offset="30" length="24">
+        <Notes>Middle speed of front wheels in kilometers per hour.</Notes>
+        <Consumer>
+          <NodeRef id="12"/>
+        </Consumer>
+        <Value slope="0.2" intercept="0" unit="km/h"/>
+        <LabelSet>
+          <Label type="error" name="invalid" value="16777215"/>
+        </LabelSet>
+      </Signal>
+      <Signal name="Handbrake" offset="54" length="8"/>
+    </Message>
+
+    <Message id="0x37F" name="CruiseControlStatus">
+      <Producer>
+        <NodeRef id="5"/>
+      </Producer>
+      <Signal name="CCEnabled" offset="0"/>
+      <Signal name="CCActivated" offset="1"/>
+      <Signal name="SpeedKm" offset="2" length="16"/>
+    </Message>
+
+    <Message id="0x400" name="Emission">
+      <Producer>
+        <NodeRef id="1"/>
+        <NodeRef id="17"/>
+      </Producer>
+      <Signal name="MIL" offset="0"/>
+      <Signal name="Enginespeed" offset="1" length="16"/>
+      <Signal name="NoxSensor" offset="17" length="16"/>
+    </Message>
+
+    <Message id="0x55B" name="SteeringInfo">
+      <Producer>
+        <NodeRef id="6"/>
+      </Producer>
+      <Signal name="RightHandDrive" offset="0"/>
+      <Signal name="WheelAngle" offset="1" length="14">
+        <Value unit="deg" slope="0.1" intercept="-800"/>
+        <LabelSet>
+          <Label name="left" value="0"/>
+          <Label name="straight" value="8000"/>
+          <Label name="right" value="16000"/>
+          <LabelGroup name="undefined" from="16001" to="16381" type="invalid"/>
+          <Label name="init" value="16382" type="invalid"/>
+          <Label name="sensor " value="16383" type="error"/>
+        </LabelSet>
+      </Signal>
+    </Message>
+
+    <Message id="0x667" name="AntiTheft">
+      <Producer>
+        <NodeRef id="4"/>
+      </Producer>
+      <Signal name="Challenge" offset="0" length="64"/>
+    </Message>
+
+
+    <Message id="0x2C2" name="Gear">
+      <Producer>
+        <NodeRef id="3"/>
+      </Producer>
+      <Signal name="EngagedGear" offset="12" length="4">
+        <Notes>Currently engaged gear.</Notes>
+        <Consumer>
+          <NodeRef id="1"/>
+          <NodeRef id="17"/>
+        </Consumer>
+        <LabelSet>
+          <Label name="disengaged" value="0" type="value"/>
+          <Label name="1" value="1"/>
+          <Label name="2" value="2"/>
+          <Label name="3" value="3"/>
+          <Label name="4" value="4"/>
+          <Label name="5" value="5"/>
+          <Label name="6" value="6"/>
+          <LabelGroup name="undefined" from="7" to="9"/>
+          <Label name="reverse" value="10"/>
+          <LabelGroup name="undefined" from="11" to="14"/>
+          <Label type="error" name="Unspecific error" value="15"/>
+        </LabelSet>
+      </Signal>
+    </Message>
+  </Bus>
+  <Bus name="Instrumentation" baudrate="125000">
+    <Message id="0x260" name="Headlights">
+      <Producer>
+        <NodeRef id="11"/>
+      </Producer>
+      <Signal name="DRL" offset="0"/>
+      <Signal name="Low" offset="1"/>
+      <Signal name="High" offset="2"/>
+      <Signal name="Fog" offset="3"/>
+      <Signal name="Turnsignal_L" offset="4"/>
+      <Signal name="Turnsignal_R" offset="5"/>
+    </Message>
+
+    <Message id="0x270" name="Wiper">
+      <Producer>
+        <NodeRef id="11"/>
+      </Producer>
+      <Signal name="WiperMode" offset="0" length="8"/>
+    </Message>
+
+    <Message id="0x385" name="BCC" count="10" triggered="true" interval="200">
+      <Producer>
+        <NodeRef id="12"/>
+      </Producer>
+      <Signal name="Milage1" offset="0" length="24">
+        <Value slope="0.1" unit="km"/>
+      </Signal>
+      <Signal name="Milage2" offset="24" length="24">
+        <Value slope="0.1" unit="km"/>
+      </Signal>
+    </Message>
+
+    <Message id="0x5A2" name="TankController" interval="200">
+      <Producer>
+        <NodeRef id="7"/>
+      </Producer>
+      <Signal name="TankLevel" offset="0" length="16"/>
+      <Signal name="TankTemperature" offset="16" length="16">
+        <Value unit="Cel" type="signed"/>
+      </Signal>
+      <Signal name="FillingStatus" offset="32" length="4"/>
+    </Message>
+
+    <Message id="0x765" name="ParksensorFront" interval="100">
+      <Producer>
+        <NodeRef id="16"/>
+      </Producer>
+      <Signal name="Sensor1" offset="0" length="16"/>
+      <Signal name="Sensor2" offset="16" length="16"/>
+      <Signal name="Sensor3" offset="32" length="16"/>
+      <Signal name="Sensor4" offset="48" length="16"/>
+    </Message>
+
+    <Message id="0x766" name="ParksensorBack" interval="100">
+      <Producer>
+        <NodeRef id="16"/>
+      </Producer>
+      <Signal name="Sensor5" offset="0" length="16"/>
+      <Signal name="Sensor6" offset="16" length="16"/>
+      <Signal name="Sensor7" offset="32" length="16"/>
+      <Signal name="Sensor8" offset="48" length="16"/>
+    </Message>
+  </Bus>
+  <Bus name="Comfort" baudrate="125000">
+    <Message id="0x21C" name="Temperature">
+      <Producer>
+        <NodeRef id="15"/>
+      </Producer>
+      <Signal name="InsideTempC" offset="0" length="12">
+        <Value type="unsigned" unit="Cel" slope="0.05" intercept="-70"/>
+      </Signal>
+      <Signal name="OutsideTempC" offset="12" length="12">
+        <Value type="unsigned" unit="Cel" slope="0.05" intercept="-70"/>
+      </Signal>
+    </Message>
+
+    <Message id="0x21D" name="AirCondition">
+      <Producer>
+        <NodeRef id="15"/>
+      </Producer>
+      <Signal name="AirConditionOnOff" offset="0"/>
+    </Message>
+
+    <Message id="0x3AB" name="FrontLeftDoor">
+      <Producer>
+        <NodeRef id="13"/>
+      </Producer>
+    </Message>
+
+    <Message id="0x3BB" name="FrontRightDoor">
+      <Producer>
+        <NodeRef id="13"/>
+      </Producer>
+    </Message>
+
+    <Message id="0x3CB" name="BackLeftDoor">
+      <Producer>
+        <NodeRef id="13"/>
+      </Producer>
+    </Message>
+
+    <Message id="0x3DB" name="BackRightDoor">
+      <Producer>
+        <NodeRef id="13"/>
+      </Producer>
+    </Message>
+
+    <Message id="0x3EB" name="TrunkLid">
+      <Producer>
+        <NodeRef id="13"/>
+      </Producer>
+    </Message>
+
+    <Message id="0x55B" name="DriverSeat">
+      <Producer>
+        <NodeRef id="14"/>
+      </Producer>
+      <Signal name="Headrest" offset="0" length="8"/>
+      <Signal name="Backrest" offset="8" length="8"/>
+      <Signal name="SeatPos" offset="16" length="8"/>
+    </Message>
+
+    <Message id="0x55C" name="CodriverSeat">
+      <Producer>
+        <NodeRef id="14"/>
+      </Producer>
+      <Signal name="Headrest" offset="0" length="8"/>
+      <Signal name="Backrest" offset="8" length="8"/>
+      <Signal name="SeatPos" offset="16" length="8"/>
+    </Message>
+
+    <Message id="0x79A" name="Radio">
+      <Producer>
+        <NodeRef id="9"/>
+      </Producer>
+      <Multiplex name="StationMux" offset="0" length="8">
+        <MuxGroup count="0">
+          <Signal name="StationId1" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="1">
+          <Signal name="StationId2" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="2">
+          <Signal name="StationId3" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="3">
+          <Signal name="StationId4" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="4">
+          <Signal name="StationId5" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="5">
+          <Signal name="StationId6" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="6">
+          <Signal name="StationId7" offset="8" length="8"/>
+        </MuxGroup>
+        <MuxGroup count="7">
+          <Signal name="StationId7" offset="8" length="8"/>
+        </MuxGroup>
+      </Multiplex>
+      <Signal name="SignalStrength" offset="16" length="16"/>
+      <Signal name="IsEnabled" offset="32"/>
+      <Signal name="TrafficInfo" offset="33"/>
+      <Signal name="Mute" offset="34"/>
+    </Message>
+
+    <Message id="0x7A9" name="Navigation">
+      <Producer>
+        <NodeRef id="10"/>
+      </Producer>
+      <Signal name="IsEnabled" offset="0"/>
+      <Signal name="Announcements" offset="1"/>
+      <Signal name="Guidance" offset="2" length="8"/>
+    </Message>
+
+    <Message id="0xDA7E" name="DateTime" format="extended">
+      <Producer>
+        <NodeRef id="8"/>
+      </Producer>
+      <Signal name="Day" offset="0" length="8">
+        <Value unit="d" min="1" max="31"/>
+      </Signal>
+      <Signal name="Month" offset="8" length="8">
+        <Value unit="mo" min="1" max="12"/>
+      </Signal>
+      <Signal name="Year" offset="16" length="8">
+        <Notes>Year starts with offset 2000. 2012 would be value 12.</Notes>
+        <Value unit="a" min="0" max="100"/>
+      </Signal>
+      <Signal name="Weekday" offset="24" length="8"/>
+      <Signal name="Hour" offset="32" length="8">
+        <Value unit="h" min="0" max="23"/>
+      </Signal>
+      <Signal name="Minute" offset="40" length="8">
+        <Value unit="min" min="0" max="59"/>
+      </Signal>
+      <Signal name="Second" offset="48" length="8">
+        <Value unit="s" min="0" max="59"/>
+      </Signal>
+    </Message>
+  </Bus>
+</NetworkDefinition>

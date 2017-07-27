@@ -1,8 +1,9 @@
+import pyparsing
+
 from .formats import dbc
 from .file import File
 from .message import Message
 from .signal import Signal
-
 
 def load(fp):
     """Read and parse given database file-like object and return a
@@ -15,10 +16,21 @@ def load(fp):
 
     """
 
-    db = File()
-    db.add_dbc(fp)
+    try:
+        db = File()
+        db.add_dbc(fp)
+        return db
+    except pyparsing.ParseException:
+        fp.seek(0)
 
-    return db
+    try:
+        db = File()
+        db.add_kcd(fp)
+        return db
+    except:
+        fp.seek(0)
+
+    raise ValueError('File format not supported.')
 
 
 def load_file(filename):
@@ -31,7 +43,5 @@ def load_file(filename):
 
     """
 
-    db = File()
-    db.add_dbc_file(filename)
-
-    return db
+    with open(filename, 'r') as fin:
+        return load(fin)

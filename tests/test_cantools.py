@@ -164,7 +164,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[4].name, 'SENSOR_SONARS')
 
         sensor_sonars = db.messages[-1]
-        
+
         self.assertFalse(db.messages[0].is_multiplexed())
         self.assertTrue(sensor_sonars.is_multiplexed())
         self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_no_filt_rear')
@@ -281,6 +281,24 @@ class CanToolsTest(unittest.TestCase):
 
         self.assertEqual(actual_output, expected_output)
 
+    def test_the_homer(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.load_file(filename)
+
+        self.assertEqual(len(db.nodes), 18)
+        self.assertEqual(db.nodes[0].name, 'Motor ACME')
+        self.assertEqual(db.nodes[1].name, 'Motor alternative supplier')
+        self.assertEqual(len(db.messages), 25)
+        self.assertEqual(len(db.messages[0].signals), 8)
+        self.assertEqual(db.messages[0].signals[0].name, 'SeatConfiguration')
+        self.assertEqual(db.messages[0].signals[0].start, 16)
+        self.assertEqual(db.messages[0].signals[0].length, 8)
+
+    def test_load_bad_format(self):
+        with self.assertRaises(ValueError) as cm:
+            cantools.db.load(StringIO(''))
+
+        self.assertEqual(str(cm.exception), 'File format not supported.')
 
 if __name__ == '__main__':
     unittest.main()

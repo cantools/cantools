@@ -261,8 +261,8 @@ class CanToolsTest(unittest.TestCase):
         input_data = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
   vcan0  064   [8]  F0 01 FF FF FF FF FF FF
 """
-        expected_output = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 :: SENSOR_SONARS(SENSOR_SONARS_rear: 0.0 , SENSOR_SONARS_right: 0.0 , SENSOR_SONARS_middle: 0.0 , SENSOR_SONARS_left: 0.0 , SENSOR_SONARS_err_count: 15 , SENSOR_SONARS_mux: 0 )
-  vcan0  064   [8]  F0 01 FF FF FF FF FF FF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240 )
+        expected_output = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 :: SENSOR_SONARS(SENSOR_SONARS_rear: 0.0, SENSOR_SONARS_right: 0.0, SENSOR_SONARS_middle: 0.0, SENSOR_SONARS_left: 0.0, SENSOR_SONARS_err_count: 15, SENSOR_SONARS_mux: 0)
+  vcan0  064   [8]  F0 01 FF FF FF FF FF FF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
 """
 
         stdin = sys.stdin

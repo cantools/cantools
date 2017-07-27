@@ -259,7 +259,7 @@ def _dump_messages(database):
                 offset=signal.offset,
                 minimum=signal.minimum,
                 maximum=signal.maximum,
-                unit='-' if signal.unit is None else signal.unit))
+                unit='' if signal.unit is None else signal.unit))
 
         bo.append('\n'.join(msg))
 
@@ -557,7 +557,7 @@ def _load_messages(tokens,
                             offset=num(signal[3][1]),
                             minimum=num(signal[4][0]),
                             maximum=num(signal[4][1]),
-                            unit=None if signal[5] == '-' else signal[5],
+                            unit=None if signal[5] == '' else signal[5],
                             choices=get_choices(int(message[1]),
                                                 signal[1][0]),
                             comment=get_comment(int(message[1]),

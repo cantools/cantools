@@ -93,7 +93,7 @@ def _load_signal_element(signal):
                   multiplexer_id=None)
 
 
-def _load_message_element(message):
+def _load_message_element(message, bus_name):
     """Load given message element and return a message object.
 
     """
@@ -135,7 +135,8 @@ def _load_message_element(message):
                    send_type=None,
                    cycle_time=None,
                    signals=signals,
-                   comment=notes)
+                   comment=notes,
+                   bus_name=bus_name)
 
 
 def dump_string(database):
@@ -155,8 +156,9 @@ def load_string(string):
     nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
     messages = []
 
-    for message in root.findall('./ns:Bus/ns:Message', NAMESPACES):
-        messages.append(_load_message_element(message))
+    for bus in root.findall('ns:Bus', NAMESPACES):
+        for message in bus.findall('ns:Message', NAMESPACES):
+            messages.append(_load_message_element(message, bus.attrib['name']))
 
     return Database(messages,
                     [Node(name=node['name'], comment=None) for node in nodes],

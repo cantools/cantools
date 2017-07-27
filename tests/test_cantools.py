@@ -296,6 +296,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.nodes[1].name, 'Motor alternative supplier')
         self.assertEqual(len(db.messages), 25)
         self.assertEqual(len(db.messages[0].signals), 8)
+        self.assertEqual(db.messages[0].bus_name, 'Motor')
+
+        self.assertEqual(db.messages[-1].bus_name, 'Comfort')
 
         seat_configuration = db.messages[0].signals[0]
 

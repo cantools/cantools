@@ -650,6 +650,7 @@ def load_string(string):
 
     return Database(messages,
                     nodes,
+                    [],
                     attributes,
                     default_attrs,
                     version)

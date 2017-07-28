@@ -1,11 +1,17 @@
 # Load and dump a CAN database in KCD format.
 import logging
 
-from xml.etree.ElementTree import fromstring
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+from xml.etree import ElementTree
 
 from ..signal import Signal
 from ..message import Message
 from ..node import Node
+from ..bus import Bus
 from ..database import Database
 
 from .utils import num
@@ -154,14 +160,19 @@ def load_string(string):
 
     root = fromstring(string)
     nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
+    buses = []
     messages = []
 
     for bus in root.findall('ns:Bus', NAMESPACES):
+        bus_name = bus.attrib['name']
+        buses.append(Bus(bus_name))
+
         for message in bus.findall('ns:Message', NAMESPACES):
-            messages.append(_load_message_element(message, bus.attrib['name']))
+            messages.append(_load_message_element(message, bus_name))
 
     return Database(messages,
                     [Node(name=node['name'], comment=None) for node in nodes],
+                    buses,
                     [],
                     [],
                     None)

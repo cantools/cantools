@@ -292,6 +292,7 @@ class CanToolsTest(unittest.TestCase):
         db = cantools.db.load_file(filename)
 
         self.assertEqual(len(db.nodes), 18)
+        self.assertEqual(len(db.buses), 3)
         self.assertEqual(db.nodes[0].name, 'Motor ACME')
         self.assertEqual(db.nodes[1].name, 'Motor alternative supplier')
         self.assertEqual(len(db.messages), 25)

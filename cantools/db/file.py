@@ -20,11 +20,13 @@ class File(object):
     def __init__(self,
                  messages=None,
                  nodes=None,
+                 buses=None,
                  attributes=None,
                  default_attrs=None,
                  version=None):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
+        self._buses = buses if buses else []
         self.attributes = attributes if attributes else []
         self.default_attrs = default_attrs if default_attrs else []
         self._frame_id_to_message = {}
@@ -45,6 +47,14 @@ class File(object):
         """
 
         return self._nodes
+
+    @property
+    def buses(self):
+        """A list of CAN buses in the database.
+
+        """
+
+        return self._buses
 
     @property
     def version(self):
@@ -93,6 +103,7 @@ class File(object):
         for message in database.messages:
             self.add_message(message)
         self._nodes = database.nodes
+        self._buses = database.buses
         self.attributes = database.attributes
         self.default_attrs = database.default_attrs
         self._version = database.version
@@ -125,6 +136,7 @@ class File(object):
         for message in database.messages:
             self.add_message(message)
         self._nodes = database.nodes
+        self._buses = database.buses
         self.attributes = database.attributes
         self.default_attrs = database.default_attrs
         self._version = database.version
@@ -150,6 +162,7 @@ class File(object):
 
         return dbc.dump_string(Database(self._messages,
                                         self._nodes,
+                                        self._buses,
                                         self.attributes,
                                         self.default_attrs,
                                         self._version))
@@ -161,6 +174,7 @@ class File(object):
 
         return kcd.dump_string(Database(self._messages,
                                         self._nodes,
+                                        self._buses,
                                         self.attributes,
                                         self.default_attrs,
                                         self._version))

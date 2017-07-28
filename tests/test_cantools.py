@@ -292,6 +292,7 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.load_file(filename)
 
+        self.assertEqual(db.version, None)
         self.assertEqual(len(db.nodes), 18)
         self.assertEqual(db.nodes[0].name, 'Motor ACME')
         self.assertEqual(db.nodes[1].name, 'Motor alternative supplier')
@@ -299,8 +300,16 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.buses[0].name, 'Motor')
         self.assertEqual(db.buses[1].name, 'Instrumentation')
         self.assertEqual(db.buses[2].name, 'Comfort')
+        self.assertEqual(db.buses[0].comment, None)
         self.assertEqual(len(db.messages), 25)
+        self.assertEqual(db.messages[0].frame_id, 0xa)
+        self.assertEqual(db.messages[0].is_extended_frame, False)
+        self.assertEqual(db.messages[0].name, 'Airbag')
+        self.assertEqual(db.messages[0].length, 8)
         self.assertEqual(len(db.messages[0].signals), 8)
+        self.assertEqual(db.messages[0].comment, None)
+        self.assertEqual(db.messages[0].send_type, None)
+        self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].bus_name, 'Motor')
 
         self.assertEqual(db.messages[-1].bus_name, 'Comfort')
@@ -318,6 +327,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(seat_configuration.minimum, None)
         self.assertEqual(seat_configuration.maximum, None)
         self.assertEqual(seat_configuration.unit, None)
+        self.assertEqual(seat_configuration.choices, None)
         self.assertEqual(seat_configuration.comment, None)
 
         tank_temperature = db.messages[10].signals[1]
@@ -333,6 +343,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(tank_temperature.minimum, None)
         self.assertEqual(tank_temperature.maximum, None)
         self.assertEqual(tank_temperature.unit, 'Cel')
+        self.assertEqual(tank_temperature.choices, None)
         self.assertEqual(tank_temperature.comment, None)
 
         speed_km = db.messages[1].signals[1]
@@ -348,6 +359,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(speed_km.minimum, None)
         self.assertEqual(speed_km.maximum, None)
         self.assertEqual(speed_km.unit, 'km/h')
+        self.assertEqual(speed_km.choices, None)
         self.assertEqual(speed_km.comment,
                          'Middle speed of front wheels in kilometers per hour.')
 
@@ -364,6 +376,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.minimum, 0)
         self.assertEqual(outside_temp.maximum, 100)
         self.assertEqual(outside_temp.unit, 'Cel')
+        self.assertEqual(outside_temp.choices, None)
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
 
     def test_load_bad_format(self):

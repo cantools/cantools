@@ -96,7 +96,7 @@ class Signal(object):
 
     @property
     def minimum(self):
-        """The minimum value of the signal.
+        """The minimum value of the signal, or ``None`` if unavailable.
 
         """
 
@@ -104,7 +104,7 @@ class Signal(object):
 
     @property
     def maximum(self):
-        """The maximum value of the signal.
+        """The maximum value of the signal, or ``None`` if unavailable.
 
         """
 
@@ -112,7 +112,7 @@ class Signal(object):
 
     @property
     def unit(self):
-        """The unit of the signal as a string.
+        """The unit of the signal as a string, or ``None`` if unavailable.
 
         """
 
@@ -120,7 +120,8 @@ class Signal(object):
 
     @property
     def choices(self):
-        """A dictionary mapping signal values to enumerated choices.
+        """A dictionary mapping signal values to enumerated choices, or
+        ``None`` if unavailable.
 
         """
 
@@ -128,7 +129,7 @@ class Signal(object):
 
     @property
     def comment(self):
-        """The signal comment, or ``None`` if no comment is available.
+        """The signal comment, or ``None`` if unavailable.
 
         """
 

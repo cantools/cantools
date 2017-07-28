@@ -58,7 +58,7 @@ class File(object):
 
     @property
     def version(self):
-        """The database version.
+        """The database version, or ``None`` if unavailable.
 
         """
 

@@ -21,7 +21,7 @@ class Bus(object):
 
     @property
     def comment(self):
-        """The bus comment, or ``None`` if no comment is available.
+        """The bus comment, or ``None`` if unavailable.
 
         """
 

@@ -21,7 +21,7 @@ class Node(object):
 
     @property
     def comment(self):
-        """The node comment, or ``None`` if no comment is available.
+        """The node comment, or ``None`` if unavailable.
 
         """
 

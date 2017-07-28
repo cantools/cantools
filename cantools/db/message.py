@@ -135,7 +135,7 @@ class Message(object):
 
     @property
     def comment(self):
-        """The message comment, or ``None`` if no comment is available.
+        """The message comment, or ``None`` if unavailable.
 
         """
 
@@ -151,7 +151,7 @@ class Message(object):
 
     @property
     def send_type(self):
-        """The message send type.
+        """The message send type, or ``None`` if unavailable.
 
         """
 
@@ -159,7 +159,7 @@ class Message(object):
 
     @property
     def cycle_time(self):
-        """The message cycle time.
+        """The message cycle time, or ``None`` if unavailable.
 
         """
 
@@ -167,7 +167,7 @@ class Message(object):
 
     @property
     def bus_name(self):
-        """The message bus name.
+        """The message bus name, or ``None`` if unavailable.
 
         """
 

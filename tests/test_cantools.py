@@ -2,6 +2,7 @@ import os
 import unittest
 import sys
 import logging
+from xml.etree import ElementTree
 
 import cantools
 
@@ -292,9 +293,12 @@ class CanToolsTest(unittest.TestCase):
         db = cantools.db.load_file(filename)
 
         self.assertEqual(len(db.nodes), 18)
-        self.assertEqual(len(db.buses), 3)
         self.assertEqual(db.nodes[0].name, 'Motor ACME')
         self.assertEqual(db.nodes[1].name, 'Motor alternative supplier')
+        self.assertEqual(len(db.buses), 3)
+        self.assertEqual(db.buses[0].name, 'Motor')
+        self.assertEqual(db.buses[1].name, 'Instrumentation')
+        self.assertEqual(db.buses[2].name, 'Comfort')
         self.assertEqual(len(db.messages), 25)
         self.assertEqual(len(db.messages[0].signals), 8)
         self.assertEqual(db.messages[0].bus_name, 'Motor')
@@ -367,6 +371,15 @@ class CanToolsTest(unittest.TestCase):
             cantools.db.load(StringIO(''))
 
         self.assertEqual(str(cm.exception), 'File format not supported.')
+
+    def test_add_bad_kcd_string(self):
+        db = cantools.db.File()
+
+        with self.assertRaises(ElementTree.ParseError) as cm:
+            db.add_kcd_string('not xml')
+
+        self.assertEqual(str(cm.exception), 'syntax error: line 1, column 0')
+
 
 # This file is not '__main__' when executed via 'python setup.py
 # test'.

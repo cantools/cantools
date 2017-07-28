@@ -158,7 +158,7 @@ def load_string(string):
 
     """
 
-    root = fromstring(string)
+    root = ElementTree.fromstring(string)
     nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
     buses = []
     messages = []

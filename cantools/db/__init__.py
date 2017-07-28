@@ -1,3 +1,5 @@
+from xml.etree import ElementTree
+
 import pyparsing
 
 from .formats import dbc
@@ -56,7 +58,7 @@ def load_string(string):
         db = File()
         db.add_kcd_string(string)
         return db
-    except:
+    except ElementTree.ParseError:
         pass
 
     raise ValueError('File format not supported.')

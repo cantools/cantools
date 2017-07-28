@@ -367,10 +367,8 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
 
     def test_load_bad_format(self):
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormat):
             cantools.db.load(StringIO(''))
-
-        self.assertEqual(str(cm.exception), 'File format not supported.')
 
     def test_add_bad_kcd_string(self):
         db = cantools.db.File()

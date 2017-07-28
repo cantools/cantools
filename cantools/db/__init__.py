@@ -8,9 +8,15 @@ from .message import Message
 from .signal import Signal
 
 
+class UnsupportedDatabaseFormat(Exception):
+    pass
+
+
 def load_file(filename):
     """Open, read and parse given database file and return a
-    :class:`~cantools.db.File` object with its contents.
+    :class:`~cantools.db.File` object with its contents. Raises an
+    exception if given file does not contain a supported database
+    format.
 
     >>> db = cantools.db.load_file('foo.dbc')
     >>> db.version
@@ -24,12 +30,14 @@ def load_file(filename):
 
 def load(fp):
     """Read and parse given database file-like object and return a
-    :class:`~cantools.db.File` object with its contents.
+    :class:`~cantools.db.File` object with its contents. Raises an
+    exception if given file-like object does not contain a supported
+    database format.
 
-    >>> with open('foo.dbc') as fin:
+    >>> with open('foo.kcd') as fin:
     ...    db = cantools.db.load(fin)
     >>> db.version
-    '1.0'
+    None
 
     """
 
@@ -38,7 +46,8 @@ def load(fp):
 
 def load_string(string):
     """Parse given database string and return a :class:`~cantools.db.File`
-    object with its contents.
+    object with its contents. Raises an exception if given string does
+    not contain a supported database format.
 
     >>> with open('foo.dbc') as fin:
     ...    db = cantools.db.load_string(fin.read())
@@ -61,4 +70,4 @@ def load_string(string):
     except ElementTree.ParseError:
         pass
 
-    raise ValueError('File format not supported.')
+    raise UnsupportedDatabaseFormat()

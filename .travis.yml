@@ -6,6 +6,6 @@ install:
   - pip install coveralls
   - pip install -r requirements.txt
 script:
-  coverage run --source=cantools.db setup.py test
+  coverage run --source=cantools setup.py test
 after_success:
   coveralls

@@ -56,12 +56,12 @@ a float, a boolean, a byte string and a string:
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> pack('u5s5f32b1r13t40', 1, -1, 3.75, True, b'\xff\xff', u'hello')
+    >>> pack('u5s5f32b1r13t40', 1, -1, 3.75, True, b'\xff\xff', 'hello')
     b'\x0f\xd0\x1c\x00\x00?\xffhello'
     >>> unpack('u5s5f32b1r13t40', b'\x0f\xd0\x1c\x00\x00?\xffhello')
-    (1, -1, 3.75, True, b'\xff\xf8', u'hello')
-    >>> calcsize('u5s5f32b1r13t24')
-    80
+    (1, -1, 3.75, True, b'\xff\xf8', 'hello')
+    >>> calcsize('u5s5f32b1r13t40')
+    96
 
 The same format and values as in the previous example, but using LSB
 (Least Significant Bit) first instead of the default MSB (Most
@@ -70,19 +70,20 @@ Significant Bit) first:
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> pack('<u5s5f32b1r13', 1, -1, 3.75, True, b'\xff\xff')
-    b'\x87\xc0\x00\x03\x80\xbf\xff'
-    >>> unpack('<u5s5f32b1r13', b'\x87\xc0\x00\x03\x80\xbf\xff')
-    (1, -1, 3.75, True, b'\xff\xf8')
-    >>> calcsize('<u5s5f32b1r13')
-    56
+    >>> pack('<u5s5f32b1r13t40', 1, -1, 3.75, True, b'\xff\xff', 'hello')
+    b'\x87\xc0\x00\x03\x80\xbf\xff\xf666\xa6\x16'
+    >>> unpack('<u5s5f32b1r13t40', b'\x87\xc0\x00\x03\x80\xbf\xff\xf666\xa6\x16')
+    (1, -1, 3.75, True, b'\xff\xf8', 'hello')
+    >>> calcsize('<u5s5f32b1r13t40')
+    96
 
 An example of unpacking values from a hexstring and a binary file:
 
 .. code-block:: python
 
     >>> from bitstruct import *
-    >>> unpack('s17s13r24', '0123456789abcdef'.decode('hex'))
+    >>> from binascii import unhexlify
+    >>> unpack('s17s13r24', unhexlify('0123456789abcdef'))
     (582, -3751, b'\xe2j\xf3')
     >>> with open("test.bin", "rb") as fin:
     ...     unpack('s17s13r24', fin.read(8))

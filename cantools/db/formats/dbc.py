@@ -530,6 +530,12 @@ def _load_messages(tokens,
 
     messages = []
 
+    def compute_start_bit(start_bit, byte_order):
+        if byte_order == '0':
+            start_bit = (8 * (start_bit // 8) + (7 - (start_bit % 8)))
+
+        return start_bit
+
     for message in tokens:
         if message[0] != MESSAGE:
             continue
@@ -546,7 +552,8 @@ def _load_messages(tokens,
             send_type=get_send_type(int(message[1])),
             cycle_time=get_cycle_time(int(message[1])),
             signals=[Signal(name=signal[1][0],
-                            start=int(signal[2][0]),
+                            start=compute_start_bit(int(signal[2][0]),
+                                                    signal[2][2]),
                             length=int(signal[2][1]),
                             nodes=signal[6],
                             byte_order=('big_endian'

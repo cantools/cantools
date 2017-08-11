@@ -13,8 +13,11 @@ def _create_message_encode_decode_format(signals):
         if padding > 0:
             fmt += 'p{}'.format(padding)
 
-        fmt += '{}{}'.format('s' if signal.is_signed else 'u',
-                             signal.length)
+        fmt += '{}{}{}'.format('>'
+                               if signal.byte_order == 'little_endian'
+                               else '<',
+                               's' if signal.is_signed else 'u',
+                               signal.length)
         end = signal.start
 
     return fmt

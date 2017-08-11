@@ -14,6 +14,8 @@ except ImportError:
 
 class CanToolsTest(unittest.TestCase):
 
+    maxDiff = None
+
     def test_vehicle(self):
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
         db = cantools.db.load_file(filename)
@@ -118,7 +120,7 @@ class CanToolsTest(unittest.TestCase):
         }
 
         encoded = db.encode_message(example_message_frame_id, data)
-        self.assertEqual(encoded, b'\xc1\x1b\x00\x00\x00\x00\x00\x00')
+        self.assertEqual(encoded, b'\x03`\x07\x00\x00\x00\x00\x00')
 
         # Encode with enumerated values.
         data = {
@@ -128,7 +130,7 @@ class CanToolsTest(unittest.TestCase):
         }
 
         encoded = db.encode_message(example_message_frame_id, data)
-        self.assertEqual(encoded, b'\xc1\x1b\x00\x00\x00\x00\x00\x00')
+        self.assertEqual(encoded, b'\x03`\x07\x00\x00\x00\x00\x00')
 
         decoded = db.decode_message(example_message_frame_id, encoded)
         self.assertEqual(decoded, data)

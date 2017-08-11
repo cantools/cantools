@@ -233,6 +233,14 @@ def _dump_nodes(database):
 
     return bu
 
+
+def _compute_start_bit(start_bit, byte_order):
+    if byte_order in ['big_endian', '0']:
+        start_bit = (8 * (start_bit // 8) + (7 - (start_bit % 8)))
+
+    return start_bit
+
+
 def _dump_messages(database):
     bo = []
 
@@ -250,7 +258,8 @@ def _dump_messages(database):
                    ' [{minimum}|{maximum}] "{unit}" {nodes}')
             msg.append(fmt.format(
                 name=signal.name,
-                start=signal.start,
+                start=_compute_start_bit(signal.start,
+                                         signal.byte_order),
                 length=signal.length,
                 nodes=', '.join(signal.nodes),
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
@@ -530,12 +539,6 @@ def _load_messages(tokens,
 
     messages = []
 
-    def compute_start_bit(start_bit, byte_order):
-        if byte_order == '0':
-            start_bit = (8 * (start_bit // 8) + (7 - (start_bit % 8)))
-
-        return start_bit
-
     for message in tokens:
         if message[0] != MESSAGE:
             continue
@@ -552,8 +555,8 @@ def _load_messages(tokens,
             send_type=get_send_type(int(message[1])),
             cycle_time=get_cycle_time(int(message[1])),
             signals=[Signal(name=signal[1][0],
-                            start=compute_start_bit(int(signal[2][0]),
-                                                    signal[2][2]),
+                            start=_compute_start_bit(int(signal[2][0]),
+                                                     signal[2][2]),
                             length=int(signal[2][1]),
                             nodes=signal[6],
                             byte_order=('big_endian'

@@ -101,6 +101,27 @@ class CanToolsTest(unittest.TestCase):
         message = db.lookup_message(0x12331)
         self.assertEqual(message.name, 'Fum')
 
+    def test_padding_bit_order(self):
+        """Encode and decode signals with revered bit order
+        """
+    
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'padding_bit_order.dbc')
+        db.add_dbc_file(filename)
+        
+        example_message_frame_id = 1
+        
+        data = {
+            'A': 0x2C9, # should set bit byte[0]bit[1]=1 and byte[1]=C9
+            'B': 1,     # should set byte[0]bit[7]=1
+            'C': 0x2C9, # should set byte[4]bit[1]=1 and byte [5]=C9
+            'D': 0      # should set byte[5]bit[7]=0          
+        }
+      
+        encoded = db.encode_message(example_message_frame_id, data)
+        print(encoded)
+        self.assertEqual(encoded, b'\x82\xC9\x00\x00\x02\xC9\x00\x00')
+        
     def test_motohawk_encode_decode(self):
         """Encode and decode the signals in a ExampleMessage frame.
 

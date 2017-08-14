@@ -102,26 +102,29 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(message.name, 'Fum')
 
     def test_padding_bit_order(self):
-        """Encode and decode signals with revered bit order
+        """Encode and decode signals with reversed bit order.
+
         """
     
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'padding_bit_order.dbc')
         db.add_dbc_file(filename)
         
-        example_message_frame_id = 1
+        msg0_frame_id = 1
         
         data = {
-            'A': 0x2C9, # should set bit byte[0]bit[1]=1 and byte[1]=C9
             'B': 1,     # should set byte[0]bit[7]=1
-            'C': 0x2C9, # should set byte[4]bit[1]=1 and byte [5]=C9
-            'D': 0      # should set byte[5]bit[7]=0          
+            'A': 0x2c9, # should set byte[0]bit[1]=1 and byte[1]=c9
+            'D': 0,     # should set byte[5]bit[7]=0          
+            'C': 0x2c9  # should set byte[4]bit[1]=1 and byte [5]=c9
         }
       
-        encoded = db.encode_message(example_message_frame_id, data)
-        print(encoded)
-        self.assertEqual(encoded, b'\x82\xC9\x00\x00\x02\xC9\x00\x00')
+        encoded = db.encode_message(msg0_frame_id, data)
+        self.assertEqual(encoded, b'\x82\xc9\x00\x00\x02\xc9')
         
+        decoded = db.decode_message(msg0_frame_id, encoded)
+        self.assertEqual(decoded, data)
+
     def test_motohawk_encode_decode(self):
         """Encode and decode the signals in a ExampleMessage frame.
 

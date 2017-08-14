@@ -5,21 +5,18 @@ import bitstruct
 
 def _create_message_encode_decode_format(signals):
     fmt = ''
-    end = 64
+    start = 0
 
     for signal in signals:
-        padding = end - (signal.start + signal.length)
+        padding = (signal.start - start)
 
         if padding > 0:
             fmt += 'p{}'.format(padding)
 
-        fmt += '{}{}{}'.format('>'
-                               if signal.byte_order == 'little_endian'
-                               else '<',
-                               's' if signal.is_signed else 'u',
-                               signal.length)
-        end = signal.start
-
+        fmt += '{}{}'.format('s' if signal.is_signed else 'u',
+                             signal.length)
+        start = (signal.start + signal.length)
+        
     return fmt
 
 
@@ -46,7 +43,6 @@ class Message(object):
         self._length = length
         self._signals = signals
         self._signals.sort(key=lambda s: s.start)
-        self._signals.reverse()
         self._comment = comment
         self._nodes = nodes
         self._send_type = send_type
@@ -211,7 +207,7 @@ class Message(object):
             value = int((scaled_value - signal.offset) / signal.scale)
             decoded_data.append(value)
 
-        return bitstruct.pack(fmt, *decoded_data)[::-1]
+        return bitstruct.pack(fmt, *decoded_data)
 
     def decode(self, data):
         """Decode given data as a message of this type.
@@ -225,7 +221,7 @@ class Message(object):
         data += b'\x00' * (8 - len(data))
 
         if self.is_multiplexed():
-            mux = bitstruct.unpack(self._multiplexer[1], data[::-1])[0]
+            mux = bitstruct.unpack(self._multiplexer[1], data)[0]
 
             if mux not in self._multiplexer_message_by_id:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
@@ -236,7 +232,7 @@ class Message(object):
             signals = self._signals
             fmt = self._fmt
 
-        unpacked_data = bitstruct.unpack(fmt, data[::-1])
+        unpacked_data = bitstruct.unpack(fmt, data)
         decoded_signals = {}
 
         for signal, value in zip(signals, unpacked_data):

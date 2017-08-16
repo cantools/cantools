@@ -16,7 +16,7 @@ class CanToolsTest(unittest.TestCase):
 
     maxDiff = None
 
-    def _test_vehicle(self):
+    def test_vehicle(self):
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
         db = cantools.db.load_file(filename)
         self.assertEqual(len(db.nodes), 1)
@@ -26,11 +26,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(str(db.messages[0]),
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, False, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
-                         "signal('INS_Vel_Sideways_2D', 40, 24, 'little_endian', "
-                         "True, 0.0001, 0, -838, 838, 'm/s', False, None, None, "
-                         "'Sideways Velocity in the vehicle body axes, 2D (no "
-                         "vertical component) .  +ve for motion to the vehicle "
-                         "RHS.')")
+                         "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
+                         "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
+                         "bit is set, invalid when bit is clear.')")
         self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
         i = 0
 
@@ -44,7 +42,7 @@ class CanToolsTest(unittest.TestCase):
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
-    def _test_motohawk(self):
+    def test_motohawk(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
         with open(filename, 'r') as fin:
@@ -74,7 +72,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 1)
         self.assertEqual(len(db.messages[0].signals[0].nodes), 1)
 
-    def _test_foobar(self):
+    def test_foobar(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db.add_dbc_file(filename)
@@ -88,14 +86,14 @@ class CanToolsTest(unittest.TestCase):
                          "node('BAR', 'fam')\n"
                          "\n"
                          "message('Foo', 0x12331, True, 8, 'Foo.')\n"
+                         "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
+                         "0, 1.0, 5.0, 'm', False, None, None, '')\n"
                          "  signal('Foo', 7, 12, 'big_endian', True, 0.01, "
                          "250, 229.53, 270.47, 'degK', False, None, {-1: \'Foo\', "
                          "-2: \'Fie\'}, None)\n"
-                         "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
-                         "0, 1.0, 5.0, 'm', False, None, None, '')\n"
                          "\n"
                          "message('Fum', 0x12331, True, 8, 'Foo.')\n"
-                         "  signal('Fum', 7, 12, 'big_endian', True, 1, 0, 0, 1, "
+                         "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
                          "'None', False, None, None, None)\n")
 
         message = db.lookup_message(0x12331)
@@ -157,7 +155,7 @@ class CanToolsTest(unittest.TestCase):
         decoded = db.decode_message(msg2_frame_id, encoded)
         self.assertEqual(decoded, data)
 
-    def _test_motohawk_encode_decode(self):
+    def test_motohawk_encode_decode(self):
         """Encode and decode the signals in a ExampleMessage frame.
 
         """
@@ -176,7 +174,7 @@ class CanToolsTest(unittest.TestCase):
         }
 
         encoded = db.encode_message(example_message_frame_id, data)
-        self.assertEqual(encoded, b'\x03`\x07\x00\x00\x00\x00\x00')
+        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
 
         # Encode with enumerated values.
         data = {
@@ -186,12 +184,12 @@ class CanToolsTest(unittest.TestCase):
         }
 
         encoded = db.encode_message(example_message_frame_id, data)
-        self.assertEqual(encoded, b'\x03`\x07\x00\x00\x00\x00\x00')
+        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
 
         decoded = db.decode_message(example_message_frame_id, encoded)
         self.assertEqual(decoded, data)
 
-    def _test_socialledge(self):
+    def test_socialledge(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
@@ -232,22 +230,22 @@ class CanToolsTest(unittest.TestCase):
 
         self.assertFalse(db.messages[0].is_multiplexed())
         self.assertTrue(sensor_sonars.is_multiplexed())
-        self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_no_filt_rear')
-        self.assertEqual(sensor_sonars.signals[0].multiplexer_id, 1)
-        self.assertEqual(sensor_sonars.signals[-3].name, 'SENSOR_SONARS_left')
-        self.assertEqual(sensor_sonars.signals[-3].multiplexer_id, 0)
-        self.assertEqual(sensor_sonars.signals[-1].name, 'SENSOR_SONARS_mux')
-        self.assertEqual(sensor_sonars.signals[-1].is_multiplexer, True)
+        self.assertEqual(sensor_sonars.signals[-1].name, 'SENSOR_SONARS_no_filt_rear')
+        self.assertEqual(sensor_sonars.signals[-1].multiplexer_id, 1)
+        self.assertEqual(sensor_sonars.signals[2].name, 'SENSOR_SONARS_left')
+        self.assertEqual(sensor_sonars.signals[2].multiplexer_id, 0)
+        self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_mux')
+        self.assertEqual(sensor_sonars.signals[0].is_multiplexer, True)
 
         self.assertEqual(sensor_sonars.get_multiplexer_signal_name(),
                          'SENSOR_SONARS_mux')
         signals = sensor_sonars.get_signals_by_multiplexer_id(0)
         self.assertEqual(len(signals), 6)
-        self.assertEqual(signals[0].name, 'SENSOR_SONARS_rear')
+        self.assertEqual(signals[-1].name, 'SENSOR_SONARS_rear')
 
         self.assertEqual(db.version, '')
 
-    def _test_socialledge_encode_decode_mux_0(self):
+    def test_socialledge_encode_decode_mux_0(self):
         """Encode and decode the signals in a SENSOR_SONARS frame with mux 0.
 
         """
@@ -272,7 +270,7 @@ class CanToolsTest(unittest.TestCase):
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded, data)
 
-    def _test_socialledge_encode_decode_mux_1(self):
+    def test_socialledge_encode_decode_mux_1(self):
         """Encode and decode the signals in a SENSOR_SONARS frame with mux 1.
 
         """
@@ -321,12 +319,12 @@ class CanToolsTest(unittest.TestCase):
         db.add_message(message)
         self.assertEqual(len(db.messages), 1)
 
-    def _test_command_line_decode(self):
+    def test_command_line_decode(self):
         argv = ['cantools', 'decode', 'tests/files/socialledge.dbc']
         input_data = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
   vcan0  064   [8]  F0 01 FF FF FF FF FF FF
 """
-        expected_output = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 :: SENSOR_SONARS(SENSOR_SONARS_rear: 0.0, SENSOR_SONARS_right: 0.0, SENSOR_SONARS_middle: 0.0, SENSOR_SONARS_left: 0.0, SENSOR_SONARS_err_count: 15, SENSOR_SONARS_mux: 0)
+        expected_output = """  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 :: SENSOR_SONARS(SENSOR_SONARS_mux: 0, SENSOR_SONARS_err_count: 15, SENSOR_SONARS_left: 0.0, SENSOR_SONARS_middle: 0.0, SENSOR_SONARS_right: 0.0, SENSOR_SONARS_rear: 0.0)
   vcan0  064   [8]  F0 01 FF FF FF FF FF FF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
 """
 
@@ -346,7 +344,7 @@ class CanToolsTest(unittest.TestCase):
 
         self.assertEqual(actual_output, expected_output)
 
-    def _test_the_homer(self):
+    def test_the_homer(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.load_file(filename)
 
@@ -372,7 +370,7 @@ class CanToolsTest(unittest.TestCase):
 
         self.assertEqual(db.messages[-1].bus_name, 'Comfort')
 
-        seat_configuration = db.messages[0].signals[0]
+        seat_configuration = db.messages[0].signals[-1]
 
         self.assertEqual(seat_configuration.name, 'SeatConfiguration')
         self.assertEqual(seat_configuration.start, 16)
@@ -421,7 +419,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(speed_km.comment,
                          'Middle speed of front wheels in kilometers per hour.')
 
-        outside_temp = db.messages[1].signals[2]
+        outside_temp = db.messages[1].signals[0]
 
         self.assertEqual(outside_temp.name, 'OutsideTemp')
         self.assertEqual(outside_temp.start, 18)
@@ -437,11 +435,11 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.choices, None)
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
 
-    def _test_load_bad_format(self):
+    def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormat):
             cantools.db.load(StringIO(''))
 
-    def _test_add_bad_kcd_string(self):
+    def test_add_bad_kcd_string(self):
         db = cantools.db.File()
 
         with self.assertRaises(ElementTree.ParseError) as cm:

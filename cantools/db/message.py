@@ -4,6 +4,85 @@ import struct
 import bitstruct
 
 
+def _unscale_value(signal, data):
+    scaled_value = data[signal.name]
+
+    if isinstance(scaled_value, str):
+        for choice_number, choice_string in signal.choices.items():
+            if choice_string == scaled_value:
+                scaled_value = choice_number
+                break
+
+    return int((scaled_value - signal.offset) / signal.scale)
+
+
+
+def _encode_data(data, signals, formats):
+    big_decoded_data = []
+    little_decoded_data = []
+
+    for signal in signals:
+        if signal.byte_order == 'little_endian':
+            continue
+
+        big_decoded_data.append(_unscale_value(signal, data))
+
+    for signal in signals[::-1]:
+        if signal.byte_order == 'big_endian':
+            continue
+
+        little_decoded_data.append(_unscale_value(signal, data))
+
+    big_packed = bitstruct.pack(formats[0], *big_decoded_data)
+    little_packed = bitstruct.pack(formats[1], *little_decoded_data)[::-1]
+    packed_union = (struct.unpack('>Q', big_packed)[0]
+                    | struct.unpack('>Q', little_packed)[0])
+
+    return struct.pack('>Q', packed_union)
+
+
+def _decode_data(data, signals, formats):
+    decoded_signals = {}
+
+    # Big endian signals.
+    big_unpacked = bitstruct.unpack(formats[0], data)
+    i = 0
+
+    for signal in signals:
+        if signal.byte_order == 'little_endian':
+            continue
+
+        value = big_unpacked[i]
+        scaled_value = (signal.scale * value + signal.offset)
+
+        try:
+            decoded_signals[signal.name] = signal.choices[scaled_value]
+        except (KeyError, TypeError):
+            decoded_signals[signal.name] = scaled_value
+
+        i += 1
+
+    # Little endian signals.
+    little_unpacked = bitstruct.unpack(formats[1], data[::-1])[::-1]
+    i = 0
+
+    for signal in signals:
+        if signal.byte_order == 'big_endian':
+            continue
+
+        value = little_unpacked[i]
+        scaled_value = (signal.scale * value + signal.offset)
+
+        try:
+            decoded_signals[signal.name] = signal.choices[scaled_value]
+        except (KeyError, TypeError):
+            decoded_signals[signal.name] = scaled_value
+
+        i += 1
+
+    return decoded_signals
+
+    
 def _create_message_encode_decode_formats(signals):
     # Big endian byte order format.
     big_fmt = ''
@@ -78,7 +157,7 @@ class Message(object):
         self._bus_name = bus_name
 
         # Message encode/decode format.
-        self._fmts = _create_message_encode_decode_formats(self._signals)
+        self._formats = _create_message_encode_decode_formats(self._signals)
 
         # Is it a multiplexed message?
         self._multiplexer = None
@@ -102,7 +181,7 @@ class Message(object):
                     if multiplexer_id not in self._multiplexer_message_by_id:
                         self._multiplexer_message_by_id[multiplexer_id] = {
                             'signals': [],
-                            'fmts': None
+                            'formats': None
                         }
 
                     self._multiplexer_message_by_id[multiplexer_id]['signals'].append(
@@ -117,7 +196,7 @@ class Message(object):
             # Sort the signals and create the encode/decode format.
             for message in self._multiplexer_message_by_id.values():
                 message['signals'].sort(key=lambda s: s.start)
-                message['fmts'] = _create_message_encode_decode_formats(message['signals'])
+                message['formats'] = _create_message_encode_decode_formats(message['signals'])
 
     @property
     def frame_id(self):
@@ -199,17 +278,6 @@ class Message(object):
 
         return self._bus_name
 
-    def _unscale_value(self, signal, data):
-        scaled_value = data[signal.name]
-
-        if isinstance(scaled_value, str):
-            for choice_number, choice_string in signal.choices.items():
-                if choice_string == scaled_value:
-                    scaled_value = choice_number
-                    break
-
-        return int((scaled_value - signal.offset) / signal.scale)
-
     def encode(self, data):
         """Encode given data as a message of this type.
 
@@ -226,32 +294,12 @@ class Message(object):
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
             signals = self._multiplexer_message_by_id[mux]['signals']
-            fmts = self._multiplexer_message_by_id[mux]['fmts']
+            formats = self._multiplexer_message_by_id[mux]['formats']
         else:
             signals = self._signals
-            fmts = self._fmts
+            formats = self._formats
 
-        big_decoded_data = []
-        little_decoded_data = []
-
-        for signal in signals:
-            if signal.byte_order == 'little_endian':
-                continue
-
-            big_decoded_data.append(self._unscale_value(signal, data))
-
-        for signal in signals[::-1]:
-            if signal.byte_order == 'big_endian':
-                continue
-
-            little_decoded_data.append(self._unscale_value(signal, data))
-
-        big_packed = bitstruct.pack(fmts[0], *big_decoded_data)
-        little_packed = bitstruct.pack(fmts[1], *little_decoded_data)[::-1]
-        packed_union = (struct.unpack('>Q', big_packed)[0]
-                        | struct.unpack('>Q', little_packed)[0])
-
-        return struct.pack('>Q', packed_union)
+        return _encode_data(data, signals, formats)
 
     def decode(self, data):
         """Decode given data as a message of this type.
@@ -265,56 +313,20 @@ class Message(object):
         data += b'\x00' * (8 - len(data))
 
         if self.is_multiplexed():
-            mux = bitstruct.unpack(self._multiplexer[1], data)[0]
+            mux = _decode_data(data,
+                               [self._multiplexer[0]],
+                               self._multiplexer[1])[self._multiplexer[0].name]
 
             if mux not in self._multiplexer_message_by_id:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
             signals = self._multiplexer_message_by_id[mux]['signals']
-            fmts = self._multiplexer_message_by_id[mux]['fmts']
+            formats = self._multiplexer_message_by_id[mux]['formats']
         else:
             signals = self._signals
-            fmts = self._fmts
+            formats = self._formats
 
-        decoded_signals = {}
-
-        # Big endian signals.
-        big_unpacked = bitstruct.unpack(fmts[0], data)
-        i = 0
-
-        for signal in signals:
-            if signal.byte_order == 'little_endian':
-                continue
-
-            value = big_unpacked[i]
-            scaled_value = (signal.scale * value + signal.offset)
-
-            try:
-                decoded_signals[signal.name] = signal.choices[scaled_value]
-            except (KeyError, TypeError):
-                decoded_signals[signal.name] = scaled_value
-
-            i += 1
-
-        # Little endian signals.
-        little_unpacked = bitstruct.unpack(fmts[1], data[::-1])[::-1]
-        i = 0
-
-        for signal in signals:
-            if signal.byte_order == 'big_endian':
-                continue
-
-            value = little_unpacked[i]
-            scaled_value = (signal.scale * value + signal.offset)
-
-            try:
-                decoded_signals[signal.name] = signal.choices[scaled_value]
-            except (KeyError, TypeError):
-                decoded_signals[signal.name] = scaled_value
-
-            i += 1
-
-        return decoded_signals
+        return _decode_data(data, signals, formats)
 
     def is_multiplexed(self):
         """Returns ``True`` if the message is multiplexed, otherwise

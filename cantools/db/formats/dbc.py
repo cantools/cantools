@@ -252,7 +252,7 @@ def _dump_messages(database):
                               length=message.length,
                               nodes=message.nodes))
 
-        for signal in message.signals:
+        for signal in message.signals[::-1]:
             fmt = (' SG_ {name} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
                    ' [{minimum}|{maximum}] "{unit}" {nodes}')
@@ -290,7 +290,7 @@ def _dump_comments(database):
             cm.append(fmt.format(frame_id=message.frame_id,
                                  comment=message.comment))
 
-        for signal in message.signals:
+        for signal in message.signals[::-1]:
             if signal.comment is not None:
                 fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
                 cm.append(fmt.format(frame_id=message.frame_id,
@@ -367,7 +367,7 @@ def _dump_choices(database):
     val = []
 
     for message in database.messages:
-        for signal in message.signals:
+        for signal in message.signals[::-1]:
             if signal.choices == None:
                 continue
 

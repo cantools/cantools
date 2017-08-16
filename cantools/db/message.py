@@ -82,7 +82,7 @@ def _decode_data(data, signals, formats):
 
     return decoded_signals
 
-    
+
 def _create_message_encode_decode_formats(signals):
     # Big endian byte order format.
     big_fmt = ''

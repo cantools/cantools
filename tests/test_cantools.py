@@ -155,6 +155,34 @@ class CanToolsTest(unittest.TestCase):
         decoded = db.decode_message(msg2_frame_id, encoded)
         self.assertEqual(decoded, data)
 
+        # Message 3.
+        msg3_frame_id = 4
+
+        data = {
+            'L': 0x0123456789abcdef
+        }
+
+        encoded = db.encode_message(msg3_frame_id, data)
+        self.assertTrue(encoded in [b'\x01\x23\x45\x67\x89\xab\xcd\xf0',
+                                    b'\x01\x23\x45\x67\x89\xab\xcd\xef'])
+
+        decoded = db.decode_message(msg3_frame_id, encoded)
+        self.assertTrue(decoded in [data, {'L': 0x0123456789abcdef + 1}])
+
+        # Message 4.
+        msg4_frame_id = 5
+
+        data = {
+            'M': 0x0123456789abcdef
+        }
+
+        encoded = db.encode_message(msg4_frame_id, data)
+        self.assertTrue(encoded in [b'\xf0\xcd\xab\x89\x67\x45\x23\x01',
+                                    b'\xef\xcd\xab\x89\x67\x45\x23\x01'])
+
+        decoded = db.decode_message(msg4_frame_id, encoded)
+        self.assertTrue(decoded in [data, {'M': 0x0123456789abcdef + 1}])
+
     def test_motohawk_encode_decode(self):
         """Encode and decode the signals in a ExampleMessage frame.
 

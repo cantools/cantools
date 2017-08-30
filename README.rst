@@ -27,40 +27,24 @@ Example usage
 Scripting
 ---------
 
-An example parsing and using a `small DBC-file`_:
+The example starts by parsing a `small DBC-file`_ and printing its
+messages and signals.
 
 .. code-block:: python
 
    >>> import cantools
    >>> from pprint import pprint
    >>> db = cantools.db.load_file('tests/files/motohawk.dbc')
-   >>> db
-   version('1.0')
-
-   node('PCM1', None)
-   node('FOO', None)
-
-   message('ExampleMessage', 0x1f0, False, 8, 'Example message used as template in MotoHawk models.')
-     signal('Enable', 0, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', False, None, {0: 'Disabled', 1: 'Enabled'}, None)
-     signal('AverageRadius', 1, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', False, None, None, '')
-     signal('Temperature', 7, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', False, None, None, None)
-
    >>> db.messages
    [message('ExampleMessage', 0x1f0, 8, 'Example message used as template in MotoHawk models.')]
    >>> example_message = db.messages[0]
-   >>> example_message.comment
-   'Example message used as template in MotoHawk models.'
    >>> pprint(example_message.signals)
    [signal('Enable', 0, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', False, None, {0: 'Disabled', 1: 'Enabled'}, None),
     signal('AverageRadius', 1, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', False, None, None, ''),
     signal('Temperature', 7, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', False, None, None, None)]
-   >>> db.nodes
-   [node('PCM1', None), node('FOO', None)]
-   >>> db.version
-   '1.0'
 
-The example continues encoding a message and sending it on a CAN bus
-using the `python-can`_ package.
+The example continues `encoding`_ a message and sending it on a CAN
+bus using the `python-can`_ package.
 
 .. code-block:: python
 
@@ -71,6 +55,17 @@ using the `python-can`_ package.
    >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})
    >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
    >>> can_bus.send(message)
+
+Alternatively, a message can be encoded using the `encode_message()`_
+method on the database object.
+
+The last part of the example receives and `decodes`_ a CAN message.
+
+.. code-block:: python
+
+   >>> message = can_bus.recv()
+   >>> db.decode_message(message.arbitration_id, message.data)
+   {'AverageRadius': 3.2, 'Enable': 'Enabled', 'Temperature': 250.09}
 
 See the test suite for additional examples: https://github.com/eerimoq/cantools/blob/master/tests/test_cantools.py
 
@@ -96,13 +91,11 @@ Contributing
 #. Implement test case(s) to ensure that future changes do not break
    legacy.
 
-#. Run the test suite for `Python 2` and `Python 3`. Make sure all
-   tests pass.
+#. Run the tests.
 
    .. code-block:: text
 
-      python2 setup.py test
-      python3 setup.py test
+      make test
 
 #. Create a pull request.
 
@@ -119,3 +112,9 @@ Contributing
 .. _DBC: http://www.socialledge.com/sjsu/index.php?title=DBC_Format
 
 .. _KCD: https://github.com/julietkilo/kcd
+
+.. _encoding: http://cantools.readthedocs.io/en/latest/#cantools.db.Message.encode
+
+.. _encode_message(): http://cantools.readthedocs.io/en/latest/#cantools.db.File.encode_message
+
+.. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.db.File.decode_message

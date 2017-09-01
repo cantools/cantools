@@ -41,7 +41,7 @@ def _encode_data(data, signals, formats):
     return struct.pack('>Q', packed_union)
 
 
-def _decode_data(data, signals, formats):
+def _decode_data(data, signals, formats, decode_choices):
     decoded_signals = {}
 
     # Big endian signals.
@@ -55,9 +55,12 @@ def _decode_data(data, signals, formats):
         value = big_unpacked[i]
         scaled_value = (signal.scale * value + signal.offset)
 
-        try:
-            decoded_signals[signal.name] = signal.choices[scaled_value]
-        except (KeyError, TypeError):
+        if decode_choices:
+            try:
+                decoded_signals[signal.name] = signal.choices[scaled_value]
+            except (KeyError, TypeError):
+                decoded_signals[signal.name] = scaled_value
+        else:
             decoded_signals[signal.name] = scaled_value
 
         i += 1
@@ -301,8 +304,11 @@ class Message(object):
 
         return _encode_data(data, signals, formats)
 
-    def decode(self, data):
+    def decode(self, data, decode_choices=True):
         """Decode given data as a message of this type.
+
+        If `decode_choices` is ``False`` scaled values are not
+        converted to choice strings (if available).
 
         >>> foo = db.messages[0]
         >>> foo.decode(b'\\x01\\x45\\x23\\x00\\x11')
@@ -315,7 +321,8 @@ class Message(object):
         if self.is_multiplexed():
             mux = _decode_data(data,
                                [self._multiplexer[0]],
-                               self._multiplexer[1])[self._multiplexer[0].name]
+                               self._multiplexer[1],
+                               False)[self._multiplexer[0].name]
 
             if mux not in self._multiplexer_message_by_id:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
@@ -326,7 +333,7 @@ class Message(object):
             signals = self._signals
             formats = self._formats
 
-        return _decode_data(data, signals, formats)
+        return _decode_data(data, signals, formats, decode_choices)
 
     def is_multiplexed(self):
         """Returns ``True`` if the message is multiplexed, otherwise

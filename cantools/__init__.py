@@ -6,7 +6,7 @@ import struct
 from . import db
 
 __author__ = 'Erik Moqvist'
-__version__ = '9.0.0'
+__version__ = '9.1.0'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -15,6 +15,7 @@ RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d\]\s*([0-9A-F ]*)$')
 
 def _do_decode(args):
     dbf = db.load_file(args.dbfile)
+    decode_choices = not args.no_decode_choices
 
     while True:
         line = sys.stdin.readline()
@@ -38,7 +39,7 @@ def _do_decode(args):
 
             try:
                 message = dbf.lookup_message(frame_id)
-                decoded_signals = message.decode(data)
+                decoded_signals = message.decode(data, decode_choices)
 
                 if message.is_multiplexed():
                     name = message.get_multiplexer_signal_name()
@@ -75,6 +76,9 @@ def _main():
         description='Various CAN utilities.')
 
     parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-c', '--no-decode-choices',
+                        action='store_true',
+                        help='Do not convert scaled values to choice strings.')
     parser.add_argument('--version',
                         action='version',
                         version=__version__,

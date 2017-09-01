@@ -200,9 +200,13 @@ class File(object):
 
         return message.encode(data)
 
-    def decode_message(self, frame_id, data):
+    def decode_message(self, frame_id, data, decode_choices=True):
         """Decode given signal data `data` as a message of given frame id
-        `frame_id`. Returns a dictionary of signal name-value entries.
+        `frame_id`. Returns a dictionary of signal name-value
+        entries.
+
+        If `decode_choices` is ``False`` scaled values are not
+        converted to choice strings (if available).
 
         >>> db.decode_message(158, b'\\x01\\x45\\x23\\x00\\x11')
         {'Bar': 1, 'Fum': 5.0}
@@ -211,7 +215,7 @@ class File(object):
 
         message = self._frame_id_to_message[frame_id]
 
-        return message.decode(data)
+        return message.decode(data, decode_choices)
 
     def __repr__(self):
         lines = []

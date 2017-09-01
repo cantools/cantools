@@ -76,9 +76,6 @@ def _main():
         description='Various CAN utilities.')
 
     parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('-c', '--no-decode-choices',
-                        action='store_true',
-                        help='Do not convert scaled values to choice strings.')
     parser.add_argument('--version',
                         action='version',
                         version=__version__,
@@ -94,6 +91,9 @@ def _main():
         'decode',
         description=('Decode "candump" CAN frames read from standard input '
                      'and print them in a human readable format.'))
+    decode_parser.add_argument('-c', '--no-decode-choices',
+                               action='store_true',
+                               help='Do not convert scaled values to choice strings.')
     decode_parser.add_argument('dbfile', help='Database file (.dbc).')
     decode_parser.set_defaults(func=_do_decode)
 

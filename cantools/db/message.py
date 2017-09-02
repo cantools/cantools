@@ -16,6 +16,19 @@ def _unscale_value(signal, data):
     return int((scaled_value - signal.offset) / signal.scale)
 
 
+def _decode_signal(signal, value, decode_choices):
+    scaled_value = (signal.scale * value + signal.offset)
+
+    if decode_choices:
+        try:
+            decoded_signal = signal.choices[scaled_value]
+        except (KeyError, TypeError):
+            decoded_signal = scaled_value
+    else:
+        decoded_signal = scaled_value
+
+    return decoded_signal
+
 
 def _encode_data(data, signals, formats):
     big_decoded_data = []
@@ -35,8 +48,8 @@ def _encode_data(data, signals, formats):
 
     big_packed = bitstruct.pack(formats[0], *big_decoded_data)
     little_packed = bitstruct.pack(formats[1], *little_decoded_data)[::-1]
-    packed_union = (struct.unpack('>Q', big_packed)[0]
-                    | struct.unpack('>Q', little_packed)[0])
+    packed_union = struct.unpack('>Q', big_packed)[0]
+    packed_union |= struct.unpack('>Q', little_packed)[0]
 
     return struct.pack('>Q', packed_union)
 
@@ -45,43 +58,26 @@ def _decode_data(data, signals, formats, decode_choices):
     decoded_signals = {}
 
     # Big endian signals.
-    big_unpacked = bitstruct.unpack(formats[0], data)
-    i = 0
+    big_unpacked = list(bitstruct.unpack(formats[0], data))
 
     for signal in signals:
         if signal.byte_order == 'little_endian':
             continue
 
-        value = big_unpacked[i]
-        scaled_value = (signal.scale * value + signal.offset)
-
-        if decode_choices:
-            try:
-                decoded_signals[signal.name] = signal.choices[scaled_value]
-            except (KeyError, TypeError):
-                decoded_signals[signal.name] = scaled_value
-        else:
-            decoded_signals[signal.name] = scaled_value
-
-        i += 1
+        decoded_signals[signal.name] = _decode_signal(signal,
+                                                      big_unpacked.pop(0),
+                                                      decode_choices)
 
     # Little endian signals.
-    little_unpacked = bitstruct.unpack(formats[1], data[::-1])[::-1]
-    i = 0
+    little_unpacked = list(bitstruct.unpack(formats[1], data[::-1])[::-1])
 
     for signal in signals:
         if signal.byte_order == 'big_endian':
             continue
 
-        value = little_unpacked[i]
-        scaled_value = (signal.scale * value + signal.offset)
-
-        try:
-            decoded_signals[signal.name] = signal.choices[scaled_value]
-        except (KeyError, TypeError):
-            decoded_signals[signal.name] = scaled_value
-
-        i += 1
+        decoded_signals[signal.name] = _decode_signal(signal,
+                                                      little_unpacked.pop(0),
+                                                      decode_choices)
 
     return decoded_signals
 

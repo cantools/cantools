@@ -217,9 +217,8 @@ class CanToolsTest(unittest.TestCase):
         decoded = db.decode_message(example_message_frame_id, encoded)
         self.assertEqual(decoded, data)
 
-    def test_motohawk_encode_decode_no_decode_choices(self):
-        """Encode and decode the signals in a ExampleMessage frame with
-        `decode_choices` set to False.
+    def test_big_endian_no_decode_choices(self):
+        """Decode a big endian signal with `decode_choices` set to False.
 
         """
 
@@ -227,19 +226,41 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
-        example_message_frame_id = 496
-
         data = {
             'Temperature': 250.55,
             'AverageRadius': 3.2,
             'Enable': 1
         }
 
-        encoded = db.encode_message(example_message_frame_id, data)
-        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
-        decoded = db.decode_message(example_message_frame_id,
-                                    encoded,
+        decoded = db.decode_message(496,
+                                    b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
                                     decode_choices=False)
+        self.assertEqual(decoded, data)
+
+    def test_little_endian_no_decode_choices(self):
+        """Decode a little endian signal with `decode_choices` set to False.
+
+        """
+
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'socialledge.dbc')
+        db.add_dbc_file(filename)
+
+        data = {
+            'DRIVER_HEARTBEAT_cmd': 1
+        }
+
+        decoded = db.decode_message(100,
+                                    b'\x01\x00\x00\x00\x00\x00\x00\x00',
+                                    decode_choices=False)
+        self.assertEqual(decoded, data)
+
+        data = {
+            'DRIVER_HEARTBEAT_cmd': 'DRIVER_HEARTBEAT_cmd_SYNC'
+        }
+
+        decoded = db.decode_message(100,
+                                    b'\x01\x00\x00\x00\x00\x00\x00\x00')
         self.assertEqual(decoded, data)
 
     def test_socialledge(self):

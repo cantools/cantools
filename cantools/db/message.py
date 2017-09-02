@@ -37,7 +37,6 @@ def _encode_data(data, signals, formats):
     little_decoded_data = [_unscale_value(signal, data)
                            for signal in signals[::-1]
                            if signal.byte_order == 'little_endian']
-
     big_packed = bitstruct.pack(formats[0], *big_decoded_data)
     little_packed = bitstruct.pack(formats[1], *little_decoded_data)[::-1]
     packed_union = struct.unpack('>Q', big_packed)[0]

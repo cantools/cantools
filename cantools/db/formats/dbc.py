@@ -329,7 +329,6 @@ def _dump_attribute_defaults(database):
         try:
             int(database.default_attrs[default_attr])
             fmt = 'BA_DEF_DEF_ "{name}" {value};'
-
         except ValueError:
             fmt = 'BA_DEF_DEF_ "{name}" "{value}";'
 
@@ -356,7 +355,6 @@ def _dump_attribute_definitions(database):
                 fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} {send_type};'
                 ba.append(fmt.format(frame_id=message.frame_id,
                                      send_type=message.send_type))
-
         except KeyError:
             continue
 
@@ -389,8 +387,6 @@ def _load_comments(tokens):
         if comment[0] == COMMENT:
             if comment[1] == NODES:
                 node_name = comment[2]
-                if node_name not in comments:
-                    comments[node_name] = {}
                 comments[node_name] = comment[3]
 
             if comment[1] == MESSAGE:
@@ -435,18 +431,15 @@ def _load_attribute_definitions(tokens):
     msg_attributes = {}
 
     for attr_definition in tokens:
-        if attr_definition[0] == ATTR_DEFINITION and \
-           attr_definition[1] == "GenMsgCycleTime" and \
-           attr_definition[2] == MESSAGE:
+        if attr_definition[0:3] == [ATTR_DEFINITION, "GenMsgCycleTime", MESSAGE]:
             frame_id = int(attr_definition[3])
             if frame_id not in msg_attributes:
                 msg_attributes[frame_id] = {}
             if 'cycle_time' not in msg_attributes[frame_id]:
                 msg_attributes[frame_id]['cycle_time'] = {}
             msg_attributes[frame_id]['cycle_time'] = attr_definition[4]
-        if attr_definition[0] == ATTR_DEFINITION and \
-           attr_definition[1] == "GenMsgSendType" and \
-           attr_definition[2] == MESSAGE:
+
+        if attr_definition[0:3] == [ATTR_DEFINITION, "GenMsgSendType", MESSAGE]:
             frame_id = int(attr_definition[3])
             if frame_id not in msg_attributes:
                 msg_attributes[frame_id] = {}
@@ -493,7 +486,6 @@ def _load_messages(tokens,
                 return comments[frame_id]['message']
             else:
                 return comments[frame_id]['signals'][signal]
-
         except KeyError:
             return None
 
@@ -503,11 +495,9 @@ def _load_messages(tokens,
         """
         try:
             return msg_attributes[frame_id]['send_type']
-
         except KeyError:
             try:
                 return default_attrs['GenMsgSendType']
-
             except KeyError:
                 return None
 
@@ -518,11 +508,9 @@ def _load_messages(tokens,
 
         try:
             return msg_attributes[frame_id]['cycle_time']
-
         except KeyError:
             try:
                 return default_attrs['GenMsgCycleTime']
-
             except KeyError:
                 return None
 
@@ -533,7 +521,6 @@ def _load_messages(tokens,
 
         try:
             return choices[frame_id][signal]
-
         except KeyError:
             return None
 
@@ -544,7 +531,7 @@ def _load_messages(tokens,
             continue
 
         frame_id = int(message[1]) & 0x7fffffff
-        is_extended_frame = (int(message[1]) & 0x80000000 != 0)
+        is_extended_frame = bool(int(message[1]) & 0x80000000)
 
         message = Message(
             frame_id=frame_id,
@@ -600,7 +587,6 @@ def _load_nodes(tokens, comments):
 
         try:
             return comments[node_name]
-
         except KeyError:
             return None
 

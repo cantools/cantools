@@ -31,20 +31,12 @@ def _decode_signal(signal, value, decode_choices):
 
 
 def _encode_data(data, signals, formats):
-    big_decoded_data = []
-    little_decoded_data = []
-
-    for signal in signals:
-        if signal.byte_order == 'little_endian':
-            continue
-
-        big_decoded_data.append(_unscale_value(signal, data))
-
-    for signal in signals[::-1]:
-        if signal.byte_order == 'big_endian':
-            continue
-
-        little_decoded_data.append(_unscale_value(signal, data))
+    big_decoded_data = [_unscale_value(signal, data)
+                        for signal in signals
+                        if signal.byte_order == 'big_endian']
+    little_decoded_data = [_unscale_value(signal, data)
+                           for signal in signals[::-1]
+                           if signal.byte_order == 'little_endian']
 
     big_packed = bitstruct.pack(formats[0], *big_decoded_data)
     little_packed = bitstruct.pack(formats[1], *little_decoded_data)[::-1]
@@ -55,31 +47,21 @@ def _encode_data(data, signals, formats):
 
 
 def _decode_data(data, signals, formats, decode_choices):
-    decoded_signals = {}
-
-    # Big endian signals.
     big_unpacked = list(bitstruct.unpack(formats[0], data))
-
-    for signal in signals:
-        if signal.byte_order == 'little_endian':
-            continue
-
-        decoded_signals[signal.name] = _decode_signal(signal,
-                                                      big_unpacked.pop(0),
-                                                      decode_choices)
-
-    # Little endian signals.
+    big_signals = [signal
+                   for signal in signals
+                   if signal.byte_order == 'big_endian']
     little_unpacked = list(bitstruct.unpack(formats[1], data[::-1])[::-1])
+    little_signals = [signal
+                      for signal in signals
+                      if signal.byte_order == 'little_endian']
+    unpacked = big_unpacked + little_unpacked
+    signals = big_signals + little_signals
 
-    for signal in signals:
-        if signal.byte_order == 'big_endian':
-            continue
-
-        decoded_signals[signal.name] = _decode_signal(signal,
-                                                      little_unpacked.pop(0),
-                                                      decode_choices)
-
-    return decoded_signals
+    return {signal.name: _decode_signal(signal,
+                                        unpacked.pop(0),
+                                        decode_choices)
+                       for signal in signals}
 
 
 def _create_message_encode_decode_formats(signals):

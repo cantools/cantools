@@ -274,11 +274,13 @@ class Message(object):
         if self.is_multiplexed():
             mux = data[self._multiplexer.signal.name]
 
-            if mux not in self._multiplexer_message_by_id:
+            try:
+                multiplexer = self._multiplexer_message_by_id[mux]
+            except KeyError:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
-            signals = self._multiplexer_message_by_id[mux]['signals']
-            formats = self._multiplexer_message_by_id[mux]['formats']
+            signals = multiplexer['signals']
+            formats = multiplexer['formats']
         else:
             signals = self._signals
             formats = self._formats
@@ -305,11 +307,13 @@ class Message(object):
                                self._multiplexer.formats,
                                False)[self._multiplexer.signal.name]
 
-            if mux not in self._multiplexer_message_by_id:
+            try:
+                multiplexer = self._multiplexer_message_by_id[mux]
+            except KeyError:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
 
-            signals = self._multiplexer_message_by_id[mux]['signals']
-            formats = self._multiplexer_message_by_id[mux]['formats']
+            signals = multiplexer['signals']
+            formats = multiplexer['formats']
         else:
             signals = self._signals
             formats = self._formats

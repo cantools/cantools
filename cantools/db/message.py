@@ -2,6 +2,7 @@
 
 import struct
 import bitstruct
+from collections import namedtuple
 
 
 def _unscale_value(signal, data):
@@ -37,8 +38,8 @@ def _encode_data(data, signals, formats):
     little_decoded_data = [_unscale_value(signal, data)
                            for signal in signals[::-1]
                            if signal.byte_order == 'little_endian']
-    big_packed = bitstruct.pack(formats[0], *big_decoded_data)
-    little_packed = bitstruct.pack(formats[1], *little_decoded_data)[::-1]
+    big_packed = bitstruct.pack(formats.big_endian, *big_decoded_data)
+    little_packed = bitstruct.pack(formats.little_endian, *little_decoded_data)[::-1]
     packed_union = struct.unpack('>Q', big_packed)[0]
     packed_union |= struct.unpack('>Q', little_packed)[0]
 
@@ -46,11 +47,11 @@ def _encode_data(data, signals, formats):
 
 
 def _decode_data(data, signals, formats, decode_choices):
-    big_unpacked = list(bitstruct.unpack(formats[0], data))
+    big_unpacked = list(bitstruct.unpack(formats.big_endian, data))
     big_signals = [signal
                    for signal in signals
                    if signal.byte_order == 'big_endian']
-    little_unpacked = list(bitstruct.unpack(formats[1], data[::-1])[::-1])
+    little_unpacked = list(bitstruct.unpack(formats.little_endian, data[::-1])[::-1])
     little_signals = [signal
                       for signal in signals
                       if signal.byte_order == 'little_endian']
@@ -104,7 +105,9 @@ def _create_message_encode_decode_formats(signals):
     if end > 0:
         little_fmt += 'p{}'.format(end)
 
-    return big_fmt, little_fmt
+    Formats = namedtuple('Formats', ['big_endian', 'little_endian'])
+
+    return Formats(big_fmt, little_fmt)
 
 
 class Message(object):
@@ -144,9 +147,10 @@ class Message(object):
 
         for signal in self._signals:
             if signal.is_multiplexer:
-                self._multiplexer = (signal,
-                                     _create_message_encode_decode_formats(
-                                         [signal]))
+                Multiplexer = namedtuple('Multiplexer', ['signal', 'formats'])
+                self._multiplexer = Multiplexer(signal,
+                                                _create_message_encode_decode_formats(
+                                                    [signal]))
                 break
 
         # Group signals for each multiplex id.
@@ -268,7 +272,7 @@ class Message(object):
         """
 
         if self.is_multiplexed():
-            mux = data[self._multiplexer[0].name]
+            mux = data[self._multiplexer.signal.name]
 
             if mux not in self._multiplexer_message_by_id:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
@@ -297,9 +301,9 @@ class Message(object):
 
         if self.is_multiplexed():
             mux = _decode_data(data,
-                               [self._multiplexer[0]],
-                               self._multiplexer[1],
-                               False)[self._multiplexer[0].name]
+                               [self._multiplexer.signal],
+                               self._multiplexer.formats,
+                               False)[self._multiplexer.signal.name]
 
             if mux not in self._multiplexer_message_by_id:
                 raise KeyError('Invalid multiplex message id {}.'.format(mux))
@@ -337,7 +341,7 @@ class Message(object):
 
         """
 
-        return self._multiplexer[0].name
+        return self._multiplexer.signal.name
 
     def get_signals_by_multiplexer_id(self, multiplexer_id):
         """Returns a list of signals for given multiplexer message id, or

@@ -545,7 +545,7 @@ def _load_messages(tokens,
                             start=_compute_start_bit(int(signal[2][0]),
                                                      signal[2][2]),
                             length=int(signal[2][1]),
-                            nodes=signal[6],
+                            nodes=list(signal[6]),
                             byte_order=('big_endian'
                                         if signal[2][2] == '0'
                                         else 'little_endian'),

@@ -23,6 +23,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.nodes[0].name, 'Vector__XXX')
         self.assertEqual(len(db.messages), 217)
         self.assertEqual(db.messages[216].frame_id, 155872546)
+        self.assertEqual(db.messages[216].nodes, ['Vector__XXX'])
         self.assertEqual(str(db.messages[0]),
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, False, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),

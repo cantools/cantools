@@ -250,7 +250,7 @@ def _dump_messages(database):
         msg.append(fmt.format(frame_id=message.frame_id,
                               name=message.name,
                               length=message.length,
-                              nodes=message.nodes))
+                              nodes=' '.join(message.nodes)))
 
         for signal in message.signals[::-1]:
             fmt = (' SG_ {name} : {start}|{length}@{byte_order}{sign}'
@@ -538,7 +538,7 @@ def _load_messages(tokens,
             is_extended_frame=is_extended_frame,
             name=message[2],
             length=int(message[3], 0),
-            nodes=message[4],
+            nodes=[message[4]],
             send_type=get_send_type(int(message[1])),
             cycle_time=get_cycle_time(int(message[1])),
             signals=[Signal(name=signal[1][0],

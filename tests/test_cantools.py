@@ -30,6 +30,7 @@ class CanToolsTest(unittest.TestCase):
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
                          "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
+        self.assertEqual(db.messages[0].signals[0].nodes, ['Vector__XXX'])
         self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
         i = 0
 

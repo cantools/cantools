@@ -6,7 +6,7 @@ import struct
 from . import db
 
 __author__ = 'Erik Moqvist'
-__version__ = '10.0.0'
+__version__ = '10.1.0'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".

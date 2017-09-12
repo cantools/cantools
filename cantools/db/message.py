@@ -5,48 +5,52 @@ import bitstruct
 from collections import namedtuple
 
 
-def _unscale_value(signal, data):
-    scaled_value = data[signal.name]
+def _encode_signal(signal, data, scaling):
+    value = data[signal.name]
 
-    if isinstance(scaled_value, str):
+    if isinstance(value, str):
         for choice_number, choice_string in signal.choices.items():
-            if choice_string == scaled_value:
-                scaled_value = choice_number
+            if choice_string == value:
+                value = choice_number
                 break
 
-    return int((scaled_value - signal.offset) / signal.scale)
+    if scaling:
+        return int((value - signal.offset) / signal.scale)
+    else:
+        return value
 
 
-def _decode_signal(signal, value, decode_choices):
-    scaled_value = (signal.scale * value + signal.offset)
+def _decode_signal(signal, value, decode_choices, scaling):
+    if scaling:
+        value = (signal.scale * value + signal.offset)
 
     if decode_choices:
         try:
-            decoded_signal = signal.choices[scaled_value]
+            decoded_signal = signal.choices[value]
         except (KeyError, TypeError):
-            decoded_signal = scaled_value
+            decoded_signal = value
     else:
-        decoded_signal = scaled_value
+        decoded_signal = value
 
     return decoded_signal
 
 
-def _encode_data(data, signals, formats):
-    big_decoded_data = [_unscale_value(signal, data)
-                        for signal in signals
-                        if signal.byte_order == 'big_endian']
-    little_decoded_data = [_unscale_value(signal, data)
-                           for signal in signals[::-1]
-                           if signal.byte_order == 'little_endian']
-    big_packed = bitstruct.pack(formats.big_endian, *big_decoded_data)
-    little_packed = bitstruct.pack(formats.little_endian, *little_decoded_data)[::-1]
+def _encode_data(data, signals, formats, scaling):
+    big_unpacked_data = [_encode_signal(signal, data, scaling)
+                         for signal in signals
+                         if signal.byte_order == 'big_endian']
+    little_unpacked_data = [_encode_signal(signal, data, scaling)
+                            for signal in signals[::-1]
+                            if signal.byte_order == 'little_endian']
+    big_packed = bitstruct.pack(formats.big_endian, *big_unpacked_data)
+    little_packed = bitstruct.pack(formats.little_endian, *little_unpacked_data)[::-1]
     packed_union = struct.unpack('>Q', big_packed)[0]
     packed_union |= struct.unpack('>Q', little_packed)[0]
 
     return struct.pack('>Q', packed_union)
 
 
-def _decode_data(data, signals, formats, decode_choices):
+def _decode_data(data, signals, formats, decode_choices, scaling):
     big_unpacked = list(bitstruct.unpack(formats.big_endian, data))
     big_signals = [signal
                    for signal in signals
@@ -60,7 +64,8 @@ def _decode_data(data, signals, formats, decode_choices):
 
     return {signal.name: _decode_signal(signal,
                                         unpacked.pop(0),
-                                        decode_choices)
+                                        decode_choices,
+                                        scaling)
                        for signal in signals}
 
 
@@ -262,8 +267,10 @@ class Message(object):
 
         return self._bus_name
 
-    def encode(self, data):
+    def encode(self, data, scaling=True):
         """Encode given data as a message of this type.
+
+        If `scaling` is ``False`` no scaling of signals is performed.
 
         >>> foo = db.messages[0]
         >>> foo.encode({'Bar': 1, 'Fum': 5.0})
@@ -285,13 +292,15 @@ class Message(object):
             signals = self._signals
             formats = self._formats
 
-        return _encode_data(data, signals, formats)
+        return _encode_data(data, signals, formats, scaling)
 
-    def decode(self, data, decode_choices=True):
+    def decode(self, data, decode_choices=True, scaling=True):
         """Decode given data as a message of this type.
 
         If `decode_choices` is ``False`` scaled values are not
         converted to choice strings (if available).
+
+        If `scaling` is ``False`` no scaling of signals is performed.
 
         >>> foo = db.messages[0]
         >>> foo.decode(b'\\x01\\x45\\x23\\x00\\x11')
@@ -305,6 +314,7 @@ class Message(object):
             mux = _decode_data(data,
                                [self._multiplexer.signal],
                                self._multiplexer.formats,
+                               False,
                                False)[self._multiplexer.signal.name]
 
             try:
@@ -318,7 +328,7 @@ class Message(object):
             signals = self._signals
             formats = self._formats
 
-        return _decode_data(data, signals, formats, decode_choices)
+        return _decode_data(data, signals, formats, decode_choices, scaling)
 
     def is_multiplexed(self):
         """Returns ``True`` if the message is multiplexed, otherwise

@@ -265,6 +265,58 @@ class CanToolsTest(unittest.TestCase):
                                     b'\x01\x00\x00\x00\x00\x00\x00\x00')
         self.assertEqual(decoded, data)
 
+    def test_encode_decode_no_scaling(self):
+        """Encode and decode a message without scaling the signal values.
+
+        """
+
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'motohawk.dbc')
+        db.add_dbc_file(filename)
+
+        data = {
+            'Temperature': 55,
+            'AverageRadius': 32,
+            'Enable': 'Enabled'
+        }
+
+        encoded = db.encode_message(496,
+                                    data,
+                                    scaling=False)
+        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
+
+        decoded = db.decode_message(496,
+                                    encoded,
+                                    scaling=False)
+        self.assertEqual(decoded, data)
+
+    def test_encode_decode_no_scaling_no_decode_choices(self):
+        """Encode and decode a message without scaling the signal values, not
+        decoding choices.
+
+        """
+
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'motohawk.dbc')
+        db.add_dbc_file(filename)
+
+        data = {
+            'Temperature': 3,
+            'AverageRadius': 2,
+            'Enable': 1
+        }
+
+        encoded = db.encode_message(496,
+                                    data,
+                                    scaling=False)
+        self.assertEqual(encoded, b'\x84\x00\x60\x00\x00\x00\x00\x00')
+
+        decoded = db.decode_message(496,
+                                    encoded,
+                                    decode_choices=False,
+                                    scaling=False)
+        self.assertEqual(decoded, data)
+
     def test_socialledge(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'socialledge.dbc')

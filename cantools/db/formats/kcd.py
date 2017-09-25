@@ -116,6 +116,8 @@ def _load_message_element(message, bus_name):
             name = value
         elif key == 'id':
             frame_id = int(value, 0)
+        elif key == 'length':
+            length = int(value)
         elif key == 'format':
             is_extended_frame = (value == 'extended')
         else:
@@ -136,7 +138,7 @@ def _load_message_element(message, bus_name):
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,
                    name=name,
-                   length=8,
+                   length=length,
                    nodes=[],
                    send_type=None,
                    cycle_time=None,

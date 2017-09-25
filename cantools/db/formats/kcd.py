@@ -1,5 +1,6 @@
 # Load and dump a CAN database in KCD format.
 import logging
+import math
 
 try:
     from StringIO import StringIO
@@ -116,12 +117,12 @@ def _load_message_element(message, bus_name):
             name = value
         elif key == 'id':
             frame_id = int(value, 0)
-        elif key == 'length':
-            length = int(value)
         elif key == 'format':
             is_extended_frame = (value == 'extended')
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
+            
+    length = message.attrib.get('length', 'auto')
 
     # Comment.
     try:
@@ -134,6 +135,15 @@ def _load_message_element(message, bus_name):
 
     for signal in message.findall('ns:Signal', NAMESPACES):
         signals.append(_load_signal_element(signal))
+        
+    if length == 'auto':
+        if signals:
+            last_signal = sorted(signals, key=lambda s: s.start)[-1]
+            length = math.ceil((last_signal.start + last_signal.length) / 8.0)
+        else:
+            length = 0
+    else:
+        length = int(length)
 
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,

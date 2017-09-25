@@ -489,7 +489,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
-        self.assertEqual(db.messages[0].length, 8)
+        self.assertEqual(db.messages[0].length, 3)
         self.assertEqual(len(db.messages[0].signals), 8)
         self.assertEqual(db.messages[0].comment, None)
         self.assertEqual(db.messages[0].send_type, None)

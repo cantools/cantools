@@ -495,6 +495,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].bus_name, 'Motor')
+        self.assertEqual(db.messages[3].frame_id, 0x400)
+        self.assertEqual(db.messages[3].name, 'Emission')
+        self.assertEqual(db.messages[3].length, 5)
 
         self.assertEqual(db.messages[-1].bus_name, 'Comfort')
 

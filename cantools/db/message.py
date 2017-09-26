@@ -35,7 +35,7 @@ def _decode_signal(signal, value, decode_choices, scaling):
     return decoded_signal
 
 
-def _encode_data(data, signals, formats, scaling):
+def _encode_data(data, signals, formats, scaling, length):
     big_unpacked_data = [_encode_signal(signal, data, scaling)
                          for signal in signals
                          if signal.byte_order == 'big_endian']
@@ -47,7 +47,7 @@ def _encode_data(data, signals, formats, scaling):
     packed_union = struct.unpack('>Q', big_packed)[0]
     packed_union |= struct.unpack('>Q', little_packed)[0]
 
-    return struct.pack('>Q', packed_union)
+    return struct.pack('>Q', packed_union)[:length]
 
 
 def _decode_data(data, signals, formats, decode_choices, scaling):
@@ -292,7 +292,7 @@ class Message(object):
             signals = self._signals
             formats = self._formats
 
-        return _encode_data(data, signals, formats, scaling)
+        return _encode_data(data, signals, formats, scaling, self._length)
 
     def decode(self, data, decode_choices=True, scaling=True):
         """Decode given data as a message of this type.

@@ -489,12 +489,15 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
-        self.assertEqual(db.messages[0].length, 8)
+        self.assertEqual(db.messages[0].length, 3)
         self.assertEqual(len(db.messages[0].signals), 8)
         self.assertEqual(db.messages[0].comment, None)
         self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].bus_name, 'Motor')
+        self.assertEqual(db.messages[3].frame_id, 0x400)
+        self.assertEqual(db.messages[3].name, 'Emission')
+        self.assertEqual(db.messages[3].length, 5)
 
         self.assertEqual(db.messages[-1].bus_name, 'Comfort')
 
@@ -562,7 +565,22 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.unit, 'Cel')
         self.assertEqual(outside_temp.choices, None)
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
+        
+    def test_the_homer_encode_length(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.load_file(filename)
 
+        frame_id = 0x400
+        data = {
+            'MIL': 0,
+            'Enginespeed': 127,
+            'NoxSensor': 127,
+        }
+
+        encoded = db.encode_message(frame_id, data)
+        self.assertEqual(len(encoded), 5)
+        self.assertEqual(encoded, b'\x00?\x80?\x80')
+        
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormat):
             cantools.db.load(StringIO(''))

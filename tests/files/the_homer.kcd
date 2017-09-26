@@ -123,7 +123,7 @@
       <Signal name="SpeedKm" offset="2" length="16"/>
     </Message>
 
-    <Message id="0x400" name="Emission">
+    <Message id="0x400" length="5" name="Emission">
       <Producer>
         <NodeRef id="1"/>
         <NodeRef id="17"/>

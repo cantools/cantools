@@ -120,6 +120,8 @@ def _load_message_element(message, bus_name):
             is_extended_frame = (value == 'extended')
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
+            
+    length = message.attrib.get('length', 'auto')
 
     # Comment.
     try:
@@ -132,11 +134,20 @@ def _load_message_element(message, bus_name):
 
     for signal in message.findall('ns:Signal', NAMESPACES):
         signals.append(_load_signal_element(signal))
+        
+    if length == 'auto':
+        if signals:
+            last_signal = sorted(signals, key=lambda s: s.start)[-1]
+            length = (last_signal.start + last_signal.length + 7) // 8
+        else:
+            length = 0
+    else:
+        length = int(length)
 
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,
                    name=name,
-                   length=8,
+                   length=length,
                    nodes=[],
                    send_type=None,
                    cycle_time=None,

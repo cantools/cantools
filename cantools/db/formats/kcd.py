@@ -1,6 +1,5 @@
 # Load and dump a CAN database in KCD format.
 import logging
-import math
 
 try:
     from StringIO import StringIO
@@ -139,7 +138,7 @@ def _load_message_element(message, bus_name):
     if length == 'auto':
         if signals:
             last_signal = sorted(signals, key=lambda s: s.start)[-1]
-            length = math.ceil((last_signal.start + last_signal.length) / 8.0)
+            length = (last_signal.start + last_signal.length + 7) // 8
         else:
             length = 0
     else:

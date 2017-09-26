@@ -582,7 +582,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(encoded, b'\x00?\x80?\x80')
         
     def test_load_bad_format(self):
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormat):
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):
             cantools.db.load(StringIO(''))
 
     def test_add_bad_kcd_string(self):

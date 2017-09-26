@@ -8,7 +8,7 @@ from .message import Message
 from .signal import Signal
 
 
-class UnsupportedDatabaseFormat(Exception):
+class UnsupportedDatabaseFormatError(Exception):
     pass
 
 
@@ -70,4 +70,4 @@ def load_string(string):
     except ElementTree.ParseError:
         pass
 
-    raise UnsupportedDatabaseFormat()
+    raise UnsupportedDatabaseFormatError()

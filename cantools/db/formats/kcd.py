@@ -177,7 +177,8 @@ def load_string(string):
 
     for bus in root.findall('ns:Bus', NAMESPACES):
         bus_name = bus.attrib['name']
-        buses.append(Bus(bus_name))
+        bus_baudrate = int(bus.get('baudrate', 500000))
+        buses.append(Bus(bus_name, baudrate=bus_baudrate))
 
         for message in bus.findall('ns:Message', NAMESPACES):
             messages.append(_load_message_element(message, bus_name))

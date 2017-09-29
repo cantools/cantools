@@ -485,6 +485,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.buses[1].name, 'Instrumentation')
         self.assertEqual(db.buses[2].name, 'Comfort')
         self.assertEqual(db.buses[0].comment, None)
+        self.assertEqual(db.buses[0].baudrate, 500000)
+        self.assertEqual(db.buses[1].baudrate, 125000)
+        
         self.assertEqual(len(db.messages), 25)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
@@ -503,8 +506,6 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[3].frame_id, 0x400)
         self.assertEqual(db.messages[3].name, 'Emission')
         self.assertEqual(db.messages[3].length, 5)
-        
-        
 
         self.assertEqual(db.messages[-1].bus_name, 'Comfort')
 

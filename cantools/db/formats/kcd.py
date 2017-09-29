@@ -81,6 +81,8 @@ def _load_signal_element(signal):
         notes = signal.find('ns:Notes', NAMESPACES).text
     except AttributeError:
         pass
+        
+    # TODO: Labels.
 
     return Signal(name=name,
                   start=offset,
@@ -126,6 +128,7 @@ def _load_message_element(message, bus_name):
             interval = int(value)
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
+            # TODO: triggered, count, remote
 
     # Comment.
     try:

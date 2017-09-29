@@ -177,6 +177,12 @@ def load_string(string):
     nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
     buses = []
     messages = []
+    
+    try:
+        document = root.find('ns:Document', NAMESPACES)
+        version = document.attrib.get('version', None)
+    except AttributeError:
+        version = None
 
     for bus in root.findall('ns:Bus', NAMESPACES):
         bus_name = bus.attrib['name']
@@ -191,4 +197,4 @@ def load_string(string):
                     buses,
                     [],
                     [],
-                    None)
+                    version)

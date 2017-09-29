@@ -122,6 +122,7 @@ def _load_message_element(message, bus_name):
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
             
     length = message.attrib.get('length', 'auto')
+    interval = int(message.attrib.get('interval', 0))
 
     # Comment.
     try:
@@ -150,7 +151,7 @@ def _load_message_element(message, bus_name):
                    length=length,
                    nodes=[],
                    send_type=None,
-                   cycle_time=None,
+                   cycle_time=interval,
                    signals=signals,
                    comment=notes,
                    bus_name=bus_name)

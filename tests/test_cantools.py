@@ -515,7 +515,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(seat_configuration.start, 16)
         self.assertEqual(seat_configuration.length, 8)
         self.assertEqual(seat_configuration.nodes, [])
-        self.assertEqual(seat_configuration.byte_order, 'big_endian')
+        self.assertEqual(seat_configuration.byte_order, 'little_endian')
         self.assertEqual(seat_configuration.is_signed, False)
         self.assertEqual(seat_configuration.scale, 1)
         self.assertEqual(seat_configuration.offset, 0)
@@ -531,7 +531,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(tank_temperature.start, 16)
         self.assertEqual(tank_temperature.length, 16)
         self.assertEqual(tank_temperature.nodes, [])
-        self.assertEqual(tank_temperature.byte_order, 'big_endian')
+        self.assertEqual(tank_temperature.byte_order, 'little_endian')
         self.assertEqual(tank_temperature.is_signed, True)
         self.assertEqual(tank_temperature.scale, 1)
         self.assertEqual(tank_temperature.offset, 0)
@@ -547,7 +547,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(speed_km.start, 30)
         self.assertEqual(speed_km.length, 24)
         self.assertEqual(speed_km.nodes, [])
-        self.assertEqual(speed_km.byte_order, 'big_endian')
+        self.assertEqual(speed_km.byte_order, 'little_endian')
         self.assertEqual(speed_km.is_signed, False)
         self.assertEqual(speed_km.scale, 0.2)
         self.assertEqual(speed_km.offset, 0)
@@ -564,7 +564,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.start, 18)
         self.assertEqual(outside_temp.length, 12)
         self.assertEqual(outside_temp.nodes, [])
-        self.assertEqual(outside_temp.byte_order, 'little_endian')
+        self.assertEqual(outside_temp.byte_order, 'big_endian')
         self.assertEqual(outside_temp.is_signed, False)
         self.assertEqual(outside_temp.scale, 0.05)
         self.assertEqual(outside_temp.offset, -40)
@@ -587,7 +587,7 @@ class CanToolsTest(unittest.TestCase):
 
         encoded = db.encode_message(frame_id, data)
         self.assertEqual(len(encoded), 5)
-        self.assertEqual(encoded, b'\x00?\x80?\x80')
+        self.assertEqual(encoded, b'\xfe\x00\xfe\x00\x00')
         
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormat):

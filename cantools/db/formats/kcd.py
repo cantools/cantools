@@ -33,7 +33,7 @@ def _load_signal_element(signal):
     name = None
     offset = None
     length = 1
-    byte_order = 'big_endian'
+    byte_order = 'little_endian'
     is_signed = False
     minimum = None
     maximum = None

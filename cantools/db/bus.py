@@ -7,9 +7,11 @@ class Bus(object):
 
     def __init__(self,
                  name,
-                 comment=None):
+                 comment=None,
+                 baudrate=None):
         self._name = name
         self._comment = comment
+        self._baudrate = baudrate
 
     @property
     def name(self):
@@ -26,6 +28,14 @@ class Bus(object):
         """
 
         return self._comment
+
+    @property
+    def baudrate(self):
+        """The bus baudrate, or ``None`` if unavailable.
+
+        """
+
+        return self._baudrate
 
     def __repr__(self):
         return "bus('{}', {})".format(

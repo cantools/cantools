@@ -476,7 +476,7 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.load_file(filename)
 
-        self.assertEqual(db.version, None)
+        self.assertEqual(db.version, '1.23')
         self.assertEqual(len(db.nodes), 18)
         self.assertEqual(db.nodes[0].name, 'Motor ACME')
         self.assertEqual(db.nodes[1].name, 'Motor alternative supplier')
@@ -485,6 +485,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.buses[1].name, 'Instrumentation')
         self.assertEqual(db.buses[2].name, 'Comfort')
         self.assertEqual(db.buses[0].comment, None)
+        self.assertEqual(db.buses[0].baudrate, 500000)
+        self.assertEqual(db.buses[1].baudrate, 125000)
+        
         self.assertEqual(len(db.messages), 25)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
@@ -493,8 +496,13 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(len(db.messages[0].signals), 8)
         self.assertEqual(db.messages[0].comment, None)
         self.assertEqual(db.messages[0].send_type, None)
-        self.assertEqual(db.messages[0].cycle_time, None)
+        self.assertEqual(db.messages[0].cycle_time, 0)
         self.assertEqual(db.messages[0].bus_name, 'Motor')
+        
+        self.assertEqual(db.messages[1].frame_id, 0x0B2)
+        self.assertEqual(db.messages[1].name, 'ABS')
+        self.assertEqual(db.messages[1].cycle_time, 100)
+        
         self.assertEqual(db.messages[3].frame_id, 0x400)
         self.assertEqual(db.messages[3].name, 'Emission')
         self.assertEqual(db.messages[3].length, 5)
@@ -507,7 +515,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(seat_configuration.start, 16)
         self.assertEqual(seat_configuration.length, 8)
         self.assertEqual(seat_configuration.nodes, [])
-        self.assertEqual(seat_configuration.byte_order, 'big_endian')
+        self.assertEqual(seat_configuration.byte_order, 'little_endian')
         self.assertEqual(seat_configuration.is_signed, False)
         self.assertEqual(seat_configuration.scale, 1)
         self.assertEqual(seat_configuration.offset, 0)
@@ -523,7 +531,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(tank_temperature.start, 16)
         self.assertEqual(tank_temperature.length, 16)
         self.assertEqual(tank_temperature.nodes, [])
-        self.assertEqual(tank_temperature.byte_order, 'big_endian')
+        self.assertEqual(tank_temperature.byte_order, 'little_endian')
         self.assertEqual(tank_temperature.is_signed, True)
         self.assertEqual(tank_temperature.scale, 1)
         self.assertEqual(tank_temperature.offset, 0)
@@ -539,7 +547,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(speed_km.start, 30)
         self.assertEqual(speed_km.length, 24)
         self.assertEqual(speed_km.nodes, [])
-        self.assertEqual(speed_km.byte_order, 'big_endian')
+        self.assertEqual(speed_km.byte_order, 'little_endian')
         self.assertEqual(speed_km.is_signed, False)
         self.assertEqual(speed_km.scale, 0.2)
         self.assertEqual(speed_km.offset, 0)
@@ -556,7 +564,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.start, 18)
         self.assertEqual(outside_temp.length, 12)
         self.assertEqual(outside_temp.nodes, [])
-        self.assertEqual(outside_temp.byte_order, 'little_endian')
+        self.assertEqual(outside_temp.byte_order, 'big_endian')
         self.assertEqual(outside_temp.is_signed, False)
         self.assertEqual(outside_temp.scale, 0.05)
         self.assertEqual(outside_temp.offset, -40)
@@ -579,7 +587,7 @@ class CanToolsTest(unittest.TestCase):
 
         encoded = db.encode_message(frame_id, data)
         self.assertEqual(len(encoded), 5)
-        self.assertEqual(encoded, b'\x00?\x80?\x80')
+        self.assertEqual(encoded, b'\xfe\x00\xfe\x00\x00')
         
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):

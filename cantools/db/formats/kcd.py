@@ -33,7 +33,7 @@ def _load_signal_element(signal):
     name = None
     offset = None
     length = 1
-    byte_order = 'big_endian'
+    byte_order = 'little_endian'
     is_signed = False
     minimum = None
     maximum = None
@@ -81,6 +81,8 @@ def _load_signal_element(signal):
         notes = signal.find('ns:Notes', NAMESPACES).text
     except AttributeError:
         pass
+        
+    # TODO: Labels.
 
     return Signal(name=name,
                   start=offset,
@@ -109,6 +111,8 @@ def _load_message_element(message, bus_name):
     frame_id = None
     is_extended_frame = False
     notes = None
+    length = 'auto'
+    interval = 0
 
     # Message XML attributes.
     for key, value in message.attrib.items():
@@ -118,10 +122,13 @@ def _load_message_element(message, bus_name):
             frame_id = int(value, 0)
         elif key == 'format':
             is_extended_frame = (value == 'extended')
+        elif key == 'length':
+            length = value  # 'auto' needs additional processing after knowing all signals
+        elif key == 'interval':
+            interval = int(value)
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
-            
-    length = message.attrib.get('length', 'auto')
+            # TODO: triggered, count, remote
 
     # Comment.
     try:
@@ -150,7 +157,7 @@ def _load_message_element(message, bus_name):
                    length=length,
                    nodes=[],
                    send_type=None,
-                   cycle_time=None,
+                   cycle_time=interval,
                    signals=signals,
                    comment=notes,
                    bus_name=bus_name)
@@ -173,10 +180,17 @@ def load_string(string):
     nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
     buses = []
     messages = []
+    
+    try:
+        document = root.find('ns:Document', NAMESPACES)
+        version = document.attrib.get('version', None)
+    except AttributeError:
+        version = None
 
     for bus in root.findall('ns:Bus', NAMESPACES):
         bus_name = bus.attrib['name']
-        buses.append(Bus(bus_name))
+        bus_baudrate = int(bus.get('baudrate', 500000))
+        buses.append(Bus(bus_name, baudrate=bus_baudrate))
 
         for message in bus.findall('ns:Message', NAMESPACES):
             messages.append(_load_message_element(message, bus_name))
@@ -186,4 +200,4 @@ def load_string(string):
                     buses,
                     [],
                     [],
-                    None)
+                    version)

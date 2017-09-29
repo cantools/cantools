@@ -109,6 +109,8 @@ def _load_message_element(message, bus_name):
     frame_id = None
     is_extended_frame = False
     notes = None
+    length = 'auto'
+    interval = 0
 
     # Message XML attributes.
     for key, value in message.attrib.items():
@@ -118,11 +120,12 @@ def _load_message_element(message, bus_name):
             frame_id = int(value, 0)
         elif key == 'format':
             is_extended_frame = (value == 'extended')
+        elif key == 'length':
+            length = value  # 'auto' needs additional processing after knowing all signals
+        elif key == 'interval':
+            interval = int(value)
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
-            
-    length = message.attrib.get('length', 'auto')
-    interval = int(message.attrib.get('interval', 0))
 
     # Comment.
     try:

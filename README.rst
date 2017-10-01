@@ -8,6 +8,8 @@ CAN BUS tools.
 
 - `DBC`_ and `KCD`_ file mangling.
 
+- CAN message encoding and decoding.
+
 - ``candump`` output decoder.
 
 Project homepage: https://github.com/eerimoq/cantools

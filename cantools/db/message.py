@@ -36,14 +36,19 @@ def _decode_signal(signal, value, decode_choices, scaling):
 
 
 def _encode_data(data, signals, formats, scaling, length):
-    big_unpacked_data = [_encode_signal(signal, data, scaling)
-                         for signal in signals
-                         if signal.byte_order == 'big_endian']
-    little_unpacked_data = [_encode_signal(signal, data, scaling)
-                            for signal in signals[::-1]
-                            if signal.byte_order == 'little_endian']
+    big_unpacked_data = [
+        _encode_signal(signal, data, scaling)
+        for signal in signals
+        if signal.byte_order == 'big_endian'
+    ]
+    little_unpacked_data = [
+        _encode_signal(signal, data, scaling)
+        for signal in signals[::-1]
+        if signal.byte_order == 'little_endian'
+    ]
     big_packed = bitstruct.pack(formats.big_endian, *big_unpacked_data)
-    little_packed = bitstruct.pack(formats.little_endian, *little_unpacked_data)[::-1]
+    little_packed = bitstruct.pack(formats.little_endian,
+                                   *little_unpacked_data)[::-1]
     packed_union = struct.unpack('>Q', big_packed)[0]
     packed_union |= struct.unpack('>Q', little_packed)[0]
 
@@ -52,21 +57,27 @@ def _encode_data(data, signals, formats, scaling, length):
 
 def _decode_data(data, signals, formats, decode_choices, scaling):
     big_unpacked = list(bitstruct.unpack(formats.big_endian, data))
-    big_signals = [signal
-                   for signal in signals
-                   if signal.byte_order == 'big_endian']
+    big_signals = [
+        signal
+        for signal in signals
+        if signal.byte_order == 'big_endian'
+    ]
     little_unpacked = list(bitstruct.unpack(formats.little_endian, data[::-1])[::-1])
-    little_signals = [signal
-                      for signal in signals
-                      if signal.byte_order == 'little_endian']
+    little_signals = [
+        signal
+        for signal in signals
+        if signal.byte_order == 'little_endian'
+    ]
     unpacked = big_unpacked + little_unpacked
     signals = big_signals + little_signals
 
-    return {signal.name: _decode_signal(signal,
-                                        unpacked.pop(0),
-                                        decode_choices,
-                                        scaling)
-                       for signal in signals}
+    return {
+        signal.name: _decode_signal(signal,
+                                    unpacked.pop(0),
+                                    decode_choices,
+                                    scaling)
+        for signal in signals
+    }
 
 
 def _create_message_encode_decode_formats(signals):
@@ -153,9 +164,8 @@ class Message(object):
         for signal in self._signals:
             if signal.is_multiplexer:
                 Multiplexer = namedtuple('Multiplexer', ['signal', 'formats'])
-                self._multiplexer = Multiplexer(signal,
-                                                _create_message_encode_decode_formats(
-                                                    [signal]))
+                formats = _create_message_encode_decode_formats([signal])
+                self._multiplexer = Multiplexer(signal, formats)
                 break
 
         # Group signals for each multiplex id.
@@ -185,7 +195,8 @@ class Message(object):
             # Sort the signals and create the encode/decode format.
             for message in self._multiplexer_message_by_id.values():
                 message['signals'].sort(key=lambda s: s.start)
-                message['formats'] = _create_message_encode_decode_formats(message['signals'])
+                formats = _create_message_encode_decode_formats(message['signals'])
+                message['formats'] = formats
 
     @property
     def frame_id(self):

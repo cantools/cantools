@@ -49,9 +49,9 @@ def _load_signal_element(signal):
         elif key == 'offset':
             offset = int(value)
         elif key == 'length':
-            length = int(signal.attrib['length'])
+            length = int(value)
         elif key == 'endianess':
-            byte_order = '{}_endian'.format(signal.attrib['endianess'])
+            byte_order = '{}_endian'.format(value)
         else:
             LOGGER.debug("Ignoring unsupported signal attribute '%s'.", key)
 

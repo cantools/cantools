@@ -271,51 +271,51 @@ class BitStructTest(unittest.TestCase):
 
         # most significant byte first (default)
         ref = b'\x02\x46\x9a\xfe\x00\x00\x00'
-        packed = pack('>>u19s3f32', 0x1234, -2, -1.0)
+        packed = pack('u19s3f32>', 0x1234, -2, -1.0)
         self.assertEqual(packed, ref)
-        unpacked = unpack('>>u19s3f32', packed)
+        unpacked = unpack('u19s3f32>', packed)
         self.assertEqual(unpacked, (0x1234, -2, -1.0))
 
         # least significant byte first
         ref = b'\x34\x12\x18\x00\x00\xe0\xbc'
-        packed = pack('><u19s3f32', 0x1234, -2, -1.0)
+        packed = pack('u19s3f32<', 0x1234, -2, -1.0)
         self.assertEqual(packed, ref)
-        unpacked = unpack('><u19s3f32', packed)
+        unpacked = unpack('u19s3f32<', packed)
         self.assertEqual(unpacked, (0x1234, -2, -1.0))
 
         # least significant byte first
         ref = b'\x34\x12'
-        packed = pack('><u8s8', 0x34, 0x12)
+        packed = pack('u8s8<', 0x34, 0x12)
         self.assertEqual(packed, ref)
-        unpacked = unpack('><u8s8', packed)
+        unpacked = unpack('u8s8<', packed)
         self.assertEqual(unpacked, (0x34, 0x12))
 
         # least significant byte first
         ref = b'\x34\x22'
-        packed = pack('><u3u12', 1, 0x234)
+        packed = pack('u3u12<', 1, 0x234)
         self.assertEqual(packed, ref)
-        unpacked = unpack('><u3s12', packed)
+        unpacked = unpack('u3s12<', packed)
         self.assertEqual(unpacked, (1, 0x234))
 
         # least significant byte first
         ref = b'\x34\x11\x00'
-        packed = pack('><u3u17', 1, 0x234)
+        packed = pack('u3u17<', 1, 0x234)
         self.assertEqual(packed, ref)
-        unpacked = unpack('><u3s17', packed)
+        unpacked = unpack('u3s17<', packed)
         self.assertEqual(unpacked, (1, 0x234))
 
         # least significant byte first
         ref = b'\x80'
-        packed = pack('><u1', 1)
+        packed = pack('u1<', 1)
         self.assertEqual(packed, ref)
-        unpacked = unpack('><u1', packed)
+        unpacked = unpack('u1<', packed)
         self.assertEqual(unpacked, (1, ))
 
         # least significant byte first
         ref = b'\x45\x23\x25\x82'
-        packed = pack('><u19u5u1u7', 0x12345, 5, 1, 2)
+        packed = pack('u19u5u1u7<', 0x12345, 5, 1, 2)
         self.assertEqual(packed, ref)
-        unpacked = unpack('><u19u5u1u7', packed)
+        unpacked = unpack('u19u5u1u7<', packed)
         self.assertEqual(unpacked, (0x12345, 5, 1, 2))
 
     def test_performance(self):

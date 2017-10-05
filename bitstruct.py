@@ -3,28 +3,30 @@ from __future__ import print_function
 import re
 import struct
 
-__version__ = "4.0.0"
+__version__ = "3.4.0"
 
 
 def _parse_format(fmt):
-    parsed_infos = re.findall(r'([<>]?)([<>]?)([a-zA-Z])(\d+)', fmt)
+    if fmt[-1] in [">", "<"]:
+        byte_order = fmt[-1]
+        fmt = fmt[:-1]
+    else:
+        byte_order = ">"
+
+    parsed_infos = re.findall(r'([<>]?)([a-zA-Z])(\d+)', fmt)
 
     # Use big endian as default and use the endianness of the previous
     # value if none is given for the current value.
     infos = []
     endianness = ">"
-    byte_order = ">"
 
     for info in parsed_infos:
         if info[0] != "":
             endianness = info[0]
 
-        if info[1] != "":
-            byte_order = info[1]
+        infos.append((info[1], int(info[2]), endianness))
 
-        infos.append((info[2], int(info[3]), endianness, byte_order))
-
-    return infos
+    return infos, byte_order
 
 
 def _pack_integer(size, arg):
@@ -125,9 +127,9 @@ def pack(fmt, *args):
     :param args: Variable argument list of values to pack.
     :returns: A byte string of the packed values.
 
-    `fmt` is a string of [bitorder-[byteorder-]]type-length
-    groups. Bitorder and byteorder may be omitted. Bitorder must be
-    given if byteorder is given.
+    `fmt` is a string of bitorder-type-length groups, and optionally a
+    byteorder identifier afer the groups. Bitorder and byteorder may
+    be omitted.
 
     Bitorder is either ">" or "<", where ">" means MSB first and "<"
     means LSB first. If bitorder is omitted, the previous values'
@@ -136,9 +138,7 @@ def pack(fmt, *args):
 
     Byteorder is either ">" or "<", where ">" means most significant
     byte first and "<" means least significant byte first. If
-    byteorder is omitted, the previous values' byteorder is used for
-    the current value. By default, most significant byte first is
-    used.
+    byteorder is omitted, most significant byte first is used.
 
     There are seven types; 'u', 's', 'f', 'b', 't', 'r' and 'p'.
 
@@ -155,12 +155,15 @@ def pack(fmt, *args):
     Example format string with default bit and byte ordering: 'u1u3p7s16'
 
     Same format string, but with least significant byte first:
-    '><u1u3p7s16'
+    'u1u3p7s16<'
+
+    Same format string, but with LSB first ('<' prefix) and least
+    significant byte first ('<' suffix): '<u1u3p7s16<'
 
     """
 
     bits = ''
-    infos  = _parse_format(fmt)
+    infos, byte_order = _parse_format(fmt)
     i = 0
 
     # Sanity check of the number of arguments.
@@ -174,7 +177,7 @@ def pack(fmt, *args):
         raise ValueError("pack expected {} item(s) for packing "
                          "(got {})".format(number_of_arguments, len(args)))
 
-    for type_, size, endianness, byte_order in infos:
+    for type_, size, endianness in infos:
         if type_ == 'p':
             bits += size * '0'
         else:
@@ -191,11 +194,11 @@ def pack(fmt, *args):
             else:
                 raise ValueError("bad type '{}' in format".format(type_))
 
-            # Reverse the bit order in little endian values.
+            # reverse the bit order in little endian values
             if endianness == "<":
                 value_bits = value_bits[::-1]
 
-            # Reverse bytes order for least significant byte first.
+            # reverse bytes order for least significant byte first
             if byte_order == ">":
                 bits += value_bits
             else:
@@ -210,9 +213,8 @@ def pack(fmt, *args):
 
             i += 1
 
-    # Padding of last byte.
+    # padding of last byte
     tail = len(bits) % 8
-
     if tail != 0:
         bits += (8 - tail) * '0'
 
@@ -232,10 +234,10 @@ def unpack(fmt, data):
     """
 
     bits = ''.join(['{:08b}'.format(b) for b in bytearray(data)])
-    infos = _parse_format(fmt)
+    infos, byte_order = _parse_format(fmt)
 
     # Sanity check.
-    number_of_bits_to_unpack = sum([size for _, size, _, _ in infos])
+    number_of_bits_to_unpack = sum([size for _, size, _ in infos])
 
     if number_of_bits_to_unpack > len(bits):
         raise ValueError("unpack requires at least {} bits to unpack "
@@ -245,11 +247,11 @@ def unpack(fmt, data):
     res = []
     offset = 0
 
-    for type_, size, endianness, byte_order in infos:
+    for type_, size, endianness in infos:
         if type_ == 'p':
             pass
         else:
-            # Reverse bytes order for least significant byte first.
+            # reverse bytes order for least significant byte first
             if byte_order == ">":
                 value_bits = bits[offset:offset+size]
             else:
@@ -264,7 +266,7 @@ def unpack(fmt, data):
 
                 value_bits += value_bits_tmp
 
-            # Reverse the bit order in little endian values.
+            # reverse the bit order in little endian values
             if endianness == "<":
                 value_bits = value_bits[::-1]
 
@@ -296,7 +298,7 @@ def calcsize(fmt):
 
     """
 
-    return sum([size for _, size, _, _ in _parse_format(fmt)])
+    return sum([size for _, size, _ in _parse_format(fmt)[0]])
 
 
 def byteswap(fmt, data, offset = 0):

@@ -128,7 +128,7 @@ def pack(fmt, *args):
     :returns: A byte string of the packed values.
 
     `fmt` is a string of bitorder-type-length groups, and optionally a
-    byteorder identifier afer the groups. Bitorder and byteorder may
+    byteorder identifier after the groups. Bitorder and byteorder may
     be omitted.
 
     Bitorder is either ">" or "<", where ">" means MSB first and "<"

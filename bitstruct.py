@@ -2,6 +2,8 @@ from __future__ import print_function
 
 import re
 import struct
+import binascii
+
 
 __version__ = "3.4.0"
 
@@ -33,9 +35,11 @@ def _pack_integer(size, arg):
     value = int(arg)
 
     if value < 0:
-        value = ((1 << size) + value)
+        value += (1 << size)
 
-    return '{{:0{}b}}'.format(size).format(value)
+    value += (1 << size)
+
+    return bin(value)[3:]
 
 
 def _pack_boolean(size, arg):
@@ -55,16 +59,11 @@ def _pack_float(size, arg):
         raise ValueError('expected float size of 32 of 64 bits (got {})'.format(
             size))
 
-    return ''.join('{:08b}'.format(b)
-                   for b in bytearray(value))
+    return bin(int(b'01' + binascii.hexlify(value), 16))[3:]
 
 
 def _pack_bytearray(size, arg):
-    value = bytearray(arg)
-    bits = ''.join('{:08b}'.format(b)
-                   for b in value)
-
-    return bits[0:size]
+    return bin(int(b'01' + binascii.hexlify(arg), 16))[3:size + 3]
 
 
 def _pack_text(size, arg):
@@ -73,20 +72,21 @@ def _pack_text(size, arg):
     return _pack_bytearray(size, bytearray(value))
 
 
-def _unpack_integer(type_, bits):
+def _unpack_signed_integer(bits):
     value = int(bits, 2)
 
-    if type_ == 's':
-        if bits[0] == '1':
-            value -= (1 << len(bits))
+    if bits[0] == '1':
+        value -= (1 << len(bits))
 
     return value
 
 
-def _unpack_boolean(bits):
-    value = _unpack_integer('u', bits)
+def _unpack_unsigned_integer(bits):
+    return int(bits, 2)
 
-    return bool(value)
+
+def _unpack_boolean(bits):
+    return bool(int(bits, 2))
 
 
 def _unpack_float(size, bits):
@@ -104,17 +104,153 @@ def _unpack_float(size, bits):
 
 
 def _unpack_bytearray(size, bits):
-    value = bytearray()
-    for i in range(size // 8):
-        value.append(int(bits[8*i:8*i+8], 2))
     rest = size % 8
+
     if rest > 0:
-        value.append(int(bits[size-rest:], 2) << (8-rest))
-    return value
+        bits += (8 - rest) * '0'
+
+    return binascii.unhexlify(hex(int('10000000' + bits, 2))[4:].strip('L'))
 
 
 def _unpack_text(size, bits):
     return _unpack_bytearray(size, bits).decode('utf-8')
+
+
+class CompiledFormat(object):
+
+    def __init__(self, fmt):
+        infos, byte_order = _parse_format(fmt)
+        self._infos = infos
+        self._byte_order = byte_order
+        self._number_of_bits_to_unpack = sum([info[1] for info in infos])
+        self._number_of_arguments = 0
+
+        for info in infos:
+            if info[0] != 'p':
+                self._number_of_arguments += 1
+
+
+    def pack(self, *args):
+        bits = ''
+        i = 0
+
+        # Sanity check of the number of arguments.
+        if self._number_of_arguments > len(args):
+            raise ValueError("pack expected {} item(s) for packing "
+                             "(got {})".format(self._number_of_arguments,
+                                               len(args)))
+
+        for type_, size, endianness in self._infos:
+            if type_ == 'p':
+                bits += size * '0'
+            else:
+                if type_ == 's':
+                    value_bits = _pack_integer(size, args[i])
+                elif type_ == 'u':
+                    value_bits = _pack_integer(size, args[i])
+                elif type_ == 'f':
+                    value_bits = _pack_float(size, args[i])
+                elif type_ == 'b':
+                    value_bits = _pack_boolean(size, args[i])
+                elif type_ == 't':
+                    value_bits = _pack_text(size, args[i])
+                elif type_ == 'r':
+                    value_bits = _pack_bytearray(size, bytearray(args[i]))
+                else:
+                    raise ValueError("bad type '{}' in format".format(type_))
+
+                # reverse the bit order in little endian values
+                if endianness == "<":
+                    value_bits = value_bits[::-1]
+
+                # reverse bytes order for least significant byte first
+                if self._byte_order == ">":
+                    bits += value_bits
+                else:
+                    aligned_offset = len(value_bits) - (8 - (len(bits) % 8))
+
+                    while aligned_offset > 0:
+                        bits += value_bits[aligned_offset:]
+                        value_bits = value_bits[:aligned_offset]
+                        aligned_offset -= 8
+
+                    bits += value_bits
+
+                i += 1
+
+        # padding of last byte
+        tail = len(bits) % 8
+
+        if tail != 0:
+            bits += (8 - tail) * '0'
+
+        return bytes(_unpack_bytearray(len(bits), bits))
+
+    def unpack(self, data):
+        bits = bin(int(b'01' + binascii.hexlify(bytearray(data)), 16))[3:]
+
+        # Sanity check.
+        if self._number_of_bits_to_unpack > len(bits):
+            raise ValueError("unpack requires at least {} bits to unpack "
+                             "(got {})".format(self._number_of_bits_to_unpack,
+                                               len(bits)))
+
+        res = []
+        offset = 0
+
+        for type_, size, endianness in self._infos:
+            if type_ == 'p':
+                pass
+            else:
+                # reverse bytes order for least significant byte first
+                if self._byte_order == ">":
+                    value_bits = bits[offset:offset+size]
+                else:
+                    value_bits_tmp = bits[offset:offset+size]
+                    aligned_offset = (size - ((offset + size) % 8))
+                    value_bits = ''
+
+                    while aligned_offset > 0:
+                        value_bits += value_bits_tmp[aligned_offset:aligned_offset+8]
+                        value_bits_tmp = value_bits_tmp[:aligned_offset]
+                        aligned_offset -= 8
+
+                    value_bits += value_bits_tmp
+
+                # reverse the bit order in little endian values
+                if endianness == "<":
+                    value_bits = value_bits[::-1]
+
+                if type_ == 's':
+                    value = _unpack_signed_integer(value_bits)
+                elif type_ == 'u':
+                    value = _unpack_unsigned_integer(value_bits)
+                elif type_ == 'f':
+                    value = _unpack_float(size, value_bits)
+                elif type_ == 'b':
+                    value = _unpack_boolean(value_bits)
+                elif type_ == 't':
+                    value = _unpack_text(size, value_bits)
+                elif type_ == 'r':
+                    value = bytes(_unpack_bytearray(size, value_bits))
+                else:
+                    raise ValueError("bad type '{}' in format".format(type_))
+
+                res.append(value)
+
+            offset += size
+
+        return tuple(res)
+
+    def calcsize(self):
+        """Calculate the number of bits in given format.
+
+        :param fmt: Bitstruct format string.
+        :returns: Number of bits in format string.
+
+        """
+
+        return sum([size for _, size, _ in self._infos])
 
 
 def pack(fmt, *args):
@@ -162,64 +298,7 @@ def pack(fmt, *args):
 
     """
 
-    bits = ''
-    infos, byte_order = _parse_format(fmt)
-    i = 0
-
-    # Sanity check of the number of arguments.
-    number_of_arguments = 0
-
-    for info in infos:
-        if info[0] != 'p':
-            number_of_arguments += 1
-
-    if number_of_arguments > len(args):
-        raise ValueError("pack expected {} item(s) for packing "
-                         "(got {})".format(number_of_arguments, len(args)))
-
-    for type_, size, endianness in infos:
-        if type_ == 'p':
-            bits += size * '0'
-        else:
-            if type_ in 'us':
-                value_bits = _pack_integer(size, args[i])
-            elif type_ == 'f':
-                value_bits = _pack_float(size, args[i])
-            elif type_ == 'b':
-                value_bits = _pack_boolean(size, args[i])
-            elif type_ == 't':
-                value_bits = _pack_text(size, args[i])
-            elif type_ == 'r':
-                value_bits = _pack_bytearray(size, bytearray(args[i]))
-            else:
-                raise ValueError("bad type '{}' in format".format(type_))
-
-            # reverse the bit order in little endian values
-            if endianness == "<":
-                value_bits = value_bits[::-1]
-
-            # reverse bytes order for least significant byte first
-            if byte_order == ">":
-                bits += value_bits
-            else:
-                aligned_offset = len(value_bits) - (8 - (len(bits) % 8))
-
-                while aligned_offset > 0:
-                    bits += value_bits[aligned_offset:]
-                    value_bits = value_bits[:aligned_offset]
-                    aligned_offset -= 8
-
-                bits += value_bits
-
-            i += 1
-
-    # padding of last byte
-    tail = len(bits) % 8
-    if tail != 0:
-        bits += (8 - tail) * '0'
-
-    return bytes(bytearray([int(''.join(bits[i:i+8]), 2)
-                            for i in range(0, len(bits), 8)]))
+    return CompiledFormat(fmt).pack(*args)
 
 
 def unpack(fmt, data):
@@ -233,61 +312,7 @@ def unpack(fmt, data):
 
     """
 
-    bits = ''.join(['{:08b}'.format(b) for b in bytearray(data)])
-    infos, byte_order = _parse_format(fmt)
-
-    # Sanity check.
-    number_of_bits_to_unpack = sum([size for _, size, _ in infos])
-
-    if number_of_bits_to_unpack > len(bits):
-        raise ValueError("unpack requires at least {} bits to unpack "
-                         "(got {})".format(number_of_bits_to_unpack,
-                                           len(bits)))
-
-    res = []
-    offset = 0
-
-    for type_, size, endianness in infos:
-        if type_ == 'p':
-            pass
-        else:
-            # reverse bytes order for least significant byte first
-            if byte_order == ">":
-                value_bits = bits[offset:offset+size]
-            else:
-                value_bits_tmp = bits[offset:offset+size]
-                aligned_offset = (size - ((offset + size) % 8))
-                value_bits = ''
-
-                while aligned_offset > 0:
-                    value_bits += value_bits_tmp[aligned_offset:aligned_offset+8]
-                    value_bits_tmp = value_bits_tmp[:aligned_offset]
-                    aligned_offset -= 8
-
-                value_bits += value_bits_tmp
-
-            # reverse the bit order in little endian values
-            if endianness == "<":
-                value_bits = value_bits[::-1]
-
-            if type_ in 'us':
-                value = _unpack_integer(type_, value_bits)
-            elif type_ == 'f':
-                value = _unpack_float(size, value_bits)
-            elif type_ == 'b':
-                value = _unpack_boolean(value_bits)
-            elif type_ == 't':
-                value = _unpack_text(size, value_bits)
-            elif type_ == 'r':
-                value = bytes(_unpack_bytearray(size, value_bits))
-            else:
-                raise ValueError("bad type '{}' in format".format(type_))
-
-            res.append(value)
-
-        offset += size
-
-    return tuple(res)
+    return CompiledFormat(fmt).unpack(data)
 
 
 def calcsize(fmt):
@@ -298,7 +323,7 @@ def calcsize(fmt):
 
     """
 
-    return sum([size for _, size, _ in _parse_format(fmt)[0]])
+    return CompiledFormat(fmt).calcsize()
 
 
 def byteswap(fmt, data, offset = 0):
@@ -325,3 +350,12 @@ def byteswap(fmt, data, offset = 0):
         i += length
 
     return data_swapped
+
+
+def compile(fmt):
+    """Compile given format string and return a CompiledFormat object that
+    can be used to pack and unpack data.
+
+    """
+
+    return CompiledFormat(fmt)

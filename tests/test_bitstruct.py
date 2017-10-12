@@ -1,8 +1,9 @@
+from __future__ import print_function
 import unittest
 import timeit
 import sys
 from bitstruct import *
-
+import bitstruct
 
 class BitStructTest(unittest.TestCase):
 
@@ -19,6 +20,14 @@ class BitStructTest(unittest.TestCase):
 
         packed = pack('u77', 0x100000000001000000)
         ref = b'\x00\x80\x00\x00\x00\x00\x08\x00\x00\x00'
+        self.assertEqual(packed, ref)
+
+        packed = pack('u8000', int(8000 * '1', 2))
+        ref = 1000 * b'\xff'
+        self.assertEqual(packed, ref)
+
+        packed = pack('s4000', int(8000 * '0', 2))
+        ref = 500 * b'\x00'
         self.assertEqual(packed, ref)
 
         packed = pack('p1u1s6u7u9', 0, -2, 65, 22)
@@ -44,6 +53,9 @@ class BitStructTest(unittest.TestCase):
 
         packed = pack('b1t24', False, "Hi!")
         self.assertEqual(packed, b'$4\x90\x80')
+
+        packed = pack('t8000', 1000 * "7")
+        self.assertEqual(packed, 1000 * b'\x37')
 
         # Too many values to pack.
         try:
@@ -104,11 +116,19 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(unpacked, (0, 0, -2, 65, 22))
 
         unpacked = unpack('u1', bytearray(b'\x80'))
-        self.assertEqual(unpacked, (1,))
+        self.assertEqual(unpacked, (1, ))
 
         packed = b'\x00\x80\x00\x00\x00\x00\x08\x00\x00\x00'
         unpacked = unpack('u77', packed)
         self.assertEqual(unpacked, (0x100000000001000000,))
+
+        packed = 1000 * b'\xff'
+        unpacked = unpack('u8000', packed)
+        self.assertEqual(unpacked, (int(8000 * '1', 2), ))
+
+        packed = 500 * b'\x00'
+        unpacked = unpack('s4000', packed)
+        self.assertEqual(unpacked, (0, ))
 
         packed = b'\x3e\x82\x16'
         unpacked = unpack('p1u1s6u7u9', packed)
@@ -124,7 +144,7 @@ class BitStructTest(unittest.TestCase):
 
         packed = [0x80]
         unpacked = unpack('b1', packed)
-        self.assertEqual(unpacked, (True,))
+        self.assertEqual(unpacked, (True, ))
 
         packed = b'\x80'
         unpacked = unpack('b1p6b1', packed)
@@ -141,6 +161,10 @@ class BitStructTest(unittest.TestCase):
         packed = b'$4\x90\x80'
         unpacked = unpack('b1t24', packed)
         self.assertEqual(unpacked, (False, u"Hi!"))
+
+        packed = 1000 * b"7"
+        unpacked = unpack('t8000', packed)
+        self.assertEqual(packed, 1000 * b'\x37')
 
         # Bad float size.
         try:
@@ -318,10 +342,12 @@ class BitStructTest(unittest.TestCase):
         unpacked = unpack('u19u5u1u7<', packed)
         self.assertEqual(unpacked, (0x12345, 5, 1, 2))
 
-    def test_performance(self):
-        """Test pack/unpack performance.
+    def test_performance_mixed_types(self):
+        """Test pack/unpack performance with mixed types.
 
         """
+
+        print()
 
         time = timeit.timeit("pack('s6u7r40b1t152', "
                              "-2, 22, b'\x01\x01\x03\x04\x05', "
@@ -329,6 +355,13 @@ class BitStructTest(unittest.TestCase):
                              setup="from bitstruct import pack",
                              number=50000)
         print("pack time: {} s ({} s/pack)".format(time, time / 50000))
+
+        time = timeit.timeit(
+            "fmt.pack(-2, 22, b'\x01\x01\x03\x04\x05', "
+            "True, u'foo fie bar gom gum')",
+            setup="import bitstruct ; fmt = bitstruct.compile('s6u7r40b1t152')",
+            number=50000)
+        print("pack time compiled: {} s ({} s/pack)".format(time, time / 50000))
 
         time = timeit.timeit("unpack('s6u7r40b1t152', "
                              "b'\\xf8\\xb0\\x08\\x08\\x18 "
@@ -339,6 +372,56 @@ class BitStructTest(unittest.TestCase):
                              setup="from bitstruct import unpack",
                              number=50000)
         print("unpack time: {} s ({} s/unpack)".format(time, time / 50000))
+
+        time = timeit.timeit(
+            "fmt.unpack(b'\\xf8\\xb0\\x08\\x08\\x18 "
+            "-\\x99\\xbd\\xbc\\x81\\x99"
+            "\\xa5\\x94\\x81\\x89\\x85"
+            "\\xc8\\x81\\x9d\\xbd\\xb4"
+            "\\x81\\x9d\\xd5\\xb4')",
+            setup="import bitstruct ; fmt = bitstruct.compile('s6u7r40b1t152')",
+            number=50000)
+        print("unpack time compiled: {} s ({} s/unpack)".format(time, time / 50000))
+
+    def test_performance_integers(self):
+        """Test pack/unpack performance with integers.
+
+        """
+
+        print()
+
+        time = timeit.timeit("pack('s13u7u35u1s9', "
+                             "-2, 22, 44567233, 0, 33)",
+                             setup="from bitstruct import pack",
+                             number=50000)
+        print("pack time: {} s ({} s/pack)".format(time, time / 50000))
+
+        time = timeit.timeit(
+            "fmt.pack(-2, 22, 44567233, 0, 33)",
+            setup="import bitstruct ; fmt = bitstruct.compile('s13u7u35u1s9')",
+            number=50000)
+        print("pack time compiled: {} s ({} s/pack)".format(time, time / 50000))
+
+        time = timeit.timeit("unpack('s13u7u35u1s9', "
+                             "b'\\xff\\xf1`\\x05P\\x15\\x82\\x10\\x80')",
+                             setup="from bitstruct import unpack",
+                             number=50000)
+        print("unpack time: {} s ({} s/unpack)".format(time, time / 50000))
+
+        time = timeit.timeit(
+            "fmt.unpack(b'\\xff\\xf1`\\x05P\\x15\\x82\\x10\\x80')",
+            setup="import bitstruct ; fmt = bitstruct.compile('s13u7u35u1s9')",
+            number=50000)
+        print("unpack time compiled: {} s ({} s/unpack)".format(time, time / 50000))
+
+    def test_compile(self):
+        compiled_format = bitstruct.compile('u1u1s6u7u9')
+
+        packed = compiled_format.pack(0, 0, -2, 65, 22)
+        self.assertEqual(packed, b'\x3e\x82\x16')
+
+        unpacked = compiled_format.unpack(b'\x3e\x82\x16')
+        self.assertEqual(unpacked, (0, 0, -2, 65, 22))
 
 
 if __name__ == '__main__':

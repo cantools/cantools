@@ -117,6 +117,16 @@ def _unpack_text(size, bits):
 
 
 class CompiledFormat(object):
+    """A compiled format that can be used to pack and/or unpack data
+    multiple.
+
+    Instances of this class are created by the factory function
+    :func:`~bitstruct.compile()`.
+
+    :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
+                for details.
+
+    """
 
     def __init__(self, fmt):
         infos, byte_order = _parse_format(fmt)
@@ -131,6 +141,16 @@ class CompiledFormat(object):
 
 
     def pack(self, *args):
+        """Return a byte string containing the values v1, v2, ... packed
+        according to the compiled format. If the total number of bits
+        are not a multiple of 8, padding will be added at the end of
+        the last byte.
+
+        :param args: Variable argument list of values to pack.
+        :returns: A byte string of the packed values.
+
+        """
+
         bits = ''
         i = 0
 
@@ -187,6 +207,15 @@ class CompiledFormat(object):
         return bytes(_unpack_bytearray(len(bits), bits))
 
     def unpack(self, data):
+        """Unpack `data` (byte string, bytearray or list of integers)
+        according to the compiled format. The result is a tuple even
+        if it contains exactly one item.
+
+        :param data: Byte string of values to unpack.
+        :returns: A tuple of the unpacked values.
+
+        """
+
         bits = bin(int(b'01' + binascii.hexlify(bytearray(data)), 16))[3:]
 
         # Sanity check.
@@ -204,14 +233,14 @@ class CompiledFormat(object):
             else:
                 # reverse bytes order for least significant byte first
                 if self._byte_order == ">":
-                    value_bits = bits[offset:offset+size]
+                    value_bits = bits[offset:offset + size]
                 else:
-                    value_bits_tmp = bits[offset:offset+size]
+                    value_bits_tmp = bits[offset:offset + size]
                     aligned_offset = (size - ((offset + size) % 8))
                     value_bits = ''
 
                     while aligned_offset > 0:
-                        value_bits += value_bits_tmp[aligned_offset:aligned_offset+8]
+                        value_bits += value_bits_tmp[aligned_offset:aligned_offset + 8]
                         value_bits_tmp = value_bits_tmp[:aligned_offset]
                         aligned_offset -= 8
 
@@ -243,10 +272,9 @@ class CompiledFormat(object):
         return tuple(res)
 
     def calcsize(self):
-        """Calculate the number of bits in given format.
+        """Calculate the number of bits in the compiled format.
 
-        :param fmt: Bitstruct format string.
-        :returns: Number of bits in format string.
+        :returns: Number of bits in the format string.
 
         """
 
@@ -267,34 +295,38 @@ def pack(fmt, *args):
     byteorder identifier after the groups. Bitorder and byteorder may
     be omitted.
 
-    Bitorder is either ">" or "<", where ">" means MSB first and "<"
-    means LSB first. If bitorder is omitted, the previous values'
-    bitorder is used for the current value. For example, in the format
-    string "u1<u2u3" u1 is MSB first and both u2 and u3 are LSB first.
+    Bitorder is either ``>`` or ``<``, where ``>`` means MSB first and
+    ``<`` means LSB first. If bitorder is omitted, the previous
+    values' bitorder is used for the current value. For example, in
+    the format string ``'u1<u2u3'``, ``u1`` is MSB first and both
+    ``u2`` and ``u3`` are LSB first.
 
-    Byteorder is either ">" or "<", where ">" means most significant
-    byte first and "<" means least significant byte first. If
-    byteorder is omitted, most significant byte first is used.
+    Byteorder is either ``>`` or ``<``, where ``>`` means most
+    significant byte first and ``<`` means least significant byte
+    first. If byteorder is omitted, most significant byte first is
+    used.
 
-    There are seven types; 'u', 's', 'f', 'b', 't', 'r' and 'p'.
+    There are seven types; ``u``, ``s``, ``f``, ``b``, ``t``, ``r``
+    and ``p``.
 
-    - 'u' -- unsigned integer
-    - 's' -- signed integer
-    - 'f' -- floating point number of 32 or 64 bits
-    - 'b' -- boolean
-    - 't' -- text (ascii or utf-8)
-    - 'r' -- raw, bytes
-    - 'p' -- padding, ignore
+    - ``u`` -- unsigned integer
+    - ``s`` -- signed integer
+    - ``f`` -- floating point number of 32 or 64 bits
+    - ``b`` -- boolean
+    - ``t`` -- text (ascii or utf-8)
+    - ``r`` -- raw, bytes
+    - ``p`` -- padding, ignore
 
     Length is the number of bits to pack the value into.
 
-    Example format string with default bit and byte ordering: 'u1u3p7s16'
+    Example format string with default bit and byte ordering:
+    ``'u1u3p7s16'``
 
     Same format string, but with least significant byte first:
-    'u1u3p7s16<'
+    ``'u1u3p7s16<'``
 
-    Same format string, but with LSB first ('<' prefix) and least
-    significant byte first ('<' suffix): '<u1u3p7s16<'
+    Same format string, but with LSB first (``<`` prefix) and least
+    significant byte first (``<`` suffix): ``'<u1u3p7s16<'``
 
     """
 
@@ -306,7 +338,8 @@ def unpack(fmt, data):
     according to the given format. The result is a tuple even if it
     contains exactly one item.
 
-    :param fmt: Bitstruct format string. See pack() for details.
+    :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
+                for details.
     :param data: Byte string of values to unpack.
     :returns: A tuple of the unpacked values.
 
@@ -318,7 +351,8 @@ def unpack(fmt, data):
 def calcsize(fmt):
     """Calculate the number of bits in given format.
 
-    :param fmt: Bitstruct format string.
+    :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
+                for details.
     :returns: Number of bits in format string.
 
     """
@@ -329,9 +363,9 @@ def calcsize(fmt):
 def byteswap(fmt, data, offset = 0):
     """Swap bytes in `data` according to `fmt`, starting at byte
     `offset`. `fmt` must be an iterable, iterating over number of
-    bytes to swap. For example, the format string "24" applied to the
-    byte string b'\x00\x11\x22\x33\x44\x55' will produce the result
-    b'\x11\x00\x55\x44\x33\x22'.
+    bytes to swap. For example, the format string ``'24'`` applied to
+    the byte string ``b'\\x00\\x11\\x22\\x33\\x44\\x55'`` will produce
+    the result ``b'\\x11\\x00\\x55\\x44\\x33\\x22'``.
 
     :param fmt: Swap format string.
     :param data: Byte string of data to swap.
@@ -345,7 +379,7 @@ def byteswap(fmt, data, offset = 0):
 
     for f in fmt:
         length = int(f)
-        value = data[i:i+length]
+        value = data[i:i + length]
         data_swapped += value[::-1]
         i += length
 
@@ -353,8 +387,12 @@ def byteswap(fmt, data, offset = 0):
 
 
 def compile(fmt):
-    """Compile given format string and return a CompiledFormat object that
-    can be used to pack and unpack data.
+    """Compile given format string and return a
+    :class:`~bitstruct.CompiledFormat` object that can be used to pack
+    and unpack data multiple times.
+
+    :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
+                for details.
 
     """
 

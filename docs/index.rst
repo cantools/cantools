@@ -18,3 +18,10 @@ Functions
 .. autofunction:: bitstruct.unpack
 .. autofunction:: bitstruct.calcsize
 .. autofunction:: bitstruct.byteswap
+.. autofunction:: bitstruct.compile
+
+Classes
+=======
+
+.. autoclass:: bitstruct.CompiledFormat
+    :members:

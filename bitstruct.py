@@ -117,8 +117,8 @@ def _unpack_text(size, bits):
 
 
 class CompiledFormat(object):
-    """A compiled format that can be used to pack and/or unpack data
-    multiple.
+    """A compiled format string that can be used to pack and/or unpack
+    data multiple.
 
     Instances of this class are created by the factory function
     :func:`~bitstruct.compile()`.
@@ -141,9 +141,9 @@ class CompiledFormat(object):
 
     def pack(self, *args):
         """Return a byte string containing the values v1, v2, ... packed
-        according to the compiled format. If the total number of bits
-        are not a multiple of 8, padding will be added at the end of
-        the last byte.
+        according to the compiled format string. If the total number
+        of bits are not a multiple of 8, padding will be added at the
+        end of the last byte.
 
         :param args: Variable argument list of values to pack.
         :returns: A byte string of the packed values.
@@ -207,8 +207,8 @@ class CompiledFormat(object):
 
     def unpack(self, data):
         """Unpack `data` (byte string, bytearray or list of integers)
-        according to the compiled format. The result is a tuple even
-        if it contains exactly one item.
+        according to the compiled format string. The result is a tuple
+        even if it contains exactly one item.
 
         :param data: Byte string of values to unpack.
         :returns: A tuple of the unpacked values.
@@ -271,7 +271,7 @@ class CompiledFormat(object):
         return tuple(res)
 
     def calcsize(self):
-        """Calculate the number of bits in the compiled format.
+        """Calculate the number of bits in the compiled format string.
 
         :returns: Number of bits in the format string.
 
@@ -282,9 +282,9 @@ class CompiledFormat(object):
 
 def pack(fmt, *args):
     """Return a byte string containing the values v1, v2, ... packed
-    according to the given format. If the total number of bits are not
-    a multiple of 8, padding will be added at the end of the last
-    byte.
+    according to given format string `fmt`. If the total number of
+    bits are not a multiple of 8, padding will be added at the end of
+    the last byte.
 
     :param fmt: Bitstruct format string. See format description below.
     :param args: Variable argument list of values to pack.
@@ -334,8 +334,8 @@ def pack(fmt, *args):
 
 def unpack(fmt, data):
     """Unpack `data` (byte string, bytearray or list of integers)
-    according to the given format. The result is a tuple even if it
-    contains exactly one item.
+    according to given format string `fmt`. The result is a tuple even
+    if it contains exactly one item.
 
     :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
                 for details.
@@ -348,7 +348,7 @@ def unpack(fmt, data):
 
 
 def calcsize(fmt):
-    """Calculate the number of bits in given format.
+    """Calculate the number of bits in given format string `fmt`.
 
     :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
                 for details.
@@ -386,7 +386,7 @@ def byteswap(fmt, data, offset = 0):
 
 
 def compile(fmt):
-    """Compile given format string and return a
+    """Compile given format string `fmt` and return a
     :class:`~bitstruct.CompiledFormat` object that can be used to pack
     and unpack data multiple times.
 

@@ -415,12 +415,12 @@ class BitStructTest(unittest.TestCase):
         print("unpack time compiled: {} s ({} s/unpack)".format(time, time / 50000))
 
     def test_compile(self):
-        compiled_format = bitstruct.compile('u1u1s6u7u9')
+        cf = bitstruct.compile('u1u1s6u7u9')
 
-        packed = compiled_format.pack(0, 0, -2, 65, 22)
+        packed = cf.pack(0, 0, -2, 65, 22)
         self.assertEqual(packed, b'\x3e\x82\x16')
 
-        unpacked = compiled_format.unpack(b'\x3e\x82\x16')
+        unpacked = cf.unpack(b'\x3e\x82\x16')
         self.assertEqual(unpacked, (0, 0, -2, 65, 22))
 
 

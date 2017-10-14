@@ -139,7 +139,6 @@ class CompiledFormat(object):
             if info[0] != 'p':
                 self._number_of_arguments += 1
 
-
     def pack(self, *args):
         """Return a byte string containing the values v1, v2, ... packed
         according to the compiled format. If the total number of bits

@@ -118,7 +118,7 @@ def _unpack_text(size, bits):
 
 class CompiledFormat(object):
     """A compiled format string that can be used to pack and/or unpack
-    data multiple.
+    data multiple times.
 
     Instances of this class are created by the factory function
     :func:`~bitstruct.compile()`.
@@ -388,7 +388,7 @@ def byteswap(fmt, data, offset = 0):
 def compile(fmt):
     """Compile given format string `fmt` and return a
     :class:`~bitstruct.CompiledFormat` object that can be used to pack
-    and unpack data multiple times.
+    and/or unpack data multiple times.
 
     :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
                 for details.

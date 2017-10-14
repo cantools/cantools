@@ -466,6 +466,40 @@ class BitStructTest(unittest.TestCase):
             self.assertEqual(pack(fmt, value), packed)
             self.assertEqual(unpack(fmt, packed), (value, ))
 
+    def test_bad_float_size(self):
+        """Test of bad float size.
+
+        """
+
+        with self.assertRaises(ValueError) as cm:
+            pack('f31', 1.0)
+
+        self.assertEqual(str(cm.exception),
+                         'expected float size of 32 of 64 bits (got 31)')
+
+        with self.assertRaises(ValueError) as cm:
+            unpack('f33', 8 * b'\x00')
+
+        self.assertEqual(str(cm.exception),
+                         'expected float size of 32 of 64 bits (got 33)')
+
+    def test_bad_format_type(self):
+        """Test of bad format type.
+
+        """
+
+        cf = bitstruct.compile('g1')
+
+        with self.assertRaises(ValueError) as cm:
+            cf.pack(1.0)
+
+        self.assertEqual(str(cm.exception), "bad type 'g' in format")
+
+        with self.assertRaises(ValueError) as cm:
+            cf.unpack(b'\x00')
+
+        self.assertEqual(str(cm.exception), "bad type 'g' in format")
+
 
 if __name__ == '__main__':
     unittest.main()

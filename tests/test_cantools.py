@@ -576,7 +576,8 @@ class CanToolsTest(unittest.TestCase):
         
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
-        db = cantools.db.load_file(filename)
+        db = cantools.db.File()
+        db.add_kcd_file(filename)
 
         frame_id = 0x400
         data = {
@@ -600,6 +601,20 @@ class CanToolsTest(unittest.TestCase):
             db.add_kcd_string('not xml')
 
         self.assertEqual(str(cm.exception), 'syntax error: line 1, column 0')
+
+    def test_bus(self):
+        bus = cantools.db.bus.Bus('foo')
+        self.assertEqual(repr(bus), "bus('foo', None)")
+
+        bus = cantools.db.bus.Bus('foo', 'bar')
+        self.assertEqual(repr(bus), "bus('foo', 'bar')")
+
+    def test_num(self):
+        self.assertEqual(cantools.db.formats.utils.num('1'), 1)
+        self.assertEqual(cantools.db.formats.utils.num('1.0'), 1.0)
+
+        with self.assertRaises(ValueError):
+            cantools.db.formats.utils.num('x')
 
 
 # This file is not '__main__' when executed via 'python setup.py

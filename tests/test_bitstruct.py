@@ -423,6 +423,49 @@ class BitStructTest(unittest.TestCase):
         unpacked = cf.unpack(b'\x3e\x82\x16')
         self.assertEqual(unpacked, (0, 0, -2, 65, 22))
 
+    def test_signed_integer(self):
+        """Pack and unpack signed integer values.
+
+        """
+
+        datas = [
+            ('s2', 0x01, b'\x40'),
+            ('s3', 0x03, b'\x60'),
+            ('s4', 0x07, b'\x70'),
+            ('s5', 0x0f, b'\x78'),
+            ('s6', 0x1f, b'\x7c'),
+            ('s7', 0x3f, b'\x7e'),
+            ('s8', 0x7f, b'\x7f'),
+            ('s9', 0xff, b'\x7f\x80'),
+            ('s1',   -1, b'\x80'),
+            ('s2',   -1, b'\xc0')
+        ]
+
+        for fmt, value, packed in datas:
+            self.assertEqual(pack(fmt, value), packed)
+            self.assertEqual(unpack(fmt, packed), (value, ))
+
+    def test_unsigned_integer(self):
+        """Pack and unpack unsigned integer values.
+
+        """
+
+        datas = [
+            ('u1', 0x001, b'\x80'),
+            ('u2', 0x003, b'\xc0'),
+            ('u3', 0x007, b'\xe0'),
+            ('u4', 0x00f, b'\xf0'),
+            ('u5', 0x01f, b'\xf8'),
+            ('u6', 0x03f, b'\xfc'),
+            ('u7', 0x07f, b'\xfe'),
+            ('u8', 0x0ff, b'\xff'),
+            ('u9', 0x1ff, b'\xff\x80')
+        ]
+
+        for fmt, value, packed in datas:
+            self.assertEqual(pack(fmt, value), packed)
+            self.assertEqual(unpack(fmt, packed), (value, ))
+
 
 if __name__ == '__main__':
     unittest.main()

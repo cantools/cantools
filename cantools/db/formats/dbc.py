@@ -21,9 +21,9 @@ MESSAGE = 'BO_'
 SIGNAL = 'SG_'
 CHOICE = 'VAL_'
 VALUE_TABLE = 'VAL_TABLE_'
-ATTRIBUTE = 'BA_DEF_'
-DEFAULT_ATTR = 'BA_DEF_DEF_'
-ATTR_DEFINITION = 'BA_'
+ATTRIBUTE_DEFINITION = 'BA_DEF_'
+ATTRIBUTE_DEFINITION_DEFAULT = 'BA_DEF_DEF_'
+ATTRIBUTE = 'BA_'
 EVENT = 'EV_'
 
 DBC_FMT = """VERSION "{version}"
@@ -81,7 +81,6 @@ def _create_dbc_grammar():
 
     """
 
-    # DBC file grammar.
     word = Word(printables.replace(';', '').replace(':', ''))
     integer = Group(Optional('-') + Word(nums))
     positive_integer = Word(nums)
@@ -108,6 +107,7 @@ def _create_dbc_grammar():
     nodes = Group(Keyword('BU_')
                   + colon
                   + Group(ZeroOrMore(node)))
+
     signal = Group(Keyword(SIGNAL)
                    + Group(word + Optional(word))
                    + colon
@@ -129,6 +129,7 @@ def _create_dbc_grammar():
                            + rb)
                    + QuotedString('"', multiline=True)
                    + Group(delimitedList(node)))
+
     message = Group(Keyword(MESSAGE)
                     + positive_integer
                     + word
@@ -136,6 +137,7 @@ def _create_dbc_grammar():
                     + positive_integer
                     + word
                     + Group(ZeroOrMore(signal)))
+
     event = Suppress(Keyword(EVENT)
                      + word
                      + colon
@@ -151,6 +153,7 @@ def _create_dbc_grammar():
                      + word
                      + node
                      + scolon)
+
     comment = Group(Keyword(COMMENT)
                     + ((Keyword(MESSAGE)
                         + positive_integer
@@ -169,60 +172,63 @@ def _create_dbc_grammar():
                           + word
                           + QuotedString('"', multiline=True)
                           + scolon)))
+
+    attribute_definition = Group(Keyword(ATTRIBUTE_DEFINITION)
+                                 + ((QuotedString('"', multiline=True))
+                                    | (Keyword(SIGNAL)
+                                       | Keyword(MESSAGE)
+                                       | Keyword(EVENT)
+                                       | Keyword(NODES))
+                                    + QuotedString('"', multiline=True))
+                                 + word
+                                 + (scolon
+                                    | (Group(ZeroOrMore(Group(
+                                        (comma | Empty())
+                                        + QuotedString('"', multiline=True))))
+                                       + scolon)
+                                    | (Group(ZeroOrMore(number))
+                                       + scolon)))
+
+    attribute_definition_default = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT)
+                                         + QuotedString('"', multiline=True)
+                                         + (positive_integer | QuotedString('"', multiline=True))
+                                         + scolon)
+
     attribute = Group(Keyword(ATTRIBUTE)
-                      + ((QuotedString('"', multiline=True))
-                         | (Keyword(SIGNAL)
-                            + QuotedString('"', multiline=True))
-                         | (Keyword(MESSAGE)
-                            + QuotedString('"', multiline=True))
-                         | (Keyword(EVENT)
-                            + QuotedString('"', multiline=True))
-                         | (Keyword(NODES)
-                            + QuotedString('"', multiline=True)))
-                      + word
-                      + ((scolon)
-                         | (Group(ZeroOrMore(Group(
-                             (comma | Empty()) + QuotedString('"', multiline=True))))
-                            + scolon)
-                         | (Group(ZeroOrMore(number))
-                            + scolon)))
-    default_attr = Group(Keyword(DEFAULT_ATTR)
-                         + QuotedString('"', multiline=True)
-                         + (positive_integer | QuotedString('"', multiline=True))
-                         + scolon)
-    attr_definition = Group(Keyword(ATTR_DEFINITION)
-                            + QuotedString('"', multiline=True)
-                            + Group(Optional((Keyword(MESSAGE) + positive_integer)
-                                             | (Keyword(SIGNAL) + positive_integer + word)
-                                             | (Keyword(NODES) + word)))
-                            + (QuotedString('"', multiline=True) | positive_integer)
-                            + scolon)
+                      + QuotedString('"', multiline=True)
+                      + Group(Optional((Keyword(MESSAGE) + positive_integer)
+                                       | (Keyword(SIGNAL) + positive_integer + word)
+                                       | (Keyword(NODES) + word)))
+                      + (QuotedString('"', multiline=True) | positive_integer)
+                      + scolon)
+
     choice = Group(Keyword(CHOICE)
                    + Optional(positive_integer)
                    + word
-                   + Group(OneOrMore(Group(
-                       integer + QuotedString('"', multiline=True))))
+                   + Group(OneOrMore(Group(integer
+                                           + QuotedString('"', multiline=True))))
                    + scolon)
+
     value_table = Group(Keyword(VALUE_TABLE)
                         + word
-                        + Group(OneOrMore(Group(
-                            integer + QuotedString('"', multiline=True))))
+                        + Group(OneOrMore(Group(integer
+                                                + QuotedString('"', multiline=True))))
                         + scolon)
+
     entry = (version
              | symbols
              | discard
              | nodes
              | message
              | comment
+             | attribute_definition
+             | attribute_definition_default
              | attribute
-             | default_attr
-             | attr_definition
              | choice
              | value_table
              | event)
-    grammar = OneOrMore(entry) + StringEnd()
 
-    return grammar
+    return OneOrMore(entry) + StringEnd()
 
 
 def _dump_nodes(database):
@@ -384,70 +390,72 @@ def _load_comments(tokens):
     comments = {}
 
     for comment in tokens:
-        if comment[0] == COMMENT:
-            if comment[1] == NODES:
-                node_name = comment[2]
-                comments[node_name] = comment[3]
+        if comment[0] != COMMENT:
+            continue
 
-            if comment[1] == MESSAGE:
-                frame_id = int(comment[2])
-                if frame_id not in comments:
-                    comments[frame_id] = {}
-                comments[frame_id]['message'] = comment[3]
+        if comment[1] == NODES:
+            node_name = comment[2]
+            comments[node_name] = comment[3]
+        elif comment[1] == MESSAGE:
+            frame_id = int(comment[2])
 
-            if comment[1] == SIGNAL:
-                frame_id = int(comment[2])
-                if frame_id not in comments:
-                    comments[frame_id] = {}
-                if 'signals' not in comments[frame_id]:
-                    comments[frame_id]['signals'] = {}
+            if frame_id not in comments:
+                comments[frame_id] = {}
 
-                comments[frame_id]['signals'][comment[3]] = comment[4]
+            comments[frame_id]['message'] = comment[3]
+        elif comment[1] == SIGNAL:
+            frame_id = int(comment[2])
+
+            if frame_id not in comments:
+                comments[frame_id] = {}
+
+            if 'signals' not in comments[frame_id]:
+                comments[frame_id]['signals'] = {}
+
+            comments[frame_id]['signals'][comment[3]] = comment[4]
 
     return comments
 
 
-def _load_attributes(tokens):
-    attributes = []
+def _load_attribute_definitions(tokens):
+    definitions = []
 
     for attribute in tokens:
-        if attribute[0] == ATTRIBUTE:
-            attributes.append(attribute)
+        if attribute[0] == ATTRIBUTE_DEFINITION:
+            definitions.append(attribute)
 
-    return attributes
+    return definitions
 
 
-def _load_attribute_defaults(tokens):
-    default_attrs = {}
+def _load_attribute_definition_defaults(tokens):
+    defaults = {}
 
     for default_attr in tokens:
-        if default_attr[0] == DEFAULT_ATTR:
-            default_attrs[default_attr[1]] = default_attr[2]
+        if default_attr[0] == ATTRIBUTE_DEFINITION_DEFAULT:
+            defaults[default_attr[1]] = default_attr[2]
 
-    return default_attrs
+    return defaults
 
 
-def _load_attribute_definitions(tokens):
-    msg_attributes = {}
+def _load_attributes(tokens):
+    attributes = {}
 
-    for attr_definition in tokens:
-        if attr_definition[0:3] == [ATTR_DEFINITION, "GenMsgCycleTime", MESSAGE]:
-            frame_id = int(attr_definition[3])
-            if frame_id not in msg_attributes:
-                msg_attributes[frame_id] = {}
-            if 'cycle_time' not in msg_attributes[frame_id]:
-                msg_attributes[frame_id]['cycle_time'] = {}
-            msg_attributes[frame_id]['cycle_time'] = attr_definition[4]
+    for attribute in tokens:
+        if attribute[0] != ATTRIBUTE:
+            continue
 
-        if attr_definition[0:3] == [ATTR_DEFINITION, "GenMsgSendType", MESSAGE]:
-            frame_id = int(attr_definition[3])
-            if frame_id not in msg_attributes:
-                msg_attributes[frame_id] = {}
-            if 'send_type' not in msg_attributes[frame_id]:
-                msg_attributes[frame_id]['send_type'] = {}
-            msg_attributes[frame_id]['send_type'] = 1 #TODO
+        name = attribute[1]
 
-    return msg_attributes
+        if len(attribute[2]) == 2:
+            if attribute[2][0] == MESSAGE:
+                frame_id = int(attribute[2][1])
+
+                if frame_id not in attributes:
+                    attributes[frame_id] = {}
+
+                attributes[frame_id][name] = attribute[3]
+
+    return attributes
 
 
 def _load_choices(tokens):
@@ -472,8 +480,8 @@ def _load_choices(tokens):
 
 def _load_messages(tokens,
                    comments,
-                   default_attrs,
-                   msg_attributes,
+                   attribute_definition_defaults,
+                   message_attributes,
                    choices):
 
     def get_comment(frame_id, signal=None):
@@ -494,10 +502,10 @@ def _load_messages(tokens,
 
         """
         try:
-            return msg_attributes[frame_id]['send_type']
+            return message_attributes[frame_id]['GenMsgSendType']
         except KeyError:
             try:
-                return default_attrs['GenMsgSendType']
+                return attribute_definition_defaults['GenMsgSendType']
             except KeyError:
                 return None
 
@@ -507,10 +515,10 @@ def _load_messages(tokens,
         """
 
         try:
-            return msg_attributes[frame_id]['cycle_time']
+            return int(message_attributes[frame_id]['GenMsgCycleTime'])
         except KeyError:
             try:
-                return default_attrs['GenMsgCycleTime']
+                return int(attribute_definition_defaults['GenMsgCycleTime'])
             except KeyError:
                 return None
 
@@ -632,14 +640,14 @@ def load_string(string):
     tokens = grammar.parseString(string)
 
     comments = _load_comments(tokens)
-    attributes = _load_attributes(tokens)
-    default_attrs = _load_attribute_defaults(tokens)
-    msg_attributes = _load_attribute_definitions(tokens)
+    attribute_definitions = _load_attribute_definitions(tokens)
+    attribute_definition_defaults = _load_attribute_definition_defaults(tokens)
+    message_attributes = _load_attributes(tokens)
     choices = _load_choices(tokens)
     messages = _load_messages(tokens,
                               comments,
-                              default_attrs,
-                              msg_attributes,
+                              attribute_definition_defaults,
+                              message_attributes,
                               choices)
     nodes = _load_nodes(tokens, comments)
     version = _load_version(tokens)
@@ -647,6 +655,6 @@ def load_string(string):
     return Database(messages,
                     nodes,
                     [],
-                    attributes,
-                    default_attrs,
+                    attribute_definitions,
+                    attribute_definition_defaults,
                     version)

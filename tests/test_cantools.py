@@ -487,7 +487,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.buses[0].comment, None)
         self.assertEqual(db.buses[0].baudrate, 500000)
         self.assertEqual(db.buses[1].baudrate, 125000)
-        
+
         self.assertEqual(len(db.messages), 25)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
@@ -498,11 +498,11 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(db.messages[0].cycle_time, 0)
         self.assertEqual(db.messages[0].bus_name, 'Motor')
-        
+
         self.assertEqual(db.messages[1].frame_id, 0x0B2)
         self.assertEqual(db.messages[1].name, 'ABS')
         self.assertEqual(db.messages[1].cycle_time, 100)
-        
+
         self.assertEqual(db.messages[3].frame_id, 0x400)
         self.assertEqual(db.messages[3].name, 'Emission')
         self.assertEqual(db.messages[3].length, 5)
@@ -573,7 +573,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.unit, 'Cel')
         self.assertEqual(outside_temp.choices, None)
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
-        
+
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.File()
@@ -589,7 +589,7 @@ class CanToolsTest(unittest.TestCase):
         encoded = db.encode_message(frame_id, data)
         self.assertEqual(len(encoded), 5)
         self.assertEqual(encoded, b'\xfe\x00\xfe\x00\x00')
-        
+
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):
             cantools.db.load(StringIO(''))
@@ -615,6 +615,20 @@ class CanToolsTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             cantools.db.formats.utils.num('x')
+
+    def test_timing(self):
+        filename = os.path.join('tests', 'files', 'timing.dbc')
+        db = cantools.db.load_file(filename)
+
+        # Message cycle time is 200, as given by BA_.
+        message = db.lookup_message(1)
+        self.assertEqual(message.cycle_time, 200)
+        self.assertEqual(message.send_type, 'cyclic')
+
+        # Default message cycle time is 0, as given by BA_DEF_DEF_.
+        message = db.lookup_message(2)
+        self.assertEqual(message.cycle_time, 0)
+        self.assertEqual(message.send_type, 'none')
 
 
 # This file is not '__main__' when executed via 'python setup.py

@@ -31,6 +31,8 @@ class CanToolsTest(unittest.TestCase):
                          "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
         self.assertEqual(db.messages[0].signals[0].nodes, ['Vector__XXX'])
+        self.assertEqual(db.messages[0].cycle_time, None)
+        self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
         i = 0
 

@@ -306,29 +306,30 @@ def _dump_comments(database):
     return cm
 
 
-def _dump_attributes(database):
+def _dump_attribute_definitions(database):
     ba_def = []
 
     for attribute in database.attributes:
-        if attribute[1] == SIGNAL or attribute[1] == MESSAGE:
+        if attribute[1] in [SIGNAL, MESSAGE]:
             fmt = 'BA_DEF_ {kind} "{name}" {type_} {choices};'
             if attribute[3] == 'ENUM':
+                choices = ','.join(['"{}"'.format(choice[0])
+                                    for choice in attribute[4]])
                 ba_def.append(fmt.format(kind=attribute[1],
                                          name=attribute[2],
                                          type_=attribute[3],
-                                         choices=','.join(['"{text}"'.format(text=choice[0])
-                                                           for choice in attribute[4]])))
+                                         choices=choices))
             elif attribute[3] == 'INT':
+                choices = ' '.join(['{}'.format(choice) for choice in attribute[4]])
                 ba_def.append(fmt.format(kind=attribute[1],
                                          name=attribute[2],
                                          type_=attribute[3],
-                                         choices=' '.join(['{num}'.format(num=choice[0])
-                                                           for choice in attribute[4]])))
+                                         choices=choices))
 
     return ba_def
 
 
-def _dump_attribute_defaults(database):
+def _dump_attribute_definition_defaults(database):
     ba_def_def = []
 
     for default_attr in database.default_attrs:
@@ -344,25 +345,29 @@ def _dump_attribute_defaults(database):
     return ba_def_def
 
 
-def _dump_attribute_definitions(database):
+def _dump_attributes(database):
     ba = []
 
+    try:
+        default_send_type = database.default_attrs['GenMsgSendType']
+    except KeyError:
+        default_send_type = None
+
+    try:
+        default_cycle_time = int(database.default_attrs['GenMsgCycleTime'])
+    except KeyError:
+        default_cycle_time = None
+
     for message in database.messages:
-        if message.cycle_time is not None:
+        if message.send_type != default_send_type:
+            fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} "{send_type}";'
+            ba.append(fmt.format(frame_id=message.frame_id,
+                                 send_type=message.send_type))
+
+        if message.cycle_time != default_cycle_time:
             fmt = 'BA_ "GenMsgCycleTime" BO_ {frame_id} {cycle_time};'
             ba.append(fmt.format(frame_id=message.frame_id,
                                  cycle_time=message.cycle_time))
-
-    ba.append('')
-
-    for message in database.messages:
-        try:
-            if message.send_type is not database.default_attrs['GenMsgSendType']:
-                fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} {send_type};'
-                ba.append(fmt.format(frame_id=message.frame_id,
-                                     send_type=message.send_type))
-        except KeyError:
-            continue
 
     return ba
 
@@ -428,7 +433,7 @@ def _load_attribute_definitions(tokens):
 
 
 def _load_attribute_definition_defaults(tokens):
-    defaults = {}
+    defaults = OrderedDict()
 
     for default_attr in tokens:
         if default_attr[0] == ATTRIBUTE_DEFINITION_DEFAULT:
@@ -617,9 +622,9 @@ def dump_string(database):
     bu = _dump_nodes(database)
     bo = _dump_messages(database)
     cm = _dump_comments(database)
-    ba_def = _dump_attributes(database)
-    ba_def_def = _dump_attribute_defaults(database)
-    ba = _dump_attribute_definitions(database)
+    ba_def = _dump_attribute_definitions(database)
+    ba_def_def = _dump_attribute_definition_defaults(database)
+    ba = _dump_attributes(database)
     val = _dump_choices(database)
 
     return DBC_FMT.format(version=database.version,

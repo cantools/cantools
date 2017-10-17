@@ -30,6 +30,8 @@ NS_ :
 	BU_BO_REL_
 	SG_MUL_VAL_
 
+BS_:
+
 BU_: Sender Receiver
 
 BO_ 1 Foo: 8 Sender
@@ -38,7 +40,9 @@ BO_ 1 Foo: 8 Sender
 BO_ 2 Bar: 8 Sender
  SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK" Receiver
 
-BA_DEF_ BO_ "GenMsgSendType" ENUM  "cyclic","triggered","none";
+
+
+BA_DEF_ BO_ "GenMsgSendType" ENUM "cyclic","triggered","none";
 BA_DEF_ BO_ "GenMsgCycleTime" INT 0 50000;
 
 BA_DEF_DEF_ "GenMsgSendType" "none";
@@ -46,3 +50,5 @@ BA_DEF_DEF_ "GenMsgCycleTime" 0;
 
 BA_ "GenMsgSendType" BO_ 1 "cyclic";
 BA_ "GenMsgCycleTime" BO_ 1 200;
+
+

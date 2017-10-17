@@ -632,6 +632,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(message.cycle_time, 0)
         self.assertEqual(message.send_type, 'none')
 
+        with open(filename, 'r') as fin:
+            self.assertEqual(db.as_dbc_string(), fin.read())
+
 
 # This file is not '__main__' when executed via 'python setup.py
 # test'.

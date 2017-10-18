@@ -81,7 +81,7 @@ def _load_signal_element(signal):
         notes = signal.find('ns:Notes', NAMESPACES).text
     except AttributeError:
         pass
-        
+
     # TODO: Labels.
 
     return Signal(name=name,
@@ -141,7 +141,7 @@ def _load_message_element(message, bus_name):
 
     for signal in message.findall('ns:Signal', NAMESPACES):
         signals.append(_load_signal_element(signal))
-        
+
     if length == 'auto':
         if signals:
             last_signal = sorted(signals, key=lambda s: s.start)[-1]
@@ -180,7 +180,7 @@ def load_string(string):
     nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
     buses = []
     messages = []
-    
+
     try:
         document = root.find('ns:Document', NAMESPACES)
         version = document.attrib.get('version', None)
@@ -198,6 +198,4 @@ def load_string(string):
     return Database(messages,
                     [Node(name=node['name'], comment=None) for node in nodes],
                     buses,
-                    [],
-                    [],
                     version)

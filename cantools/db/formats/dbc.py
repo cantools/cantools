@@ -309,7 +309,7 @@ def _dump_comments(database):
 def _dump_attribute_definitions(database):
     ba_def = []
 
-    for attribute in database.attributes:
+    for attribute in database.attribute_definitions:
         if attribute[1] in [SIGNAL, MESSAGE]:
             fmt = 'BA_DEF_ {kind} "{name}" {type_} {choices};'
             if attribute[3] == 'ENUM':
@@ -332,15 +332,15 @@ def _dump_attribute_definitions(database):
 def _dump_attribute_definition_defaults(database):
     ba_def_def = []
 
-    for default_attr in database.default_attrs:
+    for default in database.attribute_definition_defaults:
         try:
-            int(database.default_attrs[default_attr])
+            int(database.attribute_definition_defaults[default])
             fmt = 'BA_DEF_DEF_ "{name}" {value};'
         except ValueError:
             fmt = 'BA_DEF_DEF_ "{name}" "{value}";'
 
-        ba_def_def.append(fmt.format(name=default_attr,
-                                     value=database.default_attrs[default_attr]))
+        ba_def_def.append(fmt.format(name=default,
+                                     value=database.attribute_definition_defaults[default]))
 
     return ba_def_def
 
@@ -349,12 +349,12 @@ def _dump_attributes(database):
     ba = []
 
     try:
-        default_send_type = database.default_attrs['GenMsgSendType']
+        default_send_type = database.attribute_definition_defaults['GenMsgSendType']
     except KeyError:
         default_send_type = None
 
     try:
-        default_cycle_time = int(database.default_attrs['GenMsgCycleTime'])
+        default_cycle_time = int(database.attribute_definition_defaults['GenMsgCycleTime'])
     except KeyError:
         default_cycle_time = None
 
@@ -660,6 +660,6 @@ def load_string(string):
     return Database(messages,
                     nodes,
                     [],
+                    version,
                     attribute_definitions,
-                    attribute_definition_defaults,
-                    version)
+                    attribute_definition_defaults)

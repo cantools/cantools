@@ -21,7 +21,8 @@ class Signal(object):
                  comment,
                  nodes=None,
                  is_multiplexer=False,
-                 multiplexer_id=None):
+                 multiplexer_id=None,
+                 is_float=False):
         self._name = name
         self._start = start
         self._length = length
@@ -37,6 +38,7 @@ class Signal(object):
         self._nodes = [] if nodes is None else nodes
         self._is_multiplexer = is_multiplexer
         self._multiplexer_id = multiplexer_id
+        self._is_float = is_float
 
     @property
     def name(self):

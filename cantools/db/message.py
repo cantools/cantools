@@ -77,14 +77,20 @@ def _create_message_encode_decode_formats(signals):
     for signal in signals:
         if signal.byte_order == 'little_endian':
             continue
+    
+        if signal._is_float:
+            signal_type = 'f'
+        elif signal._is_signed:
+            signal_type = 's'
+        else:
+            signal_type = 'u'
 
         padding = (signal.start - start)
 
         if padding > 0:
             big_fmt += 'p{}'.format(padding)
 
-        big_fmt += '{}{}'.format('s' if signal.is_signed else 'u',
-                                 signal.length)
+        big_fmt += '{}{}'.format(signal_type, signal.length)
         start = (signal.start + signal.length)
 
     if start < 64:
@@ -97,14 +103,20 @@ def _create_message_encode_decode_formats(signals):
     for signal in signals[::-1]:
         if signal.byte_order == 'big_endian':
             continue
+    
+        if signal._is_float:
+            signal_type = 'f'
+        elif signal._is_signed:
+            signal_type = 's'
+        else:
+            signal_type = 'u'
 
         padding = end - (signal.start + signal.length)
 
         if padding > 0:
             little_fmt += 'p{}'.format(padding)
 
-        little_fmt += '{}{}'.format('s' if signal.is_signed else 'u',
-                                    signal.length)
+        little_fmt += '{}{}'.format(signal_type, signal.length)
         end = signal.start
 
     if end > 0:

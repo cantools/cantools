@@ -21,16 +21,24 @@ class File(object):
                  messages=None,
                  nodes=None,
                  buses=None,
-                 attributes=None,
-                 default_attrs=None,
-                 version=None):
+                 version=None,
+                 attribute_definitions=None,
+                 attribute_definition_defaults=None):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
         self._buses = buses if buses else []
-        self.attributes = attributes if attributes else []
-        self.default_attrs = default_attrs if default_attrs else []
         self._frame_id_to_message = {}
         self._version = version
+
+        if not attribute_definitions:
+            attribute_definitions = []
+
+        self._attribute_definitions = attribute_definitions
+
+        if not attribute_definition_defaults:
+            attribute_definition_defaults = []
+
+        self._attribute_definition_defaults = attribute_definition_defaults
 
     @property
     def messages(self):
@@ -104,9 +112,9 @@ class File(object):
             self.add_message(message)
         self._nodes = database.nodes
         self._buses = database.buses
-        self.attributes = database.attributes
-        self.default_attrs = database.default_attrs
         self._version = database.version
+        self._attribute_definitions = database.attribute_definitions
+        self._attribute_definition_defaults = database.attribute_definition_defaults
 
     def add_kcd(self, fp):
         """Read and parse KCD data from given file-like object and add the
@@ -137,9 +145,9 @@ class File(object):
             self.add_message(message)
         self._nodes = database.nodes
         self._buses = database.buses
-        self.attributes = database.attributes
-        self.default_attrs = database.default_attrs
         self._version = database.version
+        self._attribute_definitions = database.attribute_definitions
+        self._attribute_definition_defaults = database.attribute_definition_defaults
 
     def add_message(self, message):
         """Add given message to the database.
@@ -163,9 +171,9 @@ class File(object):
         return dbc.dump_string(Database(self._messages,
                                         self._nodes,
                                         self._buses,
-                                        self.attributes,
-                                        self.default_attrs,
-                                        self._version))
+                                        self._version,
+                                        self._attribute_definitions,
+                                        self._attribute_definition_defaults))
 
     def as_kcd_string(self):
         """Return the database as a string formatted as a KCD file.
@@ -175,9 +183,9 @@ class File(object):
         return kcd.dump_string(Database(self._messages,
                                         self._nodes,
                                         self._buses,
-                                        self.attributes,
-                                        self.default_attrs,
-                                        self._version))
+                                        self._version,
+                                        self._attribute_definitions,
+                                        self._attribute_definition_defaults))
 
     def lookup_message(self, frame_id):
         """Find the message object for given frame id `frame_id`.

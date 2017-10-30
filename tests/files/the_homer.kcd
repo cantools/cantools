@@ -65,7 +65,7 @@
       <Signal name="SeatConfiguration" offset="16" length="8"/>
     </Message>
 
-    <Message id="0x0B2" name="ABS" triggered="true" interval="100">
+    <Message id="0x0B2" name="ABS" triggered="true" interval="100" bad-attribute="1">
       <Notes>Anti lock brake system</Notes>
       <Producer>
         <NodeRef id="2"/>
@@ -90,12 +90,12 @@
           <Signal name="Info7" offset="8" length="8"/>
         </MuxGroup>
       </Multiplex>
-      <Signal name="OutsideTemp" offset="18" length="12" endianess="big">
+      <Signal name="OutsideTemp" offset="18" length="12" endianess="big" bad-attribute="1">
         <Notes>Outside temperature.</Notes>
         <Consumer>
           <NodeRef id="12"/>
         </Consumer>
-        <Value type="unsigned" slope="0.05" intercept="-40" unit="Cel" min="0" max="100"/>
+        <Value type="unsigned" slope="0.05" intercept="-40" unit="Cel" min="0" max="100" bad-attribute="1"/>
         <LabelSet>
           <Label name="init" value="0"/>
           <LabelGroup type="error" name="Sensor error" from="4090" to="4095"/>

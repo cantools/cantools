@@ -31,6 +31,8 @@ class CanToolsTest(unittest.TestCase):
                          "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
         self.assertEqual(db.messages[0].signals[0].nodes, ['Vector__XXX'])
+        self.assertEqual(db.messages[0].cycle_time, None)
+        self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
         i = 0
 
@@ -487,7 +489,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.buses[0].comment, None)
         self.assertEqual(db.buses[0].baudrate, 500000)
         self.assertEqual(db.buses[1].baudrate, 125000)
-        
+
         self.assertEqual(len(db.messages), 25)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
@@ -498,11 +500,11 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(db.messages[0].cycle_time, 0)
         self.assertEqual(db.messages[0].bus_name, 'Motor')
-        
+
         self.assertEqual(db.messages[1].frame_id, 0x0B2)
         self.assertEqual(db.messages[1].name, 'ABS')
         self.assertEqual(db.messages[1].cycle_time, 100)
-        
+
         self.assertEqual(db.messages[3].frame_id, 0x400)
         self.assertEqual(db.messages[3].name, 'Emission')
         self.assertEqual(db.messages[3].length, 5)
@@ -573,10 +575,11 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.unit, 'Cel')
         self.assertEqual(outside_temp.choices, None)
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
-        
+
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
-        db = cantools.db.load_file(filename)
+        db = cantools.db.File()
+        db.add_kcd_file(filename)
 
         frame_id = 0x400
         data = {
@@ -588,9 +591,9 @@ class CanToolsTest(unittest.TestCase):
         encoded = db.encode_message(frame_id, data)
         self.assertEqual(len(encoded), 5)
         self.assertEqual(encoded, b'\xfe\x00\xfe\x00\x00')
-        
+
     def test_load_bad_format(self):
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormat):
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):
             cantools.db.load(StringIO(''))
 
     def test_add_bad_kcd_string(self):
@@ -600,6 +603,37 @@ class CanToolsTest(unittest.TestCase):
             db.add_kcd_string('not xml')
 
         self.assertEqual(str(cm.exception), 'syntax error: line 1, column 0')
+
+    def test_bus(self):
+        bus = cantools.db.bus.Bus('foo')
+        self.assertEqual(repr(bus), "bus('foo', None)")
+
+        bus = cantools.db.bus.Bus('foo', 'bar')
+        self.assertEqual(repr(bus), "bus('foo', 'bar')")
+
+    def test_num(self):
+        self.assertEqual(cantools.db.formats.utils.num('1'), 1)
+        self.assertEqual(cantools.db.formats.utils.num('1.0'), 1.0)
+
+        with self.assertRaises(ValueError):
+            cantools.db.formats.utils.num('x')
+
+    def test_timing(self):
+        filename = os.path.join('tests', 'files', 'timing.dbc')
+        db = cantools.db.load_file(filename)
+
+        # Message cycle time is 200, as given by BA_.
+        message = db.lookup_message(1)
+        self.assertEqual(message.cycle_time, 200)
+        self.assertEqual(message.send_type, 'cyclic')
+
+        # Default message cycle time is 0, as given by BA_DEF_DEF_.
+        message = db.lookup_message(2)
+        self.assertEqual(message.cycle_time, 0)
+        self.assertEqual(message.send_type, 'none')
+
+        with open(filename, 'r') as fin:
+            self.assertEqual(db.as_dbc_string(), fin.read())
 
 
 # This file is not '__main__' when executed via 'python setup.py

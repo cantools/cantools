@@ -15,7 +15,10 @@ def _encode_signal(signal, data, scaling):
                 break
 
     if scaling:
-        return int((value - signal.offset) / signal.scale)
+        if signal.is_float:
+            return (value - signal.offset) / signal.scale
+        else:
+            return int((value - signal.offset) / signal.scale)
     else:
         return value
 
@@ -89,9 +92,9 @@ def _create_message_encode_decode_formats(signals):
         if signal.byte_order == 'little_endian':
             continue
     
-        if signal._is_float:
+        if signal.is_float:
             signal_type = 'f'
-        elif signal._is_signed:
+        elif signal.is_signed:
             signal_type = 's'
         else:
             signal_type = 'u'
@@ -115,9 +118,9 @@ def _create_message_encode_decode_formats(signals):
         if signal.byte_order == 'big_endian':
             continue
     
-        if signal._is_float:
+        if signal.is_float:
             signal_type = 'f'
-        elif signal._is_signed:
+        elif signal.is_signed:
             signal_type = 's'
         else:
             signal_type = 'u'

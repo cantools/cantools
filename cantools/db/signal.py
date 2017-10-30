@@ -81,6 +81,14 @@ class Signal(object):
         return self._is_signed
 
     @property
+    def is_float(self):
+        """``True`` if the signal is a float, ``False`` otherwise.
+
+        """
+
+        return self._is_float
+
+    @property
     def scale(self):
         """The scale factor of the signal value.
 

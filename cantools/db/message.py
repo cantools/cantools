@@ -87,7 +87,7 @@ def _create_message_encode_decode_formats(signals):
     # Big endian byte order format.
     big_fmt = ''
     start = 0
-    
+
     def get_format_string_type(signal):
         if signal.is_float:
             return 'f'

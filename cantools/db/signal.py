@@ -74,8 +74,8 @@ class Signal(object):
 
     @property
     def is_signed(self):
-        """``True`` if the signal is signed, ``False`` otherwise.
-           This is ignore if ``is_float == True``.
+        """``True`` if the signal is signed, ``False`` otherwise. Ignore this
+           attribute if ``is_float`` is ``True``.
 
         """
 

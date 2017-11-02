@@ -15,7 +15,10 @@ def _encode_signal(signal, data, scaling):
                 break
 
     if scaling:
-        return int((value - signal.offset) / signal.scale)
+        if signal.is_float:
+            return (value - signal.offset) / signal.scale
+        else:
+            return int((value - signal.offset) / signal.scale)
     else:
         return value
 
@@ -84,6 +87,14 @@ def _create_message_encode_decode_formats(signals):
     # Big endian byte order format.
     big_fmt = ''
     start = 0
+    
+    def get_format_string_type(signal):
+        if signal.is_float:
+            return 'f'
+        elif signal.is_signed:
+            return 's'
+        else:
+            return 'u'
 
     for signal in signals:
         if signal.byte_order == 'little_endian':
@@ -94,8 +105,7 @@ def _create_message_encode_decode_formats(signals):
         if padding > 0:
             big_fmt += 'p{}'.format(padding)
 
-        big_fmt += '{}{}'.format('s' if signal.is_signed else 'u',
-                                 signal.length)
+        big_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
         start = (signal.start + signal.length)
 
     if start < 64:
@@ -114,8 +124,7 @@ def _create_message_encode_decode_formats(signals):
         if padding > 0:
             little_fmt += 'p{}'.format(padding)
 
-        little_fmt += '{}{}'.format('s' if signal.is_signed else 'u',
-                                    signal.length)
+        little_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
         end = signal.start
 
     if end > 0:

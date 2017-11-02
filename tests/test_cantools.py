@@ -1,3 +1,4 @@
+import math
 import os
 import unittest
 import sys
@@ -490,7 +491,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.buses[0].baudrate, 500000)
         self.assertEqual(db.buses[1].baudrate, 125000)
 
-        self.assertEqual(len(db.messages), 25)
+        self.assertEqual(len(db.messages), 27)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
@@ -519,6 +520,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(seat_configuration.nodes, [])
         self.assertEqual(seat_configuration.byte_order, 'little_endian')
         self.assertEqual(seat_configuration.is_signed, False)
+        self.assertEqual(seat_configuration.is_float, False)
         self.assertEqual(seat_configuration.scale, 1)
         self.assertEqual(seat_configuration.offset, 0)
         self.assertEqual(seat_configuration.minimum, None)
@@ -535,6 +537,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(tank_temperature.nodes, [])
         self.assertEqual(tank_temperature.byte_order, 'little_endian')
         self.assertEqual(tank_temperature.is_signed, True)
+        self.assertEqual(tank_temperature.is_float, False)
         self.assertEqual(tank_temperature.scale, 1)
         self.assertEqual(tank_temperature.offset, 0)
         self.assertEqual(tank_temperature.minimum, None)
@@ -551,6 +554,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(speed_km.nodes, [])
         self.assertEqual(speed_km.byte_order, 'little_endian')
         self.assertEqual(speed_km.is_signed, False)
+        self.assertEqual(speed_km.is_float, False)
         self.assertEqual(speed_km.scale, 0.2)
         self.assertEqual(speed_km.offset, 0)
         self.assertEqual(speed_km.minimum, None)
@@ -568,6 +572,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.nodes, [])
         self.assertEqual(outside_temp.byte_order, 'big_endian')
         self.assertEqual(outside_temp.is_signed, False)
+        self.assertEqual(outside_temp.is_float, False)
         self.assertEqual(outside_temp.scale, 0.05)
         self.assertEqual(outside_temp.offset, -40)
         self.assertEqual(outside_temp.minimum, 0)
@@ -575,6 +580,40 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.unit, 'Cel')
         self.assertEqual(outside_temp.choices, None)
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
+        
+        ambient_lux = db.messages[24].signals[0]
+        
+        self.assertEqual(ambient_lux.name, 'AmbientLux')
+        self.assertEqual(ambient_lux.start, 0)
+        self.assertEqual(ambient_lux.length, 64)
+        self.assertEqual(ambient_lux.nodes, [])
+        self.assertEqual(ambient_lux.byte_order, 'little_endian')
+        self.assertEqual(ambient_lux.is_signed, False)
+        self.assertEqual(ambient_lux.is_float, True)
+        self.assertEqual(ambient_lux.scale, 1)
+        self.assertEqual(ambient_lux.offset, 0)
+        self.assertEqual(ambient_lux.minimum, None)
+        self.assertEqual(ambient_lux.maximum, None)
+        self.assertEqual(ambient_lux.unit, 'Lux')
+        self.assertEqual(ambient_lux.choices, None)
+        self.assertEqual(ambient_lux.comment, None)
+        
+        windshield_humidity = db.messages[25].signals[0]
+        
+        self.assertEqual(windshield_humidity.name, 'Windshield')
+        self.assertEqual(windshield_humidity.start, 0)
+        self.assertEqual(windshield_humidity.length, 32)
+        self.assertEqual(windshield_humidity.nodes, [])
+        self.assertEqual(windshield_humidity.byte_order, 'little_endian')
+        self.assertEqual(windshield_humidity.is_signed, False)
+        self.assertEqual(windshield_humidity.is_float, True)
+        self.assertEqual(windshield_humidity.scale, 1)
+        self.assertEqual(windshield_humidity.offset, 0)
+        self.assertEqual(windshield_humidity.minimum, None)
+        self.assertEqual(windshield_humidity.maximum, None)
+        self.assertEqual(windshield_humidity.unit, '% RH')
+        self.assertEqual(windshield_humidity.choices, None)
+        self.assertEqual(windshield_humidity.comment, None)
 
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -591,6 +630,25 @@ class CanToolsTest(unittest.TestCase):
         encoded = db.encode_message(frame_id, data)
         self.assertEqual(len(encoded), 5)
         self.assertEqual(encoded, b'\xfe\x00\xfe\x00\x00')
+
+    def test_the_homer_float(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.File()
+        db.add_kcd_file(filename)
+
+        frame_id = 0x832
+        encoded = db.encode_message(frame_id, {'AmbientLux': math.pi})
+        self.assertEqual(len(encoded), 8)
+        self.assertEqual(encoded, b'\x18\x2d\x44\x54\xfb\x21\x09\x40')
+        decoded = db.decode_message(frame_id, b'\x18\x2d\x44\x54\xfb\x21\x09\x40')
+        self.assertEqual(decoded['AmbientLux'], math.pi)
+
+        frame_id = 0x845
+        encoded = db.encode_message(frame_id, {'Windshield': math.pi})
+        self.assertEqual(len(encoded), 4)
+        self.assertEqual(encoded, b'\xdb\x0f\x49\x40')
+        decoded = db.decode_message(frame_id, b'\xdb\x0f\x49\x40')
+        self.assertEqual(decoded['Windshield'], 3.1415927410125732)
 
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):

@@ -35,6 +35,7 @@ def _load_signal_element(signal):
     length = 1
     byte_order = 'little_endian'
     is_signed = False
+    is_float = False
     minimum = None
     maximum = None
     slope = 1
@@ -72,6 +73,7 @@ def _load_signal_element(signal):
                 unit = value
             elif key == 'type':
                 is_signed = (value == 'signed')
+                is_float = (value in ['single', 'double'])
             else:
                 LOGGER.debug("Ignoring unsupported signal value attribute '%s'.",
                              key)
@@ -98,7 +100,8 @@ def _load_signal_element(signal):
                   choices=None,
                   comment=notes,
                   is_multiplexer=False,
-                  multiplexer_id=None)
+                  multiplexer_id=None,
+                  is_float=is_float)
 
 
 def _load_message_element(message, bus_name):

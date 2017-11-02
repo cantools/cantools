@@ -361,6 +361,24 @@
       <Signal name="Guidance" offset="2" length="8"/>
     </Message>
 
+    <Message id="0x832" name="Luminosity" interval="100">
+      <Producer>
+        <NodeRef id="16"/>
+      </Producer>
+      <Signal name="AmbientLux" offset="0" length="64">
+        <Value type="double" unit="Lux" />
+      </Signal>
+    </Message>
+
+    <Message id="0x845" name="Humidity" interval="100">
+      <Producer>
+        <NodeRef id="16"/>
+      </Producer>
+      <Signal name="Windshield" offset="0" length="32">
+        <Value type="single" unit="% RH" />
+      </Signal>
+    </Message>
+
     <Message id="0xDA7E" name="DateTime" format="extended">
       <Producer>
         <NodeRef id="8"/>

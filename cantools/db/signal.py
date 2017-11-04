@@ -50,7 +50,7 @@ class Signal(object):
 
     @property
     def start(self):
-        """The start bit position of the signal.
+        """The start bit position of the signal within its message.
 
         """
 

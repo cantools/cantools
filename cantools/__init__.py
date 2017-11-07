@@ -13,6 +13,18 @@ __version__ = '13.0.0'
 RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d\]\s*([0-9A-F ]*)$')
 
 
+def _mo_unpack(mo):
+    frame_id = mo.group(1)
+    frame_id = '0' * (8 - len(frame_id)) + frame_id
+    frame_id = binascii.unhexlify(frame_id)
+    frame_id = struct.unpack('>I', frame_id)[0]
+    data = mo.group(2)
+    data = data.replace(' ', '')
+    data = binascii.unhexlify(data)
+
+    return frame_id, data
+
+
 def _do_decode(args):
     dbf = db.load_file(args.dbfile)
     decode_choices = not args.no_decode_choices
@@ -27,46 +39,42 @@ def _do_decode(args):
         line = line.strip('\r\n')
         mo = RE_CANDUMP.match(line)
 
-        if mo:
-            frame_id = mo.group(1)
-            frame_id = '0' * (8 - len(frame_id)) + frame_id
-            frame_id = binascii.unhexlify(frame_id)
-            frame_id = struct.unpack('>I', frame_id)[0]
-            data = mo.group(2)
-            data = data.replace(' ', '')
-            data = binascii.unhexlify(data)
-            line += ' :: '
+        if not mo:
+            continue
 
-            try:
-                message = dbf.lookup_message(frame_id)
-                decoded_signals = message.decode(data, decode_choices)
+        frame_id, data = _mo_unpack(mo)
+        line += ' :: '
 
-                if message.is_multiplexed():
-                    name = message.get_multiplexer_signal_name()
-                    mux = decoded_signals[name]
-                    signals = message.get_signals_by_multiplexer_id(mux)
-                else:
-                    signals = message.signals
+        try:
+            message = dbf.lookup_message(frame_id)
+            decoded_signals = message.decode(data, decode_choices)
 
-                formatted_signals = []
+            if message.is_multiplexed():
+                name = message.get_multiplexer_signal_name()
+                mux = decoded_signals[name]
+                signals = message.get_signals_by_multiplexer_id(mux)
+            else:
+                signals = message.signals
 
-                for signal in signals:
-                    value = decoded_signals[signal.name]
+            formatted_signals = []
 
-                    if isinstance(value, str):
-                        value = "'" + value + "'"
+            for signal in signals:
+                value = decoded_signals[signal.name]
 
-                    formatted_signals.append(
-                        '{}: {}{}'.format(signal.name,
-                                           value,
-                                          ''
-                                          if signal.unit is None
-                                          else ' ' + signal.unit))
+                if isinstance(value, str):
+                    value = "'{}'".format(value)
 
-                line += '{}({})'.format(message.name,
-                                        ', '.join(formatted_signals))
-            except KeyError:
-                pass
+                formatted_signals.append(
+                    '{}: {}{}'.format(signal.name,
+                                       value,
+                                      ''
+                                      if signal.unit is None
+                                      else ' ' + signal.unit))
+
+            line += '{}({})'.format(message.name,
+                                    ', '.join(formatted_signals))
+        except KeyError:
+            pass
 
         print(line)
 

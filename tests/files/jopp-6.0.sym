@@ -1,0 +1,37 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Jopp"
+
+{ENUMS}
+// foo enum
+Enum=Foo(0="foo", 
+  1="bar") // barbar
+
+{SIGNALS}
+Sig=Signal1 unsigned 11 /u:A /max:255 /d:1
+Sig=Signal2 float /u:V /o:48 /min:16 /max:130 /ln:"hhh"	// bbb
+Sig=Signal3 unsigned 11 -m /max:1 /e:Foo
+
+{SEND}
+
+[Symbol1]
+ID=009h
+Len=8
+
+{RECEIVE}
+
+[Message2]
+ID=022h-023h
+Len=8
+Sig=Signal3 2
+
+{SENDRECEIVE}
+
+[Message1]
+ID=000h	// apa
+Len=8
+CycleTime=30
+Timeout=20
+MinInterval=10
+Sig=Signal2 32
+Sig=Signal1 0
+

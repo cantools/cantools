@@ -580,9 +580,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(outside_temp.unit, 'Cel')
         self.assertEqual(outside_temp.choices, None)
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
-        
+
         ambient_lux = db.messages[24].signals[0]
-        
+
         self.assertEqual(ambient_lux.name, 'AmbientLux')
         self.assertEqual(ambient_lux.start, 0)
         self.assertEqual(ambient_lux.length, 64)
@@ -597,9 +597,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(ambient_lux.unit, 'Lux')
         self.assertEqual(ambient_lux.choices, None)
         self.assertEqual(ambient_lux.comment, None)
-        
+
         windshield_humidity = db.messages[25].signals[0]
-        
+
         self.assertEqual(windshield_humidity.name, 'Windshield')
         self.assertEqual(windshield_humidity.start, 0)
         self.assertEqual(windshield_humidity.length, 32)
@@ -649,6 +649,74 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(encoded, b'\xdb\x0f\x49\x40')
         decoded = db.decode_message(frame_id, b'\xdb\x0f\x49\x40')
         self.assertEqual(decoded['Windshield'], 3.1415927410125732)
+
+    def test_jopp_5_0_sym(self):
+        filename = os.path.join('tests', 'files', 'jopp-5.0.sym')
+        db = cantools.db.File()
+
+        with self.assertRaises(ValueError) as cm:
+            db.add_sym_file(filename)
+            
+        self.assertEqual(str(cm.exception), 'Only SYM version 6.0 is supported.')
+        
+    def test_jopp_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'jopp-6.0.sym')
+        db = cantools.db.File()
+        db.add_sym_file(filename)
+
+        self.assertEqual(len(db.messages), 4)
+        self.assertEqual(len(db.messages[0].signals), 0)
+
+        signal_3 = db.messages[1].signals[0]
+        self.assertEqual(signal_3.name, 'Signal3')
+        self.assertEqual(signal_3.start, 2)
+        self.assertEqual(signal_3.length, 11)
+        self.assertEqual(signal_3.nodes, [])
+        self.assertEqual(signal_3.byte_order, 'little_endian')
+        self.assertEqual(signal_3.is_signed, False)
+        self.assertEqual(signal_3.scale, 1)
+        self.assertEqual(signal_3.offset, 0)
+        self.assertEqual(signal_3.minimum, None)
+        self.assertEqual(signal_3.maximum, 1)
+        self.assertEqual(signal_3.unit, None)
+        self.assertEqual(signal_3.choices, {0: 'foo', 1: 'bar'})
+        self.assertEqual(signal_3.comment, None)
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_id, None)
+        self.assertEqual(signal_3.is_float, False)
+
+        self.assertEqual(len(db.messages[3].signals), 2)
+        signal_2 = db.messages[3].signals[1]
+        self.assertEqual(signal_2.name, 'Signal2')
+        self.assertEqual(signal_2.start, 32)
+        self.assertEqual(signal_2.length, 32)
+        self.assertEqual(signal_2.nodes, [])
+        self.assertEqual(signal_2.byte_order, 'big_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 48)
+        self.assertEqual(signal_2.minimum, 16)
+        self.assertEqual(signal_2.maximum, 130)
+        self.assertEqual(signal_2.unit, 'V')
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_id, None)
+        self.assertEqual(signal_2.is_float, True)
+
+        frame_id = 0x009
+        encoded = db.encode_message(frame_id, {})
+        self.assertEqual(len(encoded), 8)
+        self.assertEqual(encoded, 8 * b'\x00')
+        decoded = db.decode_message(frame_id, encoded)
+        self.assertEqual(decoded, {})
+
+        frame_id = 0x022
+        encoded = db.encode_message(frame_id, {'Signal3': 'bar'})
+        self.assertEqual(len(encoded), 8)
+        self.assertEqual(encoded, b'\x04\x00\x00\x00\x00\x00\x00\x00')
+        decoded = db.decode_message(frame_id, encoded)
+        self.assertEqual(decoded['Signal3'], 'bar')
 
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):

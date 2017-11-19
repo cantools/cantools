@@ -1,6 +1,8 @@
 import logging
 
-from .formats import dbc, kcd
+from .formats import dbc
+from .formats import kcd
+from .formats import sym
 from .database import Database
 
 
@@ -140,6 +142,39 @@ class File(object):
         """
 
         database = kcd.load_string(string)
+
+        for message in database.messages:
+            self.add_message(message)
+        self._nodes = database.nodes
+        self._buses = database.buses
+        self._version = database.version
+        self._attribute_definitions = database.attribute_definitions
+        self._attribute_definition_defaults = database.attribute_definition_defaults
+
+    def add_sym(self, fp):
+        """Read and parse SYM data from given file-like object and add the
+        parsed data to the database.
+
+        """
+
+        self.add_sym_string(fp.read())
+
+    def add_sym_file(self, filename):
+        """Open, read and parse SYM data from given file and add the parsed
+        data to the database.
+
+        """
+
+        with open(filename, 'r') as fin:
+            self.add_sym(fin)
+
+    def add_sym_string(self, string):
+        """Parse given SYM data string and add the parsed data to the
+        database.
+
+        """
+
+        database = sym.load_string(string)
 
         for message in database.messages:
             self.add_message(message)

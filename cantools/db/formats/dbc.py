@@ -76,8 +76,8 @@ BU_: {bu}
 """
 
 
-def _create_dbc_grammar():
-    """Create DBC grammar.
+def _create_grammar():
+    """Create the DBC grammar.
 
     """
 
@@ -641,7 +641,7 @@ def load_string(string):
 
     """
 
-    grammar = _create_dbc_grammar()
+    grammar = _create_grammar()
     tokens = grammar.parseString(string)
 
     comments = _load_comments(tokens)

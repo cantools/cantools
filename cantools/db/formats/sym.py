@@ -21,6 +21,8 @@ from ..signal import Signal
 from ..message import Message
 from ..database import Database
 
+from .utils import num
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -147,7 +149,7 @@ def _load_enums(tokens):
 
     for name, values in section:
         enums[name] = OrderedDict(
-            (int(v[0]), v[1]) for v in values)
+            (num(v[0]), v[1]) for v in values)
 
     return enums
 
@@ -195,13 +197,13 @@ def _load_signal(tokens, enums):
         if key == '/u:':
             unit = value
         elif key == '/f:':
-            factor = int(value)
+            factor = num(value)
         elif key == '/o:':
-            offset = int(value)
+            offset = num(value)
         elif key == '/min:':
-            minimum = int(value)
+            minimum = num(value)
         elif key == '/max:':
-            maximum = int(value)
+            maximum = num(value)
         elif key == '/e:':
             enum = enums[value]
         else:

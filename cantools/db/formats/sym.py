@@ -187,7 +187,7 @@ def _load_signal(tokens, enums):
         length = 64
     else:
         LOGGER.debug("Ignoring unsupported type '%s'.", type_)
-        
+
     # Byte order.
     try:
         if tokens[3][0] == '-m':
@@ -268,18 +268,11 @@ def _load_message_signals(tokens, signals):
             for signal in tokens]
 
 
-def _load_message(frame_id, tokens, signals):
+def _load_message(frame_id, is_extended_frame, tokens, signals):
     # Default values.
     name = tokens[0]
-    length = 0
+    length = int(tokens[2][1])
     cycle_time = None
-    is_extended_frame = False
-
-    # Length.
-    try:
-        length = int(tokens[2][1])
-    except IndexError:
-        pass
 
     # Cycle time.
     try:
@@ -303,21 +296,29 @@ def _load_messages(tokens, signals):
     messages = []
 
     def load_section(name):
-        def message_frame_ids(message):
+        def parse_frame_ids(message):
             def to_int(string):
                 return int(string[:-1], 16)
 
+            def is_extended_frame(string):
+                return len(string) == 9
+
             if '-' in message[1][1]:
                 minimum, maximum = message[1][1].split('-')
-                return range(to_int(minimum), to_int(maximum) + 1)
             else:
-                return [int(to_int(message[1][1]))]
+                minimum = maximum = message[1][1]
+
+            frame_ids = range(to_int(minimum), to_int(maximum) + 1)
+
+            return frame_ids, is_extended_frame(minimum)
 
         section = _get_section(tokens, name)
 
         for message in section:
-            for frame_id in message_frame_ids(message):
+            frame_ids, is_extended_frame = parse_frame_ids(message)
+            for frame_id in frame_ids:
                 messages.append(_load_message(frame_id,
+                                              is_extended_frame,
                                               message,
                                               signals))
 

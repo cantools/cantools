@@ -3,7 +3,7 @@ Title="Jopp"
 
 {ENUMS}
 // foo enum
-Enum=Foo(0="foo", 
+Enum=Foo(0="foo",
   1="bar") // barbar
 
 {SIGNALS}
@@ -21,7 +21,7 @@ Len=8
 {RECEIVE}
 
 [Message2]
-ID=022h-023h
+ID=00000022h-00000023h
 Len=8
 Sig=Signal3 2
 
@@ -40,4 +40,3 @@ Sig=Signal1 0
 ID=099h
 Len=8
 Sig=Signal4 0
-

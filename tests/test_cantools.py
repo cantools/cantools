@@ -718,7 +718,7 @@ class CanToolsTest(unittest.TestCase):
 
         # Message2.
         self.assertEqual(db.messages[1].frame_id, 0x22)
-        self.assertEqual(db.messages[1].is_extended_frame, False)
+        self.assertEqual(db.messages[1].is_extended_frame, True)
         self.assertEqual(db.messages[1].name, 'Message2')
         self.assertEqual(db.messages[1].length, 8)
         self.assertEqual(db.messages[1].nodes, [])

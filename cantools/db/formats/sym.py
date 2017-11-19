@@ -42,10 +42,7 @@ def _create_grammar_6_0():
     rb = Suppress(Literal(']'))
     name = Word(alphas + nums + '_-').setWhitespaceChars(' ')
     assign = Suppress(Literal('='))
-    type_ = (Keyword('unsigned')
-             | Keyword('signed')
-             | Keyword('float')
-             | Keyword('double'))
+    type_ = name
 
     version = Group(Keyword('FormatVersion')
                     - assign

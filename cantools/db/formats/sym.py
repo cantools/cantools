@@ -48,23 +48,23 @@ def _create_grammar_6_0():
              | Keyword('double'))
 
     version = Group(Keyword('FormatVersion')
-                    + assign
-                    + Keyword('6.0'))
+                    - assign
+                    - Keyword('6.0'))
 
     title = Group(Keyword('Title')
-                  + assign
-                  + QuotedString('"'))
+                  - assign
+                  - QuotedString('"'))
 
     enum_value = Group(number
                        + assign
                        + QuotedString('"'))
 
     enum = Group(Suppress(Keyword('Enum'))
-                 + assign
-                 + name
-                 + Suppress(lp)
+                 - assign
+                 - name
+                 - Suppress(lp)
                  + Group(delimitedList(enum_value))
-                 + Suppress(rp))
+                 - Suppress(rp))
 
     sig_unit = Group(Literal('/u:') + word)
     sig_offset = Group(Literal('/o:') + word)
@@ -89,12 +89,12 @@ def _create_grammar_6_0():
                            + Optional(sig_enum)))
 
     symbol = Group(Suppress(lb)
-                   + name
-                   + Suppress(rb)
-                   + Group(Keyword('ID')
+                   - name
+                   - Suppress(rb)
+                   - Group(Keyword('ID')
                            + assign
                            + word)
-                   + Group(Keyword('Len')
+                   - Group(Keyword('Len')
                            + assign
                            + positive_integer)
                    + Group(Optional(Keyword('CycleTime')
@@ -129,7 +129,7 @@ def _create_grammar_6_0():
                | sendreceive)
 
     grammar = (version
-               + title
+               - title
                + Group(OneOrMore(section))
                + StringEnd())
     grammar.ignore(dblSlashComment)

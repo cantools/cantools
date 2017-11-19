@@ -17,6 +17,7 @@ from pyparsing import ZeroOrMore
 from pyparsing import OneOrMore
 from pyparsing import delimitedList
 from pyparsing import dblSlashComment
+
 from ..signal import Signal
 from ..message import Message
 from ..database import Database

@@ -1,10 +1,23 @@
 # Load and dump a CAN database in DBC format.
 
 from collections import OrderedDict
-from pyparsing import Word, Literal, Keyword, Optional, Suppress
-from pyparsing import Group, QuotedString, StringEnd
-from pyparsing import printables, nums, alphas, LineEnd, Empty
-from pyparsing import ZeroOrMore, OneOrMore, delimitedList
+from pyparsing import Word
+from pyparsing import Literal
+from pyparsing import Keyword
+from pyparsing import Optional
+from pyparsing import Suppress
+from pyparsing import Group
+from pyparsing import QuotedString
+from pyparsing import StringEnd
+from pyparsing import printables
+from pyparsing import nums
+from pyparsing import alphas
+from pyparsing import ZeroOrMore
+from pyparsing import OneOrMore
+from pyparsing import delimitedList
+from pyparsing import LineEnd
+from pyparsing import Empty
+
 from ..signal import Signal
 from ..message import Message
 from ..node import Node

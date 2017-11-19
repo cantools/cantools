@@ -9,7 +9,8 @@ Enum=Foo(0="foo",
 {SIGNALS}
 Sig=Signal1 unsigned 11 /u:A /max:255 /d:1
 Sig=Signal2 float /u:V /o:48 /min:16 /max:130 /ln:"hhh"	// bbb
-Sig=Signal3 unsigned 11 -m /max:1 /e:Foo
+Sig=Signal3 signed 11 -m /min:0 /max:1 /e:Foo
+Sig=Signal4 double /u:*UU /f:6 /o:5 /min:-1.7E308 /max:1.7E308
 
 {SEND}
 
@@ -34,4 +35,9 @@ Timeout=20
 MinInterval=10
 Sig=Signal2 32
 Sig=Signal1 0
+
+[Symbol2]
+ID=099h
+Len=8
+Sig=Signal4 0
 

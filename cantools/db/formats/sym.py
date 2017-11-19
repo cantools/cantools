@@ -67,6 +67,7 @@ def _create_grammar_6_0():
                  - Suppress(rp))
 
     sig_unit = Group(Literal('/u:') + word)
+    sig_factor = Group(Literal('/f:') + word)
     sig_offset = Group(Literal('/o:') + word)
     sig_min = Group(Literal('/min:') + word)
     sig_max = Group(Literal('/max:') + word)
@@ -81,6 +82,7 @@ def _create_grammar_6_0():
                    + Group(Optional(positive_integer))
                    + Group(Optional(Keyword('-m')))
                    + Group(Optional(sig_unit)
+                           + Optional(sig_factor)
                            + Optional(sig_offset)
                            + Optional(sig_min)
                            + Optional(sig_max)
@@ -280,8 +282,10 @@ def _load_message(frame_id, tokens, signals):
         pass
 
     # Cycle time.
-    if len(tokens[3]) == 1:
-        cycle_time = int(tokens[3][1])
+    try:
+        cycle_time = num(tokens[3][1])
+    except IndexError:
+        pass
 
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,

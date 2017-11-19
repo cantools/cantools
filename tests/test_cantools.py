@@ -656,36 +656,48 @@ class CanToolsTest(unittest.TestCase):
 
         with self.assertRaises(ValueError) as cm:
             db.add_sym_file(filename)
-            
+
         self.assertEqual(str(cm.exception), 'Only SYM version 6.0 is supported.')
-        
+
     def test_jopp_6_0_sym(self):
         filename = os.path.join('tests', 'files', 'jopp-6.0.sym')
         db = cantools.db.File()
         db.add_sym_file(filename)
 
-        self.assertEqual(len(db.messages), 4)
+        self.assertEqual(len(db.messages), 5)
         self.assertEqual(len(db.messages[0].signals), 0)
 
-        signal_3 = db.messages[1].signals[0]
-        self.assertEqual(signal_3.name, 'Signal3')
-        self.assertEqual(signal_3.start, 2)
-        self.assertEqual(signal_3.length, 11)
-        self.assertEqual(signal_3.nodes, [])
-        self.assertEqual(signal_3.byte_order, 'little_endian')
-        self.assertEqual(signal_3.is_signed, False)
-        self.assertEqual(signal_3.scale, 1)
-        self.assertEqual(signal_3.offset, 0)
-        self.assertEqual(signal_3.minimum, None)
-        self.assertEqual(signal_3.maximum, 1)
-        self.assertEqual(signal_3.unit, None)
-        self.assertEqual(signal_3.choices, {0: 'foo', 1: 'bar'})
-        self.assertEqual(signal_3.comment, None)
-        self.assertEqual(signal_3.is_multiplexer, False)
-        self.assertEqual(signal_3.multiplexer_id, None)
-        self.assertEqual(signal_3.is_float, False)
-
+        # Message1.
         self.assertEqual(len(db.messages[3].signals), 2)
+        self.assertEqual(db.messages[3].frame_id, 0)
+        self.assertEqual(db.messages[3].is_extended_frame, False)
+        self.assertEqual(db.messages[3].name, 'Message1')
+        self.assertEqual(db.messages[3].length, 8)
+        self.assertEqual(db.messages[3].nodes, [])
+        self.assertEqual(db.messages[3].send_type, None)
+        self.assertEqual(db.messages[3].cycle_time, 30)
+        self.assertEqual(len(db.messages[3].signals), 2)
+        self.assertEqual(db.messages[3].comment, None)
+        self.assertEqual(db.messages[3].bus_name, None)
+
+        signal_1 = db.messages[3].signals[0]
+        self.assertEqual(signal_1.name, 'Signal1')
+        self.assertEqual(signal_1.start, 0)
+        self.assertEqual(signal_1.length, 11)
+        self.assertEqual(signal_1.nodes, [])
+        self.assertEqual(signal_1.byte_order, 'big_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, 255)
+        self.assertEqual(signal_1.unit, 'A')
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comment, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_id, None)
+        self.assertEqual(signal_1.is_float, False)
+
         signal_2 = db.messages[3].signals[1]
         self.assertEqual(signal_2.name, 'Signal2')
         self.assertEqual(signal_2.start, 32)
@@ -704,6 +716,56 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_2.multiplexer_id, None)
         self.assertEqual(signal_2.is_float, True)
 
+        # Message2.
+        self.assertEqual(db.messages[1].frame_id, 0x22)
+        self.assertEqual(db.messages[1].is_extended_frame, False)
+        self.assertEqual(db.messages[1].name, 'Message2')
+        self.assertEqual(db.messages[1].length, 8)
+        self.assertEqual(db.messages[1].nodes, [])
+        self.assertEqual(db.messages[1].send_type, None)
+        self.assertEqual(db.messages[1].cycle_time, None)
+        self.assertEqual(len(db.messages[1].signals), 1)
+        self.assertEqual(db.messages[1].comment, None)
+        self.assertEqual(db.messages[1].bus_name, None)
+
+        signal_3 = db.messages[1].signals[0]
+        self.assertEqual(signal_3.name, 'Signal3')
+        self.assertEqual(signal_3.start, 2)
+        self.assertEqual(signal_3.length, 11)
+        self.assertEqual(signal_3.nodes, [])
+        self.assertEqual(signal_3.byte_order, 'little_endian')
+        self.assertEqual(signal_3.is_signed, True)
+        self.assertEqual(signal_3.scale, 1)
+        self.assertEqual(signal_3.offset, 0)
+        self.assertEqual(signal_3.minimum, 0)
+        self.assertEqual(signal_3.maximum, 1)
+        self.assertEqual(signal_3.unit, None)
+        self.assertEqual(signal_3.choices, {0: 'foo', 1: 'bar'})
+        self.assertEqual(signal_3.comment, None)
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_id, None)
+        self.assertEqual(signal_3.is_float, False)
+
+        # Symbol2.
+        signal_4 = db.messages[4].signals[0]
+        self.assertEqual(signal_4.name, 'Signal4')
+        self.assertEqual(signal_4.start, 0)
+        self.assertEqual(signal_4.length, 64)
+        self.assertEqual(signal_4.nodes, [])
+        self.assertEqual(signal_4.byte_order, 'big_endian')
+        self.assertEqual(signal_4.is_signed, False)
+        self.assertEqual(signal_4.scale, 6)
+        self.assertEqual(signal_4.offset, 5)
+        self.assertEqual(signal_4.minimum, -1.7e+308)
+        self.assertEqual(signal_4.maximum, 1.7e+308)
+        self.assertEqual(signal_4.unit, '*UU')
+        self.assertEqual(signal_4.choices, None)
+        self.assertEqual(signal_4.comment, None)
+        self.assertEqual(signal_4.is_multiplexer, False)
+        self.assertEqual(signal_4.multiplexer_id, None)
+        self.assertEqual(signal_4.is_float, True)
+
+        # Encode and decode.
         frame_id = 0x009
         encoded = db.encode_message(frame_id, {})
         self.assertEqual(len(encoded), 8)

@@ -3,7 +3,7 @@ Title="Jopp"
 
 {ENUMS}
 // foo enum
-enum Foo(0="foo",
+enum Foo(0="foo", 
   1="bar") // barbar
 
 {SEND}
@@ -17,7 +17,7 @@ DLC=8
 [Message2]
 ID=022h-023h
 DLC=8
-Var=Signal3 unsigned 2,11 -m /max:1 /e:Foo
+Var=Signal3 signed 2,11 -m /min:0 /max:1 /e:Foo
 
 {SENDRECEIVE}
 
@@ -28,3 +28,9 @@ CycleTime=30
 Timeout=20
 Var=Signal2 float 32,32 /u:V /o:48 /min:16 /max:130 /ln:"hhh"	// bbb
 Var=Signal1 unsigned 0,11 /u:A /max:255 /d:1
+
+[Symbol2]
+ID=099h
+DLC=8
+Var=Signal4 double 0,64 /u:*UU /f:6 /o:5 /min:-1.7E308 /max:1.7E308
+

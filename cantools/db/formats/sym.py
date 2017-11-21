@@ -143,9 +143,8 @@ def _get_section(tokens, name):
 
 
 def _load_enums(tokens):
-    enums = {}
-
     section = _get_section(tokens, '{ENUMS}')
+    enums = {}
 
     for name, values in section:
         enums[name] = OrderedDict(
@@ -228,9 +227,8 @@ def _load_signal(tokens, enums):
 
 
 def _load_signals(tokens, enums):
-    signals = {}
-
     section = _get_section(tokens, '{SIGNALS}')
+    signals = {}
 
     for signal in section:
         signal = _load_signal(signal, enums)

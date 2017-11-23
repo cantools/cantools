@@ -40,3 +40,19 @@ Sig=Signal1 0
 ID=099h
 Len=8
 Sig=Signal4 0
+
+[Symbol3]
+ID=033h
+Len=8
+Mux=Multiplexer1 0,3 0
+Sig=Signal1 3
+
+[Symbol3]
+Len=8
+Mux=Multiplexer2 0,3 1
+Sig=Signal2 6
+
+[Symbol3]
+Len=8
+Mux=Multiplexer3 0,3 2
+Sig=Signal3 9

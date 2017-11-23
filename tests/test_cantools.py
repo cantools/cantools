@@ -664,23 +664,24 @@ class CanToolsTest(unittest.TestCase):
         db = cantools.db.File()
         db.add_sym_file(filename)
 
-        self.assertEqual(len(db.messages), 5)
+        self.assertEqual(len(db.messages), 6)
         self.assertEqual(len(db.messages[0].signals), 0)
 
         # Message1.
-        self.assertEqual(len(db.messages[3].signals), 2)
-        self.assertEqual(db.messages[3].frame_id, 0)
-        self.assertEqual(db.messages[3].is_extended_frame, False)
-        self.assertEqual(db.messages[3].name, 'Message1')
-        self.assertEqual(db.messages[3].length, 8)
-        self.assertEqual(db.messages[3].nodes, [])
-        self.assertEqual(db.messages[3].send_type, None)
-        self.assertEqual(db.messages[3].cycle_time, 30)
-        self.assertEqual(len(db.messages[3].signals), 2)
-        self.assertEqual(db.messages[3].comment, None)
-        self.assertEqual(db.messages[3].bus_name, None)
+        message_1 = db.messages[3]
+        self.assertEqual(len(message_1.signals), 2)
+        self.assertEqual(message_1.frame_id, 0)
+        self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.name, 'Message1')
+        self.assertEqual(message_1.length, 8)
+        self.assertEqual(message_1.nodes, [])
+        self.assertEqual(message_1.send_type, None)
+        self.assertEqual(message_1.cycle_time, 30)
+        self.assertEqual(len(message_1.signals), 2)
+        self.assertEqual(message_1.comment, None)
+        self.assertEqual(message_1.bus_name, None)
 
-        signal_1 = db.messages[3].signals[0]
+        signal_1 = message_1.signals[0]
         self.assertEqual(signal_1.name, 'Signal1')
         self.assertEqual(signal_1.start, 0)
         self.assertEqual(signal_1.length, 11)
@@ -698,7 +699,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_1.multiplexer_id, None)
         self.assertEqual(signal_1.is_float, False)
 
-        signal_2 = db.messages[3].signals[1]
+        signal_2 = message_1.signals[1]
         self.assertEqual(signal_2.name, 'Signal2')
         self.assertEqual(signal_2.start, 32)
         self.assertEqual(signal_2.length, 32)
@@ -717,18 +718,20 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_2.is_float, True)
 
         # Message2.
-        self.assertEqual(db.messages[1].frame_id, 0x22)
-        self.assertEqual(db.messages[1].is_extended_frame, True)
-        self.assertEqual(db.messages[1].name, 'Message2')
-        self.assertEqual(db.messages[1].length, 8)
-        self.assertEqual(db.messages[1].nodes, [])
-        self.assertEqual(db.messages[1].send_type, None)
-        self.assertEqual(db.messages[1].cycle_time, None)
-        self.assertEqual(len(db.messages[1].signals), 1)
-        self.assertEqual(db.messages[1].comment, None)
-        self.assertEqual(db.messages[1].bus_name, None)
+        message_2 = db.messages[1]
+        self.assertEqual(message_2.frame_id, 0x22)
+        self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.name, 'Message2')
+        self.assertEqual(message_2.length, 8)
+        self.assertEqual(message_2.nodes, [])
+        self.assertEqual(message_2.send_type, None)
+        self.assertEqual(message_2.cycle_time, None)
+        self.assertEqual(len(message_2.signals), 1)
+        self.assertEqual(message_2.comment, None)
+        self.assertEqual(message_2.bus_name, None)
+        self.assertEqual(message_2.is_multiplexed(), False)
 
-        signal_3 = db.messages[1].signals[0]
+        signal_3 = message_2.signals[0]
         self.assertEqual(signal_3.name, 'Signal3')
         self.assertEqual(signal_3.start, 2)
         self.assertEqual(signal_3.length, 11)
@@ -764,6 +767,37 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_id, None)
         self.assertEqual(signal_4.is_float, True)
+
+        # Symbol3.
+        symbol_3 = db.messages[5]
+        self.assertEqual(symbol_3.frame_id, 0x33)
+        self.assertEqual(symbol_3.length, 8)
+        self.assertTrue(symbol_3.is_multiplexed())
+        self.assertEqual(len(symbol_3.signals), 4)
+        multiplexer = symbol_3.signals[0]
+        self.assertEqual(multiplexer.name, 'Multiplexer1')
+        self.assertEqual(multiplexer.start, 0)
+        self.assertEqual(multiplexer.length, 3)
+        self.assertEqual(multiplexer.is_multiplexer, True)
+        self.assertEqual(multiplexer.multiplexer_id, None)
+        signal_1 = symbol_3.signals[1]
+        self.assertEqual(signal_1.name, 'Signal1')
+        self.assertEqual(signal_1.start, 3)
+        self.assertEqual(signal_1.length, 11)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_id, 0)
+        signal_2 = symbol_3.signals[2]
+        self.assertEqual(signal_2.name, 'Signal2')
+        self.assertEqual(signal_2.start, 6)
+        self.assertEqual(signal_2.length, 32)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_id, 1)
+        signal_3 = symbol_3.signals[3]
+        self.assertEqual(signal_3.name, 'Signal3')
+        self.assertEqual(signal_3.start, 9)
+        self.assertEqual(signal_3.length, 11)
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_id, 2)
 
         # Encode and decode.
         frame_id = 0x009

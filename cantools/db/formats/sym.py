@@ -42,6 +42,7 @@ def _create_grammar_6_0():
     rb = Suppress(Literal(']'))
     name = Word(alphas + nums + '_-').setWhitespaceChars(' ')
     assign = Suppress(Literal('='))
+    comma = Suppress(Literal(','))
     type_ = name
 
     version = Group(Keyword('FormatVersion')
@@ -90,12 +91,19 @@ def _create_grammar_6_0():
     symbol = Group(Suppress(lb)
                    - name
                    - Suppress(rb)
-                   - Group(Keyword('ID')
-                           + assign
-                           + word)
+                   - Group(Optional(Keyword('ID')
+                                    + assign
+                                    + word))
                    - Group(Keyword('Len')
                            + assign
                            + positive_integer)
+                   + Group(Optional(Keyword('Mux')
+                                    + assign
+                                    + word
+                                    + positive_integer
+                                    + comma
+                                    + positive_integer
+                                    + positive_integer))
                    + Group(Optional(Keyword('CycleTime')
                                     + assign
                                     + positive_integer))
@@ -136,14 +144,14 @@ def _create_grammar_6_0():
     return grammar
 
 
-def _get_section(tokens, name):
+def _get_section_tokens(tokens, name):
     for section in tokens[2]:
         if section[0] == name:
             return section[1]
 
 
 def _load_enums(tokens):
-    section = _get_section(tokens, '{ENUMS}')
+    section = _get_section_tokens(tokens, '{ENUMS}')
     enums = {}
 
     for name, values in section:
@@ -227,7 +235,7 @@ def _load_signal(tokens, enums):
 
 
 def _load_signals(tokens, enums):
-    section = _get_section(tokens, '{SIGNALS}')
+    section = _get_section_tokens(tokens, '{SIGNALS}')
     signals = {}
 
     for signal in section:
@@ -237,7 +245,7 @@ def _load_signals(tokens, enums):
     return signals
 
 
-def _load_message_signal(tokens, signals):
+def _load_message_signal(tokens, signals, multiplexer_id):
     signal = signals[tokens[1]]
 
     return Signal(name=signal.name,
@@ -254,24 +262,84 @@ def _load_message_signal(tokens, signals):
                   choices=signal.choices,
                   comment=signal.comment,
                   is_multiplexer=signal.is_multiplexer,
-                  multiplexer_id=signal.multiplexer_id,
+                  multiplexer_id=multiplexer_id,
                   is_float=signal.is_float)
 
 
-def _load_message_signals(tokens, signals):
-    return [_load_message_signal(signal, signals)
-            for signal in tokens]
+def _load_message_signals_inner(message_tokens,
+                                signals,
+                                multiplexer_id=None):
+    return [
+        _load_message_signal(signal, signals, multiplexer_id)
+        for signal in message_tokens[7]
+    ]
 
 
-def _load_message(frame_id, is_extended_frame, tokens, signals):
+def _load_muxed_message_signals(message_tokens,
+                                message_section_tokens,
+                                signals):
+    mux_tokens = message_tokens[3]
+    result = [
+        Signal(name=mux_tokens[1],
+               start=int(mux_tokens[2]),
+               length=int(mux_tokens[3]),
+               nodes=None,
+               byte_order='big_endian',
+               is_signed=False,
+               scale=None,
+               offset=None,
+               minimum=None,
+               maximum=None,
+               unit=None,
+               choices=None,
+               comment=None,
+               is_multiplexer=True)
+    ]
+
+    multiplexer_id = int(mux_tokens[4])
+    result += _load_message_signals_inner(message_tokens,
+                                          signals,
+                                          multiplexer_id)
+
+    for tokens in message_section_tokens:
+        if tokens[0] == message_tokens[0] and tokens != message_tokens:
+            multiplexer_id = int(tokens[3][4])
+            result += _load_message_signals_inner(tokens,
+                                                  signals,
+                                                  multiplexer_id)
+
+    return result
+
+
+def _is_multiplexed(message_tokens):
+    return len(message_tokens[3]) > 0
+
+
+def _load_message_signals(message_tokens,
+                          message_section_tokens,
+                          signals):
+    if _is_multiplexed(message_tokens):
+        return _load_muxed_message_signals(message_tokens,
+                                           message_section_tokens,
+                                           signals)
+    else:
+        return _load_message_signals_inner(message_tokens,
+                                           signals)
+
+
+def _load_message(frame_id,
+                  is_extended_frame,
+                  message_tokens,
+                  message_section_tokens,
+                  signals):
     # Default values.
-    name = tokens[0]
-    length = int(tokens[2][1])
+    name = message_tokens[0]
+    length = int(message_tokens[2][1])
     cycle_time = None
 
     # Cycle time.
     try:
-        cycle_time = num(tokens[3][1])
+        cycle_time = num(message_tokens[4][1])
     except IndexError:
         pass
 
@@ -282,44 +350,58 @@ def _load_message(frame_id, is_extended_frame, tokens, signals):
                    nodes=[],
                    send_type=None,
                    cycle_time=cycle_time,
-                   signals=_load_message_signals(tokens[6], signals),
+                   signals=_load_message_signals(message_tokens,
+                                                 message_section_tokens,
+                                                 signals),
                    comment=None,
                    bus_name=None)
 
 
-def _load_messages(tokens, signals):
+def _parse_message_frame_ids(message):
+    def to_int(string):
+        return int(string[:-1], 16)
+
+    def is_extended_frame(string):
+        return len(string) == 9
+
+    if '-' in message[1][1]:
+        minimum, maximum = message[1][1].split('-')
+    else:
+        minimum = maximum = message[1][1]
+
+    frame_ids = range(to_int(minimum), to_int(maximum) + 1)
+
+    return frame_ids, is_extended_frame(minimum)
+
+
+def _load_message_section(section_name, tokens, signals):
+    def has_frame_id(message):
+        return len(message[1]) > 0
+
+    message_section_tokens = _get_section_tokens(tokens, section_name)
     messages = []
 
-    def load_section(name):
-        def parse_frame_ids(message):
-            def to_int(string):
-                return int(string[:-1], 16)
+    for message_tokens in message_section_tokens:
+        if not has_frame_id(message_tokens):
+            continue
 
-            def is_extended_frame(string):
-                return len(string) == 9
+        frame_ids, is_extended_frame = _parse_message_frame_ids(message_tokens)
 
-            if '-' in message[1][1]:
-                minimum, maximum = message[1][1].split('-')
-            else:
-                minimum = maximum = message[1][1]
+        for frame_id in frame_ids:
+            message = _load_message(frame_id,
+                                    is_extended_frame,
+                                    message_tokens,
+                                    message_section_tokens,
+                                    signals)
+            messages.append(message)
 
-            frame_ids = range(to_int(minimum), to_int(maximum) + 1)
+    return messages
 
-            return frame_ids, is_extended_frame(minimum)
 
-        section = _get_section(tokens, name)
-
-        for message in section:
-            frame_ids, is_extended_frame = parse_frame_ids(message)
-            for frame_id in frame_ids:
-                messages.append(_load_message(frame_id,
-                                              is_extended_frame,
-                                              message,
-                                              signals))
-
-    load_section('{SEND}')
-    load_section('{RECEIVE}')
-    load_section('{SENDRECEIVE}')
+def _load_messages(tokens, signals):
+    messages = _load_message_section('{SEND}', tokens, signals)
+    messages += _load_message_section('{RECEIVE}', tokens, signals)
+    messages += _load_message_section('{SENDRECEIVE}', tokens, signals)
 
     return messages
 

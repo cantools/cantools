@@ -171,11 +171,13 @@ class Message(object):
         self._multiplexer = None
 
         for signal in self._signals:
-            if signal.is_multiplexer:
-                Multiplexer = namedtuple('Multiplexer', ['signal', 'formats'])
-                formats = _create_message_encode_decode_formats([signal])
-                self._multiplexer = Multiplexer(signal, formats)
-                break
+            if not signal.is_multiplexer:
+                continue
+
+            Multiplexer = namedtuple('Multiplexer', ['signal', 'formats'])
+            formats = _create_message_encode_decode_formats([signal])
+            self._multiplexer = Multiplexer(signal, formats)
+            break
 
         # Group signals for each multiplex id.
         self._multiplexer_message_by_id = {}
@@ -183,23 +185,27 @@ class Message(object):
         if self.is_multiplexed():
             # Append multiplexed signals.
             for signal in self._signals:
-                if signal.multiplexer_id is not None:
-                    multiplexer_id = signal.multiplexer_id
+                if signal.multiplexer_id is None:
+                    continue
 
-                    if multiplexer_id not in self._multiplexer_message_by_id:
-                        self._multiplexer_message_by_id[multiplexer_id] = {
-                            'signals': [],
-                            'formats': None
-                        }
+                multiplexer_id = signal.multiplexer_id
 
-                    self._multiplexer_message_by_id[multiplexer_id]['signals'].append(
-                        signal)
+                if multiplexer_id not in self._multiplexer_message_by_id:
+                    self._multiplexer_message_by_id[multiplexer_id] = {
+                        'signals': [],
+                        'formats': None
+                    }
+
+                self._multiplexer_message_by_id[multiplexer_id]['signals'].append(
+                    signal)
 
             # Append common signals.
             for signal in self._signals:
-                if signal.multiplexer_id is None:
-                    for message in self._multiplexer_message_by_id.values():
-                        message['signals'].append(signal)
+                if signal.multiplexer_id is not None:
+                    continue
+
+                for message in self._multiplexer_message_by_id.values():
+                    message['signals'].append(signal)
 
             # Sort the signals and create the encode/decode format.
             for message in self._multiplexer_message_by_id.values():

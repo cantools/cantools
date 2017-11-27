@@ -99,7 +99,11 @@ class CanToolsTest(unittest.TestCase):
                          "\n"
                          "message('Fum', 0x12331, True, 8, 'Foo.')\n"
                          "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
-                         "'None', False, None, None, None)\n")
+                         "'None', False, None, None, None)\n"
+                         "\n"
+                         "message('Bar', 0x12332, True, 8, None)\n"
+                         "  signal('Binary32', 0, 32, 'little_endian', True, 1, 0, 0, "
+                         "0, 'None', False, None, None, None)\n")
 
         message = db.lookup_message(0x12331)
         self.assertEqual(message.name, 'Fum')

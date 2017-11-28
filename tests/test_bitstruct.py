@@ -173,7 +173,7 @@ class BitStructTest(unittest.TestCase):
         except ValueError as e:
             self.assertEqual(
                 str(e),
-                'expected float size of 32 of 64 bits (got 33)')
+                'expected float size of 16, 32, or 64 bits (got 33)')
 
         # Too many bits to unpack.
         try:
@@ -214,6 +214,12 @@ class BitStructTest(unittest.TestCase):
         packed = pack('f64', 1.0)
         unpacked = unpack('f64', packed)
         self.assertEqual(unpacked, (1.0, ))
+
+        packed = pack('f16', 1.0)
+        unpacked = unpack('f16', packed)
+        self.assertEqual(unpacked, (1.0, ))
+
+
 
     def test_calcsize(self):
         """Calculate size.
@@ -475,13 +481,13 @@ class BitStructTest(unittest.TestCase):
             pack('f31', 1.0)
 
         self.assertEqual(str(cm.exception),
-                         'expected float size of 32 of 64 bits (got 31)')
+                         'expected float size of 16, 32, or 64 bits (got 31)')
 
         with self.assertRaises(ValueError) as cm:
             unpack('f33', 8 * b'\x00')
 
         self.assertEqual(str(cm.exception),
-                         'expected float size of 32 of 64 bits (got 33)')
+                         'expected float size of 16, 32, or 64 bits (got 33)')
 
     def test_bad_format_type(self):
         """Test of bad format type.

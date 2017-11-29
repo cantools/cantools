@@ -51,12 +51,14 @@ def _pack_boolean(size, arg):
 def _pack_float(size, arg):
     value = float(arg)
 
-    if size == 32:
+    if size == 16:
+        value = struct.pack('>e', value)
+    elif size == 32:
         value = struct.pack('>f', value)
     elif size == 64:
         value = struct.pack('>d', value)
     else:
-        raise ValueError('expected float size of 32 of 64 bits (got {})'.format(
+        raise ValueError('expected float size of 16, 32, or 64 bits (got {})'.format(
             size))
 
     return bin(int(b'01' + binascii.hexlify(value), 16))[3:]
@@ -92,12 +94,14 @@ def _unpack_boolean(bits):
 def _unpack_float(size, bits):
     packed = _unpack_bytearray(size, bits)
 
-    if size == 32:
+    if size == 16:
+        value = struct.unpack('>e', packed)[0]
+    elif size == 32:
         value = struct.unpack('>f', packed)[0]
     elif size == 64:
         value = struct.unpack('>d', packed)[0]
     else:
-        raise ValueError('expected float size of 32 of 64 bits (got {})'.format(
+        raise ValueError('expected float size of 16, 32, or 64 bits (got {})'.format(
             size))
 
     return value
@@ -310,7 +314,7 @@ def pack(fmt, *args):
 
     - ``u`` -- unsigned integer
     - ``s`` -- signed integer
-    - ``f`` -- floating point number of 32 or 64 bits
+    - ``f`` -- floating point number of 16, 32, or 64 bits
     - ``b`` -- boolean
     - ``t`` -- text (ascii or utf-8)
     - ``r`` -- raw, bytes

@@ -215,7 +215,7 @@ class BitStructTest(unittest.TestCase):
         unpacked = unpack('f64', packed)
         self.assertEqual(unpacked, (1.0, ))
 
-        if sys.version_info[0] >= 3 and sys.version_info[1] >= 5:
+        if sys.version_info >= (3, 6):
             packed = pack('f16', 1.0)
             unpacked = unpack('f16', packed)
             self.assertEqual(unpacked, (1.0, ))

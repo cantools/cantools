@@ -861,6 +861,63 @@ class CanToolsTest(unittest.TestCase):
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_dbc_parse_error_messages(self):
+        # No valid entry.
+        with self.assertRaises(cantools.db.ParseError) as cm:
+            cantools.db.formats.dbc.load_string('abc')
+
+        self.assertEqual(
+            str(cm.exception),
+            "Invalid DBC syntax at line 1, column 1: '>!<abc': Expected "
+            "{VERSION | NS_ | BS_ | BU_ | BO_ | CM_ | BA_DEF_ | BA_DEF_DEF_ "
+            "| BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ | EV_}.")
+
+        # Bad message frame id.
+        with self.assertRaises(cantools.db.ParseError) as cm:
+            cantools.db.formats.dbc.load_string(
+                'VERSION "1.0"\n'
+                'BO_ dssd\n'
+            )
+
+        self.assertEqual(
+            str(cm.exception),
+            "Invalid DBC syntax at line 2, column 5: 'BO_ >!<dssd': Expected "
+            "frame id.")
+
+        # Bad entry key.
+        with self.assertRaises(cantools.db.ParseError) as cm:
+            cantools.db.formats.dbc.load_string(
+                'VERSION "1.0"\n'
+                'dd\n'
+            )
+
+        self.assertEqual(
+            str(cm.exception),
+            "Invalid DBC syntax at line 2, column 1: '>!<dd': Expected end "
+            "of text.")
+
+        # Missing colon in message.
+        with self.assertRaises(cantools.db.ParseError) as cm:
+            cantools.db.formats.dbc.load_string(
+                'VERSION "1.0"\n'
+                'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n'
+            )
+
+        self.assertEqual(
+            str(cm.exception),
+            "Invalid DBC syntax at line 2, column 19: 'BO_ 546 EMV_Stati "
+            ">!<8 EMV_Statusmeldungen': Expected \":\".")
+
+        # Missing frame id in message comment.
+        with self.assertRaises(cantools.db.ParseError) as cm:
+            cantools.db.formats.dbc.load_string('CM_ BO_ "Foo.";')
+
+        self.assertEqual(
+            str(cm.exception),
+            "Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo.\";': "
+            "Expected frame id.")
+
+
 
 # This file is not '__main__' when executed via 'python setup.py
 # test'.

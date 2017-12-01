@@ -3,6 +3,7 @@ from xml.etree import ElementTree
 import pyparsing
 
 from .formats import dbc
+from .formats.utils import ParseError
 from .file import File
 from .message import Message
 from .signal import Signal
@@ -60,7 +61,7 @@ def load_string(string):
         db = File()
         db.add_dbc_string(string)
         return db
-    except pyparsing.ParseException:
+    except ParseError:
         pass
 
     try:

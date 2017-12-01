@@ -17,6 +17,8 @@ from pyparsing import OneOrMore
 from pyparsing import delimitedList
 from pyparsing import LineEnd
 from pyparsing import Empty
+from pyparsing import ParseException
+from pyparsing import ParseSyntaxException
 
 from ..signal import Signal
 from ..message import Message
@@ -24,6 +26,7 @@ from ..node import Node
 from ..database import Database
 
 from .utils import num
+from .utils import ParseError
 
 
 # DBC section types.
@@ -97,7 +100,7 @@ def _create_grammar():
 
     word = Word(printables.replace(';', '').replace(':', ''))
     integer = Group(Optional('-') + Word(nums))
-    positive_integer = Word(nums)
+    positive_integer = Word(nums).setName('positive integer')
     number = Word(nums + '.Ee-+')
     colon = Suppress(Literal(':'))
     scolon = Suppress(Literal(';'))
@@ -110,17 +113,25 @@ def _create_grammar():
     rb = Suppress(Literal(']'))
     comma = Suppress(Literal(','))
     node = Word(alphas + nums + '_-').setWhitespaceChars(' ')
+    frame_id = Word(nums).setName('frame id')
 
     version = Group(Keyword('VERSION')
                     - QuotedString('"', multiline=True))
+    version.setName(VERSION)
+
     symbol = Word(alphas + '_') + Suppress(LineEnd())
+
     symbols = Group(Keyword('NS_')
                     - colon
                     - Group(ZeroOrMore(symbol)))
-    discard = Suppress(Keyword('BS_') - colon)
+    symbols.setName('NS_')
+
+    discard = Suppress(Keyword('BS_') - colon).setName('BS_')
+
     nodes = Group(Keyword('BU_')
                   - colon
                   - Group(ZeroOrMore(node)))
+    nodes.setName('BU_')
 
     signal = Group(Keyword(SIGNAL)
                    - Group(word + Optional(word))
@@ -143,14 +154,16 @@ def _create_grammar():
                            - rb)
                    - QuotedString('"', multiline=True)
                    - Group(delimitedList(node)))
+    signal.setName(SIGNAL)
 
     message = Group(Keyword(MESSAGE)
-                    - positive_integer
+                    - frame_id
                     - word
                     - colon
                     - positive_integer
                     - word
                     - Group(ZeroOrMore(signal)))
+    message.setName(MESSAGE)
 
     event = Suppress(Keyword(EVENT)
                      - word
@@ -167,14 +180,15 @@ def _create_grammar():
                      - word
                      - node
                      - scolon)
+    event.setName(EVENT)
 
     comment = Group(Keyword(COMMENT)
                     - ((Keyword(MESSAGE)
-                        - positive_integer
+                        - frame_id
                         - QuotedString('"', multiline=True)
                         - scolon)
                        | (Keyword(SIGNAL)
-                          - positive_integer
+                          - frame_id
                           - word
                           - QuotedString('"', multiline=True)
                           - scolon)
@@ -186,6 +200,7 @@ def _create_grammar():
                           - word
                           - QuotedString('"', multiline=True)
                           - scolon)))
+    comment.setName(COMMENT)
 
     attribute_definition = Group(Keyword(ATTRIBUTE_DEFINITION)
                                  - ((QuotedString('"', multiline=True))
@@ -202,19 +217,22 @@ def _create_grammar():
                                        + scolon)
                                     | (Group(ZeroOrMore(number))
                                        + scolon)))
+    attribute_definition.setName(ATTRIBUTE_DEFINITION)
 
     attribute_definition_default = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT)
                                          - QuotedString('"', multiline=True)
                                          - (positive_integer | QuotedString('"', multiline=True))
                                          - scolon)
+    attribute_definition_default.setName(ATTRIBUTE_DEFINITION_DEFAULT)
 
     attribute = Group(Keyword(ATTRIBUTE)
                       - QuotedString('"', multiline=True)
-                      - Group(Optional((Keyword(MESSAGE) + positive_integer)
+                      - Group(Optional((Keyword(MESSAGE) + frame_id)
                                        | (Keyword(SIGNAL) + positive_integer + word)
                                        | (Keyword(NODES) + word)))
                       - (QuotedString('"', multiline=True) | positive_integer)
                       - scolon)
+    attribute.setName(ATTRIBUTE)
 
     choice = Group(Keyword(CHOICE)
                    - Optional(positive_integer)
@@ -222,12 +240,14 @@ def _create_grammar():
                    - Group(OneOrMore(Group(integer
                                            + QuotedString('"', multiline=True))))
                    - scolon)
+    choice.setName(CHOICE)
 
     value_table = Group(Keyword(VALUE_TABLE)
                         - word
                         - Group(OneOrMore(Group(integer
                                                 + QuotedString('"', multiline=True))))
                         - scolon)
+    value_table.setName(VALUE_TABLE)
 
     signal_type = Group(Keyword(SIGNAL_TYPE)
                         - positive_integer
@@ -235,6 +255,7 @@ def _create_grammar():
                         - colon
                         - positive_integer
                         - scolon)
+    signal_type.setName(SIGNAL_TYPE)
 
     entry = (version
              | symbols
@@ -664,7 +685,15 @@ def load_string(string):
     """
 
     grammar = _create_grammar()
-    tokens = grammar.parseString(string)
+
+    try:
+        tokens = grammar.parseString(string)
+    except (ParseException, ParseSyntaxException) as e:
+        raise ParseError("Invalid DBC syntax at line {}, column {}: '{}': {}.".format(
+            e.lineno,
+            e.column,
+            e.markInputline(),
+            e.msg))
 
     comments = _load_comments(tokens)
     attribute_definitions = _load_attribute_definitions(tokens)

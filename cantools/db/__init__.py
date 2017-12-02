@@ -10,14 +10,26 @@ from .signal import Signal
 
 
 class UnsupportedDatabaseFormatError(Exception):
-    pass
+    """This exception is raised when :func:`~cantools.db.load_file()`,
+    :func:`~cantools.db.load()` and :func:`~cantools.db.load_string()`
+    are unable to parse given database file or string.
+
+    """
+
+    def __init__(self, e_dbc, e_kcd):
+        message = 'DBC: "{}", KCD: "{}"'.format(e_dbc, e_kcd)
+
+        super(UnsupportedDatabaseFormatError, self).__init__(message)
+
+        self.e_dbc = e_dbc
+        self.e_kcd = e_kcd
 
 
 def load_file(filename):
     """Open, read and parse given database file and return a
     :class:`~cantools.db.File` object with its contents. Raises an
-    exception if given file does not contain a supported database
-    format.
+    :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
+    given file does not contain a supported database format.
 
     >>> db = cantools.db.load_file('foo.dbc')
     >>> db.version
@@ -32,8 +44,9 @@ def load_file(filename):
 def load(fp):
     """Read and parse given database file-like object and return a
     :class:`~cantools.db.File` object with its contents. Raises an
-    exception if given file-like object does not contain a supported
-    database format.
+    :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
+    given file-like object does not contain a supported database
+    format.
 
     >>> with open('foo.kcd') as fin:
     ...    db = cantools.db.load(fin)
@@ -47,8 +60,9 @@ def load(fp):
 
 def load_string(string):
     """Parse given database string and return a :class:`~cantools.db.File`
-    object with its contents. Raises an exception if given string does
-    not contain a supported database format.
+    object with its contents. Raises an
+    :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
+    given string does not contain a supported database format.
 
     >>> with open('foo.dbc') as fin:
     ...    db = cantools.db.load_string(fin.read())
@@ -61,14 +75,14 @@ def load_string(string):
         db = File()
         db.add_dbc_string(string)
         return db
-    except ParseError:
-        pass
+    except ParseError as e:
+        e_dbc = e
 
     try:
         db = File()
         db.add_kcd_string(string)
         return db
-    except ElementTree.ParseError:
-        pass
+    except ElementTree.ParseError as e:
+        e_kcd = e
 
-    raise UnsupportedDatabaseFormatError()
+    raise UnsupportedDatabaseFormatError(e_dbc, e_kcd)

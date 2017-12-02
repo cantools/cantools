@@ -917,6 +917,15 @@ class CanToolsTest(unittest.TestCase):
             "Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo.\";': "
             "Expected frame id.")
 
+        # Missing frame id in message comment, using load_string().
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_string('CM_ BO_ "Foo.";')
+
+        self.assertEqual(
+            str(cm.exception),
+            "DBC: \"Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo"
+            ".\";': Expected frame id.\", KCD: \"syntax error: line 1, column 0\"")
+
 
 
 # This file is not '__main__' when executed via 'python setup.py

@@ -28,3 +28,6 @@ Functions and classes
 
 .. autoclass:: cantools.db.Signal
     :members:
+
+.. autoclass:: cantools.db.UnsupportedDatabaseFormatError
+    :members:

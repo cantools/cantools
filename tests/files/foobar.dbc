@@ -1,5 +1,7 @@
 VERSION "2.0"
 
+CM_ "File comment?";
+
 NS_ :
 	NS_DESC_
 	CM_

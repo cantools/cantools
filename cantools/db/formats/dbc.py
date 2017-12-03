@@ -32,14 +32,19 @@ from .utils import ParseError
 # DBC section types.
 VERSION = 'VERSION'
 NODES = 'BU_'
+NODES_REL = 'BU_SG_REL_'
 COMMENT = 'CM_'
 MESSAGE = 'BO_'
+MESSAGE_TX_NODE = 'BO_TX_BU_'
 SIGNAL = 'SG_'
 CHOICE = 'VAL_'
 VALUE_TABLE = 'VAL_TABLE_'
+ATTRIBUTE = 'BA_'
 ATTRIBUTE_DEFINITION = 'BA_DEF_'
 ATTRIBUTE_DEFINITION_DEFAULT = 'BA_DEF_DEF_'
-ATTRIBUTE = 'BA_'
+ATTRIBUTE_REL = 'BA_REL_'
+ATTRIBUTE_DEFINITION_REL = 'BA_DEF_REL_'
+ATTRIBUTE_DEFINITION_DEFAULT_REL = 'BA_DEF_DEF_REL_'
 EVENT = 'EV_'
 SIGNAL_TYPE = 'SIG_VALTYPE_'
 
@@ -186,20 +191,22 @@ def _create_grammar():
                     - ((Keyword(MESSAGE)
                         - frame_id
                         - QuotedString('"', multiline=True)
-                        - scolon)
+                        - scolon).setName(MESSAGE)
                        | (Keyword(SIGNAL)
                           - frame_id
                           - word
                           - QuotedString('"', multiline=True)
-                          - scolon)
+                          - scolon).setName(SIGNAL)
                        | (Keyword(NODES)
                           - word
                           - QuotedString('"', multiline=True)
-                          - scolon)
+                          - scolon).setName(NODES)
                        | (Keyword(EVENT)
                           - word
                           - QuotedString('"', multiline=True)
-                          - scolon)))
+                          - scolon).setName(EVENT)
+                       | (QuotedString('"', multiline=True)
+                          - scolon).setName('QuotedString')))
     comment.setName(COMMENT)
 
     attribute_definition = Group(Keyword(ATTRIBUTE_DEFINITION)

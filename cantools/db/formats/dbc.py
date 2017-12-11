@@ -264,6 +264,45 @@ def _create_grammar():
                         - scolon)
     signal_type.setName(SIGNAL_TYPE)
 
+    message_add_sender = Group(Keyword('BO_TX_BU_')
+                               - frame_id
+                               - colon
+                               - Group(delimitedList(node))
+                               - scolon)
+    #message_add_sender.setName('BO_TX_BU_') #not needed?
+
+    attribute_definition_relative = Group(Keyword('BA_DEF_REL_')
+                                          - (QuotedString('"', multiline=True)
+                                             | (Keyword('BU_SG_REL_')
+                                                + QuotedString('"', multiline=True)))
+                                          - word 
+                                          - (scolon
+                                             | (Group(ZeroOrMore(Group(
+                                                (comma | Empty())
+                                                + QuotedString('"', multiline=True))))
+                                                + scolon)
+                                             | (Group(ZeroOrMore(number))
+                                                 + scolon)))
+    #attribute_definition_relative.setName('BA_DEF_REL_')
+
+    attribute_definition_default_relative = Group(Keyword('BA_DEF_DEF_REL_')
+                           - QuotedString('"', multiline=True)
+                           - (positive_integer 
+                              | QuotedString('"', multiline=True))
+                           - scolon)
+    #attribute_definition_default_relative.setName('BA_DEF_DEF_REL_')
+
+    attribute_relative = Group(Keyword('BA_REL_')
+                   - QuotedString('"', multiline=True)
+                   - Keyword('BU_SG_REL_')
+                   - word
+                   - Keyword(SIGNAL)
+                   - frame_id
+                   - word
+                   - positive_integer
+                   - scolon)
+    #attribute_relative.setName('BA_REL_')
+    
     entry = (version
              | symbols
              | discard
@@ -276,6 +315,10 @@ def _create_grammar():
              | choice
              | value_table
              | signal_type
+             | message_add_sender
+             | attribute_definition_relative
+             | attribute_definition_default_relative
+             | attribute_relative
              | event)
 
     return OneOrMore(entry) + StringEnd()

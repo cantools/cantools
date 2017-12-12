@@ -870,7 +870,8 @@ class CanToolsTest(unittest.TestCase):
             str(cm.exception),
             "Invalid DBC syntax at line 1, column 1: '>!<abc': Expected "
             "{VERSION | NS_ | BS_ | BU_ | BO_ | CM_ | BA_DEF_ | BA_DEF_DEF_ "
-            "| BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ | EV_}.")
+            "| BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ "
+            "| BO_TX_BU_ | BA_DEF_REL_ | BA_DEF_DEF_REL_ | BA_REL_ | EV_}.")
 
         # Bad message frame id.
         with self.assertRaises(cantools.db.ParseError) as cm:

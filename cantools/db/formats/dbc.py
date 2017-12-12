@@ -564,7 +564,6 @@ def _load_choices(tokens):
             try:
                 frame_id = int(choice[1])
             except ValueError:
-                print('warning: discarding tokens {}'.format(choice))
                 continue
 
             if frame_id not in choices:

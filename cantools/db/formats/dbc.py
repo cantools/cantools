@@ -264,44 +264,44 @@ def _create_grammar():
                         - scolon)
     signal_type.setName(SIGNAL_TYPE)
 
-    message_add_sender = Group(Keyword('BO_TX_BU_')
+    message_add_sender = Group(Keyword(MESSAGE_TX_NODE)
                                - frame_id
                                - colon
                                - Group(delimitedList(node))
                                - scolon)
-    #message_add_sender.setName('BO_TX_BU_') #not needed?
+    message_add_sender.setName(MESSAGE_TX_NODE)
 
-    attribute_definition_relative = Group(Keyword('BA_DEF_REL_')
-                                          - (QuotedString('"', multiline=True)
-                                             | (Keyword('BU_SG_REL_')
-                                                + QuotedString('"', multiline=True)))
-                                          - word 
-                                          - (scolon
-                                             | (Group(ZeroOrMore(Group(
-                                                (comma | Empty())
-                                                + QuotedString('"', multiline=True))))
-                                                + scolon)
-                                             | (Group(ZeroOrMore(number))
-                                                 + scolon)))
-    #attribute_definition_relative.setName('BA_DEF_REL_')
+    attribute_definition_rel = Group(Keyword(ATTRIBUTE_DEFINITION_REL)
+                                     - (QuotedString('"', multiline=True)
+                                        | (Keyword('BU_SG_REL_')
+                                           + QuotedString('"', multiline=True)))
+                                     - word 
+                                     - (scolon
+                                        | (Group(ZeroOrMore(Group(
+                                           (comma | Empty())
+                                           + QuotedString('"', multiline=True))))
+                                           + scolon)
+                                        | (Group(ZeroOrMore(number))
+                                            + scolon)))
+    attribute_definition_rel.setName(ATTRIBUTE_DEFINITION_REL)
 
-    attribute_definition_default_relative = Group(Keyword('BA_DEF_DEF_REL_')
-                           - QuotedString('"', multiline=True)
-                           - (positive_integer 
-                              | QuotedString('"', multiline=True))
-                           - scolon)
-    #attribute_definition_default_relative.setName('BA_DEF_DEF_REL_')
+    attribute_definition_default_rel = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT_REL)
+                                             - QuotedString('"', multiline=True)
+                                             - (positive_integer 
+                                                | QuotedString('"', multiline=True))
+                                             - scolon)
+    attribute_definition_default_rel.setName(ATTRIBUTE_DEFINITION_DEFAULT_REL)
 
-    attribute_relative = Group(Keyword('BA_REL_')
-                   - QuotedString('"', multiline=True)
-                   - Keyword('BU_SG_REL_')
-                   - word
-                   - Keyword(SIGNAL)
-                   - frame_id
-                   - word
-                   - positive_integer
-                   - scolon)
-    #attribute_relative.setName('BA_REL_')
+    attribute_rel = Group(Keyword(ATTRIBUTE_REL)
+                          - QuotedString('"', multiline=True)
+                          - Keyword('BU_SG_REL_')
+                          - word
+                          - Keyword(SIGNAL)
+                          - frame_id
+                          - word
+                          - positive_integer
+                          - scolon)
+    attribute_rel.setName(ATTRIBUTE_REL)
     
     entry = (version
              | symbols
@@ -316,9 +316,9 @@ def _create_grammar():
              | value_table
              | signal_type
              | message_add_sender
-             | attribute_definition_relative
-             | attribute_definition_default_relative
-             | attribute_relative
+             | attribute_definition_rel
+             | attribute_definition_default_rel
+             | attribute_rel
              | event)
 
     return OneOrMore(entry) + StringEnd()

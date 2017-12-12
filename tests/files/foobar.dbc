@@ -62,5 +62,10 @@ BA_DEF_DEF_  "BusType" "CAN";
 BA_ "BusType" "CAN";
 BA_ "GenMsgCycleTime" BO_ 2147558193 1;
 
+BO_TX_BU_ 2147558194 : FOO,BAR;
+
+BA_DEF_REL_ BU_SG_REL_ "GenSigTimeoutTime" INT 0 65535;
+BA_DEF_DEF_REL_ "GenSigTimeoutTime" 0;
+BA_REL_ "GenSigTimeoutTime" BU_SG_REL_ MFK_3 SG_ 780 ACC_02_CRC 999;
 
 

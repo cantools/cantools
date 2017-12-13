@@ -201,6 +201,7 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
+        example_message_name = 'ExampleMessage'
         example_message_frame_id = 496
 
         # Encode with non-enumerated values.
@@ -453,6 +454,18 @@ class CanToolsTest(unittest.TestCase):
                                       comment='')
         db.add_message(message)
         self.assertEqual(len(db.messages), 1)
+
+    def test_get_message_by_frame_id_andname(self):
+        filename = os.path.join('tests', 'files', 'motohawk.dbc')
+
+        with open(filename, 'r') as fin:
+            db = cantools.db.load(fin)
+
+        message = db.get_message_by_name('ExampleMessage')
+        self.assertEqual(message.name, 'ExampleMessage')
+
+        message = db.get_message_by_frame_id(496)
+        self.assertEqual(message.frame_id, 496)
 
     def test_command_line_decode(self):
         argv = ['cantools', 'decode', 'tests/files/socialledge.dbc']

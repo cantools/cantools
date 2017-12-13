@@ -221,10 +221,18 @@ class CanToolsTest(unittest.TestCase):
             'Enable': 'Enabled'
         }
 
+        # By frame id.
         encoded = db.encode_message(example_message_frame_id, data)
         self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
 
         decoded = db.decode_message(example_message_frame_id, encoded)
+        self.assertEqual(decoded, data)
+
+        # By name.
+        encoded = db.encode_message(example_message_name, data)
+        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
+
+        decoded = db.decode_message(example_message_name, encoded)
         self.assertEqual(decoded, data)
 
     def test_big_endian_no_decode_choices(self):

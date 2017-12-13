@@ -62,6 +62,8 @@ BA_DEF_DEF_  "BusType" "CAN";
 BA_ "BusType" "CAN";
 BA_ "GenMsgCycleTime" BO_ 2147558193 1;
 
+BA_DEF_DEF_ "AFloat" 33.5;
+
 BO_TX_BU_ 2147558194 : FOO,BAR;
 
 BA_DEF_REL_ BU_SG_REL_ "GenSigTimeoutTime" INT 0 65535;

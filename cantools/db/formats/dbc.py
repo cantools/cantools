@@ -228,7 +228,7 @@ def _create_grammar():
 
     attribute_definition_default = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT)
                                          - QuotedString('"', multiline=True)
-                                         - (positive_integer | QuotedString('"', multiline=True))
+                                         - (number | QuotedString('"', multiline=True))
                                          - scolon)
     attribute_definition_default.setName(ATTRIBUTE_DEFINITION_DEFAULT)
 
@@ -287,8 +287,7 @@ def _create_grammar():
 
     attribute_definition_default_rel = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT_REL)
                                              - QuotedString('"', multiline=True)
-                                             - (positive_integer 
-                                                | QuotedString('"', multiline=True))
+                                             - (number | QuotedString('"', multiline=True))
                                              - scolon)
     attribute_definition_default_rel.setName(ATTRIBUTE_DEFINITION_DEFAULT_REL)
 

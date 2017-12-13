@@ -47,6 +47,10 @@ class File(object):
     def messages(self):
         """A list of messages in the database.
 
+        Use :meth:`.get_message_by_frame_id()` or
+        :meth:`.get_message_by_name()` to find a message by its frame
+        id or name.
+
         """
 
         return self._messages

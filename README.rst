@@ -39,7 +39,7 @@ messages and signals.
    >>> db = cantools.db.load_file('tests/files/motohawk.dbc')
    >>> db.messages
    [message('ExampleMessage', 0x1f0, 8, 'Example message used as template in MotoHawk models.')]
-   >>> example_message = db.messages[0]
+   >>> example_message = db.get_message_by_name('ExampleMessage')
    >>> pprint(example_message.signals)
    [signal('Enable', 0, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', False, None, {0: 'Disabled', 1: 'Enabled'}, None),
     signal('AverageRadius', 1, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', False, None, None, ''),

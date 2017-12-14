@@ -237,7 +237,7 @@ def _create_grammar():
                       - Group(Optional((Keyword(MESSAGE) + frame_id)
                                        | (Keyword(SIGNAL) + positive_integer + word)
                                        | (Keyword(NODES) + word)))
-                      - (QuotedString('"', multiline=True) | positive_integer)
+                      - (QuotedString('"', multiline=True) | number)
                       - scolon)
     attribute.setName(ATTRIBUTE)
 
@@ -275,14 +275,14 @@ def _create_grammar():
                                      - (QuotedString('"', multiline=True)
                                         | (Keyword('BU_SG_REL_')
                                            + QuotedString('"', multiline=True)))
-                                     - word 
+                                     - word
                                      - (scolon
                                         | (Group(ZeroOrMore(Group(
-                                           (comma | Empty())
-                                           + QuotedString('"', multiline=True))))
+                                            (comma | Empty())
+                                            + QuotedString('"', multiline=True))))
                                            + scolon)
                                         | (Group(ZeroOrMore(number))
-                                            + scolon)))
+                                           + scolon)))
     attribute_definition_rel.setName(ATTRIBUTE_DEFINITION_REL)
 
     attribute_definition_default_rel = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT_REL)
@@ -301,7 +301,7 @@ def _create_grammar():
                           - positive_integer
                           - scolon)
     attribute_rel.setName(ATTRIBUTE_REL)
-    
+
     entry = (version
              | symbols
              | discard

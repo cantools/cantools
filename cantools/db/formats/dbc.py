@@ -228,7 +228,7 @@ def _create_grammar():
 
     attribute_definition_default = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT)
                                          - QuotedString('"', multiline=True)
-                                         - (number | QuotedString('"', multiline=True))
+                                         - (positive_integer | QuotedString('"', multiline=True))
                                          - scolon)
     attribute_definition_default.setName(ATTRIBUTE_DEFINITION_DEFAULT)
 
@@ -237,7 +237,7 @@ def _create_grammar():
                       - Group(Optional((Keyword(MESSAGE) + frame_id)
                                        | (Keyword(SIGNAL) + positive_integer + word)
                                        | (Keyword(NODES) + word)))
-                      - (QuotedString('"', multiline=True) | number)
+                      - (QuotedString('"', multiline=True) | positive_integer)
                       - scolon)
     attribute.setName(ATTRIBUTE)
 
@@ -275,19 +275,20 @@ def _create_grammar():
                                      - (QuotedString('"', multiline=True)
                                         | (Keyword('BU_SG_REL_')
                                            + QuotedString('"', multiline=True)))
-                                     - word
+                                     - word 
                                      - (scolon
                                         | (Group(ZeroOrMore(Group(
-                                            (comma | Empty())
-                                            + QuotedString('"', multiline=True))))
+                                           (comma | Empty())
+                                           + QuotedString('"', multiline=True))))
                                            + scolon)
                                         | (Group(ZeroOrMore(number))
-                                           + scolon)))
+                                            + scolon)))
     attribute_definition_rel.setName(ATTRIBUTE_DEFINITION_REL)
 
     attribute_definition_default_rel = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT_REL)
                                              - QuotedString('"', multiline=True)
-                                             - (number | QuotedString('"', multiline=True))
+                                             - (positive_integer 
+                                                | QuotedString('"', multiline=True))
                                              - scolon)
     attribute_definition_default_rel.setName(ATTRIBUTE_DEFINITION_DEFAULT_REL)
 
@@ -301,7 +302,7 @@ def _create_grammar():
                           - positive_integer
                           - scolon)
     attribute_rel.setName(ATTRIBUTE_REL)
-
+    
     entry = (version
              | symbols
              | discard
@@ -563,6 +564,7 @@ def _load_choices(tokens):
             try:
                 frame_id = int(choice[1])
             except ValueError:
+                print('warning: discarding tokens {}'.format(choice))
                 continue
 
             if frame_id not in choices:

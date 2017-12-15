@@ -29,6 +29,7 @@ class File(object):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
         self._buses = buses if buses else []
+        self._name_to_message = {}
         self._frame_id_to_message = {}
         self._version = version
 
@@ -45,6 +46,10 @@ class File(object):
     @property
     def messages(self):
         """A list of messages in the database.
+
+        Use :meth:`.get_message_by_frame_id()` or
+        :meth:`.get_message_by_name()` to find a message by its frame
+        id or name.
 
         """
 
@@ -191,11 +196,17 @@ class File(object):
 
         self._messages.append(message)
 
+        if message.name in self._name_to_message:
+            LOGGER.warning("Overwriting message with name '%s' in the "
+                           "name to message lookup table.",
+                           message.name)
+
         if message.frame_id in self._frame_id_to_message:
             LOGGER.warning('Overwriting message with frame id 0x%x in the '
-                           'message lookup table.',
+                           'frame id to message lookup table.',
                            message.frame_id)
 
+        self._name_to_message[message.name] = message
         self._frame_id_to_message[message.frame_id] = message
 
     def as_dbc_string(self):
@@ -225,34 +236,56 @@ class File(object):
     def lookup_message(self, frame_id):
         """Find the message object for given frame id `frame_id`.
 
+        NOTE: This method is deprecated. Use
+        :meth:`.get_message_by_frame_id()` instead.
+
+        """
+
+        return self.get_message_by_frame_id(frame_id)
+
+    def get_message_by_name(self, name):
+        """Find the message object for given name `name`.
+
+        """
+
+        return self._name_to_message[name]
+
+    def get_message_by_frame_id(self, frame_id):
+        """Find the message object for given frame id `frame_id`.
+
         """
 
         return self._frame_id_to_message[frame_id]
 
-    def encode_message(self, frame_id, data, scaling=True):
-        """Encode given signal data `data` as a message of given
-        `frame_id`. `data` is a dictionary of signal name-value
-        entries.
+    def encode_message(self, frame_id_or_name, data, scaling=True):
+        """Encode given signal data `data` as a message of given frame id or
+        name `frame_id_or_name`. `data` is a dictionary of signal
+        name-value entries.
 
         If `scaling` is ``False`` no scaling of signals is performed.
 
         >>> db.encode_message(158, {'Bar': 1, 'Fum': 5.0})
         b'\\x01\\x45\\x23\\x00\\x11'
+        >>> db.encode_message('Foo', {'Bar': 1, 'Fum': 5.0})
+        b'\\x01\\x45\\x23\\x00\\x11'
 
         """
 
-        message = self._frame_id_to_message[frame_id]
+        try:
+            message = self._frame_id_to_message[frame_id_or_name]
+        except KeyError:
+            message = self._name_to_message[frame_id_or_name]
 
         return message.encode(data, scaling)
 
     def decode_message(self,
-                       frame_id,
+                       frame_id_or_name,
                        data,
                        decode_choices=True,
                        scaling=True):
-        """Decode given signal data `data` as a message of given frame id
-        `frame_id`. Returns a dictionary of signal name-value
-        entries.
+        """Decode given signal data `data` as a message of given frame id or
+        name `frame_id_or_name`. Returns a dictionary of signal
+        name-value entries.
 
         If `decode_choices` is ``False`` scaled values are not
         converted to choice strings (if available).
@@ -261,10 +294,15 @@ class File(object):
 
         >>> db.decode_message(158, b'\\x01\\x45\\x23\\x00\\x11')
         {'Bar': 1, 'Fum': 5.0}
+        >>> db.decode_message('Foo', b'\\x01\\x45\\x23\\x00\\x11')
+        {'Bar': 1, 'Fum': 5.0}
 
         """
 
-        message = self._frame_id_to_message[frame_id]
+        try:
+            message = self._frame_id_to_message[frame_id_or_name]
+        except KeyError:
+            message = self._name_to_message[frame_id_or_name]
 
         return message.decode(data, decode_choices, scaling)
 

@@ -171,7 +171,7 @@ def dump_string(database):
 
     """
 
-    return str(database)
+    raise NotImplementedError('The KCD dump function is not yet implemented.')
 
 
 def load_string(string):

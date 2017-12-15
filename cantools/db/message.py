@@ -298,7 +298,7 @@ class Message(object):
 
         If `scaling` is ``False`` no scaling of signals is performed.
 
-        >>> foo = db.get_message_by_name('Foo')
+        >>> foo = db.messages[0]
         >>> foo.encode({'Bar': 1, 'Fum': 5.0})
         b'\\x01\\x45\\x23\\x00\\x11'
 
@@ -328,7 +328,7 @@ class Message(object):
 
         If `scaling` is ``False`` no scaling of signals is performed.
 
-        >>> foo = db.get_message_by_name('Foo')
+        >>> foo = db.messages[0]
         >>> foo.decode(b'\\x01\\x45\\x23\\x00\\x11')
         {'Bar': 1, 'Fum': 5.0}
 
@@ -360,10 +360,10 @@ class Message(object):
         """Returns ``True`` if the message is multiplexed, otherwise
         ``False``.
 
-        >>> foo = db.get_message_by_name('Foo')
+        >>> foo = db.messages[0]
         >>> foo.is_multiplexed()
         False
-        >>> bar = db.get_message_by_name('Bar')
+        >>> bar = db.messages[1]
         >>> bar.is_multiplexed()
         True
 
@@ -375,7 +375,7 @@ class Message(object):
         """Returns the message multiplexer signal name, or raises an exception
         if the message is not multiplexed.
 
-        >>> bar = db.get_message_by_name('Bar')
+        >>> bar = db.messages[1]
         >>> bar.get_multiplexer_signal_name()
         'BarMux'
 
@@ -388,7 +388,7 @@ class Message(object):
         raises an exception if the message is not multiplexed or an
         invalid multiplexer id is given.
 
-        >>> bar = db.get_message_by_name('Bar')
+        >>> bar = db.messages[1]
         >>> bar.get_signals_by_multiplexer_id(0)
         [signal(...), signal(...), ...]
 

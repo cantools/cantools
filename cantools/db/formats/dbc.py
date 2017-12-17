@@ -97,6 +97,9 @@ BU_: {bu}
 {val}
 """
 
+ATTR_NAME_send_type = 'GenMsgSendType'
+ATTR_NAME_cycle_time = 'GenMsgCycleTime'
+
 
 def _create_grammar():
     """Create the DBC grammar.
@@ -441,23 +444,23 @@ def _dump_attributes(database):
     ba = []
 
     try:
-        default_send_type = database.attribute_definition_defaults['GenMsgSendType']
+        default_send_type = database.attribute_definition_defaults[ATTR_NAME_send_type]
     except KeyError:
         default_send_type = None
 
     try:
-        default_cycle_time = int(database.attribute_definition_defaults['GenMsgCycleTime'])
+        default_cycle_time = int(database.attribute_definition_defaults[ATTR_NAME_cycle_time])
     except KeyError:
         default_cycle_time = None
 
     for message in database.messages:
         if message.send_type != default_send_type:
-            fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} "{send_type}";'
+            fmt = 'BA_ "' + ATTR_NAME_send_type + '" BO_ {frame_id} "{send_type}";'
             ba.append(fmt.format(frame_id=message.frame_id,
                                  send_type=message.send_type))
 
         if message.cycle_time != default_cycle_time:
-            fmt = 'BA_ "GenMsgCycleTime" BO_ {frame_id} {cycle_time};'
+            fmt = 'BA_ "' + ATTR_NAME_cycle_time + '" BO_ {frame_id} {cycle_time};'
             ba.append(fmt.format(frame_id=message.frame_id,
                                  cycle_time=message.cycle_time))
 
@@ -598,10 +601,10 @@ def _load_messages(tokens,
 
         """
         try:
-            return message_attributes[frame_id]['GenMsgSendType']
+            return message_attributes[frame_id][ATTR_NAME_send_type]
         except KeyError:
             try:
-                return attribute_definition_defaults['GenMsgSendType']
+                return attribute_definition_defaults[ATTR_NAME_send_type]
             except KeyError:
                 return None
 
@@ -611,10 +614,10 @@ def _load_messages(tokens,
         """
 
         try:
-            return int(message_attributes[frame_id]['GenMsgCycleTime'])
+            return int(message_attributes[frame_id][ATTR_NAME_cycle_time])
         except KeyError:
             try:
-                return int(attribute_definition_defaults['GenMsgCycleTime'])
+                return int(attribute_definition_defaults[ATTR_NAME_cycle_time])
             except KeyError:
                 return None
 

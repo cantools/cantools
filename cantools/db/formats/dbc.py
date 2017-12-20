@@ -97,6 +97,9 @@ BU_: {bu}
 {val}
 """
 
+ATTR_NAME_send_type = 'GenMsgSendType'
+ATTR_NAME_cycle_time = 'GenMsgCycleTime'
+
 
 def _create_grammar():
     """Create the DBC grammar.
@@ -441,23 +444,23 @@ def _dump_attributes(database):
     ba = []
 
     try:
-        default_send_type = database.attribute_definition_defaults['GenMsgSendType']
+        default_send_type = database.attribute_definition_defaults[ATTR_NAME_send_type]
     except KeyError:
         default_send_type = None
 
     try:
-        default_cycle_time = int(database.attribute_definition_defaults['GenMsgCycleTime'])
+        default_cycle_time = int(database.attribute_definition_defaults[ATTR_NAME_cycle_time])
     except KeyError:
         default_cycle_time = None
 
     for message in database.messages:
         if message.send_type != default_send_type:
-            fmt = 'BA_ "GenMsgSendType" BO_ {frame_id} "{send_type}";'
+            fmt = 'BA_ "' + ATTR_NAME_send_type + '" BO_ {frame_id} "{send_type}";'
             ba.append(fmt.format(frame_id=message.frame_id,
                                  send_type=message.send_type))
 
         if message.cycle_time != default_cycle_time:
-            fmt = 'BA_ "GenMsgCycleTime" BO_ {frame_id} {cycle_time};'
+            fmt = 'BA_ "' + ATTR_NAME_cycle_time + '" BO_ {frame_id} {cycle_time};'
             ba.append(fmt.format(frame_id=message.frame_id,
                                  cycle_time=message.cycle_time))
 
@@ -469,7 +472,7 @@ def _dump_choices(database):
 
     for message in database.messages:
         for signal in message.signals[::-1]:
-            if signal.choices == None:
+            if signal.choices is None:
                 continue
 
             fmt = 'VAL_ {frame_id} {name} {choices} ;'
@@ -586,7 +589,7 @@ def _load_messages(tokens,
         """
 
         try:
-            if signal == None:
+            if signal is None:
                 return comments[frame_id]['message']
             else:
                 return comments[frame_id]['signals'][signal]
@@ -598,10 +601,10 @@ def _load_messages(tokens,
 
         """
         try:
-            return message_attributes[frame_id]['GenMsgSendType']
+            return message_attributes[frame_id][ATTR_NAME_send_type]
         except KeyError:
             try:
-                return attribute_definition_defaults['GenMsgSendType']
+                return attribute_definition_defaults[ATTR_NAME_send_type]
             except KeyError:
                 return None
 
@@ -611,10 +614,10 @@ def _load_messages(tokens,
         """
 
         try:
-            return int(message_attributes[frame_id]['GenMsgCycleTime'])
+            return int(message_attributes[frame_id][ATTR_NAME_cycle_time])
         except KeyError:
             try:
-                return int(attribute_definition_defaults['GenMsgCycleTime'])
+                return int(attribute_definition_defaults[ATTR_NAME_cycle_time])
             except KeyError:
                 return None
 
@@ -705,6 +708,26 @@ def _load_nodes(tokens, comments):
     return nodes
 
 
+def _load_additional_message_senders(tokens, messages, nodes):
+    # load additional nodes as senders for messages,
+    # from the command BO_TX_BU_ (MESSAGE_TX_NODE)
+    def get_message_by_frame_id(id):
+        for message in messages:
+            if message.frame_id == id:
+                return message
+
+    existing_node_names = [node.name for node in nodes]
+    for senders in tokens:
+        if senders[0] != MESSAGE_TX_NODE:  # BO_TX_BU_
+            continue
+
+        message = get_message_by_frame_id(int(senders[1]) & 0x7fffffff)
+        if message:  # message found?
+            for node_name in senders[2]:
+                if (node_name in existing_node_names) and (node_name not in message.nodes):
+                    message.nodes.append(node_name)
+
+
 def dump_string(database):
     """Format database in DBC file format.
 
@@ -755,6 +778,7 @@ def load_string(string):
                               choices)
     nodes = _load_nodes(tokens, comments)
     version = _load_version(tokens)
+    _load_additional_message_senders( tokens, messages, nodes )
 
     return Database(messages,
                     nodes,

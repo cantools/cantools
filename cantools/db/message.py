@@ -263,7 +263,8 @@ class Message(object):
 
     @property
     def nodes(self):
-        """A list of all message node names.
+        """A list of all message node names (or message senders, if one
+        prefers).
 
         """
 

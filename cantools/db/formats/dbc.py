@@ -469,7 +469,7 @@ def _dump_choices(database):
 
     for message in database.messages:
         for signal in message.signals[::-1]:
-            if signal.choices == None:
+            if signal.choices is None:
                 continue
 
             fmt = 'VAL_ {frame_id} {name} {choices} ;'
@@ -574,57 +574,82 @@ def _load_choices(tokens):
     return choices
 
 
+def _load_message_senders(tokens):
+    """Load additional message senders.
+
+    """
+
+    message_senders = {}
+
+    for senders in tokens:
+        if senders[0] != MESSAGE_TX_NODE:
+            continue
+
+        try:
+            frame_id = int(senders[1])
+        except ValueError:
+            continue
+
+        if frame_id not in message_senders:
+            message_senders[frame_id] = []
+
+        message_senders[frame_id] += list(senders[2])
+
+    return message_senders
+
+
 def _load_messages(tokens,
                    comments,
                    attribute_definition_defaults,
                    message_attributes,
-                   choices):
+                   choices,
+                   message_senders):
 
-    def get_comment(frame_id, signal=None):
+    def get_comment(frame_id_dbc, signal=None):
         """Get comment for given message or signal.
 
         """
 
         try:
-            if signal == None:
-                return comments[frame_id]['message']
+            if signal is None:
+                return comments[frame_id_dbc]['message']
             else:
-                return comments[frame_id]['signals'][signal]
+                return comments[frame_id_dbc]['signals'][signal]
         except KeyError:
             return None
 
-    def get_send_type(frame_id):
+    def get_send_type(frame_id_dbc):
         """Get send type for a given message
 
         """
         try:
-            return message_attributes[frame_id]['GenMsgSendType']
+            return message_attributes[frame_id_dbc]['GenMsgSendType']
         except KeyError:
             try:
                 return attribute_definition_defaults['GenMsgSendType']
             except KeyError:
                 return None
 
-    def get_cycle_time(frame_id):
+    def get_cycle_time(frame_id_dbc):
         """Get cycle time for a given message
 
         """
 
         try:
-            return int(message_attributes[frame_id]['GenMsgCycleTime'])
+            return int(message_attributes[frame_id_dbc]['GenMsgCycleTime'])
         except KeyError:
             try:
                 return int(attribute_definition_defaults['GenMsgCycleTime'])
             except KeyError:
                 return None
 
-    def get_choices(frame_id, signal):
+    def get_choices(frame_id_dbc, signal):
         """Get choices for given signal.
 
         """
 
         try:
-            return choices[frame_id][signal]
+            return choices[frame_id_dbc][signal]
         except KeyError:
             return None
 
@@ -634,17 +659,26 @@ def _load_messages(tokens,
         if message[0] != MESSAGE:
             continue
 
-        frame_id = int(message[1]) & 0x7fffffff
-        is_extended_frame = bool(int(message[1]) & 0x80000000)
+        # Frame id.
+        frame_id_dbc = int(message[1])
+        frame_id = frame_id_dbc & 0x7fffffff
+        is_extended_frame = bool(frame_id_dbc & 0x80000000)
+
+        # Nodes (or better, senders).
+        nodes = [message[4]]
+
+        for node in message_senders.get(frame_id_dbc, []):
+            if node not in nodes:
+                nodes.append(node)
 
         message = Message(
             frame_id=frame_id,
             is_extended_frame=is_extended_frame,
             name=message[2],
             length=int(message[3], 0),
-            nodes=[message[4]],
-            send_type=get_send_type(int(message[1])),
-            cycle_time=get_cycle_time(int(message[1])),
+            nodes=nodes,
+            send_type=get_send_type(frame_id_dbc),
+            cycle_time=get_cycle_time(frame_id_dbc),
             signals=[Signal(name=signal[1][0],
                             start=_compute_start_bit(int(signal[2][0]),
                                                      signal[2][2]),
@@ -659,9 +693,9 @@ def _load_messages(tokens,
                             minimum=num(signal[4][0]),
                             maximum=num(signal[4][1]),
                             unit=None if signal[5] == '' else signal[5],
-                            choices=get_choices(int(message[1]),
+                            choices=get_choices(frame_id_dbc,
                                                 signal[1][0]),
-                            comment=get_comment(int(message[1]),
+                            comment=get_comment(frame_id_dbc,
                                                 signal[1][0]),
                             is_multiplexer=(signal[1][1] == 'M'
                                             if len(signal[1]) == 2
@@ -670,7 +704,7 @@ def _load_messages(tokens,
                                             if len(signal[1]) == 2 and signal[1][1] != 'M'
                                             else None))
                      for signal in message[5]],
-            comment=get_comment(int(message[1])))
+            comment=get_comment(frame_id_dbc))
 
         messages.append(message)
 
@@ -727,6 +761,7 @@ def dump_string(database):
                           ba='\n'.join(ba),
                           val='\n'.join(val))
 
+
 def load_string(string):
     """Parse given string.
 
@@ -748,11 +783,13 @@ def load_string(string):
     attribute_definition_defaults = _load_attribute_definition_defaults(tokens)
     message_attributes = _load_attributes(tokens)
     choices = _load_choices(tokens)
+    message_senders = _load_message_senders(tokens)
     messages = _load_messages(tokens,
                               comments,
                               attribute_definition_defaults,
                               message_attributes,
-                              choices)
+                              choices,
+                              message_senders)
     nodes = _load_nodes(tokens, comments)
     version = _load_version(tokens)
 

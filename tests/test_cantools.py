@@ -82,13 +82,14 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db.add_dbc_file(filename)
 
-        self.assertEqual(len(db.nodes), 2)
+        self.assertEqual(len(db.nodes), 3)
         self.assertEqual(db.version, '2.0')
         self.assertEqual(repr(db),
                          "version('2.0')\n"
                          "\n"
                          "node('FOO', None)\n"
                          "node('BAR', 'fam')\n"
+                         "node('FIE', None)\n"
                          "\n"
                          "message('Foo', 0x12331, True, 8, 'Foo.')\n"
                          "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
@@ -107,6 +108,12 @@ class CanToolsTest(unittest.TestCase):
 
         message = db.lookup_message(0x12331)
         self.assertEqual(message.name, 'Fum')
+        self.assertEqual(message.nodes, ['FOO'])
+
+        message = db.lookup_message(0x12332)
+        self.assertEqual(message.name, 'Bar')
+        self.assertEqual(message.nodes, ['FOO', 'BAR'])
+        self.assertEqual(message.signals[0].nodes, ['Vector__XXX', 'FUM'])
 
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.

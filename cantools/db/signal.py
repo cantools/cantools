@@ -148,7 +148,8 @@ class Signal(object):
 
     @property
     def nodes(self):
-        """A list of nodes for this signal.
+        """A list of nodes for this signal (or signal receivers, if one
+        prefers).
 
         """
 

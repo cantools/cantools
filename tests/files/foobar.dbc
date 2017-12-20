@@ -32,7 +32,7 @@ NS_ :
 	BU_BO_REL_
 	SG_MUL_VAL_
 
-BU_: FOO BAR
+BU_: FOO BAR FIE
 
 BO_ 2147558193 Foo : 8 FOO
  SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK" Vector__XXX, BAR
@@ -42,7 +42,7 @@ BO_ 2147558193 Fum: 8 FOO
  SG_ Fum : 0|12@1- (1,0) [0|1] "" Vector__XXX, BAR
 
 BO_ 2147558194 Bar: 8 FOO
- SG_ Binary32 : 0|32@1- (1,0) [0|0] "" Vector__XXX, BAR
+ SG_ Binary32 : 0|32@1- (1,0) [0|0] "" Vector__XXX, FUM
 
 CM_ BU_ BAR "fam";
 CM_ BO_ 2147558193 "Foo.";

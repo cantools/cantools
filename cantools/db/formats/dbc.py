@@ -610,12 +610,38 @@ def _load_message_senders(tokens):
     return message_senders
 
 
+def _load_signal_types(tokens):
+    """Load signal types.
+
+    """
+
+    signal_types = {}
+
+    for signal_type in tokens:
+        if signal_type[0] != SIGNAL_TYPE:
+            continue
+
+        try:
+            frame_id = int(signal_type[1])
+        except ValueError:
+            continue
+
+        if frame_id not in signal_types:
+            signal_types[frame_id] = {}
+
+        signal_name = signal_type[2]
+        signal_types[frame_id][signal_name] = int(signal_type[3])
+
+    return signal_types
+
+
 def _load_messages(tokens,
                    comments,
                    attribute_definition_defaults,
                    message_attributes,
                    choices,
-                   message_senders):
+                   message_senders,
+                   signal_types):
 
     def get_comment(frame_id_dbc, signal=None):
         """Get comment for given message or signal.
@@ -664,6 +690,16 @@ def _load_messages(tokens,
             return choices[frame_id_dbc][signal]
         except KeyError:
             return None
+
+    def get_is_float(frame_id_dbc, signal):
+        """Get is_float for given signal.
+
+        """
+
+        try:
+            return signal_types[frame_id_dbc][signal] == 1
+        except KeyError:
+            return False
 
     messages = []
 
@@ -714,7 +750,9 @@ def _load_messages(tokens,
                                             else False),
                             multiplexer_id=(int(signal[1][1][1:])
                                             if len(signal[1]) == 2 and signal[1][1] != 'M'
-                                            else None))
+                                            else None),
+                            is_float=get_is_float(frame_id_dbc,
+                                                  signal[1][0]))
                      for signal in message[5]],
             comment=get_comment(frame_id_dbc))
 
@@ -796,12 +834,14 @@ def load_string(string):
     message_attributes = _load_attributes(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens)
+    signal_types = _load_signal_types(tokens)
     messages = _load_messages(tokens,
                               comments,
                               attribute_definition_defaults,
                               message_attributes,
                               choices,
-                              message_senders)
+                              message_senders,
+                              signal_types)
     nodes = _load_nodes(tokens, comments)
     version = _load_version(tokens)
 

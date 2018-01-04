@@ -109,11 +109,27 @@ class CanToolsTest(unittest.TestCase):
         message = db.lookup_message(0x12331)
         self.assertEqual(message.name, 'Fum')
         self.assertEqual(message.nodes, ['FOO'])
+        self.assertEqual(message.signals[0].is_float, False)
 
         message = db.lookup_message(0x12332)
         self.assertEqual(message.name, 'Bar')
         self.assertEqual(message.nodes, ['FOO', 'BAR'])
         self.assertEqual(message.signals[0].nodes, ['Vector__XXX', 'FUM'])
+        self.assertEqual(message.signals[0].is_float, True)
+        self.assertEqual(message.signals[0].length, 32)
+
+    def test_foobar_float(self):
+        db = cantools.db.File()
+        filename = os.path.join('tests', 'files', 'foobar.dbc')
+        db.add_dbc_file(filename)
+
+        decoded_message = {'Binary32': 1.0}
+        encoded_message = b'\x00\x00\x80\x3f\x00\x00\x00\x00'
+
+        encoded = db.encode_message(0x12332, decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = db.decode_message(0x12332, encoded)
+        self.assertEqual(decoded, decoded_message)
 
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.

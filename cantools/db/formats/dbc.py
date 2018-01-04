@@ -258,7 +258,7 @@ def _create_grammar():
     value_table.setName(VALUE_TABLE)
 
     signal_type = Group(Keyword(SIGNAL_TYPE)
-                        - positive_integer
+                        - frame_id
                         - word
                         - colon
                         - positive_integer
@@ -597,10 +597,7 @@ def _load_message_senders(tokens):
         if senders[0] != MESSAGE_TX_NODE:
             continue
 
-        try:
-            frame_id = int(senders[1])
-        except ValueError:
-            continue
+        frame_id = int(senders[1])
 
         if frame_id not in message_senders:
             message_senders[frame_id] = []
@@ -621,10 +618,7 @@ def _load_signal_types(tokens):
         if signal_type[0] != SIGNAL_TYPE:
             continue
 
-        try:
-            frame_id = int(signal_type[1])
-        except ValueError:
-            continue
+        frame_id = int(signal_type[1])
 
         if frame_id not in signal_types:
             signal_types[frame_id] = {}

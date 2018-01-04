@@ -889,6 +889,24 @@ class CanToolsTest(unittest.TestCase):
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_multiplex(self):
+        filename = os.path.join('tests', 'files', 'multiplex.dbc')
+        db = cantools.db.load_file(filename)
+
+        message_1 = db.messages[0]
+        self.assertTrue(message_1.is_multiplexed())
+
+        signal_multiplexor = message_1.signals[0]
+        self.assertTrue(signal_multiplexor.is_multiplexer)
+
+        signal_bit_j = message_1.signals[1]
+        self.assertFalse(signal_bit_j.is_multiplexer)
+        self.assertEqual(signal_bit_j.multiplexer_id, 8)
+
+        signal_bit_a = message_1.signals[5]
+        self.assertFalse(signal_bit_a.is_multiplexer)
+        self.assertEqual(signal_bit_a.multiplexer_id, 24)
+
     def test_dbc_parse_error_messages(self):
         # No valid entry.
         with self.assertRaises(cantools.db.ParseError) as cm:
@@ -898,7 +916,7 @@ class CanToolsTest(unittest.TestCase):
             str(cm.exception),
             "Invalid DBC syntax at line 1, column 1: '>!<abc': Expected "
             "{VERSION | NS_ | BS_ | BU_ | BO_ | CM_ | BA_DEF_ | BA_DEF_DEF_ "
-            "| BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ "
+            "| BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ | SG_MUL_VAL_ "
             "| BO_TX_BU_ | BA_DEF_REL_ | BA_DEF_DEF_REL_ | BA_REL_ | EV_}.")
 
         # Bad message frame id.

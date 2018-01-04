@@ -47,6 +47,7 @@ ATTRIBUTE_DEFINITION_REL = 'BA_DEF_REL_'
 ATTRIBUTE_DEFINITION_DEFAULT_REL = 'BA_DEF_DEF_REL_'
 EVENT = 'EV_'
 SIGNAL_TYPE = 'SIG_VALTYPE_'
+SIGNAL_MULTIPLEXER_CHOICES = 'SG_MUL_VAL_'
 
 DBC_FMT = """VERSION "{version}"
 
@@ -264,6 +265,16 @@ def _create_grammar():
                         - scolon)
     signal_type.setName(SIGNAL_TYPE)
 
+    signal_multiplexer_choices = Group(Keyword(SIGNAL_MULTIPLEXER_CHOICES)
+                                       - positive_integer
+                                       - word
+                                       - word
+                                       - delimitedList(positive_integer
+                                                       - '-'
+                                                       - positive_integer)
+                                       - scolon)
+    signal_multiplexer_choices.setName(SIGNAL_MULTIPLEXER_CHOICES)
+
     message_add_sender = Group(Keyword(MESSAGE_TX_NODE)
                                - frame_id
                                - colon
@@ -314,6 +325,7 @@ def _create_grammar():
              | choice
              | value_table
              | signal_type
+             | signal_multiplexer_choices
              | message_add_sender
              | attribute_definition_rel
              | attribute_definition_default_rel

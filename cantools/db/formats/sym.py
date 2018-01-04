@@ -243,7 +243,7 @@ def _load_signals(tokens, enums):
     return signals
 
 
-def _load_message_signal(tokens, signals, multiplexer_id):
+def _load_message_signal(tokens, signals, multiplexer_signal, multiplexer_id):
     signal = signals[tokens[1]]
 
     return Signal(name=signal.name,
@@ -261,14 +261,19 @@ def _load_message_signal(tokens, signals, multiplexer_id):
                   comment=signal.comment,
                   is_multiplexer=signal.is_multiplexer,
                   multiplexer_id=multiplexer_id,
+                  multiplexer_signal=multiplexer_signal,
                   is_float=signal.is_float)
 
 
 def _load_message_signals_inner(message_tokens,
                                 signals,
+                                multiplexer_signal=None,
                                 multiplexer_id=None):
     return [
-        _load_message_signal(signal, signals, multiplexer_id)
+        _load_message_signal(signal,
+                             signals,
+                             multiplexer_signal,
+                             multiplexer_id)
         for signal in message_tokens[7]
     ]
 
@@ -277,8 +282,9 @@ def _load_muxed_message_signals(message_tokens,
                                 message_section_tokens,
                                 signals):
     mux_tokens = message_tokens[3]
+    multiplexer_signal = mux_tokens[1]
     result = [
-        Signal(name=mux_tokens[1],
+        Signal(name=multiplexer_signal,
                start=int(mux_tokens[2]),
                length=int(mux_tokens[3]),
                byte_order='big_endian',
@@ -288,6 +294,7 @@ def _load_muxed_message_signals(message_tokens,
     multiplexer_id = int(mux_tokens[4])
     result += _load_message_signals_inner(message_tokens,
                                           signals,
+                                          multiplexer_signal,
                                           multiplexer_id)
 
     for tokens in message_section_tokens:
@@ -295,6 +302,7 @@ def _load_muxed_message_signals(message_tokens,
             multiplexer_id = int(tokens[3][4])
             result += _load_message_signals_inner(tokens,
                                                   signals,
+                                                  multiplexer_signal,
                                                   multiplexer_id)
 
     return result

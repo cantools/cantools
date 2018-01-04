@@ -38,7 +38,7 @@ def _decode_signal(signal, value, decode_choices, scaling):
     return decoded_signal
 
 
-def _encode_data(data, signals, formats, scaling, length):
+def _encode_data(data, signals, formats, scaling):
     big_unpacked_data = [
         _encode_signal(signal, data, scaling)
         for signal in signals
@@ -55,7 +55,7 @@ def _encode_data(data, signals, formats, scaling, length):
     packed_union = struct.unpack('>Q', big_packed)[0]
     packed_union |= struct.unpack('>Q', little_packed)[0]
 
-    return struct.pack('>Q', packed_union)[:length]
+    return packed_union
 
 
 def _decode_data(data, signals, formats, decode_choices, scaling):
@@ -163,55 +163,47 @@ class Message(object):
         self._send_type = send_type
         self._cycle_time = cycle_time
         self._bus_name = bus_name
+        self._codecs = self._create_codec()
 
-        # Message encode/decode format.
-        self._formats = _create_message_encode_decode_formats(self._signals)
+    def _create_codec(self, parent_signal=None, multiplexer_id=None):
+        """Create a codec of all signals with given parent signal. This is a
+        recursive function.
 
-        # Is it a multiplexed message?
-        self._multiplexer = None
+        """
 
+        signals = []
+        multiplexers = {}
+
+        # Find all signals matching given parent signal name and given
+        # multiplexer id. Root signals' parent and multiplexer id are
+        # both None.
         for signal in self._signals:
-            if not signal.is_multiplexer:
+            if signal.multiplexer_signal != parent_signal:
                 continue
 
-            Multiplexer = namedtuple('Multiplexer', ['signal', 'formats'])
-            formats = _create_message_encode_decode_formats([signal])
-            self._multiplexer = Multiplexer(signal, formats)
-            break
+            if signal.multiplexer_id != multiplexer_id:
+                continue
 
-        # Group signals for each multiplex id.
-        self._multiplexer_message_by_id = {}
+            if signal.is_multiplexer:
+                children_ids = set([s.multiplexer_id
+                                    for s in self._signals
+                                    if s.multiplexer_signal == signal.name])
 
-        if self.is_multiplexed():
-            # Append multiplexed signals.
-            for signal in self._signals:
-                if signal.multiplexer_id is None:
-                    continue
+                for child_id in children_ids:
+                    codec = self._create_codec(signal.name, child_id)
 
-                multiplexer_id = signal.multiplexer_id
+                    if signal.name not in multiplexers:
+                        multiplexers[signal.name] = {}
 
-                if multiplexer_id not in self._multiplexer_message_by_id:
-                    self._multiplexer_message_by_id[multiplexer_id] = {
-                        'signals': [],
-                        'formats': None
-                    }
+                    multiplexers[signal.name][child_id] = codec
 
-                self._multiplexer_message_by_id[multiplexer_id]['signals'].append(
-                    signal)
+            signals.append(signal)
 
-            # Append common signals.
-            for signal in self._signals:
-                if signal.multiplexer_id is not None:
-                    continue
-
-                for message in self._multiplexer_message_by_id.values():
-                    message['signals'].append(signal)
-
-            # Sort the signals and create the encode/decode format.
-            for message in self._multiplexer_message_by_id.values():
-                message['signals'].sort(key=lambda s: s.start)
-                formats = _create_message_encode_decode_formats(message['signals'])
-                message['formats'] = formats
+        return {
+            'signals': signals,
+            'formats': _create_message_encode_decode_formats(signals),
+            'multiplexers': multiplexers
+        }
 
     @property
     def frame_id(self):
@@ -294,6 +286,21 @@ class Message(object):
 
         return self._bus_name
 
+    def _encode(self, node, data, scaling):
+        encoded = _encode_data(data,
+                               node['signals'],
+                               node['formats'],
+                               scaling)
+
+        multiplexers = node['multiplexers']
+
+        for signal in multiplexers:
+            mux = data[signal]
+            node = multiplexers[signal][mux]
+            encoded |= self._encode(node, data, scaling)
+
+        return encoded
+
     def encode(self, data, scaling=True):
         """Encode given data as a message of this type.
 
@@ -305,21 +312,28 @@ class Message(object):
 
         """
 
-        if self.is_multiplexed():
-            mux = data[self._multiplexer.signal.name]
+        encoded = self._encode(self._codecs, data, scaling)
 
-            try:
-                multiplexer = self._multiplexer_message_by_id[mux]
-            except KeyError:
-                raise KeyError('Invalid multiplex message id {}.'.format(mux))
+        return struct.pack('>Q', encoded)[:self._length]
 
-            signals = multiplexer['signals']
-            formats = multiplexer['formats']
-        else:
-            signals = self._signals
-            formats = self._formats
+    def _decode(self, node, data, decode_choices, scaling):
+        decoded = _decode_data(data,
+                               node['signals'],
+                               node['formats'],
+                               decode_choices,
+                               scaling)
 
-        return _encode_data(data, signals, formats, scaling, self._length)
+        multiplexers = node['multiplexers']
+
+        for signal in multiplexers:
+            mux = decoded[signal]
+            node = multiplexers[signal][mux]
+            decoded.update(self._decode(node,
+                                        data,
+                                        decode_choices,
+                                        scaling))
+
+        return decoded
 
     def decode(self, data, decode_choices=True, scaling=True):
         """Decode given data as a message of this type.
@@ -337,25 +351,7 @@ class Message(object):
 
         data += b'\x00' * (8 - len(data))
 
-        if self.is_multiplexed():
-            mux = _decode_data(data,
-                               [self._multiplexer.signal],
-                               self._multiplexer.formats,
-                               False,
-                               False)[self._multiplexer.signal.name]
-
-            try:
-                multiplexer = self._multiplexer_message_by_id[mux]
-            except KeyError:
-                raise KeyError('Invalid multiplex message id {}.'.format(mux))
-
-            signals = multiplexer['signals']
-            formats = multiplexer['formats']
-        else:
-            signals = self._signals
-            formats = self._formats
-
-        return _decode_data(data, signals, formats, decode_choices, scaling)
+        return self._decode(self._codecs, data, decode_choices, scaling)
 
     def is_multiplexed(self):
         """Returns ``True`` if the message is multiplexed, otherwise
@@ -370,7 +366,7 @@ class Message(object):
 
         """
 
-        return self._multiplexer is not None
+        return bool(self._codecs['multiplexers'])
 
     def get_multiplexer_signal_name(self):
         """Returns the message multiplexer signal name, or raises an exception
@@ -382,7 +378,10 @@ class Message(object):
 
         """
 
-        return self._multiplexer.signal.name
+        if self.is_multiplexed():
+            return self._codecs['signals'][0].name
+        else:
+            raise ValueError('Message not multiplexed.')
 
     def get_signals_by_multiplexer_id(self, multiplexer_id):
         """Returns a list of signals for given multiplexer message id, or
@@ -395,7 +394,11 @@ class Message(object):
 
         """
 
-        return self._multiplexer_message_by_id[multiplexer_id]['signals']
+        signals = self._codecs['signals']
+        multiplexer = [a for a in self._codecs['multiplexers'].values()][0]
+        signals += multiplexer[multiplexer_id]['signals']
+
+        return signals
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(

@@ -821,7 +821,7 @@ class CanToolsTest(unittest.TestCase):
         symbol_3 = db.messages[5]
         self.assertEqual(symbol_3.frame_id, 0x33)
         self.assertEqual(symbol_3.length, 8)
-        self.assertTrue(symbol_3.is_multiplexed())
+        self.assertEqual(symbol_3.is_multiplexed(), True)
         self.assertEqual(len(symbol_3.signals), 4)
         multiplexer = symbol_3.signals[0]
         self.assertEqual(multiplexer.name, 'Multiplexer1')
@@ -925,42 +925,70 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_bit_a.multiplexer_id, 24)
 
     def test_multiplex_extended(self):
+        #            tree              |  bits
+        # =============================+========
+        # -- {root}                    |
+        #    +-- S0                    |  0..4
+        #    |   +-- 0                 |
+        #    |   |   +-- S1            |  4..8
+        #    |   |       +-- 0         |
+        #    |   |       |   +-- S2    |  8..16
+        #    |   |       |   +-- S3    | 16..32
+        #    |   |       +-- 2         |
+        #    |   |           +-- S4    |  8..32
+        #    |   +-- 1                 |
+        #    |       +-- S5            |  4..32
+        #    +-- S6                    | 32..40
+        #        +-- 1                 |
+        #        |   +-- S7            | 40..64
+        #        +-- 2                 |
+        #            +-- S8            | 40..48
+        #
         signals = [
             cantools.db.Signal(name='S0',
                                start=0,
-                               length=8,
+                               length=4,
                                is_multiplexer=True),
             cantools.db.Signal(name='S1',
-                               start=8,
-                               length=24,
+                               start=4,
+                               length=4,
                                is_multiplexer=True,
-                               multiplexer_id=(0, 1),
+                               multiplexer_id=0,
                                multiplexer_signal='S0'),
             cantools.db.Signal(name='S2',
-                               start=32,
-                               length=16,
-                               multiplexer_id=4,
+                               start=8,
+                               length=8,
+                               multiplexer_id=0,
                                multiplexer_signal='S1'),
             cantools.db.Signal(name='S3',
-                               start=48,
+                               start=16,
                                length=16,
-                               multiplexer_id=4,
+                               multiplexer_id=0,
                                multiplexer_signal='S1'),
             cantools.db.Signal(name='S4',
-                               start=32,
-                               length=32,
-                               multiplexer_id=5,
+                               start=8,
+                               length=24,
+                               multiplexer_id=2,
                                multiplexer_signal='S1'),
             cantools.db.Signal(name='S5',
-                               start=32,
-                               length=32,
-                               multiplexer_id=6,
-                               multiplexer_signal='S1'),
+                               start=4,
+                               length=28,
+                               multiplexer_id=1,
+                               multiplexer_signal='S0'),
             cantools.db.Signal(name='S6',
-                               start=8,
-                               length=56,
+                               start=32,
+                               length=8,
+                               is_multiplexer=True),
+            cantools.db.Signal(name='S7',
+                               start=40,
+                               length=24,
+                               multiplexer_id=1,
+                               multiplexer_signal='S6'),
+            cantools.db.Signal(name='S8',
+                               start=40,
+                               length=8,
                                multiplexer_id=2,
-                               multiplexer_signal='S0')
+                               multiplexer_signal='S6')
         ]
 
         message = cantools.db.Message(frame_id=1,
@@ -971,17 +999,25 @@ class CanToolsTest(unittest.TestCase):
         # Encode and decode a few messages with different
         # multiplexing.
         messages = [
-            ({'S0': 0, 'S1': 5, 'S4': 10000}, b''),
-            ({'S0': 1, 'S1': 4, 'S2': 10000, 'S3': 5000}, b''),
-            ({'S0': 2, 'S6': 3}, b'')
+            (
+                {'S0': 0, 'S1': 2, 'S4': 10000, 'S6': 1, 'S7': 33},
+                b'\x20\x10\x27\x00\x01\x21\x00\x00'
+            ),
+            (
+                {'S0': 0, 'S1': 0, 'S2': 100, 'S3': 5000, 'S6': 2, 'S8': 22},
+                b'\x00\x64\x88\x13\x02\x16\x00\x00'
+            ),
+            (
+                {'S0': 1, 'S5': 3, 'S6': 1, 'S7': 772},
+                b'\x31\x00\x00\x00\x01\x04\x03\x00'
+            )
         ]
 
         for decoded_message, encoded_message in messages:
-            with self.assertRaises(Exception):
-                encoded = message.encode(decoded_message)
-                self.assertEqual(encoded, encoded_message)
-                decoded = message.decode(encoded)
-                self.assertEqual(decoded, decoded_message)
+            encoded = message.encode(decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = message.decode(encoded)
+            self.assertEqual(decoded, decoded_message)
 
     def test_dbc_parse_error_messages(self):
         # No valid entry.

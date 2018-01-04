@@ -713,6 +713,14 @@ def _load_messages(tokens,
             if node not in nodes:
                 nodes.append(node)
 
+        multiplexer_signal = None
+
+        for signal in message[5]:
+            if len(signal[1]) == 2:
+                if signal[1][1] == 'M':
+                    multiplexer_signal = signal[1][0]
+                    break
+
         message = Message(
             frame_id=frame_id,
             is_extended_frame=is_extended_frame,
@@ -745,6 +753,10 @@ def _load_messages(tokens,
                             multiplexer_id=(int(signal[1][1][1:])
                                             if len(signal[1]) == 2 and signal[1][1] != 'M'
                                             else None),
+                            multiplexer_signal=(multiplexer_signal
+                                                if (signal[1][0] != multiplexer_signal
+                                                    and len(signal[1]) == 2)
+                                                else None),
                             is_float=get_is_float(frame_id_dbc,
                                                   signal[1][0]))
                      for signal in message[5]],

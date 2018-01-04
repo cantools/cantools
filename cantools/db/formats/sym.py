@@ -228,9 +228,7 @@ def _load_signal(tokens, enums):
                   maximum=maximum,
                   unit=unit,
                   choices=enum,
-                  comment=None,
                   is_multiplexer=False,
-                  multiplexer_id=None,
                   is_float=is_float)
 
 
@@ -283,16 +281,7 @@ def _load_muxed_message_signals(message_tokens,
         Signal(name=mux_tokens[1],
                start=int(mux_tokens[2]),
                length=int(mux_tokens[3]),
-               nodes=None,
                byte_order='big_endian',
-               is_signed=False,
-               scale=None,
-               offset=None,
-               minimum=None,
-               maximum=None,
-               unit=None,
-               choices=None,
-               comment=None,
                is_multiplexer=True)
     ]
 

@@ -464,19 +464,20 @@ class CanToolsTest(unittest.TestCase):
 
     def test_add_message(self):
         db = cantools.db.File()
-        signals = [cantools.db.Signal(name='signal',
-                                      start=0,
-                                      length=4,
-                                      nodes=['foo'],
-                                      byte_order='big_endian',
-                                      is_signed=False,
-                                      scale=1.0,
-                                      offset=10,
-                                      minimum=10.0,
-                                      maximum=100.0,
-                                      unit='m/s',
-                                      choices=None,
-                                      comment=None)]
+
+        signals = [
+            cantools.db.Signal(name='signal',
+                               start=0,
+                               length=4,
+                               nodes=['foo'],
+                               byte_order='big_endian',
+                               scale=1.0,
+                               offset=10,
+                               minimum=10.0,
+                               maximum=100.0,
+                               unit='m/s')
+        ]
+
         message = cantools.db.Message(frame_id=37,
                                       name='message',
                                       length=8,
@@ -486,7 +487,7 @@ class CanToolsTest(unittest.TestCase):
         db.add_message(message)
         self.assertEqual(len(db.messages), 1)
 
-    def test_get_message_by_frame_id_andname(self):
+    def test_get_message_by_frame_id_and_name(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
         with open(filename, 'r') as fin:
@@ -922,6 +923,65 @@ class CanToolsTest(unittest.TestCase):
         signal_bit_a = message_1.signals[5]
         self.assertFalse(signal_bit_a.is_multiplexer)
         self.assertEqual(signal_bit_a.multiplexer_id, 24)
+
+    def test_multiplex_extended(self):
+        signals = [
+            cantools.db.Signal(name='S0',
+                               start=0,
+                               length=8,
+                               is_multiplexer=True),
+            cantools.db.Signal(name='S1',
+                               start=8,
+                               length=24,
+                               is_multiplexer=True,
+                               multiplexer_id=(0, 1),
+                               multiplexer_signal='S0'),
+            cantools.db.Signal(name='S2',
+                               start=32,
+                               length=16,
+                               multiplexer_id=4,
+                               multiplexer_signal='S1'),
+            cantools.db.Signal(name='S3',
+                               start=48,
+                               length=16,
+                               multiplexer_id=4,
+                               multiplexer_signal='S1'),
+            cantools.db.Signal(name='S4',
+                               start=32,
+                               length=32,
+                               multiplexer_id=5,
+                               multiplexer_signal='S1'),
+            cantools.db.Signal(name='S5',
+                               start=32,
+                               length=32,
+                               multiplexer_id=6,
+                               multiplexer_signal='S1'),
+            cantools.db.Signal(name='S6',
+                               start=8,
+                               length=56,
+                               multiplexer_id=2,
+                               multiplexer_signal='S0')
+        ]
+
+        message = cantools.db.Message(frame_id=1,
+                                      name='M0',
+                                      length=8,
+                                      signals=signals)
+
+        # Encode and decode a few messages with different
+        # multiplexing.
+        messages = [
+            ({'S0': 0, 'S1': 5, 'S4': 10000}, b''),
+            ({'S0': 1, 'S1': 4, 'S2': 10000, 'S3': 5000}, b''),
+            ({'S0': 2, 'S6': 3}, b'')
+        ]
+
+        for decoded_message, encoded_message in messages:
+            with self.assertRaises(Exception):
+                encoded = message.encode(decoded_message)
+                self.assertEqual(encoded, encoded_message)
+                decoded = message.decode(encoded)
+                self.assertEqual(decoded, decoded_message)
 
     def test_dbc_parse_error_messages(self):
         # No valid entry.

@@ -97,10 +97,7 @@ def _load_signal_element(signal):
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
-                  choices=None,
                   comment=notes,
-                  is_multiplexer=False,
-                  multiplexer_id=None,
                   is_float=is_float)
 
 

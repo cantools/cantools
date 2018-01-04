@@ -10,18 +10,19 @@ class Signal(object):
                  name,
                  start,
                  length,
-                 byte_order,
-                 is_signed,
-                 scale,
-                 offset,
-                 minimum,
-                 maximum,
-                 unit,
-                 choices,
-                 comment,
+                 byte_order='little_endian',
+                 is_signed=False,
+                 scale=1,
+                 offset=0,
+                 minimum=None,
+                 maximum=None,
+                 unit=None,
+                 choices=None,
+                 comment=None,
                  nodes=None,
                  is_multiplexer=False,
                  multiplexer_id=None,
+                 multiplexer_signal=None,
                  is_float=False):
         self._name = name
         self._start = start
@@ -38,6 +39,7 @@ class Signal(object):
         self._nodes = [] if nodes is None else nodes
         self._is_multiplexer = is_multiplexer
         self._multiplexer_id = multiplexer_id
+        self._multiplexer_signal = multiplexer_signal
         self._is_float = is_float
 
     @property
@@ -172,6 +174,15 @@ class Signal(object):
         """
 
         return self._multiplexer_id
+
+    @property
+    def multiplexer_signal(self):
+        """The multiplexer signal if the signal is part of a multiplexed
+        message, ``None`` otherwise.
+
+        """
+
+        return self._multiplexer_signal
 
     def __repr__(self):
         if self._choices is None:

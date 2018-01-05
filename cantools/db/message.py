@@ -164,6 +164,7 @@ class Message(object):
         self._cycle_time = cycle_time
         self._bus_name = bus_name
         self._codecs = self._create_codec()
+        self._signal_tree = self._create_signal_tree(self._codecs)
 
     def _create_codec(self, parent_signal=None, multiplexer_id=None):
         """Create a codec of all signals with given parent signal. This is a
@@ -204,6 +205,31 @@ class Message(object):
             'formats': _create_message_encode_decode_formats(signals),
             'multiplexers': multiplexers
         }
+
+    def _create_signal_tree(self, codec):
+        """Create a multiplexing tree node of given codec. This is a recursive
+        function.
+
+        """
+
+        nodes = []
+
+        for signal in codec['signals']:
+            multiplexers = codec['multiplexers']
+
+            if signal.name in multiplexers:
+                node = {
+                    signal.name: {
+                        mux: self._create_signal_tree(mux_codec)
+                        for mux, mux_codec in multiplexers[signal.name].items()
+                    }
+                }
+            else:
+                node = signal.name
+
+            nodes.append(node)
+
+        return nodes
 
     @property
     def frame_id(self):
@@ -286,6 +312,22 @@ class Message(object):
 
         return self._bus_name
 
+    @property
+    def signal_tree(self):
+        """All signal names and multiplexer ids as a tree. Multiplexer signals
+        are dictionaries, while other signals are strings.
+
+        >>> foo = db.get_message_by_name('Foo')
+        >>> foo.signal_tree
+        ['Bar', 'Fum']
+        >>> bar = db.get_message_by_name('Bar')
+        >>> bar.signal_tree
+        [{'A': {0: ['C', 'D'], 1: ['E']}}, 'B']
+
+        """
+
+        return self._signal_tree
+
     def _encode(self, node, data, scaling):
         encoded = _encode_data(data,
                                node['signals'],
@@ -353,6 +395,13 @@ class Message(object):
 
         return self._decode(self._codecs, data, decode_choices, scaling)
 
+    def get_signal_by_name(self, name):
+        for signal in self._signals:
+            if signal.name == name:
+                return signal
+
+        raise KeyError(name)
+
     def is_multiplexed(self):
         """Returns ``True`` if the message is multiplexed, otherwise
         ``False``.
@@ -367,38 +416,6 @@ class Message(object):
         """
 
         return bool(self._codecs['multiplexers'])
-
-    def get_multiplexer_signal_name(self):
-        """Returns the message multiplexer signal name, or raises an exception
-        if the message is not multiplexed.
-
-        >>> bar = db.get_message_by_name('Bar')
-        >>> bar.get_multiplexer_signal_name()
-        'BarMux'
-
-        """
-
-        if self.is_multiplexed():
-            return self._codecs['signals'][0].name
-        else:
-            raise ValueError('Message not multiplexed.')
-
-    def get_signals_by_multiplexer_id(self, multiplexer_id):
-        """Returns a list of signals for given multiplexer message id, or
-        raises an exception if the message is not multiplexed or an
-        invalid multiplexer id is given.
-
-        >>> bar = db.get_message_by_name('Bar')
-        >>> bar.get_signals_by_multiplexer_id(0)
-        [signal(...), signal(...), ...]
-
-        """
-
-        signals = self._codecs['signals']
-        multiplexer = [a for a in self._codecs['multiplexers'].values()][0]
-        signals += multiplexer[multiplexer_id]['signals']
-
-        return signals
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(

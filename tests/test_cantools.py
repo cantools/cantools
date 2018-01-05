@@ -404,11 +404,26 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_mux')
         self.assertEqual(sensor_sonars.signals[0].is_multiplexer, True)
 
-        self.assertEqual(sensor_sonars.get_multiplexer_signal_name(),
-                         'SENSOR_SONARS_mux')
-        signals = sensor_sonars.get_signals_by_multiplexer_id(0)
-        self.assertEqual(len(signals), 6)
-        self.assertEqual(signals[-1].name, 'SENSOR_SONARS_rear')
+        self.assertEqual(sensor_sonars.signal_tree,
+                         [
+                             {
+                                 'SENSOR_SONARS_mux': {
+                                     0: [
+                                         'SENSOR_SONARS_left',
+                                         'SENSOR_SONARS_middle',
+                                         'SENSOR_SONARS_right',
+                                         'SENSOR_SONARS_rear'
+                                     ],
+                                     1: [
+                                         'SENSOR_SONARS_no_filt_left',
+                                         'SENSOR_SONARS_no_filt_middle',
+                                         'SENSOR_SONARS_no_filt_right',
+                                         'SENSOR_SONARS_no_filt_rear'
+                                     ]
+                                 }
+                             },
+                             'SENSOR_SONARS_err_count'
+                         ])
 
         self.assertEqual(db.version, '')
 
@@ -498,6 +513,23 @@ class CanToolsTest(unittest.TestCase):
 
         message = db.get_message_by_frame_id(496)
         self.assertEqual(message.frame_id, 496)
+
+    def test_get_signal_by_name(self):
+        filename = os.path.join('tests', 'files', 'foobar.dbc')
+        db = cantools.db.load_file(filename)
+
+        message = db.get_message_by_name('Foo')
+
+        signal = message.get_signal_by_name('Foo')
+        self.assertEqual(signal.name, 'Foo')
+
+        signal = message.get_signal_by_name('Bar')
+        self.assertEqual(signal.name, 'Bar')
+
+        with self.assertRaises(KeyError) as cm:
+            message.get_signal_by_name('Fum')
+
+        self.assertIn('Fum', str(cm.exception))
 
     def test_command_line_decode(self):
         argv = ['cantools', 'decode', 'tests/files/socialledge.dbc']
@@ -995,6 +1027,29 @@ class CanToolsTest(unittest.TestCase):
                                       name='M0',
                                       length=8,
                                       signals=signals)
+
+        self.assertEqual(message.signal_tree,
+                         [
+                             {
+                                 'S0': {
+                                     0: [
+                                         {
+                                             'S1': {
+                                                 0: ['S2', 'S3'],
+                                                 2: ['S4']
+                                             }
+                                         }
+                                     ],
+                                     1: ['S5']
+                                 }
+                             },
+                             {
+                                 'S6': {
+                                     1: ['S7'],
+                                     2: ['S8']
+                                 }
+                             }
+                         ])
 
         # Encode and decode a few messages with different
         # multiplexing.

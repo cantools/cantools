@@ -48,18 +48,13 @@ def _do_decode(args):
         try:
             message = dbf.lookup_message(frame_id)
             decoded_signals = message.decode(data, decode_choices)
-
-            if message.is_multiplexed():
-                name = message.get_multiplexer_signal_name()
-                mux = decoded_signals[name]
-                signals = message.get_signals_by_multiplexer_id(mux)
-            else:
-                signals = message.signals
-
             formatted_signals = []
 
-            for signal in signals:
-                value = decoded_signals[signal.name]
+            for signal in message.signals:
+                try:
+                    value = decoded_signals[signal.name]
+                except KeyError:
+                    continue
 
                 if isinstance(value, str):
                     value = "'{}'".format(value)

@@ -998,7 +998,7 @@ class CanToolsTest(unittest.TestCase):
                     'BIT_E': 1, 'BIT_F': 1, 'BIT_G': 1, 'BIT_H': 1,
                     'BIT_J': 1, 'BIT_K': 1, 'BIT_L': 1
                 },
-                b'\x60\x00\x8c5\xc3\x00\x00\x00'
+                b'\x60\x00\x8c\x35\xc3\x00\x00\x00'
             )
         ]
 

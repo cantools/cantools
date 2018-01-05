@@ -40,6 +40,7 @@ BO_ 2147558193 Foo : 8 FOO
 
 BO_ 2147558193 Fum: 5 FOO
  SG_ Fum : 0|12@1- (1,0) [0|1] "" Vector__XXX, BAR
+ SG_ Fam : 12|12@1- (1.0,0.0) [0|1] "" Vector__XXX, BAR
 
 BO_ 2147558194 Bar: 4 FOO
  SG_ Binary32 : 0|32@1- (1,0) [0|0] "" Vector__XXX, FUM

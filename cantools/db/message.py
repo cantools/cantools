@@ -19,7 +19,7 @@ def _encode_signal(signal, data, scaling):
         if signal.is_float:
             return (value - signal.offset) / signal.scale
         else:
-            value = (Decimal(value) - signal.offset) / Decimal(signal.scale)
+            value = (Decimal(value) - Decimal(signal.offset)) / Decimal(signal.scale)
             
             return value.to_integral()
     else:

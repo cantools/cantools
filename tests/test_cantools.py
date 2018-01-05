@@ -137,8 +137,8 @@ class CanToolsTest(unittest.TestCase):
         messages = [
             (
                 'Fum',
-                {'Fum': 9},
-                b'\x09\x00\x00\x00\x00'
+                {'Fum': 9, 'Fam': 5},
+                b'\x09\x50\x00\x00\x00'
             ),
             (
                 'Bar',

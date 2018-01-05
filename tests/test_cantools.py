@@ -5,12 +5,12 @@ import sys
 import logging
 from xml.etree import ElementTree
 
-import cantools
-
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+
+import cantools
 
 
 class CanToolsTest(unittest.TestCase):

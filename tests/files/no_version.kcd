@@ -1,0 +1,4 @@
+<NetworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kayak.2codeornot2code.org/1.0" xsi:noNamespaceSchemaLocation="Definition.xsd">
+  <Document name="NoVersion">
+  </Document>
+</NetworkDefinition>

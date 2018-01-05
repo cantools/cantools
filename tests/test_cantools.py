@@ -764,6 +764,13 @@ class CanToolsTest(unittest.TestCase):
         decoded = db.decode_message(frame_id, b'\xdb\x0f\x49\x40')
         self.assertEqual(decoded['Windshield'], 3.1415927410125732)
 
+    def test_no_version(self):
+        filename = os.path.join('tests', 'files', 'no_version.kcd')
+        db = cantools.db.load_file(filename)
+
+        self.assertEqual(db.version, None)
+        self.assertEqual(db.nodes, [])
+
     def test_jopp_5_0_sym(self):
         filename = os.path.join('tests', 'files', 'jopp-5.0.sym')
         db = cantools.db.File()

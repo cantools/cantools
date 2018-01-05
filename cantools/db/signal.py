@@ -21,7 +21,7 @@ class Signal(object):
                  comment=None,
                  nodes=None,
                  is_multiplexer=False,
-                 multiplexer_id=None,
+                 multiplexer_ids=None,
                  multiplexer_signal=None,
                  is_float=False):
         self._name = name
@@ -38,7 +38,7 @@ class Signal(object):
         self._comment = comment
         self._nodes = [] if nodes is None else nodes
         self._is_multiplexer = is_multiplexer
-        self._multiplexer_id = multiplexer_id
+        self._multiplexer_ids = multiplexer_ids
         self._multiplexer_signal = multiplexer_signal
         self._is_float = is_float
 
@@ -167,13 +167,13 @@ class Signal(object):
         return self._is_multiplexer
 
     @property
-    def multiplexer_id(self):
-        """The multiplexer id if the signal is part of a multiplexed message,
-        ``None`` otherwise.
+    def multiplexer_ids(self):
+        """The multiplexer ids list if the signal is part of a multiplexed
+        message, ``None`` otherwise.
 
         """
 
-        return self._multiplexer_id
+        return self._multiplexer_ids
 
     @property
     def multiplexer_signal(self):
@@ -204,6 +204,6 @@ class Signal(object):
             self._maximum,
             self._unit,
             self._is_multiplexer,
-            self._multiplexer_id,
+            self._multiplexer_ids,
             choices,
             "'" + self._comment + "'" if self._comment is not None else None)

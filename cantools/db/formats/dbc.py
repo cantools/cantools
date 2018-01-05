@@ -47,7 +47,7 @@ ATTRIBUTE_DEFINITION_REL = 'BA_DEF_REL_'
 ATTRIBUTE_DEFINITION_DEFAULT_REL = 'BA_DEF_DEF_REL_'
 EVENT = 'EV_'
 SIGNAL_TYPE = 'SIG_VALTYPE_'
-SIGNAL_MULTIPLEXER_CHOICES = 'SG_MUL_VAL_'
+SIGNAL_MULTIPLEXER_VALUES = 'SG_MUL_VAL_'
 
 DBC_FMT = """VERSION "{version}"
 
@@ -265,15 +265,15 @@ def _create_grammar():
                         - scolon)
     signal_type.setName(SIGNAL_TYPE)
 
-    signal_multiplexer_choices = Group(Keyword(SIGNAL_MULTIPLEXER_CHOICES)
+    signal_multiplexer_values = Group(Keyword(SIGNAL_MULTIPLEXER_VALUES)
                                        - frame_id
                                        - word
                                        - word
-                                       - delimitedList(positive_integer
-                                                       - '-'
-                                                       - positive_integer)
+                                       - Group(delimitedList(positive_integer
+                                                             - Suppress('-')
+                                                             - Suppress(positive_integer)))
                                        - scolon)
-    signal_multiplexer_choices.setName(SIGNAL_MULTIPLEXER_CHOICES)
+    signal_multiplexer_values.setName(SIGNAL_MULTIPLEXER_VALUES)
 
     message_add_sender = Group(Keyword(MESSAGE_TX_NODE)
                                - frame_id
@@ -325,7 +325,7 @@ def _create_grammar():
              | choice
              | value_table
              | signal_type
-             | signal_multiplexer_choices
+             | signal_multiplexer_values
              | message_add_sender
              | attribute_definition_rel
              | attribute_definition_default_rel
@@ -631,13 +631,41 @@ def _load_signal_types(tokens):
     return signal_types
 
 
+def _load_signal_multiplexer_values(tokens):
+    """Load additional signal multiplexer values.
+
+    """
+
+    signal_multiplexer_values = {}
+
+    for signal_multiplexer_value in tokens:
+        if signal_multiplexer_value[0] != SIGNAL_MULTIPLEXER_VALUES:
+            continue
+
+        frame_id = signal_multiplexer_value[1]
+        signal_name = signal_multiplexer_value[2]
+        multiplexer_signal = signal_multiplexer_value[3]
+        multiplexer_ids = [int(v) for v in signal_multiplexer_value[4]]
+
+        if frame_id not in signal_multiplexer_values:
+            signal_multiplexer_values[frame_id] = {}
+
+        if multiplexer_signal not in signal_multiplexer_values[frame_id]:
+            signal_multiplexer_values[frame_id][multiplexer_signal] = {}
+
+        signal_multiplexer_values[frame_id][multiplexer_signal][signal_name] = multiplexer_ids
+
+    return signal_multiplexer_values
+
+
 def _load_messages(tokens,
                    comments,
                    attribute_definition_defaults,
                    message_attributes,
                    choices,
                    message_senders,
-                   signal_types):
+                   signal_types,
+                   signal_multiplexer_values):
     """Load messages.
 
     """
@@ -688,6 +716,22 @@ def _load_messages(tokens,
         try:
             return choices[frame_id_dbc][signal]
         except KeyError:
+            return None
+
+    def get_multiplexer_ids(frame_id_dbc, signal, multiplexer_signal):
+        ids = []
+
+        if len(signal) == 2 and signal[1] != 'M':
+            ids.append(int(signal[1][1:]))
+
+        try:
+            ids.extend(signal_multiplexer_values[frame_id_dbc][multiplexer_signal][signal[0]])
+        except KeyError:
+            pass
+
+        if ids:
+            return list(set(ids))
+        else:
             return None
 
     def get_is_float(frame_id_dbc, signal):
@@ -756,9 +800,9 @@ def _load_messages(tokens,
                             is_multiplexer=(signal[1][1] == 'M'
                                             if len(signal[1]) == 2
                                             else False),
-                            multiplexer_id=(int(signal[1][1][1:])
-                                            if len(signal[1]) == 2 and signal[1][1] != 'M'
-                                            else None),
+                            multiplexer_ids=get_multiplexer_ids(frame_id_dbc,
+                                                                signal[1],
+                                                                multiplexer_signal),
                             multiplexer_signal=(multiplexer_signal
                                                 if (signal[1][0] != multiplexer_signal
                                                     and len(signal[1]) == 2)
@@ -847,13 +891,15 @@ def load_string(string):
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens)
     signal_types = _load_signal_types(tokens)
+    signal_multiplexer_values = _load_signal_multiplexer_values(tokens)
     messages = _load_messages(tokens,
                               comments,
                               attribute_definition_defaults,
                               message_attributes,
                               choices,
                               message_senders,
-                              signal_types)
+                              signal_types,
+                              signal_multiplexer_values)
     nodes = _load_nodes(tokens, comments)
     version = _load_version(tokens)
 

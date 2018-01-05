@@ -398,9 +398,9 @@ class CanToolsTest(unittest.TestCase):
         self.assertFalse(db.messages[0].is_multiplexed())
         self.assertTrue(sensor_sonars.is_multiplexed())
         self.assertEqual(sensor_sonars.signals[-1].name, 'SENSOR_SONARS_no_filt_rear')
-        self.assertEqual(sensor_sonars.signals[-1].multiplexer_id, 1)
+        self.assertEqual(sensor_sonars.signals[-1].multiplexer_ids, [1])
         self.assertEqual(sensor_sonars.signals[2].name, 'SENSOR_SONARS_left')
-        self.assertEqual(sensor_sonars.signals[2].multiplexer_id, 0)
+        self.assertEqual(sensor_sonars.signals[2].multiplexer_ids, [0])
         self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_mux')
         self.assertEqual(sensor_sonars.signals[0].is_multiplexer, True)
 
@@ -777,7 +777,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
-        self.assertEqual(signal_1.multiplexer_id, None)
+        self.assertEqual(signal_1.multiplexer_ids, None)
         self.assertEqual(signal_1.is_float, False)
 
         signal_2 = message_1.signals[1]
@@ -795,7 +795,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comment, None)
         self.assertEqual(signal_2.is_multiplexer, False)
-        self.assertEqual(signal_2.multiplexer_id, None)
+        self.assertEqual(signal_2.multiplexer_ids, None)
         self.assertEqual(signal_2.is_float, True)
 
         # Message2.
@@ -827,7 +827,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_3.choices, {0: 'foo', 1: 'bar'})
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
-        self.assertEqual(signal_3.multiplexer_id, None)
+        self.assertEqual(signal_3.multiplexer_ids, None)
         self.assertEqual(signal_3.is_float, False)
 
         # Symbol2.
@@ -846,7 +846,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(signal_4.choices, None)
         self.assertEqual(signal_4.comment, None)
         self.assertEqual(signal_4.is_multiplexer, False)
-        self.assertEqual(signal_4.multiplexer_id, None)
+        self.assertEqual(signal_4.multiplexer_ids, None)
         self.assertEqual(signal_4.is_float, True)
 
         # Symbol3.
@@ -860,25 +860,25 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(multiplexer.start, 0)
         self.assertEqual(multiplexer.length, 3)
         self.assertEqual(multiplexer.is_multiplexer, True)
-        self.assertEqual(multiplexer.multiplexer_id, None)
+        self.assertEqual(multiplexer.multiplexer_ids, None)
         signal_1 = symbol_3.signals[1]
         self.assertEqual(signal_1.name, 'Signal1')
         self.assertEqual(signal_1.start, 3)
         self.assertEqual(signal_1.length, 11)
         self.assertEqual(signal_1.is_multiplexer, False)
-        self.assertEqual(signal_1.multiplexer_id, 0)
+        self.assertEqual(signal_1.multiplexer_ids, [0])
         signal_2 = symbol_3.signals[2]
         self.assertEqual(signal_2.name, 'Signal2')
         self.assertEqual(signal_2.start, 6)
         self.assertEqual(signal_2.length, 32)
         self.assertEqual(signal_2.is_multiplexer, False)
-        self.assertEqual(signal_2.multiplexer_id, 1)
+        self.assertEqual(signal_2.multiplexer_ids, [1])
         signal_3 = symbol_3.signals[3]
         self.assertEqual(signal_3.name, 'Signal3')
         self.assertEqual(signal_3.start, 9)
         self.assertEqual(signal_3.length, 11)
         self.assertEqual(signal_3.is_multiplexer, False)
-        self.assertEqual(signal_3.multiplexer_id, 2)
+        self.assertEqual(signal_3.multiplexer_ids, [2])
 
         # Encode and decode.
         frame_id = 0x009
@@ -945,16 +945,68 @@ class CanToolsTest(unittest.TestCase):
         message_1 = db.messages[0]
         self.assertTrue(message_1.is_multiplexed())
 
+        self.assertEqual(message_1.signal_tree,
+                         [
+                             {
+                                 'Multiplexor': {
+                                     8: [
+                                         'BIT_J', 'BIT_C', 'BIT_G', 'BIT_L'
+                                     ],
+                                     16: [
+                                         'BIT_J', 'BIT_C', 'BIT_G', 'BIT_L'
+                                     ],
+                                     24: [
+                                         'BIT_J', 'BIT_C', 'BIT_G', 'BIT_L',
+                                         'BIT_A', 'BIT_K', 'BIT_E', 'BIT_D',
+                                         'BIT_B', 'BIT_H', 'BIT_F'
+                                     ]
+                                 }
+                             }
+                         ])
+
         signal_multiplexor = message_1.signals[0]
-        self.assertTrue(signal_multiplexor.is_multiplexer)
+        self.assertEqual(signal_multiplexor.is_multiplexer, True)
 
         signal_bit_j = message_1.signals[1]
-        self.assertFalse(signal_bit_j.is_multiplexer)
-        self.assertEqual(signal_bit_j.multiplexer_id, 8)
+        self.assertEqual(signal_bit_j.is_multiplexer, False)
+        self.assertEqual(signal_bit_j.multiplexer_ids, [8, 16, 24])
 
         signal_bit_a = message_1.signals[5]
-        self.assertFalse(signal_bit_a.is_multiplexer)
-        self.assertEqual(signal_bit_a.multiplexer_id, 24)
+        self.assertEqual(signal_bit_a.is_multiplexer, False)
+        self.assertEqual(signal_bit_a.multiplexer_ids, [24])
+
+        # Encoding and decoding.
+        messages = [
+            (
+                {
+                    'Multiplexor': 8,
+                    'BIT_C': 1, 'BIT_G': 1, 'BIT_J': 1, 'BIT_L': 1
+                },
+                b'\x20\x00\x8c\x01\x00\x00\x00\x00'
+            ),
+            (
+                {
+                    'Multiplexor': 16,
+                    'BIT_C': 1, 'BIT_G': 1, 'BIT_J': 1, 'BIT_L': 1
+                },
+                b'\x40\x00\x8c\x01\x00\x00\x00\x00'
+            ),
+            (
+                {
+                    'Multiplexor': 24,
+                    'BIT_A': 1, 'BIT_B': 1, 'BIT_C': 1, 'BIT_D': 1,
+                    'BIT_E': 1, 'BIT_F': 1, 'BIT_G': 1, 'BIT_H': 1,
+                    'BIT_J': 1, 'BIT_K': 1, 'BIT_L': 1
+                },
+                b'\x60\x00\x8c5\xc3\x00\x00\x00'
+            )
+        ]
+
+        for decoded_message, encoded_message in messages:
+            encoded = message_1.encode(decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = message_1.decode(encoded)
+            self.assertEqual(decoded, decoded_message)
 
     def test_multiplex_extended(self):
         #            tree              |  bits
@@ -985,27 +1037,27 @@ class CanToolsTest(unittest.TestCase):
                                start=4,
                                length=4,
                                is_multiplexer=True,
-                               multiplexer_id=0,
+                               multiplexer_ids=[0],
                                multiplexer_signal='S0'),
             cantools.db.Signal(name='S2',
                                start=8,
                                length=8,
-                               multiplexer_id=0,
+                               multiplexer_ids=[0],
                                multiplexer_signal='S1'),
             cantools.db.Signal(name='S3',
                                start=16,
                                length=16,
-                               multiplexer_id=0,
+                               multiplexer_ids=[0],
                                multiplexer_signal='S1'),
             cantools.db.Signal(name='S4',
                                start=8,
                                length=24,
-                               multiplexer_id=2,
+                               multiplexer_ids=[2],
                                multiplexer_signal='S1'),
             cantools.db.Signal(name='S5',
                                start=4,
                                length=28,
-                               multiplexer_id=1,
+                               multiplexer_ids=[1],
                                multiplexer_signal='S0'),
             cantools.db.Signal(name='S6',
                                start=32,
@@ -1014,12 +1066,12 @@ class CanToolsTest(unittest.TestCase):
             cantools.db.Signal(name='S7',
                                start=40,
                                length=24,
-                               multiplexer_id=1,
+                               multiplexer_ids=[1],
                                multiplexer_signal='S6'),
             cantools.db.Signal(name='S8',
                                start=40,
                                length=8,
-                               multiplexer_id=2,
+                               multiplexer_ids=[2],
                                multiplexer_signal='S6')
         ]
 

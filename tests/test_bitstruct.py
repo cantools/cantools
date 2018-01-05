@@ -505,6 +505,32 @@ class BitStructTest(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), "bad type 'g' in format")
 
+    def test_empty_format(self):
+        """Test of empty format type.
+
+        """
+
+        cf = bitstruct.compile('')
+
+        self.assertEqual(cf.pack(), b'')
+        self.assertEqual(cf.pack(1), b'')
+
+        self.assertEqual(cf.unpack(b''), ())
+        self.assertEqual(cf.unpack(b'\x00'), ())
+
+    def test_byte_order_format(self):
+        """Test of a format with only byte order informationx.
+
+        """
+
+        cf = bitstruct.compile('>')
+
+        self.assertEqual(cf.pack(), b'')
+        self.assertEqual(cf.pack(1), b'')
+
+        self.assertEqual(cf.unpack(b''), ())
+        self.assertEqual(cf.unpack(b'\x00'), ())
+
 
 if __name__ == '__main__':
     unittest.main()

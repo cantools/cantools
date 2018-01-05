@@ -5,11 +5,11 @@ import struct
 import binascii
 
 
-__version__ = "3.6.0"
+__version__ = "3.6.1"
 
 
 def _parse_format(fmt):
-    if fmt[-1] in [">", "<"]:
+    if fmt and fmt[-1] in [">", "<"]:
         byte_order = fmt[-1]
         fmt = fmt[:-1]
     else:
@@ -158,7 +158,7 @@ class CompiledFormat(object):
         i = 0
 
         # Sanity check of the number of arguments.
-        if self._number_of_arguments > len(args):
+        if len(args) < self._number_of_arguments:
             raise ValueError("pack expected {} item(s) for packing "
                              "(got {})".format(self._number_of_arguments,
                                                len(args)))

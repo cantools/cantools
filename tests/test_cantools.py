@@ -98,13 +98,17 @@ class CanToolsTest(unittest.TestCase):
                          "250, 229.53, 270.47, 'degK', False, None, {-1: \'Foo\', "
                          "-2: \'Fie\'}, None)\n"
                          "\n"
-                         "message('Fum', 0x12331, True, 8, 'Foo.')\n"
+                         "message('Fum', 0x12331, True, 5, 'Foo.')\n"
                          "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
                          "'None', False, None, None, None)\n"
                          "\n"
-                         "message('Bar', 0x12332, True, 8, None)\n"
+                         "message('Bar', 0x12332, True, 4, None)\n"
                          "  signal('Binary32', 0, 32, 'little_endian', True, 1, 0, 0, "
-                         "0, 'None', False, None, None, None)\n")
+                         "0, 'None', False, None, None, None)\n"
+                         "\n"
+                         "message('CanFd', 0x12333, True, 64, None)\n"
+                         "  signal('Foo', 0, 512, 'little_endian', True, 1, 0, 0, 0, "
+                         "'None', False, None, None, None)\n")
 
         message = db.lookup_message(0x12331)
         self.assertEqual(message.name, 'Fum')
@@ -118,18 +122,45 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(message.signals[0].is_float, True)
         self.assertEqual(message.signals[0].length, 32)
 
-    def test_foobar_float(self):
+        message = db.lookup_message(0x12333)
+        self.assertEqual(message.name, 'CanFd')
+        self.assertEqual(message.nodes, ['FOO'])
+        self.assertEqual(message.signals[0].nodes, ['Vector__XXX', 'FUM'])
+        self.assertEqual(message.signals[0].is_float, False)
+        self.assertEqual(message.signals[0].length, 512)
+
+    def test_foobar_encode_decode(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db.add_dbc_file(filename)
 
-        decoded_message = {'Binary32': 1.0}
-        encoded_message = b'\x00\x00\x80\x3f\x00\x00\x00\x00'
+        messages = [
+            (
+                'Fum',
+                {'Fum': 9},
+                b'\x09\x00\x00\x00\x00'
+            ),
+            (
+                'Bar',
+                {'Binary32': 1.0},
+                b'\x00\x00\x80\x3f'
+            ),
+            (
+                'CanFd',
+                {'Foo': 98723498729384782349872340000000},
+                b'\x00\xdd\x85\x4c\xf5\x42\x25\x72\x00\x27\xd4\x10\xde\x04\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00'
+            )
+        ]
 
-        encoded = db.encode_message(0x12332, decoded_message)
-        self.assertEqual(encoded, encoded_message)
-        decoded = db.decode_message(0x12332, encoded)
-        self.assertEqual(decoded, decoded_message)
+        for name, decoded_message, encoded_message in messages:
+            encoded = db.encode_message(name, decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = db.decode_message(name, encoded)
+            self.assertEqual(decoded, decoded_message)
 
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.
@@ -437,7 +468,8 @@ class CanToolsTest(unittest.TestCase):
         db.add_dbc_file(filename)
 
         frame_id = 200
-        data = {
+
+        decoded_message = {
             'SENSOR_SONARS_mux': 0,
             'SENSOR_SONARS_err_count': 1,
             'SENSOR_SONARS_left': 2,
@@ -445,12 +477,12 @@ class CanToolsTest(unittest.TestCase):
             'SENSOR_SONARS_right': 4,
             'SENSOR_SONARS_rear': 5
         }
+        encoded_message = b'\x10\x00\x14\xe0\x01( \x03'
 
-        encoded = db.encode_message(frame_id, data)
-        self.assertEqual(encoded, b'\x10\x00\x14\xe0\x01( \x03')
-
+        encoded = db.encode_message(frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(frame_id, encoded)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
     def test_socialledge_encode_decode_mux_1(self):
         """Encode and decode the signals in a SENSOR_SONARS frame with mux 1.
@@ -462,7 +494,8 @@ class CanToolsTest(unittest.TestCase):
         db.add_dbc_file(filename)
 
         frame_id = 200
-        data = {
+
+        decoded_message = {
             'SENSOR_SONARS_mux': 1,
             'SENSOR_SONARS_err_count': 2,
             'SENSOR_SONARS_no_filt_left': 3,
@@ -470,12 +503,12 @@ class CanToolsTest(unittest.TestCase):
             'SENSOR_SONARS_no_filt_right': 5,
             'SENSOR_SONARS_no_filt_rear': 6
         }
+        encoded_message = b'!\x00\x1e\x80\x022\xc0\x03'
 
-        encoded = db.encode_message(frame_id, data)
-        self.assertEqual(encoded, b'!\x00\x1e\x80\x022\xc0\x03')
-
+        encoded = db.encode_message(frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(frame_id, encoded)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
     def test_add_message(self):
         db = cantools.db.File()

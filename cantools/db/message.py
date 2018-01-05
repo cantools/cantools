@@ -1,8 +1,9 @@
-# CAN database.
+# A CAN message.
 
-import struct
-import bitstruct
+import binascii
 from collections import namedtuple
+from decimal import Decimal
+import bitstruct
 
 
 def _encode_signal(signal, data, scaling):
@@ -18,7 +19,9 @@ def _encode_signal(signal, data, scaling):
         if signal.is_float:
             return (value - signal.offset) / signal.scale
         else:
-            return int((value - signal.offset) / signal.scale)
+            value = (Decimal(value) - signal.offset) / Decimal(signal.scale)
+            
+            return value.to_integral()
     else:
         return value
 
@@ -51,8 +54,8 @@ def _encode_data(data, signals, formats, scaling):
     ]
     big_packed = formats.big_endian.pack(*big_unpacked_data)
     little_packed = formats.little_endian.pack(*little_unpacked_data)[::-1]
-    packed_union = struct.unpack('>Q', big_packed)[0]
-    packed_union |= struct.unpack('>Q', little_packed)[0]
+    packed_union = int(binascii.hexlify(big_packed), 16)
+    packed_union |= int(binascii.hexlify(little_packed), 16)
 
     return packed_union
 
@@ -80,58 +83,6 @@ def _decode_data(data, signals, formats, decode_choices, scaling):
                                     scaling)
         for signal in signals
     }
-
-
-def _create_message_encode_decode_formats(signals):
-    # Big endian byte order format.
-    big_fmt = ''
-    start = 0
-
-    def get_format_string_type(signal):
-        if signal.is_float:
-            return 'f'
-        elif signal.is_signed:
-            return 's'
-        else:
-            return 'u'
-
-    for signal in signals:
-        if signal.byte_order == 'little_endian':
-            continue
-
-        padding = (signal.start - start)
-
-        if padding > 0:
-            big_fmt += 'p{}'.format(padding)
-
-        big_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
-        start = (signal.start + signal.length)
-
-    if start < 64:
-        big_fmt += 'p{}'.format(64 - start)
-
-    # Little endian byte order format.
-    little_fmt = ''
-    end = 64
-
-    for signal in signals[::-1]:
-        if signal.byte_order == 'big_endian':
-            continue
-
-        padding = end - (signal.start + signal.length)
-
-        if padding > 0:
-            little_fmt += 'p{}'.format(padding)
-
-        little_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
-        end = signal.start
-
-    if end > 0:
-        little_fmt += 'p{}'.format(end)
-
-    Formats = namedtuple('Formats', ['big_endian', 'little_endian'])
-
-    return Formats(bitstruct.compile(big_fmt), bitstruct.compile(little_fmt))
 
 
 class Message(object):
@@ -208,7 +159,7 @@ class Message(object):
 
         return {
             'signals': signals,
-            'formats': _create_message_encode_decode_formats(signals),
+            'formats': self._create_message_encode_decode_formats(signals),
             'multiplexers': multiplexers
         }
 
@@ -236,6 +187,58 @@ class Message(object):
             nodes.append(node)
 
         return nodes
+
+    def _create_message_encode_decode_formats(self, signals):
+        # Big endian byte order format.
+        big_fmt = '>'
+        start = 0
+        message_length = (8 * self._length)
+
+        def get_format_string_type(signal):
+            if signal.is_float:
+                return 'f'
+            elif signal.is_signed:
+                return 's'
+            else:
+                return 'u'
+
+        for signal in signals:
+            if signal.byte_order == 'little_endian':
+                continue
+
+            padding = (signal.start - start)
+
+            if padding > 0:
+                big_fmt += 'p{}'.format(padding)
+
+            big_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
+            start = (signal.start + signal.length)
+
+        if start < message_length:
+            big_fmt += 'p{}'.format(message_length - start)
+
+        # Little endian byte order format.
+        little_fmt = '>'
+        end = message_length
+
+        for signal in signals[::-1]:
+            if signal.byte_order == 'big_endian':
+                continue
+
+            padding = end - (signal.start + signal.length)
+
+            if padding > 0:
+                little_fmt += 'p{}'.format(padding)
+
+            little_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
+            end = signal.start
+
+        if end > 0:
+            little_fmt += 'p{}'.format(end)
+
+        Formats = namedtuple('Formats', ['big_endian', 'little_endian'])
+
+        return Formats(bitstruct.compile(big_fmt), bitstruct.compile(little_fmt))
 
     @property
     def frame_id(self):
@@ -361,8 +364,10 @@ class Message(object):
         """
 
         encoded = self._encode(self._codecs, data, scaling)
+        encoded |= (0x80 << (8 * self._length))
+        encoded = hex(encoded)[4:].rstrip('L')
 
-        return struct.pack('>Q', encoded)[:self._length]
+        return binascii.unhexlify(encoded)[:self._length]
 
     def _decode(self, node, data, decode_choices, scaling):
         decoded = _decode_data(data,
@@ -397,7 +402,7 @@ class Message(object):
 
         """
 
-        data += b'\x00' * (8 - len(data))
+        data = data[:self._length]
 
         return self._decode(self._codecs, data, decode_choices, scaling)
 

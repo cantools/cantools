@@ -38,11 +38,14 @@ BO_ 2147558193 Foo : 8 FOO
  SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK" Vector__XXX, BAR
  SG_ Bar : 6|6@0+ (0.1,0) [1.0|5.0] "m" Vector__XXX, FOO
 
-BO_ 2147558193 Fum: 8 FOO
+BO_ 2147558193 Fum: 5 FOO
  SG_ Fum : 0|12@1- (1,0) [0|1] "" Vector__XXX, BAR
 
-BO_ 2147558194 Bar: 8 FOO
+BO_ 2147558194 Bar: 4 FOO
  SG_ Binary32 : 0|32@1- (1,0) [0|0] "" Vector__XXX, FUM
+
+BO_ 2147558195 CanFd: 64 FOO
+ SG_ Foo : 0|512@1- (1,0) [0|0] "" Vector__XXX, FUM
 
 CM_ BU_ BAR "fam";
 CM_ BO_ 2147558193 "Foo.";

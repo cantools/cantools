@@ -236,14 +236,14 @@ def _create_grammar():
     attribute = Group(Keyword(ATTRIBUTE)
                       - QuotedString('"', multiline=True)
                       - Group(Optional((Keyword(MESSAGE) + frame_id)
-                                       | (Keyword(SIGNAL) + positive_integer + word)
+                                       | (Keyword(SIGNAL) + frame_id + word)
                                        | (Keyword(NODES) + word)))
                       - (QuotedString('"', multiline=True) | number)
                       - scolon)
     attribute.setName(ATTRIBUTE)
 
     choice = Group(Keyword(CHOICE)
-                   - Optional(positive_integer)
+                   - Optional(frame_id)
                    - word
                    - Group(OneOrMore(Group(integer
                                            + QuotedString('"', multiline=True))))
@@ -266,7 +266,7 @@ def _create_grammar():
     signal_type.setName(SIGNAL_TYPE)
 
     signal_multiplexer_choices = Group(Keyword(SIGNAL_MULTIPLEXER_CHOICES)
-                                       - positive_integer
+                                       - frame_id
                                        - word
                                        - word
                                        - delimitedList(positive_integer
@@ -284,7 +284,7 @@ def _create_grammar():
 
     attribute_definition_rel = Group(Keyword(ATTRIBUTE_DEFINITION_REL)
                                      - (QuotedString('"', multiline=True)
-                                        | (Keyword('BU_SG_REL_')
+                                        | (Keyword(NODES_REL)
                                            + QuotedString('"', multiline=True)))
                                      - word
                                      - (scolon
@@ -304,7 +304,7 @@ def _create_grammar():
 
     attribute_rel = Group(Keyword(ATTRIBUTE_REL)
                           - QuotedString('"', multiline=True)
-                          - Keyword('BU_SG_REL_')
+                          - Keyword(NODES_REL)
                           - word
                           - Keyword(SIGNAL)
                           - frame_id
@@ -331,6 +331,8 @@ def _create_grammar():
              | attribute_definition_default_rel
              | attribute_rel
              | event)
+
+    frame_id.setParseAction(lambda _s, _l, t: int(t[0]))
 
     return OneOrMore(entry) + StringEnd()
 
@@ -506,14 +508,14 @@ def _load_comments(tokens):
             node_name = comment[2]
             comments[node_name] = comment[3]
         elif comment[1] == MESSAGE:
-            frame_id = int(comment[2])
+            frame_id = comment[2]
 
             if frame_id not in comments:
                 comments[frame_id] = {}
 
             comments[frame_id]['message'] = comment[3]
         elif comment[1] == SIGNAL:
-            frame_id = int(comment[2])
+            frame_id = comment[2]
 
             if frame_id not in comments:
                 comments[frame_id] = {}
@@ -557,7 +559,7 @@ def _load_attributes(tokens):
 
         if len(attribute[2]) == 2:
             if attribute[2][0] == MESSAGE:
-                frame_id = int(attribute[2][1])
+                frame_id = attribute[2][1]
 
                 if frame_id not in attributes:
                     attributes[frame_id] = {}
@@ -573,7 +575,7 @@ def _load_choices(tokens):
     for choice in tokens:
         if choice[0] == CHOICE:
             try:
-                frame_id = int(choice[1])
+                frame_id = choice[1]
             except ValueError:
                 continue
 
@@ -597,7 +599,7 @@ def _load_message_senders(tokens):
         if senders[0] != MESSAGE_TX_NODE:
             continue
 
-        frame_id = int(senders[1])
+        frame_id = senders[1]
 
         if frame_id not in message_senders:
             message_senders[frame_id] = []
@@ -618,7 +620,7 @@ def _load_signal_types(tokens):
         if signal_type[0] != SIGNAL_TYPE:
             continue
 
-        frame_id = int(signal_type[1])
+        frame_id = signal_type[1]
 
         if frame_id not in signal_types:
             signal_types[frame_id] = {}
@@ -636,6 +638,9 @@ def _load_messages(tokens,
                    choices,
                    message_senders,
                    signal_types):
+    """Load messages.
+
+    """
 
     def get_comment(frame_id_dbc, signal=None):
         """Get comment for given message or signal.
@@ -702,7 +707,7 @@ def _load_messages(tokens,
             continue
 
         # Frame id.
-        frame_id_dbc = int(message[1])
+        frame_id_dbc = message[1]
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
 
@@ -713,6 +718,7 @@ def _load_messages(tokens,
             if node not in nodes:
                 nodes.append(node)
 
+        # Signal multiplexing.
         multiplexer_signal = None
 
         for signal in message[5]:

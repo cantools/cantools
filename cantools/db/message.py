@@ -165,7 +165,7 @@ class Message(object):
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
 
-    def _create_codec(self, parent_signal=None, multiplexer_ids=None):
+    def _create_codec(self, parent_signal=None, multiplexer_id=None):
         """Create a codec of all signals with given parent signal. This is a
         recursive function.
 
@@ -181,8 +181,8 @@ class Message(object):
             if signal.multiplexer_signal != parent_signal:
                 continue
 
-            if ((multiplexer_ids is not None)
-                and (multiplexer_ids not in signal.multiplexer_ids)):
+            if ((multiplexer_id is not None)
+                and (multiplexer_id not in signal.multiplexer_ids)):
                 continue
 
             if signal.is_multiplexer:

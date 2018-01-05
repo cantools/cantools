@@ -1,11 +1,6 @@
 # Load and dump a CAN database in KCD format.
 import logging
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-
 from xml.etree import ElementTree
 
 from ..signal import Signal

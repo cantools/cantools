@@ -49,9 +49,8 @@ def _encode_data(data, signals, formats, scaling):
         for signal in signals[::-1]
         if signal.byte_order == 'little_endian'
     ]
-    big_packed = bitstruct.pack(formats.big_endian, *big_unpacked_data)
-    little_packed = bitstruct.pack(formats.little_endian,
-                                   *little_unpacked_data)[::-1]
+    big_packed = formats.big_endian.pack(*big_unpacked_data)
+    little_packed = formats.little_endian.pack(*little_unpacked_data)[::-1]
     packed_union = struct.unpack('>Q', big_packed)[0]
     packed_union |= struct.unpack('>Q', little_packed)[0]
 
@@ -59,13 +58,13 @@ def _encode_data(data, signals, formats, scaling):
 
 
 def _decode_data(data, signals, formats, decode_choices, scaling):
-    big_unpacked = list(bitstruct.unpack(formats.big_endian, data))
+    big_unpacked = list(formats.big_endian.unpack(data))
     big_signals = [
         signal
         for signal in signals
         if signal.byte_order == 'big_endian'
     ]
-    little_unpacked = list(bitstruct.unpack(formats.little_endian, data[::-1])[::-1])
+    little_unpacked = list(formats.little_endian.unpack(data[::-1])[::-1])
     little_signals = [
         signal
         for signal in signals
@@ -132,7 +131,7 @@ def _create_message_encode_decode_formats(signals):
 
     Formats = namedtuple('Formats', ['big_endian', 'little_endian'])
 
-    return Formats(big_fmt, little_fmt)
+    return Formats(bitstruct.compile(big_fmt), bitstruct.compile(little_fmt))
 
 
 class Message(object):

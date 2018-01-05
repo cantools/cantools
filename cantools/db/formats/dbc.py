@@ -243,7 +243,7 @@ def _create_grammar():
     attribute.setName(ATTRIBUTE)
 
     choice = Group(Keyword(CHOICE)
-                   - Optional(frame_id)
+                   - Group(Optional(frame_id))
                    - word
                    - Group(OneOrMore(Group(integer
                                            + QuotedString('"', multiline=True))))
@@ -573,17 +573,19 @@ def _load_choices(tokens):
     choices = {}
 
     for choice in tokens:
-        if choice[0] == CHOICE:
-            try:
-                frame_id = choice[1]
-            except ValueError:
-                continue
+        if choice[0] != CHOICE:
+            continue
 
-            if frame_id not in choices:
-                choices[frame_id] = {}
+        if not choice[1]:
+            continue
 
-            choices[frame_id][choice[2]] = OrderedDict(
-                (int(''.join(v[0])), v[1]) for v in choice[3])
+        frame_id = choice[1][0]
+
+        if frame_id not in choices:
+            choices[frame_id] = {}
+
+        choices[frame_id][choice[2]] = OrderedDict(
+            (int(''.join(v[0])), v[1]) for v in choice[3])
 
     return choices
 

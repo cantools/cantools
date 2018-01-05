@@ -55,6 +55,7 @@ BA_ "FOO" BU_ FIE 1;
 BA_ "BAR" BU_ FIE "FUM";
 
 VAL_ 2147558193 Foo -1 "Foo" -2 "Fie" ;
+VAL_ Bar 1 "Go" 0 "NoGo" ;
 
 VAL_TABLE_ State 0 "Disabled" 1 "Enabled" ;
 

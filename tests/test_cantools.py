@@ -101,6 +101,8 @@ class CanToolsTest(unittest.TestCase):
                          "message('Fum', 0x12331, True, 5, 'Foo.')\n"
                          "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
                          "'None', False, None, None, None)\n"
+                         "  signal('Fam', 12, 12, 'little_endian', True, 1.0, 0.0, "
+                         "0, 1, 'None', False, None, None, None)\n"
                          "\n"
                          "message('Bar', 0x12332, True, 4, None)\n"
                          "  signal('Binary32', 0, 32, 'little_endian', True, 1, 0, 0, "

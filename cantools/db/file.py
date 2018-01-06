@@ -32,16 +32,12 @@ class File(object):
         self._name_to_message = {}
         self._frame_id_to_message = {}
         self._version = version
-
-        if not attribute_definitions:
-            attribute_definitions = []
-
-        self._attribute_definitions = attribute_definitions
-
-        if not attribute_definition_defaults:
-            attribute_definition_defaults = []
-
-        self._attribute_definition_defaults = attribute_definition_defaults
+        self._attribute_definitions = (attribute_definitions
+                                       if attribute_definitions
+                                       else [])
+        self._attribute_definition_defaults = (attribute_definition_defaults
+                                               if attribute_definition_defaults
+                                               else [])
 
     @property
     def messages(self):

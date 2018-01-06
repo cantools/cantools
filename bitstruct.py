@@ -119,7 +119,7 @@ def _unpack_bytearray(size, bits):
     if rest > 0:
         bits += (8 - rest) * '0'
 
-    return binascii.unhexlify(hex(int('10000000' + bits, 2))[4:].strip('L'))
+    return binascii.unhexlify(hex(int('10000000' + bits, 2))[4:].rstrip('L'))
 
 
 def _unpack_text(size, bits):

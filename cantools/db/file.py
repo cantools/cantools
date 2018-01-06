@@ -253,6 +253,28 @@ class File(object):
 
         return self._frame_id_to_message[frame_id]
 
+    def get_node_by_name(self, name):
+        """Find the node object for given name `name`.
+
+        """
+
+        for node in self._nodes:
+            if node.name == name:
+                return node
+
+        raise KeyError(name)
+
+    def get_bus_by_name(self, name):
+        """Find the bus object for given name `name`.
+
+        """
+
+        for bus in self._buses:
+            if bus.name == name:
+                return bus
+
+        raise KeyError(name)
+
     def encode_message(self, frame_id_or_name, data, scaling=True):
         """Encode given signal data `data` as a message of given frame id or
         name `frame_id_or_name`. `data` is a dictionary of signal

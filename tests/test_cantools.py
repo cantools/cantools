@@ -564,7 +564,7 @@ class CanToolsTest(unittest.TestCase):
         with self.assertRaises(KeyError) as cm:
             message.get_signal_by_name('Fum')
 
-        self.assertIn('Fum', str(cm.exception))
+        self.assertEqual(str(cm.exception), "'Fum'")
 
     def test_command_line_decode(self):
         argv = ['cantools', 'decode', 'tests/files/socialledge.dbc']
@@ -1234,6 +1234,28 @@ class CanToolsTest(unittest.TestCase):
             "DBC: \"Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo"
             ".\";': Expected frame id.\", KCD: \"syntax error: line 1, column 0\"")
 
+    def test_get_node_by_name(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.load_file(filename)
+
+        self.assertIs(db.get_node_by_name('Motor alternative supplier'),
+                      db.nodes[1])
+
+        with self.assertRaises(KeyError) as cm:
+            db.get_node_by_name('Missing')
+
+        self.assertEqual(str(cm.exception), "'Missing'")
+
+    def test_get_bus_by_name(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.load_file(filename)
+
+        self.assertIs(db.get_bus_by_name('Comfort'), db.buses[2])
+
+        with self.assertRaises(KeyError) as cm:
+            db.get_bus_by_name('Missing')
+
+        self.assertEqual(str(cm.exception), "'Missing'")
 
 
 # This file is not '__main__' when executed via 'python setup.py

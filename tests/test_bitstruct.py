@@ -488,22 +488,28 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(str(cm.exception),
                          'expected float size of 16, 32, or 64 bits (got 33)')
 
-    def test_bad_format_type(self):
-        """Test of bad format type.
+    def test_bad_format(self):
+        """Test of bad format.
 
         """
 
-        cf = bitstruct.compile('g1')
+        formats = [
+            ('g1', "bad char 'g' in format"),
+            ('s1u1f32b1t8r8G13', "bad char 'G' in format"),
+            ('s1u1f32b1t8r8G13S3', "bad char 'G' in format"),
+            ('s', "bad format 's'"),
+            ('1', "bad format '1'"),
+            ('ss1', "bad format 'ss1'"),
+            ('1s', "bad format '1s'"),
+            ('foo', "bad format 'foo'"),
+            ('s>1>', "bad format 's>1>'")
+        ]
 
-        with self.assertRaises(ValueError) as cm:
-            cf.pack(1.0)
+        for fmt, expected_error in formats:
+            with self.assertRaises(ValueError) as cm:
+                bitstruct.compile(fmt)
 
-        self.assertEqual(str(cm.exception), "bad type 'g' in format")
-
-        with self.assertRaises(ValueError) as cm:
-            cf.unpack(b'\x00')
-
-        self.assertEqual(str(cm.exception), "bad type 'g' in format")
+            self.assertEqual(str(cm.exception), expected_error)
 
     def test_empty_format(self):
         """Test of empty format type.

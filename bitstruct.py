@@ -5,17 +5,20 @@ import struct
 import binascii
 
 
-__version__ = "3.6.1"
+__version__ = "3.7.0"
 
 
 def _parse_format(fmt):
-    if fmt and fmt[-1] in [">", "<"]:
+    if fmt and fmt[-1] in '><':
         byte_order = fmt[-1]
         fmt = fmt[:-1]
     else:
-        byte_order = ">"
+        byte_order = ''
 
     parsed_infos = re.findall(r'([<>]?)([a-zA-Z])(\d+)', fmt)
+
+    if ''.join([''.join(info) for info in parsed_infos]) != fmt:
+        raise ValueError("bad format '{}'".format(fmt + byte_order))
 
     # Use big endian as default and use the endianness of the previous
     # value if none is given for the current value.
@@ -26,9 +29,12 @@ def _parse_format(fmt):
         if info[0] != "":
             endianness = info[0]
 
+        if info[1] not in 'supfbtr':
+            raise ValueError("bad char '{}' in format".format(info[1]))
+
         infos.append((info[1], int(info[2]), endianness))
 
-    return infos, byte_order
+    return infos, byte_order or '>'
 
 
 def _pack_integer(size, arg):

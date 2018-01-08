@@ -1,8 +1,5 @@
 from xml.etree import ElementTree
 
-import pyparsing
-
-from .formats import dbc
 from .formats.utils import ParseError
 from .file import File
 from .message import Message
@@ -17,7 +14,15 @@ class UnsupportedDatabaseFormatError(Exception):
     """
 
     def __init__(self, e_dbc, e_kcd):
-        message = 'DBC: "{}", KCD: "{}"'.format(e_dbc, e_kcd)
+        message = []
+
+        if e_dbc is not None:
+            message.append('DBC: "{}"'.format(e_dbc))
+
+        if e_kcd is not None:
+            message.append('KCD: "{}"'.format(e_kcd))
+
+        message = ', '.join(message)
 
         super(UnsupportedDatabaseFormatError, self).__init__(message)
 
@@ -25,9 +30,11 @@ class UnsupportedDatabaseFormatError(Exception):
         self.e_kcd = e_kcd
 
 
-def load_file(filename):
+def load_file(filename, database_format=None):
     """Open, read and parse given database file and return a
-    :class:`~cantools.db.File` object with its contents. Raises an
+    :class:`~cantools.db.File` object with its
+    contents. `database_format` may be one of ``'dbc'``, ``'kcd'`` or
+    ``None``, where ``None`` means transparent format. Raises an
     :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
     given file does not contain a supported database format.
 
@@ -38,12 +45,14 @@ def load_file(filename):
     """
 
     with open(filename, 'r') as fin:
-        return load(fin)
+        return load(fin, database_format)
 
 
-def load(fp):
+def load(fp, database_format=None):
     """Read and parse given database file-like object and return a
-    :class:`~cantools.db.File` object with its contents. Raises an
+    :class:`~cantools.db.File` object with its
+    contents. `database_format` may be one of ``'dbc'``, ``'kcd'`` or
+    ``None``, where ``None`` means transparent format. Raises an
     :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
     given file-like object does not contain a supported database
     format.
@@ -55,12 +64,14 @@ def load(fp):
 
     """
 
-    return load_string(fp.read())
+    return load_string(fp.read(), database_format)
 
 
-def load_string(string):
+def load_string(string, database_format=None):
     """Parse given database string and return a :class:`~cantools.db.File`
-    object with its contents. Raises an
+    object with its contents. `database_format` may be one of
+    ``'dbc'``, ``'kcd'`` or ``None``, where ``None`` means transparent
+    format. Raises an
     :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
     given string does not contain a supported database format.
 
@@ -71,18 +82,28 @@ def load_string(string):
 
     """
 
-    try:
-        db = File()
-        db.add_dbc_string(string)
-        return db
-    except ParseError as e:
-        e_dbc = e
+    if database_format not in ['dbc', 'kcd', None]:
+        raise ValueError(
+            "expected database format 'dbc', 'kcd' or None, but got '{}'".format(
+                database_format))
 
-    try:
-        db = File()
-        db.add_kcd_string(string)
-        return db
-    except ElementTree.ParseError as e:
-        e_kcd = e
+    e_dbc = None
+    e_kcd = None
+
+    if database_format in ['dbc', None]:
+        try:
+            db = File()
+            db.add_dbc_string(string)
+            return db
+        except ParseError as e:
+            e_dbc = e
+
+    if database_format in ['kcd', None]:
+        try:
+            db = File()
+            db.add_kcd_string(string)
+            return db
+        except ElementTree.ParseError as e:
+            e_kcd = e
 
     raise UnsupportedDatabaseFormatError(e_dbc, e_kcd)

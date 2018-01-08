@@ -1274,6 +1274,36 @@ class CanToolsTest(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), "'Missing'")
 
+    def test_load_file_with_database_format(self):
+        filename_dbc = os.path.join('tests', 'files', 'foobar.dbc')
+        filename_kcd = os.path.join('tests', 'files', 'the_homer.kcd')
+
+        cantools.db.load_file(filename_dbc, database_format=None)
+
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_file(filename_dbc, database_format='kcd')
+
+        self.assertEqual(
+            str(cm.exception),
+            "KCD: \"syntax error: line 1, column 0\"")
+
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_file(filename_kcd, database_format='dbc')
+
+        self.assertEqual(
+            str(cm.exception),
+            "DBC: \"Invalid DBC syntax at line 1, column 1: \'>!<<!--\': "
+            "Expected {VERSION | NS_ | BS_ | BU_ | BO_ | CM_ | BA_DEF_ | "
+            "BA_DEF_DEF_ | BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ | SG_MUL_VAL_ "
+            "| BO_TX_BU_ | BA_DEF_REL_ | BA_DEF_DEF_REL_ | BA_REL_ | EV_}.\"")
+
+        with self.assertRaises(ValueError) as cm:
+            cantools.db.load_file(filename_kcd, database_format='bad')
+
+        self.assertEqual(
+            str(cm.exception),
+            "expected database format 'dbc', 'kcd' or None, but got 'bad'")
+
 
 # This file is not '__main__' when executed via 'python setup.py
 # test'.

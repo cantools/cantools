@@ -14,11 +14,11 @@ CAN BUS tools
 Functions and classes
 =====================
 
-.. autofunction:: cantools.db.load
-
 .. autofunction:: cantools.db.load_file
 
 .. autofunction:: cantools.db.load_string
+
+.. autofunction:: cantools.db.load
 
 .. autoclass:: cantools.db.File
     :members:

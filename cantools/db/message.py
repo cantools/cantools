@@ -10,17 +10,14 @@ def _encode_signal(signal, data, scaling):
     value = data[signal.name]
 
     if isinstance(value, str):
-        for choice_number, choice_string in signal.choices.items():
-            if choice_string == value:
-                value = choice_number
-                break
+        value = signal.choice_string_to_number(value)
 
     if scaling:
         if signal.is_float:
             return (value - signal.offset) / signal.scale
         else:
             value = (Decimal(value) - Decimal(signal.offset)) / Decimal(signal.scale)
-            
+
             return value.to_integral()
     else:
         return value
@@ -337,6 +334,15 @@ class Message(object):
 
         return self._signal_tree
 
+    def _get_mux_number(self, decoded, signal_name):
+        mux = decoded[signal_name]
+
+        if isinstance(mux, str):
+            signal = self.get_signal_by_name(signal_name)
+            mux = signal.choice_string_to_number(mux)
+
+        return mux
+
     def _encode(self, node, data, scaling):
         encoded = _encode_data(data,
                                node['signals'],
@@ -346,7 +352,7 @@ class Message(object):
         multiplexers = node['multiplexers']
 
         for signal in multiplexers:
-            mux = data[signal]
+            mux = self._get_mux_number(data, signal)
             node = multiplexers[signal][mux]
             encoded |= self._encode(node, data, scaling)
 
@@ -379,7 +385,7 @@ class Message(object):
         multiplexers = node['multiplexers']
 
         for signal in multiplexers:
-            mux = decoded[signal]
+            mux = self._get_mux_number(decoded, signal)
             node = multiplexers[signal][mux]
             decoded.update(self._decode(node,
                                         data,

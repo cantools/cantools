@@ -184,6 +184,11 @@ class Signal(object):
 
         return self._multiplexer_signal
 
+    def choice_string_to_number(self, string):
+        for choice_number, choice_string in self.choices.items():
+            if choice_string == string:
+                return choice_number
+    
     def __repr__(self):
         if self._choices is None:
             choices = None

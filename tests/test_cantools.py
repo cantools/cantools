@@ -1050,6 +1050,23 @@ class CanToolsTest(unittest.TestCase):
             decoded = message_1.decode(encoded)
             self.assertEqual(decoded, decoded_message)
 
+    def test_multiplex_choices(self):
+        filename = os.path.join('tests', 'files', 'multiplex_choices.dbc')
+        db = cantools.db.load_file(filename)
+
+        decoded_message = {
+            'Multiplexor': 'MULTIPLEXOR_8',
+            'BIT_C': 1, 'BIT_G': 1, 'BIT_J': 1, 'BIT_L': 1
+        }
+        encoded_message = b'\x20\x00\x8c\x01\x00\x00\x00\x00'
+
+        message_1 = db.messages[0]
+
+        encoded = message_1.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message_1.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
+
     def test_multiplex_extended(self):
         #            tree              |  bits
         # =============================+========

@@ -18,7 +18,7 @@ setup(name='cantools',
       keywords=['can', 'can bus', 'dbc', 'kcd', 'automotive'],
       url='https://github.com/eerimoq/cantools',
       packages=find_packages(exclude=['tests']),
-      install_requires=['bitstruct>=0.7.1',
+      install_requires=['bitstruct>=3.7.0',
                         'pyparsing>=2.0.3'],
       test_suite="tests",
       entry_points = {

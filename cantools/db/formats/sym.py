@@ -17,12 +17,15 @@ from pyparsing import ZeroOrMore
 from pyparsing import OneOrMore
 from pyparsing import delimitedList
 from pyparsing import dblSlashComment
+from pyparsing import ParseException
+from pyparsing import ParseSyntaxException
 
 from ..signal import Signal
 from ..message import Message
 from ..database import Database
 
 from .utils import num
+from .utils import ParseError
 
 
 LOGGER = logging.getLogger(__name__)
@@ -416,10 +419,19 @@ def load_string(string):
     """
 
     if not string.startswith('FormatVersion=6.0'):
-        raise ValueError('Only SYM version 6.0 is supported.')
+        raise ParseError('Only SYM version 6.0 is supported.')
 
     grammar = _create_grammar_6_0()
-    tokens = grammar.parseString(string)
+
+    try:
+        tokens = grammar.parseString(string)
+    except (ParseException, ParseSyntaxException) as e:
+        raise ParseError(
+            "Invalid SYM syntax at line {}, column {}: '{}': {}.".format(
+                e.lineno,
+                e.column,
+                e.markInputline(),
+                e.msg))
 
     version = _load_version(tokens)
     enums = _load_enums(tokens)

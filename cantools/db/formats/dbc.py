@@ -880,11 +880,12 @@ def load_string(string):
     try:
         tokens = grammar.parseString(string)
     except (ParseException, ParseSyntaxException) as e:
-        raise ParseError("Invalid DBC syntax at line {}, column {}: '{}': {}.".format(
-            e.lineno,
-            e.column,
-            e.markInputline(),
-            e.msg))
+        raise ParseError(
+            "Invalid DBC syntax at line {}, column {}: '{}': {}.".format(
+                e.lineno,
+                e.column,
+                e.markInputline(),
+                e.msg))
 
     comments = _load_comments(tokens)
     attribute_definitions = _load_attribute_definitions(tokens)

@@ -777,7 +777,7 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'jopp-5.0.sym')
         db = cantools.db.File()
 
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(cantools.db.ParseError) as cm:
             db.add_sym_file(filename)
 
         self.assertEqual(str(cm.exception), 'Only SYM version 6.0 is supported.')
@@ -936,6 +936,18 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(encoded, b'\x04\x00\x00\x00\x00\x00\x00\x00')
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded['Signal3'], 'bar')
+
+    def test_add_bad_sym_string(self):
+        db = cantools.db.File()
+
+        with self.assertRaises(cantools.db.ParseError) as cm:
+            db.add_sym_string('FormatVersion=6.0\n'
+                              'Foo="Jopp"')
+
+        self.assertEqual(
+            str(cm.exception),
+            'Invalid SYM syntax at line 2, column 1: \'>!<Foo="Jopp"\': '
+            'Expected "Title".')
 
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):
@@ -1216,8 +1228,7 @@ class CanToolsTest(unittest.TestCase):
         with self.assertRaises(cantools.db.ParseError) as cm:
             cantools.db.formats.dbc.load_string(
                 'VERSION "1.0"\n'
-                'BO_ dssd\n'
-            )
+                'BO_ dssd\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -1228,8 +1239,7 @@ class CanToolsTest(unittest.TestCase):
         with self.assertRaises(cantools.db.ParseError) as cm:
             cantools.db.formats.dbc.load_string(
                 'VERSION "1.0"\n'
-                'dd\n'
-            )
+                'dd\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -1240,8 +1250,7 @@ class CanToolsTest(unittest.TestCase):
         with self.assertRaises(cantools.db.ParseError) as cm:
             cantools.db.formats.dbc.load_string(
                 'VERSION "1.0"\n'
-                'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n'
-            )
+                'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -1264,7 +1273,8 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(
             str(cm.exception),
             "DBC: \"Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo"
-            ".\";': Expected frame id.\", KCD: \"syntax error: line 1, column 0\"")
+            ".\";': Expected frame id.\", KCD: \"syntax error: line 1, "
+            "column 0\", SYM: \"Only SYM version 6.0 is supported.\"")
 
     def test_get_node_by_name(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -1292,9 +1302,15 @@ class CanToolsTest(unittest.TestCase):
     def test_load_file_with_database_format(self):
         filename_dbc = os.path.join('tests', 'files', 'foobar.dbc')
         filename_kcd = os.path.join('tests', 'files', 'the_homer.kcd')
+        filename_sym = os.path.join('tests', 'files', 'jopp-6.0.sym')
 
+        # Matching file contents and database format.
         cantools.db.load_file(filename_dbc, database_format=None)
+        cantools.db.load_file(filename_dbc, database_format='dbc')
+        cantools.db.load_file(filename_kcd, database_format='kcd')
+        cantools.db.load_file(filename_sym, database_format='sym')
 
+        # KCD database format, but file is DBC.
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(filename_dbc, database_format='kcd')
 
@@ -1302,6 +1318,7 @@ class CanToolsTest(unittest.TestCase):
             str(cm.exception),
             "KCD: \"syntax error: line 1, column 0\"")
 
+        # DBC database format, but file is KCD.
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(filename_kcd, database_format='dbc')
 
@@ -1312,12 +1329,22 @@ class CanToolsTest(unittest.TestCase):
             "BA_DEF_DEF_ | BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ | SG_MUL_VAL_ "
             "| BO_TX_BU_ | BA_DEF_REL_ | BA_DEF_DEF_REL_ | BA_REL_ | EV_}.\"")
 
+        # SYM database format, but file is KCD.
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_file(filename_kcd, database_format='sym')
+
+        self.assertEqual(
+            str(cm.exception),
+            "SYM: \"Only SYM version 6.0 is supported.\"")
+
+        # Unsupported database format.
         with self.assertRaises(ValueError) as cm:
             cantools.db.load_file(filename_kcd, database_format='bad')
 
         self.assertEqual(
             str(cm.exception),
-            "expected database format 'dbc', 'kcd' or None, but got 'bad'")
+            "expected database format 'dbc', 'kcd', 'sym' or None, but "
+            "got 'bad'")
 
 
 # This file is not '__main__' when executed via 'python setup.py

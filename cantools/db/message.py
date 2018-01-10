@@ -46,11 +46,11 @@ def _encode_data(data, signals, formats, scaling):
     ]
     little_unpacked_data = [
         _encode_signal(signal, data, scaling)
-        for signal in signals[::-1]
+        for signal in signals
         if signal.byte_order == 'little_endian'
     ]
     big_packed = formats.big_endian.pack(*big_unpacked_data)
-    little_packed = formats.little_endian.pack(*little_unpacked_data)[::-1]
+    little_packed = formats.little_endian.pack(*little_unpacked_data[::-1])[::-1]
     packed_union = int(binascii.hexlify(big_packed), 16)
     packed_union |= int(binascii.hexlify(little_packed), 16)
 
@@ -75,10 +75,10 @@ def _decode_data(data, signals, formats, decode_choices, scaling):
 
     return {
         signal.name: _decode_signal(signal,
-                                    unpacked.pop(0),
+                                    value,
                                     decode_choices,
                                     scaling)
-        for signal in signals
+        for signal, value in zip(signals, unpacked)
     }
 
 

@@ -4,6 +4,7 @@ import unittest
 import sys
 import logging
 from xml.etree import ElementTree
+import timeit
 
 try:
     from StringIO import StringIO
@@ -1345,6 +1346,53 @@ class CanToolsTest(unittest.TestCase):
             str(cm.exception),
             "expected database format 'dbc', 'kcd', 'sym' or None, but "
             "got 'bad'")
+
+    def test_performance_big_endian_signals(self):
+        """Test pack/unpack performance of a frame with big endian signals.
+
+        """
+
+        iterations = 10000
+
+        signals = [
+            cantools.db.Signal('S0',  0, 4,  'big_endian'),
+            cantools.db.Signal('S1',  4, 4,  'big_endian'),
+            cantools.db.Signal('S2',  8, 4,  'big_endian'),
+            cantools.db.Signal('S3', 12, 8,  'big_endian'),
+            cantools.db.Signal('S4', 20, 1,  'big_endian'),
+            cantools.db.Signal('S5', 22, 17, 'big_endian'),
+            cantools.db.Signal('S6', 40, 15, 'big_endian')
+        ]
+
+        message = cantools.db.Message(frame_id=1,
+                                      name='M0',
+                                      length=8,
+                                      signals=signals)
+
+        # Encode.
+        def encode():
+            message.encode({
+                'S0': 3,
+                'S1': 0,
+                'S2': 2,
+                'S3': 55,
+                'S4': 1,
+                'S5': 2323,
+                'S6': 3224
+            })
+
+        time = timeit.timeit(encode, number=iterations)
+
+        print()
+        print("Encode time: {} s ({} s/encode)".format(time, time / iterations))
+
+        # Decode.
+        def decode():
+            message.decode(b'\x30\x23\x78\x12\x26\x19\x30\x00')
+
+        time = timeit.timeit(decode, number=iterations)
+
+        print("Decode time: {} s ({} s/decode)".format(time, time / iterations))
 
 
 # This file is not '__main__' when executed via 'python setup.py

@@ -177,77 +177,75 @@ class CanToolsTest(unittest.TestCase):
         # Message 0.
         msg0_frame_id = 1
 
-        data = {
+        decoded_message = {
             'B': 1,      # should set byte[0]bit[7]=1
             'A': 0x2c9,  # should set byte[0]bit[1]=1 and byte[1]=c9
             'D': 0,      # should set byte[5]bit[7]=0
             'C': 0x2c9   # should set byte[4]bit[1]=1 and byte [5]=c9
         }
+        encoded_message = b'\x82\xc9\x00\x00\x02\xc9\x00\x00'
 
-        encoded = db.encode_message(msg0_frame_id, data)
-        self.assertEqual(encoded, b'\x82\xc9\x00\x00\x02\xc9\x00\x00')
-
+        encoded = db.encode_message(msg0_frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(msg0_frame_id, encoded)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
         # Message 1.
         msg1_frame_id = 2
 
-        data = {
+        decoded_message = {
             'E': 1,      # should set byte[0]bit[0]=1
             'F': 0x2c9,  # should set byte[0]bit[7:1]=92 and byte[1]=05
             'G': 0,      # should set byte[4]bit[0]=0
             'H': 0x2c9   # should set byte[4]bit[7:1]=92 and byte[5]=05
         }
+        encoded_message = b'\x93\x05\x00\x00\x92\x05\x00\x00'
 
-        encoded = db.encode_message(msg1_frame_id, data)
-        self.assertEqual(encoded, b'\x93\x05\x00\x00\x92\x05\x00\x00')
-
+        encoded = db.encode_message(msg1_frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(msg1_frame_id, encoded)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
         # Message 2.
         msg2_frame_id = 3
 
-        data = {
+        decoded_message = {
             'I': 1,  # should set byte[0]bit[3:0]=1
             'J': 2,  # should set byte[0]bit[7:4]=2
             'K': 3   # should set byte[1]bit[3:0]=3
         }
+        encoded_message = b'\x21\x03\x00\x00\x00\x00\x00\x00'
 
-        encoded = db.encode_message(msg2_frame_id, data)
-        self.assertEqual(encoded, b'\x21\x03\x00\x00\x00\x00\x00\x00')
-
+        encoded = db.encode_message(msg2_frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(msg2_frame_id, encoded)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
         # Message 3.
         msg3_frame_id = 4
 
-        data = {
+        decoded_message = {
             'L': 0x0123456789abcdef
         }
+        encoded_message = b'\x01\x23\x45\x67\x89\xab\xcd\xef'
 
-        encoded = db.encode_message(msg3_frame_id, data)
-        self.assertTrue(encoded in [b'\x01\x23\x45\x67\x89\xab\xcd\xf0',
-                                    b'\x01\x23\x45\x67\x89\xab\xcd\xef'])
-
+        encoded = db.encode_message(msg3_frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(msg3_frame_id, encoded)
-        self.assertTrue(decoded in [data, {'L': 0x0123456789abcdef + 1}])
+        self.assertEqual(decoded, decoded_message)
 
         # Message 4.
         msg4_frame_id = 5
 
-        data = {
+        decoded_message = {
             'M': 0x0123456789abcdef
         }
+        encoded_message = b'\xef\xcd\xab\x89\x67\x45\x23\x01'
 
-        encoded = db.encode_message(msg4_frame_id, data)
-        self.assertTrue(encoded in [b'\xf0\xcd\xab\x89\x67\x45\x23\x01',
-                                    b'\xef\xcd\xab\x89\x67\x45\x23\x01'])
-
+        encoded = db.encode_message(msg4_frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(msg4_frame_id, encoded)
-        self.assertTrue(decoded in [data, {'M': 0x0123456789abcdef + 1}])
+        self.assertEqual(decoded, decoded_message)
 
     def test_motohawk_encode_decode(self):
         """Encode and decode the signals in a ExampleMessage frame.
@@ -262,35 +260,34 @@ class CanToolsTest(unittest.TestCase):
         example_message_frame_id = 496
 
         # Encode with non-enumerated values.
-        data = {
+        decoded_message = {
             'Temperature': 250.55,
             'AverageRadius': 3.2,
             'Enable': 1
         }
+        encoded_message = b'\xc0\x06\xe0\x00\x00\x00\x00\x00'
 
-        encoded = db.encode_message(example_message_frame_id, data)
-        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
+        encoded = db.encode_message(example_message_frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
 
         # Encode with enumerated values.
-        data = {
+        decoded_message = {
             'Temperature': 250.55,
             'AverageRadius': 3.2,
             'Enable': 'Enabled'
         }
 
         # By frame id.
-        encoded = db.encode_message(example_message_frame_id, data)
-        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
-
+        encoded = db.encode_message(example_message_frame_id, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(example_message_frame_id, encoded)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
         # By name.
-        encoded = db.encode_message(example_message_name, data)
-        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
-
+        encoded = db.encode_message(example_message_name, decoded_message)
+        self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(example_message_name, encoded)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
     def test_big_endian_no_decode_choices(self):
         """Decode a big endian signal with `decode_choices` set to False.
@@ -301,16 +298,17 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
-        data = {
+        decoded_message = {
             'Temperature': 250.55,
             'AverageRadius': 3.2,
             'Enable': 1
         }
+        encoded_message = b'\xc0\x06\xe0\x00\x00\x00\x00\x00'
 
         decoded = db.decode_message(496,
-                                    b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
+                                    encoded_message,
                                     decode_choices=False)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
     def test_little_endian_no_decode_choices(self):
         """Decode a little endian signal with `decode_choices` set to False.
@@ -321,22 +319,23 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
 
-        data = {
+        decoded_message = {
             'DRIVER_HEARTBEAT_cmd': 1
         }
+        encoded_message = b'\x01\x00\x00\x00\x00\x00\x00\x00'
 
         decoded = db.decode_message(100,
-                                    b'\x01\x00\x00\x00\x00\x00\x00\x00',
+                                    encoded_message,
                                     decode_choices=False)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
-        data = {
+        decoded_message = {
             'DRIVER_HEARTBEAT_cmd': 'DRIVER_HEARTBEAT_cmd_SYNC'
         }
 
         decoded = db.decode_message(100,
-                                    b'\x01\x00\x00\x00\x00\x00\x00\x00')
-        self.assertEqual(decoded, data)
+                                    encoded_message)
+        self.assertEqual(decoded, decoded_message)
 
     def test_encode_decode_no_scaling(self):
         """Encode and decode a message without scaling the signal values.
@@ -347,21 +346,22 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
-        data = {
+        decoded_message = {
             'Temperature': 55,
             'AverageRadius': 32,
             'Enable': 'Enabled'
         }
+        encoded_message = b'\xc0\x06\xe0\x00\x00\x00\x00\x00'
 
         encoded = db.encode_message(496,
-                                    data,
+                                    decoded_message,
                                     scaling=False)
-        self.assertEqual(encoded, b'\xc0\x06\xe0\x00\x00\x00\x00\x00')
+        self.assertEqual(encoded, encoded_message)
 
         decoded = db.decode_message(496,
                                     encoded,
                                     scaling=False)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not
@@ -373,22 +373,23 @@ class CanToolsTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
-        data = {
+        decoded_message = {
             'Temperature': 3,
             'AverageRadius': 2,
             'Enable': 1
         }
+        encoded_message = b'\x84\x00\x60\x00\x00\x00\x00\x00'
 
         encoded = db.encode_message(496,
-                                    data,
+                                    decoded_message,
                                     scaling=False)
-        self.assertEqual(encoded, b'\x84\x00\x60\x00\x00\x00\x00\x00')
+        self.assertEqual(encoded, encoded_message)
 
         decoded = db.decode_message(496,
                                     encoded,
                                     decode_choices=False,
                                     scaling=False)
-        self.assertEqual(decoded, data)
+        self.assertEqual(decoded, decoded_message)
 
     def test_socialledge(self):
         db = cantools.db.File()
@@ -738,34 +739,45 @@ class CanToolsTest(unittest.TestCase):
         db.add_kcd_file(filename)
 
         frame_id = 0x400
-        data = {
+        decoded_message = {
             'MIL': 0,
             'Enginespeed': 127,
             'NoxSensor': 127,
         }
+        encoded_message = b'\xfe\x00\xfe\x00\x00'
 
-        encoded = db.encode_message(frame_id, data)
+        encoded = db.encode_message(frame_id, decoded_message)
         self.assertEqual(len(encoded), 5)
-        self.assertEqual(encoded, b'\xfe\x00\xfe\x00\x00')
+        self.assertEqual(encoded, encoded_message)
 
     def test_the_homer_float(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.File()
         db.add_kcd_file(filename)
 
+        # Message 1 (binary64).
         frame_id = 0x832
-        encoded = db.encode_message(frame_id, {'AmbientLux': math.pi})
-        self.assertEqual(len(encoded), 8)
-        self.assertEqual(encoded, b'\x18\x2d\x44\x54\xfb\x21\x09\x40')
-        decoded = db.decode_message(frame_id, b'\x18\x2d\x44\x54\xfb\x21\x09\x40')
-        self.assertEqual(decoded['AmbientLux'], math.pi)
 
+        decoded_message = {'AmbientLux': math.pi}
+        encoded_message = b'\x18\x2d\x44\x54\xfb\x21\x09\x40'
+
+        encoded = db.encode_message(frame_id, decoded_message)
+        self.assertEqual(len(encoded), 8)
+        self.assertEqual(encoded, encoded_message)
+        decoded = db.decode_message(frame_id, encoded)
+        self.assertEqual(decoded, decoded_message)
+
+        # Message 2 (binary32).
         frame_id = 0x845
-        encoded = db.encode_message(frame_id, {'Windshield': math.pi})
+
+        decoded_message = {'Windshield': 3.1415927410125732}
+        encoded_message = b'\xdb\x0f\x49\x40'
+
+        encoded = db.encode_message(frame_id, decoded_message)
         self.assertEqual(len(encoded), 4)
-        self.assertEqual(encoded, b'\xdb\x0f\x49\x40')
-        decoded = db.decode_message(frame_id, b'\xdb\x0f\x49\x40')
-        self.assertEqual(decoded['Windshield'], 3.1415927410125732)
+        self.assertEqual(encoded, encoded_message)
+        decoded = db.decode_message(frame_id, encoded)
+        self.assertEqual(decoded, decoded_message)
 
     def test_empty_kcd(self):
         filename = os.path.join('tests', 'files', 'empty.kcd')

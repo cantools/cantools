@@ -1458,6 +1458,10 @@ class CanToolsTest(unittest.TestCase):
 
         encoded = message_1.encode(decoded_message, padding=True)
         self.assertEqual(encoded, encoded_message)
+        encoded = db.encode_message(message_1.name,
+                                    decoded_message,
+                                    padding=True)
+        self.assertEqual(encoded, encoded_message)
         decoded = message_1.decode(encoded)
         self.assertEqual(decoded, decoded_message)
 

@@ -265,12 +265,18 @@ class File(object):
 
         raise KeyError(name)
 
-    def encode_message(self, frame_id_or_name, data, scaling=True):
+    def encode_message(self,
+                       frame_id_or_name,
+                       data,
+                       scaling=True,
+                       padding=False):
         """Encode given signal data `data` as a message of given frame id or
         name `frame_id_or_name`. `data` is a dictionary of signal
         name-value entries.
 
         If `scaling` is ``False`` no scaling of signals is performed.
+
+        If `padding` is ``True`` unused bits are encoded as 1.
 
         >>> db.encode_message(158, {'Bar': 1, 'Fum': 5.0})
         b'\\x01\\x45\\x23\\x00\\x11'
@@ -284,7 +290,7 @@ class File(object):
         except KeyError:
             message = self._name_to_message[frame_id_or_name]
 
-        return message.encode(data, scaling)
+        return message.encode(data, scaling, padding)
 
     def decode_message(self,
                        frame_id_or_name,

@@ -113,19 +113,19 @@ class CanToolsTest(unittest.TestCase):
                          "  signal('Foo', 0, 512, 'little_endian', True, 1, 0, 0, 0, "
                          "'None', False, None, None, None)\n")
 
-        message = db.lookup_message(0x12331)
+        message = db.get_message_by_frame_id(0x12331)
         self.assertEqual(message.name, 'Fum')
         self.assertEqual(message.nodes, ['FOO'])
         self.assertEqual(message.signals[0].is_float, False)
 
-        message = db.lookup_message(0x12332)
+        message = db.get_message_by_frame_id(0x12332)
         self.assertEqual(message.name, 'Bar')
         self.assertEqual(message.nodes, ['FOO', 'BAR'])
         self.assertEqual(message.signals[0].nodes, ['Vector__XXX', 'FUM'])
         self.assertEqual(message.signals[0].is_float, True)
         self.assertEqual(message.signals[0].length, 32)
 
-        message = db.lookup_message(0x12333)
+        message = db.get_message_by_frame_id(0x12333)
         self.assertEqual(message.name, 'CanFd')
         self.assertEqual(message.nodes, ['FOO'])
         self.assertEqual(message.signals[0].nodes, ['Vector__XXX', 'FUM'])
@@ -993,12 +993,12 @@ class CanToolsTest(unittest.TestCase):
         db = cantools.db.load_file(filename)
 
         # Message cycle time is 200, as given by BA_.
-        message = db.lookup_message(1)
+        message = db.get_message_by_frame_id(1)
         self.assertEqual(message.cycle_time, 200)
         self.assertEqual(message.send_type, 'cyclic')
 
         # Default message cycle time is 0, as given by BA_DEF_DEF_.
-        message = db.lookup_message(2)
+        message = db.get_message_by_frame_id(2)
         self.assertEqual(message.cycle_time, 0)
         self.assertEqual(message.send_type, 'none')
 
@@ -1360,7 +1360,7 @@ class CanToolsTest(unittest.TestCase):
             "got 'bad'")
 
     def test_performance_big_endian_signals(self):
-        """Test pack/unpack performance of a frame with big endian signals.
+        """Test encode/decode performance of a frame with big endian signals.
 
         """
 
@@ -1405,6 +1405,61 @@ class CanToolsTest(unittest.TestCase):
         time = timeit.timeit(decode, number=iterations)
 
         print("Decode time: {} s ({} s/decode)".format(time, time / iterations))
+
+    def test_padding_one(self):
+        """Test to encode a message with padding as one.
+
+        """
+
+        signals = [
+            cantools.db.Signal('S1',  4, 4,  'big_endian'),
+            cantools.db.Signal('S2',  8, 4,  'big_endian'),
+            cantools.db.Signal('S3', 12, 8,  'big_endian'),
+            cantools.db.Signal('S4', 20, 1,  'big_endian'),
+            cantools.db.Signal('S5', 22, 17, 'big_endian'),
+            cantools.db.Signal('S6', 40, 15, 'big_endian')
+        ]
+
+        message = cantools.db.Message(frame_id=1,
+                                      name='M0',
+                                      length=8,
+                                      signals=signals)
+
+        decoded_message = {
+            'S1': 0,
+            'S2': 2,
+            'S3': 55,
+            'S4': 1,
+            'S5': 2323,
+            'S6': 3224
+        }
+        encoded_message = b'\xf0\x23\x7c\x12\x27\x19\x31\xff'
+
+        encoded = message.encode(decoded_message, padding=True)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
+
+    def test_multiplex_choices_padding_one(self):
+        """Test to encode a multiplexed message with padding as one.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'multiplex_choices.dbc')
+        db = cantools.db.load_file(filename)
+
+        decoded_message = {
+            'Multiplexor': 'MULTIPLEXOR_8',
+            'BIT_C': 0, 'BIT_G': 0, 'BIT_J': 0, 'BIT_L': 'Off'
+        }
+        encoded_message = b'\x23\xff\x73\xfe\xff\xff\xff\xff'
+
+        message_1 = db.messages[0]
+
+        encoded = message_1.encode(decoded_message, padding=True)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message_1.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
 
 
 # This file is not '__main__' when executed via 'python setup.py

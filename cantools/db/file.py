@@ -229,16 +229,6 @@ class File(object):
                                         self._attribute_definitions,
                                         self._attribute_definition_defaults))
 
-    def lookup_message(self, frame_id):
-        """Find the message object for given frame id `frame_id`.
-
-        NOTE: This method is deprecated. Use
-        :meth:`.get_message_by_frame_id()` instead.
-
-        """
-
-        return self.get_message_by_frame_id(frame_id)
-
     def get_message_by_name(self, name):
         """Find the message object for given name `name`.
 

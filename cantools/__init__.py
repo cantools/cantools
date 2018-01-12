@@ -46,7 +46,7 @@ def _do_decode(args):
         line += ' :: '
 
         try:
-            message = dbf.lookup_message(frame_id)
+            message = dbf.get_message_by_frame_id(frame_id)
             decoded_signals = message.decode(data, decode_choices)
             formatted_signals = []
 

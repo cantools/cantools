@@ -186,9 +186,6 @@ class Message(object):
         return nodes
 
     def _create_message_encode_decode_formats(self, signals):
-        # Big endian byte order format.
-        big_fmt = '>'
-        start = 0
         message_length = (8 * self._length)
 
         def get_format_string_type(signal):
@@ -199,43 +196,86 @@ class Message(object):
             else:
                 return 'u'
 
-        for signal in signals:
-            if signal.byte_order == 'little_endian':
-                continue
+        def padding_item(length):
+            fmt = 'p{}'.format(length)
+            padding_mask = '1' * length
 
-            padding = (signal.start - start)
+            return fmt, padding_mask
 
-            if padding > 0:
-                big_fmt += 'p{}'.format(padding)
+        def signal_item(signal):
+            fmt = '{}{}'.format(get_format_string_type(signal),
+                                signal.length)
+            padding_mask = '0' * signal.length
 
-            big_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
-            start = (signal.start + signal.length)
+            return fmt, padding_mask
 
-        if start < message_length:
-            big_fmt += 'p{}'.format(message_length - start)
+        def fmt(items):
+            return ''.join([item[0] for item in items])
 
-        # Little endian byte order format.
-        little_fmt = '>'
-        end = message_length
+        def padding_mask(items):
+            try:
+                return int(''.join([item[1] for item in items]), 2)
+            except ValueError:
+                return 0
 
-        for signal in signals[::-1]:
-            if signal.byte_order == 'big_endian':
-                continue
+        def create_big():
+            items = [('>', '')]
+            start = 0
 
-            padding = end - (signal.start + signal.length)
+            for signal in signals:
+                if signal.byte_order == 'little_endian':
+                    continue
 
-            if padding > 0:
-                little_fmt += 'p{}'.format(padding)
+                padding_length = (signal.start - start)
 
-            little_fmt += '{}{}'.format(get_format_string_type(signal), signal.length)
-            end = signal.start
+                if padding_length > 0:
+                    items.append(padding_item(padding_length))
 
-        if end > 0:
-            little_fmt += 'p{}'.format(end)
+                items.append(signal_item(signal))
+                start = (signal.start + signal.length)
 
-        Formats = namedtuple('Formats', ['big_endian', 'little_endian'])
+            if start < message_length:
+                length = message_length - start
+                items.append(padding_item(length))
 
-        return Formats(bitstruct.compile(big_fmt), bitstruct.compile(little_fmt))
+            return fmt(items), padding_mask(items)
+
+        def create_little():
+            items = [('>', '')]
+            end = message_length
+
+            for signal in signals[::-1]:
+                if signal.byte_order == 'big_endian':
+                    continue
+
+                padding_length = end - (signal.start + signal.length)
+
+                if padding_length > 0:
+                    items.append(padding_item(padding_length))
+
+                items.append(signal_item(signal))
+                end = signal.start
+
+            if end > 0:
+                items.append(padding_item(end))
+
+            value = padding_mask(items)
+
+            if message_length > 0:
+                value = bitstruct.pack('u{}'.format(message_length), value)
+                value = int(binascii.hexlify(value[::-1]), 16)
+
+            return fmt(items), value
+
+        big_fmt, big_padding_mask = create_big()
+        little_fmt, little_padding_mask = create_little()
+
+        Formats = namedtuple('Formats',
+                             ['big_endian', 'little_endian', 'padding_mask'])
+
+        return Formats(bitstruct.compile(big_fmt),
+                       bitstruct.compile(little_fmt),
+                       big_padding_mask & little_padding_mask)
 
     @property
     def frame_id(self):
@@ -348,20 +388,24 @@ class Message(object):
                                node['signals'],
                                node['formats'],
                                scaling)
-
+        padding_mask = node['formats'].padding_mask
         multiplexers = node['multiplexers']
 
         for signal in multiplexers:
             mux = self._get_mux_number(data, signal)
             node = multiplexers[signal][mux]
-            encoded |= self._encode(node, data, scaling)
+            mux_encoded, mux_padding_mask = self._encode(node, data, scaling)
+            encoded |= mux_encoded
+            padding_mask &= mux_padding_mask
 
-        return encoded
+        return encoded, padding_mask
 
-    def encode(self, data, scaling=True):
+    def encode(self, data, scaling=True, padding=False):
         """Encode given data as a message of this type.
 
         If `scaling` is ``False`` no scaling of signals is performed.
+
+        If `padding` is ``True`` unused bits are encoded as 1.
 
         >>> foo = db.get_message_by_name('Foo')
         >>> foo.encode({'Bar': 1, 'Fum': 5.0})
@@ -369,7 +413,11 @@ class Message(object):
 
         """
 
-        encoded = self._encode(self._codecs, data, scaling)
+        encoded, padding_mask = self._encode(self._codecs, data, scaling)
+
+        if padding:
+            encoded |= padding_mask
+
         encoded |= (0x80 << (8 * self._length))
         encoded = hex(encoded)[4:].rstrip('L')
 

@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import re
 import struct
+from io import BytesIO
 import binascii
 
 
@@ -369,7 +370,7 @@ def calcsize(fmt):
     return CompiledFormat(fmt).calcsize()
 
 
-def byteswap(fmt, data, offset = 0):
+def byteswap(fmt, data, offset=0):
     """Swap bytes in `data` according to `fmt`, starting at byte
     `offset`. `fmt` must be an iterable, iterating over number of
     bytes to swap. For example, the format string ``'24'`` applied to
@@ -383,16 +384,15 @@ def byteswap(fmt, data, offset = 0):
 
     """
 
-    i = offset
-    data_swapped = b''
+    data = BytesIO(data)
+    data.seek(offset)
+    data_swapped = BytesIO()
 
     for f in fmt:
-        length = int(f)
-        value = data[i:i + length]
-        data_swapped += value[::-1]
-        i += length
+        swapped = data.read(int(f))[::-1]
+        data_swapped.write(swapped)
 
-    return data_swapped
+    return data_swapped.getvalue()
 
 
 def compile(fmt):

@@ -6,6 +6,13 @@ from decimal import Decimal
 import bitstruct
 
 
+def _start_bit(signal):
+    if signal.byte_order == 'big_endian':
+        return (8 * (signal.start // 8) + (7 - (signal.start % 8)))
+    else:
+        return signal.start
+
+
 def _encode_signal(signal, data, scaling):
     value = data[signal.name]
 
@@ -104,7 +111,7 @@ class Message(object):
         self._name = name
         self._length = length
         self._signals = signals
-        self._signals.sort(key=lambda s: s.start)
+        self._signals.sort(key=_start_bit)
         self._comment = comment
         self._nodes = nodes
         self._send_type = send_type
@@ -226,13 +233,13 @@ class Message(object):
                 if signal.byte_order == 'little_endian':
                     continue
 
-                padding_length = (signal.start - start)
+                padding_length = (_start_bit(signal) - start)
 
                 if padding_length > 0:
                     items.append(padding_item(padding_length))
 
                 items.append(signal_item(signal))
-                start = (signal.start + signal.length)
+                start = (_start_bit(signal) + signal.length)
 
             if start < message_length:
                 length = message_length - start

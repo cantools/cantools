@@ -93,9 +93,9 @@ class CanToolsTest(unittest.TestCase):
                          "node('FIE', None)\n"
                          "\n"
                          "message('Foo', 0x12331, True, 8, 'Foo.')\n"
-                         "  signal('Bar', 1, 6, 'big_endian', False, 0.1, "
+                         "  signal('Bar', 6, 6, 'big_endian', False, 0.1, "
                          "0, 1.0, 5.0, 'm', False, None, None, '')\n"
-                         "  signal('Foo', 7, 12, 'big_endian', True, 0.01, "
+                         "  signal('Foo', 0, 12, 'big_endian', True, 0.01, "
                          "250, 229.53, 270.47, 'degK', False, None, {-1: \'Foo\', "
                          "-2: \'Fie\'}, None)\n"
                          "\n"
@@ -910,24 +910,24 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(symbol_3.length, 8)
         self.assertEqual(symbol_3.is_multiplexed(), True)
         self.assertEqual(len(symbol_3.signals), 4)
-        multiplexer = symbol_3.signals[0]
-        self.assertEqual(multiplexer.name, 'Multiplexer1')
-        self.assertEqual(multiplexer.start, 0)
-        self.assertEqual(multiplexer.length, 3)
-        self.assertEqual(multiplexer.is_multiplexer, True)
-        self.assertEqual(multiplexer.multiplexer_ids, None)
+        signal_2 = symbol_3.signals[0]
+        self.assertEqual(signal_2.name, 'Signal2')
+        self.assertEqual(signal_2.start, 6)
+        self.assertEqual(signal_2.length, 32)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, [1])
         signal_1 = symbol_3.signals[1]
         self.assertEqual(signal_1.name, 'Signal1')
         self.assertEqual(signal_1.start, 3)
         self.assertEqual(signal_1.length, 11)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, [0])
-        signal_2 = symbol_3.signals[2]
-        self.assertEqual(signal_2.name, 'Signal2')
-        self.assertEqual(signal_2.start, 6)
-        self.assertEqual(signal_2.length, 32)
-        self.assertEqual(signal_2.is_multiplexer, False)
-        self.assertEqual(signal_2.multiplexer_ids, [1])
+        multiplexer = symbol_3.signals[2]
+        self.assertEqual(multiplexer.name, 'Multiplexer1')
+        self.assertEqual(multiplexer.start, 0)
+        self.assertEqual(multiplexer.length, 3)
+        self.assertEqual(multiplexer.is_multiplexer, True)
+        self.assertEqual(multiplexer.multiplexer_ids, None)
         signal_3 = symbol_3.signals[3]
         self.assertEqual(signal_3.name, 'Signal3')
         self.assertEqual(signal_3.start, 9)
@@ -1367,13 +1367,13 @@ class CanToolsTest(unittest.TestCase):
         iterations = 10000
 
         signals = [
-            cantools.db.Signal('S0',  0, 4,  'big_endian'),
-            cantools.db.Signal('S1',  4, 4,  'big_endian'),
-            cantools.db.Signal('S2',  8, 4,  'big_endian'),
-            cantools.db.Signal('S3', 12, 8,  'big_endian'),
-            cantools.db.Signal('S4', 20, 1,  'big_endian'),
-            cantools.db.Signal('S5', 22, 17, 'big_endian'),
-            cantools.db.Signal('S6', 40, 15, 'big_endian')
+            cantools.db.Signal('S0',  7, 4,  'big_endian'),
+            cantools.db.Signal('S1',  3, 4,  'big_endian'),
+            cantools.db.Signal('S2', 15, 4,  'big_endian'),
+            cantools.db.Signal('S3', 11, 8,  'big_endian'),
+            cantools.db.Signal('S4', 19, 1,  'big_endian'),
+            cantools.db.Signal('S5', 17, 17, 'big_endian'),
+            cantools.db.Signal('S6', 47, 15, 'big_endian')
         ]
 
         message = cantools.db.Message(frame_id=1,
@@ -1412,12 +1412,12 @@ class CanToolsTest(unittest.TestCase):
         """
 
         signals = [
-            cantools.db.Signal('S1',  4, 4,  'big_endian'),
-            cantools.db.Signal('S2',  8, 4,  'big_endian'),
-            cantools.db.Signal('S3', 12, 8,  'big_endian'),
-            cantools.db.Signal('S4', 20, 1,  'big_endian'),
-            cantools.db.Signal('S5', 22, 17, 'big_endian'),
-            cantools.db.Signal('S6', 40, 15, 'big_endian')
+            cantools.db.Signal('S1',  3, 4,  'big_endian'),
+            cantools.db.Signal('S2', 15, 4,  'big_endian'),
+            cantools.db.Signal('S3', 11, 8,  'big_endian'),
+            cantools.db.Signal('S4', 19, 1,  'big_endian'),
+            cantools.db.Signal('S5', 17, 17, 'big_endian'),
+            cantools.db.Signal('S6', 47, 15, 'big_endian')
         ]
 
         message = cantools.db.Message(frame_id=1,

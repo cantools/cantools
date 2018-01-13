@@ -4,6 +4,35 @@ class Signal(object):
     """A CAN signal with position, size, unit and other information. A
     signal is part of a message.
 
+    Signal bit numbering in a message:
+
+    .. code:: text
+
+       Byte:       0        1        2        3
+              +--------+--------+--------+--- - -
+              |        |        |        |
+              +--------+--------+--------+--- - -
+       Bit:    7      0 15     8 23    16 24
+
+    Big endian signal with start bit 2 and length 5 (0=LSB, 4=MSB):
+
+    .. code:: text
+
+       Byte:       0        1        2        3
+              +--------+--------+--------+--- - -
+              |    |432|10|     |        |
+              +--------+--------+--------+--- - -
+       Bit:    7      0 15     8 23    16 24
+
+    Little endian signal with start bit 2 and length 9 (0=LSB, 8=MSB):
+
+    .. code:: text
+
+       Byte:       0        1        2        3
+              +--------+--------+--------+--- - -
+              |543210| |    |876|        |
+              +--------+--------+--------+--- - -
+       Bit:    7      0 15     8 23    16 24
     """
 
     def __init__(self,
@@ -188,7 +217,7 @@ class Signal(object):
         for choice_number, choice_string in self.choices.items():
             if choice_string == string:
                 return choice_number
-    
+
     def __repr__(self):
         if self._choices is None:
             choices = None

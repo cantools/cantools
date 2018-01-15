@@ -10,7 +10,7 @@ __version__ = '16.0.0'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d\]\s*([0-9A-F ]*)$')
+RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d+\]\s*([0-9A-F ]*)$')
 
 
 def _mo_unpack(mo):

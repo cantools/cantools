@@ -579,6 +579,7 @@ class CanToolsTest(unittest.TestCase):
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
   vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF
   vcan0  ERROR
+
   vcan0  1F4   [4]  01 02 03 04
   vcan0  1F4   [3]  01 02 03
   vcan0  1F3   [3]  01 02 03
@@ -587,6 +588,7 @@ class CanToolsTest(unittest.TestCase):
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 :: SENSOR_SONARS(SENSOR_SONARS_mux: 0, SENSOR_SONARS_err_count: 15, SENSOR_SONARS_left: 0.0, SENSOR_SONARS_middle: 0.0, SENSOR_SONARS_right: 0.0, SENSOR_SONARS_rear: 0.0)
   vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
   vcan0  ERROR
+
   vcan0  1F4   [4]  01 02 03 04 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two', IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
   vcan0  1F4   [3]  01 02 03 :: unpack requires at least 32 bits to unpack (got 24)
   vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499

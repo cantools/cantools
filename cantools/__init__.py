@@ -25,6 +25,39 @@ def _mo_unpack(mo):
     return frame_id, data
 
 
+def _format_message(dbf, frame_id, data, decode_choices):
+    try:
+        message = dbf.get_message_by_frame_id(frame_id)
+    except KeyError:
+        return 'Unknown frame id {}'.format(frame_id)
+
+    try:
+        decoded_signals = message.decode(data, decode_choices)
+    except ValueError as e:
+        return str(e)
+
+    formatted_signals = []
+
+    for signal in message.signals:
+        try:
+            value = decoded_signals[signal.name]
+        except KeyError:
+            continue
+
+        if isinstance(value, str):
+            value = "'{}'".format(value)
+
+        formatted_signals.append(
+            '{}: {}{}'.format(signal.name,
+                               value,
+                              ''
+                              if signal.unit is None
+                              else ' ' + signal.unit))
+
+    return '{}({})'.format(message.name,
+                           ', '.join(formatted_signals))
+
+
 def _do_decode(args):
     dbf = db.load_file(args.dbfile)
     decode_choices = not args.no_decode_choices
@@ -42,42 +75,10 @@ def _do_decode(args):
         if mo:
             frame_id, data = _mo_unpack(mo)
             line += ' :: '
-
-            try:
-                try:
-                    message = dbf.get_message_by_frame_id(frame_id)
-                except KeyError:
-                    line += 'Unknown frame id {}'.format(frame_id)
-                    raise
-
-                try:
-                    decoded_signals = message.decode(data, decode_choices)
-                except ValueError as e:
-                    line += str(e)
-                    raise
-
-                formatted_signals = []
-
-                for signal in message.signals:
-                    try:
-                        value = decoded_signals[signal.name]
-                    except KeyError:
-                        continue
-
-                    if isinstance(value, str):
-                        value = "'{}'".format(value)
-
-                    formatted_signals.append(
-                        '{}: {}{}'.format(signal.name,
-                                           value,
-                                          ''
-                                          if signal.unit is None
-                                          else ' ' + signal.unit))
-
-                line += '{}({})'.format(message.name,
-                                        ', '.join(formatted_signals))
-            except (KeyError, ValueError):
-                pass
+            line += _format_message(dbf,
+                                    frame_id,
+                                    data,
+                                    decode_choices)
 
         print(line)
 

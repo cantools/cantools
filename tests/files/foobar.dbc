@@ -80,5 +80,8 @@ BA_REL_ "GenSigTimeoutTime" BU_SG_REL_ MFK_3 SG_ 780 ACC_02_CRC 999;
 BA_DEF_REL_ BU_SG_REL_ "AFloat2" FLOAT 0.0 65535.0;
 BA_DEF_DEF_REL_ "AFloat2" 0.0;
 BA_REL_ "AFloat2" BU_SG_REL_ MFK_3 SG_ 780 ACC_02_CRC 999;
+BA_REL_ "AFloat2" BU_SG_REL_ MFK_3 SG_ 780 ACC_02_CRC "";
+
+SIG_GROUP_ 462 SecSomethingReq 1 : SomethingReqVal SomethingElseReqVal;
 
 

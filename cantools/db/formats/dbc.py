@@ -48,6 +48,7 @@ ATTRIBUTE_DEFINITION_DEFAULT_REL = 'BA_DEF_DEF_REL_'
 EVENT = 'EV_'
 SIGNAL_TYPE = 'SIG_VALTYPE_'
 SIGNAL_MULTIPLEXER_VALUES = 'SG_MUL_VAL_'
+SIGNAL_GROUP = 'SIG_GROUP_'
 
 DBC_FMT = """VERSION "{version}"
 
@@ -309,9 +310,18 @@ def _create_grammar():
                           - Keyword(SIGNAL)
                           - frame_id
                           - word
-                          - positive_integer
+                          - (positive_integer | QuotedString('"'))
                           - scolon)
     attribute_rel.setName(ATTRIBUTE_REL)
+
+    sig_group = Group(Keyword(SIGNAL_GROUP)
+                          - frame_id
+                          - word
+                          - integer
+                          - colon
+                          - OneOrMore(word)
+                          - scolon)
+    sig_group.setName(SIGNAL_GROUP)
 
     entry = (version
              | symbols
@@ -330,6 +340,7 @@ def _create_grammar():
              | attribute_definition_rel
              | attribute_definition_default_rel
              | attribute_rel
+             | sig_group
              | event)
 
     frame_id.setParseAction(lambda _s, _l, t: int(t[0]))

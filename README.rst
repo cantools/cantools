@@ -10,6 +10,8 @@ CAN BUS tools.
 
 - CAN message encoding and decoding.
 
+- Simple and extended signal multiplexing.
+
 - ``candump`` output decoder.
 
 Project homepage: https://github.com/eerimoq/cantools

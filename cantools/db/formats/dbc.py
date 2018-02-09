@@ -314,14 +314,14 @@ def _create_grammar():
                           - scolon)
     attribute_rel.setName(ATTRIBUTE_REL)
 
-    sig_group = Group(Keyword(SIGNAL_GROUP)
-                          - frame_id
-                          - word
-                          - integer
-                          - colon
-                          - OneOrMore(word)
-                          - scolon)
-    sig_group.setName(SIGNAL_GROUP)
+    signal_group = Group(Keyword(SIGNAL_GROUP)
+                         - frame_id
+                         - word
+                         - integer
+                         - colon
+                         - OneOrMore(word)
+                         - scolon)
+    signal_group.setName(SIGNAL_GROUP)
 
     entry = (version
              | symbols
@@ -340,7 +340,7 @@ def _create_grammar():
              | attribute_definition_rel
              | attribute_definition_default_rel
              | attribute_rel
-             | sig_group
+             | signal_group
              | event)
 
     frame_id.setParseAction(lambda _s, _l, t: int(t[0]))

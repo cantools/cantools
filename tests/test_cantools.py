@@ -1477,6 +1477,31 @@ class CanToolsTest(unittest.TestCase):
         decoded = message_1.decode(encoded)
         self.assertEqual(decoded, decoded_message)
 
+    def test_multiplex_bad_multiplexer(self):
+        """Test to encode and decode a multiplexer not part of the
+        multiplexer.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'multiplex_choices.dbc')
+        db = cantools.db.load_file(filename)
+
+        message_1 = db.messages[0]
+
+        # Encode.
+        with self.assertRaises(cantools.db.EncodeError) as cm:
+            message_1.encode({'Multiplexor': 7})
+
+        self.assertEqual(str(cm.exception),
+                         'expected multiplexer id 8, 16 or 24, but got 7')
+
+        # Decode.
+        with self.assertRaises(cantools.db.DecodeError) as cm:
+            message_1.decode(b'\x1f\xff\x73\xfe\xff\xff\xff\xff')
+
+        self.assertEqual(str(cm.exception),
+                         'expected multiplexer id 8, 16 or 24, but got 7')
+
 
 # This file is not '__main__' when executed via 'python setup.py
 # test'.

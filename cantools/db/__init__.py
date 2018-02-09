@@ -3,6 +3,8 @@ from xml.etree import ElementTree
 from .formats.utils import ParseError
 from .file import File
 from .message import Message
+from .message import EncodeError
+from .message import DecodeError
 from .signal import Signal
 
 

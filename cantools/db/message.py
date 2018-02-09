@@ -6,6 +6,24 @@ from decimal import Decimal
 import bitstruct
 
 
+class EncodeError(Exception):
+    pass
+
+
+class DecodeError(Exception):
+    pass
+
+
+def _format_or(items):
+    items = [str(item) for item in items]
+
+    if len(items) == 1:
+        return items
+    else:
+        return '{} or {}'.format(', '.join(items[:-1]),
+                                 items[-1])
+
+
 def _start_bit(signal):
     if signal.byte_order == 'big_endian':
         return (8 * (signal.start // 8) + (7 - (signal.start % 8)))
@@ -400,7 +418,14 @@ class Message(object):
 
         for signal in multiplexers:
             mux = self._get_mux_number(data, signal)
-            node = multiplexers[signal][mux]
+
+            try:
+                node = multiplexers[signal][mux]
+            except KeyError:
+                raise EncodeError('expected multiplexer id {}, but got {}'.format(
+                    _format_or(multiplexers[signal]),
+                    mux))
+
             mux_encoded, mux_padding_mask = self._encode(node, data, scaling)
             encoded |= mux_encoded
             padding_mask &= mux_padding_mask
@@ -441,7 +466,14 @@ class Message(object):
 
         for signal in multiplexers:
             mux = self._get_mux_number(decoded, signal)
-            node = multiplexers[signal][mux]
+
+            try:
+                node = multiplexers[signal][mux]
+            except KeyError:
+                raise DecodeError('expected multiplexer id {}, but got {}'.format(
+                    _format_or(multiplexers[signal]),
+                    mux))
+
             decoded.update(self._decode(node,
                                         data,
                                         decode_choices,

@@ -7,7 +7,7 @@ from ..signal import Signal
 from ..message import Message
 from ..node import Node
 from ..bus import Bus
-from ..database import Database
+from ..internal_database import InternalDatabase
 
 from .utils import num
 
@@ -190,7 +190,7 @@ def load_string(string):
         for message in bus.findall('ns:Message', NAMESPACES):
             messages.append(_load_message_element(message, bus_name))
 
-    return Database(messages,
-                    [Node(name=node['name'], comment=None) for node in nodes],
-                    buses,
-                    version)
+    return InternalDatabase(messages,
+                            [Node(name=node['name'], comment=None) for node in nodes],
+                            buses,
+                            version)

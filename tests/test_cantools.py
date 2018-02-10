@@ -84,7 +84,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(len(db.messages[0].signals[0].nodes), 1)
 
     def test_foobar(self):
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db.add_dbc_file(filename)
 
@@ -138,7 +138,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(message.signals[0].length, 512)
 
     def test_foobar_encode_decode(self):
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db.add_dbc_file(filename)
 
@@ -175,7 +175,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'padding_bit_order.dbc')
         db.add_dbc_file(filename)
 
@@ -257,7 +257,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
@@ -299,7 +299,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
@@ -320,7 +320,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
 
@@ -347,7 +347,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
@@ -374,7 +374,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
         db.add_dbc_file(filename)
 
@@ -397,7 +397,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(decoded, decoded_message)
 
     def test_socialledge(self):
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
 
@@ -472,7 +472,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
 
@@ -498,7 +498,7 @@ class CanToolsTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'socialledge.dbc')
         db.add_dbc_file(filename)
 
@@ -520,7 +520,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(decoded, decoded_message)
 
     def test_add_message(self):
-        db = cantools.db.File()
+        db = cantools.db.Database()
 
         signals = [
             cantools.db.Signal(name='signal',
@@ -800,7 +800,7 @@ IO_DEBUG(
 
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
-        db = cantools.db.File()
+        db = cantools.db.Database()
         db.add_kcd_file(filename)
 
         frame_id = 0x400
@@ -817,7 +817,7 @@ IO_DEBUG(
 
     def test_the_homer_float(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
-        db = cantools.db.File()
+        db = cantools.db.Database()
         db.add_kcd_file(filename)
 
         # Message 1 (binary64).
@@ -853,7 +853,7 @@ IO_DEBUG(
 
     def test_jopp_5_0_sym(self):
         filename = os.path.join('tests', 'files', 'jopp-5.0.sym')
-        db = cantools.db.File()
+        db = cantools.db.Database()
 
         with self.assertRaises(cantools.db.ParseError) as cm:
             db.add_sym_file(filename)
@@ -862,7 +862,7 @@ IO_DEBUG(
 
     def test_jopp_6_0_sym(self):
         filename = os.path.join('tests', 'files', 'jopp-6.0.sym')
-        db = cantools.db.File()
+        db = cantools.db.Database()
         db.add_sym_file(filename)
 
         self.assertEqual(len(db.messages), 6)
@@ -1016,7 +1016,7 @@ IO_DEBUG(
         self.assertEqual(decoded['Signal3'], 'bar')
 
     def test_add_bad_sym_string(self):
-        db = cantools.db.File()
+        db = cantools.db.Database()
 
         with self.assertRaises(cantools.db.ParseError) as cm:
             db.add_sym_string('FormatVersion=6.0\n'
@@ -1032,7 +1032,7 @@ IO_DEBUG(
             cantools.db.load(StringIO(''))
 
     def test_add_bad_kcd_string(self):
-        db = cantools.db.File()
+        db = cantools.db.Database()
 
         with self.assertRaises(ElementTree.ParseError) as cm:
             db.add_kcd_string('not xml')

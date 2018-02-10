@@ -1,7 +1,9 @@
 from xml.etree import ElementTree
 
 from .formats.utils import ParseError
-from .file import File
+from .database import Database
+# ToDo: Remove backwards compatibility File in future release.
+from .database import Database as File
 from .message import Message
 from .message import EncodeError
 from .message import DecodeError
@@ -38,7 +40,7 @@ class UnsupportedDatabaseFormatError(Exception):
 
 def load_file(filename, database_format=None):
     """Open, read and parse given database file and return a
-    :class:`~cantools.db.File` object with its
+    :class:`~cantools.db.Database` object with its
     contents. `database_format` may be one of ``'dbc'``, ``'kcd'``,
     ``'sym'`` or ``None``, where ``None`` means transparent
     format. Raises an
@@ -57,7 +59,7 @@ def load_file(filename, database_format=None):
 
 def load(fp, database_format=None):
     """Read and parse given database file-like object and return a
-    :class:`~cantools.db.File` object with its
+    :class:`~cantools.db.Database` object with its
     contents. `database_format` may be one of ``'dbc'``, ``'kcd'``,
     ``'sym'`` or ``None``, where ``None`` means transparent
     format. Raises an
@@ -76,10 +78,11 @@ def load(fp, database_format=None):
 
 
 def load_string(string, database_format=None):
-    """Parse given database string and return a :class:`~cantools.db.File`
-    object with its contents. `database_format` may be one of
-    ``'dbc'``, ``'kcd'``, ``'sym'`` or ``None``, where ``None`` means
-    transparent format. Raises an
+    """Parse given database string and return a
+    :class:`~cantools.db.Database` object with its
+    contents. `database_format` may be one of ``'dbc'``, ``'kcd'``,
+    ``'sym'`` or ``None``, where ``None`` means transparent
+    format. Raises an
     :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
     given string does not contain a supported database format.
 
@@ -101,7 +104,7 @@ def load_string(string, database_format=None):
 
     if database_format in ['dbc', None]:
         try:
-            db = File()
+            db = Database()
             db.add_dbc_string(string)
             return db
         except ParseError as e:
@@ -109,7 +112,7 @@ def load_string(string, database_format=None):
 
     if database_format in ['kcd', None]:
         try:
-            db = File()
+            db = Database()
             db.add_kcd_string(string)
             return db
         except ElementTree.ParseError as e:
@@ -117,7 +120,7 @@ def load_string(string, database_format=None):
 
     if database_format in ['sym', None]:
         try:
-            db = File()
+            db = Database()
             db.add_sym_string(string)
             return db
         except ParseError as e:

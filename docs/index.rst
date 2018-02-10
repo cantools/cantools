@@ -20,7 +20,7 @@ Functions and classes
 
 .. autofunction:: cantools.db.load
 
-.. autoclass:: cantools.db.File
+.. autoclass:: cantools.db.Database
     :members:
 
 .. autoclass:: cantools.db.Message

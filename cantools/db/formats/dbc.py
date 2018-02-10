@@ -23,7 +23,7 @@ from pyparsing import ParseSyntaxException
 from ..signal import Signal
 from ..message import Message
 from ..node import Node
-from ..database import Database
+from ..internal_database import InternalDatabase
 
 from .utils import num
 from .utils import ParseError
@@ -908,9 +908,9 @@ def load_string(string):
     nodes = _load_nodes(tokens, comments)
     version = _load_version(tokens)
 
-    return Database(messages,
-                    nodes,
-                    [],
-                    version,
-                    attribute_definitions,
-                    attribute_definition_defaults)
+    return InternalDatabase(messages,
+                            nodes,
+                            [],
+                            version,
+                            attribute_definitions,
+                            attribute_definition_defaults)

@@ -22,7 +22,7 @@ from pyparsing import ParseSyntaxException
 
 from ..signal import Signal
 from ..message import Message
-from ..database import Database
+from ..internal_database import InternalDatabase
 
 from .utils import num
 from .utils import ParseError
@@ -438,9 +438,9 @@ def load_string(string):
     signals = _load_signals(tokens, enums)
     messages = _load_messages(tokens, signals)
 
-    return Database(messages,
-                    [],
-                    [],
-                    version,
-                    [],
-                    [])
+    return InternalDatabase(messages,
+                            [],
+                            [],
+                            version,
+                            [],
+                            [])

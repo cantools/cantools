@@ -81,19 +81,19 @@ Decode CAN frames captured with the Linux program ``candump``.
 .. code-block:: text
 
    $ candump vcan0 | cantools decode tests/files/motohawk.dbc
-   vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
+     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
    ExampleMessage(
        Enable: 'Enabled' -,
        AverageRadius: 0.0 m,
        Temperature: 255.92 degK
    )
-   vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
+     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
    ExampleMessage(
        Enable: 'Enabled' -,
        AverageRadius: 0.0 m,
        Temperature: 255.92 degK
    )
-   vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
+     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
    ExampleMessage(
        Enable: 'Enabled' -,
        AverageRadius: 0.0 m,
@@ -105,9 +105,9 @@ Alternatively, the decoded message is printed on a single line:
 .. code-block:: text
 
    $ candump vcan0 | cantools decode --single-line tests/files/motohawk.dbc
-   vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
-   vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
-   vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
+     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
+     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
+     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
 
 Contributing
 ============

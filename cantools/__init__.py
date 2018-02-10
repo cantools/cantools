@@ -12,6 +12,12 @@ __version__ = '17.0.0'
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
 RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d+\]\s*([0-9A-F ]*)$')
 
+MULTI_LINE_FMT = '''
+{message}(
+{signals}
+)\
+'''
+
 
 def _mo_unpack(mo):
     frame_id = mo.group(1)
@@ -25,17 +31,7 @@ def _mo_unpack(mo):
     return frame_id, data
 
 
-def _format_message(dbf, frame_id, data, decode_choices):
-    try:
-        message = dbf.get_message_by_frame_id(frame_id)
-    except KeyError:
-        return 'Unknown frame id {}'.format(frame_id)
-
-    try:
-        decoded_signals = message.decode(data, decode_choices)
-    except ValueError as e:
-        return str(e)
-
+def _format_signals(message, decoded_signals):
     formatted_signals = []
 
     for signal in message.signals:
@@ -54,8 +50,41 @@ def _format_message(dbf, frame_id, data, decode_choices):
                               if signal.unit is None
                               else ' ' + signal.unit))
 
-    return '{}({})'.format(message.name,
-                           ', '.join(formatted_signals))
+    return formatted_signals
+
+
+def _format_message_single_line(message, formatted_signals):
+    return ' {}({})'.format(message.name,
+                            ', '.join(formatted_signals))
+
+
+def _format_message_multi_line(message, formatted_signals):
+    indented_signals = [
+        '    ' + formatted_signal
+        for formatted_signal in formatted_signals
+    ]
+
+    return MULTI_LINE_FMT.format(message=message.name,
+                                 signals=',\n'.join(indented_signals))
+
+
+def _format_message(dbf, frame_id, data, decode_choices, single_line):
+    try:
+        message = dbf.get_message_by_frame_id(frame_id)
+    except KeyError:
+        return ' Unknown frame id {}'.format(frame_id)
+
+    try:
+        decoded_signals = message.decode(data, decode_choices)
+    except ValueError as e:
+        return ' ' + str(e)
+
+    formatted_signals = _format_signals(message, decoded_signals)
+
+    if single_line:
+        return _format_message_single_line(message, formatted_signals)
+    else:
+        return _format_message_multi_line(message, formatted_signals)
 
 
 def _do_decode(args):
@@ -74,11 +103,12 @@ def _do_decode(args):
 
         if mo:
             frame_id, data = _mo_unpack(mo)
-            line += ' :: '
+            line += ' ::'
             line += _format_message(dbf,
                                     frame_id,
                                     data,
-                                    decode_choices)
+                                    decode_choices,
+                                    args.single_line)
 
         print(line)
 
@@ -106,6 +136,9 @@ def _main():
     decode_parser.add_argument('-c', '--no-decode-choices',
                                action='store_true',
                                help='Do not convert scaled values to choice strings.')
+    decode_parser.add_argument('-s', '--single-line',
+                               action='store_true',
+                               help='Print the decoded message on a single line.')
     decode_parser.add_argument('dbfile', help='Database file (.dbc).')
     decode_parser.set_defaults(func=_do_decode)
 

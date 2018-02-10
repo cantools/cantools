@@ -149,6 +149,6 @@ Contributing
 
 .. _encoding: http://cantools.readthedocs.io/en/latest/#cantools.db.Message.encode
 
-.. _encode_message(): http://cantools.readthedocs.io/en/latest/#cantools.db.File.encode_message
+.. _encode_message(): http://cantools.readthedocs.io/en/latest/#cantools.db.Database.encode_message
 
-.. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.db.File.decode_message
+.. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.db.Database.decode_message

@@ -194,12 +194,12 @@ class Database(object):
 
         if message.name in self._name_to_message:
             LOGGER.warning("Overwriting message with name '%s' in the "
-                           "name to message lookup table.",
+                           "name to message dictionary.",
                            message.name)
 
         if message.frame_id in self._frame_id_to_message:
             LOGGER.warning('Overwriting message with frame id 0x%x in the '
-                           'frame id to message lookup table.',
+                           'frame id to message dictionary.',
                            message.frame_id)
 
         self._name_to_message[message.name] = message

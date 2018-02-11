@@ -100,7 +100,7 @@ Decode CAN frames captured with the Linux program ``candump``.
        Temperature: 255.92 degK
    )
 
-Alternatively, the decoded message is printed on a single line:
+Alternatively, the decoded message can be printed on a single line:
 
 .. code-block:: text
 

@@ -23,6 +23,6 @@ class InternalDatabase(object):
         self.attribute_definitions = attribute_definitions
 
         if attribute_definition_defaults is None:
-            attribute_definition_defaults = []
+            attribute_definition_defaults = {}
 
         self.attribute_definition_defaults = attribute_definition_defaults

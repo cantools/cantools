@@ -34,7 +34,7 @@ class Database(object):
         self._version = version
         self._attribute_definitions = (attribute_definitions
                                        if attribute_definitions
-                                       else {})
+                                       else [])
         self._attribute_definition_defaults = (attribute_definition_defaults
                                                if attribute_definition_defaults
                                                else {})

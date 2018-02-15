@@ -37,7 +37,7 @@ class Database(object):
                                        else [])
         self._attribute_definition_defaults = (attribute_definition_defaults
                                                if attribute_definition_defaults
-                                               else [])
+                                               else {})
 
     @property
     def messages(self):

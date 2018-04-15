@@ -102,7 +102,7 @@ class Message(UserDict, object):
     def send_periodic_start(self):
         if not self._enabled:
             return
-        
+
         self._periodic_task = self._can_bus.send_periodic(
             self._can_message,
             self.database.cycle_time / 1000.0)
@@ -129,6 +129,14 @@ class Tester(object):
     database object, and `can_bus` a CAN bus object, normally created
     using the python-can package.
 
+    >>> import can
+    >>> import cantools
+    >>> can.rc['interface'] = 'socketcan_native'
+    >>> can.rc['channel'] = 'vcan0'
+    >>> can_bus = can.interface.Bus()
+    >>> database = cantools.db.load_file('tests/files/tester.kcd')
+    >>> tester = cantools.tester.Tester('PeriodicConsumer', 'PeriodicBus', database, can_bus)
+
     """
 
     def __init__(self, dut_name, bus_name, database, can_bus):
@@ -150,6 +158,8 @@ class Tester(object):
     def start(self):
         """Start the tester. Starts sending enabled periodic messages.
 
+        >>> tester.start()
+
         """
 
         for message in self._messages.values():
@@ -164,6 +174,8 @@ class Tester(object):
     def stop(self):
         """Stop the tester.
 
+        >>> tester.stop()
+
         """
 
         for message in self._messages.values():
@@ -171,7 +183,17 @@ class Tester(object):
 
     @property
     def messages(self):
-        """A dictionary-like object of all messages.
+        """Set and get signals in messages. Changed signal values takes effect
+        immediately for periodic messages. Call
+        :meth:`~cantools.tester.Tester.send()` for other messages.
+
+        >>> periodic_message = tester.messages['PeriodicMessage1']
+        >>> periodic_message
+        {'Signal1': 0, 'Signal2': 0}
+        >>> periodic_message['Signal1'] = 1
+        >>> periodic_message.update({'Signal1': 2, 'Signal2': 5})
+        >>> periodic_message
+        {'Signal1': 2, 'Signal2': 5}
 
         """
 
@@ -180,6 +202,8 @@ class Tester(object):
     def enable(self, message_name):
         """Enable given message.
 
+        >>> tester.enable('PeriodicMessage1')
+
         """
 
         self._messages[message_name].enabled = True
@@ -187,12 +211,17 @@ class Tester(object):
     def disable(self, message_name):
         """Disable given message.
 
+        >>> tester.disable('PeriodicMessage1')
+
         """
 
         self._messages[message_name].enabled = False
 
     def is_enabled(self, message_name):
         """``True`` is given message is enabled, ``False`` otherwise.
+
+        >>> tester.is_enabled('PeriodicMessage1')
+        True
 
         """
 
@@ -202,7 +231,8 @@ class Tester(object):
         """Send a message with given name `message_name` and optional signals
         `signals`.
 
-        >>> tester.send('Foo', {'Bar': 5})
+        >>> tester.send('Message1', {'Signal2': 10})
+        >>> tester.send('Message1')
 
         """
 
@@ -210,17 +240,19 @@ class Tester(object):
 
     def expect(self, message_name, signals=None, timeout=None):
         """Expect a message with name `message_name` and signal values
-        `signals`. Give `signals` as ``None`` to expect any signal
-        values.
+        `signals` within `timeout` seconds. Give `signals` as ``None``
+        to expect any signal values. Give `timeout` as ``None`` to
+        wait forever.
 
-        >>> tester.expect('Foo', {'Bar': 5})
+        >>> tester.expect('Message2', {'Signal1': 13})
+        {'Signal1': 13, 'Signal2': 9}
 
         """
 
         return self._messages[message_name].expect(signals, timeout)
 
     def flush_input(self):
-        """Flush, or discard, all messages in the message input queue.
+        """Flush, or discard, all messages in the input queue.
 
         """
 

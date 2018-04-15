@@ -46,6 +46,7 @@ def setup_tester():
                                     'PeriodicBus',
                                     database,
                                     can_bus)
+
     return tester, can_bus
 
 

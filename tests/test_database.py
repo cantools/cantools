@@ -19,7 +19,7 @@ except ImportError:
 import cantools
 
 
-class CanToolsTest(unittest.TestCase):
+class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
 
@@ -679,6 +679,7 @@ IO_DEBUG(
         self.assertEqual(db.messages[0].is_extended_frame, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
         self.assertEqual(db.messages[0].length, 3)
+        self.assertEqual(db.messages[0].senders, ['Brake ACME'])
         self.assertEqual(len(db.messages[0].signals), 8)
         self.assertEqual(db.messages[0].comment, None)
         self.assertEqual(db.messages[0].send_type, None)
@@ -688,10 +689,13 @@ IO_DEBUG(
         self.assertEqual(db.messages[1].frame_id, 0x0B2)
         self.assertEqual(db.messages[1].name, 'ABS')
         self.assertEqual(db.messages[1].cycle_time, 100)
+        self.assertEqual(db.messages[1].senders,
+                         ['Brake ACME', 'Brake alternative supplier'])
 
         self.assertEqual(db.messages[3].frame_id, 0x400)
         self.assertEqual(db.messages[3].name, 'Emission')
         self.assertEqual(db.messages[3].length, 5)
+        self.assertEqual(db.messages[3].senders, [])
 
         self.assertEqual(db.messages[-1].bus_name, 'Comfort')
 

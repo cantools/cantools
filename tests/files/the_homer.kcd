@@ -124,10 +124,6 @@
     </Message>
 
     <Message id="0x400" length="5" name="Emission">
-      <Producer>
-        <NodeRef id="1"/>
-        <NodeRef id="17"/>
-      </Producer>
       <Signal name="MIL" offset="0"/>
       <Signal name="Enginespeed" offset="1" length="16"/>
       <Signal name="NoxSensor" offset="17" length="16"/>

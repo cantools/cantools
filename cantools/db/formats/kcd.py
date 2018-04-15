@@ -19,6 +19,12 @@ NAMESPACE = 'http://kayak.2codeornot2code.org/1.0'
 NAMESPACES = {'ns': NAMESPACE}
 
 
+def _get_node_name_by_id(nodes, node_id):
+    for node in nodes:
+        if node['id'] == node_id:
+            return node['name']
+
+
 def _load_signal_element(signal):
     """Load given signal element and return a signal object.
 
@@ -96,7 +102,7 @@ def _load_signal_element(signal):
                   is_float=is_float)
 
 
-def _load_message_element(message, bus_name):
+def _load_message_element(message, bus_name, nodes):
     """Load given message element and return a message object.
 
     """
@@ -108,6 +114,7 @@ def _load_message_element(message, bus_name):
     notes = None
     length = 'auto'
     interval = 0
+    senders = []
 
     # Message XML attributes.
     for key, value in message.attrib.items():
@@ -131,6 +138,16 @@ def _load_message_element(message, bus_name):
     except AttributeError:
         pass
 
+    # Senders.
+    try:
+        producer = message.find('ns:Producer', NAMESPACES)
+
+        for sender in producer.findall('ns:NodeRef', NAMESPACES):
+            senders.append(_get_node_name_by_id(nodes,
+                                                sender.attrib['id']))
+    except AttributeError:
+        pass
+
     # Find all signals in this message.
     signals = []
 
@@ -150,7 +167,7 @@ def _load_message_element(message, bus_name):
                    is_extended_frame=is_extended_frame,
                    name=name,
                    length=length,
-                   senders=[],
+                   senders=senders,
                    send_type=None,
                    cycle_time=interval,
                    signals=signals,
@@ -188,9 +205,14 @@ def load_string(string):
         buses.append(Bus(bus_name, baudrate=bus_baudrate))
 
         for message in bus.findall('ns:Message', NAMESPACES):
-            messages.append(_load_message_element(message, bus_name))
+            messages.append(_load_message_element(message,
+                                                  bus_name,
+                                                  nodes))
 
     return InternalDatabase(messages,
-                            [Node(name=node['name'], comment=None) for node in nodes],
+                            [
+                                Node(name=node['name'], comment=None)
+                                for node in nodes
+                            ],
                             buses,
                             version)

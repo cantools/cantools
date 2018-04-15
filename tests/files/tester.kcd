@@ -1,0 +1,38 @@
+<NetworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kayak.2codeornot2code.org/1.0" xsi:noNamespaceSchemaLocation="Definition.xsd">
+  <Document name="Simulator" version="1.0" author="" company="" date="">
+    Simulator.
+  </Document>
+  <Node id="1" name="PeriodicProducer"/>
+  <Node id="2" name="PeriodicConsumer"/>
+  <Node id="3" name="SetGetNode"/>
+
+  <Bus name="PeriodicBus">
+    <Message id="0x001" name="PeriodicMessage1" interval="50">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="0" length="8" />
+      <Signal name="Signal2" offset="8" length="8" />
+    </Message>
+  </Bus>
+
+  <Bus name="SetGetBus">
+    <Message id="0x002" name="SetGetMessage1">
+      <Producer>
+        <NodeRef id="3"/>
+      </Producer>
+      <Signal name="Signal1" offset="0" length="8" />
+      <Signal name="Signal2" offset="8" length="1" />
+    </Message>
+
+    <Message id="0x003" name="SetGetMessage2">
+      <Producer>
+        <NodeRef id="3"/>
+      </Producer>
+      <Signal name="Signal1" offset="0" length="8" />
+      <Signal name="Signal2" offset="8" length="1" />
+      <Signal name="Signal3" offset="16" length="8" />
+    </Message>
+  </Bus>
+
+</NetworkDefinition>

@@ -32,6 +32,9 @@ Functions and classes
 .. autoclass:: cantools.db.UnsupportedDatabaseFormatError
     :members:
 
+.. autoclass:: cantools.tester.Tester
+    :members:
+
 Tips and tricks
 ===============
 

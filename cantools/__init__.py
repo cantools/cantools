@@ -4,6 +4,8 @@ import re
 import binascii
 import struct
 from . import db
+from . import tester
+
 
 __author__ = 'Erik Moqvist'
 __version__ = '18.0.1'

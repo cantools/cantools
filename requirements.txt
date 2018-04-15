@@ -2,3 +2,4 @@ bitstruct
 pyparsing
 codespell
 mock
+python-can

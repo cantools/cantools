@@ -1,0 +1,41 @@
+<NetworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kayak.2codeornot2code.org/1.0" xsi:noNamespaceSchemaLocation="Definition.xsd">
+
+  <Document name="Network" version="1.0" author="Erik Moqvist" company="-" date="2018-04-10">
+    A washing machine.
+  </Document>
+
+  <Node id="1" name="Motor"/>
+  <Node id="2" name="Controller"/>
+
+  <Bus name="MainBus">
+
+    <Message id="0x010" name="MotorStatus" interval="1000">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Speed" offset="0" length="16">
+        <Consumer>
+          <NodeRef id="2"/>
+        </Consumer>
+      </Signal>
+      <Signal name="Load" offset="16" length="8">
+        <Consumer>
+          <NodeRef id="2"/>
+        </Consumer>
+      </Signal>
+    </Message>
+
+    <Message id="0x011" name="MotorControl">
+      <Producer>
+        <NodeRef id="2"/>
+      </Producer>
+      <Signal name="Speed" offset="0" length="16">
+        <Consumer>
+          <NodeRef id="1"/>
+        </Consumer>
+      </Signal>
+    </Message>
+
+  </Bus>
+
+</NetworkDefinition>

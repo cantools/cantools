@@ -355,6 +355,17 @@ class Message(object):
         """A list of all message node names (or message senders, if one
         prefers).
 
+        NOTE: This property is deprecated. Use
+        :data:`~cantools.db.Message.senders` instead.
+
+        """
+
+        return self._nodes
+
+    @property
+    def senders(self):
+        """A list of all message sender names.
+
         """
 
         return self._nodes

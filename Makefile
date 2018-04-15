@@ -1,6 +1,7 @@
 test:
 	python2 setup.py test
 	python3 setup.py test
+	env PYTHONPATH=. python2 examples/hello_world.py
 	env PYTHONPATH=. python3 examples/hello_world.py
 	codespell -d $$(git ls-files | grep -v the_homer\.kcd)
 

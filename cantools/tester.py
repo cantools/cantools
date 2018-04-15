@@ -115,9 +115,13 @@ class Message(UserDict, object):
     def _update_can_message(self):
         arbitration_id = self.database.frame_id
         data = self.database.encode(self.data)
+        extended_id = self.database.is_extended_frame
         self._can_message = can.Message(arbitration_id=arbitration_id,
-                                        extended_id=False,
+                                        extended_id=extended_id,
                                         data=data)
+
+        if self._periodic_task is not None:
+            self._periodic_task.modify_data(self._can_message)
 
 
 class Tester(object):

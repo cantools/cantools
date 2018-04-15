@@ -1,3 +1,5 @@
+# The tester module.
+
 try:
     from collections import UserDict
 except ImportError:
@@ -119,7 +121,9 @@ class Message(UserDict, object):
 
 
 class Tester(object):
-    """The CAN bus tester.
+    """Test the node named `dut_name` on bus `bus_name`. `database` is a
+    database object, and `can_bus` a CAN bus object, normally created
+    using the python-can package.
 
     """
 
@@ -212,7 +216,7 @@ class Tester(object):
         return self._messages[message_name].expect(signals, timeout)
 
     def flush_input(self):
-        """Flush the message input queue.
+        """Flush, or discard, all messages in the message input queue.
 
         """
 

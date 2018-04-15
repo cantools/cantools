@@ -95,6 +95,9 @@ class Message(UserDict, object):
                 return decoded
 
     def send_periodic_start(self):
+        if not self._enabled:
+            return
+        
         self._periodic_task = self._can_bus.send_periodic(
             self._can_message,
             self.database.cycle_time / 1000.0)

@@ -180,7 +180,7 @@ class Signal(object):
 
     @property
     def receivers(self):
-        """A list of receivers for this signal.
+        """A list of all receiver nodes of this signal.
 
         """
 

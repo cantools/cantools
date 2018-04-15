@@ -352,7 +352,7 @@ class Message(object):
 
     @property
     def senders(self):
-        """A list of all message sender names.
+        """A list of all sender nodes of this message.
 
         """
 

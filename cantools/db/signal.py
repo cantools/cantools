@@ -49,7 +49,7 @@ class Signal(object):
                  unit=None,
                  choices=None,
                  comment=None,
-                 nodes=None,
+                 receivers=None,
                  is_multiplexer=False,
                  multiplexer_ids=None,
                  multiplexer_signal=None,
@@ -66,7 +66,7 @@ class Signal(object):
         self._unit = unit
         self._choices = choices
         self._comment = comment
-        self._nodes = [] if nodes is None else nodes
+        self._receivers = [] if receivers is None else receivers
         self._is_multiplexer = is_multiplexer
         self._multiplexer_ids = multiplexer_ids
         self._multiplexer_signal = multiplexer_signal
@@ -179,13 +179,12 @@ class Signal(object):
         return self._comment
 
     @property
-    def nodes(self):
-        """A list of nodes for this signal (or signal receivers, if one
-        prefers).
+    def receivers(self):
+        """A list of receivers for this signal.
 
         """
 
-        return self._nodes
+        return self._receivers
 
     @property
     def is_multiplexer(self):

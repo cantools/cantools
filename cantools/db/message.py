@@ -119,7 +119,7 @@ class Message(object):
                  length,
                  signals,
                  comment=None,
-                 nodes=None,
+                 senders=None,
                  send_type=None,
                  cycle_time=None,
                  is_extended_frame=False,
@@ -131,7 +131,7 @@ class Message(object):
         self._signals = signals
         self._signals.sort(key=_start_bit)
         self._comment = comment
-        self._nodes = nodes
+        self._senders = senders
         self._send_type = send_type
         self._cycle_time = cycle_time
         self._bus_name = bus_name
@@ -351,24 +351,12 @@ class Message(object):
         return self._comment
 
     @property
-    def nodes(self):
-        """A list of all message node names (or message senders, if one
-        prefers).
-
-        NOTE: This property is deprecated. Use
-        :data:`~cantools.db.Message.senders` instead.
-
-        """
-
-        return self._nodes
-
-    @property
     def senders(self):
         """A list of all message sender names.
 
         """
 
-        return self._nodes
+        return self._senders
 
     @property
     def send_type(self):

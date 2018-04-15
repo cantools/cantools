@@ -362,21 +362,21 @@ def _dump_messages(database):
 
     for message in database.messages:
         msg = []
-        fmt = 'BO_ {frame_id} {name}: {length} {nodes}'
+        fmt = 'BO_ {frame_id} {name}: {length} {senders}'
         msg.append(fmt.format(frame_id=message.frame_id,
                               name=message.name,
                               length=message.length,
-                              nodes=' '.join(message.nodes)))
+                              senders=' '.join(message.senders)))
 
         for signal in message.signals[::-1]:
             fmt = (' SG_ {name} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
-                   ' [{minimum}|{maximum}] "{unit}" {nodes}')
+                   ' [{minimum}|{maximum}] "{unit}" {receivers}')
             msg.append(fmt.format(
                 name=signal.name,
                 start=signal.start,
                 length=signal.length,
-                nodes=', '.join(signal.nodes),
+                receivers=', '.join(signal.receivers),
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
                 sign=('-' if signal.is_signed else '+'),
                 scale=signal.scale,
@@ -760,12 +760,12 @@ def _load_messages(tokens,
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
 
-        # Nodes (or better, senders).
-        nodes = [message[4]]
+        # Senders.
+        senders = [message[4]]
 
         for node in message_senders.get(frame_id_dbc, []):
-            if node not in nodes:
-                nodes.append(node)
+            if node not in senders:
+                senders.append(node)
 
         # Signal multiplexing.
         multiplexer_signal = None
@@ -781,13 +781,13 @@ def _load_messages(tokens,
             is_extended_frame=is_extended_frame,
             name=message[2],
             length=int(message[3], 0),
-            nodes=nodes,
+            senders=senders,
             send_type=get_send_type(frame_id_dbc),
             cycle_time=get_cycle_time(frame_id_dbc),
             signals=[Signal(name=signal[1][0],
                             start=int(signal[2][0]),
                             length=int(signal[2][1]),
-                            nodes=list(signal[6]),
+                            receivers=list(signal[6]),
                             byte_order=('big_endian'
                                         if signal[2][2] == '0'
                                         else 'little_endian'),

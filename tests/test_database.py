@@ -30,14 +30,14 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.nodes[0].name, 'Vector__XXX')
         self.assertEqual(len(db.messages), 217)
         self.assertEqual(db.messages[216].frame_id, 155872546)
-        self.assertEqual(db.messages[216].nodes, ['Vector__XXX'])
+        self.assertEqual(db.messages[216].senders, ['Vector__XXX'])
         self.assertEqual(str(db.messages[0]),
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, False, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
                          "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
-        self.assertEqual(db.messages[0].signals[0].nodes, ['Vector__XXX'])
+        self.assertEqual(db.messages[0].signals[0].receivers, ['Vector__XXX'])
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
@@ -63,10 +63,10 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(db.nodes[0].name, 'PCM1')
         self.assertEqual(db.nodes[1].name, 'FOO')
         self.assertEqual(len(db.messages), 1)
-        self.assertEqual(len(db.messages[0].signals[2].nodes), 2)
-        self.assertEqual(db.messages[0].signals[2].nodes[0], 'Vector__XXX')
-        self.assertEqual(db.messages[0].signals[2].nodes[1], 'FOO')
-        self.assertEqual(db.messages[0].signals[1].nodes[0], 'Vector__XXX')
+        self.assertEqual(len(db.messages[0].signals[2].receivers), 2)
+        self.assertEqual(db.messages[0].signals[2].receivers[0], 'Vector__XXX')
+        self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
+        self.assertEqual(db.messages[0].signals[1].receivers[0], 'Vector__XXX')
 
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
@@ -81,7 +81,7 @@ class CanToolsTest(unittest.TestCase):
         self.assertEqual(len(db.nodes), 1)
         self.assertEqual(db.nodes[0].name, 'EMV_Statusmeldungen')
         self.assertEqual(len(db.messages), 1)
-        self.assertEqual(len(db.messages[0].signals[0].nodes), 1)
+        self.assertEqual(len(db.messages[0].signals[0].receivers), 1)
 
     def test_foobar(self):
         db = cantools.db.Database()
@@ -120,20 +120,20 @@ class CanToolsTest(unittest.TestCase):
 
         message = db.get_message_by_frame_id(0x12331)
         self.assertEqual(message.name, 'Fum')
-        self.assertEqual(message.nodes, ['FOO'])
+        self.assertEqual(message.senders, ['FOO'])
         self.assertEqual(message.signals[0].is_float, False)
 
         message = db.get_message_by_frame_id(0x12332)
         self.assertEqual(message.name, 'Bar')
-        self.assertEqual(message.nodes, ['FOO', 'BAR'])
-        self.assertEqual(message.signals[0].nodes, ['Vector__XXX', 'FUM'])
+        self.assertEqual(message.senders, ['FOO', 'BAR'])
+        self.assertEqual(message.signals[0].receivers, ['Vector__XXX', 'FUM'])
         self.assertEqual(message.signals[0].is_float, True)
         self.assertEqual(message.signals[0].length, 32)
 
         message = db.get_message_by_frame_id(0x12333)
         self.assertEqual(message.name, 'CanFd')
-        self.assertEqual(message.nodes, ['FOO'])
-        self.assertEqual(message.signals[0].nodes, ['Vector__XXX', 'FUM'])
+        self.assertEqual(message.senders, ['FOO'])
+        self.assertEqual(message.signals[0].receivers, ['Vector__XXX', 'FUM'])
         self.assertEqual(message.signals[0].is_float, False)
         self.assertEqual(message.signals[0].length, 512)
 
@@ -526,7 +526,7 @@ class CanToolsTest(unittest.TestCase):
             cantools.db.Signal(name='signal',
                                start=0,
                                length=4,
-                               nodes=['foo'],
+                               receivers=['foo'],
                                byte_order='big_endian',
                                scale=1.0,
                                offset=10,
@@ -538,7 +538,7 @@ class CanToolsTest(unittest.TestCase):
         message = cantools.db.Message(frame_id=37,
                                       name='message',
                                       length=8,
-                                      nodes=['bar'],
+                                      senders=['bar'],
                                       signals=signals,
                                       comment='')
         db.add_message(message)
@@ -700,7 +700,7 @@ IO_DEBUG(
         self.assertEqual(seat_configuration.name, 'SeatConfiguration')
         self.assertEqual(seat_configuration.start, 16)
         self.assertEqual(seat_configuration.length, 8)
-        self.assertEqual(seat_configuration.nodes, [])
+        self.assertEqual(seat_configuration.receivers, [])
         self.assertEqual(seat_configuration.byte_order, 'little_endian')
         self.assertEqual(seat_configuration.is_signed, False)
         self.assertEqual(seat_configuration.is_float, False)
@@ -717,7 +717,7 @@ IO_DEBUG(
         self.assertEqual(tank_temperature.name, 'TankTemperature')
         self.assertEqual(tank_temperature.start, 16)
         self.assertEqual(tank_temperature.length, 16)
-        self.assertEqual(tank_temperature.nodes, [])
+        self.assertEqual(tank_temperature.receivers, [])
         self.assertEqual(tank_temperature.byte_order, 'little_endian')
         self.assertEqual(tank_temperature.is_signed, True)
         self.assertEqual(tank_temperature.is_float, False)
@@ -734,7 +734,7 @@ IO_DEBUG(
         self.assertEqual(speed_km.name, 'SpeedKm')
         self.assertEqual(speed_km.start, 30)
         self.assertEqual(speed_km.length, 24)
-        self.assertEqual(speed_km.nodes, [])
+        self.assertEqual(speed_km.receivers, [])
         self.assertEqual(speed_km.byte_order, 'little_endian')
         self.assertEqual(speed_km.is_signed, False)
         self.assertEqual(speed_km.is_float, False)
@@ -752,7 +752,7 @@ IO_DEBUG(
         self.assertEqual(outside_temp.name, 'OutsideTemp')
         self.assertEqual(outside_temp.start, 18)
         self.assertEqual(outside_temp.length, 12)
-        self.assertEqual(outside_temp.nodes, [])
+        self.assertEqual(outside_temp.receivers, [])
         self.assertEqual(outside_temp.byte_order, 'big_endian')
         self.assertEqual(outside_temp.is_signed, False)
         self.assertEqual(outside_temp.is_float, False)
@@ -769,7 +769,7 @@ IO_DEBUG(
         self.assertEqual(ambient_lux.name, 'AmbientLux')
         self.assertEqual(ambient_lux.start, 0)
         self.assertEqual(ambient_lux.length, 64)
-        self.assertEqual(ambient_lux.nodes, [])
+        self.assertEqual(ambient_lux.receivers, [])
         self.assertEqual(ambient_lux.byte_order, 'little_endian')
         self.assertEqual(ambient_lux.is_signed, False)
         self.assertEqual(ambient_lux.is_float, True)
@@ -786,7 +786,7 @@ IO_DEBUG(
         self.assertEqual(windshield_humidity.name, 'Windshield')
         self.assertEqual(windshield_humidity.start, 0)
         self.assertEqual(windshield_humidity.length, 32)
-        self.assertEqual(windshield_humidity.nodes, [])
+        self.assertEqual(windshield_humidity.receivers, [])
         self.assertEqual(windshield_humidity.byte_order, 'little_endian')
         self.assertEqual(windshield_humidity.is_signed, False)
         self.assertEqual(windshield_humidity.is_float, True)
@@ -875,7 +875,7 @@ IO_DEBUG(
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 8)
-        self.assertEqual(message_1.nodes, [])
+        self.assertEqual(message_1.senders, [])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, 30)
         self.assertEqual(len(message_1.signals), 2)
@@ -886,7 +886,7 @@ IO_DEBUG(
         self.assertEqual(signal_1.name, 'Signal1')
         self.assertEqual(signal_1.start, 0)
         self.assertEqual(signal_1.length, 11)
-        self.assertEqual(signal_1.nodes, [])
+        self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'big_endian')
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.scale, 1)
@@ -904,7 +904,7 @@ IO_DEBUG(
         self.assertEqual(signal_2.name, 'Signal2')
         self.assertEqual(signal_2.start, 32)
         self.assertEqual(signal_2.length, 32)
-        self.assertEqual(signal_2.nodes, [])
+        self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'big_endian')
         self.assertEqual(signal_2.is_signed, False)
         self.assertEqual(signal_2.scale, 1)
@@ -924,7 +924,7 @@ IO_DEBUG(
         self.assertEqual(message_2.is_extended_frame, True)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 8)
-        self.assertEqual(message_2.nodes, [])
+        self.assertEqual(message_2.senders, [])
         self.assertEqual(message_2.send_type, None)
         self.assertEqual(message_2.cycle_time, None)
         self.assertEqual(len(message_2.signals), 1)
@@ -936,7 +936,7 @@ IO_DEBUG(
         self.assertEqual(signal_3.name, 'Signal3')
         self.assertEqual(signal_3.start, 2)
         self.assertEqual(signal_3.length, 11)
-        self.assertEqual(signal_3.nodes, [])
+        self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'little_endian')
         self.assertEqual(signal_3.is_signed, True)
         self.assertEqual(signal_3.scale, 1)
@@ -955,7 +955,7 @@ IO_DEBUG(
         self.assertEqual(signal_4.name, 'Signal4')
         self.assertEqual(signal_4.start, 0)
         self.assertEqual(signal_4.length, 64)
-        self.assertEqual(signal_4.nodes, [])
+        self.assertEqual(signal_4.receivers, [])
         self.assertEqual(signal_4.byte_order, 'big_endian')
         self.assertEqual(signal_4.is_signed, False)
         self.assertEqual(signal_4.scale, 6)

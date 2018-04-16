@@ -1,5 +1,7 @@
 # The tester module.
 
+import time
+
 try:
     from collections import UserDict
 except ImportError:
@@ -14,6 +16,10 @@ import can
 
 
 class Error(Exception):
+    pass
+
+
+class TimeoutError(Error):
     pass
 
 
@@ -70,11 +76,6 @@ class Message(UserDict, object):
     def enabled(self, value):
         self._enabled = value
 
-        if value and self.periodic:
-            self.send_periodic_start()
-        else:
-            self.send_periodic_stop()
-
     def send(self, signals=None):
         if signals is not None:
             self.update(signals)
@@ -82,8 +83,22 @@ class Message(UserDict, object):
         self._can_bus.send(self._can_message)
 
     def expect(self, signals=None, timeout=None):
+        if signals is None:
+            signals = {}
+
+        if timeout is not None:
+            end_time = time.time() + timeout
+
         while True:
-            message = self._input_queue.get(timeout=timeout)
+            if timeout is not None:
+                remaining_time = end_time - time.time()
+
+                if remaining_time <= 0:
+                    raise TimeoutError()
+            else:
+                remaining_time = None
+
+            message = self._input_queue.get(timeout=remaining_time)
 
             if message is None:
                 continue
@@ -92,9 +107,6 @@ class Message(UserDict, object):
                 continue
 
             decoded = self.database.decode(message.data)
-
-            if signals is None:
-                return decoded
 
             if all([decoded[name] == signals[name] for name in signals]):
                 return decoded
@@ -114,8 +126,8 @@ class Message(UserDict, object):
 
     def _update_can_message(self):
         arbitration_id = self.database.frame_id
-        data = self.database.encode(self.data)
         extended_id = self.database.is_extended_frame
+        data = self.database.encode(self.data)
         self._can_message = can.Message(arbitration_id=arbitration_id,
                                         extended_id=extended_id,
                                         data=data)
@@ -148,6 +160,7 @@ class Tester(object):
         self._notifier = can.Notifier(can_bus,
                                       [Listener(self._input_queue)])
         self._messages = Messages()
+        self._is_running = False
 
         for message in database.messages:
             if message.bus_name == bus_name:
@@ -171,6 +184,8 @@ class Tester(object):
 
             message.send_periodic_start()
 
+        self._is_running = True
+
     def stop(self):
         """Stop the tester.
 
@@ -181,10 +196,12 @@ class Tester(object):
         for message in self._messages.values():
             message.send_periodic_stop()
 
+        self._is_running = False
+
     @property
     def messages(self):
         """Set and get signals in messages. Changed signal values takes effect
-        immediately for periodic messages. Call
+        immediately for started periodic messages. Call
         :meth:`~cantools.tester.Tester.send()` for other messages.
 
         >>> periodic_message = tester.messages['PeriodicMessage1']
@@ -200,32 +217,30 @@ class Tester(object):
         return self._messages
 
     def enable(self, message_name):
-        """Enable given message.
+        """Enable given message `message_name`.
 
         >>> tester.enable('PeriodicMessage1')
 
         """
 
-        self._messages[message_name].enabled = True
+        message = self._messages[message_name]
+        message.enabled = True
+
+        if self._is_running and message.periodic:
+            message.send_periodic_start()
 
     def disable(self, message_name):
-        """Disable given message.
+        """Disable given message `message_name`.
 
         >>> tester.disable('PeriodicMessage1')
 
         """
 
-        self._messages[message_name].enabled = False
+        message = self._messages[message_name]
+        message.enabled = False
 
-    def is_enabled(self, message_name):
-        """``True`` is given message is enabled, ``False`` otherwise.
-
-        >>> tester.is_enabled('PeriodicMessage1')
-        True
-
-        """
-
-        return self._messages[message_name].enabled
+        if self._is_running and message.periodic:
+            message.send_periodic_stop()
 
     def send(self, message_name, signals=None):
         """Send a message with given name `message_name` and optional signals

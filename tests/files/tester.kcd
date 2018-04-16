@@ -6,7 +6,7 @@
   <Node id="2" name="PeriodicConsumer"/>
   <Node id="3" name="SetGetNode"/>
 
-  <Bus name="PeriodicBus">
+  <Bus name="Bus1">
     <Message id="0x001" name="PeriodicMessage1" interval="50">
       <Producer>
         <NodeRef id="1"/>
@@ -14,10 +14,8 @@
       <Signal name="Signal1" offset="0" length="8" />
       <Signal name="Signal2" offset="8" length="8" />
     </Message>
-  </Bus>
 
-  <Bus name="SetGetBus">
-    <Message id="0x002" name="SetGetMessage1">
+    <Message id="0x002" name="Message1">
       <Producer>
         <NodeRef id="3"/>
       </Producer>
@@ -25,12 +23,12 @@
       <Signal name="Signal2" offset="8" length="1" />
     </Message>
 
-    <Message id="0x003" name="SetGetMessage2">
+    <Message id="0x003" name="Message2">
       <Producer>
         <NodeRef id="3"/>
       </Producer>
       <Signal name="Signal1" offset="0" length="8" />
-      <Signal name="Signal2" offset="8" length="1" />
+      <Signal name="Signal2" offset="8" length="4" />
       <Signal name="Signal3" offset="16" length="8" />
     </Message>
   </Bus>

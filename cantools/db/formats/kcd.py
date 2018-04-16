@@ -113,7 +113,7 @@ def _load_message_element(message, bus_name, nodes):
     is_extended_frame = False
     notes = None
     length = 'auto'
-    interval = 0
+    interval = None
     senders = []
 
     # Message XML attributes.

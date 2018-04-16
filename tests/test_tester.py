@@ -45,9 +45,9 @@ def setup_tester():
     database = cantools.db.load_file(filename)
     can_bus = CanBus()
     tester = cantools.tester.Tester('PeriodicConsumer',
-                                    'Bus1',
                                     database,
-                                    can_bus)
+                                    can_bus,
+                                    'Bus1')
 
     return tester, can_bus
 

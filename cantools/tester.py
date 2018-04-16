@@ -147,11 +147,11 @@ class Tester(object):
     >>> can.rc['channel'] = 'vcan0'
     >>> can_bus = can.interface.Bus()
     >>> database = cantools.db.load_file('tests/files/tester.kcd')
-    >>> tester = cantools.tester.Tester('PeriodicConsumer', 'PeriodicBus', database, can_bus)
+    >>> tester = cantools.tester.Tester('PeriodicConsumer', database, can_bus, 'PeriodicBus')
 
     """
 
-    def __init__(self, dut_name, bus_name, database, can_bus):
+    def __init__(self, dut_name, database, can_bus, bus_name=None):
         self._dut_name = dut_name
         self._bus_name = bus_name
         self._database = database

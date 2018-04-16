@@ -17,9 +17,9 @@ can.rc['channel'] = 'vcan0'
 can_bus = can.interface.Bus()
 database = cantools.db.load_file(WASHING_MACHINE_KCD_PATH)
 tester = cantools.tester.Tester('Motor',
-                                'MainBus',
                                 database,
-                                can_bus)
+                                can_bus,
+                                'MainBus')
 tester.start()
 
 status = tester.expect('MotorStatus')

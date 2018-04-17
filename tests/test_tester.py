@@ -211,7 +211,7 @@ class CanToolsTesterTest(unittest.TestCase):
 
         """
 
-        tester, can_bus = setup_tester('Node1')
+        tester, _ = setup_tester('Node1')
         tester.start()
 
         with self.assertRaises(cantools.tester.Error) as cm:

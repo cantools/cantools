@@ -124,9 +124,11 @@ class Message(UserDict, object):
 
 
 class Tester(object):
-    """Test the node named `dut_name` on bus `bus_name`. `database` is a
+    """Test the node `dut_name` on CAN bus `bus_name`. `database` is a
     database object, and `can_bus` a CAN bus object, normally created
     using the python-can package.
+
+    Here is an example of how to create a tester:
 
     >>> import can
     >>> import cantools
@@ -174,7 +176,9 @@ class Tester(object):
         self._is_running = True
 
     def stop(self):
-        """Stop the tester.
+        """Stop the tester. Periodic messages will not be sent after this
+        call. Call :meth:`~cantools.tester.Tester.start()` to resume a
+        stopped tester.
 
         >>> tester.stop()
 
@@ -187,8 +191,8 @@ class Tester(object):
 
     @property
     def messages(self):
-        """Set and get signals in messages. Changed signal values takes effect
-        immediately for started periodic messages. Call
+        """Set and get signals in messages. Set signals takes effect
+        immediately for started enabled periodic messages. Call
         :meth:`~cantools.tester.Tester.send()` for other messages.
 
         >>> periodic_message = tester.messages['PeriodicMessage1']
@@ -204,7 +208,8 @@ class Tester(object):
         return self._messages
 
     def enable(self, message_name):
-        """Enable given message `message_name`.
+        """Enable given message `message_name` and start sending it if its
+        periodic and the tester is running.
 
         >>> tester.enable('PeriodicMessage1')
 
@@ -217,7 +222,8 @@ class Tester(object):
             message.send_periodic_start()
 
     def disable(self, message_name):
-        """Disable given message `message_name`.
+        """Disable given message `message_name` and stop sending it if its
+        periodic, enabled and the tester is running.
 
         >>> tester.disable('PeriodicMessage1')
 
@@ -230,8 +236,7 @@ class Tester(object):
             message.send_periodic_stop()
 
     def send(self, message_name, signals=None):
-        """Send a message with given name `message_name` and optional signals
-        `signals`.
+        """Send given message `message_name` and optional signals `signals`.
 
         >>> tester.send('Message1', {'Signal2': 10})
         >>> tester.send('Message1')
@@ -241,10 +246,11 @@ class Tester(object):
         self._messages[message_name].send(signals)
 
     def expect(self, message_name, signals=None, timeout=None):
-        """Expect a message with name `message_name` and signal values
-        `signals` within `timeout` seconds. Give `signals` as ``None``
-        to expect any signal values. Give `timeout` as ``None`` to
-        wait forever.
+        """Expect given message `message_name` and signal values `signals`
+        within `timeout` seconds. Give `signals` as ``None`` to expect
+        any signal values. Give `timeout` as ``None`` to wait forever.
+
+        Returns the expected message, or ``None`` on timeout.
 
         >>> tester.expect('Message2', {'Signal1': 13})
         {'Signal1': 13, 'Signal2': 9}

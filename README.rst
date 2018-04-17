@@ -14,6 +14,8 @@ CAN BUS tools.
 
 - ``candump`` output decoder.
 
+- Node `tester`_.
+
 Project homepage: https://github.com/eerimoq/cantools
 
 Documentation: http://cantools.readthedocs.org/en/latest
@@ -146,6 +148,8 @@ Contributing
 .. _DBC: http://www.socialledge.com/sjsu/index.php?title=DBC_Format
 
 .. _KCD: https://github.com/julietkilo/kcd
+
+.. _tester: http://cantools.readthedocs.io/en/latest/#cantools.tester.Tester
 
 .. _encoding: http://cantools.readthedocs.io/en/latest/#cantools.db.Message.encode
 

@@ -8,18 +8,14 @@ except ImportError:
     from UserDict import UserDict
 
 try:
-    from queue import Queue
+    import queue
 except ImportError:
-    from Queue import Queue
+    import Queue as queue
 
 import can
 
 
 class Error(Exception):
-    pass
-
-
-class TimeoutError(Error):
     pass
 
 
@@ -48,7 +44,7 @@ class Message(UserDict, object):
         self.database = database
         self._can_bus = can_bus
         self._input_queue = input_queue
-        self._enabled = True
+        self.enabled = True
         self._can_message = None
         self._periodic_task = None
         self.update({signal.name: 0 for signal in database.signals})
@@ -68,14 +64,6 @@ class Message(UserDict, object):
         self.data.update(signals)
         self._update_can_message()
 
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, value):
-        self._enabled = value
-
     def send(self, signals=None):
         if signals is not None:
             self.update(signals)
@@ -88,17 +76,21 @@ class Message(UserDict, object):
 
         if timeout is not None:
             end_time = time.time() + timeout
+            remaining_time = timeout
+        else:
+            remaining_time = None
 
         while True:
+            try:
+                message = self._input_queue.get(timeout=remaining_time)
+            except queue.Empty:
+                return
+
             if timeout is not None:
                 remaining_time = end_time - time.time()
 
                 if remaining_time <= 0:
-                    raise TimeoutError()
-            else:
-                remaining_time = None
-
-            message = self._input_queue.get(timeout=remaining_time)
+                    return
 
             if message is None:
                 continue
@@ -112,7 +104,7 @@ class Message(UserDict, object):
                 return decoded
 
     def send_periodic_start(self):
-        if not self._enabled:
+        if not self.enabled:
             return
 
         self._periodic_task = self._can_bus.send_periodic(
@@ -156,7 +148,7 @@ class Tester(object):
         self._bus_name = bus_name
         self._database = database
         self._can_bus = can_bus
-        self._input_queue = Queue()
+        self._input_queue = queue.Queue()
         self._notifier = can.Notifier(can_bus,
                                       [Listener(self._input_queue)])
         self._messages = Messages()

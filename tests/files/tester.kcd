@@ -2,9 +2,8 @@
   <Document name="Simulator" version="1.0" author="" company="" date="">
     Simulator.
   </Document>
-  <Node id="1" name="PeriodicProducer"/>
-  <Node id="2" name="PeriodicConsumer"/>
-  <Node id="3" name="SetGetNode"/>
+  <Node id="1" name="Node1"/>
+  <Node id="2" name="Node2"/>
 
   <Bus name="Bus1">
     <Message id="0x001" name="PeriodicMessage1" interval="50">
@@ -15,17 +14,17 @@
       <Signal name="Signal2" offset="8" length="8" />
     </Message>
 
-    <Message id="0x002" name="Message1">
+    <Message id="0x101" name="Message1">
       <Producer>
-        <NodeRef id="3"/>
+        <NodeRef id="1"/>
       </Producer>
       <Signal name="Signal1" offset="0" length="8" />
-      <Signal name="Signal2" offset="8" length="1" />
+      <Signal name="Signal2" offset="8" length="8" />
     </Message>
 
-    <Message id="0x003" name="Message2">
+    <Message id="0x102" name="Message2">
       <Producer>
-        <NodeRef id="3"/>
+        <NodeRef id="2"/>
       </Producer>
       <Signal name="Signal1" offset="0" length="8" />
       <Signal name="Signal2" offset="8" length="4" />

@@ -171,6 +171,7 @@ class CanToolsTesterTest(unittest.TestCase):
         tester.start()
 
         can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
         self.assertIsNone(tester.flush_input())
         message = tester.expect('Message1', timeout=0.0)
         self.assertIsNone(message)
@@ -185,10 +186,39 @@ class CanToolsTesterTest(unittest.TestCase):
         tester, can_bus = setup_tester('Node1')
         tester.start()
 
+        # Without signals.
         tester.send('Message1')
         message = can_bus.wait_for_send()
         self.assertEqual(message.arbitration_id, 0x101)
         self.assertEqual(message.data, b'\x00\x00')
+
+        # With a signal.
+        tester.send('Message1', {'Signal1': 1})
+        message = can_bus.wait_for_send()
+        self.assertEqual(message.arbitration_id, 0x101)
+        self.assertEqual(message.data, b'\x01\x00')
+
+        # Without signals again.
+        tester.send('Message1')
+        message = can_bus.wait_for_send()
+        self.assertEqual(message.arbitration_id, 0x101)
+        self.assertEqual(message.data, b'\x01\x00')
+
+        tester.stop()
+
+    def test_bad_message_name(self):
+        """Try to send an unknown message.
+
+        """
+
+        tester, can_bus = setup_tester('Node1')
+        tester.start()
+
+        with self.assertRaises(cantools.tester.Error) as cm:
+            tester.send('MessageMissing')
+
+        self.assertEqual(str(cm.exception),
+                         "invalid message name 'MessageMissing'")
 
         tester.stop()
 

@@ -86,15 +86,6 @@ class Message(UserDict, object):
             except queue.Empty:
                 return
 
-            if timeout is not None:
-                remaining_time = end_time - time.time()
-
-                if remaining_time <= 0:
-                    return
-
-            if message is None:
-                continue
-
             if message.arbitration_id != self.database.frame_id:
                 continue
 
@@ -102,6 +93,12 @@ class Message(UserDict, object):
 
             if all([decoded[name] == signals[name] for name in signals]):
                 return decoded
+
+            if timeout is not None:
+                remaining_time = end_time - time.time()
+
+                if remaining_time <= 0:
+                    return
 
     def send_periodic_start(self):
         if not self.enabled:

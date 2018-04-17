@@ -6,7 +6,7 @@ About
 
 CAN BUS tools.
 
-- `DBC`_, `KCD`_ and SYM file mangling.
+- `DBC`_, `KCD`_ and SYM file parsing.
 
 - CAN message encoding and decoding.
 

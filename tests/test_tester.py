@@ -160,6 +160,11 @@ class CanToolsTesterTest(unittest.TestCase):
         message = tester.expect('Message2', timeout=0.0)
         self.assertIsNone(message)
 
+        # Expect with timeout 0.0 with wrong message in queue.
+        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+        message = tester.expect('Message1', timeout=0.0)
+        self.assertIsNone(message)
+
         tester.stop()
 
     def test_flush_input(self):

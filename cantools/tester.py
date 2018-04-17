@@ -86,13 +86,11 @@ class Message(UserDict, object):
             except queue.Empty:
                 return
 
-            if message.arbitration_id != self.database.frame_id:
-                continue
+            if message.arbitration_id == self.database.frame_id:
+                decoded = self.database.decode(message.data)
 
-            decoded = self.database.decode(message.data)
-
-            if all([decoded[name] == signals[name] for name in signals]):
-                return decoded
+                if all([decoded[name] == signals[name] for name in signals]):
+                    return decoded
 
             if timeout is not None:
                 remaining_time = end_time - time.time()

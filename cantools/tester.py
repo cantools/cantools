@@ -44,6 +44,7 @@ class Message(UserDict, object):
         self.database = database
         self._can_bus = can_bus
         self._input_queue = input_queue
+        self._input_list = []
         self.enabled = True
         self._can_message = None
         self._periodic_task = None
@@ -70,10 +71,39 @@ class Message(UserDict, object):
 
         self._can_bus.send(self._can_message)
 
-    def expect(self, signals=None, timeout=None):
+    def expect(self, signals=None, timeout=None, discard_other_messages=True):
         if signals is None:
             signals = {}
 
+        decoded = self._expect_input_list(signals, discard_other_messages)
+
+        if decoded is None:
+            decoded = self._expect_input_queue(signals,
+                                               timeout,
+                                               discard_other_messages)
+
+        return decoded
+
+    def _expect_input_list(self, signals, discard_other_messages):
+        other_messages = []
+
+        while len(self._input_list) > 0:
+            message = self._input_list.pop(0)
+            decoded = self._decode_expected_message(message, signals)
+
+            if decoded is not None:
+                break
+
+            other_messages.append(message)
+        else:
+            decoded = None
+
+        if not discard_other_messages:
+            self._input_list = other_messages + self._input_list
+
+        return decoded
+
+    def _expect_input_queue(self, signals, timeout, discard_other_messages):
         if timeout is not None:
             end_time = time.time() + timeout
             remaining_time = timeout
@@ -86,17 +116,26 @@ class Message(UserDict, object):
             except queue.Empty:
                 return
 
-            if message.arbitration_id == self.database.frame_id:
-                decoded = self.database.decode(message.data)
+            decoded = self._decode_expected_message(message, signals)
 
-                if all([decoded[name] == signals[name] for name in signals]):
-                    return decoded
+            if decoded is not None:
+                return decoded
+
+            if not discard_other_messages:
+                self._input_list.append(message)
 
             if timeout is not None:
                 remaining_time = end_time - time.time()
 
                 if remaining_time <= 0:
                     return
+
+    def _decode_expected_message(self, message, signals):
+        if message.arbitration_id == self.database.frame_id:
+            decoded = self.database.decode(message.data)
+
+            if all([decoded[name] == signals[name] for name in signals]):
+                return decoded
 
     def send_periodic_start(self):
         if not self.enabled:

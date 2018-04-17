@@ -284,10 +284,17 @@ class Tester(object):
 
         self._messages[message_name].send(signals)
 
-    def expect(self, message_name, signals=None, timeout=None):
+    def expect(self,
+               message_name,
+               signals=None,
+               timeout=None,
+               discard_other_messages=True):
         """Expect given message `message_name` and signal values `signals`
         within `timeout` seconds. Give `signals` as ``None`` to expect
-        any signal values. Give `timeout` as ``None`` to wait forever.
+        any signal values. Give `timeout` as ``None`` to wait
+        forever. Messages not matching given `message_name` and
+        `signals` are discarded if `discard_other_messages` is
+        ``True``.
 
         Returns the expected message, or ``None`` on timeout.
 
@@ -296,7 +303,9 @@ class Tester(object):
 
         """
 
-        return self._messages[message_name].expect(signals, timeout)
+        return self._messages[message_name].expect(signals,
+                                                   timeout,
+                                                   discard_other_messages)
 
     def flush_input(self):
         """Flush, or discard, all messages in the input queue.

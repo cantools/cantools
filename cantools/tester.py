@@ -124,9 +124,9 @@ class Message(UserDict, object):
 
 
 class Tester(object):
-    """Test the node `dut_name` on CAN bus `bus_name`. `database` is a
-    database object, and `can_bus` a CAN bus object, normally created
-    using the python-can package.
+    """Test given node `dut_name` on given CAN bus `bus_name`. `database`
+    is a database object, and `can_bus` a CAN bus object, normally
+    created using the python-can package.
 
     Here is an example of how to create a tester:
 

@@ -73,7 +73,7 @@ The last part of the example receives and `decodes`_ a CAN message.
    >>> db.decode_message(message.arbitration_id, message.data)
    {'AverageRadius': 3.2, 'Enable': 'Enabled', 'Temperature': 250.09}
 
-See the test suite for additional examples: https://github.com/eerimoq/cantools/blob/master/tests/test_cantools.py
+See `examples`_ for additional examples.
 
 Command line tool
 -----------------
@@ -156,3 +156,5 @@ Contributing
 .. _encode_message(): http://cantools.readthedocs.io/en/latest/#cantools.db.Database.encode_message
 
 .. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.db.Database.decode_message
+
+.. _examples: https://github.com/eerimoq/cantools/blob/master/examples

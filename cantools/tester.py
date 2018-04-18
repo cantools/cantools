@@ -338,7 +338,7 @@ class Tester(object):
 
         """
 
-        self._input_list = []
+        del self._input_list[:]
 
         while not self._input_queue.empty():
             self._input_queue.get()

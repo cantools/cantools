@@ -173,6 +173,8 @@ class CanToolsTesterTest(unittest.TestCase):
         can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x05\x00'))
         message = tester.expect('Message1', discard_other_messages=False)
         self.assertEqual(message, {'Signal1': 5, 'Signal2': 0})
+        message = tester.expect('Message1', timeout=0.0, discard_other_messages=False)
+        self.assertIsNone(message)
         message = tester.expect('Message2', discard_other_messages=False)
         self.assertEqual(message, {'Signal1': 3, 'Signal2': 0, 'Signal3': 0})
         message = tester.expect('Message2', discard_other_messages=False)

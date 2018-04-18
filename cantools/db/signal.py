@@ -107,7 +107,8 @@ class Signal(object):
     @property
     def is_signed(self):
         """``True`` if the signal is signed, ``False`` otherwise. Ignore this
-           attribute if ``is_float`` is ``True``.
+           attribute if :data:`~cantools.db.Signal.is_float` is
+           ``True``.
 
         """
 

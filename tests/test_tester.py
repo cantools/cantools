@@ -1,3 +1,4 @@
+import time
 import os
 import unittest
 import can
@@ -162,7 +163,23 @@ class CanToolsTesterTest(unittest.TestCase):
 
         # Expect with timeout 0.0 with wrong message in queue.
         can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+        time.sleep(0.1)
         message = tester.expect('Message1', timeout=0.0)
+        self.assertIsNone(message)
+
+        # Expect with discard_other_messages set to False.
+        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x03\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x04\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x05\x00'))
+        message = tester.expect('Message1', discard_other_messages=False)
+        self.assertEqual(message, {'Signal1': 5, 'Signal2': 0})
+        message = tester.expect('Message2', discard_other_messages=False)
+        self.assertEqual(message, {'Signal1': 3, 'Signal2': 0, 'Signal3': 0})
+        message = tester.expect('Message2', discard_other_messages=False)
+        self.assertEqual(message, {'Signal1': 4, 'Signal2': 0, 'Signal3': 0})
+        message = tester.expect('Message1', timeout=0.0)
+        self.assertIsNone(message)
+        message = tester.expect('Message2', timeout=0.0)
         self.assertIsNone(message)
 
         tester.stop()
@@ -226,6 +243,52 @@ class CanToolsTesterTest(unittest.TestCase):
                          "invalid message name 'MessageMissing'")
 
         tester.stop()
+
+    def test_bad_dut_name(self):
+        """The DUT must exist in the database.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'tester.kcd')
+        database = cantools.db.load_file(filename)
+        can_bus = CanBus()
+
+        with self.assertRaises(cantools.tester.Error) as cm:
+            cantools.tester.Tester('BadDut', database, can_bus, 'Bus1')
+
+        self.assertEqual(str(cm.exception),
+                         "expected DUT name in ['Node1', 'Node2'], but got 'BadDut'")
+
+    def test_bad_bus_name(self):
+        """The bus must exist in the database.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'tester.kcd')
+        database = cantools.db.load_file(filename)
+        can_bus = CanBus()
+
+        with self.assertRaises(cantools.tester.Error) as cm:
+            cantools.tester.Tester('Node1', database, can_bus, 'BadBus')
+
+        self.assertEqual(str(cm.exception),
+                         "expected bus name in ['Bus1'], but got 'BadBus'")
+
+    def test_bus_name_none(self):
+        """The bus name should be None if no bus is given in the database.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'foobar.dbc')
+        database = cantools.db.load_file(filename)
+        can_bus = CanBus()
+
+        with self.assertRaises(cantools.tester.Error) as cm:
+            cantools.tester.Tester('FOO', database, can_bus, 'BadBus')
+
+        self.assertEqual(str(cm.exception),
+                         "expected bus name None as there are no buses defined "
+                         "in the database, but got 'BadBus'")
 
 
 if __name__ == '__main__':

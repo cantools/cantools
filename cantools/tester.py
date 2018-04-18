@@ -39,12 +39,12 @@ class Listener(can.Listener):
 
 class Message(UserDict, object):
 
-    def __init__(self, database, can_bus, input_queue):
+    def __init__(self, database, can_bus, input_list, input_queue):
         super(Message, self).__init__()
         self.database = database
         self._can_bus = can_bus
         self._input_queue = input_queue
-        self._input_list = []
+        self._input_list = input_list
         self.enabled = True
         self._can_message = None
         self._periodic_task = None
@@ -99,7 +99,9 @@ class Message(UserDict, object):
             decoded = None
 
         if not discard_other_messages:
-            self._input_list = other_messages + self._input_list
+            other_messages += self._input_list
+            del self._input_list[:]
+            self._input_list.extend(other_messages)
 
         return decoded
 
@@ -184,17 +186,41 @@ class Tester(object):
         self._bus_name = bus_name
         self._database = database
         self._can_bus = can_bus
+        self._input_list = []
         self._input_queue = queue.Queue()
-        self._notifier = can.Notifier(can_bus,
-                                      [Listener(self._input_queue)])
         self._messages = Messages()
         self._is_running = False
+
+        # DUT name validation.
+        node_names = [node.name for node in database.nodes]
+
+        if not any([name == dut_name for name in node_names]):
+            raise Error(
+                "expected DUT name in {}, but got '{}'".format(node_names,
+                                                               dut_name))
+
+        # BUS name validation.
+        bus_names = [bus.name for bus in database.buses]
+
+        if len(bus_names) == 0:
+            if bus_name is not None:
+                raise Error(
+                    "expected bus name None as there are no buses defined in "
+                    "the database, but got '{}'".format(bus_name))
+        elif not any([name == bus_name for name in bus_names]):
+            raise Error(
+                "expected bus name in {}, but got '{}'".format(bus_names,
+                                                               bus_name))
 
         for message in database.messages:
             if message.bus_name == bus_name:
                 self._messages[message.name] = Message(message,
                                                        can_bus,
+                                                       self._input_list,
                                                        self._input_queue)
+
+        self._notifier = can.Notifier(can_bus,
+                                      [Listener(self._input_queue)])
 
     def start(self):
         """Start the tester. Starts sending enabled periodic messages.
@@ -311,6 +337,8 @@ class Tester(object):
         """Flush, or discard, all messages in the input queue.
 
         """
+
+        self._input_list = []
 
         while not self._input_queue.empty():
             self._input_queue.get()

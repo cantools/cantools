@@ -19,6 +19,16 @@ class Error(Exception):
     pass
 
 
+class DecodedMessage(object):
+    """A decoded message.
+
+    """
+
+    def __init__(self, name, signals):
+        self.name = name
+        self.signals = signals
+
+
 class Messages(dict):
 
     def __missing__(self, key):
@@ -27,14 +37,33 @@ class Messages(dict):
 
 class Listener(can.Listener):
 
-    def __init__(self, input_queue):
+    def __init__(self, database, messages, input_queue, on_message):
+        self._database = database
+        self._messages = messages
         self._input_queue = input_queue
+        self._on_message = on_message
 
     def on_message_received(self, msg):
         if msg.is_error_frame or msg.is_remote_frame:
             return
 
-        self._input_queue.put(msg)
+        try:
+            message = self._database.get_message_by_frame_id(msg.arbitration_id)
+        except KeyError:
+            return
+
+        if message.name not in self._messages:
+            return
+
+        if not self._messages[message.name].enabled:
+            return
+
+        decoded = DecodedMessage(message.name, message.decode(msg.data))
+
+        if self._on_message:
+            self._on_message(decoded)
+
+        self._input_queue.put(decoded)
 
 
 class Message(UserDict, object):
@@ -89,7 +118,7 @@ class Message(UserDict, object):
 
         while len(self._input_list) > 0:
             message = self._input_list.pop(0)
-            decoded = self._decode_expected_message(message, signals)
+            decoded = self._filter_expected_message(message, signals)
 
             if decoded is not None:
                 break
@@ -118,7 +147,7 @@ class Message(UserDict, object):
             except queue.Empty:
                 return
 
-            decoded = self._decode_expected_message(message, signals)
+            decoded = self._filter_expected_message(message, signals)
 
             if decoded is not None:
                 return decoded
@@ -132,12 +161,10 @@ class Message(UserDict, object):
                 if remaining_time <= 0:
                     return
 
-    def _decode_expected_message(self, message, signals):
-        if message.arbitration_id == self.database.frame_id:
-            decoded = self.database.decode(message.data)
-
-            if all([decoded[name] == signals[name] for name in signals]):
-                return decoded
+    def _filter_expected_message(self, message, signals):
+        if message.name == self.database.name:
+            if all([message.signals[name] == signals[name] for name in signals]):
+                return message.signals
 
     def send_periodic_start(self):
         if not self.enabled:
@@ -165,9 +192,16 @@ class Message(UserDict, object):
 
 
 class Tester(object):
-    """Test given node `dut_name` on given CAN bus `bus_name`. `database`
-    is a database object, and `can_bus` a CAN bus object, normally
-    created using the python-can package.
+    """Test given node `dut_name` on given CAN bus `bus_name`.
+
+    `database` is a :class:`~cantools.db.Database` instance.
+
+    `can_bus` a CAN bus object, normally created using the python-can
+    package.
+
+    The `on_message` callback is called for every successfully decoded
+    received message. It is called with one argument, an
+    :class:`~cantools.tester.DecodedMessage` instance.
 
     Here is an example of how to create a tester:
 
@@ -181,7 +215,12 @@ class Tester(object):
 
     """
 
-    def __init__(self, dut_name, database, can_bus, bus_name=None):
+    def __init__(self,
+                 dut_name,
+                 database,
+                 can_bus,
+                 bus_name=None,
+                 on_message=None):
         self._dut_name = dut_name
         self._bus_name = bus_name
         self._database = database
@@ -219,8 +258,11 @@ class Tester(object):
                                                        self._input_list,
                                                        self._input_queue)
 
-        self._notifier = can.Notifier(can_bus,
-                                      [Listener(self._input_queue)])
+        listener = Listener(self._database,
+                            self._messages,
+                            self._input_queue,
+                            on_message)
+        self._notifier = can.Notifier(can_bus, [listener])
 
     def start(self):
         """Start the tester. Starts sending enabled periodic messages.
@@ -316,11 +358,18 @@ class Tester(object):
                timeout=None,
                discard_other_messages=True):
         """Expect given message `message_name` and signal values `signals`
-        within `timeout` seconds. Give `signals` as ``None`` to expect
-        any signal values. Give `timeout` as ``None`` to wait
-        forever. Messages not matching given `message_name` and
-        `signals` are discarded if `discard_other_messages` is
-        ``True``.
+        within `timeout` seconds.
+
+        Give `signals` as ``None`` to expect any signal values.
+
+        Give `timeout` as ``None`` to wait forever.
+
+        Messages are read from the input queue, and those not matching
+        given `message_name` and `signals` are discarded if
+        `discard_other_messages` is
+        ``True``. :meth:`~cantools.tester.Tester.flush_input()` may be
+        called to discard all old messages in the input queue before
+        calling the expect function.
 
         Returns the expected message, or ``None`` on timeout.
 

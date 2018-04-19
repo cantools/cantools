@@ -44,14 +44,15 @@ class CanBus(object):
         self._input_queue.put(message)
 
 
-def setup_tester(dut_name):
+def setup_tester(dut_name, on_message=None):
     filename = os.path.join('tests', 'files', 'tester.kcd')
     database = cantools.db.load_file(filename)
     can_bus = CanBus()
     tester = cantools.tester.Tester(dut_name,
                                     database,
                                     can_bus,
-                                    'Bus1')
+                                    'Bus1',
+                                    on_message=on_message)
 
     return tester, can_bus
 
@@ -291,6 +292,37 @@ class CanToolsTesterTest(unittest.TestCase):
         self.assertEqual(str(cm.exception),
                          "expected bus name None as there are no buses defined "
                          "in the database, but got 'BadBus'")
+
+    def test_on_message(self):
+        """Test the on_message callback.
+
+        """
+
+        message_queue = Queue()
+
+        def on_message(decoded_message):
+            message_queue.put(decoded_message)
+
+        tester, can_bus = setup_tester('Node1', on_message)
+        tester.disable('Message2')
+        tester.start()
+
+        # Bad message id.
+        can_bus.input_message(can.Message(arbitration_id=0x7ff, data=b'\x00\x00'))
+
+        # Disabled message.
+        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+
+        # Good message
+        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x00\x00'))
+
+        # Check that only the good message was passed to on_message().
+        decoded_message = message_queue.get()
+        self.assertEqual(decoded_message.name, 'Message1')
+        self.assertEqual(decoded_message.signals, {'Signal1': 0, 'Signal2': 0})
+        self.assertTrue(message_queue.empty())
+
+        tester.stop()
 
 
 if __name__ == '__main__':

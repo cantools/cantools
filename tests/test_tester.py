@@ -19,9 +19,13 @@ class CanBus(object):
         self._queue = Queue()
         self._periodic_queue = Queue()
         self._input_queue = Queue()
+        self._periodic_stop_queue = Queue()
 
     def stop(self):
-        pass
+        self._periodic_stop_queue.put(None)
+
+    def wait_for_periodic_stop(self):
+        return self._periodic_stop_queue.get()
 
     def send(self, message):
         self._queue.put(message)
@@ -81,6 +85,7 @@ class CanToolsTesterTest(unittest.TestCase):
         self.assertEqual(period, 0.05)
 
         tester.stop()
+        can_bus.wait_for_periodic_stop()
 
     def test_set_and_get_signals(self):
         """Set and get signals.
@@ -123,6 +128,9 @@ class CanToolsTesterTest(unittest.TestCase):
         self.assertEqual(message.arbitration_id, 1)
         self.assertEqual(message.data, b'\x00\x00')
         self.assertEqual(period, 0.05)
+
+        tester.disable('PeriodicMessage1')
+        can_bus.wait_for_periodic_stop()
 
         tester.stop()
 

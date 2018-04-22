@@ -205,6 +205,7 @@ class CanToolsTesterTest(unittest.TestCase):
 
         can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x00\x00'))
         can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+        time.sleep(0.1)
         self.assertIsNone(tester.flush_input())
         message = tester.expect('Message1', timeout=0.0)
         self.assertIsNone(message)

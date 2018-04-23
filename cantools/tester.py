@@ -48,17 +48,23 @@ class Listener(can.Listener):
             return
 
         try:
-            message = self._database.get_message_by_frame_id(msg.arbitration_id)
+            database_message = self._database.get_message_by_frame_id(
+                msg.arbitration_id)
         except KeyError:
             return
 
-        if message.name not in self._messages:
+        if database_message.name not in self._messages:
             return
 
-        if not self._messages[message.name].enabled:
+        message = self._messages[database_message.name]
+
+        if not message.enabled:
             return
 
-        decoded = DecodedMessage(message.name, message.decode(msg.data))
+        decoded = DecodedMessage(database_message.name,
+                                 database_message.decode(msg.data,
+                                                         message.decode_choices,
+                                                         message.scaling))
 
         if self._on_message:
             self._on_message(decoded)
@@ -68,11 +74,21 @@ class Listener(can.Listener):
 
 class Message(UserDict, object):
 
-    def __init__(self, database, can_bus, input_list, input_queue):
+    def __init__(self,
+                 database,
+                 can_bus,
+                 input_list,
+                 input_queue,
+                 decode_choices,
+                 scaling,
+                 padding):
         super(Message, self).__init__()
         self.database = database
         self._can_bus = can_bus
         self._input_queue = input_queue
+        self.decode_choices = decode_choices
+        self.scaling = scaling
+        self.padding = padding
         self._input_list = input_list
         self.enabled = True
         self._can_message = None
@@ -182,7 +198,9 @@ class Message(UserDict, object):
     def _update_can_message(self):
         arbitration_id = self.database.frame_id
         extended_id = self.database.is_extended_frame
-        data = self.database.encode(self.data)
+        data = self.database.encode(self.data,
+                                    self.scaling,
+                                    self.padding)
         self._can_message = can.Message(arbitration_id=arbitration_id,
                                         extended_id=extended_id,
                                         data=data)
@@ -220,7 +238,10 @@ class Tester(object):
                  database,
                  can_bus,
                  bus_name=None,
-                 on_message=None):
+                 on_message=None,
+                 decode_choices=True,
+                 scaling=True,
+                 padding=False):
         self._dut_name = dut_name
         self._bus_name = bus_name
         self._database = database
@@ -256,7 +277,10 @@ class Tester(object):
                 self._messages[message.name] = Message(message,
                                                        can_bus,
                                                        self._input_list,
-                                                       self._input_queue)
+                                                       self._input_queue,
+                                                       decode_choices,
+                                                       scaling,
+                                                       padding)
 
         listener = Listener(self._database,
                             self._messages,

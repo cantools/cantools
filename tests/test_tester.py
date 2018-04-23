@@ -48,7 +48,10 @@ class CanBus(object):
         self._input_queue.put(message)
 
 
-def setup_tester(dut_name, on_message=None):
+def setup_tester(dut_name,
+                 on_message=None,
+                 decode_choices=False,
+                 scaling=False):
     filename = os.path.join('tests', 'files', 'tester.kcd')
     database = cantools.db.load_file(filename)
     can_bus = CanBus()
@@ -56,7 +59,9 @@ def setup_tester(dut_name, on_message=None):
                                     database,
                                     can_bus,
                                     'Bus1',
-                                    on_message=on_message)
+                                    on_message=on_message,
+                                    decode_choices=decode_choices,
+                                    scaling=scaling)
 
     return tester, can_bus
 
@@ -237,6 +242,21 @@ class CanToolsTesterTest(unittest.TestCase):
         message = can_bus.wait_for_send()
         self.assertEqual(message.arbitration_id, 0x101)
         self.assertEqual(message.data, b'\x01\x00')
+
+        tester.stop()
+
+    def test_send_with_scaling(self):
+        """Test the send method with scaling.
+
+        """
+
+        tester, can_bus = setup_tester('Node1', scaling=True)
+        tester.start()
+
+        tester.send('Message1')
+        message = can_bus.wait_for_send()
+        self.assertEqual(message.arbitration_id, 0x101)
+        self.assertEqual(message.data, b'\x0a\x00')
 
         tester.stop()
 

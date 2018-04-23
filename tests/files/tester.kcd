@@ -18,7 +18,9 @@
       <Producer>
         <NodeRef id="1"/>
       </Producer>
-      <Signal name="Signal1" offset="0" length="8" />
+      <Signal name="Signal1" offset="0" length="8">
+        <Value intercept="-10" />
+      </Signal>
       <Signal name="Signal2" offset="8" length="8" />
     </Message>
 

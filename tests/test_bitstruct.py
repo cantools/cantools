@@ -67,54 +67,43 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(packed, 1000 * b'\x37')
 
         # Too many values to pack.
-        try:
+        with self.assertRaises(Error) as cm:
             pack('b1t24', False)
-            self.fail()
-        except ValueError as e:
-            self.assertEqual(
-                str(e),
-                'pack expected 2 item(s) for packing (got 1)')
+
+        self.assertEqual(str(cm.exception),
+                         'pack expected 2 item(s) for packing (got 1)')
 
         # Cannot convert argument to integer.
-        try:
+        with self.assertRaises(ValueError) as cm:
             pack('u1', "foo")
-            self.fail()
-        except ValueError as e:
-            self.assertEqual(
-                str(e),
-                "invalid literal for int() with base 10: 'foo'")
+
+        self.assertEqual(str(cm.exception),
+                         "invalid literal for int() with base 10: 'foo'")
 
         # Cannot convert argument to float.
-        try:
+        with self.assertRaises(ValueError) as cm:
             pack('f32', "foo")
-            self.fail()
-        except ValueError as e:
-            if sys.version_info[0] < 3:
-                self.assertEqual(
-                    str(e),
-                    'could not convert string to float: foo')
-            else:
-                self.assertEqual(
-                    str(e),
-                    "could not convert string to float: 'foo'")
+
+        if sys.version_info[0] < 3:
+            self.assertEqual(str(cm.exception),
+                             'could not convert string to float: foo')
+        else:
+            self.assertEqual(str(cm.exception),
+                             "could not convert string to float: 'foo'")
 
         # Cannot convert argument to bytearray.
-        try:
+        with self.assertRaises(TypeError) as cm:
             pack('r5', 1.0)
-            self.fail()
-        except TypeError as e:
-            self.assertEqual(
-                str(e),
-                "'float' object is not iterable")
+
+        self.assertEqual(str(cm.exception),
+                         "'float' object is not iterable")
 
         # Cannot encode argument as utf-8.
-        try:
+        with self.assertRaises(AttributeError) as cm:
             pack('t8', 1.0)
-            self.fail()
-        except AttributeError as e:
-            self.assertEqual(
-                str(e),
-                "'float' object has no attribute 'encode'")
+
+        self.assertEqual(str(cm.exception),
+                         "'float' object has no attribute 'encode'")
 
     def test_unpack(self):
         """Unpack values.
@@ -188,22 +177,18 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(packed, 1000 * b'\x37')
 
         # Bad float size.
-        try:
+        with self.assertRaises(Error) as cm:
             unpack('f33', b'\x00\x00\x00\x00\x00')
-            self.fail()
-        except ValueError as e:
-            self.assertEqual(
-                str(e),
-                'expected float size of 16, 32, or 64 bits (got 33)')
+
+        self.assertEqual(str(cm.exception),
+                         'expected float size of 16, 32, or 64 bits (got 33)')
 
         # Too many bits to unpack.
-        try:
+        with self.assertRaises(Error) as cm:
             unpack('u9', b'\x00')
-            self.fail()
-        except ValueError as e:
-            self.assertEqual(
-                str(e),
-                'unpack requires at least 9 bits to unpack (got 8)')
+
+        self.assertEqual(str(cm.exception),
+                         'unpack requires at least 9 bits to unpack (got 8)')
 
         # gcc packed struct with bitfields
         #
@@ -500,13 +485,13 @@ class BitStructTest(unittest.TestCase):
 
         """
 
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(Error) as cm:
             pack('f31', 1.0)
 
         self.assertEqual(str(cm.exception),
                          'expected float size of 16, 32, or 64 bits (got 31)')
 
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(Error) as cm:
             unpack('f33', 8 * b'\x00')
 
         self.assertEqual(str(cm.exception),
@@ -530,7 +515,7 @@ class BitStructTest(unittest.TestCase):
         ]
 
         for fmt, expected_error in formats:
-            with self.assertRaises(ValueError) as cm:
+            with self.assertRaises(Error) as cm:
                 bitstruct.compile(fmt)
 
             self.assertEqual(str(cm.exception), expected_error)
@@ -560,6 +545,58 @@ class BitStructTest(unittest.TestCase):
 
         self.assertEqual(cf.unpack(b''), ())
         self.assertEqual(cf.unpack(b'\x00'), ())
+
+    def test_pack_into(self):
+        """Pack values into a buffer.
+
+        """
+
+        packed = bytearray(3)
+        pack_into('u1u1s6u7u9', packed, 0, 0, 0, -2, 65, 22)
+        self.assertEqual(packed, b'\x3e\x82\x16')
+
+        datas = [
+            (0,  b'\x80\x00'),
+            (1,  b'\x40\x00'),
+            (7,  b'\x01\x00'),
+            (15, b'\x00\x01')
+        ]
+
+        for offset, expected in datas:
+            packed = bytearray(2)
+            pack_into('u1', packed, offset, 1)
+            self.assertEqual(packed, expected)
+
+        packed = bytearray(b'\xff\xff\xff')
+        pack_into('p4u4p4u4p4u4', packed, 0, 1, 2, 3, fill_padding=False)
+        self.assertEqual(packed, b'\xf1\xf2\xf3')
+
+        packed = bytearray(b'\xff\xff\xff')
+        pack_into('p4u4p4u4p4u4', packed, 0, 1, 2, 3, fill_padding=True)
+        self.assertEqual(packed, b'\x01\x02\x03')
+
+        packed = bytearray(2)
+
+        with self.assertRaises(Error) as cm:
+            pack_into('u17', packed, 0, 1)
+
+        self.assertEqual(str(cm.exception),
+                         'pack requires a buffer of at least 17 bits')
+
+    def test_unpack_from(self):
+        """Unpack values at given bit offset.
+
+        """
+
+        unpacked = unpack_from('u1u1s6u7u9', b'\x1f\x41\x0b\x00', 1)
+        self.assertEqual(unpacked, (0, 0, -2, 65, 22))
+
+        with self.assertRaises(Error) as cm:
+            unpack_from('u1u1s6u7u9', b'\x1f\x41\x0b', 1)
+
+        self.assertEqual(str(cm.exception),
+                         'unpack requires at least 24 bits to unpack '
+                         '(got 23)')
 
 
 if __name__ == '__main__':

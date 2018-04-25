@@ -9,6 +9,10 @@ import binascii
 __version__ = "3.7.0"
 
 
+class Error(Exception):
+    pass
+
+
 def _parse_format(fmt):
     if fmt and fmt[-1] in '><':
         byte_order = fmt[-1]
@@ -19,7 +23,7 @@ def _parse_format(fmt):
     parsed_infos = re.findall(r'([<>]?)([a-zA-Z])(\d+)', fmt)
 
     if ''.join([''.join(info) for info in parsed_infos]) != fmt:
-        raise ValueError("bad format '{}'".format(fmt + byte_order))
+        raise Error("bad format '{}'".format(fmt + byte_order))
 
     # Use big endian as default and use the endianness of the previous
     # value if none is given for the current value.
@@ -31,7 +35,7 @@ def _parse_format(fmt):
             endianness = info[0]
 
         if info[1] not in 'supPfbtr':
-            raise ValueError("bad char '{}' in format".format(info[1]))
+            raise Error("bad char '{}' in format".format(info[1]))
 
         infos.append((info[1], int(info[2]), endianness))
 
@@ -65,7 +69,7 @@ def _pack_float(size, arg):
     elif size == 64:
         value = struct.pack('>d', value)
     else:
-        raise ValueError('expected float size of 16, 32, or 64 bits (got {})'.format(
+        raise Error('expected float size of 16, 32, or 64 bits (got {})'.format(
             size))
 
     return bin(int(b'01' + binascii.hexlify(value), 16))[3:]
@@ -108,7 +112,7 @@ def _unpack_float(size, bits):
     elif size == 64:
         value = struct.unpack('>d', packed)[0]
     else:
-        raise ValueError('expected float size of 16, 32, or 64 bits (got {})'.format(
+        raise Error('expected float size of 16, 32, or 64 bits (got {})'.format(
             size))
 
     return value
@@ -150,6 +154,41 @@ class CompiledFormat(object):
             if info[0] not in 'pP':
                 self._number_of_arguments += 1
 
+    def _pack_value(self, type_, size, value, endianness, bits):
+        if type_ == 's':
+            value_bits = _pack_integer(size, value)
+        elif type_ == 'u':
+            value_bits = _pack_integer(size, value)
+        elif type_ == 'f':
+            value_bits = _pack_float(size, value)
+        elif type_ == 'b':
+            value_bits = _pack_boolean(size, value)
+        elif type_ == 't':
+            value_bits = _pack_text(size, value)
+        elif type_ == 'r':
+            value_bits = _pack_bytearray(size, bytearray(value))
+        else:
+            raise Error("bad type '{}' in format".format(type_))
+
+        # reverse the bit order in little endian values
+        if endianness == "<":
+            value_bits = value_bits[::-1]
+
+        # reverse bytes order for least significant byte first
+        if self._byte_order == ">":
+            bits += value_bits
+        else:
+            aligned_offset = len(value_bits) - (8 - (len(bits) % 8))
+
+            while aligned_offset > 0:
+                bits += value_bits[aligned_offset:]
+                value_bits = value_bits[:aligned_offset]
+                aligned_offset -= 8
+
+            bits += value_bits
+
+        return bits
+
     def pack(self, *args):
         """Return a byte string containing the values v1, v2, ... packed
         according to the compiled format string. If the total number
@@ -166,9 +205,10 @@ class CompiledFormat(object):
 
         # Sanity check of the number of arguments.
         if len(args) < self._number_of_arguments:
-            raise ValueError("pack expected {} item(s) for packing "
-                             "(got {})".format(self._number_of_arguments,
-                                               len(args)))
+            raise Error(
+                "pack expected {} item(s) for packing (got {})".format(
+                    self._number_of_arguments,
+                    len(args)))
 
         for type_, size, endianness in self._infos:
             if type_ == 'p':
@@ -176,38 +216,7 @@ class CompiledFormat(object):
             elif type_ == 'P':
                 bits += size * '1'
             else:
-                if type_ == 's':
-                    value_bits = _pack_integer(size, args[i])
-                elif type_ == 'u':
-                    value_bits = _pack_integer(size, args[i])
-                elif type_ == 'f':
-                    value_bits = _pack_float(size, args[i])
-                elif type_ == 'b':
-                    value_bits = _pack_boolean(size, args[i])
-                elif type_ == 't':
-                    value_bits = _pack_text(size, args[i])
-                elif type_ == 'r':
-                    value_bits = _pack_bytearray(size, bytearray(args[i]))
-                else:
-                    raise ValueError("bad type '{}' in format".format(type_))
-
-                # reverse the bit order in little endian values
-                if endianness == "<":
-                    value_bits = value_bits[::-1]
-
-                # reverse bytes order for least significant byte first
-                if self._byte_order == ">":
-                    bits += value_bits
-                else:
-                    aligned_offset = len(value_bits) - (8 - (len(bits) % 8))
-
-                    while aligned_offset > 0:
-                        bits += value_bits[aligned_offset:]
-                        value_bits = value_bits[:aligned_offset]
-                        aligned_offset -= 8
-
-                    bits += value_bits
-
+                bits = self._pack_value(type_, size, args[i], endianness, bits)
                 i += 1
 
         # padding of last byte
@@ -228,13 +237,75 @@ class CompiledFormat(object):
 
         """
 
-        bits = bin(int(b'01' + binascii.hexlify(bytearray(data)), 16))[3:]
+        return self.unpack_from(data)
+
+    def pack_into(self, buf, offset, *args, **kwargs):
+        """Pack given values v1, v2, ... into `buf`, starting at given bit
+        offset `offset`. Give `fill_padding` as ``False`` to leave
+        padding bits in `buf` unmodified.
+
+        :param buf: Buffer to pack data into.
+        :param offset: Bit offset to start at.
+        :param args: Variable argument list of values to pack.
+        :param fill_padding: A boolean to control if padding should
+                             overwrite bits in `buf`.
+
+        """
+
+        # Sanity check of the number of arguments.
+        if len(args) < self._number_of_arguments:
+            raise Error(
+                "pack expected {} item(s) for packing (got {})".format(
+                    self._number_of_arguments,
+                    len(args)))
+
+        fill_padding = kwargs.get('fill_padding', True)
+        buf_bits = _pack_bytearray(8 * len(buf), buf)
+        bits = buf_bits[0:offset]
+        i = 0
+
+        for type_, size, endianness in self._infos:
+            if type_ in 'pP':
+                if fill_padding:
+                    if type_ == 'p':
+                        bits += size * '0'
+                    else:
+                        bits += size * '1'
+                else:
+                    bits += buf_bits[len(bits):len(bits) + size]
+            else:
+                bits = self._pack_value(type_, size, args[i], endianness, bits)
+                i += 1
+
+        bits += buf_bits[len(bits):]
+
+        if len(bits) > len(buf_bits):
+            raise Error(
+                'pack requires a buffer of at least {} bits'.format(
+                    len(bits)))
+
+        buf[:] = _unpack_bytearray(len(bits), bits)
+
+    def unpack_from(self, data, offset=0):
+        """Unpack `data` (byte string, bytearray or list of integers)
+        according to given format string `fmt`, starting at given bit
+        offset `offset`. The result is a tuple even if it contains
+        exactly one item.
+
+        :param data: Byte string of values to unpack.
+        :param offset: Bit offset to start unpack from.
+        :returns: A tuple of the unpacked values.
+
+        """
+
+        bits = bin(int(b'01' + binascii.hexlify(bytearray(data)), 16))[3 + offset:]
 
         # Sanity check.
         if self._number_of_bits_to_unpack > len(bits):
-            raise ValueError("unpack requires at least {} bits to unpack "
-                             "(got {})".format(self._number_of_bits_to_unpack,
-                                               len(bits)))
+            raise Error(
+                "unpack requires at least {} bits to unpack (got {})".format(
+                    self._number_of_bits_to_unpack,
+                    len(bits)))
 
         res = []
         offset = 0
@@ -275,7 +346,7 @@ class CompiledFormat(object):
                 elif type_ == 'r':
                     value = bytes(_unpack_bytearray(size, value_bits))
                 else:
-                    raise ValueError("bad type '{}' in format".format(type_))
+                    raise Error("bad type '{}' in format".format(type_))
 
                 res.append(value)
 
@@ -359,6 +430,44 @@ def unpack(fmt, data):
     """
 
     return CompiledFormat(fmt).unpack(data)
+
+
+def pack_into(fmt, buf, offset, *args, **kwargs):
+    """Pack given values v1, v2, ... into `buf`, starting at given bit
+    offset `offset`. Pack according to given format string `fmt`. Give
+    `fill_padding` as ``False`` to leave padding bits in `buf`
+    unmodified.
+
+    :param fmt: Bitstruct format string. See format description below.
+    :param buf: Buffer to pack data into.
+    :param offset: Bit offset to start at.
+    :param args: Variable argument list of values to pack.
+    :param fill_padding: A boolean to control if padding should
+                         overwrite bits in `buf`.
+
+    """
+
+    return CompiledFormat(fmt).pack_into(buf,
+                                         offset,
+                                         *args,
+                                         **kwargs)
+
+
+def unpack_from(fmt, data, offset=0):
+    """Unpack `data` (byte string, bytearray or list of integers)
+    according to given format string `fmt`, starting at given bit
+    offset `offset`. The result is a tuple even if it contains exactly
+    one item.
+
+    :param fmt: Bitstruct format string. See :func:`~bitstruct.pack()`
+                for details.
+    :param data: Byte string of values to unpack.
+    :param offset: Bit offset to start unpack from.
+    :returns: A tuple of the unpacked values.
+
+    """
+
+    return CompiledFormat(fmt).unpack_from(data, offset)
 
 
 def calcsize(fmt):

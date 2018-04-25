@@ -30,7 +30,7 @@ def _parse_format(fmt):
         if info[0] != "":
             endianness = info[0]
 
-        if info[1] not in 'supfbtr':
+        if info[1] not in 'supPfbtr':
             raise ValueError("bad char '{}' in format".format(info[1]))
 
         infos.append((info[1], int(info[2]), endianness))
@@ -147,7 +147,7 @@ class CompiledFormat(object):
         self._number_of_arguments = 0
 
         for info in infos:
-            if info[0] != 'p':
+            if info[0] not in 'pP':
                 self._number_of_arguments += 1
 
     def pack(self, *args):
@@ -173,6 +173,8 @@ class CompiledFormat(object):
         for type_, size, endianness in self._infos:
             if type_ == 'p':
                 bits += size * '0'
+            elif type_ == 'P':
+                bits += size * '1'
             else:
                 if type_ == 's':
                     value_bits = _pack_integer(size, args[i])
@@ -238,7 +240,7 @@ class CompiledFormat(object):
         offset = 0
 
         for type_, size, endianness in self._infos:
-            if type_ == 'p':
+            if type_ in 'pP':
                 pass
             else:
                 # reverse bytes order for least significant byte first
@@ -325,7 +327,8 @@ def pack(fmt, *args):
     - ``b`` -- boolean
     - ``t`` -- text (ascii or utf-8)
     - ``r`` -- raw, bytes
-    - ``p`` -- padding, ignore
+    - ``p`` -- padding with zeros, ignore
+    - ``P`` -- padding with ones, ignore
 
     Length is the number of bits to pack the value into.
 

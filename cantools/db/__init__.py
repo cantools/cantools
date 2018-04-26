@@ -1,3 +1,4 @@
+import sys
 from xml.etree import ElementTree
 
 from .formats.utils import ParseError
@@ -38,14 +39,19 @@ class UnsupportedDatabaseFormatError(Exception):
         self.e_sym = e_sym
 
 
-def load_file(filename, database_format=None):
+def load_file(filename, database_format=None, encoding='utf-8'):
     """Open, read and parse given database file and return a
     :class:`~cantools.db.Database` object with its
-    contents. `database_format` may be one of ``'dbc'``, ``'kcd'``,
-    ``'sym'`` or ``None``, where ``None`` means transparent
-    format. Raises an
-    :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
-    given file does not contain a supported database format.
+    contents.
+
+    `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'`` or
+    ``None``, where ``None`` means transparent format.
+
+    `encoding` specifies the file encoding.
+
+    Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
+    exception if given file does not contain a supported database
+    format.
 
     >>> db = cantools.db.load_file('foo.dbc')
     >>> db.version
@@ -53,19 +59,25 @@ def load_file(filename, database_format=None):
 
     """
 
-    with open(filename, 'r') as fin:
-        return load(fin, database_format)
+    if sys.version_info[0] < 3:
+        with open(filename, 'r') as fin:
+            return load(fin, database_format)
+    else:
+        with open(filename, 'r', encoding=encoding, errors='replace') as fin:
+            return load(fin, database_format)
 
 
 def load(fp, database_format=None):
     """Read and parse given database file-like object and return a
     :class:`~cantools.db.Database` object with its
-    contents. `database_format` may be one of ``'dbc'``, ``'kcd'``,
-    ``'sym'`` or ``None``, where ``None`` means transparent
-    format. Raises an
-    :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
-    given file-like object does not contain a supported database
-    format.
+    contents.
+
+    `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'`` or
+    ``None``, where ``None`` means transparent format.
+
+    Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
+    exception if given file-like object does not contain a supported
+    database format.
 
     >>> with open('foo.kcd') as fin:
     ...    db = cantools.db.load(fin)
@@ -80,11 +92,14 @@ def load(fp, database_format=None):
 def load_string(string, database_format=None):
     """Parse given database string and return a
     :class:`~cantools.db.Database` object with its
-    contents. `database_format` may be one of ``'dbc'``, ``'kcd'``,
-    ``'sym'`` or ``None``, where ``None`` means transparent
-    format. Raises an
-    :class:`~cantools.db.UnsupportedDatabaseFormatError` exception if
-    given string does not contain a supported database format.
+    contents.
+
+    `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'`` or
+    ``None``, where ``None`` means transparent format.
+
+    Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
+    exception if given string does not contain a supported database
+    format.
 
     >>> with open('foo.dbc') as fin:
     ...    db = cantools.db.load_string(fin.read())

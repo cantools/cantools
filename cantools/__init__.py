@@ -8,7 +8,7 @@ from . import tester
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '20.3.0'
+__version__ = '20.3.1'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -90,7 +90,7 @@ def _format_message(dbf, frame_id, data, decode_choices, single_line):
 
 
 def _do_decode(args):
-    dbf = db.load_file(args.dbfile)
+    dbf = db.load_file(args.dbfile, encoding=args.encoding)
     decode_choices = not args.no_decode_choices
 
     while True:
@@ -141,6 +141,9 @@ def _main():
     decode_parser.add_argument('-s', '--single-line',
                                action='store_true',
                                help='Print the decoded message on a single line.')
+    decode_parser.add_argument('-e', '--encoding',
+                               default='utf-8',
+                               help='File encoding (default: utf-8).')
     decode_parser.add_argument('dbfile', help='Database file (.dbc).')
     decode_parser.set_defaults(func=_do_decode)
 

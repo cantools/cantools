@@ -94,7 +94,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          "version('2.0')\n"
                          "\n"
                          "node('FOO', None)\n"
-                         "node('BAR', 'fam')\n"
+                         "node('BAR', 'fam \"1\"')\n"
                          "node('FIE', None)\n"
                          "\n"
                          "message('Foo', 0x12331, True, 8, 'Foo.')\n"

@@ -1,13 +1,13 @@
 # Load and dump a CAN database in DBC format.
 
 from collections import OrderedDict
+import pyparsing
 from pyparsing import Word
 from pyparsing import Literal
 from pyparsing import Keyword
 from pyparsing import Optional
 from pyparsing import Suppress
 from pyparsing import Group
-from pyparsing import QuotedString
 from pyparsing import StringEnd
 from pyparsing import printables
 from pyparsing import nums
@@ -100,6 +100,17 @@ BU_: {bu}
 """
 
 
+class QuotedString(pyparsing.QuotedString):
+    """Quoted string accepting escaped quotation marks.
+
+    """
+
+    def __init__(self):
+        super(QuotedString, self).__init__('"',
+                                           multiline=True,
+                                           escChar='\\')
+
+
 def _create_grammar():
     """Create the DBC grammar.
 
@@ -123,7 +134,7 @@ def _create_grammar():
     frame_id = Word(nums).setName('frame id')
 
     version = Group(Keyword('VERSION')
-                    - QuotedString('"', multiline=True))
+                    - QuotedString())
     version.setName(VERSION)
 
     symbol = Word(alphas + '_') + Suppress(LineEnd())
@@ -159,7 +170,7 @@ def _create_grammar():
                            - pipe
                            - number
                            - rb)
-                   - QuotedString('"', multiline=True)
+                   - QuotedString()
                    - Group(delimitedList(node)))
     signal.setName(SIGNAL)
 
@@ -181,7 +192,7 @@ def _create_grammar():
                      - pipe
                      - number
                      - rb
-                     - QuotedString('"', multiline=True)
+                     - QuotedString()
                      - number
                      - number
                      - word
@@ -192,54 +203,54 @@ def _create_grammar():
     comment = Group(Keyword(COMMENT)
                     - ((Keyword(MESSAGE)
                         - frame_id
-                        - QuotedString('"', multiline=True)
+                        - QuotedString()
                         - scolon).setName(MESSAGE)
                        | (Keyword(SIGNAL)
                           - frame_id
                           - word
-                          - QuotedString('"', multiline=True)
+                          - QuotedString()
                           - scolon).setName(SIGNAL)
                        | (Keyword(NODES)
                           - word
-                          - QuotedString('"', multiline=True)
+                          - QuotedString()
                           - scolon).setName(NODES)
                        | (Keyword(EVENT)
                           - word
-                          - QuotedString('"', multiline=True)
+                          - QuotedString()
                           - scolon).setName(EVENT)
-                       | (QuotedString('"', multiline=True)
+                       | (QuotedString()
                           - scolon).setName('QuotedString')))
     comment.setName(COMMENT)
 
     attribute_definition = Group(Keyword(ATTRIBUTE_DEFINITION)
-                                 - ((QuotedString('"', multiline=True))
+                                 - ((QuotedString())
                                     | (Keyword(SIGNAL)
                                        | Keyword(MESSAGE)
                                        | Keyword(EVENT)
                                        | Keyword(NODES))
-                                    + QuotedString('"', multiline=True))
+                                    + QuotedString())
                                  - word
                                  - (scolon
                                     | (Group(ZeroOrMore(Group(
                                         (comma | Empty())
-                                        + QuotedString('"', multiline=True))))
+                                        + QuotedString())))
                                        + scolon)
                                     | (Group(ZeroOrMore(number))
                                        + scolon)))
     attribute_definition.setName(ATTRIBUTE_DEFINITION)
 
     attribute_definition_default = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT)
-                                         - QuotedString('"', multiline=True)
-                                         - (number | QuotedString('"', multiline=True))
+                                         - QuotedString()
+                                         - (number | QuotedString())
                                          - scolon)
     attribute_definition_default.setName(ATTRIBUTE_DEFINITION_DEFAULT)
 
     attribute = Group(Keyword(ATTRIBUTE)
-                      - QuotedString('"', multiline=True)
+                      - QuotedString()
                       - Group(Optional((Keyword(MESSAGE) + frame_id)
                                        | (Keyword(SIGNAL) + frame_id + word)
                                        | (Keyword(NODES) + word)))
-                      - (QuotedString('"', multiline=True) | number)
+                      - (QuotedString() | number)
                       - scolon)
     attribute.setName(ATTRIBUTE)
 
@@ -247,14 +258,14 @@ def _create_grammar():
                    - Group(Optional(frame_id))
                    - word
                    - Group(OneOrMore(Group(integer
-                                           + QuotedString('"', multiline=True))))
+                                           + QuotedString())))
                    - scolon)
     choice.setName(CHOICE)
 
     value_table = Group(Keyword(VALUE_TABLE)
                         - word
                         - Group(OneOrMore(Group(integer
-                                                + QuotedString('"', multiline=True))))
+                                                + QuotedString())))
                         - scolon)
     value_table.setName(VALUE_TABLE)
 
@@ -284,33 +295,33 @@ def _create_grammar():
     message_add_sender.setName(MESSAGE_TX_NODE)
 
     attribute_definition_rel = Group(Keyword(ATTRIBUTE_DEFINITION_REL)
-                                     - (QuotedString('"', multiline=True)
+                                     - (QuotedString()
                                         | (Keyword(NODES_REL)
-                                           + QuotedString('"', multiline=True)))
+                                           + QuotedString()))
                                      - word
                                      - (scolon
                                         | (Group(ZeroOrMore(Group(
                                             (comma | Empty())
-                                            + QuotedString('"', multiline=True))))
+                                            + QuotedString())))
                                            + scolon)
                                         | (Group(ZeroOrMore(number))
                                            + scolon)))
     attribute_definition_rel.setName(ATTRIBUTE_DEFINITION_REL)
 
     attribute_definition_default_rel = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT_REL)
-                                             - QuotedString('"', multiline=True)
-                                             - (number | QuotedString('"', multiline=True))
+                                             - QuotedString()
+                                             - (number | QuotedString())
                                              - scolon)
     attribute_definition_default_rel.setName(ATTRIBUTE_DEFINITION_DEFAULT_REL)
 
     attribute_rel = Group(Keyword(ATTRIBUTE_REL)
-                          - QuotedString('"', multiline=True)
+                          - QuotedString()
                           - Keyword(NODES_REL)
                           - word
                           - Keyword(SIGNAL)
                           - frame_id
                           - word
-                          - (positive_integer | QuotedString('"'))
+                          - (positive_integer | QuotedString())
                           - scolon)
     attribute_rel.setName(ATTRIBUTE_REL)
 
@@ -727,10 +738,13 @@ def _load_messages(tokens,
         ids = []
 
         if len(signal) == 2 and signal[1] != 'M':
-            ids.append(int(signal[1][1:]))
+            # ToDo: Extended multiplexing not yet supported.
+            value = signal[1][1:].strip('M')
+            ids.append(int(value))
 
         try:
-            ids.extend(signal_multiplexer_values[frame_id_dbc][multiplexer_signal][signal[0]])
+            ids.extend(
+                signal_multiplexer_values[frame_id_dbc][multiplexer_signal][signal[0]])
         except KeyError:
             pass
 

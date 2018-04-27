@@ -48,7 +48,7 @@ BO_ 2147558194 Bar: 4 FOO
 BO_ 2147558195 CanFd: 64 FOO
  SG_ Foo : 0|512@1- (1,0) [0|0] "" Vector__XXX, FUM
 
-CM_ BU_ BAR "fam";
+CM_ BU_ BAR "fam \"1\"";
 CM_ BO_ 2147558193 "Foo.";
 CM_ SG_ 2147558193 Bar "";
 

@@ -25,7 +25,8 @@ class Database(object):
                  buses=None,
                  version=None,
                  attribute_definitions=None,
-                 attribute_definition_defaults=None):
+                 attribute_definition_defaults=None,
+                 frame_id_mask=None):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
         self._buses = buses if buses else []
@@ -38,6 +39,11 @@ class Database(object):
         self._attribute_definition_defaults = (attribute_definition_defaults
                                                if attribute_definition_defaults
                                                else {})
+
+        if frame_id_mask is None:
+            frame_id_mask = 0xffffffff
+
+        self._frame_id_mask = frame_id_mask
 
     @property
     def messages(self):
@@ -197,13 +203,17 @@ class Database(object):
                            "name to message dictionary.",
                            message.name)
 
-        if message.frame_id in self._frame_id_to_message:
-            LOGGER.warning('Overwriting message with frame id 0x%x in the '
-                           'frame id to message dictionary.',
-                           message.frame_id)
+        masked_frame_id = (message.frame_id & self._frame_id_mask)
+
+        if masked_frame_id in self._frame_id_to_message:
+            LOGGER.warning(
+                'Overwriting message with masked frame id 0x%x (0x%x) in the '
+                'frame id to message dictionary.',
+                masked_frame_id,
+                message.frame_id)
 
         self._name_to_message[message.name] = message
-        self._frame_id_to_message[message.frame_id] = message
+        self._frame_id_to_message[masked_frame_id] = message
 
     def as_dbc_string(self):
         """Return the database as a string formatted as a DBC file.
@@ -241,7 +251,7 @@ class Database(object):
 
         """
 
-        return self._frame_id_to_message[frame_id]
+        return self._frame_id_to_message[frame_id & self._frame_id_mask]
 
     def get_node_by_name(self, name):
         """Find the node object for given name `name`.

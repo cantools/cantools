@@ -8,7 +8,7 @@ from . import tester
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '20.3.2'
+__version__ = '20.4.0'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -70,11 +70,11 @@ def _format_message_multi_line(message, formatted_signals):
                                  signals=',\n'.join(indented_signals))
 
 
-def _format_message(dbf, frame_id, data, decode_choices, single_line):
+def _format_message(database, frame_id, data, decode_choices, single_line):
     try:
-        message = dbf.get_message_by_frame_id(frame_id)
+        message = database.get_message_by_frame_id(frame_id)
     except KeyError:
-        return ' Unknown frame id {}'.format(frame_id)
+        return ' Unknown frame id {0} (0x{0:x})'.format(frame_id)
 
     try:
         decoded_signals = message.decode(data, decode_choices)
@@ -90,7 +90,9 @@ def _format_message(dbf, frame_id, data, decode_choices, single_line):
 
 
 def _do_decode(args):
-    dbf = db.load_file(args.dbfile, encoding=args.encoding)
+    database = db.load_file(args.database,
+                            encoding=args.encoding,
+                            frame_id_mask=args.frame_id_mask)
     decode_choices = not args.no_decode_choices
 
     while True:
@@ -106,7 +108,7 @@ def _do_decode(args):
         if mo:
             frame_id, data = _mo_unpack(mo)
             line += ' ::'
-            line += _format_message(dbf,
+            line += _format_message(database,
                                     frame_id,
                                     data,
                                     decode_choices,
@@ -135,16 +137,27 @@ def _main():
         'decode',
         description=('Decode "candump" CAN frames read from standard input '
                      'and print them in a human readable format.'))
-    decode_parser.add_argument('-c', '--no-decode-choices',
-                               action='store_true',
-                               help='Do not convert scaled values to choice strings.')
-    decode_parser.add_argument('-s', '--single-line',
-                               action='store_true',
-                               help='Print the decoded message on a single line.')
-    decode_parser.add_argument('-e', '--encoding',
-                               default='utf-8',
-                               help='File encoding (default: utf-8).')
-    decode_parser.add_argument('dbfile', help='Database file (.dbc).')
+    decode_parser.add_argument(
+        '-c', '--no-decode-choices',
+        action='store_true',
+        help='Do not convert scaled values to choice strings.')
+    decode_parser.add_argument(
+        '-s', '--single-line',
+        action='store_true',
+        help='Print the decoded message on a single line.')
+    decode_parser.add_argument(
+        '-e', '--encoding',
+        default='utf-8',
+        help='File encoding (default: utf-8).')
+    decode_parser.add_argument(
+        '-m', '--frame-id-mask',
+        type=lambda x: int(x, 0),
+        help=('Only use masked frame id bits to find the message in the '
+              'database. By default the candump and databae frame ids must '
+              'be equal.'))
+    decode_parser.add_argument(
+        'database',
+        help='Database file.')
     decode_parser.set_defaults(func=_do_decode)
 
     args = parser.parse_args()

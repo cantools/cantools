@@ -170,6 +170,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
             decoded = db.decode_message(name, encoded)
             self.assertEqual(decoded, decoded_message)
 
+    def test_foobar_decode_masked_frame_id(self):
+        db = cantools.db.Database(frame_id_mask=0xff)
+        filename = os.path.join('tests', 'files', 'foobar.dbc')
+        db.add_dbc_file(filename)
+
+        frame_ids = [
+            0x12331,
+            0xfff31,
+            0x00031
+        ]
+
+        for frame_id in frame_ids:
+            db.get_message_by_frame_id(frame_id)
+
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.
 
@@ -609,7 +623,7 @@ IO_DEBUG(
     IO_DEBUG_test_float: 2.0
 )
   vcan0  1F4   [3]  01 02 03 :: unpack requires at least 32 bits to unpack (got 24)
-  vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499
+  vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
 """
 
         stdout = StringIO()
@@ -646,7 +660,7 @@ IO_DEBUG(
 
   vcan0  1F4   [4]  01 02 03 04 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two', IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
   vcan0  1F4   [3]  01 02 03 :: unpack requires at least 32 bits to unpack (got 24)
-  vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499
+  vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
 """
 
         stdout = StringIO()

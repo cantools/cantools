@@ -39,7 +39,10 @@ class UnsupportedDatabaseFormatError(Exception):
         self.e_sym = e_sym
 
 
-def load_file(filename, database_format=None, encoding='utf-8'):
+def load_file(filename,
+              database_format=None,
+              encoding='utf-8',
+              frame_id_mask=None):
     """Open, read and parse given database file and return a
     :class:`~cantools.db.Database` object with its
     contents.
@@ -61,13 +64,13 @@ def load_file(filename, database_format=None, encoding='utf-8'):
 
     if sys.version_info[0] < 3:
         with open(filename, 'r') as fin:
-            return load(fin, database_format)
+            return load(fin, database_format, frame_id_mask)
     else:
         with open(filename, 'r', encoding=encoding, errors='replace') as fin:
-            return load(fin, database_format)
+            return load(fin, database_format, frame_id_mask)
 
 
-def load(fp, database_format=None):
+def load(fp, database_format=None, frame_id_mask=None):
     """Read and parse given database file-like object and return a
     :class:`~cantools.db.Database` object with its
     contents.
@@ -86,10 +89,10 @@ def load(fp, database_format=None):
 
     """
 
-    return load_string(fp.read(), database_format)
+    return load_string(fp.read(), database_format, frame_id_mask)
 
 
-def load_string(string, database_format=None):
+def load_string(string, database_format=None, frame_id_mask=None):
     """Parse given database string and return a
     :class:`~cantools.db.Database` object with its
     contents.
@@ -119,7 +122,7 @@ def load_string(string, database_format=None):
 
     if database_format in ['dbc', None]:
         try:
-            db = Database()
+            db = Database(frame_id_mask=frame_id_mask)
             db.add_dbc_string(string)
             return db
         except ParseError as e:
@@ -127,7 +130,7 @@ def load_string(string, database_format=None):
 
     if database_format in ['kcd', None]:
         try:
-            db = Database()
+            db = Database(frame_id_mask=frame_id_mask)
             db.add_kcd_string(string)
             return db
         except ElementTree.ParseError as e:
@@ -135,7 +138,7 @@ def load_string(string, database_format=None):
 
     if database_format in ['sym', None]:
         try:
-            db = Database()
+            db = Database(frame_id_mask=frame_id_mask)
             db.add_sym_string(string)
             return db
         except ParseError as e:

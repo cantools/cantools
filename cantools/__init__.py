@@ -152,9 +152,9 @@ def _main():
     decode_parser.add_argument(
         '-m', '--frame-id-mask',
         type=lambda x: int(x, 0),
-        help=('Only use masked frame id bits to find the message in the '
-              'database. By default the candump and databae frame ids must '
-              'be equal.'))
+        help=('Only compare selected frame id bits to find the message in the '
+              'database. By default the candump and database frame ids must '
+              'be equal for a match.'))
     decode_parser.add_argument(
         'database',
         help='Database file.')

@@ -587,6 +587,14 @@ class BitStructTest(unittest.TestCase):
         pack_into('P4u4', packed, 0, 1)
         self.assertEqual(packed, b'\xf1')
 
+        # Too many values to pack.
+        with self.assertRaises(Error) as cm:
+            packed = bytearray(b'\x00')
+            pack_into('b1t24', packed, 0, False)
+
+        self.assertEqual(str(cm.exception),
+                         'pack expected 2 item(s) for packing (got 1)')
+
     def test_unpack_from(self):
         """Unpack values at given bit offset.
 

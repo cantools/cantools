@@ -33,8 +33,14 @@ class BitStructTest(unittest.TestCase):
         packed = pack('p1u1s6u7u9', 0, -2, 65, 22)
         self.assertEqual(packed, b'\x3e\x82\x16')
 
+        packed = pack('P1u1s6u7u9', 0, -2, 65, 22)
+        self.assertEqual(packed, b'\xbe\x82\x16')
+
         packed = pack('p1u1s6p7u9', 0, -2, 22)
         self.assertEqual(packed, b'\x3e\x00\x16')
+
+        packed = pack('P1u1s6p7u9', 0, -2, 22)
+        self.assertEqual(packed, b'\xbe\x00\x16')
 
         packed = pack('u1s6f32r43', 0, -2, 3.75, b'\x00\xff\x00\xff\x00\xff')
         self.assertEqual(packed, b'\x7c\x80\xe0\x00\x00\x01\xfe\x01\xfe\x01\xc0')
@@ -44,6 +50,9 @@ class BitStructTest(unittest.TestCase):
 
         packed = pack('b1p6b1', True, True)
         self.assertEqual(packed, b'\x81')
+
+        packed = pack('b1P6b1', True, True)
+        self.assertEqual(packed, b'\xff')
 
         packed = pack('u5b2u1', -1, False, 1)
         self.assertEqual(packed, b'\xf9')
@@ -129,6 +138,18 @@ class BitStructTest(unittest.TestCase):
         packed = 500 * b'\x00'
         unpacked = unpack('s4000', packed)
         self.assertEqual(unpacked, (0, ))
+
+        packed = b'\xbe\x82\x16'
+        unpacked = unpack('P1u1s6u7u9', packed)
+        self.assertEqual(unpacked, (0, -2, 65, 22))
+
+        packed = b'\x3e\x82\x16'
+        unpacked = unpack('P1u1s6u7u9', packed)
+        self.assertEqual(unpacked, (0, -2, 65, 22))
+
+        packed = b'\xbe\x82\x16'
+        unpacked = unpack('p1u1s6u7u9', packed)
+        self.assertEqual(unpacked, (0, -2, 65, 22))
 
         packed = b'\x3e\x82\x16'
         unpacked = unpack('p1u1s6u7u9', packed)
@@ -238,6 +259,9 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(size, 23)
 
         size = calcsize('b1s6u7u9p1t8')
+        self.assertEqual(size, 32)
+
+        size = calcsize('b1s6u7u9P1t8')
         self.assertEqual(size, 32)
 
     def test_byteswap(self):
@@ -525,7 +549,7 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(cf.unpack(b'\x00'), ())
 
     def test_byte_order_format(self):
-        """Test of a format with only byte order informationx.
+        """Test of a format with only byte order information.
 
         """
 

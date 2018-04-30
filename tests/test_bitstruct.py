@@ -583,6 +583,10 @@ class BitStructTest(unittest.TestCase):
         self.assertEqual(str(cm.exception),
                          'pack requires a buffer of at least 17 bits')
 
+        packed = bytearray(b'\x00')
+        pack_into('P4u4', packed, 0, 1)
+        self.assertEqual(packed, b'\xf1')
+
     def test_unpack_from(self):
         """Unpack values at given bit offset.
 

@@ -201,23 +201,23 @@ def _create_grammar():
     event.setName(EVENT)
 
     comment = Group(Keyword(COMMENT)
-                    - ((Keyword(MESSAGE)
-                        - frame_id
-                        - QuotedString()
-                        - scolon).setName(MESSAGE)
-                       | (Keyword(SIGNAL)
+                    - ((Keyword(SIGNAL)
                           - frame_id
                           - word
                           - QuotedString()
                           - scolon).setName(SIGNAL)
-                       | (Keyword(NODES)
-                          - word
-                          - QuotedString()
-                          - scolon).setName(NODES)
+                       | (Keyword(MESSAGE)
+                        - frame_id
+                        - QuotedString()
+                        - scolon).setName(MESSAGE)
                        | (Keyword(EVENT)
                           - word
                           - QuotedString()
                           - scolon).setName(EVENT)
+                       | (Keyword(NODES)
+                          - word
+                          - QuotedString()
+                          - scolon).setName(NODES)
                        | (QuotedString()
                           - scolon).setName('QuotedString')))
     comment.setName(COMMENT)
@@ -334,25 +334,25 @@ def _create_grammar():
                          - scolon)
     signal_group.setName(SIGNAL_GROUP)
 
-    entry = (version
-             | symbols
-             | discard
-             | nodes
-             | message
+    entry = (message
              | comment
-             | attribute_definition
-             | attribute_definition_default
              | attribute
              | choice
+             | attribute_definition
+             | attribute_definition_default
+             | attribute_rel
+             | attribute_definition_rel
+             | attribute_definition_default_rel
+             | signal_group
+             | event
+             | message_add_sender
              | value_table
              | signal_type
              | signal_multiplexer_values
-             | message_add_sender
-             | attribute_definition_rel
-             | attribute_definition_default_rel
-             | attribute_rel
-             | signal_group
-             | event)
+             | discard
+             | nodes
+             | symbols
+             | version)
 
     frame_id.setParseAction(lambda _s, _l, t: int(t[0]))
 

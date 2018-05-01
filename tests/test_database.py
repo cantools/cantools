@@ -1316,10 +1316,10 @@ IO_DEBUG(
         self.assertEqual(
             str(cm.exception),
             "Invalid DBC syntax at line 1, column 1: '>!<abc': Expected "
-            "{VERSION | NS_ | BS_ | BU_ | BO_ | CM_ | BA_DEF_ | BA_DEF_DEF_ "
-            "| BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ | SG_MUL_VAL_ "
-            "| BO_TX_BU_ | BA_DEF_REL_ | BA_DEF_DEF_REL_ | BA_REL_ | SIG_GROUP_ "
-            "| EV_}.")
+            "{BO_ | CM_ | BA_ | VAL_ | BA_DEF_ | BA_DEF_DEF_ | BA_REL_ "
+            "| BA_DEF_REL_ | BA_DEF_DEF_REL_ | SIG_GROUP_ | EV_ | BO_TX_BU_ "
+            "| VAL_TABLE_ | SIG_VALTYPE_ | SG_MUL_VAL_ | BS_ | BU_ | NS_ "
+            "| VERSION}.")
 
         # Bad message frame id.
         with self.assertRaises(cantools.db.ParseError) as cm:
@@ -1422,10 +1422,10 @@ IO_DEBUG(
         self.assertEqual(
             str(cm.exception),
             "DBC: \"Invalid DBC syntax at line 1, column 1: \'>!<<!--\': "
-            "Expected {VERSION | NS_ | BS_ | BU_ | BO_ | CM_ | BA_DEF_ | "
-            "BA_DEF_DEF_ | BA_ | VAL_ | VAL_TABLE_ | SIG_VALTYPE_ | SG_MUL_VAL_ "
-            "| BO_TX_BU_ | BA_DEF_REL_ | BA_DEF_DEF_REL_ | BA_REL_ | SIG_GROUP_ "
-            "| EV_}.\"")
+            "Expected {BO_ | CM_ | BA_ | VAL_ | BA_DEF_ | BA_DEF_DEF_ "
+            "| BA_REL_ | BA_DEF_REL_ | BA_DEF_DEF_REL_ | SIG_GROUP_ | EV_ "
+            "| BO_TX_BU_ | VAL_TABLE_ | SIG_VALTYPE_ | SG_MUL_VAL_ | BS_ "
+            "| BU_ | NS_ | VERSION}.\"")
 
         # SYM database format, but file is KCD.
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:

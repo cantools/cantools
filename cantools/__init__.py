@@ -8,7 +8,7 @@ from . import tester
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '20.4.0'
+__version__ = '20.5.0'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -78,7 +78,7 @@ def _format_message(database, frame_id, data, decode_choices, single_line):
 
     try:
         decoded_signals = message.decode(data, decode_choices)
-    except ValueError as e:
+    except Exception as e:
         return ' ' + str(e)
 
     formatted_signals = _format_signals(message, decoded_signals)

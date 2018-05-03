@@ -207,10 +207,11 @@ class Database(object):
 
         if masked_frame_id in self._frame_id_to_message:
             LOGGER.warning(
-                'Overwriting message with masked frame id 0x%x (0x%x) in the '
-                'frame id to message dictionary.',
-                masked_frame_id,
-                message.frame_id)
+                "Overwriting message '%s' with '%s' in the frame id to message "
+                "dictionary because they have identical masked frame ids 0x%x.",
+                self._frame_id_to_message[masked_frame_id].name,
+                message.name,
+                masked_frame_id)
 
         self._name_to_message[message.name] = message
         self._frame_id_to_message[masked_frame_id] = message

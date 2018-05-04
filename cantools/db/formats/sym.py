@@ -169,7 +169,7 @@ def _load_signal(tokens, enums):
     name = tokens[0]
     is_signed = False
     is_float = False
-    byte_order = 'big_endian'
+    byte_order = 'little_endian'
     offset = 0
     factor = 1
     unit = None
@@ -198,7 +198,7 @@ def _load_signal(tokens, enums):
     # Byte order.
     try:
         if tokens[3][0] == '-m':
-            byte_order = 'little_endian'
+            byte_order = 'big_endian'
     except IndexError:
         pass
 
@@ -251,9 +251,13 @@ def _load_message_signal(tokens,
                          multiplexer_signal,
                          multiplexer_ids):
     signal = signals[tokens[1]]
+    start = int(tokens[2])
+
+    if signal.byte_order == 'big_endian':
+        start = (8 * (start // 8) + (7 - (start % 8)))
 
     return Signal(name=signal.name,
-                  start=int(tokens[2]),
+                  start=start,
                   length=signal.length,
                   receivers=signal.receivers,
                   byte_order=signal.byte_order,
@@ -293,7 +297,7 @@ def _load_muxed_message_signals(message_tokens,
         Signal(name=multiplexer_signal,
                start=int(mux_tokens[2]),
                length=int(mux_tokens[3]),
-               byte_order='big_endian',
+               byte_order='little_endian',
                is_multiplexer=True)
     ]
 

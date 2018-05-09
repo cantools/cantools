@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import cantools
+import os
+
+with open(os.path.join('cantools', '__init__.py'), 'r') as f:
+    for line in f:
+        if line.startswith('__version__'):
+            version = line.split('=')[-1].strip().strip("'")
+            break
 
 setup(name='cantools',
-      version=cantools.__version__,
+      version=version,
       description='CAN BUS tools.',
       long_description=open('README.rst', 'r').read(),
       author='Erik Moqvist',

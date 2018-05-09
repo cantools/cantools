@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
+import os
 
-with open(path.join('cantools', '__init__.py'), 'r') as f:
+with open(os.path.join('cantools', '__init__.py'), 'r') as f:
     for line in f:
         if line.startswith('__version__'):
             version = line.split('=')[-1].strip().strip("'")

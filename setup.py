@@ -1,10 +1,17 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import cantools
+import re
+
+
+def find_version():
+    return re.search(r"^__version__ = '(.*)'$",
+                     open('cantools/__init__.py', 'r').read(),
+                     re.MULTILINE).group(1)
+
 
 setup(name='cantools',
-      version=cantools.__version__,
+      version=find_version(),
       description='CAN BUS tools.',
       long_description=open('README.rst', 'r').read(),
       author='Erik Moqvist',

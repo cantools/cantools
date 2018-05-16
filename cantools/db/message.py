@@ -159,15 +159,22 @@ class Message(object):
                 continue
 
             if signal.is_multiplexer:
-                children_ids = []
+                children_ids = set()
 
                 for s in self._signals:
                     if s.multiplexer_signal != signal.name:
                         continue
 
-                    children_ids.extend(s.multiplexer_ids)
+                    children_ids.update(s.multiplexer_ids)
 
-                children_ids = set(children_ids)
+                # Some CAN messages will have muxes containing only
+                # the multiplexer and no additional signals. At Tesla
+                # these are indicated in advance by assigning them an
+                # enumeration. Here we ensure that any named
+                # multiplexer is included, even if it has no child
+                # signals.
+                if signal.choices:
+                    children_ids.update(signal.choices.keys())
 
                 for child_id in children_ids:
                     codec = self._create_codec(signal.name, child_id)

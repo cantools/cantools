@@ -39,3 +39,5 @@ print('Motor speed is {Speed} rpm and load is {Load}%.'.format(**status))
 
 print('Setting motor speed to 65535 rpm to terminate it.')
 tester.send('MotorControl', {'Speed': 65535})
+
+print('Done!')

@@ -25,10 +25,13 @@ def main():
 
         if message.arbitration_id == 0x011:
             speed = struct.unpack('<H', message.data)[0]
+            print('Received motor speed of {} rpm.'.format(speed))
             task.modify_data(create_message(speed, 12))
 
             if message.data == b'\xff\xff':
                 break
+
+    print('Done!')
 
 
 if __name__ == '__main__':

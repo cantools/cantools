@@ -167,9 +167,12 @@ class Message(object):
 
                     children_ids.update(s.multiplexer_ids)
 
-                # Some CAN messages will have muxes containing only the multiplexer and no additional signals.
-                # At Tesla these are indicated in advance by assigning them an enumeration. Here we ensure
-                # that any named multiplexer is included, even if it has no child id.
+                # Some CAN messages will have muxes containing only
+                # the multiplexer and no additional signals. At Tesla
+                # these are indicated in advance by assigning them an
+                # enumeration. Here we ensure that any named
+                # multiplexer is included, even if it has no child
+                # signals.
                 if signal.choices:
                     children_ids.update(signal.choices.keys())
 

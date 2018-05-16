@@ -1190,6 +1190,19 @@ IO_DEBUG(
         decoded = message_1.decode(encoded, decode_choices=False)
         self.assertEqual(decoded, decoded_message)
 
+        # With Multiplexor as the only signal.
+        decoded_message = {
+            'Multiplexor': 4
+        }
+        encoded_message = b'\x10\x00\x00\x00\x00\x00\x00\x00'
+
+        message_2 = db.messages[1]
+
+        encoded = message_2.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message_2.decode(encoded, decode_choices=False)
+        self.assertEqual(decoded, decoded_message)
+
     def test_multiplex_extended(self):
         #            tree              |  bits
         # =============================+========

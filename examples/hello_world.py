@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+#
+# > python3 hello_world.py
+# Message: {'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 'Enabled'}
+# Encoded: c001400000000000
+# Decoded: {'Enable': 'Enabled', 'AverageRadius': 3.2, 'Temperature': 250.1}
+#
 
 from __future__ import print_function
 import os
@@ -13,7 +19,7 @@ MOTOHAWK_PATH = os.path.join(SCRIPT_DIR,
                              'files',
                              'motohawk.dbc')
 
-database = cantools.db.load_file('tests/files/motohawk.dbc')
+database = cantools.db.load_file(MOTOHAWK_PATH)
 
 message = {
     'Temperature': 250.1,

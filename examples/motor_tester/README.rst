@@ -34,8 +34,8 @@ Motor tester
 
    .. code-block::
    
-      Received motor speed of 50 rpm
-      Received motor speed of 0 rpm
-      Received motor speed of 65535 rpm
+      Received motor speed of 50 rpm.
+      Received motor speed of 0 rpm.
+      Received motor speed of 65535 rpm.
       Done!
       >

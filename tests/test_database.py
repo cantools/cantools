@@ -1203,6 +1203,26 @@ IO_DEBUG(
         decoded = message_2.decode(encoded, decode_choices=False)
         self.assertEqual(decoded, decoded_message)
 
+        self.assertEqual(message_2.signal_tree,
+                         [
+                             {
+                                 'Multiplexor': {
+                                     4: [],
+                                     8: [
+                                         'BIT_J', 'BIT_C', 'BIT_G', 'BIT_L'
+                                     ],
+                                     16: [
+                                         'BIT_J', 'BIT_C', 'BIT_G', 'BIT_L'
+                                     ],
+                                     24: [
+                                         'BIT_J', 'BIT_C', 'BIT_G', 'BIT_L',
+                                         'BIT_A', 'BIT_K', 'BIT_E', 'BIT_D',
+                                         'BIT_B', 'BIT_H', 'BIT_F'
+                                     ]
+                                 }
+                             }
+                         ])
+
     def test_multiplex_extended(self):
         #            tree              |  bits
         # =============================+========

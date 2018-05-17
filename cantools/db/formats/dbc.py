@@ -380,11 +380,13 @@ def _dump_messages(database):
                               senders=' '.join(message.senders)))
 
         for signal in message.signals[::-1]:
-            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{sign}'
+            fmt = (' SG_ {name} {muxType}{muxId} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
                    ' [{minimum}|{maximum}] "{unit}" {receivers}')
             msg.append(fmt.format(
                 name=signal.name,
+                muxType='M' if signal.is_multiplexer else 'm' if signal.multiplexer_ids != None else '',
+                muxId='' if signal.multiplexer_ids == None else signal.multiplexer_ids[0],
                 start=signal.start,
                 length=signal.length,
                 receivers=', '.join(signal.receivers),

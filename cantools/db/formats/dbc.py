@@ -447,7 +447,10 @@ def _dump_attribute_definitions(database):
                                          name=attribute[2],
                                          type_=attribute[3],
                                          choices=choices))
-
+        elif attribute[0] in [ATTRIBUTE_DEFINITION]:
+            fmt = 'BA_DEF_ "{name}" {type_};'
+            ba_def.append(fmt.format(name=attribute[1],
+                                     type_=attribute[2]))
     return ba_def
 
 

@@ -1619,7 +1619,7 @@ IO_DEBUG(
         db = cantools.db.load_file(filename)
         dumped_db = cantools.db.load_string(db.as_dbc_string())
         reg_id_msg = dumped_db.get_message_by_frame_id(0x100)
-        ext_id_msg = dumped_db.get_message_by_frame_id(0x1C2A2A2A)
+        ext_id_msg = dumped_db.get_message_by_frame_id(0x1c2a2a2a)
 
         self.assertEqual(reg_id_msg.is_extended_frame, False)
         self.assertEqual(ext_id_msg.is_extended_frame, True)

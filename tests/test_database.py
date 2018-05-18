@@ -1614,6 +1614,16 @@ IO_DEBUG(
         self.assertEqual(attr[0][1], "BusType")
         self.assertEqual(attr[0][2], "STRING")
 
+    def test_extended_id_dump(self):
+        filename = os.path.join('tests', 'files', 'test_extended_id_dump.dbc')
+        db = cantools.db.load_file(filename)
+        dumped_db = cantools.db.load_string(db.as_dbc_string())
+        reg_id_msg = dumped_db.get_message_by_frame_id(0x100)
+        ext_id_msg = dumped_db.get_message_by_frame_id(0x1C2A2A2A)
+
+        self.assertEqual(reg_id_msg.is_extended_frame, False)
+        self.assertEqual(ext_id_msg.is_extended_frame, True)
+        
 # This file is not '__main__' when executed via 'python setup.py
 # test'.
 logging.basicConfig(level=logging.DEBUG)

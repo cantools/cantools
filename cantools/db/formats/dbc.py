@@ -374,7 +374,7 @@ def _dump_messages(database):
     for message in database.messages:
         msg = []
         fmt = 'BO_ {frame_id} {name}: {length} {senders}'
-        msg.append(fmt.format(frame_id=message.frame_id,
+        msg.append(fmt.format(frame_id=message.frame_id | (1 << 31 if message.is_extended_frame else 0),
                               name=message.name,
                               length=message.length,
                               senders=' '.join(message.senders)))

@@ -1619,7 +1619,7 @@ IO_DEBUG(
         self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[1].name, "MultiplexedSig")
         self.assertEqual(dumped_msg.signals[1].is_multiplexer, False)
-        self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2A)
+        self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
         self.assertEqual(dumped_msg.signals[2].name, "UnmultiplexedSig")
         self.assertEqual(dumped_msg.signals[2].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[2].is_multiplexer, False)
@@ -1643,7 +1643,7 @@ IO_DEBUG(
 
         self.assertEqual(reg_id_msg.is_extended_frame, False)
         self.assertEqual(ext_id_msg.is_extended_frame, True)
-        
+
 # This file is not '__main__' when executed via 'python setup.py
 # test'.
 logging.basicConfig(level=logging.DEBUG)

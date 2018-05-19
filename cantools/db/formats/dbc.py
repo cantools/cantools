@@ -370,16 +370,23 @@ def _dump_nodes(database):
 
 def _dump_messages(database):
     bo = []
-    
+
     def get_frame_id(message):
-        return message.frame_id | (1 << 31 if message.is_extended_frame else 0)
+        frame_id = message.frame_id
+
+        if message.is_extended_frame:
+            frame_id |= 0x80000000
+
+        return frame_id
 
     def get_mux(signal):
-        result = ''
         if signal.is_multiplexer:
-            result += ' M'
-        elif signal.multiplexer_ids != None:
-            result += ' m' + str(signal.multiplexer_ids[0])
+            result = ' M'
+        elif signal.multiplexer_ids is not None:
+            result = ' m{}'.format(signal.multiplexer_ids[0])
+        else:
+            result = ''
+
         return result
 
     for message in database.messages:
@@ -461,6 +468,7 @@ def _dump_attribute_definitions(database):
             fmt = 'BA_DEF_ "{name}" {type_};'
             ba_def.append(fmt.format(name=attribute[1],
                                      type_=attribute[2]))
+
     return ba_def
 
 

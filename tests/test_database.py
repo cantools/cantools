@@ -1608,7 +1608,42 @@ IO_DEBUG(
         self.assertEqual(str(cm.exception),
                          'expected multiplexer id 8, 16 or 24, but got 7')
 
+    def test_multiplex_dump(self):
+        filename = os.path.join('tests', 'files', 'test_multiplex_dump.dbc')
+        db = cantools.db.load_file(filename)
+        dumped_db = cantools.db.load_string(db.as_dbc_string())
+        dumped_msg = dumped_db.get_message_by_frame_id(0x100)
 
+        self.assertEqual(dumped_msg.signals[0].name, "MultiplexorSig")
+        self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
+        self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
+        self.assertEqual(dumped_msg.signals[1].name, "MultiplexedSig")
+        self.assertEqual(dumped_msg.signals[1].is_multiplexer, False)
+        self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2A)
+        self.assertEqual(dumped_msg.signals[2].name, "UnmultiplexedSig")
+        self.assertEqual(dumped_msg.signals[2].multiplexer_ids, None)
+        self.assertEqual(dumped_msg.signals[2].is_multiplexer, False)
+
+    def test_string_attribute_definition_dump(self):
+        filename = os.path.join('tests', 'files', 'test_multiplex_dump.dbc')
+        db = cantools.db.load_file(filename)
+        dumped_db = cantools.db.load_string(db.as_dbc_string())
+        attr = dumped_db._attribute_definitions
+
+        self.assertEqual(attr[0][0], "BA_DEF_")
+        self.assertEqual(attr[0][1], "BusType")
+        self.assertEqual(attr[0][2], "STRING")
+
+    def test_extended_id_dump(self):
+        filename = os.path.join('tests', 'files', 'test_extended_id_dump.dbc')
+        db = cantools.db.load_file(filename)
+        dumped_db = cantools.db.load_string(db.as_dbc_string())
+        reg_id_msg = dumped_db.get_message_by_frame_id(0x100)
+        ext_id_msg = dumped_db.get_message_by_frame_id(0x1c2a2a2a)
+
+        self.assertEqual(reg_id_msg.is_extended_frame, False)
+        self.assertEqual(ext_id_msg.is_extended_frame, True)
+        
 # This file is not '__main__' when executed via 'python setup.py
 # test'.
 logging.basicConfig(level=logging.DEBUG)

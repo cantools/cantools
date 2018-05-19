@@ -370,21 +370,33 @@ def _dump_nodes(database):
 
 def _dump_messages(database):
     bo = []
+    
+    def get_frame_id(message):
+        return message.frame_id | (1 << 31 if message.is_extended_frame else 0)
+
+    def get_mux(signal):
+        result = ''
+        if signal.is_multiplexer:
+            result += ' M'
+        elif signal.multiplexer_ids != None:
+            result += ' m' + str(signal.multiplexer_ids[0])
+        return result
 
     for message in database.messages:
         msg = []
         fmt = 'BO_ {frame_id} {name}: {length} {senders}'
-        msg.append(fmt.format(frame_id=message.frame_id,
+        msg.append(fmt.format(frame_id=get_frame_id(message),
                               name=message.name,
                               length=message.length,
                               senders=' '.join(message.senders)))
 
         for signal in message.signals[::-1]:
-            fmt = (' SG_ {name} : {start}|{length}@{byte_order}{sign}'
+            fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
                    ' [{minimum}|{maximum}] "{unit}" {receivers}')
             msg.append(fmt.format(
                 name=signal.name,
+                mux=get_mux(signal),
                 start=signal.start,
                 length=signal.length,
                 receivers=', '.join(signal.receivers),
@@ -445,7 +457,10 @@ def _dump_attribute_definitions(database):
                                          name=attribute[2],
                                          type_=attribute[3],
                                          choices=choices))
-
+        elif attribute[0] == ATTRIBUTE_DEFINITION:
+            fmt = 'BA_DEF_ "{name}" {type_};'
+            ba_def.append(fmt.format(name=attribute[1],
+                                     type_=attribute[2]))
     return ba_def
 
 

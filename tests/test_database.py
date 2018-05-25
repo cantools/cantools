@@ -761,7 +761,7 @@ IO_DEBUG(
         self.assertEqual(speed_km.minimum, None)
         self.assertEqual(speed_km.maximum, None)
         self.assertEqual(speed_km.unit, 'km/h')
-        self.assertEqual(speed_km.choices, None)
+        self.assertEqual(speed_km.choices, {16777215: 'invalid'})
         self.assertEqual(speed_km.comment,
                          'Middle speed of front wheels in kilometers per hour.')
 
@@ -779,7 +779,7 @@ IO_DEBUG(
         self.assertEqual(outside_temp.minimum, 0)
         self.assertEqual(outside_temp.maximum, 100)
         self.assertEqual(outside_temp.unit, 'Cel')
-        self.assertEqual(outside_temp.choices, None)
+        self.assertEqual(outside_temp.choices, {0: 'init'})
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
 
         ambient_lux = db.messages[24].signals[0]
@@ -815,6 +815,30 @@ IO_DEBUG(
         self.assertEqual(windshield_humidity.unit, '% RH')
         self.assertEqual(windshield_humidity.choices, None)
         self.assertEqual(windshield_humidity.comment, None)
+
+        wheel_angle = db.messages[4].signals[1]
+
+        self.assertEqual(wheel_angle.name, 'WheelAngle')
+        self.assertEqual(wheel_angle.start, 1)
+        self.assertEqual(wheel_angle.length, 14)
+        self.assertEqual(wheel_angle.receivers, [])
+        self.assertEqual(wheel_angle.byte_order, 'little_endian')
+        self.assertEqual(wheel_angle.is_signed, False)
+        self.assertEqual(wheel_angle.is_float, False)
+        self.assertEqual(wheel_angle.scale, 0.1)
+        self.assertEqual(wheel_angle.offset, -800)
+        self.assertEqual(wheel_angle.minimum, None)
+        self.assertEqual(wheel_angle.maximum, None)
+        self.assertEqual(wheel_angle.unit, 'deg')
+        self.assertEqual(wheel_angle.choices,
+                         {
+                             0: 'left',
+                             8000: 'straight',
+                             16000: 'right',
+                             16382: 'init',
+                             16383: 'sensor '
+                         })
+        self.assertEqual(wheel_angle.comment, None)
 
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -861,6 +885,31 @@ IO_DEBUG(
         self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded, decoded_message)
+
+    def test_the_homer_encode_decode_choices(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.load_file(filename)
+
+        messages = [
+            (         {'EngagedGear': 'disengaged'}, b'\x00\x00'),
+            (                  {'EngagedGear': '1'}, b'\x00\x10'),
+            (                  {'EngagedGear': '2'}, b'\x00\x20'),
+            (                  {'EngagedGear': '3'}, b'\x00\x30'),
+            (                  {'EngagedGear': '4'}, b'\x00\x40'),
+            (                  {'EngagedGear': '5'}, b'\x00\x50'),
+            (                  {'EngagedGear': '6'}, b'\x00\x60'),
+            (                    {'EngagedGear': 7}, b'\x00\x70'),
+            (                    {'EngagedGear': 8}, b'\x00\x80'),
+            (                    {'EngagedGear': 9}, b'\x00\x90'),
+            (            {'EngagedGear': 'reverse'}, b'\x00\xa0'),
+            (   {'EngagedGear': 'Unspecific error'}, b'\x00\xf0')
+        ]
+
+        for decoded_message, encoded_message in messages:
+            encoded = db.encode_message('Gear', decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = db.decode_message('Gear', encoded)
+            self.assertEqual(decoded, decoded_message)
 
     def test_empty_kcd(self):
         filename = os.path.join('tests', 'files', 'empty.kcd')

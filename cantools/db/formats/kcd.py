@@ -42,6 +42,7 @@ def _load_signal_element(signal):
     slope = 1
     intercept = 0
     unit = None
+    labels = None
     notes = None
 
     # Signal XML attributes.
@@ -85,7 +86,18 @@ def _load_signal_element(signal):
     except AttributeError:
         pass
 
-    # TODO: Labels.
+    # Label set XML element.
+    label_set = signal.find('ns:LabelSet', NAMESPACES)
+
+    if label_set is not None:
+        labels = {}
+
+        for label in label_set.findall('ns:Label', NAMESPACES):
+            label_value = int(label.attrib['value'])
+            label_name = label.attrib['name']
+            labels[label_value] = label_name
+
+        # TODO: Label groups.
 
     return Signal(name=name,
                   start=offset,
@@ -98,6 +110,7 @@ def _load_signal_element(signal):
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
+                  choices=labels,
                   comment=notes,
                   is_float=is_float)
 
@@ -139,14 +152,12 @@ def _load_message_element(message, bus_name, nodes):
         pass
 
     # Senders.
-    try:
-        producer = message.find('ns:Producer', NAMESPACES)
+    producer = message.find('ns:Producer', NAMESPACES)
 
+    if producer is not None:
         for sender in producer.findall('ns:NodeRef', NAMESPACES):
             senders.append(_get_node_name_by_id(nodes,
                                                 sender.attrib['id']))
-    except AttributeError:
-        pass
 
     # Find all signals in this message.
     signals = []

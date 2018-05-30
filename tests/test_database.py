@@ -676,6 +676,12 @@ IO_DEBUG(
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.load_file(filename)
 
+        with self.assertRaises(NotImplementedError) as cm:
+            db.as_kcd_string()
+
+        self.assertEqual(str(cm.exception),
+                         'The KCD dump function is not yet implemented.')
+
         self.assertEqual(db.version, '1.23')
         self.assertEqual(len(db.nodes), 18)
         self.assertEqual(db.nodes[0].name, 'Motor ACME')

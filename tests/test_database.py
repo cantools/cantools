@@ -1657,6 +1657,22 @@ IO_DEBUG(
         self.assertEqual(str(cm.exception),
                          'expected multiplexer id 8, 16 or 24, but got 7')
 
+        message_3 = db.messages[2]
+
+        # Encode with single multiplexer id 8.
+        with self.assertRaises(cantools.db.EncodeError) as cm:
+            message_3.encode({'Multiplexor': 7})
+
+        self.assertEqual(str(cm.exception),
+                         'expected multiplexer id 8, but got 7')
+
+        # Decode with single multiplexer id 8.
+        with self.assertRaises(cantools.db.DecodeError) as cm:
+            message_3.decode(b'\x1f\xff\x73\xfe\xff\xff\xff\xff')
+
+        self.assertEqual(str(cm.exception),
+                         'expected multiplexer id 8, but got 7')
+
     def test_multiplex_dump(self):
         filename = os.path.join('tests', 'files', 'test_multiplex_dump.dbc')
         db = cantools.db.load_file(filename)

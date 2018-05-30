@@ -64,6 +64,13 @@ BO_ 2148676695 Message2: 8 Vector__XXX
  SG_ BIT_J m8 : 18|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ Multiplexor M : 2|6@1+ (1,0) [0|0] "" Vector__XXX
 
+BO_ 2148676696 Message3: 8 Vector__XXX
+ SG_ BIT_L m8 : 24|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_G m8 : 23|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_C m8 : 19|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_J m8 : 18|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Multiplexor M : 2|6@1+ (1,0) [0|0] "" Vector__XXX
+
 CM_ SG_ 2148676694 Multiplexor "Defines data content for response messages.";
 BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";

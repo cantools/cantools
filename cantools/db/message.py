@@ -18,7 +18,7 @@ def _format_or(items):
     items = [str(item) for item in items]
 
     if len(items) == 1:
-        return items
+        return items[0]
     else:
         return '{} or {}'.format(', '.join(items[:-1]),
                                  items[-1])

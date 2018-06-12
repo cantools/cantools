@@ -50,13 +50,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(i, 15)
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_motohawk(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
         self.assertEqual(len(db.nodes), 2)
@@ -68,14 +68,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
         self.assertEqual(db.messages[0].signals[1].receivers[0], 'Vector__XXX')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_emc32(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'emc32.dbc')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             db.add_dbc(fin)
 
         self.assertEqual(len(db.nodes), 1)
@@ -561,7 +561,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_get_message_by_frame_id_and_name(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
         message = db.get_message_by_name('ExampleMessage')
@@ -1140,7 +1140,7 @@ IO_DEBUG(
         self.assertEqual(message.cycle_time, 0)
         self.assertEqual(message.send_type, 'none')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_multiplex(self):
@@ -1718,7 +1718,7 @@ IO_DEBUG(
     def test_attributes(self):
         filename = os.path.join('tests', 'files', 'attributes.dbc')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
         self.assertEqual(len(db._attributes), 5)
@@ -1733,7 +1733,7 @@ IO_DEBUG(
         self.assertEqual(db._attributes[4].value, '1')
         self.assertEqual(db._attributes[4].owner, 57)
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
 # This file is not '__main__' when executed via 'python setup.py

@@ -694,6 +694,7 @@ def _load_signal_multiplexer_values(tokens):
 def _load_messages(tokens,
                    comments,
                    attribute_definition_defaults,
+                   attribute_definitions,
                    attributes,
                    choices,
                    message_senders,
@@ -725,7 +726,15 @@ def _load_messages(tokens,
             if attribute.type_ == MESSAGE and attribute.owner == frame_id_dbc:
                 if attribute.name == 'GenMsgSendType':
                     result = attribute.value
-        if result == None:
+        # Try to resolve the ENUM index
+        if result != None:
+            try:
+                for definition in attribute_definitions:
+                    if definition[2] == 'GenMsgSendType':
+                        result = definition[4][int(result)][0]
+            except:
+                pass
+        else:   
             try:
                 result = attribute_definition_defaults['GenMsgSendType']
             except KeyError:
@@ -938,6 +947,7 @@ def load_string(string):
     messages = _load_messages(tokens,
                               comments,
                               attribute_definition_defaults,
+                              attribute_definitions,
                               attributes,
                               choices,
                               message_senders,

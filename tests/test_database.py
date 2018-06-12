@@ -1133,7 +1133,7 @@ IO_DEBUG(
         # Message cycle time is 200, as given by BA_.
         message = db.get_message_by_frame_id(1)
         self.assertEqual(message.cycle_time, 200)
-        self.assertEqual(message.send_type, '0')
+        self.assertEqual(message.send_type, 'cyclic')
 
         # Default message cycle time is 0, as given by BA_DEF_DEF_.
         message = db.get_message_by_frame_id(2)

@@ -728,12 +728,9 @@ def _load_messages(tokens,
                     result = attribute.value
         # Try to resolve the ENUM index
         if result != None:
-            try:
-                for definition in attribute_definitions:
-                    if definition[2] == 'GenMsgSendType':
-                        result = definition[4][int(result)][0]
-            except:
-                pass
+            for definition in attribute_definitions:
+                if definition[2] == 'GenMsgSendType':
+                    result = definition[4][int(result)][0]
         else:   
             try:
                 result = attribute_definition_defaults['GenMsgSendType']

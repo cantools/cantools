@@ -1722,18 +1722,25 @@ IO_DEBUG(
             db = cantools.db.load(fin)
 
         self.assertEqual(len(db._attributes), 5)
-        self.assertEqual(db._attributes[0].name, "TheFloatAttribute")
-        self.assertEqual(db._attributes[0].value, "58")
-        self.assertEqual(db._attributes[1].name, "TheHexAttribute")
-        self.assertEqual(db._attributes[1].value, "5")
-        self.assertEqual(db._attributes[2].type_, "BO_")
-        self.assertEqual(db._attributes[3].type_, "BO_")
+        self.assertEqual(db._attributes[0].type_, "BO_")
+        self.assertEqual(db._attributes[1].type_, "BO_")
+        self.assertEqual(db._attributes[2].name, "TheHexAttribute")
+        self.assertEqual(db._attributes[2].value, "5")
+        self.assertEqual(db._attributes[3].name, "TheFloatAttribute")
+        self.assertEqual(db._attributes[3].value, "58")
         self.assertEqual(db._attributes[4].type_, "SG_")
         self.assertEqual(db._attributes[4].signal_name, "TheSignal")
         self.assertEqual(db._attributes[4].value, '1')
         self.assertEqual(db._attributes[4].owner, 57)
         self.assertEqual(repr(db._attributes[4]), "attribute('GenSigSendType', 1)")
-        
+
+        message = db.get_message_by_frame_id(57)
+        self.assertEqual(message.cycle_time, 1000)
+        self.assertEqual(message.send_type, 'Cyclic')
+
+        self.assertEqual(db.nodes[0].name, "TheNode")
+        self.assertEqual(db.nodes[0].comment, "TheNodeComment")
+
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 

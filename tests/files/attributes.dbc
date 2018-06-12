@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: 
+BU_: TheNode
 
 
 BO_ 57 TheMessage: 8 Vector__XXX
@@ -41,7 +41,7 @@ BO_ 57 TheMessage: 8 Vector__XXX
 
 
 
-
+CM_ BU_ TheNode "TheNodeComment";
 BA_DEF_ BO_  "TheHexAttribute" HEX 0 8;
 BA_DEF_ BO_  "TheFloatAttribute" FLOAT 5 87;
 BA_DEF_ BU_  "TheNodeAttribute" INT 50 150;
@@ -82,10 +82,10 @@ BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
 BA_DEF_DEF_  "GenSigInactiveValue" 0;
 BA_DEF_DEF_  "GenSigSendType" "Cyclic";
 BA_DEF_DEF_  "GenSigStartValue" 0;
-BA_ "TheFloatAttribute" BO_ 57 58;
-BA_ "TheHexAttribute" BO_ 57 5;
-BA_ "GenMsgSendType" BO_ 57 0;
 BA_ "GenMsgCycleTime" BO_ 57 1000;
+BA_ "GenMsgSendType" BO_ 57 0;
+BA_ "TheHexAttribute" BO_ 57 5;
+BA_ "TheFloatAttribute" BO_ 57 58;
 BA_ "GenSigSendType" SG_ 57 TheSignal 1;
 
 

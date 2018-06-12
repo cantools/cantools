@@ -1721,13 +1721,17 @@ IO_DEBUG(
         with open(filename, 'r') as fin:
             db = cantools.db.load(fin)
 
-        self.assertEqual(len(db._attributes), 3)
-        self.assertEqual(db._attributes[0].type_, "BO_")
-        self.assertEqual(db._attributes[1].type_, "BO_")
-        self.assertEqual(db._attributes[2].type_, "SG_")
-        self.assertEqual(db._attributes[2].signal_name, "TheSignal")
-        self.assertEqual(db._attributes[2].value, '1')
-        self.assertEqual(db._attributes[2].owner, 57)
+        self.assertEqual(len(db._attributes), 5)
+        self.assertEqual(db._attributes[0].name, "TheFloatAttribute")
+        self.assertEqual(db._attributes[0].value, "58")
+        self.assertEqual(db._attributes[1].name, "TheHexAttribute")
+        self.assertEqual(db._attributes[1].value, "5")
+        self.assertEqual(db._attributes[2].type_, "BO_")
+        self.assertEqual(db._attributes[3].type_, "BO_")
+        self.assertEqual(db._attributes[4].type_, "SG_")
+        self.assertEqual(db._attributes[4].signal_name, "TheSignal")
+        self.assertEqual(db._attributes[4].value, '1')
+        self.assertEqual(db._attributes[4].owner, 57)
 
         with open(filename, 'r') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())

@@ -451,7 +451,7 @@ def _dump_attribute_definitions(database):
                                          name=attribute[2],
                                          type_=attribute[3] + " ",
                                          choices=choices))
-            elif attribute[3] in ['INT', 'FLOAT']:
+            elif attribute[3] in ['INT', 'FLOAT', 'HEX']:
                 choices = ' '.join(['{}'.format(choice) for choice in attribute[4]])
                 ba_def.append(fmt.format(kind=attribute[1],
                                          name=attribute[2],

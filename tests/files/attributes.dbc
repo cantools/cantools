@@ -42,6 +42,8 @@ BO_ 57 TheMessage: 8 Vector__XXX
 
 
 
+BA_DEF_ BO_  "TheHexAttribute" HEX 0 8;
+BA_DEF_ BO_  "TheFloatAttribute" FLOAT 5 87;
 BA_DEF_ BU_  "TheNodeAttribute" INT 50 150;
 BA_DEF_ BU_  "NodeLayerModules" STRING ;
 BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 65535;
@@ -60,6 +62,8 @@ BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotU
 BA_DEF_ SG_  "GenSigInactiveValue" INT 0 100000;
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed";
 BA_DEF_ SG_  "GenSigStartValue" FLOAT 0 100000000000;
+BA_DEF_DEF_  "TheHexAttribute" 4;
+BA_DEF_DEF_  "TheFloatAttribute" 55;
 BA_DEF_DEF_  "TheNodeAttribute" 100;
 BA_DEF_DEF_  "NodeLayerModules" "CANoeILNLVector.dll";
 BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
@@ -78,6 +82,8 @@ BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
 BA_DEF_DEF_  "GenSigInactiveValue" 0;
 BA_DEF_DEF_  "GenSigSendType" "Cyclic";
 BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "TheFloatAttribute" BO_ 57 58;
+BA_ "TheHexAttribute" BO_ 57 5;
 BA_ "GenMsgSendType" BO_ 57 0;
 BA_ "GenMsgCycleTime" BO_ 57 1000;
 BA_ "GenSigSendType" SG_ 57 TheSignal 1;

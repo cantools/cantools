@@ -1732,7 +1732,8 @@ IO_DEBUG(
         self.assertEqual(db._attributes[4].signal_name, "TheSignal")
         self.assertEqual(db._attributes[4].value, '1')
         self.assertEqual(db._attributes[4].owner, 57)
-
+        self.assertEqual(repr(db._attributes[4]), "attribute('GenSigSendType', 1)")
+        
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 

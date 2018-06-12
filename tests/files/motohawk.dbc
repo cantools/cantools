@@ -1,6 +1,7 @@
 VERSION "1.0"
 
-NS_ :
+
+NS_ : 
 	NS_DESC_
 	CM_
 	BA_DEF_
@@ -34,18 +35,17 @@ BS_:
 
 BU_: PCM1 FOO
 
+
 BO_ 496 ExampleMessage: 8 PCM1
- SG_ Temperature : 0|12@0- (0.01,250) [229.53|270.47] "degK" Vector__XXX, FOO
- SG_ AverageRadius : 6|6@0+ (0.1,0) [0.0|5.0] "m" Vector__XXX
- SG_ Enable : 7|1@0+ (1.0,0) [0.0|0.0] "-" Vector__XXX
+ SG_ Temperature : 0|12@0- (0.01,250) [229.53|270.47] "degK" PCM1,FOO
+ SG_ AverageRadius : 6|6@0+ (0.1,0) [0|5] "m" Vector__XXX
+ SG_ Enable : 7|1@0+ (1,0) [0|0] "-" Vector__XXX
+
+
 
 CM_ BO_ 496 "Example message used as template in MotoHawk models.";
-CM_ SG_ 496 AverageRadius "";
-
-
-
-
 
 
 
 VAL_ 496 Enable 0 "Disabled" 1 "Enabled" ;
+

@@ -10,12 +10,18 @@ class InternalDatabase(object):
                  nodes,
                  buses,
                  version,
+                 attributes=None,
                  attribute_definitions=None,
                  attribute_definition_defaults=None):
         self.messages = messages
         self.nodes = nodes
         self.buses = buses
         self.version = version
+
+        if attributes is None:
+            attributes = []
+
+        self.attributes = attributes
 
         if attribute_definitions is None:
             attribute_definitions = []

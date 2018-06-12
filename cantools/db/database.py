@@ -24,6 +24,7 @@ class Database(object):
                  nodes=None,
                  buses=None,
                  version=None,
+                 attributes=None,
                  attribute_definitions=None,
                  attribute_definition_defaults=None,
                  frame_id_mask=None):
@@ -33,6 +34,9 @@ class Database(object):
         self._name_to_message = {}
         self._frame_id_to_message = {}
         self._version = version
+        self._attributes = (attributes
+                            if attributes
+                            else [])
         self._attribute_definitions = (attribute_definitions
                                        if attribute_definitions
                                        else [])
@@ -122,6 +126,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
+        self._attributes=database.attributes
         self._attribute_definitions = database.attribute_definitions
         self._attribute_definition_defaults = database.attribute_definition_defaults
 
@@ -155,6 +160,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
+        self._attributes=database.attributes
         self._attribute_definitions = database.attribute_definitions
         self._attribute_definition_defaults = database.attribute_definition_defaults
 
@@ -188,6 +194,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
+        self._attributes=database.attributes
         self._attribute_definitions = database.attribute_definitions
         self._attribute_definition_defaults = database.attribute_definition_defaults
 
@@ -225,6 +232,7 @@ class Database(object):
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
+                                                self._attributes,
                                                 self._attribute_definitions,
                                                 self._attribute_definition_defaults))
 
@@ -237,6 +245,7 @@ class Database(object):
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
+                                                self._attributes,
                                                 self._attribute_definitions,
                                                 self._attribute_definition_defaults))
 

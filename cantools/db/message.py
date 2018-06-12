@@ -527,6 +527,13 @@ class Message(object):
 
         return bool(self._codecs['multiplexers'])
 
+    def get_dbc_frame_id(self):
+        frame_id = self.frame_id
+        if self.is_extended_frame:
+            frame_id |= 0x80000000
+
+        return frame_id
+
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(
             self._name,

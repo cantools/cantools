@@ -27,12 +27,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
         db = cantools.db.load_file(filename)
         self.assertEqual(len(db.nodes), 1)
-        self.assertEqual(db.nodes[0].name, 'Vector__XXX')
+        self.assertEqual(db.nodes[0].name, 'UnusedNode')
         self.assertEqual(len(db.messages), 217)
         self.assertEqual(db.messages[216].frame_id, 155872546)
         self.assertEqual(db.messages[216].senders, ['Vector__XXX'])
         self.assertEqual(str(db.messages[0]),
-                         "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, False, 8, None)")
+                         "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, True, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
                          "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
@@ -40,7 +40,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[0].receivers, ['Vector__XXX'])
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].send_type, None)
-        self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
+        self.assertEqual(repr(db.nodes[0]), "node('UnusedNode', None)")
         i = 0
 
         for message in db.messages:
@@ -64,7 +64,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.nodes[1].name, 'FOO')
         self.assertEqual(len(db.messages), 1)
         self.assertEqual(len(db.messages[0].signals[2].receivers), 2)
-        self.assertEqual(db.messages[0].signals[2].receivers[0], 'Vector__XXX')
+        self.assertEqual(db.messages[0].signals[2].receivers[0], 'PCM1')
         self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
         self.assertEqual(db.messages[0].signals[1].receivers[0], 'Vector__XXX')
 
@@ -1133,7 +1133,7 @@ IO_DEBUG(
         # Message cycle time is 200, as given by BA_.
         message = db.get_message_by_frame_id(1)
         self.assertEqual(message.cycle_time, 200)
-        self.assertEqual(message.send_type, 'cyclic')
+        self.assertEqual(message.send_type, '0')
 
         # Default message cycle time is 0, as given by BA_DEF_DEF_.
         message = db.get_message_by_frame_id(2)
@@ -1714,6 +1714,23 @@ IO_DEBUG(
 
         self.assertEqual(reg_id_msg.is_extended_frame, False)
         self.assertEqual(ext_id_msg.is_extended_frame, True)
+
+    def test_attributes(self):
+        filename = os.path.join('tests', 'files', 'attributes.dbc')
+
+        with open(filename, 'r') as fin:
+            db = cantools.db.load(fin)
+
+        self.assertEqual(len(db._attributes), 3)
+        self.assertEqual(db._attributes[0].type_, "BO_")
+        self.assertEqual(db._attributes[1].type_, "BO_")
+        self.assertEqual(db._attributes[2].type_, "SG_")
+        self.assertEqual(db._attributes[2].signal_name, "TheSignal")
+        self.assertEqual(db._attributes[2].value, '1')
+        self.assertEqual(db._attributes[2].owner, 57)
+
+        with open(filename, 'r') as fin:
+            self.assertEqual(db.as_dbc_string(), fin.read())
 
 # This file is not '__main__' when executed via 'python setup.py
 # test'.

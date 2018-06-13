@@ -102,7 +102,7 @@ class Database(object):
 
         """
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'r', encoding="utf-8") as fin:
             self.add_dbc(fin)
 
     def add_dbc_string(self, string):

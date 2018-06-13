@@ -8,7 +8,7 @@ from . import tester
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '21.0.1'
+__version__ = '21.0.2'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".

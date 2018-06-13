@@ -4,6 +4,7 @@ from .formats import dbc
 from .formats import kcd
 from .formats import sym
 from .internal_database import InternalDatabase
+from ..compat import fopen
 
 
 LOGGER = logging.getLogger(__name__)
@@ -93,16 +94,18 @@ class Database(object):
 
         self.add_dbc_string(fp.read())
 
-    def add_dbc_file(self, filename):
+    def add_dbc_file(self, filename, encoding='utf-8'):
         """Open, read and parse DBC data from given file and add the parsed
         data to the database.
+
+        `encoding` specifies the file encoding.
 
         >>> db = cantools.db.Database()
         >>> db.add_dbc_file('foo.dbc', 'r')
 
         """
 
-        with open(filename, 'r') as fin:
+        with fopen(filename, 'r', encoding=encoding) as fin:
             self.add_dbc(fin)
 
     def add_dbc_string(self, string):
@@ -133,13 +136,15 @@ class Database(object):
 
         self.add_kcd_string(fp.read())
 
-    def add_kcd_file(self, filename):
+    def add_kcd_file(self, filename, encoding='utf-8'):
         """Open, read and parse KCD data from given file and add the parsed
         data to the database.
 
+        `encoding` specifies the file encoding.
+
         """
 
-        with open(filename, 'r') as fin:
+        with fopen(filename, 'r', encoding=encoding) as fin:
             self.add_kcd(fin)
 
     def add_kcd_string(self, string):
@@ -166,13 +171,15 @@ class Database(object):
 
         self.add_sym_string(fp.read())
 
-    def add_sym_file(self, filename):
+    def add_sym_file(self, filename, encoding='utf-8'):
         """Open, read and parse SYM data from given file and add the parsed
         data to the database.
 
+        `encoding` specifies the file encoding.
+
         """
 
-        with open(filename, 'r') as fin:
+        with fopen(filename, 'r', encoding=encoding) as fin:
             self.add_sym(fin)
 
     def add_sym_string(self, string):

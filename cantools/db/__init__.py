@@ -9,6 +9,7 @@ from .message import Message
 from .message import EncodeError
 from .message import DecodeError
 from .signal import Signal
+from ..compat import fopen
 
 
 class UnsupportedDatabaseFormatError(Exception):
@@ -62,12 +63,8 @@ def load_file(filename,
 
     """
 
-    if sys.version_info[0] < 3:
-        with open(filename, 'r') as fin:
-            return load(fin, database_format, frame_id_mask)
-    else:
-        with open(filename, 'r', encoding=encoding, errors='replace') as fin:
-            return load(fin, database_format, frame_id_mask)
+    with fopen(filename, 'r', encoding=encoding) as fin:
+        return load(fin, database_format, frame_id_mask)
 
 
 def load(fp, database_format=None, frame_id_mask=None):

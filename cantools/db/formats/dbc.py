@@ -362,6 +362,14 @@ def _create_grammar():
     return OneOrMore(entry) + StringEnd()
 
 
+def get_dbc_frame_id(message):
+    frame_id = message.frame_id
+    if message.is_extended_frame:
+        frame_id |= 0x80000000
+
+    return frame_id
+
+
 def _dump_nodes(database):
     bu = []
 
@@ -387,7 +395,7 @@ def _dump_messages(database):
     for message in database.messages:
         msg = []
         fmt = 'BO_ {frame_id} {name}: {length} {senders}'
-        msg.append(fmt.format(frame_id=message.get_dbc_frame_id(),
+        msg.append(fmt.format(frame_id=get_dbc_frame_id(message),
                               name=message.name,
                               length=message.length,
                               senders=' '.join(message.senders)))
@@ -427,13 +435,13 @@ def _dump_comments(database):
     for message in database.messages:
         if message.comment is not None:
             fmt = 'CM_ BO_ {frame_id} "{comment}";'
-            cm.append(fmt.format(frame_id=message.get_dbc_frame_id(),
+            cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
                                  comment=message.comment))
 
         for signal in message.signals[::-1]:
             if signal.comment is not None:
                 fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
-                cm.append(fmt.format(frame_id=message.get_dbc_frame_id(),
+                cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
                                      name=signal.name,
                                      comment=signal.comment))
 
@@ -521,7 +529,7 @@ def _dump_attributes(database):
                 fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
                                     kind=attribute.definition.kind,
-                                    frame_id=message.get_dbc_frame_id(),
+                                    frame_id=get_dbc_frame_id(message),
                                     value=attribute.value))
 
         for signal in message.signals[::-1]:
@@ -530,7 +538,7 @@ def _dump_attributes(database):
                     fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
                     ba.append(fmt.format(name=attribute.definition.name,
                                         kind=attribute.definition.kind,
-                                        frame_id=message.get_dbc_frame_id(),
+                                        frame_id=get_dbc_frame_id(message),
                                         signal_name=signal.name,
                                         value=attribute.value))
 
@@ -547,7 +555,7 @@ def _dump_choices(database):
 
             fmt = 'VAL_ {frame_id} {name} {choices} ;'
             val.append(fmt.format(
-                frame_id=message.get_dbc_frame_id(),
+                frame_id=get_dbc_frame_id(message),
                 name=signal.name,
                 choices=' '.join(['{value} "{text}"'.format(value=value,
                                                             text=text)

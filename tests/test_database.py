@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import math
 import os
 import unittest
@@ -17,8 +16,6 @@ try:
 except ImportError:
     from io import StringIO
 
-import sys
-sys.path.append('/mnt/d/JQU/dbc/cantools')
 import cantools
 
 class CanToolsDatabaseTest(unittest.TestCase):

@@ -48,6 +48,7 @@ class Signal(object):
                  maximum=None,
                  unit=None,
                  choices=None,
+                 attributes=None,
                  comment=None,
                  receivers=None,
                  is_multiplexer=False,
@@ -65,6 +66,7 @@ class Signal(object):
         self._maximum = maximum
         self._unit = unit
         self._choices = choices
+        self._attributes = attributes
         self._comment = comment
         self._receivers = [] if receivers is None else receivers
         self._is_multiplexer = is_multiplexer
@@ -170,6 +172,14 @@ class Signal(object):
         """
 
         return self._choices
+
+    @property
+    def attributes(self):
+        """The attributes the signal, or ``None`` if unavailable.
+
+        """
+
+        return self._attributes
 
     @property
     def comment(self):

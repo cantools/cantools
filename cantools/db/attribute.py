@@ -1,21 +1,13 @@
-
-
 class Attribute(object):
     """An atttribute that can be associated with nodes/messages/signals
 
     """
 
     def __init__(self,
-                 name,
                  value,
-                 type_=None,
-                 owner=None,
-                 signal_name=None):
-        self._name = name
+                 definition):
         self._value = value
-        self._type_ = type_
-        self._owner = owner
-        self._signal_name = signal_name
+        self._definition = definition
 
     @property
     def name(self):
@@ -23,7 +15,7 @@ class Attribute(object):
 
         """
 
-        return self._name
+        return self._definition.name
 
     @property
     def value(self):
@@ -34,30 +26,14 @@ class Attribute(object):
         return self._value
 
     @property
-    def type_(self):
-        """The attribute type (either BU_ or BO_ or SG_), or ``None`` if unavailable.
+    def definition(self):
+        """The attribute definition.
 
         """
 
-        return self._type_
-
-    @property
-    def owner(self):
-        """The owner owning this attribute (either node name or frame id) or ``None`` if unavailable.
-
-        """
-
-        return self._owner
-
-    @property
-    def signal_name(self):
-        """The signal name that this attribute is associated with or ``None`` if unavailable.
-
-        """
-
-        return self._signal_name
+        return self._definition
 
     def __repr__(self):
         return "attribute('{}', {})".format(
-            self._name,
-            self._value)
+            self.name,
+            self.value)

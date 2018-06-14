@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import math
 import os
 import unittest
@@ -16,8 +17,9 @@ try:
 except ImportError:
     from io import StringIO
 
+import sys
+sys.path.append('/mnt/d/JQU/dbc/cantools')
 import cantools
-
 
 class CanToolsDatabaseTest(unittest.TestCase):
 
@@ -1699,11 +1701,9 @@ IO_DEBUG(
         filename = os.path.join('tests', 'files', 'test_multiplex_dump.dbc')
         db = cantools.db.load_file(filename)
         dumped_db = cantools.db.load_string(db.as_dbc_string())
-        attr = dumped_db._attribute_definitions
+        attr = dumped_db.attribute_definitions
 
-        self.assertEqual(attr[0][0], "BA_DEF_")
-        self.assertEqual(attr[0][1], "BusType")
-        self.assertEqual(attr[0][2], "STRING")
+        self.assertEqual(attr['BusType'].type_, "STRING")
 
     def test_extended_id_dump(self):
         filename = os.path.join('tests', 'files', 'test_extended_id_dump.dbc')
@@ -1721,18 +1721,10 @@ IO_DEBUG(
         with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
-        self.assertEqual(len(db._attributes), 5)
-        self.assertEqual(db._attributes[0].type_, "BO_")
-        self.assertEqual(db._attributes[1].type_, "BO_")
-        self.assertEqual(db._attributes[2].name, "TheHexAttribute")
-        self.assertEqual(db._attributes[2].value, "5")
-        self.assertEqual(db._attributes[3].name, "TheFloatAttribute")
-        self.assertEqual(db._attributes[3].value, "58")
-        self.assertEqual(db._attributes[4].type_, "SG_")
-        self.assertEqual(db._attributes[4].signal_name, "TheSignal")
-        self.assertEqual(db._attributes[4].value, '1')
-        self.assertEqual(db._attributes[4].owner, 57)
-        self.assertEqual(repr(db._attributes[4]), "attribute('GenSigSendType', 1)")
+        self.assertEqual(len(db.messages[0].attributes), 4)
+        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].name, "TheHexAttribute")
+        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].value, "5")
+        self.assertEqual(repr(db.messages[0].attributes["TheHexAttribute"]), "attribute('TheHexAttribute', 5)")
 
         message = db.get_message_by_frame_id(57)
         self.assertEqual(message.cycle_time, 1000)

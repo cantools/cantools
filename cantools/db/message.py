@@ -122,6 +122,7 @@ class Message(object):
                  senders=None,
                  send_type=None,
                  cycle_time=None,
+                 attributes=None,
                  is_extended_frame=False,
                  bus_name=None):
         self._frame_id = frame_id
@@ -134,6 +135,7 @@ class Message(object):
         self._senders = senders
         self._send_type = send_type
         self._cycle_time = cycle_time
+        self._attributes = attributes
         self._bus_name = bus_name
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
@@ -380,6 +382,14 @@ class Message(object):
         """
 
         return self._cycle_time
+
+    @property
+    def attributes(self):
+        """The message attributes, or ``None`` if unavailable.
+
+        """
+
+        return self._attributes
 
     @property
     def bus_name(self):

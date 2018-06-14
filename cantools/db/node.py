@@ -7,9 +7,11 @@ class Node(object):
 
     def __init__(self,
                  name,
-                 comment):
+                 comment,
+                 attributes=None):
         self._name = name
         self._comment = comment
+        self._attributes = attributes
 
     @property
     def name(self):
@@ -26,6 +28,14 @@ class Node(object):
         """
 
         return self._comment
+
+    @property
+    def attributes(self):
+        """The node attributes, or ``None`` if unavailable.
+
+        """
+
+        return self._attributes
 
     def __repr__(self):
         return "node('{}', {})".format(

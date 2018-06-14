@@ -26,7 +26,6 @@ class Database(object):
                  version=None,
                  attributes=None,
                  attribute_definitions=None,
-                 attribute_definition_defaults=None,
                  frame_id_mask=None):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
@@ -40,9 +39,6 @@ class Database(object):
         self._attribute_definitions = (attribute_definitions
                                        if attribute_definitions
                                        else [])
-        self._attribute_definition_defaults = (attribute_definition_defaults
-                                               if attribute_definition_defaults
-                                               else {})
 
         if frame_id_mask is None:
             frame_id_mask = 0xffffffff
@@ -84,6 +80,14 @@ class Database(object):
         """
 
         return self._version
+
+    @property
+    def attribute_definitions(self):
+        """A dictionary of attribute definitions, or ``None`` if unavailable.
+
+        """
+
+        return self._attribute_definitions
 
     def add_dbc(self, fp):
         """Read and parse DBC data from given file-like object and add the
@@ -128,7 +132,6 @@ class Database(object):
         self._version = database.version
         self._attributes=database.attributes
         self._attribute_definitions = database.attribute_definitions
-        self._attribute_definition_defaults = database.attribute_definition_defaults
 
     def add_kcd(self, fp):
         """Read and parse KCD data from given file-like object and add the
@@ -162,7 +165,6 @@ class Database(object):
         self._version = database.version
         self._attributes=database.attributes
         self._attribute_definitions = database.attribute_definitions
-        self._attribute_definition_defaults = database.attribute_definition_defaults
 
     def add_sym(self, fp):
         """Read and parse SYM data from given file-like object and add the
@@ -196,7 +198,6 @@ class Database(object):
         self._version = database.version
         self._attributes=database.attributes
         self._attribute_definitions = database.attribute_definitions
-        self._attribute_definition_defaults = database.attribute_definition_defaults
 
     def add_message(self, message):
         """Add given message to the database.
@@ -233,8 +234,7 @@ class Database(object):
                                                 self._buses,
                                                 self._version,
                                                 self._attributes,
-                                                self._attribute_definitions,
-                                                self._attribute_definition_defaults))
+                                                self._attribute_definitions))
 
     def as_kcd_string(self):
         """Return the database as a string formatted as a KCD file.
@@ -246,8 +246,7 @@ class Database(object):
                                                 self._buses,
                                                 self._version,
                                                 self._attributes,
-                                                self._attribute_definitions,
-                                                self._attribute_definition_defaults))
+                                                self._attribute_definitions))
 
     def get_message_by_name(self, name):
         """Find the message object for given name `name`.

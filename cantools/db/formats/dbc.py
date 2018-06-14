@@ -20,6 +20,7 @@ from pyparsing import Empty
 from pyparsing import ParseException
 from pyparsing import ParseSyntaxException
 
+from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
 from ..signal import Signal
 from ..message import Message
@@ -441,51 +442,57 @@ def _dump_comments(database):
 
 def _dump_attribute_definitions(database):
     ba_def = []
-    for attribute in database.attribute_definitions:
-        if attribute[1] in [SIGNAL, MESSAGE, NODES]:
-            fmt = 'BA_DEF_ {kind}  "{name}" {type_} {choices};'
-            if attribute[3] == 'ENUM':
-                choices = ','.join(['"{}"'.format(choice[0])
-                                    for choice in attribute[4]])
-                ba_def.append(fmt.format(kind=attribute[1],
-                                         name=attribute[2],
-                                         type_=attribute[3] + " ",
-                                         choices=choices))
-            elif attribute[3] in ['INT', 'FLOAT', 'HEX']:
-                choices = ' '.join(['{}'.format(choice) for choice in attribute[4]])
-                ba_def.append(fmt.format(kind=attribute[1],
-                                         name=attribute[2],
-                                         type_=attribute[3],
-                                         choices=choices))
-            elif attribute[3] == 'STRING':
-                choices = ''
-                ba_def.append(fmt.format(kind=attribute[1],
-                                         name=attribute[2],
-                                         type_=attribute[3],
-                                         choices=choices))
-        else:
-            fmt = 'BA_DEF_  "{name}" {type_} {choices};'
-            choices = ''
-            if len(attribute) > 3:
-                choices = ' '.join(['{}'.format(choice) for choice in attribute[3]])
-            ba_def.append(fmt.format(name=attribute[1],
-                                     type_=attribute[2],
+
+    def get_minimum(definition):
+        return '' if definition.minimum == None else ' ' + definition.minimum
+    
+    def get_maximum(definition):
+        return '' if definition.maximum == None else ' ' + definition.maximum
+    
+    def get_kind(definition):
+        return '' if definition.kind == None else definition.kind + ' '
+
+    for name, definition in database.attribute_definitions.items():
+        
+        if definition.type_ == 'ENUM':
+            fmt = 'BA_DEF_ {kind}  "{name}" {type_}  {choices};'
+            choices = ','.join(['"{}"'.format(choice)
+                                for choice in definition.choices])
+            ba_def.append(fmt.format(kind=definition.kind,
+                                     name=definition.name,
+                                     type_=definition.type_,
                                      choices=choices))
+
+        elif definition.type_ in ['INT', 'FLOAT', 'HEX']:
+            fmt = 'BA_DEF_ {kind} "{name}" {type_}{minimum}{maximum};'
+            ba_def.append(fmt.format(kind=get_kind(definition),
+                                     name=definition.name,
+                                     type_=definition.type_,
+                                     minimum=get_minimum(definition),
+                                     maximum=get_maximum(definition)))
+
+        elif definition.type_ == 'STRING':
+            fmt = 'BA_DEF_ {kind} "{name}" {type_} ;'
+            ba_def.append(fmt.format(kind=get_kind(definition),
+                                     name=definition.name,
+                                     type_=definition.type_))
+
     return ba_def
 
 
 def _dump_attribute_definition_defaults(database):
     ba_def_def = []
 
-    for default in database.attribute_definition_defaults:
-        try:
-            int(database.attribute_definition_defaults[default])
-            fmt = 'BA_DEF_DEF_  "{name}" {value};'
-        except ValueError:
-            fmt = 'BA_DEF_DEF_  "{name}" "{value}";'
+    for name, definition in database.attribute_definitions.items():
+        if definition.defaultValue != None:
+            try:
+                int(definition.defaultValue)
+                fmt = 'BA_DEF_DEF_  "{name}" {value};'
+            except ValueError:
+                fmt = 'BA_DEF_DEF_  "{name}" "{value}";'
 
-        ba_def_def.append(fmt.format(name=default,
-                                     value=database.attribute_definition_defaults[default]))
+            ba_def_def.append(fmt.format(name=definition.name,
+                                        value=definition.defaultValue))
 
     return ba_def_def
 
@@ -493,20 +500,40 @@ def _dump_attribute_definition_defaults(database):
 def _dump_attributes(database):
     ba = []
 
-    for attribute in database.attributes:
-        if attribute.type_ == SIGNAL:
-            fmt = 'BA_ "{name}" {type_} {owner} {signal_name} {value};'
-            ba.append(fmt.format(name=attribute.name,
-                                type_=attribute.type_,
-                                owner=attribute.owner,
-                                signal_name=attribute.signal_name,
+    if database.attributes is not None:
+        for name, attribute in database.attributes.items():
+            fmt = 'BA_ "{name}" {value};'
+            ba.append(fmt.format(name=attribute.definition.name,
                                 value=attribute.value))
-        else:
-            fmt = 'BA_ "{name}" {type_} {owner} {value};'
-            ba.append(fmt.format(name=attribute.name,
-                                type_=attribute.type_,
-                                owner=attribute.owner,
-                                value=attribute.value))
+
+    for node in database.nodes:
+        if node.attributes is not None:
+            for name, attribute in node.attributes.items():
+                fmt = 'BA_ "{name}" {kind} {node_name} {value};'
+                ba.append(fmt.format(name=attribute.definition.name,
+                                    type_=attribute.definition.kind,
+                                    node_name=node.name,
+                                    value=attribute.value))
+
+    for message in database.messages:
+        if message.attributes is not None:
+            for name, attribute in message.attributes.items():
+                fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
+                ba.append(fmt.format(name=attribute.definition.name,
+                                    kind=attribute.definition.kind,
+                                    frame_id=message.get_dbc_frame_id(),
+                                    value=attribute.value))
+
+        for signal in message.signals[::-1]:
+            if signal.attributes is not None:
+                for name, attribute in signal.attributes.items():
+                    fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
+                    ba.append(fmt.format(name=attribute.definition.name,
+                                        kind=attribute.definition.kind,
+                                        frame_id=message.get_dbc_frame_id(),
+                                        signal_name=signal.name,
+                                        value=attribute.value))
+
     return ba
 
 
@@ -552,10 +579,10 @@ def _load_comments(tokens):
             if frame_id not in comments:
                 comments[frame_id] = {}
 
-            if 'signals' not in comments[frame_id]:
-                comments[frame_id]['signals'] = {}
+            if 'signal' not in comments[frame_id]:
+                comments[frame_id]['signal'] = {}
 
-            comments[frame_id]['signals'][comment[3]] = comment[4]
+            comments[frame_id]['signal'][comment[3]] = comment[4]
 
     return comments
 
@@ -580,22 +607,65 @@ def _load_attribute_definition_defaults(tokens):
     return defaults
 
 
-def _load_attributes(tokens):
-    attributes = []
+def _load_attributes(tokens, definitions):
+    attributes = OrderedDict()
 
-    for attributeToken in tokens:
-        if attributeToken[0] != ATTRIBUTE:
+    def to_object(attribute):
+        try:
+            definition = definitions[attribute[1]]
+        except KeyError:
+            definition = None
+        
+        return Attribute(value=attribute[3],
+                         definition=definition)
+
+    for attribute in tokens:
+        if attribute[0] != ATTRIBUTE:
             continue
 
-        optionals = attributeToken[2]
-        attribute = Attribute(
-            name=attributeToken[1],
-            value=attributeToken[3],
-            type_=None if len(optionals) < 1 else optionals[0],
-            owner=None if len(optionals) < 2 else optionals[1],
-            signal_name=None if len(optionals) < 3 else optionals[2]
-        )
-        attributes.append(attribute)
+        name = attribute[1]
+
+        if len(attribute[2]) > 0: 
+            if attribute[2][0] == NODES:
+                node = attribute[2][1]
+                
+                if 'node' not in attributes:
+                    attributes['node'] = OrderedDict()
+                
+                if node not in attributes['node']:
+                    attributes['node'][node] = OrderedDict()
+
+                attributes['node'][node][name] = to_object(attribute)
+
+            elif attribute[2][0] == MESSAGE:
+                frame_id = attribute[2][1]
+
+                if frame_id not in attributes:
+                    attributes[frame_id] = {}
+                    attributes[frame_id]['message'] = OrderedDict()
+
+                attributes[frame_id]['message'][name] = to_object(attribute)
+
+            elif attribute[2][0] == SIGNAL:
+                frame_id = attribute[2][1]
+                signal = attribute[2][2]
+
+                if frame_id not in attributes:
+                    attributes[frame_id] = {}
+
+                if 'signal' not in attributes[frame_id]:
+                    attributes[frame_id]['signal'] = OrderedDict()
+                
+                if signal not in attributes[frame_id]['signal']:
+                    attributes[frame_id]['signal'][signal] = OrderedDict()
+                    
+                attributes[frame_id]['signal'][signal][name] = to_object(attribute)
+        else:
+            if 'database' not in attributes:
+                attributes['database'] = OrderedDict()
+                                
+            attributes['database'][name] = to_object(attribute)
+
 
     return attributes
 
@@ -693,9 +763,8 @@ def _load_signal_multiplexer_values(tokens):
 
 def _load_messages(tokens,
                    comments,
-                   attribute_definition_defaults,
-                   attribute_definitions,
                    attributes,
+                   definitions,
                    choices,
                    message_senders,
                    signal_types,
@@ -703,6 +772,18 @@ def _load_messages(tokens,
     """Load messages.
 
     """
+
+    def get_attributes(frame_id_dbc, signal=None):
+        """Get attributes for given message or signal.
+
+        """
+        try:
+            if signal is None:
+                return attributes[frame_id_dbc]['message']
+            else:
+                return attributes[frame_id_dbc]['signal'][signal]
+        except KeyError:
+            return None
 
     def get_comment(frame_id_dbc, signal=None):
         """Get comment for given message or signal.
@@ -713,46 +794,46 @@ def _load_messages(tokens,
             if signal is None:
                 return comments[frame_id_dbc]['message']
             else:
-                return comments[frame_id_dbc]['signals'][signal]
-        except KeyError:
+                return comments[frame_id_dbc]['signal'][signal]
+        except:
             return None
 
     def get_send_type(frame_id_dbc):
         """Get send type for a given message
 
         """
+
         result = None
-        for attribute in attributes:
-            if attribute.type_ == MESSAGE and attribute.owner == frame_id_dbc:
-                if attribute.name == 'GenMsgSendType':
-                    result = attribute.value
-        # Try to resolve the ENUM index
-        if result != None:
-            for definition in attribute_definitions:
-                if definition[2] == 'GenMsgSendType':
-                    result = definition[4][int(result)][0]
-        else:   
+        messageAttributes = get_attributes(frame_id_dbc)
+        try:
+            result = messageAttributes['GenMsgSendType'].value
+        except (KeyError, TypeError):
             try:
-                result = attribute_definition_defaults['GenMsgSendType']
-            except KeyError:
-                pass
+                result = definitions['GenMsgSendType'].defaultValue
+            except (KeyError, TypeError):
+                result = None
+        # Resolve ENUM index to ENUM text
+        if result != None:
+            try:
+                result = definitions['GenMsgSendType'].choices[int(result)]
+            except ValueError:
+                result = None
+
         return result
 
     def get_cycle_time(frame_id_dbc):
         """Get cycle time for a given message
 
         """
-        result = None
-        for attribute in attributes:
-            if attribute.type_ == MESSAGE and attribute.owner == frame_id_dbc:
-                if attribute.name == 'GenMsgCycleTime':
-                    result = int(attribute.value)
-        if result == None:
+
+        messageAttributes = get_attributes(frame_id_dbc)
+        try:
+            return int(messageAttributes['GenMsgCycleTime'].value)
+        except (KeyError, TypeError):
             try:
-                result = int(attribute_definition_defaults['GenMsgCycleTime'])
-            except KeyError:
-                pass
-        return result
+                return int(definitions['GenMsgCycleTime'].defaultValue)
+            except (KeyError, TypeError):
+                return None
 
     def get_choices(frame_id_dbc, signal):
         """Get choices for given signal.
@@ -828,6 +909,7 @@ def _load_messages(tokens,
             senders=senders,
             send_type=get_send_type(frame_id_dbc),
             cycle_time=get_cycle_time(frame_id_dbc),
+            attributes=get_attributes(frame_id_dbc),
             signals=[Signal(name=signal[1][0],
                             start=int(signal[2][0]),
                             length=int(signal[2][1]),
@@ -843,6 +925,8 @@ def _load_messages(tokens,
                             unit=None if signal[5] == '' else signal[5],
                             choices=get_choices(frame_id_dbc,
                                                 signal[1][0]),
+                            attributes=get_attributes(frame_id_dbc,
+                                                      signal[1][0]),
                             comment=get_comment(frame_id_dbc,
                                                 signal[1][0]),
                             is_multiplexer=(signal[1][1] == 'M'
@@ -859,9 +943,7 @@ def _load_messages(tokens,
                                                   signal[1][0]))
                      for signal in message[5]],
             comment=get_comment(frame_id_dbc))
-
         messages.append(message)
-
     return messages
 
 
@@ -871,7 +953,8 @@ def _load_version(tokens):
             if token[0] == VERSION][0]
 
 
-def _load_nodes(tokens, comments):
+def _load_nodes(tokens, comments, attributes, definitions):
+    
     def get_node_comment(node_name):
         """Get comment for a given node_name
 
@@ -882,12 +965,22 @@ def _load_nodes(tokens, comments):
         except KeyError:
             return None
 
+    def get_node_attributes(node_name):
+        """Get attributes for given node.
+
+        """
+        try:
+            return attributes['node'][node_name]
+        except KeyError:
+            return None
+
     nodes = None
 
     for token in tokens:
         if token[0] == NODES:
             nodes = [Node(name=node,
-                          comment=get_node_comment(node))
+                          comment=get_node_comment(node),
+                          attributes=get_node_attributes(node))
                      for node in token[1]]
 
     return nodes
@@ -916,10 +1009,53 @@ def dump_string(database):
                           val='\n'.join(val))
 
 
+def build_attribute_definition_dict(definitions, defaults):
+    result = OrderedDict()
+    for item in definitions:
+        choicesOrRange = None
+        if item[1] in [SIGNAL, MESSAGE, NODES]:
+            definition = AttributeDefinition(name=item[2],
+                                             kind=item[1],
+                                             type_=item[3])
+            if len(item) > 4:
+                choicesOrRange = item[4]
+        
+        else:
+            definition = AttributeDefinition(name=item[1],
+                                             type_=item[2])
+            if len(item) > 3:
+                choicesOrRange = item[3]
+
+        if choicesOrRange != None:
+            if definition.type_ == "ENUM":
+                choices = []
+                for choice in choicesOrRange:
+                    choices.append(choice[0])
+                definition.choices = choices
+            elif definition.type_ in ['INT', 'FLOAT', 'HEX']:
+                definition.minimum = choicesOrRange[0]
+                definition.maximum = choicesOrRange[1]
+        try:
+            definition.defaultValue = defaults[definition.name]
+        except KeyError:
+            definition.defaultValue = None
+        result[definition.name] = definition
+    
+    return result
+
 def load_string(string):
     """Parse given string.
 
     """
+
+    def get_database_attributes():
+        """Get attributes for the database.
+
+        """
+        try:
+            return attributes['database']
+        except KeyError:
+            return None
 
     grammar = _create_grammar()
 
@@ -934,29 +1070,28 @@ def load_string(string):
                 e.msg))
 
     comments = _load_comments(tokens)
-    attribute_definitions = _load_attribute_definitions(tokens)
-    attribute_definition_defaults = _load_attribute_definition_defaults(tokens)
-    attributes = _load_attributes(tokens)
+    definitions = _load_attribute_definitions(tokens)
+    defaults = _load_attribute_definition_defaults(tokens)
+    attribute_definitions = build_attribute_definition_dict(definitions, defaults)
+    attributes = _load_attributes(tokens, attribute_definitions)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens)
     signal_types = _load_signal_types(tokens)
     signal_multiplexer_values = _load_signal_multiplexer_values(tokens)
     messages = _load_messages(tokens,
                               comments,
-                              attribute_definition_defaults,
-                              attribute_definitions,
                               attributes,
+                              attribute_definitions,
                               choices,
                               message_senders,
                               signal_types,
                               signal_multiplexer_values)
-    nodes = _load_nodes(tokens, comments)
+    nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
 
     return InternalDatabase(messages,
                             nodes,
                             [],
                             version,
-                            attributes,
-                            attribute_definitions,
-                            attribute_definition_defaults)
+                            get_database_attributes(),
+                            attribute_definitions)

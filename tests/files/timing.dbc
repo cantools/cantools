@@ -47,7 +47,7 @@ BO_ 2 Bar: 8 Sender
 
 BA_DEF_ BO_  "GenMsgSendType" ENUM  "cyclic","triggered","none";
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 50000;
-BA_DEF_DEF_  "GenMsgSendType" "none";
+BA_DEF_DEF_  "GenMsgSendType" 2;
 BA_DEF_DEF_  "GenMsgCycleTime" 0;
 BA_ "GenMsgSendType" BO_ 1 0;
 BA_ "GenMsgCycleTime" BO_ 1 200;

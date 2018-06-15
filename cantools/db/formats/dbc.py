@@ -510,11 +510,8 @@ def _dump_attributes(database):
 
     def get_value(attribute):
         result = attribute.value
-        try:
-            if attribute.definition.type_ == "STRING":
-                result = '"' + attribute.value + '"'
-        except:
-            pass
+        if attribute.definition.type_ == "STRING":
+            result = '"' + attribute.value + '"'
         return result
 
     if database.attributes is not None:

@@ -1779,6 +1779,7 @@ IO_DEBUG(
         db.messages[0].signals[0].length = 8
         db.messages[0].signals[0].byte_order = "big_endian"
         db.messages[0].signals[0].is_signed = True
+        db.messages[0].signals[0].is_float = True
         db.messages[0].signals[0].scale = 10
         db.messages[0].signals[0].offset = 1
         db.messages[0].signals[0].minimum = 0
@@ -1805,6 +1806,17 @@ IO_DEBUG(
         msg = db.get_message_by_name("TheNewMessage")
         self.assertEqual(msg.name, "TheNewMessage")
         self.assertEqual(msg.frame_id,0x40)
+
+        with self.assertRaises(KeyError) as cm:
+            db.get_message_by_name('TheMissingMessage')
+
+        self.assertEqual(str(cm.exception), "'TheMissingMessage'")
+
+        with self.assertRaises(KeyError) as cm:
+            db.get_message_by_frame_id(0x41)
+
+        self.assertEqual(cm.exception.args[0], 0x41)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

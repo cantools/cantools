@@ -1768,6 +1768,7 @@ IO_DEBUG(
         # since functionality is trivial.
         db.nodes[0].name = "SetterName"
         db.nodes[0].comment = "SetterComment"
+        db.attributes["BusType"].value = "LIN"
         db.messages[0].name = "SetterName"
         db.messages[0].frame_id = 0x12121212
         db.messages[0].is_extended_frame = True

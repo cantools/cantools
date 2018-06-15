@@ -1805,7 +1805,7 @@ IO_DEBUG(
         msg.name = "TheNewMessage"
         msg = db.get_message_by_name("TheNewMessage")
         self.assertEqual(msg.name, "TheNewMessage")
-        self.assertEqual(msg.frame_id,0x40)
+        self.assertEqual(msg.frame_id, 0x40)
 
         with self.assertRaises(KeyError) as cm:
             db.get_message_by_name('TheMissingMessage')

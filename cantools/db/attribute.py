@@ -25,6 +25,10 @@ class Attribute(object):
 
         return self._value
 
+    @value.setter
+    def value(self, value):
+        self._value = value
+
     @property
     def definition(self):
         """The attribute definition.

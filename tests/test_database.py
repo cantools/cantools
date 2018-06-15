@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import math
 import os
 import unittest
@@ -17,8 +16,6 @@ try:
 except ImportError:
     from io import StringIO
 
-import sys
-sys.path.append('/mnt/d/JQU/dbc/cantools')
 import cantools
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -1722,9 +1719,32 @@ IO_DEBUG(
             db = cantools.db.load(fin)
 
         self.assertEqual(len(db.messages[0].attributes), 4)
-        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].name, "TheHexAttribute")
-        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].value, "5")
-        self.assertEqual(repr(db.messages[0].attributes["TheHexAttribute"]), "attribute('TheHexAttribute', 5)")
+        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].value, 5)
+        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].name,
+            "TheHexAttribute")
+        self.assertEqual(repr(db.messages[0].attributes["TheHexAttribute"]), 
+            "attribute('TheHexAttribute', 5)")
+        self.assertEqual(
+            repr(db.messages[0].attributes["TheHexAttribute"].definition),
+            "attribute_definition('TheHexAttribute', 4)")
+
+        self.assertEqual(
+            db.messages[0].signals[0].attributes["TheSignalStringAttribute"].name,
+            "TheSignalStringAttribute")
+        self.assertEqual(
+            db.messages[0].signals[0].attributes["TheSignalStringAttribute"].value,
+            "TestString")
+        self.assertEqual(
+            db.messages[0].signals[0].attributes["GenSigSendType"].name,
+            "GenSigSendType")
+        self.assertEqual(
+            db.messages[0].signals[0].attributes["GenSigSendType"].value, 1)
+
+        self.assertEqual(db.attributes["BusType"].name, "BusType")
+        self.assertEqual(db.attributes["BusType"].value, "CAN")
+        self.assertEqual(db.attributes["TheNetworkAttribute"].name,
+            "TheNetworkAttribute")
+        self.assertEqual(db.attributes["TheNetworkAttribute"].value, 51)
 
         message = db.get_message_by_frame_id(57)
         self.assertEqual(message.cycle_time, 1000)
@@ -1732,9 +1752,42 @@ IO_DEBUG(
 
         self.assertEqual(db.nodes[0].name, "TheNode")
         self.assertEqual(db.nodes[0].comment, "TheNodeComment")
+        self.assertEqual(db.nodes[0].attributes["TheNodeAttribute"].name, 
+            "TheNodeAttribute")
+        self.assertEqual(db.nodes[0].attributes["TheNodeAttribute"].value, 99)
 
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
+
+    def test_setters(self):
+        filename = os.path.join('tests', 'files', 'attributes.dbc')
+
+        with open(filename, 'rU') as fin:
+            db = cantools.db.load(fin)
+        # Calling the setters for coverage. Assertions are not necessary here 
+        # since functionality is trivial.
+        db.nodes[0].name = "SetterName"
+        db.nodes[0].comment = "SetterComment"
+        db.messages[0].name = "SetterName"
+        db.messages[0].frame_id = 0x12121212
+        db.messages[0].is_extended_frame = True
+        db.messages[0].length = 6
+        db.messages[0].comment = "TheNewComment"
+        db.messages[0].bus_name = "TheNewBusName"
+        db.messages[0].signals[0].name = "SetterName"
+        db.messages[0].signals[0].start = 8
+        db.messages[0].signals[0].length = 8
+        db.messages[0].signals[0].byte_order = "big_endian"
+        db.messages[0].signals[0].is_signed = True
+        db.messages[0].signals[0].scale = 10
+        db.messages[0].signals[0].offset = 1
+        db.messages[0].signals[0].minimum = 0
+        db.messages[0].signals[0].maximum = 100
+        db.messages[0].signals[0].unit = "TheNewUnit"
+        db.messages[0].signals[0].is_multiplexer = True
+        db.messages[0].signals[0].multiplexer_signal = db.messages[0].signals[0]
+        db.messages[0].signals[0].comment = "TheNewComment"
+
 
 # This file is not '__main__' when executed via 'python setup.py
 # test'.

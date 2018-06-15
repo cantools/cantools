@@ -319,6 +319,10 @@ class Message(object):
 
         return self._frame_id
 
+    @frame_id.setter
+    def frame_id(self, value):
+        self._frame_id = value
+
     @property
     def is_extended_frame(self):
         """``True`` if the message is an extended frame, ``False`` otherwise.
@@ -326,6 +330,10 @@ class Message(object):
         """
 
         return self._is_extended_frame
+
+    @is_extended_frame.setter
+    def is_extended_frame(self, value):
+        self._is_extended_frame = value
 
     @property
     def name(self):
@@ -335,6 +343,10 @@ class Message(object):
 
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def length(self):
         """The message data length in bytes.
@@ -342,6 +354,10 @@ class Message(object):
         """
 
         return self._length
+
+    @length.setter
+    def length(self, value):
+        self._length = value
 
     @property
     def signals(self):
@@ -358,6 +374,10 @@ class Message(object):
         """
 
         return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        self._comment = value
 
     @property
     def senders(self):
@@ -398,6 +418,10 @@ class Message(object):
         """
 
         return self._bus_name
+
+    @bus_name.setter
+    def bus_name(self, value):
+        self._bus_name = value
 
     @property
     def signal_tree(self):

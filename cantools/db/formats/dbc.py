@@ -508,20 +508,29 @@ def _dump_attribute_definition_defaults(database):
 def _dump_attributes(database):
     ba = []
 
+    def get_value(attribute):
+        result = attribute.value
+        try:
+            if attribute.definition.type_ == "STRING":
+                result = '"' + attribute.value + '"'
+        except:
+            pass
+        return result
+
     if database.attributes is not None:
         for name, attribute in database.attributes.items():
             fmt = 'BA_ "{name}" {value};'
             ba.append(fmt.format(name=attribute.definition.name,
-                                value=attribute.value))
+                                value=get_value(attribute)))
 
     for node in database.nodes:
         if node.attributes is not None:
             for name, attribute in node.attributes.items():
                 fmt = 'BA_ "{name}" {kind} {node_name} {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
-                                    type_=attribute.definition.kind,
+                                    kind=attribute.definition.kind,
                                     node_name=node.name,
-                                    value=attribute.value))
+                                    value=get_value(attribute)))
 
     for message in database.messages:
         if message.attributes is not None:
@@ -530,7 +539,7 @@ def _dump_attributes(database):
                 ba.append(fmt.format(name=attribute.definition.name,
                                     kind=attribute.definition.kind,
                                     frame_id=get_dbc_frame_id(message),
-                                    value=attribute.value))
+                                    value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
             if signal.attributes is not None:
@@ -540,7 +549,7 @@ def _dump_attributes(database):
                                         kind=attribute.definition.kind,
                                         frame_id=get_dbc_frame_id(message),
                                         signal_name=signal.name,
-                                        value=attribute.value))
+                                        value=get_value(attribute)))
 
     return ba
 
@@ -619,12 +628,17 @@ def _load_attributes(tokens, definitions):
     attributes = OrderedDict()
 
     def to_object(attribute):
+        value=attribute[3]
         try:
             definition = definitions[attribute[1]]
+            if definition.type_ in ['INT', 'HEX', 'ENUM']:
+                value = int(value)
+            elif definition.type_ == 'FLOAT':
+                value = float(value)
         except KeyError:
             definition = None
         
-        return Attribute(value=attribute[3],
+        return Attribute(value=value,
                          definition=definition)
 
     for attribute in tokens:

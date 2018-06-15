@@ -83,6 +83,14 @@ class Database(object):
         return self._version
 
     @property
+    def attributes(self):
+        """A dictionary of attributes for the database, or ``None`` if unavailable.
+
+        """
+
+        return self._attributes
+
+    @property
     def attribute_definitions(self):
         """A dictionary of attribute definitions, or ``None`` if unavailable.
 
@@ -259,15 +267,57 @@ class Database(object):
         """Find the message object for given name `name`.
 
         """
-
-        return self._name_to_message[name]
+        try:
+            return self._name_to_message[name]
+        except KeyError:
+            # Maybe the dict is outdated. Try finding the message and update the dict
+            message = self._find_message_by_name(name)
+            if message != None:
+                self._name_to_message[name] = message
+                return message
+                
+        raise KeyError(name)
 
     def get_message_by_frame_id(self, frame_id):
         """Find the message object for given frame id `frame_id`.
 
         """
+        try:
+            return self._frame_id_to_message[frame_id & self._frame_id_mask]
+        except KeyError:
+            # Maybe the dict is outdated. Try finding the message and update the dict
+            message = self._find_message_by_frame_id(frame_id)
+            if message != None:
+                self._frame_id_to_message[frame_id & self._frame_id_mask] = message
+                return message
 
-        return self._frame_id_to_message[frame_id & self._frame_id_mask]
+        raise KeyError(frame_id & self._frame_id_mask)
+
+    def _find_message_by_name(self, name):
+        """Find the message object for given name `name`. This is just private to 
+        encourage usage of the dict based get_message_by_name. It is used as a 
+        backup mechanism to cope with outdated dicts due to name changes.
+
+        """
+        for message in self._messages:
+            if message.name == name:
+                return message
+
+        return None
+
+    def _find_message_by_frame_id(self, frame_id):
+        """Find the message object for given frame id `frame_id`. This is just
+        private to encourage usage of the dict based get_message_by_name. It 
+        is used as a backup mechanism to cope with outdated dicts due to name
+        changes.
+
+        """
+        mask = self._frame_id_mask
+        for message in self._messages:
+            if message.frame_id & mask == frame_id & mask:
+                return message
+
+        return None
 
     def get_node_by_name(self, name):
         """Find the node object for given name `name`.

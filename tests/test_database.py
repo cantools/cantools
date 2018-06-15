@@ -1788,8 +1788,25 @@ IO_DEBUG(
         db.messages[0].signals[0].multiplexer_signal = db.messages[0].signals[0]
         db.messages[0].signals[0].comment = "TheNewComment"
 
+    def test_lookups(self):
+        filename = os.path.join('tests', 'files', 'attributes.dbc')
 
-# This file is not '__main__' when executed via 'python setup.py
+        with open(filename, 'rU') as fin:
+            db = cantools.db.load(fin)
+        
+        msg = db.get_message_by_frame_id(0x39)
+        self.assertEqual(msg.name, "TheMessage")
+        msg.frame_id = 0x40
+        msg = db.get_message_by_frame_id(0x40)
+        self.assertEqual(msg.name, "TheMessage")
+        self.assertEqual(msg.frame_id,0x40)
+
+        msg.name = "TheNewMessage"
+        msg = db.get_message_by_name("TheNewMessage")
+        self.assertEqual(msg.name, "TheNewMessage")
+        self.assertEqual(msg.frame_id,0x40)
+
+# This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.DEBUG)
 

@@ -669,9 +669,6 @@ def _load_attributes(tokens, definitions):
                 frame_id = attribute[2][1]
                 signal = attribute[2][2]
 
-                if frame_id not in attributes:
-                    attributes[frame_id] = {}
-
                 if 'signal' not in attributes[frame_id]:
                     attributes[frame_id]['signal'] = OrderedDict()
                 

@@ -25,8 +25,7 @@ class Database(object):
                  nodes=None,
                  buses=None,
                  version=None,
-                 attributes=None,
-                 attribute_definitions=None,
+                 dbc_specifics=None,
                  frame_id_mask=None):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
@@ -34,12 +33,7 @@ class Database(object):
         self._name_to_message = {}
         self._frame_id_to_message = {}
         self._version = version
-        self._attributes = (attributes
-                            if attributes
-                            else [])
-        self._attribute_definitions = (attribute_definitions
-                                       if attribute_definitions
-                                       else [])
+        self._dbc = dbc_specifics
 
         if frame_id_mask is None:
             frame_id_mask = 0xffffffff
@@ -83,20 +77,12 @@ class Database(object):
         return self._version
 
     @property
-    def attributes(self):
-        """A dictionary of attributes for the database, or ``None`` if unavailable.
+    def dbc(self):
+        """An object containing dbc specific properties like e.g. attributes.
 
         """
 
-        return self._attributes
-
-    @property
-    def attribute_definitions(self):
-        """A dictionary of attribute definitions, or ``None`` if unavailable.
-
-        """
-
-        return self._attribute_definitions
+        return self._dbc
 
     def add_dbc(self, fp):
         """Read and parse DBC data from given file-like object and add the
@@ -141,8 +127,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
-        self._attributes=database.attributes
-        self._attribute_definitions = database.attribute_definitions
+        self._dbc=database.dbc
 
     def add_kcd(self, fp):
         """Read and parse KCD data from given file-like object and add the
@@ -176,8 +161,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
-        self._attributes=database.attributes
-        self._attribute_definitions = database.attribute_definitions
+        self._dbc=database.dbc
 
     def add_sym(self, fp):
         """Read and parse SYM data from given file-like object and add the
@@ -211,8 +195,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
-        self._attributes=database.attributes
-        self._attribute_definitions = database.attribute_definitions
+        self._dbc=database.dbc
 
     def add_message(self, message):
         """Add given message to the database.
@@ -248,8 +231,7 @@ class Database(object):
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._attributes,
-                                                self._attribute_definitions))
+                                                self._dbc))
 
     def as_kcd_string(self):
         """Return the database as a string formatted as a KCD file.
@@ -260,8 +242,7 @@ class Database(object):
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._attributes,
-                                                self._attribute_definitions))
+                                                self._dbc))
 
     def get_message_by_name(self, name):
         """Find the message object for given name `name`.

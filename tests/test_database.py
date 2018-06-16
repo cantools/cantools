@@ -1698,7 +1698,7 @@ IO_DEBUG(
         filename = os.path.join('tests', 'files', 'test_multiplex_dump.dbc')
         db = cantools.db.load_file(filename)
         dumped_db = cantools.db.load_string(db.as_dbc_string())
-        attr = dumped_db.attribute_definitions
+        attr = dumped_db.dbc.attribute_definitions
 
         self.assertEqual(attr['BusType'].type_, "STRING")
 
@@ -1718,33 +1718,33 @@ IO_DEBUG(
         with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
-        self.assertEqual(len(db.messages[0].attributes), 4)
-        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].value, 5)
-        self.assertEqual(db.messages[0].attributes["TheHexAttribute"].name,
+        self.assertEqual(len(db.messages[0].dbc.attributes), 4)
+        self.assertEqual(db.messages[0].dbc.attributes["TheHexAttribute"].value, 5)
+        self.assertEqual(db.messages[0].dbc.attributes["TheHexAttribute"].name,
             "TheHexAttribute")
-        self.assertEqual(repr(db.messages[0].attributes["TheHexAttribute"]), 
+        self.assertEqual(repr(db.messages[0].dbc.attributes["TheHexAttribute"]), 
             "attribute('TheHexAttribute', 5)")
         self.assertEqual(
-            repr(db.messages[0].attributes["TheHexAttribute"].definition),
+            repr(db.messages[0].dbc.attributes["TheHexAttribute"].definition),
             "attribute_definition('TheHexAttribute', 4)")
 
         self.assertEqual(
-            db.messages[0].signals[0].attributes["TheSignalStringAttribute"].name,
+            db.messages[0].signals[0].dbc.attributes["TheSignalStringAttribute"].name,
             "TheSignalStringAttribute")
         self.assertEqual(
-            db.messages[0].signals[0].attributes["TheSignalStringAttribute"].value,
+            db.messages[0].signals[0].dbc.attributes["TheSignalStringAttribute"].value,
             "TestString")
         self.assertEqual(
-            db.messages[0].signals[0].attributes["GenSigSendType"].name,
+            db.messages[0].signals[0].dbc.attributes["GenSigSendType"].name,
             "GenSigSendType")
         self.assertEqual(
-            db.messages[0].signals[0].attributes["GenSigSendType"].value, 1)
+            db.messages[0].signals[0].dbc.attributes["GenSigSendType"].value, 1)
 
-        self.assertEqual(db.attributes["BusType"].name, "BusType")
-        self.assertEqual(db.attributes["BusType"].value, "CAN")
-        self.assertEqual(db.attributes["TheNetworkAttribute"].name,
+        self.assertEqual(db.dbc.attributes["BusType"].name, "BusType")
+        self.assertEqual(db.dbc.attributes["BusType"].value, "CAN")
+        self.assertEqual(db.dbc.attributes["TheNetworkAttribute"].name,
             "TheNetworkAttribute")
-        self.assertEqual(db.attributes["TheNetworkAttribute"].value, 51)
+        self.assertEqual(db.dbc.attributes["TheNetworkAttribute"].value, 51)
 
         message = db.get_message_by_frame_id(57)
         self.assertEqual(message.cycle_time, 1000)
@@ -1752,9 +1752,9 @@ IO_DEBUG(
 
         self.assertEqual(db.nodes[0].name, "TheNode")
         self.assertEqual(db.nodes[0].comment, "TheNodeComment")
-        self.assertEqual(db.nodes[0].attributes["TheNodeAttribute"].name, 
+        self.assertEqual(db.nodes[0].dbc.attributes["TheNodeAttribute"].name, 
             "TheNodeAttribute")
-        self.assertEqual(db.nodes[0].attributes["TheNodeAttribute"].value, 99)
+        self.assertEqual(db.nodes[0].dbc.attributes["TheNodeAttribute"].value, 99)
 
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
@@ -1768,7 +1768,7 @@ IO_DEBUG(
         # since functionality is trivial.
         db.nodes[0].name = "SetterName"
         db.nodes[0].comment = "SetterComment"
-        db.attributes["BusType"].value = "LIN"
+        db.dbc.attributes["BusType"].value = "LIN"
         db.messages[0].name = "SetterName"
         db.messages[0].frame_id = 0x12121212
         db.messages[0].is_extended_frame = True

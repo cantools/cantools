@@ -10,19 +10,9 @@ class InternalDatabase(object):
                  nodes,
                  buses,
                  version,
-                 attributes=None,
-                 attribute_definitions=None):
+                 dbc_specifics=None):
         self.messages = messages
         self.nodes = nodes
         self.buses = buses
         self.version = version
-
-        if attributes is None:
-            attributes = {}
-
-        self.attributes = attributes
-
-        if attribute_definitions is None:
-            attribute_definitions = {}
-
-        self.attribute_definitions = attribute_definitions
+        self.dbc = dbc_specifics

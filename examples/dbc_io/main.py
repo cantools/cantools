@@ -21,9 +21,9 @@ db = cantools.db.load_file(infile)
 msg = db.get_message_by_name('TheMessage')
 # Manipulate a message attribute. Try/except will catch accesses to non existent attributes
 try:
-    print("Input cycle time: " + str(msg.attributes['GenMsgCycleTime'].value))
-    msg.attributes['GenMsgCycleTime'].value = 2000
-    print("Output cycle time: " + str(msg.attributes['GenMsgCycleTime'].value))
+    print("Input cycle time: " + str(msg.dbc.attributes['GenMsgCycleTime'].value))
+    msg.dbc.attributes['GenMsgCycleTime'].value = 2000
+    print("Output cycle time: " + str(msg.dbc.attributes['GenMsgCycleTime'].value))
 except KeyError:
     pass
 # Manipulate the message frame id

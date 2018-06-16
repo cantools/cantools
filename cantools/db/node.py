@@ -8,10 +8,10 @@ class Node(object):
     def __init__(self,
                  name,
                  comment,
-                 attributes=None):
+                 dbc_specifics=None):
         self._name = name
         self._comment = comment
-        self._attributes = attributes
+        self._dbc = dbc_specifics
 
     @property
     def name(self):
@@ -38,12 +38,12 @@ class Node(object):
         self._comment = value
 
     @property
-    def attributes(self):
-        """The node attributes, or ``None`` if unavailable.
+    def dbc(self):
+        """An object containing dbc specific properties like e.g. attributes.
 
         """
 
-        return self._attributes
+        return self._dbc
 
     def __repr__(self):
         return "node('{}', {})".format(

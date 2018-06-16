@@ -48,7 +48,7 @@ class Signal(object):
                  maximum=None,
                  unit=None,
                  choices=None,
-                 attributes=None,
+                 dbc_specifics=None,
                  comment=None,
                  receivers=None,
                  is_multiplexer=False,
@@ -66,7 +66,7 @@ class Signal(object):
         self._maximum = maximum
         self._unit = unit
         self._choices = choices
-        self._attributes = attributes
+        self._dbc = dbc_specifics
         self._comment = comment
         self._receivers = [] if receivers is None else receivers
         self._is_multiplexer = is_multiplexer
@@ -218,12 +218,12 @@ class Signal(object):
         return self._choices
 
     @property
-    def attributes(self):
-        """The attributes the signal, or ``None`` if unavailable.
+    def dbc(self):
+        """An object containing dbc specific properties like e.g. attributes.
 
         """
 
-        return self._attributes
+        return self._dbc
 
     @property
     def comment(self):

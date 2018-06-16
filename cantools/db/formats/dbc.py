@@ -361,6 +361,30 @@ def _create_grammar():
 
     return OneOrMore(entry) + StringEnd()
 
+class DBC_Specifics:
+    _attribute_definitions = None
+
+    def __init__(self,
+                 attributes = None):
+        self._attributes = attributes
+
+    @property
+    def attributes(self):
+        """The dbc specific attributes of the parent object (database, node, 
+        message or signal) as a dictionary.
+
+        """
+
+        return self._attributes
+    
+    @property
+    def attribute_definitions(self):
+        """The dbc specific attribute definitions as one dictionary for all
+        instances.
+
+        """
+
+        return DBC_Specifics._attribute_definitions 
 
 def get_dbc_frame_id(message):
     frame_id = message.frame_id
@@ -450,6 +474,7 @@ def _dump_comments(database):
 
 def _dump_attribute_definitions(database):
     ba_def = []
+    attribute_definitions = DBC_Specifics.attribute_definitions
 
     def get_minimum(definition):
         return '' if definition.minimum == None else ' ' + definition.minimum
@@ -460,7 +485,7 @@ def _dump_attribute_definitions(database):
     def get_kind(definition):
         return '' if definition.kind == None else definition.kind + ' '
 
-    for name, definition in database.attribute_definitions.items():
+    for name, definition in attribute_definitions.items():
         
         if definition.type_ == 'ENUM':
             fmt = 'BA_DEF_ {kind}  "{name}" {type_}  {choices};'
@@ -490,8 +515,9 @@ def _dump_attribute_definitions(database):
 
 def _dump_attribute_definition_defaults(database):
     ba_def_def = []
+    attribute_definitions = DBC_Specifics.attribute_definitions
 
-    for name, definition in database.attribute_definitions.items():
+    for name, definition in attribute_definitions.items():
         if definition.defaultValue != None:
             try:
                 int(definition.defaultValue)
@@ -514,15 +540,15 @@ def _dump_attributes(database):
             result = '"' + attribute.value + '"'
         return result
 
-    if database.attributes is not None:
-        for name, attribute in database.attributes.items():
+    if database.dbc.attributes is not None:
+        for name, attribute in database.dbc.attributes.items():
             fmt = 'BA_ "{name}" {value};'
             ba.append(fmt.format(name=attribute.definition.name,
                                 value=get_value(attribute)))
 
     for node in database.nodes:
-        if node.attributes is not None:
-            for name, attribute in node.attributes.items():
+        if node.dbc.attributes is not None:
+            for name, attribute in node.dbc.attributes.items():
                 fmt = 'BA_ "{name}" {kind} {node_name} {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
                                     kind=attribute.definition.kind,
@@ -530,8 +556,8 @@ def _dump_attributes(database):
                                     value=get_value(attribute)))
 
     for message in database.messages:
-        if message.attributes is not None:
-            for name, attribute in message.attributes.items():
+        if message.dbc.attributes is not None:
+            for name, attribute in message.dbc.attributes.items():
                 fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
                                     kind=attribute.definition.kind,
@@ -539,8 +565,8 @@ def _dump_attributes(database):
                                     value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
-            if signal.attributes is not None:
-                for name, attribute in signal.attributes.items():
+            if signal.dbc.attributes is not None:
+                for name, attribute in signal.dbc.attributes.items():
                     fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
                     ba.append(fmt.format(name=attribute.definition.name,
                                         kind=attribute.definition.kind,
@@ -621,9 +647,9 @@ def _load_attribute_definition_defaults(tokens):
     return defaults
 
 
-def _load_attributes(tokens, definitions):
+def _load_attributes(tokens):
     attributes = OrderedDict()
-
+    definitions = DBC_Specifics.attribute_definitions
     def to_object(attribute):
         value=attribute[3]
         try:
@@ -780,7 +806,6 @@ def _load_signal_multiplexer_values(tokens):
 def _load_messages(tokens,
                    comments,
                    attributes,
-                   definitions,
                    choices,
                    message_senders,
                    signal_types,
@@ -821,6 +846,7 @@ def _load_messages(tokens,
 
         result = None
         messageAttributes = get_attributes(frame_id_dbc)
+        definitions = DBC_Specifics.attribute_definitions
         try:
             result = messageAttributes['GenMsgSendType'].value
         except (KeyError, TypeError):
@@ -843,6 +869,7 @@ def _load_messages(tokens,
         """
 
         messageAttributes = get_attributes(frame_id_dbc)
+        definitions = DBC_Specifics.attribute_definitions
         try:
             return int(messageAttributes['GenMsgCycleTime'].value)
         except (KeyError, TypeError):
@@ -925,7 +952,7 @@ def _load_messages(tokens,
             senders=senders,
             send_type=get_send_type(frame_id_dbc),
             cycle_time=get_cycle_time(frame_id_dbc),
-            attributes=get_attributes(frame_id_dbc),
+            dbc_specifics=DBC_Specifics(attributes=get_attributes(frame_id_dbc)),
             signals=[Signal(name=signal[1][0],
                             start=int(signal[2][0]),
                             length=int(signal[2][1]),
@@ -941,8 +968,9 @@ def _load_messages(tokens,
                             unit=None if signal[5] == '' else signal[5],
                             choices=get_choices(frame_id_dbc,
                                                 signal[1][0]),
-                            attributes=get_attributes(frame_id_dbc,
-                                                      signal[1][0]),
+                            dbc_specifics=DBC_Specifics(attributes=get_attributes(
+                                                                    frame_id_dbc,
+                                                                    signal[1][0])),
                             comment=get_comment(frame_id_dbc,
                                                 signal[1][0]),
                             is_multiplexer=(signal[1][1] == 'M'
@@ -969,7 +997,7 @@ def _load_version(tokens):
             if token[0] == VERSION][0]
 
 
-def _load_nodes(tokens, comments, attributes, definitions):
+def _load_nodes(tokens, comments, attributes):
     
     def get_node_comment(node_name):
         """Get comment for a given node_name
@@ -996,7 +1024,7 @@ def _load_nodes(tokens, comments, attributes, definitions):
         if token[0] == NODES:
             nodes = [Node(name=node,
                           comment=get_node_comment(node),
-                          attributes=get_node_attributes(node))
+                          dbc_specifics=DBC_Specifics(get_node_attributes(node)))
                      for node in token[1]]
 
     return nodes
@@ -1025,7 +1053,7 @@ def dump_string(database):
                           val='\n'.join(val))
 
 
-def build_attribute_definition_dict(definitions, defaults):
+def get_definitions_dict(definitions, defaults):
     result = OrderedDict()
     for item in definitions:
         choicesOrRange = None
@@ -1088,8 +1116,8 @@ def load_string(string):
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)
     defaults = _load_attribute_definition_defaults(tokens)
-    attribute_definitions = build_attribute_definition_dict(definitions, defaults)
-    attributes = _load_attributes(tokens, attribute_definitions)
+    DBC_Specifics.attribute_definitions = get_definitions_dict(definitions, defaults)
+    attributes = _load_attributes(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens)
     signal_types = _load_signal_types(tokens)
@@ -1097,17 +1125,15 @@ def load_string(string):
     messages = _load_messages(tokens,
                               comments,
                               attributes,
-                              attribute_definitions,
                               choices,
                               message_senders,
                               signal_types,
                               signal_multiplexer_values)
-    nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
+    nodes = _load_nodes(tokens, comments, attributes)
     version = _load_version(tokens)
-
+    dbc_specifics = DBC_Specifics(attributes=get_database_attributes())
     return InternalDatabase(messages,
                             nodes,
                             [],
                             version,
-                            get_database_attributes(),
-                            attribute_definitions)
+                            dbc_specifics)

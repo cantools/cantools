@@ -1757,10 +1757,9 @@ IO_DEBUG(
             "TheNodeAttribute")
         self.assertEqual(node.dbc.attributes["TheNodeAttribute"].value, 99)
 
-        DBC_Specifics = cantools.db.formats.dbc.DBC_Specifics
-        dict_definition = DBC_Specifics.attribute_definitions["TheNodeAttribute"]
-        attribute_definition = node.dbc.attributes["TheNodeAttribute"].definition
-        self.assertEqual(dict_definition, attribute_definition)
+        db_definition = db.dbc.attribute_definitions["TheNodeAttribute"]
+        node_definition = node.dbc.attributes["TheNodeAttribute"].definition
+        self.assertEqual(db_definition, node_definition)
 
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
@@ -1770,6 +1769,7 @@ IO_DEBUG(
 
         with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
+
         # Calling the setters for coverage. Assertions are not necessary here 
         # since functionality is trivial.
         db.nodes[0].name = "SetterName"

@@ -13,10 +13,10 @@ class AttributeDefinition(object):
                  choices=None):
         self._name = name
         self._default_value = default_value
-        self._kind=kind
+        self._kind = kind
         self._type_name = type_name
-        self._minimum=minimum
-        self._maximum=maximum
+        self._minimum = minimum
+        self._maximum = maximum
         self._choices = choices
 
     @property

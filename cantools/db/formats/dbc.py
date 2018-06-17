@@ -485,8 +485,7 @@ def _dump_attribute_definitions(database):
     def get_kind(definition):
         return '' if definition.kind == None else definition.kind + ' '
 
-    for name, definition in definitions.items():
-        
+    for name, definition in definitions.items():      
         if definition.type_name == 'ENUM':
             fmt = 'BA_DEF_ {kind}  "{name}" {type_name}  {choices};'
             choices = ','.join(['"{}"'.format(choice)
@@ -495,7 +494,6 @@ def _dump_attribute_definitions(database):
                                      name=definition.name,
                                      type_name=definition.type_name,
                                      choices=choices))
-
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
             fmt = 'BA_DEF_ {kind} "{name}" {type_name}{minimum}{maximum};'
             ba_def.append(fmt.format(kind=get_kind(definition),
@@ -503,7 +501,6 @@ def _dump_attribute_definitions(database):
                                      type_name=definition.type_name,
                                      minimum=get_minimum(definition),
                                      maximum=get_maximum(definition)))
-
         elif definition.type_name == 'STRING':
             fmt = 'BA_DEF_ {kind} "{name}" {type_name} ;'
             ba_def.append(fmt.format(kind=get_kind(definition),

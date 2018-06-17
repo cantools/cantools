@@ -400,5 +400,14 @@
         <Value unit="s" min="0" max="59"/>
       </Signal>
     </Message>
+
+    <Message id="0x380" name="BigEndian">
+      <Producer>
+        <NodeRef id="5"/>
+      </Producer>
+      <Signal name="A" offset="0" length="17" endianess="big"/>
+      <Signal name="B" offset="17" length="1" endianess="big"/>
+      <Signal name="C" offset="18" length="5" endianess="big"/>
+    </Message>
   </Bus>
 </NetworkDefinition>

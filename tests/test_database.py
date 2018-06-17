@@ -694,7 +694,7 @@ IO_DEBUG(
         self.assertEqual(db.buses[0].baudrate, 500000)
         self.assertEqual(db.buses[1].baudrate, 125000)
 
-        self.assertEqual(len(db.messages), 27)
+        self.assertEqual(len(db.messages), 28)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
@@ -774,7 +774,7 @@ IO_DEBUG(
         outside_temp = db.messages[1].signals[0]
 
         self.assertEqual(outside_temp.name, 'OutsideTemp')
-        self.assertEqual(outside_temp.start, 18)
+        self.assertEqual(outside_temp.start, 21)
         self.assertEqual(outside_temp.length, 12)
         self.assertEqual(outside_temp.receivers, [])
         self.assertEqual(outside_temp.byte_order, 'big_endian')
@@ -916,6 +916,22 @@ IO_DEBUG(
             self.assertEqual(encoded, encoded_message)
             decoded = db.decode_message('Gear', encoded)
             self.assertEqual(decoded, decoded_message)
+
+    def test_the_homer_encode_decode_big_endian(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.load_file(filename)
+
+        decoded_message = {
+            'A': 0x140fa,
+            'B': 1,
+            'C': 18
+        }
+        encoded_message = b'\xa0\x7d\x64'
+
+        encoded = db.encode_message('BigEndian', decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = db.decode_message('BigEndian', encoded)
+        self.assertEqual(decoded, decoded_message)
 
     def test_empty_kcd(self):
         filename = os.path.join('tests', 'files', 'empty.kcd')

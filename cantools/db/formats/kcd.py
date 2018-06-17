@@ -19,6 +19,13 @@ NAMESPACE = 'http://kayak.2codeornot2code.org/1.0'
 NAMESPACES = {'ns': NAMESPACE}
 
 
+def _start_bit(offset, byte_order):
+    if byte_order == 'big_endian':
+        return (8 * (offset // 8) + (7 - (offset % 8)))
+    else:
+        return offset
+
+
 def _get_node_name_by_id(nodes, node_id):
     for node in nodes:
         if node['id'] == node_id:
@@ -100,7 +107,7 @@ def _load_signal_element(signal):
         # TODO: Label groups.
 
     return Signal(name=name,
-                  start=offset,
+                  start=_start_bit(offset, byte_order),
                   length=length,
                   receivers=[],
                   byte_order=byte_order,

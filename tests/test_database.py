@@ -1750,11 +1750,16 @@ IO_DEBUG(
         self.assertEqual(message.cycle_time, 1000)
         self.assertEqual(message.send_type, 'Cyclic')
 
-        self.assertEqual(db.nodes[0].name, "TheNode")
-        self.assertEqual(db.nodes[0].comment, "TheNodeComment")
-        self.assertEqual(db.nodes[0].dbc.attributes["TheNodeAttribute"].name, 
+        node = db.nodes[0]
+        self.assertEqual(node.name, "TheNode")
+        self.assertEqual(node.comment, "TheNodeComment")
+        self.assertEqual(node.dbc.attributes["TheNodeAttribute"].name, 
             "TheNodeAttribute")
-        self.assertEqual(db.nodes[0].dbc.attributes["TheNodeAttribute"].value, 99)
+        self.assertEqual(node.dbc.attributes["TheNodeAttribute"].value, 99)
+
+        dict_definition = db.dbc.attribute_definitions["TheNodeAttribute"]
+        attribute_definition = node.dbc.attributes["TheNodeAttribute"].definition
+        self.assertEqual(dict_definition, attribute_definition)
 
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())

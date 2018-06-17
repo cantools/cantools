@@ -1757,7 +1757,8 @@ IO_DEBUG(
             "TheNodeAttribute")
         self.assertEqual(node.dbc.attributes["TheNodeAttribute"].value, 99)
 
-        dict_definition = db.dbc.attribute_definitions["TheNodeAttribute"]
+        DBC_Specifics = cantools.db.formats.dbc.DBC_Specifics
+        dict_definition = DBC_Specifics.attribute_definitions["TheNodeAttribute"]
         attribute_definition = node.dbc.attributes["TheNodeAttribute"].definition
         self.assertEqual(dict_definition, attribute_definition)
 

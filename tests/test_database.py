@@ -1700,7 +1700,7 @@ IO_DEBUG(
         dumped_db = cantools.db.load_string(db.as_dbc_string())
         attr = dumped_db.dbc.attribute_definitions
 
-        self.assertEqual(attr['BusType'].type_, "STRING")
+        self.assertEqual(attr['BusType'].type_name, "STRING")
 
     def test_extended_id_dump(self):
         filename = os.path.join('tests', 'files', 'test_extended_id_dump.dbc')
@@ -1796,17 +1796,17 @@ IO_DEBUG(
         with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
         
-        msg = db.get_message_by_frame_id(0x39)
-        self.assertEqual(msg.name, "TheMessage")
-        msg.frame_id = 0x40
-        msg = db.get_message_by_frame_id(0x40)
-        self.assertEqual(msg.name, "TheMessage")
-        self.assertEqual(msg.frame_id,0x40)
+        message = db.get_message_by_frame_id(0x39)
+        self.assertEqual(message.name, "TheMessage")
+        message.frame_id = 0x40
+        message = db.get_message_by_frame_id(0x40)
+        self.assertEqual(message.name, "TheMessage")
+        self.assertEqual(message.frame_id,0x40)
 
-        msg.name = "TheNewMessage"
-        msg = db.get_message_by_name("TheNewMessage")
-        self.assertEqual(msg.name, "TheNewMessage")
-        self.assertEqual(msg.frame_id, 0x40)
+        message.name = "TheNewMessage"
+        message = db.get_message_by_name("TheNewMessage")
+        self.assertEqual(message.name, "TheNewMessage")
+        self.assertEqual(message.frame_id, 0x40)
 
         with self.assertRaises(KeyError) as cm:
             db.get_message_by_name('TheMissingMessage')

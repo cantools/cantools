@@ -487,28 +487,28 @@ def _dump_attribute_definitions(database):
 
     for name, definition in attribute_definitions.items():
         
-        if definition.type_ == 'ENUM':
-            fmt = 'BA_DEF_ {kind}  "{name}" {type_}  {choices};'
+        if definition.type_name == 'ENUM':
+            fmt = 'BA_DEF_ {kind}  "{name}" {type_name}  {choices};'
             choices = ','.join(['"{}"'.format(choice)
                                 for choice in definition.choices])
             ba_def.append(fmt.format(kind=definition.kind,
                                      name=definition.name,
-                                     type_=definition.type_,
+                                     type_name=definition.type_name,
                                      choices=choices))
 
-        elif definition.type_ in ['INT', 'FLOAT', 'HEX']:
-            fmt = 'BA_DEF_ {kind} "{name}" {type_}{minimum}{maximum};'
+        elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
+            fmt = 'BA_DEF_ {kind} "{name}" {type_name}{minimum}{maximum};'
             ba_def.append(fmt.format(kind=get_kind(definition),
                                      name=definition.name,
-                                     type_=definition.type_,
+                                     type_name=definition.type_name,
                                      minimum=get_minimum(definition),
                                      maximum=get_maximum(definition)))
 
-        elif definition.type_ == 'STRING':
-            fmt = 'BA_DEF_ {kind} "{name}" {type_} ;'
+        elif definition.type_name == 'STRING':
+            fmt = 'BA_DEF_ {kind} "{name}" {type_name} ;'
             ba_def.append(fmt.format(kind=get_kind(definition),
                                      name=definition.name,
-                                     type_=definition.type_))
+                                     type_name=definition.type_name))
 
     return ba_def
 
@@ -518,15 +518,15 @@ def _dump_attribute_definition_defaults(database):
     attribute_definitions = DBC_Specifics.attribute_definitions
 
     for name, definition in attribute_definitions.items():
-        if definition.defaultValue != None:
+        if definition.default_value != None:
             try:
-                int(definition.defaultValue)
+                int(definition.default_value)
                 fmt = 'BA_DEF_DEF_  "{name}" {value};'
             except ValueError:
                 fmt = 'BA_DEF_DEF_  "{name}" "{value}";'
 
             ba_def_def.append(fmt.format(name=definition.name,
-                                        value=definition.defaultValue))
+                                        value=definition.default_value))
 
     return ba_def_def
 
@@ -536,7 +536,7 @@ def _dump_attributes(database):
 
     def get_value(attribute):
         result = attribute.value
-        if attribute.definition.type_ == "STRING":
+        if attribute.definition.type_name == "STRING":
             result = '"' + attribute.value + '"'
         return result
 
@@ -654,9 +654,9 @@ def _load_attributes(tokens):
         value=attribute[3]
         try:
             definition = definitions[attribute[1]]
-            if definition.type_ in ['INT', 'HEX', 'ENUM']:
+            if definition.type_name in ['INT', 'HEX', 'ENUM']:
                 value = int(value)
-            elif definition.type_ == 'FLOAT':
+            elif definition.type_name == 'FLOAT':
                 value = float(value)
         except KeyError:
             definition = None
@@ -851,7 +851,7 @@ def _load_messages(tokens,
             result = messageAttributes['GenMsgSendType'].value
         except (KeyError, TypeError):
             try:
-                result = definitions['GenMsgSendType'].defaultValue
+                result = definitions['GenMsgSendType'].default_value
             except (KeyError, TypeError):
                 result = None
         # Resolve ENUM index to ENUM text
@@ -874,7 +874,7 @@ def _load_messages(tokens,
             return int(messageAttributes['GenMsgCycleTime'].value)
         except (KeyError, TypeError):
             try:
-                return int(definitions['GenMsgCycleTime'].defaultValue)
+                return int(definitions['GenMsgCycleTime'].default_value)
             except (KeyError, TypeError):
                 return None
 
@@ -1060,29 +1060,29 @@ def get_definitions_dict(definitions, defaults):
         if item[1] in [SIGNAL, MESSAGE, NODES]:
             definition = AttributeDefinition(name=item[2],
                                              kind=item[1],
-                                             type_=item[3])
+                                             type_name=item[3])
             if len(item) > 4:
                 choicesOrRange = item[4]
         
         else:
             definition = AttributeDefinition(name=item[1],
-                                             type_=item[2])
+                                             type_name=item[2])
             if len(item) > 3:
                 choicesOrRange = item[3]
 
         if choicesOrRange != None:
-            if definition.type_ == "ENUM":
+            if definition.type_name == "ENUM":
                 choices = []
                 for choice in choicesOrRange:
                     choices.append(choice[0])
                 definition.choices = choices
-            elif definition.type_ in ['INT', 'FLOAT', 'HEX']:
+            elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
                 definition.minimum = choicesOrRange[0]
                 definition.maximum = choicesOrRange[1]
         try:
-            definition.defaultValue = defaults[definition.name]
+            definition.default_value = defaults[definition.name]
         except KeyError:
-            definition.defaultValue = None
+            definition.default_value = None
         result[definition.name] = definition
     
     return result

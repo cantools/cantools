@@ -10,26 +10,24 @@ sys.path.append('/mnt/d/JQU/dbc/cantools')
 import cantools
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-DBC_IO_DBC_PATH = os.path.join(SCRIPT_DIR, 'dbc_input.dbc')
-
-infile = DBC_IO_DBC_PATH
-outfile = infile.replace('_input', '_output')
+INPUT_DBC_PATH = os.path.join(SCRIPT_DIR, 'dbc_input.dbc')
+OUTPUT_DBC_PATH = os.path.join(SCRIPT_DIR, 'dbc_output.dbc')
 
 # Read the dbc
-db = cantools.db.load_file(infile)
+db = cantools.db.load_file(INPUT_DBC_PATH)
 # Get a message to manipulate
-msg = db.get_message_by_name('TheMessage')
+message = db.get_message_by_name('TheMessage')
 # Manipulate a message attribute. Try/except will catch accesses to non existent attributes
 try:
-    print("Input cycle time: " + str(msg.dbc.attributes['GenMsgCycleTime'].value))
-    msg.dbc.attributes['GenMsgCycleTime'].value = 2000
-    print("Output cycle time: " + str(msg.dbc.attributes['GenMsgCycleTime'].value))
-except KeyError:
-    pass
+    print("Input cycle time:", message.dbc.attributes['GenMsgCycleTime'].value)
+    message.dbc.attributes['GenMsgCycleTime'].value = 2000
+    print("Output cycle time:", message.dbc.attributes['GenMsgCycleTime'].value)
+except KeyError as e:
+    raise e
 # Manipulate the message frame id
-print("Input frame id: " + hex(msg.frame_id))
-msg.frame_id = 0x234
-print("Output frame id: " + hex(msg.frame_id))
+print("Input frame id: " + hex(message.frame_id))
+message.frame_id = 0x234
+print("Output frame id: " + hex(message.frame_id))
 
-with open(outfile, 'w', newline="\r\n") as f:
+with open(OUTPUT_DBC_PATH, 'w', newline="\r\n") as f:
      f.write(db.as_dbc_string())

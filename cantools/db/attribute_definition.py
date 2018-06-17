@@ -5,16 +5,16 @@ class AttributeDefinition(object):
 
     def __init__(self,
                  name,
-                 defaultValue=None,
+                 default_value=None,
                  kind=None,
-                 type_=None,
+                 type_name=None,
                  minimum=None,
                  maximum=None,
                  choices=None):
         self._name = name
-        self._defaultValue = defaultValue
+        self._default_value = default_value
         self._kind=kind
-        self._type_ = type_
+        self._type_name = type_name
         self._minimum=minimum
         self._maximum=maximum
         self._choices = choices
@@ -28,16 +28,16 @@ class AttributeDefinition(object):
         return self._name
 
     @property
-    def defaultValue(self):
+    def default_value(self):
         """The default value that this attribute has, or ``None`` if unavailable.
 
         """
 
-        return self._defaultValue
+        return self._default_value
 
-    @defaultValue.setter
-    def defaultValue(self, value):
-        self._defaultValue = value
+    @default_value.setter
+    def default_value(self, value):
+        self._default_value = value
 
     @property
     def kind(self):
@@ -48,12 +48,12 @@ class AttributeDefinition(object):
         return self._kind
 
     @property
-    def type_(self):
+    def type_name(self):
         """The attribute type (INT, HEX, FLOAT, STRING, ENUM), or ``None`` if unavailable.
 
         """
 
-        return self._type_
+        return self._type_name
 
     @property
     def minimum(self):
@@ -95,4 +95,4 @@ class AttributeDefinition(object):
     def __repr__(self):
         return "attribute_definition('{}', {})".format(
             self._name,
-            self._defaultValue)
+            self._default_value)

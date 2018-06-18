@@ -1,5 +1,5 @@
 class Attribute(object):
-    """An atttribute that can be associated with nodes/messages/signals
+    """An atttribute that can be associated with nodes/messages/signals.
 
     """
 
@@ -38,7 +38,6 @@ class Attribute(object):
         return self._definition
 
     def __repr__(self):
-        
         return "attribute('{}', {})".format(
             self.name,
             self.value)

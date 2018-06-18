@@ -93,7 +93,7 @@ class Signal(object):
         """
 
         return self._start
-    
+
     @start.setter
     def start(self, value):
         self._start = value
@@ -281,9 +281,7 @@ class Signal(object):
         self._multiplexer_signal = value
 
     def choice_string_to_number(self, string):
-
         for choice_number, choice_string in self.choices.items():
-            
             if choice_string == string:
                 return choice_number
 

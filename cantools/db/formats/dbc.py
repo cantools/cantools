@@ -55,7 +55,8 @@ SIGNAL_GROUP = 'SIG_GROUP_'
 DBC_FMT = """VERSION "{version}"
 
 
-NS_ : 
+NS_ : \
+
 \tNS_DESC_
 \tCM_
 \tBA_DEF_
@@ -372,25 +373,25 @@ class DbcSpecifics(object):
 
     @property
     def attributes(self):
-        """The dbc specific attributes of the parent object (database, node, 
+        """The dbc specific attributes of the parent object (database, node,
         message or signal) as a dictionary.
 
         """
 
         return self._attributes
-    
+
     @property
     def attribute_definitions(self):
         """The dbc specific attribute definitions as dictionary.
 
         """
 
-        return self._attribute_definitions 
+        return self._attribute_definitions
 
 
 def get_dbc_frame_id(message):
     frame_id = message.frame_id
-    
+
     if message.is_extended_frame:
         frame_id |= 0x80000000
 
@@ -410,7 +411,6 @@ def _dump_messages(database):
     bo = []
 
     def get_mux(signal):
-
         if signal.is_multiplexer:
             result = ' M'
         elif signal.multiplexer_ids is not None:
@@ -455,21 +455,18 @@ def _dump_comments(database):
     cm = []
 
     for node in database.nodes:
-
         if node.comment is not None:
             fmt = 'CM_ BU_ {name} "{comment}";'
             cm.append(fmt.format(name=node.name,
                                  comment=node.comment))
 
     for message in database.messages:
-
         if message.comment is not None:
             fmt = 'CM_ BO_ {frame_id} "{comment}";'
             cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
                                  comment=message.comment))
 
         for signal in message.signals[::-1]:
-
             if signal.comment is not None:
                 fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
                 cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
@@ -484,16 +481,15 @@ def _dump_attribute_definitions(database):
     definitions = database.dbc.attribute_definitions
 
     def get_minimum(definition):
-        return '' if definition.minimum == None else ' ' + definition.minimum
-    
+        return '' if definition.minimum is None else ' ' + definition.minimum
+
     def get_maximum(definition):
-        return '' if definition.maximum == None else ' ' + definition.maximum
-    
+        return '' if definition.maximum is None else ' ' + definition.maximum
+
     def get_kind(definition):
-        return '' if definition.kind == None else definition.kind + ' '
+        return '' if definition.kind is None else definition.kind + ' '
 
-    for name, definition in definitions.items():      
-
+    for definition in definitions.values():
         if definition.type_name == 'ENUM':
             fmt = 'BA_DEF_ {kind}  "{name}" {type_name}  {choices};'
             choices = ','.join(['"{}"'.format(choice)
@@ -523,9 +519,7 @@ def _dump_attribute_definition_defaults(database):
     definitions = database.dbc.attribute_definitions
 
     for name, definition in definitions.items():
-
         if definition.default_value is not None:
-
             try:
                 int(definition.default_value)
                 fmt = 'BA_DEF_DEF_  "{name}" {value};'
@@ -550,16 +544,13 @@ def _dump_attributes(database):
         return result
 
     if database.dbc.attributes is not None:
-
         for name, attribute in database.dbc.attributes.items():
             fmt = 'BA_ "{name}" {value};'
             ba.append(fmt.format(name=attribute.definition.name,
                                  value=get_value(attribute)))
 
     for node in database.nodes:
-
         if node.dbc.attributes is not None:
-
             for name, attribute in node.dbc.attributes.items():
                 fmt = 'BA_ "{name}" {kind} {node_name} {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
@@ -568,9 +559,7 @@ def _dump_attributes(database):
                                      value=get_value(attribute)))
 
     for message in database.messages:
-
         if message.dbc.attributes is not None:
-
             for name, attribute in message.dbc.attributes.items():
                 fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
@@ -579,9 +568,7 @@ def _dump_attributes(database):
                                      value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
-
             if signal.dbc.attributes is not None:
-
                 for name, attribute in signal.dbc.attributes.items():
                     fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
                     ba.append(fmt.format(name=attribute.definition.name,
@@ -597,9 +584,7 @@ def _dump_choices(database):
     val = []
 
     for message in database.messages:
-
         for signal in message.signals[::-1]:
-
             if signal.choices is None:
                 continue
 
@@ -618,7 +603,6 @@ def _load_comments(tokens):
     comments = {}
 
     for comment in tokens:
-
         if comment[0] != COMMENT:
             continue
 
@@ -650,7 +634,6 @@ def _load_attribute_definitions(tokens):
     definitions = []
 
     for attribute in tokens:
-
         if attribute[0] == ATTRIBUTE_DEFINITION:
             definitions.append(attribute)
 
@@ -661,7 +644,6 @@ def _load_attribute_definition_defaults(tokens):
     defaults = OrderedDict()
 
     for default_attr in tokens:
-
         if default_attr[0] == ATTRIBUTE_DEFINITION_DEFAULT:
             defaults[default_attr[1]] = default_attr[2]
 
@@ -684,25 +666,23 @@ def _load_attributes(tokens, definitions):
 
         except KeyError:
             definition = None
-        
+
         return Attribute(value=value,
                          definition=definition)
 
     for attribute in tokens:
-
         if attribute[0] != ATTRIBUTE:
             continue
 
         name = attribute[1]
 
-        if len(attribute[2]) > 0: 
-
+        if len(attribute[2]) > 0:
             if attribute[2][0] == NODES:
                 node = attribute[2][1]
-                
+
                 if 'node' not in attributes:
                     attributes['node'] = OrderedDict()
-                
+
                 if node not in attributes['node']:
                     attributes['node'][node] = OrderedDict()
 
@@ -721,13 +701,12 @@ def _load_attributes(tokens, definitions):
 
                 if 'signal' not in attributes[frame_id]:
                     attributes[frame_id]['signal'] = OrderedDict()
-                
+
                 if signal not in attributes[frame_id]['signal']:
                     attributes[frame_id]['signal'][signal] = OrderedDict()
-                    
+
                 attributes[frame_id]['signal'][signal][name] = to_object(attribute)
         else:
-
             if 'database' not in attributes:
                 attributes['database'] = OrderedDict()
 
@@ -740,7 +719,6 @@ def _load_choices(tokens):
     choices = {}
 
     for choice in tokens:
-
         if choice[0] != CHOICE:
             continue
 
@@ -766,7 +744,6 @@ def _load_message_senders(tokens):
     message_senders = {}
 
     for senders in tokens:
-
         if senders[0] != MESSAGE_TX_NODE:
             continue
 
@@ -788,7 +765,6 @@ def _load_signal_types(tokens):
     signal_types = {}
 
     for signal_type in tokens:
-
         if signal_type[0] != SIGNAL_TYPE:
             continue
 
@@ -811,7 +787,6 @@ def _load_signal_multiplexer_values(tokens):
     signal_multiplexer_values = {}
 
     for signal_multiplexer_value in tokens:
-
         if signal_multiplexer_value[0] != SIGNAL_MULTIPLEXER_VALUES:
             continue
 
@@ -849,12 +824,10 @@ def _load_messages(tokens,
         """
 
         try:
-
             if signal is None:
                 return attributes[frame_id_dbc]['message']
             else:
                 return attributes[frame_id_dbc]['signal'][signal]
-
         except KeyError:
             return None
 
@@ -864,12 +837,10 @@ def _load_messages(tokens,
         """
 
         try:
-
             if signal is None:
                 return comments[frame_id_dbc]['message']
             else:
                 return comments[frame_id_dbc]['signal'][signal]
-
         except:
             return None
 
@@ -884,13 +855,13 @@ def _load_messages(tokens,
         try:
             result = messageAttributes['GenMsgSendType'].value
         except (KeyError, TypeError):
-
             try:
                 result = definitions['GenMsgSendType'].default_value
             except (KeyError, TypeError):
                 result = None
+
         # Resolve ENUM index to ENUM text
-        if result != None:
+        if result is not None:
             try:
                 result = definitions['GenMsgSendType'].choices[int(result)]
             except ValueError:
@@ -908,7 +879,6 @@ def _load_messages(tokens,
         try:
             return int(messageAttributes['GenMsgCycleTime'].value)
         except (KeyError, TypeError):
-
             try:
                 return int(definitions['GenMsgCycleTime'].default_value)
             except (KeyError, TypeError):
@@ -956,7 +926,6 @@ def _load_messages(tokens,
     messages = []
 
     for message in tokens:
-
         if message[0] != MESSAGE:
             continue
 
@@ -969,7 +938,6 @@ def _load_messages(tokens,
         senders = [message[4]]
 
         for node in message_senders.get(frame_id_dbc, []):
-
             if node not in senders:
                 senders.append(node)
 
@@ -977,9 +945,7 @@ def _load_messages(tokens,
         multiplexer_signal = None
 
         for signal in message[5]:
-
             if len(signal[1]) == 2:
-
                 if signal[1][1] == 'M':
                     multiplexer_signal = signal[1][0]
                     break
@@ -1042,7 +1008,6 @@ def _load_version(tokens):
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
-    
     def get_node_comment(node_name):
         """Get comment for a given node_name
 
@@ -1066,7 +1031,6 @@ def _load_nodes(tokens, comments, attributes, definitions):
     nodes = None
 
     for token in tokens:
-
         if token[0] == NODES:
             nodes = [Node(name=node,
                           comment=get_node_comment(node),
@@ -1113,7 +1077,7 @@ def get_definitions_dict(definitions, defaults):
 
             if len(item) > 4:
                 choicesOrRange = item[4]
-        
+
         else:
             definition = AttributeDefinition(name=item[1],
                                              type_name=item[2])
@@ -1121,8 +1085,7 @@ def get_definitions_dict(definitions, defaults):
             if len(item) > 3:
                 choicesOrRange = item[3]
 
-        if choicesOrRange != None:
-
+        if choicesOrRange is not None:
             if definition.type_name == "ENUM":
                 choices = []
 
@@ -1139,7 +1102,7 @@ def get_definitions_dict(definitions, defaults):
             definition.default_value = None
 
         result[definition.name] = definition
-    
+
     return result
 
 def load_string(string):

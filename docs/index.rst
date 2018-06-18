@@ -52,7 +52,7 @@ The coding style for this package is defined as below. The rules are
 based on my personal preference.
 
 - Blank lines before and after statements (if, while, return, ...)
-  (1), unless at beginning of another statement (8).
+  (1), unless at beginning or end of another statement or file (8).
 
 - Two blank lines between file level definitions (2).
 

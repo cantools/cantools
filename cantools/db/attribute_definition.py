@@ -1,5 +1,6 @@
 class AttributeDefinition(object):
-    """A definition of an attribute that can be associated with attributes in nodes/messages/signals
+    """A definition of an attribute that can be associated with attributes
+    in nodes/messages/signals.
 
     """
 
@@ -29,7 +30,8 @@ class AttributeDefinition(object):
 
     @property
     def default_value(self):
-        """The default value that this attribute has, or ``None`` if unavailable.
+        """The default value that this attribute has, or ``None`` if
+        unavailable.
 
         """
 
@@ -49,7 +51,8 @@ class AttributeDefinition(object):
 
     @property
     def type_name(self):
-        """The attribute type (INT, HEX, FLOAT, STRING, ENUM), or ``None`` if unavailable.
+        """The attribute type (INT, HEX, FLOAT, STRING, ENUM), or ``None`` if
+        unavailable.
 
         """
 
@@ -79,7 +82,7 @@ class AttributeDefinition(object):
     def maximum(self, value):
         self._maximum = value
 
-    @property    
+    @property
     def choices(self):
         """A dictionary mapping attribute values to enumerated choices, or
         ``None`` if unavailable.
@@ -93,7 +96,6 @@ class AttributeDefinition(object):
         self._choices = value
 
     def __repr__(self):
-        
         return "attribute_definition('{}', {})".format(
             self._name,
             self._default_value)

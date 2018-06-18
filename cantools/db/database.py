@@ -124,6 +124,7 @@ class Database(object):
 
         for message in database.messages:
             self.add_message(message)
+            
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
@@ -248,11 +249,13 @@ class Database(object):
         """Find the message object for given name `name`.
 
         """
+        
         try:
             return self._name_to_message[name]
         except KeyError:
             # Maybe the dict is outdated. Try finding the message and update the dict
             message = self._find_message_by_name(name)
+
             if message != None:
                 self._name_to_message[name] = message
                 return message
@@ -263,11 +266,13 @@ class Database(object):
         """Find the message object for given frame id `frame_id`.
 
         """
+
         try:
             return self._frame_id_to_message[frame_id & self._frame_id_mask]
         except KeyError:
             # Maybe the dict is outdated. Try finding the message and update the dict
             message = self._find_message_by_frame_id(frame_id)
+
             if message != None:
                 self._frame_id_to_message[frame_id & self._frame_id_mask] = message
                 return message
@@ -280,7 +285,9 @@ class Database(object):
         backup mechanism to cope with outdated dicts due to name changes.
 
         """
+
         for message in self._messages:
+
             if message.name == name:
                 return message
 
@@ -293,8 +300,11 @@ class Database(object):
         changes.
 
         """
+
         mask = self._frame_id_mask
+
         for message in self._messages:
+
             if message.frame_id & mask == frame_id & mask:
                 return message
 
@@ -306,6 +316,7 @@ class Database(object):
         """
 
         for node in self._nodes:
+
             if node.name == name:
                 return node
 
@@ -317,6 +328,7 @@ class Database(object):
         """
 
         for bus in self._buses:
+
             if bus.name == name:
                 return bus
 

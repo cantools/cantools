@@ -70,6 +70,11 @@ based on my personal preference.
 
 - All function arguments on one line, or one per line.
 
+- Class names are CamelCase. Underscore is not allowed.
+
+- Function and variable names are lower case with underscore
+  separating words.
+
   .. code-block:: python
 
      import sys

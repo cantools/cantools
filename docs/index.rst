@@ -67,7 +67,9 @@ based on my personal preference.
 - Blank line after doc strings (7).
 
 - Maximum line length of 90 characters, but aim for less than 80.
-  
+
+- All function arguments on one line, or one per line.
+
   .. code-block:: python
 
      import sys

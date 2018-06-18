@@ -38,12 +38,14 @@ def _encode_signal(signal, data, scaling):
         value = signal.choice_string_to_number(value)
 
     if scaling:
+
         if signal.is_float:
             return (value - signal.offset) / signal.scale
         else:
             value = (Decimal(value) - Decimal(signal.offset)) / Decimal(signal.scale)
 
             return value.to_integral()
+            
     else:
         return value
 
@@ -53,10 +55,12 @@ def _decode_signal(signal, value, decode_choices, scaling):
         value = (signal.scale * value + signal.offset)
 
     if decode_choices:
+
         try:
             decoded_signal = signal.choices[value]
         except (KeyError, TypeError):
             decoded_signal = value
+
     else:
         decoded_signal = value
 
@@ -122,6 +126,7 @@ class Message(object):
                  senders=None,
                  send_type=None,
                  cycle_time=None,
+                 dbc_specifics=None,
                  is_extended_frame=False,
                  bus_name=None):
         self._frame_id = frame_id
@@ -134,6 +139,7 @@ class Message(object):
         self._senders = senders
         self._send_type = send_type
         self._cycle_time = cycle_time
+        self._dbc = dbc_specifics
         self._bus_name = bus_name
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
@@ -151,6 +157,7 @@ class Message(object):
         # multiplexer id. Root signals' parent and multiplexer id are
         # both None.
         for signal in self._signals:
+
             if signal.multiplexer_signal != parent_signal:
                 continue
 
@@ -162,6 +169,7 @@ class Message(object):
                 children_ids = set()
 
                 for s in self._signals:
+
                     if s.multiplexer_signal != signal.name:
                         continue
 
@@ -221,6 +229,7 @@ class Message(object):
         message_length = (8 * self._length)
 
         def get_format_string_type(signal):
+
             if signal.is_float:
                 return 'f'
             elif signal.is_signed:
@@ -242,9 +251,11 @@ class Message(object):
             return fmt, padding_mask
 
         def fmt(items):
+
             return ''.join([item[0] for item in items])
 
         def padding_mask(items):
+
             try:
                 return int(''.join([item[1] for item in items]), 2)
             except ValueError:
@@ -255,6 +266,7 @@ class Message(object):
             start = 0
 
             for signal in signals:
+
                 if signal.byte_order == 'little_endian':
                     continue
 
@@ -277,6 +289,7 @@ class Message(object):
             end = message_length
 
             for signal in signals[::-1]:
+
                 if signal.byte_order == 'big_endian':
                     continue
 
@@ -317,6 +330,10 @@ class Message(object):
 
         return self._frame_id
 
+    @frame_id.setter
+    def frame_id(self, value):
+        self._frame_id = value
+
     @property
     def is_extended_frame(self):
         """``True`` if the message is an extended frame, ``False`` otherwise.
@@ -324,6 +341,10 @@ class Message(object):
         """
 
         return self._is_extended_frame
+
+    @is_extended_frame.setter
+    def is_extended_frame(self, value):
+        self._is_extended_frame = value
 
     @property
     def name(self):
@@ -333,6 +354,10 @@ class Message(object):
 
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def length(self):
         """The message data length in bytes.
@@ -340,6 +365,10 @@ class Message(object):
         """
 
         return self._length
+
+    @length.setter
+    def length(self, value):
+        self._length = value
 
     @property
     def signals(self):
@@ -356,6 +385,10 @@ class Message(object):
         """
 
         return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        self._comment = value
 
     @property
     def senders(self):
@@ -380,6 +413,14 @@ class Message(object):
         """
 
         return self._cycle_time
+    
+    @property
+    def dbc(self):
+        """An object containing dbc specific properties like e.g. attributes.
+
+        """
+
+        return self._dbc
 
     @property
     def bus_name(self):
@@ -388,6 +429,10 @@ class Message(object):
         """
 
         return self._bus_name
+
+    @bus_name.setter
+    def bus_name(self, value):
+        self._bus_name = value
 
     @property
     def signal_tree(self):
@@ -506,7 +551,9 @@ class Message(object):
         return self._decode(self._codecs, data, decode_choices, scaling)
 
     def get_signal_by_name(self, name):
+
         for signal in self._signals:
+
             if signal.name == name:
                 return signal
 

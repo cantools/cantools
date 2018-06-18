@@ -25,8 +25,7 @@ class Database(object):
                  nodes=None,
                  buses=None,
                  version=None,
-                 attribute_definitions=None,
-                 attribute_definition_defaults=None,
+                 dbc_specifics=None,
                  frame_id_mask=None):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
@@ -34,12 +33,7 @@ class Database(object):
         self._name_to_message = {}
         self._frame_id_to_message = {}
         self._version = version
-        self._attribute_definitions = (attribute_definitions
-                                       if attribute_definitions
-                                       else [])
-        self._attribute_definition_defaults = (attribute_definition_defaults
-                                               if attribute_definition_defaults
-                                               else {})
+        self._dbc = dbc_specifics
 
         if frame_id_mask is None:
             frame_id_mask = 0xffffffff
@@ -82,6 +76,14 @@ class Database(object):
 
         return self._version
 
+    @property
+    def dbc(self):
+        """An object containing dbc specific properties like e.g. attributes.
+
+        """
+
+        return self._dbc
+
     def add_dbc(self, fp):
         """Read and parse DBC data from given file-like object and add the
         parsed data to the database.
@@ -122,11 +124,11 @@ class Database(object):
 
         for message in database.messages:
             self.add_message(message)
+            
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
-        self._attribute_definitions = database.attribute_definitions
-        self._attribute_definition_defaults = database.attribute_definition_defaults
+        self._dbc=database.dbc
 
     def add_kcd(self, fp):
         """Read and parse KCD data from given file-like object and add the
@@ -160,8 +162,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
-        self._attribute_definitions = database.attribute_definitions
-        self._attribute_definition_defaults = database.attribute_definition_defaults
+        self._dbc=database.dbc
 
     def add_sym(self, fp):
         """Read and parse SYM data from given file-like object and add the
@@ -195,8 +196,7 @@ class Database(object):
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
-        self._attribute_definitions = database.attribute_definitions
-        self._attribute_definition_defaults = database.attribute_definition_defaults
+        self._dbc=database.dbc
 
     def add_message(self, message):
         """Add given message to the database.
@@ -232,8 +232,7 @@ class Database(object):
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._attribute_definitions,
-                                                self._attribute_definition_defaults))
+                                                self._dbc))
 
     def as_kcd_string(self):
         """Return the database as a string formatted as a KCD file.
@@ -244,22 +243,72 @@ class Database(object):
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._attribute_definitions,
-                                                self._attribute_definition_defaults))
+                                                self._dbc))
 
     def get_message_by_name(self, name):
         """Find the message object for given name `name`.
 
         """
+        
+        try:
+            return self._name_to_message[name]
+        except KeyError:
+            # Maybe the dict is outdated. Try finding the message and update the dict
+            message = self._find_message_by_name(name)
 
-        return self._name_to_message[name]
+            if message != None:
+                self._name_to_message[name] = message
+                return message
+                
+        raise KeyError(name)
 
     def get_message_by_frame_id(self, frame_id):
         """Find the message object for given frame id `frame_id`.
 
         """
 
-        return self._frame_id_to_message[frame_id & self._frame_id_mask]
+        try:
+            return self._frame_id_to_message[frame_id & self._frame_id_mask]
+        except KeyError:
+            # Maybe the dict is outdated. Try finding the message and update the dict
+            message = self._find_message_by_frame_id(frame_id)
+
+            if message != None:
+                self._frame_id_to_message[frame_id & self._frame_id_mask] = message
+                return message
+
+        raise KeyError(frame_id & self._frame_id_mask)
+
+    def _find_message_by_name(self, name):
+        """Find the message object for given name `name`. This is just private to 
+        encourage usage of the dict based get_message_by_name. It is used as a 
+        backup mechanism to cope with outdated dicts due to name changes.
+
+        """
+
+        for message in self._messages:
+
+            if message.name == name:
+                return message
+
+        return None
+
+    def _find_message_by_frame_id(self, frame_id):
+        """Find the message object for given frame id `frame_id`. This is just
+        private to encourage usage of the dict based get_message_by_name. It 
+        is used as a backup mechanism to cope with outdated dicts due to name
+        changes.
+
+        """
+
+        mask = self._frame_id_mask
+
+        for message in self._messages:
+
+            if message.frame_id & mask == frame_id & mask:
+                return message
+
+        return None
 
     def get_node_by_name(self, name):
         """Find the node object for given name `name`.
@@ -267,6 +316,7 @@ class Database(object):
         """
 
         for node in self._nodes:
+
             if node.name == name:
                 return node
 
@@ -278,6 +328,7 @@ class Database(object):
         """
 
         for bus in self._buses:
+
             if bus.name == name:
                 return bus
 

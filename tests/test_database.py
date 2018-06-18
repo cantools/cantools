@@ -18,7 +18,6 @@ except ImportError:
 
 import cantools
 
-
 class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
@@ -27,12 +26,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
         db = cantools.db.load_file(filename)
         self.assertEqual(len(db.nodes), 1)
-        self.assertEqual(db.nodes[0].name, 'Vector__XXX')
+        self.assertEqual(db.nodes[0].name, 'UnusedNode')
         self.assertEqual(len(db.messages), 217)
         self.assertEqual(db.messages[216].frame_id, 155872546)
         self.assertEqual(db.messages[216].senders, ['Vector__XXX'])
         self.assertEqual(str(db.messages[0]),
-                         "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, False, 8, None)")
+                         "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, True, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
                          "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
@@ -40,7 +39,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[0].receivers, ['Vector__XXX'])
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].send_type, None)
-        self.assertEqual(repr(db.nodes[0]), "node('Vector__XXX', None)")
+        self.assertEqual(repr(db.nodes[0]), "node('UnusedNode', None)")
         i = 0
 
         for message in db.messages:
@@ -50,13 +49,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(i, 15)
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_motohawk(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
         self.assertEqual(len(db.nodes), 2)
@@ -64,18 +63,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.nodes[1].name, 'FOO')
         self.assertEqual(len(db.messages), 1)
         self.assertEqual(len(db.messages[0].signals[2].receivers), 2)
-        self.assertEqual(db.messages[0].signals[2].receivers[0], 'Vector__XXX')
+        self.assertEqual(db.messages[0].signals[2].receivers[0], 'PCM1')
         self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
         self.assertEqual(db.messages[0].signals[1].receivers[0], 'Vector__XXX')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_emc32(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'emc32.dbc')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             db.add_dbc(fin)
 
         self.assertEqual(len(db.nodes), 1)
@@ -561,7 +560,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_get_message_by_frame_id_and_name(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
         message = db.get_message_by_name('ExampleMessage')
@@ -1156,7 +1155,7 @@ IO_DEBUG(
         self.assertEqual(message.cycle_time, 0)
         self.assertEqual(message.send_type, 'none')
 
-        with open(filename, 'r') as fin:
+        with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_multiplex(self):
@@ -1715,11 +1714,9 @@ IO_DEBUG(
         filename = os.path.join('tests', 'files', 'test_multiplex_dump.dbc')
         db = cantools.db.load_file(filename)
         dumped_db = cantools.db.load_string(db.as_dbc_string())
-        attr = dumped_db._attribute_definitions
+        attr = dumped_db.dbc.attribute_definitions
 
-        self.assertEqual(attr[0][0], "BA_DEF_")
-        self.assertEqual(attr[0][1], "BusType")
-        self.assertEqual(attr[0][2], "STRING")
+        self.assertEqual(attr['BusType'].type_name, "STRING")
 
     def test_extended_id_dump(self):
         filename = os.path.join('tests', 'files', 'test_extended_id_dump.dbc')
@@ -1731,7 +1728,120 @@ IO_DEBUG(
         self.assertEqual(reg_id_msg.is_extended_frame, False)
         self.assertEqual(ext_id_msg.is_extended_frame, True)
 
-# This file is not '__main__' when executed via 'python setup.py
+    def test_attributes(self):
+        filename = os.path.join('tests', 'files', 'attributes.dbc')
+
+        with open(filename, 'rU') as fin:
+            db = cantools.db.load(fin)
+
+        self.assertEqual(len(db.messages[0].dbc.attributes), 4)
+        self.assertEqual(db.messages[0].dbc.attributes["TheHexAttribute"].value, 5)
+        self.assertEqual(db.messages[0].dbc.attributes["TheHexAttribute"].name,
+            "TheHexAttribute")
+        self.assertEqual(repr(db.messages[0].dbc.attributes["TheHexAttribute"]), 
+            "attribute('TheHexAttribute', 5)")
+        self.assertEqual(
+            repr(db.messages[0].dbc.attributes["TheHexAttribute"].definition),
+            "attribute_definition('TheHexAttribute', 4)")
+
+        self.assertEqual(
+            db.messages[0].signals[0].dbc.attributes["TheSignalStringAttribute"].name,
+            "TheSignalStringAttribute")
+        self.assertEqual(
+            db.messages[0].signals[0].dbc.attributes["TheSignalStringAttribute"].value,
+            "TestString")
+        self.assertEqual(
+            db.messages[0].signals[0].dbc.attributes["GenSigSendType"].name,
+            "GenSigSendType")
+        self.assertEqual(
+            db.messages[0].signals[0].dbc.attributes["GenSigSendType"].value, 1)
+
+        self.assertEqual(db.dbc.attributes["BusType"].name, "BusType")
+        self.assertEqual(db.dbc.attributes["BusType"].value, "CAN")
+        self.assertEqual(db.dbc.attributes["TheNetworkAttribute"].name,
+            "TheNetworkAttribute")
+        self.assertEqual(db.dbc.attributes["TheNetworkAttribute"].value, 51)
+
+        message = db.get_message_by_frame_id(57)
+        self.assertEqual(message.cycle_time, 1000)
+        self.assertEqual(message.send_type, 'Cyclic')
+
+        node = db.nodes[0]
+        self.assertEqual(node.name, "TheNode")
+        self.assertEqual(node.comment, "TheNodeComment")
+        self.assertEqual(node.dbc.attributes["TheNodeAttribute"].name, 
+            "TheNodeAttribute")
+        self.assertEqual(node.dbc.attributes["TheNodeAttribute"].value, 99)
+
+        db_definition = db.dbc.attribute_definitions["TheNodeAttribute"]
+        node_definition = node.dbc.attributes["TheNodeAttribute"].definition
+        self.assertEqual(db_definition, node_definition)
+
+        with open(filename, 'rU') as fin:
+            self.assertEqual(db.as_dbc_string(), fin.read())
+
+    def test_setters(self):
+        filename = os.path.join('tests', 'files', 'attributes.dbc')
+
+        with open(filename, 'rU') as fin:
+            db = cantools.db.load(fin)
+
+        # Calling the setters for coverage. Assertions are not necessary here 
+        # since functionality is trivial.
+        db.nodes[0].name = "SetterName"
+        db.nodes[0].comment = "SetterComment"
+        db.dbc.attributes["BusType"].value = "LIN"
+        db.messages[0].name = "SetterName"
+        db.messages[0].frame_id = 0x12121212
+        db.messages[0].is_extended_frame = True
+        db.messages[0].length = 6
+        db.messages[0].comment = "TheNewComment"
+        db.messages[0].bus_name = "TheNewBusName"
+        db.messages[0].signals[0].name = "SetterName"
+        db.messages[0].signals[0].start = 8
+        db.messages[0].signals[0].length = 8
+        db.messages[0].signals[0].byte_order = "big_endian"
+        db.messages[0].signals[0].is_signed = True
+        db.messages[0].signals[0].is_float = True
+        db.messages[0].signals[0].scale = 10
+        db.messages[0].signals[0].offset = 1
+        db.messages[0].signals[0].minimum = 0
+        db.messages[0].signals[0].maximum = 100
+        db.messages[0].signals[0].unit = "TheNewUnit"
+        db.messages[0].signals[0].is_multiplexer = True
+        db.messages[0].signals[0].multiplexer_signal = db.messages[0].signals[0]
+        db.messages[0].signals[0].comment = "TheNewComment"
+
+    def test_lookups(self):
+        filename = os.path.join('tests', 'files', 'attributes.dbc')
+
+        with open(filename, 'rU') as fin:
+            db = cantools.db.load(fin)
+        
+        message = db.get_message_by_frame_id(0x39)
+        self.assertEqual(message.name, "TheMessage")
+        message.frame_id = 0x40
+        message = db.get_message_by_frame_id(0x40)
+        self.assertEqual(message.name, "TheMessage")
+        self.assertEqual(message.frame_id,0x40)
+
+        message.name = "TheNewMessage"
+        message = db.get_message_by_name("TheNewMessage")
+        self.assertEqual(message.name, "TheNewMessage")
+        self.assertEqual(message.frame_id, 0x40)
+
+        with self.assertRaises(KeyError) as cm:
+            db.get_message_by_name('TheMissingMessage')
+
+        self.assertEqual(str(cm.exception), "'TheMissingMessage'")
+
+        with self.assertRaises(KeyError) as cm:
+            db.get_message_by_frame_id(0x41)
+
+        self.assertEqual(cm.exception.args[0], 0x41)
+
+
+# This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.DEBUG)
 

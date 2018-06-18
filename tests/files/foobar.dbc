@@ -1,6 +1,5 @@
 VERSION "2.0"
 
-CM_ "File comment?";
 
 NS_ :
 	NS_DESC_
@@ -31,6 +30,8 @@ NS_ :
 	BU_EV_REL_
 	BU_BO_REL_
 	SG_MUL_VAL_
+
+BS_:
 
 BU_: FOO BAR FIE
 

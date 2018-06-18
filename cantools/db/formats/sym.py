@@ -446,5 +446,4 @@ def load_string(string):
                             [],
                             [],
                             version,
-                            [],
                             [])

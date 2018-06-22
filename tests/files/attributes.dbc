@@ -93,7 +93,7 @@ BA_ "TheFloatAttribute" BO_ 2147483705 58.7;
 BA_ "TheHexAttribute" BO_ 2147483705 5;
 BA_ "GenMsgSendType" BO_ 2147483705 0;
 BA_ "GenMsgCycleTime" BO_ 2147483705 1000;
-BA_ "TheSignalStringAttribute" SG_ 2147483706 TheSignal "TestString";
+BA_ "TheSignalStringAttribute" SG_ 2147483705 TheSignal "TestString";
 BA_ "GenSigSendType" SG_ 2147483705 TheSignal 1;
 
 

@@ -98,10 +98,6 @@ class Signal(object):
     def start(self, value):
         self._start = value
 
-    @start.setter
-    def start(self, value):
-        self._start = value
-
     @property
     def length(self):
         """The length of the signal in bits.

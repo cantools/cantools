@@ -39,11 +39,15 @@ BU_: TheNode
 BO_ 2147483705 TheMessage: 8 Vector__XXX
  SG_ TheSignal : 0|8@1- (1,0) [0|0] "" Vector__XXX
 
+BO_ 42 TheOtherMessage: 8 Vector__XXX
+ SG_ TheSignal : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
 
 
 CM_ BU_ TheNode "TheNodeComment";
 BA_DEF_ SG_  "TheSignalStringAttribute" STRING ;
 BA_DEF_  "TheNetworkAttribute" INT 0 100;
+BA_DEF_ BO_  "TheUnusedAttributeDefinitionWithoutDefault" HEX 0 8;
 BA_DEF_ BO_  "TheHexAttribute" HEX 0 8;
 BA_DEF_ BO_  "TheFloatAttribute" FLOAT 5 87;
 BA_DEF_ BU_  "TheNodeAttribute" INT 50 150;

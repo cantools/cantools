@@ -657,16 +657,12 @@ def _load_attributes(tokens, definitions):
     def to_object(attribute):
         value=attribute[3]
 
-        try:
-            definition = definitions[attribute[1]]
+        definition = definitions[attribute[1]]
 
-            if definition.type_name in ['INT', 'HEX', 'ENUM']:
-                value = int(value)
-            elif definition.type_name == 'FLOAT':
-                value = float(value)
-
-        except KeyError:
-            definition = None
+        if definition.type_name in ['INT', 'HEX', 'ENUM']:
+            value = int(value)
+        elif definition.type_name == 'FLOAT':
+            value = float(value)
 
         return Attribute(value=value,
                          definition=definition)

@@ -18,6 +18,7 @@ except ImportError:
 
 import cantools
 
+
 class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None

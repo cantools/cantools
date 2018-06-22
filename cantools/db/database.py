@@ -124,6 +124,7 @@ class Database(object):
 
         for message in database.messages:
             self.add_message(message)
+
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
@@ -250,7 +251,7 @@ class Database(object):
         """Find the message object for given name `name`.
 
         """
-        
+
         try:
             return self._name_to_message[name]
         except KeyError:
@@ -318,7 +319,6 @@ class Database(object):
         """
 
         for node in self._nodes:
-
             if node.name == name:
                 return node
 
@@ -330,7 +330,6 @@ class Database(object):
         """
 
         for bus in self._buses:
-
             if bus.name == name:
                 return bus
 

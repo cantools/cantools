@@ -379,6 +379,7 @@ class DbcSpecifics(object):
         """
 
         return self._attributes
+
     @property
     def attribute_definitions(self):
         """The dbc specific attribute definitions as dictionary.
@@ -410,7 +411,6 @@ def _dump_messages(database):
     bo = []
 
     def get_mux(signal):
-
         if signal.is_multiplexer:
             result = ' M'
         elif signal.multiplexer_ids is not None:
@@ -456,21 +456,18 @@ def _dump_comments(database):
     cm = []
 
     for node in database.nodes:
-
         if node.comment is not None:
             fmt = 'CM_ BU_ {name} "{comment}";'
             cm.append(fmt.format(name=node.name,
                                  comment=node.comment))
 
     for message in database.messages:
-
         if message.comment is not None:
             fmt = 'CM_ BO_ {frame_id} "{comment}";'
             cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
                                  comment=message.comment))
 
         for signal in message.signals[::-1]:
-
             if signal.comment is not None:
                 fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
                 cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
@@ -588,9 +585,7 @@ def _dump_choices(database):
     val = []
 
     for message in database.messages:
-
         for signal in message.signals[::-1]:
-
             if signal.choices is None:
                 continue
 
@@ -609,7 +604,6 @@ def _load_comments(tokens):
     comments = {}
 
     for comment in tokens:
-
         if comment[0] != COMMENT:
             continue
 
@@ -641,7 +635,6 @@ def _load_attribute_definitions(tokens):
     definitions = []
 
     for attribute in tokens:
-
         if attribute[0] == ATTRIBUTE_DEFINITION:
             definitions.append(attribute)
 
@@ -652,7 +645,6 @@ def _load_attribute_definition_defaults(tokens):
     defaults = OrderedDict()
 
     for default_attr in tokens:
-
         if default_attr[0] == ATTRIBUTE_DEFINITION_DEFAULT:
             defaults[default_attr[1]] = default_attr[2]
 
@@ -675,11 +667,11 @@ def _load_attributes(tokens, definitions):
 
         except KeyError:
             definition = None
+
         return Attribute(value=value,
                          definition=definition)
 
     for attribute in tokens:
-
         if attribute[0] != ATTRIBUTE:
             continue
 
@@ -728,7 +720,6 @@ def _load_choices(tokens):
     choices = {}
 
     for choice in tokens:
-
         if choice[0] != CHOICE:
             continue
 
@@ -754,7 +745,6 @@ def _load_message_senders(tokens):
     message_senders = {}
 
     for senders in tokens:
-
         if senders[0] != MESSAGE_TX_NODE:
             continue
 
@@ -776,7 +766,6 @@ def _load_signal_types(tokens):
     signal_types = {}
 
     for signal_type in tokens:
-
         if signal_type[0] != SIGNAL_TYPE:
             continue
 
@@ -799,7 +788,6 @@ def _load_signal_multiplexer_values(tokens):
     signal_multiplexer_values = {}
 
     for signal_multiplexer_value in tokens:
-
         if signal_multiplexer_value[0] != SIGNAL_MULTIPLEXER_VALUES:
             continue
 
@@ -940,7 +928,6 @@ def _load_messages(tokens,
     messages = []
 
     for message in tokens:
-
         if message[0] != MESSAGE:
             continue
 
@@ -953,7 +940,6 @@ def _load_messages(tokens,
         senders = [message[4]]
 
         for node in message_senders.get(frame_id_dbc, []):
-
             if node not in senders:
                 senders.append(node)
 
@@ -961,9 +947,7 @@ def _load_messages(tokens,
         multiplexer_signal = None
 
         for signal in message[5]:
-
             if len(signal[1]) == 2:
-
                 if signal[1][1] == 'M':
                     multiplexer_signal = signal[1][0]
                     break
@@ -1049,7 +1033,6 @@ def _load_nodes(tokens, comments, attributes, definitions):
     nodes = None
 
     for token in tokens:
-
         if token[0] == NODES:
             nodes = [Node(name=node,
                           comment=get_node_comment(node),
@@ -1087,7 +1070,7 @@ def get_definitions_dict(definitions, defaults):
     result = OrderedDict()
 
     for item in definitions:
-        choicesOrRange = None
+        choices_or_range = None
 
         if item[1] in [SIGNAL, MESSAGE, NODES]:
             definition = AttributeDefinition(name=item[2],
@@ -1095,31 +1078,32 @@ def get_definitions_dict(definitions, defaults):
                                              type_name=item[3])
 
             if len(item) > 4:
-                choicesOrRange = item[4]
+                choices_or_range = item[4]
         else:
             definition = AttributeDefinition(name=item[1],
                                              type_name=item[2])
 
             if len(item) > 3:
-                choicesOrRange = item[3]
+                choices_or_range = item[3]
 
-        if choicesOrRange is not None:
+        if choices_or_range is not None:
             if definition.type_name == "ENUM":
                 choices = []
 
-                for choice in choicesOrRange:
+                for choice in choices_or_range:
                     choices.append(choice[0])
 
                 definition.choices = choices
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = choicesOrRange[0]
-                definition.maximum = choicesOrRange[1]
+                definition.minimum = choices_or_range[0]
+                definition.maximum = choices_or_range[1]
         try:
             definition.default_value = defaults[definition.name]
         except KeyError:
             definition.default_value = None
 
         result[definition.name] = definition
+        
     return result
 
 def load_string(string):

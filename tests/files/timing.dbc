@@ -37,19 +37,19 @@ BU_: Sender Receiver
 
 
 BO_ 1 Foo: 8 Sender
- SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK" Receiver
+ SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK"  Receiver
 
 BO_ 2 Bar: 8 Sender
- SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK" Receiver
+ SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK"  Receiver
 
 
 
 
-BA_DEF_ BO_  "GenMsgSendType" ENUM  "cyclic","triggered","none";
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","IfActive","NoMsgSendType","NotUsed","vector_leerstring";
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 50000;
-BA_DEF_DEF_  "GenMsgSendType" 2;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
 BA_DEF_DEF_  "GenMsgCycleTime" 0;
-BA_ "GenMsgSendType" BO_ 1 0;
 BA_ "GenMsgCycleTime" BO_ 1 200;
+BA_ "GenMsgSendType" BO_ 1 0;
 
 

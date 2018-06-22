@@ -38,13 +38,13 @@ def _encode_signal(signal, data, scaling):
         value = signal.choice_string_to_number(value)
 
     if scaling:
+
         if signal.is_float:
             return (value - signal.offset) / signal.scale
         else:
             value = (Decimal(value) - Decimal(signal.offset)) / Decimal(signal.scale)
 
             return value.to_integral()
-
     else:
         return value
 
@@ -54,10 +54,12 @@ def _decode_signal(signal, value, decode_choices, scaling):
         value = (signal.scale * value + signal.offset)
 
     if decode_choices:
+
         try:
             decoded_signal = signal.choices[value]
         except (KeyError, TypeError):
             decoded_signal = value
+
     else:
         decoded_signal = value
 
@@ -154,6 +156,7 @@ class Message(object):
         # multiplexer id. Root signals' parent and multiplexer id are
         # both None.
         for signal in self._signals:
+
             if signal.multiplexer_signal != parent_signal:
                 continue
 
@@ -165,6 +168,7 @@ class Message(object):
                 children_ids = set()
 
                 for s in self._signals:
+
                     if s.multiplexer_signal != signal.name:
                         continue
 
@@ -224,6 +228,7 @@ class Message(object):
         message_length = (8 * self._length)
 
         def get_format_string_type(signal):
+
             if signal.is_float:
                 return 'f'
             elif signal.is_signed:
@@ -249,6 +254,7 @@ class Message(object):
             return ''.join([item[0] for item in items])
 
         def padding_mask(items):
+
             try:
                 return int(''.join([item[1] for item in items]), 2)
             except ValueError:
@@ -406,7 +412,7 @@ class Message(object):
         """
 
         return self._cycle_time
-
+    
     @property
     def dbc(self):
         """An object containing dbc specific properties like e.g. attributes.
@@ -544,7 +550,9 @@ class Message(object):
         return self._decode(self._codecs, data, decode_choices, scaling)
 
     def get_signal_by_name(self, name):
+
         for signal in self._signals:
+
             if signal.name == name:
                 return signal
 

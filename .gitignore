@@ -56,4 +56,8 @@ docs/_build/
 # PyBuilder
 target/
 
+# CANdb++
+/tests/files/*.ini
+
+# Example outputs
 examples/dbc_io/dbc_output.dbc

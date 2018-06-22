@@ -87,34 +87,40 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db.add_dbc_file(filename)
 
-        self.assertEqual(len(db.nodes), 3)
-        self.assertEqual(db.version, '2.0')
+        self.assertEqual(len(db.nodes), 4)
+        self.assertEqual(db.version, '')
         self.assertEqual(repr(db),
-                         "version('2.0')\n"
+                         "version('')\n"
                          "\n"
                          "node('FOO', None)\n"
                          "node('BAR', 'fam \"1\"')\n"
                          "node('FIE', None)\n"
+                         "node('FUM', None)\n"
                          "\n"
-                         "message('Foo', 0x12331, True, 8, 'Foo.')\n"
-                         "  signal('Bar', 6, 6, 'big_endian', False, 0.1, "
-                         "0, 1.0, 5.0, 'm', False, None, None, '')\n"
+                         "message('Foo', 0x12330, True, 8, 'Foo.')\n"
+                         "  signal('Bar', 6, 32, 'big_endian', True, 0.1, "
+                         "0, 1, 5, 'm', False, None, None, 'Bar.')\n"
                          "  signal('Foo', 0, 12, 'big_endian', True, 0.01, "
-                         "250, 229.53, 270.47, 'degK', False, None, {-1: \'Foo\', "
-                         "-2: \'Fie\'}, None)\n"
+                         "250, 229.53, 270.47, 'degK', False, None, None, None)\n"
                          "\n"
-                         "message('Fum', 0x12331, True, 5, 'Foo.')\n"
+                         "message('Fum', 0x12331, True, 5, None)\n"
                          "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
                          "'None', False, None, None, None)\n"
-                         "  signal('Fam', 12, 12, 'little_endian', True, 1.0, 0.0, "
-                         "0, 1, 'None', False, None, None, None)\n"
+                         "  signal('Fam', 12, 12, 'little_endian', True, 1, 0, "
+                         "0, 1, 'None', False, None, {1: \'Enabled\', 0: \'Disabled\'}, None)\n"
                          "\n"
                          "message('Bar', 0x12332, True, 4, None)\n"
                          "  signal('Binary32', 0, 32, 'little_endian', True, 1, 0, 0, "
                          "0, 'None', False, None, None, None)\n"
                          "\n"
                          "message('CanFd', 0x12333, True, 64, None)\n"
-                         "  signal('Foo', 0, 512, 'little_endian', True, 1, 0, 0, 0, "
+                         "  signal('Fie', 0, 64, 'little_endian', False, 1, 0, 0, 0, "
+                         "'None', False, None, None, None)\n"
+                         "  signal('Fas', 64, 64, 'little_endian', False, 1, 0, 0, 0, "
+                         "'None', False, None, None, None)\n"
+                         "\n"
+                         "message('FOOBAR', 0x30c, False, 8, None)\n"
+                         "  signal('ACC_02_CRC', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
                          "'None', False, None, None, None)\n")
 
         message = db.get_message_by_frame_id(0x12331)
@@ -125,16 +131,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message = db.get_message_by_frame_id(0x12332)
         self.assertEqual(message.name, 'Bar')
         self.assertEqual(message.senders, ['FOO', 'BAR'])
-        self.assertEqual(message.signals[0].receivers, ['Vector__XXX', 'FUM'])
+        self.assertEqual(message.signals[0].receivers, [ 'FUM'])
         self.assertEqual(message.signals[0].is_float, True)
         self.assertEqual(message.signals[0].length, 32)
 
         message = db.get_message_by_frame_id(0x12333)
         self.assertEqual(message.name, 'CanFd')
         self.assertEqual(message.senders, ['FOO'])
-        self.assertEqual(message.signals[0].receivers, ['Vector__XXX', 'FUM'])
+        self.assertEqual(message.signals[0].receivers, ['FUM'])
         self.assertEqual(message.signals[0].is_float, False)
-        self.assertEqual(message.signals[0].length, 512)
+        self.assertEqual(message.signals[0].length, 64)
 
     def test_foobar_encode_decode(self):
         db = cantools.db.Database()
@@ -154,12 +160,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
             ),
             (
                 'CanFd',
-                {'Foo': 98723498729384782349872340000000},
-                b'\x00\xdd\x85\x4c\xf5\x42\x25\x72\x00\x27\xd4\x10\xde\x04\x00'
-                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00'
+                {'Fie': 0x123456789abcdef, 'Fas': 0xdeadbeefdeadbeef},
+                b'\xef\xcd\xab\x89\x67\x45\x23\x01'
+                b'\xef\xbe\xad\xde\xef\xbe\xad\xde'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
             )
         ]
 
@@ -1148,12 +1157,12 @@ IO_DEBUG(
         # Message cycle time is 200, as given by BA_.
         message = db.get_message_by_frame_id(1)
         self.assertEqual(message.cycle_time, 200)
-        self.assertEqual(message.send_type, 'cyclic')
+        self.assertEqual(message.send_type, 'Cyclic')
 
         # Default message cycle time is 0, as given by BA_DEF_DEF_.
         message = db.get_message_by_frame_id(2)
         self.assertEqual(message.cycle_time, 0)
-        self.assertEqual(message.send_type, 'none')
+        self.assertEqual(message.send_type, 'NoMsgSendType')
 
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
@@ -1759,7 +1768,7 @@ IO_DEBUG(
                          'TheNetworkAttribute')
         self.assertEqual(db.dbc.attributes['TheNetworkAttribute'].value, 51)
 
-        message = db.get_message_by_frame_id(57)
+        message = db.get_message_by_frame_id(0x39)
         self.assertEqual(message.cycle_time, 1000)
         self.assertEqual(message.send_type, 'Cyclic')
 

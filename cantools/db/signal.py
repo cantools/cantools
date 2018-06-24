@@ -93,7 +93,7 @@ class Signal(object):
         """
 
         return self._start
-    
+
     @start.setter
     def start(self, value):
         self._start = value

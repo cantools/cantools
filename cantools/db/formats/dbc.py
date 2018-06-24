@@ -834,7 +834,6 @@ def _load_messages(tokens,
         """
 
         try:
-
             if signal is None:
                 return comments[frame_id_dbc]['message']
             else:
@@ -854,7 +853,6 @@ def _load_messages(tokens,
             result = messageAttributes['GenMsgSendType'].value
             # Resolve ENUM index to ENUM text
             result = definitions['GenMsgSendType'].choices[int(result)]
-
         except (KeyError, TypeError):
             try:
                 result = definitions['GenMsgSendType'].default_value
@@ -1095,7 +1093,7 @@ def get_definitions_dict(definitions, defaults):
             definition.default_value = None
 
         result[definition.name] = definition
-        
+
     return result
 
 def load_string(string):

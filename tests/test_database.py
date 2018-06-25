@@ -1847,6 +1847,24 @@ IO_DEBUG(
 
         self.assertEqual(cm.exception.args[0], 0x41)
 
+    def test_missing_dbc_specifics(self):
+        class NodeMock(object):
+            def __init__(self, name, comment):
+                self.name = name
+                self.comment = comment
+                self.dbc = None
+        
+        nodes = []
+        node = NodeMock("FakeNode", "Comment")
+        nodes.append(node)
+        db = cantools.db.Database(nodes=nodes)
+        signals = []
+        signals.append(cantools.db.Signal("C", 0, 8))
+        db.messages.append(cantools.db.Message(0x20, "D", 8, signals))       
+
+        # Test if dump executes without raising
+        db.as_dbc_string()
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

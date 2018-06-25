@@ -120,7 +120,7 @@ class Message(object):
                  length,
                  signals,
                  comment=None,
-                 senders=None,
+                 senders=[],
                  send_type=None,
                  cycle_time=None,
                  dbc_specifics=None,

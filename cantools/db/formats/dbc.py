@@ -481,7 +481,7 @@ def _dump_attribute_definitions(database):
     ba_def = []
 
     if database.dbc is None:
-        return
+        return ba_def
 
     definitions = database.dbc.attribute_definitions
 
@@ -523,7 +523,7 @@ def _dump_attribute_definition_defaults(database):
     ba_def_def = []
     
     if database.dbc is None:
-        return
+        return ba_def_def
 
     definitions = database.dbc.attribute_definitions
 

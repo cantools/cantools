@@ -91,7 +91,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.nodes), 4)
         self.assertEqual(db.version, '2.0')
         self.assertEqual(repr(db),
-                         "version('')\n"
+                         "version('2.0')\n"
                          "\n"
                          "node('FOO', None)\n"
                          "node('BAR', 'fam \"1\"')\n"

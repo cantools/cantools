@@ -544,39 +544,43 @@ def _dump_attributes(database):
 
         return result
 
-    if database.dbc.attributes is not None:
-        for name, attribute in database.dbc.attributes.items():
-            fmt = 'BA_ "{name}" {value};'
-            ba.append(fmt.format(name=attribute.definition.name,
-                                 value=get_value(attribute)))
+    if database.dbc is not None:
+        if database.dbc.attributes is not None:
+            for name, attribute in database.dbc.attributes.items():
+                fmt = 'BA_ "{name}" {value};'
+                ba.append(fmt.format(name=attribute.definition.name,
+                                    value=get_value(attribute)))
 
     for node in database.nodes:
-        if node.dbc.attributes is not None:
-            for name, attribute in node.dbc.attributes.items():
-                fmt = 'BA_ "{name}" {kind} {node_name} {value};'
-                ba.append(fmt.format(name=attribute.definition.name,
-                                     kind=attribute.definition.kind,
-                                     node_name=node.name,
-                                     value=get_value(attribute)))
+        if node.dbc is not None:
+            if node.dbc.attributes is not None:
+                for name, attribute in node.dbc.attributes.items():
+                    fmt = 'BA_ "{name}" {kind} {node_name} {value};'
+                    ba.append(fmt.format(name=attribute.definition.name,
+                                        kind=attribute.definition.kind,
+                                        node_name=node.name,
+                                        value=get_value(attribute)))
 
     for message in database.messages:
-        if message.dbc.attributes is not None:
-            for name, attribute in message.dbc.attributes.items():
-                fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
-                ba.append(fmt.format(name=attribute.definition.name,
-                                     kind=attribute.definition.kind,
-                                     frame_id=get_dbc_frame_id(message),
-                                     value=get_value(attribute)))
+        if message.dbc is not None:
+            if message.dbc.attributes is not None:
+                for name, attribute in message.dbc.attributes.items():
+                    fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
+                    ba.append(fmt.format(name=attribute.definition.name,
+                                        kind=attribute.definition.kind,
+                                        frame_id=get_dbc_frame_id(message),
+                                        value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
-            if signal.dbc.attributes is not None:
-                for name, attribute in signal.dbc.attributes.items():
-                    fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
-                    ba.append(fmt.format(name=attribute.definition.name,
-                                         kind=attribute.definition.kind,
-                                         frame_id=get_dbc_frame_id(message),
-                                         signal_name=signal.name,
-                                         value=get_value(attribute)))
+            if signal.dbc is not None:
+                if signal.dbc.attributes is not None:
+                    for name, attribute in signal.dbc.attributes.items():
+                        fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
+                        ba.append(fmt.format(name=attribute.definition.name,
+                                            kind=attribute.definition.kind,
+                                            frame_id=get_dbc_frame_id(message),
+                                            signal_name=signal.name,
+                                            value=get_value(attribute)))
 
     return ba
 
@@ -695,6 +699,10 @@ def _load_attributes(tokens, definitions):
             elif attribute[2][0] == SIGNAL:
                 frame_id_dbc = attribute[2][1]
                 signal = attribute[2][2]
+
+                if frame_id_dbc not in attributes:
+                    attributes[frame_id_dbc] = {}
+                    attributes[frame_id_dbc]['message'] = OrderedDict()
 
                 if 'signal' not in attributes[frame_id_dbc]:
                     attributes[frame_id_dbc]['signal'] = OrderedDict()

@@ -479,6 +479,10 @@ def _dump_comments(database):
 
 def _dump_attribute_definitions(database):
     ba_def = []
+
+    if database.dbc is None:
+        return
+
     definitions = database.dbc.attribute_definitions
 
     def get_minimum(definition):
@@ -517,6 +521,10 @@ def _dump_attribute_definitions(database):
 
 def _dump_attribute_definition_defaults(database):
     ba_def_def = []
+    
+    if database.dbc is None:
+        return
+
     definitions = database.dbc.attribute_definitions
 
     for name, definition in definitions.items():

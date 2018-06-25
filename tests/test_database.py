@@ -89,7 +89,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_dbc_file(filename)
 
         self.assertEqual(len(db.nodes), 4)
-        self.assertEqual(db.version, '')
+        self.assertEqual(db.version, '2.0')
         self.assertEqual(repr(db),
                          "version('')\n"
                          "\n"

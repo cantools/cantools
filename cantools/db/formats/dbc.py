@@ -1,6 +1,6 @@
 # Load and dump a CAN database in DBC format.
 
-from collections import OrderedDict
+from collections import OrderedDict as odict
 import pyparsing
 from pyparsing import Word
 from pyparsing import Literal
@@ -521,7 +521,7 @@ def _dump_attribute_definitions(database):
 
 def _dump_attribute_definition_defaults(database):
     ba_def_def = []
-    
+
     if database.dbc is None:
         return ba_def_def
 
@@ -654,7 +654,7 @@ def _load_attribute_definitions(tokens):
 
 
 def _load_attribute_definition_defaults(tokens):
-    defaults = OrderedDict()
+    defaults = odict()
 
     for default_attr in tokens:
         if default_attr[0] == ATTRIBUTE_DEFINITION_DEFAULT:
@@ -664,7 +664,7 @@ def _load_attribute_definition_defaults(tokens):
 
 
 def _load_attributes(tokens, definitions):
-    attributes = OrderedDict()
+    attributes = odict()
 
     def to_object(attribute):
         value=attribute[3]
@@ -690,10 +690,10 @@ def _load_attributes(tokens, definitions):
                 node = attribute[2][1]
 
                 if 'node' not in attributes:
-                    attributes['node'] = OrderedDict()
+                    attributes['node'] = odict()
 
                 if node not in attributes['node']:
-                    attributes['node'][node] = OrderedDict()
+                    attributes['node'][node] = odict()
 
                 attributes['node'][node][name] = to_object(attribute)
             elif attribute[2][0] == MESSAGE:
@@ -701,7 +701,7 @@ def _load_attributes(tokens, definitions):
 
                 if frame_id_dbc not in attributes:
                     attributes[frame_id_dbc] = {}
-                    attributes[frame_id_dbc]['message'] = OrderedDict()
+                    attributes[frame_id_dbc]['message'] = odict()
 
                 attributes[frame_id_dbc]['message'][name] = to_object(attribute)
             elif attribute[2][0] == SIGNAL:
@@ -710,18 +710,18 @@ def _load_attributes(tokens, definitions):
 
                 if frame_id_dbc not in attributes:
                     attributes[frame_id_dbc] = {}
-                    attributes[frame_id_dbc]['message'] = OrderedDict()
+                    attributes[frame_id_dbc]['message'] = odict()
 
                 if 'signal' not in attributes[frame_id_dbc]:
-                    attributes[frame_id_dbc]['signal'] = OrderedDict()
+                    attributes[frame_id_dbc]['signal'] = odict()
 
                 if signal not in attributes[frame_id_dbc]['signal']:
-                    attributes[frame_id_dbc]['signal'][signal] = OrderedDict()
+                    attributes[frame_id_dbc]['signal'][signal] = odict()
 
                 attributes[frame_id_dbc]['signal'][signal][name] = to_object(attribute)
         else:
             if 'database' not in attributes:
-                attributes['database'] = OrderedDict()
+                attributes['database'] = odict()
 
             attributes['database'][name] = to_object(attribute)
 
@@ -743,7 +743,7 @@ def _load_choices(tokens):
         if frame_id not in choices:
             choices[frame_id] = {}
 
-        choices[frame_id][choice[2]] = OrderedDict(
+        choices[frame_id][choice[2]] = odict(
             (int(''.join(v[0])), v[1]) for v in choice[3])
 
     return choices
@@ -1073,7 +1073,7 @@ def dump_string(database):
 
 
 def get_definitions_dict(definitions, defaults):
-    result = OrderedDict()
+    result = odict()
 
     for item in definitions:
         choices_or_range = None

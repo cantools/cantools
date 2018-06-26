@@ -1,7 +1,7 @@
 # Load and dump a CAN database in SYM format.
 
 import logging
-from collections import OrderedDict
+from collections import OrderedDict as odict
 from pyparsing import Word
 from pyparsing import Literal
 from pyparsing import Keyword
@@ -158,8 +158,7 @@ def _load_enums(tokens):
     enums = {}
 
     for name, values in section:
-        enums[name] = OrderedDict(
-            (num(v[0]), v[1]) for v in values)
+        enums[name] = odict((num(v[0]), v[1]) for v in values)
 
     return enums
 

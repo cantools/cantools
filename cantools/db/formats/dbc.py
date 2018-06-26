@@ -432,12 +432,13 @@ def _dump_messages(database):
             fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
                    ' [{minimum}|{maximum}] "{unit}" {receivers}')
+            space_correction = '' if "Vector__XXX" in signal.receivers else ' '
             msg.append(fmt.format(
                 name=signal.name,
                 mux=get_mux(signal),
                 start=signal.start,
                 length=signal.length,
-                receivers=','.join(signal.receivers),
+                receivers=space_correction + ','.join(signal.receivers),
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
                 sign=('-' if signal.is_signed else '+'),
                 scale=signal.scale,
@@ -478,6 +479,10 @@ def _dump_comments(database):
 
 def _dump_attribute_definitions(database):
     ba_def = []
+
+    if database.dbc is None:
+        return ba_def
+
     definitions = database.dbc.attribute_definitions
 
     def get_minimum(definition):
@@ -516,6 +521,10 @@ def _dump_attribute_definitions(database):
 
 def _dump_attribute_definition_defaults(database):
     ba_def_def = []
+    
+    if database.dbc is None:
+        return ba_def_def
+
     definitions = database.dbc.attribute_definitions
 
     for name, definition in definitions.items():
@@ -543,39 +552,43 @@ def _dump_attributes(database):
 
         return result
 
-    if database.dbc.attributes is not None:
-        for name, attribute in database.dbc.attributes.items():
-            fmt = 'BA_ "{name}" {value};'
-            ba.append(fmt.format(name=attribute.definition.name,
-                                 value=get_value(attribute)))
+    if database.dbc is not None:
+        if database.dbc.attributes is not None:
+            for name, attribute in database.dbc.attributes.items():
+                fmt = 'BA_ "{name}" {value};'
+                ba.append(fmt.format(name=attribute.definition.name,
+                                    value=get_value(attribute)))
 
     for node in database.nodes:
-        if node.dbc.attributes is not None:
-            for name, attribute in node.dbc.attributes.items():
-                fmt = 'BA_ "{name}" {kind} {node_name} {value};'
-                ba.append(fmt.format(name=attribute.definition.name,
-                                     kind=attribute.definition.kind,
-                                     node_name=node.name,
-                                     value=get_value(attribute)))
+        if node.dbc is not None:
+            if node.dbc.attributes is not None:
+                for name, attribute in node.dbc.attributes.items():
+                    fmt = 'BA_ "{name}" {kind} {node_name} {value};'
+                    ba.append(fmt.format(name=attribute.definition.name,
+                                        kind=attribute.definition.kind,
+                                        node_name=node.name,
+                                        value=get_value(attribute)))
 
     for message in database.messages:
-        if message.dbc.attributes is not None:
-            for name, attribute in message.dbc.attributes.items():
-                fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
-                ba.append(fmt.format(name=attribute.definition.name,
-                                     kind=attribute.definition.kind,
-                                     frame_id=get_dbc_frame_id(message),
-                                     value=get_value(attribute)))
+        if message.dbc is not None:
+            if message.dbc.attributes is not None:
+                for name, attribute in message.dbc.attributes.items():
+                    fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
+                    ba.append(fmt.format(name=attribute.definition.name,
+                                        kind=attribute.definition.kind,
+                                        frame_id=get_dbc_frame_id(message),
+                                        value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
-            if signal.dbc.attributes is not None:
-                for name, attribute in signal.dbc.attributes.items():
-                    fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
-                    ba.append(fmt.format(name=attribute.definition.name,
-                                         kind=attribute.definition.kind,
-                                         frame_id=get_dbc_frame_id(message),
-                                         signal_name=signal.name,
-                                         value=get_value(attribute)))
+            if signal.dbc is not None:
+                if signal.dbc.attributes is not None:
+                    for name, attribute in signal.dbc.attributes.items():
+                        fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
+                        ba.append(fmt.format(name=attribute.definition.name,
+                                            kind=attribute.definition.kind,
+                                            frame_id=get_dbc_frame_id(message),
+                                            signal_name=signal.name,
+                                            value=get_value(attribute)))
 
     return ba
 
@@ -656,16 +669,12 @@ def _load_attributes(tokens, definitions):
     def to_object(attribute):
         value=attribute[3]
 
-        try:
-            definition = definitions[attribute[1]]
+        definition = definitions[attribute[1]]
 
-            if definition.type_name in ['INT', 'HEX', 'ENUM']:
-                value = int(value)
-            elif definition.type_name == 'FLOAT':
-                value = float(value)
-
-        except KeyError:
-            definition = None
+        if definition.type_name in ['INT', 'HEX', 'ENUM']:
+            value = int(value)
+        elif definition.type_name == 'FLOAT':
+            value = float(value)
 
         return Attribute(value=value,
                          definition=definition)
@@ -688,24 +697,28 @@ def _load_attributes(tokens, definitions):
 
                 attributes['node'][node][name] = to_object(attribute)
             elif attribute[2][0] == MESSAGE:
-                frame_id = attribute[2][1]
+                frame_id_dbc = attribute[2][1]
 
-                if frame_id not in attributes:
-                    attributes[frame_id] = {}
-                    attributes[frame_id]['message'] = OrderedDict()
+                if frame_id_dbc not in attributes:
+                    attributes[frame_id_dbc] = {}
+                    attributes[frame_id_dbc]['message'] = OrderedDict()
 
-                attributes[frame_id]['message'][name] = to_object(attribute)
+                attributes[frame_id_dbc]['message'][name] = to_object(attribute)
             elif attribute[2][0] == SIGNAL:
-                frame_id = attribute[2][1]
+                frame_id_dbc = attribute[2][1]
                 signal = attribute[2][2]
 
-                if 'signal' not in attributes[frame_id]:
-                    attributes[frame_id]['signal'] = OrderedDict()
+                if frame_id_dbc not in attributes:
+                    attributes[frame_id_dbc] = {}
+                    attributes[frame_id_dbc]['message'] = OrderedDict()
 
-                if signal not in attributes[frame_id]['signal']:
-                    attributes[frame_id]['signal'][signal] = OrderedDict()
+                if 'signal' not in attributes[frame_id_dbc]:
+                    attributes[frame_id_dbc]['signal'] = OrderedDict()
 
-                attributes[frame_id]['signal'][signal][name] = to_object(attribute)
+                if signal not in attributes[frame_id_dbc]['signal']:
+                    attributes[frame_id_dbc]['signal'][signal] = OrderedDict()
+
+                attributes[frame_id_dbc]['signal'][signal][name] = to_object(attribute)
         else:
             if 'database' not in attributes:
                 attributes['database'] = OrderedDict()
@@ -854,17 +867,12 @@ def _load_messages(tokens,
 
         try:
             result = messageAttributes['GenMsgSendType'].value
+            # Resolve ENUM index to ENUM text
+            result = definitions['GenMsgSendType'].choices[int(result)]
         except (KeyError, TypeError):
             try:
                 result = definitions['GenMsgSendType'].default_value
             except (KeyError, TypeError):
-                result = None
-
-        # Resolve ENUM index to ENUM text
-        if result is not None:
-            try:
-                result = definitions['GenMsgSendType'].choices[int(result)]
-            except ValueError:
                 result = None
 
         return result
@@ -1068,7 +1076,7 @@ def get_definitions_dict(definitions, defaults):
     result = OrderedDict()
 
     for item in definitions:
-        choicesOrRange = None
+        choices_or_range = None
 
         if item[1] in [SIGNAL, MESSAGE, NODES]:
             definition = AttributeDefinition(name=item[2],
@@ -1076,26 +1084,25 @@ def get_definitions_dict(definitions, defaults):
                                              type_name=item[3])
 
             if len(item) > 4:
-                choicesOrRange = item[4]
-
+                choices_or_range = item[4]
         else:
             definition = AttributeDefinition(name=item[1],
                                              type_name=item[2])
 
             if len(item) > 3:
-                choicesOrRange = item[3]
+                choices_or_range = item[3]
 
-        if choicesOrRange is not None:
+        if choices_or_range is not None:
             if definition.type_name == "ENUM":
                 choices = []
 
-                for choice in choicesOrRange:
+                for choice in choices_or_range:
                     choices.append(choice[0])
 
                 definition.choices = choices
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = choicesOrRange[0]
-                definition.maximum = choicesOrRange[1]
+                definition.minimum = choices_or_range[0]
+                definition.maximum = choices_or_range[1]
         try:
             definition.default_value = defaults[definition.name]
         except KeyError:

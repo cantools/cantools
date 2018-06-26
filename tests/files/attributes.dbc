@@ -36,7 +36,10 @@ BS_:
 BU_: TheNode
 
 
-BO_ 57 TheMessage: 8 Vector__XXX
+BO_ 2147483705 TheMessage: 8 Vector__XXX
+ SG_ TheSignal : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 42 TheOtherMessage: 8 Vector__XXX
  SG_ TheSignal : 0|8@1- (1,0) [0|0] "" Vector__XXX
 
 
@@ -44,6 +47,7 @@ BO_ 57 TheMessage: 8 Vector__XXX
 CM_ BU_ TheNode "TheNodeComment";
 BA_DEF_ SG_  "TheSignalStringAttribute" STRING ;
 BA_DEF_  "TheNetworkAttribute" INT 0 100;
+BA_DEF_ BO_  "TheUnusedAttributeDefinitionWithoutDefault" HEX 0 8;
 BA_DEF_ BO_  "TheHexAttribute" HEX 0 8;
 BA_DEF_ BO_  "TheFloatAttribute" FLOAT 5 87;
 BA_DEF_ BU_  "TheNodeAttribute" INT 50 150;
@@ -89,11 +93,12 @@ BA_DEF_DEF_  "GenSigStartValue" 0;
 BA_ "TheNetworkAttribute" 51;
 BA_ "BusType" "CAN";
 BA_ "TheNodeAttribute" BU_ TheNode 99;
-BA_ "TheFloatAttribute" BO_ 57 58.7;
-BA_ "TheHexAttribute" BO_ 57 5;
-BA_ "GenMsgSendType" BO_ 57 0;
-BA_ "GenMsgCycleTime" BO_ 57 1000;
-BA_ "TheSignalStringAttribute" SG_ 57 TheSignal "TestString";
-BA_ "GenSigSendType" SG_ 57 TheSignal 1;
+BA_ "TheFloatAttribute" BO_ 2147483705 58.7;
+BA_ "TheHexAttribute" BO_ 2147483705 5;
+BA_ "GenMsgSendType" BO_ 2147483705 0;
+BA_ "GenMsgCycleTime" BO_ 2147483705 1000;
+BA_ "TheSignalStringAttribute" SG_ 2147483705 TheSignal "TestString";
+BA_ "GenSigSendType" SG_ 2147483705 TheSignal 1;
+BA_ "GenSigSendType" SG_ 42 TheSignal 1;
 
 

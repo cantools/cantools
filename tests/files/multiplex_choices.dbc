@@ -71,6 +71,8 @@ BO_ 2148676696 Message3: 8 Vector__XXX
  SG_ BIT_J m8 : 18|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ Multiplexor M : 2|6@1+ (1,0) [0|0] "" Vector__XXX
 
+
+
 CM_ SG_ 2148676694 Multiplexor "Defines data content for response messages.";
 BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
@@ -91,17 +93,16 @@ BA_DEF_DEF_  "BusType" "CAN";
 BA_ "BusType" "CAN";
 BA_ "DBName" "Network_A";
 BA_ "VFrameFormat" BO_ 2148676694 3;
- 
-VAL_ 2148676694 Multiplexor 8 "MULTIPLEXOR_8" 16 "MULTIPLEXOR_16" 24 "MULTIPLEXOR_24" ;
+BA_ "VFrameFormat" BO_ 2148676695 3;
+BA_ "VFrameFormat" BO_ 2148676696 3;
 VAL_ 2148676694 BIT_L 0 "Off" 1 "On" ;
-
+VAL_ 2148676694 Multiplexor 8 "MULTIPLEXOR_8" 16 "MULTIPLEXOR_16" 24 "MULTIPLEXOR_24" ;
 VAL_ 2148676695 Multiplexor 4 "MULTIPLEXOR_4_NO_SIGNALS" 8 "MULTIPLEXOR_8" 16 "MULTIPLEXOR_16" 24 "MULTIPLEXOR_24" ;
 
 SG_MUL_VAL_ 2148676694 BIT_L Multiplexor 8-8, 16-16, 24-24;
 SG_MUL_VAL_ 2148676694 BIT_G Multiplexor 8-8, 16-16, 24-24;
 SG_MUL_VAL_ 2148676694 BIT_C Multiplexor 8-8, 16-16, 24-24;
 SG_MUL_VAL_ 2148676694 BIT_J Multiplexor 8-8, 16-16, 24-24;
-
 SG_MUL_VAL_ 2148676695 BIT_L Multiplexor 8-8, 16-16, 24-24;
 SG_MUL_VAL_ 2148676695 BIT_G Multiplexor 8-8, 16-16, 24-24;
 SG_MUL_VAL_ 2148676695 BIT_C Multiplexor 8-8, 16-16, 24-24;

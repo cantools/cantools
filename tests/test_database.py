@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import math
 import os
 import unittest
@@ -16,7 +17,10 @@ try:
 except ImportError:
     from io import StringIO
 
+import sys
+sys.path.append('/mnt/d/JQU/dbc/cantools')
 import cantools
+
 
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -1755,12 +1759,11 @@ IO_DEBUG(
                          "attribute_definition('TheHexAttribute', 4)")
 
         attributes_0_0 = db.messages[0].signals[0].dbc.attributes
-        self.assertEqual(attributes_0_0['TheSignalStringAttribute'].name,
-                         'TheSignalStringAttribute')
-        self.assertEqual(attributes_0_0['TheSignalStringAttribute'].value,
-                         'TestString')
-        self.assertEqual(attributes_0_0['GenSigSendType'].name,
-                         'GenSigSendType')
+        signal_string_attribute = attributes_0_0['TheSignalStringAttribute']
+        self.assertEqual(signal_string_attribute.name, 'TheSignalStringAttribute')
+        self.assertEqual(signal_string_attribute.value, 'TestString')
+        self.assertEqual(signal_string_attribute.definition.default_value, '100')
+        self.assertEqual(attributes_0_0['GenSigSendType'].name, 'GenSigSendType')
         self.assertEqual(attributes_0_0['GenSigSendType'].value, 1)
 
         self.assertEqual(db.dbc.attributes['BusType'].name, 'BusType')

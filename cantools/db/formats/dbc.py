@@ -529,11 +529,10 @@ def _dump_attribute_definition_defaults(database):
 
     for name, definition in definitions.items():
         if definition.default_value is not None:
-            try:
-                int(definition.default_value)
-                fmt = 'BA_DEF_DEF_  "{name}" {value};'
-            except ValueError:
+            if definition.type_name in ["STRING", "ENUM"]:
                 fmt = 'BA_DEF_DEF_  "{name}" "{value}";'
+            else:
+                fmt = 'BA_DEF_DEF_  "{name}" {value};'
 
             ba_def_def.append(fmt.format(name=definition.name,
                                          value=definition.default_value))

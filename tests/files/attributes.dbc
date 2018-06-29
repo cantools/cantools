@@ -68,7 +68,7 @@ BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotU
 BA_DEF_ SG_  "GenSigInactiveValue" INT 0 100000;
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed";
 BA_DEF_ SG_  "GenSigStartValue" FLOAT 0 100000000000;
-BA_DEF_DEF_  "TheSignalStringAttribute" "";
+BA_DEF_DEF_  "TheSignalStringAttribute" "100";
 BA_DEF_DEF_  "TheNetworkAttribute" 50;
 BA_DEF_DEF_  "TheHexAttribute" 4;
 BA_DEF_DEF_  "TheFloatAttribute" 55;

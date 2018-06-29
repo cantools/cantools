@@ -1797,6 +1797,8 @@ IO_DEBUG(
         self.assertEqual(repr(attribute), "attribute('TheHexAttribute', 5)")
         self.assertEqual(attribute.definition,
                          db.dbc.attribute_definitions['TheHexAttribute'])
+        self.assertEqual(repr(attribute.definition),
+                         "attribute_definition('TheHexAttribute', 4)")
         self.assertEqual(attribute.definition.default_value, 4)
         self.assertEqual(attribute.definition.kind, 'BO_')
         self.assertEqual(attribute.definition.type_name, 'HEX')

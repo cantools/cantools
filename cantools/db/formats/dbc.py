@@ -491,9 +491,6 @@ def _dump_attribute_definitions(database):
         if definition.minimum is None:
             value = ''
         else:
-            if definition.type_name == "STRING":
-                value = '"' + value + '"'
-
             value = ' {}'.format(value)
 
         return value

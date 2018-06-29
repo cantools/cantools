@@ -1,6 +1,7 @@
 import math
 import os
 import unittest
+from decimal import Decimal
 
 try:
     from unittest.mock import patch
@@ -1744,44 +1745,123 @@ IO_DEBUG(
         with open(filename, 'rU') as fin:
             db = cantools.db.load(fin)
 
-        attributes_0 = db.messages[0].dbc.attributes
-        self.assertEqual(len(attributes_0), 4)
-        self.assertEqual(attributes_0['TheHexAttribute'].value, 5)
-        self.assertEqual(attributes_0['TheHexAttribute'].name,
-                         'TheHexAttribute')
-        self.assertEqual(repr(attributes_0['TheHexAttribute']),
-                         "attribute('TheHexAttribute', 5)")
-        self.assertEqual(repr(attributes_0["TheHexAttribute"].definition),
-                         "attribute_definition('TheHexAttribute', 4)")
+        # Signal attributes.
+        attributes = db.messages[0].signals[0].dbc.attributes
 
-        attributes_0_0 = db.messages[0].signals[0].dbc.attributes
-        signal_string_attribute = attributes_0_0['TheSignalStringAttribute']
-        self.assertEqual(signal_string_attribute.name, 'TheSignalStringAttribute')
-        self.assertEqual(signal_string_attribute.value, 'TestString')
-        self.assertEqual(signal_string_attribute.definition.default_value, '100')
-        self.assertEqual(attributes_0_0['GenSigSendType'].name, 'GenSigSendType')
-        self.assertEqual(attributes_0_0['GenSigSendType'].value, 1)
+        attribute = attributes['TheSignalStringAttribute']
+        self.assertEqual(attribute.name, 'TheSignalStringAttribute')
+        self.assertEqual(attribute.value, 'TestString')
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['TheSignalStringAttribute'])
+        self.assertEqual(attribute.definition.default_value, '100')
+        self.assertEqual(attribute.definition.kind, 'SG_')
+        self.assertEqual(attribute.definition.type_name, 'STRING')
+        self.assertEqual(attribute.definition.minimum, None)
+        self.assertEqual(attribute.definition.maximum, None)
+        self.assertEqual(attribute.definition.choices, None)
 
-        self.assertEqual(db.dbc.attributes['BusType'].name, 'BusType')
-        self.assertEqual(db.dbc.attributes['BusType'].value, 'CAN')
-        self.assertEqual(db.dbc.attributes['TheNetworkAttribute'].name,
-                         'TheNetworkAttribute')
-        self.assertEqual(db.dbc.attributes['TheNetworkAttribute'].value, 51)
+        attribute = attributes['GenSigSendType']
+        self.assertEqual(attribute.name, 'GenSigSendType')
+        self.assertEqual(attribute.value, 1)
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['GenSigSendType'])
+        self.assertEqual(attribute.definition.default_value, 'Cyclic')
+        self.assertEqual(attribute.definition.kind, 'SG_')
+        self.assertEqual(attribute.definition.type_name, 'ENUM')
+        self.assertEqual(attribute.definition.minimum, None)
+        self.assertEqual(attribute.definition.maximum, None)
+        self.assertEqual(attribute.definition.choices,
+                         [
+                             'Cyclic',
+                             'OnWrite',
+                             'OnWriteWithRepetition',
+                             'OnChange',
+                             'OnChangeWithRepetition',
+                             'IfActive',
+                             'IfActiveWithRepetition',
+                             'NoSigSendType',
+                             'NotUsed',
+                             'NotUsed',
+                             'NotUsed',
+                             'NotUsed',
+                             'NotUsed'
+                         ])
+                     
+        # Message attribute.
+        attributes = db.messages[0].dbc.attributes
+        self.assertEqual(len(attributes), 4)
 
-        message = db.get_message_by_frame_id(0x39)
-        self.assertEqual(message.cycle_time, 1000)
-        self.assertEqual(message.send_type, 'Cyclic')
+        attribute = attributes['TheHexAttribute']
+        self.assertEqual(attribute.name, 'TheHexAttribute')
+        self.assertEqual(attribute.value, 5)
+        self.assertEqual(repr(attribute), "attribute('TheHexAttribute', 5)")
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['TheHexAttribute'])
+        self.assertEqual(attribute.definition.default_value, 4)
+        self.assertEqual(attribute.definition.kind, 'BO_')
+        self.assertEqual(attribute.definition.type_name, 'HEX')
+        self.assertEqual(attribute.definition.minimum, 0)
+        self.assertEqual(attribute.definition.maximum, 8)
+        self.assertEqual(attribute.definition.choices, None)
 
+        attribute = attributes['TheFloatAttribute']
+        self.assertEqual(attribute.name, 'TheFloatAttribute')
+        self.assertEqual(attribute.value, Decimal('58.7'))
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['TheFloatAttribute'])
+        self.assertEqual(attribute.definition.default_value, 55.0)
+        self.assertEqual(attribute.definition.kind, 'BO_')
+        self.assertEqual(attribute.definition.type_name, 'FLOAT')
+        self.assertEqual(attribute.definition.minimum, 5.0)
+        self.assertEqual(attribute.definition.maximum, 87.0)
+        self.assertEqual(attribute.definition.choices, None)
+
+        # Node attributes.
         node = db.nodes[0]
         self.assertEqual(node.name, 'TheNode')
         self.assertEqual(node.comment, 'TheNodeComment')
-        self.assertEqual(node.dbc.attributes['TheNodeAttribute'].name,
-                         'TheNodeAttribute')
-        self.assertEqual(node.dbc.attributes['TheNodeAttribute'].value, 99)
 
-        db_definition = db.dbc.attribute_definitions['TheNodeAttribute']
-        node_definition = node.dbc.attributes['TheNodeAttribute'].definition
-        self.assertEqual(db_definition, node_definition)
+        attribute = node.dbc.attributes['TheNodeAttribute']
+        self.assertEqual(attribute.name, 'TheNodeAttribute')
+        self.assertEqual(attribute.value, 99)
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['TheNodeAttribute'])
+        self.assertEqual(attribute.definition.default_value, 100)
+        self.assertEqual(attribute.definition.kind, 'BU_')
+        self.assertEqual(attribute.definition.type_name, 'INT')
+        self.assertEqual(attribute.definition.minimum, 50)
+        self.assertEqual(attribute.definition.maximum, 150)
+        self.assertEqual(attribute.definition.choices, None)
+
+        # Database attributes.
+        attribute = db.dbc.attributes['BusType']
+        self.assertEqual(attribute.name, 'BusType')
+        self.assertEqual(attribute.value, 'CAN')
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['BusType'])
+        self.assertEqual(attribute.definition.default_value, '')
+        self.assertEqual(attribute.definition.kind, None)
+        self.assertEqual(attribute.definition.type_name, 'STRING')
+        self.assertEqual(attribute.definition.minimum, None)
+        self.assertEqual(attribute.definition.maximum, None)
+        self.assertEqual(attribute.definition.choices, None)
+
+        attribute = db.dbc.attributes['TheNetworkAttribute']
+        self.assertEqual(attribute.name, 'TheNetworkAttribute')
+        self.assertEqual(attribute.value, 51)
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['TheNetworkAttribute'])
+        self.assertEqual(attribute.definition.default_value, 50)
+        self.assertEqual(attribute.definition.kind, None)
+        self.assertEqual(attribute.definition.type_name, 'INT')
+        self.assertEqual(attribute.definition.minimum, 0)
+        self.assertEqual(attribute.definition.maximum, 100)
+        self.assertEqual(attribute.definition.choices, None)
+
+        # Message send type.
+        message = db.get_message_by_frame_id(0x39)
+        self.assertEqual(message.cycle_time, 1000)
+        self.assertEqual(message.send_type, 'Cyclic')
 
         with open(filename, 'rU') as fin:
             self.assertEqual(db.as_dbc_string(), fin.read())
@@ -1854,7 +1934,7 @@ IO_DEBUG(
 
         signals = [cantools.db.Signal('C', 0, 8)]
         message = cantools.db.Message(0x20, 'D', 8, signals)
-        db.messages.append(message)       
+        db.messages.append(message)
 
         # Test that dump executes without raising.
         db.as_dbc_string()

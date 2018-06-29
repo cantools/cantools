@@ -1,6 +1,8 @@
 # Load and dump a CAN database in DBC format.
 
 from collections import OrderedDict as odict
+from decimal import Decimal
+
 import pyparsing
 from pyparsing import Word
 from pyparsing import Literal
@@ -485,11 +487,22 @@ def _dump_attribute_definitions(database):
 
     definitions = database.dbc.attribute_definitions
 
+    def get_value(definition, value):
+        if definition.minimum is None:
+            value = ''
+        else:
+            if definition.type_name == "STRING":
+                value = '"' + value + '"'
+
+            value = ' {}'.format(value)
+
+        return value
+
     def get_minimum(definition):
-        return '' if definition.minimum is None else ' ' + definition.minimum
+        return get_value(definition, definition.minimum)
 
     def get_maximum(definition):
-        return '' if definition.maximum is None else ' ' + definition.maximum
+        return get_value(definition, definition.maximum)
 
     def get_kind(definition):
         return '' if definition.kind is None else definition.kind + ' '
@@ -527,7 +540,7 @@ def _dump_attribute_definition_defaults(database):
 
     definitions = database.dbc.attribute_definitions
 
-    for name, definition in definitions.items():
+    for definition in definitions.values():
         if definition.default_value is not None:
             if definition.type_name in ["STRING", "ENUM"]:
                 fmt = 'BA_DEF_DEF_  "{name}" "{value}";'
@@ -553,7 +566,7 @@ def _dump_attributes(database):
 
     if database.dbc is not None:
         if database.dbc.attributes is not None:
-            for name, attribute in database.dbc.attributes.items():
+            for attribute in database.dbc.attributes.values():
                 fmt = 'BA_ "{name}" {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
                                     value=get_value(attribute)))
@@ -561,7 +574,7 @@ def _dump_attributes(database):
     for node in database.nodes:
         if node.dbc is not None:
             if node.dbc.attributes is not None:
-                for name, attribute in node.dbc.attributes.items():
+                for attribute in node.dbc.attributes.values():
                     fmt = 'BA_ "{name}" {kind} {node_name} {value};'
                     ba.append(fmt.format(name=attribute.definition.name,
                                         kind=attribute.definition.kind,
@@ -571,7 +584,7 @@ def _dump_attributes(database):
     for message in database.messages:
         if message.dbc is not None:
             if message.dbc.attributes is not None:
-                for name, attribute in message.dbc.attributes.items():
+                for attribute in message.dbc.attributes.values():
                     fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
                     ba.append(fmt.format(name=attribute.definition.name,
                                         kind=attribute.definition.kind,
@@ -581,7 +594,7 @@ def _dump_attributes(database):
         for signal in message.signals[::-1]:
             if signal.dbc is not None:
                 if signal.dbc.attributes is not None:
-                    for name, attribute in signal.dbc.attributes.items():
+                    for attribute in signal.dbc.attributes.values():
                         fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
                         ba.append(fmt.format(name=attribute.definition.name,
                                             kind=attribute.definition.kind,
@@ -673,7 +686,7 @@ def _load_attributes(tokens, definitions):
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
             value = int(value)
         elif definition.type_name == 'FLOAT':
-            value = float(value)
+            value = Decimal(value)
 
         return Attribute(value=value,
                          definition=definition)
@@ -813,7 +826,8 @@ def _load_signal_multiplexer_values(tokens):
         if multiplexer_signal not in signal_multiplexer_values[frame_id]:
             signal_multiplexer_values[frame_id][multiplexer_signal] = {}
 
-        signal_multiplexer_values[frame_id][multiplexer_signal][signal_name] = multiplexer_ids
+        multiplexer_signal = signal_multiplexer_values[frame_id][multiplexer_signal]
+        multiplexer_signal[signal_name] = multiplexer_ids
 
     return signal_multiplexer_values
 
@@ -1074,6 +1088,14 @@ def dump_string(database):
 def get_definitions_dict(definitions, defaults):
     result = odict()
 
+    def convert_value(definition, value):
+        if definition.type_name in ['INT', 'HEX']:
+            value = int(value)
+        elif definition.type_name == 'FLOAT':
+            value = Decimal(value)
+
+        return value
+
     for item in definitions:
         choices_or_range = None
 
@@ -1100,10 +1122,15 @@ def get_definitions_dict(definitions, defaults):
 
                 definition.choices = choices
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = choices_or_range[0]
-                definition.maximum = choices_or_range[1]
+                definition.minimum = convert_value(definition,
+                                                   choices_or_range[0])
+                definition.maximum = convert_value(definition,
+                                                   choices_or_range[1])
+
         try:
-            definition.default_value = defaults[definition.name]
+            value = defaults[definition.name]
+            definition.default_value = convert_value(definition,
+                                                     value)
         except KeyError:
             definition.default_value = None
 

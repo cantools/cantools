@@ -20,7 +20,8 @@ class DataType(object):
                  encoding,
                  minimum,
                  maximum,
-                 choices):
+                 choices,
+                 byte_order):
         self.name = name
         self.id_ = id_
         self.bit_length = bit_length
@@ -28,6 +29,7 @@ class DataType(object):
         self.minimum = minimum
         self.maximum = maximum
         self.choices = choices
+        self.byte_order = byte_order
 
 
 def dump_string(database):
@@ -76,6 +78,11 @@ def _load_data_types(ecu_doc):
         minimum = int(ctype.attrib['minsz'])
         maximum = int(ctype.attrib['maxsz'])
 
+        if ctype.attrib['bo'] == '21':
+            byte_order = 'little_endian'
+        else:
+            byte_order = 'big_endian'
+
         # Choices.
         choices = _load_choices(data_type)
 
@@ -85,7 +92,8 @@ def _load_data_types(ecu_doc):
                                        encoding,
                                        minimum,
                                        maximum,
-                                       choices)
+                                       choices,
+                                       byte_order)
 
     return data_types
 

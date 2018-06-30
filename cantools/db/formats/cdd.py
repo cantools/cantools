@@ -65,10 +65,28 @@ def _load_data_types(ecu_doc):
         type_name = data_type.find('NAME/TUV[1]').text
         type_id = data_type.attrib['id']
         ctype = data_type.find('CVALUETYPE')
-        bit_length = int(ctype.attrib['bl'])
-        encoding = ctype.attrib['enc']
-        minimum = int(ctype.attrib['minsz'])
-        maximum = int(ctype.attrib['maxsz'])
+
+        # Default values.
+        bit_length = None
+        encoding = None
+        minimum = None
+        maximum = None
+
+        # Data type XML attributes.
+        for key, value in ctype.attrib.items():
+            if key == 'bl':
+                bit_length = int(value)
+            elif key == 'enc':
+                encoding = value
+            elif key == 'minsz':
+                minimum = int(value)
+            elif key == 'maxsz':
+                maximum = int(value)
+            else:
+                LOGGER.debug(
+                    "Ignoring unsupported data type attribute '%s'.",
+                    key)
+
         data_types[type_id] = DataType(type_name,
                                        type_id,
                                        bit_length,
@@ -87,7 +105,6 @@ def _load_signal_element(signal, offset, data_types):
     try:
         data_type = data_types[signal.attrib['dtref']]
     except KeyError:
-        print('skipping', signal.find('QUAL').text)
         return None
 
     return Signal(name=signal.find('QUAL').text,
@@ -113,7 +130,6 @@ def _load_message_element(message, data_types):
 
     offset = 0
     signals = []
-
     datas = message.findall('SIMPLECOMPCONT/DATAOBJ')
     datas += message.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
 
@@ -127,11 +143,13 @@ def _load_message_element(message, data_types):
             offset += signal.length
 
     frame_id = int(message.attrib['id'][1:], 16)
+    name = message.find('QUAL').text
+    length = (offset + 7) // 8
 
     return Message(frame_id=frame_id,
                    is_extended_frame=False,
-                   name=message.find('QUAL').text,
-                   length=(offset + 7) // 8,
+                   name=name,
+                   length=length,
                    senders=[],
                    send_type=None,
                    cycle_time=None,

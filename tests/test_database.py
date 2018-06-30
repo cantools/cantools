@@ -1966,6 +1966,32 @@ IO_DEBUG(
                              'InputOutput'
                          ])
 
+        # ECU_Identification data structure.
+        message = db.get_message_by_name('ECU_Identification')
+        self.assertEqual(len(message.signals), 5)
+        self.assertEqual([signal.name for signal in message.signals],
+                         [
+                             'Ident_Number_7_6',
+                             'Ident_Number_5_4',
+                             'Ident_Number_3_2',
+                             'Ident_Number_1_0',
+                             'Diagnostic_Identification'
+                         ])
+
+        decoded_message = {
+            'Ident_Number_7_6': 0x1234,
+            'Ident_Number_5_4': 0x5678,
+            'Ident_Number_3_2': 0x9012,
+            'Ident_Number_1_0': 0x3456,
+            'Diagnostic_Identification': 0xabcd
+        }
+        encoded_message = b'\x34\x12\x78\x56\x12\x90\x56\x34\xcd\xab'
+
+        encoded = message.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
+
         # SawTooth data structure.
         message = db.get_message_by_name('SawTooth')
 

@@ -95,10 +95,7 @@ def _load_signal_element(signal, offset, data_types):
 
     """
 
-    try:
-        data_type = data_types[signal.attrib['dtref']]
-    except KeyError:
-        return None
+    data_type = data_types[signal.attrib['dtref']]
 
     return Signal(name=signal.find('QUAL').text,
                   start=offset,

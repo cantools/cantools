@@ -2020,6 +2020,31 @@ IO_DEBUG(
         decoded = message.decode(encoded)
         self.assertEqual(decoded, decoded_message)
 
+        # Sine data structure.
+        message = db.get_message_by_name('Sine')
+        self.assertEqual(len(message.signals), 3)
+        self.assertEqual([signal.name for signal in message.signals],
+                         [
+                             'ampl',
+                             'period',
+                             'value'
+                         ])
+        self.assertEqual(message.frame_id, 243)
+        self.assertEqual(message.signals[1].name, 'period')
+        self.assertEqual(message.signals[1].unit, 'sec')
+
+        decoded_message = {
+            'ampl': 1,
+            'period': 2,
+            'value': 3
+        }
+        encoded_message = b'\x01\x02\x03'
+
+        encoded = message.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
+
         # Coding data structure.
         message = db.get_message_by_name('Coding')
         self.assertEqual(len(message.signals), 3)

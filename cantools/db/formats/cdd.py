@@ -21,7 +21,8 @@ class DataType(object):
                  minimum,
                  maximum,
                  choices,
-                 byte_order):
+                 byte_order,
+                 unit):
         self.name = name
         self.id_ = id_
         self.bit_length = bit_length
@@ -30,6 +31,7 @@ class DataType(object):
         self.maximum = maximum
         self.choices = choices
         self.byte_order = byte_order
+        self.unit = unit
 
 
 def dump_string(database):
@@ -68,11 +70,17 @@ def _load_data_types(ecu_doc):
     types += ecu_doc.findall('DATATYPES/TEXTTBL')
 
     for data_type in types:
+        # Default values.
+        byte_order = 'big_endian'
+        unit = None
+
+        # Name and id.
         type_name = data_type.find('NAME/TUV[1]').text
         type_id = data_type.attrib['id']
 
-        # Various attributes.
+        # Load from C-type element.
         ctype = data_type.find('CVALUETYPE')
+
         bit_length = int(ctype.attrib['bl'])
         encoding = ctype.attrib['enc']
         minimum = int(ctype.attrib['minsz'])
@@ -80,8 +88,10 @@ def _load_data_types(ecu_doc):
 
         if ctype.attrib['bo'] == '21':
             byte_order = 'little_endian'
-        else:
-            byte_order = 'big_endian'
+
+        # Load from P-type element.
+        if data_type.find('PVALUETYPE/UNIT') is not None:
+            unit = data_type.find('PVALUETYPE/UNIT').text
 
         # Choices.
         choices = _load_choices(data_type)
@@ -93,7 +103,8 @@ def _load_data_types(ecu_doc):
                                        minimum,
                                        maximum,
                                        choices,
-                                       byte_order)
+                                       byte_order,
+                                       unit)
 
     return data_types
 
@@ -115,7 +126,7 @@ def _load_signal_element(signal, offset, data_types):
                   offset=0,
                   minimum=data_type.minimum,
                   maximum=data_type.maximum,
-                  unit=None,
+                  unit=data_type.unit,
                   choices=data_type.choices,
                   comment=None,
                   is_float=False)

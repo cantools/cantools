@@ -131,7 +131,7 @@ def load_string(string, database_format=None, frame_id_mask=None):
             db = Database(frame_id_mask=frame_id_mask)
             db.add_kcd_string(string)
             return db
-        except ElementTree.ParseError as e:
+        except (ElementTree.ParseError, ValueError) as e:
             e_kcd = e
 
     if database_format in ['sym', None]:

@@ -950,6 +950,17 @@ IO_DEBUG(
         self.assertEqual(db.version, None)
         self.assertEqual(db.nodes, [])
 
+    def test_invalid_kcd(self):
+        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_string('<WrongRootElement/>',
+                                    database_format='kcd')
+
+        self.assertEqual(
+            str(cm.exception),
+            'KCD: "Expected root element tag '
+            '{http://kayak.2codeornot2code.org/1.0}NetworkDefinition, but '
+            'got WrongRootElement."')
+
     def test_jopp_5_0_sym(self):
         filename = os.path.join('tests', 'files', 'jopp-5.0.sym')
         db = cantools.db.Database()

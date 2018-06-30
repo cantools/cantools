@@ -18,6 +18,8 @@ LOGGER = logging.getLogger(__name__)
 NAMESPACE = 'http://kayak.2codeornot2code.org/1.0'
 NAMESPACES = {'ns': NAMESPACE}
 
+ROOT_TAG = '{{{}}}NetworkDefinition'.format(NAMESPACE)
+
 
 def _start_bit(offset, byte_order):
     if byte_order == 'big_endian':
@@ -207,6 +209,13 @@ def load_string(string):
     """
 
     root = ElementTree.fromstring(string)
+
+    # Should be replaced with a validation using the XSD file.
+    if root.tag != ROOT_TAG:
+        raise ValueError(
+            'Expected root element tag {}, but got {}.'.format(ROOT_TAG,
+                                                               root.tag))
+
     nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
     buses = []
     messages = []

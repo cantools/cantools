@@ -1977,6 +1977,7 @@ IO_DEBUG(
                              'Ident_Number_1_0',
                              'Diagnostic_Identification'
                          ])
+        self.assertEqual(message.frame_id, 144)
 
         decoded_message = {
             'Ident_Number_7_6': 0x1234,
@@ -1994,6 +1995,7 @@ IO_DEBUG(
 
         # SawTooth data structure.
         message = db.get_message_by_name('SawTooth')
+        self.assertEqual(message.frame_id, 244)
 
         decoded_message = {
             'ampl': 1,
@@ -2016,6 +2018,7 @@ IO_DEBUG(
                              'Vehicle_type',
                              'Special_setting'
                          ])
+        self.assertEqual(message.frame_id, 160)
 
         decoded_message = {
             'Country_variant': 1,

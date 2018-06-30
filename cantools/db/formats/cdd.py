@@ -142,7 +142,7 @@ def _load_message_element(message, data_types):
             signals.append(signal)
             offset += signal.length
 
-    frame_id = int(message.attrib['id'][1:], 16)
+    frame_id = int(message.find('STATICVALUE').attrib['v'])
     name = message.find('QUAL').text
     length = (offset + 7) // 8
 

@@ -3,6 +3,7 @@ import logging
 from .formats import dbc
 from .formats import kcd
 from .formats import sym
+from .formats import cdd
 from .internal_database import InternalDatabase
 from ..compat import fopen
 
@@ -191,6 +192,41 @@ class Database(object):
         """
 
         database = sym.load_string(string)
+
+        for message in database.messages:
+            self.add_message(message)
+
+        self._nodes = database.nodes
+        self._buses = database.buses
+        self._version = database.version
+        self._dbc=database.dbc
+
+    def add_cdd(self, fp):
+        """Read and parse CDD data from given file-like object and add the
+        parsed data to the database.
+
+        """
+
+        self.add_cdd_string(fp.read())
+
+    def add_cdd_file(self, filename, encoding='utf-8'):
+        """Open, read and parse CDD data from given file and add the parsed
+        data to the database.
+
+        `encoding` specifies the file encoding.
+
+        """
+
+        with fopen(filename, 'r', encoding=encoding) as fin:
+            self.add_cdd(fin)
+
+    def add_cdd_string(self, string):
+        """Parse given CDD data string and add the parsed data to the
+        database.
+
+        """
+
+        database = cdd.load_string(string)
 
         for message in database.messages:
             self.add_message(message)

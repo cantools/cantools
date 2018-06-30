@@ -1786,7 +1786,7 @@ IO_DEBUG(
                              'NotUsed',
                              'NotUsed'
                          ])
-                     
+
         # Message attribute.
         attributes = db.messages[0].dbc.attributes
         self.assertEqual(len(attributes), 4)
@@ -1940,6 +1940,68 @@ IO_DEBUG(
 
         # Test that dump executes without raising.
         db.as_dbc_string()
+
+    def test_cdd(self):
+        filename = os.path.join('tests', 'files', 'example.cdd')
+        db = cantools.db.Database()
+        db.add_cdd_file(filename, encoding='iso-8859-1')
+
+        self.assertEqual(len(db.messages), 15)
+        self.assertEqual([message.name for message in db.messages],
+                         [
+                             'DEFAULT_SESSION',
+                             'ProgrammingSession',
+                             'ECU_Identification',
+                             'Development_Data',
+                             'Serial_Number',
+                             'REQUEST_SEED_SERVICE',
+                             'SUBMIT_KEY_SERVICE',
+                             'A_D_Werte',
+                             'SawTooth',
+                             'Sine',
+                             'FaultMemory_identified',
+                             'FaultMemory_supported',
+                             'TestData',
+                             'Coding',
+                             'InputOutput'
+                         ])
+
+        # SawTooth data structure.
+        message = db.get_message_by_name('SawTooth')
+
+        decoded_message = {
+            'ampl': 1,
+            'period': 2,
+            'value': 3
+        }
+        encoded_message = b'\x01\x02\x03'
+
+        encoded = message.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
+
+        # Coding data structure.
+        message = db.get_message_by_name('Coding')
+        self.assertEqual(len(message.signals), 3)
+        self.assertEqual([signal.name for signal in message.signals],
+                         [
+                             'Country_variant',
+                             'Vehicle_type',
+                             'Special_setting'
+                         ])
+
+        decoded_message = {
+            'Country_variant': 1,
+            'Vehicle_type': 2,
+            'Special_setting': 3
+        }
+        encoded_message = b'\x21\x03'
+
+        encoded = message.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

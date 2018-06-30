@@ -22,7 +22,9 @@ class DataType(object):
                  maximum,
                  choices,
                  byte_order,
-                 unit):
+                 unit,
+                 factor,
+                 offset):
         self.name = name
         self.id_ = id_
         self.bit_length = bit_length
@@ -32,6 +34,8 @@ class DataType(object):
         self.choices = choices
         self.byte_order = byte_order
         self.unit = unit
+        self.factor = factor
+        self.offset = offset
 
 
 def dump_string(database):
@@ -73,6 +77,8 @@ def _load_data_types(ecu_doc):
         # Default values.
         byte_order = 'big_endian'
         unit = None
+        factor = 1
+        offset = 0
 
         # Name and id.
         type_name = data_type.find('NAME/TUV[1]').text
@@ -90,11 +96,20 @@ def _load_data_types(ecu_doc):
             byte_order = 'little_endian'
 
         # Load from P-type element.
-        if data_type.find('PVALUETYPE/UNIT') is not None:
-            unit = data_type.find('PVALUETYPE/UNIT').text
+        ptype_unit = data_type.find('PVALUETYPE/UNIT')
 
-        # Choices.
+        if ptype_unit is not None:
+            unit = ptype_unit.text
+
+        # Choices, scale and offset.
         choices = _load_choices(data_type)
+
+        # Slope and offset.
+        comp = data_type.find('COMP')
+
+        if comp is not None:
+            factor = float(comp.attrib['f'])
+            offset = float(comp.attrib['o'])
 
         data_types[type_id] = DataType(type_name,
                                        type_id,
@@ -104,7 +119,9 @@ def _load_data_types(ecu_doc):
                                        maximum,
                                        choices,
                                        byte_order,
-                                       unit)
+                                       unit,
+                                       factor,
+                                       offset)
 
     return data_types
 
@@ -122,8 +139,8 @@ def _load_signal_element(signal, offset, data_types):
                   receivers=[],
                   byte_order='little_endian',
                   is_signed=False,
-                  scale=1,
-                  offset=0,
+                  scale=data_type.factor,
+                  offset=data_type.offset,
                   minimum=data_type.minimum,
                   maximum=data_type.maximum,
                   unit=data_type.unit,

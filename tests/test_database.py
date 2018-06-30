@@ -2019,10 +2019,20 @@ IO_DEBUG(
                              'Special_setting'
                          ])
         self.assertEqual(message.frame_id, 160)
+        self.assertEqual(message.signals[1].name, 'Vehicle_type')
+        self.assertEqual(message.signals[1].choices,
+                         {
+                             0: '(not defined)',
+                             1: 'Coupe',
+                             2: 'Sedan',
+                             3: 'Transporter'
+                         })
+        self.assertEqual(message.signals[2].name, 'Special_setting')
+        self.assertEqual(message.signals[2].choices, None)
 
         decoded_message = {
-            'Country_variant': 1,
-            'Vehicle_type': 2,
+            'Country_variant': 'Europe',
+            'Vehicle_type': 'Sedan',
             'Special_setting': 3
         }
         encoded_message = b'\x21\x03'

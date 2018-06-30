@@ -19,28 +19,15 @@ class DataType(object):
                  bit_length,
                  encoding,
                  minimum,
-                 maximum):
+                 maximum,
+                 choices):
         self.name = name
         self.id_ = id_
         self.bit_length = bit_length
         self.encoding = encoding
         self.minimum = minimum
         self.maximum = maximum
-
-    def __repr__(self):
-        return ('DataType('
-                'name={}, '
-                'id={}, '
-                'bit_length={}, '
-                'encoding={}, '
-                'minimum={}, '
-                'maximum={}'
-                ')').format(self.name,
-                            self.id_,
-                            self.bit_length,
-                            self.encoding,
-                            self.minimum,
-                            self.maximum)
+        self.choices = choices
 
 
 def dump_string(database):
@@ -51,48 +38,54 @@ def dump_string(database):
     raise NotImplementedError('The CDD dump function is not yet implemented.')
 
 
+def _load_choices(data_type):
+    choices = {}
+
+    for choice in data_type.findall('TEXTMAP'):
+        start = int(choice.attrib['s'])
+        end = int(choice.attrib['e'])
+
+        if start == end:
+            choices[start] = choice.find('TEXT/TUV[1]').text
+
+    if not choices:
+        choices = None
+
+    return choices
+
+
 def _load_data_types(ecu_doc):
-    """Load all data types founf in given ECU doc element.
+    """Load all data types found in given ECU doc element.
 
     """
+
+    data_types = {}
 
     types = ecu_doc.findall('DATATYPES/IDENT')
     types += ecu_doc.findall('DATATYPES/LINCOMP')
     types += ecu_doc.findall('DATATYPES/TEXTTBL')
-    data_types = {}
 
     for data_type in types:
         type_name = data_type.find('NAME/TUV[1]').text
         type_id = data_type.attrib['id']
+
+        # Various attributes.
         ctype = data_type.find('CVALUETYPE')
+        bit_length = int(ctype.attrib['bl'])
+        encoding = ctype.attrib['enc']
+        minimum = int(ctype.attrib['minsz'])
+        maximum = int(ctype.attrib['maxsz'])
 
-        # Default values.
-        bit_length = None
-        encoding = None
-        minimum = None
-        maximum = None
-
-        # Data type XML attributes.
-        for key, value in ctype.attrib.items():
-            if key == 'bl':
-                bit_length = int(value)
-            elif key == 'enc':
-                encoding = value
-            elif key == 'minsz':
-                minimum = int(value)
-            elif key == 'maxsz':
-                maximum = int(value)
-            else:
-                LOGGER.debug(
-                    "Ignoring unsupported data type attribute '%s'.",
-                    key)
+        # Choices.
+        choices = _load_choices(data_type)
 
         data_types[type_id] = DataType(type_name,
                                        type_id,
                                        bit_length,
                                        encoding,
                                        minimum,
-                                       maximum)
+                                       maximum,
+                                       choices)
 
     return data_types
 
@@ -118,7 +111,7 @@ def _load_signal_element(signal, offset, data_types):
                   minimum=data_type.minimum,
                   maximum=data_type.maximum,
                   unit=None,
-                  choices=None,
+                  choices=data_type.choices,
                   comment=None,
                   is_float=False)
 

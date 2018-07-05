@@ -124,6 +124,26 @@ def _load_signal_element(signal):
                   is_float=is_float)
 
 
+def _load_multiplex_element(mux):
+    """Load given multiplex elements and its signals and return list of signals.
+
+    """
+    mux_signal = _load_signal_element(mux)
+    mux_signal.is_multiplexer = True
+    signals = [mux_signal]
+
+    for mux_group in mux.findall('ns:MuxGroup', NAMESPACES):
+        multiplexer_id = mux_group.attrib['count']
+
+        for signal_element in mux_group.findall('ns:Signal', NAMESPACES):
+            signal = _load_signal_element(signal_element)
+            signal._multiplexer_ids = [int(multiplexer_id)]
+            signal._multiplexer_signal = mux_signal.name
+            signals.append(signal)
+
+    return signals
+
+
 def _load_message_element(message, bus_name, nodes):
     """Load given message element and return a message object.
 
@@ -168,9 +188,13 @@ def _load_message_element(message, bus_name, nodes):
             senders.append(_get_node_name_by_id(nodes,
                                                 sender.attrib['id']))
 
-    # Find all signals in this message.
     signals = []
 
+    # Multiplexers
+    for mux in message.findall('ns:Multiplex', NAMESPACES):
+        signals += _load_multiplex_element(mux)
+
+    # Find all signals in this message.
     for signal in message.findall('ns:Signal', NAMESPACES):
         signals.append(_load_signal_element(signal))
 

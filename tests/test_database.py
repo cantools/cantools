@@ -767,7 +767,71 @@ IO_DEBUG(
         self.assertEqual(tank_temperature.choices, None)
         self.assertEqual(tank_temperature.comment, None)
 
-        speed_km = db.messages[1].signals[1]
+        info_0 = db.messages[1].signals[0]
+
+        self.assertEqual(info_0.name, 'Info0')
+        self.assertEqual(info_0.start, 0)
+        self.assertEqual(info_0.length, 8)
+        self.assertEqual(info_0.receivers, [])
+        self.assertEqual(info_0.byte_order, 'little_endian')
+        self.assertEqual(info_0.is_signed, False)
+        self.assertEqual(info_0.is_float, False)
+        self.assertEqual(info_0.is_multiplexer, False)
+        self.assertEqual(info_0.multiplexer_ids, [0])
+        self.assertEqual(info_0.multiplexer_signal, 'ABS_InfoMux')
+
+        info_2 = db.messages[1].signals[1]
+
+        self.assertEqual(info_2.name, 'Info2')
+        self.assertEqual(info_2.start, 0)
+        self.assertEqual(info_2.length, 8)
+        self.assertEqual(info_2.receivers, [])
+        self.assertEqual(info_2.byte_order, 'little_endian')
+        self.assertEqual(info_2.is_signed, False)
+        self.assertEqual(info_2.is_float, False)
+        self.assertEqual(info_2.is_multiplexer, False)
+        self.assertEqual(info_2.multiplexer_ids, [1])
+        self.assertEqual(info_2.multiplexer_signal, 'ABS_InfoMux')
+
+        info_4 = db.messages[1].signals[2]
+
+        self.assertEqual(info_4.name, 'Info4')
+        self.assertEqual(info_4.start, 0)
+        self.assertEqual(info_4.length, 8)
+        self.assertEqual(info_4.receivers, [])
+        self.assertEqual(info_4.byte_order, 'little_endian')
+        self.assertEqual(info_4.is_signed, False)
+        self.assertEqual(info_4.is_float, False)
+        self.assertEqual(info_4.is_multiplexer, False)
+        self.assertEqual(info_4.multiplexer_ids, [2])
+        self.assertEqual(info_4.multiplexer_signal, 'ABS_InfoMux')
+
+        info_6 = db.messages[1].signals[3]
+
+        self.assertEqual(info_6.name, 'Info6')
+        self.assertEqual(info_6.start, 0)
+        self.assertEqual(info_6.length, 8)
+        self.assertEqual(info_6.receivers, [])
+        self.assertEqual(info_6.byte_order, 'little_endian')
+        self.assertEqual(info_6.is_signed, False)
+        self.assertEqual(info_6.is_float, False)
+        self.assertEqual(info_6.is_multiplexer, False)
+        self.assertEqual(info_6.multiplexer_ids, [3])
+        self.assertEqual(info_6.multiplexer_signal, 'ABS_InfoMux')
+
+        abs_info_mux = db.messages[1].signals[8]
+        self.assertEqual(abs_info_mux.name, 'ABS_InfoMux')
+        self.assertEqual(abs_info_mux.start, 16)
+        self.assertEqual(abs_info_mux.length, 2)
+        self.assertEqual(abs_info_mux.receivers, [])
+        self.assertEqual(abs_info_mux.byte_order, 'little_endian')
+        self.assertEqual(abs_info_mux.is_signed, False)
+        self.assertEqual(abs_info_mux.is_float, False)
+        self.assertEqual(abs_info_mux.is_multiplexer, True)
+        self.assertEqual(abs_info_mux.multiplexer_ids, None)
+        self.assertEqual(abs_info_mux.multiplexer_signal, None)
+
+        speed_km = db.messages[1].signals[10]
 
         self.assertEqual(speed_km.name, 'SpeedKm')
         self.assertEqual(speed_km.start, 30)
@@ -785,7 +849,7 @@ IO_DEBUG(
         self.assertEqual(speed_km.comment,
                          'Middle speed of front wheels in kilometers per hour.')
 
-        outside_temp = db.messages[1].signals[0]
+        outside_temp = db.messages[1].signals[9]
 
         self.assertEqual(outside_temp.name, 'OutsideTemp')
         self.assertEqual(outside_temp.start, 21)

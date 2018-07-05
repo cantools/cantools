@@ -56,7 +56,7 @@ based on my personal preference.
 
 - Two blank lines between file level definitions (2).
 
-- Space before and after operators (3), except for keywork arguments
+- Space before and after operators (3), except for keyword arguments
   where no space is allowed (4).
 
 - One import per line (5).

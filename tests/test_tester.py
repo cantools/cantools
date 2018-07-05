@@ -16,6 +16,7 @@ import cantools
 class CanBus(object):
 
     def __init__(self):
+        self.channel_info = None
         self._queue = Queue()
         self._periodic_queue = Queue()
         self._input_queue = Queue()
@@ -42,7 +43,10 @@ class CanBus(object):
         return self._periodic_queue.get(timeout=timeout)
 
     def recv(self, timeout=None):
-        return self._input_queue.get(timeout=timeout)
+        try:
+            return self._input_queue.get(timeout=timeout)
+        except Empty:
+            return None
 
     def input_message(self, message):
         self._input_queue.put(message)

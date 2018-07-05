@@ -2,4 +2,4 @@ bitstruct
 pyparsing
 codespell
 mock
-python-can==2.1.0
+python-can

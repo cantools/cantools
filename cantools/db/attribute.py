@@ -1,5 +1,5 @@
 class Attribute(object):
-    """An atttribute that can be associated with nodes/messages/signals.
+    """An attribute that can be associated with nodes/messages/signals.
 
     """
 

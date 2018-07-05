@@ -1495,8 +1495,9 @@ IO_DEBUG(
         self.assertEqual(
             str(cm.exception),
             "DBC: \"Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo"
-            ".\";': Expected frame id.\", KCD: \"syntax error: line 1, "
-            "column 0\", SYM: \"Only SYM version 6.0 is supported.\"")
+            ".\";': Expected frame id.\", KCD: \"syntax error: line 1, column"
+            " 0\", SYM: \"Only SYM version 6.0 is supported.\", CDD: \"syntax "
+            "error: line 1, column 0\"")
 
     def test_get_node_by_name(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -1566,7 +1567,7 @@ IO_DEBUG(
 
         self.assertEqual(
             str(cm.exception),
-            "expected database format 'dbc', 'kcd', 'sym' or None, but "
+            "expected database format 'dbc', 'kcd', 'sym', 'cdd' or None, but "
             "got 'bad'")
 
     def test_performance_big_endian_signals(self):
@@ -1954,11 +1955,16 @@ IO_DEBUG(
 
     def test_cdd(self):
         filename = os.path.join('tests', 'files', 'example.cdd')
-        db = cantools.db.Database()
-        db.add_cdd_file(filename, encoding='iso-8859-1')
+        db = cantools.db.load_file(filename, encoding='iso-8859-1')
 
-        self.assertEqual(len(db.messages), 15)
-        self.assertEqual([message.name for message in db.messages],
+        self.assertEqual(len(db.messages), 0)
+        self.assertEqual(len(db.nodes), 0)
+        self.assertEqual(len(db.buses), 0)
+        self.assertEqual(db.version, None)
+        self.assertEqual(db.dbc, None)
+        
+        self.assertEqual(len(db.dids), 15)
+        self.assertEqual([did.name for did in db.dids],
                          [
                              'DEFAULT_SESSION',
                              'ProgrammingSession',
@@ -1978,9 +1984,9 @@ IO_DEBUG(
                          ])
 
         # ECU_Identification data structure.
-        message = db.get_message_by_name('ECU_Identification')
-        self.assertEqual(len(message.signals), 5)
-        self.assertEqual([signal.name for signal in message.signals],
+        did = db.get_did_by_name('ECU_Identification')
+        self.assertEqual(len(did.datas), 5)
+        self.assertEqual([data.name for data in did.datas],
                          [
                              'Ident_Number_7_6',
                              'Ident_Number_5_4',
@@ -1988,97 +1994,97 @@ IO_DEBUG(
                              'Ident_Number_1_0',
                              'Diagnostic_Identification'
                          ])
-        self.assertEqual(message.frame_id, 144)
+        self.assertEqual(did.identifier, 144)
 
-        decoded_message = {
+        decoded_did = {
             'Ident_Number_7_6': 0x1234,
             'Ident_Number_5_4': 0x5678,
             'Ident_Number_3_2': 0x9012,
             'Ident_Number_1_0': 0x3456,
             'Diagnostic_Identification': 0xabcd
         }
-        encoded_message = b'\x34\x12\x78\x56\x12\x90\x56\x34\xcd\xab'
+        encoded_did = b'\x34\x12\x78\x56\x12\x90\x56\x34\xcd\xab'
 
-        encoded = message.encode(decoded_message)
-        self.assertEqual(encoded, encoded_message)
-        decoded = message.decode(encoded)
-        self.assertEqual(decoded, decoded_message)
+        encoded = did.encode(decoded_did)
+        self.assertEqual(encoded, encoded_did)
+        decoded = did.decode(encoded)
+        self.assertEqual(decoded, decoded_did)
 
-        # SawTooth data structure.
-        message = db.get_message_by_name('SawTooth')
-        self.assertEqual(message.frame_id, 244)
+        # SawTooth did structure.
+        did = db.get_did_by_id(244)
+        self.assertEqual(did.identifier, 244)
 
-        decoded_message = {
+        decoded_did = {
             'ampl': 1,
             'period': 40,
             'value': 3
         }
-        encoded_message = b'\x01\x02\x03'
+        encoded_did = b'\x01\x02\x03'
 
-        encoded = message.encode(decoded_message)
-        self.assertEqual(encoded, encoded_message)
-        decoded = message.decode(encoded)
-        self.assertEqual(decoded, decoded_message)
+        encoded = did.encode(decoded_did)
+        self.assertEqual(encoded, encoded_did)
+        decoded = did.decode(encoded)
+        self.assertEqual(decoded, decoded_did)
 
-        # Sine data structure.
-        message = db.get_message_by_name('Sine')
-        self.assertEqual(len(message.signals), 3)
-        self.assertEqual([signal.name for signal in message.signals],
+        # Sine did structure.
+        did = db.get_did_by_name('Sine')
+        self.assertEqual(len(did.datas), 3)
+        self.assertEqual([data.name for data in did.datas],
                          [
                              'ampl',
                              'period',
                              'value'
                          ])
-        self.assertEqual(message.frame_id, 243)
-        self.assertEqual(message.signals[1].name, 'period')
-        self.assertEqual(message.signals[1].unit, 'sec')
-        self.assertEqual(message.signals[1].scale, 20)
-        self.assertEqual(message.signals[1].offset, 0)
+        self.assertEqual(did.identifier, 243)
+        self.assertEqual(did.datas[1].name, 'period')
+        self.assertEqual(did.datas[1].unit, 'sec')
+        self.assertEqual(did.datas[1].scale, 20)
+        self.assertEqual(did.datas[1].offset, 0)
 
-        decoded_message = {
+        decoded_did = {
             'ampl': 1,
             'period': 40,
             'value': 3
         }
-        encoded_message = b'\x01\x02\x03'
+        encoded_did = b'\x01\x02\x03'
 
-        encoded = message.encode(decoded_message)
-        self.assertEqual(encoded, encoded_message)
-        decoded = message.decode(encoded)
-        self.assertEqual(decoded, decoded_message)
+        encoded = did.encode(decoded_did)
+        self.assertEqual(encoded, encoded_did)
+        decoded = did.decode(encoded)
+        self.assertEqual(decoded, decoded_did)
 
-        # Coding data structure.
-        message = db.get_message_by_name('Coding')
-        self.assertEqual(len(message.signals), 3)
-        self.assertEqual([signal.name for signal in message.signals],
+        # Coding did structure.
+        did = db.get_did_by_name('Coding')
+        self.assertEqual(len(did.datas), 3)
+        self.assertEqual([data.name for data in did.datas],
                          [
                              'Country_variant',
                              'Vehicle_type',
                              'Special_setting'
                          ])
-        self.assertEqual(message.frame_id, 160)
-        self.assertEqual(message.signals[1].name, 'Vehicle_type')
-        self.assertEqual(message.signals[1].choices,
+        self.assertEqual(did.identifier, 160)
+        self.assertEqual(did.datas[1].name, 'Vehicle_type')
+        self.assertEqual(did.datas[1].choices,
                          {
                              0: '(not defined)',
                              1: 'Coupe',
                              2: 'Sedan',
                              3: 'Transporter'
                          })
-        self.assertEqual(message.signals[2].name, 'Special_setting')
-        self.assertEqual(message.signals[2].choices, None)
+        self.assertEqual(did.datas[2].name, 'Special_setting')
+        self.assertEqual(did.datas[2].choices, None)
 
-        decoded_message = {
+        decoded_did = {
             'Country_variant': 'Europe',
             'Vehicle_type': 'Sedan',
             'Special_setting': 3
         }
-        encoded_message = b'\x21\x03'
+        encoded_did = b'\x21\x03'
 
-        encoded = message.encode(decoded_message)
-        self.assertEqual(encoded, encoded_message)
-        decoded = message.decode(encoded)
-        self.assertEqual(decoded, decoded_message)
+        encoded = did.encode(decoded_did)
+        self.assertEqual(encoded, encoded_did)
+        decoded = did.decode(encoded)
+        self.assertEqual(decoded, decoded_did)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

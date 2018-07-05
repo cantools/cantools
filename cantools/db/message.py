@@ -1,9 +1,10 @@
 # A CAN message.
 
 import binascii
-from collections import namedtuple
-from decimal import Decimal
-import bitstruct
+
+from .format import encode_data
+from .format import decode_data
+from .format import create_encode_decode_formats
 
 
 class EncodeError(Exception):
@@ -31,83 +32,6 @@ def _start_bit(signal):
         return signal.start
 
 
-def _encode_signal(signal, data, scaling):
-    value = data[signal.name]
-
-    if isinstance(value, str):
-        value = signal.choice_string_to_number(value)
-
-    if scaling:
-        if signal.is_float:
-            return (value - signal.offset) / signal.scale
-        else:
-            value = (Decimal(value) - Decimal(signal.offset)) / Decimal(signal.scale)
-
-            return value.to_integral()
-
-    else:
-        return value
-
-
-def _decode_signal(signal, value, decode_choices, scaling):
-    if scaling:
-        value = (signal.scale * value + signal.offset)
-
-    if decode_choices:
-        try:
-            decoded_signal = signal.choices[value]
-        except (KeyError, TypeError):
-            decoded_signal = value
-    else:
-        decoded_signal = value
-
-    return decoded_signal
-
-
-def _encode_data(data, signals, formats, scaling):
-    big_unpacked_data = [
-        _encode_signal(signal, data, scaling)
-        for signal in signals
-        if signal.byte_order == 'big_endian'
-    ]
-    little_unpacked_data = [
-        _encode_signal(signal, data, scaling)
-        for signal in signals
-        if signal.byte_order == 'little_endian'
-    ]
-    big_packed = formats.big_endian.pack(*big_unpacked_data)
-    little_packed = formats.little_endian.pack(*little_unpacked_data[::-1])[::-1]
-    packed_union = int(binascii.hexlify(big_packed), 16)
-    packed_union |= int(binascii.hexlify(little_packed), 16)
-
-    return packed_union
-
-
-def _decode_data(data, signals, formats, decode_choices, scaling):
-    big_unpacked = list(formats.big_endian.unpack(data))
-    big_signals = [
-        signal
-        for signal in signals
-        if signal.byte_order == 'big_endian'
-    ]
-    little_unpacked = list(formats.little_endian.unpack(data[::-1])[::-1])
-    little_signals = [
-        signal
-        for signal in signals
-        if signal.byte_order == 'little_endian'
-    ]
-    unpacked = big_unpacked + little_unpacked
-    signals = big_signals + little_signals
-
-    return {
-        signal.name: _decode_signal(signal,
-                                    value,
-                                    decode_choices,
-                                    scaling)
-        for signal, value in zip(signals, unpacked)
-    }
-
-
 class Message(object):
     """A CAN message with frame id, comment, signals and other
     information.
@@ -120,7 +44,7 @@ class Message(object):
                  length,
                  signals,
                  comment=None,
-                 senders=[],
+                 senders=None,
                  send_type=None,
                  cycle_time=None,
                  dbc_specifics=None,
@@ -133,7 +57,7 @@ class Message(object):
         self._signals = signals
         self._signals.sort(key=_start_bit)
         self._comment = comment
-        self._senders = senders
+        self._senders = senders if senders else []
         self._send_type = send_type
         self._cycle_time = cycle_time
         self._dbc = dbc_specifics
@@ -191,7 +115,8 @@ class Message(object):
 
         return {
             'signals': signals,
-            'formats': self._create_message_encode_decode_formats(signals),
+            'formats': create_encode_decode_formats(signals,
+                                                    self._length),
             'multiplexers': multiplexers
         }
 
@@ -219,101 +144,6 @@ class Message(object):
             nodes.append(node)
 
         return nodes
-
-    def _create_message_encode_decode_formats(self, signals):
-        message_length = (8 * self._length)
-
-        def get_format_string_type(signal):
-            if signal.is_float:
-                return 'f'
-            elif signal.is_signed:
-                return 's'
-            else:
-                return 'u'
-
-        def padding_item(length):
-            fmt = 'p{}'.format(length)
-            padding_mask = '1' * length
-
-            return fmt, padding_mask
-
-        def signal_item(signal):
-            fmt = '{}{}'.format(get_format_string_type(signal),
-                                signal.length)
-            padding_mask = '0' * signal.length
-
-            return fmt, padding_mask
-
-        def fmt(items):
-
-            return ''.join([item[0] for item in items])
-
-        def padding_mask(items):
-            try:
-                return int(''.join([item[1] for item in items]), 2)
-            except ValueError:
-                return 0
-
-        def create_big():
-            items = [('>', '')]
-            start = 0
-
-            for signal in signals:
-
-                if signal.byte_order == 'little_endian':
-                    continue
-
-                padding_length = (_start_bit(signal) - start)
-
-                if padding_length > 0:
-                    items.append(padding_item(padding_length))
-
-                items.append(signal_item(signal))
-                start = (_start_bit(signal) + signal.length)
-
-            if start < message_length:
-                length = message_length - start
-                items.append(padding_item(length))
-
-            return fmt(items), padding_mask(items)
-
-        def create_little():
-            items = [('>', '')]
-            end = message_length
-
-            for signal in signals[::-1]:
-
-                if signal.byte_order == 'big_endian':
-                    continue
-
-                padding_length = end - (signal.start + signal.length)
-
-                if padding_length > 0:
-                    items.append(padding_item(padding_length))
-
-                items.append(signal_item(signal))
-                end = signal.start
-
-            if end > 0:
-                items.append(padding_item(end))
-
-            value = padding_mask(items)
-
-            if message_length > 0:
-                value = bitstruct.pack('u{}'.format(message_length), value)
-                value = int(binascii.hexlify(value[::-1]), 16)
-
-            return fmt(items), value
-
-        big_fmt, big_padding_mask = create_big()
-        little_fmt, little_padding_mask = create_little()
-
-        Formats = namedtuple('Formats',
-                             ['big_endian', 'little_endian', 'padding_mask'])
-
-        return Formats(bitstruct.compile(big_fmt),
-                       bitstruct.compile(little_fmt),
-                       big_padding_mask & little_padding_mask)
 
     @property
     def frame_id(self):
@@ -453,10 +283,10 @@ class Message(object):
         return mux
 
     def _encode(self, node, data, scaling):
-        encoded = _encode_data(data,
-                               node['signals'],
-                               node['formats'],
-                               scaling)
+        encoded = encode_data(data,
+                              node['signals'],
+                              node['formats'],
+                              scaling)
         padding_mask = node['formats'].padding_mask
         multiplexers = node['multiplexers']
 
@@ -500,11 +330,11 @@ class Message(object):
         return binascii.unhexlify(encoded)[:self._length]
 
     def _decode(self, node, data, decode_choices, scaling):
-        decoded = _decode_data(data,
-                               node['signals'],
-                               node['formats'],
-                               decode_choices,
-                               scaling)
+        decoded = decode_data(data,
+                              node['signals'],
+                              node['formats'],
+                              decode_choices,
+                              scaling)
 
         multiplexers = node['multiplexers']
 

@@ -3,8 +3,8 @@ import logging
 
 from xml.etree import ElementTree
 
-from ..signal import Signal
-from ..message import Message
+from ..data import Data
+from ..did import Did
 from ..internal_database import InternalDatabase
 
 
@@ -38,7 +38,7 @@ class DataType(object):
         self.offset = offset
 
 
-def dump_string(database):
+def dump_string(_database):
     """Format given database in CDD file format.
 
     """
@@ -50,8 +50,8 @@ def _load_choices(data_type):
     choices = {}
 
     for choice in data_type.findall('TEXTMAP'):
-        start = int(choice.attrib['s'])
-        end = int(choice.attrib['e'])
+        start = int(choice.attrib['s'].strip('()'))
+        end = int(choice.attrib['e'].strip('()'))
 
         if start == end:
             choices[start] = choice.find('TEXT/TUV[1]').text
@@ -72,6 +72,8 @@ def _load_data_types(ecu_doc):
     types = ecu_doc.findall('DATATYPES/IDENT')
     types += ecu_doc.findall('DATATYPES/LINCOMP')
     types += ecu_doc.findall('DATATYPES/TEXTTBL')
+    types += ecu_doc.findall('DATATYPES/STRUCTDT')
+    types += ecu_doc.findall('DATATYPES/EOSITERDT')
 
     for data_type in types:
         # Default values.
@@ -79,6 +81,10 @@ def _load_data_types(ecu_doc):
         unit = None
         factor = 1
         offset = 0
+        bit_length = None
+        encoding = None
+        minimum = None
+        maximum = None
 
         # Name and id.
         type_name = data_type.find('NAME/TUV[1]').text
@@ -87,10 +93,17 @@ def _load_data_types(ecu_doc):
         # Load from C-type element.
         ctype = data_type.find('CVALUETYPE')
 
-        bit_length = int(ctype.attrib['bl'])
-        encoding = ctype.attrib['enc']
-        minimum = int(ctype.attrib['minsz'])
-        maximum = int(ctype.attrib['maxsz'])
+        for key, value in ctype.attrib.items():
+            if key == 'bl':
+                bit_length = int(value)
+            elif key == 'enc':
+                encoding = value
+            elif key == 'minsz':
+                minimum = int(value)
+            elif key == 'maxsz':
+                maximum = int(value)
+            else:
+                LOGGER.debug("Ignoring unsupported attribute '%s'.", key)
 
         if ctype.attrib['bo'] == '21':
             byte_order = 'little_endian'
@@ -126,62 +139,52 @@ def _load_data_types(ecu_doc):
     return data_types
 
 
-def _load_signal_element(signal, offset, data_types):
+def _load_data_element(data, offset, data_types):
     """Load given signal element and return a signal object.
 
     """
 
-    data_type = data_types[signal.attrib['dtref']]
+    data_type = data_types[data.attrib['dtref']]
 
-    return Signal(name=signal.find('QUAL').text,
-                  start=offset,
-                  length=data_type.bit_length,
-                  receivers=[],
-                  byte_order='little_endian',
-                  is_signed=False,
-                  scale=data_type.factor,
-                  offset=data_type.offset,
-                  minimum=data_type.minimum,
-                  maximum=data_type.maximum,
-                  unit=data_type.unit,
-                  choices=data_type.choices,
-                  comment=None,
-                  is_float=False)
+    return Data(name=data.find('QUAL').text,
+                start=offset,
+                length=data_type.bit_length,
+                byte_order='little_endian',
+                scale=data_type.factor,
+                offset=data_type.offset,
+                minimum=data_type.minimum,
+                maximum=data_type.maximum,
+                unit=data_type.unit,
+                choices=data_type.choices)
 
 
-def _load_message_element(message, data_types):
-    """Load given message element and return a message object.
+def _load_did_element(did, data_types):
+    """Load given DID element and return a did object.
 
     """
 
     offset = 0
-    signals = []
-    datas = message.findall('SIMPLECOMPCONT/DATAOBJ')
-    datas += message.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
+    datas = []
+    data_objs = did.findall('SIMPLECOMPCONT/DATAOBJ')
+    data_objs += did.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
 
-    for data_obj in datas:
-        signal = _load_signal_element(data_obj,
-                                      offset,
-                                      data_types)
+    for data_obj in data_objs:
+        data = _load_data_element(data_obj,
+                                  offset,
+                                  data_types)
 
-        if signal:
-            signals.append(signal)
-            offset += signal.length
+        if data:
+            datas.append(data)
+            offset += data.length
 
-    frame_id = int(message.find('STATICVALUE').attrib['v'])
-    name = message.find('QUAL').text
+    identifier = int(did.find('STATICVALUE').attrib['v'])
+    name = did.find('QUAL').text
     length = (offset + 7) // 8
 
-    return Message(frame_id=frame_id,
-                   is_extended_frame=False,
-                   name=name,
-                   length=length,
-                   senders=[],
-                   send_type=None,
-                   cycle_time=None,
-                   signals=signals,
-                   comment=None,
-                   bus_name=None)
+    return Did(identifier=identifier,
+               name=name,
+               length=length,
+               datas=datas)
 
 
 def load_string(string):
@@ -193,15 +196,17 @@ def load_string(string):
     ecu_doc = root.find('ECUDOC')
     data_types = _load_data_types(ecu_doc)
     var = ecu_doc.findall('ECU')[0].find('VAR')
-    messages = []
+    dids = []
 
     for diag_class in var.findall('DIAGCLASS'):
         for diag_inst in diag_class.findall('DIAGINST'):
-            message = _load_message_element(diag_inst,
-                                            data_types)
-            messages.append(message)
+            did = _load_did_element(diag_inst,
+                                    data_types)
+            dids.append(did)
 
-    return InternalDatabase(messages,
+    return InternalDatabase([],
                             [],
                             [],
-                            None)
+                            None,
+                            None,
+                            dids)

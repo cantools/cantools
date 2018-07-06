@@ -38,14 +38,6 @@ class DataType(object):
         self.offset = offset
 
 
-def dump_string(_database):
-    """Format given database in CDD file format.
-
-    """
-
-    raise NotImplementedError('The CDD dump function is not yet implemented.')
-
-
 def _load_choices(data_type):
     choices = {}
 

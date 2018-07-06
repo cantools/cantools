@@ -1996,6 +1996,18 @@ IO_DEBUG(
                          ])
         self.assertEqual(did.identifier, 144)
 
+        data = did.get_data_by_name('Diagnostic_Identification')
+        self.assertEqual(data.name, 'Diagnostic_Identification')
+        self.assertEqual(data.start, 64)
+        self.assertEqual(data.length, 16)
+        self.assertEqual(data.byte_order, 'little_endian')
+        self.assertEqual(data.scale, 1)
+        self.assertEqual(data.offset, 0)
+        self.assertEqual(data.minimum, 0)
+        self.assertEqual(data.maximum, 255)
+        self.assertEqual(data.unit, None)
+        self.assertEqual(data.choices, None)
+
         decoded_did = {
             'Ident_Number_7_6': 0x1234,
             'Ident_Number_5_4': 0x5678,

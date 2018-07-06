@@ -1953,7 +1953,7 @@ IO_DEBUG(
         # Test that dump executes without raising.
         db.as_dbc_string()
 
-    def test_cdd(self):
+    def test_example_cdd(self):
         filename = os.path.join('tests', 'files', 'example.cdd')
         db = cantools.db.load_file(filename, encoding='iso-8859-1')
 
@@ -1962,7 +1962,7 @@ IO_DEBUG(
         self.assertEqual(len(db.buses), 0)
         self.assertEqual(db.version, None)
         self.assertEqual(db.dbc, None)
-        
+
         self.assertEqual(len(db.dids), 15)
         self.assertEqual([did.name for did in db.dids],
                          [
@@ -2085,6 +2085,13 @@ IO_DEBUG(
         self.assertEqual(encoded, encoded_did)
         decoded = did.decode(encoded)
         self.assertEqual(decoded, decoded_did)
+
+    def test_cdd_add(self):
+        filename = os.path.join('tests', 'files', 'example.cdd')
+
+        db = cantools.db.Database()
+        db.add_cdd_file(filename, encoding='iso-8859-1')
+        self.assertEqual(len(db.dids), 15)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

@@ -240,9 +240,6 @@ class Database(object):
 
         database = cdd.load_string(string)
 
-        for message in database.messages:
-            self.add_message(message)
-
         for did in database.dids:
             self.add_did(did)
 

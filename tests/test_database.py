@@ -1983,7 +1983,7 @@ IO_DEBUG(
                              'InputOutput'
                          ])
 
-        # ECU_Identification data structure.
+        # ECU_Identification DID structure.
         did = db.get_did_by_name('ECU_Identification')
         self.assertEqual(did.name, 'ECU_Identification')
         self.assertEqual(did.identifier, 144)
@@ -2023,7 +2023,7 @@ IO_DEBUG(
         decoded = did.decode(encoded)
         self.assertEqual(decoded, decoded_did)
 
-        # SawTooth did structure.
+        # SawTooth DID structure.
         did = db.get_did_by_id(244)
         self.assertEqual(did.identifier, 244)
 
@@ -2039,7 +2039,7 @@ IO_DEBUG(
         decoded = did.decode(encoded)
         self.assertEqual(decoded, decoded_did)
 
-        # Sine did structure.
+        # Sine DID structure.
         did = db.get_did_by_name('Sine')
         self.assertEqual(len(did.datas), 3)
         self.assertEqual([data.name for data in did.datas],
@@ -2066,7 +2066,7 @@ IO_DEBUG(
         decoded = did.decode(encoded)
         self.assertEqual(decoded, decoded_did)
 
-        # Coding did structure.
+        # Coding DID structure.
         did = db.get_did_by_name('Coding')
         self.assertEqual(len(did.datas), 3)
         self.assertEqual([data.name for data in did.datas],

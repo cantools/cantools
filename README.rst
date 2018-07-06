@@ -6,11 +6,13 @@ About
 
 CAN BUS tools.
 
-- `DBC`_, `KCD`_ and SYM file parsing.
+- `DBC`_, `KCD`_, SYM and CDD file parsing.
 
 - CAN message encoding and decoding.
 
 - Simple and extended signal multiplexing.
+
+- Diagnostic DID encoding and decoding.
 
 - ``candump`` output decoder.
 

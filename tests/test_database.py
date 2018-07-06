@@ -1985,7 +1985,9 @@ IO_DEBUG(
 
         # ECU_Identification data structure.
         did = db.get_did_by_name('ECU_Identification')
-        self.assertEqual(len(did.datas), 5)
+        self.assertEqual(did.name, 'ECU_Identification')
+        self.assertEqual(did.identifier, 144)
+        self.assertEqual(did.length, 10)
         self.assertEqual([data.name for data in did.datas],
                          [
                              'Ident_Number_7_6',
@@ -1994,7 +1996,6 @@ IO_DEBUG(
                              'Ident_Number_1_0',
                              'Diagnostic_Identification'
                          ])
-        self.assertEqual(did.identifier, 144)
 
         data = did.get_data_by_name('Diagnostic_Identification')
         self.assertEqual(data.name, 'Diagnostic_Identification')

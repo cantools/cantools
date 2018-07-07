@@ -54,56 +54,56 @@ SIGNAL_TYPE = 'SIG_VALTYPE_'
 SIGNAL_MULTIPLEXER_VALUES = 'SG_MUL_VAL_'
 SIGNAL_GROUP = 'SIG_GROUP_'
 
-DBC_FMT = """VERSION "{version}"
-
-
-NS_ : \
-
-\tNS_DESC_
-\tCM_
-\tBA_DEF_
-\tBA_
-\tVAL_
-\tCAT_DEF_
-\tCAT_
-\tFILTER
-\tBA_DEF_DEF_
-\tEV_DATA_
-\tENVVAR_DATA_
-\tSGTYPE_
-\tSGTYPE_VAL_
-\tBA_DEF_SGTYPE_
-\tBA_SGTYPE_
-\tSIG_TYPE_REF_
-\tVAL_TABLE_
-\tSIG_GROUP_
-\tSIG_VALTYPE_
-\tSIGTYPE_VALTYPE_
-\tBO_TX_BU_
-\tBA_DEF_REL_
-\tBA_REL_
-\tBA_DEF_DEF_REL_
-\tBU_SG_REL_
-\tBU_EV_REL_
-\tBU_BO_REL_
-\tSG_MUL_VAL_
-
-BS_:
-
-BU_: {bu}
-
-
-{bo}
-
-
-
-{cm}
-{ba_def}
-{ba_def_def}
-{ba}
-{val}
-
-"""
+DBC_FMT = (
+    'VERSION "{version}"\r\n'
+    '\r\n'
+    '\r\n'
+    'NS_ : \r\n'
+    '\tNS_DESC_\r\n'
+    '\tCM_\r\n'
+    '\tBA_DEF_\r\n'
+    '\tBA_\r\n'
+    '\tVAL_\r\n'
+    '\tCAT_DEF_\r\n'
+    '\tCAT_\r\n'
+    '\tFILTER\r\n'
+    '\tBA_DEF_DEF_\r\n'
+    '\tEV_DATA_\r\n'
+    '\tENVVAR_DATA_\r\n'
+    '\tSGTYPE_\r\n'
+    '\tSGTYPE_VAL_\r\n'
+    '\tBA_DEF_SGTYPE_\r\n'
+    '\tBA_SGTYPE_\r\n'
+    '\tSIG_TYPE_REF_\r\n'
+    '\tVAL_TABLE_\r\n'
+    '\tSIG_GROUP_\r\n'
+    '\tSIG_VALTYPE_\r\n'
+    '\tSIGTYPE_VALTYPE_\r\n'
+    '\tBO_TX_BU_\r\n'
+    '\tBA_DEF_REL_\r\n'
+    '\tBA_REL_\r\n'
+    '\tBA_DEF_DEF_REL_\r\n'
+    '\tBU_SG_REL_\r\n'
+    '\tBU_EV_REL_\r\n'
+    '\tBU_BO_REL_\r\n'
+    '\tSG_MUL_VAL_\r\n'
+    '\r\n'
+    'BS_:\r\n'
+    '\r\n'
+    'BU_: {bu}\r\n'
+    '\r\n'
+    '\r\n'
+    '{bo}\r\n'
+    '\r\n'
+    '\r\n'
+    '\r\n'
+    '{cm}\r\n'
+    '{ba_def}\r\n'
+    '{ba_def_def}\r\n'
+    '{ba}\r\n'
+    '{val}\r\n'
+    '\r\n'
+)
 
 
 class QuotedString(pyparsing.QuotedString):
@@ -449,7 +449,7 @@ def _dump_messages(database):
                 maximum=signal.maximum,
                 unit='' if signal.unit is None else signal.unit))
 
-        bo.append('\n'.join(msg))
+        bo.append('\r\n'.join(msg))
 
     return bo
 
@@ -1074,12 +1074,12 @@ def dump_string(database):
 
     return DBC_FMT.format(version=database.version,
                           bu=' '.join(bu),
-                          bo='\n\n'.join(bo),
-                          cm='\n'.join(cm),
-                          ba_def='\n'.join(ba_def),
-                          ba_def_def='\n'.join(ba_def_def),
-                          ba='\n'.join(ba),
-                          val='\n'.join(val))
+                          bo='\r\n\r\n'.join(bo),
+                          cm='\r\n'.join(cm),
+                          ba_def='\r\n'.join(ba_def),
+                          ba_def_def='\r\n'.join(ba_def_def),
+                          ba='\r\n'.join(ba),
+                          val='\r\n'.join(val))
 
 
 def get_definitions_dict(definitions, defaults):

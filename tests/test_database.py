@@ -1,3 +1,4 @@
+import sys
 import math
 import os
 import unittest
@@ -51,13 +52,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(i, 15)
 
-        with open(filename, 'rU') as fin:
-            self.assertEqual(db.as_dbc_string(), fin.read())
+        with open(filename, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('utf-8'), fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_motohawk(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
-        with open(filename, 'rU') as fin:
+        with open(filename, 'r') as fin:
             db = cantools.db.load(fin)
 
         self.assertEqual(len(db.nodes), 2)
@@ -69,14 +73,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
         self.assertEqual(db.messages[0].signals[1].receivers[0], 'Vector__XXX')
 
-        with open(filename, 'rU') as fin:
-            self.assertEqual(db.as_dbc_string(), fin.read())
+        with open(filename, 'rb') as fin:
+            self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
 
     def test_emc32(self):
         db = cantools.db.File()
         filename = os.path.join('tests', 'files', 'emc32.dbc')
 
-        with open(filename, 'rU') as fin:
+        with open(filename, 'r') as fin:
             db.add_dbc(fin)
 
         self.assertEqual(len(db.nodes), 1)
@@ -571,7 +575,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_get_message_by_frame_id_and_name(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
-        with open(filename, 'rU') as fin:
+        with open(filename, 'r') as fin:
             db = cantools.db.load(fin)
 
         message = db.get_message_by_name('ExampleMessage')
@@ -1177,8 +1181,8 @@ IO_DEBUG(
         self.assertEqual(message.cycle_time, 0)
         self.assertEqual(message.send_type, 'NoMsgSendType')
 
-        with open(filename, 'rU') as fin:
-            self.assertEqual(db.as_dbc_string(), fin.read())
+        with open(filename, 'rb') as fin:
+            self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
 
     def test_multiplex(self):
         filename = os.path.join('tests', 'files', 'multiplex.dbc')
@@ -1754,7 +1758,7 @@ IO_DEBUG(
     def test_attributes(self):
         filename = os.path.join('tests', 'files', 'attributes.dbc')
 
-        with open(filename, 'rU') as fin:
+        with open(filename, 'r') as fin:
             db = cantools.db.load(fin)
 
         # Signal attributes.
@@ -1877,13 +1881,13 @@ IO_DEBUG(
         self.assertEqual(message.cycle_time, 1000)
         self.assertEqual(message.send_type, 'Cyclic')
 
-        with open(filename, 'rU') as fin:
-            self.assertEqual(db.as_dbc_string(), fin.read())
+        with open(filename, 'rb') as fin:
+            self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
 
     def test_setters(self):
         filename = os.path.join('tests', 'files', 'attributes.dbc')
 
-        with open(filename, 'rU') as fin:
+        with open(filename, 'r') as fin:
             db = cantools.db.load(fin)
 
         # Calling the setters for coverage. Assertions are not
@@ -1915,7 +1919,7 @@ IO_DEBUG(
     def test_lookups(self):
         filename = os.path.join('tests', 'files', 'attributes.dbc')
 
-        with open(filename, 'rU') as fin:
+        with open(filename, 'r') as fin:
             db = cantools.db.load(fin)
 
         message = db.get_message_by_frame_id(0x39)

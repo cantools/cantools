@@ -15,6 +15,7 @@ import cantools
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 EXAMPLE_PATH = os.path.join(SCRIPT_DIR,
                             '..',
+                            '..',
                             'tests',
                             'files',
                             'example.cdd')

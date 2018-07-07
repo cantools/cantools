@@ -2,9 +2,9 @@
 
 import binascii
 
-from .format import encode_data
-from .format import decode_data
-from .format import create_encode_decode_formats
+from ..format import encode_data
+from ..format import decode_data
+from ..format import create_encode_decode_formats
 
 
 class Did(object):
@@ -121,3 +121,8 @@ class Did(object):
                            self._codec['formats'],
                            decode_choices,
                            scaling)
+
+    def __repr__(self):
+        return "did('{}', 0x{:04x})".format(
+            self._name,
+            self._identifier)

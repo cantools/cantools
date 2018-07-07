@@ -29,6 +29,15 @@ Functions and classes
 .. autoclass:: cantools.db.Signal
     :members:
 
+.. autoclass:: cantools.db.diagnostics.Database
+    :members:
+
+.. autoclass:: cantools.db.diagnostics.Did
+    :members:
+
+.. autoclass:: cantools.db.diagnostics.Data
+    :members:
+
 .. autoclass:: cantools.db.UnsupportedDatabaseFormatError
     :members:
 

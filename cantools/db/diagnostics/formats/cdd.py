@@ -1,4 +1,4 @@
-# Load and dump a CAN database in CDD format.
+# Load and dump a diagnostics database in CDD format.
 import logging
 
 from xml.etree import ElementTree
@@ -196,9 +196,4 @@ def load_string(string):
                                     data_types)
             dids.append(did)
 
-    return InternalDatabase([],
-                            [],
-                            [],
-                            None,
-                            None,
-                            dids)
+    return InternalDatabase(dids)

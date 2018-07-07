@@ -4,7 +4,7 @@ test:
 	env PYTHONPATH=. python2 examples/hello_world.py
 	env PYTHONPATH=. python3 examples/hello_world.py
 	env PYTHONPATH=. python3 examples/dbc_io/main.py
-	env PYTHONPATH=. python3 examples/did.py
+	env PYTHONPATH=. python3 examples/diagnostics/did.py
 	codespell -d $$(git ls-files | grep -v the_homer\.kcd)
 
 release-to-pypi:

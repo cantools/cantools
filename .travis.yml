@@ -8,6 +8,6 @@ install:
 script:
   - coverage run --source=cantools setup.py test
   - env PYTHONPATH=. python examples/hello_world.py
-  - env PYTHONPATH=. python examples/did.py
+  - env PYTHONPATH=. python examples/diagnostics/did.py
 after_success:
   coveralls

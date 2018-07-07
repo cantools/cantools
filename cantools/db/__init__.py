@@ -9,6 +9,7 @@ from .message import EncodeError
 from .message import DecodeError
 from .signal import Signal
 from .node import Node
+from . import diagnostics
 from ..compat import fopen
 
 
@@ -49,8 +50,9 @@ def load_file(filename,
               encoding='utf-8',
               frame_id_mask=None):
     """Open, read and parse given database file and return a
-    :class:`~cantools.db.Database` object with its
-    contents.
+    :class:`~cantools.db.Database` or
+    :class:`diagnostics.Database<.diagnostics.Database>` object with
+    its contents.
 
     `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
     ``'cdd'`` or ``None``, where ``None`` means transparent format.
@@ -73,8 +75,9 @@ def load_file(filename,
 
 def load(fp, database_format=None, frame_id_mask=None):
     """Read and parse given database file-like object and return a
-    :class:`~cantools.db.Database` object with its
-    contents.
+    :class:`~cantools.db.Database` or
+    :class:`diagnostics.Database<.diagnostics.Database>` object with
+    its contents.
 
     `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
     ``'cdd'`` or ``None``, where ``None`` means transparent format.
@@ -95,8 +98,9 @@ def load(fp, database_format=None, frame_id_mask=None):
 
 def load_string(string, database_format=None, frame_id_mask=None):
     """Parse given database string and return a
-    :class:`~cantools.db.Database` object with its
-    contents.
+    :class:`~cantools.db.Database` or
+    :class:`diagnostics.Database<.diagnostics.Database>` object with
+    its contents.
 
     `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
     ``'cdd'`` or ``None``, where ``None`` means transparent format.
@@ -148,7 +152,7 @@ def load_string(string, database_format=None, frame_id_mask=None):
 
     if database_format in ['cdd', None]:
         try:
-            db = Database(frame_id_mask=frame_id_mask)
+            db = diagnostics.Database()
             db.add_cdd_string(string)
             return db
         except (ElementTree.ParseError, ValueError) as e:

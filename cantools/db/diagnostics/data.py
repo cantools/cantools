@@ -152,3 +152,24 @@ class Data(object):
         for choice_number, choice_string in self.choices.items():
             if choice_string == string:
                 return choice_number
+
+    def __repr__(self):
+
+        if self._choices is None:
+            choices = None
+        else:
+            choices = '{{{}}}'.format(', '.join(
+                ["{}: '{}'".format(value, text)
+                 for value, text in self._choices.items()]))
+
+        return "data('{}', {}, {}, '{}', {}, {}, {}, {}, '{}', {})".format(
+            self._name,
+            self._start,
+            self._length,
+            self._byte_order,
+            self._scale,
+            self._offset,
+            self._minimum,
+            self._maximum,
+            self._unit,
+            choices)

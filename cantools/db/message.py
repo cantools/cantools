@@ -5,13 +5,14 @@ import binascii
 from .format import encode_data
 from .format import decode_data
 from .format import create_encode_decode_formats
+from .errors import Error
 
 
-class EncodeError(Exception):
+class EncodeError(Error):
     pass
 
 
-class DecodeError(Exception):
+class DecodeError(Error):
     pass
 
 
@@ -394,6 +395,71 @@ class Message(object):
         """
 
         return bool(self._codecs['multiplexers'])
+
+    def signals_ascii_art(self):
+        """ASCII art of all signals.
+
+        .. code:: text
+
+                                Bit
+
+                   7   6   5   4   3   2   1   0
+                 +---+---+---+---+---+---+---+---+
+               0 |   |   |   |   |   |<----------|
+                 +---+---+---+---+---+---+---+---+
+               1 |------x|   |   |   |   |<-x|   |
+                 +---+---+---+---+---+---+---+---+
+               2 |   |   |   |   |   |   |   |   |
+           B     +---+---+---+---+---+---+---+---+
+           y   3 |--------------x|   |   |   |   |
+           t     +---+---+---+---+---+---+---+---+
+           e   4 |-------------------------------|
+                 +---+---+---+---+---+---+---+---+
+               5 |   |   |<----------------------|
+                 +---+---+---+---+---+---+---+---+
+               6 |   |   |   |   |   |   |   |   |
+                 +---+---+---+---+---+---+---+---+
+               7 |   |   |   |   |   |   |   |   |
+                 +---+---+---+---+---+---+---+---+
+
+        """
+
+        raise NotImplementedError
+
+    def check_signals(self):
+        """Check that no signals are overlapping and that they fit in the
+        message.
+
+        """
+
+        message_bits = 8 * self.length * [None]
+
+        for signal in self.signals:
+            signal_bits = signal.length * [signal]
+
+            if signal.byte_order == 'big_endian':
+                padding = _start_bit(signal) * [None]
+                signal_bits = padding + signal_bits
+            else:
+                raise NotImplementedError
+
+            # Check that the signal fits in the message.
+            if len(signal_bits) > len(message_bits):
+                raise Error(
+                    'The signal {} does not fit in the message.'.format(
+                        signal.name))
+
+            # Check that the signal does not overlap with other
+            # signals.
+            for offset, signal_bit in enumerate(signal_bits):
+                if signal_bit is not None:
+                    if message_bits[offset] is not None:
+                        raise Error(
+                            'The signals {} and {} are overlapping.'.format(
+                                signal.name,
+                                message_bits[offset].name))
+
+                    message_bits[offset] = signal
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(

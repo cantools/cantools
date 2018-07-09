@@ -3,6 +3,7 @@ import math
 import os
 import unittest
 from decimal import Decimal
+from collections import namedtuple
 
 try:
     from unittest.mock import patch
@@ -2035,6 +2036,78 @@ IO_DEBUG(
 
         # Test that dump executes without raising.
         db.as_dbc_string()
+
+    def test_check_signals(self):
+        Data = namedtuple('Data', ['start', 'length'])
+
+        # Not overlapping.
+        datas = [
+            (Data(start=7, length=1), Data(start=6, length=1)),
+            (Data(start=7, length=8), Data(start=15, length=8)),
+            (Data(start=7, length=7), Data(start=0, length=2))
+        ]
+
+        for s0, s1 in datas:
+            signal_0 = cantools.db.Signal('S0',
+                                          s0.start,
+                                          s0.length,
+                                          'big_endian')
+            signal_1 = cantools.db.Signal('S1',
+                                          s1.start,
+                                          s1.length,
+                                          'big_endian')
+            message = cantools.db.Message(1,
+                                          'M',
+                                          8,
+                                          [signal_0, signal_1])
+            message.check_signals()
+
+        # Overlapping.
+        datas = [
+            (Data(start=7, length=1), Data(start=7, length=1)),
+            (Data(start=7, length=8), Data(start=5, length=10))
+        ]
+
+        for data0, data1 in datas:
+            signal_0 = cantools.db.Signal('S0',
+                                          data0.start,
+                                          data0.length,
+                                          'big_endian')
+            signal_1 = cantools.db.Signal('S1',
+                                          data1.start,
+                                          data1.length,
+                                          'big_endian')
+            message = cantools.db.Message(1,
+                                          'M',
+                                          8,
+                                          [signal_0, signal_1])
+
+            with self.assertRaises(cantools.db.Error) as cm:
+                message.check_signals()
+
+            self.assertEqual(str(cm.exception),
+                             'The signals S1 and S0 are overlapping.')
+
+        # Outside the message.
+        datas = [
+            Data(start=56, length=2)
+        ]
+
+        for data in datas:
+            signal = cantools.db.Signal('S',
+                                        data.start,
+                                        data.length,
+                                        'big_endian')
+            message = cantools.db.Message(1,
+                                          'M',
+                                          8,
+                                          [signal])
+
+            with self.assertRaises(cantools.db.Error) as cm:
+                message.check_signals()
+
+            self.assertEqual(str(cm.exception),
+                             'The signal S does not fit in the message.')
 
 
 # This file is not '__main__' when executed via 'python setup.py3

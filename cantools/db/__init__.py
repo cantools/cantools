@@ -9,11 +9,12 @@ from .message import EncodeError
 from .message import DecodeError
 from .signal import Signal
 from .node import Node
+from .errors import Error
 from . import diagnostics
 from ..compat import fopen
 
 
-class UnsupportedDatabaseFormatError(Exception):
+class UnsupportedDatabaseFormatError(Error):
     """This exception is raised when :func:`~cantools.db.load_file()`,
     :func:`~cantools.db.load()` and :func:`~cantools.db.load_string()`
     are unable to parse given database file or string.

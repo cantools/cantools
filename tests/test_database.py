@@ -831,6 +831,23 @@ IO_DEBUG(
         self.assertEqual(abs_info_mux.multiplexer_ids, None)
         self.assertEqual(abs_info_mux.multiplexer_signal, None)
 
+        outside_temp = db.messages[1].signals[9]
+
+        self.assertEqual(outside_temp.name, 'OutsideTemp')
+        self.assertEqual(outside_temp.start, 21)
+        self.assertEqual(outside_temp.length, 12)
+        self.assertEqual(outside_temp.receivers, [])
+        self.assertEqual(outside_temp.byte_order, 'big_endian')
+        self.assertEqual(outside_temp.is_signed, False)
+        self.assertEqual(outside_temp.is_float, False)
+        self.assertEqual(outside_temp.scale, 0.05)
+        self.assertEqual(outside_temp.offset, -40)
+        self.assertEqual(outside_temp.minimum, 0)
+        self.assertEqual(outside_temp.maximum, 100)
+        self.assertEqual(outside_temp.unit, 'Cel')
+        self.assertEqual(outside_temp.choices, {0: 'init'})
+        self.assertEqual(outside_temp.comment, 'Outside temperature.')
+
         speed_km = db.messages[1].signals[10]
 
         self.assertEqual(speed_km.name, 'SpeedKm')
@@ -849,22 +866,20 @@ IO_DEBUG(
         self.assertEqual(speed_km.comment,
                          'Middle speed of front wheels in kilometers per hour.')
 
-        outside_temp = db.messages[1].signals[9]
-
-        self.assertEqual(outside_temp.name, 'OutsideTemp')
-        self.assertEqual(outside_temp.start, 21)
-        self.assertEqual(outside_temp.length, 12)
-        self.assertEqual(outside_temp.receivers, [])
-        self.assertEqual(outside_temp.byte_order, 'big_endian')
-        self.assertEqual(outside_temp.is_signed, False)
-        self.assertEqual(outside_temp.is_float, False)
-        self.assertEqual(outside_temp.scale, 0.05)
-        self.assertEqual(outside_temp.offset, -40)
-        self.assertEqual(outside_temp.minimum, 0)
-        self.assertEqual(outside_temp.maximum, 100)
-        self.assertEqual(outside_temp.unit, 'Cel')
-        self.assertEqual(outside_temp.choices, {0: 'init'})
-        self.assertEqual(outside_temp.comment, 'Outside temperature.')
+        self.assertEqual(db.messages[1].signal_tree,
+                         [
+                             {
+                                 'ABS_InfoMux': {
+                                     0: ['Info0', 'Info1'],
+                                     1: ['Info2', 'Info3'],
+                                     2: ['Info4', 'Info5'],
+                                     3: ['Info6', 'Info7']
+                                 }
+                             },
+                             'OutsideTemp',
+                             'SpeedKm',
+                             'Handbrake'
+                         ])
 
         ambient_lux = db.messages[24].signals[0]
 

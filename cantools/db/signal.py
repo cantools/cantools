@@ -267,6 +267,10 @@ class Signal(object):
 
         return self._multiplexer_ids
 
+    @multiplexer_ids.setter
+    def multiplexer_ids(self, value):
+        self._multiplexer_ids = value
+
     @property
     def multiplexer_signal(self):
         """The multiplexer signal if the signal is part of a multiplexed

@@ -435,13 +435,19 @@ class Message(object):
         message_bits = 8 * self.length * [None]
 
         for signal in self.signals:
-            signal_bits = signal.length * [signal]
+            signal_bits = signal.length * [signal.name]
 
             if signal.byte_order == 'big_endian':
                 padding = _start_bit(signal) * [None]
                 signal_bits = padding + signal_bits
             else:
-                raise NotImplementedError
+                signal_bits += signal.start * [None]
+                padding = (len(message_bits) - len(signal_bits)) * [None]
+                reversed_signal_bits = padding + signal_bits
+                signal_bits = []
+
+                for i in range(0, len(message_bits), 8):
+                    signal_bits = reversed_signal_bits[i:i + 8] + signal_bits
 
             # Check that the signal fits in the message.
             if len(signal_bits) > len(message_bits):
@@ -457,9 +463,9 @@ class Message(object):
                         raise Error(
                             'The signals {} and {} are overlapping.'.format(
                                 signal.name,
-                                message_bits[offset].name))
+                                message_bits[offset]))
 
-                    message_bits[offset] = signal
+                    message_bits[offset] = signal.name
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(

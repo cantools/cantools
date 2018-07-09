@@ -2038,48 +2038,75 @@ IO_DEBUG(
         db.as_dbc_string()
 
     def test_check_signals(self):
-        Data = namedtuple('Data', ['start', 'length'])
+        Data = namedtuple('Data', ['start', 'length', 'byte_order'])
 
         # Not overlapping.
         datas = [
-            (Data(start=7, length=1), Data(start=6, length=1)),
-            (Data(start=7, length=8), Data(start=15, length=8)),
-            (Data(start=7, length=7), Data(start=0, length=2))
-        ]
-
-        for s0, s1 in datas:
-            signal_0 = cantools.db.Signal('S0',
-                                          s0.start,
-                                          s0.length,
-                                          'big_endian')
-            signal_1 = cantools.db.Signal('S1',
-                                          s1.start,
-                                          s1.length,
-                                          'big_endian')
-            message = cantools.db.Message(1,
-                                          'M',
-                                          8,
-                                          [signal_0, signal_1])
-            message.check_signals()
-
-        # Overlapping.
-        datas = [
-            (Data(start=7, length=1), Data(start=7, length=1)),
-            (Data(start=7, length=8), Data(start=5, length=10))
+            (
+                Data(start=7, length=1, byte_order='big_endian'),
+                Data(start=6, length=1, byte_order='big_endian')
+            ),
+            (
+                Data(start=7, length=8, byte_order='big_endian'),
+                Data(start=15, length=8, byte_order='big_endian')
+            ),
+            (
+                Data(start=7, length=7, byte_order='big_endian'),
+                Data(start=0, length=2, byte_order='big_endian')
+            ),
+            (
+                Data(start=2, length=6, byte_order='little_endian'),
+                Data(start=0, length=2, byte_order='little_endian')
+            ),
+            (
+                Data(start=2, length=7, byte_order='little_endian'),
+                Data(start=1, length=9, byte_order='big_endian')
+            )
         ]
 
         for data0, data1 in datas:
             signal_0 = cantools.db.Signal('S0',
                                           data0.start,
                                           data0.length,
-                                          'big_endian')
+                                          data0.byte_order)
             signal_1 = cantools.db.Signal('S1',
                                           data1.start,
                                           data1.length,
-                                          'big_endian')
+                                          data1.byte_order)
             message = cantools.db.Message(1,
                                           'M',
-                                          8,
+                                          7,
+                                          [signal_0, signal_1])
+            message.check_signals()
+
+        # Overlapping.
+        datas = [
+            (
+                Data(start=7, length=1, byte_order='big_endian'),
+                Data(start=7, length=1, byte_order='big_endian')
+            ),
+            (
+                Data(start=7, length=8, byte_order='big_endian'),
+                Data(start=5, length=10, byte_order='big_endian')
+            ),
+            (
+                Data(start=2, length=7, byte_order='little_endian'),
+                Data(start=1, length=10, byte_order='big_endian')
+            )
+        ]
+
+        for data0, data1 in datas:
+            signal_0 = cantools.db.Signal('S0',
+                                          data0.start,
+                                          data0.length,
+                                          data0.byte_order)
+            signal_1 = cantools.db.Signal('S1',
+                                          data1.start,
+                                          data1.length,
+                                          data1.byte_order)
+            message = cantools.db.Message(1,
+                                          'M',
+                                          7,
                                           [signal_0, signal_1])
 
             with self.assertRaises(cantools.db.Error) as cm:
@@ -2090,14 +2117,14 @@ IO_DEBUG(
 
         # Outside the message.
         datas = [
-            Data(start=56, length=2)
+            Data(start=56, length=2, byte_order='big_endian')
         ]
 
         for data in datas:
             signal = cantools.db.Signal('S',
                                         data.start,
                                         data.length,
-                                        'big_endian')
+                                        data.byte_order)
             message = cantools.db.Message(1,
                                           'M',
                                           8,

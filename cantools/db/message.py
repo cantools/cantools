@@ -38,6 +38,9 @@ class Message(object):
     """A CAN message with frame id, comment, signals and other
     information.
 
+    If `strict` is ``True`` an exception is raised if any signals are
+    overlapping or if they don't fit in the message.
+
     """
 
     def __init__(self,
@@ -52,7 +55,7 @@ class Message(object):
                  dbc_specifics=None,
                  is_extended_frame=False,
                  bus_name=None,
-                 check_signals=False):
+                 strict=True):
         self._frame_id = frame_id
         self._is_extended_frame = is_extended_frame
         self._name = name
@@ -65,11 +68,10 @@ class Message(object):
         self._cycle_time = cycle_time
         self._dbc = dbc_specifics
         self._bus_name = bus_name
-        self._codecs = self._create_codec()
-        self._signal_tree = self._create_signal_tree(self._codecs)
-
-        if check_signals:
-            self.check_signals()
+        self._codecs = None
+        self._signal_tree = None
+        self._strict = strict
+        self.refresh()
 
     def _create_codec(self, parent_signal=None, multiplexer_id=None):
         """Create a codec of all signals with given parent signal. This is a
@@ -494,14 +496,25 @@ class Message(object):
                 self._check_signal(message_bits,
                                    self.get_signal_by_name(signal_name))
 
-    def check_signals(self):
-        """Check that no signals are overlapping and that they fit in the
-        message.
+    def refresh(self, strict=None):
+        """Refresh the internal message state.
+
+        If `strict` is ``True`` an exception is raised if any signals
+        are overlapping or if they don't fit in the message. This
+        argument overrides the value of the same argument passed to
+        the constructor.
 
         """
 
-        message_bits = 8 * self.length * [None]
-        self._check_signal_tree(message_bits, self.signal_tree)
+        self._codecs = self._create_codec()
+        self._signal_tree = self._create_signal_tree(self._codecs)
+
+        if strict is None:
+            strict = self._strict
+
+        if strict:
+            message_bits = 8 * self.length * [None]
+            self._check_signal_tree(message_bits, self.signal_tree)
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(

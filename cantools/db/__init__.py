@@ -49,16 +49,17 @@ class UnsupportedDatabaseFormatError(Error):
 def load_file(filename,
               database_format=None,
               encoding='utf-8',
-              frame_id_mask=None):
+              frame_id_mask=None,
+              strict=True):
     """Open, read and parse given database file and return a
     :class:`~cantools.db.Database` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
-    `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
-    ``'cdd'`` or ``None``, where ``None`` means transparent format.
-
     `encoding` specifies the file encoding.
+
+    See :func:`~cantools.db.load_string()` for descriptions of other
+    arguments.
 
     Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
     exception if given file does not contain a supported database
@@ -71,17 +72,23 @@ def load_file(filename,
     """
 
     with fopen(filename, 'r', encoding=encoding) as fin:
-        return load(fin, database_format, frame_id_mask)
+        return load(fin,
+                    database_format,
+                    frame_id_mask,
+                    strict)
 
 
-def load(fp, database_format=None, frame_id_mask=None):
+def load(fp,
+         database_format=None,
+         frame_id_mask=None,
+         strict=True):
     """Read and parse given database file-like object and return a
     :class:`~cantools.db.Database` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
-    `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
-    ``'cdd'`` or ``None``, where ``None`` means transparent format.
+    See :func:`~cantools.db.load_string()` for descriptions of other
+    arguments.
 
     Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
     exception if given file-like object does not contain a supported
@@ -94,10 +101,16 @@ def load(fp, database_format=None, frame_id_mask=None):
 
     """
 
-    return load_string(fp.read(), database_format, frame_id_mask)
+    return load_string(fp.read(),
+                       database_format,
+                       frame_id_mask,
+                       strict)
 
 
-def load_string(string, database_format=None, frame_id_mask=None):
+def load_string(string,
+                database_format=None,
+                frame_id_mask=None,
+                strict=True):
     """Parse given database string and return a
     :class:`~cantools.db.Database` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -105,6 +118,8 @@ def load_string(string, database_format=None, frame_id_mask=None):
 
     `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
     ``'cdd'`` or ``None``, where ``None`` means transparent format.
+
+    See :class:`~cantools.db.Database` for a description of `strict`.
 
     Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
     exception if given string does not contain a supported database
@@ -127,27 +142,34 @@ def load_string(string, database_format=None, frame_id_mask=None):
     e_sym = None
     e_cdd = None
 
+    def load_can_database(fmt):
+        db = Database(frame_id_mask=frame_id_mask,
+                      strict=strict)
+
+        if fmt == 'dbc':
+            db.add_dbc_string(string)
+        elif fmt == 'kcd':
+            db.add_kcd_string(string)
+        elif fmt == 'sym':
+            db.add_sym_string(string)
+
+        return db
+
     if database_format in ['dbc', None]:
         try:
-            db = Database(frame_id_mask=frame_id_mask)
-            db.add_dbc_string(string)
-            return db
+            return load_can_database('dbc')
         except ParseError as e:
             e_dbc = e
 
     if database_format in ['kcd', None]:
         try:
-            db = Database(frame_id_mask=frame_id_mask)
-            db.add_kcd_string(string)
-            return db
+            return load_can_database('kcd')
         except (ElementTree.ParseError, ValueError) as e:
             e_kcd = e
 
     if database_format in ['sym', None]:
         try:
-            db = Database(frame_id_mask=frame_id_mask)
-            db.add_sym_string(string)
-            return db
+            return load_can_database('sym')
         except ParseError as e:
             e_sym = e
 

@@ -18,6 +18,9 @@ class Database(object):
     :func:`cantools.db.load_file()` and
     :func:`cantools.db.load_string()` returns instances of this class.
 
+    If `strict` is ``True`` an exception is raised if any signals are
+    overlapping or if they don't fit in their message.
+
     """
 
     def __init__(self,
@@ -26,7 +29,8 @@ class Database(object):
                  buses=None,
                  version=None,
                  dbc_specifics=None,
-                 frame_id_mask=None):
+                 frame_id_mask=None,
+                 strict=True):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
         self._buses = buses if buses else []
@@ -39,6 +43,8 @@ class Database(object):
             frame_id_mask = 0xffffffff
 
         self._frame_id_mask = frame_id_mask
+        self._strict = strict
+        self.refresh()
 
     @property
     def messages(self):
@@ -122,13 +128,12 @@ class Database(object):
 
         database = dbc.load_string(string)
 
-        for message in database.messages:
-            self.add_message(message)
-
+        self._messages = database.messages
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
+        self.refresh()
 
     def add_kcd(self, fp):
         """Read and parse KCD data from given file-like object and add the
@@ -157,13 +162,12 @@ class Database(object):
 
         database = kcd.load_string(string)
 
-        for message in database.messages:
-            self.add_message(message)
-
+        self._messages = database.messages
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
+        self.refresh()
 
     def add_sym(self, fp):
         """Read and parse SYM data from given file-like object and add the
@@ -192,20 +196,17 @@ class Database(object):
 
         database = sym.load_string(string)
 
-        for message in database.messages:
-            self.add_message(message)
-
+        self._messages = database.messages
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
+        self.refresh()
 
-    def add_message(self, message):
+    def _add_message(self, message):
         """Add given message to the database.
 
         """
-
-        self._messages.append(message)
 
         if message.name in self._name_to_message:
             LOGGER.warning("Overwriting message with name '%s' in the "
@@ -252,66 +253,14 @@ class Database(object):
 
         """
 
-        try:
-            return self._name_to_message[name]
-        except KeyError:
-            # Maybe the dict is outdated. Try finding the message and update the dict
-            message = self._find_message_by_name(name)
-
-            if message is not None:
-                self._name_to_message[name] = message
-
-                return message
-
-        raise KeyError(name)
+        return self._name_to_message[name]
 
     def get_message_by_frame_id(self, frame_id):
         """Find the message object for given frame id `frame_id`.
 
         """
 
-        try:
-            return self._frame_id_to_message[frame_id & self._frame_id_mask]
-        except KeyError:
-            # Maybe the dict is outdated. Try finding the message and update the dict
-            message = self._find_message_by_frame_id(frame_id)
-
-            if message is not None:
-                self._frame_id_to_message[frame_id & self._frame_id_mask] = message
-
-                return message
-
-        raise KeyError(frame_id & self._frame_id_mask)
-
-    def _find_message_by_name(self, name):
-        """Find the message object for given name `name`. This is just private
-        to encourage usage of the dict based get_message_by_name. It
-        is used as a backup mechanism to cope with outdated dicts due
-        to name changes.
-
-        """
-
-        for message in self._messages:
-            if message.name == name:
-                return message
-
-        return None
-
-    def _find_message_by_frame_id(self, frame_id):
-        """Find the message object for given frame id `frame_id`. This is just
-        private to encourage usage of the dict based
-        get_message_by_name. It is used as a backup mechanism to cope
-        with outdated dicts due to name changes.
-
-        """
-
-        mask = self._frame_id_mask
-
-        for message in self._messages:
-            if message.frame_id & mask == frame_id & mask:
-                return message
-
-        return None
+        return self._frame_id_to_message[frame_id & self._frame_id_mask]
 
     def get_node_by_name(self, name):
         """Find the node object for given name `name`.
@@ -389,6 +338,22 @@ class Database(object):
             message = self._name_to_message[frame_id_or_name]
 
         return message.decode(data, decode_choices, scaling)
+
+    def refresh(self):
+        """Refresh the internal database state.
+
+        This method must be called after modifying any message in the
+        database to refresh the internal lookup tables used when
+        encoding and decoding messages.
+
+        """
+
+        self._name_to_message = {}
+        self._frame_id_to_message = {}
+
+        for message in self._messages:
+            message.refresh(self._strict)
+            self._add_message(message)
 
     def __repr__(self):
         lines = []

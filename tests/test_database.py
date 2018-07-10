@@ -553,31 +553,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded, decoded_message)
 
-    def test_add_message(self):
-        db = cantools.db.Database()
-
-        signals = [
-            cantools.db.Signal(name='signal',
-                               start=0,
-                               length=4,
-                               receivers=['foo'],
-                               byte_order='big_endian',
-                               scale=1.0,
-                               offset=10,
-                               minimum=10.0,
-                               maximum=100.0,
-                               unit='m/s')
-        ]
-
-        message = cantools.db.Message(frame_id=37,
-                                      name='message',
-                                      length=8,
-                                      senders=['bar'],
-                                      signals=signals,
-                                      comment='')
-        db.add_message(message)
-        self.assertEqual(len(db.messages), 1)
-
     def test_get_message_by_frame_id_and_name(self):
         filename = os.path.join('tests', 'files', 'motohawk.dbc')
 
@@ -2018,7 +1993,7 @@ IO_DEBUG(
         db.messages[0].signals[0].multiplexer_signal = db.messages[0].signals[0]
         db.messages[0].signals[0].comment = 'TheNewComment'
 
-    def test_lookups(self):
+    def test_refresh(self):
         filename = os.path.join('tests', 'files', 'attributes.dbc')
 
         with open(filename, 'r') as fin:
@@ -2027,11 +2002,13 @@ IO_DEBUG(
         message = db.get_message_by_frame_id(0x39)
         self.assertEqual(message.name, 'TheMessage')
         message.frame_id = 0x40
+        db.refresh()
         message = db.get_message_by_frame_id(0x40)
         self.assertEqual(message.name, 'TheMessage')
         self.assertEqual(message.frame_id,0x40)
 
         message.name = 'TheNewMessage'
+        db.refresh()
         message = db.get_message_by_name('TheNewMessage')
         self.assertEqual(message.name, 'TheNewMessage')
         self.assertEqual(message.frame_id, 0x40)
@@ -2059,7 +2036,7 @@ IO_DEBUG(
         # Test that dump executes without raising.
         db.as_dbc_string()
 
-    def test_check_signals_no_multiplexer(self):
+    def test_strict_no_multiplexer(self):
         Data = namedtuple('Data', ['start', 'length', 'byte_order'])
 
         # Signals not overlapping.
@@ -2095,11 +2072,11 @@ IO_DEBUG(
                                           data1.start,
                                           data1.length,
                                           data1.byte_order)
-            message = cantools.db.Message(1,
-                                          'M',
-                                          7,
-                                          [signal_0, signal_1])
-            message.check_signals()
+            cantools.db.Message(1,
+                                'M',
+                                7,
+                                [signal_0, signal_1],
+                                strict=True)
 
         # Signals overlapping.
         datas = [
@@ -2132,7 +2109,7 @@ IO_DEBUG(
                                     'M',
                                     7,
                                     [signal_0, signal_1],
-                                    check_signals=True)
+                                    strict=True)
 
             self.assertEqual(str(cm.exception),
                              'The signals S1 and S0 are overlapping in message M.')
@@ -2158,12 +2135,12 @@ IO_DEBUG(
                                     'M',
                                     8,
                                     [signal],
-                                    check_signals=True)
+                                    strict=True)
 
             self.assertEqual(str(cm.exception),
                              'The signal S does not fit in message M.')
 
-    def test_check_signals_multiplexer(self):
+    def test_strict_multiplexer(self):
         # Signals not overlapping.
         signals = [
             cantools.db.Signal('S0',
@@ -2213,8 +2190,11 @@ IO_DEBUG(
                                multiplexer_signal='S6')
         ]
 
-        message = cantools.db.Message(1, 'M', 7, signals)
-        message.check_signals()
+        cantools.db.Message(1,
+                            'M',
+                            7,
+                            signals,
+                            strict=True)
 
         # Signals overlapping.
         datas = [
@@ -2355,9 +2335,28 @@ IO_DEBUG(
 
         for signals, expected_overlpping in datas:
             with self.assertRaises(cantools.db.Error) as cm:
-                cantools.db.Message(1, 'M', 7, signals, check_signals=True)
+                cantools.db.Message(1, 'M', 7, signals, strict=True)
 
             self.assertEqual(str(cm.exception), expected_overlpping)
+
+    def test_database_signals_check_failure(self):
+        signal = cantools.db.Signal('S',
+                                    7,
+                                    33,
+                                    'big_endian')
+
+        message = cantools.db.Message(37,
+                                      'M',
+                                      4,
+                                      [signal],
+                                      strict=False)
+
+        with self.assertRaises(cantools.db.errors.Error) as cm:
+            cantools.db.Database([message])
+
+        self.assertEqual(str(cm.exception),
+                         'The signal S does not fit in message M.')
+
 
 
 # This file is not '__main__' when executed via 'python setup.py3

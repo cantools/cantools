@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Script testing dbc manipulation and io.
+# Script testing DBC manipulation and io.
 #
 
 import os
@@ -10,7 +10,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 INPUT_DBC_PATH = os.path.join(SCRIPT_DIR, 'dbc_input.dbc')
 OUTPUT_DBC_PATH = os.path.join(SCRIPT_DIR, 'dbc_output.dbc')
 
-# Read the dbc.
+# Read the DBC.
 print("Loading DBC database from '{}'.".format(INPUT_DBC_PATH))
 db = cantools.db.load_file(INPUT_DBC_PATH)
 

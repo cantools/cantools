@@ -83,9 +83,9 @@ def decode_data(data, fields, formats, decode_choices, scaling):
 
     return {
         field.name: _decode_field(field,
-                                    value,
-                                    decode_choices,
-                                    scaling)
+                                  value,
+                                  decode_choices,
+                                  scaling)
         for field, value in zip(fields, unpacked)
     }
 
@@ -115,7 +115,6 @@ def create_encode_decode_formats(datas, number_of_bytes):
         return fmt, padding_mask
 
     def fmt(items):
-
         return ''.join([item[0] for item in items])
 
     def padding_mask(items):

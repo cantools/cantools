@@ -1,6 +1,7 @@
 # A CAN message.
 
 import binascii
+from copy import deepcopy
 
 from .format import encode_data
 from .format import decode_data
@@ -50,7 +51,8 @@ class Message(object):
                  cycle_time=None,
                  dbc_specifics=None,
                  is_extended_frame=False,
-                 bus_name=None):
+                 bus_name=None,
+                 check_signals=False):
         self._frame_id = frame_id
         self._is_extended_frame = is_extended_frame
         self._name = name
@@ -65,6 +67,9 @@ class Message(object):
         self._bus_name = bus_name
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
+
+        if check_signals:
+            self.check_signals()
 
     def _create_codec(self, parent_signal=None, multiplexer_id=None):
         """Create a codec of all signals with given parent signal. This is a
@@ -426,6 +431,69 @@ class Message(object):
 
         raise NotImplementedError
 
+    def _check_signal(self, message_bits, signal):
+        signal_bits = signal.length * [signal.name]
+
+        if signal.byte_order == 'big_endian':
+            padding = _start_bit(signal) * [None]
+            signal_bits = padding + signal_bits
+        else:
+            signal_bits += signal.start * [None]
+
+            if len(signal_bits) < len(message_bits):
+                padding = (len(message_bits) - len(signal_bits)) * [None]
+                reversed_signal_bits = padding + signal_bits
+            else:
+                reversed_signal_bits = signal_bits
+
+            signal_bits = []
+
+            for i in range(0, len(reversed_signal_bits), 8):
+                signal_bits = reversed_signal_bits[i:i + 8] + signal_bits
+
+        # Check that the signal fits in the message.
+        if len(signal_bits) > len(message_bits):
+            raise Error(
+                'The signal {} does not fit in message {}.'.format(
+                    signal.name,
+                    self.name))
+
+        # Check that the signal does not overlap with other
+        # signals.
+        for offset, signal_bit in enumerate(signal_bits):
+            if signal_bit is not None:
+                if message_bits[offset] is not None:
+                    raise Error(
+                        'The signals {} and {} are overlapping in message {}.'.format(
+                            signal.name,
+                            message_bits[offset],
+                            self.name))
+
+                message_bits[offset] = signal.name
+
+    def _check_mux(self, message_bits, mux):
+        signal_name, children = list(mux.items())[0]
+        self._check_signal(message_bits,
+                           self.get_signal_by_name(signal_name))
+        children_message_bits = deepcopy(message_bits)
+
+        for multiplexer_id in sorted(children):
+            child_tree = children[multiplexer_id]
+            child_message_bits = deepcopy(children_message_bits)
+            self._check_signal_tree(child_message_bits, child_tree)
+
+            for i, child_bit in enumerate(child_message_bits):
+                if child_bit is not None:
+                    message_bits[i] = child_bit
+
+    def _check_signal_tree(self, message_bits, signal_tree):
+        for signal_name in signal_tree:
+            if isinstance(signal_name, dict):
+                self._check_mux(message_bits, signal_name)
+            else:
+                self._check_signal(message_bits,
+                                   self.get_signal_by_name(signal_name))
+
     def check_signals(self):
         """Check that no signals are overlapping and that they fit in the
         message.
@@ -433,44 +501,7 @@ class Message(object):
         """
 
         message_bits = 8 * self.length * [None]
-
-        for signal in self.signals:
-            signal_bits = signal.length * [signal.name]
-
-            if signal.byte_order == 'big_endian':
-                padding = _start_bit(signal) * [None]
-                signal_bits = padding + signal_bits
-            else:
-                signal_bits += signal.start * [None]
-
-                if len(signal_bits) < len(message_bits):
-                    padding = (len(message_bits) - len(signal_bits)) * [None]
-                    reversed_signal_bits = padding + signal_bits
-                else:
-                    reversed_signal_bits = signal_bits
-
-                signal_bits = []
-
-                for i in range(0, len(reversed_signal_bits), 8):
-                    signal_bits = reversed_signal_bits[i:i + 8] + signal_bits
-
-            # Check that the signal fits in the message.
-            if len(signal_bits) > len(message_bits):
-                raise Error(
-                    'The signal {} does not fit in the message.'.format(
-                        signal.name))
-
-            # Check that the signal does not overlap with other
-            # signals.
-            for offset, signal_bit in enumerate(signal_bits):
-                if signal_bit is not None:
-                    if message_bits[offset] is not None:
-                        raise Error(
-                            'The signals {} and {} are overlapping.'.format(
-                                signal.name,
-                                message_bits[offset]))
-
-                    message_bits[offset] = signal.name
+        self._check_signal_tree(message_bits, self.signal_tree)
 
     def __repr__(self):
         return "message('{}', 0x{:x}, {}, {}, {})".format(

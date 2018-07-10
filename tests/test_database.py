@@ -105,10 +105,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          "node('FUM', None)\n"
                          "\n"
                          "message('Foo', 0x12330, True, 8, 'Foo.')\n"
-                         "  signal('Bar', 6, 32, 'big_endian', True, 0.1, "
-                         "0, 1, 5, 'm', False, None, None, 'Bar.')\n"
                          "  signal('Foo', 0, 12, 'big_endian', True, 0.01, "
                          "250, 229.53, 270.47, 'degK', False, None, None, None)\n"
+                         "  signal('Bar', 24, 32, 'big_endian', True, 0.1, "
+                         "0, 1, 5, 'm', False, None, None, 'Bar.')\n"
                          "\n"
                          "message('Fum', 0x12331, True, 5, None)\n"
                          "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
@@ -155,6 +155,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_dbc_file(filename)
 
         messages = [
+            (
+                'Foo',
+                {'Foo': 250, 'Bar': 0.0},
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+            ),
             (
                 'Fum',
                 {'Fum': 9, 'Fam': 5},
@@ -835,10 +840,10 @@ IO_DEBUG(
         outside_temp = db.messages[1].signals[9]
 
         self.assertEqual(outside_temp.name, 'OutsideTemp')
-        self.assertEqual(outside_temp.start, 21)
+        self.assertEqual(outside_temp.start, 18)
         self.assertEqual(outside_temp.length, 12)
         self.assertEqual(outside_temp.receivers, [])
-        self.assertEqual(outside_temp.byte_order, 'big_endian')
+        self.assertEqual(outside_temp.byte_order, 'little_endian')
         self.assertEqual(outside_temp.is_signed, False)
         self.assertEqual(outside_temp.is_float, False)
         self.assertEqual(outside_temp.scale, 0.05)
@@ -939,6 +944,23 @@ IO_DEBUG(
                              16383: 'sensor '
                          })
         self.assertEqual(wheel_angle.comment, None)
+
+        big_endian_a = db.get_message_by_name('BigEndian').signals[0]
+
+        self.assertEqual(big_endian_a.name, 'A')
+        self.assertEqual(big_endian_a.start, 7)
+        self.assertEqual(big_endian_a.length, 17)
+        self.assertEqual(big_endian_a.receivers, [])
+        self.assertEqual(big_endian_a.byte_order, 'big_endian')
+        self.assertEqual(big_endian_a.is_signed, False)
+        self.assertEqual(big_endian_a.is_float, False)
+        self.assertEqual(big_endian_a.scale, 1)
+        self.assertEqual(big_endian_a.offset, 0)
+        self.assertEqual(big_endian_a.minimum, None)
+        self.assertEqual(big_endian_a.maximum, None)
+        self.assertEqual(big_endian_a.unit, None)
+        self.assertEqual(big_endian_a.choices, None)
+        self.assertEqual(big_endian_a.comment, None)
 
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -2104,16 +2126,16 @@ IO_DEBUG(
                                           data1.start,
                                           data1.length,
                                           data1.byte_order)
-            message = cantools.db.Message(1,
-                                          'M',
-                                          7,
-                                          [signal_0, signal_1])
 
             with self.assertRaises(cantools.db.Error) as cm:
-                message.check_signals()
+                cantools.db.Message(1,
+                                    'M',
+                                    7,
+                                    [signal_0, signal_1],
+                                    check_signals=True)
 
             self.assertEqual(str(cm.exception),
-                             'The signals S1 and S0 are overlapping.')
+                             'The signals S1 and S0 are overlapping in message M.')
 
         # Signal outside the message.
         datas = [
@@ -2130,16 +2152,212 @@ IO_DEBUG(
                                         data.start,
                                         data.length,
                                         data.byte_order)
-            message = cantools.db.Message(1,
-                                          'M',
-                                          8,
-                                          [signal])
 
             with self.assertRaises(cantools.db.Error) as cm:
-                message.check_signals()
+                cantools.db.Message(1,
+                                    'M',
+                                    8,
+                                    [signal],
+                                    check_signals=True)
 
             self.assertEqual(str(cm.exception),
-                             'The signal S does not fit in the message.')
+                             'The signal S does not fit in message M.')
+
+    def test_check_signals_multiplexer(self):
+        # Signals not overlapping.
+        signals = [
+            cantools.db.Signal('S0',
+                               7,
+                               2,
+                               'big_endian',
+                               is_multiplexer=True),
+            cantools.db.Signal('S1',
+                               5,
+                               2,
+                               'big_endian',
+                               multiplexer_ids=[0],
+                               multiplexer_signal='S0'),
+            cantools.db.Signal('S2',
+                               5,
+                               1,
+                               'big_endian',
+                               multiplexer_ids=[1],
+                               multiplexer_signal='S0'),
+            cantools.db.Signal('S3',
+                               3,
+                               1,
+                               'big_endian'),
+            cantools.db.Signal('S4',
+                               2,
+                               2,
+                               'big_endian',
+                               is_multiplexer=True),
+            cantools.db.Signal('S5',
+                               0,
+                               2,
+                               'big_endian',
+                               multiplexer_ids=[0],
+                               multiplexer_signal='S4'),
+            cantools.db.Signal('S6',
+                               0,
+                               2,
+                               'big_endian',
+                               is_multiplexer=True,
+                               multiplexer_ids=[1],
+                               multiplexer_signal='S4'),
+            cantools.db.Signal('S7',
+                               14,
+                               1,
+                               'big_endian',
+                               multiplexer_ids=[0],
+                               multiplexer_signal='S6')
+        ]
+
+        message = cantools.db.Message(1, 'M', 7, signals)
+        message.check_signals()
+
+        # Signals overlapping.
+        datas = [
+            (
+                [
+                    cantools.db.Signal('S0',
+                                       7,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=True,
+                                       multiplexer_ids=None,
+                                       multiplexer_signal=None),
+                    cantools.db.Signal('S1',
+                                       5,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=False,
+                                       multiplexer_ids=[0],
+                                       multiplexer_signal='S0'),
+                    cantools.db.Signal('S2',
+                                       5,
+                                       1,
+                                       'big_endian',
+                                       is_multiplexer=False,
+                                       multiplexer_ids=[1],
+                                       multiplexer_signal='S0'),
+                    cantools.db.Signal('S3',
+                                       4,
+                                       1,
+                                       'big_endian',
+                                       is_multiplexer=False,
+                                       multiplexer_ids=None,
+                                       multiplexer_signal=None)
+                ],
+                'The signals S3 and S1 are overlapping in message M.'
+            ),
+            (
+                [
+                    cantools.db.Signal('S0',
+                                       7,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=True),
+                    cantools.db.Signal('S1',
+                                       5,
+                                       2,
+                                       'big_endian',
+                                       multiplexer_ids=[0],
+                                       multiplexer_signal='S0'),
+                    cantools.db.Signal('S2',
+                                       5,
+                                       1,
+                                       'big_endian',
+                                       multiplexer_ids=[1],
+                                       multiplexer_signal='S0'),
+                    cantools.db.Signal('S3',
+                                       3,
+                                       1,
+                                       'big_endian'),
+                    cantools.db.Signal('S4',
+                                       2,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=True),
+                    cantools.db.Signal('S5',
+                                       0,
+                                       2,
+                                       'big_endian',
+                                       multiplexer_ids=[0],
+                                       multiplexer_signal='S4'),
+                    cantools.db.Signal('S6',
+                                       0,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=True,
+                                       multiplexer_ids=[1],
+                                       multiplexer_signal='S4'),
+                    cantools.db.Signal('S7',
+                                       7,
+                                       1,
+                                       'big_endian',
+                                       multiplexer_ids=[0],
+                                       multiplexer_signal='S6')
+                ],
+                'The signals S7 and S0 are overlapping in message M.'
+            ),
+            (
+                [
+                    cantools.db.Signal('S0',
+                                       7,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=True),
+                    cantools.db.Signal('S1',
+                                       5,
+                                       2,
+                                       'big_endian',
+                                       multiplexer_ids=[0],
+                                       multiplexer_signal='S0'),
+                    cantools.db.Signal('S2',
+                                       5,
+                                       1,
+                                       'big_endian',
+                                       multiplexer_ids=[1],
+                                       multiplexer_signal='S0'),
+                    cantools.db.Signal('S3',
+                                       3,
+                                       1,
+                                       'big_endian'),
+                    cantools.db.Signal('S4',
+                                       2,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=True),
+                    cantools.db.Signal('S5',
+                                       0,
+                                       2,
+                                       'big_endian',
+                                       multiplexer_ids=[0],
+                                       multiplexer_signal='S4'),
+                    cantools.db.Signal('S6',
+                                       1,
+                                       2,
+                                       'big_endian',
+                                       is_multiplexer=True,
+                                       multiplexer_ids=[1],
+                                       multiplexer_signal='S4'),
+                    cantools.db.Signal('S7',
+                                       14,
+                                       1,
+                                       'big_endian',
+                                       multiplexer_ids=[0],
+                                       multiplexer_signal='S6')
+                ],
+                'The signals S6 and S4 are overlapping in message M.'
+            )
+        ]
+
+        for signals, expected_overlpping in datas:
+            with self.assertRaises(cantools.db.Error) as cm:
+                cantools.db.Message(1, 'M', 7, signals, check_signals=True)
+
+            self.assertEqual(str(cm.exception), expected_overlpping)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

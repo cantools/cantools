@@ -250,40 +250,40 @@ BO_ 2304208418 RT_SB_Trig_Accel: 8 Vector__XXX
  SG_ Validity_Average_Accel : 1|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ Validity_MFDD : 0|1@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304800804 RT_DL1MK3_Measure_Time_12: 2 Vector__XXX
+BO_ 2304800804 RT_DL1MK3_Measure_Time_12: 3 Vector__XXX
  SG_ Measured_Time_12 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304800548 RT_DL1MK3_Measure_Time_11: 2 Vector__XXX
+BO_ 2304800548 RT_DL1MK3_Measure_Time_11: 3 Vector__XXX
  SG_ Measured_Time_11 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304800292 RT_DL1MK3_Measure_Time_10: 2 Vector__XXX
+BO_ 2304800292 RT_DL1MK3_Measure_Time_10: 3 Vector__XXX
  SG_ Measured_Time_10 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304800036 RT_DL1MK3_Measure_Time_9: 2 Vector__XXX
+BO_ 2304800036 RT_DL1MK3_Measure_Time_9: 3 Vector__XXX
  SG_ Measured_Time_9 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304799780 RT_DL1MK3_Measure_Time_8: 2 Vector__XXX
+BO_ 2304799780 RT_DL1MK3_Measure_Time_8: 3 Vector__XXX
  SG_ Measured_Time_8 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304799524 RT_DL1MK3_Measure_Time_7: 2 Vector__XXX
+BO_ 2304799524 RT_DL1MK3_Measure_Time_7: 3 Vector__XXX
  SG_ Measured_Time_7 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304799268 RT_DL1MK3_Measure_Time_6: 2 Vector__XXX
+BO_ 2304799268 RT_DL1MK3_Measure_Time_6: 3 Vector__XXX
  SG_ Measured_Time_6 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304799012 RT_DL1MK3_Measure_Time_5: 2 Vector__XXX
+BO_ 2304799012 RT_DL1MK3_Measure_Time_5: 3 Vector__XXX
  SG_ Measured_Time_5 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304798756 RT_DL1MK3_Measure_Time_4: 2 Vector__XXX
+BO_ 2304798756 RT_DL1MK3_Measure_Time_4: 3 Vector__XXX
  SG_ Measured_Time_4 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304798500 RT_DL1MK3_Measure_Time_3: 2 Vector__XXX
+BO_ 2304798500 RT_DL1MK3_Measure_Time_3: 3 Vector__XXX
  SG_ Measured_Time_3 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304798244 RT_DL1MK3_Measure_Time_2: 2 Vector__XXX
+BO_ 2304798244 RT_DL1MK3_Measure_Time_2: 3 Vector__XXX
  SG_ Measured_Time_2 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2304797988 RT_DL1MK3_Measure_Time_1: 2 Vector__XXX
+BO_ 2304797988 RT_DL1MK3_Measure_Time_1: 3 Vector__XXX
  SG_ Measured_Time_1 : 0|24@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 2304735268 RT_DL1MK3_RPM: 2 Vector__XXX

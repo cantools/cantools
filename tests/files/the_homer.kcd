@@ -90,7 +90,7 @@
           <Signal name="Info7" offset="8" length="8"/>
         </MuxGroup>
       </Multiplex>
-      <Signal name="OutsideTemp" offset="18" length="12" endianess="big" bad-attribute="1">
+      <Signal name="OutsideTemp" offset="18" length="12" bad-attribute="1">
         <Notes>Outside temperature.</Notes>
         <Consumer>
           <NodeRef id="12"/>

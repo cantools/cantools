@@ -2037,10 +2037,10 @@ IO_DEBUG(
         # Test that dump executes without raising.
         db.as_dbc_string()
 
-    def test_check_signals(self):
+    def test_check_signals_no_multiplexer(self):
         Data = namedtuple('Data', ['start', 'length', 'byte_order'])
 
-        # Not overlapping.
+        # Signals not overlapping.
         datas = [
             (
                 Data(start=7, length=1, byte_order='big_endian'),
@@ -2079,7 +2079,7 @@ IO_DEBUG(
                                           [signal_0, signal_1])
             message.check_signals()
 
-        # Overlapping.
+        # Signals overlapping.
         datas = [
             (
                 Data(start=7, length=1, byte_order='big_endian'),
@@ -2115,9 +2115,14 @@ IO_DEBUG(
             self.assertEqual(str(cm.exception),
                              'The signals S1 and S0 are overlapping.')
 
-        # Outside the message.
+        # Signal outside the message.
         datas = [
-            Data(start=56, length=2, byte_order='big_endian')
+            Data(start=56, length=2, byte_order='big_endian'),
+            Data(start=63, length=2, byte_order='little_endian'),
+            Data(start=64, length=1, byte_order='big_endian'),
+            Data(start=64, length=1, byte_order='little_endian'),
+            Data(start=7, length=65, byte_order='big_endian'),
+            Data(start=0, length=65, byte_order='little_endian')
         ]
 
         for data in datas:

@@ -442,11 +442,16 @@ class Message(object):
                 signal_bits = padding + signal_bits
             else:
                 signal_bits += signal.start * [None]
-                padding = (len(message_bits) - len(signal_bits)) * [None]
-                reversed_signal_bits = padding + signal_bits
+
+                if len(signal_bits) < len(message_bits):
+                    padding = (len(message_bits) - len(signal_bits)) * [None]
+                    reversed_signal_bits = padding + signal_bits
+                else:
+                    reversed_signal_bits = signal_bits
+
                 signal_bits = []
 
-                for i in range(0, len(message_bits), 8):
+                for i in range(0, len(reversed_signal_bits), 8):
                     signal_bits = reversed_signal_bits[i:i + 8] + signal_bits
 
             # Check that the signal fits in the message.

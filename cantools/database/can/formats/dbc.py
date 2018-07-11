@@ -30,7 +30,7 @@ from ..node import Node
 from ..internal_database import InternalDatabase
 
 from .utils import num
-from .utils import ParseError
+from ...errors import ParseError
 
 
 # DBC section types.

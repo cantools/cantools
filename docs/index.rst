@@ -14,31 +14,31 @@ CAN BUS tools
 Functions and classes
 =====================
 
-.. autofunction:: cantools.db.load_file
+.. autofunction:: cantools.database.load_file
 
-.. autofunction:: cantools.db.load_string
+.. autofunction:: cantools.database.load_string
 
-.. autofunction:: cantools.db.load
+.. autofunction:: cantools.database.load
 
-.. autoclass:: cantools.db.Database
+.. autoclass:: cantools.database.can.Database
     :members:
 
-.. autoclass:: cantools.db.Message
+.. autoclass:: cantools.database.can.Message
     :members:
 
-.. autoclass:: cantools.db.Signal
+.. autoclass:: cantools.database.can.Signal
     :members:
 
-.. autoclass:: cantools.db.diagnostics.Database
+.. autoclass:: cantools.database.diagnostics.Database
     :members:
 
-.. autoclass:: cantools.db.diagnostics.Did
+.. autoclass:: cantools.database.diagnostics.Did
     :members:
 
-.. autoclass:: cantools.db.diagnostics.Data
+.. autoclass:: cantools.database.diagnostics.Data
     :members:
 
-.. autoclass:: cantools.db.UnsupportedDatabaseFormatError
+.. autoclass:: cantools.database.UnsupportedDatabaseFormatError
     :members:
 
 .. autoclass:: cantools.tester.Tester

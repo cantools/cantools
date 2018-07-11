@@ -3,8 +3,11 @@ import argparse
 import re
 import binascii
 import struct
-from . import db
+from . import database
 from . import tester
+
+# Remove once less users are using the old package structure.
+from . import database as db
 
 
 __author__ = 'Erik Moqvist'
@@ -70,9 +73,9 @@ def _format_message_multi_line(message, formatted_signals):
                                  signals=',\n'.join(indented_signals))
 
 
-def _format_message(database, frame_id, data, decode_choices, single_line):
+def _format_message(database_, frame_id, data, decode_choices, single_line):
     try:
-        message = database.get_message_by_frame_id(frame_id)
+        message = database_.get_message_by_frame_id(frame_id)
     except KeyError:
         return ' Unknown frame id {0} (0x{0:x})'.format(frame_id)
 
@@ -90,9 +93,9 @@ def _format_message(database, frame_id, data, decode_choices, single_line):
 
 
 def _do_decode(args):
-    database = db.load_file(args.database,
-                            encoding=args.encoding,
-                            frame_id_mask=args.frame_id_mask)
+    database_ = database.load_file(args.database,
+                                   encoding=args.encoding,
+                                   frame_id_mask=args.frame_id_mask)
     decode_choices = not args.no_decode_choices
 
     while True:
@@ -108,7 +111,7 @@ def _do_decode(args):
         if mo:
             frame_id, data = _mo_unpack(mo)
             line += ' ::'
-            line += _format_message(database,
+            line += _format_message(database_,
                                     frame_id,
                                     data,
                                     decode_choices,

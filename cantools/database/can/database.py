@@ -4,7 +4,7 @@ from .formats import dbc
 from .formats import kcd
 from .formats import sym
 from .internal_database import InternalDatabase
-from ..compat import fopen
+from ...compat import fopen
 
 
 LOGGER = logging.getLogger(__name__)
@@ -14,9 +14,10 @@ class Database(object):
     """This class contains all messages, signals and definitions of a CAN
     network.
 
-    The factory functions :func:`cantools.db.load()`,
-    :func:`cantools.db.load_file()` and
-    :func:`cantools.db.load_string()` returns instances of this class.
+    The factory functions :func:`load()<cantools.database.load()>`,
+    :func:`load_file()<cantools.database.load_file()>` and
+    :func:`load_string()<cantools.database.load_string()>` returns
+    instances of this class.
 
     If `strict` is ``True`` an exception is raised if any signals are
     overlapping or if they don't fit in their message.
@@ -94,7 +95,7 @@ class Database(object):
         """Read and parse DBC data from given file-like object and add the
         parsed data to the database.
 
-        >>> db = cantools.db.Database()
+        >>> db = cantools.database.Database()
         >>> with open ('foo.dbc', 'r') as fin:
         ...     db.add_dbc(fin)
 
@@ -108,7 +109,7 @@ class Database(object):
 
         `encoding` specifies the file encoding.
 
-        >>> db = cantools.db.Database()
+        >>> db = cantools.database.Database()
         >>> db.add_dbc_file('foo.dbc', 'r')
 
         """
@@ -120,7 +121,7 @@ class Database(object):
         """Parse given DBC data string and add the parsed data to the
         database.
 
-        >>> db = cantools.db.Database()
+        >>> db = cantools.database.Database()
         >>> with open ('foo.dbc', 'r') as fin:
         ...     db.add_dbc_string(fin.read())
 

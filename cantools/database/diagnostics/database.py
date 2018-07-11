@@ -10,9 +10,10 @@ LOGGER = logging.getLogger(__name__)
 class Database(object):
     """This class contains all DIDs.
 
-    The factory functions :func:`cantools.db.load()`,
-    :func:`cantools.db.load_file()` and
-    :func:`cantools.db.load_string()` returns instances of this class.
+    The factory functions :func:`load()<cantools.database.load()>`,
+    :func:`load_file()<cantools.database.load_file()>` and
+    :func:`load_string()<cantools.database.load_string()>` returns
+    instances of this class.
 
     """
 

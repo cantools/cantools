@@ -42,7 +42,7 @@ messages and signals.
 
    >>> import cantools
    >>> from pprint import pprint
-   >>> db = cantools.db.load_file('tests/files/motohawk.dbc')
+   >>> db = cantools.database.load_file('tests/files/motohawk.dbc')
    >>> db.messages
    [message('ExampleMessage', 0x1f0, False, 8, 'Example message used as template in MotoHawk models.')]
    >>> example_message = db.get_message_by_name('ExampleMessage')
@@ -153,10 +153,10 @@ Contributing
 
 .. _tester: http://cantools.readthedocs.io/en/latest/#cantools.tester.Tester
 
-.. _encoding: http://cantools.readthedocs.io/en/latest/#cantools.db.Message.encode
+.. _encoding: http://cantools.readthedocs.io/en/latest/#cantools.database.can.Message.encode
 
-.. _encode_message(): http://cantools.readthedocs.io/en/latest/#cantools.db.Database.encode_message
+.. _encode_message(): http://cantools.readthedocs.io/en/latest/#cantools.database.can.Database.encode_message
 
-.. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.db.Database.decode_message
+.. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.database.can.Database.decode_message
 
 .. _examples: https://github.com/eerimoq/cantools/blob/master/examples

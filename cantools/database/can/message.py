@@ -3,12 +3,12 @@
 import binascii
 from copy import deepcopy
 
-from .utils import format_or
-from .utils import start_bit
-from .utils import encode_data
-from .utils import decode_data
-from .utils import create_encode_decode_formats
-from .errors import Error
+from ..utils import format_or
+from ..utils import start_bit
+from ..utils import encode_data
+from ..utils import decode_data
+from ..utils import create_encode_decode_formats
+from ..errors import Error
 
 
 class EncodeError(Error):

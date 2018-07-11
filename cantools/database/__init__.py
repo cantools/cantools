@@ -1,23 +1,20 @@
 from xml.etree import ElementTree
-
-from .formats.utils import ParseError
-from .database import Database
-# ToDo: Remove backwards compatibility File in future release.
-from .database import Database as File
-from .message import Message
-from .message import EncodeError
-from .message import DecodeError
-from .signal import Signal
-from .node import Node
+from .errors import ParseError
 from .errors import Error
-from . import diagnostics
 from ..compat import fopen
+from . import can
+from . import diagnostics
+
+# Remove once less users are using the old package structure.
+from .can import *
 
 
 class UnsupportedDatabaseFormatError(Error):
-    """This exception is raised when :func:`~cantools.db.load_file()`,
-    :func:`~cantools.db.load()` and :func:`~cantools.db.load_string()`
-    are unable to parse given database file or string.
+    """This exception is raised when
+    :func:`~cantools.database.load_file()`,
+    :func:`~cantools.database.load()` and
+    :func:`~cantools.database.load_string()` are unable to parse given
+    database file or string.
 
     """
 
@@ -52,20 +49,21 @@ def load_file(filename,
               frame_id_mask=None,
               strict=True):
     """Open, read and parse given database file and return a
-    :class:`~cantools.db.Database` or
+    :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
     `encoding` specifies the file encoding.
 
-    See :func:`~cantools.db.load_string()` for descriptions of other
-    arguments.
+    See :func:`~cantools.database.load_string()` for descriptions of
+    other arguments.
 
-    Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
+    Raises an
+    :class:`~cantools.database.UnsupportedDatabaseFormatError`
     exception if given file does not contain a supported database
     format.
 
-    >>> db = cantools.db.load_file('foo.dbc')
+    >>> db = cantools.database.load_file('foo.dbc')
     >>> db.version
     '1.0'
 
@@ -83,19 +81,20 @@ def load(fp,
          frame_id_mask=None,
          strict=True):
     """Read and parse given database file-like object and return a
-    :class:`~cantools.db.Database` or
+    :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
-    See :func:`~cantools.db.load_string()` for descriptions of other
-    arguments.
+    See :func:`~cantools.database.load_string()` for descriptions of
+    other arguments.
 
-    Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
+    Raises an
+    :class:`~cantools.database.UnsupportedDatabaseFormatError`
     exception if given file-like object does not contain a supported
     database format.
 
     >>> with open('foo.kcd') as fin:
-    ...    db = cantools.db.load(fin)
+    ...    db = cantools.database.load(fin)
     >>> db.version
     None
 
@@ -112,21 +111,23 @@ def load_string(string,
                 frame_id_mask=None,
                 strict=True):
     """Parse given database string and return a
-    :class:`~cantools.db.Database` or
+    :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
     `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
     ``'cdd'`` or ``None``, where ``None`` means transparent format.
 
-    See :class:`~cantools.db.Database` for a description of `strict`.
+    See :class:`can.Database<.can.Database>` for a description of
+    `strict`.
 
-    Raises an :class:`~cantools.db.UnsupportedDatabaseFormatError`
+    Raises an
+    :class:`~cantools.database.UnsupportedDatabaseFormatError`
     exception if given string does not contain a supported database
     format.
 
     >>> with open('foo.dbc') as fin:
-    ...    db = cantools.db.load_string(fin.read())
+    ...    db = cantools.database.load_string(fin.read())
     >>> db.version
     '1.0'
 
@@ -143,8 +144,8 @@ def load_string(string,
     e_cdd = None
 
     def load_can_database(fmt):
-        db = Database(frame_id_mask=frame_id_mask,
-                      strict=strict)
+        db = can.Database(frame_id_mask=frame_id_mask,
+                          strict=strict)
 
         if fmt == 'dbc':
             db.add_dbc_string(string)

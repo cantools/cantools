@@ -28,7 +28,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_vehicle(self):
         filename = os.path.join('tests', 'files', 'vehicle.dbc')
-        db = cantools.db.load_file(filename)
+        db = cantools.database.load_file(filename)
         self.assertEqual(len(db.nodes), 1)
         self.assertEqual(db.nodes[0].name, 'UnusedNode')
         self.assertEqual(len(db.messages), 217)
@@ -1238,11 +1238,11 @@ IO_DEBUG(
         self.assertEqual(repr(bus), "bus('foo', 'bar')")
 
     def test_num(self):
-        self.assertEqual(cantools.db.formats.utils.num('1'), 1)
-        self.assertEqual(cantools.db.formats.utils.num('1.0'), 1.0)
+        self.assertEqual(cantools.database.can.formats.utils.num('1'), 1)
+        self.assertEqual(cantools.database.can.formats.utils.num('1.0'), 1.0)
 
         with self.assertRaises(ValueError):
-            cantools.db.formats.utils.num('x')
+            cantools.database.can.formats.utils.num('x')
 
     def test_timing(self):
         filename = os.path.join('tests', 'files', 'timing.dbc')
@@ -2340,19 +2340,19 @@ IO_DEBUG(
             self.assertEqual(str(cm.exception), expected_overlpping)
 
     def test_database_signals_check_failure(self):
-        signal = cantools.db.Signal('S',
-                                    7,
-                                    33,
-                                    'big_endian')
+        signal = cantools.database.can.Signal('S',
+                                              7,
+                                              33,
+                                              'big_endian')
 
-        message = cantools.db.Message(37,
-                                      'M',
-                                      4,
-                                      [signal],
-                                      strict=False)
+        message = cantools.database.can.Message(37,
+                                                'M',
+                                                4,
+                                                [signal],
+                                                strict=False)
 
-        with self.assertRaises(cantools.db.errors.Error) as cm:
-            cantools.db.Database([message])
+        with self.assertRaises(cantools.database.errors.Error) as cm:
+            cantools.database.can.Database([message])
 
         self.assertEqual(str(cm.exception),
                          'The signal S does not fit in message M.')

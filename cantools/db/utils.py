@@ -6,7 +6,17 @@ from collections import namedtuple
 import bitstruct
 
 
-def _start_bit(data):
+def format_or(items):
+    items = [str(item) for item in items]
+
+    if len(items) == 1:
+        return items[0]
+    else:
+        return '{} or {}'.format(', '.join(items[:-1]),
+                                 items[-1])
+
+
+def start_bit(data):
     if data.byte_order == 'big_endian':
         return (8 * (data.start // 8) + (7 - (data.start % 8)))
     else:
@@ -132,13 +142,13 @@ def create_encode_decode_formats(datas, number_of_bytes):
             if data.byte_order == 'little_endian':
                 continue
 
-            padding_length = (_start_bit(data) - start)
+            padding_length = (start_bit(data) - start)
 
             if padding_length > 0:
                 items.append(padding_item(padding_length))
 
             items.append(data_item(data))
-            start = (_start_bit(data) + data.length)
+            start = (start_bit(data) + data.length)
 
         if start < format_length:
             length = format_length - start

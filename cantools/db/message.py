@@ -3,9 +3,11 @@
 import binascii
 from copy import deepcopy
 
-from .format import encode_data
-from .format import decode_data
-from .format import create_encode_decode_formats
+from .utils import format_or
+from .utils import start_bit
+from .utils import encode_data
+from .utils import decode_data
+from .utils import create_encode_decode_formats
 from .errors import Error
 
 
@@ -15,23 +17,6 @@ class EncodeError(Error):
 
 class DecodeError(Error):
     pass
-
-
-def _format_or(items):
-    items = [str(item) for item in items]
-
-    if len(items) == 1:
-        return items[0]
-    else:
-        return '{} or {}'.format(', '.join(items[:-1]),
-                                 items[-1])
-
-
-def _start_bit(signal):
-    if signal.byte_order == 'big_endian':
-        return (8 * (signal.start // 8) + (7 - (signal.start % 8)))
-    else:
-        return signal.start
 
 
 class Message(object):
@@ -61,7 +46,7 @@ class Message(object):
         self._name = name
         self._length = length
         self._signals = signals
-        self._signals.sort(key=_start_bit)
+        self._signals.sort(key=start_bit)
         self._comment = comment
         self._senders = senders if senders else []
         self._send_type = send_type
@@ -305,7 +290,7 @@ class Message(object):
                 node = multiplexers[signal][mux]
             except KeyError:
                 raise EncodeError('expected multiplexer id {}, but got {}'.format(
-                    _format_or(multiplexers[signal]),
+                    format_or(multiplexers[signal]),
                     mux))
 
             mux_encoded, mux_padding_mask = self._encode(node, data, scaling)
@@ -353,7 +338,7 @@ class Message(object):
                 node = multiplexers[signal][mux]
             except KeyError:
                 raise DecodeError('expected multiplexer id {}, but got {}'.format(
-                    _format_or(multiplexers[signal]),
+                    format_or(multiplexers[signal]),
                     mux))
 
             decoded.update(self._decode(node,
@@ -437,7 +422,7 @@ class Message(object):
         signal_bits = signal.length * [signal.name]
 
         if signal.byte_order == 'big_endian':
-            padding = _start_bit(signal) * [None]
+            padding = start_bit(signal) * [None]
             signal_bits = padding + signal_bits
         else:
             signal_bits += signal.start * [None]

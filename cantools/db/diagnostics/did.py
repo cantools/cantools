@@ -2,9 +2,9 @@
 
 import binascii
 
-from ..format import encode_data
-from ..format import decode_data
-from ..format import create_encode_decode_formats
+from ..utils import encode_data
+from ..utils import decode_data
+from ..utils import create_encode_decode_formats
 
 
 class Did(object):

@@ -21,6 +21,7 @@ class Database(object):
         self._name_to_did = {}
         self._identifier_to_did = {}
         self._dids = dids if dids else []
+        self.refresh()
 
     @property
     def dids(self):
@@ -56,16 +57,13 @@ class Database(object):
         """
 
         database = cdd.load_string(string)
+        self._dids = database.dids
+        self.refresh()
 
-        for did in database.dids:
-            self.add_did(did)
-
-    def add_did(self, did):
+    def _add_did(self, did):
         """Add given DID to the database.
 
         """
-
-        self._dids.append(did)
 
         if did.name in self._name_to_did:
             LOGGER.warning("Overwriting DID with name '%s' in the "
@@ -96,6 +94,22 @@ class Database(object):
         """
 
         return self._identifier_to_did[identifier]
+
+    def refresh(self):
+        """Refresh the internal database state.
+
+        This method must be called after modifying any DIDs in the
+        database to refresh the internal lookup tables used when
+        encoding and decoding DIDs.
+
+        """
+
+        self._name_to_did = {}
+        self._identifier_to_did = {}
+
+        for did in self._dids:
+            did.refresh()
+            self._add_did(did)
 
     def __repr__(self):
         lines = []

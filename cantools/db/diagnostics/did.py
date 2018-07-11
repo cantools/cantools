@@ -21,11 +21,8 @@ class Did(object):
         self._name = name
         self._length = length
         self._datas = datas
-        self._codec = {
-            'datas': self._datas,
-            'formats': create_encode_decode_formats(self._datas,
-                                                    self._length)
-        }
+        self._codec = None
+        self.refresh()
 
     @property
     def identifier(self):
@@ -121,6 +118,17 @@ class Did(object):
                            self._codec['formats'],
                            decode_choices,
                            scaling)
+
+    def refresh(self):
+        """Refresh the internal DID state.
+
+        """
+
+        self._codec = {
+            'datas': self._datas,
+            'formats': create_encode_decode_formats(self._datas,
+                                                    self._length)
+        }
 
     def __repr__(self):
         return "did('{}', 0x{:04x})".format(

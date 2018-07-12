@@ -145,7 +145,7 @@ def _load_multiplex_element(mux):
     return signals
 
 
-def _load_message_element(message, bus_name, nodes):
+def _load_message_element(message, bus_name, nodes, strict):
     """Load given message element and return a message object.
 
     """
@@ -216,7 +216,8 @@ def _load_message_element(message, bus_name, nodes):
                    cycle_time=interval,
                    signals=signals,
                    comment=notes,
-                   bus_name=bus_name)
+                   bus_name=bus_name,
+                   strict=strict)
 
 
 def dump_string(database):
@@ -227,7 +228,7 @@ def dump_string(database):
     raise NotImplementedError('The KCD dump function is not yet implemented.')
 
 
-def load_string(string):
+def load_string(string, strict=True):
     """Parse given KCD format string.
 
     """
@@ -258,7 +259,8 @@ def load_string(string):
         for message in bus.findall('ns:Message', NAMESPACES):
             messages.append(_load_message_element(message,
                                                   bus_name,
-                                                  nodes))
+                                                  nodes,
+                                                  strict))
 
     return InternalDatabase(messages,
                             [

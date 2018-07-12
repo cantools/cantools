@@ -836,7 +836,8 @@ def _load_messages(tokens,
                    choices,
                    message_senders,
                    signal_types,
-                   signal_multiplexer_values):
+                   signal_multiplexer_values,
+                   strict):
     """Load messages.
 
     """
@@ -1012,7 +1013,8 @@ def _load_messages(tokens,
                             is_float=get_is_float(frame_id_dbc,
                                                   signal[1][0]))
                      for signal in message[5]],
-            comment=get_comment(frame_id_dbc))
+            comment=get_comment(frame_id_dbc),
+            strict=strict)
         messages.append(message)
 
     return messages
@@ -1135,7 +1137,7 @@ def get_definitions_dict(definitions, defaults):
 
     return result
 
-def load_string(string):
+def load_string(string, strict=True):
     """Parse given string.
 
     """
@@ -1178,7 +1180,8 @@ def load_string(string):
                               choices,
                               message_senders,
                               signal_types,
-                              signal_multiplexer_values)
+                              signal_multiplexer_values,
+                              strict)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     dbc_specifics = DbcSpecifics(attributes=get_database_attributes(),

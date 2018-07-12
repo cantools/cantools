@@ -138,7 +138,6 @@ def create_encode_decode_formats(datas, number_of_bytes):
         start = 0
 
         for data in datas:
-
             if data.byte_order == 'little_endian':
                 continue
 
@@ -161,7 +160,6 @@ def create_encode_decode_formats(datas, number_of_bytes):
         end = format_length
 
         for data in datas[::-1]:
-
             if data.byte_order == 'big_endian':
                 continue
 

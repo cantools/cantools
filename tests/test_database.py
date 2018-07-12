@@ -2339,6 +2339,30 @@ IO_DEBUG(
 
             self.assertEqual(str(cm.exception), expected_overlpping)
 
+    def test_strict_load(self):
+        filenames = [
+            os.path.join('tests', 'files', 'bad_message_length.kcd'),
+            os.path.join('tests', 'files', 'bad_message_length.dbc'),
+            os.path.join('tests', 'files', 'bad_message_length.sym')
+        ]
+
+        for filename in filenames:
+            # Strict true.
+            with self.assertRaises(cantools.database.Error) as cm:
+                cantools.database.load_file(filename, strict=True)
+
+            self.assertEqual(str(cm.exception),
+                             'The signal Signal1 does not fit in message Message1.')
+
+            # Strict false.
+            db = cantools.database.load_file(filename, strict=False)
+
+            # Sanity checks.
+            message_1 = db.get_message_by_frame_id(1)
+            self.assertEqual(message_1.length, 1)
+            self.assertEqual(message_1.signals[0].start, 8)
+            self.assertEqual(message_1.signals[0].length, 1)
+
     def test_database_signals_check_failure(self):
         signal = cantools.database.can.Signal('S',
                                               7,

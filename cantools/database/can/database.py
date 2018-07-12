@@ -127,7 +127,7 @@ class Database(object):
 
         """
 
-        database = dbc.load_string(string)
+        database = dbc.load_string(string, self._strict)
 
         self._messages = database.messages
         self._nodes = database.nodes
@@ -161,7 +161,7 @@ class Database(object):
 
         """
 
-        database = kcd.load_string(string)
+        database = kcd.load_string(string, self._strict)
 
         self._messages = database.messages
         self._nodes = database.nodes
@@ -195,7 +195,7 @@ class Database(object):
 
         """
 
-        database = sym.load_string(string)
+        database = sym.load_string(string, self._strict)
 
         self._messages = database.messages
         self._nodes = database.nodes

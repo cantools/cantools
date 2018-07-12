@@ -1,0 +1,18 @@
+FormatVersion=6.0 // Do not edit this line!
+Title=""
+
+{ENUMS}
+
+{SIGNALS}
+Sig=Signal1 unsigned 1
+
+{SEND}
+
+{RECEIVE}
+
+{SENDRECEIVE}
+
+[Message1]
+ID=001h
+Len=1
+Sig=Signal1 8

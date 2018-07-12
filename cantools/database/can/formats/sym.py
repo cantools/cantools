@@ -337,7 +337,8 @@ def _load_message(frame_id,
                   is_extended_frame,
                   message_tokens,
                   message_section_tokens,
-                  signals):
+                  signals,
+                  strict):
     # Default values.
     name = message_tokens[0]
     length = int(message_tokens[2][1])
@@ -360,7 +361,8 @@ def _load_message(frame_id,
                                                  message_section_tokens,
                                                  signals),
                    comment=None,
-                   bus_name=None)
+                   bus_name=None,
+                   strict=strict)
 
 
 def _parse_message_frame_ids(message):
@@ -380,7 +382,7 @@ def _parse_message_frame_ids(message):
     return frame_ids, is_extended_frame(minimum)
 
 
-def _load_message_section(section_name, tokens, signals):
+def _load_message_section(section_name, tokens, signals, strict):
     def has_frame_id(message):
         return len(message[1]) > 0
 
@@ -398,16 +400,17 @@ def _load_message_section(section_name, tokens, signals):
                                     is_extended_frame,
                                     message_tokens,
                                     message_section_tokens,
-                                    signals)
+                                    signals,
+                                    strict)
             messages.append(message)
 
     return messages
 
 
-def _load_messages(tokens, signals):
-    messages = _load_message_section('{SEND}', tokens, signals)
-    messages += _load_message_section('{RECEIVE}', tokens, signals)
-    messages += _load_message_section('{SENDRECEIVE}', tokens, signals)
+def _load_messages(tokens, signals, strict):
+    messages = _load_message_section('{SEND}', tokens, signals, strict)
+    messages += _load_message_section('{RECEIVE}', tokens, signals, strict)
+    messages += _load_message_section('{SENDRECEIVE}', tokens, signals, strict)
 
     return messages
 
@@ -416,7 +419,7 @@ def _load_version(tokens):
     return tokens[0][1]
 
 
-def load_string(string):
+def load_string(string, strict=True):
     """Parse given string.
 
     """
@@ -439,7 +442,7 @@ def load_string(string):
     version = _load_version(tokens)
     enums = _load_enums(tokens)
     signals = _load_signals(tokens, enums)
-    messages = _load_messages(tokens, signals)
+    messages = _load_messages(tokens, signals, strict)
 
     return InternalDatabase(messages,
                             [],

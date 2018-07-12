@@ -1,0 +1,14 @@
+<NetworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kayak.2codeornot2code.org/1.0" xsi:noNamespaceSchemaLocation="Definition.xsd">
+  <Document name="" version="" author="" company="" date="">
+  </Document>
+  <Node id="1" name="Node1"/>
+
+  <Bus name="Bus1">
+    <Message id="1" name="Message1" length="1">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="8" length="1"/>
+    </Message>
+  </Bus>
+</NetworkDefinition>

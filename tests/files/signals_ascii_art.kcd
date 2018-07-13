@@ -55,5 +55,12 @@
       <Signal name="Signal8" offset="5" length="1" endianess="big"/>
     </Message>
 
+    <Message id="7" name="Message7">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="0" length="128"/>
+    </Message>
+
   </Bus>
 </NetworkDefinition>

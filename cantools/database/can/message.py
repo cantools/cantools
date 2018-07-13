@@ -468,16 +468,13 @@ class Message(object):
 
             for chars in zip(*signals):
                 left = chars.count('<')
-                right = chars.count('>')
                 dash = chars.count('-')
                 x = chars.count('x')
 
-                if left + right + dash + x > 1:
+                if left + dash + x > 1:
                     formatted += 'X'
                 elif left == 1:
                     formatted += '<'
-                elif right == 1:
-                    formatted += '>'
                 elif dash == 1:
                     formatted += '-'
                 elif x == 1:

@@ -689,7 +689,7 @@ IO_DEBUG(
         self.assertEqual(db.buses[0].baudrate, 500000)
         self.assertEqual(db.buses[1].baudrate, 125000)
 
-        self.assertEqual(len(db.messages), 28)
+        self.assertEqual(len(db.messages), 31)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
@@ -936,6 +936,15 @@ IO_DEBUG(
         self.assertEqual(big_endian_a.unit, None)
         self.assertEqual(big_endian_a.choices, None)
         self.assertEqual(big_endian_a.comment, None)
+
+        message = db.get_message_by_name('LittleEndianAuto')
+        self.assertEqual(message.length, 1)
+
+        message = db.get_message_by_name('BigEndianAuto')
+        self.assertEqual(message.length, 1)
+
+        message = db.get_message_by_name('LittleBigEndianAuto')
+        self.assertEqual(message.length, 1)
 
     def test_the_homer_encode_length(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -2532,6 +2541,49 @@ IO_DEBUG(
         ]
 
         actual = db.get_message_by_name('Message7').signals_ascii_art()
+        self.assertEqual(actual, '\n'.join(expected_lines))
+
+        # Message 8.
+        expected_lines = [
+            '                       Bit',
+            '',
+            '          7   6   5   4   3   2   1   0',
+            '        +---+---+---+---+---+---+---+---+',
+            '      0 |<------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '      1 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '      2 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '      3 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '      4 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '      5 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '      6 |-------------------------------|',
+            ' B      +---+---+---+---+---+---+---+---+',
+            ' y    7 |-------------------------------|',
+            ' t      +---+---+---+---+---+---+---+---+',
+            ' e    8 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '      9 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '     10 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '     11 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '     12 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '     13 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '     14 |-------------------------------|',
+            '        +---+---+---+---+---+---+---+---+',
+            '     15 |------------------------------x|',
+            '        +---+---+---+---+---+---+---+---+'
+        ]
+
+        actual = db.get_message_by_name('Message8').signals_ascii_art()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
 

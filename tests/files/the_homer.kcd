@@ -409,5 +409,27 @@
       <Signal name="B" offset="17" length="1" endianess="big"/>
       <Signal name="C" offset="18" length="5" endianess="big"/>
     </Message>
+
+    <Message id="0x381" name="BigEndianAuto">
+      <Producer>
+        <NodeRef id="5"/>
+      </Producer>
+      <Signal name="A" offset="0" length="8" endianess="big"/>
+    </Message>
+
+    <Message id="0x382" name="LittleEndianAuto">
+      <Producer>
+        <NodeRef id="5"/>
+      </Producer>
+      <Signal name="A" offset="0" length="8" endianess="little"/>
+    </Message>
+
+    <Message id="0x383" name="LittleBigEndianAuto">
+      <Producer>
+        <NodeRef id="5"/>
+      </Producer>
+      <Signal name="A" offset="0" length="2" endianess="big"/>
+      <Signal name="B" offset="0" length="2" endianess="little"/>
+    </Message>
   </Bus>
 </NetworkDefinition>

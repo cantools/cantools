@@ -8,7 +8,7 @@ from ..message import Message
 from ..node import Node
 from ..bus import Bus
 from ..internal_database import InternalDatabase
-
+from ...utils import start_bit
 from .utils import num
 
 
@@ -200,8 +200,8 @@ def _load_message_element(message, bus_name, nodes, strict):
 
     if length == 'auto':
         if signals:
-            last_signal = sorted(signals, key=lambda s: s.start)[-1]
-            length = (last_signal.start + last_signal.length + 7) // 8
+            last_signal = sorted(signals, key=start_bit)[-1]
+            length = (start_bit(last_signal) + last_signal.length + 7) // 8
         else:
             length = 0
     else:

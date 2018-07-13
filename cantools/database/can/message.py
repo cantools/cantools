@@ -389,7 +389,9 @@ class Message(object):
         return bool(self._codecs['multiplexers'])
 
     def signals_ascii_art(self):
-        """ASCII art of all signals.
+        """ASCII art of all signals in the message. Each signal is an arrow
+        from LSB ``x`` to MSB ``<``. Overlapping signal bits are set
+        to ``X``.
 
         .. code:: text
 
@@ -403,7 +405,7 @@ class Message(object):
                  +---+---+---+---+---+---+---+---+
                2 |   |   |   |   |   |   |   |   |
            B     +---+---+---+---+---+---+---+---+
-           y   3 |--------------x|   |   |   |   |
+           y   3 |----XXXXXXX---x|   |   |   |   |
            t     +---+---+---+---+---+---+---+---+
            e   4 |-------------------------------|
                  +---+---+---+---+---+---+---+---+
@@ -416,7 +418,186 @@ class Message(object):
 
         """
 
-        raise NotImplementedError
+        def format_big():
+            signals = []
+
+            for signal in self._signals:
+                if signal.byte_order != 'big_endian':
+                    continue
+
+                formatted = start_bit(signal) * '   '
+                formatted += '<{}x'.format((3 * signal.length - 2) * '-')
+                signals.append(formatted)
+
+            return signals
+
+        def format_little():
+            signals = []
+
+            for signal in self._signals:
+                if signal.byte_order != 'little_endian':
+                    continue
+
+                formatted = signal.start * '   '
+                formatted += 'x{}<'.format((3 * signal.length - 2) * '-')
+                end = signal.start + signal.length
+
+                if end % 8 != 0:
+                    formatted += (8 - (end % 8)) * '   '
+
+                formatted = ''.join([
+                    formatted[i:i + 24][::-1]
+                    for i in range(0, len(formatted), 24)
+                ])
+                signals.append(formatted)
+
+            return signals
+
+        def format_byte_lines():
+            signals = format_big() + format_little()
+
+            if len(signals) > 0:
+                length = max([len(signal) for signal in signals])
+
+                if length % 24 != 0:
+                    length += (24 - (length % 24))
+
+                signals = [signal + (length - len(signal)) * ' ' for signal in signals]
+
+            formatted = ''
+
+            for chars in zip(*signals):
+                left = chars.count('<')
+                right = chars.count('>')
+                dash = chars.count('-')
+                x = chars.count('x')
+
+                if left + right + dash + x > 1:
+                    formatted += 'X'
+                elif left == 1:
+                    formatted += '<'
+                elif right == 1:
+                    formatted += '>'
+                elif dash == 1:
+                    formatted += '-'
+                elif x == 1:
+                    formatted += 'x'
+                else:
+                    formatted += ' '
+
+            byte_lines = [
+                formatted[i:i + 24]
+                for i in range(0, len(formatted), 24)
+            ]
+
+            unused_byte_lines = self._length - len(byte_lines)
+
+            if unused_byte_lines > 0:
+                byte_lines += unused_byte_lines * [24 * ' ']
+
+            lines = []
+
+            for byte_line in byte_lines:
+                line = ''
+                prev_byte = None
+
+                for i in range(0, 24, 3):
+                    byte_triple = byte_line[i:i + 3]
+
+                    if i == 0:
+                        line += '|' + byte_triple
+                    elif byte_line[i] in ' <>x':
+                        line += '|' + byte_triple
+                    elif byte_line[i] == 'X':
+                        if prev_byte == 'X':
+                            line += 'X' + byte_triple
+                        elif prev_byte == '-':
+                            line += '-' + byte_triple
+                        else:
+                            line += '|' + byte_triple
+                    else:
+                        line += '-' + byte_triple
+
+                    prev_byte = byte_line[i + 2]
+
+                line += '|'
+                lines.append(line)
+
+            return lines
+
+        def add_horizontal_and_header_lines(byte_lines):
+            lines = [
+                '               Bit',
+                '',
+                '  7   6   5   4   3   2   1   0',
+                '+---+---+---+---+---+---+---+---+'
+            ]
+
+            for byte_line in byte_lines:
+                lines.append(byte_line)
+                lines.append('+---+---+---+---+---+---+---+---+')
+
+            return lines
+
+        def add_byte_numbers(lines):
+            width = len(str((len(lines) - 4) // 2)) + 4
+            fmt = '{{:{}d}} '.format(width - 1)
+            numbers_lines = []
+
+            for index in range(len(lines)):
+                if index < 3 or (index % 2) == 1:
+                    prefix = width * ' '
+                else:
+                    prefix = fmt.format((index - 4) // 2)
+
+                numbers_lines.append(prefix)
+
+            return [
+                number_line + line
+                for number_line, line in zip(numbers_lines, lines)
+            ]
+
+        def add_y_axis_name(lines):
+            number_of_matrix_lines = (len(lines) - 3)
+            start_index = 4
+
+            if number_of_matrix_lines >= 4:
+                start_index += (number_of_matrix_lines - 4) // 2 - 1
+
+                if start_index < 4:
+                    start_index = 4
+
+            if len(lines) < 8:
+                lines += (8 - len(lines)) * ['     ']
+
+            axis_lines = []
+
+            for index in range(len(lines)):
+                if index == start_index:
+                    prefix = ' B'
+                elif index == start_index + 1:
+                    prefix = ' y'
+                elif index == start_index + 2:
+                    prefix = ' t'
+                elif index == start_index + 3:
+                    prefix = ' e'
+                else:
+                    prefix = '  '
+
+                axis_lines.append(prefix)
+
+            return [
+                axis_line + line
+                for axis_line, line in zip(axis_lines, lines)
+            ]
+
+        lines = format_byte_lines()
+        lines = add_horizontal_and_header_lines(lines)
+        lines = add_byte_numbers(lines)
+        lines = add_y_axis_name(lines)
+        lines = [line.rstrip() for line in lines]
+
+        return '\n'.join(lines)
 
     def _check_signal(self, message_bits, signal):
         signal_bits = signal.length * [signal.name]

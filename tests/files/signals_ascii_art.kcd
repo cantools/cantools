@@ -1,0 +1,59 @@
+<NetworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kayak.2codeornot2code.org/1.0" xsi:noNamespaceSchemaLocation="Definition.xsd">
+  <Document name="" version="" author="" company="" date="">
+  </Document>
+  <Node id="1" name="Node1"/>
+
+  <Bus name="Bus1">
+
+    <Message id="1" name="Message1">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+    </Message>
+
+    <Message id="2" name="Message2" length="8">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="5" length="5" endianess="big"/>
+      <Signal name="Signal2" offset="14" length="1" endianess="big"/>
+      <Signal name="Signal3" offset="28" length="18" endianess="little"/>
+    </Message>
+
+    <Message id="3" name="Message3" length="1">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="0" length="8" endianess="big"/>
+    </Message>
+
+    <Message id="4" name="Message4" length="1">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="7" length="2" endianess="big"/>
+    </Message>
+
+    <Message id="5" name="Message5" length="3">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="7" length="2" endianess="big"/>
+    </Message>
+
+    <Message id="6" name="Message6">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal name="Signal1" offset="0" length="5" endianess="big"/>
+      <Signal name="Signal2" offset="1" length="2" endianess="big"/>
+      <Signal name="Signal3" offset="14" length="3" endianess="big"/>
+      <Signal name="Signal4" offset="14" length="1" endianess="big"/>
+      <Signal name="Signal5" offset="15" length="3" endianess="big"/>
+      <Signal name="Signal6" offset="13" length="1" endianess="big"/>
+      <Signal name="Signal7" offset="2" length="1" endianess="little"/>
+      <Signal name="Signal8" offset="5" length="1" endianess="big"/>
+    </Message>
+
+  </Bus>
+</NetworkDefinition>

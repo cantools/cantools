@@ -2381,6 +2381,115 @@ IO_DEBUG(
         self.assertEqual(str(cm.exception),
                          'The signal S does not fit in message M.')
 
+    def test_database_signals_ascii_art(self):
+        filename = os.path.join('tests', 'files', 'signals_ascii_art.kcd')
+        db = cantools.database.load_file(filename, strict=False)
+
+        # Message 1.
+        expected_lines = [
+            '                      Bit',
+            '',
+            '         7   6   5   4   3   2   1   0',
+            '       +---+---+---+---+---+---+---+---+',
+            ' B',
+            ' y',
+            ' t',
+            ' e'
+        ]
+
+        actual = db.get_message_by_name('Message1').signals_ascii_art()
+        self.assertEqual(actual, '\n'.join(expected_lines))
+
+        # Message 2.
+        expected_lines = [
+            '                      Bit',
+            '',
+            '         7   6   5   4   3   2   1   0',
+            '       +---+---+---+---+---+---+---+---+',
+            '     0 |   |   |   |   |   |<----------|',
+            '       +---+---+---+---+---+---+---+---+',
+            '     1 |------x|   |   |   |   |<-x|   |',
+            '       +---+---+---+---+---+---+---+---+',
+            '     2 |   |   |   |   |   |   |   |   |',
+            ' B     +---+---+---+---+---+---+---+---+',
+            ' y   3 |--------------x|   |   |   |   |',
+            ' t     +---+---+---+---+---+---+---+---+',
+            ' e   4 |-------------------------------|',
+            '       +---+---+---+---+---+---+---+---+',
+            '     5 |   |   |<----------------------|',
+            '       +---+---+---+---+---+---+---+---+',
+            '     6 |   |   |   |   |   |   |   |   |',
+            '       +---+---+---+---+---+---+---+---+',
+            '     7 |   |   |   |   |   |   |   |   |',
+            '       +---+---+---+---+---+---+---+---+'
+        ]
+
+        actual = db.get_message_by_name('Message2').signals_ascii_art()
+        self.assertEqual(actual, '\n'.join(expected_lines))
+
+        # Message 3.
+        expected_lines = [
+            '                      Bit',
+            '',
+            '         7   6   5   4   3   2   1   0',
+            '       +---+---+---+---+---+---+---+---+',
+            ' B   0 |<-----------------------------x|',
+            ' y     +---+---+---+---+---+---+---+---+',
+            ' t',
+            ' e'
+        ]
+
+        actual = db.get_message_by_name('Message3').signals_ascii_art()
+        self.assertEqual(actual, '\n'.join(expected_lines))
+
+        # Message 4.
+        expected_lines = [
+            '                      Bit',
+            '',
+            '         7   6   5   4   3   2   1   0',
+            '       +---+---+---+---+---+---+---+---+',
+            ' B   0 |   |   |   |   |   |   |   |<--|',
+            ' y     +---+---+---+---+---+---+---+---+',
+            ' t   1 |--x|   |   |   |   |   |   |   |',
+            ' e     +---+---+---+---+---+---+---+---+'
+        ]
+
+        actual = db.get_message_by_name('Message4').signals_ascii_art()
+        self.assertEqual(actual, '\n'.join(expected_lines))
+
+        # Message 5.
+        expected_lines = [
+            '                      Bit',
+            '',
+            '         7   6   5   4   3   2   1   0',
+            '       +---+---+---+---+---+---+---+---+',
+            ' B   0 |   |   |   |   |   |   |   |<--|',
+            ' y     +---+---+---+---+---+---+---+---+',
+            ' t   1 |--x|   |   |   |   |   |   |   |',
+            ' e     +---+---+---+---+---+---+---+---+',
+            '     2 |   |   |   |   |   |   |   |   |',
+            '       +---+---+---+---+---+---+---+---+'
+        ]
+
+        actual = db.get_message_by_name('Message5').signals_ascii_art()
+        self.assertEqual(actual, '\n'.join(expected_lines))
+
+        # Message 6.
+        expected_lines = [
+            '                      Bit',
+            '',
+            '         7   6   5   4   3   2   1   0',
+            '       +---+---+---+---+---+---+---+---+',
+            ' B   0 |<---XXXXXXX-------x|XXX|   |   |',
+            ' y     +---+---+---+---+---+---+---+---+',
+            ' t   1 |   |   |   |   |   |<-x|XXXXXXX|',
+            ' e     +---+---+---+---+---+---+---+---+',
+            '     2 |XXX---x|   |   |   |   |   |   |',
+            '       +---+---+---+---+---+---+---+---+'
+        ]
+
+        actual = db.get_message_by_name('Message6').signals_ascii_art()
+        self.assertEqual(actual, '\n'.join(expected_lines))
 
 
 # This file is not '__main__' when executed via 'python setup.py3

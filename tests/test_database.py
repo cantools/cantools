@@ -2390,8 +2390,8 @@ IO_DEBUG(
         self.assertEqual(str(cm.exception),
                          'The signal S does not fit in message M.')
 
-    def test_database_signals_ascii_art(self):
-        filename = os.path.join('tests', 'files', 'signals_ascii_art.kcd')
+    def test_message_layout(self):
+        filename = os.path.join('tests', 'files', 'message_layout.kcd')
         db = cantools.database.load_file(filename, strict=False)
 
         # Message 1.
@@ -2406,7 +2406,7 @@ IO_DEBUG(
             ' e'
         ]
 
-        actual = db.get_message_by_name('Message1').signals_ascii_art()
+        actual = db.get_message_by_name('Message1').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 2.
@@ -2433,7 +2433,7 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message2').signals_ascii_art()
+        actual = db.get_message_by_name('Message2').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 3.
@@ -2448,7 +2448,7 @@ IO_DEBUG(
             ' e'
         ]
 
-        actual = db.get_message_by_name('Message3').signals_ascii_art()
+        actual = db.get_message_by_name('Message3').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 4.
@@ -2463,7 +2463,7 @@ IO_DEBUG(
             ' e     +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message4').signals_ascii_art()
+        actual = db.get_message_by_name('Message4').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 5.
@@ -2480,7 +2480,7 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message5').signals_ascii_art()
+        actual = db.get_message_by_name('Message5').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 6.
@@ -2497,7 +2497,7 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message6').signals_ascii_art()
+        actual = db.get_message_by_name('Message6').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 7.
@@ -2540,7 +2540,7 @@ IO_DEBUG(
             '        +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message7').signals_ascii_art()
+        actual = db.get_message_by_name('Message7').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 8.
@@ -2583,7 +2583,7 @@ IO_DEBUG(
             '        +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message8').signals_ascii_art()
+        actual = db.get_message_by_name('Message8').layout
         self.assertEqual(actual, '\n'.join(expected_lines))
 
 

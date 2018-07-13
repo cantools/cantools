@@ -50,6 +50,6 @@ for message in database.messages:
     print('Id:     0x{:x}'.format(message.frame_id))
     print('Length: {}'.format(message.length))
     print()
-    print(message.signals_ascii_art())
+    print(message.layout)
     print()
     print('------------------------------------------------')

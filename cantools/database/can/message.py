@@ -388,10 +388,10 @@ class Message(object):
 
         return bool(self._codecs['multiplexers'])
 
-    def signals_ascii_art(self):
-        """ASCII art of all signals in the message. Each signal is an arrow
-        from LSB ``x`` to MSB ``<``. Overlapping signal bits are set
-        to ``X``.
+    @property
+    def layout(self):
+        """ASCII art of the message layout. Each signal is an arrow from LSB
+        ``x`` to MSB ``<``. Overlapping signal bits are set to ``X``.
 
         .. code:: text
 

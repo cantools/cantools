@@ -280,15 +280,23 @@ class Message(object):
                  +---+---+---+---+---+---+---+---+
                0 |   |   |   |   |   |<----------|
                  +---+---+---+---+---+---+---+---+
+                                       +-- Foo
+                 +---+---+---+---+---+---+---+---+
                1 |------x|   |   |   |   |<-x|   |
+                 +---+---+---+---+---+---+---+---+
+                                           +-- Bar
                  +---+---+---+---+---+---+---+---+
                2 |   |   |   |   |   |   |   |   |
            B     +---+---+---+---+---+---+---+---+
            y   3 |----XXXXXXX---x|   |   |   |   |
            t     +---+---+---+---+---+---+---+---+
-           e   4 |-------------------------------|
+           e           +-- Fie
+                 +---+---+---+---+---+---+---+---+
+               4 |-------------------------------|
                  +---+---+---+---+---+---+---+---+
                5 |   |   |<----------------------|
+                 +---+---+---+---+---+---+---+---+
+                           +-- Fum
                  +---+---+---+---+---+---+---+---+
                6 |   |   |   |   |   |   |   |   |
                  +---+---+---+---+---+---+---+---+
@@ -405,39 +413,89 @@ class Message(object):
                 line += '|'
                 lines.append(line)
 
-            return lines
+            # Add byte numbering.
+            number_width = len(str(len(lines))) + 4
+            number_fmt = '{{:{}d}} {{}}'.format(number_width - 1)
+            a = []
 
-        def add_header_and_horizontal_lines(byte_lines):
-            lines = [
-                '               Bit',
-                '',
-                '  7   6   5   4   3   2   1   0',
-                '+---+---+---+---+---+---+---+---+'
-            ]
+            for number, line in enumerate(lines):
+                a.append(number_fmt.format(number, line))
+
+            return a, len(lines), number_width
+
+        def add_header_lines(lines, number_width):
+            padding = number_width * ' '
+
+            return [
+                padding + '               Bit',
+                padding + '',
+                padding + '  7   6   5   4   3   2   1   0',
+                padding + '+---+---+---+---+---+---+---+---+'
+            ] + lines
+
+        def add_horizontal_lines(byte_lines, number_width):
+            padding = number_width * ' '
+            lines = []
 
             for byte_line in byte_lines:
                 lines.append(byte_line)
-                lines.append('+---+---+---+---+---+---+---+---+')
+                lines.append(padding + '+---+---+---+---+---+---+---+---+')
 
             return lines
 
-        def add_byte_numbers(lines):
-            width = len(str((len(lines) - 4) // 2)) + 4
-            fmt = '{{:{}d}} '.format(width - 1)
-            numbers_lines = []
+        def add_signal_names(input_lines,
+                             number_of_bytes,
+                             number_width):
+            # Find MSB and name of all signals.
+            padding = number_width * ' '
+            signals_per_byte = [[] for _ in range(number_of_bytes)]
 
-            for index in range(len(lines)):
-                if index < 3 or (index % 2) == 1:
-                    prefix = width * ' '
-                else:
-                    prefix = fmt.format((index - 4) // 2)
+            for signal in self._signals:
+                msb = signal.start
 
-                numbers_lines.append(prefix)
+                if signal.byte_order == 'little_endian':
+                    msb += signal.length - 1
 
-            return [
-                number_line + line
-                for number_line, line in zip(numbers_lines, lines)
-            ]
+                byte, bit = divmod(msb, 8)
+                signals_per_byte[byte].append((bit, '+-- ' + signal.name))
+
+            # Format signal lines.
+            signal_lines_per_byte = []
+
+            for signals in signals_per_byte:
+                signals = sorted(signals)
+                signals_lines = []
+
+                for signal in signals:
+                    line = number_width * ' ' + '  ' + signal[1]
+                    line = (7 - signal[0]) * '    ' + line
+                    chars = [char for char in line]
+
+                    for other_signal in signals:
+                        if other_signal[0] > signal[0]:
+                            other_signal_msb = (number_width
+                                                + 2
+                                                + 4 * (7 - other_signal[0]))
+                            chars[other_signal_msb] = '|'
+
+                    signals_lines.append(''.join(chars))
+
+                signal_lines_per_byte.append(signals_lines)
+
+            # Insert the signals names lines among other lines.
+            lines = []
+
+            for number in range(number_of_bytes):
+                lines += input_lines[2 * number: 2 * number + 2]
+
+                if signal_lines_per_byte[number]:
+                    lines += signal_lines_per_byte[number]
+
+                    if number + 1 < number_of_bytes:
+                        lines.append(
+                            padding + '+---+---+---+---+---+---+---+---+')
+
+            return lines
 
         def add_y_axis_name(lines):
             number_of_matrix_lines = (len(lines) - 3)
@@ -459,9 +517,15 @@ class Message(object):
                 for axis_line, line in zip(axis_lines, lines)
             ]
 
-        lines = format_byte_lines()
-        lines = add_header_and_horizontal_lines(lines)
-        lines = add_byte_numbers(lines)
+        lines, number_of_bytes, number_width = format_byte_lines()
+        lines = add_horizontal_lines(lines, number_width)
+
+        if signal_names:
+            lines = add_signal_names(lines,
+                                     number_of_bytes,
+                                     number_width)
+
+        lines = add_header_lines(lines, number_width)
         lines = add_y_axis_name(lines)
         lines = [line.rstrip() for line in lines]
 

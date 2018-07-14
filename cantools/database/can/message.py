@@ -266,10 +266,11 @@ class Message(object):
 
         return self._signal_tree
 
-    @property
-    def layout(self):
+    def layout(self, signal_names=True):
         """ASCII art of the message layout. Each signal is an arrow from LSB
         ``x`` to MSB ``<``. Overlapping signal bits are set to ``X``.
+
+        Set `signal_names` to ``False`` to hide signal names.
 
         .. code:: text
 

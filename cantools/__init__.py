@@ -96,7 +96,8 @@ def _format_message(dbase, frame_id, data, decode_choices, single_line):
 def _do_decode(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
-                               frame_id_mask=args.frame_id_mask)
+                               frame_id_mask=args.frame_id_mask,
+                               strict=not args.no_strict)
     decode_choices = not args.no_decode_choices
 
     while True:
@@ -123,7 +124,8 @@ def _do_decode(args):
 
 def _do_dump(args):
     dbase = database.load_file(args.database,
-                               encoding=args.encoding)
+                               encoding=args.encoding,
+                               strict=not args.no_strict)
 
     print('================================= Messages =================================')
     print()
@@ -176,6 +178,10 @@ def _main():
         default='utf-8',
         help='File encoding (default: utf-8).')
     decode_parser.add_argument(
+        '--no-strict',
+        action='store_true',
+        help='Skip database consistency checks.')
+    decode_parser.add_argument(
         '-m', '--frame-id-mask',
         type=lambda x: int(x, 0),
         help=('Only compare selected frame id bits to find the message in the '
@@ -195,6 +201,10 @@ def _main():
         default='utf-8',
         help='File encoding (default: utf-8).')
     dump_parser.add_argument(
+        '--no-strict',
+        action='store_true',
+        help='Skip database consistency checks.')
+    dump_parser.add_argument(
         'database',
         help='Database file.')
     dump_parser.set_defaults(func=_do_dump)
@@ -207,4 +217,4 @@ def _main():
         try:
             args.func(args)
         except BaseException as e:
-            sys.exit(str(e))
+            sys.exit('error: ' + str(e))

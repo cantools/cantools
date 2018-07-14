@@ -266,128 +266,6 @@ class Message(object):
 
         return self._signal_tree
 
-    def _get_mux_number(self, decoded, signal_name):
-        mux = decoded[signal_name]
-
-        if isinstance(mux, str):
-            signal = self.get_signal_by_name(signal_name)
-            mux = signal.choice_string_to_number(mux)
-
-        return mux
-
-    def _encode(self, node, data, scaling):
-        encoded = encode_data(data,
-                              node['signals'],
-                              node['formats'],
-                              scaling)
-        padding_mask = node['formats'].padding_mask
-        multiplexers = node['multiplexers']
-
-        for signal in multiplexers:
-            mux = self._get_mux_number(data, signal)
-
-            try:
-                node = multiplexers[signal][mux]
-            except KeyError:
-                raise EncodeError('expected multiplexer id {}, but got {}'.format(
-                    format_or(multiplexers[signal]),
-                    mux))
-
-            mux_encoded, mux_padding_mask = self._encode(node, data, scaling)
-            encoded |= mux_encoded
-            padding_mask &= mux_padding_mask
-
-        return encoded, padding_mask
-
-    def encode(self, data, scaling=True, padding=False):
-        """Encode given data as a message of this type.
-
-        If `scaling` is ``False`` no scaling of signals is performed.
-
-        If `padding` is ``True`` unused bits are encoded as 1.
-
-        >>> foo = db.get_message_by_name('Foo')
-        >>> foo.encode({'Bar': 1, 'Fum': 5.0})
-        b'\\x01\\x45\\x23\\x00\\x11'
-
-        """
-
-        encoded, padding_mask = self._encode(self._codecs, data, scaling)
-
-        if padding:
-            encoded |= padding_mask
-
-        encoded |= (0x80 << (8 * self._length))
-        encoded = hex(encoded)[4:].rstrip('L')
-
-        return binascii.unhexlify(encoded)[:self._length]
-
-    def _decode(self, node, data, decode_choices, scaling):
-        decoded = decode_data(data,
-                              node['signals'],
-                              node['formats'],
-                              decode_choices,
-                              scaling)
-
-        multiplexers = node['multiplexers']
-
-        for signal in multiplexers:
-            mux = self._get_mux_number(decoded, signal)
-
-            try:
-                node = multiplexers[signal][mux]
-            except KeyError:
-                raise DecodeError('expected multiplexer id {}, but got {}'.format(
-                    format_or(multiplexers[signal]),
-                    mux))
-
-            decoded.update(self._decode(node,
-                                        data,
-                                        decode_choices,
-                                        scaling))
-
-        return decoded
-
-    def decode(self, data, decode_choices=True, scaling=True):
-        """Decode given data as a message of this type.
-
-        If `decode_choices` is ``False`` scaled values are not
-        converted to choice strings (if available).
-
-        If `scaling` is ``False`` no scaling of signals is performed.
-
-        >>> foo = db.get_message_by_name('Foo')
-        >>> foo.decode(b'\\x01\\x45\\x23\\x00\\x11')
-        {'Bar': 1, 'Fum': 5.0}
-
-        """
-
-        data = data[:self._length]
-
-        return self._decode(self._codecs, data, decode_choices, scaling)
-
-    def get_signal_by_name(self, name):
-        for signal in self._signals:
-            if signal.name == name:
-                return signal
-
-        raise KeyError(name)
-
-    def is_multiplexed(self):
-        """Returns ``True`` if the message is multiplexed, otherwise
-        ``False``.
-
-        >>> foo = db.get_message_by_name('Foo')
-        >>> foo.is_multiplexed()
-        False
-        >>> bar = db.get_message_by_name('Bar')
-        >>> bar.is_multiplexed()
-        True
-
-        """
-
-        return bool(self._codecs['multiplexers'])
-
     @property
     def layout(self):
         """ASCII art of the message layout. Each signal is an arrow from LSB
@@ -595,6 +473,128 @@ class Message(object):
         lines = [line.rstrip() for line in lines]
 
         return '\n'.join(lines)
+
+    def _get_mux_number(self, decoded, signal_name):
+        mux = decoded[signal_name]
+
+        if isinstance(mux, str):
+            signal = self.get_signal_by_name(signal_name)
+            mux = signal.choice_string_to_number(mux)
+
+        return mux
+
+    def _encode(self, node, data, scaling):
+        encoded = encode_data(data,
+                              node['signals'],
+                              node['formats'],
+                              scaling)
+        padding_mask = node['formats'].padding_mask
+        multiplexers = node['multiplexers']
+
+        for signal in multiplexers:
+            mux = self._get_mux_number(data, signal)
+
+            try:
+                node = multiplexers[signal][mux]
+            except KeyError:
+                raise EncodeError('expected multiplexer id {}, but got {}'.format(
+                    format_or(multiplexers[signal]),
+                    mux))
+
+            mux_encoded, mux_padding_mask = self._encode(node, data, scaling)
+            encoded |= mux_encoded
+            padding_mask &= mux_padding_mask
+
+        return encoded, padding_mask
+
+    def encode(self, data, scaling=True, padding=False):
+        """Encode given data as a message of this type.
+
+        If `scaling` is ``False`` no scaling of signals is performed.
+
+        If `padding` is ``True`` unused bits are encoded as 1.
+
+        >>> foo = db.get_message_by_name('Foo')
+        >>> foo.encode({'Bar': 1, 'Fum': 5.0})
+        b'\\x01\\x45\\x23\\x00\\x11'
+
+        """
+
+        encoded, padding_mask = self._encode(self._codecs, data, scaling)
+
+        if padding:
+            encoded |= padding_mask
+
+        encoded |= (0x80 << (8 * self._length))
+        encoded = hex(encoded)[4:].rstrip('L')
+
+        return binascii.unhexlify(encoded)[:self._length]
+
+    def _decode(self, node, data, decode_choices, scaling):
+        decoded = decode_data(data,
+                              node['signals'],
+                              node['formats'],
+                              decode_choices,
+                              scaling)
+
+        multiplexers = node['multiplexers']
+
+        for signal in multiplexers:
+            mux = self._get_mux_number(decoded, signal)
+
+            try:
+                node = multiplexers[signal][mux]
+            except KeyError:
+                raise DecodeError('expected multiplexer id {}, but got {}'.format(
+                    format_or(multiplexers[signal]),
+                    mux))
+
+            decoded.update(self._decode(node,
+                                        data,
+                                        decode_choices,
+                                        scaling))
+
+        return decoded
+
+    def decode(self, data, decode_choices=True, scaling=True):
+        """Decode given data as a message of this type.
+
+        If `decode_choices` is ``False`` scaled values are not
+        converted to choice strings (if available).
+
+        If `scaling` is ``False`` no scaling of signals is performed.
+
+        >>> foo = db.get_message_by_name('Foo')
+        >>> foo.decode(b'\\x01\\x45\\x23\\x00\\x11')
+        {'Bar': 1, 'Fum': 5.0}
+
+        """
+
+        data = data[:self._length]
+
+        return self._decode(self._codecs, data, decode_choices, scaling)
+
+    def get_signal_by_name(self, name):
+        for signal in self._signals:
+            if signal.name == name:
+                return signal
+
+        raise KeyError(name)
+
+    def is_multiplexed(self):
+        """Returns ``True`` if the message is multiplexed, otherwise
+        ``False``.
+
+        >>> foo = db.get_message_by_name('Foo')
+        >>> foo.is_multiplexed()
+        False
+        >>> bar = db.get_message_by_name('Bar')
+        >>> bar.is_multiplexed()
+        True
+
+        """
+
+        return bool(self._codecs['multiplexers'])
 
     def _check_signal(self, message_bits, signal):
         signal_bits = signal.length * [signal.name]

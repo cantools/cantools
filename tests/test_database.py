@@ -667,6 +667,58 @@ IO_DEBUG(
                     actual_output = stdout.getvalue()
                     self.assertEqual(actual_output, expected_output)
 
+    def test_command_line_dump(self):
+        argv = [
+            'cantools',
+            'dump',
+            'tests/files/motohawk.dbc'
+        ]
+
+        expected_output = """\
+================================= Messages =================================
+
+  ------------------------------------------------------------------------
+
+  Name:   ExampleMessage
+  Id:     0x1f0
+  Length: 8
+
+                        Bit
+
+           7   6   5   4   3   2   1   0
+         +---+---+---+---+---+---+---+---+
+       0 |<-x|<---------------------x|<--|
+         +---+---+---+---+---+---+---+---+
+           |   |                       +-- Temperature
+           |   +-- AverageRadius
+           +-- Enable
+         +---+---+---+---+---+---+---+---+
+       1 |-------------------------------|
+   B     +---+---+---+---+---+---+---+---+
+   y   2 |----------x|   |   |   |   |   |
+   t     +---+---+---+---+---+---+---+---+
+   e   3 |   |   |   |   |   |   |   |   |
+         +---+---+---+---+---+---+---+---+
+       4 |   |   |   |   |   |   |   |   |
+         +---+---+---+---+---+---+---+---+
+       5 |   |   |   |   |   |   |   |   |
+         +---+---+---+---+---+---+---+---+
+       6 |   |   |   |   |   |   |   |   |
+         +---+---+---+---+---+---+---+---+
+       7 |   |   |   |   |   |   |   |   |
+         +---+---+---+---+---+---+---+---+
+
+  ------------------------------------------------------------------------
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdout', stdout):
+            with patch('sys.argv', argv):
+                cantools._main()
+                actual_output = stdout.getvalue()
+                self.assertEqual(actual_output, expected_output)
+
     def test_the_homer(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.load_file(filename)

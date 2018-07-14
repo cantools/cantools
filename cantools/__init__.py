@@ -73,9 +73,9 @@ def _format_message_multi_line(message, formatted_signals):
                                  signals=',\n'.join(indented_signals))
 
 
-def _format_message(database_, frame_id, data, decode_choices, single_line):
+def _format_message(dbase, frame_id, data, decode_choices, single_line):
     try:
-        message = database_.get_message_by_frame_id(frame_id)
+        message = dbase.get_message_by_frame_id(frame_id)
     except KeyError:
         return ' Unknown frame id {0} (0x{0:x})'.format(frame_id)
 
@@ -93,9 +93,9 @@ def _format_message(database_, frame_id, data, decode_choices, single_line):
 
 
 def _do_decode(args):
-    database_ = database.load_file(args.database,
-                                   encoding=args.encoding,
-                                   frame_id_mask=args.frame_id_mask)
+    dbase = database.load_file(args.database,
+                               encoding=args.encoding,
+                               frame_id_mask=args.frame_id_mask)
     decode_choices = not args.no_decode_choices
 
     while True:
@@ -111,13 +111,35 @@ def _do_decode(args):
         if mo:
             frame_id, data = _mo_unpack(mo)
             line += ' ::'
-            line += _format_message(database_,
+            line += _format_message(dbase,
                                     frame_id,
                                     data,
                                     decode_choices,
                                     args.single_line)
 
         print(line)
+
+
+def _do_dump(args):
+    dbase = database.load_file(args.database,
+                               encoding=args.encoding)
+
+    print('================================= Messages =================================')
+    print()
+    print('  ' + 72 * '-')
+
+    for message in dbase.messages:
+        print()
+        print('  Name:   {}'.format(message.name))
+        print('  Id:     0x{:x}'.format(message.frame_id))
+        print('  Length: {}'.format(message.length))
+        print()
+        print('\n'.join([
+            ('  ' + line).rstrip()
+            for line in message.layout().splitlines()
+        ]))
+        print()
+        print('  ' + 72 * '-')
 
 
 def _main():
@@ -162,6 +184,19 @@ def _main():
         'database',
         help='Database file.')
     decode_parser.set_defaults(func=_do_decode)
+
+    # The 'dump' subparser.
+    dump_parser = subparsers.add_parser(
+        'dump',
+        description='Dump given database in a human readable format.')
+    dump_parser.add_argument(
+        '-e', '--encoding',
+        default='utf-8',
+        help='File encoding (default: utf-8).')
+    dump_parser.add_argument(
+        'database',
+        help='Database file.')
+    dump_parser.set_defaults(func=_do_dump)
 
     args = parser.parse_args()
 

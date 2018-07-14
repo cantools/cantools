@@ -281,11 +281,10 @@ class Message(object):
                  +---+---+---+---+---+---+---+---+
                0 |   |   |   |   |   |<----------|
                  +---+---+---+---+---+---+---+---+
-                                       +-- Foo
-                 +---+---+---+---+---+---+---+---+
                1 |------x|   |   |   |   |<-x|   |
                  +---+---+---+---+---+---+---+---+
-                                           +-- Bar
+                       |                   +-- Bar
+                       +-- Foo
                  +---+---+---+---+---+---+---+---+
                2 |   |   |   |   |   |   |   |   |
            B     +---+---+---+---+---+---+---+---+
@@ -444,6 +443,14 @@ class Message(object):
 
             return lines
 
+        def name_bit(signal):
+            offset = start_bit(signal) + signal.length - 1
+
+            if signal.byte_order == 'big_endian':
+                return (8 * (offset // 8) + (7 - (offset % 8)))
+            else:
+                return offset
+
         def add_signal_names(input_lines,
                              number_of_bytes,
                              number_width):
@@ -452,12 +459,7 @@ class Message(object):
             signals_per_byte = [[] for _ in range(number_of_bytes)]
 
             for signal in self._signals:
-                msb = signal.start
-
-                if signal.byte_order == 'little_endian':
-                    msb += signal.length - 1
-
-                byte, bit = divmod(msb, 8)
+                byte, bit = divmod(name_bit(signal), 8)
                 signals_per_byte[byte].append((bit, '+-- ' + signal.name))
 
             # Format signal lines.

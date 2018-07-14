@@ -332,6 +332,7 @@ class Message(object):
             return signals
 
         def format_byte_lines():
+            # Signal lines.
             signals = format_big() + format_little()
 
             if len(signals) > 0:
@@ -342,34 +343,38 @@ class Message(object):
 
                 signals = [signal + (length - len(signal)) * ' ' for signal in signals]
 
-            formatted = ''
+            # Signals union line.
+            signals_union = ''
 
             for chars in zip(*signals):
-                left = chars.count('<')
+                head = chars.count('<')
                 dash = chars.count('-')
-                x = chars.count('x')
+                tail = chars.count('x')
 
-                if left + dash + x > 1:
-                    formatted += 'X'
-                elif left == 1:
-                    formatted += '<'
+                if head + dash + tail > 1:
+                    signals_union += 'X'
+                elif head == 1:
+                    signals_union += '<'
                 elif dash == 1:
-                    formatted += '-'
-                elif x == 1:
-                    formatted += 'x'
+                    signals_union += '-'
+                elif tail == 1:
+                    signals_union += 'x'
                 else:
-                    formatted += ' '
+                    signals_union += ' '
 
+            # Split the signals union line into byte lines, 8 bits per
+            # line.
             byte_lines = [
-                formatted[i:i + 24]
-                for i in range(0, len(formatted), 24)
+                signals_union[i:i + 24]
+                for i in range(0, len(signals_union), 24)
             ]
 
-            unused_byte_lines = self._length - len(byte_lines)
+            unused_byte_lines = (self._length - len(byte_lines))
 
             if unused_byte_lines > 0:
                 byte_lines += unused_byte_lines * [24 * ' ']
 
+            # Insert bits separators into each byte line.
             lines = []
 
             for byte_line in byte_lines:
@@ -380,27 +385,28 @@ class Message(object):
                     byte_triple = byte_line[i:i + 3]
 
                     if i == 0:
-                        line += '|' + byte_triple
-                    elif byte_line[i] in ' <>x':
-                        line += '|' + byte_triple
-                    elif byte_line[i] == 'X':
+                        line += '|'
+                    elif byte_triple[0] in ' <>x':
+                        line += '|'
+                    elif byte_triple[0] == 'X':
                         if prev_byte == 'X':
-                            line += 'X' + byte_triple
+                            line += 'X'
                         elif prev_byte == '-':
-                            line += '-' + byte_triple
+                            line += '-'
                         else:
-                            line += '|' + byte_triple
+                            line += '|'
                     else:
-                        line += '-' + byte_triple
+                        line += '-'
 
-                    prev_byte = byte_line[i + 2]
+                    line += byte_triple
+                    prev_byte = byte_triple[2]
 
                 line += '|'
                 lines.append(line)
 
             return lines
 
-        def add_horizontal_and_header_lines(byte_lines):
+        def add_header_and_horizontal_lines(byte_lines):
             lines = [
                 '               Bit',
                 '',
@@ -434,32 +440,18 @@ class Message(object):
 
         def add_y_axis_name(lines):
             number_of_matrix_lines = (len(lines) - 3)
-            start_index = 4
 
-            if number_of_matrix_lines >= 4:
-                start_index += (number_of_matrix_lines - 4) // 2 - 1
+            if number_of_matrix_lines < 5:
+                lines += (5 - number_of_matrix_lines) * ['     ']
 
-                if start_index < 4:
-                    start_index = 4
+            start_index = 4 + ((number_of_matrix_lines - 4) // 2 - 1)
 
-            if len(lines) < 8:
-                lines += (8 - len(lines)) * ['     ']
+            if start_index < 4:
+                start_index = 4
 
-            axis_lines = []
-
-            for index in range(len(lines)):
-                if index == start_index:
-                    prefix = ' B'
-                elif index == start_index + 1:
-                    prefix = ' y'
-                elif index == start_index + 2:
-                    prefix = ' t'
-                elif index == start_index + 3:
-                    prefix = ' e'
-                else:
-                    prefix = '  '
-
-                axis_lines.append(prefix)
+            axis_lines = start_index * ['  ']
+            axis_lines += [' B', ' y', ' t', ' e']
+            axis_lines += (len(lines) - start_index - 4) * ['  ']
 
             return [
                 axis_line + line
@@ -467,7 +459,7 @@ class Message(object):
             ]
 
         lines = format_byte_lines()
-        lines = add_horizontal_and_header_lines(lines)
+        lines = add_header_and_horizontal_lines(lines)
         lines = add_byte_numbers(lines)
         lines = add_y_axis_name(lines)
         lines = [line.rstrip() for line in lines]

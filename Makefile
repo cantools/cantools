@@ -5,7 +5,6 @@ test:
 	env PYTHONPATH=. python3 examples/hello_world.py
 	env PYTHONPATH=. python3 examples/dbc_io/main.py
 	env PYTHONPATH=. python3 examples/diagnostics/did.py
-	env PYTHONPATH=. python3 examples/dump_messages.py tests/files/motohawk.dbc
 	codespell -d $$(git ls-files \
                         | grep -v the_homer\.kcd \
                         | grep -v signals_ascii_art\.kcd \

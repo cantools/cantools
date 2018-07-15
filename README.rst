@@ -80,6 +80,9 @@ See `examples`_ for additional examples.
 Command line tool
 -----------------
 
+The decode subcommand
+^^^^^^^^^^^^^^^^^^^^^
+
 Decode CAN frames captured with the Linux program ``candump``.
 
 .. code-block:: text
@@ -112,6 +115,9 @@ Alternatively, the decoded message can be printed on a single line:
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
+
+The dump subcommand
+^^^^^^^^^^^^^^^^^^^
 
 Dump given database in a human readable format:
 

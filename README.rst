@@ -131,6 +131,7 @@ Dump given database in a human readable format:
      Name:   ExampleMessage
      Id:     0x1f0
      Length: 8
+     Senders: PCM1
      Layout:
 
                              Bit

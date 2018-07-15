@@ -5,6 +5,7 @@ import re
 import binascii
 import struct
 from . import database
+from .database.utils import format_and
 from . import tester
 
 # Remove once less users are using the old package structure.
@@ -136,6 +137,7 @@ def _do_dump(args):
         print('  Name:   {}'.format(message.name))
         print('  Id:     0x{:x}'.format(message.frame_id))
         print('  Length: {}'.format(message.length))
+        print('  Senders: {}'.format(format_and(message.senders)))
         print('  Layout:')
         print()
         print('\n'.join([

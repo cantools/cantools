@@ -16,6 +16,16 @@ def format_or(items):
                                  items[-1])
 
 
+def format_and(items):
+    items = [str(item) for item in items]
+
+    if len(items) == 1:
+        return items[0]
+    else:
+        return '{} and {}'.format(', '.join(items[:-1]),
+                                  items[-1])
+
+
 def start_bit(data):
     if data.byte_order == 'big_endian':
         return (8 * (data.start // 8) + (7 - (data.start % 8)))

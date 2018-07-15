@@ -266,7 +266,56 @@ class Message(object):
 
         return self._signal_tree
 
-    def layout(self, signal_names=True):
+    def signal_tree_string(self):
+        """Returns the message signal tree as a string.
+
+        """
+
+        def get_prefix(index, length):
+            if index < length - 1:
+                return '|   '
+            else:
+                return '    '
+
+        def add_prefix(prefix, lines):
+            return [prefix + line for line in lines]
+
+        def format_mux(mux):
+            signal_name, multiplexed_signals = list(mux.items())[0]
+            multiplexed_signals = sorted(list(multiplexed_signals.items()))
+            lines = []
+
+            for index, multiplexed_signal in enumerate(multiplexed_signals):
+                multiplexer_id, signal_names = multiplexed_signal
+                lines.append('+-- {}'.format(multiplexer_id))
+                lines += add_prefix(get_prefix(index, len(multiplexed_signals)),
+                                    format_level_lines(signal_names))
+
+            return '+-- {}'.format(signal_name), lines
+
+        def format_level_lines(signal_names):
+            lines = []
+
+            for index, signal_name in enumerate(signal_names):
+                if isinstance(signal_name, dict):
+                    signal_name_line, signal_lines = format_mux(signal_name)
+                    signal_lines = add_prefix(get_prefix(index, len(signal_names)),
+                                              signal_lines)
+                else:
+                    signal_name_line = '+-- {}'.format(signal_name)
+                    signal_lines = []
+
+                lines.append(signal_name_line)
+                lines += signal_lines
+
+            return lines
+
+        lines = format_level_lines(self.signal_tree)
+        lines = ['-- {root}'] + add_prefix('   ', lines)
+
+        return '\n'.join(lines)
+
+    def layout_string(self, signal_names=True):
         """Returns the message layout as an ASCII art string. Each signal is
         an arrow from LSB ``x`` to MSB ``<``. Overlapping signal bits
         are set to ``X``.

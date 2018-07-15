@@ -682,32 +682,40 @@ IO_DEBUG(
   Name:   ExampleMessage
   Id:     0x1f0
   Length: 8
+  Layout:
 
-                        Bit
+                          Bit
 
-           7   6   5   4   3   2   1   0
-         +---+---+---+---+---+---+---+---+
-       0 |<-x|<---------------------x|<--|
-         +---+---+---+---+---+---+---+---+
-           |                       +-- AverageRadius
-           +-- Enable
-         +---+---+---+---+---+---+---+---+
-       1 |-------------------------------|
-         +---+---+---+---+---+---+---+---+
-       2 |----------x|   |   |   |   |   |
-   B     +---+---+---+---+---+---+---+---+
-   y               +-- Temperature
-   t     +---+---+---+---+---+---+---+---+
-   e   3 |   |   |   |   |   |   |   |   |
-         +---+---+---+---+---+---+---+---+
-       4 |   |   |   |   |   |   |   |   |
-         +---+---+---+---+---+---+---+---+
-       5 |   |   |   |   |   |   |   |   |
-         +---+---+---+---+---+---+---+---+
-       6 |   |   |   |   |   |   |   |   |
-         +---+---+---+---+---+---+---+---+
-       7 |   |   |   |   |   |   |   |   |
-         +---+---+---+---+---+---+---+---+
+             7   6   5   4   3   2   1   0
+           +---+---+---+---+---+---+---+---+
+         0 |<-x|<---------------------x|<--|
+           +---+---+---+---+---+---+---+---+
+             |                       +-- AverageRadius
+             +-- Enable
+           +---+---+---+---+---+---+---+---+
+         1 |-------------------------------|
+           +---+---+---+---+---+---+---+---+
+         2 |----------x|   |   |   |   |   |
+     B     +---+---+---+---+---+---+---+---+
+     y               +-- Temperature
+     t     +---+---+---+---+---+---+---+---+
+     e   3 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         4 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         5 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         6 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         7 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+
+  Signal tree:
+
+    -- {root}
+       +-- Enable
+       +-- AverageRadius
+       +-- Temperature
 
   ------------------------------------------------------------------------
 """
@@ -914,6 +922,26 @@ IO_DEBUG(
                              'SpeedKm',
                              'Handbrake'
                          ])
+
+        self.assertEqual(
+            db.messages[1].signal_tree_string(),
+            '-- {root}\n'
+            '   +-- ABS_InfoMux\n'
+            '   |   +-- 0\n'
+            '   |   |   +-- Info0\n'
+            '   |   |   +-- Info1\n'
+            '   |   +-- 1\n'
+            '   |   |   +-- Info2\n'
+            '   |   |   +-- Info3\n'
+            '   |   +-- 2\n'
+            '   |   |   +-- Info4\n'
+            '   |   |   +-- Info5\n'
+            '   |   +-- 3\n'
+            '   |       +-- Info6\n'
+            '   |       +-- Info7\n'
+            '   +-- OutsideTemp\n'
+            '   +-- SpeedKm\n'
+            '   +-- Handbrake')
 
         ambient_lux = db.messages[24].signals[0]
 
@@ -1349,6 +1377,33 @@ IO_DEBUG(
                              }
                          ])
 
+        self.assertEqual(
+            message_1.signal_tree_string(),
+            '-- {root}\n'
+            '   +-- Multiplexor\n'
+            '       +-- 8\n'
+            '       |   +-- BIT_J\n'
+            '       |   +-- BIT_C\n'
+            '       |   +-- BIT_G\n'
+            '       |   +-- BIT_L\n'
+            '       +-- 16\n'
+            '       |   +-- BIT_J\n'
+            '       |   +-- BIT_C\n'
+            '       |   +-- BIT_G\n'
+            '       |   +-- BIT_L\n'
+            '       +-- 24\n'
+            '           +-- BIT_J\n'
+            '           +-- BIT_C\n'
+            '           +-- BIT_G\n'
+            '           +-- BIT_L\n'
+            '           +-- BIT_A\n'
+            '           +-- BIT_K\n'
+            '           +-- BIT_E\n'
+            '           +-- BIT_D\n'
+            '           +-- BIT_B\n'
+            '           +-- BIT_H\n'
+            '           +-- BIT_F')
+
         signal_multiplexor = message_1.signals[0]
         self.assertEqual(signal_multiplexor.is_multiplexer, True)
 
@@ -1458,6 +1513,34 @@ IO_DEBUG(
                              }
                          ])
 
+        self.assertEqual(
+            message_2.signal_tree_string(),
+            '-- {root}\n'
+            '   +-- Multiplexor\n'
+            '       +-- 4\n'
+            '       +-- 8\n'
+            '       |   +-- BIT_J\n'
+            '       |   +-- BIT_C\n'
+            '       |   +-- BIT_G\n'
+            '       |   +-- BIT_L\n'
+            '       +-- 16\n'
+            '       |   +-- BIT_J\n'
+            '       |   +-- BIT_C\n'
+            '       |   +-- BIT_G\n'
+            '       |   +-- BIT_L\n'
+            '       +-- 24\n'
+            '           +-- BIT_J\n'
+            '           +-- BIT_C\n'
+            '           +-- BIT_G\n'
+            '           +-- BIT_L\n'
+            '           +-- BIT_A\n'
+            '           +-- BIT_K\n'
+            '           +-- BIT_E\n'
+            '           +-- BIT_D\n'
+            '           +-- BIT_B\n'
+            '           +-- BIT_H\n'
+            '           +-- BIT_F')
+
     def test_multiplex_extended(self):
         #            tree              |  bits
         # =============================+========
@@ -1552,6 +1635,26 @@ IO_DEBUG(
                                  }
                              }
                          ])
+
+        self.assertEqual(
+            message.signal_tree_string(),
+            '-- {root}\n'
+            '   +-- S0\n'
+            '   |   +-- 0\n'
+            '   |   |   +-- S1\n'
+            '   |   |       +-- 0\n'
+            '   |   |       |   +-- S2\n'
+            '   |   |       |   +-- S3\n'
+            '   |   |       +-- 2\n'
+            '   |   |           +-- S4\n'
+            '   |   +-- 1\n'
+            '   |       +-- S5\n'
+            '   +-- S6\n'
+            '       +-- 1\n'
+            '       |   +-- S7\n'
+            '       +-- 2\n'
+            '           +-- S8'
+        )
 
         # Encode and decode a few messages with different
         # multiplexing.
@@ -2459,7 +2562,7 @@ IO_DEBUG(
             ' e'
         ]
 
-        actual = db.get_message_by_name('Message1').layout()
+        actual = db.get_message_by_name('Message1').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 2.
@@ -2474,7 +2577,7 @@ IO_DEBUG(
             ' e'
         ]
 
-        actual = db.get_message_by_name('Message2').layout()
+        actual = db.get_message_by_name('Message2').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 3.
@@ -2490,7 +2593,7 @@ IO_DEBUG(
             '         +-- Signal1',
         ]
 
-        actual = db.get_message_by_name('Message3').layout()
+        actual = db.get_message_by_name('Message3').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 4.
@@ -2509,7 +2612,7 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message4').layout()
+        actual = db.get_message_by_name('Message4').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 5.
@@ -2536,7 +2639,7 @@ IO_DEBUG(
             '         +-- Signal3'
         ]
 
-        actual = db.get_message_by_name('Message5').layout()
+        actual = db.get_message_by_name('Message5').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 6.
@@ -2568,7 +2671,7 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message6').layout()
+        actual = db.get_message_by_name('Message6').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 7.
@@ -2612,7 +2715,7 @@ IO_DEBUG(
             '          +-- Signal1'
         ]
 
-        actual = db.get_message_by_name('Message7').layout()
+        actual = db.get_message_by_name('Message7').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 8.
@@ -2656,7 +2759,7 @@ IO_DEBUG(
             '                                      +-- Signal1'
         ]
 
-        actual = db.get_message_by_name('Message8').layout()
+        actual = db.get_message_by_name('Message8').layout_string()
         self.assertEqual(actual, '\n'.join(expected_lines))
 
     def test_message_layout_without_signal_names(self):
@@ -2675,7 +2778,8 @@ IO_DEBUG(
             ' e'
         ]
 
-        actual = db.get_message_by_name('Message1').layout(signal_names=False)
+        message = db.get_message_by_name('Message1')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 2.
@@ -2690,7 +2794,8 @@ IO_DEBUG(
             ' e'
         ]
 
-        actual = db.get_message_by_name('Message2').layout(signal_names=False)
+        message = db.get_message_by_name('Message2')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 3.
@@ -2705,7 +2810,8 @@ IO_DEBUG(
             ' e     +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message3').layout(signal_names=False)
+        message = db.get_message_by_name('Message3')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 4.
@@ -2722,7 +2828,8 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message4').layout(signal_names=False)
+        message = db.get_message_by_name('Message4')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 5.
@@ -2739,7 +2846,8 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message5').layout(signal_names=False)
+        message = db.get_message_by_name('Message5')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 6.
@@ -2766,7 +2874,8 @@ IO_DEBUG(
             '       +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message6').layout(signal_names=False)
+        message = db.get_message_by_name('Message6')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 7.
@@ -2809,7 +2918,8 @@ IO_DEBUG(
             '        +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message7').layout(signal_names=False)
+        message = db.get_message_by_name('Message7')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
         # Message 8.
@@ -2852,7 +2962,8 @@ IO_DEBUG(
             '        +---+---+---+---+---+---+---+---+'
         ]
 
-        actual = db.get_message_by_name('Message8').layout(signal_names=False)
+        message = db.get_message_by_name('Message8')
+        actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
 

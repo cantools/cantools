@@ -412,15 +412,25 @@ def _dump_nodes(database):
 def _dump_messages(database):
     bo = []
 
-    def get_mux(signal):
+    def format_mux(signal):
         if signal.is_multiplexer:
-            result = ' M'
+            return ' M'
         elif signal.multiplexer_ids is not None:
-            result = ' m{}'.format(signal.multiplexer_ids[0])
+            return ' m{}'.format(signal.multiplexer_ids[0])
         else:
-            result = ''
+            return ''
 
-        return result
+    def format_receivers(signal):
+        if signal.receivers:
+            return ' ' + ','.join(signal.receivers)
+        else:
+            return 'Vector__XXX'
+
+    def format_senders(message):
+        if message.senders:
+            return ' '.join(message.senders)
+        else:
+            return 'Vector__XXX'
 
     for message in database.messages:
         msg = []
@@ -428,19 +438,18 @@ def _dump_messages(database):
         msg.append(fmt.format(frame_id=get_dbc_frame_id(message),
                               name=message.name,
                               length=message.length,
-                              senders=' '.join(message.senders)))
+                              senders=format_senders(message)))
 
         for signal in message.signals[::-1]:
             fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
                    ' [{minimum}|{maximum}] "{unit}" {receivers}')
-            space_correction = '' if "Vector__XXX" in signal.receivers else ' '
             msg.append(fmt.format(
                 name=signal.name,
-                mux=get_mux(signal),
+                mux=format_mux(signal),
                 start=signal.start,
                 length=signal.length,
-                receivers=space_correction + ','.join(signal.receivers),
+                receivers=format_receivers(signal),
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
                 sign=('-' if signal.is_signed else '+'),
                 scale=signal.scale,
@@ -942,6 +951,12 @@ def _load_messages(tokens,
         except KeyError:
             return False
 
+    def get_receivers(receivers):
+        if receivers == ['Vector__XXX']:
+            receivers = []
+
+        return receivers
+
     messages = []
 
     for message in tokens:
@@ -959,6 +974,9 @@ def _load_messages(tokens,
         for node in message_senders.get(frame_id_dbc, []):
             if node not in senders:
                 senders.append(node)
+
+        if senders == ['Vector__XXX']:
+            senders = []
 
         # Signal multiplexing.
         multiplexer_signal = None
@@ -982,7 +1000,7 @@ def _load_messages(tokens,
             signals=[Signal(name=signal[1][0],
                             start=int(signal[2][0]),
                             length=int(signal[2][1]),
-                            receivers=list(signal[6]),
+                            receivers=get_receivers(list(signal[6])),
                             byte_order=('big_endian'
                                         if signal[2][2] == '0'
                                         else 'little_endian'),

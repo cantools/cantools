@@ -32,15 +32,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.nodes), 1)
         self.assertEqual(db.nodes[0].name, 'UnusedNode')
         self.assertEqual(len(db.messages), 217)
+        self.assertEqual(db.messages[216].name, 'RT_SB_Gyro_Rates')
         self.assertEqual(db.messages[216].frame_id, 155872546)
-        self.assertEqual(db.messages[216].senders, ['Vector__XXX'])
+        self.assertEqual(db.messages[216].senders, [])
         self.assertEqual(str(db.messages[0]),
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, True, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
                          "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
-        self.assertEqual(db.messages[0].signals[0].receivers, ['Vector__XXX'])
+        self.assertEqual(db.messages[0].signals[0].receivers, [])
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].send_type, None)
         self.assertEqual(repr(db.nodes[0]), "node('UnusedNode', None)")
@@ -72,7 +73,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages[0].signals[2].receivers), 2)
         self.assertEqual(db.messages[0].signals[2].receivers[0], 'PCM1')
         self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
-        self.assertEqual(db.messages[0].signals[1].receivers[0], 'Vector__XXX')
+        self.assertEqual(db.messages[0].signals[1].receivers, [])
 
         with open(filename, 'rb') as fin:
             self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
@@ -87,7 +88,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.nodes), 1)
         self.assertEqual(db.nodes[0].name, 'EMV_Statusmeldungen')
         self.assertEqual(len(db.messages), 1)
+        self.assertEqual(db.messages[0].signals[0].name, 'EMV_Aktion_Status_3')
         self.assertEqual(len(db.messages[0].signals[0].receivers), 1)
+        self.assertEqual(db.messages[0].signals[1].name, 'EMV_Aktion_Status_4')
+        self.assertEqual(len(db.messages[0].signals[1].receivers), 0)
 
     def test_foobar(self):
         db = cantools.db.Database()

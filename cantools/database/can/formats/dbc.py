@@ -2,7 +2,6 @@
 
 from collections import OrderedDict as odict
 from decimal import Decimal
-import re
 
 import pyparsing
 from pyparsing import Word

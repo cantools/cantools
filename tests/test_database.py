@@ -481,6 +481,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
                               {'Signal1': signal_value},
                               strict=False)
 
+        # Missing value.
+        with self.assertRaises(cantools.database.EncodeError) as cm:
+            db.encode_message('Message1', {'Foo': 1})
+
+        self.assertEqual(
+            str(cm.exception),
+            "Expected signal value for 'Signal1' in data, but got {'Foo': 1}.")
+
+        # Missing value, but checks disabled.
+        with self.assertRaises(KeyError):
+            db.encode_message('Message1', {'Foo': 1}, strict=False)
+
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not
         decoding choices.

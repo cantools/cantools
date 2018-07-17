@@ -618,18 +618,20 @@ class Message(object):
                                                                  self.name,
                                                                  value))
 
-    def _check_signals(self, signals, data, scaling, strict):
+    def _check_signals(self, signals, data, scaling):
         for signal in signals:
             if signal.name not in data:
-                raise EncodeError('Expected ..., but got {}.'.format(
-                    signal.name))
+                raise EncodeError(
+                    "Expected signal value for '{}' in data, but got {}.".format(
+                        signal.name,
+                        data))
 
         if scaling:
             self._check_signals_ranges_scaling(signals, data)
 
     def _encode(self, node, data, scaling, strict):
         if strict:
-            self._check_signals(node['signals'], data, scaling, strict)
+            self._check_signals(node['signals'], data, scaling)
 
         encoded = encode_data(data,
                               node['signals'],

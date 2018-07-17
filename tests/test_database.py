@@ -1877,7 +1877,7 @@ IO_DEBUG(
 
         self.assertEqual(
             str(cm.exception),
-            "KCD: \"syntax error: line 1, column 0\"")
+            "KCD: \"not well-formed (invalid token): line 1, column 0\"")
 
         # DBC database format, but file is KCD.
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:

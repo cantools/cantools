@@ -2,6 +2,7 @@
 
 from collections import OrderedDict as odict
 from decimal import Decimal
+import re
 
 import pyparsing
 from pyparsing import Word
@@ -21,6 +22,7 @@ from pyparsing import LineEnd
 from pyparsing import Empty
 from pyparsing import ParseException
 from pyparsing import ParseSyntaxException
+from pyparsing import dblSlashComment
 
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
@@ -362,7 +364,10 @@ def _create_grammar():
 
     frame_id.setParseAction(lambda _s, _l, t: int(t[0]))
 
-    return OneOrMore(entry) + StringEnd()
+    grammar = OneOrMore(entry) + StringEnd()
+    grammar.ignore(dblSlashComment)
+
+    return grammar
 
 
 class DbcSpecifics(object):
@@ -1168,6 +1173,7 @@ def get_definitions_dict(definitions, defaults):
         result[definition.name] = definition
 
     return result
+
 
 def load_string(string, strict=True):
     """Parse given string.

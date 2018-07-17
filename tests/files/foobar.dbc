@@ -1,4 +1,6 @@
-VERSION "2.0"
+// A comment.
+
+VERSION "2.0" // Another comment.
 
 
 NS_ : 

@@ -454,8 +454,8 @@ def _dump_messages(database):
                 sign=('-' if signal.is_signed else '+'),
                 scale=signal.scale,
                 offset=signal.offset,
-                minimum=signal.minimum,
-                maximum=signal.maximum,
+                minimum=(0 if signal.minimum is None else signal.minimum),
+                maximum=(0 if signal.maximum is None else signal.maximum),
                 unit='' if signal.unit is None else signal.unit))
 
         bo.append('\r\n'.join(msg))
@@ -957,6 +957,18 @@ def _load_messages(tokens,
 
         return receivers
 
+    def get_minimum(minimum, maximum):
+        if minimum == maximum == 0:
+            return None
+        else:
+            return minimum
+
+    def get_maximum(minimum, maximum):
+        if minimum == maximum == 0:
+            return None
+        else:
+            return maximum
+
     messages = []
 
     for message in tokens:
@@ -1007,8 +1019,10 @@ def _load_messages(tokens,
                             is_signed=(signal[2][3] == '-'),
                             scale=num(signal[3][0]),
                             offset=num(signal[3][1]),
-                            minimum=num(signal[4][0]),
-                            maximum=num(signal[4][1]),
+                            minimum=get_minimum(num(signal[4][0]),
+                                                num(signal[4][1])),
+                            maximum=get_maximum(num(signal[4][0]),
+                                                num(signal[4][1])),
                             unit=None if signal[5] == '' else signal[5],
                             choices=get_choices(frame_id_dbc,
                                                 signal[1][0]),

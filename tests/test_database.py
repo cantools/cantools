@@ -100,39 +100,40 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(len(db.nodes), 4)
         self.assertEqual(db.version, '2.0')
-        self.assertEqual(repr(db),
-                         "version('2.0')\n"
-                         "\n"
-                         "node('FOO', None)\n"
-                         "node('BAR', 'fam \"1\"')\n"
-                         "node('FIE', None)\n"
-                         "node('FUM', None)\n"
-                         "\n"
-                         "message('Foo', 0x12330, True, 8, 'Foo.')\n"
-                         "  signal('Foo', 0, 12, 'big_endian', True, 0.01, "
-                         "250, 229.53, 270.47, 'degK', False, None, None, None)\n"
-                         "  signal('Bar', 24, 32, 'big_endian', True, 0.1, "
-                         "0, 1, 5, 'm', False, None, None, 'Bar.')\n"
-                         "\n"
-                         "message('Fum', 0x12331, True, 5, None)\n"
-                         "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
-                         "'None', False, None, None, None)\n"
-                         "  signal('Fam', 12, 12, 'little_endian', True, 1, 0, "
-                         "0, 1, 'None', False, None, {1: \'Enabled\', 0: \'Disabled\'}, None)\n"
-                         "\n"
-                         "message('Bar', 0x12332, True, 4, None)\n"
-                         "  signal('Binary32', 0, 32, 'little_endian', True, 1, 0, 0, "
-                         "0, 'None', False, None, None, None)\n"
-                         "\n"
-                         "message('CanFd', 0x12333, True, 64, None)\n"
-                         "  signal('Fie', 0, 64, 'little_endian', False, 1, 0, 0, 0, "
-                         "'None', False, None, None, None)\n"
-                         "  signal('Fas', 64, 64, 'little_endian', False, 1, 0, 0, 0, "
-                         "'None', False, None, None, None)\n"
-                         "\n"
-                         "message('FOOBAR', 0x30c, False, 8, None)\n"
-                         "  signal('ACC_02_CRC', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
-                         "'None', False, None, None, None)\n")
+        self.assertEqual(
+            repr(db),
+            "version('2.0')\n"
+            "\n"
+            "node('FOO', None)\n"
+            "node('BAR', 'fam \"1\"')\n"
+            "node('FIE', None)\n"
+            "node('FUM', None)\n"
+            "\n"
+            "message('Foo', 0x12330, True, 8, 'Foo.')\n"
+            "  signal('Foo', 0, 12, 'big_endian', True, 0.01, "
+            "250, 229.53, 270.47, 'degK', False, None, None, None)\n"
+            "  signal('Bar', 24, 32, 'big_endian', True, 0.1, "
+            "0, 0, 5, 'm', False, None, None, 'Bar.')\n"
+            "\n"
+            "message('Fum', 0x12331, True, 5, None)\n"
+            "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 10, "
+            "'None', False, None, None, None)\n"
+            "  signal('Fam', 12, 12, 'little_endian', True, 1, 0, "
+            "0, 8, 'None', False, None, {1: \'Enabled\', 0: \'Disabled\'}, None)\n"
+            "\n"
+            "message('Bar', 0x12332, True, 4, None)\n"
+            "  signal('Binary32', 0, 32, 'little_endian', True, 1, 0, None, "
+            "None, 'None', False, None, None, None)\n"
+            "\n"
+            "message('CanFd', 0x12333, True, 64, None)\n"
+            "  signal('Fie', 0, 64, 'little_endian', False, 1, 0, None, None, "
+            "'None', False, None, None, None)\n"
+            "  signal('Fas', 64, 64, 'little_endian', False, 1, 0, None, None, "
+            "'None', False, None, None, None)\n"
+            "\n"
+            "message('FOOBAR', 0x30c, False, 8, None)\n"
+            "  signal('ACC_02_CRC', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
+            "'None', False, None, None, None)\n")
 
         message = db.get_message_by_frame_id(0x12331)
         self.assertEqual(message.name, 'Fum')
@@ -405,6 +406,80 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                     encoded,
                                     scaling=False)
         self.assertEqual(decoded, decoded_message)
+
+    def test_encode_signal_strict(self):
+        """Test signal out of range errors.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'signal_range.kcd')
+        db = cantools.database.load_file(filename)
+
+        # Values in range.
+        datas = [
+            ('Message2', 3),
+            ('Message3', 0)
+        ]
+
+        for message_name, signal_value in datas:
+            db.encode_message(message_name, {'Signal1': signal_value})
+
+        # Values out of range.
+        datas = [
+            (
+                'Message1',
+                0,
+                "Expected signal 'Signal1' value greater than or equal to 1 in "
+                "message 'Message1', but got 0."
+            ),
+            (
+                'Message1',
+                3,
+                "Expected signal 'Signal1' value less than or equal to 2 in "
+                "message 'Message1', but got 3."
+            ),
+            (
+                'Message2',
+                0,
+                "Expected signal 'Signal1' value greater than or equal to 1 in "
+                "message 'Message2', but got 0."
+            ),
+            (
+                'Message3',
+                3,
+                "Expected signal 'Signal1' value less than or equal to 2 in "
+                "message 'Message3', but got 3."
+            ),
+            (
+                'Message4',
+                1.9,
+                "Expected signal 'Signal1' value greater than or equal to 2 in "
+                "message 'Message4', but got 1.9."
+            ),
+            (
+                'Message4',
+                8.1,
+                "Expected signal 'Signal1' value less than or equal to 8 in "
+                "message 'Message4', but got 8.1."
+            )
+        ]
+
+        for message_name, signal_value, error_message in datas:
+            with self.assertRaises(cantools.database.EncodeError) as cm:
+                db.encode_message(message_name, {'Signal1': signal_value})
+
+            self.assertEqual(str(cm.exception), error_message)
+
+        # Values out of range, but range checks disabled.
+        datas = [
+            ('Message1', 0),
+            ('Message1', 3)
+        ]
+
+        for message_name, signal_value in datas:
+            db.encode_message(message_name,
+                              {'Signal1': signal_value},
+                              strict=False)
 
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not

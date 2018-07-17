@@ -592,7 +592,44 @@ class Message(object):
 
         return mux
 
-    def _encode(self, node, data, scaling):
+    def _check_signals_ranges_scaling(self, signals, data):
+        for signal in signals:
+            value = data[signal.name]
+
+            # Choices are checked later.
+            if isinstance(value, str):
+                continue
+
+            if signal.minimum is not None:
+                if value < signal.minimum:
+                    raise EncodeError(
+                        "Expected signal '{}' value greater than or equal to "
+                        "{} in message '{}', but got {}.".format(signal.name,
+                                                                 signal.minimum,
+                                                                 self._name,
+                                                                 value))
+
+            if signal.maximum is not None:
+                if value > signal.maximum:
+                    raise EncodeError(
+                        "Expected signal '{}' value less than or equal to "
+                        "{} in message '{}', but got {}.".format(signal.name,
+                                                                 signal.maximum,
+                                                                 self.name,
+                                                                 value))
+
+    def _check_signals(self, signals, data, scaling, strict):
+        for signal in signals:
+            if signal.name not in data:
+                raise EncodeError('Expected ..., but got {}.'.format(
+                    signal.name))
+
+        if strict:
+            if scaling:
+                self._check_signals_ranges_scaling(signals, data)
+
+    def _encode(self, node, data, scaling, strict):
+        self._check_signals(node['signals'], data, scaling, strict)
         encoded = encode_data(data,
                               node['signals'],
                               node['formats'],
@@ -610,18 +647,24 @@ class Message(object):
                     format_or(multiplexers[signal]),
                     mux))
 
-            mux_encoded, mux_padding_mask = self._encode(node, data, scaling)
+            mux_encoded, mux_padding_mask = self._encode(node,
+                                                         data,
+                                                         scaling,
+                                                         strict)
             encoded |= mux_encoded
             padding_mask &= mux_padding_mask
 
         return encoded, padding_mask
 
-    def encode(self, data, scaling=True, padding=False):
+    def encode(self, data, scaling=True, padding=False, strict=True):
         """Encode given data as a message of this type.
 
         If `scaling` is ``False`` no scaling of signals is performed.
 
         If `padding` is ``True`` unused bits are encoded as 1.
+
+        If `strict` is ``True`` all signal values must be within their
+        allowed ranges, or an exception is raised.
 
         >>> foo = db.get_message_by_name('Foo')
         >>> foo.encode({'Bar': 1, 'Fum': 5.0})
@@ -629,7 +672,10 @@ class Message(object):
 
         """
 
-        encoded, padding_mask = self._encode(self._codecs, data, scaling)
+        encoded, padding_mask = self._encode(self._codecs,
+                                             data,
+                                             scaling,
+                                             strict)
 
         if padding:
             encoded |= padding_mask

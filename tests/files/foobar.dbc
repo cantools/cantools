@@ -39,11 +39,11 @@ VAL_TABLE_ State 1 "Enabled" 0 "Disabled" ;
 
 BO_ 2147558192 Foo: 8 FOO
  SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK"  BAR
- SG_ Bar : 24|32@0- (0.1,0) [1|5] "m"  FOO
+ SG_ Bar : 24|32@0- (0.1,0) [0|5] "m"  FOO
 
 BO_ 2147558193 Fum: 5 FOO
- SG_ Fum : 0|12@1- (1,0) [0|1] ""  BAR
- SG_ Fam : 12|12@1- (1,0) [0|1] ""  BAR
+ SG_ Fum : 0|12@1- (1,0) [0|10] ""  BAR
+ SG_ Fam : 12|12@1- (1,0) [0|8] ""  BAR
 
 BO_ 2147558194 Bar: 4 FOO
  SG_ Binary32 : 0|32@1- (1,0) [0|0] ""  FUM

@@ -289,7 +289,8 @@ class Database(object):
                        frame_id_or_name,
                        data,
                        scaling=True,
-                       padding=False):
+                       padding=False,
+                       strict=True):
         """Encode given signal data `data` as a message of given frame id or
         name `frame_id_or_name`. `data` is a dictionary of signal
         name-value entries.
@@ -297,6 +298,9 @@ class Database(object):
         If `scaling` is ``False`` no scaling of signals is performed.
 
         If `padding` is ``True`` unused bits are encoded as 1.
+
+        If `strict` is ``True`` all signal values must be within their
+        allowed ranges, or an exception is raised.
 
         >>> db.encode_message(158, {'Bar': 1, 'Fum': 5.0})
         b'\\x01\\x45\\x23\\x00\\x11'
@@ -310,7 +314,7 @@ class Database(object):
         except KeyError:
             message = self._name_to_message[frame_id_or_name]
 
-        return message.encode(data, scaling, padding)
+        return message.encode(data, scaling, padding, strict)
 
     def decode_message(self,
                        frame_id_or_name,

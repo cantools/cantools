@@ -133,11 +133,17 @@ def _do_dump(args):
     print('  ' + 72 * '-')
 
     for message in dbase.messages:
+        cycle_time = message.cycle_time
+
+        if cycle_time is None:
+            cycle_time = '-'
+
         print()
-        print('  Name:   {}'.format(message.name))
-        print('  Id:     0x{:x}'.format(message.frame_id))
-        print('  Length: {}'.format(message.length))
-        print('  Senders: {}'.format(format_and(message.senders)))
+        print('  Name:       {}'.format(message.name))
+        print('  Id:         0x{:x}'.format(message.frame_id))
+        print('  Length:     {} bytes'.format(message.length))
+        print('  Cycle time: {} ms'.format(cycle_time))
+        print('  Senders:    {}'.format(format_and(message.senders)))
         print('  Layout:')
         print()
         print('\n'.join([

@@ -624,12 +624,13 @@ class Message(object):
                 raise EncodeError('Expected ..., but got {}.'.format(
                     signal.name))
 
-        if strict:
-            if scaling:
-                self._check_signals_ranges_scaling(signals, data)
+        if scaling:
+            self._check_signals_ranges_scaling(signals, data)
 
     def _encode(self, node, data, scaling, strict):
-        self._check_signals(node['signals'], data, scaling, strict)
+        if strict:
+            self._check_signals(node['signals'], data, scaling, strict)
+
         encoded = encode_data(data,
                               node['signals'],
                               node['formats'],

@@ -13,7 +13,7 @@ from . import database as db
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '28.0.0'
+__version__ = '28.0.1'
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".

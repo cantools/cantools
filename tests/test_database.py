@@ -3059,6 +3059,25 @@ IO_DEBUG(
         actual = message.layout_string(signal_names=False)
         self.assertEqual(actual, '\n'.join(expected_lines))
 
+    def test_add_two_dbc_files(self):
+        """Test adding two DBC-files to the same database.
+
+        """
+
+        db = cantools.database.Database()
+
+        filename = os.path.join('tests', 'files', 'add_two_dbc_files_1.dbc')
+        db.add_dbc_file(filename)
+        self.assertEqual(len(db.messages), 2)
+        self.assertEqual(db.get_message_by_name('M1').frame_id, 1)
+        self.assertEqual(db.get_message_by_frame_id(2).name, 'M2')
+
+        filename = os.path.join('tests', 'files', 'add_two_dbc_files_2.dbc')
+        db.add_dbc_file(filename)
+        self.assertEqual(len(db.messages), 3)
+        self.assertEqual(db.get_message_by_name('M1').frame_id, 2)
+        self.assertEqual(db.get_message_by_frame_id(2).name, 'M1')
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

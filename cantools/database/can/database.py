@@ -129,7 +129,7 @@ class Database(object):
 
         database = dbc.load_string(string, self._strict)
 
-        self._messages = database.messages
+        self._messages += database.messages
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
@@ -163,7 +163,7 @@ class Database(object):
 
         database = kcd.load_string(string, self._strict)
 
-        self._messages = database.messages
+        self._messages += database.messages
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
@@ -197,7 +197,7 @@ class Database(object):
 
         database = sym.load_string(string, self._strict)
 
-        self._messages = database.messages
+        self._messages += database.messages
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
@@ -210,8 +210,9 @@ class Database(object):
         """
 
         if message.name in self._name_to_message:
-            LOGGER.warning("Overwriting message with name '%s' in the "
+            LOGGER.warning("Overwriting message '%s' with '%s' in the "
                            "name to message dictionary.",
+                           self._name_to_message[message.name].name,
                            message.name)
 
         masked_frame_id = (message.frame_id & self._frame_id_mask)

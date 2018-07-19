@@ -3,25 +3,16 @@
 import re
 from collections import OrderedDict as odict
 from decimal import Decimal
+import collections
 
-import pyparsing
-from pyparsing import Word
-from pyparsing import Literal
-from pyparsing import Keyword
-from pyparsing import Optional
-from pyparsing import Suppress
-from pyparsing import Group
-from pyparsing import StringEnd
-from pyparsing import printables
-from pyparsing import nums
-from pyparsing import alphas
-from pyparsing import ZeroOrMore
-from pyparsing import OneOrMore
-from pyparsing import delimitedList
-from pyparsing import LineEnd
-from pyparsing import Empty
-from pyparsing import ParseException
-from pyparsing import ParseSyntaxException
+from .stparser import Sequence
+from .stparser import choice
+from .stparser import ZeroOrMore
+from .stparser import OneOrMore
+from .stparser import DelimitedList
+from .stparser import Any
+from .stparser import Grammar
+from .stparser import Inline
 
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
@@ -33,27 +24,6 @@ from ..internal_database import InternalDatabase
 from .utils import num
 from ...errors import ParseError
 
-
-# DBC section types.
-VERSION = 'VERSION'
-NODES = 'BU_'
-NODES_REL = 'BU_SG_REL_'
-COMMENT = 'CM_'
-MESSAGE = 'BO_'
-MESSAGE_TX_NODE = 'BO_TX_BU_'
-SIGNAL = 'SG_'
-CHOICE = 'VAL_'
-VALUE_TABLE = 'VAL_TABLE_'
-ATTRIBUTE = 'BA_'
-ATTRIBUTE_DEFINITION = 'BA_DEF_'
-ATTRIBUTE_DEFINITION_DEFAULT = 'BA_DEF_DEF_'
-ATTRIBUTE_REL = 'BA_REL_'
-ATTRIBUTE_DEFINITION_REL = 'BA_DEF_REL_'
-ATTRIBUTE_DEFINITION_DEFAULT_REL = 'BA_DEF_DEF_REL_'
-EVENT = 'EV_'
-SIGNAL_TYPE = 'SIG_VALTYPE_'
-SIGNAL_MULTIPLEXER_VALUES = 'SG_MUL_VAL_'
-SIGNAL_GROUP = 'SIG_GROUP_'
 
 DBC_FMT = (
     'VERSION "{version}"\r\n'
@@ -107,265 +77,251 @@ DBC_FMT = (
 )
 
 
-class QuotedString(pyparsing.QuotedString):
-    """Quoted string accepting escaped quotation marks.
+def tokenize(code):
+    Token = collections.namedtuple('Token',
+                                   ['kind', 'value', 'line', 'column'])
 
-    """
+    keywords = set([
+        'BA_',
+        'BA_DEF_',
+        'BA_DEF_DEF_',
+        'BA_DEF_DEF_REL_',
+        'BA_DEF_REL_',
+        'BA_DEF_SGTYPE_',
+        'BA_REL_',
+        'BA_SGTYPE_',
+        'BO_',
+        'BO_TX_BU_',
+        'BS_',
+        'BU_',
+        'BU_BO_REL_',
+        'BU_EV_REL_',
+        'BU_SG_REL_',
+        'CAT_',
+        'CAT_DEF_',
+        'CM_',
+        'ENVVAR_DATA_',
+        'EV_',
+        'EV_DATA_',
+        'FILTER',
+        'NS_',
+        'NS_DESC_',
+        'SG_',
+        'SG_MUL_VAL_',
+        'SGTYPE_',
+        'SGTYPE_VAL_',
+        'SIG_GROUP_',
+        'SIG_TYPE_REF_',
+        'SIG_VALTYPE_',
+        'SIGTYPE_VALTYPE_',
+        'VAL_',
+        'VAL_TABLE_',
+        'VERSION'
+    ])
 
-    def __init__(self):
-        super(QuotedString, self).__init__('"',
-                                           multiline=True,
-                                           escChar='\\')
+    names = {
+        'LPAREN': '(',
+        'RPAREN': ')',
+        'LBRACE': '[',
+        'RBRACE': ']',
+        'COMMA':  ',',
+        'AT':     '@',
+        'SCOLON': ';',
+        'COLON':  ':',
+        'PIPE':   '|',
+        'SIGN':   '+/-'
+    }
+
+    token_specs = [
+        ('SKIP',     r'[ \r\t]+'),
+        ('NUMBER',   r'-?\d+(\.\d+)?([eE][+-]?\d+)?'),
+        ('WORD',     r'[A-Za-z0-9_]+'),
+        ('NEWLINE',  r'\n'),
+        ('STRING',   r'"(\\"|[^"])*?"'),
+        ('LPAREN',   r'\('),
+        ('RPAREN',   r'\)'),
+        ('LBRACE',   r'\['),
+        ('RBRACE',   r'\]'),
+        ('COMMA',    r','),
+        ('PIPE',     r'\|'),
+        ('AT',       r'@'),
+        ('SIGN',     r'[+-]'),
+        ('SCOLON',   r';'),
+        ('COLON',    r':'),
+        ('COMMENT',  r'//.*?\n'),
+        ('MISMATCH', r'.')
+    ]
+
+    tok_regex = '|'.join([
+        '(?P<{}>{})'.format(name, regex) for name, regex in token_specs
+    ])
+    line = 1
+    line_start = 0
+    tokens = []
+
+    for mo in re.finditer(tok_regex, code, re.DOTALL):
+        kind = mo.lastgroup
+
+        if kind == 'SKIP':
+            pass
+        elif kind in ['NEWLINE', 'COMMENT']:
+            line_start = mo.end()
+            line += 1
+        elif kind == 'STRING':
+            column = mo.start() - line_start
+            value = mo.group(kind)[1:-1].replace('\\"', '"')
+            tokens.append(Token(kind, value, line, column))
+        elif kind != 'MISMATCH':
+            value = mo.group(kind)
+
+            if value in keywords:
+                kind = value
+
+            if kind in names:
+                kind = names[kind]
+
+            column = mo.start() - line_start
+            tokens.append(Token(kind, value, line, column))
+        else:
+            raise ParseError(
+                "Invalid DBC syntax at line {}, column {}: '{}': {}.".format(
+                    line,
+                    mo.start() - line_start,
+                    '',
+                    ''))
+
+    tokens.append(Token('__EOF__', None, None, None))
+
+    return tokens
 
 
-def _create_grammar():
-    """Create the DBC grammar.
+def treenize(tokens):
+    version = Sequence('VERSION', 'STRING')
 
-    """
+    ns = Sequence('NS_', ':', OneOrMore(Any(), Sequence(Any(), ':')))
 
-    word = Word(printables.replace(';', '').replace(':', ''))
-    integer = Group(Optional('-') + Word(nums))
-    positive_integer = Word(nums).setName('positive integer')
-    number = Word(nums + '.Ee-+')
-    colon = Suppress(Literal(':'))
-    scolon = Suppress(Literal(';'))
-    pipe = Suppress(Literal('|'))
-    at = Suppress(Literal('@'))
-    sign = Literal('+') | Literal('-')
-    lp = Suppress(Literal('('))
-    rp = Suppress(Literal(')'))
-    lb = Suppress(Literal('['))
-    rb = Suppress(Literal(']'))
-    comma = Suppress(Literal(','))
-    node = Word(alphas + nums + '_-').setWhitespaceChars(' ')
-    frame_id = Word(nums).setName('frame id')
+    bs = Sequence('BS_', ':')
 
-    version = Group(Keyword('VERSION')
-                    - QuotedString())
-    version.setName(VERSION)
+    nodes = Sequence('BU_', ':', ZeroOrMore('WORD'))
 
-    symbol = Word(alphas + '_') + Suppress(LineEnd())
+    signal = Sequence(
+        'SG_', choice(Sequence('WORD', 'WORD'), Sequence('WORD')), ':',
+        'NUMBER', '|', 'NUMBER', '@', 'NUMBER', '+/-',
+        '(', 'NUMBER', ',', 'NUMBER', ')',
+        '[', 'NUMBER', '|', 'NUMBER', ']',
+        'STRING',
+        DelimitedList('WORD'))
 
-    symbols = Group(Keyword('NS_')
-                    - colon
-                    - Group(ZeroOrMore(symbol)))
-    symbols.setName('NS_')
+    message = Sequence(
+        'BO_', 'NUMBER', 'WORD', ':', 'NUMBER', 'WORD', ZeroOrMore(signal))
 
-    discard = Suppress(Keyword('BS_') - colon).setName('BS_')
+    value_table = Sequence(
+        'VAL_TABLE_', 'WORD', OneOrMore(Sequence('NUMBER', 'STRING')), ';')
 
-    nodes = Group(Keyword('BU_')
-                  - colon
-                  - Group(ZeroOrMore(node)))
-    nodes.setName('BU_')
+    message_add_sender = Sequence(
+        'BO_TX_BU_', 'NUMBER', ':', DelimitedList('WORD'), ';')
 
-    signal = Group(Keyword(SIGNAL)
-                   - Group(word + Optional(word))
-                   - colon
-                   - Group(positive_integer
-                           - pipe
-                           - positive_integer
-                           - at
-                           - positive_integer
-                           - sign)
-                   - Group(lp
-                           - number
-                           - comma
-                           - number
-                           - rp)
-                   - Group(lb
-                           - number
-                           - pipe
-                           - number
-                           - rb)
-                   - QuotedString()
-                   - Group(delimitedList(node)))
-    signal.setName(SIGNAL)
+    comment = Sequence(
+        'CM_',
+        Inline(choice(
+            Sequence('SG_', 'NUMBER', 'WORD', 'STRING', ';'),
+            Sequence('BO_', 'NUMBER', 'STRING', ';'),
+            Sequence('EV_', 'WORD', 'STRING', ';'),
+            Sequence('BU_', 'WORD', 'STRING', ';'),
+            Sequence('STRING', ';'))))
 
-    message = Group(Keyword(MESSAGE)
-                    - frame_id
-                    - word
-                    - colon
-                    - positive_integer
-                    - word
-                    - Group(ZeroOrMore(signal)))
-    message.setName(MESSAGE)
+    attribute_definition = Sequence(
+        'BA_DEF_',
+        Inline(choice(Sequence(choice('SG_', 'BO_', 'EV_', 'BU_'), 'STRING'),
+                      'STRING')),
+        'WORD',
+        choice(
+            Sequence(
+                choice(DelimitedList('STRING'), ZeroOrMore('NUMBER')), ';'),
+            ';'))
 
-    event = Suppress(Keyword(EVENT)
-                     - word
-                     - colon
-                     - positive_integer
-                     - lb
-                     - number
-                     - pipe
-                     - number
-                     - rb
-                     - QuotedString()
-                     - number
-                     - number
-                     - word
-                     - node
-                     - scolon)
-    event.setName(EVENT)
+    attribute_definition_rel = Sequence(
+        'BA_DEF_REL_',
+        choice('STRING', Sequence('BU_SG_REL_', 'STRING')),
+        'WORD',
+        choice(';',
+               Sequence(DelimitedList('STRING'), ';'),
+               Sequence(OneOrMore('NUMBER'), ';')))
 
-    comment = Group(Keyword(COMMENT)
-                    - ((Keyword(SIGNAL)
-                          - frame_id
-                          - word
-                          - QuotedString()
-                          - scolon).setName(SIGNAL)
-                       | (Keyword(MESSAGE)
-                        - frame_id
-                        - QuotedString()
-                        - scolon).setName(MESSAGE)
-                       | (Keyword(EVENT)
-                          - word
-                          - QuotedString()
-                          - scolon).setName(EVENT)
-                       | (Keyword(NODES)
-                          - word
-                          - QuotedString()
-                          - scolon).setName(NODES)
-                       | (QuotedString()
-                          - scolon).setName('QuotedString')))
-    comment.setName(COMMENT)
+    attribute_definition_default = Sequence(
+        'BA_DEF_DEF_', 'STRING', choice('NUMBER', 'STRING'), ';')
 
-    attribute_definition = Group(Keyword(ATTRIBUTE_DEFINITION)
-                                 - ((QuotedString())
-                                    | (Keyword(SIGNAL)
-                                       | Keyword(MESSAGE)
-                                       | Keyword(EVENT)
-                                       | Keyword(NODES))
-                                    + QuotedString())
-                                 - word
-                                 - (scolon
-                                    | (Group(ZeroOrMore(Group(
-                                        (comma | Empty())
-                                        + QuotedString())))
-                                       + scolon)
-                                    | (Group(ZeroOrMore(number))
-                                       + scolon)))
-    attribute_definition.setName(ATTRIBUTE_DEFINITION)
+    attribute_definition_default_rel = Sequence(
+        'BA_DEF_DEF_REL_','STRING', choice('NUMBER', 'STRING'), ';')
 
-    attribute_definition_default = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT)
-                                         - QuotedString()
-                                         - (number | QuotedString())
-                                         - scolon)
-    attribute_definition_default.setName(ATTRIBUTE_DEFINITION_DEFAULT)
+    attribute = Sequence(
+        'BA_', 'STRING',
+        ZeroOrMore(choice(Sequence('BO_', 'NUMBER'),
+                          Sequence('SG_', 'NUMBER', 'WORD'),
+                          Sequence('BU_', 'WORD'))),
+        choice('NUMBER', 'STRING'),
+        ';')
 
-    attribute = Group(Keyword(ATTRIBUTE)
-                      - QuotedString()
-                      - Group(Optional((Keyword(MESSAGE) + frame_id)
-                                       | (Keyword(SIGNAL) + frame_id + word)
-                                       | (Keyword(NODES) + word)))
-                      - (QuotedString() | number)
-                      - scolon)
-    attribute.setName(ATTRIBUTE)
+    attribute_rel = Sequence(
+        'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
+        'WORD', choice('NUMBER', 'STRING'), ';')
 
-    choice = Group(Keyword(CHOICE)
-                   - Group(Optional(frame_id))
-                   - word
-                   - Group(OneOrMore(Group(integer
-                                           + QuotedString())))
-                   - scolon)
-    choice.setName(CHOICE)
+    choice_ = Sequence(
+        'VAL_',
+        choice(Sequence('NUMBER', 'WORD'),
+               Sequence('WORD')),
+        OneOrMore(Sequence('NUMBER', 'STRING')),
+        ';')
 
-    value_table = Group(Keyword(VALUE_TABLE)
-                        - word
-                        - Group(OneOrMore(Group(integer
-                                                + QuotedString())))
-                        - scolon)
-    value_table.setName(VALUE_TABLE)
+    signal_group = Sequence(
+        'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
 
-    signal_type = Group(Keyword(SIGNAL_TYPE)
-                        - frame_id
-                        - word
-                        - colon
-                        - positive_integer
-                        - scolon)
-    signal_type.setName(SIGNAL_TYPE)
+    signal_type = Sequence(
+        'SIG_VALTYPE_', 'NUMBER', 'WORD', ':', 'NUMBER', ';')
 
-    signal_multiplexer_values = Group(Keyword(SIGNAL_MULTIPLEXER_VALUES)
-                                       - frame_id
-                                       - word
-                                       - word
-                                       - Group(delimitedList(positive_integer
-                                                             - Suppress('-')
-                                                             - Suppress(positive_integer)))
-                                       - scolon)
-    signal_multiplexer_values.setName(SIGNAL_MULTIPLEXER_VALUES)
+    environment_variable = Sequence(
+        'EV_', 'WORD', ':', 'NUMBER',
+        '[', 'NUMBER', '|', 'NUMBER', ']',
+        'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD', ';')
 
-    message_add_sender = Group(Keyword(MESSAGE_TX_NODE)
-                               - frame_id
-                               - colon
-                               - Group(delimitedList(node))
-                               - scolon)
-    message_add_sender.setName(MESSAGE_TX_NODE)
+    signal_multiplexer_values = Sequence(
+        'SG_MUL_VAL_',
+        'NUMBER',
+        'WORD',
+        'WORD',
+        DelimitedList(Sequence('NUMBER', 'NUMBER')),
+        ';')
 
-    attribute_definition_rel = Group(Keyword(ATTRIBUTE_DEFINITION_REL)
-                                     - (QuotedString()
-                                        | (Keyword(NODES_REL)
-                                           + QuotedString()))
-                                     - word
-                                     - (scolon
-                                        | (Group(ZeroOrMore(Group(
-                                            (comma | Empty())
-                                            + QuotedString())))
-                                           + scolon)
-                                        | (Group(ZeroOrMore(number))
-                                           + scolon)))
-    attribute_definition_rel.setName(ATTRIBUTE_DEFINITION_REL)
+    grammar = Grammar(
+        OneOrMore(
+            choice(
+                message,
+                comment,
+                attribute_definition,
+                value_table,
+                choice_,
+                attribute,
+                attribute_rel,
+                attribute_definition_rel,
+                attribute_definition_default,
+                attribute_definition_default_rel,
+                signal_group,
+                signal_type,
+                signal_multiplexer_values,
+                message_add_sender,
+                environment_variable,
+                nodes,
+                ns,
+                bs,
+                version
+            )
+        )
+    )
 
-    attribute_definition_default_rel = Group(Keyword(ATTRIBUTE_DEFINITION_DEFAULT_REL)
-                                             - QuotedString()
-                                             - (number | QuotedString())
-                                             - scolon)
-    attribute_definition_default_rel.setName(ATTRIBUTE_DEFINITION_DEFAULT_REL)
-
-    attribute_rel = Group(Keyword(ATTRIBUTE_REL)
-                          - QuotedString()
-                          - Keyword(NODES_REL)
-                          - word
-                          - Keyword(SIGNAL)
-                          - frame_id
-                          - word
-                          - (positive_integer | QuotedString())
-                          - scolon)
-    attribute_rel.setName(ATTRIBUTE_REL)
-
-    signal_group = Group(Keyword(SIGNAL_GROUP)
-                         - frame_id
-                         - word
-                         - integer
-                         - colon
-                         - OneOrMore(word)
-                         - scolon)
-    signal_group.setName(SIGNAL_GROUP)
-
-    entry = (message
-             | comment
-             | attribute
-             | choice
-             | attribute_definition
-             | attribute_definition_default
-             | attribute_rel
-             | attribute_definition_rel
-             | attribute_definition_default_rel
-             | signal_group
-             | event
-             | message_add_sender
-             | value_table
-             | signal_type
-             | signal_multiplexer_values
-             | discard
-             | nodes
-             | symbols
-             | version)
-
-    frame_id.setParseAction(lambda _s, _l, t: int(t[0]))
-
-    grammar = OneOrMore(entry) + StringEnd()
-
-    return grammar
+    try:
+        return grammar.parse(tokens)
+    except Exception:
+        raise ParseError('Failed to treenize.')
 
 
 class DbcSpecifics(object):
@@ -637,21 +593,21 @@ def _load_comments(tokens):
     comments = {}
 
     for comment in tokens:
-        if comment[0] != COMMENT:
+        if comment[0] != 'CM_':
             continue
 
-        if comment[1] == NODES:
+        if comment[1] == 'BU_':
             node_name = comment[2]
             comments[node_name] = comment[3]
-        elif comment[1] == MESSAGE:
-            frame_id = comment[2]
+        elif comment[1] == 'BO_':
+            frame_id = int(comment[2])
 
             if frame_id not in comments:
                 comments[frame_id] = {}
 
             comments[frame_id]['message'] = comment[3]
-        elif comment[1] == SIGNAL:
-            frame_id = comment[2]
+        elif comment[1] == 'SG_':
+            frame_id = int(comment[2])
 
             if frame_id not in comments:
                 comments[frame_id] = {}
@@ -668,7 +624,7 @@ def _load_attribute_definitions(tokens):
     definitions = []
 
     for attribute in tokens:
-        if attribute[0] == ATTRIBUTE_DEFINITION:
+        if attribute[0] == 'BA_DEF_':
             definitions.append(attribute)
 
     return definitions
@@ -678,7 +634,7 @@ def _load_attribute_definition_defaults(tokens):
     defaults = odict()
 
     for default_attr in tokens:
-        if default_attr[0] == ATTRIBUTE_DEFINITION_DEFAULT:
+        if default_attr[0] == 'BA_DEF_DEF_':
             defaults[default_attr[1]] = default_attr[2]
 
     return defaults
@@ -688,7 +644,7 @@ def _load_attributes(tokens, definitions):
     attributes = odict()
 
     def to_object(attribute):
-        value=attribute[3]
+        value = attribute[3]
 
         definition = definitions[attribute[1]]
 
@@ -701,14 +657,14 @@ def _load_attributes(tokens, definitions):
                          definition=definition)
 
     for attribute in tokens:
-        if attribute[0] != ATTRIBUTE:
+        if attribute[0] != 'BA_':
             continue
 
         name = attribute[1]
 
         if len(attribute[2]) > 0:
-            if attribute[2][0] == NODES:
-                node = attribute[2][1]
+            if attribute[2][0][0] == 'BU_':
+                node = attribute[2][0][1]
 
                 if 'node' not in attributes:
                     attributes['node'] = odict()
@@ -717,17 +673,17 @@ def _load_attributes(tokens, definitions):
                     attributes['node'][node] = odict()
 
                 attributes['node'][node][name] = to_object(attribute)
-            elif attribute[2][0] == MESSAGE:
-                frame_id_dbc = attribute[2][1]
+            elif attribute[2][0][0] == 'BO_':
+                frame_id_dbc = int(attribute[2][0][1])
 
                 if frame_id_dbc not in attributes:
                     attributes[frame_id_dbc] = {}
                     attributes[frame_id_dbc]['message'] = odict()
 
                 attributes[frame_id_dbc]['message'][name] = to_object(attribute)
-            elif attribute[2][0] == SIGNAL:
-                frame_id_dbc = attribute[2][1]
-                signal = attribute[2][2]
+            elif attribute[2][0][0] == 'SG_':
+                frame_id_dbc = int(attribute[2][0][1])
+                signal = attribute[2][0][2]
 
                 if frame_id_dbc not in attributes:
                     attributes[frame_id_dbc] = {}
@@ -753,19 +709,19 @@ def _load_choices(tokens):
     choices = {}
 
     for choice in tokens:
-        if choice[0] != CHOICE:
+        if choice[0] != 'VAL_':
             continue
 
-        if not choice[1]:
+        if len(choice[1]) == 1:
             continue
 
-        frame_id = choice[1][0]
+        frame_id = int(choice[1][0])
 
         if frame_id not in choices:
             choices[frame_id] = {}
 
-        choices[frame_id][choice[2]] = odict(
-            (int(''.join(v[0])), v[1]) for v in choice[3])
+        choices[frame_id][choice[1][1]] = odict(
+            (int(''.join(v[0])), v[1]) for v in choice[2])
 
     return choices
 
@@ -778,15 +734,15 @@ def _load_message_senders(tokens):
     message_senders = {}
 
     for senders in tokens:
-        if senders[0] != MESSAGE_TX_NODE:
+        if senders[0] != 'BO_TX_BU_':
             continue
 
-        frame_id = senders[1]
+        frame_id = int(senders[1])
 
         if frame_id not in message_senders:
             message_senders[frame_id] = []
 
-        message_senders[frame_id] += list(senders[2])
+        message_senders[frame_id] += list(senders[3])
 
     return message_senders
 
@@ -799,16 +755,16 @@ def _load_signal_types(tokens):
     signal_types = {}
 
     for signal_type in tokens:
-        if signal_type[0] != SIGNAL_TYPE:
+        if signal_type[0] != 'SIG_VALTYPE_':
             continue
 
-        frame_id = signal_type[1]
+        frame_id = int(signal_type[1])
 
         if frame_id not in signal_types:
             signal_types[frame_id] = {}
 
         signal_name = signal_type[2]
-        signal_types[frame_id][signal_name] = int(signal_type[3])
+        signal_types[frame_id][signal_name] = int(signal_type[4])
 
     return signal_types
 
@@ -821,13 +777,13 @@ def _load_signal_multiplexer_values(tokens):
     signal_multiplexer_values = {}
 
     for signal_multiplexer_value in tokens:
-        if signal_multiplexer_value[0] != SIGNAL_MULTIPLEXER_VALUES:
+        if signal_multiplexer_value[0] != 'SG_MUL_VAL_':
             continue
 
-        frame_id = signal_multiplexer_value[1]
+        frame_id = int(signal_multiplexer_value[1])
         signal_name = signal_multiplexer_value[2]
         multiplexer_signal = signal_multiplexer_value[3]
-        multiplexer_ids = [int(v) for v in signal_multiplexer_value[4]]
+        multiplexer_ids = [int(v[0]) for v in signal_multiplexer_value[4]]
 
         if frame_id not in signal_multiplexer_values:
             signal_multiplexer_values[frame_id] = {}
@@ -975,16 +931,16 @@ def _load_messages(tokens,
     messages = []
 
     for message in tokens:
-        if message[0] != MESSAGE:
+        if message[0] != 'BO_':
             continue
 
         # Frame id.
-        frame_id_dbc = message[1]
+        frame_id_dbc = int(message[1])
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
 
         # Senders.
-        senders = [message[4]]
+        senders = [message[5]]
 
         for node in message_senders.get(frame_id_dbc, []):
             if node not in senders:
@@ -996,7 +952,7 @@ def _load_messages(tokens,
         # Signal multiplexing.
         multiplexer_signal = None
 
-        for signal in message[5]:
+        for signal in message[6]:
             if len(signal[1]) == 2:
                 if signal[1][1] == 'M':
                     multiplexer_signal = signal[1][0]
@@ -1006,27 +962,27 @@ def _load_messages(tokens,
             frame_id=frame_id,
             is_extended_frame=is_extended_frame,
             name=message[2],
-            length=int(message[3], 0),
+            length=int(message[4], 0),
             senders=senders,
             send_type=get_send_type(frame_id_dbc),
             cycle_time=get_cycle_time(frame_id_dbc),
             dbc_specifics=DbcSpecifics(attributes=get_attributes(frame_id_dbc),
                                        attribute_definitions=definitions),
             signals=[Signal(name=signal[1][0],
-                            start=int(signal[2][0]),
-                            length=int(signal[2][1]),
-                            receivers=get_receivers(list(signal[6])),
+                            start=int(signal[3]),
+                            length=int(signal[5]),
+                            receivers=get_receivers(signal[20]),
                             byte_order=('big_endian'
-                                        if signal[2][2] == '0'
+                                        if signal[7] == '0'
                                         else 'little_endian'),
-                            is_signed=(signal[2][3] == '-'),
-                            scale=num(signal[3][0]),
-                            offset=num(signal[3][1]),
-                            minimum=get_minimum(num(signal[4][0]),
-                                                num(signal[4][1])),
-                            maximum=get_maximum(num(signal[4][0]),
-                                                num(signal[4][1])),
-                            unit=None if signal[5] == '' else signal[5],
+                            is_signed=(signal[8] == '-'),
+                            scale=num(signal[10]),
+                            offset=num(signal[12]),
+                            minimum=get_minimum(num(signal[15]),
+                                                num(signal[17])),
+                            maximum=get_maximum(num(signal[15]),
+                                                num(signal[17])),
+                            unit=None if signal[19] == '' else signal[19],
                             choices=get_choices(frame_id_dbc,
                                                 signal[1][0]),
                             dbc_specifics=DbcSpecifics(attributes=get_attributes(
@@ -1047,7 +1003,7 @@ def _load_messages(tokens,
                                                 else None),
                             is_float=get_is_float(frame_id_dbc,
                                                   signal[1][0]))
-                     for signal in message[5]],
+                     for signal in message[6]],
             comment=get_comment(frame_id_dbc),
             strict=strict)
         messages.append(message)
@@ -1059,7 +1015,7 @@ def _load_version(tokens):
 
     return [token[1]
             for token in tokens
-            if token[0] == VERSION][0]
+            if token[0] == 'VERSION'][0]
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
@@ -1086,12 +1042,14 @@ def _load_nodes(tokens, comments, attributes, definitions):
     nodes = None
 
     for token in tokens:
-        if token[0] == NODES:
-            nodes = [Node(name=node,
-                          comment=get_node_comment(node),
-                          dbc_specifics=DbcSpecifics(get_node_attributes(node),
-                                                      definitions))
-                     for node in token[1]]
+        if token[0] != 'BU_':
+            continue
+
+        nodes = [Node(name=node,
+                      comment=get_node_comment(node),
+                      dbc_specifics=DbcSpecifics(get_node_attributes(node),
+                                                 definitions))
+                 for node in token[2]]
 
     return nodes
 
@@ -1133,26 +1091,26 @@ def get_definitions_dict(definitions, defaults):
     for item in definitions:
         choices_or_range = None
 
-        if item[1] in [SIGNAL, MESSAGE, NODES]:
+        if item[1] in ['SG_', 'BO_', 'BU_']:
             definition = AttributeDefinition(name=item[2],
                                              kind=item[1],
                                              type_name=item[3])
 
             if len(item) > 4:
-                choices_or_range = item[4]
+                choices_or_range = item[4][0]
         else:
             definition = AttributeDefinition(name=item[1],
                                              type_name=item[2])
 
             if len(item) > 3:
-                choices_or_range = item[3]
+                choices_or_range = item[3][0]
 
         if choices_or_range is not None:
             if definition.type_name == "ENUM":
                 choices = []
 
                 for choice in choices_or_range:
-                    choices.append(choice[0])
+                    choices.append(choice)
 
                 definition.choices = choices
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
@@ -1219,6 +1177,10 @@ def ignore_comments(string):
     return re.sub(r"(//[\s\S]*?)([\r\n])", replace, string)
 
 
+def parse(string):
+    return treenize(tokenize(string))
+
+
 def load_string(string, strict=True):
     """Parse given string.
 
@@ -1234,18 +1196,8 @@ def load_string(string, strict=True):
         except KeyError:
             return None
 
-    grammar = _create_grammar()
 
-    try:
-        string = ignore_comments(string)
-        tokens = grammar.parseString(string)
-    except (ParseException, ParseSyntaxException) as e:
-        raise ParseError(
-            "Invalid DBC syntax at line {}, column {}: '{}': {}.".format(
-                e.lineno,
-                e.column,
-                e.markInputline(),
-                e.msg))
+    tokens = parse(string)
 
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)

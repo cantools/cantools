@@ -532,7 +532,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.nodes[0].comment, None)
         self.assertEqual(db.nodes[1].name, 'DRIVER')
         self.assertEqual(db.nodes[1].comment,
-                         'The driver controller driving the car')
+                         '// The driver controller driving the car //')
         self.assertEqual(db.nodes[2].name, 'IO')
         self.assertEqual(db.nodes[2].comment, None)
         self.assertEqual(db.nodes[3].name, 'MOTOR')

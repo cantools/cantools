@@ -66,8 +66,9 @@ BO_ 200 SENSOR_SONARS: 8 SENSOR
  SG_ SENSOR_SONARS_no_filt_rear m1 : 52|12@1+ (0.1,0) [0|0] ""  DBG
 
 
-
-CM_ BU_ DRIVER "The driver controller driving the car";
+// Hello, as ds d.
+// Foobar.
+CM_ BU_ DRIVER "// The driver controller driving the car //"; // Comment. // In.
 CM_ BU_ MOTOR "The motor controller of the car";
 CM_ BU_ SENSOR "The sensor controller of the car";
 CM_ BO_ 100 "Sync message used to synchronize the controllers";

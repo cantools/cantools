@@ -3,3 +3,4 @@ pyparsing
 codespell
 mock
 python-can
+textparser

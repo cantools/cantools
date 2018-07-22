@@ -29,7 +29,8 @@ setup(name='cantools',
       install_requires=[
           'bitstruct>=3.7.0',
           'pyparsing>=2.0.3',
-          'python-can>=2.1.0'
+          'python-can>=2.1.0',
+          'textparser'
       ],
       test_suite="tests",
       entry_points = {

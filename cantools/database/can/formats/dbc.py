@@ -5,14 +5,17 @@ from collections import OrderedDict as odict
 from decimal import Decimal
 import collections
 
-from .stparser import Sequence
-from .stparser import choice
-from .stparser import ZeroOrMore
-from .stparser import OneOrMore
-from .stparser import DelimitedList
-from .stparser import Any
-from .stparser import Grammar
-from .stparser import Inline
+from textparser import Sequence
+from textparser import choice
+from textparser import ZeroOrMore
+from textparser import OneOrMore
+from textparser import DelimitedList
+from textparser import Any
+from textparser import Grammar
+from textparser import Inline
+from textparser import create_token_re
+from textparser import Token
+from textparser import TokenizerError
 
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
@@ -77,10 +80,7 @@ DBC_FMT = (
 )
 
 
-def tokenize(code):
-    Token = collections.namedtuple('Token',
-                                   ['kind', 'value', 'line', 'column'])
-
+def tokenize(string):
     keywords = set([
         'BA_',
         'BA_DEF_',
@@ -152,20 +152,18 @@ def tokenize(code):
         ('MISMATCH', r'.')
     ]
 
-    tok_regex = '|'.join([
-        '(?P<{}>{})'.format(name, regex) for name, regex in token_specs
-    ])
+    token_regex = create_token_re(token_specs)
     line = 1
-    line_start = 0
+    line_start = -1
     tokens = []
 
-    for mo in re.finditer(tok_regex, code, re.DOTALL):
+    for mo in re.finditer(token_regex, string, re.DOTALL):
         kind = mo.lastgroup
 
         if kind == 'SKIP':
             pass
         elif kind in ['NEWLINE', 'COMMENT']:
-            line_start = mo.end()
+            line_start = mo.end() - 1
             line += 1
         elif kind == 'STRING':
             column = mo.start() - line_start
@@ -183,12 +181,10 @@ def tokenize(code):
             column = mo.start() - line_start
             tokens.append(Token(kind, value, line, column))
         else:
-            raise ParseError(
-                "Invalid DBC syntax at line {}, column {}: '{}': {}.".format(
-                    line,
-                    mo.start() - line_start,
-                    '',
-                    ''))
+            column = mo.start() - line_start
+            message = str(TokenizerError(line, column, mo.start(), string))
+
+            raise ParseError(message)
 
     tokens.append(Token('__EOF__', None, None, None))
 
@@ -320,7 +316,7 @@ def treenize(tokens):
 
     try:
         return grammar.parse(tokens)
-    except Exception:
+    except Exception as e:
         raise ParseError('Failed to treenize.')
 
 

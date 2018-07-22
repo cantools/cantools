@@ -1887,7 +1887,7 @@ IO_DEBUG(
 
         self.assertEqual(
             str(cm.exception),
-            "DBC: \"Invalid DBC syntax at line 1, column 0: '': .\"")
+            "DBC: \"Invalid syntax at line 1, column 1: \">>!<<<!--\"\"")
 
         # SYM database format, but file is KCD.
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:

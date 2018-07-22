@@ -3,7 +3,6 @@
 import re
 from collections import OrderedDict as odict
 from decimal import Decimal
-import collections
 
 from textparser import Sequence
 from textparser import choice

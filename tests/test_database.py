@@ -3078,6 +3078,17 @@ IO_DEBUG(
         self.assertEqual(db.get_message_by_name('M1').frame_id, 2)
         self.assertEqual(db.get_message_by_frame_id(2).name, 'M1')
 
+    def test_empty_ns_dbc(self):
+        """Test loading a DBC-file with empty NS_.
+
+        """
+
+        db = cantools.database.Database()
+
+        filename = os.path.join('tests', 'files', 'empty_ns.dbc')
+        db.add_dbc_file(filename)
+        self.assertEqual(len(db.nodes), 0)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

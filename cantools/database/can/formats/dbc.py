@@ -8,6 +8,7 @@ from textparser import Sequence
 from textparser import choice
 from textparser import ZeroOrMore
 from textparser import OneOrMore
+from textparser import OneOrMoreDict
 from textparser import DelimitedList
 from textparser import Any
 from textparser import Grammar
@@ -188,7 +189,7 @@ def tokenize(string):
 def treenize(tokens):
     version = Sequence('VERSION', 'STRING')
 
-    ns = Sequence('NS_', ':', OneOrMore(Any(), Sequence(Any(), ':')))
+    ns = Sequence('NS_', ':', ZeroOrMore(Any(), Sequence(Any(), ':')))
 
     bs = Sequence('BS_', ':')
 
@@ -283,7 +284,7 @@ def treenize(tokens):
         ';')
 
     grammar = Grammar(
-        OneOrMore(
+        OneOrMoreDict(
             choice(
                 message,
                 comment,
@@ -582,10 +583,7 @@ def _dump_choices(database):
 def _load_comments(tokens):
     comments = {}
 
-    for comment in tokens:
-        if comment[0] != 'CM_':
-            continue
-
+    for comment in tokens.get('CM_', []):
         if comment[1] == 'BU_':
             node_name = comment[2]
             comments[node_name] = comment[3]
@@ -611,21 +609,14 @@ def _load_comments(tokens):
 
 
 def _load_attribute_definitions(tokens):
-    definitions = []
-
-    for attribute in tokens:
-        if attribute[0] == 'BA_DEF_':
-            definitions.append(attribute)
-
-    return definitions
+    return tokens.get('BA_DEF_', [])
 
 
 def _load_attribute_definition_defaults(tokens):
     defaults = odict()
 
-    for default_attr in tokens:
-        if default_attr[0] == 'BA_DEF_DEF_':
-            defaults[default_attr[1]] = default_attr[2]
+    for default_attr in tokens.get('BA_DEF_DEF_', []):
+        defaults[default_attr[1]] = default_attr[2]
 
     return defaults
 
@@ -646,10 +637,7 @@ def _load_attributes(tokens, definitions):
         return Attribute(value=value,
                          definition=definition)
 
-    for attribute in tokens:
-        if attribute[0] != 'BA_':
-            continue
-
+    for attribute in tokens.get('BA_', []):
         name = attribute[1]
 
         if len(attribute[2]) > 0:
@@ -698,10 +686,7 @@ def _load_attributes(tokens, definitions):
 def _load_choices(tokens):
     choices = {}
 
-    for choice in tokens:
-        if choice[0] != 'VAL_':
-            continue
-
+    for choice in tokens.get('VAL_', []):
         if len(choice[1]) == 1:
             continue
 
@@ -723,10 +708,7 @@ def _load_message_senders(tokens):
 
     message_senders = {}
 
-    for senders in tokens:
-        if senders[0] != 'BO_TX_BU_':
-            continue
-
+    for senders in tokens.get('BO_TX_BU_', []):
         frame_id = int(senders[1])
 
         if frame_id not in message_senders:
@@ -744,10 +726,7 @@ def _load_signal_types(tokens):
 
     signal_types = {}
 
-    for signal_type in tokens:
-        if signal_type[0] != 'SIG_VALTYPE_':
-            continue
-
+    for signal_type in tokens.get('SIG_VALTYPE_', []):
         frame_id = int(signal_type[1])
 
         if frame_id not in signal_types:
@@ -766,10 +745,7 @@ def _load_signal_multiplexer_values(tokens):
 
     signal_multiplexer_values = {}
 
-    for signal_multiplexer_value in tokens:
-        if signal_multiplexer_value[0] != 'SG_MUL_VAL_':
-            continue
-
+    for signal_multiplexer_value in tokens.get('SG_MUL_VAL_', []):
         frame_id = int(signal_multiplexer_value[1])
         signal_name = signal_multiplexer_value[2]
         multiplexer_signal = signal_multiplexer_value[3]
@@ -920,10 +896,7 @@ def _load_messages(tokens,
 
     messages = []
 
-    for message in tokens:
-        if message[0] != 'BO_':
-            continue
-
+    for message in tokens.get('BO_', []):
         # Frame id.
         frame_id_dbc = int(message[1])
         frame_id = frame_id_dbc & 0x7fffffff
@@ -1002,10 +975,7 @@ def _load_messages(tokens,
 
 
 def _load_version(tokens):
-
-    return [token[1]
-            for token in tokens
-            if token[0] == 'VERSION'][0]
+    return tokens.get('VERSION', [[None, None]])[0][1]
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
@@ -1031,10 +1001,7 @@ def _load_nodes(tokens, comments, attributes, definitions):
 
     nodes = None
 
-    for token in tokens:
-        if token[0] != 'BU_':
-            continue
-
+    for token in tokens.get('BU_', []):
         nodes = [Node(name=node,
                       comment=get_node_comment(node),
                       dbc_specifics=DbcSpecifics(get_node_attributes(node),

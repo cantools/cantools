@@ -12,9 +12,9 @@ from textparser import DelimitedList
 from textparser import Any
 from textparser import Grammar
 from textparser import Inline
-from textparser import create_token_re
+from textparser import tokenize_init
 from textparser import Token
-from textparser import TokenizerError
+from textparser import TokenizeError
 
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
@@ -151,10 +151,7 @@ def tokenize(string):
         ('MISMATCH', r'.')
     ]
 
-    token_regex = create_token_re(token_specs)
-    line = 1
-    line_start = -1
-    tokens = []
+    line, line_start, tokens, token_regex = tokenize_init(token_specs)
 
     for mo in re.finditer(token_regex, string, re.DOTALL):
         kind = mo.lastgroup
@@ -181,11 +178,9 @@ def tokenize(string):
             tokens.append(Token(kind, value, line, column))
         else:
             column = mo.start() - line_start
-            message = str(TokenizerError(line, column, mo.start(), string))
+            message = str(TokenizeError(line, column, mo.start(), string))
 
             raise ParseError(message)
-
-    tokens.append(Token('__EOF__', None, None, None))
 
     return tokens
 

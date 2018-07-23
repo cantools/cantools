@@ -206,11 +206,10 @@ def treenize(tokens):
     message = Sequence(
         'BO_', 'NUMBER', 'WORD', ':', 'NUMBER', 'WORD', ZeroOrMore(signal))
 
-    value_table = Sequence(
-        'VAL_TABLE_', 'WORD', OneOrMore(Sequence('NUMBER', 'STRING')), ';')
-
-    message_add_sender = Sequence(
-        'BO_TX_BU_', 'NUMBER', ':', DelimitedList('WORD'), ';')
+    environment_variable = Sequence(
+        'EV_', 'WORD', ':', 'NUMBER',
+        '[', 'NUMBER', '|', 'NUMBER', ']',
+        'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD', ';')
 
     comment = Sequence(
         'CM_',
@@ -231,19 +230,8 @@ def treenize(tokens):
                 choice(DelimitedList('STRING'), ZeroOrMore('NUMBER')), ';'),
             ';'))
 
-    attribute_definition_rel = Sequence(
-        'BA_DEF_REL_',
-        choice('STRING', Sequence('BU_SG_REL_', 'STRING')),
-        'WORD',
-        choice(';',
-               Sequence(DelimitedList('STRING'), ';'),
-               Sequence(OneOrMore('NUMBER'), ';')))
-
     attribute_definition_default = Sequence(
         'BA_DEF_DEF_', 'STRING', choice('NUMBER', 'STRING'), ';')
-
-    attribute_definition_default_rel = Sequence(
-        'BA_DEF_DEF_REL_','STRING', choice('NUMBER', 'STRING'), ';')
 
     attribute = Sequence(
         'BA_', 'STRING',
@@ -252,6 +240,17 @@ def treenize(tokens):
                           Sequence('BU_', 'WORD'))),
         choice('NUMBER', 'STRING'),
         ';')
+
+    attribute_definition_rel = Sequence(
+        'BA_DEF_REL_',
+        choice('STRING', Sequence('BU_SG_REL_', 'STRING')),
+        'WORD',
+        choice(';',
+               Sequence(DelimitedList('STRING'), ';'),
+               Sequence(OneOrMore('NUMBER'), ';')))
+
+    attribute_definition_default_rel = Sequence(
+        'BA_DEF_DEF_REL_','STRING', choice('NUMBER', 'STRING'), ';')
 
     attribute_rel = Sequence(
         'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
@@ -264,16 +263,11 @@ def treenize(tokens):
         OneOrMore(Sequence('NUMBER', 'STRING')),
         ';')
 
-    signal_group = Sequence(
-        'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
+    value_table = Sequence(
+        'VAL_TABLE_', 'WORD', OneOrMore(Sequence('NUMBER', 'STRING')), ';')
 
     signal_type = Sequence(
         'SIG_VALTYPE_', 'NUMBER', 'WORD', ':', 'NUMBER', ';')
-
-    environment_variable = Sequence(
-        'EV_', 'WORD', ':', 'NUMBER',
-        '[', 'NUMBER', '|', 'NUMBER', ']',
-        'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD', ';')
 
     signal_multiplexer_values = Sequence(
         'SG_MUL_VAL_',
@@ -282,6 +276,12 @@ def treenize(tokens):
         'WORD',
         DelimitedList(Sequence('NUMBER', 'NUMBER')),
         ';')
+
+    message_add_sender = Sequence(
+        'BO_TX_BU_', 'NUMBER', ':', DelimitedList('WORD'), ';')
+
+    signal_group = Sequence(
+        'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
 
     grammar = Grammar(
         OneOrMoreDict(

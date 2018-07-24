@@ -4,6 +4,7 @@ import os
 import unittest
 from decimal import Decimal
 from collections import namedtuple
+import textparser
 
 try:
     from unittest.mock import patch
@@ -1772,61 +1773,53 @@ IO_DEBUG(
             decoded = message.decode(encoded)
             self.assertEqual(decoded, decoded_message)
 
-    @unittest.skip('')
     def test_dbc_parse_error_messages(self):
         # No valid entry.
-        with self.assertRaises(cantools.db.ParseError) as cm:
+        with self.assertRaises(textparser.ParseError) as cm:
             cantools.db.formats.dbc.load_string('abc')
 
         self.assertEqual(
             str(cm.exception),
-            "Invalid DBC syntax at line 1', column 1: '>!<abc': Expected "
-            "'BO_', 'CM_', 'BA_', 'VAL_', 'BA_DEF_', 'BA_DEF_DEF_', "
-            "'BA_REL_', 'BA_DEF_REL_', 'BA_DEF_DEF_REL_', 'SIG_GROUP_', "
-            "'EV_', 'BO_TX_BU_', 'VAL_TABLE_', 'SIG_VALTYPE_', 'SG_MUL_VAL_', "
-            "'BS_', 'BU_', 'NS_' or 'VERSION', but got 'abc'.")
+            'Invalid syntax at line 1, column 1: ">>!<<abc"')
 
         # Bad message frame id.
-        with self.assertRaises(cantools.db.ParseError) as cm:
+        with self.assertRaises(textparser.ParseError) as cm:
             cantools.db.formats.dbc.load_string(
                 'VERSION "1.0"\n'
                 'BO_ dssd\n')
 
         self.assertEqual(
             str(cm.exception),
-            "Invalid DBC syntax at line 2, column 5: 'BO_ >!<dssd': Expected "
-            "frame id.")
+            'Invalid syntax at line 2, column 5: "BO_ >>!<<dssd"')
 
         # Bad entry key.
-        with self.assertRaises(cantools.db.ParseError) as cm:
+        with self.assertRaises(textparser.ParseError) as cm:
             cantools.db.formats.dbc.load_string(
                 'VERSION "1.0"\n'
                 'dd\n')
 
         self.assertEqual(
             str(cm.exception),
-            "Invalid DBC syntax at line 2, column 1: '>!<dd': Expected end "
-            "of text.")
+            'Invalid syntax at line 2, column 1: ">>!<<dd"')
 
         # Missing colon in message.
-        with self.assertRaises(cantools.db.ParseError) as cm:
+        with self.assertRaises(textparser.ParseError) as cm:
             cantools.db.formats.dbc.load_string(
                 'VERSION "1.0"\n'
                 'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
 
         self.assertEqual(
             str(cm.exception),
-            "Invalid DBC syntax at line 2, column 19: 'BO_ 546 EMV_Stati "
-            ">!<8 EMV_Statusmeldungen': Expected \":\".")
+            'Invalid syntax at line 2, column 19: "BO_ 546 EMV_Stati '
+            '>>!<<8 EMV_Statusmeldungen"')
 
         # Missing frame id in message comment.
-        with self.assertRaises(cantools.db.ParseError) as cm:
+        with self.assertRaises(textparser.ParseError) as cm:
             cantools.db.formats.dbc.load_string('CM_ BO_ "Foo.";')
 
         self.assertEqual(
             str(cm.exception),
-            "Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo.\";': "
-            "Expected frame id.")
+            'Invalid syntax at line 1, column 9: "CM_ BO_ >>!<<"Foo.";"')
 
         # Missing frame id in message comment, using load_string().
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
@@ -1834,10 +1827,10 @@ IO_DEBUG(
 
         self.assertEqual(
             str(cm.exception),
-            "DBC: \"Invalid DBC syntax at line 1, column 9: 'CM_ BO_ >!<\"Foo"
-            ".\";': Expected frame id.\", KCD: \"syntax error: line 1, column"
-            " 0\", SYM: \"Only SYM version 6.0 is supported.\", CDD: \"syntax "
-            "error: line 1, column 0\"")
+            "DBC: \"Invalid syntax at line 1, column 9: \"CM_ BO_ >>!<<\"Foo."
+            "\";\"\", KCD: \"syntax error: line 1, column 0\", SYM: \"Only SYM "
+            "version 6.0 is supported.\", CDD: \"syntax error: line 1, column "
+            "0\"")
 
     def test_get_node_by_name(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')

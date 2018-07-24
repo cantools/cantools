@@ -1073,52 +1073,6 @@ def get_definitions_dict(definitions, defaults):
     return result
 
 
-class QuotedStringRanges(object):
-
-    def __init__(self, string):
-        self.index = 0
-        self.quoted_string_ranges = []
-
-        for mo in re.finditer(r'"[^"]*?"', string):
-            self.quoted_string_ranges.append((mo.start(), mo.end()))
-
-    def get(self):
-        while self.index < len(self.quoted_string_ranges):
-            self.index += 1
-
-            yield self.quoted_string_ranges[self.index - 1]
-
-    def keep(self):
-        self.index -= 1
-
-
-def ignore_comments(string):
-    """Ignore comments in given string by replacing them with spaces. This
-    reduces the parsing time by quite a lot.
-
-    """
-
-    quoted_string_ranges = QuotedStringRanges(string)
-
-    def replace(mo):
-        for begin, end in quoted_string_ranges.get():
-            if mo.start() >= end:
-                continue
-
-            quoted_string_ranges.keep()
-
-            if begin <= mo.start() < end:
-                string = ignore_comments('"' + mo.group(1)[2:] + mo.group(2))
-
-                return '//' + string[1:]
-            else:
-                break
-
-        return ' ' * len(mo.group(1)) + mo.group(2)
-
-    return re.sub(r"(//[\s\S]*?)([\r\n])", replace, string)
-
-
 def load_string(string, strict=True):
     """Parse given string.
 

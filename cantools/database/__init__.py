@@ -4,6 +4,7 @@ from .errors import Error
 from ..compat import fopen
 from . import can
 from . import diagnostics
+import textparser
 
 # Remove once less users are using the old package structure.
 from .can import *
@@ -159,7 +160,7 @@ def load_string(string,
     if database_format in ['dbc', None]:
         try:
             return load_can_database('dbc')
-        except ParseError as e:
+        except textparser.ParseError as e:
             e_dbc = e
 
     if database_format in ['kcd', None]:

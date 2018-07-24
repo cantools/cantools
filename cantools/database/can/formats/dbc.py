@@ -4,6 +4,7 @@ import re
 from collections import OrderedDict as odict
 from decimal import Decimal
 
+import textparser
 from textparser import Sequence
 from textparser import choice
 from textparser import ZeroOrMore
@@ -25,7 +26,6 @@ from ..node import Node
 from ..internal_database import InternalDatabase
 
 from .utils import num
-from ...errors import ParseError
 
 
 DBC_FMT = (
@@ -80,7 +80,7 @@ DBC_FMT = (
 )
 
 
-def tokenize(string):
+def _tokenize(string):
     keywords = set([
         'BA_',
         'BA_DEF_',
@@ -133,10 +133,9 @@ def tokenize(string):
     }
 
     token_specs = [
-        ('SKIP',     r'[ \r\t]+'),
+        ('SKIP',     r'[ \r\n\t]+|//.*?\n'),
         ('NUMBER',   r'-?\d+(\.\d+)?([eE][+-]?\d+)?'),
         ('WORD',     r'[A-Za-z0-9_]+'),
-        ('NEWLINE',  r'\n'),
         ('STRING',   r'"(\\"|[^"])*?"'),
         ('LPAREN',   r'\('),
         ('RPAREN',   r'\)'),
@@ -148,24 +147,19 @@ def tokenize(string):
         ('SIGN',     r'[+-]'),
         ('SCOLON',   r';'),
         ('COLON',    r':'),
-        ('COMMENT',  r'//.*?\n'),
         ('MISMATCH', r'.')
     ]
 
-    line, line_start, tokens, token_regex = tokenize_init(token_specs)
+    tokens, token_regex = tokenize_init(token_specs)
 
     for mo in re.finditer(token_regex, string, re.DOTALL):
         kind = mo.lastgroup
 
         if kind == 'SKIP':
             pass
-        elif kind in ['NEWLINE', 'COMMENT']:
-            line_start = mo.end() - 1
-            line += 1
         elif kind == 'STRING':
-            column = mo.start() - line_start
             value = mo.group(kind)[1:-1].replace('\\"', '"')
-            tokens.append(Token(kind, value, line, column))
+            tokens.append(Token(kind, value, mo.start()))
         elif kind != 'MISMATCH':
             value = mo.group(kind)
 
@@ -175,18 +169,14 @@ def tokenize(string):
             if kind in names:
                 kind = names[kind]
 
-            column = mo.start() - line_start
-            tokens.append(Token(kind, value, line, column))
+            tokens.append(Token(kind, value, mo.start()))
         else:
-            column = mo.start() - line_start
-            message = str(TokenizeError(line, column, mo.start(), string))
-
-            raise ParseError(message)
+            raise TokenizeError(string, mo.start())
 
     return tokens
 
 
-def treenize(tokens):
+def _create_grammar():
     version = Sequence('VERSION', 'STRING')
 
     ns = Sequence('NS_', ':', ZeroOrMore(Any(), Sequence(Any(), ':')))
@@ -283,7 +273,7 @@ def treenize(tokens):
     signal_group = Sequence(
         'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
 
-    grammar = Grammar(
+    return Grammar(
         OneOrMoreDict(
             choice(
                 message,
@@ -308,11 +298,6 @@ def treenize(tokens):
             )
         )
     )
-
-    try:
-        return grammar.parse(tokens)
-    except Exception as e:
-        raise ParseError('Failed to treenize.')
 
 
 class DbcSpecifics(object):
@@ -1134,10 +1119,6 @@ def ignore_comments(string):
     return re.sub(r"(//[\s\S]*?)([\r\n])", replace, string)
 
 
-def parse(string):
-    return treenize(tokenize(string))
-
-
 def load_string(string, strict=True):
     """Parse given string.
 
@@ -1154,7 +1135,8 @@ def load_string(string, strict=True):
             return None
 
 
-    tokens = parse(string)
+    grammar = _create_grammar()
+    tokens = textparser.parse(string, _tokenize, grammar)
 
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)

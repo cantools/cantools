@@ -80,224 +80,225 @@ DBC_FMT = (
 )
 
 
-def _tokenize(string):
-    keywords = set([
-        'BA_',
-        'BA_DEF_',
-        'BA_DEF_DEF_',
-        'BA_DEF_DEF_REL_',
-        'BA_DEF_REL_',
-        'BA_DEF_SGTYPE_',
-        'BA_REL_',
-        'BA_SGTYPE_',
-        'BO_',
-        'BO_TX_BU_',
-        'BS_',
-        'BU_',
-        'BU_BO_REL_',
-        'BU_EV_REL_',
-        'BU_SG_REL_',
-        'CAT_',
-        'CAT_DEF_',
-        'CM_',
-        'ENVVAR_DATA_',
-        'EV_',
-        'EV_DATA_',
-        'FILTER',
-        'NS_',
-        'NS_DESC_',
-        'SG_',
-        'SG_MUL_VAL_',
-        'SGTYPE_',
-        'SGTYPE_VAL_',
-        'SIG_GROUP_',
-        'SIG_TYPE_REF_',
-        'SIG_VALTYPE_',
-        'SIGTYPE_VALTYPE_',
-        'VAL_',
-        'VAL_TABLE_',
-        'VERSION'
-    ])
+class Parser(textparser.Parser):
 
-    names = {
-        'LPAREN': '(',
-        'RPAREN': ')',
-        'LBRACE': '[',
-        'RBRACE': ']',
-        'COMMA':  ',',
-        'AT':     '@',
-        'SCOLON': ';',
-        'COLON':  ':',
-        'PIPE':   '|',
-        'SIGN':   '+/-'
-    }
+    def tokenize(self, string):
+        keywords = set([
+            'BA_',
+            'BA_DEF_',
+            'BA_DEF_DEF_',
+            'BA_DEF_DEF_REL_',
+            'BA_DEF_REL_',
+            'BA_DEF_SGTYPE_',
+            'BA_REL_',
+            'BA_SGTYPE_',
+            'BO_',
+            'BO_TX_BU_',
+            'BS_',
+            'BU_',
+            'BU_BO_REL_',
+            'BU_EV_REL_',
+            'BU_SG_REL_',
+            'CAT_',
+            'CAT_DEF_',
+            'CM_',
+            'ENVVAR_DATA_',
+            'EV_',
+            'EV_DATA_',
+            'FILTER',
+            'NS_',
+            'NS_DESC_',
+            'SG_',
+            'SG_MUL_VAL_',
+            'SGTYPE_',
+            'SGTYPE_VAL_',
+            'SIG_GROUP_',
+            'SIG_TYPE_REF_',
+            'SIG_VALTYPE_',
+            'SIGTYPE_VALTYPE_',
+            'VAL_',
+            'VAL_TABLE_',
+            'VERSION'
+        ])
 
-    token_specs = [
-        ('SKIP',     r'[ \r\n\t]+|//.*?\n'),
-        ('NUMBER',   r'-?\d+(\.\d+)?([eE][+-]?\d+)?'),
-        ('WORD',     r'[A-Za-z0-9_]+'),
-        ('STRING',   r'"(\\"|[^"])*?"'),
-        ('LPAREN',   r'\('),
-        ('RPAREN',   r'\)'),
-        ('LBRACE',   r'\['),
-        ('RBRACE',   r'\]'),
-        ('COMMA',    r','),
-        ('PIPE',     r'\|'),
-        ('AT',       r'@'),
-        ('SIGN',     r'[+-]'),
-        ('SCOLON',   r';'),
-        ('COLON',    r':'),
-        ('MISMATCH', r'.')
-    ]
+        names = {
+            'LPAREN': '(',
+            'RPAREN': ')',
+            'LBRACE': '[',
+            'RBRACE': ']',
+            'COMMA':  ',',
+            'AT':     '@',
+            'SCOLON': ';',
+            'COLON':  ':',
+            'PIPE':   '|',
+            'SIGN':   '+/-'
+        }
 
-    tokens, token_regex = tokenize_init(token_specs)
+        token_specs = [
+            ('SKIP',     r'[ \r\n\t]+|//.*?\n'),
+            ('NUMBER',   r'-?\d+(\.\d+)?([eE][+-]?\d+)?'),
+            ('WORD',     r'[A-Za-z0-9_]+'),
+            ('STRING',   r'"(\\"|[^"])*?"'),
+            ('LPAREN',   r'\('),
+            ('RPAREN',   r'\)'),
+            ('LBRACE',   r'\['),
+            ('RBRACE',   r'\]'),
+            ('COMMA',    r','),
+            ('PIPE',     r'\|'),
+            ('AT',       r'@'),
+            ('SIGN',     r'[+-]'),
+            ('SCOLON',   r';'),
+            ('COLON',    r':'),
+            ('MISMATCH', r'.')
+        ]
 
-    for mo in re.finditer(token_regex, string, re.DOTALL):
-        kind = mo.lastgroup
+        tokens, token_regex = tokenize_init(token_specs)
 
-        if kind == 'SKIP':
-            pass
-        elif kind == 'STRING':
-            value = mo.group(kind)[1:-1].replace('\\"', '"')
-            tokens.append(Token(kind, value, mo.start()))
-        elif kind != 'MISMATCH':
-            value = mo.group(kind)
+        for mo in re.finditer(token_regex, string, re.DOTALL):
+            kind = mo.lastgroup
 
-            if value in keywords:
-                kind = value
+            if kind == 'SKIP':
+                pass
+            elif kind == 'STRING':
+                value = mo.group(kind)[1:-1].replace('\\"', '"')
+                tokens.append(Token(kind, value, mo.start()))
+            elif kind != 'MISMATCH':
+                value = mo.group(kind)
 
-            if kind in names:
-                kind = names[kind]
+                if value in keywords:
+                    kind = value
 
-            tokens.append(Token(kind, value, mo.start()))
-        else:
-            raise TokenizeError(string, mo.start())
+                if kind in names:
+                    kind = names[kind]
 
-    return tokens
+                tokens.append(Token(kind, value, mo.start()))
+            else:
+                raise TokenizeError(string, mo.start())
 
+        return tokens
 
-def _create_grammar():
-    version = Sequence('VERSION', 'STRING')
+    def grammar(self):
+        version = Sequence('VERSION', 'STRING')
 
-    ns = Sequence('NS_', ':', ZeroOrMore(Any(), Sequence(Any(), ':')))
+        ns = Sequence('NS_', ':', ZeroOrMore(Any(), Sequence(Any(), ':')))
 
-    bs = Sequence('BS_', ':')
+        bs = Sequence('BS_', ':')
 
-    nodes = Sequence('BU_', ':', ZeroOrMore('WORD'))
+        nodes = Sequence('BU_', ':', ZeroOrMore('WORD'))
 
-    signal = Sequence(
-        'SG_', choice(Sequence('WORD', 'WORD'), Sequence('WORD')), ':',
-        'NUMBER', '|', 'NUMBER', '@', 'NUMBER', '+/-',
-        '(', 'NUMBER', ',', 'NUMBER', ')',
-        '[', 'NUMBER', '|', 'NUMBER', ']',
-        'STRING',
-        DelimitedList('WORD'))
+        signal = Sequence(
+            'SG_', choice(Sequence('WORD', 'WORD'), Sequence('WORD')), ':',
+            'NUMBER', '|', 'NUMBER', '@', 'NUMBER', '+/-',
+            '(', 'NUMBER', ',', 'NUMBER', ')',
+            '[', 'NUMBER', '|', 'NUMBER', ']',
+            'STRING',
+            DelimitedList('WORD'))
 
-    message = Sequence(
-        'BO_', 'NUMBER', 'WORD', ':', 'NUMBER', 'WORD', ZeroOrMore(signal))
+        message = Sequence(
+            'BO_', 'NUMBER', 'WORD', ':', 'NUMBER', 'WORD', ZeroOrMore(signal))
 
-    environment_variable = Sequence(
-        'EV_', 'WORD', ':', 'NUMBER',
-        '[', 'NUMBER', '|', 'NUMBER', ']',
-        'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD', ';')
+        environment_variable = Sequence(
+            'EV_', 'WORD', ':', 'NUMBER',
+            '[', 'NUMBER', '|', 'NUMBER', ']',
+            'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD', ';')
 
-    comment = Sequence(
-        'CM_',
-        Inline(choice(
-            Sequence('SG_', 'NUMBER', 'WORD', 'STRING', ';'),
-            Sequence('BO_', 'NUMBER', 'STRING', ';'),
-            Sequence('EV_', 'WORD', 'STRING', ';'),
-            Sequence('BU_', 'WORD', 'STRING', ';'),
-            Sequence('STRING', ';'))))
+        comment = Sequence(
+            'CM_',
+            Inline(choice(
+                Sequence('SG_', 'NUMBER', 'WORD', 'STRING', ';'),
+                Sequence('BO_', 'NUMBER', 'STRING', ';'),
+                Sequence('EV_', 'WORD', 'STRING', ';'),
+                Sequence('BU_', 'WORD', 'STRING', ';'),
+                Sequence('STRING', ';'))))
 
-    attribute_definition = Sequence(
-        'BA_DEF_',
-        Inline(choice(Sequence(choice('SG_', 'BO_', 'EV_', 'BU_'), 'STRING'),
-                      'STRING')),
-        'WORD',
-        choice(
-            Sequence(
-                choice(DelimitedList('STRING'), ZeroOrMore('NUMBER')), ';'),
-            ';'))
-
-    attribute_definition_default = Sequence(
-        'BA_DEF_DEF_', 'STRING', choice('NUMBER', 'STRING'), ';')
-
-    attribute = Sequence(
-        'BA_', 'STRING',
-        ZeroOrMore(choice(Sequence('BO_', 'NUMBER'),
-                          Sequence('SG_', 'NUMBER', 'WORD'),
-                          Sequence('BU_', 'WORD'))),
-        choice('NUMBER', 'STRING'),
-        ';')
-
-    attribute_definition_rel = Sequence(
-        'BA_DEF_REL_',
-        choice('STRING', Sequence('BU_SG_REL_', 'STRING')),
-        'WORD',
-        choice(';',
-               Sequence(DelimitedList('STRING'), ';'),
-               Sequence(OneOrMore('NUMBER'), ';')))
-
-    attribute_definition_default_rel = Sequence(
-        'BA_DEF_DEF_REL_','STRING', choice('NUMBER', 'STRING'), ';')
-
-    attribute_rel = Sequence(
-        'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
-        'WORD', choice('NUMBER', 'STRING'), ';')
-
-    choice_ = Sequence(
-        'VAL_',
-        choice(Sequence('NUMBER', 'WORD'),
-               Sequence('WORD')),
-        OneOrMore(Sequence('NUMBER', 'STRING')),
-        ';')
-
-    value_table = Sequence(
-        'VAL_TABLE_', 'WORD', OneOrMore(Sequence('NUMBER', 'STRING')), ';')
-
-    signal_type = Sequence(
-        'SIG_VALTYPE_', 'NUMBER', 'WORD', ':', 'NUMBER', ';')
-
-    signal_multiplexer_values = Sequence(
-        'SG_MUL_VAL_',
-        'NUMBER',
-        'WORD',
-        'WORD',
-        DelimitedList(Sequence('NUMBER', 'NUMBER')),
-        ';')
-
-    message_add_sender = Sequence(
-        'BO_TX_BU_', 'NUMBER', ':', DelimitedList('WORD'), ';')
-
-    signal_group = Sequence(
-        'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
-
-    return Grammar(
-        OneOrMoreDict(
+        attribute_definition = Sequence(
+            'BA_DEF_',
+            Inline(choice(Sequence(choice('SG_', 'BO_', 'EV_', 'BU_'), 'STRING'),
+                          'STRING')),
+            'WORD',
             choice(
-                message,
-                comment,
-                attribute_definition,
-                value_table,
-                choice_,
-                attribute,
-                attribute_rel,
-                attribute_definition_rel,
-                attribute_definition_default,
-                attribute_definition_default_rel,
-                signal_group,
-                signal_type,
-                signal_multiplexer_values,
-                message_add_sender,
-                environment_variable,
-                nodes,
-                ns,
-                bs,
-                version
+                Sequence(
+                    choice(DelimitedList('STRING'), ZeroOrMore('NUMBER')), ';'),
+                ';'))
+
+        attribute_definition_default = Sequence(
+            'BA_DEF_DEF_', 'STRING', choice('NUMBER', 'STRING'), ';')
+
+        attribute = Sequence(
+            'BA_', 'STRING',
+            ZeroOrMore(choice(Sequence('BO_', 'NUMBER'),
+                              Sequence('SG_', 'NUMBER', 'WORD'),
+                              Sequence('BU_', 'WORD'))),
+            choice('NUMBER', 'STRING'),
+            ';')
+
+        attribute_definition_rel = Sequence(
+            'BA_DEF_REL_',
+            choice('STRING', Sequence('BU_SG_REL_', 'STRING')),
+            'WORD',
+            choice(';',
+                   Sequence(DelimitedList('STRING'), ';'),
+                   Sequence(OneOrMore('NUMBER'), ';')))
+
+        attribute_definition_default_rel = Sequence(
+            'BA_DEF_DEF_REL_','STRING', choice('NUMBER', 'STRING'), ';')
+
+        attribute_rel = Sequence(
+            'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
+            'WORD', choice('NUMBER', 'STRING'), ';')
+
+        choice_ = Sequence(
+            'VAL_',
+            choice(Sequence('NUMBER', 'WORD'),
+                   Sequence('WORD')),
+            OneOrMore(Sequence('NUMBER', 'STRING')),
+            ';')
+
+        value_table = Sequence(
+            'VAL_TABLE_', 'WORD', OneOrMore(Sequence('NUMBER', 'STRING')), ';')
+
+        signal_type = Sequence(
+            'SIG_VALTYPE_', 'NUMBER', 'WORD', ':', 'NUMBER', ';')
+
+        signal_multiplexer_values = Sequence(
+            'SG_MUL_VAL_',
+            'NUMBER',
+            'WORD',
+            'WORD',
+            DelimitedList(Sequence('NUMBER', 'NUMBER')),
+            ';')
+
+        message_add_sender = Sequence(
+            'BO_TX_BU_', 'NUMBER', ':', DelimitedList('WORD'), ';')
+
+        signal_group = Sequence(
+            'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
+
+        return Grammar(
+            OneOrMoreDict(
+                choice(
+                    message,
+                    comment,
+                    attribute_definition,
+                    value_table,
+                    choice_,
+                    attribute,
+                    attribute_rel,
+                    attribute_definition_rel,
+                    attribute_definition_default,
+                    attribute_definition_default_rel,
+                    signal_group,
+                    signal_type,
+                    signal_multiplexer_values,
+                    message_add_sender,
+                    environment_variable,
+                    nodes,
+                    ns,
+                    bs,
+                    version
+                )
             )
         )
-    )
 
 
 class DbcSpecifics(object):
@@ -1089,8 +1090,7 @@ def load_string(string, strict=True):
             return None
 
 
-    grammar = _create_grammar()
-    tokens = textparser.parse(string, _tokenize, grammar)
+    tokens = Parser().parse(string)
 
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)

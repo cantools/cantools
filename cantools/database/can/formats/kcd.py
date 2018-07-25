@@ -2,6 +2,8 @@
 import logging
 
 from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import SubElement
 
 from ..signal import Signal
 from ..message import Message
@@ -34,7 +36,7 @@ def _get_node_name_by_id(nodes, node_id):
             return node['name']
 
 
-def _load_signal_element(signal):
+def _load_signal_element(signal, nodes):
     """Load given signal element and return a signal object.
 
     """
@@ -53,6 +55,7 @@ def _load_signal_element(signal):
     unit = None
     labels = None
     notes = None
+    receivers = []
 
     # Signal XML attributes.
     for key, value in signal.attrib.items():
@@ -108,10 +111,18 @@ def _load_signal_element(signal):
 
         # TODO: Label groups.
 
+    # Receivers.
+    consumer = signal.find('ns:Consumer', NAMESPACES)
+
+    if consumer is not None:
+        for receiver in consumer.findall('ns:NodeRef', NAMESPACES):
+            receivers.append(_get_node_name_by_id(nodes,
+                                                  receiver.attrib['id']))
+
     return Signal(name=name,
                   start=_start_bit(offset, byte_order),
                   length=length,
-                  receivers=[],
+                  receivers=receivers,
                   byte_order=byte_order,
                   is_signed=is_signed,
                   scale=slope,
@@ -124,12 +135,12 @@ def _load_signal_element(signal):
                   is_float=is_float)
 
 
-def _load_multiplex_element(mux):
+def _load_multiplex_element(mux, nodes):
     """Load given multiplex elements and its signals and return list of signals.
 
     """
 
-    mux_signal = _load_signal_element(mux)
+    mux_signal = _load_signal_element(mux, nodes)
     mux_signal.is_multiplexer = True
     signals = [mux_signal]
 
@@ -137,7 +148,7 @@ def _load_multiplex_element(mux):
         multiplexer_id = mux_group.attrib['count']
 
         for signal_element in mux_group.findall('ns:Signal', NAMESPACES):
-            signal = _load_signal_element(signal_element)
+            signal = _load_signal_element(signal_element, nodes)
             signal.multiplexer_ids = [int(multiplexer_id)]
             signal.multiplexer_signal = mux_signal.name
             signals.append(signal)
@@ -193,10 +204,10 @@ def _load_message_element(message, bus_name, nodes, strict):
     signals = []
 
     for mux in message.findall('ns:Multiplex', NAMESPACES):
-        signals += _load_multiplex_element(mux)
+        signals += _load_multiplex_element(mux, nodes)
 
     for signal in message.findall('ns:Signal', NAMESPACES):
-        signals.append(_load_signal_element(signal))
+        signals.append(_load_signal_element(signal, nodes))
 
     if length == 'auto':
         if signals:
@@ -220,12 +231,217 @@ def _load_message_element(message, bus_name, nodes, strict):
                    strict=strict)
 
 
+def _indent_xml(element, indent, level=0):
+    i = "\n" + level * indent
+
+    if len(element):
+        if not element.text or not element.text.strip():
+            element.text = i + indent
+
+        if not element.tail or not element.tail.strip():
+            element.tail = i
+
+        for element in element:
+            _indent_xml(element, indent, level + 1)
+
+        if not element.tail or not element.tail.strip():
+            element.tail = i
+    else:
+        if level and (not element.tail or not element.tail.strip()):
+            element.tail = i
+
+
+def _dump_notes(parent, comment):
+    notes = SubElement(parent, 'Notes')
+    notes.text = comment
+
+
+def _dump_signal(signal, node_refs, signal_element):
+    signal_element.set('name', signal.name)
+    signal_element.set('offset', str(signal.start))
+
+    # Length.
+    if signal.length != 1:
+        signal_element.set('length', str(signal.length))
+
+    # Byte order.
+    if signal.byte_order != 'little_endian':
+        signal_element.set('endianess', signal.byte_order[:-7])
+
+    # Comment.
+    if signal.comment is not None:
+        _dump_notes(signal_element, signal.comment)
+
+    # Receivers.
+    if signal.receivers:
+        consumer = SubElement(signal_element, 'Consumer')
+
+        for receiver in signal.receivers:
+            SubElement(consumer,
+                       'NodeRef',
+                       id=str(node_refs[receiver]))
+
+    # Value.
+    value = Element('Value')
+
+    if signal.minimum is not None:
+        value.set('min', str(signal.minimum))
+
+    if signal.maximum is not None:
+        value.set('max', str(signal.maximum))
+
+    if signal.scale != 1:
+        value.set('slope', str(signal.scale))
+
+    if signal.offset != 0:
+        value.set('intercept', str(signal.offset))
+
+    if signal.unit is not None:
+        value.set('unit', signal.unit)
+
+    if signal.is_float:
+        if signal.length == 32:
+            type_name = 'single'
+        else:
+            type_name = 'double'
+    elif signal.is_signed:
+        type_name = 'signed'
+    else:
+        type_name = None
+
+    if type_name is not None:
+        value.set('type', type_name)
+
+    if value.attrib:
+        signal_element.append(value)
+
+    # Label set.
+    if signal.choices:
+        label_set = SubElement(signal_element, 'LabelSet')
+
+        for value, name in signal.choices.items():
+            SubElement(label_set, 'Label', name=name, value=str(value))
+
+
+def _dump_mux_group(multiplexer_id,
+                    multiplexed_signals,
+                    node_refs,
+                    parent):
+    mux_group = SubElement(parent,
+                           'MuxGroup',
+                           count=str(multiplexer_id))
+
+    for signal in multiplexed_signals:
+        _dump_signal(signal,
+                     node_refs,
+                     SubElement(mux_group, 'Signal'))
+
+def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
+    signals_per_count = {}
+
+    for signal in signals:
+        if signal.multiplexer_signal is None:
+            continue
+
+        if signal.multiplexer_signal != multiplexer_name:
+            continue
+
+        multiplexer_id = signal.multiplexer_ids[0]
+
+        if multiplexer_id not in signals_per_count:
+            signals_per_count[multiplexer_id] = []
+
+        signals_per_count[multiplexer_id].append(signal)
+
+    for multiplexer_id, multiplexed_signals in signals_per_count.items():
+        _dump_mux_group(multiplexer_id,
+                        multiplexed_signals,
+                        node_refs,
+                        parent)
+
+
+def _dump_message(message, bus, node_refs):
+    frame_id = '0x{:03X}'.format(message.frame_id)
+    message_element = SubElement(bus,
+                                 'Message',
+                                 id=frame_id,
+                                 name=message.name,
+                                 length=str(message.length))
+
+    if message.cycle_time is not None:
+        message_element.set('interval', str(message.cycle_time))
+
+    if message.is_extended_frame:
+        message_element.set('format', 'extended')
+
+    # Comment.
+    if message.comment is not None:
+        _dump_notes(message_element, message.comment)
+
+    # Senders.
+    if message.senders:
+        producer = SubElement(message_element, 'Producer')
+
+        for sender in message.senders:
+            SubElement(producer,
+                       'NodeRef',
+                       id=str(node_refs[sender]))
+
+    # Signals.
+    for signal in message.signals:
+        if signal.is_multiplexer:
+            signal_element = SubElement(message_element, 'Multiplex')
+            _dump_signal(signal,
+                         node_refs,
+                         signal_element)
+            _dump_mux_groups(signal.name,
+                             message.signals,
+                             node_refs,
+                             signal_element)
+        elif signal.multiplexer_ids is None:
+            _dump_signal(signal,
+                         node_refs,
+                         SubElement(message_element, 'Signal'))
+
+
+def _dump_version(version, parent):
+    SubElement(parent, 'Document', version=version)
+
+
+def _dump_nodes(nodes, node_refs, parent):
+    for node_id, node in enumerate(nodes, 1):
+        SubElement(parent, 'Node', id=str(node_id), name=node.name)
+        node_refs[node.name] = node_id
+
+
+def _dump_messages(messages, node_refs, parent):
+    bus = SubElement(parent, 'Bus', name='Bus')
+
+    for message in messages:
+        _dump_message(message, bus, node_refs)
+
+
 def dump_string(database):
     """Format given database in KCD file format.
 
     """
 
-    raise NotImplementedError('The KCD dump function is not yet implemented.')
+    node_refs = {}
+
+    attrib = {
+        'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+        'xmlns': 'http://kayak.2codeornot2code.org/1.0',
+        'xsi:noNamespaceSchemaLocation': 'Definition.xsd'
+    }
+    network_definition = Element('NetworkDefinition', attrib)
+
+    _dump_version(database.version, network_definition)
+    _dump_nodes(database.nodes, node_refs, network_definition)
+    _dump_messages(database.messages, node_refs, network_definition)
+
+    _indent_xml(network_definition, '  ')
+
+    return ElementTree.tostring(network_definition).decode('utf-8')
 
 
 def load_string(string, strict=True):

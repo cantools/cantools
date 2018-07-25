@@ -1,0 +1,62 @@
+<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Definition.xsd">
+  <Document version="1.0" />
+  <Node id="1" name="Node1" />
+  <Node id="2" name="Node2" />
+  <Node id="3" name="Node3" />
+  <Bus name="Bus">
+    <Message id="0x001" length="5" name="Message1">
+      <Producer>
+        <NodeRef id="1" />
+      </Producer>
+      <Signal name="Signal1" offset="0" />
+      <Signal length="32" name="Signal2" offset="8">
+        <Consumer>
+          <NodeRef id="2" />
+          <NodeRef id="3" />
+        </Consumer>
+        <Value type="single" />
+        <LabelSet>
+          <Label name="label1" value="0" />
+          <Label name="label2" value="1" />
+        </LabelSet>
+      </Signal>
+    </Message>
+    <Message id="0x002" interval="100" length="4" name="Message2">
+      <Notes>Note message 2.</Notes>
+      <Producer>
+        <NodeRef id="2" />
+        <NodeRef id="3" />
+      </Producer>
+      <Multiplex length="2" name="Mux1" offset="16">
+        <MuxGroup count="0">
+          <Signal length="8" name="Signal1" offset="0" />
+          <Signal length="8" name="Signal2" offset="8" />
+        </MuxGroup>
+        <MuxGroup count="1">
+          <Signal length="8" name="Signal3" offset="0" />
+          <Signal length="8" name="Signal4" offset="8" />
+        </MuxGroup>
+      </Multiplex>
+      <Multiplex name="Mux2" offset="18">
+        <MuxGroup count="0">
+          <Signal name="Signal5" offset="19" />
+        </MuxGroup>
+      </Multiplex>
+      <Signal length="12" name="Signal6" offset="20">
+        <Notes>Note signal 6.</Notes>
+        <Consumer>
+          <NodeRef id="1" />
+        </Consumer>
+        <Value intercept="-40" max="100" min="0" slope="0.05" type="signed" unit="Cel" />
+        <LabelSet>
+          <Label name="init" value="0" />
+        </LabelSet>
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x003" length="8" name="Message3">
+      <Signal length="64" name="Signal1" offset="0">
+        <Value type="double" />
+      </Signal>
+    </Message>
+  </Bus>
+</NetworkDefinition>

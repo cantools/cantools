@@ -826,12 +826,6 @@ IO_DEBUG(
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.load_file(filename)
 
-        with self.assertRaises(NotImplementedError) as cm:
-            db.as_kcd_string()
-
-        self.assertEqual(str(cm.exception),
-                         'The KCD dump function is not yet implemented.')
-
         self.assertEqual(db.version, '1.23')
         self.assertEqual(len(db.nodes), 18)
         self.assertEqual(db.nodes[0].name, 'Motor ACME')
@@ -972,7 +966,7 @@ IO_DEBUG(
         self.assertEqual(outside_temp.name, 'OutsideTemp')
         self.assertEqual(outside_temp.start, 18)
         self.assertEqual(outside_temp.length, 12)
-        self.assertEqual(outside_temp.receivers, [])
+        self.assertEqual(outside_temp.receivers, ['BodyComputer'])
         self.assertEqual(outside_temp.byte_order, 'little_endian')
         self.assertEqual(outside_temp.is_signed, False)
         self.assertEqual(outside_temp.is_float, False)
@@ -989,7 +983,7 @@ IO_DEBUG(
         self.assertEqual(speed_km.name, 'SpeedKm')
         self.assertEqual(speed_km.start, 30)
         self.assertEqual(speed_km.length, 24)
-        self.assertEqual(speed_km.receivers, [])
+        self.assertEqual(speed_km.receivers, ['BodyComputer'])
         self.assertEqual(speed_km.byte_order, 'little_endian')
         self.assertEqual(speed_km.is_signed, False)
         self.assertEqual(speed_km.is_float, False)
@@ -3079,6 +3073,16 @@ IO_DEBUG(
         db.add_dbc_file(filename)
         self.assertEqual(len(db.nodes), 0)
 
+    def test_as_kcd_string(self):
+        """Test the KCD dump functionality.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'dump.kcd')
+        db = cantools.database.load_file(filename)
+
+        with open(filename, 'rb') as fin:
+            self.assertEqual(db.as_kcd_string().encode('ascii'), fin.read())
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

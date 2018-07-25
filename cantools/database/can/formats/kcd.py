@@ -342,9 +342,6 @@ def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
     signals_per_count = {}
 
     for signal in signals:
-        if signal.multiplexer_signal is None:
-            continue
-
         if signal.multiplexer_signal != multiplexer_name:
             continue
 

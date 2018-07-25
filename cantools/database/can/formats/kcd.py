@@ -1,4 +1,6 @@
 # Load and dump a CAN database in KCD format.
+
+import sys
 import logging
 
 from xml.etree import ElementTree
@@ -440,7 +442,10 @@ def dump_string(database):
 
     _indent_xml(network_definition, '  ')
 
-    return ElementTree.tostring(network_definition).decode('utf-8')
+    if sys.version_info[0] > 2:
+        return ElementTree.tostring(network_definition, encoding='unicode')
+    else:
+        return ElementTree.tostring(network_definition)
 
 
 def load_string(string, strict=True):

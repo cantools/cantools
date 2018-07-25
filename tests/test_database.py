@@ -822,6 +822,59 @@ IO_DEBUG(
                 actual_output = stdout.getvalue()
                 self.assertEqual(actual_output, expected_output)
 
+    def test_command_line_convert(self):
+        # DBC to KCD.
+        argv = [
+            'cantools',
+            'convert',
+            'tests/files/motohawk.dbc',
+            'test_command_line_convert.kcd'
+        ]
+
+        if os.path.exists('test_command_line_convert.kcd'):
+            os.remove('test_command_line_convert.kcd')
+
+        with patch('sys.argv', argv):
+            cantools._main()
+
+        db = cantools.database.Database()
+        db.add_kcd_file('test_command_line_convert.kcd')
+        self.assertEqual(db.version, '1.0')
+
+        # KCD to DBC.
+        argv = [
+            'cantools',
+            'convert',
+            'test_command_line_convert.kcd',
+            'test_command_line_convert.dbc'
+        ]
+
+        if os.path.exists('test_command_line_convert.dbc'):
+            os.remove('test_command_line_convert.dbc')
+
+        with patch('sys.argv', argv):
+            cantools._main()
+
+        db = cantools.database.Database()
+        db.add_dbc_file('test_command_line_convert.dbc')
+        self.assertEqual(db.version, '1.0')
+
+    def test_command_line_convert_bad_outfile(self):
+        argv = [
+            'cantools',
+            'convert',
+            'tests/files/motohawk.dbc',
+            'test_command_line_convert.foo'
+        ]
+
+        with patch('sys.argv', argv):
+            with self.assertRaises(SystemExit) as cm:
+                cantools._main()
+
+            self.assertEqual(
+                str(cm.exception),
+                "error: Unsupported output database format 'foo'.")
+
     def test_the_homer(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.db.load_file(filename)

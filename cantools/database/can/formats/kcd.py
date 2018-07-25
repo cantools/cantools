@@ -258,7 +258,9 @@ def _dump_notes(parent, comment):
 
 def _dump_signal(signal, node_refs, signal_element):
     signal_element.set('name', signal.name)
-    signal_element.set('offset', str(signal.start))
+
+    offset = _start_bit(signal.start, signal.byte_order)
+    signal_element.set('offset', str(offset))
 
     # Length.
     if signal.length != 1:

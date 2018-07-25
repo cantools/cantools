@@ -58,5 +58,9 @@
         <Value type="double" />
       </Signal>
     </Message>
+    <Message id="0x004" length="5" name="Message4">
+      <Signal endianess="big" name="Signal1" offset="0" />
+      <Signal endianess="big" length="12" name="Signal2" offset="15" />
+    </Message>
   </Bus>
 </NetworkDefinition>

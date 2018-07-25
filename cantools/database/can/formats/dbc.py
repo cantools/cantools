@@ -12,7 +12,6 @@ from textparser import OneOrMore
 from textparser import OneOrMoreDict
 from textparser import DelimitedList
 from textparser import Any
-from textparser import Grammar
 from textparser import Inline
 from textparser import tokenize_init
 from textparser import Token
@@ -274,29 +273,27 @@ class Parser(textparser.Parser):
         signal_group = Sequence(
             'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
 
-        return Grammar(
-            OneOrMoreDict(
-                choice(
-                    message,
-                    comment,
-                    attribute_definition,
-                    value_table,
-                    choice_,
-                    attribute,
-                    attribute_rel,
-                    attribute_definition_rel,
-                    attribute_definition_default,
-                    attribute_definition_default_rel,
-                    signal_group,
-                    signal_type,
-                    signal_multiplexer_values,
-                    message_add_sender,
-                    environment_variable,
-                    nodes,
-                    ns,
-                    bs,
-                    version
-                )
+        return OneOrMoreDict(
+            choice(
+                message,
+                comment,
+                attribute_definition,
+                value_table,
+                choice_,
+                attribute,
+                attribute_rel,
+                attribute_definition_rel,
+                attribute_definition_default,
+                attribute_definition_default_rel,
+                signal_group,
+                signal_type,
+                signal_multiplexer_values,
+                message_add_sender,
+                environment_variable,
+                nodes,
+                ns,
+                bs,
+                version
             )
         )
 

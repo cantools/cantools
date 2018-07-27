@@ -232,14 +232,14 @@ class Parser(textparser.Parser):
 
         attribute_definition_rel = Sequence(
             'BA_DEF_REL_',
-            choice('STRING', Sequence('BU_SG_REL_', 'STRING')),
+            Optional('BU_SG_REL_'),
+            'STRING',
             'WORD',
-            choice(';',
-                   Sequence(DelimitedList('STRING'), ';'),
-                   Sequence(OneOrMore('NUMBER'), ';')))
+            choice(DelimitedList('STRING'), OneOrMore('NUMBER')),
+            ';')
 
         attribute_definition_default_rel = Sequence(
-            'BA_DEF_DEF_REL_','STRING', choice('NUMBER', 'STRING'), ';')
+            'BA_DEF_DEF_REL_', 'STRING', choice('NUMBER', 'STRING'), ';')
 
         attribute_rel = Sequence(
             'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
@@ -247,8 +247,8 @@ class Parser(textparser.Parser):
 
         choice_ = Sequence(
             'VAL_',
-            choice(Sequence('NUMBER', 'WORD'),
-                   Sequence('WORD')),
+            Optional('NUMBER'),
+            'WORD',
             OneOrMore(Sequence('NUMBER', 'STRING')),
             ';')
 
@@ -678,7 +678,7 @@ def _load_choices(tokens):
     choices = {}
 
     for choice in tokens.get('VAL_', []):
-        if len(choice[1]) == 1:
+        if len(choice[1]) == 0:
             continue
 
         frame_id = int(choice[1][0])
@@ -686,8 +686,8 @@ def _load_choices(tokens):
         if frame_id not in choices:
             choices[frame_id] = {}
 
-        choices[frame_id][choice[1][1]] = odict(
-            (int(''.join(v[0])), v[1]) for v in choice[2])
+        choices[frame_id][choice[2]] = odict(
+            (int(''.join(v[0])), v[1]) for v in choice[3])
 
     return choices
 

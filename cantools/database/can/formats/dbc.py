@@ -12,10 +12,10 @@ from textparser import OneOrMore
 from textparser import OneOrMoreDict
 from textparser import DelimitedList
 from textparser import Any
-from textparser import Inline
 from textparser import tokenize_init
 from textparser import Token
 from textparser import TokenizeError
+from textparser import Optional
 
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
@@ -203,22 +203,21 @@ class Parser(textparser.Parser):
 
         comment = Sequence(
             'CM_',
-            Inline(choice(
-                Sequence('SG_', 'NUMBER', 'WORD', 'STRING', ';'),
-                Sequence('BO_', 'NUMBER', 'STRING', ';'),
-                Sequence('EV_', 'WORD', 'STRING', ';'),
-                Sequence('BU_', 'WORD', 'STRING', ';'),
-                Sequence('STRING', ';'))))
+            choice(
+                Sequence('SG_', 'NUMBER', 'WORD', 'STRING'),
+                Sequence('BO_', 'NUMBER', 'STRING'),
+                Sequence('EV_', 'WORD', 'STRING'),
+                Sequence('BU_', 'WORD', 'STRING'),
+                'STRING'),
+            ';')
 
         attribute_definition = Sequence(
             'BA_DEF_',
-            Inline(choice(Sequence(choice('SG_', 'BO_', 'EV_', 'BU_'), 'STRING'),
-                          'STRING')),
+            Optional(choice('SG_', 'BO_', 'EV_', 'BU_')),
+            'STRING',
             'WORD',
-            choice(
-                Sequence(
-                    choice(DelimitedList('STRING'), ZeroOrMore('NUMBER')), ';'),
-                ';'))
+            Optional(choice(DelimitedList('STRING'), ZeroOrMore('NUMBER'))),
+            ';')
 
         attribute_definition_default = Sequence(
             'BA_DEF_DEF_', 'STRING', choice('NUMBER', 'STRING'), ';')
@@ -567,18 +566,14 @@ def _load_comments(tokens):
     comments = {}
 
     for comment in tokens.get('CM_', []):
-        if comment[1] == 'BU_':
-            node_name = comment[2]
-            comments[node_name] = comment[3]
-        elif comment[1] == 'BO_':
-            frame_id = int(comment[2])
+        if not isinstance(comment[1], list):
+            continue
 
-            if frame_id not in comments:
-                comments[frame_id] = {}
+        item = comment[1]
+        kind = item[0]
 
-            comments[frame_id]['message'] = comment[3]
-        elif comment[1] == 'SG_':
-            frame_id = int(comment[2])
+        if kind == 'SG_':
+            frame_id = int(item[1])
 
             if frame_id not in comments:
                 comments[frame_id] = {}
@@ -586,7 +581,17 @@ def _load_comments(tokens):
             if 'signal' not in comments[frame_id]:
                 comments[frame_id]['signal'] = {}
 
-            comments[frame_id]['signal'][comment[3]] = comment[4]
+            comments[frame_id]['signal'][item[2]] = item[3]
+        elif kind == 'BO_':
+            frame_id = int(item[1])
+
+            if frame_id not in comments:
+                comments[frame_id] = {}
+
+            comments[frame_id]['message'] = item[2]
+        elif kind == 'BU_':
+            node_name = item[1]
+            comments[node_name] = item[2]
 
     return comments
 
@@ -624,27 +629,12 @@ def _load_attributes(tokens, definitions):
         name = attribute[1]
 
         if len(attribute[2]) > 0:
-            if attribute[2][0][0] == 'BU_':
-                node = attribute[2][0][1]
+            item = attribute[2][0]
+            kind = item[0]
 
-                if 'node' not in attributes:
-                    attributes['node'] = odict()
-
-                if node not in attributes['node']:
-                    attributes['node'][node] = odict()
-
-                attributes['node'][node][name] = to_object(attribute)
-            elif attribute[2][0][0] == 'BO_':
-                frame_id_dbc = int(attribute[2][0][1])
-
-                if frame_id_dbc not in attributes:
-                    attributes[frame_id_dbc] = {}
-                    attributes[frame_id_dbc]['message'] = odict()
-
-                attributes[frame_id_dbc]['message'][name] = to_object(attribute)
-            elif attribute[2][0][0] == 'SG_':
-                frame_id_dbc = int(attribute[2][0][1])
-                signal = attribute[2][0][2]
+            if kind == 'SG_':
+                frame_id_dbc = int(item[1])
+                signal = item[2]
 
                 if frame_id_dbc not in attributes:
                     attributes[frame_id_dbc] = {}
@@ -657,6 +647,24 @@ def _load_attributes(tokens, definitions):
                     attributes[frame_id_dbc]['signal'][signal] = odict()
 
                 attributes[frame_id_dbc]['signal'][signal][name] = to_object(attribute)
+            elif kind == 'BO_':
+                frame_id_dbc = int(item[1])
+
+                if frame_id_dbc not in attributes:
+                    attributes[frame_id_dbc] = {}
+                    attributes[frame_id_dbc]['message'] = odict()
+
+                attributes[frame_id_dbc]['message'][name] = to_object(attribute)
+            elif kind == 'BU_':
+                node = item[1]
+
+                if 'node' not in attributes:
+                    attributes['node'] = odict()
+
+                if node not in attributes['node']:
+                    attributes['node'][node] = odict()
+
+                attributes['node'][node][name] = to_object(attribute)
         else:
             if 'database' not in attributes:
                 attributes['database'] = odict()
@@ -1029,40 +1037,26 @@ def get_definitions_dict(definitions, defaults):
         return value
 
     for item in definitions:
-        choices_or_range = None
-
-        if item[1] in ['SG_', 'BO_', 'BU_']:
-            definition = AttributeDefinition(name=item[2],
-                                             kind=item[1],
-                                             type_name=item[3])
-
-            if len(item) > 4:
-                choices_or_range = item[4][0]
+        if len(item[1]) > 0:
+            kind = item[1][0]
         else:
-            definition = AttributeDefinition(name=item[1],
-                                             type_name=item[2])
+            kind = None
 
-            if len(item) > 3:
-                choices_or_range = item[3][0]
+        definition = AttributeDefinition(name=item[2],
+                                         kind=kind,
+                                         type_name=item[3])
+        values = item[4][0]
 
-        if choices_or_range is not None:
+        if len(values) > 0:
             if definition.type_name == "ENUM":
-                choices = []
-
-                for choice in choices_or_range:
-                    choices.append(choice)
-
-                definition.choices = choices
+                definition.choices = values
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = convert_value(definition,
-                                                   choices_or_range[0])
-                definition.maximum = convert_value(definition,
-                                                   choices_or_range[1])
+                definition.minimum = convert_value(definition, values[0])
+                definition.maximum = convert_value(definition, values[1])
 
         try:
             value = defaults[definition.name]
-            definition.default_value = convert_value(definition,
-                                                     value)
+            definition.default_value = convert_value(definition, value)
         except KeyError:
             definition.default_value = None
 

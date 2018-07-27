@@ -292,9 +292,7 @@ class Parser(textparser.Parser):
                 nodes,
                 ns,
                 bs,
-                version
-            )
-        )
+                version))
 
 
 class DbcSpecifics(object):

@@ -16,6 +16,7 @@ from textparser import tokenize_init
 from textparser import Token
 from textparser import TokenizeError
 from textparser import Optional
+from textparser import Not
 
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
@@ -179,7 +180,7 @@ class Parser(textparser.Parser):
     def grammar(self):
         version = Sequence('VERSION', 'STRING')
 
-        ns = Sequence('NS_', ':', ZeroOrMore(Any(), Sequence(Any(), ':')))
+        ns = Sequence('NS_', ':', ZeroOrMore(Sequence(Any(), Not(':'))))
 
         bs = Sequence('BS_', ':')
 

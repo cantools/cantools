@@ -52,15 +52,23 @@ def _encode_field(field, data, scaling):
 
 
 def _decode_field(field, value, decode_choices, scaling):
+    
+    #disable this if block, and use "potential fix" to always use raw signal value for decoded field
     if scaling:
         value = (field.scale * value + field.offset)
 
+    #decode choices applies to raw signal value
     if decode_choices:
         try:
             decoded_field = field.choices[value]
         except (KeyError, TypeError):
             decoded_field = value
     else:
+
+        #potential fix to always use raw value
+        #if scaling:
+        #    value = (field.scale * value + field.offset)
+
         decoded_field = value
 
     return decoded_field

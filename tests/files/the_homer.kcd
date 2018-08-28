@@ -431,15 +431,30 @@
       <Signal name="A" offset="0" length="2" endianess="big"/>
       <Signal name="B" offset="0" length="2" endianess="little"/>
     </Message>
-  
-    <Message id="0x900" length="8" name="generic">
+
+    <Message id="0x900" length="8" name="EnumTestMessage">
+      <Producer>
+        <NodeRef id="1"/>
+      </Producer>
+      <Signal offset="0" length="8" name="EnumTest">
+        <Value slope="2"/>
+        <LabelSet>
+          <Label name="one" value="128"/>
+          <Label name="two" value="255"/>
+        </LabelSet>
+      </Signal>
+   </Message>
+    
+  <Message id="0x901" length="8" name="EnumTestMessage">
 			<Producer>
 				<NodeRef id="1"/>
 			</Producer>
-			<Signal offset="0" length="8" name="EnumTest">
-				<Value slope="2"/>
+		
+    <Signal offset="0" length="8" name="EnumTestFloat">
+				<Value slope="2.0"/>
 				<LabelSet>
-					<Label name="pass" value="255"/>
+          <Label name="one" value="128"/>
+					<Label name="two" value="255"/>
 				</LabelSet>
 			</Signal>
 		</Message>

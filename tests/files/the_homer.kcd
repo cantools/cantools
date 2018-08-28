@@ -446,18 +446,18 @@
    </Message>
     
   <Message id="0x901" length="8" name="EnumTestMessage">
-			<Producer>
-				<NodeRef id="1"/>
-			</Producer>
+    <Producer>
+			<NodeRef id="1"/>
+    </Producer>
 		
     <Signal offset="0" length="8" name="EnumTestFloat">
-				<Value slope="2.0"/>
-				<LabelSet>
-          <Label name="one" value="128"/>
-					<Label name="two" value="255"/>
-				</LabelSet>
-			</Signal>
-		</Message>
+      <Value slope="2.0"/>
+      <LabelSet>
+        <Label name="one" value="128"/>
+        <Label name="two" value="255"/>
+      </LabelSet>
+    </Signal>
+	</Message>
   
   </Bus>
 </NetworkDefinition>

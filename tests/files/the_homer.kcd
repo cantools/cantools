@@ -431,5 +431,19 @@
       <Signal name="A" offset="0" length="2" endianess="big"/>
       <Signal name="B" offset="0" length="2" endianess="little"/>
     </Message>
+  
+    <Message id="0x400" length="8" name="generic">
+			<Producer>
+				<NodeRef id="1"/>
+			</Producer>
+            
+			<Signal offset="0" length="8" name="EnumTest">
+				<Value slope="2"/>
+				<LabelSet>
+					<Label name="pass" value="255"/>
+				</LabelSet>
+			</Signal>
+		</Message>
+  
   </Bus>
 </NetworkDefinition>

@@ -657,39 +657,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message = db.get_message_by_frame_id(496)
         self.assertEqual(message.frame_id, 496)
 
-    def test_enum_decode_scaling(self):
-
-        testkcd = """<?xml version="1.0" standalone="no"?>
-        <NetworkDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://kayak.2codeornot2code.org/1.0" xsi:schemaLocation="Definition.xsd">
-	        <Document name="test">test</Document>
-	        <Node id="1" name="test"/>
-
-	        <Bus name="Example">
-		
-		        <Message name="generic" id="0x16C0FFEE" length="8" format="extended">
-			        <Producer>
-				        <NodeRef id="1"/>
-			        </Producer>
-            
-			        <Signal name="enum_test" offset="0" length="8">
-				        <Value slope="2"/>
-				        <LabelSet>
-					        <Label name="pass" value="255"/>
-				        </LabelSet>
-			        </Signal>
-		        </Message>
-		
-	            </Bus>
-        </NetworkDefinition>
-        """
-        candb = cantools.database.load_string(testkcd)
-        
-        #encode first byte with 255
-        message = candb.decode_message(0x16C0FFEE, [0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00])
-
-        #label value, should me matched with raw value not scaled according to KCD spec
-        self.assertEqual(message["enum_test"], "pass")
-
     def test_get_signal_by_name(self):
         filename = os.path.join('tests', 'files', 'foobar.dbc')
         db = cantools.db.load_file(filename)
@@ -1271,6 +1238,31 @@ IO_DEBUG(
             self.assertEqual(encoded, encoded_message)
             decoded = db.decode_message('Gear', encoded)
             self.assertEqual(decoded, decoded_message)
+
+    def test_the_homer_decode_choice_scaling(self):
+        """
+        Verify a label/enum matches the raw value, and is not affected by scaling
+        """
+
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.database.load_file(filename)
+               
+        message = db.decode_message(0x400, [0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00])
+
+        #label value, should me matched with raw value not scaled according to KCD spec
+        self.assertEqual(message["EnumTest"], "pass")
+
+    def test_the_homer_encode_choice_scaling(self):
+        """
+        Verify a label/enum matches the raw value, and is not affected by scaling
+        """
+
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.database.load_file(filename)
+               
+        data = db.encode_message(0x400, {'EnumTest' : 'pass'} )
+
+        self.assertEqual(data[0], 0xFF)
 
     def test_the_homer_encode_decode_big_endian(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')

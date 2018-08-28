@@ -447,7 +447,7 @@
     
   <Message id="0x901" length="8" name="EnumTestMessage">
     <Producer>
-			<NodeRef id="1"/>
+      <NodeRef id="1"/>
     </Producer>
 		
     <Signal offset="0" length="8" name="EnumTestFloat">

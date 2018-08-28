@@ -457,7 +457,7 @@
         <Label name="two" value="255"/>
       </LabelSet>
     </Signal>
-	</Message>
+  </Message>
   
   </Bus>
 </NetworkDefinition>

@@ -891,7 +891,7 @@ IO_DEBUG(
         self.assertEqual(db.buses[0].baudrate, 500000)
         self.assertEqual(db.buses[1].baudrate, 125000)
 
-        self.assertEqual(len(db.messages), 31)
+        self.assertEqual(len(db.messages), 32)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
@@ -1239,6 +1239,23 @@ IO_DEBUG(
             decoded = db.decode_message('Gear', encoded)
             self.assertEqual(decoded, decoded_message)
 
+    def test_the_homer_encode_decode_choice_scaling(self):
+        """
+        Verify a label/enum matches the raw value, and is not affected by scaling
+        """
+
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.database.load_file(filename)
+        
+        data = db.encode_message(0x900, {'EnumTest' : 'pass'} )
+
+        self.assertEqual(data[0], 0xFF)
+
+        message = db.decode_message(0x900, data)
+
+        #label value, should me matched with raw value not scaled according to KCD spec
+        self.assertEqual(message["EnumTest"], "pass")
+
     def test_the_homer_decode_choice_scaling(self):
         """
         Verify a label/enum matches the raw value, and is not affected by scaling
@@ -1247,7 +1264,7 @@ IO_DEBUG(
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.database.load_file(filename)
                
-        message = db.decode_message(0x400, [0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00])
+        message = db.decode_message(0x900, [0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00])
 
         #label value, should me matched with raw value not scaled according to KCD spec
         self.assertEqual(message["EnumTest"], "pass")
@@ -1260,7 +1277,7 @@ IO_DEBUG(
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.database.load_file(filename)
                
-        data = db.encode_message(0x400, {'EnumTest' : 'pass'} )
+        data = db.encode_message(0x900, {'EnumTest' : 'pass'} )
 
         self.assertEqual(data[0], 0xFF)
 

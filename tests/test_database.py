@@ -1258,10 +1258,7 @@ IO_DEBUG(
             (    0x900,     {'EnumTest': 0x04}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
             (    0x901,     {'EnumTestFloat': 0x04}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
             (    0x900,     {'EnumTest': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (    0x901,     {'EnumTestFloat': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            #(    0x900,     {'EnumTest': 0xFF}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
-            #(    0x901,     {'EnumTestFloat': 0xFF}, b'\x80\x00\x00\x00\x00\x00\x00\x00')
-       
+            (    0x901,     {'EnumTestFloat': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),       
         ]
 
         for message_id, decoded_message, encoded_message in messages:

@@ -37,33 +37,29 @@ def _encode_field(field, data, scaling):
     value = data[field.name]
 
     if isinstance(value, str):
-        value = field.choice_string_to_number(value)
-
-    if scaling:
+        return field.choice_string_to_number(value)
+    elif scaling:
         if field.is_float:
             return (value - field.offset) / field.scale
         else:
             value = (Decimal(value) - Decimal(field.offset)) / Decimal(field.scale)
 
             return value.to_integral()
-
     else:
         return value
 
 
 def _decode_field(field, value, decode_choices, scaling):
-    if scaling:
-        value = (field.scale * value + field.offset)
-
     if decode_choices:
         try:
-            decoded_field = field.choices[value]
+            return field.choices[value]
         except (KeyError, TypeError):
-            decoded_field = value
+            pass
+    
+    if scaling:
+        return (field.scale * value + field.offset)
     else:
-        decoded_field = value
-
-    return decoded_field
+        return value
 
 
 def encode_data(data, fields, formats, scaling):

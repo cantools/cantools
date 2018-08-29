@@ -1240,29 +1240,27 @@ IO_DEBUG(
             self.assertEqual(decoded, decoded_message)
 
     def test_the_homer_encode_decode_choice_scaling(self):
-        """
-        Verify a label/enum matches the raw value, and is not affected by scaling
+        """Verify a label/enum matches the raw value, and is not affected by scaling
         """
 
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
         db = cantools.database.load_file(filename)
         
-
         messages = [
-            (    0x900,     {'EnumTest': 'one'}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
-            (    0x900,     {'EnumTest': 'two'}, b'\xFF\x00\x00\x00\x00\x00\x00\x00'),
-            (    0x901,     {'EnumTestFloat': 'one'}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
-            (    0x901,     {'EnumTestFloat': 'two'}, b'\xFF\x00\x00\x00\x00\x00\x00\x00'),
+            (0x900, {'EnumTest': 'one'}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
+            (0x900, {'EnumTest': 'two'}, b'\xFF\x00\x00\x00\x00\x00\x00\x00'),
+            (0x901, {'EnumTestFloat': 'one'}, b'\x00\x00\x00C\x00\x00\x00\x00'),
+            (0x901, {'EnumTestFloat': 'two'}, b'\x00\x00\x7fC\x00\x00\x00\x00'),
 
             #verify encode/decode using int/float to verify scaling still works
-            (    0x900,     {'EnumTest': 0x04}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (    0x901,     {'EnumTestFloat': 0x04}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (    0x900,     {'EnumTest': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (    0x901,     {'EnumTestFloat': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),       
+            (0x900, {'EnumTest': 0x04}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
+            (0x901, {'EnumTestFloat': 0x04}, b'\x00\x00\x00@\x00\x00\x00\x00'),
+            (0x900, {'EnumTest': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
+            (0x901, {'EnumTestFloat': 4.0}, b'\x00\x00\x00@\x00\x00\x00\x00'),       
         ]
 
         for message_id, decoded_message, encoded_message in messages:
-            encoded = db.encode_message(message_id, decoded_message )
+            encoded = db.encode_message(message_id, decoded_message)
             self.assertEqual(encoded,encoded_message)
             decoded = db.decode_message(message_id, encoded)
             self.assertEqual(decoded, decoded_message)

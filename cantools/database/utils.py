@@ -55,7 +55,7 @@ def _decode_field(field, value, decode_choices, scaling):
             return field.choices[value]
         except (KeyError, TypeError):
             pass
-    
+
     if scaling:
         return (field.scale * value + field.offset)
     else:

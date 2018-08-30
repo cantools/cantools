@@ -34,34 +34,14 @@ NS_ :
 BS_:
 
 BU_:
-VAL_TABLE_ Vt_Pack_Configuration 7 "Slave 7" 6 "Slave 6" 5 "Slave 5" 4 "Slave 4" 3 "Slave 3" 2 "Slave 2" 1 "Slave 1" 0 "Master" ;
-VAL_TABLE_ EVT_Categorie 1 "Safety_Warning" 2 "Safety Error" 0 "Warning_Application" ;
-VAL_TABLE_ BSW 6 "ERR_EEPROM" 5 "ERR_DATASET_CRC" 4 "ERR_MASTER_SLAVE_CONFIG" 3 "ERR_INTER_COM" 2 "ERR_INTERNAL" 1 "ERR_TIMEOUT_MSG_REQ" ;
-VAL_TABLE_ detected 1 "detected" 0 "not detected" ;
-VAL_TABLE_ Fan_active 1 "Fan on" 0 "Fan off" ;
-VAL_TABLE_ Warning 1 "Warning active" 0 "No Warning" ;
-VAL_TABLE_ Error 1 "Error" 0 "No Error" ;
-VAL_TABLE_ disable_enable 1 "enable" 0 "disable" ;
-VAL_TABLE_ active_state 1 "active" 0 "inactive" ;
-VAL_TABLE_ SNA_4bit 15 "SNA" ;
-VAL_TABLE_ SNA_32bit -1 "SNA" ;
-VAL_TABLE_ SNA_24bit 16777215 "SNA" ;
-VAL_TABLE_ SNA_8bit 255 "SNA" ;
-VAL_TABLE_ SNA_16bit 65535 "SNA" ;
 
 
 BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
- SG_ signal_without_sender : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ signal_without_sender : 0|8@1- (1,0) [0|0] "" Vector__XXX
 
 
 
 CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
 BA_DEF_  "BusType" STRING ;
-BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
-BA_DEF_ SG_  "GenSigStartValue" FLOAT -3.4E+038 3.4E+038;
-BA_DEF_DEF_  "BusType" "CAN";
-BA_DEF_DEF_  "GenMsgCycleTime" 0;
-BA_DEF_DEF_  "GenSigStartValue" 0;
-BA_ "BusType" "CAN";
-BA_ "GenSigStartValue" SG_ 3221225472 signal_without_sender 0;
+BA_DEF_DEF_  "BusType" "";
 

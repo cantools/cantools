@@ -838,7 +838,7 @@ IO_DEBUG(
   Name:       VECTOR__INDEPENDENT_SIG_MSG
   Id:         0x40000000
   Length:     0 bytes
-  Cycle time: 0 ms
+  Cycle time: - ms
   Senders:    -
   Layout:
 
@@ -846,9 +846,9 @@ IO_DEBUG(
 
              7   6   5   4   3   2   1   0
            +---+---+---+---+---+---+---+---+
-     B   0 |   |   |   |   |   |   |   |<-x|
+     B   0 |<-----------------------------x|
      y     +---+---+---+---+---+---+---+---+
-     t                                   +-- signal_without_sender
+     t       +-- signal_without_sender
      e
 
   Signal tree:

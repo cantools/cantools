@@ -9,9 +9,7 @@ import bitstruct
 def format_or(items):
     items = [str(item) for item in items]
 
-    if len(items) == 0:
-        return None
-    elif len(items) == 1:
+    if len(items) == 1:
         return items[0]
     else:
         return '{} or {}'.format(', '.join(items[:-1]),
@@ -21,9 +19,7 @@ def format_or(items):
 def format_and(items):
     items = [str(item) for item in items]
 
-    if len(items) == 0:
-        return None
-    elif len(items) == 1:
+    if len(items) == 1:
         return items[0]
     else:
         return '{} and {}'.format(', '.join(items[:-1]),

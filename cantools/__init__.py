@@ -140,6 +140,9 @@ def _do_dump(args):
         if cycle_time is None:
             cycle_time = '-'
 
+        if len(message.senders) == 0:
+            message.senders.append('-')
+
         print()
         print('  Name:       {}'.format(message.name))
         print('  Id:         0x{:x}'.format(message.frame_id))

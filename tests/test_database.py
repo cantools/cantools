@@ -822,6 +822,51 @@ IO_DEBUG(
                 actual_output = stdout.getvalue()
                 self.assertEqual(actual_output, expected_output)
 
+    def test_command_line_dump_no_sender(self):
+        argv = [
+            'cantools',
+            'dump',
+            '--no-strict',
+            'tests/files/no_sender.dbc'
+        ]
+
+        expected_output = """\
+================================= Messages =================================
+
+  ------------------------------------------------------------------------
+
+  Name:       VECTOR__INDEPENDENT_SIG_MSG
+  Id:         0x40000000
+  Length:     0 bytes
+  Cycle time: - ms
+  Senders:    -
+  Layout:
+
+                          Bit
+
+             7   6   5   4   3   2   1   0
+           +---+---+---+---+---+---+---+---+
+     B   0 |<-----------------------------x|
+     y     +---+---+---+---+---+---+---+---+
+     t       +-- signal_without_sender
+     e
+
+  Signal tree:
+
+    -- {root}
+       +-- signal_without_sender
+
+  ------------------------------------------------------------------------
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdout', stdout):
+            with patch('sys.argv', argv):
+                cantools._main()
+                actual_output = stdout.getvalue()
+                self.assertEqual(actual_output, expected_output)
+
     def test_command_line_convert(self):
         # DBC to KCD.
         argv = [

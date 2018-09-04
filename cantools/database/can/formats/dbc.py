@@ -1079,7 +1079,6 @@ def load_string(string, strict=True):
         except KeyError:
             return None
 
-
     tokens = Parser().parse(string)
 
     comments = _load_comments(tokens)
@@ -1103,7 +1102,7 @@ def load_string(string, strict=True):
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     dbc_specifics = DbcSpecifics(attributes=get_database_attributes(),
-                                  attribute_definitions=attribute_definitions)
+                                 attribute_definitions=attribute_definitions)
 
     return InternalDatabase(messages,
                             nodes,

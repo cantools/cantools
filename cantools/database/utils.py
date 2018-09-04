@@ -6,6 +6,14 @@ from collections import namedtuple
 import bitstruct
 
 
+Formats = namedtuple('Formats',
+                     [
+                         'big_endian',
+                         'little_endian',
+                         'padding_mask'
+                     ])
+
+
 def format_or(items):
     items = [str(item) for item in items]
 
@@ -190,9 +198,6 @@ def create_encode_decode_formats(datas, number_of_bytes):
 
     big_fmt, big_padding_mask = create_big()
     little_fmt, little_padding_mask = create_little()
-
-    Formats = namedtuple('Formats',
-                         ['big_endian', 'little_endian', 'padding_mask'])
 
     return Formats(bitstruct.compile(big_fmt),
                    bitstruct.compile(little_fmt),

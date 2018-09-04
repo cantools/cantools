@@ -4,14 +4,14 @@
 projects using the same database over and over again.
 
 > python3 database_cache.py
-
-Loaded database using cantools.
-Number of messages: 217
-Execution time: 0.09 seconds
-
-Loaded cached database.
-Number of messages: 217
-Execution time: 0.0 seconds
+First:
+  Loaded database using cantools.
+  Number of messages: 217
+  Execution time: 0.09 seconds
+Second:
+  Loaded cached database.
+  Number of messages: 217
+  Execution time: 0.0 seconds
 
 The database is found in the cantools-database-cache folder.
 
@@ -42,7 +42,7 @@ def load_database(filename):
         with open(filename, 'rb') as fin:
             database = DATABASE_CACHE[fin.read()]
 
-        print('Loaded cached database.')
+        print('  Loaded cached database.')
     except KeyError:
         # The database for given file was not found in the cache. Load
         # it using cantools.
@@ -51,22 +51,22 @@ def load_database(filename):
         with open(filename, 'rb') as fin:
             DATABASE_CACHE[fin.read()] = database
 
-        print('Loaded database using cantools.')
+        print('  Loaded database using cantools.')
 
     return database
 
 
-def timed_database_load():
+def timed_database_load(title):
+    print(title)
+
     start_time = time.time()
     database = load_database(DBC_PATH)
     end_time = time.time()
 
-    print('Number of messages:', len(database.messages))
-    print('Execution time: {} seconds'.format(round(end_time - start_time, 2)))
+    print('  Number of messages:', len(database.messages))
+    print('  Execution time: {} seconds'.format(round(end_time - start_time, 2)))
 
 
 if __name__ == '__main__':
-    print()
-    timed_database_load()
-    print()
-    timed_database_load()
+    timed_database_load('First:')
+    timed_database_load('Second:')

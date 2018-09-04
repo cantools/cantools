@@ -37,19 +37,20 @@ DATABASE_CACHE = diskcache.Cache('cantools-database-cache')
 
 
 def load_database(filename):
+    # Use the full file contents as database key.
+    with open(filename, 'rb') as fin:
+        key = fin.read()
+
     try:
         # Try to load the database for given file from the cache.
-        with open(filename, 'rb') as fin:
-            database = DATABASE_CACHE[fin.read()]
+        database = DATABASE_CACHE[key]
 
         print('  Loaded cached database.')
     except KeyError:
         # The database for given file was not found in the cache. Load
         # it using cantools.
         database = cantools.database.load_file(filename)
-
-        with open(filename, 'rb') as fin:
-            DATABASE_CACHE[fin.read()] = database
+        DATABASE_CACHE[key] = database
 
         print('  Loaded database using cantools.')
 

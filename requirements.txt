@@ -4,3 +4,4 @@ codespell
 mock
 python-can
 textparser
+diskcache

@@ -61,3 +61,7 @@ target/
 
 # Example outputs
 examples/dbc_io/dbc_output.dbc
+
+cantools-database-cache/
+test_command_line_convert.dbc
+test_command_line_convert.kcd

@@ -9,6 +9,7 @@ script:
   - coverage run --source=cantools setup.py test
   - make test-sdist
   - env PYTHONPATH=. python examples/hello_world.py
+  - env PYTHONPATH=. python examples/database_cache.py
   - env PYTHONPATH=. python examples/diagnostics/did.py
 after_success:
   coveralls

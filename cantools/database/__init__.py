@@ -5,6 +5,7 @@ from ..compat import fopen
 from . import can
 from . import diagnostics
 import textparser
+import diskcache
 
 # Remove once less users are using the old package structure.
 from .can import *
@@ -48,13 +49,18 @@ def load_file(filename,
               database_format=None,
               encoding='utf-8',
               frame_id_mask=None,
-              strict=True):
+              strict=True,
+              cache_dir=None):
     """Open, read and parse given database file and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
     `encoding` specifies the file encoding.
+
+    `cache_dir` specifies the database cache location in the file
+    system. Give as ``None`` to disable the cache. By default the
+    cache is disabled.
 
     See :func:`~cantools.database.load_string()` for descriptions of
     other arguments.
@@ -69,6 +75,15 @@ def load_file(filename,
     '1.0'
 
     """
+
+    if cache_dir is not None:
+        with open(filename, 'rb') as fin:
+            key = fin.read()
+
+        try:
+            return diskcache.Cache(cache_dir)[key]
+        except KeyError:
+            pass
 
     with fopen(filename, 'r', encoding=encoding) as fin:
         return load(fin,

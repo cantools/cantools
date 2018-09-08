@@ -30,7 +30,8 @@ setup(name='cantools',
           'bitstruct>=3.7.0',
           'pyparsing>=2.0.3',
           'python-can>=2.1.0',
-          'textparser'
+          'textparser',
+          'diskcache'
       ],
       test_suite="tests",
       entry_points = {

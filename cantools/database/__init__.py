@@ -45,6 +45,30 @@ class UnsupportedDatabaseFormatError(Error):
         self.e_cdd = e_cdd
 
 
+def _load_file_cache(filename,
+                     database_format,
+                     encoding,
+                     frame_id_mask,
+                     strict,
+                     cache_dir):
+    with open(filename, 'rb') as fin:
+        key = fin.read()
+
+    cache = diskcache.Cache(cache_dir)
+
+    try:
+        return cache[key]
+    except KeyError:
+        with fopen(filename, 'r', encoding=encoding) as fin:
+            database = load(fin,
+                            database_format,
+                            frame_id_mask,
+                            strict)
+        cache[key] = database
+
+        return database
+
+
 def load_file(filename,
               database_format=None,
               encoding='utf-8',
@@ -76,20 +100,19 @@ def load_file(filename,
 
     """
 
-    if cache_dir is not None:
-        with open(filename, 'rb') as fin:
-            key = fin.read()
-
-        try:
-            return diskcache.Cache(cache_dir)[key]
-        except KeyError:
-            pass
-
-    with fopen(filename, 'r', encoding=encoding) as fin:
-        return load(fin,
-                    database_format,
-                    frame_id_mask,
-                    strict)
+    if cache_dir is None:
+        with fopen(filename, 'r', encoding=encoding) as fin:
+            return load(fin,
+                        database_format,
+                        frame_id_mask,
+                        strict)
+    else:
+        return _load_file_cache(filename,
+                                database_format,
+                                encoding,
+                                frame_id_mask,
+                                strict,
+                                cache_dir)
 
 
 def load(fp,

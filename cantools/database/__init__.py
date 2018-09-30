@@ -84,7 +84,11 @@ def load_file(filename,
 
     `cache_dir` specifies the database cache location in the file
     system. Give as ``None`` to disable the cache. By default the
-    cache is disabled.
+    cache is disabled. The cache key is the contents of given
+    file. Using a cache will significantly reduce the load time when
+    reloading the same file. The cache directory is automatically
+    created if it does not exist. Remove the cache directory
+    `cache_dir` to clear the cache.
 
     See :func:`~cantools.database.load_string()` for descriptions of
     other arguments.

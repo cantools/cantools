@@ -759,6 +759,30 @@ IO_DEBUG(
                     actual_output = stdout.getvalue()
                     self.assertEqual(actual_output, expected_output)
 
+    def test_decimal_parsing_dump(self):
+        """Do not error on a DBC that uses a decimal value on a INT attribute, some DBCs do that.
+
+        """
+
+        argv = [
+            'cantools',
+            'dump',
+            'tests/files/decimal.dbc'
+        ]
+
+        expected_output = """\
+================================= Messages =================================
+
+  ------------------------------------------------------------------------
+"""
+        stdout = StringIO()
+
+        with patch('sys.stdout', stdout):
+            with patch('sys.argv', argv):
+                cantools._main()
+                actual_output = stdout.getvalue()
+                self.assertEqual(actual_output, expected_output)
+
     def test_command_line_dump(self):
         argv = [
             'cantools',

@@ -1,0 +1,54 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+ SG_ NumberOfMembersInWorkingSet : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SourceAddress : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ NncntnuslyMonitoredSystemsStatus : 0|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ NncntnslyMonitoredSystemsSupport : 0|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CntnslyMntrdSystmsSupport_Status : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ AETCTorqueValue : 0|16@1+ (1,0) [0|64255] "Nm" Vector__XXX
+ SG_ TrailerWeight : 0|16@1+ (2,0) [0|128510] "kg" Vector__XXX
+ SG_ ReferenceTirePressSetting : 0|8@1+ (8,0) [0|2000] "kPa" Vector__XXX
+ SG_ ReferenceTirePress : 0|8@1+ (8,0) [0|2000] "kPa" Vector__XXX
+ SG_ TirePressThresholdDetection : 0|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ TireAirLeakageRate : 0|16@1+ (0.1,0) [0|6425.5] "Pa/s" Vector__XXX
+ SG_ CTIWheelEndElectricalFault : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ CTITireStatus : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ CTIWheelSensorStatus : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TireTemp : 0|16@1+ (0.03125,-273) [-273|1734.96875] "deg C" Vector__XXX
+ SG_ TirePress : 0|8@1+ (4,0) [0|1000] "kPa" Vector__XXX
+ SG_ EngTurningGearEngaged : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ AETCSpeedValue : 0|16@1+ (0.125,0) [0|8031.875] "rpm" Vector__XXX

@@ -835,7 +835,7 @@ IO_DEBUG(
 
   ------------------------------------------------------------------------
 
-  Name:       VECTOR__INDEPENDENT_SIG_MSG
+  Name:       Foo
   Id:         0x40000000
   Length:     0 bytes
   Cycle time: - ms
@@ -3210,6 +3210,15 @@ IO_DEBUG(
 
         with open(filename, 'rb') as fin:
             self.assertEqual(db.as_kcd_string().encode('ascii'), fin.read())
+
+    def test_issue_62(self):
+        """Test issue 62.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'issue_62.dbc')
+        db = cantools.database.load_file(filename)
+        self.assertEqual(len(db.messages), 0)
 
     def test_issue_63(self):
         """Test issue 63.

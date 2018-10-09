@@ -887,6 +887,12 @@ def _load_messages(tokens,
     messages = []
 
     for message in tokens.get('BO_', []):
+        # Any message named VECTOR__INDEPENDENT_SIG_MSG contains
+        # signals not assigned to any message. Cantools does not yet
+        # support unassigned signals. Discard them for now.
+        if message[2] == 'VECTOR__INDEPENDENT_SIG_MSG':
+            continue
+
         # Frame id.
         frame_id_dbc = int(message[1])
         frame_id = frame_id_dbc & 0x7fffffff

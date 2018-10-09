@@ -36,7 +36,7 @@ BS_:
 BU_:
 
 
-BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+BO_ 3221225472 Foo: 0 Vector__XXX
  SG_ signal_without_sender : 0|8@1- (1,0) [0|0] "" Vector__XXX
 
 

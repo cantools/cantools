@@ -191,7 +191,8 @@ def create_encode_decode_formats(datas, number_of_bytes):
         value = padding_mask(items)
 
         if format_length > 0:
-            value = bitstruct.pack('u{}'.format(format_length), value)
+            length = len(''.join([item[1] for item in items]))
+            value = bitstruct.pack('u{}'.format(length), value)
             value = int(binascii.hexlify(value[::-1]), 16)
 
         return fmt(items), value

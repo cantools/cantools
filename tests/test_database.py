@@ -3211,6 +3211,57 @@ IO_DEBUG(
         with open(filename, 'rb') as fin:
             self.assertEqual(db.as_kcd_string().encode('ascii'), fin.read())
 
+    def test_issue_63(self):
+        """Test issue 63.
+
+        """
+
+        filename = os.path.join('tests', 'files', 'issue_63.dbc')
+
+        with self.assertRaises(cantools.database.errors.Error) as cm:
+            cantools.database.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'The signals HtrRes and MaxRes are overlapping in message '
+            'AFT1PSI2.')
+
+        db = cantools.database.load_file(filename, strict=False)
+        self.assertEqual(
+            db.messages[0].layout_string(),
+            '                      Bit\n'
+            '\n'
+            '         7   6   5   4   3   2   1   0\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '     0 |   |   |<-----x|<-------------x|\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '                 |       +-- DetectionStatus\n'
+            '                 +-- PwrSupply\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '     1 |<-----------------------------x|\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '         +-- RegenFailedCount\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '     2 |------------------------------x|\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            ' B   3 |<------------------------------|\n'
+            ' y     +---+---+---+---+---+---+---+---+\n'
+            ' t       +-- Temp\n'
+            ' e     +---+---+---+---+---+---+---+---+\n'
+            '     4 |------------------------------x|\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '     5 |XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '         +-- MaxRes\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '     6 |<------------------------------|\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '         +-- HtrRes\n'
+            '       +---+---+---+---+---+---+---+---+\n'
+            '     7 |   |   |   |   |   |   |   |   |\n'
+            '       +---+---+---+---+---+---+---+---+')
+
+
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.DEBUG)

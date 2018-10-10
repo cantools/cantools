@@ -57,9 +57,7 @@ bus using the `python-can`_ package.
 .. code-block:: python
 
    >>> import can
-   >>> can.rc['interface'] = 'socketcan_ctypes'
-   >>> can.rc['channel'] = 'vcan0'
-   >>> can_bus = can.interface.Bus()
+   >>> can_bus = can.interface.Bus('vcan0', bustype='socketcan')
    >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})
    >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
    >>> can_bus.send(message)

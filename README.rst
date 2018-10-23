@@ -168,6 +168,20 @@ Dump given database in a human readable format:
 
      ------------------------------------------------------------------------
 
+The generate C source subcommand
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Generate `C` source code from given database. The generated code
+contains encode and decode functions for all messages.
+
+.. code-block:: text
+
+   $ cantools generate_c_source tests/files/motohawk.dbc
+   Successfully generated motohawk.h and motohawk.c.
+
+See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
+files.
+
 Contributing
 ============
 
@@ -215,3 +229,7 @@ Contributing
 .. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.database.can.Database.decode_message
 
 .. _examples: https://github.com/eerimoq/cantools/blob/master/examples
+
+.. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.h
+
+.. _motohawk.c: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.c

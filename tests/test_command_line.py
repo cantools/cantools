@@ -1,4 +1,5 @@
 import os
+import re
 import unittest
 
 try:
@@ -12,6 +13,15 @@ except ImportError:
     from io import StringIO
 
 import cantools
+
+
+def remove_date_time(string):
+    return re.sub(r' \* This file was generated.*', '', string)
+
+
+def read_file(filename):
+    with open(filename, 'r') as fin:
+        return remove_date_time(fin.read())
 
 
 class CanToolsCommandLineTest(unittest.TestCase):
@@ -263,6 +273,36 @@ IO_DEBUG(
             self.assertEqual(
                 str(cm.exception),
                 "error: Unsupported output database format 'foo'.")
+
+    def test_generate(self):
+        databases = [
+            'motohawk',
+            'padding_bit_order'
+        ]
+
+        for database in databases:
+            argv = [
+                'cantools',
+                'generate_c_source',
+                'tests/files/{}.dbc'.format(database)
+            ]
+
+            database_h = database + '.h'
+            database_c = database + '.c'
+
+            if os.path.exists(database_h):
+                os.remove(database_h)
+
+            if os.path.exists(database_c):
+                os.remove(database_c)
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            self.assertEqual(read_file('tests/files/' + database_h),
+                             read_file(database_h))
+            self.assertEqual(read_file('tests/files/' + database_c),
+                             read_file(database_c))
 
 
 if __name__ == '__main__':

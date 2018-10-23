@@ -65,3 +65,6 @@ examples/dbc_io/dbc_output.dbc
 cantools-database-cache/
 test_command_line_convert.dbc
 test_command_line_convert.kcd
+/motohawk.[hc]
+/padding_bit_order.[hc]
+/a.out

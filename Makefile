@@ -7,6 +7,12 @@ test:
 	env PYTHONPATH=. python3 examples/dbc_io/main.py
 	env PYTHONPATH=. python3 examples/diagnostics/did.py
 	codespell -d $$(git ls-files | grep -v \.kcd)
+	$(MAKE) test_c
+
+test_c:
+	gcc -Wall tests/main.c \
+	    tests/files/motohawk.c \
+	    tests/files/padding_bit_order.c && ./a.out
 
 test-sdist:
 	rm -rf dist

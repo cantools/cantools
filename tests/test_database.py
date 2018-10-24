@@ -304,16 +304,35 @@ class CanToolsDatabaseTest(unittest.TestCase):
         example_message_name = 'ExampleMessage'
         example_message_frame_id = 496
 
-        # Encode with non-enumerated values.
-        decoded_message = {
-            'Temperature': 250.55,
-            'AverageRadius': 3.2,
-            'Enable': 1
-        }
-        encoded_message = b'\xc0\x06\xe0\x00\x00\x00\x00\x00'
+        # Encode and decode with non-enumerated values. Temperature
+        # 229.53 is encoded as a negative value.
+        datas = [
+            (
+                {
+                    'Temperature': 250.55,
+                    'AverageRadius': 3.2,
+                    'Enable': 1
+                },
+                b'\xc0\x06\xe0\x00\x00\x00\x00\x00'
+            ),
+            (
+                {
+                    'Temperature': 229.53,
+                    'AverageRadius': 0,
+                    'Enable': 0
+                },
+                b'\x01\x00\x20\x00\x00\x00\x00\x00'
+            )
+        ]
 
-        encoded = db.encode_message(example_message_frame_id, decoded_message)
-        self.assertEqual(encoded, encoded_message)
+        for decoded_message, encoded_message in datas:
+            encoded = db.encode_message(example_message_frame_id,
+                                        decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = db.decode_message(example_message_frame_id,
+                                        encoded,
+                                        decode_choices=False)
+            self.assertEqual(decoded, decoded_message)
 
         # Encode with enumerated values.
         decoded_message = {
@@ -321,6 +340,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'AverageRadius': 3.2,
             'Enable': 'Enabled'
         }
+        encoded_message = b'\xc0\x06\xe0\x00\x00\x00\x00\x00'
 
         # By frame id.
         encoded = db.encode_message(example_message_frame_id, decoded_message)
@@ -1082,6 +1102,35 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message('BigEndian', encoded)
         self.assertEqual(decoded, decoded_message)
+
+    def test_the_homer_encode_decode_signed(self):
+        filename = os.path.join('tests', 'files', 'the_homer.kcd')
+        db = cantools.db.load_file(filename)
+
+        datas = [
+            (
+                {
+                    'TankLevel': 0,
+                    'TankTemperature': -32768,
+                    'FillingStatus': 0
+                },
+                b'\x00\x00\x00\x80\x00'
+            ),
+            (
+                {
+                    'TankLevel': 65535,
+                    'TankTemperature': 32767,
+                    'FillingStatus': 15
+                },
+                b'\xff\xff\xff\x7f\x0f'
+            )
+        ]
+
+        for decoded_message, encoded_message in datas:
+            encoded = db.encode_message('TankController', decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = db.decode_message('TankController', encoded)
+            self.assertEqual(decoded, decoded_message)
 
     def test_empty_kcd(self):
         filename = os.path.join('tests', 'files', 'empty.kcd')

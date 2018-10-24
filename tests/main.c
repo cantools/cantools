@@ -5,6 +5,7 @@
 
 #include "files/motohawk.h"
 #include "files/padding_bit_order.h"
+#include "files/vehicle.h"
 
 static void test_motohawk_example_message(void)
 {

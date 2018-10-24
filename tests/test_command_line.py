@@ -277,7 +277,8 @@ IO_DEBUG(
     def test_generate(self):
         databases = [
             'motohawk',
-            'padding_bit_order'
+            'padding_bit_order',
+            'vehicle'
         ]
 
         for database in databases:

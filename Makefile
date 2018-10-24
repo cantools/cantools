@@ -12,7 +12,8 @@ test:
 test_c:
 	gcc -Wall -Wpedantic tests/main.c \
 	    tests/files/motohawk.c \
-	    tests/files/padding_bit_order.c && ./a.out
+	    tests/files/padding_bit_order.c \
+	    tests/files/vehicle.c && ./a.out
 
 test-sdist:
 	rm -rf dist

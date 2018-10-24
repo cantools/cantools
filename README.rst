@@ -18,6 +18,8 @@ CAN BUS tools.
 
 - Node `tester`_.
 
+- `C` source code generator.
+
 Project homepage: https://github.com/eerimoq/cantools
 
 Documentation: http://cantools.readthedocs.org/en/latest

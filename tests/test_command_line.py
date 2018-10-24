@@ -300,9 +300,9 @@ IO_DEBUG(
             with patch('sys.argv', argv):
                 cantools._main()
 
-            self.assertEqual(read_file('tests/files/' + database_h),
+            self.assertEqual(read_file('tests/files/c_source/' + database_h),
                              read_file(database_h))
-            self.assertEqual(read_file('tests/files/' + database_c),
+            self.assertEqual(read_file('tests/files/c_source/' + database_c),
                              read_file(database_c))
 
 

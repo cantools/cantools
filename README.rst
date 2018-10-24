@@ -230,6 +230,6 @@ Contributing
 
 .. _examples: https://github.com/eerimoq/cantools/blob/master/examples
 
-.. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.h
+.. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h
 
-.. _motohawk.c: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.c
+.. _motohawk.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.c

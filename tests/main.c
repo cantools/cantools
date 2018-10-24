@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <string.h>
 
-#include "files/motohawk.h"
-#include "files/padding_bit_order.h"
-#include "files/vehicle.h"
+#include "files/c_source/motohawk.h"
+#include "files/c_source/padding_bit_order.h"
+#include "files/c_source/vehicle.h"
 
 static void test_motohawk_example_message(void)
 {

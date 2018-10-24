@@ -34,6 +34,10 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#ifndef EINVAL
+#    define EINVAL -22
+#endif
+
 /**
  * Signals in message MSG0.
  *

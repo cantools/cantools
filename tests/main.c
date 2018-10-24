@@ -8,20 +8,55 @@
 
 static void test_motohawk_example_message(void)
 {
+    struct {
+        struct motohawk_example_message_t decoded;
+        uint8_t encoded[8];
+    } datas[3] = {
+        {
+            .decoded = {
+                .temperature = 55,
+                .average_radius = 32,
+                .enable = 1
+            },
+            .encoded = "\xc0\x06\xe0\x00\x00\x00\x00\x00"
+        },
+        {
+            .decoded = {
+                .temperature = -2047,
+                .average_radius = 0,
+                .enable = 0
+            },
+            .encoded = "\x01\x00\x20\x00\x00\x00\x00\x00"
+        },
+        {
+            .decoded = {
+                .temperature = -2048,
+                .average_radius = 0,
+                .enable = 0
+            },
+            .encoded = "\x01\x00\x00\x00\x00\x00\x00\x00"
+        }
+    };
     struct motohawk_example_message_t decoded;
     uint8_t buf[8];
+    int i;
 
-    decoded.temperature = 55;
-    decoded.average_radius = 32;
-    decoded.enable = 1;
-
-    memset(&buf[0], 0, sizeof(buf));
-    assert(motohawk_example_message_encode(&buf[0],
-                                           &decoded,
-                                           sizeof(buf)) == 8);
-    assert(memcmp(&buf[0],
-                  "\xc0\x06\xe0\x00\x00\x00\x00\x00",
-                  sizeof(buf)) == 0);
+    for (i = 0; i < 3; i++) {
+        memset(&buf[0], 0, sizeof(buf));
+        assert(motohawk_example_message_encode(&buf[0],
+                                               &datas[i].decoded,
+                                               sizeof(buf)) == 8);
+        assert(memcmp(&buf[0],
+                      &datas[i].encoded[0],
+                      sizeof(buf)) == 0);
+        memset(&decoded, 0, sizeof(decoded));
+        assert(motohawk_example_message_decode(&decoded,
+                                               &buf[0],
+                                               sizeof(buf)) == 0);
+        assert(decoded.temperature == datas[i].decoded.temperature);
+        assert(decoded.average_radius == datas[i].decoded.average_radius);
+        assert(decoded.enable == datas[i].decoded.enable);
+    }
 }
 
 static void test_padding_bit_order_msg0(void)
@@ -41,6 +76,14 @@ static void test_padding_bit_order_msg0(void)
     assert(memcmp(&buf[0],
                   "\x82\xc9\x00\x00\x02\xc9\x00\x00",
                   sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(padding_bit_order_msg0_decode(&decoded,
+                                         &buf[0],
+                                         sizeof(buf)) == 0);
+    assert(decoded.a == 0x2c9);
+    assert(decoded.b == 1);
+    assert(decoded.c == 0x2c9);
+    assert(decoded.d == 0);
 }
 
 static void test_padding_bit_order_msg1(void)
@@ -60,6 +103,14 @@ static void test_padding_bit_order_msg1(void)
     assert(memcmp(&buf[0],
                   "\x93\x05\x00\x00\x92\x05\x00\x00",
                   sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(padding_bit_order_msg1_decode(&decoded,
+                                         &buf[0],
+                                         sizeof(buf)) == 0);
+    assert(decoded.e == 1);
+    assert(decoded.f == 0x2c9);
+    assert(decoded.g == 0);
+    assert(decoded.h == 0x2c9);
 }
 
 static void test_padding_bit_order_msg2(void)
@@ -78,6 +129,13 @@ static void test_padding_bit_order_msg2(void)
     assert(memcmp(&buf[0],
                   "\x21\x03\x00\x00\x00\x00\x00\x00",
                   sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(padding_bit_order_msg2_decode(&decoded,
+                                         &buf[0],
+                                         sizeof(buf)) == 0);
+    assert(decoded.i == 1);
+    assert(decoded.j == 2);
+    assert(decoded.k == 3);
 }
 
 static void test_padding_bit_order_msg3(void)
@@ -94,6 +152,11 @@ static void test_padding_bit_order_msg3(void)
     assert(memcmp(&buf[0],
                   "\x01\x23\x45\x67\x89\xab\xcd\xef",
                   sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(padding_bit_order_msg3_decode(&decoded,
+                                         &buf[0],
+                                         sizeof(buf)) == 0);
+    assert(decoded.l == 0x0123456789abcdef);
 }
 
 static void test_padding_bit_order_msg4(void)
@@ -110,6 +173,11 @@ static void test_padding_bit_order_msg4(void)
     assert(memcmp(&buf[0],
                   "\xef\xcd\xab\x89\x67\x45\x23\x01",
                   sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(padding_bit_order_msg4_decode(&decoded,
+                                         &buf[0],
+                                         sizeof(buf)) == 0);
+    assert(decoded.m == 0x0123456789abcdef);
 }
 
 static void test_padding_bit_order(void)

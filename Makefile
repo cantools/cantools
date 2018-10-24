@@ -10,7 +10,7 @@ test:
 	$(MAKE) test_c
 
 test_c:
-	gcc -Wall tests/main.c \
+	gcc -Wall -Wpedantic tests/main.c \
 	    tests/files/motohawk.c \
 	    tests/files/padding_bit_order.c && ./a.out
 

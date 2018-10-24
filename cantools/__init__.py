@@ -66,6 +66,10 @@ GENERATE_H_FMT = '''\
 #include <stdint.h>
 #include <unistd.h>
 
+#ifndef EINVAL
+#    define EINVAL -22
+#endif
+
 {structs}
 {declarations}
 #endif
@@ -105,10 +109,6 @@ GENERATE_C_FMT = '''\
 #include <string.h>
 
 #include "{header}"
-
-#ifndef EINVAL
-#    define EINVAL -22
-#endif
 
 {definitions}\
 '''
@@ -166,7 +166,7 @@ ssize_t {database_name}_{message_name}_encode(
 
     memset(&dst_p[0], 0, {message_length});
 
-{assignments}
+{encode_code}
 
     return ({message_length});
 }}
@@ -176,8 +176,23 @@ int {database_name}_{message_name}_decode(
     uint8_t *src_p,
     size_t size)
 {{
+    if (size < {message_length}) {{
+        return (-EINVAL);
+    }}
+
+    memset(dst_p, 0, sizeof(*dst_p));
+
+{decode_code}
+
     return (0);
 }}
+'''
+
+SIGN_EXTENSION_FMT = '''
+    if (dst_p->{name} & (1 << {shift})) {{
+        dst_p->{name} |= {mask};
+    }}
+
 '''
 
 
@@ -433,7 +448,7 @@ def _generate_signal(signal):
     return comment, member
 
 
-def _signal_segments(signal):
+def _signal_segments(signal, invert_shift):
     index, pos = divmod(signal.start, 8)
     left = signal.length
 
@@ -467,10 +482,16 @@ def _signal_segments(signal):
                 shift = pos
                 mask <<= pos
 
-        if shift < 0:
-            shift = '>> {}'.format(-shift)
+        if invert_shift:
+            if shift < 0:
+                shift = '<< {}'.format(-shift)
+            else:
+                shift = '>> {}'.format(shift)
         else:
-            shift = '<< {}'.format(shift)
+            if shift < 0:
+                shift = '>> {}'.format(-shift)
+            else:
+                shift = '<< {}'.format(shift)
 
         yield index, shift, mask
 
@@ -478,27 +499,65 @@ def _signal_segments(signal):
         index += 1
 
 
-def _format_assignments(message):
-    assignments_per_index = {}
+def _format_encode_code(message):
+    code_per_index = {}
 
     for signal in message.signals:
-        for index, shift, mask in _signal_segments(signal):
-            if index not in assignments_per_index:
-                assignments_per_index[index] = []
+        for index, shift, mask in _signal_segments(signal, False):
+            if index not in code_per_index:
+                code_per_index[index] = []
 
-            assignment = '    dst_p[{}] |= ((src_p->{} {}) & 0x{:02x});'.format(
+            line = '    dst_p[{}] |= ((src_p->{} {}) & 0x{:02x});'.format(
                 index,
                 _camel_to_snake_case(signal.name),
                 shift,
                 mask)
-            assignments_per_index[index].append(assignment)
+            code_per_index[index].append(line)
 
-    assignments = []
+    code = []
 
-    for index in sorted(assignments_per_index):
-        assignments += assignments_per_index[index]
+    for index in sorted(code_per_index):
+        code += code_per_index[index]
 
-    return '\n'.join(assignments)
+    return '\n'.join(code)
+
+
+def _format_decode_code(message):
+    code = []
+
+    for signal in message.signals:
+        name = _camel_to_snake_case(signal.name)
+        if signal.length <= 8:
+            type_length = 8
+        elif signal.length <= 16:
+            type_length = 16
+        elif signal.length <= 32:
+            type_length = 32
+        elif signal.length <= 64:
+            type_length = 64
+
+        for index, shift, mask in _signal_segments(signal, True):
+            line = '    dst_p->{} |= ((uint{}_t)(src_p[{}] & 0x{:02x}) {});'.format(
+                name,
+                type_length,
+                index,
+                mask,
+                shift)
+            code.append(line)
+
+        if signal.is_signed:
+            mask = ((1 << (type_length - signal.length)) - 1)
+            mask <<= signal.length
+            formatted = SIGN_EXTENSION_FMT.format(name=name,
+                                                  shift=signal.length - 1,
+                                                  mask=hex(mask))
+            code.extend(formatted.splitlines())
+
+    if code[-1] == '':
+        code = code[:-1]
+
+    return '\n'.join(code)
+
 
 def _generate_message(database_name, message):
     comments = []
@@ -522,12 +581,14 @@ def _generate_message(database_name, message):
     declaration = DECLARATION_FMT.format(database_name=database_name,
                                          database_message_name=message.name,
                                          message_name=name)
-    assignments = _format_assignments(message)
+    encode_code = _format_encode_code(message)
+    decode_code = _format_decode_code(message)
     definition = DEFINITION_FMT.format(database_name=database_name,
                                        database_message_name=message.name,
                                        message_name=name,
                                        message_length=message.length,
-                                       assignments=assignments)
+                                       encode_code=encode_code,
+                                       decode_code=decode_code)
 
     return struct_, declaration, definition
 

@@ -184,6 +184,16 @@ contains encode and decode functions for all messages.
 See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
 files.
 
+Known limitations:
+
+- Float signals are ignored.
+
+- Multiplexed signals are ignored.
+
+- No signal scaling.
+
+- Maximum signal size is 64 bits.
+
 Contributing
 ============
 

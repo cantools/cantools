@@ -6,6 +6,7 @@
 #include "files/c_source/motohawk.h"
 #include "files/c_source/padding_bit_order.h"
 #include "files/c_source/vehicle.h"
+#include "files/c_source/multiplex.h"
 
 static void test_motohawk_example_message(void)
 {
@@ -190,10 +191,86 @@ static void test_padding_bit_order(void)
     test_padding_bit_order_msg4();
 }
 
+static void test_multiplex(void)
+{
+    struct {
+        struct multiplex_message_1_t decoded;
+        uint8_t encoded[8];
+    } datas[3] = {
+        {
+            .decoded = {
+                .multiplexor = 8,
+                .bit_c = 1,
+                .bit_g = 1,
+                .bit_j = 1,
+                .bit_l = 1
+            },
+            .encoded = "\x20\x00\x8c\x01\x00\x00\x00\x00"
+        },
+        {
+            .decoded = {
+                .multiplexor = 16,
+                .bit_c = 1,
+                .bit_g = 1,
+                .bit_j = 1,
+                .bit_l = 1
+            },
+            .encoded = "\x40\x00\x8c\x01\x00\x00\x00\x00"
+        },
+        {
+            .decoded = {
+                .multiplexor = 24,
+                .bit_a = 1,
+                .bit_b = 1,
+                .bit_c = 1,
+                .bit_d = 1,
+                .bit_e = 1,
+                .bit_f = 1,
+                .bit_g = 1,
+                .bit_h = 1,
+                .bit_j = 1,
+                .bit_k = 1,
+                .bit_l = 1
+            },
+            .encoded = "\x60\x00\x8c\x35\xc3\x00\x00\x00"
+        }
+    };
+    struct multiplex_message_1_t decoded;
+    uint8_t buf[8];
+    int i;
+
+    for (i = 0; i < 3; i++) {
+        memset(&buf[0], 0, sizeof(buf));
+        assert(multiplex_message_1_encode(&buf[0],
+                                          &datas[i].decoded,
+                                          sizeof(buf)) == 8);
+        assert(memcmp(&buf[0],
+                      &datas[i].encoded[0],
+                      sizeof(buf)) == 0);
+        memset(&decoded, 0, sizeof(decoded));
+        assert(multiplex_message_1_decode(&decoded,
+                                          &buf[0],
+                                          sizeof(buf)) == 0);
+        assert(decoded.multiplexor == datas[i].decoded.multiplexor);
+        assert(decoded.bit_a == datas[i].decoded.bit_a);
+        assert(decoded.bit_b == datas[i].decoded.bit_b);
+        assert(decoded.bit_c == datas[i].decoded.bit_c);
+        assert(decoded.bit_d == datas[i].decoded.bit_d);
+        assert(decoded.bit_e == datas[i].decoded.bit_e);
+        assert(decoded.bit_f == datas[i].decoded.bit_f);
+        assert(decoded.bit_g == datas[i].decoded.bit_g);
+        assert(decoded.bit_h == datas[i].decoded.bit_h);
+        assert(decoded.bit_j == datas[i].decoded.bit_j);
+        assert(decoded.bit_k == datas[i].decoded.bit_k);
+        assert(decoded.bit_l == datas[i].decoded.bit_l);
+    }
+}
+
 int main()
 {
     test_motohawk_example_message();
     test_padding_bit_order();
+    test_multiplex();
 
     return (0);
 }

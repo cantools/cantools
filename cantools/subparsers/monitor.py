@@ -30,6 +30,7 @@ class Monitor(can.Listener):
                                          strict=not args.no_strict)
         self._filtered_sorted_message_names = []
         self._filter = ''
+        self._compiled_filter = None
         self._formatted_messages = {}
         self._playing = True
         self._modified = True
@@ -160,6 +161,7 @@ class Monitor(can.Listener):
             self._discarded = 0
             self._basetime = None
             self._filter = ''
+            self._compiled_filter = None
             self._modified = True
 
             while not self._queue.empty():
@@ -168,6 +170,12 @@ class Monitor(can.Listener):
             self._show_filter = True
             self._modified = True
             curses.curs_set(True)
+
+    def compile_filter(self):
+        try:
+            self._compiled_filter = re.compile(self._filter)
+        except:
+            self._compiled_filter = None
 
     def process_user_input_filter(self, key):
         if key == '\n':
@@ -178,6 +186,7 @@ class Monitor(can.Listener):
         else:
             self._filter += key
 
+        self.compile_filter()
         self._filtered_sorted_message_names = []
 
         for name in self._formatted_messages:
@@ -241,7 +250,7 @@ class Monitor(can.Listener):
         return modified
 
     def insort_filtered(self, name):
-        if not self._filter or re.search(self._filter, name):
+        if self._compiled_filter is None or self._compiled_filter.search(name):
             bisect.insort(self._filtered_sorted_message_names,
                           name)
 

@@ -212,6 +212,10 @@ class Monitor(can.Listener):
             self._discarded += 1
             return
 
+        if len(data) != message.length:
+            self._discarded += 1
+            return
+
         formatted = format_message(message, data, True, False)
         lines = formatted.splitlines()
         formatted = ['{:12.3f}  {}'.format(timestamp, lines[1])]
@@ -268,7 +272,7 @@ def _do_monitor(args, _version):
 def add_subparser(subparsers):
     monitor_parser = subparsers.add_parser(
         'monitor',
-        description='Monitor CAN bus traffic in a text based UI.')
+        description='Monitor CAN bus traffic in a text based user interface.')
     monitor_parser.add_argument(
         '-e', '--encoding',
         default='utf-8',

@@ -194,6 +194,29 @@ Known limitations:
 
 - Maximum signal size is 64 bits.
 
+The monitor subcommand
+^^^^^^^^^^^^^^^^^^^^^^
+
+Monitor CAN bus traffic in a text based user interface.
+
+.. code-block:: text
+
+   $ cantools monitor tests/files/motohawk.dbc
+
+.. image:: https://github.com/eerimoq/cantools/blob/master/docs/monitor.png
+
+The list at the bottom of the monitor shows the available commands.
+
+- Quit: Quit the monitor. Ctrl-C can be used as well.
+
+- Filter: Only display messages matching given regular expression
+  filter. Press <Enter> to return to the menu from the filter input
+  line.
+
+- Play/Pause: Toggle between playing and paused (or running and freezed).
+
+- Reset: Reset the monitor to its initial state.
+
 Contributing
 ============
 

@@ -56,9 +56,15 @@ class Monitor(can.Listener):
         if args.bit_rate is not None:
             kwargs['bitrate'] = int(args.bit_rate)
 
-        return can.Bus(bustype=args.bus_type,
-                       channel=args.channel,
-                       **kwargs)
+        try:
+            return can.Bus(bustype=args.bus_type,
+                           channel=args.channel,
+                           **kwargs)
+        except:
+            raise Exception(
+                "Failed to create CAN bus with bustype='{}' and "
+                "channel='{}'.".format(args.bus_type,
+                                       args.channel))
 
     def run(self):
         while True:
@@ -266,7 +272,10 @@ def _do_monitor(args, _version):
     def monitor(stdscr):
         Monitor(stdscr, args).run()
 
-    curses.wrapper(monitor)
+    try:
+        curses.wrapper(monitor)
+    except KeyboardInterrupt:
+        pass
 
 
 def add_subparser(subparsers):

@@ -20,6 +20,8 @@ CAN BUS tools.
 
 - `C` source code generator.
 
+- CAN bus monitor.
+
 Project homepage: https://github.com/eerimoq/cantools
 
 Documentation: http://cantools.readthedocs.org/en/latest

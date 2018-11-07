@@ -165,6 +165,12 @@ IO_DEBUG(
        +-- AverageRadius
        +-- Temperature
 
+  Signal choices:
+
+    Enable
+        0 Disabled
+        1 Enabled
+
   ------------------------------------------------------------------------
 """
 
@@ -209,6 +215,10 @@ IO_DEBUG(
 
     -- {root}
        +-- signal_without_sender
+
+  Signal choices:
+
+
 
   ------------------------------------------------------------------------
 """

@@ -315,6 +315,28 @@ class Message(object):
 
         return '\n'.join(lines)
 
+    def signal_choice_string(self):
+        """Returns the signal choice values as a string
+
+        """
+
+        def add_prefix(prefix, lines):
+            return [prefix + line for line in lines]
+
+        lines = []
+
+        for signal in self.signals:
+            if signal.choices:
+                lines.append(signal.name)
+
+                choice_lines = []
+                for value, text in sorted(signal.choices.items()):
+                    choice_lines.append('{} {}'.format(value, text))
+
+                lines += add_prefix('    ', choice_lines)
+
+        return '\n'.join(lines)
+
     def layout_string(self, signal_names=True):
         """Returns the message layout as an ASCII art string. Each signal is
         an arrow from LSB ``x`` to MSB ``<``. Overlapping signal bits

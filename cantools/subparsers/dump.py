@@ -42,6 +42,13 @@ def _do_dump(args, _version):
             for line in message.signal_tree_string().splitlines()
         ]))
         print()
+        print('  Signal choices:')
+        print()
+        print('\n'.join([
+            ('    ' + line).rstrip()
+            for line in message.signal_choice_string().splitlines()
+        ]))
+        print()
         print('  ' + 72 * '-')
 
 

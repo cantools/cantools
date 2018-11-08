@@ -8,6 +8,7 @@ from .subparsers import monitor as _monitor
 from .subparsers import dump as _dump
 from .subparsers import convert as _convert
 from .subparsers import generate_c_source as _generate_c_source
+from .errors import Error
 
 # Remove once less users are using the old package structure.
 from . import database as db

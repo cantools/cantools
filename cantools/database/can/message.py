@@ -40,7 +40,8 @@ class Message(object):
                  dbc_specifics=None,
                  is_extended_frame=False,
                  bus_name=None,
-                 strict=True):
+                 strict=True,
+                 protocol=None):
         self._frame_id = frame_id
         self._is_extended_frame = is_extended_frame
         self._name = name
@@ -56,6 +57,7 @@ class Message(object):
         self._codecs = None
         self._signal_tree = None
         self._strict = strict
+        self._protocol = protocol
         self.refresh()
 
     def _create_codec(self, parent_signal=None, multiplexer_id=None):
@@ -249,6 +251,18 @@ class Message(object):
     @bus_name.setter
     def bus_name(self, value):
         self._bus_name = value
+
+    @property
+    def protocol(self):
+        """The message protocol, or ``None`` if unavailable.
+
+        """
+
+        return self._protocol
+
+    @protocol.setter
+    def protocol(self, value):
+        self._protocol = value
 
     @property
     def signal_tree(self):

@@ -14,9 +14,7 @@ except ImportError:
 
 import can
 
-
-class Error(Exception):
-    pass
+from .errors import Error
 
 
 class DecodedMessage(object):

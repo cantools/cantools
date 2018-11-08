@@ -231,7 +231,6 @@ IO_DEBUG(
         argv = [
             'cantools',
             'dump',
-            '--no-strict',
             'tests/files/dump_signal_choices.dbc'
         ]
 
@@ -305,6 +304,71 @@ IO_DEBUG(
                 cantools._main()
                 actual_output = stdout.getvalue()
                 self.assertEqual(actual_output, expected_output)
+
+    def test_dump_j1939(self):
+        argv = [
+            'cantools',
+            'dump',
+            'tests/files/j1939.dbc'
+        ]
+
+        expected_output = """\
+================================= Messages =================================
+
+  ------------------------------------------------------------------------
+
+  Name:       Message1
+  Id:         0x15340201
+      Priority:            5
+      PGN:                 0x13402
+          Format:          PDU1
+          Destination:     0x02
+          Data page:       1
+      Source:              0x01
+  Length:     8 bytes
+  Cycle time: 0 ms
+  Senders:    Node1
+  Layout:
+
+                          Bit
+
+             7   6   5   4   3   2   1   0
+           +---+---+---+---+---+---+---+---+
+         0 |<-----------------------------x|
+           +---+---+---+---+---+---+---+---+
+             +-- Signal1
+           +---+---+---+---+---+---+---+---+
+         1 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+     B   2 |   |   |   |   |   |   |   |   |
+     y     +---+---+---+---+---+---+---+---+
+     t   3 |   |   |   |   |   |   |   |   |
+     e     +---+---+---+---+---+---+---+---+
+         4 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         5 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         6 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         7 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+
+  Signal tree:
+
+    -- {root}
+       +-- Signal1
+
+  ------------------------------------------------------------------------
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdout', stdout):
+            with patch('sys.argv', argv):
+                cantools._main()
+                actual_output = stdout.getvalue()
+                self.assertEqual(actual_output, expected_output)
+
 
     def test_convert(self):
         # DBC to KCD.

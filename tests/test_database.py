@@ -33,6 +33,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.nodes), 1)
         self.assertEqual(db.nodes[0].name, 'UnusedNode')
         self.assertEqual(len(db.messages), 217)
+        self.assertEqual(db.messages[216].protocol, None)
         self.assertEqual(db.messages[216].name, 'RT_SB_Gyro_Rates')
         self.assertEqual(db.messages[216].frame_id, 155872546)
         self.assertEqual(db.messages[216].senders, [])
@@ -3085,6 +3086,171 @@ class CanToolsDatabaseTest(unittest.TestCase):
             '       +---+---+---+---+---+---+---+---+\n'
             '     7 |   |   |   |   |   |   |   |   |\n'
             '       +---+---+---+---+---+---+---+---+')
+
+    def test_j1939_dbc(self):
+        filename = os.path.join('tests', 'files', 'j1939.dbc')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.messages[0].name, 'Message1')
+        self.assertEqual(db.messages[0].frame_id, 0x15340201)
+        self.assertEqual(db.messages[0].protocol, 'j1939')
+
+    def test_j1939_frame_id_pack_unpack(self):
+        Data = namedtuple('Data',
+                          [
+                              'priority',
+                              'parameter_group_number',
+                              'source_address',
+                              'packed'
+                          ])
+
+        datas = [
+            Data(priority=0x7,
+                 parameter_group_number=0x3ffff,
+                 source_address=0xff,
+                 packed=0x1fffffff),
+            Data(priority=0x5,
+                 parameter_group_number=0x1f4f0,
+                 source_address=0x12,
+                 packed=0x15f4f012)
+        ]
+
+        for data in datas:
+            packed = cantools.j1939.frame_id_pack(*data[:3])
+            self.assertEqual(packed, data.packed)
+            unpacked = cantools.j1939.frame_id_unpack(packed)
+            self.assertEqual(unpacked, data[:3])
+
+    def test_j1939_frame_id_pack_bad_data(self):
+        Data = namedtuple('Data',
+                          [
+                              'priority',
+                              'parameter_group_number',
+                              'source_address',
+                              'message'
+                          ])
+
+        datas = [
+            Data(priority=0x8,
+                 parameter_group_number=0,
+                 source_address=0,
+                 message='Expected priority 0..7, but got 8.'),
+            Data(priority=0,
+                 parameter_group_number=0x40000,
+                 source_address=0,
+                 message=('Expected parameter group number 0..0x3ffff, but '
+                          'got 0x40000.')),
+            Data(priority=0,
+                 parameter_group_number=0,
+                 source_address=0x100,
+                 message='Expected source address 0..255, but got 256.')
+        ]
+
+        for data in datas:
+            with self.assertRaises(cantools.Error) as cm:
+                cantools.j1939.frame_id_pack(data.priority,
+                                    data.parameter_group_number,
+                                    data.source_address)
+
+            self.assertEqual(str(cm.exception), data.message)
+
+    def test_j1939_frame_id_unpack_bad_data(self):
+        Data = namedtuple('Data', ['data', 'message'])
+
+        datas = [
+            Data(data=0x100000000,
+                 message=('Expected a frame id 0..0x1fffffff, but got '
+                          '0x100000000.'))
+        ]
+
+        for data in datas:
+            with self.assertRaises(cantools.Error) as cm:
+                cantools.j1939.frame_id_unpack(data.data)
+
+            self.assertEqual(str(cm.exception), data.message)
+
+    def test_j1939_parameter_group_number_pack_unpack(self):
+        Data = namedtuple('Data',
+                          [
+                              'reserved',
+                              'data_page',
+                              'pdu_format',
+                              'pdu_specific',
+                              'packed'
+                          ])
+
+        datas = [
+            Data(reserved=1,
+                 data_page=1,
+                 pdu_format=0xff,
+                 pdu_specific=0xff,
+                 packed=0x3ffff),
+            Data(reserved=0,
+                 data_page=0,
+                 pdu_format=0x12,
+                 pdu_specific=0x34,
+                 packed=0x1234)
+        ]
+
+        for data in datas:
+            packed = cantools.j1939.parameter_group_number_pack(*data[:4])
+            self.assertEqual(packed, data.packed)
+            unpacked = cantools.j1939.parameter_group_number_unpack(packed)
+            self.assertEqual(unpacked, data[:4])
+
+    def test_j1939_parameter_group_number_pack_bad_data(self):
+        Data = namedtuple('Data',
+                          [
+                              'reserved',
+                              'data_page',
+                              'pdu_format',
+                              'pdu_specific',
+                              'message'
+                          ])
+
+        datas = [
+            Data(reserved=2,
+                 data_page=0,
+                 pdu_format=0,
+                 pdu_specific=0,
+                 message='Expected reserved 0..1, but got 2.'),
+            Data(reserved=0,
+                 data_page=2,
+                 pdu_format=0,
+                 pdu_specific=0,
+                 message='Expected data page 0..1, but got 2.'),
+            Data(reserved=0,
+                 data_page=0,
+                 pdu_format=0x100,
+                 pdu_specific=0,
+                 message='Expected PDU format 0..255, but got 256.'),
+            Data(reserved=0,
+                 data_page=0,
+                 pdu_format=0,
+                 pdu_specific=0x100,
+                 message='Expected PDU specific 0..255, but got 256.')
+        ]
+
+        for data in datas:
+            with self.assertRaises(cantools.Error) as cm:
+                cantools.j1939.parameter_group_number_pack(*data[:4])
+
+            self.assertEqual(str(cm.exception), data.message)
+
+    def test_j1939_parameter_group_number_unpack_bad_data(self):
+        Data = namedtuple('Data', ['data', 'message'])
+
+        datas = [
+            Data(data=0x40000,
+                 message=('Expected a parameter group number 0..0x3ffff, '
+                          'but got 0x40000.'))
+        ]
+
+        for data in datas:
+            with self.assertRaises(cantools.Error) as cm:
+                cantools.j1939.parameter_group_number_unpack(data.data)
+
+            self.assertEqual(str(cm.exception), data.message)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

@@ -2,6 +2,28 @@ from __future__ import print_function
 
 from .. import database
 from ..database.utils import format_and
+from ..j1939 import frame_id_unpack
+from ..j1939 import parameter_group_number_unpack
+
+
+def _print_j1939_frame_id(message):
+    priority, parameter_group_number, source_address = frame_id_unpack(
+        message.frame_id)
+    _, data_page, pdu_format, pdu_specific = parameter_group_number_unpack(
+        parameter_group_number)
+
+    print('      Priority:            {}'.format(priority))
+    print('      PGN:                 0x{:05x}'.format(parameter_group_number))
+
+    if pdu_format < 240:
+        print('          Format:          PDU1')
+        print('          Destination:     0x{:02x}'.format(pdu_specific))
+    else:
+        print('          Format:          PDU2')
+        print('          Group extension: 0x{:02x}'.format(pdu_specific))
+
+    print('          Data page:       {}'.format(data_page))
+    print('      Source:              0x{:02x}'.format(source_address))
 
 
 def _do_dump(args, _version):
@@ -26,6 +48,10 @@ def _do_dump(args, _version):
         print()
         print('  Name:       {}'.format(message.name))
         print('  Id:         0x{:x}'.format(message.frame_id))
+
+        if message.protocol == 'j1939':
+            _print_j1939_frame_id(message)
+
         print('  Length:     {} bytes'.format(message.length))
         print('  Cycle time: {} ms'.format(cycle_time))
         print('  Senders:    {}'.format(format_and(message.senders)))

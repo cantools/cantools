@@ -793,15 +793,15 @@ def _load_messages(tokens,
             return None
 
     def get_send_type(frame_id_dbc):
-        """Get send type for a given message
+        """Get send type for a given message.
 
         """
 
         result = None
-        messageAttributes = get_attributes(frame_id_dbc)
+        message_attributes = get_attributes(frame_id_dbc)
 
         try:
-            result = messageAttributes['GenMsgSendType'].value
+            result = message_attributes['GenMsgSendType'].value
             # Resolve ENUM index to ENUM text
             result = definitions['GenMsgSendType'].choices[int(result)]
         except (KeyError, TypeError):
@@ -813,14 +813,14 @@ def _load_messages(tokens,
         return result
 
     def get_cycle_time(frame_id_dbc):
-        """Get cycle time for a given message
+        """Get cycle time for a given message.
 
         """
 
-        messageAttributes = get_attributes(frame_id_dbc)
+        message_attributes = get_attributes(frame_id_dbc)
 
         try:
-            return int(messageAttributes['GenMsgCycleTime'].value)
+            return int(message_attributes['GenMsgCycleTime'].value)
         except (KeyError, TypeError):
             try:
                 return int(definitions['GenMsgCycleTime'].default_value)
@@ -883,6 +883,27 @@ def _load_messages(tokens,
             return None
         else:
             return maximum
+
+    def get_protocol(frame_id_dbc):
+        """Get protocol for a given message.
+
+        """
+
+        message_attributes = get_attributes(frame_id_dbc)
+
+        try:
+            frame_format = message_attributes['VFrameFormat'].value
+            frame_format = definitions['VFrameFormat'].choices[frame_format]
+        except (KeyError, TypeError):
+            try:
+                frame_format = definitions['VFrameFormat'].default_value
+            except (KeyError, TypeError):
+                frame_format = None
+
+        if frame_format == 'J1939PG':
+            return 'j1939'
+        else:
+            return None
 
     messages = []
 
@@ -964,7 +985,8 @@ def _load_messages(tokens,
                                                   signal[1][0]))
                      for signal in message[6]],
             comment=get_comment(frame_id_dbc),
-            strict=strict)
+            strict=strict,
+            protocol=get_protocol(frame_id_dbc))
         messages.append(message)
 
     return messages

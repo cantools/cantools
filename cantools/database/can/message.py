@@ -324,6 +324,7 @@ class Message(object):
 
         for signal in self._signals:
             if signal.choices:
+                lines.append('')
                 lines.append(signal.name)
 
                 for value, text in sorted(signal.choices.items()):

@@ -45,7 +45,6 @@ def _do_dump(args, _version):
         print()
         if signal_choice_string:
             print('  Signal choices:')
-            print()
             print('\n'.join([
                 ('    ' + line).rstrip()
                 for line in signal_choice_string.splitlines()

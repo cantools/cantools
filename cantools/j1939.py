@@ -80,7 +80,7 @@ def parameter_group_number_pack(reserved,
 
 def parameter_group_number_unpack(parameter_group_number):
     """Unpack given parameter group number (PGN) and return a tuple of
-    Data Page, PDU Format, PDU Specific and Reserved.
+    Reserved, Data Page, PDU Format and PDU Specific.
 
     """
 

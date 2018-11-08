@@ -1,0 +1,37 @@
+VERSION "HIPBNYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY/4/%%%/4/'%**4YYY///"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+
+BS_:
+
+BU_: Node0
+
+
+BO_ 1024 Message0: 8 Node0
+ SG_ FooSignal : 0|2@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BarSignal : 2|3@1+ (1,0) [0|0] "" Vector__XXX
+
+
+VAL_ 1024 FooSignal 0 "FOO_A" 1 "FOO_B" 2 "FOO_C" 3 "FOO_D" ;
+VAL_ 1024 BarSignal 0 "BAR_A" 1 "BAR_B" 2 "BAR_C" 3 "BAR_D" 4 "BAR_E" 5 "BAR_F" 6 "BAR_G" 7 "BAR_H" ;

@@ -320,20 +320,14 @@ class Message(object):
 
         """
 
-        def add_prefix(prefix, lines):
-            return [prefix + line for line in lines]
-
         lines = []
 
-        for signal in self.signals:
+        for signal in self._signals:
             if signal.choices:
                 lines.append(signal.name)
 
-                choice_lines = []
                 for value, text in sorted(signal.choices.items()):
-                    choice_lines.append('{} {}'.format(value, text))
-
-                lines += add_prefix('    ', choice_lines)
+                    lines.append('    {} {}'.format(value, text))
 
         return '\n'.join(lines)
 

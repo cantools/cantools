@@ -165,6 +165,12 @@ IO_DEBUG(
        +-- AverageRadius
        +-- Temperature
 
+  Signal choices:
+
+    Enable
+        0 Disabled
+        1 Enabled
+
   ------------------------------------------------------------------------
 """
 
@@ -209,6 +215,85 @@ IO_DEBUG(
 
     -- {root}
        +-- signal_without_sender
+
+  ------------------------------------------------------------------------
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdout', stdout):
+            with patch('sys.argv', argv):
+                cantools._main()
+                actual_output = stdout.getvalue()
+                self.assertEqual(actual_output, expected_output)
+
+    def test_dump_signal_choices(self):
+        argv = [
+            'cantools',
+            'dump',
+            '--no-strict',
+            'tests/files/dump_signal_choices.dbc'
+        ]
+
+        expected_output = """\
+================================= Messages =================================
+
+  ------------------------------------------------------------------------
+
+  Name:       Message0
+  Id:         0x400
+  Length:     8 bytes
+  Cycle time: - ms
+  Senders:    Node0
+  Layout:
+
+                          Bit
+
+             7   6   5   4   3   2   1   0
+           +---+---+---+---+---+---+---+---+
+         0 |   |   |   |<---------x|<-----x|
+           +---+---+---+---+---+---+---+---+
+                         |           +-- FooSignal
+                         +-- BarSignal
+           +---+---+---+---+---+---+---+---+
+         1 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+     B   2 |   |   |   |   |   |   |   |   |
+     y     +---+---+---+---+---+---+---+---+
+     t   3 |   |   |   |   |   |   |   |   |
+     e     +---+---+---+---+---+---+---+---+
+         4 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         5 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         6 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         7 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+
+  Signal tree:
+
+    -- {root}
+       +-- FooSignal
+       +-- BarSignal
+
+  Signal choices:
+
+    FooSignal
+        0 FOO_A
+        1 FOO_B
+        2 FOO_C
+        3 FOO_D
+
+    BarSignal
+        0 BAR_A
+        1 BAR_B
+        2 BAR_C
+        3 BAR_D
+        4 BAR_E
+        5 BAR_F
+        6 BAR_G
+        7 BAR_H
 
   ------------------------------------------------------------------------
 """

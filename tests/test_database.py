@@ -1498,6 +1498,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = message_1.decode(encoded, decode_choices=False)
         self.assertEqual(decoded, decoded_message)
 
+        self.assertEqual(
+            message_1.signal_choice_string(),
+            '\n'
+            'Multiplexor\n'
+            '    8 MULTIPLEXOR_8\n'
+            '    16 MULTIPLEXOR_16\n'
+            '    24 MULTIPLEXOR_24\n'
+            '\n'
+            'BIT_L\n'
+            '    0 Off\n'
+            '    1 On'
+        )
+
         # With Multiplexor as the only signal.
         decoded_message = {
             'Multiplexor': 4

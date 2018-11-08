@@ -315,8 +315,8 @@ class Message(object):
 
         return '\n'.join(lines)
 
-    def signal_choice_string(self):
-        """Returns the signal choice values as a string
+    def signal_choices_string(self):
+        """Returns the signal choices as a string.
 
         """
 

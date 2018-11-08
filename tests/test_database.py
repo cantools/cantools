@@ -1499,7 +1499,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(decoded, decoded_message)
 
         self.assertEqual(
-            message_1.signal_choice_string(),
+            message_1.signal_choices_string(),
             '\n'
             'Multiplexor\n'
             '    8 MULTIPLEXOR_8\n'

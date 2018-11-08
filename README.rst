@@ -170,6 +170,12 @@ Dump given database in a human readable format:
           +-- AverageRadius
           +-- Temperature
 
+     Signal choices:
+
+       Enable
+           0 Disabled
+           1 Enabled
+
      ------------------------------------------------------------------------
 
 The generate C source subcommand

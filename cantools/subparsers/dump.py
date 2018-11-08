@@ -15,6 +15,7 @@ def _do_dump(args, _version):
 
     for message in dbase.messages:
         cycle_time = message.cycle_time
+        signal_choice_string = message.signal_choice_string()
 
         if cycle_time is None:
             cycle_time = '-'
@@ -42,13 +43,14 @@ def _do_dump(args, _version):
             for line in message.signal_tree_string().splitlines()
         ]))
         print()
-        print('  Signal choices:')
-        print()
-        print('\n'.join([
-            ('    ' + line).rstrip()
-            for line in message.signal_choice_string().splitlines()
-        ]))
-        print()
+        if signal_choice_string:
+            print('  Signal choices:')
+            print()
+            print('\n'.join([
+                ('    ' + line).rstrip()
+                for line in signal_choice_string.splitlines()
+            ]))
+            print()
         print('  ' + 72 * '-')
 
 

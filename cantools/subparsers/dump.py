@@ -2,28 +2,33 @@ from __future__ import print_function
 
 from .. import database
 from ..database.utils import format_and
+from ..j1939 import is_pdu_format_1
 from ..j1939 import frame_id_unpack
-from ..j1939 import parameter_group_number_unpack
+from ..j1939 import parameter_group_number_pack
 
 
 def _print_j1939_frame_id(message):
-    priority, parameter_group_number, source_address = frame_id_unpack(
-        message.frame_id)
-    _, data_page, pdu_format, pdu_specific = parameter_group_number_unpack(
-        parameter_group_number)
+    unpacked = frame_id_unpack(message.frame_id)
 
-    print('      Priority:            {}'.format(priority))
-    print('      PGN:                 0x{:05x}'.format(parameter_group_number))
+    print('      Priority:       {}'.format(unpacked.priority))
 
-    if pdu_format < 240:
-        print('          Format:          PDU1')
-        print('          Destination:     0x{:02x}'.format(pdu_specific))
+    if is_pdu_format_1(unpacked.pdu_format):
+        pdu_format = 'PDU 1'
+        pdu_specific = 0
+        destination = '0x{:02x}'.format(unpacked.pdu_specific)
     else:
-        print('          Format:          PDU2')
-        print('          Group extension: 0x{:02x}'.format(pdu_specific))
+        pdu_format = 'PDU 2'
+        pdu_specific = unpacked.pdu_specific
+        destination = 'All'
 
-    print('          Data page:       {}'.format(data_page))
-    print('      Source:              0x{:02x}'.format(source_address))
+    print('      PGN:            0x{:05x}'.format(
+        parameter_group_number_pack(unpacked.reserved,
+                                    unpacked.data_page,
+                                    unpacked.pdu_format,
+                                    pdu_specific)))
+    print('      Source:         0x{:02x}'.format(unpacked.source_address))
+    print('      Destination:    {}'.format(destination))
+    print('      Format:         {}'.format(pdu_format))
 
 
 def _do_dump(args, _version):

@@ -3099,58 +3099,97 @@ class CanToolsDatabaseTest(unittest.TestCase):
         Data = namedtuple('Data',
                           [
                               'priority',
-                              'parameter_group_number',
+                              'reserved',
+                              'data_page',
+                              'pdu_format',
+                              'pdu_specific',
                               'source_address',
                               'packed'
                           ])
 
         datas = [
             Data(priority=0x7,
-                 parameter_group_number=0x3ffff,
+                 reserved=0x1,
+                 data_page=0x1,
+                 pdu_format=0xff,
+                 pdu_specific=0xff,
                  source_address=0xff,
                  packed=0x1fffffff),
             Data(priority=0x5,
-                 parameter_group_number=0x1f4f0,
-                 source_address=0x12,
-                 packed=0x15f4f012)
+                 reserved=0x0,
+                 data_page=0x0,
+                 pdu_format=0x12,
+                 pdu_specific=0x34,
+                 source_address=0x56,
+                 packed=0x14123456)
         ]
 
         for data in datas:
-            packed = cantools.j1939.frame_id_pack(*data[:3])
+            packed = cantools.j1939.frame_id_pack(*data[:-1])
             self.assertEqual(packed, data.packed)
             unpacked = cantools.j1939.frame_id_unpack(packed)
-            self.assertEqual(unpacked, data[:3])
+            self.assertEqual(unpacked, data[:-1])
 
     def test_j1939_frame_id_pack_bad_data(self):
         Data = namedtuple('Data',
                           [
                               'priority',
-                              'parameter_group_number',
+                              'reserved',
+                              'data_page',
+                              'pdu_format',
+                              'pdu_specific',
                               'source_address',
                               'message'
                           ])
 
         datas = [
-            Data(priority=0x8,
-                 parameter_group_number=0,
+            Data(priority=8,
+                 reserved=0,
+                 data_page=0,
+                 pdu_format=0,
+                 pdu_specific=0,
                  source_address=0,
                  message='Expected priority 0..7, but got 8.'),
             Data(priority=0,
-                 parameter_group_number=0x40000,
+                 reserved=2,
+                 data_page=0,
+                 pdu_format=0,
+                 pdu_specific=0,
                  source_address=0,
-                 message=('Expected parameter group number 0..0x3ffff, but '
-                          'got 0x40000.')),
+                 message='Expected reserved 0..1, but got 2.'),
             Data(priority=0,
-                 parameter_group_number=0,
-                 source_address=0x100,
+                 reserved=0,
+                 data_page=2,
+                 pdu_format=0,
+                 pdu_specific=0,
+                 source_address=0,
+                 message='Expected data page 0..1, but got 2.'),
+            Data(priority=0,
+                 reserved=0,
+                 data_page=0,
+                 pdu_format=0x100,
+                 pdu_specific=0,
+                 source_address=0,
+                 message='Expected PDU format 0..255, but got 256.'),
+            Data(priority=0,
+                 reserved=0,
+                 data_page=0,
+                 pdu_format=0,
+                 pdu_specific=0x100,
+                 source_address=0,
+                 message='Expected PDU specific 0..255, but got 256.'),
+            Data(priority=0,
+                 reserved=0,
+                 data_page=0,
+                 pdu_format=0,
+                 pdu_specific=0,
+                 source_address=256,
                  message='Expected source address 0..255, but got 256.')
         ]
 
         for data in datas:
             with self.assertRaises(cantools.Error) as cm:
-                cantools.j1939.frame_id_pack(data.priority,
-                                    data.parameter_group_number,
-                                    data.source_address)
+                cantools.j1939.frame_id_pack(*data[:-1])
 
             self.assertEqual(str(cm.exception), data.message)
 
@@ -3186,10 +3225,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
                  pdu_specific=0xff,
                  packed=0x3ffff),
             Data(reserved=0,
+                 data_page=1,
+                 pdu_format=0xef,
+                 pdu_specific=0,
+                 packed=0x1ef00),
+            Data(reserved=0,
                  data_page=0,
-                 pdu_format=0x12,
+                 pdu_format=0xf0,
                  pdu_specific=0x34,
-                 packed=0x1234)
+                 packed=0xf034)
         ]
 
         for data in datas:
@@ -3226,9 +3270,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
                  message='Expected PDU format 0..255, but got 256.'),
             Data(reserved=0,
                  data_page=0,
-                 pdu_format=0,
+                 pdu_format=0xf0,
                  pdu_specific=0x100,
-                 message='Expected PDU specific 0..255, but got 256.')
+                 message='Expected PDU specific 0..255, but got 256.'),
+            Data(reserved=0,
+                 data_page=0,
+                 pdu_format=0xef,
+                 pdu_specific=1,
+                 message=('Expected PDU specific 0 when PDU format is 0..239, '
+                          'but got 1.'))
         ]
 
         for data in datas:

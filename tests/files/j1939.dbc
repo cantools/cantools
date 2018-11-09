@@ -40,6 +40,10 @@ BO_ 2503213569 Message1: 8 Node1
  SG_ Signal1 : 0|8@1- (1,0) [0|0] ""  Node2
 
 
+BO_ 2515537922 Message2: 8 Node2
+ SG_ Signal2 : 0|8@1- (1,0) [0|0] ""  Node1
+
+
 
 BA_DEF_ BO_  "TpJ1939VarDlc" ENUM  "No","Yes";
 BA_DEF_ SG_  "SigType" ENUM  "Default","Range","RangeSigned","ASCII","Discrete","Control","ReferencePGN","DTC","StringDelimiter","StringLength","StringLengthControl","MessageCounter","MessageChecksum";

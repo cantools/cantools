@@ -1,25 +1,64 @@
+from collections import namedtuple
 import bitstruct
 
 from .errors import Error
 
 
-def frame_id_pack(priority, parameter_group_number, source_address):
+FrameId = namedtuple('FrameId',
+                     [
+                         'priority',
+                         'reserved',
+                         'data_page',
+                         'pdu_format',
+                         'pdu_specific',
+                         'source_address',
+                     ])
+
+
+ParameterGroupNumber = namedtuple('ParameterGroupNumber',
+                     [
+                         'reserved',
+                         'data_page',
+                         'pdu_format',
+                        'pdu_specific'
+                     ])
+
+
+def is_pdu_format_1(pdu_format):
+    return (pdu_format < 240)
+
+
+def frame_id_pack(priority,
+                  reserved,
+                  data_page,
+                  pdu_format,
+                  pdu_specific,
+                  source_address):
     """Pack given values as a frame id and return it as an integer.
 
     """
 
     try:
-        packed = bitstruct.pack('u3u18u8',
+        packed = bitstruct.pack('u3u1u1u8u8u8',
                                 priority,
-                                parameter_group_number,
+                                reserved,
+                                data_page,
+                                pdu_format,
+                                pdu_specific,
                                 source_address)
     except bitstruct.Error:
         if priority > 7:
             raise Error('Expected priority 0..7, but got {}.'.format(priority))
-        elif parameter_group_number > 0x3ffff:
-            raise Error(
-                'Expected parameter group number 0..0x3ffff, but got {}.'.format(
-                    hex(parameter_group_number)))
+        elif reserved > 1:
+            raise Error('Expected reserved 0..1, but got {}.'.format(reserved))
+        elif data_page > 1:
+            raise Error('Expected data page 0..1, but got {}.'.format(data_page))
+        elif pdu_format > 255:
+            raise Error('Expected PDU format 0..255, but got {}.'.format(
+                pdu_format))
+        elif pdu_specific > 255:
+            raise Error('Expected PDU specific 0..255, but got {}.'.format(
+                pdu_specific))
         elif source_address > 255:
             raise Error('Expected source address 0..255, but got {}.'.format(
                 source_address))
@@ -30,8 +69,8 @@ def frame_id_pack(priority, parameter_group_number, source_address):
 
 
 def frame_id_unpack(frame_id):
-    """Unpack given frame id and return a tuple of Priority, Parameter
-    Group Number (PGN) and Source Address.
+    """Unpack given frame id and return a tuple of priority, reserved,
+    data page, PDU format, PDU specific and source address.
 
     """
 
@@ -42,17 +81,22 @@ def frame_id_unpack(frame_id):
             'Expected a frame id 0..0x1fffffff, but got {}.'.format(
                 hex(frame_id)))
 
-    return bitstruct.unpack('u3u18u8', packed)
+    return FrameId(*bitstruct.unpack('u3u1u1u8u8u8', packed))
 
 
 def parameter_group_number_pack(reserved,
                                 data_page,
                                 pdu_format,
-                                pdu_specific):
+                                pdu_specific=0):
     """Pack given values as a parameter group number (PGN) and return it
     as an integer.
 
     """
+
+    if pdu_format < 240 and pdu_specific != 0:
+        raise Error(
+            'Expected PDU specific 0 when PDU format is 0..239, but got {}.'.format(
+                pdu_specific))
 
     try:
         packed = bitstruct.pack('u1u1u8u8',
@@ -91,4 +135,22 @@ def parameter_group_number_unpack(parameter_group_number):
             'Expected a parameter group number 0..0x3ffff, but got {}.'.format(
                 hex(parameter_group_number)))
 
-    return bitstruct.unpack('u1u1u8u8', packed)
+    return ParameterGroupNumber(*bitstruct.unpack('u1u1u8u8', packed))
+
+
+def parameter_group_number_from_frame_id(frame_id):
+    """Get the parameter group number (PGN) from given frame id.
+
+    """
+
+    unpacked = frame_id_unpack(frame_id)
+
+    if unpacked.pdu_format < 240:
+        pdu_specific = 0
+    else:
+        pdu_specific = unpacked.pdu_specific
+
+    return parameter_group_number_pack(unpacked.reserved,
+                                       unpacked.data_page,
+                                       unpacked.pdu_format,
+                                       pdu_specific)

@@ -211,7 +211,7 @@ Monitor CAN bus traffic in a text based user interface.
 
    $ cantools monitor tests/files/motohawk.dbc
 
-.. image:: https://github.com/eerimoq/cantools/blob/master/docs/monitor.png
+.. image:: https://github.com/eerimoq/cantools/raw/master/docs/monitor.png
 
 The menu at the bottom of the monitor shows the available commands.
 

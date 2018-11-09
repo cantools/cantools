@@ -254,7 +254,8 @@ class Message(object):
 
     @property
     def protocol(self):
-        """The message protocol, or ``None`` if unavailable.
+        """The message protocol, or ``None`` if unavailable. Only one protocol
+        is currently supported; ``'j1939'``.
 
         """
 

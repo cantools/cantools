@@ -15,13 +15,13 @@ FrameId = namedtuple('FrameId',
                      ])
 
 
-ParameterGroupNumber = namedtuple('ParameterGroupNumber',
-                     [
-                         'reserved',
-                         'data_page',
-                         'pdu_format',
-                        'pdu_specific'
-                     ])
+PGN = namedtuple('PGN',
+                 [
+                     'reserved',
+                     'data_page',
+                     'pdu_format',
+                     'pdu_specific'
+                 ])
 
 
 def is_pdu_format_1(pdu_format):
@@ -84,10 +84,7 @@ def frame_id_unpack(frame_id):
     return FrameId(*bitstruct.unpack('u3u1u1u8u8u8', packed))
 
 
-def parameter_group_number_pack(reserved,
-                                data_page,
-                                pdu_format,
-                                pdu_specific=0):
+def pgn_pack(reserved, data_page, pdu_format, pdu_specific=0):
     """Pack given values as a parameter group number (PGN) and return it
     as an integer.
 
@@ -122,23 +119,23 @@ def parameter_group_number_pack(reserved,
     return bitstruct.unpack('u18', packed)[0]
 
 
-def parameter_group_number_unpack(parameter_group_number):
+def pgn_unpack(pgn):
     """Unpack given parameter group number (PGN) and return a tuple of
     Reserved, Data Page, PDU Format and PDU Specific.
 
     """
 
     try:
-        packed = bitstruct.pack('u18', parameter_group_number)
+        packed = bitstruct.pack('u18', pgn)
     except bitstruct.Error:
         raise Error(
             'Expected a parameter group number 0..0x3ffff, but got {}.'.format(
-                hex(parameter_group_number)))
+                hex(pgn)))
 
-    return ParameterGroupNumber(*bitstruct.unpack('u1u1u8u8', packed))
+    return PGN(*bitstruct.unpack('u1u1u8u8', packed))
 
 
-def parameter_group_number_from_frame_id(frame_id):
+def pgn_from_frame_id(frame_id):
     """Get the parameter group number (PGN) from given frame id.
 
     """
@@ -150,7 +147,7 @@ def parameter_group_number_from_frame_id(frame_id):
     else:
         pdu_specific = unpacked.pdu_specific
 
-    return parameter_group_number_pack(unpacked.reserved,
-                                       unpacked.data_page,
-                                       unpacked.pdu_format,
-                                       pdu_specific)
+    return pgn_pack(unpacked.reserved,
+                    unpacked.data_page,
+                    unpacked.pdu_format,
+                    pdu_specific)

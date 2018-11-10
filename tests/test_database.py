@@ -3208,7 +3208,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
             self.assertEqual(str(cm.exception), data.message)
 
-    def test_j1939_parameter_group_number_pack_unpack(self):
+    def test_j1939_pgn_pack_unpack(self):
         Data = namedtuple('Data',
                           [
                               'reserved',
@@ -3237,12 +3237,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         ]
 
         for data in datas:
-            packed = cantools.j1939.parameter_group_number_pack(*data[:4])
+            packed = cantools.j1939.pgn_pack(*data[:4])
             self.assertEqual(packed, data.packed)
-            unpacked = cantools.j1939.parameter_group_number_unpack(packed)
+            unpacked = cantools.j1939.pgn_unpack(packed)
             self.assertEqual(unpacked, data[:4])
 
-    def test_j1939_parameter_group_number_pack_bad_data(self):
+    def test_j1939_pgn_pack_bad_data(self):
         Data = namedtuple('Data',
                           [
                               'reserved',
@@ -3283,11 +3283,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         for data in datas:
             with self.assertRaises(cantools.Error) as cm:
-                cantools.j1939.parameter_group_number_pack(*data[:4])
+                cantools.j1939.pgn_pack(*data[:4])
 
             self.assertEqual(str(cm.exception), data.message)
 
-    def test_j1939_parameter_group_number_unpack_bad_data(self):
+    def test_j1939_pgn_unpack_bad_data(self):
         Data = namedtuple('Data', ['data', 'message'])
 
         datas = [
@@ -3298,7 +3298,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         for data in datas:
             with self.assertRaises(cantools.Error) as cm:
-                cantools.j1939.parameter_group_number_unpack(data.data)
+                cantools.j1939.pgn_unpack(data.data)
 
             self.assertEqual(str(cm.exception), data.message)
 

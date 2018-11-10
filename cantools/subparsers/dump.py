@@ -4,7 +4,7 @@ from .. import database
 from ..database.utils import format_and
 from ..j1939 import is_pdu_format_1
 from ..j1939 import frame_id_unpack
-from ..j1939 import parameter_group_number_pack
+from ..j1939 import pgn_pack
 
 
 def _print_j1939_frame_id(message):
@@ -22,10 +22,10 @@ def _print_j1939_frame_id(message):
         destination = 'All'
 
     print('      PGN:            0x{:05x}'.format(
-        parameter_group_number_pack(unpacked.reserved,
-                                    unpacked.data_page,
-                                    unpacked.pdu_format,
-                                    pdu_specific)))
+        pgn_pack(unpacked.reserved,
+                 unpacked.data_page,
+                 unpacked.pdu_format,
+                 pdu_specific)))
     print('      Source:         0x{:02x}'.format(unpacked.source_address))
     print('      Destination:    {}'.format(destination))
     print('      Format:         {}'.format(pdu_format))

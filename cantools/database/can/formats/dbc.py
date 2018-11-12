@@ -80,6 +80,16 @@ DBC_FMT = (
 )
 
 
+# Signal types.
+SIGNAL_TYPE_FLOAT = 1
+SIGNAL_TYPE_DOUBLE = 2
+
+FLOAT_SIGNAL_TYPES = [
+    SIGNAL_TYPE_FLOAT,
+    SIGNAL_TYPE_DOUBLE
+]
+
+
 class Parser(textparser.Parser):
 
     def tokenize(self, string):
@@ -862,7 +872,7 @@ def _load_messages(tokens,
         """
 
         try:
-            return signal_types[frame_id_dbc][signal] == 1
+            return signal_types[frame_id_dbc][signal] in FLOAT_SIGNAL_TYPES
         except KeyError:
             return False
 

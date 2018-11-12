@@ -3302,6 +3302,23 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
             self.assertEqual(str(cm.exception), data.message)
 
+    def test_double_dbc(self):
+        filename = os.path.join('tests', 'files', 'double.dbc')
+        db = cantools.database.load_file(filename)
+
+        message = db.get_message_by_frame_id(1024)
+        signal = message.get_signal_by_name('Signal1')
+        self.assertEqual(signal.is_float, True)
+        self.assertEqual(signal.length, 64)
+
+        decoded_message = {'Signal1': -129.448}
+        encoded_message = b'\x75\x93\x18\x04\x56\x2e\x60\xc0'
+
+        encoded = message.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

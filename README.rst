@@ -257,7 +257,7 @@ Contributing
 
 .. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.dbc
 
-.. _python-can: https://python-can.readthedocs.io/en/latest/
+.. _python-can: https://python-can.readthedocs.io/en/master/
 
 .. _DBC: http://www.socialledge.com/sjsu/index.php?title=DBC_Format
 

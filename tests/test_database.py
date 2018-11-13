@@ -211,6 +211,24 @@ class CanToolsDatabaseTest(unittest.TestCase):
         for frame_id in frame_ids:
             db.get_message_by_frame_id(frame_id)
 
+    def test_dbc_dump_val_table(self):
+        filename = os.path.join('tests', 'files', 'val_table.dbc')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(
+            db.dbc.value_tables,
+            {
+                'Table3': {16: '16', 0: '0', 2: '2', 7: '7'},
+                'Table2': {},
+                'Table1': {0: 'Zero', 1: 'One'}
+            })
+        
+        with open(filename, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('utf-8'), fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
+
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.
 

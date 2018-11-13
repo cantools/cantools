@@ -65,6 +65,7 @@ DBC_FMT = (
     'BS_:\r\n'
     '\r\n'
     'BU_: {bu}\r\n'
+    '{val_table}'
     '\r\n'
     '\r\n'
     '{bo}\r\n'
@@ -264,7 +265,7 @@ class Parser(textparser.Parser):
             ';')
 
         value_table = Sequence(
-            'VAL_TABLE_', 'WORD', OneOrMore(Sequence('NUMBER', 'STRING')), ';')
+            'VAL_TABLE_', 'WORD', ZeroOrMore(Sequence('NUMBER', 'STRING')), ';')
 
         signal_type = Sequence(
             'SIG_VALTYPE_', 'NUMBER', 'WORD', ':', 'NUMBER', ';')
@@ -309,14 +310,20 @@ class Parser(textparser.Parser):
 class DbcSpecifics(object):
 
     def __init__(self,
-                 attributes = None,
-                 attribute_definitions = None):
+                 attributes=None,
+                 attribute_definitions=None,
+                 value_tables=None):
         self._attributes = attributes
         self._attribute_definitions = attribute_definitions
 
+        if value_tables is None:
+            value_tables = odict()
+            
+        self._value_tables = value_tables
+
     @property
     def attributes(self):
-        """The dbc specific attributes of the parent object (database, node,
+        """The DBC specific attributes of the parent object (database, node,
         message or signal) as a dictionary.
 
         """
@@ -325,11 +332,20 @@ class DbcSpecifics(object):
 
     @property
     def attribute_definitions(self):
-        """The dbc specific attribute definitions as dictionary.
+        """The DBC specific attribute definitions as dictionary.
 
         """
 
         return self._attribute_definitions
+
+    @property
+    def value_tables(self):
+        """An ordered dictionary of all value tables. Only valid for DBC
+        specifiers on database level.
+
+        """
+
+        return self._value_tables
 
 
 def get_dbc_frame_id(message):
@@ -348,6 +364,22 @@ def _dump_nodes(database):
         bu.append(node.name)
 
     return bu
+
+
+def _dump_value_tables(database):
+    if database.dbc is None:
+        return []
+
+    val_table = []
+
+    for name, choices in database.dbc.value_tables.items():
+        choices = [
+            '{} "{}"'.format(number, text)
+            for number, text in reversed(sorted(choices.items()))
+        ]
+        val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices)))
+
+    return val_table + ['']
 
 
 def _dump_messages(database):
@@ -681,6 +713,21 @@ def _load_attributes(tokens, definitions):
             attributes['database'][name] = to_object(attribute)
 
     return attributes
+
+
+def _load_value_tables(tokens):
+    """Load value tables, that is, choice definitions.
+
+    """
+
+    value_tables = odict()
+
+    for value_table in tokens.get('VAL_TABLE_', []):
+        name = value_table[1]
+        choices = {int(number): text for number, text in value_table[2]}
+        value_tables[name] = choices
+
+    return value_tables
 
 
 def _load_choices(tokens):
@@ -1045,6 +1092,7 @@ def dump_string(database):
     """
 
     bu = _dump_nodes(database)
+    val_table = _dump_value_tables(database)
     bo = _dump_messages(database)
     cm = _dump_comments(database)
     ba_def = _dump_attribute_definitions(database)
@@ -1054,6 +1102,7 @@ def dump_string(database):
 
     return DBC_FMT.format(version=database.version,
                           bu=' '.join(bu),
+                          val_table='\r\n'.join(val_table),
                           bo='\r\n\r\n'.join(bo),
                           cm='\r\n'.join(cm),
                           ba_def='\r\n'.join(ba_def),
@@ -1124,6 +1173,7 @@ def load_string(string, strict=True):
     defaults = _load_attribute_definition_defaults(tokens)
     attribute_definitions = get_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
+    value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens)
     signal_types = _load_signal_types(tokens)
@@ -1140,7 +1190,8 @@ def load_string(string, strict=True):
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     dbc_specifics = DbcSpecifics(attributes=get_database_attributes(),
-                                 attribute_definitions=attribute_definitions)
+                                 attribute_definitions=attribute_definitions,
+                                 value_tables=value_tables)
 
     return InternalDatabase(messages,
                             nodes,

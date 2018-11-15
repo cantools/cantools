@@ -38,6 +38,8 @@
 #    define EINVAL -22
 #endif
 
+#define MOTOHAWK_FRAME_ID_EXAMPLE_MESSAGE (0x1f0U)
+
 /**
  * Signals in message ExampleMessage.
  *

@@ -47,6 +47,8 @@ GENERATE_H_FMT = '''\
 #    define EINVAL -22
 #endif
 
+{frame_id_defines}
+
 {structs}
 {declarations}
 #endif
@@ -409,7 +411,12 @@ def _generate_message(database_name, message):
                                        encode_code=encode_code,
                                        decode_code=decode_code)
 
-    return struct_, declaration, definition
+    frame_id_define = '#define {}_FRAME_ID_{} (0x{:02x}U)'.format(
+        database_name.upper(),
+        name.upper(),
+        message.frame_id)
+
+    return struct_, declaration, definition, frame_id_define
 
 
 def _do_generate_c_source(args, version):
@@ -426,20 +433,26 @@ def _do_generate_c_source(args, version):
     structs = []
     declarations = []
     definitions = []
+    frame_ids = []
 
     for message in dbase.messages:
-        struct_, declaration, definition = _generate_message(filename,
+        struct_, declaration, definition, enum = _generate_message(filename,
                                                              message)
         structs.append(struct_)
         declarations.append(declaration)
         definitions.append(definition)
+
+        frame_ids.append(enum)
+
+    frame_id_defines = '\n'.join(frame_ids)
 
     with open(filename_h, 'w') as fout:
         fout.write(GENERATE_H_FMT.format(version=version,
                                          date=date,
                                          include_guard=include_guard,
                                          structs='\n'.join(structs),
-                                         declarations='\n'.join(declarations)))
+                                         declarations='\n'.join(declarations),
+                                         frame_id_defines=frame_id_defines))
 
     with open(filename_c, 'w') as fout:
         fout.write(GENERATE_C_FMT.format(version=version,

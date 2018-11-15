@@ -433,32 +433,37 @@ def _do_generate_c_source(args, version):
     structs = []
     declarations = []
     definitions = []
-    frame_ids = []
+    frame_id_defines = []
 
     for message in dbase.messages:
-        struct_, declaration, definition, enum = _generate_message(filename,
-                                                             message)
+        (struct_,
+         declaration,
+         definition,
+         frame_id_define) = _generate_message(filename,
+                                              message)
         structs.append(struct_)
         declarations.append(declaration)
         definitions.append(definition)
+        frame_id_defines.append(frame_id_define)
 
-        frame_ids.append(enum)
-
-    frame_id_defines = '\n'.join(frame_ids)
+    structs = '\n'.join(structs)
+    declarations = '\n'.join(declarations)
+    definitions = '\n'.join(definitions)
+    frame_id_defines = '\n'.join(frame_id_defines)
 
     with open(filename_h, 'w') as fout:
         fout.write(GENERATE_H_FMT.format(version=version,
                                          date=date,
                                          include_guard=include_guard,
-                                         structs='\n'.join(structs),
-                                         declarations='\n'.join(declarations),
+                                         structs=structs,
+                                         declarations=declarations,
                                          frame_id_defines=frame_id_defines))
 
     with open(filename_c, 'w') as fout:
         fout.write(GENERATE_C_FMT.format(version=version,
                                          date=date,
                                          header=filename_h,
-                                         definitions='\n'.join(definitions)))
+                                         definitions=definitions))
 
     print('Successfully generated {} and {}.'.format(filename_h, filename_c))
 

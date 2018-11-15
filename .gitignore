@@ -68,4 +68,5 @@ test_command_line_convert.kcd
 /motohawk.[hc]
 /padding_bit_order.[hc]
 /vehicle.[hc]
+/floating_point.[hc]
 /a.out

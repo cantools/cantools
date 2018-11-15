@@ -32,6 +32,11 @@
 
 #include "padding_bit_order.h"
 
+#define ftoi(value) (*((uint32_t *)(&(value))))
+#define itof(value) (*((float *)(&(value))))
+#define dtoi(value) (*((uint64_t *)(&(value))))
+#define itod(value) (*((double *)(&(value))))
+
 ssize_t padding_bit_order_msg0_encode(
     uint8_t *dst_p,
     struct padding_bit_order_msg0_t *src_p,

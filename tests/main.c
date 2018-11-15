@@ -7,6 +7,7 @@
 #include "files/c_source/padding_bit_order.h"
 #include "files/c_source/vehicle.h"
 #include "files/c_source/multiplex.h"
+#include "files/c_source/floating_point.h"
 
 static void test_motohawk_example_message(void)
 {
@@ -266,11 +267,62 @@ static void test_multiplex(void)
     }
 }
 
+static void test_floating_point_message1(void)
+{
+    struct floating_point_message1_t decoded;
+    uint8_t buf[8];
+
+    decoded.signal1 = -129.448;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(floating_point_message1_encode(&buf[0],
+                                          &decoded,
+                                          sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\x75\x93\x18\x04\x56\x2e\x60\xc0",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(floating_point_message1_decode(&decoded,
+                                          &buf[0],
+                                          sizeof(buf)) == 0);
+    assert(decoded.signal1 == -129.448);
+}
+
+static void test_floating_point_message2(void)
+{
+    struct floating_point_message2_t decoded;
+    uint8_t buf[8];
+
+    decoded.signal1 = 129.5;
+    decoded.signal2 = 1234500.5;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(floating_point_message2_encode(&buf[0],
+                                          &decoded,
+                                          sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\x00\x80\x01\x43\x24\xb2\x96\x49",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(floating_point_message2_decode(&decoded,
+                                          &buf[0],
+                                          sizeof(buf)) == 0);
+    assert(decoded.signal1 == 129.5);
+    assert(decoded.signal2 == 1234500.5);
+}
+
+static void test_floating_point(void)
+{
+    test_floating_point_message1();
+    test_floating_point_message2();
+}
+
 int main()
 {
     test_motohawk_example_message();
     test_padding_bit_order();
     test_multiplex();
+    test_floating_point();
 
     return (0);
 }

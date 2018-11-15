@@ -32,6 +32,11 @@
 
 #include "vehicle.h"
 
+#define ftoi(value) (*((uint32_t *)(&(value))))
+#define itof(value) (*((float *)(&(value))))
+#define dtoi(value) (*((uint64_t *)(&(value))))
+#define itod(value) (*((double *)(&(value))))
+
 ssize_t vehicle_rt_sb_ins_vel_body_axes_encode(
     uint8_t *dst_p,
     struct vehicle_rt_sb_ins_vel_body_axes_t *src_p,

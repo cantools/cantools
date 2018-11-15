@@ -32,6 +32,11 @@
 
 #include "motohawk.h"
 
+#define ftoi(value) (*((uint32_t *)(&(value))))
+#define itof(value) (*((float *)(&(value))))
+#define dtoi(value) (*((uint64_t *)(&(value))))
+#define itod(value) (*((double *)(&(value))))
+
 ssize_t motohawk_example_message_encode(
     uint8_t *dst_p,
     struct motohawk_example_message_t *src_p,

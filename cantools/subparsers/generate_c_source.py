@@ -89,6 +89,11 @@ GENERATE_C_FMT = '''\
 
 #include "{header}"
 
+#define ftoi(value) (*((uint32_t *)(&(value))))
+#define itof(value) (*((float *)(&(value))))
+#define dtoi(value) (*((uint64_t *)(&(value))))
+#define itod(value) (*((double *)(&(value))))
+
 {definitions}\
 '''
 
@@ -139,13 +144,14 @@ ssize_t {database_name}_{message_name}_encode(
     struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
+{encode_variables}\
     if (size < {message_length}) {{
         return (-EINVAL);
     }}
 
     memset(&dst_p[0], 0, {message_length});
 
-{encode_code}
+{encode_body}
 
     return ({message_length});
 }}
@@ -155,13 +161,14 @@ int {database_name}_{message_name}_decode(
     uint8_t *src_p,
     size_t size)
 {{
+{decode_variables}\
     if (size < {message_length}) {{
         return (-EINVAL);
     }}
 
     memset(dst_p, 0, sizeof(*dst_p));
 
-{decode_code}
+{decode_body}
 
     return (0);
 }}
@@ -235,25 +242,30 @@ def _generate_signal(signal):
         return None, None
 
     if signal.is_float:
-        print('warning: Float signals are not yet supported.')
+        if signal.length == 32:
+            type_name = 'float'
+        elif signal.length == 64:
+            type_name = 'double'
+        else:
+            print('warning: Floating point signal not 32 or 64 bits.')
 
-        return None, None
-
-    if signal.length <= 8:
-        type_name = 'int8_t'
-    elif signal.length <= 16:
-        type_name = 'int16_t'
-    elif signal.length <= 32:
-        type_name = 'int32_t'
-    elif signal.length <= 64:
-        type_name = 'int64_t'
+            return None, None
     else:
-        print('warning: Signal lengths over 64 bits are not yet supported.')
+        if signal.length <= 8:
+            type_name = 'int8_t'
+        elif signal.length <= 16:
+            type_name = 'int16_t'
+        elif signal.length <= 32:
+            type_name = 'int32_t'
+        elif signal.length <= 64:
+            type_name = 'int64_t'
+        else:
+            print('warning: Signal lengths over 64 bits are not yet supported.')
 
-        return None, None
+            return None, None
 
-    if not signal.is_signed:
-        type_name = 'u' + type_name
+        if not signal.is_signed:
+            type_name = 'u' + type_name
 
     name = _camel_to_snake_case(signal.name)
     lines = [' * @param {}'.format(name)]
@@ -321,33 +333,61 @@ def _signal_segments(signal, invert_shift):
 
 
 def _format_encode_code(message):
-    code_per_index = {}
+    body_per_index = {}
+    variables = []
+    conversions = []
 
     for signal in message.signals:
+        signal_name = _camel_to_snake_case(signal.name)
+
+        if signal.is_float:
+            if signal.length == 32:
+                variable = '    uint32_t {};'.format(signal_name)
+                line = '    {0} = ftoi(src_p->{0});'.format(signal_name)
+            else:
+                variable = '    uint64_t {};'.format(signal_name)
+                line = '    {0} = dtoi(src_p->{0});'.format(signal_name)
+
+            variables.append(variable)
+            conversions.append(line)
+
         for index, shift, mask in _signal_segments(signal, False):
-            if index not in code_per_index:
-                code_per_index[index] = []
+            if index not in body_per_index:
+                body_per_index[index] = []
 
-            line = '    dst_p[{}] |= ((src_p->{} {}) & 0x{:02x});'.format(
-                index,
-                _camel_to_snake_case(signal.name),
-                shift,
-                mask)
-            code_per_index[index].append(line)
+            if signal.is_float:
+                fmt = '    dst_p[{}] |= (({} {}) & 0x{:02x});'
+            else:
+                fmt = '    dst_p[{}] |= ((src_p->{} {}) & 0x{:02x});'
 
-    code = []
+            line = fmt.format(index, signal_name, shift, mask)
+            body_per_index[index].append(line)
 
-    for index in sorted(code_per_index):
-        code += code_per_index[index]
+    body = []
 
-    return '\n'.join(code)
+    for index in sorted(body_per_index):
+        body += body_per_index[index]
+
+    if variables:
+        variables += ['', '']
+
+    if conversions:
+        conversions += ['']
+
+    variables = '\n'.join(variables)
+    body = '\n'.join(conversions + body)
+
+    return variables, body
 
 
 def _format_decode_code(message):
-    code = []
+    variables = []
+    body = []
+    conversions = []
 
     for signal in message.signals:
-        name = _camel_to_snake_case(signal.name)
+        signal_name = _camel_to_snake_case(signal.name)
+
         if signal.length <= 8:
             type_length = 8
         elif signal.length <= 16:
@@ -358,26 +398,48 @@ def _format_decode_code(message):
             type_length = 64
 
         for index, shift, mask in _signal_segments(signal, True):
-            line = '    dst_p->{} |= ((uint{}_t)(src_p[{}] & 0x{:02x}) {});'.format(
-                name,
-                type_length,
-                index,
-                mask,
-                shift)
-            code.append(line)
+            if signal.is_float:
+                fmt = '    {} |= ((uint{}_t)(src_p[{}] & 0x{:02x}) {});'
+            else:
+                fmt = '    dst_p->{} |= ((uint{}_t)(src_p[{}] & 0x{:02x}) {});'
 
-        if signal.is_signed:
+            line = fmt.format(signal_name, type_length, index, mask, shift)
+            body.append(line)
+
+        if signal.is_float:
+            if signal.length == 32:
+                variable = '    uint32_t {} = 0;'.format(signal_name)
+                line = '    dst_p->{0} = itof({0});'.format(signal_name)
+            else:
+                variable = '    uint64_t {} = 0;'.format(signal_name)
+                line = '    dst_p->{0} = itod({0});'.format(signal_name)
+
+            variables.append(variable)
+            conversions.append(line)
+        elif signal.is_signed:
             mask = ((1 << (type_length - signal.length)) - 1)
             mask <<= signal.length
-            formatted = SIGN_EXTENSION_FMT.format(name=name,
+            formatted = SIGN_EXTENSION_FMT.format(name=signal_name,
                                                   shift=signal.length - 1,
                                                   mask=hex(mask))
-            code.extend(formatted.splitlines())
+            body.extend(formatted.splitlines())
 
-    if code[-1] == '':
-        code = code[:-1]
+    if variables:
+        variables += ['', '']
 
-    return '\n'.join(code)
+    variables = '\n'.join(variables)
+
+    if conversions:
+        conversions = [''] + conversions + ['']
+
+    body += conversions
+
+    if body[-1] == '':
+        body = body[:-1]
+
+    body = '\n'.join(body)
+
+    return variables, body
 
 
 def _generate_message(database_name, message):
@@ -402,14 +464,16 @@ def _generate_message(database_name, message):
     declaration = DECLARATION_FMT.format(database_name=database_name,
                                          database_message_name=message.name,
                                          message_name=name)
-    encode_code = _format_encode_code(message)
-    decode_code = _format_decode_code(message)
+    encode_variables, encode_body = _format_encode_code(message)
+    decode_variables, decode_body = _format_decode_code(message)
     definition = DEFINITION_FMT.format(database_name=database_name,
                                        database_message_name=message.name,
                                        message_name=name,
                                        message_length=message.length,
-                                       encode_code=encode_code,
-                                       decode_code=decode_code)
+                                       encode_variables=encode_variables,
+                                       encode_body=encode_body,
+                                       decode_variables=decode_variables,
+                                       decode_body=decode_body)
 
     frame_id_define = '#define {}_FRAME_ID_{} (0x{:02x}U)'.format(
         database_name.upper(),

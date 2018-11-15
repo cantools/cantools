@@ -32,6 +32,11 @@
 
 #include "multiplex.h"
 
+#define ftoi(value) (*((uint32_t *)(&(value))))
+#define itof(value) (*((float *)(&(value))))
+#define dtoi(value) (*((uint64_t *)(&(value))))
+#define itod(value) (*((double *)(&(value))))
+
 ssize_t multiplex_message_1_encode(
     uint8_t *dst_p,
     struct multiplex_message_1_t *src_p,

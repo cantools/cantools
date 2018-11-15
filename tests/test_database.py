@@ -222,7 +222,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 'Table2': {},
                 'Table1': {0: 'Zero', 1: 'One'}
             })
-        
+
         with open(filename, 'rb') as fin:
             if sys.version_info[0] > 2:
                 self.assertEqual(db.as_dbc_string().encode('utf-8'), fin.read())
@@ -3320,10 +3320,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
             self.assertEqual(str(cm.exception), data.message)
 
-    def test_double_dbc(self):
-        filename = os.path.join('tests', 'files', 'double.dbc')
+    def test_float_dbc(self):
+        filename = os.path.join('tests', 'files', 'floating_point.dbc')
         db = cantools.database.load_file(filename)
 
+        # Double.
         message = db.get_message_by_frame_id(1024)
         signal = message.get_signal_by_name('Signal1')
         self.assertEqual(signal.is_float, True)
@@ -3331,6 +3332,23 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         decoded_message = {'Signal1': -129.448}
         encoded_message = b'\x75\x93\x18\x04\x56\x2e\x60\xc0'
+
+        encoded = message.encode(decoded_message)
+        self.assertEqual(encoded, encoded_message)
+        decoded = message.decode(encoded)
+        self.assertEqual(decoded, decoded_message)
+
+        # Float.
+        message = db.get_message_by_frame_id(1025)
+        signal = message.get_signal_by_name('Signal1')
+        self.assertEqual(signal.is_float, True)
+        self.assertEqual(signal.length, 32)
+
+        decoded_message = {
+            'Signal1': 129.5,
+            'Signal2': 1234500.5
+        }
+        encoded_message = b'\x00\x80\x01\x43\x24\xb2\x96\x49'
 
         encoded = message.encode(decoded_message)
         self.assertEqual(encoded, encoded_message)

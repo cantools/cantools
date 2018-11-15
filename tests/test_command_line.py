@@ -468,7 +468,8 @@ IO_DEBUG(
         databases = [
             'motohawk',
             'padding_bit_order',
-            'vehicle'
+            'vehicle',
+            'floating_point'
         ]
 
         for database in databases:

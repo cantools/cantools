@@ -31,6 +31,12 @@ BU_: TestNode
 BO_ 1024 Message1: 8 TestNode
  SG_ Signal1 : 0|64@1- (1,0) [0|0] "" Vector__XXX
 
+BO_ 1025 Message2: 8 TestNode
+ SG_ Signal1 : 0|32@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Signal2 : 32|32@1- (1,0) [0|0] "" Vector__XXX
+
 
 CM_ BU_ TestNode "";
 SIG_VALTYPE_ 1024 Signal1 : 2;
+SIG_VALTYPE_ 1025 Signal1 : 1;
+SIG_VALTYPE_ 1025 Signal2 : 1;

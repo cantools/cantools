@@ -69,4 +69,5 @@ test_command_line_convert.kcd
 /padding_bit_order.[hc]
 /vehicle.[hc]
 /floating_point.[hc]
+/the_homer.[hc]
 /a.out

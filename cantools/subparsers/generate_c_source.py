@@ -150,9 +150,7 @@ ssize_t {database_name}_{message_name}_encode(
     }}
 
     memset(&dst_p[0], 0, {message_length});
-
 {encode_body}
-
     return ({message_length});
 }}
 
@@ -167,8 +165,26 @@ int {database_name}_{message_name}_decode(
     }}
 
     memset(dst_p, 0, sizeof(*dst_p));
-
 {decode_body}
+    return (0);
+}}
+'''
+
+EMPTY_DEFINITION_FMT = '''\
+ssize_t {database_name}_{message_name}_encode(
+    uint8_t *dst_p,
+    struct {database_name}_{message_name}_t *src_p,
+    size_t size)
+{{
+    return (0);
+}}
+
+int {database_name}_{message_name}_decode(
+    struct {database_name}_{message_name}_t *dst_p,
+    uint8_t *src_p,
+    size_t size)
+{{
+    memset(dst_p, 0, sizeof(*dst_p));
 
     return (0);
 }}
@@ -375,7 +391,13 @@ def _format_encode_code(message):
         conversions += ['']
 
     variables = '\n'.join(variables)
-    body = '\n'.join(conversions + body)
+
+    body = conversions + body
+
+    if body:
+        body = [''] + body + ['']
+
+    body = '\n'.join(body)
 
     return variables, body
 
@@ -434,15 +456,18 @@ def _format_decode_code(message):
 
     body += conversions
 
-    if body[-1] == '':
-        body = body[:-1]
+    if body:
+        if body[-1] == '':
+            body = body[:-1]
+
+        body = [''] + body + ['']
 
     body = '\n'.join(body)
 
     return variables, body
 
 
-def _generate_message(database_name, message):
+def _generate_struct(message):
     comments = []
     members = []
 
@@ -455,29 +480,45 @@ def _generate_message(database_name, message):
         if member is not None:
             members.append(member)
 
-    name = _camel_to_snake_case(message.name)
+    if not comments:
+        comments = [' * @param dummy Dummy signal in empty message.']
+
+    if not members:
+        members = ['    uint8_t dummy;']
+
+    return comments, members
+
+
+def _generate_message(database_name, message):
+    message_name = _camel_to_snake_case(message.name)
+    comments, members = _generate_struct(message)
     struct_ = STRUCT_FMT.format(database_message_name=message.name,
-                                message_name=name,
+                                message_name=message_name,
                                 database_name=database_name,
                                 comments='\n'.join(comments),
                                 members='\n'.join(members))
     declaration = DECLARATION_FMT.format(database_name=database_name,
                                          database_message_name=message.name,
-                                         message_name=name)
-    encode_variables, encode_body = _format_encode_code(message)
-    decode_variables, decode_body = _format_decode_code(message)
-    definition = DEFINITION_FMT.format(database_name=database_name,
-                                       database_message_name=message.name,
-                                       message_name=name,
-                                       message_length=message.length,
-                                       encode_variables=encode_variables,
-                                       encode_body=encode_body,
-                                       decode_variables=decode_variables,
-                                       decode_body=decode_body)
+                                         message_name=message_name)
+
+    if message.length > 0:
+        encode_variables, encode_body = _format_encode_code(message)
+        decode_variables, decode_body = _format_decode_code(message)
+        definition = DEFINITION_FMT.format(database_name=database_name,
+                                           database_message_name=message.name,
+                                           message_name=message_name,
+                                           message_length=message.length,
+                                           encode_variables=encode_variables,
+                                           encode_body=encode_body,
+                                           decode_variables=decode_variables,
+                                           decode_body=decode_body)
+    else:
+        definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
+                                                 message_name=message_name)
 
     frame_id_define = '#define {}_FRAME_ID_{} (0x{:02x}U)'.format(
         database_name.upper(),
-        name.upper(),
+        message_name.upper(),
         message.frame_id)
 
     return struct_, declaration, definition, frame_id_define

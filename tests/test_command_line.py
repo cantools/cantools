@@ -469,7 +469,8 @@ IO_DEBUG(
             'motohawk',
             'padding_bit_order',
             'vehicle',
-            'floating_point'
+            'floating_point',
+            'no_signals'
         ]
 
         for database in databases:

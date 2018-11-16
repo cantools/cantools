@@ -8,6 +8,7 @@
 #include "files/c_source/vehicle.h"
 #include "files/c_source/multiplex.h"
 #include "files/c_source/floating_point.h"
+#include "files/c_source/no_signals.h"
 
 static void test_motohawk_example_message(void)
 {

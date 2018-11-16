@@ -15,7 +15,8 @@ test_c:
 	    tests/files/c_source/padding_bit_order.c \
 	    tests/files/c_source/vehicle.c \
 	    tests/files/c_source/multiplex.c \
-	    tests/files/c_source/floating_point.c && ./a.out
+	    tests/files/c_source/floating_point.c \
+	    tests/files/c_source/no_signals.c && ./a.out
 
 test-sdist:
 	rm -rf dist

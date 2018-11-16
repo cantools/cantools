@@ -194,8 +194,6 @@ files.
 
 Known limitations:
 
-- Float signals are ignored.
-
 - Multiplexed signals are ignored.
 
 - No signal scaling.

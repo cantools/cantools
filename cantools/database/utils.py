@@ -71,18 +71,12 @@ def _decode_field(field, value, decode_choices, scaling):
 
 
 def encode_data(data, fields, formats, scaling):
-    big_unpacked_data = [
-        _encode_field(field, data, scaling)
+    unpacked = {
+        field.name: _encode_field(field, data, scaling)
         for field in fields
-        if field.byte_order == 'big_endian'
-    ]
-    little_unpacked_data = [
-        _encode_field(field, data, scaling)
-        for field in fields
-        if field.byte_order == 'little_endian'
-    ]
-    big_packed = formats.big_endian.pack(*big_unpacked_data)
-    little_packed = formats.little_endian.pack(*little_unpacked_data[::-1])[::-1]
+    }
+    big_packed = formats.big_endian.pack_dict(unpacked)
+    little_packed = formats.little_endian.pack_dict(unpacked)[::-1]
     packed_union = int(binascii.hexlify(big_packed), 16)
     packed_union |= int(binascii.hexlify(little_packed), 16)
 
@@ -90,27 +84,15 @@ def encode_data(data, fields, formats, scaling):
 
 
 def decode_data(data, fields, formats, decode_choices, scaling):
-    big_unpacked = list(formats.big_endian.unpack(data))
-    big_fields = [
-        field
-        for field in fields
-        if field.byte_order == 'big_endian'
-    ]
-    little_unpacked = list(formats.little_endian.unpack(data[::-1])[::-1])
-    little_fields = [
-        field
-        for field in fields
-        if field.byte_order == 'little_endian'
-    ]
-    unpacked = big_unpacked + little_unpacked
-    fields = big_fields + little_fields
+    unpacked = formats.big_endian.unpack_dict(data)
+    unpacked.update(formats.little_endian.unpack_dict(data[::-1]))
 
     return {
         field.name: _decode_field(field,
-                                  value,
+                                  unpacked[field.name],
                                   decode_choices,
                                   scaling)
-        for field, value in zip(fields, unpacked)
+        for field in fields
     }
 
 
@@ -129,17 +111,20 @@ def create_encode_decode_formats(datas, number_of_bytes):
         fmt = 'p{}'.format(length)
         padding_mask = '1' * length
 
-        return fmt, padding_mask
+        return fmt, padding_mask, None
 
     def data_item(data):
         fmt = '{}{}'.format(get_format_string_type(data),
                             data.length)
         padding_mask = '0' * data.length
 
-        return fmt, padding_mask
+        return fmt, padding_mask, data.name
 
     def fmt(items):
         return ''.join([item[0] for item in items])
+
+    def names(items):
+        return [item[2] for item in items if item[2] is not None]
 
     def padding_mask(items):
         try:
@@ -148,7 +133,7 @@ def create_encode_decode_formats(datas, number_of_bytes):
             return 0
 
     def create_big():
-        items = [('>', '')]
+        items = [('>', '', None)]
         start = 0
 
         for data in datas:
@@ -167,10 +152,10 @@ def create_encode_decode_formats(datas, number_of_bytes):
             length = format_length - start
             items.append(padding_item(length))
 
-        return fmt(items), padding_mask(items)
+        return fmt(items), padding_mask(items), names(items)
 
     def create_little():
-        items = [('>', '')]
+        items = [('>', '', None)]
         end = format_length
 
         for data in datas[::-1]:
@@ -195,11 +180,11 @@ def create_encode_decode_formats(datas, number_of_bytes):
             value = bitstruct.pack('u{}'.format(length), value)
             value = int(binascii.hexlify(value[::-1]), 16)
 
-        return fmt(items), value
+        return fmt(items), value, names(items)
 
-    big_fmt, big_padding_mask = create_big()
-    little_fmt, little_padding_mask = create_little()
+    big_fmt, big_padding_mask, big_names = create_big()
+    little_fmt, little_padding_mask, little_names = create_little()
 
-    return Formats(bitstruct.compile(big_fmt),
-                   bitstruct.compile(little_fmt),
+    return Formats(bitstruct.compile(big_fmt, big_names),
+                   bitstruct.compile(little_fmt, little_names),
                    big_padding_mask & little_padding_mask)

@@ -45,6 +45,8 @@
 #define PADDING_BIT_ORDER_FRAME_ID_MSG3 (0x04U)
 #define PADDING_BIT_ORDER_FRAME_ID_MSG4 (0x05U)
 
+
+
 /**
  * Signals in message MSG0.
  *

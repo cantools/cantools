@@ -42,6 +42,8 @@
 #define FLOATING_POINT_FRAME_ID_MESSAGE1 (0x400U)
 #define FLOATING_POINT_FRAME_ID_MESSAGE2 (0x401U)
 
+
+
 /**
  * Signals in message Message1.
  *

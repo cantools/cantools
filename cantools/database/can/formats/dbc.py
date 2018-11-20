@@ -238,7 +238,8 @@ class Parser(textparser.Parser):
             'BA_', 'STRING',
             ZeroOrMore(choice(Sequence('BO_', 'NUMBER'),
                               Sequence('SG_', 'NUMBER', 'WORD'),
-                              Sequence('BU_', 'WORD'))),
+                              Sequence('BU_', 'WORD'),
+                              Sequence('EV_', 'WORD'))),
             choice('NUMBER', 'STRING'),
             ';')
 
@@ -318,7 +319,7 @@ class DbcSpecifics(object):
 
         if value_tables is None:
             value_tables = odict()
-            
+
         self._value_tables = value_tables
 
     @property
@@ -355,6 +356,13 @@ def get_dbc_frame_id(message):
         frame_id |= 0x80000000
 
     return frame_id
+
+
+def _get_node_name(attributes, name):
+    try:
+        return attributes['node'][name]['SystemNodeLongSymbol'].value
+    except (KeyError, TypeError):
+        return name
 
 
 def _dump_nodes(database):
@@ -748,7 +756,7 @@ def _load_choices(tokens):
     return choices
 
 
-def _load_message_senders(tokens):
+def _load_message_senders(tokens, attributes):
     """Load additional message senders.
 
     """
@@ -761,7 +769,8 @@ def _load_message_senders(tokens):
         if frame_id not in message_senders:
             message_senders[frame_id] = []
 
-        message_senders[frame_id] += list(senders[3])
+        message_senders[frame_id] += list(_get_node_name(attributes,
+                                                         senders[3]))
 
     return message_senders
 
@@ -927,7 +936,7 @@ def _load_messages(tokens,
         if receivers == ['Vector__XXX']:
             receivers = []
 
-        return receivers
+        return [_get_node_name(attributes, receiver) for receiver in receivers]
 
     def get_minimum(minimum, maximum):
         if minimum == maximum == 0:
@@ -962,6 +971,22 @@ def _load_messages(tokens,
         else:
             return None
 
+    def get_message_name(frame_id_dbc, name):
+        message_attributes = get_attributes(frame_id_dbc)
+
+        try:
+            return message_attributes['SystemMessageLongSymbol'].value
+        except (KeyError, TypeError):
+            return name
+
+    def get_signal_name(frame_id_dbc, name):
+        signal_attributes = get_attributes(frame_id_dbc, name)
+
+        try:
+            return signal_attributes['SystemSignalLongSymbol'].value
+        except (KeyError, TypeError):
+            return name
+
     messages = []
 
     for message in tokens.get('BO_', []):
@@ -977,7 +1002,7 @@ def _load_messages(tokens,
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
 
         # Senders.
-        senders = [message[5]]
+        senders = [_get_node_name(attributes, message[5])]
 
         for node in message_senders.get(frame_id_dbc, []):
             if node not in senders:
@@ -998,14 +1023,14 @@ def _load_messages(tokens,
         message = Message(
             frame_id=frame_id,
             is_extended_frame=is_extended_frame,
-            name=message[2],
+            name=get_message_name(frame_id_dbc, message[2]),
             length=int(message[4], 0),
             senders=senders,
             send_type=get_send_type(frame_id_dbc),
             cycle_time=get_cycle_time(frame_id_dbc),
             dbc_specifics=DbcSpecifics(attributes=get_attributes(frame_id_dbc),
                                        attribute_definitions=definitions),
-            signals=[Signal(name=signal[1][0],
+            signals=[Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
                             start=int(signal[3]),
                             length=int(signal[5]),
                             receivers=get_receivers(signal[20]),
@@ -1077,7 +1102,7 @@ def _load_nodes(tokens, comments, attributes, definitions):
     nodes = None
 
     for token in tokens.get('BU_', []):
-        nodes = [Node(name=node,
+        nodes = [Node(name=_get_node_name(attributes, node),
                       comment=get_node_comment(node),
                       dbc_specifics=DbcSpecifics(get_node_attributes(node),
                                                  definitions))
@@ -1175,7 +1200,7 @@ def load_string(string, strict=True):
     attributes = _load_attributes(tokens, attribute_definitions)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
-    message_senders = _load_message_senders(tokens)
+    message_senders = _load_message_senders(tokens, attributes)
     signal_types = _load_signal_types(tokens)
     signal_multiplexer_values = _load_signal_multiplexer_values(tokens)
     messages = _load_messages(tokens,

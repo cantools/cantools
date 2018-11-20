@@ -3355,6 +3355,29 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = message.decode(encoded)
         self.assertEqual(decoded, decoded_message)
 
+    def test_long_names_dbc(self):
+        filename = os.path.join('tests', 'files', 'long_names.dbc')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.nodes[0].name, 'N12345678901234567890123456789012')
+        self.assertEqual(db.nodes[1].name, 'N1234567890123456789012345678901')
+
+        self.assertEqual(db.messages[0].name, 'M1234567890123456789012345678901')
+        self.assertEqual(db.messages[0].senders,
+                         ['N1234567890123456789012345678901'])
+        self.assertEqual(db.messages[1].name, 'M12345678901234567890123456789012')
+        self.assertEqual(db.messages[1].senders,
+                         ['N12345678901234567890123456789012'])
+
+        self.assertEqual(db.messages[0].signals[0].name,
+                         'S1234567890123456789012345678901')
+        self.assertEqual(db.messages[0].signals[0].receivers,
+                         ['N12345678901234567890123456789012'])
+        self.assertEqual(db.messages[0].signals[1].name,
+                         'S123456789012345678901234567890123')
+        self.assertEqual(db.messages[0].signals[2].name,
+                         'SS12345678901234567890123456789012')
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

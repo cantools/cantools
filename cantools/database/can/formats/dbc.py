@@ -2,6 +2,7 @@
 
 import re
 from collections import OrderedDict as odict
+from collections import defaultdict
 from decimal import Decimal
 
 import textparser
@@ -612,7 +613,7 @@ def _dump_choices(database):
 
 
 def _load_comments(tokens):
-    comments = {}
+    comments = defaultdict(dict)
 
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
@@ -624,19 +625,12 @@ def _load_comments(tokens):
         if kind == 'SG_':
             frame_id = int(item[1])
 
-            if frame_id not in comments:
-                comments[frame_id] = {}
-
             if 'signal' not in comments[frame_id]:
                 comments[frame_id]['signal'] = {}
 
             comments[frame_id]['signal'][item[2]] = item[3]
         elif kind == 'BO_':
             frame_id = int(item[1])
-
-            if frame_id not in comments:
-                comments[frame_id] = {}
-
             comments[frame_id]['message'] = item[2]
         elif kind == 'BU_':
             node_name = item[1]
@@ -737,17 +731,13 @@ def _load_value_tables(tokens):
 
 
 def _load_choices(tokens):
-    choices = {}
+    choices = defaultdict(dict)
 
     for choice in tokens.get('VAL_', []):
         if len(choice[1]) == 0:
             continue
 
         frame_id = int(choice[1][0])
-
-        if frame_id not in choices:
-            choices[frame_id] = {}
-
         choices[frame_id][choice[2]] = odict(
             (int(''.join(v[0])), v[1]) for v in choice[3])
 
@@ -759,16 +749,13 @@ def _load_message_senders(tokens, attributes):
 
     """
 
-    message_senders = {}
+    message_senders = defaultdict(list)
 
     for senders in tokens.get('BO_TX_BU_', []):
         frame_id = int(senders[1])
-
-        if frame_id not in message_senders:
-            message_senders[frame_id] = []
-
-        message_senders[frame_id] += [_get_node_name(attributes, sender)
-                                      for sender in senders[3]]
+        message_senders[frame_id] += [
+            _get_node_name(attributes, sender) for sender in senders[3]
+        ]
 
     return message_senders
 
@@ -778,14 +765,10 @@ def _load_signal_types(tokens):
 
     """
 
-    signal_types = {}
+    signal_types = defaultdict(dict)
 
     for signal_type in tokens.get('SIG_VALTYPE_', []):
         frame_id = int(signal_type[1])
-
-        if frame_id not in signal_types:
-            signal_types[frame_id] = {}
-
         signal_name = signal_type[2]
         signal_types[frame_id][signal_name] = int(signal_type[4])
 
@@ -797,16 +780,13 @@ def _load_signal_multiplexer_values(tokens):
 
     """
 
-    signal_multiplexer_values = {}
+    signal_multiplexer_values = defaultdict(dict)
 
     for signal_multiplexer_value in tokens.get('SG_MUL_VAL_', []):
         frame_id = int(signal_multiplexer_value[1])
         signal_name = signal_multiplexer_value[2]
         multiplexer_signal = signal_multiplexer_value[3]
         multiplexer_ids = [int(v[0]) for v in signal_multiplexer_value[4]]
-
-        if frame_id not in signal_multiplexer_values:
-            signal_multiplexer_values[frame_id] = {}
 
         if multiplexer_signal not in signal_multiplexer_values[frame_id]:
             signal_multiplexer_values[frame_id][multiplexer_signal] = {}

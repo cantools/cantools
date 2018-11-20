@@ -2,6 +2,7 @@
 
 import sys
 import logging
+from collections import defaultdict
 
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
@@ -341,17 +342,13 @@ def _dump_mux_group(multiplexer_id,
                      SubElement(mux_group, 'Signal'))
 
 def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
-    signals_per_count = {}
+    signals_per_count = defaultdict(list)
 
     for signal in signals:
         if signal.multiplexer_signal != multiplexer_name:
             continue
 
         multiplexer_id = signal.multiplexer_ids[0]
-
-        if multiplexer_id not in signals_per_count:
-            signals_per_count[multiplexer_id] = []
-
         signals_per_count[multiplexer_id].append(signal)
 
     for multiplexer_id, multiplexed_signals in signals_per_count.items():

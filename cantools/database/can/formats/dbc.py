@@ -660,6 +660,7 @@ def _load_attribute_definition_defaults(tokens):
 
 def _load_attributes(tokens, definitions):
     attributes = odict()
+    attributes['node'] = odict()
 
     def to_object(attribute):
         value = attribute[3]
@@ -706,9 +707,6 @@ def _load_attributes(tokens, definitions):
                 attributes[frame_id_dbc]['message'][name] = to_object(attribute)
             elif kind == 'BU_':
                 node = item[1]
-
-                if 'node' not in attributes:
-                    attributes['node'] = odict()
 
                 if node not in attributes['node']:
                     attributes['node'][node] = odict()
@@ -769,8 +767,8 @@ def _load_message_senders(tokens, attributes):
         if frame_id not in message_senders:
             message_senders[frame_id] = []
 
-        message_senders[frame_id] += list(_get_node_name(attributes,
-                                                         senders[3]))
+        message_senders[frame_id] += [_get_node_name(attributes, sender)
+                                      for sender in senders[3]]
 
     return message_senders
 
@@ -1079,32 +1077,13 @@ def _load_version(tokens):
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
-    def get_node_comment(node_name):
-        """Get comment for a given node_name
-
-        """
-
-        try:
-            return comments[node_name]
-        except KeyError:
-            return None
-
-    def get_node_attributes(node_name):
-        """Get attributes for given node.
-
-        """
-
-        try:
-            return attributes['node'][node_name]
-        except KeyError:
-            return None
-
     nodes = None
 
     for token in tokens.get('BU_', []):
         nodes = [Node(name=_get_node_name(attributes, node),
-                      comment=get_node_comment(node),
-                      dbc_specifics=DbcSpecifics(get_node_attributes(node),
+                      comment=comments.get(node, None),
+                      dbc_specifics=DbcSpecifics(attributes['node'].get(node,
+                                                                        None),
                                                  definitions))
                  for node in token[2]]
 
@@ -1181,16 +1160,6 @@ def load_string(string, strict=True):
 
     """
 
-    def get_database_attributes():
-        """Get attributes for the database.
-
-        """
-
-        try:
-            return attributes['database']
-        except KeyError:
-            return None
-
     tokens = Parser().parse(string)
 
     comments = _load_comments(tokens)
@@ -1214,7 +1183,7 @@ def load_string(string, strict=True):
                               strict)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
-    dbc_specifics = DbcSpecifics(attributes=get_database_attributes(),
+    dbc_specifics = DbcSpecifics(attributes=attributes.get('database', None),
                                  attribute_definitions=attribute_definitions,
                                  value_tables=value_tables)
 

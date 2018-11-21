@@ -15,7 +15,7 @@ from . import database as db
 
 
 __author__ = 'Erik Moqvist'
-__version__ = '29.0.0'
+__version__ = '29.1.0'
 
 
 def _main():

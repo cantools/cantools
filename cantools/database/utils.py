@@ -75,8 +75,8 @@ def encode_data(data, fields, formats, scaling):
         field.name: _encode_field(field, data, scaling)
         for field in fields
     }
-    big_packed = formats.big_endian.pack_dict(unpacked)
-    little_packed = formats.little_endian.pack_dict(unpacked)[::-1]
+    big_packed = formats.big_endian.pack(unpacked)
+    little_packed = formats.little_endian.pack(unpacked)[::-1]
     packed_union = int(binascii.hexlify(big_packed), 16)
     packed_union |= int(binascii.hexlify(little_packed), 16)
 
@@ -84,8 +84,8 @@ def encode_data(data, fields, formats, scaling):
 
 
 def decode_data(data, fields, formats, decode_choices, scaling):
-    unpacked = formats.big_endian.unpack_dict(data)
-    unpacked.update(formats.little_endian.unpack_dict(data[::-1]))
+    unpacked = formats.big_endian.unpack(data)
+    unpacked.update(formats.little_endian.unpack(data[::-1]))
 
     return {
         field.name: _decode_field(field,

@@ -1,1 +1,1 @@
-tests/files/c_source/* linguist-vendored
+*.[hc] linguist-vendored

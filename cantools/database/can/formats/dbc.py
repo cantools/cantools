@@ -350,6 +350,51 @@ class DbcSpecifics(object):
         return self._value_tables
 
 
+class LongNamesConverter(object):
+
+    def __init__(self, names):
+        self._long_to_short_names_dict = {}
+        next_index_per_base_name = {}
+        short_names = set()
+
+        def basename(name):
+            return name[:27]
+
+        for name in names:
+            if len(name) != 32:
+                continue
+
+            next_index_per_base_name[basename(name)] = 0
+            short_names.add(name)
+
+        for name in names:
+            if len(name) <= 32:
+                continue
+
+            base_name = basename(name)
+            short_name = name[:32]
+
+            if short_name in short_names:
+                index = next_index_per_base_name[base_name]
+                next_index_per_base_name[base_name] += 1
+                short_name = '{}_{:04d}'.format(name[:27], index)
+            else:
+                next_index_per_base_name[base_name] = 0
+                short_names.add(short_name)
+
+            self._long_to_short_names_dict[name] = short_name
+
+    def lookup_name(self, name):
+        if name in self._long_to_short_names_dict:
+            name = self._long_to_short_names_dict[name]
+
+        return name
+
+    @property
+    def long_to_short_names_dict(self):
+        return self._long_to_short_names_dict
+
+
 def get_dbc_frame_id(message):
     frame_id = message.frame_id
 

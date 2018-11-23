@@ -3359,24 +3359,94 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'long_names.dbc')
         db = cantools.database.load_file(filename)
 
-        self.assertEqual(db.nodes[0].name, 'N12345678901234567890123456789012')
-        self.assertEqual(db.nodes[1].name, 'N1234567890123456789012345678901')
+        self.assertEqual(db.nodes[0].name, 'NN123456789012345678901234567890123')
+        self.assertEqual(db.nodes[1].name, 'N123456789012345678901234567890123')
+        self.assertEqual(db.nodes[2].name, 'N1234567890123456789012345678901')
+        self.assertEqual(db.nodes[3].name, 'N12345678901234567890123456789012')
 
-        self.assertEqual(db.messages[0].name, 'M1234567890123456789012345678901')
-        self.assertEqual(db.messages[0].senders,
-                         ['N1234567890123456789012345678901'])
-        self.assertEqual(db.messages[1].name, 'M12345678901234567890123456789012')
-        self.assertEqual(db.messages[1].senders,
-                         ['N12345678901234567890123456789012'])
+        self.assertEqual(db.messages[0].name, 'SS12345678901234567890123458789012345')
+        self.assertEqual(db.messages[1].name, 'SS1234567890123456789012345778901')
+        self.assertEqual(db.messages[2].name, 'SS1234567890123456789012345878901234')
+        self.assertEqual(db.messages[3].name, 'SS123456789012345678901234577890')
+        self.assertEqual(db.messages[4].name, 'SS12345678901234567890123456789012')
+        self.assertEqual(db.messages[5].name, 'S12345678901234567890123456789012')
+        self.assertEqual(db.messages[6].name, 'M123456789012345678901234567890123')
+        self.assertEqual(db.messages[7].name, 'M1234567890123456789012345678901')
+        self.assertEqual(db.messages[8].name, 'M12345678901234567890123456789012')
+        self.assertEqual(db.messages[9].name, 'MM12345678901234567890123456789012')
 
-        self.assertEqual(db.messages[0].signals[0].name,
-                         'S1234567890123456789012345678901')
-        self.assertEqual(db.messages[0].signals[0].receivers,
-                         ['N12345678901234567890123456789012'])
-        self.assertEqual(db.messages[0].signals[1].name,
-                         'S123456789012345678901234567890123')
-        self.assertEqual(db.messages[0].signals[2].name,
+        self.assertEqual(db.messages[7].senders, ['N1234567890123456789012345678901'])
+        self.assertEqual(db.messages[8].senders, ['N12345678901234567890123456789012'])
+
+        self.assertEqual(db.messages[5].signals[0].name,
                          'SS12345678901234567890123456789012')
+        self.assertEqual(db.messages[6].signals[0].name,
+                         'SSS12345678901234567890123456789012')
+        self.assertEqual(db.messages[7].signals[0].name,
+                         'S1234567890123456789012345678901')
+        self.assertEqual(db.messages[7].signals[1].name,
+                         'S123456789012345678901234567890123')
+        self.assertEqual(db.messages[7].signals[2].name,
+                         'SS12345678901234567890123456789012')
+        self.assertEqual(db.messages[7].signals[3].name,
+                         'SS1234567890123456789012345678901233')
+        self.assertEqual(db.messages[7].signals[4].name,
+                         'SS12345678901234567890123456789012332')
+        self.assertEqual(db.messages[8].signals[0].name,
+                         'S123456789012345678901234567890123')
+        self.assertEqual(db.messages[8].signals[1].name,
+                         'S12345678901234567890123456789012')
+        self.assertEqual(db.messages[8].signals[2].name,
+                         'SS12345678901234567890123456789012')
+        self.assertEqual(db.messages[8].signals[3].name,
+                         'SS12345678901234567890123456789012dw')
+        self.assertEqual(db.messages[9].signals[0].name,
+                         'SS1234567890123456789012345678901233')
+        self.assertEqual(db.messages[9].signals[1].name,
+                         'SSS12345678901234567890123456789012')
+
+        self.assertEqual(db.messages[7].signals[2].receivers,
+                         ['N123456789012345678901234567890123'])
+
+    def test_dbc_short_names_dict(self):
+        long_names = [
+            # 32 characters.
+            'M1234567890123456789012345678901',
+            'SS123456789012345678901234577890',
+            # More than 32 characters.
+            'SS12345678901234567890123458789012345',
+            'SS1234567890123456789012345778901',
+            'SS1234567890123456789012345878901234',
+            'SS12345678901234567890123456789012',
+            'S12345678901234567890123456789012',
+            'M123456789012345678901234567890123',
+            'M12345678901234567890123456789012',
+            'MM12345678901234567890123456789012'
+        ]
+
+        short_names = [
+            # 32 characters.
+            'M1234567890123456789012345678901',
+            'SS123456789012345678901234577890',
+            # More than 32 characters.
+            'SS123456789012345678901234587890',
+            'SS1234567890123456789012345_0000',
+            'SS1234567890123456789012345_0001',
+            'SS123456789012345678901234567890',
+            'S1234567890123456789012345678901',
+            'M12345678901234567890123456_0000',
+            'M12345678901234567890123456_0001',
+            'MM123456789012345678901234567890'
+        ]
+
+        converter = cantools.database.can.formats.dbc.LongNamesConverter(
+            long_names)
+
+        for long_name, short_name in zip(long_names, short_names):
+            self.assertEqual(converter.lookup_name(long_name), short_name)
+
+        self.assertEqual(converter.long_to_short_names_dict,
+                         dict(zip(long_names[2:], short_names[2:])))
 
 
 # This file is not '__main__' when executed via 'python setup.py3

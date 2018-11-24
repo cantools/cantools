@@ -41,6 +41,7 @@ GENERATE_H_FMT = '''\
 #define {include_guard}
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 #ifndef EINVAL
@@ -138,6 +139,17 @@ int {database_name}_{message_name}_decode(
     size_t size);
 '''
 
+IS_IN_RANGE_DECLARATION_FMT = '''\
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
+'''
+
 DEFINITION_FMT = '''\
 ssize_t {database_name}_{message_name}_encode(
     uint8_t *dst_p,
@@ -167,6 +179,13 @@ int {database_name}_{message_name}_decode(
     memset(dst_p, 0, sizeof(*dst_p));
 {decode_body}
     return (0);
+}}
+'''
+
+IS_IN_RANGE_DEFINITION_FMT = '''\
+bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
+{{
+    return ({check});
 }}
 '''
 
@@ -251,11 +270,8 @@ def _format_unit(unit):
         return [' *            Unit: {}'.format(unit)]
 
 
-def _generate_signal(signal):
-    if signal.is_multiplexer or signal.multiplexer_ids:
-        print('warning: Multiplexed signals are not yet supported.')
-
-        return None, None
+def _type_name(signal):
+    type_name = None
 
     if signal.is_float:
         if signal.length == 32:
@@ -264,8 +280,6 @@ def _generate_signal(signal):
             type_name = 'double'
         else:
             print('warning: Floating point signal not 32 or 64 bits.')
-
-            return None, None
     else:
         if signal.length <= 8:
             type_name = 'int8_t'
@@ -278,10 +292,35 @@ def _generate_signal(signal):
         else:
             print('warning: Signal lengths over 64 bits are not yet supported.')
 
-            return None, None
-
         if not signal.is_signed:
             type_name = 'u' + type_name
+
+    return type_name
+
+
+def _get_type_suffix(type_name):
+    if type_name in ['uint8_t', 'uint16_t', 'uint32_t']:
+        return 'u'
+    elif type_name in ['int64_t']:
+        return 'll'
+    elif type_name in ['uint64_t']:
+        return 'ull'
+    elif type_name == 'float':
+        return 'f'
+    else:
+        return ''
+
+
+def _generate_signal(signal):
+    if signal.is_multiplexer or signal.multiplexer_ids:
+        print('warning: Multiplexed signals are not yet supported.')
+
+        return None, None
+
+    type_name = _type_name(signal)
+
+    if type_name is None:
+        return None, None
 
     name = _camel_to_snake_case(signal.name)
     lines = [' * @param {}'.format(name)]
@@ -489,9 +528,86 @@ def _generate_struct(message):
     return comments, members
 
 
+def _is_minimum_type_value(type_name, value):
+    if type_name == 'int8_t':
+        return value == -128
+    elif type_name == 'int16_t':
+        return value == -32768
+    elif type_name == 'int32_t':
+        return value == -2147483648
+    elif type_name == 'int64_t':
+        return value == -9223372036854775808
+    elif type_name[0] == 'u':
+        return value == 0
+    else:
+        return False
+
+
+def _generate_is_in_range(message):
+    """Generate range checks for all signals in given message.
+
+    """
+
+    signals = []
+
+    for signal in message.signals:
+        scale = signal.decimal.scale
+        offset = (signal.decimal.offset / scale)
+        minimum = signal.decimal.minimum
+        maximum = signal.decimal.maximum
+
+        if minimum is not None:
+            minimum = int(minimum / scale - offset)
+
+        if maximum is not None:
+            maximum = int(maximum / scale - offset)
+
+        type_name = _type_name(signal)
+        suffix = _get_type_suffix(type_name)
+        checks = []
+
+        if minimum is not None:
+            if not _is_minimum_type_value(type_name, minimum):
+                checks.append('(value >= {}{})'.format(minimum, suffix))
+
+        if maximum is not None:
+            checks.append('(value <= {}{})'.format(maximum, suffix))
+
+        if not checks:
+            checks = ['true']
+        elif len(checks) == 1:
+            checks = [checks[0][1:-1]]
+
+        checks = ' && '.join(checks)
+
+        signals.append((_camel_to_snake_case(signal.name),
+                        type_name,
+                        checks))
+
+    return signals
+
+
 def _generate_message(database_name, message):
     message_name = _camel_to_snake_case(message.name)
     comments, members = _generate_struct(message)
+    is_in_range_declarations = []
+    is_in_range_definitions = []
+
+    for signal_name, type_name, check in _generate_is_in_range(message):
+        is_in_range_declaration = IS_IN_RANGE_DECLARATION_FMT.format(
+            database_name=database_name,
+            message_name=message_name,
+            signal_name=signal_name,
+            type_name=type_name)
+        is_in_range_declarations.append(is_in_range_declaration)
+        is_in_range_definition = IS_IN_RANGE_DEFINITION_FMT.format(
+            database_name=database_name,
+            message_name=message_name,
+            signal_name=signal_name,
+            type_name=type_name,
+            check=check)
+        is_in_range_definitions.append(is_in_range_definition)
+
     struct_ = STRUCT_FMT.format(database_message_name=message.name,
                                 message_name=message_name,
                                 database_name=database_name,
@@ -500,6 +616,7 @@ def _generate_message(database_name, message):
     declaration = DECLARATION_FMT.format(database_name=database_name,
                                          database_message_name=message.name,
                                          message_name=message_name)
+    declaration += '\n' + '\n'.join(is_in_range_declarations)
 
     if message.length > 0:
         encode_variables, encode_body = _format_encode_code(message)
@@ -515,6 +632,8 @@ def _generate_message(database_name, message):
     else:
         definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                  message_name=message_name)
+
+    definition += '\n' + '\n'.join(is_in_range_definitions)
 
     frame_id_define = '#define {}_FRAME_ID_{} (0x{:02x}U)'.format(
         database_name.upper(),

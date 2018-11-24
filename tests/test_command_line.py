@@ -464,7 +464,7 @@ IO_DEBUG(
                 str(cm.exception),
                 "error: Unsupported output database format 'foo'.")
 
-    def test_generate(self):
+    def test_generate_c_source(self):
         databases = [
             'motohawk',
             'padding_bit_order',

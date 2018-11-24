@@ -60,6 +60,13 @@ static void test_motohawk_example_message(void)
         assert(decoded.temperature == datas[i].decoded.temperature);
         assert(decoded.average_radius == datas[i].decoded.average_radius);
         assert(decoded.enable == datas[i].decoded.enable);
+
+        assert(motohawk_example_message_enable_is_in_range(
+                   decoded.enable));
+        assert(motohawk_example_message_average_radius_is_in_range(
+                   decoded.average_radius));
+        assert(motohawk_example_message_temperature_is_in_range(
+                   decoded.temperature));
     }
 }
 
@@ -318,12 +325,32 @@ static void test_floating_point(void)
     test_floating_point_message2();
 }
 
+static void test_is_in_range(void)
+{
+    /* Missing limits. Anything allowed, byt should probably check
+       that it fits in its number of bits. */
+    assert(motohawk_example_message_enable_is_in_range(0));
+    assert(motohawk_example_message_enable_is_in_range(1));
+
+    /* Unsigned value with 0 as lower limit. */
+    assert(motohawk_example_message_average_radius_is_in_range(0));
+    assert(motohawk_example_message_average_radius_is_in_range(50));
+    assert(motohawk_example_message_average_radius_is_in_range(51) == false);
+
+    /* Signed value with upper and lower limits. */
+    assert(motohawk_example_message_temperature_is_in_range(-2049) == false);
+    assert(motohawk_example_message_temperature_is_in_range(-2048));
+    assert(motohawk_example_message_temperature_is_in_range(2047));
+    assert(motohawk_example_message_temperature_is_in_range(2048) == false);
+}
+
 int main()
 {
     test_motohawk_example_message();
     test_padding_bit_order();
     test_multiplex();
     test_floating_point();
+    test_is_in_range();
 
     return (0);
 }

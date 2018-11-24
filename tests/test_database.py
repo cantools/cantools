@@ -3409,7 +3409,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[7].signals[2].receivers,
                          ['N123456789012345678901234567890123'])
 
-    def test_dbc_short_names_dict(self):
+    def test_dbc_long_names_converter(self):
         long_names = [
             # 32 characters.
             'M1234567890123456789012345678901',

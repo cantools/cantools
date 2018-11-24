@@ -10,7 +10,8 @@ test:
 	$(MAKE) test_c
 
 test_c:
-	gcc -Wall -Wpedantic tests/main.c \
+	gcc -Wall -Wpedantic -Werror \
+	    tests/main.c \
 	    tests/files/c_source/motohawk.c \
 	    tests/files/c_source/padding_bit_order.c \
 	    tests/files/c_source/vehicle.c \

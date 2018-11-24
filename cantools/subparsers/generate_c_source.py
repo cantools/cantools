@@ -216,6 +216,16 @@ SIGN_EXTENSION_FMT = '''
 
 '''
 
+SIGNAL_PARAM_COMMENT_FMT = '''\
+ * @param {name}
+{comment}\
+ *            Minimum: {minimum}
+ *            Maximum: {maximum}
+ *            Scale: {scale}
+ *            Offset: {offset}
+ *            Unit: {unit}\
+'''
+
 
 def _camel_to_snake_case(value):
     value = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', value)
@@ -226,48 +236,13 @@ def _camel_to_snake_case(value):
 
 
 def _format_comment(comment):
-    if comment is None:
-        return []
-    else:
-        return [
+    if comment:
+        return '\n'.join([
             ' *            ' + line.rstrip()
             for line in comment.splitlines()
-        ]
-
-
-def _format_minimum(minimum):
-    if minimum is None:
-        return []
+        ]) + '\n'
     else:
-        return [' *            Minimum: {}'.format(minimum)]
-
-
-def _format_maximum(maximum):
-    if maximum is None:
-        return []
-    else:
-        return [' *            Maximum: {}'.format(maximum)]
-
-
-def _format_scale(scale):
-    if scale is None:
-        return []
-    else:
-        return [' *            Scale: {}'.format(scale)]
-
-
-def _format_offset(offset):
-    if offset is None:
-        return []
-    else:
-        return [' *            Offset: {}'.format(offset)]
-
-
-def _format_unit(unit):
-    if unit is None:
-        return []
-    else:
-        return [' *            Unit: {}'.format(unit)]
+        return ''
 
 
 def _type_name(signal):
@@ -311,6 +286,13 @@ def _get_type_suffix(type_name):
         return ''
 
 
+def _get(value, default):
+    if value is None:
+        value = default
+
+    return value
+
+
 def _generate_signal(signal):
     if signal.is_multiplexer or signal.multiplexer_ids:
         print('warning: Multiplexed signals are not yet supported.')
@@ -323,14 +305,20 @@ def _generate_signal(signal):
         return None, None
 
     name = _camel_to_snake_case(signal.name)
-    lines = [' * @param {}'.format(name)]
-    lines += _format_comment(signal.comment)
-    lines += _format_minimum(signal.minimum)
-    lines += _format_maximum(signal.maximum)
-    lines += _format_scale(signal.scale)
-    lines += _format_offset(signal.offset)
-    lines += _format_unit(signal.unit)
-    comment = '\n'.join(lines)
+    comment = _format_comment(signal.comment)
+    minimum = _get(signal.minimum, '-')
+    maximum = _get(signal.maximum, '-')
+    scale = _get(signal.scale, '-')
+    offset = _get(signal.offset, '-')
+    unit = _get(signal.unit, '-')
+
+    comment = SIGNAL_PARAM_COMMENT_FMT.format(name=name,
+                                              comment=comment,
+                                              minimum=minimum,
+                                              maximum=maximum,
+                                              scale=scale,
+                                              offset=offset,
+                                              unit=unit)
     member = '    {} {};'.format(type_name, name)
 
     return comment, member

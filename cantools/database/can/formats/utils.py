@@ -1,4 +1,3 @@
-
 def num(number_as_string):
     """Convert given string to an integer or a float.
 

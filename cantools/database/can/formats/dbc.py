@@ -22,6 +22,7 @@ from textparser import Not
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
 from ..signal import Signal
+from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..node import Node
 from ..internal_database import InternalDatabase
@@ -962,16 +963,28 @@ def _load_messages(tokens,
         return [_get_node_name(attributes, receiver) for receiver in receivers]
 
     def get_minimum(minimum, maximum):
-        if minimum == maximum == 0:
+        if minimum == maximum == '0':
             return None
         else:
-            return minimum
+            return num(minimum)
 
     def get_maximum(minimum, maximum):
-        if minimum == maximum == 0:
+        if minimum == maximum == '0':
             return None
         else:
-            return maximum
+            return num(maximum)
+
+    def get_minimum_decimal(minimum, maximum):
+        if minimum == maximum == '0':
+            return None
+        else:
+            return Decimal(minimum)
+
+    def get_maximum_decimal(minimum, maximum):
+        if minimum == maximum == '0':
+            return None
+        else:
+            return Decimal(maximum)
 
     def get_protocol(frame_id_dbc):
         """Get protocol for a given message.
@@ -1063,10 +1076,14 @@ def _load_messages(tokens,
                             is_signed=(signal[8] == '-'),
                             scale=num(signal[10]),
                             offset=num(signal[12]),
-                            minimum=get_minimum(num(signal[15]),
-                                                num(signal[17])),
-                            maximum=get_maximum(num(signal[15]),
-                                                num(signal[17])),
+                            minimum=get_minimum(signal[15], signal[17]),
+                            maximum=get_maximum(signal[15], signal[17]),
+                            decimal=SignalDecimal(Decimal(signal[10]),
+                                                  Decimal(signal[12]),
+                                                  get_minimum_decimal(signal[15],
+                                                                      signal[17]),
+                                                  get_maximum_decimal(signal[15],
+                                                                      signal[17])),
                             unit=None if signal[19] == '' else signal[19],
                             choices=get_choices(frame_id_dbc,
                                                 signal[1][0]),

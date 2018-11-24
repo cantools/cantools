@@ -1,5 +1,73 @@
 # A CAN signal.
 
+class Decimal(object):
+    """Holds the same values as
+    :attr:`~cantools.database.can.Signal.scale`,
+    :attr:`~cantools.database.can.Signal.offset`,
+    :attr:`~cantools.database.can.Signal.minimum` and
+    :attr:`~cantools.database.can.Signal.maximum`, but as
+    ``decimal.Decimal`` instead of ``int`` and ``float`` for higher
+    precision (no rounding errors).
+
+    """
+
+    def __init__(self, scale=None, offset=None, minimum=None, maximum=None):
+        self._scale = scale
+        self._offset = offset
+        self._minimum = minimum
+        self._maximum = maximum
+
+    @property
+    def scale(self):
+        """The scale factor of the signal value as ``decimal.Decimal``.
+
+        """
+
+        return self._scale
+
+    @scale.setter
+    def scale(self, value):
+        self._scale = value
+
+    @property
+    def offset(self):
+        """The offset of the signal value as ``decimal.Decimal``.
+
+        """
+
+        return self._offset
+
+    @offset.setter
+    def offset(self, value):
+        self._offset = value
+
+    @property
+    def minimum(self):
+        """The minimum value of the signal as ``decimal.Decimal``, or ``None``
+        if unavailable.
+
+        """
+
+        return self._minimum
+
+    @minimum.setter
+    def minimum(self, value):
+        self._minimum = value
+
+    @property
+    def maximum(self):
+        """The maximum value of the signal as ``decimal.Decimal``, or ``None``
+        if unavailable.
+
+        """
+
+        return self._maximum
+
+    @maximum.setter
+    def maximum(self, value):
+        self._maximum = value
+
+
 class Signal(object):
     """A CAN signal with position, size, unit and other information. A
     signal is part of a message.
@@ -54,7 +122,8 @@ class Signal(object):
                  is_multiplexer=False,
                  multiplexer_ids=None,
                  multiplexer_signal=None,
-                 is_float=False):
+                 is_float=False,
+                 decimal=None):
         self._name = name
         self._start = start
         self._length = length
@@ -64,6 +133,7 @@ class Signal(object):
         self._offset = offset
         self._minimum = minimum
         self._maximum = maximum
+        self._decimal = Decimal() if decimal is None else decimal
         self._unit = unit
         self._choices = choices
         self._dbc = dbc_specifics
@@ -195,6 +265,21 @@ class Signal(object):
     @maximum.setter
     def maximum(self, value):
         self._maximum = value
+
+    @property
+    def decimal(self):
+        """The high precision values of
+        :attr:`~cantools.database.can.Signal.scale`,
+        :attr:`~cantools.database.can.Signal.offset`,
+        :attr:`~cantools.database.can.Signal.minimum` and
+        :attr:`~cantools.database.can.Signal.maximum`.
+
+        See :class:`~cantools.database.can.signal.Decimal` for more
+        details.
+
+        """
+
+        return self._decimal
 
     @property
     def unit(self):

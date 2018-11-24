@@ -3,12 +3,14 @@
 import sys
 import logging
 from collections import defaultdict
+from decimal import Decimal
 
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 from xml.etree.ElementTree import SubElement
 
 from ..signal import Signal
+from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..node import Node
 from ..bus import Bus
@@ -59,7 +61,8 @@ def _load_signal_element(signal, nodes):
     labels = None
     notes = None
     receivers = []
-
+    decimal = SignalDecimal(Decimal(slope), Decimal(intercept))
+    
     # Signal XML attributes.
     for key, value in signal.attrib.items():
         if key == 'name':
@@ -80,12 +83,16 @@ def _load_signal_element(signal, nodes):
         for key, value in value.attrib.items():
             if key == 'min':
                 minimum = num(value)
+                decimal.minimum = Decimal(value)
             elif key == 'max':
                 maximum = num(value)
+                decimal.maximum = Decimal(value)
             elif key == 'slope':
                 slope = num(value)
+                decimal.scale = Decimal(value)
             elif key == 'intercept':
                 intercept = num(value)
+                decimal.offset = Decimal(value)
             elif key == 'unit':
                 unit = value
             elif key == 'type':
@@ -135,7 +142,8 @@ def _load_signal_element(signal, nodes):
                   unit=unit,
                   choices=labels,
                   comment=notes,
-                  is_float=is_float)
+                  is_float=is_float,
+                  decimal=decimal)
 
 
 def _load_multiplex_element(mux, nodes):

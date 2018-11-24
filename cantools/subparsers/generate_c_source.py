@@ -235,16 +235,6 @@ def _camel_to_snake_case(value):
     return value
 
 
-def _format_comment(comment):
-    if comment:
-        return '\n'.join([
-            ' *            ' + line.rstrip()
-            for line in comment.splitlines()
-        ]) + '\n'
-    else:
-        return ''
-
-
 def _type_name(signal):
     type_name = None
 
@@ -267,22 +257,24 @@ def _type_name(signal):
         else:
             print('warning: Signal lengths over 64 bits are not yet supported.')
 
-        if not signal.is_signed:
-            type_name = 'u' + type_name
+        if type_name is not None:
+            if not signal.is_signed:
+                type_name = 'u' + type_name
 
     return type_name
 
 
 def _get_type_suffix(type_name):
-    if type_name in ['uint8_t', 'uint16_t', 'uint32_t']:
-        return 'u'
-    elif type_name in ['int64_t']:
-        return 'll'
-    elif type_name in ['uint64_t']:
-        return 'ull'
-    elif type_name == 'float':
-        return 'f'
-    else:
+    try:
+        return {
+            'uint8_t': 'u',
+            'uint16_t': 'u',
+            'uint32_t': 'u',
+            'int64_t': 'll',
+            'uint64_t': 'ull',
+            'float': 'f'
+        }[type_name]
+    except KeyError:
         return ''
 
 
@@ -291,6 +283,47 @@ def _get(value, default):
         value = default
 
     return value
+
+
+def _is_minimum_type_value(type_name, value):
+    if type_name == 'int8_t':
+        return value == -128
+    elif type_name == 'int16_t':
+        return value == -32768
+    elif type_name == 'int32_t':
+        return value == -2147483648
+    elif type_name == 'int64_t':
+        return value == -9223372036854775808
+    elif type_name[0] == 'u':
+        return value == 0
+    else:
+        return False
+
+
+def _is_maximum_type_value(type_name, value):
+    try:
+        return {
+            'int8_t': 127,
+            'int16_t': 32767,
+            'int32_t': 2147483647,
+            'int64_t': 9223372036854775807,
+            'uint8_t': 255,
+            'uint16_t': 65535,
+            'uint32_t': 4294967295,
+            'uint64_t': 18446744073709551615
+        }[type_name] == value
+    except KeyError:
+        return False
+
+
+def _format_comment(comment):
+    if comment:
+        return '\n'.join([
+            ' *            ' + line.rstrip()
+            for line in comment.splitlines()
+        ]) + '\n'
+    else:
+        return ''
 
 
 def _generate_signal(signal):
@@ -514,37 +547,6 @@ def _generate_struct(message):
         members = ['    uint8_t dummy;']
 
     return comments, members
-
-
-def _is_minimum_type_value(type_name, value):
-    if type_name == 'int8_t':
-        return value == -128
-    elif type_name == 'int16_t':
-        return value == -32768
-    elif type_name == 'int32_t':
-        return value == -2147483648
-    elif type_name == 'int64_t':
-        return value == -9223372036854775808
-    elif type_name[0] == 'u':
-        return value == 0
-    else:
-        return False
-
-
-def _is_maximum_type_value(type_name, value):
-    try:
-        return {
-            'int8_t': 127,
-            'int16_t': 32767,
-            'int32_t': 2147483647,
-            'int64_t': 9223372036854775807,
-            'uint8_t': 255,
-            'uint16_t': 65535,
-            'uint32_t': 4294967295,
-            'uint64_t': 18446744073709551615
-        }[type_name] == value
-    except KeyError:
-        return False
 
 
 def _generate_is_in_range(message):

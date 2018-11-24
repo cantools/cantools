@@ -21,6 +21,7 @@ except ImportError:
     from io import StringIO
 
 import cantools
+from cantools.database.can.formats import dbc
 
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -1732,7 +1733,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_dbc_parse_error_messages(self):
         # No valid entry.
         with self.assertRaises(textparser.ParseError) as cm:
-            cantools.db.formats.dbc.load_string('abc')
+            dbc.load_string('abc')
 
         self.assertEqual(
             str(cm.exception),
@@ -1740,9 +1741,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Bad message frame id.
         with self.assertRaises(textparser.ParseError) as cm:
-            cantools.db.formats.dbc.load_string(
-                'VERSION "1.0"\n'
-                'BO_ dssd\n')
+            dbc.load_string('VERSION "1.0"\n'
+                            'BO_ dssd\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -1750,9 +1750,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Bad entry key.
         with self.assertRaises(textparser.ParseError) as cm:
-            cantools.db.formats.dbc.load_string(
-                'VERSION "1.0"\n'
-                'dd\n')
+            dbc.load_string('VERSION "1.0"\n'
+                            'dd\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -1760,9 +1759,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Missing colon in message.
         with self.assertRaises(textparser.ParseError) as cm:
-            cantools.db.formats.dbc.load_string(
-                'VERSION "1.0"\n'
-                'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
+            dbc.load_string('VERSION "1.0"\n'
+                            'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -1771,7 +1769,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Missing frame id in message comment.
         with self.assertRaises(textparser.ParseError) as cm:
-            cantools.db.formats.dbc.load_string('CM_ BO_ "Foo.";')
+            dbc.load_string('CM_ BO_ "Foo.";')
 
         self.assertEqual(
             str(cm.exception),
@@ -3359,11 +3357,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = os.path.join('tests', 'files', 'long_names.dbc')
         db = cantools.database.load_file(filename)
 
+        # Nodes.
         self.assertEqual(db.nodes[0].name, 'NN123456789012345678901234567890123')
         self.assertEqual(db.nodes[1].name, 'N123456789012345678901234567890123')
         self.assertEqual(db.nodes[2].name, 'N1234567890123456789012345678901')
         self.assertEqual(db.nodes[3].name, 'N12345678901234567890123456789012')
 
+        # Messages.
         self.assertEqual(db.messages[0].name, 'SS12345678901234567890123458789012345')
         self.assertEqual(db.messages[1].name, 'SS1234567890123456789012345778901')
         self.assertEqual(db.messages[2].name, 'SS1234567890123456789012345878901234')
@@ -3378,6 +3378,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[7].senders, ['N1234567890123456789012345678901'])
         self.assertEqual(db.messages[8].senders, ['N12345678901234567890123456789012'])
 
+        # Signals.
         self.assertEqual(db.messages[5].signals[0].name,
                          'SS12345678901234567890123456789012')
         self.assertEqual(db.messages[6].signals[0].name,
@@ -3439,8 +3440,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'MM123456789012345678901234567890'
         ]
 
-        converter = cantools.database.can.formats.dbc.LongNamesConverter(
-            long_names)
+        converter = dbc.LongNamesConverter(long_names)
 
         for long_name, short_name in zip(long_names, short_names):
             self.assertEqual(converter.lookup_name(long_name), short_name)

@@ -390,7 +390,7 @@ def _generate_signal(signal):
 
     choices = []
     if signal.choices:
-        for value, text in signal.choices.items():
+        for value, text in sorted(signal.choices.items()):
             if not signal.is_signed:
                 choice_fmt_str = '{choice_name}_VAL_{choice_text} ({choice_value}U)'
             else:

@@ -217,13 +217,11 @@ SIGN_EXTENSION_FMT = '''
 '''
 
 SIGNAL_PARAM_COMMENT_FMT = '''\
- * @param {name}
+ * @param {name} Value as on the CAN bus.
 {comment}\
- *            Minimum: {minimum}
- *            Maximum: {maximum}
+ *            Range: {range}
  *            Scale: {scale}
- *            Offset: {offset}
- *            Unit: {unit}\
+ *            Offset: {offset}\
 '''
 
 
@@ -326,6 +324,41 @@ def _format_comment(comment):
         return ''
 
 
+def _format_decimal(value):
+    if int(value) == value:
+        value = int(value)
+
+    return str(value)
+
+
+def _format_range(signal):
+    minimum = signal.decimal.minimum
+    maximum = signal.decimal.maximum
+    scale = signal.decimal.scale
+    offset = signal.decimal.offset
+    unit = _get(signal.unit, '-')
+
+    if minimum is not None and maximum is not None:
+        return '{}..{} ({}..{} {})'.format(
+            _format_decimal((minimum - offset) / scale),
+            _format_decimal((maximum - offset) / scale),
+            minimum,
+            maximum,
+            unit)
+    elif minimum is not None:
+        return '{}.. ({}.. {})'.format(
+            _format_decimal((minimum - offset) / scale),
+            minimum,
+            unit)
+    elif maximum is not None:
+        return '..{} (..{} {}'.format(
+            _format_decimal((maximum - offset) / scale),
+            maximum,
+            unit)
+    else:
+        return '-'
+
+
 def _generate_signal(signal):
     if signal.is_multiplexer or signal.multiplexer_ids:
         print('warning: Multiplexed signals are not yet supported.')
@@ -339,19 +372,15 @@ def _generate_signal(signal):
 
     name = _camel_to_snake_case(signal.name)
     comment = _format_comment(signal.comment)
-    minimum = _get(signal.minimum, '-')
-    maximum = _get(signal.maximum, '-')
+    range_ = _format_range(signal)
     scale = _get(signal.scale, '-')
     offset = _get(signal.offset, '-')
-    unit = _get(signal.unit, '-')
 
     comment = SIGNAL_PARAM_COMMENT_FMT.format(name=name,
                                               comment=comment,
-                                              minimum=minimum,
-                                              maximum=maximum,
+                                              range=range_,
                                               scale=scale,
-                                              offset=offset,
-                                              unit=unit)
+                                              offset=offset)
     member = '    {} {};'.format(type_name, name)
 
     return comment, member

@@ -531,6 +531,22 @@ def _is_minimum_type_value(type_name, value):
         return False
 
 
+def _is_maximum_type_value(type_name, value):
+    try:
+        return {
+            'int8_t': 127,
+            'int16_t': 32767,
+            'int32_t': 2147483647,
+            'int64_t': 9223372036854775807,
+            'uint8_t': 255,
+            'uint16_t': 65535,
+            'uint32_t': 4294967295,
+            'uint64_t': 18446744073709551615
+        }[type_name] == value
+    except KeyError:
+        return False
+
+
 def _generate_is_in_range(message):
     """Generate range checks for all signals in given message.
 
@@ -559,7 +575,8 @@ def _generate_is_in_range(message):
                 checks.append('(value >= {}{})'.format(minimum, suffix))
 
         if maximum is not None:
-            checks.append('(value <= {}{})'.format(maximum, suffix))
+            if not _is_maximum_type_value(type_name, maximum):
+                checks.append('(value <= {}{})'.format(maximum, suffix))
 
         if not checks:
             checks = ['true']

@@ -1640,6 +1640,68 @@ class CanToolsDatabaseTest(unittest.TestCase):
             '           +-- BIT_H\n'
             '           +-- BIT_F')
 
+    def test_multiplex_2(self):
+        filename = os.path.join('tests', 'files', 'multiplex_2.dbc')
+
+        # ToDo: Fix DBC parser.
+        with self.assertRaises(Exception) as cm:
+            db = cantools.db.load_file(filename)
+
+        self.assertEqual(str(cm.exception), "'NoneType' object is not iterable")
+        return
+
+        # Shared.
+        message = db.messages[0]
+        self.assertEqual(message.signal_tree,
+                         [
+                             {
+                                 'S0': {
+                                     1: ['S1'],
+                                     2: ['S2'],
+                                     3: ['S1', 'S2'],
+                                     4: ['S2'],
+                                     5: ['S2']
+                                 }
+                             }
+                         ])
+
+        # Normal.
+        message = db.messages[1]
+        self.assertEqual(message.signal_tree,
+                         [
+                             {
+                                 'S0': {
+                                     0: ['S1'],
+                                     1: ['S2']
+                                 }
+                             }
+                         ])
+
+        # Extended.
+        message = db.messages[2]
+        self.assertEqual(message.signal_tree,
+                         [
+                             {
+                                 'S0': {
+                                     0: [
+                                         {
+                                             'S1': {
+                                                 0: ['S2', 'S3'],
+                                                 2: ['S4']
+                                             }
+                                         }
+                                     ],
+                                     1: ['S5']
+                                 }
+                             },
+                             {
+                                 'S6': {
+                                     1: ['S7'],
+                                     2: ['S8']
+                                 }
+                             }
+                         ])
+
     def test_multiplex_extended(self):
         #            tree              |  bits
         # =============================+========

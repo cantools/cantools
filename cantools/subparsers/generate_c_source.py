@@ -50,6 +50,8 @@ GENERATE_H_FMT = '''\
 
 {frame_id_defines}
 
+{signal_choice_val_defines}
+
 {structs}
 {declarations}
 #endif
@@ -226,9 +228,12 @@ SIGNAL_PARAM_COMMENT_FMT = '''\
 
 
 def _camel_to_snake_case(value):
+    value = re.sub('( +)', r'_', value)
+    value = re.sub('(:)', r'_', value)
     value = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', value)
     value = re.sub('(_+)', r'_', value)
     value = re.sub('([a-z0-9])([A-Z])', r'\1_\2', value).lower()
+    value = re.sub('\.', '', value)
 
     return value
 
@@ -383,7 +388,20 @@ def _generate_signal(signal):
                                               offset=offset)
     member = '    {} {};'.format(type_name, name)
 
-    return comment, member
+    choices = []
+    if signal.choices:
+        for value, text in sorted(signal.choices.items()):
+            if not signal.is_signed:
+                choice_fmt_str = '{choice_name}_{choice_text}_CHOICE ({choice_value}U)'
+            else:
+                choice_fmt_str = '{choice_name}_{choice_text}_CHOICE ({choice_value})'
+
+            choices.append(choice_fmt_str.format(
+                choice_name=name.upper(),
+                choice_text=_camel_to_snake_case(text).upper(),
+                choice_value=value))
+
+    return comment, member, choices
 
 
 def _signal_segments(signal, invert_shift):
@@ -559,9 +577,10 @@ def _format_decode_code(message):
 def _generate_struct(message):
     comments = []
     members = []
+    choices = []
 
     for signal in message.signals:
-        comment, member = _generate_signal(signal)
+        comment, member, signal_choice = _generate_signal(signal)
 
         if comment is not None:
             comments.append(comment)
@@ -569,13 +588,19 @@ def _generate_struct(message):
         if member is not None:
             members.append(member)
 
+        if signal_choice:
+            signal_choice = ['{message_name}_{choice_str}'.format(
+                message_name=_camel_to_snake_case(message.name).upper(),
+                choice_str=choice) for choice in signal_choice]
+            choices.append(signal_choice)
+
     if not comments:
         comments = [' * @param dummy Dummy signal in empty message.']
 
     if not members:
         members = ['    uint8_t dummy;']
 
-    return comments, members
+    return comments, members, choices
 
 
 def _generate_is_in_range(message):
@@ -625,7 +650,7 @@ def _generate_is_in_range(message):
 
 def _generate_message(database_name, message):
     message_name = _camel_to_snake_case(message.name)
-    comments, members = _generate_struct(message)
+    comments, members, choices = _generate_struct(message)
     is_in_range_declarations = []
     is_in_range_definitions = []
 
@@ -676,7 +701,17 @@ def _generate_message(database_name, message):
         message_name.upper(),
         message.frame_id)
 
-    return struct_, declaration, definition, frame_id_define
+    choices = [
+        [
+            '#define {database_name}_{choice_str}'.format(
+                database_name=database_name.upper(),
+                choice_str=choice
+            ) for choice in signal_choice
+        ]
+        for signal_choice in choices
+    ]
+
+    return struct_, declaration, definition, frame_id_define, choices
 
 
 def _do_generate_c_source(args, version):
@@ -694,22 +729,27 @@ def _do_generate_c_source(args, version):
     declarations = []
     definitions = []
     frame_id_defines = []
+    choices_defines = []
 
     for message in dbase.messages:
         (struct_,
          declaration,
          definition,
-         frame_id_define) = _generate_message(filename,
-                                              message)
+         frame_id_define,
+         choices) = _generate_message(filename, message)
+
         structs.append(struct_)
         declarations.append(declaration)
         definitions.append(definition)
         frame_id_defines.append(frame_id_define)
+        if choices:
+            choices_defines.extend(choices)
 
     structs = '\n'.join(structs)
     declarations = '\n'.join(declarations)
     definitions = '\n'.join(definitions)
     frame_id_defines = '\n'.join(frame_id_defines)
+    choices_defines = '\n\n'.join(['\n'.join(signal_choice) for signal_choice in choices_defines])
 
     with open(filename_h, 'w') as fout:
         fout.write(GENERATE_H_FMT.format(version=version,
@@ -717,7 +757,8 @@ def _do_generate_c_source(args, version):
                                          include_guard=include_guard,
                                          structs=structs,
                                          declarations=declarations,
-                                         frame_id_defines=frame_id_defines))
+                                         frame_id_defines=frame_id_defines,
+                                         signal_choice_val_defines=choices_defines))
 
     with open(filename_c, 'w') as fout:
         fout.write(GENERATE_C_FMT.format(version=version,

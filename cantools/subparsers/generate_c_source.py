@@ -580,7 +580,7 @@ def _generate_struct(message):
     choices = []
 
     for signal in message.signals:
-        comment, member, choice = _generate_signal(signal)
+        comment, member, signal_choice = _generate_signal(signal)
 
         if comment is not None:
             comments.append(comment)
@@ -588,19 +588,17 @@ def _generate_struct(message):
         if member is not None:
             members.append(member)
 
-        if choice is not None:
-            choices.extend(choice)
+        if signal_choice:
+            signal_choice = ['{message_name}_{choice_str}'.format(
+                message_name=_camel_to_snake_case(message.name).upper(),
+                choice_str=choice) for choice in signal_choice]
+            choices.append(signal_choice)
 
     if not comments:
         comments = [' * @param dummy Dummy signal in empty message.']
 
     if not members:
         members = ['    uint8_t dummy;']
-
-    choices = ['{message_name}_{choice_str}'.format(
-        message_name=_camel_to_snake_case(message.name).upper(),
-        choice_str=choice)
-    for choice in choices]
 
     return comments, members, choices
 
@@ -703,10 +701,15 @@ def _generate_message(database_name, message):
         message_name.upper(),
         message.frame_id)
 
-    choices = ['#define {database_name}_{choice_str}'.format(
-        database_name=database_name.upper(),
-        choice_str=choice)
-    for choice in choices]
+    choices = [
+        [
+            '#define {database_name}_{choice_str}'.format(
+                database_name=database_name.upper(),
+                choice_str=choice
+            ) for choice in signal_choice
+        ]
+        for signal_choice in choices
+    ]
 
     return struct_, declaration, definition, frame_id_define, choices
 
@@ -740,13 +743,13 @@ def _do_generate_c_source(args, version):
         definitions.append(definition)
         frame_id_defines.append(frame_id_define)
         if choices:
-            choices_defines.append(choices)
+            choices_defines.extend(choices)
 
     structs = '\n'.join(structs)
     declarations = '\n'.join(declarations)
     definitions = '\n'.join(definitions)
     frame_id_defines = '\n'.join(frame_id_defines)
-    choices_defines= '\n\n'.join(['\n'.join(msg) for msg in choices_defines])
+    choices_defines = '\n\n'.join(['\n'.join(signal_choice) for signal_choice in choices_defines])
 
     with open(filename_h, 'w') as fout:
         fout.write(GENERATE_H_FMT.format(version=version,

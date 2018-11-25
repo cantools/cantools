@@ -843,6 +843,157 @@ def _load_signal_multiplexer_values(tokens):
     return signal_multiplexer_values
 
 
+def _load_signals(tokens,
+                  comments,
+                  attributes,
+                  definitions,
+                  choices,
+                  signal_types,
+                  signal_multiplexer_values,
+                  frame_id_dbc,
+                  multiplexer_signal):
+    def get_attributes(frame_id_dbc, signal):
+        """Get attributes for given signal.
+
+        """
+
+        try:
+            return attributes[frame_id_dbc]['signal'][signal]
+        except KeyError:
+            return None
+
+    def get_comment(frame_id_dbc, signal):
+        """Get comment for given signal.
+
+        """
+
+        try:
+            return comments[frame_id_dbc]['signal'][signal]
+        except:
+            return None
+
+    def get_choices(frame_id_dbc, signal):
+        """Get choices for given signal.
+
+        """
+
+        try:
+            return choices[frame_id_dbc][signal]
+        except KeyError:
+            return None
+
+    def get_multiplexer_ids(frame_id_dbc, signal, multiplexer_signal):
+        ids = []
+
+        if len(signal) == 2 and signal[1] != 'M':
+            # ToDo: Extended multiplexing not yet supported.
+            value = signal[1][1:].strip('M')
+            ids.append(int(value))
+
+        try:
+            ids.extend(
+                signal_multiplexer_values[frame_id_dbc][multiplexer_signal][signal[0]])
+        except KeyError:
+            pass
+
+        if ids:
+            return list(set(ids))
+        else:
+            return None
+
+    def get_receivers(receivers):
+        if receivers == ['Vector__XXX']:
+            receivers = []
+
+        return [_get_node_name(attributes, receiver) for receiver in receivers]
+
+    def get_minimum(minimum, maximum):
+        if minimum == maximum == '0':
+            return None
+        else:
+            return num(minimum)
+
+    def get_maximum(minimum, maximum):
+        if minimum == maximum == '0':
+            return None
+        else:
+            return num(maximum)
+
+    def get_minimum_decimal(minimum, maximum):
+        if minimum == maximum == '0':
+            return None
+        else:
+            return Decimal(minimum)
+
+    def get_maximum_decimal(minimum, maximum):
+        if minimum == maximum == '0':
+            return None
+        else:
+            return Decimal(maximum)
+
+    def get_is_float(frame_id_dbc, signal):
+        """Get is_float for given signal.
+
+        """
+
+        try:
+            return signal_types[frame_id_dbc][signal] in FLOAT_SIGNAL_TYPES
+        except KeyError:
+            return False
+
+    def get_signal_name(frame_id_dbc, name):
+        signal_attributes = get_attributes(frame_id_dbc, name)
+
+        try:
+            return signal_attributes['SystemSignalLongSymbol'].value
+        except (KeyError, TypeError):
+            return name
+
+    signals = []
+
+    for signal in tokens:
+        signals.append(
+            Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
+                   start=int(signal[3]),
+                   length=int(signal[5]),
+                   receivers=get_receivers(signal[20]),
+                   byte_order=('big_endian'
+                               if signal[7] == '0'
+                               else 'little_endian'),
+                   is_signed=(signal[8] == '-'),
+                   scale=num(signal[10]),
+                   offset=num(signal[12]),
+                   minimum=get_minimum(signal[15], signal[17]),
+                   maximum=get_maximum(signal[15], signal[17]),
+                   decimal=SignalDecimal(Decimal(signal[10]),
+                                         Decimal(signal[12]),
+                                         get_minimum_decimal(signal[15],
+                                                             signal[17]),
+                                         get_maximum_decimal(signal[15],
+                                                             signal[17])),
+                   unit=(None if signal[19] == '' else signal[19]),
+                   choices=get_choices(frame_id_dbc,
+                                       signal[1][0]),
+                   dbc_specifics=DbcSpecifics(
+                       attributes=get_attributes(frame_id_dbc, signal[1][0]),
+                       attribute_definitions=definitions),
+                   comment=get_comment(frame_id_dbc,
+                                       signal[1][0]),
+                   is_multiplexer=(signal[1][1] == 'M'
+                                   if len(signal[1]) == 2
+                                   else False),
+                   multiplexer_ids=get_multiplexer_ids(frame_id_dbc,
+                                                       signal[1],
+                                                       multiplexer_signal),
+                   multiplexer_signal=(multiplexer_signal
+                                       if (signal[1][0] != multiplexer_signal
+                                           and len(signal[1]) == 2)
+                                       else None),
+                   is_float=get_is_float(frame_id_dbc, signal[1][0])))
+
+    return signals
+
+
 def _load_messages(tokens,
                    comments,
                    attributes,
@@ -856,29 +1007,23 @@ def _load_messages(tokens,
 
     """
 
-    def get_attributes(frame_id_dbc, signal=None):
-        """Get attributes for given message or signal.
+    def get_attributes(frame_id_dbc):
+        """Get attributes for given message.
 
         """
 
         try:
-            if signal is None:
-                return attributes[frame_id_dbc]['message']
-            else:
-                return attributes[frame_id_dbc]['signal'][signal]
+            return attributes[frame_id_dbc]['message']
         except KeyError:
             return None
 
-    def get_comment(frame_id_dbc, signal=None):
-        """Get comment for given message or signal.
+    def get_comment(frame_id_dbc):
+        """Get comment for given message.
 
         """
 
         try:
-            if signal is None:
-                return comments[frame_id_dbc]['message']
-            else:
-                return comments[frame_id_dbc]['signal'][signal]
+            return comments[frame_id_dbc]['message']
         except:
             return None
 
@@ -917,75 +1062,6 @@ def _load_messages(tokens,
             except (KeyError, TypeError):
                 return None
 
-    def get_choices(frame_id_dbc, signal):
-        """Get choices for given signal.
-
-        """
-
-        try:
-            return choices[frame_id_dbc][signal]
-        except KeyError:
-            return None
-
-    def get_multiplexer_ids(frame_id_dbc, signal, multiplexer_signal):
-        ids = []
-
-        if len(signal) == 2 and signal[1] != 'M':
-            # ToDo: Extended multiplexing not yet supported.
-            value = signal[1][1:].strip('M')
-            ids.append(int(value))
-
-        try:
-            ids.extend(
-                signal_multiplexer_values[frame_id_dbc][multiplexer_signal][signal[0]])
-        except KeyError:
-            pass
-
-        if ids:
-            return list(set(ids))
-        else:
-            return None
-
-    def get_is_float(frame_id_dbc, signal):
-        """Get is_float for given signal.
-
-        """
-
-        try:
-            return signal_types[frame_id_dbc][signal] in FLOAT_SIGNAL_TYPES
-        except KeyError:
-            return False
-
-    def get_receivers(receivers):
-        if receivers == ['Vector__XXX']:
-            receivers = []
-
-        return [_get_node_name(attributes, receiver) for receiver in receivers]
-
-    def get_minimum(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return num(minimum)
-
-    def get_maximum(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return num(maximum)
-
-    def get_minimum_decimal(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return Decimal(minimum)
-
-    def get_maximum_decimal(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return Decimal(maximum)
-
     def get_protocol(frame_id_dbc):
         """Get protocol for a given message.
 
@@ -1012,14 +1088,6 @@ def _load_messages(tokens,
 
         try:
             return message_attributes['SystemMessageLongSymbol'].value
-        except (KeyError, TypeError):
-            return name
-
-    def get_signal_name(frame_id_dbc, name):
-        signal_attributes = get_attributes(frame_id_dbc, name)
-
-        try:
-            return signal_attributes['SystemSignalLongSymbol'].value
         except (KeyError, TypeError):
             return name
 
@@ -1056,60 +1124,31 @@ def _load_messages(tokens,
                     multiplexer_signal = signal[1][0]
                     break
 
-        message = Message(
-            frame_id=frame_id,
-            is_extended_frame=is_extended_frame,
-            name=get_message_name(frame_id_dbc, message[2]),
-            length=int(message[4], 0),
-            senders=senders,
-            send_type=get_send_type(frame_id_dbc),
-            cycle_time=get_cycle_time(frame_id_dbc),
-            dbc_specifics=DbcSpecifics(attributes=get_attributes(frame_id_dbc),
-                                       attribute_definitions=definitions),
-            signals=[Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
-                            start=int(signal[3]),
-                            length=int(signal[5]),
-                            receivers=get_receivers(signal[20]),
-                            byte_order=('big_endian'
-                                        if signal[7] == '0'
-                                        else 'little_endian'),
-                            is_signed=(signal[8] == '-'),
-                            scale=num(signal[10]),
-                            offset=num(signal[12]),
-                            minimum=get_minimum(signal[15], signal[17]),
-                            maximum=get_maximum(signal[15], signal[17]),
-                            decimal=SignalDecimal(Decimal(signal[10]),
-                                                  Decimal(signal[12]),
-                                                  get_minimum_decimal(signal[15],
-                                                                      signal[17]),
-                                                  get_maximum_decimal(signal[15],
-                                                                      signal[17])),
-                            unit=None if signal[19] == '' else signal[19],
-                            choices=get_choices(frame_id_dbc,
-                                                signal[1][0]),
-                            dbc_specifics=DbcSpecifics(attributes=get_attributes(
-                                                                    frame_id_dbc,
-                                                                    signal[1][0]),
-                                                       attribute_definitions=definitions),
-                            comment=get_comment(frame_id_dbc,
-                                                signal[1][0]),
-                            is_multiplexer=(signal[1][1] == 'M'
-                                            if len(signal[1]) == 2
-                                            else False),
-                            multiplexer_ids=get_multiplexer_ids(frame_id_dbc,
-                                                                signal[1],
-                                                                multiplexer_signal),
-                            multiplexer_signal=(multiplexer_signal
-                                                if (signal[1][0] != multiplexer_signal
-                                                    and len(signal[1]) == 2)
-                                                else None),
-                            is_float=get_is_float(frame_id_dbc,
-                                                  signal[1][0]))
-                     for signal in message[6]],
-            comment=get_comment(frame_id_dbc),
-            strict=strict,
-            protocol=get_protocol(frame_id_dbc))
-        messages.append(message)
+        signals = _load_signals(message[6],
+                                comments,
+                                attributes,
+                                definitions,
+                                choices,
+                                signal_types,
+                                signal_multiplexer_values,
+                                frame_id_dbc,
+                                multiplexer_signal)
+
+        messages.append(
+            Message(frame_id=frame_id,
+                    is_extended_frame=is_extended_frame,
+                    name=get_message_name(frame_id_dbc, message[2]),
+                    length=int(message[4], 0),
+                    senders=senders,
+                    send_type=get_send_type(frame_id_dbc),
+                    cycle_time=get_cycle_time(frame_id_dbc),
+                    dbc_specifics=DbcSpecifics(
+                        attributes=get_attributes(frame_id_dbc),
+                        attribute_definitions=definitions),
+                    signals=signals,
+                    comment=get_comment(frame_id_dbc),
+                    strict=strict,
+                    protocol=get_protocol(frame_id_dbc)))
 
     return messages
 

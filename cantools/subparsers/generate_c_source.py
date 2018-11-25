@@ -392,9 +392,9 @@ def _generate_signal(signal):
     if signal.choices:
         for value, text in sorted(signal.choices.items()):
             if not signal.is_signed:
-                choice_fmt_str = '{choice_name}_VAL_{choice_text} ({choice_value}U)'
+                choice_fmt_str = '{choice_name}_CHOICE_{choice_text} ({choice_value}U)'
             else:
-                choice_fmt_str = '{choice_name}_VAL_{choice_text} ({choice_value})'
+                choice_fmt_str = '{choice_name}_CHOICE_{choice_text} ({choice_value})'
 
             choices.append(choice_fmt_str.format(
                 choice_name=name.upper(),

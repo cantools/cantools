@@ -194,7 +194,7 @@ files.
 
 Known limitations:
 
-- Multiplexed signals are ignored.
+- Signal multiplexing is not yet supported.
 
 - No signal scaling.
 

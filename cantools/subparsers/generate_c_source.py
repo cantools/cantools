@@ -408,24 +408,19 @@ def _format_choices(signal, signal_name):
     choices = []
 
     for value, name in sorted(_unique_choices(signal.choices).items()):
-        if not signal.is_signed:
-            fmt = '{signal_name}_{name}_CHOICE ({value}u)'
-        else:
+        if signal.is_signed:
             fmt = '{signal_name}_{name}_CHOICE ({value})'
+        else:
+            fmt = '{signal_name}_{name}_CHOICE ({value}u)'
 
         choices.append(fmt.format(signal_name=signal_name.upper(),
                                   name=name,
                                   value=value))
 
-    return  choices
+    return choices
 
 
 def _generate_signal(signal):
-    if signal.is_multiplexer or signal.multiplexer_ids:
-        print('warning: Multiplexed signals are not yet supported.')
-
-        return None, None
-
     type_name = _type_name(signal)
 
     if type_name is None:

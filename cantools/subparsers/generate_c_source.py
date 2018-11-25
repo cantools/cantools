@@ -409,7 +409,7 @@ def _format_choices(signal, signal_name):
 
     for value, name in sorted(_unique_choices(signal.choices).items()):
         if not signal.is_signed:
-            fmt = '{signal_name}_{name}_CHOICE ({value}U)'
+            fmt = '{signal_name}_{name}_CHOICE ({value}u)'
         else:
             fmt = '{signal_name}_{name}_CHOICE ({value})'
 
@@ -744,7 +744,7 @@ def _generate_message(database_name, message):
 
     definition += '\n' + '\n'.join(is_in_range_definitions)
 
-    frame_id_define = '#define {}_FRAME_ID_{} (0x{:02x}U)'.format(
+    frame_id_define = '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
         database_name.upper(),
         message_name.upper(),
         message.frame_id)

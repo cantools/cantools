@@ -1642,13 +1642,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_multiplex_2(self):
         filename = os.path.join('tests', 'files', 'multiplex_2.dbc')
-
-        # ToDo: Fix DBC parser.
-        with self.assertRaises(Exception) as cm:
-            db = cantools.db.load_file(filename)
-
-        self.assertEqual(str(cm.exception), "'NoneType' object is not iterable")
-        return
+        db = cantools.db.load_file(filename)
 
         # Shared.
         message = db.messages[0]
@@ -1814,8 +1808,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             '       +-- 1\n'
             '       |   +-- S7\n'
             '       +-- 2\n'
-            '           +-- S8'
-        )
+            '           +-- S8')
 
         # Encode and decode a few messages with different
         # multiplexing.

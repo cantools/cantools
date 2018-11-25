@@ -832,7 +832,14 @@ def _load_signal_multiplexer_values(tokens):
         frame_id = int(signal_multiplexer_value[1])
         signal_name = signal_multiplexer_value[2]
         multiplexer_signal = signal_multiplexer_value[3]
-        multiplexer_ids = [int(v[0]) for v in signal_multiplexer_value[4]]
+        multiplexer_ids = []
+
+        for lower, upper in signal_multiplexer_value[4]:
+            lower = int(lower)
+            upper = int(upper[1:])
+            # ToDo: Probably store ranges as tuples to not run out of
+            #       memory on huge ranges.
+            multiplexer_ids.extend(range(lower, upper + 1))
 
         if multiplexer_signal not in signal_multiplexer_values[frame_id]:
             signal_multiplexer_values[frame_id][multiplexer_signal] = {}
@@ -852,6 +859,17 @@ def _load_signals(tokens,
                   signal_multiplexer_values,
                   frame_id_dbc,
                   multiplexer_signal):
+    signal_to_multiplexer = {}
+
+    try:
+        signal_multiplexer_values = signal_multiplexer_values[frame_id_dbc]
+
+        for multiplexer_name, items in signal_multiplexer_values.items():
+            for name in items:
+                signal_to_multiplexer[name] = multiplexer_name
+    except KeyError:
+        pass
+
     def get_attributes(frame_id_dbc, signal):
         """Get attributes for given signal.
 
@@ -888,27 +906,36 @@ def _load_signals(tokens,
         else:
             return False
 
-    def get_multiplexer_ids(frame_id_dbc, signal, multiplexer_signal):
+    def get_multiplexer_ids(signal, multiplexer_signal):
         ids = []
 
-        if len(signal) == 2 and signal[1] != 'M':
-            # ToDo: Extended multiplexing not yet supported.
-            value = signal[1][1:].strip('M')
-            ids.append(int(value))
+        if multiplexer_signal is not None:
+            if len(signal) == 2 and not signal[1].endswith('M'):
+                value = signal[1][1:].rstrip('M')
+                ids.append(int(value))
+        else:
+            multiplexer_signal = get_multiplexer_signal(signal,
+                                                        multiplexer_signal)
 
         try:
             ids.extend(
-                signal_multiplexer_values[frame_id_dbc][multiplexer_signal][signal[0]])
+                signal_multiplexer_values[multiplexer_signal][signal[0]])
         except KeyError:
             pass
 
         if ids:
             return list(set(ids))
-        else:
-            return None
 
     def get_multiplexer_signal(signal, multiplexer_signal):
-        if signal[1][0] != multiplexer_signal and len(signal[1]) == 2:
+        if len(signal) != 2:
+            return
+
+        if multiplexer_signal is None:
+            try:
+                return signal_to_multiplexer[signal[0]]
+            except KeyError:
+                pass
+        elif signal[0] != multiplexer_signal:
             return multiplexer_signal
 
     def get_receivers(receivers):
@@ -990,10 +1017,9 @@ def _load_signals(tokens,
                    comment=get_comment(frame_id_dbc,
                                        signal[1][0]),
                    is_multiplexer=get_is_multiplexer(signal),
-                   multiplexer_ids=get_multiplexer_ids(frame_id_dbc,
-                                                       signal[1],
+                   multiplexer_ids=get_multiplexer_ids(signal[1],
                                                        multiplexer_signal),
-                   multiplexer_signal=get_multiplexer_signal(signal,
+                   multiplexer_signal=get_multiplexer_signal(signal[1],
                                                              multiplexer_signal),
                    is_float=get_is_float(frame_id_dbc, signal[1][0])))
 
@@ -1126,9 +1152,12 @@ def _load_messages(tokens,
 
         for signal in message[6]:
             if len(signal[1]) == 2:
-                if signal[1][1] == 'M':
-                    multiplexer_signal = signal[1][0]
-                    break
+                if signal[1][1].endswith('M'):
+                    if multiplexer_signal is None:
+                        multiplexer_signal = signal[1][0]
+                    else:
+                        multiplexer_signal = None
+                        break
 
         signals = _load_signals(message[6],
                                 comments,

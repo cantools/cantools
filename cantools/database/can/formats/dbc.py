@@ -882,6 +882,12 @@ def _load_signals(tokens,
         except KeyError:
             return None
 
+    def get_is_multiplexer(signal):
+        if len(signal[1]) == 2:
+            return signal[1][1].endswith('M')
+        else:
+            return False
+
     def get_multiplexer_ids(frame_id_dbc, signal, multiplexer_signal):
         ids = []
 
@@ -900,6 +906,10 @@ def _load_signals(tokens,
             return list(set(ids))
         else:
             return None
+
+    def get_multiplexer_signal(signal, multiplexer_signal):
+        if signal[1][0] != multiplexer_signal and len(signal[1]) == 2:
+            return multiplexer_signal
 
     def get_receivers(receivers):
         if receivers == ['Vector__XXX']:
@@ -979,16 +989,12 @@ def _load_signals(tokens,
                        attribute_definitions=definitions),
                    comment=get_comment(frame_id_dbc,
                                        signal[1][0]),
-                   is_multiplexer=(signal[1][1] == 'M'
-                                   if len(signal[1]) == 2
-                                   else False),
+                   is_multiplexer=get_is_multiplexer(signal),
                    multiplexer_ids=get_multiplexer_ids(frame_id_dbc,
                                                        signal[1],
                                                        multiplexer_signal),
-                   multiplexer_signal=(multiplexer_signal
-                                       if (signal[1][0] != multiplexer_signal
-                                           and len(signal[1]) == 2)
-                                       else None),
+                   multiplexer_signal=get_multiplexer_signal(signal,
+                                                             multiplexer_signal),
                    is_float=get_is_float(frame_id_dbc, signal[1][0])))
 
     return signals

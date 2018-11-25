@@ -227,13 +227,19 @@ SIGNAL_PARAM_COMMENT_FMT = '''\
 '''
 
 
+def _canonical(value):
+    """Replace anything but 'a-z', 'A-Z', '0-9' and '_' with '_'.
+
+    """
+
+    return re.sub(r'\W', '_', value)
+
+
 def _camel_to_snake_case(value):
-    value = re.sub('( +)', r'_', value)
-    value = re.sub('(:)', r'_', value)
-    value = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', value)
-    value = re.sub('(_+)', r'_', value)
-    value = re.sub('([a-z0-9])([A-Z])', r'\1_\2', value).lower()
-    value = re.sub('\.', '', value)
+    value = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', value)
+    value = re.sub(r'(_+)', '_', value)
+    value = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', value).lower()
+    value = _canonical(value)
 
     return value
 
@@ -364,6 +370,56 @@ def _format_range(signal):
         return '-'
 
 
+def _unique_choices(choices):
+    """Make duplicated choice names unique by first appending its value
+    and then underscores until unique.
+
+    """
+
+    items = {
+        value: _camel_to_snake_case(name).upper()
+        for value, name in choices.items()
+    }
+    names = list(items.values())
+    duplicated_names = [
+        name
+        for name in set(names)
+        if names.count(name) > 1
+    ]
+    unique_choices = {
+        value: name
+        for value, name in items.items()
+        if names.count(name) == 1
+    }
+
+    for value, name in items.items():
+        if name in duplicated_names:
+            name += _canonical('_{}'.format(value))
+
+            while name in unique_choices.values():
+                name += '_'
+
+            unique_choices[value] = name
+
+    return unique_choices
+
+
+def _format_choices(signal, signal_name):
+    choices = []
+
+    for value, name in sorted(_unique_choices(signal.choices).items()):
+        if not signal.is_signed:
+            fmt = '{signal_name}_{name}_CHOICE ({value}U)'
+        else:
+            fmt = '{signal_name}_{name}_CHOICE ({value})'
+
+        choices.append(fmt.format(signal_name=signal_name.upper(),
+                                  name=name,
+                                  value=value))
+
+    return  choices
+
+
 def _generate_signal(signal):
     if signal.is_multiplexer or signal.multiplexer_ids:
         print('warning: Multiplexed signals are not yet supported.')
@@ -388,18 +444,10 @@ def _generate_signal(signal):
                                               offset=offset)
     member = '    {} {};'.format(type_name, name)
 
-    choices = []
     if signal.choices:
-        for value, text in sorted(signal.choices.items()):
-            if not signal.is_signed:
-                choice_fmt_str = '{choice_name}_{choice_text}_CHOICE ({choice_value}U)'
-            else:
-                choice_fmt_str = '{choice_name}_{choice_text}_CHOICE ({choice_value})'
-
-            choices.append(choice_fmt_str.format(
-                choice_name=name.upper(),
-                choice_text=_camel_to_snake_case(text).upper(),
-                choice_value=value))
+        choices = _format_choices(signal, name)
+    else:
+        choices = []
 
     return comment, member, choices
 

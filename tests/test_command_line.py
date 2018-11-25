@@ -470,7 +470,8 @@ IO_DEBUG(
             'padding_bit_order',
             'vehicle',
             'floating_point',
-            'no_signals'
+            'no_signals',
+            'choices'
         ]
 
         for database in databases:

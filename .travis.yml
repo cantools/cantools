@@ -10,5 +10,6 @@ script:
   - make test-sdist
   - env PYTHONPATH=. python examples/hello_world.py
   - env PYTHONPATH=. python examples/diagnostics/did.py
+  - make test_c
 after_success:
   coveralls

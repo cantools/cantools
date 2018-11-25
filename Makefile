@@ -1,3 +1,4 @@
+.PHONY: test
 test:
 	python2 setup.py test
 	python3 setup.py test
@@ -9,6 +10,7 @@ test:
 	codespell -d $$(git ls-files | grep -v \.kcd | grep -v \.[hc])
 	$(MAKE) test_c
 
+.PHONY: test_c
 test_c:
 	gcc -Wall -Wpedantic -Werror -std=c99 \
 	    tests/main.c \
@@ -20,6 +22,7 @@ test_c:
 	    tests/files/c_source/no_signals.c \
 	    tests/files/c_source/choices.c && ./a.out
 
+.PHONY: test-sdist
 test-sdist:
 	rm -rf dist
 	python setup.py sdist
@@ -30,6 +33,7 @@ test-sdist:
 	cd cantools-* && \
 	python setup.py test
 
+.PHONY: release-to-pypi
 release-to-pypi:
 	python setup.py sdist
 	python setup.py bdist_wheel --universal

@@ -8,10 +8,10 @@ test:
 	env PYTHONPATH=. python3 examples/dbc_io/main.py
 	env PYTHONPATH=. python3 examples/diagnostics/did.py
 	codespell -d $$(git ls-files | grep -v \.kcd | grep -v \.[hc])
-	$(MAKE) test_c
+	$(MAKE) test-c
 
-.PHONY: test_c
-test_c:
+.PHONY: test-c
+test-c:
 	gcc -Wall -Wpedantic -Werror -std=c99 \
 	    tests/main.c \
 	    tests/files/c_source/motohawk.c \

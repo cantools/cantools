@@ -109,10 +109,6 @@ int multiplex_2_shared_decode(
 
     case 2:
         dst_p->s2 |= ((uint8_t)(src_p[1] & 0xff) >> 0);
-
-        if (dst_p->s2 & (1 << 7)) {
-            dst_p->s2 |= 0x0;
-        }
         break;
 
     case 3:
@@ -123,26 +119,14 @@ int multiplex_2_shared_decode(
         }
 
         dst_p->s2 |= ((uint8_t)(src_p[1] & 0xff) >> 0);
-
-        if (dst_p->s2 & (1 << 7)) {
-            dst_p->s2 |= 0x0;
-        }
         break;
 
     case 4:
         dst_p->s2 |= ((uint8_t)(src_p[1] & 0xff) >> 0);
-
-        if (dst_p->s2 & (1 << 7)) {
-            dst_p->s2 |= 0x0;
-        }
         break;
 
     case 5:
         dst_p->s2 |= ((uint8_t)(src_p[1] & 0xff) >> 0);
-
-        if (dst_p->s2 & (1 << 7)) {
-            dst_p->s2 |= 0x0;
-        }
         break;
 
     default:
@@ -226,10 +210,6 @@ int multiplex_2_normal_decode(
 
     case 1:
         dst_p->s2 |= ((uint8_t)(src_p[1] & 0xff) >> 0);
-
-        if (dst_p->s2 & (1 << 7)) {
-            dst_p->s2 |= 0x0;
-        }
         break;
 
     default:
@@ -353,17 +333,8 @@ int multiplex_2_extended_decode(
 
         case 0:
             dst_p->s2 |= ((uint8_t)(src_p[1] & 0xff) >> 0);
-
-            if (dst_p->s2 & (1 << 7)) {
-                dst_p->s2 |= 0x0;
-            }
-
             dst_p->s3 |= ((uint16_t)(src_p[2] & 0xff) >> 0);
             dst_p->s3 |= ((uint16_t)(src_p[3] & 0xff) << 8);
-
-            if (dst_p->s3 & (1 << 15)) {
-                dst_p->s3 |= 0x0;
-            }
             break;
 
         case 2:
@@ -398,10 +369,6 @@ int multiplex_2_extended_decode(
 
     dst_p->s6 |= ((uint8_t)(src_p[4] & 0xff) >> 0);
 
-    if (dst_p->s6 & (1 << 7)) {
-        dst_p->s6 |= 0x0;
-    }
-
     switch (dst_p->s6) {
 
     case 1:
@@ -416,10 +383,6 @@ int multiplex_2_extended_decode(
 
     case 2:
         dst_p->s8 |= ((uint8_t)(src_p[5] & 0xff) >> 0);
-
-        if (dst_p->s8 & (1 << 7)) {
-            dst_p->s8 |= 0x0;
-        }
         break;
 
     default:

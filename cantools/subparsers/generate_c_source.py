@@ -590,11 +590,13 @@ def _format_decode_code(message):
             conversions.append(line)
         elif signal.is_signed:
             mask = ((1 << (type_length - signal.length)) - 1)
-            mask <<= signal.length
-            formatted = SIGN_EXTENSION_FMT.format(name=signal_name,
-                                                  shift=signal.length - 1,
-                                                  mask=hex(mask))
-            body.extend(formatted.splitlines())
+
+            if mask != 0:
+                mask <<= signal.length
+                formatted = SIGN_EXTENSION_FMT.format(name=signal_name,
+                                                      shift=signal.length - 1,
+                                                      mask=hex(mask))
+                body.extend(formatted.splitlines())
 
     if variables:
         variables += ['', '']

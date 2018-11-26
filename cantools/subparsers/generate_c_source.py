@@ -370,56 +370,6 @@ def _format_range(signal):
         return '-'
 
 
-def _unique_choices(choices):
-    """Make duplicated choice names unique by first appending its value
-    and then underscores until unique.
-
-    """
-
-    items = {
-        value: _camel_to_snake_case(name).upper()
-        for value, name in choices.items()
-    }
-    names = list(items.values())
-    duplicated_names = [
-        name
-        for name in set(names)
-        if names.count(name) > 1
-    ]
-    unique_choices = {
-        value: name
-        for value, name in items.items()
-        if names.count(name) == 1
-    }
-
-    for value, name in items.items():
-        if name in duplicated_names:
-            name += _canonical('_{}'.format(value))
-
-            while name in unique_choices.values():
-                name += '_'
-
-            unique_choices[value] = name
-
-    return unique_choices
-
-
-def _format_choices(signal, signal_name):
-    choices = []
-
-    for value, name in sorted(_unique_choices(signal.choices).items()):
-        if signal.is_signed:
-            fmt = '{signal_name}_{name}_CHOICE ({value})'
-        else:
-            fmt = '{signal_name}_{name}_CHOICE ({value}u)'
-
-        choices.append(fmt.format(signal_name=signal_name.upper(),
-                                  name=name,
-                                  value=value))
-
-    return choices
-
-
 def _generate_signal(signal):
     type_name = _type_name(signal)
 
@@ -439,12 +389,7 @@ def _generate_signal(signal):
                                               offset=offset)
     member = '    {} {};'.format(type_name, name)
 
-    if signal.choices:
-        choices = _format_choices(signal, name)
-    else:
-        choices = []
-
-    return comment, member, choices
+    return comment, member
 
 
 def _signal_segments(signal, invert_shift):
@@ -622,10 +567,9 @@ def _format_decode_code(message):
 def _generate_struct(message):
     comments = []
     members = []
-    choices = []
 
     for signal in message.signals:
-        comment, member, signal_choice = _generate_signal(signal)
+        comment, member = _generate_signal(signal)
 
         if comment is not None:
             comments.append(comment)
@@ -633,19 +577,82 @@ def _generate_struct(message):
         if member is not None:
             members.append(member)
 
-        if signal_choice:
-            signal_choice = ['{message_name}_{choice_str}'.format(
-                message_name=_camel_to_snake_case(message.name).upper(),
-                choice_str=choice) for choice in signal_choice]
-            choices.append(signal_choice)
-
     if not comments:
         comments = [' * @param dummy Dummy signal in empty message.']
 
     if not members:
         members = ['    uint8_t dummy;']
 
-    return comments, members, choices
+    return comments, members
+
+
+def _unique_choices(choices):
+    """Make duplicated choice names unique by first appending its value
+    and then underscores until unique.
+
+    """
+
+    items = {
+        value: _camel_to_snake_case(name).upper()
+        for value, name in choices.items()
+    }
+    names = list(items.values())
+    duplicated_names = [
+        name
+        for name in set(names)
+        if names.count(name) > 1
+    ]
+    unique_choices = {
+        value: name
+        for value, name in items.items()
+        if names.count(name) == 1
+    }
+
+    for value, name in items.items():
+        if name in duplicated_names:
+            name += _canonical('_{}'.format(value))
+
+            while name in unique_choices.values():
+                name += '_'
+
+            unique_choices[value] = name
+
+    return unique_choices
+
+
+def _format_choices(signal, signal_name):
+    choices = []
+
+    for value, name in sorted(_unique_choices(signal.choices).items()):
+        if signal.is_signed:
+            fmt = '{signal_name}_{name}_CHOICE ({value})'
+        else:
+            fmt = '{signal_name}_{name}_CHOICE ({value}u)'
+
+        choices.append(fmt.format(signal_name=signal_name.upper(),
+                                  name=name,
+                                  value=value))
+
+    return choices
+
+
+def _generate_signals_choices(message, message_name):
+    signals_choices = []
+
+    for signal in message.signals:
+        if signal.choices is None:
+            continue
+
+        signal_name = _camel_to_snake_case(signal.name)
+        choices = _format_choices(signal, signal_name)
+        signal_choices = [
+            '{message_name}_{choice}'.format(message_name=message_name.upper(),
+                                             choice=choice)
+            for choice in choices
+        ]
+        signals_choices.append(signal_choices)
+
+    return signals_choices
 
 
 def _generate_is_in_range(message):
@@ -695,7 +702,8 @@ def _generate_is_in_range(message):
 
 def _generate_message(database_name, message):
     message_name = _camel_to_snake_case(message.name)
-    comments, members, choices = _generate_struct(message)
+    comments, members = _generate_struct(message)
+    signals_choices = _generate_signals_choices(message, message_name)
     is_in_range_declarations = []
     is_in_range_definitions = []
 
@@ -746,17 +754,15 @@ def _generate_message(database_name, message):
         message_name.upper(),
         message.frame_id)
 
-    choices = [
+    choices_defines = [
         [
-            '#define {database_name}_{choice}'.format(
-                database_name=database_name.upper(),
-                choice=choice)
-            for choice in signal_choice
+            '#define {}_{}'.format(database_name.upper(), signal_choice)
+            for signal_choice in signal_choices
         ]
-        for signal_choice in choices
+        for signal_choices in signals_choices
     ]
 
-    return struct_, declaration, definition, frame_id_define, choices
+    return struct_, declaration, definition, frame_id_define, choices_defines
 
 
 def _do_generate_c_source(args, version):

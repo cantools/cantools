@@ -50,7 +50,7 @@ GENERATE_H_FMT = '''\
 
 {frame_id_defines}
 
-{signal_choice_val_defines}
+{choices_defines}
 
 {structs}
 {declarations}
@@ -748,10 +748,10 @@ def _generate_message(database_name, message):
 
     choices = [
         [
-            '#define {database_name}_{choice_str}'.format(
+            '#define {database_name}_{choice}'.format(
                 database_name=database_name.upper(),
-                choice_str=choice
-            ) for choice in signal_choice
+                choice=choice)
+            for choice in signal_choice
         ]
         for signal_choice in choices
     ]
@@ -787,23 +787,25 @@ def _do_generate_c_source(args, version):
         declarations.append(declaration)
         definitions.append(definition)
         frame_id_defines.append(frame_id_define)
-        if choices:
-            choices_defines.extend(choices)
+        choices_defines.extend(choices)
 
+    frame_id_defines = '\n'.join(frame_id_defines)
+    choices_defines = '\n\n'.join([
+        '\n'.join(signal_choice)
+        for signal_choice in choices_defines
+    ])
     structs = '\n'.join(structs)
     declarations = '\n'.join(declarations)
     definitions = '\n'.join(definitions)
-    frame_id_defines = '\n'.join(frame_id_defines)
-    choices_defines = '\n\n'.join(['\n'.join(signal_choice) for signal_choice in choices_defines])
 
     with open(filename_h, 'w') as fout:
         fout.write(GENERATE_H_FMT.format(version=version,
                                          date=date,
                                          include_guard=include_guard,
-                                         structs=structs,
-                                         declarations=declarations,
                                          frame_id_defines=frame_id_defines,
-                                         signal_choice_val_defines=choices_defines))
+                                         choices_defines=choices_defines,
+                                         structs=structs,
+                                         declarations=declarations))
 
     with open(filename_c, 'w') as fout:
         fout.write(GENERATE_C_FMT.format(version=version,

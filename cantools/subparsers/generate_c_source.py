@@ -770,11 +770,11 @@ def _do_generate_c_source(args, version):
     filename_c = filename + '.c'
     date = time.ctime()
     include_guard = '__{}_H__'.format(filename.upper())
+    frame_id_defines = []
+    choices_defines = []
     structs = []
     declarations = []
     definitions = []
-    frame_id_defines = []
-    choices_defines = []
 
     for message in dbase.messages:
         (struct_,
@@ -783,11 +783,11 @@ def _do_generate_c_source(args, version):
          frame_id_define,
          choices) = _generate_message(filename, message)
 
+        frame_id_defines.append(frame_id_define)
+        choices_defines.extend(choices)
         structs.append(struct_)
         declarations.append(declaration)
         definitions.append(definition)
-        frame_id_defines.append(frame_id_define)
-        choices_defines.extend(choices)
 
     frame_id_defines = '\n'.join(frame_id_defines)
     choices_defines = '\n\n'.join([

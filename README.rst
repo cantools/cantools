@@ -194,8 +194,6 @@ files.
 
 Known limitations:
 
-- Signal multiplexing is not yet supported.
-
 - No signal scaling.
 
 - Maximum signal size is 64 bits.

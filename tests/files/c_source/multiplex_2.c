@@ -246,6 +246,7 @@ ssize_t multiplex_2_extended_encode(
     memset(&dst_p[0], 0, 8);
 
     dst_p[0] |= ((src_p->s0 << 0) & 0x0f);
+    dst_p[4] |= ((src_p->s6 << 0) & 0xff);
 
     switch (src_p->s0) {
 
@@ -282,8 +283,6 @@ ssize_t multiplex_2_extended_encode(
         break;
     }
 
-    dst_p[4] |= ((src_p->s6 << 0) & 0xff);
-
     switch (src_p->s6) {
 
     case 1:
@@ -319,6 +318,8 @@ int multiplex_2_extended_decode(
     if (dst_p->s0 & (1 << 3)) {
         dst_p->s0 |= 0xf0;
     }
+
+    dst_p->s6 |= ((uint8_t)(src_p[4] & 0xff) >> 0);
 
     switch (dst_p->s0) {
 
@@ -366,8 +367,6 @@ int multiplex_2_extended_decode(
     default:
         break;
     }
-
-    dst_p->s6 |= ((uint8_t)(src_p[4] & 0xff) >> 0);
 
     switch (dst_p->s6) {
 

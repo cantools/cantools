@@ -471,7 +471,9 @@ IO_DEBUG(
             'vehicle',
             'floating_point',
             'no_signals',
-            'choices'
+            'choices',
+            'multiplex',
+            'multiplex_2'
         ]
 
         for database in databases:

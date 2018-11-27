@@ -37,9 +37,9 @@
 #define dtoi(value) (*((uint64_t *)(&(value))))
 #define itod(value) (*((double *)(&(value))))
 
-ssize_t multiplex_message_1_encode(
+ssize_t multiplex_message1_encode(
     uint8_t *dst_p,
-    struct multiplex_message_1_t *src_p,
+    struct multiplex_message1_t *src_p,
     size_t size)
 {
     if (size < 8) {
@@ -53,31 +53,31 @@ ssize_t multiplex_message_1_encode(
     switch (src_p->multiplexor) {
 
     case 8:
+        dst_p[2] |= ((src_p->bit_j << 2) & 0x04);
         dst_p[2] |= ((src_p->bit_c << 3) & 0x08);
         dst_p[2] |= ((src_p->bit_g << 7) & 0x80);
-        dst_p[2] |= ((src_p->bit_j << 2) & 0x04);
         dst_p[3] |= ((src_p->bit_l << 0) & 0x01);
         break;
 
     case 16:
+        dst_p[2] |= ((src_p->bit_j << 2) & 0x04);
         dst_p[2] |= ((src_p->bit_c << 3) & 0x08);
         dst_p[2] |= ((src_p->bit_g << 7) & 0x80);
-        dst_p[2] |= ((src_p->bit_j << 2) & 0x04);
         dst_p[3] |= ((src_p->bit_l << 0) & 0x01);
         break;
 
     case 24:
+        dst_p[2] |= ((src_p->bit_j << 2) & 0x04);
         dst_p[2] |= ((src_p->bit_c << 3) & 0x08);
         dst_p[2] |= ((src_p->bit_g << 7) & 0x80);
-        dst_p[2] |= ((src_p->bit_j << 2) & 0x04);
-        dst_p[3] |= ((src_p->bit_a << 2) & 0x04);
-        dst_p[3] |= ((src_p->bit_e << 5) & 0x20);
-        dst_p[3] |= ((src_p->bit_k << 4) & 0x10);
         dst_p[3] |= ((src_p->bit_l << 0) & 0x01);
-        dst_p[4] |= ((src_p->bit_b << 1) & 0x02);
+        dst_p[3] |= ((src_p->bit_a << 2) & 0x04);
+        dst_p[3] |= ((src_p->bit_k << 4) & 0x10);
+        dst_p[3] |= ((src_p->bit_e << 5) & 0x20);
         dst_p[4] |= ((src_p->bit_d << 0) & 0x01);
-        dst_p[4] |= ((src_p->bit_f << 7) & 0x80);
+        dst_p[4] |= ((src_p->bit_b << 1) & 0x02);
         dst_p[4] |= ((src_p->bit_h << 6) & 0x40);
+        dst_p[4] |= ((src_p->bit_f << 7) & 0x80);
         break;
 
     default:
@@ -87,8 +87,8 @@ ssize_t multiplex_message_1_encode(
     return (8);
 }
 
-int multiplex_message_1_decode(
-    struct multiplex_message_1_t *dst_p,
+int multiplex_message1_decode(
+    struct multiplex_message1_t *dst_p,
     uint8_t *src_p,
     size_t size)
 {
@@ -103,31 +103,31 @@ int multiplex_message_1_decode(
     switch (dst_p->multiplexor) {
 
     case 8:
+        dst_p->bit_j |= ((uint8_t)(src_p[2] & 0x04) >> 2);
         dst_p->bit_c |= ((uint8_t)(src_p[2] & 0x08) >> 3);
         dst_p->bit_g |= ((uint8_t)(src_p[2] & 0x80) >> 7);
-        dst_p->bit_j |= ((uint8_t)(src_p[2] & 0x04) >> 2);
         dst_p->bit_l |= ((uint8_t)(src_p[3] & 0x01) >> 0);
         break;
 
     case 16:
+        dst_p->bit_j |= ((uint8_t)(src_p[2] & 0x04) >> 2);
         dst_p->bit_c |= ((uint8_t)(src_p[2] & 0x08) >> 3);
         dst_p->bit_g |= ((uint8_t)(src_p[2] & 0x80) >> 7);
-        dst_p->bit_j |= ((uint8_t)(src_p[2] & 0x04) >> 2);
         dst_p->bit_l |= ((uint8_t)(src_p[3] & 0x01) >> 0);
         break;
 
     case 24:
+        dst_p->bit_j |= ((uint8_t)(src_p[2] & 0x04) >> 2);
         dst_p->bit_c |= ((uint8_t)(src_p[2] & 0x08) >> 3);
         dst_p->bit_g |= ((uint8_t)(src_p[2] & 0x80) >> 7);
-        dst_p->bit_j |= ((uint8_t)(src_p[2] & 0x04) >> 2);
-        dst_p->bit_a |= ((uint8_t)(src_p[3] & 0x04) >> 2);
-        dst_p->bit_e |= ((uint8_t)(src_p[3] & 0x20) >> 5);
-        dst_p->bit_k |= ((uint8_t)(src_p[3] & 0x10) >> 4);
         dst_p->bit_l |= ((uint8_t)(src_p[3] & 0x01) >> 0);
-        dst_p->bit_b |= ((uint8_t)(src_p[4] & 0x02) >> 1);
+        dst_p->bit_a |= ((uint8_t)(src_p[3] & 0x04) >> 2);
+        dst_p->bit_k |= ((uint8_t)(src_p[3] & 0x10) >> 4);
+        dst_p->bit_e |= ((uint8_t)(src_p[3] & 0x20) >> 5);
         dst_p->bit_d |= ((uint8_t)(src_p[4] & 0x01) >> 0);
-        dst_p->bit_f |= ((uint8_t)(src_p[4] & 0x80) >> 7);
+        dst_p->bit_b |= ((uint8_t)(src_p[4] & 0x02) >> 1);
         dst_p->bit_h |= ((uint8_t)(src_p[4] & 0x40) >> 6);
+        dst_p->bit_f |= ((uint8_t)(src_p[4] & 0x80) >> 7);
         break;
 
     default:
@@ -135,4 +135,64 @@ int multiplex_message_1_decode(
     }
 
     return (0);
+}
+
+bool multiplex_message1_multiplexor_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_j_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_c_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_g_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_l_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_a_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_k_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_e_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_d_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_b_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_h_is_in_range(uint8_t value)
+{
+    return (true);
+}
+
+bool multiplex_message1_bit_f_is_in_range(uint8_t value)
+{
+    return (true);
 }

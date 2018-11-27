@@ -7,6 +7,7 @@
 #include "files/c_source/padding_bit_order.h"
 #include "files/c_source/vehicle.h"
 #include "files/c_source/multiplex.h"
+#include "files/c_source/multiplex_2.h"
 #include "files/c_source/floating_point.h"
 #include "files/c_source/no_signals.h"
 
@@ -203,7 +204,7 @@ static void test_padding_bit_order(void)
 static void test_multiplex(void)
 {
     struct {
-        struct multiplex_message_1_t decoded;
+        struct multiplex_message1_t decoded;
         uint8_t encoded[8];
     } datas[3] = {
         {
@@ -244,22 +245,22 @@ static void test_multiplex(void)
             .encoded = "\x60\x00\x8c\x35\xc3\x00\x00\x00"
         }
     };
-    struct multiplex_message_1_t decoded;
+    struct multiplex_message1_t decoded;
     uint8_t buf[8];
     int i;
 
     for (i = 0; i < 3; i++) {
         memset(&buf[0], 0, sizeof(buf));
-        assert(multiplex_message_1_encode(&buf[0],
-                                          &datas[i].decoded,
-                                          sizeof(buf)) == 8);
+        assert(multiplex_message1_encode(&buf[0],
+                                         &datas[i].decoded,
+                                         sizeof(buf)) == 8);
         assert(memcmp(&buf[0],
                       &datas[i].encoded[0],
                       sizeof(buf)) == 0);
         memset(&decoded, 0, sizeof(decoded));
-        assert(multiplex_message_1_decode(&decoded,
-                                          &buf[0],
-                                          sizeof(buf)) == 0);
+        assert(multiplex_message1_decode(&decoded,
+                                         &buf[0],
+                                         sizeof(buf)) == 0);
         assert(decoded.multiplexor == datas[i].decoded.multiplexor);
         assert(decoded.bit_a == datas[i].decoded.bit_a);
         assert(decoded.bit_b == datas[i].decoded.bit_b);
@@ -272,6 +273,83 @@ static void test_multiplex(void)
         assert(decoded.bit_j == datas[i].decoded.bit_j);
         assert(decoded.bit_k == datas[i].decoded.bit_k);
         assert(decoded.bit_l == datas[i].decoded.bit_l);
+    }
+}
+
+static void test_multiplex_2_extended(void)
+{
+    struct {
+        struct multiplex_2_extended_t decoded;
+        uint8_t encoded[8];
+    } datas[3] = {
+        {
+            .decoded = {
+                .s0 = 0,
+                .s1 = 2,
+                .s2 = 0,
+                .s3 = 0,
+                .s4 = 10000,
+                .s5 = 0,
+                .s6 = 1,
+                .s7 = 33,
+                .s8 = 0
+            },
+            .encoded = "\x20\x10\x27\x00\x01\x21\x00\x00"
+        },
+        {
+            .decoded = {
+                .s0 = 0,
+                .s1 = 0,
+                .s2 = 100,
+                .s3 = 5000,
+                .s4 = 0,
+                .s5 = 0,
+                .s6 = 2,
+                .s7 = 0,
+                .s8 = 22
+            },
+            .encoded = "\x00\x64\x88\x13\x02\x16\x00\x00"
+        },
+        {
+            .decoded = {
+                .s0 = 1,
+                .s1 = 0,
+                .s2 = 0,
+                .s3 = 0,
+                .s4 = 0,
+                .s5 = 3,
+                .s6 = 1,
+                .s7 = 772,
+                .s8 = 0
+            },
+            .encoded = "\x31\x00\x00\x00\x01\x04\x03\x00"
+        },
+    };
+    struct multiplex_2_extended_t decoded;
+    uint8_t buf[8];
+    int i;
+
+    for (i = 0; i < 3; i++) {
+        memset(&buf[0], 0, sizeof(buf));
+        assert(multiplex_2_extended_encode(&buf[0],
+                                           &datas[i].decoded,
+                                           sizeof(buf)) == 8);
+        assert(memcmp(&buf[0],
+                      &datas[i].encoded[0],
+                      sizeof(buf)) == 0);
+        memset(&decoded, 0, sizeof(decoded));
+        assert(multiplex_2_extended_decode(&decoded,
+                                           &buf[0],
+                                           sizeof(buf)) == 0);
+        assert(decoded.s0 == datas[i].decoded.s0);
+        assert(decoded.s1 == datas[i].decoded.s1);
+        assert(decoded.s2 == datas[i].decoded.s2);
+        assert(decoded.s3 == datas[i].decoded.s3);
+        assert(decoded.s4 == datas[i].decoded.s4);
+        assert(decoded.s5 == datas[i].decoded.s5);
+        assert(decoded.s6 == datas[i].decoded.s6);
+        assert(decoded.s7 == datas[i].decoded.s7);
+        assert(decoded.s8 == datas[i].decoded.s8);
     }
 }
 
@@ -349,6 +427,7 @@ int main()
     test_motohawk_example_message();
     test_padding_bit_order();
     test_multiplex();
+    test_multiplex_2_extended();
     test_floating_point();
     test_is_in_range();
 

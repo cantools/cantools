@@ -348,11 +348,16 @@ def _format_comment(comment):
         return ''
 
 
-def _format_decimal(value):
+def _format_decimal(value, is_float=False):
     if int(value) == value:
         value = int(value)
 
-    return str(value)
+        if is_float:
+            return str(value) + '.0'
+        else:
+            return str(value)
+    else:
+        return str(value)
 
 
 def _format_range(signal):
@@ -830,10 +835,10 @@ def _generate_is_in_range(message):
         maximum = signal.decimal.maximum
 
         if minimum is not None:
-            minimum = int(minimum / scale - offset)
+            minimum = (minimum / scale - offset)
 
         if maximum is not None:
-            maximum = int(maximum / scale - offset)
+            maximum = (maximum / scale - offset)
 
         type_name = _type_name(signal)
         suffix = _get_type_suffix(type_name)
@@ -841,10 +846,12 @@ def _generate_is_in_range(message):
 
         if minimum is not None:
             if not _is_minimum_type_value(type_name, minimum):
+                minimum = _format_decimal(minimum, signal.is_float)
                 checks.append('(value >= {}{})'.format(minimum, suffix))
 
         if maximum is not None:
             if not _is_maximum_type_value(type_name, maximum):
+                maximum = _format_decimal(maximum, signal.is_float)
                 checks.append('(value <= {}{})'.format(maximum, suffix))
 
         if not checks:

@@ -1696,6 +1696,28 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              }
                          ])
 
+        # Extended types.
+        message = db.messages[3]
+        self.assertEqual(message.signal_tree,
+                         [
+                             {
+                                 'S11': {
+                                     3: [
+                                         {
+                                             'S0': {
+                                                 0: [
+                                                     'S10'
+                                                 ]
+                                             }
+                                         }
+                                     ],
+                                     5: [
+                                         'S9'
+                                     ]
+                                 }
+                             }
+                         ])
+
     def test_multiplex_extended(self):
         #            tree              |  bits
         # =============================+========

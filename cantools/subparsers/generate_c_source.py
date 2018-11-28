@@ -2,7 +2,7 @@ from __future__ import print_function
 import os
 
 from .. import database
-from ..database.can.c_source import generate_c_source
+from ..database.can import c_source
 
 
 def _do_generate_c_source(args):
@@ -14,7 +14,7 @@ def _do_generate_c_source(args):
     filename = os.path.splitext(basename)[0]
     filename_h = filename + '.h'
     filename_c = filename + '.c'
-    header, source = generate_c_source(dbase, filename, filename_h)
+    header, source = c_source.generate(dbase, filename, filename_h)
 
     with open(filename_h, 'w') as fout:
         fout.write(header)

@@ -802,25 +802,6 @@ def _format_choices(signal, signal_name):
     return choices
 
 
-def _generate_signals_choices(message, message_name):
-    signals_choices = []
-
-    for signal in message.signals:
-        if signal.choices is None:
-            continue
-
-        signal_name = _camel_to_snake_case(signal.name)
-        choices = _format_choices(signal, signal_name)
-        signal_choices = [
-            '{message_name}_{choice}'.format(message_name=message_name.upper(),
-                                             choice=choice)
-            for choice in choices
-        ]
-        signals_choices.append(signal_choices)
-
-    return signals_choices
-
-
 def _generate_is_in_range(message):
     """Generate range checks for all signals in given message.
 
@@ -868,69 +849,113 @@ def _generate_is_in_range(message):
     return signals
 
 
-def _generate_message(database_name, message):
-    message_name = _camel_to_snake_case(message.name)
-    comments, members = _generate_struct(message)
-    signals_choices = _generate_signals_choices(message, message_name)
-    is_in_range_declarations = []
-    is_in_range_definitions = []
+def _generage_frame_id_defines(database_name, messages):
+    return '\n'.join([
+        '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
+            database_name.upper(),
+            _camel_to_snake_case(message.name).upper(),
+            message.frame_id)
+        for message in messages
+    ])
 
-    for signal_name, type_name, check in _generate_is_in_range(message):
-        is_in_range_declaration = IS_IN_RANGE_DECLARATION_FMT.format(
-            database_name=database_name,
-            message_name=message_name,
-            signal_name=signal_name,
-            type_name=type_name)
-        is_in_range_declarations.append(is_in_range_declaration)
-        is_in_range_definition = IS_IN_RANGE_DEFINITION_FMT.format(
-            database_name=database_name,
-            message_name=message_name,
-            signal_name=signal_name,
-            type_name=type_name,
-            check=check)
-        is_in_range_definitions.append(is_in_range_definition)
 
-    struct_ = STRUCT_FMT.format(database_message_name=message.name,
-                                message_name=message_name,
-                                database_name=database_name,
-                                comments='\n'.join(comments),
-                                members='\n'.join(members))
-    declaration = DECLARATION_FMT.format(database_name=database_name,
-                                         database_message_name=message.name,
-                                         message_name=message_name)
-    declaration += '\n' + '\n'.join(is_in_range_declarations)
+def _generate_choices_defines(database_name, messages):
+    choices_defines = []
 
-    if message.length > 0:
-        encode_variables, encode_body = _format_encode_code(message)
-        decode_variables, decode_body = _format_decode_code(message)
-        definition = DEFINITION_FMT.format(database_name=database_name,
-                                           database_message_name=message.name,
-                                           message_name=message_name,
-                                           message_length=message.length,
-                                           encode_variables=encode_variables,
-                                           encode_body=encode_body,
-                                           decode_variables=decode_variables,
-                                           decode_body=decode_body)
-    else:
-        definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
-                                                 message_name=message_name)
+    for message in messages:
+        message_name = _camel_to_snake_case(message.name)
 
-    definition += '\n' + '\n'.join(is_in_range_definitions)
+        for signal in message.signals:
+            if signal.choices is None:
+                continue
 
-    frame_id_define = '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
-        database_name.upper(),
-        message_name.upper(),
-        message.frame_id)
+            signal_name = _camel_to_snake_case(signal.name)
+            choices = _format_choices(signal, signal_name)
+            signal_choices_defines = '\n'.join([
+                '#define {}_{}_{}'.format(database_name.upper(),
+                                          message_name.upper(),
+                                          choice)
+                for choice in choices
+            ])
+            choices_defines.append(signal_choices_defines)
 
-    choices_defines = [
-        [
-            '#define {}_{}'.format(database_name.upper(), signal_choice)
-            for signal_choice in signal_choices
-        ]
-        for signal_choices in signals_choices
-    ]
+    return '\n\n'.join(choices_defines)
 
-    return struct_, declaration, definition, frame_id_define, choices_defines
+
+def _generate_structs(database_name, messages):
+    structs = []
+
+    for message in messages:
+        comments, members = _generate_struct(message)
+        structs.append(
+            STRUCT_FMT.format(database_message_name=message.name,
+                              message_name=_camel_to_snake_case(message.name),
+                              database_name=database_name,
+                              comments='\n'.join(comments),
+                              members='\n'.join(members)))
+
+    return '\n'.join(structs)
+
+
+def _generate_declarations(database_name, messages):
+    declarations = []
+
+    for message in messages:
+        message_name = _camel_to_snake_case(message.name)
+        is_in_range_declarations = []
+
+        for signal_name, type_name, _ in _generate_is_in_range(message):
+            is_in_range_declaration = IS_IN_RANGE_DECLARATION_FMT.format(
+                database_name=database_name,
+                message_name=message_name,
+                signal_name=signal_name,
+                type_name=type_name)
+            is_in_range_declarations.append(is_in_range_declaration)
+
+        declaration = DECLARATION_FMT.format(database_name=database_name,
+                                             database_message_name=message.name,
+                                             message_name=message_name)
+        declaration += '\n' + '\n'.join(is_in_range_declarations)
+        declarations.append(declaration)
+
+    return '\n'.join(declarations)
+
+
+def _generate_definitions(database_name, messages):
+    definitions = []
+
+    for message in messages:
+        message_name = _camel_to_snake_case(message.name)
+        is_in_range_definitions = []
+
+        for signal_name, type_name, check in _generate_is_in_range(message):
+            is_in_range_definition = IS_IN_RANGE_DEFINITION_FMT.format(
+                database_name=database_name,
+                message_name=message_name,
+                signal_name=signal_name,
+                type_name=type_name,
+                check=check)
+            is_in_range_definitions.append(is_in_range_definition)
+
+        if message.length > 0:
+            encode_variables, encode_body = _format_encode_code(message)
+            decode_variables, decode_body = _format_decode_code(message)
+            definition = DEFINITION_FMT.format(database_name=database_name,
+                                               database_message_name=message.name,
+                                               message_name=message_name,
+                                               message_length=message.length,
+                                               encode_variables=encode_variables,
+                                               encode_body=encode_body,
+                                               decode_variables=decode_variables,
+                                               decode_body=decode_body)
+        else:
+            definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
+                                                     message_name=message_name)
+
+        definition += '\n' + '\n'.join(is_in_range_definitions)
+        definitions.append(definition)
+
+    return '\n'.join(definitions)
 
 
 def _do_generate_c_source(args, version):
@@ -943,34 +968,14 @@ def _do_generate_c_source(args, version):
     filename_h = filename + '.h'
     filename_c = filename + '.c'
     date = time.ctime()
-    include_guard = '__{}_H__'.format(filename.upper())
-    frame_id_defines = []
-    choices_defines = []
-    structs = []
-    declarations = []
-    definitions = []
-
-    for message in dbase.messages:
-        (struct_,
-         declaration,
-         definition,
-         frame_id_define,
-         choices) = _generate_message(filename, message)
-
-        frame_id_defines.append(frame_id_define)
-        choices_defines.extend(choices)
-        structs.append(struct_)
-        declarations.append(declaration)
-        definitions.append(definition)
-
-    frame_id_defines = '\n'.join(frame_id_defines)
-    choices_defines = '\n\n'.join([
-        '\n'.join(signal_choice)
-        for signal_choice in choices_defines
-    ])
-    structs = '\n'.join(structs)
-    declarations = '\n'.join(declarations)
-    definitions = '\n'.join(definitions)
+    database_name = filename
+    messages = dbase.messages
+    include_guard = '__{}_H__'.format(database_name.upper())
+    frame_id_defines = _generage_frame_id_defines(database_name, messages)
+    choices_defines = _generate_choices_defines(database_name, messages)
+    structs = _generate_structs(database_name, messages)
+    declarations = _generate_declarations(database_name, messages)
+    definitions = _generate_definitions(database_name, messages)
 
     with open(filename_h, 'w') as fout:
         fout.write(GENERATE_H_FMT.format(version=version,

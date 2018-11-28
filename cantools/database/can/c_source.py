@@ -960,6 +960,20 @@ def _generate_definitions(database_name, messages):
 def generate_c_source(database,
                       database_name,
                       header_name):
+    """Generate C source code from given CAN database
+    `database`.
+
+    `database_name` is used as a prefix for all defines, data
+    structures and functions.
+
+    `header_name` is the file name of the C header file, which is
+    included by the C source file.
+
+    This function returns a tuple of the C header and source files as
+    strings.
+
+    """
+
     date = time.ctime()
     messages = database.messages
     include_guard = '__{}_H__'.format(database_name.upper())

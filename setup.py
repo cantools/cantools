@@ -7,7 +7,7 @@ import re
 
 def find_version():
     return re.search(r"^__version__ = '(.*)'$",
-                     open('cantools/__init__.py', 'r').read(),
+                     open('cantools/version.py', 'r').read(),
                      re.MULTILINE).group(1)
 
 

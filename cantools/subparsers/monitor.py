@@ -268,7 +268,7 @@ class Monitor(can.Listener):
         self._queue.put(msg)
 
 
-def _do_monitor(args, _version):
+def _do_monitor(args):
     def monitor(stdscr):
         Monitor(stdscr, args).run()
 

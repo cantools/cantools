@@ -31,7 +31,7 @@ def _print_j1939_frame_id(message):
     print('      Format:         {}'.format(pdu_format))
 
 
-def _do_dump(args, _version):
+def _do_dump(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                strict=not args.no_strict)

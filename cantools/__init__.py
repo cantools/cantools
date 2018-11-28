@@ -13,9 +13,9 @@ from .errors import Error
 # Remove once less users are using the old package structure.
 from . import database as db
 
+from .version import __version__
 
 __author__ = 'Erik Moqvist'
-__version__ = '29.5.0'
 
 
 def _main():
@@ -42,9 +42,9 @@ def _main():
     args = parser.parse_args()
 
     if args.debug:
-        args.func(args, __version__)
+        args.func(args)
     else:
         try:
-            args.func(args, __version__)
+            args.func(args)
         except BaseException as e:
             sys.exit('error: ' + str(e))

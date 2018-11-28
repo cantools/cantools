@@ -6,7 +6,7 @@ from .. import database
 from ..compat import fopen
 
 
-def _do_convert(args, _version):
+def _do_convert(args):
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
                                strict=not args.no_strict)

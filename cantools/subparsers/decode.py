@@ -24,7 +24,7 @@ def _mo_unpack(mo):
     return frame_id, data
 
 
-def _do_decode(args, _version):
+def _do_decode(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,

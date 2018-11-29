@@ -306,40 +306,40 @@ def _get(value, default):
     return value
 
 
-def _is_le_minimum_type_value(type_name, value):
+def _minimum_type_value(type_name):
     if type_name == 'int8_t':
-        return value <= -128
+        return -128
     elif type_name == 'int16_t':
-        return value <= -32768
+        return -32768
     elif type_name == 'int32_t':
-        return value <= -2147483648
+        return -2147483648
     elif type_name == 'int64_t':
-        return value <= -9223372036854775808
+        return -9223372036854775808
     elif type_name[0] == 'u':
-        return value <= 0
+        return 0
     else:
-        return False
+        return None
 
 
-def _is_ge_maximum_type_value(type_name, value):
+def _maximum_type_value(type_name):
     if type_name == 'int8_t':
-        return value >= 127
+        return 127
     elif type_name == 'int16_t':
-        return value >= 32767
+        return 32767
     elif type_name == 'int32_t':
-        return value >= 2147483647
+        return 2147483647
     elif type_name == 'int64_t':
-        return value >= 9223372036854775807
+        return 9223372036854775807
     elif type_name == 'uint8_t':
-        return value >= 255
+        return 255
     elif type_name == 'uint16_t':
-        return value >= 65535
+        return 65535
     elif type_name == 'uint32_t':
-        return value >= 4294967295
+        return 4294967295
     elif type_name == 'uint64_t':
-        return value >= 18446744073709551615
+        return 18446744073709551615
     else:
-        return False
+        return None
 
 
 def _format_comment(comment):
@@ -830,12 +830,16 @@ def _generate_is_in_range(message):
         checks = []
 
         if minimum is not None:
-            if not _is_le_minimum_type_value(type_name, minimum):
+            minimum_type_value = _minimum_type_value(type_name)
+
+            if (minimum_type_value is None) or (minimum > minimum_type_value):
                 minimum = _format_decimal(minimum, signal.is_float)
                 checks.append('(value >= {}{})'.format(minimum, suffix))
 
         if maximum is not None:
-            if not _is_ge_maximum_type_value(type_name, maximum):
+            maximum_type_value = _maximum_type_value(type_name)
+
+            if (maximum_type_value is None) or (maximum < maximum_type_value):
                 maximum = _format_decimal(maximum, signal.is_float)
                 checks.append('(value <= {}{})'.format(maximum, suffix))
 

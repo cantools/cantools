@@ -124,7 +124,7 @@ DECLARATION_FMT = '''\
  */
 ssize_t {database_name}_{message_name}_encode(
     uint8_t *dst_p,
-    struct {database_name}_{message_name}_t *src_p,
+    const struct {database_name}_{message_name}_t *src_p,
     size_t size);
 
 /**
@@ -138,7 +138,7 @@ ssize_t {database_name}_{message_name}_encode(
  */
 int {database_name}_{message_name}_decode(
     struct {database_name}_{message_name}_t *dst_p,
-    uint8_t *src_p,
+    const uint8_t *src_p,
     size_t size);
 '''
 
@@ -156,7 +156,7 @@ bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 DEFINITION_FMT = '''\
 ssize_t {database_name}_{message_name}_encode(
     uint8_t *dst_p,
-    struct {database_name}_{message_name}_t *src_p,
+    const struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
 {unused}\
@@ -172,7 +172,7 @@ ssize_t {database_name}_{message_name}_encode(
 
 int {database_name}_{message_name}_decode(
     struct {database_name}_{message_name}_t *dst_p,
-    uint8_t *src_p,
+    const uint8_t *src_p,
     size_t size)
 {{
 {unused}\
@@ -198,7 +198,7 @@ bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 EMPTY_DEFINITION_FMT = '''\
 ssize_t {database_name}_{message_name}_encode(
     uint8_t *dst_p,
-    struct {database_name}_{message_name}_t *src_p,
+    const struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
     UNUSED(dst_p);
@@ -210,7 +210,7 @@ ssize_t {database_name}_{message_name}_encode(
 
 int {database_name}_{message_name}_decode(
     struct {database_name}_{message_name}_t *dst_p,
-    uint8_t *src_p,
+    const uint8_t *src_p,
     size_t size)
 {{
     UNUSED(src_p);

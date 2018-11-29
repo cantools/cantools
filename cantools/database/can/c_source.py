@@ -973,7 +973,7 @@ def generate(database, database_name, header_name):
 
     date = time.ctime()
     messages = database.messages
-    include_guard = '__{}_H__'.format(database_name.upper())
+    include_guard = '{}_H'.format(database_name.upper())
     frame_id_defines = _generage_frame_id_defines(database_name, messages)
     choices_defines = _generate_choices_defines(database_name, messages)
     structs = _generate_structs(database_name, messages)

@@ -14,9 +14,11 @@ test:
 test-c:
 	gcc \
 	    -Wall \
-	    -Wpedantic \
-	    -Werror \
 	    -Wextra \
+	    -Wpedantic \
+	    -Wlogical-op \
+	    -Wdouble-promotion \
+	    -Werror \
 	    -std=c99 \
 	    tests/main.c \
 	    tests/files/c_source/motohawk.c \
@@ -26,7 +28,8 @@ test-c:
 	    tests/files/c_source/multiplex_2.c \
 	    tests/files/c_source/floating_point.c \
 	    tests/files/c_source/no_signals.c \
-	    tests/files/c_source/choices.c && ./a.out
+	    tests/files/c_source/choices.c
+	./a.out
 
 .PHONY: test-sdist
 test-sdist:

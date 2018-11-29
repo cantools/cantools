@@ -393,8 +393,8 @@ static void test_floating_point_message2(void)
     assert(floating_point_message2_decode(&decoded,
                                           &buf[0],
                                           sizeof(buf)) == 0);
-    assert(decoded.signal1 == 129.5);
-    assert(decoded.signal2 == 1234500.5);
+    assert(decoded.signal1 == 129.5f);
+    assert(decoded.signal2 == 1234500.5f);
 }
 
 static void test_floating_point(void)

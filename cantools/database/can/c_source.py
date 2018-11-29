@@ -91,6 +91,8 @@ SOURCE_FMT = '''\
 
 #include "{header}"
 
+#define UNUSED(x) (void)(x)
+
 #define ftoi(value) (*((uint32_t *)(&(value))))
 #define itof(value) (*((float *)(&(value))))
 #define dtoi(value) (*((uint64_t *)(&(value))))
@@ -157,6 +159,7 @@ ssize_t {database_name}_{message_name}_encode(
     struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
+{unused}\
 {encode_variables}\
     if (size < {message_length}) {{
         return (-EINVAL);
@@ -172,6 +175,7 @@ int {database_name}_{message_name}_decode(
     uint8_t *src_p,
     size_t size)
 {{
+{unused}\
 {decode_variables}\
     if (size < {message_length}) {{
         return (-EINVAL);
@@ -186,6 +190,7 @@ int {database_name}_{message_name}_decode(
 IS_IN_RANGE_DEFINITION_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 {{
+{unused}\
     return ({check});
 }}
 '''
@@ -196,6 +201,10 @@ ssize_t {database_name}_{message_name}_encode(
     struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
+    UNUSED(dst_p);
+    UNUSED(src_p);
+    UNUSED(size);
+
     return (0);
 }}
 
@@ -204,6 +213,9 @@ int {database_name}_{message_name}_decode(
     uint8_t *src_p,
     size_t size)
 {{
+    UNUSED(src_p);
+    UNUSED(size);
+
     memset(dst_p, 0, sizeof(*dst_p));
 
     return (0);
@@ -937,21 +949,34 @@ def _generate_definitions(database_name, messages):
         is_in_range_definitions = []
 
         for signal_name, type_name, check in _generate_is_in_range(message):
+            if check == 'true':
+                unused = '    UNUSED(value);\n\n'
+            else:
+                unused = ''
+
             is_in_range_definition = IS_IN_RANGE_DEFINITION_FMT.format(
                 database_name=database_name,
                 message_name=message_name,
                 signal_name=signal_name,
                 type_name=type_name,
+                unused=unused,
                 check=check)
             is_in_range_definitions.append(is_in_range_definition)
 
         if message.length > 0:
             encode_variables, encode_body = _format_encode_code(message)
             decode_variables, decode_body = _format_decode_code(message)
+
+            if encode_body:
+                unused = ''
+            else:
+                unused = '    UNUSED(src_p);\n\n'
+
             definition = DEFINITION_FMT.format(database_name=database_name,
                                                database_message_name=message.name,
                                                message_name=message_name,
                                                message_length=message.length,
+                                               unused=unused,
                                                encode_variables=encode_variables,
                                                encode_body=encode_body,
                                                decode_variables=decode_variables,

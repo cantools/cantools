@@ -5,7 +5,7 @@ import time
 from ...version import __version__
 
 
-GENERATE_H_FMT = '''\
+HEADER_FMT = '''\
 /**
  * The MIT License (MIT)
  *
@@ -56,7 +56,7 @@ GENERATE_H_FMT = '''\
 #endif
 '''
 
-GENERATE_C_FMT = '''\
+SOURCE_FMT = '''\
 /**
  * The MIT License (MIT)
  *
@@ -980,17 +980,17 @@ def generate(database, database_name, header_name):
     declarations = _generate_declarations(database_name, messages)
     definitions = _generate_definitions(database_name, messages)
 
-    header = GENERATE_H_FMT.format(version=__version__,
-                                   date=date,
-                                   include_guard=include_guard,
-                                   frame_id_defines=frame_id_defines,
-                                   choices_defines=choices_defines,
-                                   structs=structs,
-                                   declarations=declarations)
+    header = HEADER_FMT.format(version=__version__,
+                               date=date,
+                               include_guard=include_guard,
+                               frame_id_defines=frame_id_defines,
+                               choices_defines=choices_defines,
+                               structs=structs,
+                               declarations=declarations)
 
-    source = GENERATE_C_FMT.format(version=__version__,
-                                   date=date,
-                                   header=header_name,
-                                   definitions=definitions)
+    source = SOURCE_FMT.format(version=__version__,
+                               date=date,
+                               header=header_name,
+                               definitions=definitions)
 
     return header, source

@@ -2587,12 +2587,12 @@ bool vehicle_rt_sb_trig_accel_validity_triggered_time_is_in_range(uint8_t value)
 
 bool vehicle_rt_sb_trig_accel_mfdd_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_sb_trig_accel_average_accel_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_sb_trig_accel_triggered_time_is_in_range(uint32_t value)
@@ -7152,17 +7152,17 @@ bool vehicle_rt_dl1_mk3_accel_accuracy_accel_is_in_range(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_accel_accel_longitudinal_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_dl1_mk3_accel_accel_lateral_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_dl1_mk3_accel_accel_vertical_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 ssize_t vehicle_rt_sb_ins_vpt_4_vel_ned_2_encode(
@@ -7956,7 +7956,7 @@ bool vehicle_rt_sb_ins_slip_accuracy_ins_slip_is_in_range(uint8_t value)
 
 bool vehicle_rt_sb_ins_slip_ins_slip_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 bool vehicle_rt_sb_ins_slip_accuracy_ins_squat_is_in_range(uint8_t value)
@@ -7966,7 +7966,7 @@ bool vehicle_rt_sb_ins_slip_accuracy_ins_squat_is_in_range(uint8_t value)
 
 bool vehicle_rt_sb_ins_slip_ins_squat_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 ssize_t vehicle_rt_sb_ins_vel_ecef_2_encode(
@@ -8801,17 +8801,17 @@ bool vehicle_rt_sb_ins_attitude_accuracy_attitude_is_in_range(uint8_t value)
 
 bool vehicle_rt_sb_ins_attitude_attitude_yaw_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 bool vehicle_rt_sb_ins_attitude_attitude_pitch_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 bool vehicle_rt_sb_ins_attitude_attitude_roll_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 ssize_t vehicle_rt_sb_output_status_encode(
@@ -9192,7 +9192,7 @@ bool vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_is_in_range(uint
 
 bool vehicle_rt_sb_trigger_timestamp_trigger_number_is_in_range(uint8_t value)
 {
-    return ((value >= -1u) && (value <= 127u));
+    return (value <= 127u);
 }
 
 bool vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_is_in_range(uint8_t value)
@@ -9362,17 +9362,17 @@ bool vehicle_rt_imu06_accel_accuracy_accel_is_in_range(uint8_t value)
 
 bool vehicle_rt_imu06_accel_accel_longitudinal_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_imu06_accel_accel_lateral_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_imu06_accel_accel_vertical_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 ssize_t vehicle_rt_sb_speed_encode(
@@ -9504,12 +9504,12 @@ bool vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_is_in_range(uint8_t value)
 
 bool vehicle_rt_sb_rtk_slip_rtk_slip_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 bool vehicle_rt_sb_rtk_slip_rtk_squat_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 bool vehicle_rt_sb_rtk_slip_rtk_baseline_is_in_range(uint16_t value)
@@ -9589,7 +9589,7 @@ bool vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_is_in_range(uint8_t value)
 
 bool vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_is_in_range(int16_t value)
 {
-    return ((value >= -36000) && (value <= 36000));
+    return (true);
 }
 
 bool vehicle_rt_sb_rtk_attitude_rtk_attitude_pitch_is_in_range(int16_t value)
@@ -9663,7 +9663,7 @@ bool vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_is_in_range(uint8_
 
 bool vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_is_in_range(int16_t value)
@@ -10622,17 +10622,17 @@ bool vehicle_rt_sb_accel_accuracy_accel_is_in_range(uint8_t value)
 
 bool vehicle_rt_sb_accel_accel_longitudinal_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_sb_accel_accel_lateral_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 bool vehicle_rt_sb_accel_accel_vertical_is_in_range(int16_t value)
 {
-    return ((value >= -65000) && (value <= 65000));
+    return (true);
 }
 
 ssize_t vehicle_rt_sb_gyro_rates_encode(

@@ -17,7 +17,6 @@ test-c:
 	    -Wpedantic \
 	    -Werror \
 	    -Wextra \
-	    -Wno-type-limits \
 	    -Wno-unused-parameter \
 	    -std=c99 \
 	    tests/main.c \

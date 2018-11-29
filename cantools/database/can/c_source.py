@@ -306,34 +306,39 @@ def _get(value, default):
     return value
 
 
-def _is_minimum_type_value(type_name, value):
+def _is_le_minimum_type_value(type_name, value):
     if type_name == 'int8_t':
-        return value == -128
+        return value <= -128
     elif type_name == 'int16_t':
-        return value == -32768
+        return value <= -32768
     elif type_name == 'int32_t':
-        return value == -2147483648
+        return value <= -2147483648
     elif type_name == 'int64_t':
-        return value == -9223372036854775808
+        return value <= -9223372036854775808
     elif type_name[0] == 'u':
-        return value == 0
+        return value <= 0
     else:
         return False
 
 
-def _is_maximum_type_value(type_name, value):
-    try:
-        return {
-            'int8_t': 127,
-            'int16_t': 32767,
-            'int32_t': 2147483647,
-            'int64_t': 9223372036854775807,
-            'uint8_t': 255,
-            'uint16_t': 65535,
-            'uint32_t': 4294967295,
-            'uint64_t': 18446744073709551615
-        }[type_name] == value
-    except KeyError:
+def _is_ge_maximum_type_value(type_name, value):
+    if type_name == 'int8_t':
+        return value >= 127
+    elif type_name == 'int16_t':
+        return value >= 32767
+    elif type_name == 'int32_t':
+        return value >= 2147483647
+    elif type_name == 'int64_t':
+        return value >= 9223372036854775807
+    elif type_name == 'uint8_t':
+        return value >= 255
+    elif type_name == 'uint16_t':
+        return value >= 65535
+    elif type_name == 'uint32_t':
+        return value >= 4294967295
+    elif type_name == 'uint64_t':
+        return value >= 18446744073709551615
+    else:
         return False
 
 
@@ -825,12 +830,12 @@ def _generate_is_in_range(message):
         checks = []
 
         if minimum is not None:
-            if not _is_minimum_type_value(type_name, minimum):
+            if not _is_le_minimum_type_value(type_name, minimum):
                 minimum = _format_decimal(minimum, signal.is_float)
                 checks.append('(value >= {}{})'.format(minimum, suffix))
 
         if maximum is not None:
-            if not _is_maximum_type_value(type_name, maximum):
+            if not _is_ge_maximum_type_value(type_name, maximum):
                 maximum = _format_decimal(maximum, signal.is_float)
                 checks.append('(value <= {}{})'.format(maximum, suffix))
 

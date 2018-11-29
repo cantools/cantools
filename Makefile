@@ -12,7 +12,14 @@ test:
 
 .PHONY: test-c
 test-c:
-	gcc -Wall -Wpedantic -Werror -std=c99 \
+	gcc \
+	    -Wall \
+	    -Wpedantic \
+	    -Werror \
+	    -Wextra \
+	    -Wno-type-limits \
+	    -Wno-unused-parameter \
+	    -std=c99 \
 	    tests/main.c \
 	    tests/files/c_source/motohawk.c \
 	    tests/files/c_source/padding_bit_order.c \

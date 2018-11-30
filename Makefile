@@ -20,6 +20,7 @@ test-c:
 	    -Wdouble-promotion \
 	    -Werror \
 	    -std=c99 \
+	    -O3 \
 	    tests/main.c \
 	    tests/files/c_source/motohawk.c \
 	    tests/files/c_source/padding_bit_order.c \

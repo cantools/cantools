@@ -93,11 +93,6 @@ SOURCE_FMT = '''\
 
 #define UNUSED(x) (void)(x)
 
-#define ftoi(value) (*((uint32_t *)(&(value))))
-#define itof(value) (*((float *)(&(value))))
-#define dtoi(value) (*((uint64_t *)(&(value))))
-#define itod(value) (*((double *)(&(value))))
-
 {definitions}\
 '''
 
@@ -528,10 +523,10 @@ def _format_encode_code_signal(message,
     if signal.is_float:
         if signal.length == 32:
             variable = '    uint32_t {};'.format(signal_name)
-            conversion = '    {0} = ftoi(src_p->{0});'.format(signal_name)
+            conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(signal_name)
         else:
             variable = '    uint64_t {};'.format(signal_name)
-            conversion = '    {0} = dtoi(src_p->{0});'.format(signal_name)
+            conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(signal_name)
 
         variable_lines.append(variable)
         conversion_lines.append(conversion)
@@ -668,10 +663,10 @@ def _format_decode_code_signal(message,
     if signal.is_float:
         if signal.length == 32:
             variable = '    uint32_t {} = 0;'.format(signal_name)
-            line = '    dst_p->{0} = itof({0});'.format(signal_name)
+            line = '    memcpy(&dst_p->{0}, &{0}, sizeof({0}));'.format(signal_name)
         else:
             variable = '    uint64_t {} = 0;'.format(signal_name)
-            line = '    dst_p->{0} = itod({0});'.format(signal_name)
+            line = '    memcpy(&dst_p->{0}, &{0}, sizeof({0}));'.format(signal_name)
 
         variable_lines.append(variable)
         conversion_lines.append(line)

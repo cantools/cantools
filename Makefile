@@ -1,3 +1,24 @@
+# C source files
+C_SOURCES := \
+	    tests/main.c \
+	    tests/files/c_source/motohawk.c \
+	    tests/files/c_source/padding_bit_order.c \
+	    tests/files/c_source/vehicle.c \
+	    tests/files/c_source/multiplex.c \
+	    tests/files/c_source/multiplex_2.c \
+	    tests/files/c_source/floating_point.c \
+	    tests/files/c_source/no_signals.c \
+	    tests/files/c_source/choices.c \
+	    tests/files/c_source/signed.c
+
+CFLAGS := \
+	    -Wall \
+	    -Wextra \
+	    -Wpedantic \
+	    -Wlogical-op \
+	    -Wdouble-promotion \
+	    -Werror
+
 .PHONY: test
 test:
 	python2 setup.py test
@@ -13,24 +34,10 @@ test:
 .PHONY: test-c
 test-c:
 	gcc \
-	    -Wall \
-	    -Wextra \
-	    -Wpedantic \
-	    -Wlogical-op \
-	    -Wdouble-promotion \
-	    -Werror \
+	    $(CFLAGS) \
 	    -std=c99 \
 	    -O3 \
-	    tests/main.c \
-	    tests/files/c_source/motohawk.c \
-	    tests/files/c_source/padding_bit_order.c \
-	    tests/files/c_source/vehicle.c \
-	    tests/files/c_source/multiplex.c \
-	    tests/files/c_source/multiplex_2.c \
-	    tests/files/c_source/floating_point.c \
-	    tests/files/c_source/no_signals.c \
-	    tests/files/c_source/choices.c \
-	    tests/files/c_source/signed.c
+	    $(C_SOURCES)
 	./a.out
 
 .PHONY: test-sdist

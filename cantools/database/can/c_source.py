@@ -663,10 +663,10 @@ def _format_decode_code_signal(message,
     if signal.is_float:
         if signal.length == 32:
             variable = '    uint32_t {} = 0;'.format(signal_name)
-            line = '    memcpy(&dst_p->{0}, &{0}, sizeof({0}));'.format(signal_name)
+            line = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(signal_name)
         else:
             variable = '    uint64_t {} = 0;'.format(signal_name)
-            line = '    memcpy(&dst_p->{0}, &{0}, sizeof({0}));'.format(signal_name)
+            line = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(signal_name)
 
         variable_lines.append(variable)
         conversion_lines.append(line)

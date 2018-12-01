@@ -549,7 +549,7 @@ int multiplex_2_extended_types_decode(
             s10 |= ((uint32_t)(src_p[4] & 0xff) << 16);
             s10 |= ((uint32_t)(src_p[5] & 0xff) << 24);
 
-            memcpy(&dst_p->s10, &s10, sizeof(s10));
+            memcpy(&dst_p->s10, &s10, sizeof(dst_p->s10));
             break;
 
         default:
@@ -563,7 +563,7 @@ int multiplex_2_extended_types_decode(
         s9 |= ((uint32_t)(src_p[5] & 0xff) << 16);
         s9 |= ((uint32_t)(src_p[6] & 0xff) << 24);
 
-        memcpy(&dst_p->s9, &s9, sizeof(s9));
+        memcpy(&dst_p->s9, &s9, sizeof(dst_p->s9));
         break;
 
     default:

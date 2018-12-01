@@ -83,7 +83,7 @@ int floating_point_message1_decode(
     signal1 |= ((uint64_t)(src_p[6] & 0xff) << 48);
     signal1 |= ((uint64_t)(src_p[7] & 0xff) << 56);
 
-    memcpy(&dst_p->signal1, &signal1, sizeof(signal1));
+    memcpy(&dst_p->signal1, &signal1, sizeof(dst_p->signal1));
 
     return (0);
 }
@@ -147,8 +147,8 @@ int floating_point_message2_decode(
     signal2 |= ((uint32_t)(src_p[6] & 0xff) << 16);
     signal2 |= ((uint32_t)(src_p[7] & 0xff) << 24);
 
-    memcpy(&dst_p->signal1, &signal1, sizeof(signal1));
-    memcpy(&dst_p->signal2, &signal2, sizeof(signal2));
+    memcpy(&dst_p->signal1, &signal1, sizeof(dst_p->signal1));
+    memcpy(&dst_p->signal2, &signal2, sizeof(dst_p->signal2));
 
     return (0);
 }

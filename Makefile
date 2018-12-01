@@ -4,31 +4,31 @@ endif
 
 # C source files
 C_SOURCES := \
-	    tests/main.c \
-	    tests/files/c_source/motohawk.c \
-	    tests/files/c_source/padding_bit_order.c \
-	    tests/files/c_source/vehicle.c \
-	    tests/files/c_source/multiplex.c \
-	    tests/files/c_source/multiplex_2.c \
-	    tests/files/c_source/floating_point.c \
-	    tests/files/c_source/no_signals.c \
-	    tests/files/c_source/choices.c \
-	    tests/files/c_source/signed.c
+	tests/main.c \
+	tests/files/c_source/motohawk.c \
+	tests/files/c_source/padding_bit_order.c \
+	tests/files/c_source/vehicle.c \
+	tests/files/c_source/multiplex.c \
+	tests/files/c_source/multiplex_2.c \
+	tests/files/c_source/floating_point.c \
+	tests/files/c_source/no_signals.c \
+	tests/files/c_source/choices.c \
+	tests/files/c_source/signed.c
 
 CFLAGS_EXTRA := \
-	    -Wduplicated-branches \
-	    -Wduplicated-cond \
-	    -Wjump-misses-init \
-	    -Wlogical-op \
-	    -Wnull-dereference \
-	    -Wrestrict
+	-Wduplicated-branches \
+	-Wduplicated-cond \
+	-Wjump-misses-init \
+	-Wlogical-op \
+	-Wnull-dereference \
+	-Wrestrict
 
 CFLAGS := \
-	    -Wall \
-	    -Wextra \
-	    -Wpedantic \
-	    -Wdouble-promotion \
-	    -Werror
+	-Wall \
+	-Wextra \
+	-Wpedantic \
+	-Wdouble-promotion \
+	-Werror
 CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA))
 
 .PHONY: test

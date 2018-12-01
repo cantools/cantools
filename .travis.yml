@@ -12,7 +12,6 @@ addons:
 install:
   - pip install coveralls
   - pip install -r requirements.txt
-  - gcc-8 --version
 script:
   - coverage run --source=cantools setup.py test
   - make test-sdist

@@ -218,8 +218,8 @@ int {database_name}_{message_name}_decode(
 '''
 
 SIGN_EXTENSION_FMT = '''
-    if (dst_p->{name} & (1 << {shift})) {{
-        dst_p->{name} |= {mask};
+    if (({name} & (1{suffix} << {shift})) != 0{suffix}) {{
+        {name} |= 0x{mask:x}{suffix};
     }}
 
 '''
@@ -263,31 +263,28 @@ def _strip_blank_lines(lines):
     return lines
 
 
-def _type_name(signal):
-    type_name = None
+def _type_length(length):
+    if length <= 8:
+        return 8
+    elif length <= 16:
+        return 16
+    elif length <= 32:
+        return 32
+    else:
+        return 64
 
+
+def _type_name(signal):
     if signal.is_float:
         if signal.length == 32:
             type_name = 'float'
-        elif signal.length == 64:
+        else:
             type_name = 'double'
-        else:
-            print('warning: Floating point signal not 32 or 64 bits.')
     else:
-        if signal.length <= 8:
-            type_name = 'int8_t'
-        elif signal.length <= 16:
-            type_name = 'int16_t'
-        elif signal.length <= 32:
-            type_name = 'int32_t'
-        elif signal.length <= 64:
-            type_name = 'int64_t'
-        else:
-            print('warning: Signal lengths over 64 bits are not yet supported.')
+        type_name = 'int{}_t'.format(_type_length(signal.length))
 
-        if type_name is not None:
-            if not signal.is_signed:
-                type_name = 'u' + type_name
+        if not signal.is_signed:
+            type_name = 'u' + type_name
 
     return type_name
 
@@ -475,14 +472,12 @@ def _signal_segments(signal, invert_shift):
 def _format_encode_code_mux(message,
                             mux,
                             body_lines_per_index,
-                            variable_lines,
-                            conversion_lines):
+                            variable_lines):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_encode_code_signal(message,
                                signal_name,
                                body_lines_per_index,
-                               variable_lines,
-                               conversion_lines)
+                               variable_lines)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
     signal_name = _camel_to_snake_case(signal_name)
 
@@ -514,34 +509,34 @@ def _format_encode_code_mux(message,
 
 def _format_encode_code_signal(message,
                                signal_name,
-                               body_lines_per_index,
-                               variable_lines,
-                               conversion_lines):
+                               body_lines,
+                               variable_lines):
     signal = message.get_signal_by_name(signal_name)
     signal_name = _camel_to_snake_case(signal_name)
 
-    if signal.is_float:
-        if signal.length == 32:
-            variable = '    uint32_t {};'.format(signal_name)
-            conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(signal_name)
-        else:
-            variable = '    uint64_t {};'.format(signal_name)
-            conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(signal_name)
-
-        variable_lines.append(variable)
-        conversion_lines.append(conversion)
-
-    for index, shift, mask in _signal_segments(signal, False):
-        if index not in body_lines_per_index:
-            body_lines_per_index[index] = []
+    if signal.is_float or signal.is_signed:
+        variable = '    uint{}_t {};'.format(_type_length(signal.length),
+                                             signal_name)
 
         if signal.is_float:
-            fmt = '    dst_p[{}] |= (({} {}) & 0x{:02x});'
+            conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
+                signal_name)
         else:
-            fmt = '    dst_p[{}] |= ((src_p->{} {}) & 0x{:02x});'
+            conversion = '    {0} = (uint{1}_t)src_p->{0};'.format(
+                signal_name,
+                _type_length(signal.length))
+
+        variable_lines.append(variable)
+        body_lines.append(conversion)
+
+    for index, shift, mask in _signal_segments(signal, False):
+        if signal.is_float or signal.is_signed:
+            fmt = '    dst_p[{}] |= (({} {}) & 0x{:02x}u);'
+        else:
+            fmt = '    dst_p[{}] |= ((src_p->{} {}) & 0x{:02x}u);'
 
         line = fmt.format(index, signal_name, shift, mask)
-        body_lines_per_index[index].append(line)
+        body_lines.append(line)
 
 
 def _format_encode_code_level(message,
@@ -551,34 +546,23 @@ def _format_encode_code_level(message,
 
     """
 
-    body_lines_per_index = {}
-    conversion_lines = []
+    body_lines = []
     muxes_lines = []
 
     for signal_name in signal_names:
         if isinstance(signal_name, dict):
             mux_lines = _format_encode_code_mux(message,
                                                 signal_name,
-                                                body_lines_per_index,
-                                                variable_lines,
-                                                conversion_lines)
+                                                body_lines,
+                                                variable_lines)
             muxes_lines += mux_lines
         else:
             _format_encode_code_signal(message,
                                        signal_name,
-                                       body_lines_per_index,
-                                       variable_lines,
-                                       conversion_lines)
+                                       body_lines,
+                                       variable_lines)
 
-    body_lines = []
-
-    for index in sorted(body_lines_per_index):
-        body_lines += body_lines_per_index[index]
-
-    if conversion_lines:
-        conversion_lines += ['']
-
-    body_lines = conversion_lines + body_lines + muxes_lines
+    body_lines = body_lines + muxes_lines
 
     if body_lines:
         body_lines = [''] + body_lines + ['']
@@ -593,7 +577,7 @@ def _format_encode_code(message):
                                            variable_lines)
 
     if variable_lines:
-        variable_lines += ['', '']
+        variable_lines = sorted(list(set(variable_lines))) + ['', '']
 
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
@@ -601,14 +585,12 @@ def _format_encode_code(message):
 def _format_decode_code_mux(message,
                             mux,
                             body_lines_per_index,
-                            variable_lines,
-                            conversion_lines):
+                            variable_lines):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_decode_code_signal(message,
                                signal_name,
                                body_lines_per_index,
-                               variable_lines,
-                               conversion_lines)
+                               variable_lines)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
     signal_name = _camel_to_snake_case(signal_name)
 
@@ -637,39 +619,32 @@ def _format_decode_code_mux(message,
 def _format_decode_code_signal(message,
                                signal_name,
                                body_lines,
-                               variable_lines,
-                               conversion_lines):
+                               variable_lines):
     signal = message.get_signal_by_name(signal_name)
     signal_name = _camel_to_snake_case(signal_name)
+    type_length = _type_length(signal.length)
+    conversion_type_name = 'uint{}_t'.format(type_length)
+    conversion_type_suffix = _get_type_suffix(conversion_type_name)
 
-    if signal.length <= 8:
-        type_length = 8
-    elif signal.length <= 16:
-        type_length = 16
-    elif signal.length <= 32:
-        type_length = 32
-    elif signal.length <= 64:
-        type_length = 64
+    if signal.is_float or signal.is_signed:
+        variable = '    {} {};'.format(conversion_type_name, signal_name)
+        variable_lines.append(variable)
+        body_lines.append('    {} = 0{};'.format(signal_name,
+                                                 conversion_type_suffix))
 
     for index, shift, mask in _signal_segments(signal, True):
-        if signal.is_float:
-            fmt = '    {} |= ((uint{}_t)(src_p[{}] & 0x{:02x}) {});'
+        if signal.is_float or signal.is_signed:
+            fmt = '    {} |= ((uint{}_t)(src_p[{}] & 0x{:02x}u) {});'
         else:
-            fmt = '    dst_p->{} |= ((uint{}_t)(src_p[{}] & 0x{:02x}) {});'
+            fmt = '    dst_p->{} |= ((uint{}_t)(src_p[{}] & 0x{:02x}u) {});'
 
         line = fmt.format(signal_name, type_length, index, mask, shift)
         body_lines.append(line)
 
     if signal.is_float:
-        if signal.length == 32:
-            variable = '    uint32_t {} = 0;'.format(signal_name)
-            line = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(signal_name)
-        else:
-            variable = '    uint64_t {} = 0;'.format(signal_name)
-            line = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(signal_name)
-
-        variable_lines.append(variable)
-        conversion_lines.append(line)
+        conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
+            signal_name)
+        body_lines.append(conversion)
     elif signal.is_signed:
         mask = ((1 << (type_length - signal.length)) - 1)
 
@@ -677,8 +652,13 @@ def _format_decode_code_signal(message,
             mask <<= signal.length
             formatted = SIGN_EXTENSION_FMT.format(name=signal_name,
                                                   shift=signal.length - 1,
-                                                  mask=hex(mask))
+                                                  mask=mask,
+                                                  suffix=conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
+
+        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal_name,
+                                                              type_length)
+        body_lines.append(conversion)
 
 
 def _format_decode_code_level(message,
@@ -689,7 +669,6 @@ def _format_decode_code_level(message,
     """
 
     body_lines = []
-    conversion_lines = []
     muxes_lines = []
 
     for signal_name in signal_names:
@@ -697,8 +676,7 @@ def _format_decode_code_level(message,
             mux_lines = _format_decode_code_mux(message,
                                                 signal_name,
                                                 body_lines,
-                                                variable_lines,
-                                                conversion_lines)
+                                                variable_lines)
 
             if muxes_lines:
                 muxes_lines.append('')
@@ -708,11 +686,7 @@ def _format_decode_code_level(message,
             _format_decode_code_signal(message,
                                        signal_name,
                                        body_lines,
-                                       variable_lines,
-                                       conversion_lines)
-
-    if conversion_lines:
-        conversion_lines += ['']
+                                       variable_lines)
 
     if body_lines:
         if body_lines[-1] != '':
@@ -721,7 +695,7 @@ def _format_decode_code_level(message,
     if muxes_lines:
         muxes_lines.append('')
 
-    body_lines = body_lines + muxes_lines + conversion_lines
+    body_lines = body_lines + muxes_lines
 
     if body_lines:
         body_lines = [''] + body_lines
@@ -736,7 +710,7 @@ def _format_decode_code(message):
                                            variable_lines)
 
     if variable_lines:
-        variable_lines += ['', '']
+        variable_lines = sorted(list(set(variable_lines))) + ['', '']
 
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 

@@ -1,5 +1,6 @@
-CC := gcc
-CC_NEW := gcc-8
+ifeq ($(origin CC),default)
+CC = gcc
+endif
 
 # C source files
 C_SOURCES := \
@@ -14,26 +15,21 @@ C_SOURCES := \
 	    tests/files/c_source/choices.c \
 	    tests/files/c_source/signed.c
 
+CFLAGS_EXTRA := \
+	    -Wduplicated-branches \
+	    -Wduplicated-cond \
+	    -Wjump-misses-init \
+	    -Wlogical-op \
+	    -Wnull-dereference \
+	    -Wrestrict
+
 CFLAGS := \
 	    -Wall \
 	    -Wextra \
 	    -Wpedantic \
 	    -Wdouble-promotion \
-	    -Wjump-misses-init \
-	    -Wlogical-op \
 	    -Werror
-
-# CFLAGS added in GCC 6
-CFLAGS_GCC6 := \
-	    -Wduplicated-cond \
-
-# CFLAGS added in GCC 7
-CFLAGS_GCC7 := \
-	    -Wduplicated-branches \
-	    -Wrestrict
-
-CFLAGS_GCC8 := \
-	    -Wnull-dereference
+CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA))
 
 .PHONY: test
 test:
@@ -51,18 +47,6 @@ test:
 test-c:
 	$(CC) \
 	    $(CFLAGS) \
-	    -std=c99 \
-	    -O3 \
-	    $(C_SOURCES)
-	./a.out
-
-.PHONY: test-c-gcc-8
-test-c-gcc-8:
-	$(CC_NEW) \
-	    $(CFLAGS) \
-	    $(CFLAGS_GCC6) \
-	    $(CFLAGS_GCC7) \
-	    $(CFLAGS_GCC8) \
 	    -std=c99 \
 	    -O3 \
 	    $(C_SOURCES)

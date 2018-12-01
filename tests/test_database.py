@@ -3482,6 +3482,49 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = message.decode(encoded)
         self.assertEqual(decoded, decoded_message)
 
+    def test_signed_dbc(self):
+        filename = os.path.join('tests', 'files', 'signed.dbc')
+        db = cantools.database.load_file(filename)
+
+        datas = [
+            (
+                'Message64',
+                {'s64': -5},
+                b'\xfb\xff\xff\xff\xff\xff\xff\xff'
+            ),
+            (
+                'Message33',
+                {'s33': -5},
+                b'\xfb\xff\xff\xff\x01\x00\x00\x00'
+            ),
+            (
+                'Message32',
+                {'s32': -5},
+                b'\xfb\xff\xff\xff\x00\x00\x00\x00'
+            ),
+            (
+                'Message64big',
+                {'s64big': -5},
+                b'\xff\xff\xff\xff\xff\xff\xff\xfb'
+            ),
+            (
+                'Message33big',
+                {'s33big': -5},
+                b'\xff\xff\xff\xfd\x80\x00\x00\x00'
+            ),
+            (
+                'Message32big',
+                {'s32big': -5},
+                b'\xff\xff\xff\xfb\x00\x00\x00\x00'
+            )
+        ]
+
+        for name, decoded_message, encoded_message in datas:
+            encoded = db.encode_message(name, decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = db.decode_message(name, encoded)
+            self.assertEqual(decoded, decoded_message)
+
     def test_long_names_dbc(self):
         filename = os.path.join('tests', 'files', 'long_names.dbc')
         db = cantools.database.load_file(filename)

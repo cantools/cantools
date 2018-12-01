@@ -443,16 +443,16 @@ def _signal_segments(signal, invert_shift):
 
                 mask <<= (pos - length + 1)
         else:
+            shift = (left - signal.length) + pos
+
             if left >= (8 - pos):
                 length = (8 - pos)
-                shift = (left - signal.length) + pos
                 mask = ((1 << length) - 1)
                 mask <<= pos
                 pos = 0
             else:
                 length = left
                 mask = ((1 << length) - 1)
-                shift = pos
                 mask <<= pos
 
         if invert_shift:

@@ -29,7 +29,8 @@ test-c:
 	    tests/files/c_source/multiplex_2.c \
 	    tests/files/c_source/floating_point.c \
 	    tests/files/c_source/no_signals.c \
-	    tests/files/c_source/choices.c
+	    tests/files/c_source/choices.c \
+	    tests/files/c_source/signed.c
 	./a.out
 
 .PHONY: test-sdist

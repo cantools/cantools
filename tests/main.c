@@ -10,6 +10,7 @@
 #include "files/c_source/multiplex_2.h"
 #include "files/c_source/floating_point.h"
 #include "files/c_source/no_signals.h"
+#include "files/c_source/signed.h"
 
 static void test_motohawk_example_message(void)
 {
@@ -403,6 +404,142 @@ static void test_floating_point(void)
     test_floating_point_message2();
 }
 
+static void test_signed_message64(void)
+{
+    struct signed_message64_t decoded;
+    uint8_t buf[8];
+
+    decoded.s64 = -5;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(signed_message64_encode(&buf[0],
+                                   &decoded,
+                                   sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\xfb\xff\xff\xff\xff\xff\xff\xff",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(signed_message64_decode(&decoded,
+                                   &buf[0],
+                                   sizeof(buf)) == 0);
+    assert(decoded.s64 == -5);
+}
+
+static void test_signed_message33(void)
+{
+    struct signed_message33_t decoded;
+    uint8_t buf[8];
+
+    decoded.s33 = -5;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(signed_message33_encode(&buf[0],
+                                   &decoded,
+                                   sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\xfb\xff\xff\xff\x01\x00\x00\x00",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(signed_message33_decode(&decoded,
+                                   &buf[0],
+                                   sizeof(buf)) == 0);
+    assert(decoded.s33 == -5);
+}
+
+static void test_signed_message32(void)
+{
+    struct signed_message32_t decoded;
+    uint8_t buf[8];
+
+    decoded.s32 = -5;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(signed_message32_encode(&buf[0],
+                                   &decoded,
+                                   sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\xfb\xff\xff\xff\x00\x00\x00\x00",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(signed_message32_decode(&decoded,
+                                   &buf[0],
+                                   sizeof(buf)) == 0);
+    assert(decoded.s32 == -5);
+}
+
+static void test_signed_message64big(void)
+{
+    struct signed_message64big_t decoded;
+    uint8_t buf[8];
+
+    decoded.s64big = -5;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(signed_message64big_encode(&buf[0],
+                                      &decoded,
+                                      sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\xff\xff\xff\xff\xff\xff\xff\xfb",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(signed_message64big_decode(&decoded,
+                                      &buf[0],
+                                      sizeof(buf)) == 0);
+    assert(decoded.s64big == -5);
+}
+
+static void test_signed_message33big(void)
+{
+    struct signed_message33big_t decoded;
+    uint8_t buf[8];
+
+    decoded.s33big = -5;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(signed_message33big_encode(&buf[0],
+                                      &decoded,
+                                      sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\xff\xff\xff\xfd\x80\x00\x00\x00",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(signed_message33big_decode(&decoded,
+                                      &buf[0],
+                                      sizeof(buf)) == 0);
+    assert(decoded.s33big == -5);
+}
+
+static void test_signed_message32big(void)
+{
+    struct signed_message32big_t decoded;
+    uint8_t buf[8];
+
+    decoded.s32big = -5;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(signed_message32big_encode(&buf[0],
+                                      &decoded,
+                                      sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\xff\xff\xff\xfb\x00\x00\x00\x00",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(signed_message32big_decode(&decoded,
+                                      &buf[0],
+                                      sizeof(buf)) == 0);
+    assert(decoded.s32big == -5);
+}
+
+static void test_signed(void)
+{
+    test_signed_message64();
+    test_signed_message33();
+    test_signed_message32();
+    test_signed_message64big();
+    test_signed_message33big();
+    test_signed_message32big();
+}
+
 static void test_is_in_range(void)
 {
     /* Missing limits. Anything allowed, byt should probably check
@@ -429,6 +566,7 @@ int main()
     test_multiplex();
     test_multiplex_2_extended();
     test_floating_point();
+    test_signed();
     test_is_in_range();
 
     return (0);

@@ -473,7 +473,8 @@ IO_DEBUG(
             'no_signals',
             'choices',
             'multiplex',
-            'multiplex_2'
+            'multiplex_2',
+            'signed'
         ]
 
         for database in databases:

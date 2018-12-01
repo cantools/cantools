@@ -19,5 +19,6 @@ script:
   - env PYTHONPATH=. python examples/hello_world.py
   - env PYTHONPATH=. python examples/diagnostics/did.py
   - make test-c
+  - make test-c-gcc-8
 after_success:
   coveralls

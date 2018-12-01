@@ -1,3 +1,6 @@
+CC := gcc
+CC_NEW := gcc-8
+
 # C source files
 C_SOURCES := \
 	    tests/main.c \
@@ -15,9 +18,22 @@ CFLAGS := \
 	    -Wall \
 	    -Wextra \
 	    -Wpedantic \
-	    -Wlogical-op \
 	    -Wdouble-promotion \
+	    -Wjump-misses-init \
+	    -Wlogical-op \
 	    -Werror
+
+# CFLAGS added in GCC 6
+CFLAGS_GCC6 := \
+	    -Wduplicated-cond \
+
+# CFLAGS added in GCC 7
+CFLAGS_GCC7 := \
+	    -Wduplicated-branches \
+	    -Wrestrict
+
+CFLAGS_GCC8 := \
+	    -Wnull-dereference
 
 .PHONY: test
 test:
@@ -33,8 +49,20 @@ test:
 
 .PHONY: test-c
 test-c:
-	gcc \
+	$(CC) \
 	    $(CFLAGS) \
+	    -std=c99 \
+	    -O3 \
+	    $(C_SOURCES)
+	./a.out
+
+.PHONY: test-c-gcc-8
+test-c-gcc-8:
+	$(CC_NEW) \
+	    $(CFLAGS) \
+	    $(CFLAGS_GCC6) \
+	    $(CFLAGS_GCC7) \
+	    $(CFLAGS_GCC8) \
 	    -std=c99 \
 	    -O3 \
 	    $(C_SOURCES)

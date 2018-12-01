@@ -103,7 +103,7 @@ class Database(object):
 
         self.add_dbc_string(fp.read())
 
-    def add_dbc_file(self, filename, encoding='utf-8'):
+    def add_dbc_file(self, filename, encoding='cp1252'):
         """Open, read and parse DBC data from given file and add the parsed
         data to the database.
 

@@ -59,7 +59,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         with open(filename, 'rb') as fin:
             if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('utf-8'), fin.read())
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),
+                                 fin.read())
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
@@ -713,6 +714,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
             message.get_signal_by_name('Fum')
 
         self.assertEqual(str(cm.exception), "'Fum'")
+
+    def test_cp1252_dbc(self):
+        filename = os.path.join('tests', 'files', 'cp1252.dbc')
+        db = cantools.database.load_file(filename)
+
+        if sys.version_info[0] > 2:
+            self.assertEqual(
+                db.nodes[0].comment,
+                bytearray([
+                    v for v in range(256)
+                    if v not in [34, 129, 141, 143, 144, 157]
+                ])[32:].decode('cp1252'))
 
     def test_the_homer(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -1977,6 +1990,36 @@ class CanToolsDatabaseTest(unittest.TestCase):
             str(cm.exception),
             "expected database format 'dbc', 'kcd', 'sym', 'cdd' or None, but "
             "got 'bad'")
+
+    def test_load_file_encoding(self):
+        filename_dbc = os.path.join('tests', 'files', 'cp1252.dbc')
+
+        # Override default encoding.
+        #
+        # Does not fail to load using UTF-8 encoding because encoding
+        # errors are replaced (fopen(errors='replace')).
+        db = cantools.database.load_file(filename_dbc,
+                                         encoding='utf-8')
+
+        if sys.version_info[0] > 2:
+            replaced = 123 * b'\xef\xbf\xbd'.decode('utf-8')
+        else:
+            replaced = (
+                '\x80\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8e\x91'
+                '\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9e\x9f\xa0'
+                '\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae'
+                '\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc'
+                '\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca'
+                '\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8'
+                '\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6'
+                '\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4'
+                '\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff')
+
+        self.assertEqual(
+            db.nodes[0].comment,
+            r" !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTU"
+            r"VWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+            + replaced)
 
     def test_performance_big_endian_signals(self):
         """Test encode/decode performance of a frame with big endian signals.

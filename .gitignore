@@ -4,6 +4,8 @@ __pycache__/
 
 # C extensions
 *.so
+*.o
+a.out
 
 # Distribution / packaging
 .Python
@@ -66,4 +68,3 @@ cantools-database-cache/
 test_command_line_convert.dbc
 test_command_line_convert.kcd
 /*.[hc]
-/a.out

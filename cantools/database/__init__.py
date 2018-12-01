@@ -1,3 +1,4 @@
+import os
 from xml.etree import ElementTree
 from .errors import ParseError
 from .errors import Error
@@ -71,7 +72,7 @@ def _load_file_cache(filename,
 
 def load_file(filename,
               database_format=None,
-              encoding='utf-8',
+              encoding=None,
               frame_id_mask=None,
               strict=True,
               cache_dir=None):
@@ -80,7 +81,42 @@ def load_file(filename,
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
-    `encoding` specifies the file encoding.
+    `database_format` is one of ``'dbc'``, ``'kcd'``, ``'sym'``,
+    ``cdd`` and ``None``. If ``None``, the database format is selected
+    based on the filename extension as in the table below.
+
+    +-----------+-----------------+
+    | Extension | Database format |
+    +===========+=================+
+    | .dbc      | ``'dbc'``       |
+    +-----------+-----------------+
+    | .kcd      | ``'kcd'``       |
+    +-----------+-----------------+
+    | .sym      | ``'sym'``       |
+    +-----------+-----------------+
+    | .cdd      | ``'cdd'``       |
+    +-----------+-----------------+
+    | <unknown> | ``None``        |
+    +-----------+-----------------+
+
+    `encoding` specifies the file encoding. If ``None``, the encoding
+    is selected based on the database format as in the table
+    below. Use ``open()`` and :func:`~cantools.database.load()` if
+    platform dependent encoding is desired.
+
+    +-----------------+-------------------+
+    | Database format | Default encoding  |
+    +=================+===================+
+    | ``'dbc'``       | ``'cp1252'``      |
+    +-----------------+-------------------+
+    | ``'kcd'``       | ``'utf-8'``       |
+    +-----------------+-------------------+
+    | ``'sym'``       | ``'utf-8'``       |
+    +-----------------+-------------------+
+    | ``'cdd'``       | ``'utf-8'``       |
+    +-----------------+-------------------+
+    | ``None``        | ``'utf-8'``       |
+    +-----------------+-------------------+
 
     `cache_dir` specifies the database cache location in the file
     system. Give as ``None`` to disable the cache. By default the
@@ -103,6 +139,24 @@ def load_file(filename,
     '1.0'
 
     """
+
+    if database_format is None:
+        try:
+            database_format = {
+                '.dbc': 'dbc',
+                '.kcd': 'kcd',
+                '.sym': 'sym'
+            }[os.path.splitext(filename)[1]]
+        except KeyError:
+            pass
+
+    if encoding is None:
+        try:
+            encoding = {
+                'dbc': 'cp1252'
+            }[database_format]
+        except KeyError:
+            encoding = 'utf-8'
 
     if cache_dir is None:
         with fopen(filename, 'r', encoding=encoding) as fin:

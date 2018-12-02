@@ -274,6 +274,158 @@ SIGNAL_PARAM_COMMENT_FMT = '''\
 '''
 
 
+class Signal(object):
+
+    def __init__(self, signal):
+        self._signal = signal
+        self.snake_name = _camel_to_snake_case(self.name)
+
+    def __getattr__(self, name):
+        return getattr(self._signal, name)
+
+    @property
+    def unit(self):
+        return _get(self._signal.unit, '-')
+
+    @property
+    def type_length(self):
+        if self.length <= 8:
+            return 8
+        elif self.length <= 16:
+            return 16
+        elif self.length <= 32:
+            return 32
+        else:
+            return 64
+
+    @property
+    def type_name(self):
+        if self.is_float:
+            if self.length == 32:
+                type_name = 'float'
+            else:
+                type_name = 'double'
+        else:
+            type_name = 'int{}_t'.format(self.type_length)
+
+            if not self.is_signed:
+                type_name = 'u' + type_name
+
+        return type_name
+
+    @property
+    def type_suffix(self):
+        try:
+            return {
+                'uint8_t': 'u',
+                'uint16_t': 'u',
+                'uint32_t': 'u',
+                'int64_t': 'll',
+                'uint64_t': 'ull',
+                'float': 'f'
+            }[self.type_name]
+        except KeyError:
+            return ''
+
+    @property
+    def conversion_type_suffix(self):
+        try:
+            return {
+                8: 'u',
+                16: 'u',
+                32: 'u',
+                64: 'ull'
+            }[self.type_length]
+        except KeyError:
+            return ''
+
+    @property
+    def unique_choices(self):
+        """Make duplicated choice names unique by first appending its value
+        and then underscores until unique.
+
+        """
+
+        items = {
+            value: _camel_to_snake_case(name).upper()
+            for value, name in self.choices.items()
+        }
+        names = list(items.values())
+        duplicated_names = [
+            name
+            for name in set(names)
+            if names.count(name) > 1
+        ]
+        unique_choices = {
+            value: name
+            for value, name in items.items()
+            if names.count(name) == 1
+        }
+
+        for value, name in items.items():
+            if name in duplicated_names:
+                name += _canonical('_{}'.format(value))
+
+                while name in unique_choices.values():
+                    name += '_'
+
+                unique_choices[value] = name
+
+        return unique_choices
+
+    @property
+    def minimum_type_value(self):
+        if self.type_name == 'int8_t':
+            return -128
+        elif self.type_name == 'int16_t':
+            return -32768
+        elif self.type_name == 'int32_t':
+            return -2147483648
+        elif self.type_name == 'int64_t':
+            return -9223372036854775808
+        elif self.type_name[0] == 'u':
+            return 0
+        else:
+            return None
+
+    @property
+    def maximum_type_value(self):
+        if self.type_name == 'int8_t':
+            return 127
+        elif self.type_name == 'int16_t':
+            return 32767
+        elif self.type_name == 'int32_t':
+            return 2147483647
+        elif self.type_name == 'int64_t':
+            return 9223372036854775807
+        elif self.type_name == 'uint8_t':
+            return 255
+        elif self.type_name == 'uint16_t':
+            return 65535
+        elif self.type_name == 'uint32_t':
+            return 4294967295
+        elif self.type_name == 'uint64_t':
+            return 18446744073709551615
+        else:
+            return None
+
+
+class Message(object):
+
+    def __init__(self, message):
+        self._message = message
+        self.snake_name = _camel_to_snake_case(self.name)
+        self.signals = [Signal(signal)for signal in message.signals]
+
+    def __getattr__(self, name):
+        return getattr(self._message, name)
+
+    def get_signal_by_name(self, name):
+        for signal in self.signals:
+            if signal.name == name:
+                return signal
+
+
 def _canonical(value):
     """Replace anything but 'a-z', 'A-Z' and '0-9' with '_'.
 
@@ -304,87 +456,11 @@ def _strip_blank_lines(lines):
     return lines
 
 
-def _type_length(length):
-    if length <= 8:
-        return 8
-    elif length <= 16:
-        return 16
-    elif length <= 32:
-        return 32
-    else:
-        return 64
-
-
-def _type_name(signal):
-    if signal.is_float:
-        if signal.length == 32:
-            type_name = 'float'
-        else:
-            type_name = 'double'
-    else:
-        type_name = 'int{}_t'.format(_type_length(signal.length))
-
-        if not signal.is_signed:
-            type_name = 'u' + type_name
-
-    return type_name
-
-
-def _get_type_suffix(type_name):
-    try:
-        return {
-            'uint8_t': 'u',
-            'uint16_t': 'u',
-            'uint32_t': 'u',
-            'int64_t': 'll',
-            'uint64_t': 'ull',
-            'float': 'f'
-        }[type_name]
-    except KeyError:
-        return ''
-
-
 def _get(value, default):
     if value is None:
         value = default
 
     return value
-
-
-def _minimum_type_value(type_name):
-    if type_name == 'int8_t':
-        return -128
-    elif type_name == 'int16_t':
-        return -32768
-    elif type_name == 'int32_t':
-        return -2147483648
-    elif type_name == 'int64_t':
-        return -9223372036854775808
-    elif type_name[0] == 'u':
-        return 0
-    else:
-        return None
-
-
-def _maximum_type_value(type_name):
-    if type_name == 'int8_t':
-        return 127
-    elif type_name == 'int16_t':
-        return 32767
-    elif type_name == 'int32_t':
-        return 2147483647
-    elif type_name == 'int64_t':
-        return 9223372036854775807
-    elif type_name == 'uint8_t':
-        return 255
-    elif type_name == 'uint16_t':
-        return 65535
-    elif type_name == 'uint32_t':
-        return 4294967295
-    elif type_name == 'uint64_t':
-        return 18446744073709551615
-    else:
-        return None
 
 
 def _format_comment(comment):
@@ -414,7 +490,6 @@ def _format_range(signal):
     maximum = signal.decimal.maximum
     scale = signal.decimal.scale
     offset = signal.decimal.offset
-    unit = _get(signal.unit, '-')
 
     if minimum is not None and maximum is not None:
         return '{}..{} ({}..{} {})'.format(
@@ -422,28 +497,26 @@ def _format_range(signal):
             _format_decimal((maximum - offset) / scale),
             minimum,
             maximum,
-            unit)
+            signal.unit)
     elif minimum is not None:
         return '{}.. ({}.. {})'.format(
             _format_decimal((minimum - offset) / scale),
             minimum,
-            unit)
+            signal.unit)
     elif maximum is not None:
         return '..{} (..{} {}'.format(
             _format_decimal((maximum - offset) / scale),
             maximum,
-            unit)
+            signal.unit)
     else:
         return '-'
 
 
 def _generate_signal(signal):
-    type_name = _type_name(signal)
-
-    if type_name is None:
+    if signal.type_name is None:
         return None, None
 
-    name = _camel_to_snake_case(signal.name)
+    name = signal.snake_name
     comment = _format_comment(signal.comment)
     range_ = _format_range(signal)
     scale = _get(signal.scale, '-')
@@ -454,7 +527,7 @@ def _generate_signal(signal):
                                               range=range_,
                                               scale=scale,
                                               offset=offset)
-    member = '    {} {};'.format(type_name, name)
+    member = '    {} {};'.format(signal.type_name, name)
 
     return comment, member
 
@@ -555,19 +628,18 @@ def _format_encode_code_signal(message,
                                body_lines,
                                variable_lines):
     signal = message.get_signal_by_name(signal_name)
-    signal_name = _camel_to_snake_case(signal_name)
-    type_length = _type_length(signal.length)
 
     if signal.is_float or signal.is_signed:
-        variable = '    uint{}_t {};'.format(type_length, signal_name)
+        variable = '    uint{}_t {};'.format(signal.type_length,
+                                             signal.snake_name)
 
         if signal.is_float:
             conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
-                signal_name)
+                signal.snake_name)
         else:
             conversion = '    {0} = (uint{1}_t)src_p->{0};'.format(
-                signal_name,
-                type_length)
+                signal.snake_name,
+                signal.type_length)
 
         variable_lines.append(variable)
         body_lines.append(conversion)
@@ -580,8 +652,8 @@ def _format_encode_code_signal(message,
 
         line = fmt.format(index,
                           shift_direction,
-                          type_length,
-                          signal_name,
+                          signal.type_length,
+                          signal.snake_name,
                           shift,
                           mask)
         body_lines.append(line)
@@ -669,16 +741,14 @@ def _format_decode_code_signal(message,
                                body_lines,
                                variable_lines):
     signal = message.get_signal_by_name(signal_name)
-    signal_name = _camel_to_snake_case(signal_name)
-    type_length = _type_length(signal.length)
+    type_length = signal.type_length
     conversion_type_name = 'uint{}_t'.format(type_length)
-    conversion_type_suffix = _get_type_suffix(conversion_type_name)
 
     if signal.is_float or signal.is_signed:
-        variable = '    {} {};'.format(conversion_type_name, signal_name)
+        variable = '    {} {};'.format(conversion_type_name, signal.snake_name)
         variable_lines.append(variable)
-        body_lines.append('    {} = 0{};'.format(signal_name,
-                                                 conversion_type_suffix))
+        body_lines.append('    {} = 0{};'.format(signal.snake_name,
+                                                 signal.conversion_type_suffix))
 
     for index, shift, shift_direction, mask in _signal_segments(signal, True):
         if signal.is_float or signal.is_signed:
@@ -686,7 +756,7 @@ def _format_decode_code_signal(message,
         else:
             fmt = '    dst_p->{} |= decode_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
-        line = fmt.format(signal_name,
+        line = fmt.format(signal.snake_name,
                           shift_direction,
                           type_length,
                           index,
@@ -696,20 +766,20 @@ def _format_decode_code_signal(message,
 
     if signal.is_float:
         conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
-            signal_name)
+            signal.snake_name)
         body_lines.append(conversion)
     elif signal.is_signed:
         mask = ((1 << (type_length - signal.length)) - 1)
 
         if mask != 0:
             mask <<= signal.length
-            formatted = SIGN_EXTENSION_FMT.format(name=signal_name,
+            formatted = SIGN_EXTENSION_FMT.format(name=signal.snake_name,
                                                   shift=signal.length - 1,
                                                   mask=mask,
-                                                  suffix=conversion_type_suffix)
+                                                  suffix=signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
 
-        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal_name,
+        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal.snake_name,
                                                               type_length)
         body_lines.append(conversion)
 
@@ -790,44 +860,10 @@ def _generate_struct(message):
     return comments, members
 
 
-def _unique_choices(choices):
-    """Make duplicated choice names unique by first appending its value
-    and then underscores until unique.
-
-    """
-
-    items = {
-        value: _camel_to_snake_case(name).upper()
-        for value, name in choices.items()
-    }
-    names = list(items.values())
-    duplicated_names = [
-        name
-        for name in set(names)
-        if names.count(name) > 1
-    ]
-    unique_choices = {
-        value: name
-        for value, name in items.items()
-        if names.count(name) == 1
-    }
-
-    for value, name in items.items():
-        if name in duplicated_names:
-            name += _canonical('_{}'.format(value))
-
-            while name in unique_choices.values():
-                name += '_'
-
-            unique_choices[value] = name
-
-    return unique_choices
-
-
 def _format_choices(signal, signal_name):
     choices = []
 
-    for value, name in sorted(_unique_choices(signal.choices).items()):
+    for value, name in sorted(signal.unique_choices.items()):
         if signal.is_signed:
             fmt = '{signal_name}_{name}_CHOICE ({value})'
         else:
@@ -859,19 +895,18 @@ def _generate_is_in_range(message):
         if maximum is not None:
             maximum = (maximum / scale - offset)
 
-        type_name = _type_name(signal)
-        suffix = _get_type_suffix(type_name)
+        suffix = signal.type_suffix
         checks = []
 
         if minimum is not None:
-            minimum_type_value = _minimum_type_value(type_name)
+            minimum_type_value = signal.minimum_type_value
 
             if (minimum_type_value is None) or (minimum > minimum_type_value):
                 minimum = _format_decimal(minimum, signal.is_float)
                 checks.append('(value >= {}{})'.format(minimum, suffix))
 
         if maximum is not None:
-            maximum_type_value = _maximum_type_value(type_name)
+            maximum_type_value = signal.maximum_type_value
 
             if (maximum_type_value is None) or (maximum < maximum_type_value):
                 maximum = _format_decimal(maximum, signal.is_float)
@@ -884,9 +919,7 @@ def _generate_is_in_range(message):
 
         checks = ' && '.join(checks)
 
-        signals.append((_camel_to_snake_case(signal.name),
-                        type_name,
-                        checks))
+        signals.append((signal.snake_name, signal.type_name, checks))
 
     return signals
 
@@ -895,7 +928,7 @@ def _generage_frame_id_defines(database_name, messages):
     return '\n'.join([
         '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
             database_name.upper(),
-            _camel_to_snake_case(message.name).upper(),
+            message.snake_name.upper(),
             message.frame_id)
         for message in messages
     ])
@@ -905,17 +938,14 @@ def _generate_choices_defines(database_name, messages):
     choices_defines = []
 
     for message in messages:
-        message_name = _camel_to_snake_case(message.name)
-
         for signal in message.signals:
             if signal.choices is None:
                 continue
 
-            signal_name = _camel_to_snake_case(signal.name)
-            choices = _format_choices(signal, signal_name)
+            choices = _format_choices(signal, signal.snake_name)
             signal_choices_defines = '\n'.join([
                 '#define {}_{}_{}'.format(database_name.upper(),
-                                          message_name.upper(),
+                                          message.snake_name.upper(),
                                           choice)
                 for choice in choices
             ])
@@ -931,7 +961,7 @@ def _generate_structs(database_name, messages):
         comments, members = _generate_struct(message)
         structs.append(
             STRUCT_FMT.format(database_message_name=message.name,
-                              message_name=_camel_to_snake_case(message.name),
+                              message_name=message.snake_name,
                               database_name=database_name,
                               comments='\n'.join(comments),
                               members='\n'.join(members)))
@@ -943,20 +973,19 @@ def _generate_declarations(database_name, messages):
     declarations = []
 
     for message in messages:
-        message_name = _camel_to_snake_case(message.name)
         is_in_range_declarations = []
 
         for signal_name, type_name, _ in _generate_is_in_range(message):
             is_in_range_declaration = IS_IN_RANGE_DECLARATION_FMT.format(
                 database_name=database_name,
-                message_name=message_name,
+                message_name=message.snake_name,
                 signal_name=signal_name,
                 type_name=type_name)
             is_in_range_declarations.append(is_in_range_declaration)
 
         declaration = DECLARATION_FMT.format(database_name=database_name,
                                              database_message_name=message.name,
-                                             message_name=message_name)
+                                             message_name=message.snake_name)
         declaration += '\n' + '\n'.join(is_in_range_declarations)
         declarations.append(declaration)
 
@@ -967,7 +996,6 @@ def _generate_definitions(database_name, messages):
     definitions = []
 
     for message in messages:
-        message_name = _camel_to_snake_case(message.name)
         is_in_range_definitions = []
 
         for signal_name, type_name, check in _generate_is_in_range(message):
@@ -978,7 +1006,7 @@ def _generate_definitions(database_name, messages):
 
             is_in_range_definition = IS_IN_RANGE_DEFINITION_FMT.format(
                 database_name=database_name,
-                message_name=message_name,
+                message_name=message.snake_name,
                 signal_name=signal_name,
                 type_name=type_name,
                 unused=unused,
@@ -996,7 +1024,7 @@ def _generate_definitions(database_name, messages):
 
             definition = DEFINITION_FMT.format(database_name=database_name,
                                                database_message_name=message.name,
-                                               message_name=message_name,
+                                               message_name=message.snake_name,
                                                message_length=message.length,
                                                unused=unused,
                                                encode_variables=encode_variables,
@@ -1005,7 +1033,7 @@ def _generate_definitions(database_name, messages):
                                                decode_body=decode_body)
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
-                                                     message_name=message_name)
+                                                     message_name=message.snake_name)
 
         definition += '\n' + '\n'.join(is_in_range_definitions)
         definitions.append(definition)
@@ -1028,7 +1056,7 @@ def generate(database, database_name, header_name):
     """
 
     date = time.ctime()
-    messages = database.messages
+    messages = [Message(message) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
     frame_id_defines = _generage_frame_id_defines(database_name, messages)
     choices_defines = _generate_choices_defines(database_name, messages)

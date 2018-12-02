@@ -93,7 +93,7 @@ SOURCE_FMT = '''\
 
 #define UNUSED(x) (void)(x)
 
-{helpers}
+{helpers}\
 {definitions}\
 '''
 
@@ -158,6 +158,7 @@ static inline uint8_t encode_left_shift_u{length}(
     return (uint8_t)((uint8_t)(value << shift) & mask);
 }}
 '''
+
 ENCODE_HELPER_RIGHT_SHIFT = '''\
 static inline uint8_t encode_right_shift_u{length}(
     {var_type} value,
@@ -168,7 +169,7 @@ static inline uint8_t encode_right_shift_u{length}(
 }}
 '''
 
-DECODE_HELPER_LEFT_SHIFT = '''
+DECODE_HELPER_LEFT_SHIFT = '''\
 static inline {var_type} decode_left_shift_u{length}(
     uint8_t value,
     uint8_t shift,
@@ -177,7 +178,8 @@ static inline {var_type} decode_left_shift_u{length}(
     return ({var_type})(({var_type})(value & mask) << shift);
 }}
 '''
-DECODE_HELPER_RIGHT_SHIFT = '''
+
+DECODE_HELPER_RIGHT_SHIFT = '''\
 static inline {var_type} decode_right_shift_u{length}(
     uint8_t value,
     uint8_t shift,

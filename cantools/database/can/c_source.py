@@ -93,7 +93,7 @@ SOURCE_FMT = '''\
 
 #define UNUSED(x) (void)(x)
 
-{helpers}\
+{helpers}
 {definitions}\
 '''
 
@@ -1080,14 +1080,13 @@ def generate(database, database_name, header_name):
         DECODE_HELPER_RIGHT_SHIFT
     ]
     size_lengths = [8, 16, 32, 64]
+
     for length in size_lengths:
         var_type = 'uint{}_t'.format(length)
 
         for fmt in helper_formats:
-            line = fmt.format(
-                length=length,
-                var_type=var_type)
-            helpers.append(line)
+            helper = fmt.format(length=length, var_type=var_type)
+            helpers.append(helper)
 
     helpers = '\n'.join(helpers)
 

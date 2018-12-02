@@ -576,13 +576,12 @@ def _format_encode_code_signal(message,
         else:
             fmt = '    dst_p[{}] |= encode_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
 
-        line = fmt.format(
-            index,
-            shift_direction,
-            type_length,
-            signal_name,
-            shift,
-            mask)
+        line = fmt.format(index,
+                          shift_direction,
+                          type_length,
+                          signal_name,
+                          shift,
+                          mask)
         body_lines.append(line)
 
 
@@ -685,13 +684,12 @@ def _format_decode_code_signal(message,
         else:
             fmt = '    dst_p->{} |= decode_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
-        line = fmt.format(
-            signal_name,
-            shift_direction,
-            type_length,
-            index,
-            shift,
-            mask)
+        line = fmt.format(signal_name,
+                          shift_direction,
+                          type_length,
+                          index,
+                          shift,
+                          mask)
         body_lines.append(line)
 
     if signal.is_float:
@@ -1045,22 +1043,22 @@ def generate(database, database_name, header_name):
                                declarations=declarations)
 
     helpers = []
-    for length in [8, 16, 32, 64]:
-        var_type = 'uint'+str(length)+'_t'
+    helper_formats = [
+        ENCODE_HELPER_LEFT_SHIFT,
+        ENCODE_HELPER_RIGHT_SHIFT,
+        DECODE_HELPER_LEFT_SHIFT,
+        DECODE_HELPER_RIGHT_SHIFT
+    ]
+    size_lengths = [8, 16, 32, 64]
+    for length in size_lengths:
+        var_type = 'uint{}_t'.format(length)
 
-        for fmt in [ENCODE_HELPER_LEFT_SHIFT, ENCODE_HELPER_RIGHT_SHIFT]:
+        for fmt in helper_formats:
             line = fmt.format(
                 length=length,
-                var_type=var_type
-                )
+                var_type=var_type)
             helpers.append(line)
 
-        for fmt in [DECODE_HELPER_LEFT_SHIFT, DECODE_HELPER_RIGHT_SHIFT]:
-            line = fmt.format(
-                length=length,
-                var_type=var_type
-                )
-            helpers.append(line)
     helpers = '\n'.join(helpers)
 
     source = SOURCE_FMT.format(version=__version__,

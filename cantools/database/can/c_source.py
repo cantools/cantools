@@ -93,6 +93,7 @@ SOURCE_FMT = '''\
 
 #define UNUSED(x) (void)(x)
 
+{helpers}
 {definitions}\
 '''
 
@@ -146,6 +147,44 @@ IS_IN_RANGE_DECLARATION_FMT = '''\
  * @return true if in range, false otherwise.
  */
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
+'''
+
+ENCODE_HELPER_LEFT_SHIFT = '''\
+static inline uint8_t encode_left_shift_u{length}(
+    {var_type} value,
+    uint8_t shift,
+    uint8_t mask)
+{{
+    return (uint8_t)((uint8_t)(value << shift) & mask);
+}}
+'''
+ENCODE_HELPER_RIGHT_SHIFT = '''\
+static inline uint8_t encode_right_shift_u{length}(
+    {var_type} value,
+    uint8_t shift,
+    uint8_t mask)
+{{
+    return (uint8_t)((uint8_t)(value >> shift) & mask);
+}}
+'''
+
+DECODE_HELPER_LEFT_SHIFT = '''
+static inline {var_type} decode_left_shift_u{length}(
+    uint8_t value,
+    uint8_t mask,
+    int shift)
+{{
+    return ({var_type})(({var_type})(value & mask) << shift);
+}}
+'''
+DECODE_HELPER_RIGHT_SHIFT = '''
+static inline {var_type} decode_right_shift_u{length}(
+    uint8_t value,
+    uint8_t mask,
+    int shift)
+{{
+    return ({var_type})(({var_type})(value & mask) >> shift);
+}}
 '''
 
 DEFINITION_FMT = '''\
@@ -454,16 +493,18 @@ def _signal_segments(signal, invert_shift):
 
         if invert_shift:
             if shift < 0:
-                shift = '<< {}'.format(-shift)
+                shift = -shift
+                shift_direction = 'left'
             else:
-                shift = '>> {}'.format(shift)
+                shift_direction = 'right'
         else:
             if shift < 0:
-                shift = '>> {}'.format(-shift)
+                shift = -shift
+                shift_direction = 'right'
             else:
-                shift = '<< {}'.format(shift)
+                shift_direction = 'left'
 
-        yield index, shift, mask
+        yield index, shift, shift_direction, mask
 
         left -= length
         index += 1
@@ -513,10 +554,10 @@ def _format_encode_code_signal(message,
                                variable_lines):
     signal = message.get_signal_by_name(signal_name)
     signal_name = _camel_to_snake_case(signal_name)
+    type_length = _type_length(signal.length)
 
     if signal.is_float or signal.is_signed:
-        variable = '    uint{}_t {};'.format(_type_length(signal.length),
-                                             signal_name)
+        variable = '    uint{}_t {};'.format(type_length, signal_name)
 
         if signal.is_float:
             conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
@@ -524,18 +565,24 @@ def _format_encode_code_signal(message,
         else:
             conversion = '    {0} = (uint{1}_t)src_p->{0};'.format(
                 signal_name,
-                _type_length(signal.length))
+                type_length)
 
         variable_lines.append(variable)
         body_lines.append(conversion)
 
-    for index, shift, mask in _signal_segments(signal, False):
+    for index, shift, shift_direction, mask in _signal_segments(signal, False):
         if signal.is_float or signal.is_signed:
-            fmt = '    dst_p[{}] |= (uint8_t)((uint8_t)({} {}) & 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= encode_{}_shift_u{}({}, {}, 0x{:02x}u);'
         else:
-            fmt = '    dst_p[{}] |= (uint8_t)((uint8_t)(src_p->{} {}) & 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= encode_{}_shift_u{}(src_p->{}, {}, 0x{:02x}u);'
 
-        line = fmt.format(index, signal_name, shift, mask)
+        line = fmt.format(
+            index,
+            shift_direction,
+            type_length,
+            signal_name,
+            shift,
+            mask)
         body_lines.append(line)
 
 
@@ -632,13 +679,19 @@ def _format_decode_code_signal(message,
         body_lines.append('    {} = 0{};'.format(signal_name,
                                                  conversion_type_suffix))
 
-    for index, shift, mask in _signal_segments(signal, True):
+    for index, shift, shift_direction, mask in _signal_segments(signal, True):
         if signal.is_float or signal.is_signed:
-            fmt = '    {} |= ((uint{}_t)(src_p[{}] & 0x{:02x}u) {});'
+            fmt = '    {} |= decode_{}_shift_u{}(src_p[{}], {}, 0x{:02x}u);'
         else:
-            fmt = '    dst_p->{} |= ((uint{}_t)(src_p[{}] & 0x{:02x}u) {});'
+            fmt = '    dst_p->{} |= decode_{}_shift_u{}(src_p[{}], {}, 0x{:02x}u);'
 
-        line = fmt.format(signal_name, type_length, index, mask, shift)
+        line = fmt.format(
+            signal_name,
+            shift_direction,
+            type_length,
+            index,
+            mask,
+            shift)
         body_lines.append(line)
 
     if signal.is_float:
@@ -991,9 +1044,29 @@ def generate(database, database_name, header_name):
                                structs=structs,
                                declarations=declarations)
 
+    helpers = []
+    for length in [8, 16, 32, 64]:
+        var_type = 'uint'+str(length)+'_t'
+
+        for fmt in [ENCODE_HELPER_LEFT_SHIFT, ENCODE_HELPER_RIGHT_SHIFT]:
+            line = fmt.format(
+                length=length,
+                var_type=var_type
+                )
+            helpers.append(line)
+
+        for fmt in [DECODE_HELPER_LEFT_SHIFT, DECODE_HELPER_RIGHT_SHIFT]:
+            line = fmt.format(
+                length=length,
+                var_type=var_type
+                )
+            helpers.append(line)
+    helpers = '\n'.join(helpers)
+
     source = SOURCE_FMT.format(version=__version__,
                                date=date,
                                header=header_name,
+                               helpers=helpers,
                                definitions=definitions)
 
     return header, source

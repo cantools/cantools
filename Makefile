@@ -28,7 +28,8 @@ CFLAGS := \
 	-Wextra \
 	-Wpedantic \
 	-Wdouble-promotion \
-	-Wsign-conversion \
+	-Wconversion \
+	-Wno-unused-function \
 	-Werror
 CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA))
 

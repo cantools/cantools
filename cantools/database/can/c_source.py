@@ -171,8 +171,8 @@ static inline uint8_t encode_right_shift_u{length}(
 DECODE_HELPER_LEFT_SHIFT = '''
 static inline {var_type} decode_left_shift_u{length}(
     uint8_t value,
-    uint8_t mask,
-    int shift)
+    uint8_t shift,
+    uint8_t mask)
 {{
     return ({var_type})(({var_type})(value & mask) << shift);
 }}
@@ -180,8 +180,8 @@ static inline {var_type} decode_left_shift_u{length}(
 DECODE_HELPER_RIGHT_SHIFT = '''
 static inline {var_type} decode_right_shift_u{length}(
     uint8_t value,
-    uint8_t mask,
-    int shift)
+    uint8_t shift,
+    uint8_t mask)
 {{
     return ({var_type})(({var_type})(value & mask) >> shift);
 }}
@@ -572,9 +572,9 @@ def _format_encode_code_signal(message,
 
     for index, shift, shift_direction, mask in _signal_segments(signal, False):
         if signal.is_float or signal.is_signed:
-            fmt = '    dst_p[{}] |= encode_{}_shift_u{}({}, {}, 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= encode_{}_shift_u{}({}, {}u, 0x{:02x}u);'
         else:
-            fmt = '    dst_p[{}] |= encode_{}_shift_u{}(src_p->{}, {}, 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= encode_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
 
         line = fmt.format(
             index,
@@ -681,17 +681,17 @@ def _format_decode_code_signal(message,
 
     for index, shift, shift_direction, mask in _signal_segments(signal, True):
         if signal.is_float or signal.is_signed:
-            fmt = '    {} |= decode_{}_shift_u{}(src_p[{}], {}, 0x{:02x}u);'
+            fmt = '    {} |= decode_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
         else:
-            fmt = '    dst_p->{} |= decode_{}_shift_u{}(src_p[{}], {}, 0x{:02x}u);'
+            fmt = '    dst_p->{} |= decode_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
         line = fmt.format(
             signal_name,
             shift_direction,
             type_length,
             index,
-            mask,
-            shift)
+            shift,
+            mask)
         body_lines.append(line)
 
     if signal.is_float:

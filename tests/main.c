@@ -530,6 +530,41 @@ static void test_signed_message32big(void)
     assert(decoded.s32big == -5);
 }
 
+static void test_signed_message378910(void)
+{
+    struct signed_message378910_t decoded;
+    uint8_t buf[8];
+
+    decoded.s7 = -40;
+    decoded.s8big = 0x5a;
+    decoded.s9 = 0xa5;
+    decoded.s8 = -43;
+    decoded.s3big = -4;
+    decoded.s3 = 1;
+    decoded.s10big = -253;
+    decoded.s7big = -9;
+
+    memset(&buf[0], 0, sizeof(buf));
+    assert(signed_message378910_encode(&buf[0],
+                                       &decoded,
+                                       sizeof(buf)) == 8);
+    assert(memcmp(&buf[0],
+                  "\xb0\xb4\x4a\x55\x87\x01\x81\xf7",
+                  sizeof(buf)) == 0);
+    memset(&decoded, 0, sizeof(decoded));
+    assert(signed_message378910_decode(&decoded,
+                                       &buf[0],
+                                       sizeof(buf)) == 0);
+    assert(decoded.s7 == -40);
+    assert(decoded.s8big == 0x5a);
+    assert(decoded.s9 == 0xa5);
+    assert(decoded.s8 == -43);
+    assert(decoded.s3big == -4);
+    assert(decoded.s3 == 1);
+    assert(decoded.s10big == -253);
+    assert(decoded.s7big == -9);
+}
+
 static void test_signed(void)
 {
     test_signed_message64();
@@ -538,6 +573,7 @@ static void test_signed(void)
     test_signed_message64big();
     test_signed_message33big();
     test_signed_message32big();
+    test_signed_message378910();
 }
 
 static void test_is_in_range(void)

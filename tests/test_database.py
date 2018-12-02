@@ -3559,6 +3559,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 'Message32big',
                 {'s32big': -5},
                 b'\xff\xff\xff\xfb\x00\x00\x00\x00'
+            ),
+            (
+                'Message378910',
+                {
+                    's7': -40,
+                    's8big': 0x5a,
+                    's9': 0xa5,
+                    's8': -43,
+                    's3big': -4,
+                    's3': 1,
+                    's10big': -253,
+                    's7big': -9
+                },
+                b'\xb0\xb4\x4a\x55\x87\x01\x81\xf7'
             )
         ]
 

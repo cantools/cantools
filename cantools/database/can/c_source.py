@@ -538,7 +538,7 @@ def _signal_segments(signal, invert_shift):
 
     while left > 0:
         if signal.byte_order == 'big_endian':
-            if left > (pos + 1):
+            if left >= (pos + 1):
                 length = (pos + 1)
                 pos = 7
                 shift = -(left - length)

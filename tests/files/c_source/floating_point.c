@@ -48,14 +48,14 @@ ssize_t floating_point_message1_encode(
     memset(&dst_p[0], 0, 8);
 
     memcpy(&signal1, &src_p->signal1, sizeof(signal1));
-    dst_p[0] |= ((signal1 << 0) & 0xffu);
-    dst_p[1] |= ((signal1 >> 8) & 0xffu);
-    dst_p[2] |= ((signal1 >> 16) & 0xffu);
-    dst_p[3] |= ((signal1 >> 24) & 0xffu);
-    dst_p[4] |= ((signal1 >> 32) & 0xffu);
-    dst_p[5] |= ((signal1 >> 40) & 0xffu);
-    dst_p[6] |= ((signal1 >> 48) & 0xffu);
-    dst_p[7] |= ((signal1 >> 56) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(signal1 << 0) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(signal1 >> 8) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(signal1 >> 16) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(signal1 >> 24) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(signal1 >> 32) & 0xffu);
+    dst_p[5] |= (uint8_t)((uint8_t)(signal1 >> 40) & 0xffu);
+    dst_p[6] |= (uint8_t)((uint8_t)(signal1 >> 48) & 0xffu);
+    dst_p[7] |= (uint8_t)((uint8_t)(signal1 >> 56) & 0xffu);
 
     return (8);
 }
@@ -109,15 +109,15 @@ ssize_t floating_point_message2_encode(
     memset(&dst_p[0], 0, 8);
 
     memcpy(&signal1, &src_p->signal1, sizeof(signal1));
-    dst_p[0] |= ((signal1 << 0) & 0xffu);
-    dst_p[1] |= ((signal1 >> 8) & 0xffu);
-    dst_p[2] |= ((signal1 >> 16) & 0xffu);
-    dst_p[3] |= ((signal1 >> 24) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(signal1 << 0) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(signal1 >> 8) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(signal1 >> 16) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(signal1 >> 24) & 0xffu);
     memcpy(&signal2, &src_p->signal2, sizeof(signal2));
-    dst_p[4] |= ((signal2 << 0) & 0xffu);
-    dst_p[5] |= ((signal2 >> 8) & 0xffu);
-    dst_p[6] |= ((signal2 >> 16) & 0xffu);
-    dst_p[7] |= ((signal2 >> 24) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(signal2 << 0) & 0xffu);
+    dst_p[5] |= (uint8_t)((uint8_t)(signal2 >> 8) & 0xffu);
+    dst_p[6] |= (uint8_t)((uint8_t)(signal2 >> 16) & 0xffu);
+    dst_p[7] |= (uint8_t)((uint8_t)(signal2 >> 24) & 0xffu);
 
     return (8);
 }

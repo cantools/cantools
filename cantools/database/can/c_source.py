@@ -531,9 +531,9 @@ def _format_encode_code_signal(message,
 
     for index, shift, mask in _signal_segments(signal, False):
         if signal.is_float or signal.is_signed:
-            fmt = '    dst_p[{}] |= (({} {}) & 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= (uint8_t)((uint8_t)({} {}) & 0x{:02x}u);'
         else:
-            fmt = '    dst_p[{}] |= ((src_p->{} {}) & 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= (uint8_t)((uint8_t)(src_p->{} {}) & 0x{:02x}u);'
 
         line = fmt.format(index, signal_name, shift, mask)
         body_lines.append(line)

@@ -45,36 +45,36 @@ ssize_t multiplex_message1_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->multiplexor << 2) & 0xfcu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->multiplexor << 2) & 0xfcu);
 
     switch (src_p->multiplexor) {
 
     case 8:
-        dst_p[2] |= ((src_p->bit_j << 2) & 0x04u);
-        dst_p[2] |= ((src_p->bit_c << 3) & 0x08u);
-        dst_p[2] |= ((src_p->bit_g << 7) & 0x80u);
-        dst_p[3] |= ((src_p->bit_l << 0) & 0x01u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_j << 2) & 0x04u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_c << 3) & 0x08u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_g << 7) & 0x80u);
+        dst_p[3] |= (uint8_t)((uint8_t)(src_p->bit_l << 0) & 0x01u);
         break;
 
     case 16:
-        dst_p[2] |= ((src_p->bit_j << 2) & 0x04u);
-        dst_p[2] |= ((src_p->bit_c << 3) & 0x08u);
-        dst_p[2] |= ((src_p->bit_g << 7) & 0x80u);
-        dst_p[3] |= ((src_p->bit_l << 0) & 0x01u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_j << 2) & 0x04u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_c << 3) & 0x08u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_g << 7) & 0x80u);
+        dst_p[3] |= (uint8_t)((uint8_t)(src_p->bit_l << 0) & 0x01u);
         break;
 
     case 24:
-        dst_p[2] |= ((src_p->bit_j << 2) & 0x04u);
-        dst_p[2] |= ((src_p->bit_c << 3) & 0x08u);
-        dst_p[2] |= ((src_p->bit_g << 7) & 0x80u);
-        dst_p[3] |= ((src_p->bit_l << 0) & 0x01u);
-        dst_p[3] |= ((src_p->bit_a << 2) & 0x04u);
-        dst_p[3] |= ((src_p->bit_k << 4) & 0x10u);
-        dst_p[3] |= ((src_p->bit_e << 5) & 0x20u);
-        dst_p[4] |= ((src_p->bit_d << 0) & 0x01u);
-        dst_p[4] |= ((src_p->bit_b << 1) & 0x02u);
-        dst_p[4] |= ((src_p->bit_h << 6) & 0x40u);
-        dst_p[4] |= ((src_p->bit_f << 7) & 0x80u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_j << 2) & 0x04u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_c << 3) & 0x08u);
+        dst_p[2] |= (uint8_t)((uint8_t)(src_p->bit_g << 7) & 0x80u);
+        dst_p[3] |= (uint8_t)((uint8_t)(src_p->bit_l << 0) & 0x01u);
+        dst_p[3] |= (uint8_t)((uint8_t)(src_p->bit_a << 2) & 0x04u);
+        dst_p[3] |= (uint8_t)((uint8_t)(src_p->bit_k << 4) & 0x10u);
+        dst_p[3] |= (uint8_t)((uint8_t)(src_p->bit_e << 5) & 0x20u);
+        dst_p[4] |= (uint8_t)((uint8_t)(src_p->bit_d << 0) & 0x01u);
+        dst_p[4] |= (uint8_t)((uint8_t)(src_p->bit_b << 1) & 0x02u);
+        dst_p[4] |= (uint8_t)((uint8_t)(src_p->bit_h << 6) & 0x40u);
+        dst_p[4] |= (uint8_t)((uint8_t)(src_p->bit_f << 7) & 0x80u);
         break;
 
     default:

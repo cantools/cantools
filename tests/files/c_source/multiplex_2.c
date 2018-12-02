@@ -50,35 +50,35 @@ ssize_t multiplex_2_shared_encode(
     memset(&dst_p[0], 0, 8);
 
     s0 = (uint8_t)src_p->s0;
-    dst_p[0] |= ((s0 << 0) & 0x0fu);
+    dst_p[0] |= (uint8_t)((uint8_t)(s0 << 0) & 0x0fu);
 
     switch (src_p->s0) {
 
     case 1:
         s1 = (uint8_t)src_p->s1;
-        dst_p[0] |= ((s1 << 4) & 0xf0u);
+        dst_p[0] |= (uint8_t)((uint8_t)(s1 << 4) & 0xf0u);
         break;
 
     case 2:
         s2 = (uint8_t)src_p->s2;
-        dst_p[1] |= ((s2 << 0) & 0xffu);
+        dst_p[1] |= (uint8_t)((uint8_t)(s2 << 0) & 0xffu);
         break;
 
     case 3:
         s1 = (uint8_t)src_p->s1;
-        dst_p[0] |= ((s1 << 4) & 0xf0u);
+        dst_p[0] |= (uint8_t)((uint8_t)(s1 << 4) & 0xf0u);
         s2 = (uint8_t)src_p->s2;
-        dst_p[1] |= ((s2 << 0) & 0xffu);
+        dst_p[1] |= (uint8_t)((uint8_t)(s2 << 0) & 0xffu);
         break;
 
     case 4:
         s2 = (uint8_t)src_p->s2;
-        dst_p[1] |= ((s2 << 0) & 0xffu);
+        dst_p[1] |= (uint8_t)((uint8_t)(s2 << 0) & 0xffu);
         break;
 
     case 5:
         s2 = (uint8_t)src_p->s2;
-        dst_p[1] |= ((s2 << 0) & 0xffu);
+        dst_p[1] |= (uint8_t)((uint8_t)(s2 << 0) & 0xffu);
         break;
 
     default:
@@ -201,18 +201,18 @@ ssize_t multiplex_2_normal_encode(
     memset(&dst_p[0], 0, 8);
 
     s0 = (uint8_t)src_p->s0;
-    dst_p[0] |= ((s0 << 0) & 0x0fu);
+    dst_p[0] |= (uint8_t)((uint8_t)(s0 << 0) & 0x0fu);
 
     switch (src_p->s0) {
 
     case 0:
         s1 = (uint8_t)src_p->s1;
-        dst_p[0] |= ((s1 << 4) & 0xf0u);
+        dst_p[0] |= (uint8_t)((uint8_t)(s1 << 4) & 0xf0u);
         break;
 
     case 1:
         s2 = (uint8_t)src_p->s2;
-        dst_p[1] |= ((s2 << 0) & 0xffu);
+        dst_p[1] |= (uint8_t)((uint8_t)(s2 << 0) & 0xffu);
         break;
 
     default:
@@ -315,31 +315,31 @@ ssize_t multiplex_2_extended_encode(
     memset(&dst_p[0], 0, 8);
 
     s0 = (uint8_t)src_p->s0;
-    dst_p[0] |= ((s0 << 0) & 0x0fu);
+    dst_p[0] |= (uint8_t)((uint8_t)(s0 << 0) & 0x0fu);
     s6 = (uint8_t)src_p->s6;
-    dst_p[4] |= ((s6 << 0) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(s6 << 0) & 0xffu);
 
     switch (src_p->s0) {
 
     case 0:
         s1 = (uint8_t)src_p->s1;
-        dst_p[0] |= ((s1 << 4) & 0xf0u);
+        dst_p[0] |= (uint8_t)((uint8_t)(s1 << 4) & 0xf0u);
 
         switch (src_p->s1) {
 
         case 0:
             s2 = (uint8_t)src_p->s2;
-            dst_p[1] |= ((s2 << 0) & 0xffu);
+            dst_p[1] |= (uint8_t)((uint8_t)(s2 << 0) & 0xffu);
             s3 = (uint16_t)src_p->s3;
-            dst_p[2] |= ((s3 << 0) & 0xffu);
-            dst_p[3] |= ((s3 >> 8) & 0xffu);
+            dst_p[2] |= (uint8_t)((uint8_t)(s3 << 0) & 0xffu);
+            dst_p[3] |= (uint8_t)((uint8_t)(s3 >> 8) & 0xffu);
             break;
 
         case 2:
             s4 = (uint32_t)src_p->s4;
-            dst_p[1] |= ((s4 << 0) & 0xffu);
-            dst_p[2] |= ((s4 >> 8) & 0xffu);
-            dst_p[3] |= ((s4 >> 16) & 0xffu);
+            dst_p[1] |= (uint8_t)((uint8_t)(s4 << 0) & 0xffu);
+            dst_p[2] |= (uint8_t)((uint8_t)(s4 >> 8) & 0xffu);
+            dst_p[3] |= (uint8_t)((uint8_t)(s4 >> 16) & 0xffu);
             break;
 
         default:
@@ -349,10 +349,10 @@ ssize_t multiplex_2_extended_encode(
 
     case 1:
         s5 = (uint32_t)src_p->s5;
-        dst_p[0] |= ((s5 << 4) & 0xf0u);
-        dst_p[1] |= ((s5 >> 4) & 0xffu);
-        dst_p[2] |= ((s5 >> 12) & 0xffu);
-        dst_p[3] |= ((s5 >> 20) & 0xffu);
+        dst_p[0] |= (uint8_t)((uint8_t)(s5 << 4) & 0xf0u);
+        dst_p[1] |= (uint8_t)((uint8_t)(s5 >> 4) & 0xffu);
+        dst_p[2] |= (uint8_t)((uint8_t)(s5 >> 12) & 0xffu);
+        dst_p[3] |= (uint8_t)((uint8_t)(s5 >> 20) & 0xffu);
         break;
 
     default:
@@ -363,14 +363,14 @@ ssize_t multiplex_2_extended_encode(
 
     case 1:
         s7 = (uint32_t)src_p->s7;
-        dst_p[5] |= ((s7 << 0) & 0xffu);
-        dst_p[6] |= ((s7 >> 8) & 0xffu);
-        dst_p[7] |= ((s7 >> 16) & 0xffu);
+        dst_p[5] |= (uint8_t)((uint8_t)(s7 << 0) & 0xffu);
+        dst_p[6] |= (uint8_t)((uint8_t)(s7 >> 8) & 0xffu);
+        dst_p[7] |= (uint8_t)((uint8_t)(s7 >> 16) & 0xffu);
         break;
 
     case 2:
         s8 = (uint8_t)src_p->s8;
-        dst_p[5] |= ((s8 << 0) & 0xffu);
+        dst_p[5] |= (uint8_t)((uint8_t)(s8 << 0) & 0xffu);
         break;
 
     default:
@@ -579,22 +579,22 @@ ssize_t multiplex_2_extended_types_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->s11 << 0) & 0x1fu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->s11 << 0) & 0x1fu);
 
     switch (src_p->s11) {
 
     case 3:
         s0 = (uint8_t)src_p->s0;
-        dst_p[1] |= ((s0 << 0) & 0x0fu);
+        dst_p[1] |= (uint8_t)((uint8_t)(s0 << 0) & 0x0fu);
 
         switch (src_p->s0) {
 
         case 0:
             memcpy(&s10, &src_p->s10, sizeof(s10));
-            dst_p[2] |= ((s10 << 0) & 0xffu);
-            dst_p[3] |= ((s10 >> 8) & 0xffu);
-            dst_p[4] |= ((s10 >> 16) & 0xffu);
-            dst_p[5] |= ((s10 >> 24) & 0xffu);
+            dst_p[2] |= (uint8_t)((uint8_t)(s10 << 0) & 0xffu);
+            dst_p[3] |= (uint8_t)((uint8_t)(s10 >> 8) & 0xffu);
+            dst_p[4] |= (uint8_t)((uint8_t)(s10 >> 16) & 0xffu);
+            dst_p[5] |= (uint8_t)((uint8_t)(s10 >> 24) & 0xffu);
             break;
 
         default:
@@ -604,10 +604,10 @@ ssize_t multiplex_2_extended_types_encode(
 
     case 5:
         memcpy(&s9, &src_p->s9, sizeof(s9));
-        dst_p[3] |= ((s9 << 0) & 0xffu);
-        dst_p[4] |= ((s9 >> 8) & 0xffu);
-        dst_p[5] |= ((s9 >> 16) & 0xffu);
-        dst_p[6] |= ((s9 >> 24) & 0xffu);
+        dst_p[3] |= (uint8_t)((uint8_t)(s9 << 0) & 0xffu);
+        dst_p[4] |= (uint8_t)((uint8_t)(s9 >> 8) & 0xffu);
+        dst_p[5] |= (uint8_t)((uint8_t)(s9 >> 16) & 0xffu);
+        dst_p[6] |= (uint8_t)((uint8_t)(s9 >> 24) & 0xffu);
         break;
 
     default:

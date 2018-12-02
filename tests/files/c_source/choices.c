@@ -48,7 +48,7 @@ ssize_t choices_foo_encode(
     memset(&dst_p[0], 0, 8);
 
     foo = (uint8_t)src_p->foo;
-    dst_p[0] |= ((foo << 0) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(foo << 0) & 0xffu);
 
     return (8);
 }

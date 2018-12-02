@@ -48,10 +48,10 @@ ssize_t signed_message32big_encode(
     memset(&dst_p[0], 0, 8);
 
     s32big = (uint32_t)src_p->s32big;
-    dst_p[0] |= ((s32big >> 24) & 0xffu);
-    dst_p[1] |= ((s32big >> 16) & 0xffu);
-    dst_p[2] |= ((s32big >> 8) & 0xffu);
-    dst_p[3] |= ((s32big << 0) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(s32big >> 24) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(s32big >> 16) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(s32big >> 8) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(s32big << 0) & 0xffu);
 
     return (8);
 }
@@ -100,11 +100,11 @@ ssize_t signed_message33big_encode(
     memset(&dst_p[0], 0, 8);
 
     s33big = (uint64_t)src_p->s33big;
-    dst_p[0] |= ((s33big >> 25) & 0xffu);
-    dst_p[1] |= ((s33big >> 17) & 0xffu);
-    dst_p[2] |= ((s33big >> 9) & 0xffu);
-    dst_p[3] |= ((s33big >> 1) & 0xffu);
-    dst_p[4] |= ((s33big << 7) & 0x80u);
+    dst_p[0] |= (uint8_t)((uint8_t)(s33big >> 25) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(s33big >> 17) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(s33big >> 9) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(s33big >> 1) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(s33big << 7) & 0x80u);
 
     return (8);
 }
@@ -159,14 +159,14 @@ ssize_t signed_message64big_encode(
     memset(&dst_p[0], 0, 8);
 
     s64big = (uint64_t)src_p->s64big;
-    dst_p[0] |= ((s64big >> 56) & 0xffu);
-    dst_p[1] |= ((s64big >> 48) & 0xffu);
-    dst_p[2] |= ((s64big >> 40) & 0xffu);
-    dst_p[3] |= ((s64big >> 32) & 0xffu);
-    dst_p[4] |= ((s64big >> 24) & 0xffu);
-    dst_p[5] |= ((s64big >> 16) & 0xffu);
-    dst_p[6] |= ((s64big >> 8) & 0xffu);
-    dst_p[7] |= ((s64big << 0) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(s64big >> 56) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(s64big >> 48) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(s64big >> 40) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(s64big >> 32) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(s64big >> 24) & 0xffu);
+    dst_p[5] |= (uint8_t)((uint8_t)(s64big >> 16) & 0xffu);
+    dst_p[6] |= (uint8_t)((uint8_t)(s64big >> 8) & 0xffu);
+    dst_p[7] |= (uint8_t)((uint8_t)(s64big << 0) & 0xffu);
 
     return (8);
 }
@@ -219,14 +219,14 @@ ssize_t signed_message64_encode(
     memset(&dst_p[0], 0, 8);
 
     s64 = (uint64_t)src_p->s64;
-    dst_p[0] |= ((s64 << 0) & 0xffu);
-    dst_p[1] |= ((s64 >> 8) & 0xffu);
-    dst_p[2] |= ((s64 >> 16) & 0xffu);
-    dst_p[3] |= ((s64 >> 24) & 0xffu);
-    dst_p[4] |= ((s64 >> 32) & 0xffu);
-    dst_p[5] |= ((s64 >> 40) & 0xffu);
-    dst_p[6] |= ((s64 >> 48) & 0xffu);
-    dst_p[7] |= ((s64 >> 56) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(s64 << 0) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(s64 >> 8) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(s64 >> 16) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(s64 >> 24) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(s64 >> 32) & 0xffu);
+    dst_p[5] |= (uint8_t)((uint8_t)(s64 >> 40) & 0xffu);
+    dst_p[6] |= (uint8_t)((uint8_t)(s64 >> 48) & 0xffu);
+    dst_p[7] |= (uint8_t)((uint8_t)(s64 >> 56) & 0xffu);
 
     return (8);
 }
@@ -279,11 +279,11 @@ ssize_t signed_message33_encode(
     memset(&dst_p[0], 0, 8);
 
     s33 = (uint64_t)src_p->s33;
-    dst_p[0] |= ((s33 << 0) & 0xffu);
-    dst_p[1] |= ((s33 >> 8) & 0xffu);
-    dst_p[2] |= ((s33 >> 16) & 0xffu);
-    dst_p[3] |= ((s33 >> 24) & 0xffu);
-    dst_p[4] |= ((s33 >> 32) & 0x01u);
+    dst_p[0] |= (uint8_t)((uint8_t)(s33 << 0) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(s33 >> 8) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(s33 >> 16) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(s33 >> 24) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(s33 >> 32) & 0x01u);
 
     return (8);
 }
@@ -336,10 +336,10 @@ ssize_t signed_message32_encode(
     memset(&dst_p[0], 0, 8);
 
     s32 = (uint32_t)src_p->s32;
-    dst_p[0] |= ((s32 << 0) & 0xffu);
-    dst_p[1] |= ((s32 >> 8) & 0xffu);
-    dst_p[2] |= ((s32 >> 16) & 0xffu);
-    dst_p[3] |= ((s32 >> 24) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(s32 << 0) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(s32 >> 8) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(s32 >> 16) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(s32 >> 24) & 0xffu);
 
     return (8);
 }

@@ -45,12 +45,12 @@ ssize_t padding_bit_order_msg0_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->b << 7) & 0x80u);
-    dst_p[0] |= ((src_p->a >> 8) & 0x7fu);
-    dst_p[1] |= ((src_p->a << 0) & 0xffu);
-    dst_p[4] |= ((src_p->d << 7) & 0x80u);
-    dst_p[4] |= ((src_p->c >> 8) & 0x7fu);
-    dst_p[5] |= ((src_p->c << 0) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->b << 7) & 0x80u);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->a >> 8) & 0x7fu);
+    dst_p[1] |= (uint8_t)((uint8_t)(src_p->a << 0) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(src_p->d << 7) & 0x80u);
+    dst_p[4] |= (uint8_t)((uint8_t)(src_p->c >> 8) & 0x7fu);
+    dst_p[5] |= (uint8_t)((uint8_t)(src_p->c << 0) & 0xffu);
 
     return (8);
 }
@@ -107,12 +107,12 @@ ssize_t padding_bit_order_msg1_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->e << 0) & 0x01u);
-    dst_p[0] |= ((src_p->f << 1) & 0xfeu);
-    dst_p[1] |= ((src_p->f >> 7) & 0xffu);
-    dst_p[4] |= ((src_p->g << 0) & 0x01u);
-    dst_p[4] |= ((src_p->h << 1) & 0xfeu);
-    dst_p[5] |= ((src_p->h >> 7) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->e << 0) & 0x01u);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->f << 1) & 0xfeu);
+    dst_p[1] |= (uint8_t)((uint8_t)(src_p->f >> 7) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(src_p->g << 0) & 0x01u);
+    dst_p[4] |= (uint8_t)((uint8_t)(src_p->h << 1) & 0xfeu);
+    dst_p[5] |= (uint8_t)((uint8_t)(src_p->h >> 7) & 0xffu);
 
     return (8);
 }
@@ -169,9 +169,9 @@ ssize_t padding_bit_order_msg2_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->i << 0) & 0x0fu);
-    dst_p[0] |= ((src_p->j << 4) & 0xf0u);
-    dst_p[1] |= ((src_p->k << 0) & 0x0fu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->i << 0) & 0x0fu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->j << 4) & 0xf0u);
+    dst_p[1] |= (uint8_t)((uint8_t)(src_p->k << 0) & 0x0fu);
 
     return (8);
 }
@@ -220,14 +220,14 @@ ssize_t padding_bit_order_msg3_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->l >> 56) & 0xffu);
-    dst_p[1] |= ((src_p->l >> 48) & 0xffu);
-    dst_p[2] |= ((src_p->l >> 40) & 0xffu);
-    dst_p[3] |= ((src_p->l >> 32) & 0xffu);
-    dst_p[4] |= ((src_p->l >> 24) & 0xffu);
-    dst_p[5] |= ((src_p->l >> 16) & 0xffu);
-    dst_p[6] |= ((src_p->l >> 8) & 0xffu);
-    dst_p[7] |= ((src_p->l << 0) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->l >> 56) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(src_p->l >> 48) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(src_p->l >> 40) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(src_p->l >> 32) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(src_p->l >> 24) & 0xffu);
+    dst_p[5] |= (uint8_t)((uint8_t)(src_p->l >> 16) & 0xffu);
+    dst_p[6] |= (uint8_t)((uint8_t)(src_p->l >> 8) & 0xffu);
+    dst_p[7] |= (uint8_t)((uint8_t)(src_p->l << 0) & 0xffu);
 
     return (8);
 }
@@ -273,14 +273,14 @@ ssize_t padding_bit_order_msg4_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->m << 0) & 0xffu);
-    dst_p[1] |= ((src_p->m >> 8) & 0xffu);
-    dst_p[2] |= ((src_p->m >> 16) & 0xffu);
-    dst_p[3] |= ((src_p->m >> 24) & 0xffu);
-    dst_p[4] |= ((src_p->m >> 32) & 0xffu);
-    dst_p[5] |= ((src_p->m >> 40) & 0xffu);
-    dst_p[6] |= ((src_p->m >> 48) & 0xffu);
-    dst_p[7] |= ((src_p->m >> 56) & 0xffu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->m << 0) & 0xffu);
+    dst_p[1] |= (uint8_t)((uint8_t)(src_p->m >> 8) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(src_p->m >> 16) & 0xffu);
+    dst_p[3] |= (uint8_t)((uint8_t)(src_p->m >> 24) & 0xffu);
+    dst_p[4] |= (uint8_t)((uint8_t)(src_p->m >> 32) & 0xffu);
+    dst_p[5] |= (uint8_t)((uint8_t)(src_p->m >> 40) & 0xffu);
+    dst_p[6] |= (uint8_t)((uint8_t)(src_p->m >> 48) & 0xffu);
+    dst_p[7] |= (uint8_t)((uint8_t)(src_p->m >> 56) & 0xffu);
 
     return (8);
 }

@@ -47,12 +47,12 @@ ssize_t motohawk_example_message_encode(
 
     memset(&dst_p[0], 0, 8);
 
-    dst_p[0] |= ((src_p->enable << 7) & 0x80u);
-    dst_p[0] |= ((src_p->average_radius << 1) & 0x7eu);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->enable << 7) & 0x80u);
+    dst_p[0] |= (uint8_t)((uint8_t)(src_p->average_radius << 1) & 0x7eu);
     temperature = (uint16_t)src_p->temperature;
-    dst_p[0] |= ((temperature >> 11) & 0x01u);
-    dst_p[1] |= ((temperature >> 3) & 0xffu);
-    dst_p[2] |= ((temperature << 5) & 0xe0u);
+    dst_p[0] |= (uint8_t)((uint8_t)(temperature >> 11) & 0x01u);
+    dst_p[1] |= (uint8_t)((uint8_t)(temperature >> 3) & 0xffu);
+    dst_p[2] |= (uint8_t)((uint8_t)(temperature << 5) & 0xe0u);
 
     return (8);
 }

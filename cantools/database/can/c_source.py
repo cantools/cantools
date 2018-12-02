@@ -149,7 +149,7 @@ IS_IN_RANGE_DECLARATION_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
 '''
 
-ENCODE_HELPER_LEFT_SHIFT = '''\
+ENCODE_HELPER_LEFT_SHIFT_FMT = '''\
 static inline uint8_t encode_left_shift_u{length}(
     {var_type} value,
     uint8_t shift,
@@ -159,7 +159,7 @@ static inline uint8_t encode_left_shift_u{length}(
 }}
 '''
 
-ENCODE_HELPER_RIGHT_SHIFT = '''\
+ENCODE_HELPER_RIGHT_SHIFT_FMT = '''\
 static inline uint8_t encode_right_shift_u{length}(
     {var_type} value,
     uint8_t shift,
@@ -169,7 +169,7 @@ static inline uint8_t encode_right_shift_u{length}(
 }}
 '''
 
-DECODE_HELPER_LEFT_SHIFT = '''\
+DECODE_HELPER_LEFT_SHIFT_FMT = '''\
 static inline {var_type} decode_left_shift_u{length}(
     uint8_t value,
     uint8_t shift,
@@ -179,7 +179,7 @@ static inline {var_type} decode_left_shift_u{length}(
 }}
 '''
 
-DECODE_HELPER_RIGHT_SHIFT = '''\
+DECODE_HELPER_RIGHT_SHIFT_FMT = '''\
 static inline {var_type} decode_right_shift_u{length}(
     uint8_t value,
     uint8_t shift,
@@ -1041,6 +1041,26 @@ def _generate_definitions(database_name, messages):
     return '\n'.join(definitions)
 
 
+def _generate_helpers():
+    helpers = []
+    helper_formats = [
+        ENCODE_HELPER_LEFT_SHIFT_FMT,
+        ENCODE_HELPER_RIGHT_SHIFT_FMT,
+        DECODE_HELPER_LEFT_SHIFT_FMT,
+        DECODE_HELPER_RIGHT_SHIFT_FMT
+    ]
+    size_lengths = [8, 16, 32, 64]
+
+    for length in size_lengths:
+        var_type = 'uint{}_t'.format(length)
+
+        for fmt in helper_formats:
+            helper = fmt.format(length=length, var_type=var_type)
+            helpers.append(helper)
+
+    return '\n'.join(helpers)
+
+
 def generate(database, database_name, header_name):
     """Generate C source code from given CAN database `database`.
 
@@ -1063,6 +1083,7 @@ def generate(database, database_name, header_name):
     structs = _generate_structs(database_name, messages)
     declarations = _generate_declarations(database_name, messages)
     definitions = _generate_definitions(database_name, messages)
+    helpers = _generate_helpers()
 
     header = HEADER_FMT.format(version=__version__,
                                date=date,
@@ -1071,24 +1092,6 @@ def generate(database, database_name, header_name):
                                choices_defines=choices_defines,
                                structs=structs,
                                declarations=declarations)
-
-    helpers = []
-    helper_formats = [
-        ENCODE_HELPER_LEFT_SHIFT,
-        ENCODE_HELPER_RIGHT_SHIFT,
-        DECODE_HELPER_LEFT_SHIFT,
-        DECODE_HELPER_RIGHT_SHIFT
-    ]
-    size_lengths = [8, 16, 32, 64]
-
-    for length in size_lengths:
-        var_type = 'uint{}_t'.format(length)
-
-        for fmt in helper_formats:
-            helper = fmt.format(length=length, var_type=var_type)
-            helpers.append(helper)
-
-    helpers = '\n'.join(helpers)
 
     source = SOURCE_FMT.format(version=__version__,
                                date=date,

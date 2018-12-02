@@ -92,8 +92,7 @@ def add_subparser(subparsers):
         description='Dump given database in a human readable format.')
     dump_parser.add_argument(
         '-e', '--encoding',
-        default='utf-8',
-        help='File encoding (default: utf-8).')
+        help='File encoding.')
     dump_parser.add_argument(
         '--no-strict',
         action='store_true',

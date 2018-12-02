@@ -32,8 +32,7 @@ def add_subparser(subparsers):
         description='Convert given database from one format to another.')
     convert_parser.add_argument(
         '-e', '--encoding',
-        default='utf-8',
-        help='File encoding (default: utf-8).')
+        help='File encoding.')
     convert_parser.add_argument(
         '--no-strict',
         action='store_true',

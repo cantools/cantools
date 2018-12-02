@@ -234,11 +234,11 @@ SIGNAL_PARAM_COMMENT_FMT = '''\
 
 
 def _canonical(value):
-    """Replace anything but 'a-z', 'A-Z', '0-9' and '_' with '_'.
+    """Replace anything but 'a-z', 'A-Z' and '0-9' with '_'.
 
     """
 
-    return re.sub(r'\W', '_', value)
+    return re.sub(r'[^a-zA-Z0-9]', '_', value)
 
 
 def _camel_to_snake_case(value):

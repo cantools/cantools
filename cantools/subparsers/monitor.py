@@ -284,8 +284,7 @@ def add_subparser(subparsers):
         description='Monitor CAN bus traffic in a text based user interface.')
     monitor_parser.add_argument(
         '-e', '--encoding',
-        default='utf-8',
-        help='File encoding (default: utf-8).')
+        help='File encoding.')
     monitor_parser.add_argument(
         '--no-strict',
         action='store_true',

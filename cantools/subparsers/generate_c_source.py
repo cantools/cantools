@@ -31,8 +31,7 @@ def add_subparser(subparsers):
         description='Generate C source code from given database file.')
     generate_c_source_parser.add_argument(
         '-e', '--encoding',
-        default='utf-8',
-        help='File encoding (default: utf-8).')
+        help='File encoding.')
     generate_c_source_parser.add_argument(
         '--no-strict',
         action='store_true',

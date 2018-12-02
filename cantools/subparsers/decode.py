@@ -68,8 +68,7 @@ def add_subparser(subparsers):
         help='Print the decoded message on a single line.')
     decode_parser.add_argument(
         '-e', '--encoding',
-        default='utf-8',
-        help='File encoding (default: utf-8).')
+        help='File encoding.')
     decode_parser.add_argument(
         '--no-strict',
         action='store_true',

@@ -4,7 +4,7 @@
 About
 =====
 
-CAN BUS tools.
+CAN BUS tools in Python 3.
 
 - `DBC`_, `KCD`_, SYM and CDD file parsing.
 
@@ -21,6 +21,8 @@ CAN BUS tools.
 - `C` source code generator.
 
 - CAN bus monitor.
+
+Python 2 support is deprecated as Python 3 has better unicode support.
 
 Project homepage: https://github.com/eerimoq/cantools
 

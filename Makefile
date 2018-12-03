@@ -27,8 +27,9 @@ CFLAGS := \
 	-Wall \
 	-Wextra \
 	-Wpedantic \
-	-Wdouble-promotion \
 	-Wconversion \
+	-Wdouble-promotion \
+	-Wfloat-equal \
 	-Werror
 CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA))
 

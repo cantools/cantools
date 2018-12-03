@@ -12,6 +12,21 @@
 #include "files/c_source/no_signals.h"
 #include "files/c_source/signed.h"
 
+#define FLOATING_ERROR_DOUBLE (0.00001)
+#define FLOATING_ERROR_FLOAT (0.1f)
+
+#define FLOATING_APPROX_EQUAL(val1, val2, epsilon) \
+  do { \
+    assert((((val1) - (epsilon)) < (val2))); \
+    assert((((val1) + (epsilon)) > (val2))); \
+  } while (0)
+
+#define FLOATING_APPROX_EQUAL_FLOAT(val1, val2) \
+  FLOATING_APPROX_EQUAL((val1), (val2), FLOATING_ERROR_FLOAT)
+
+#define FLOATING_APPROX_EQUAL_DOUBLE(val1, val2) \
+  FLOATING_APPROX_EQUAL((val1), (val2), FLOATING_ERROR_DOUBLE)
+
 static void test_motohawk_example_message(void)
 {
     struct {
@@ -372,7 +387,7 @@ static void test_floating_point_message1(void)
     assert(floating_point_message1_decode(&decoded,
                                           &buf[0],
                                           sizeof(buf)) == 0);
-    assert(decoded.signal1 == -129.448);
+    FLOATING_APPROX_EQUAL_DOUBLE(decoded.signal1, -129.448);
 }
 
 static void test_floating_point_message2(void)
@@ -394,8 +409,8 @@ static void test_floating_point_message2(void)
     assert(floating_point_message2_decode(&decoded,
                                           &buf[0],
                                           sizeof(buf)) == 0);
-    assert(decoded.signal1 == 129.5f);
-    assert(decoded.signal2 == 1234500.5f);
+    FLOATING_APPROX_EQUAL_FLOAT(decoded.signal1, 129.5f);
+    FLOATING_APPROX_EQUAL_FLOAT(decoded.signal2, 1234500.5f);
 }
 
 static void test_floating_point(void)
@@ -595,7 +610,7 @@ static void test_is_in_range(void)
     assert(motohawk_example_message_temperature_is_in_range(2048) == false);
 }
 
-int main()
+int main(void)
 {
     test_motohawk_example_message();
     test_padding_bit_order();

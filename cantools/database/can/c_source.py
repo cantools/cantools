@@ -409,6 +409,53 @@ class Signal(object):
         else:
             return None
 
+    def segments(self, invert_shift):
+        index, pos = divmod(self.start, 8)
+        left = self.length
+
+        while left > 0:
+            if self.byte_order == 'big_endian':
+                if left >= (pos + 1):
+                    length = (pos + 1)
+                    pos = 7
+                    shift = -(left - length)
+                    mask = ((1 << length) - 1)
+                else:
+                    length = left
+                    shift = (pos - length + 1)
+                    mask = ((1 << length) - 1)
+                    mask <<= (pos - length + 1)
+            else:
+                shift = (left - self.length) + pos
+
+                if left >= (8 - pos):
+                    length = (8 - pos)
+                    mask = ((1 << length) - 1)
+                    mask <<= pos
+                    pos = 0
+                else:
+                    length = left
+                    mask = ((1 << length) - 1)
+                    mask <<= pos
+
+            if invert_shift:
+                if shift < 0:
+                    shift = -shift
+                    shift_direction = 'left'
+                else:
+                    shift_direction = 'right'
+            else:
+                if shift < 0:
+                    shift = -shift
+                    shift_direction = 'right'
+                else:
+                    shift_direction = 'left'
+
+            yield index, shift, shift_direction, mask
+
+            left -= length
+            index += 1
+
 
 class Message(object):
 
@@ -532,63 +579,17 @@ def _generate_signal(signal):
     return comment, member
 
 
-def _signal_segments(signal, invert_shift):
-    index, pos = divmod(signal.start, 8)
-    left = signal.length
-
-    while left > 0:
-        if signal.byte_order == 'big_endian':
-            if left >= (pos + 1):
-                length = (pos + 1)
-                pos = 7
-                shift = -(left - length)
-                mask = ((1 << length) - 1)
-            else:
-                length = left
-                shift = (pos - length + 1)
-                mask = ((1 << length) - 1)
-                mask <<= (pos - length + 1)
-        else:
-            shift = (left - signal.length) + pos
-
-            if left >= (8 - pos):
-                length = (8 - pos)
-                mask = ((1 << length) - 1)
-                mask <<= pos
-                pos = 0
-            else:
-                length = left
-                mask = ((1 << length) - 1)
-                mask <<= pos
-
-        if invert_shift:
-            if shift < 0:
-                shift = -shift
-                shift_direction = 'left'
-            else:
-                shift_direction = 'right'
-        else:
-            if shift < 0:
-                shift = -shift
-                shift_direction = 'right'
-            else:
-                shift_direction = 'left'
-
-        yield index, shift, shift_direction, mask
-
-        left -= length
-        index += 1
-
-
 def _format_encode_code_mux(message,
                             mux,
                             body_lines_per_index,
-                            variable_lines):
+                            variable_lines,
+                            helper_kinds):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_encode_code_signal(message,
                                signal_name,
                                body_lines_per_index,
-                               variable_lines)
+                               variable_lines,
+                               helper_kinds)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
     signal_name = _camel_to_snake_case(signal_name)
 
@@ -600,7 +601,8 @@ def _format_encode_code_mux(message,
     for multiplexer_id, multiplexed_signals in multiplexed_signals_per_id:
         body_lines = _format_encode_code_level(message,
                                                multiplexed_signals,
-                                               variable_lines)
+                                               variable_lines,
+                                               helper_kinds)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
 
@@ -621,7 +623,8 @@ def _format_encode_code_mux(message,
 def _format_encode_code_signal(message,
                                signal_name,
                                body_lines,
-                               variable_lines):
+                               variable_lines,
+                               helper_kinds):
     signal = message.get_signal_by_name(signal_name)
 
     if signal.is_float or signal.is_signed:
@@ -639,7 +642,7 @@ def _format_encode_code_signal(message,
         variable_lines.append(variable)
         body_lines.append(conversion)
 
-    for index, shift, shift_direction, mask in _signal_segments(signal, False):
+    for index, shift, shift_direction, mask in signal.segments(invert_shift=False):
         if signal.is_float or signal.is_signed:
             fmt = '    dst_p[{}] |= encode_{}_shift_u{}({}, {}u, 0x{:02x}u);'
         else:
@@ -652,11 +655,13 @@ def _format_encode_code_signal(message,
                           shift,
                           mask)
         body_lines.append(line)
+        helper_kinds.add((shift_direction, signal.type_length))
 
 
 def _format_encode_code_level(message,
                               signal_names,
-                              variable_lines):
+                              variable_lines,
+                              helper_kinds):
     """Format one encode level in a signal tree.
 
     """
@@ -669,13 +674,15 @@ def _format_encode_code_level(message,
             mux_lines = _format_encode_code_mux(message,
                                                 signal_name,
                                                 body_lines,
-                                                variable_lines)
+                                                variable_lines,
+                                                helper_kinds)
             muxes_lines += mux_lines
         else:
             _format_encode_code_signal(message,
                                        signal_name,
                                        body_lines,
-                                       variable_lines)
+                                       variable_lines,
+                                       helper_kinds)
 
     body_lines = body_lines + muxes_lines
 
@@ -685,11 +692,12 @@ def _format_encode_code_level(message,
     return body_lines
 
 
-def _format_encode_code(message):
+def _format_encode_code(message, helper_kinds):
     variable_lines = []
     body_lines = _format_encode_code_level(message,
                                            message.signal_tree,
-                                           variable_lines)
+                                           variable_lines,
+                                           helper_kinds)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -700,12 +708,14 @@ def _format_encode_code(message):
 def _format_decode_code_mux(message,
                             mux,
                             body_lines_per_index,
-                            variable_lines):
+                            variable_lines,
+                            helper_kinds):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_decode_code_signal(message,
                                signal_name,
                                body_lines_per_index,
-                               variable_lines)
+                               variable_lines,
+                               helper_kinds)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
     signal_name = _camel_to_snake_case(signal_name)
 
@@ -716,7 +726,8 @@ def _format_decode_code_mux(message,
     for multiplexer_id, multiplexed_signals in multiplexed_signals_per_id:
         body_lines = _format_decode_code_level(message,
                                                multiplexed_signals,
-                                               variable_lines)
+                                               variable_lines,
+                                               helper_kinds)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
         lines.extend(_strip_blank_lines(body_lines))
@@ -734,10 +745,10 @@ def _format_decode_code_mux(message,
 def _format_decode_code_signal(message,
                                signal_name,
                                body_lines,
-                               variable_lines):
+                               variable_lines,
+                               helper_kinds):
     signal = message.get_signal_by_name(signal_name)
-    type_length = signal.type_length
-    conversion_type_name = 'uint{}_t'.format(type_length)
+    conversion_type_name = 'uint{}_t'.format(signal.type_length)
 
     if signal.is_float or signal.is_signed:
         variable = '    {} {};'.format(conversion_type_name, signal.snake_name)
@@ -745,7 +756,7 @@ def _format_decode_code_signal(message,
         body_lines.append('    {} = 0{};'.format(signal.snake_name,
                                                  signal.conversion_type_suffix))
 
-    for index, shift, shift_direction, mask in _signal_segments(signal, True):
+    for index, shift, shift_direction, mask in signal.segments(invert_shift=True):
         if signal.is_float or signal.is_signed:
             fmt = '    {} |= decode_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
         else:
@@ -753,18 +764,19 @@ def _format_decode_code_signal(message,
 
         line = fmt.format(signal.snake_name,
                           shift_direction,
-                          type_length,
+                          signal.type_length,
                           index,
                           shift,
                           mask)
         body_lines.append(line)
+        helper_kinds.add((shift_direction, signal.type_length))
 
     if signal.is_float:
         conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
             signal.snake_name)
         body_lines.append(conversion)
     elif signal.is_signed:
-        mask = ((1 << (type_length - signal.length)) - 1)
+        mask = ((1 << (signal.type_length - signal.length)) - 1)
 
         if mask != 0:
             mask <<= signal.length
@@ -775,13 +787,14 @@ def _format_decode_code_signal(message,
             body_lines.extend(formatted.splitlines())
 
         conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal.snake_name,
-                                                              type_length)
+                                                              signal.type_length)
         body_lines.append(conversion)
 
 
 def _format_decode_code_level(message,
                               signal_names,
-                              variable_lines):
+                              variable_lines,
+                              helper_kinds):
     """Format one decode level in a signal tree.
 
     """
@@ -794,7 +807,8 @@ def _format_decode_code_level(message,
             mux_lines = _format_decode_code_mux(message,
                                                 signal_name,
                                                 body_lines,
-                                                variable_lines)
+                                                variable_lines,
+                                                helper_kinds)
 
             if muxes_lines:
                 muxes_lines.append('')
@@ -804,7 +818,8 @@ def _format_decode_code_level(message,
             _format_decode_code_signal(message,
                                        signal_name,
                                        body_lines,
-                                       variable_lines)
+                                       variable_lines,
+                                       helper_kinds)
 
     if body_lines:
         if body_lines[-1] != '':
@@ -821,11 +836,12 @@ def _format_decode_code_level(message,
     return body_lines
 
 
-def _format_decode_code(message):
+def _format_decode_code(message, helper_kinds):
     variable_lines = []
     body_lines = _format_decode_code_level(message,
                                            message.signal_tree,
-                                           variable_lines)
+                                           variable_lines,
+                                           helper_kinds)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -989,6 +1005,8 @@ def _generate_declarations(database_name, messages):
 
 def _generate_definitions(database_name, messages):
     definitions = []
+    encode_helper_kinds = set()
+    decode_helper_kinds = set()
 
     for message in messages:
         is_in_range_definitions = []
@@ -1009,8 +1027,10 @@ def _generate_definitions(database_name, messages):
             is_in_range_definitions.append(is_in_range_definition)
 
         if message.length > 0:
-            encode_variables, encode_body = _format_encode_code(message)
-            decode_variables, decode_body = _format_decode_code(message)
+            encode_variables, encode_body = _format_encode_code(message,
+                                                                encode_helper_kinds)
+            decode_variables, decode_body = _format_decode_code(message,
+                                                                decode_helper_kinds)
 
             if encode_body:
                 unused = ''
@@ -1033,27 +1053,46 @@ def _generate_definitions(database_name, messages):
         definition += '\n' + '\n'.join(is_in_range_definitions)
         definitions.append(definition)
 
-    return '\n'.join(definitions)
+    return '\n'.join(definitions), (encode_helper_kinds, decode_helper_kinds)
 
 
-def _generate_helpers():
+def _generate_encode_helpers(kinds):
     helpers = []
-    helper_formats = [
-        ENCODE_HELPER_LEFT_SHIFT_FMT,
-        ENCODE_HELPER_RIGHT_SHIFT_FMT,
-        DECODE_HELPER_LEFT_SHIFT_FMT,
-        DECODE_HELPER_RIGHT_SHIFT_FMT
-    ]
-    size_lengths = [8, 16, 32, 64]
+    formats = {
+        'left': ENCODE_HELPER_LEFT_SHIFT_FMT,
+        'right': ENCODE_HELPER_RIGHT_SHIFT_FMT
+    }
 
-    for length in size_lengths:
+    for shift_direction, length in sorted(kinds):
         var_type = 'uint{}_t'.format(length)
+        helper = formats[shift_direction].format(length=length,
+                                                 var_type=var_type)
+        helpers.append(helper)
 
-        for fmt in helper_formats:
-            helper = fmt.format(length=length, var_type=var_type)
-            helpers.append(helper)
+    return helpers
 
-    return '\n'.join(helpers)
+
+def _generate_decode_helpers(kinds):
+    helpers = []
+    formats = {
+        'left': DECODE_HELPER_LEFT_SHIFT_FMT,
+        'right': DECODE_HELPER_RIGHT_SHIFT_FMT
+    }
+
+    for shift_direction, length in sorted(kinds):
+        var_type = 'uint{}_t'.format(length)
+        helper = formats[shift_direction].format(length=length,
+                                                 var_type=var_type)
+        helpers.append(helper)
+
+    return helpers
+
+
+def _generate_helpers(kinds):
+    encode_helpers = _generate_encode_helpers(kinds[0])
+    decode_helpers = _generate_decode_helpers(kinds[1])
+
+    return '\n'.join(encode_helpers + decode_helpers)
 
 
 def generate(database, database_name, header_name):
@@ -1077,8 +1116,8 @@ def generate(database, database_name, header_name):
     choices_defines = _generate_choices_defines(database_name, messages)
     structs = _generate_structs(database_name, messages)
     declarations = _generate_declarations(database_name, messages)
-    definitions = _generate_definitions(database_name, messages)
-    helpers = _generate_helpers()
+    definitions, helper_kinds = _generate_definitions(database_name, messages)
+    helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(version=__version__,
                                date=date,

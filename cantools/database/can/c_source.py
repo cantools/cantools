@@ -1056,28 +1056,12 @@ def _generate_definitions(database_name, messages):
     return '\n'.join(definitions), (encode_helper_kinds, decode_helper_kinds)
 
 
-def _generate_encode_helpers(kinds):
-    helpers = []
+def _generate_helpers_kind(kinds, left_format, right_format):
     formats = {
-        'left': ENCODE_HELPER_LEFT_SHIFT_FMT,
-        'right': ENCODE_HELPER_RIGHT_SHIFT_FMT
+        'left': left_format,
+        'right': right_format
     }
-
-    for shift_direction, length in sorted(kinds):
-        var_type = 'uint{}_t'.format(length)
-        helper = formats[shift_direction].format(length=length,
-                                                 var_type=var_type)
-        helpers.append(helper)
-
-    return helpers
-
-
-def _generate_decode_helpers(kinds):
     helpers = []
-    formats = {
-        'left': DECODE_HELPER_LEFT_SHIFT_FMT,
-        'right': DECODE_HELPER_RIGHT_SHIFT_FMT
-    }
 
     for shift_direction, length in sorted(kinds):
         var_type = 'uint{}_t'.format(length)
@@ -1089,8 +1073,12 @@ def _generate_decode_helpers(kinds):
 
 
 def _generate_helpers(kinds):
-    encode_helpers = _generate_encode_helpers(kinds[0])
-    decode_helpers = _generate_decode_helpers(kinds[1])
+    encode_helpers = _generate_helpers_kind(kinds[0],
+                                            ENCODE_HELPER_LEFT_SHIFT_FMT,
+                                            ENCODE_HELPER_RIGHT_SHIFT_FMT)
+    decode_helpers = _generate_helpers_kind(kinds[1],
+                                            DECODE_HELPER_LEFT_SHIFT_FMT,
+                                            DECODE_HELPER_RIGHT_SHIFT_FMT)
 
     return '\n'.join(encode_helpers + decode_helpers)
 

@@ -356,10 +356,11 @@ static void test_multiplex_2_extended(void)
 
 static void test_floating_point_message1(void)
 {
+    double signal1 = -129.448;
     struct floating_point_message1_t decoded;
     uint8_t buf[8];
 
-    decoded.signal1 = -129.448;
+    decoded.signal1 = signal1;
 
     memset(&buf[0], 0, sizeof(buf));
     assert(floating_point_message1_encode(&buf[0],
@@ -372,16 +373,18 @@ static void test_floating_point_message1(void)
     assert(floating_point_message1_decode(&decoded,
                                           &buf[0],
                                           sizeof(buf)) == 0);
-    assert(decoded.signal1 == -129.448);
+    assert(memcmp(&decoded.signal1, &signal1, sizeof(decoded.signal1)) == 0);
 }
 
 static void test_floating_point_message2(void)
 {
+    float signal1 = 129.5f;
+    float signal2 = 1234500.5f;
     struct floating_point_message2_t decoded;
     uint8_t buf[8];
 
-    decoded.signal1 = 129.5;
-    decoded.signal2 = 1234500.5;
+    decoded.signal1 = signal1;
+    decoded.signal2 = signal2;
 
     memset(&buf[0], 0, sizeof(buf));
     assert(floating_point_message2_encode(&buf[0],
@@ -394,8 +397,9 @@ static void test_floating_point_message2(void)
     assert(floating_point_message2_decode(&decoded,
                                           &buf[0],
                                           sizeof(buf)) == 0);
-    assert(decoded.signal1 == 129.5f);
-    assert(decoded.signal2 == 1234500.5f);
+
+    assert(memcmp(&decoded.signal1, &signal1, sizeof(decoded.signal1)) == 0);
+    assert(memcmp(&decoded.signal2, &signal2, sizeof(decoded.signal2)) == 0);
 }
 
 static void test_floating_point(void)
@@ -595,7 +599,7 @@ static void test_is_in_range(void)
     assert(motohawk_example_message_temperature_is_in_range(2048) == false);
 }
 
-int main()
+int main(void)
 {
     test_motohawk_example_message();
     test_padding_bit_order();

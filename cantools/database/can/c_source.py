@@ -197,7 +197,7 @@ ssize_t {database_name}_{message_name}_encode(
 {{
 {unused}\
 {encode_variables}\
-    if (size < {message_length}) {{
+    if (size < {message_length}u) {{
         return (-EINVAL);
     }}
 
@@ -213,7 +213,7 @@ int {database_name}_{message_name}_decode(
 {{
 {unused}\
 {decode_variables}\
-    if (size < {message_length}) {{
+    if (size < {message_length}u) {{
         return (-EINVAL);
     }}
 

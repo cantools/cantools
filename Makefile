@@ -1,8 +1,7 @@
-ifeq ($(origin CC),default)
+ifeq ($(origin CC), default)
 CC = gcc
 endif
 
-# C source files
 C_SOURCES := \
 	tests/main.c \
 	tests/files/c_source/motohawk.c \

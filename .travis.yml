@@ -1,7 +1,9 @@
 language: python
+
 python:
   - "2.7"
   - "3.6"
+
 addons:
   apt:
     update: true
@@ -11,9 +13,11 @@ addons:
     packages:
       - clang-7
       - gcc-8
+
 install:
   - pip install coveralls
   - pip install -r requirements.txt
+
 script:
   - coverage run --source=cantools setup.py test
   - make test-sdist
@@ -22,5 +26,6 @@ script:
   - make test-c
   - CC=gcc-8 make test-c
   - CC=clang-7 make test-c
+
 after_success:
   coveralls

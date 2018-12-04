@@ -23,6 +23,85 @@ CFLAGS_EXTRA := \
 	-Wnull-dereference \
 	-Wrestrict
 
+CFLAGS_EXTRA_CLANG := \
+	-fsanitize=address \
+	-fsanitize=undefined,nullability \
+	-Warray-bounds-pointer-arithmetic \
+	-Wassign-enum \
+	-Wbad-function-cast \
+	-Wcast-align \
+	-Wcast-qual \
+	-Wchar-subscripts \
+	-Wcomma \
+	-Wcomment \
+	-Wconditional-uninitialized \
+	-Wcovered-switch-default \
+	-Wdate-time \
+	-Wduplicate-decl-specifier \
+	-Wduplicate-enum \
+	-Wduplicate-method-arg \
+	-Wduplicate-method-match \
+	-Wembedded-directive \
+	-Wempty-translation-unit \
+	-Wexpansion-to-defined \
+	-Wflexible-array-extensions \
+	-Wfloat-conversion \
+	-Wfloat-equal \
+	-Wfloat-overflow-conversion \
+	-Wfloat-zero-conversion \
+	-Wformat-non-iso \
+	-Wformat-nonliteral \
+	-Wformat-pedantic \
+	-Wfour-char-constants \
+	-Wgnu-anonymous-struct \
+	-Wgnu-array-member-paren-init \
+	-Wgnu-auto-type \
+	-Wgnu-binary-literal \
+	-Wgnu-case-range \
+	-Wgnu-complex-integer \
+	-Wgnu-compound-literal-initializer \
+	-Wgnu-conditional-omitted-operand \
+	-Wgnu-designator \
+	-Wgnu-empty-initializer \
+	-Wgnu-empty-struct \
+	-Wgnu-flexible-array-initializer \
+	-Wgnu-flexible-array-union-member \
+	-Wgnu-folding-constant \
+	-Wgnu-imaginary-constant \
+	-Wgnu-include-next \
+	-Wgnu-label-as-value \
+	-Wgnu-redeclared-enum \
+	-Wgnu-statement-expression \
+	-Wgnu-union-cast \
+	-Wgnu-zero-line-directive \
+	-Wgnu-zero-variadic-macro-arguments \
+	-Wheader-hygiene \
+	-Widiomatic-parentheses \
+	-Wimplicit \
+	-Wimplicit-fallthrough \
+	-Wloop-analysis \
+	-Wmethod-signatures \
+	-Wmissing-braces \
+	-Wmissing-field-initializers \
+	-Wnested-anon-types \
+	-Wnewline-eof \
+	-Wnull-pointer-arithmetic \
+	-Woverlength-strings \
+	-Wpointer-arith \
+	-Wsign-compare \
+	-Wtautological-compare \
+	-Wundef \
+	-Wuninitialized \
+	-Wunreachable-code \
+	-Wunreachable-code-aggressive \
+	-Wunused-comparison \
+	-Wunused-const-variable \
+	-Wunused-parameter \
+	-Wunused-variable \
+	-Wvariadic-macros \
+	-Wzero-as-null-pointer-constant \
+	-Wzero-length-array
+
 CFLAGS := \
 	-Wall \
 	-Wextra \
@@ -30,8 +109,11 @@ CFLAGS := \
 	-Wconversion \
 	-Wdouble-promotion \
 	-Wfloat-equal \
+	-Wformat=2 \
+	-Wshadow \
 	-Werror
 CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA))
+CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA_CLANG) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA_CLANG))
 
 .PHONY: test
 test:

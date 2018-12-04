@@ -6,8 +6,10 @@ addons:
   apt:
     update: true
     sources:
+      - llvm-toolchain-trusty-7
       - ubuntu-toolchain-r-test
     packages:
+      - clang-7
       - gcc-8
 install:
   - pip install coveralls
@@ -19,5 +21,6 @@ script:
   - env PYTHONPATH=. python examples/diagnostics/did.py
   - make test-c
   - CC=gcc-8 make test-c
+  - CC=clang-7 make test-c
 after_success:
   coveralls

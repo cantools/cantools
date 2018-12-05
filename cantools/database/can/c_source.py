@@ -101,7 +101,8 @@ STRUCT_FMT = '''\
 /**
  * Signals in message {database_message_name}.
  *
-{comments}
+{comment}\
+ * All signal values are as on the CAN bus.
  */
 struct {database_name}_{message_name}_t {{
 {members}
@@ -265,12 +266,14 @@ SIGN_EXTENSION_FMT = '''
 
 '''
 
-SIGNAL_PARAM_COMMENT_FMT = '''\
- * @param {name} Value as on the CAN bus.
+SIGNAL_MEMBER_FMT = '''\
+    /**
 {comment}\
- *            Range: {range}
- *            Scale: {scale}
- *            Offset: {offset}\
+     * Range: {range}
+     * Scale: {scale}
+     * Offset: {offset}
+     */
+    {type_name} {name};\
 '''
 
 
@@ -513,9 +516,9 @@ def _get(value, default):
 def _format_comment(comment):
     if comment:
         return '\n'.join([
-            ' *            ' + line.rstrip()
+            '     * ' + line.rstrip()
             for line in comment.splitlines()
-        ]) + '\n'
+        ]) + '\n     *\n'
     else:
         return ''
 
@@ -561,22 +564,21 @@ def _format_range(signal):
 
 def _generate_signal(signal):
     if signal.type_name is None:
-        return None, None
+        return None
 
-    name = signal.snake_name
     comment = _format_comment(signal.comment)
     range_ = _format_range(signal)
     scale = _get(signal.scale, '-')
     offset = _get(signal.offset, '-')
 
-    comment = SIGNAL_PARAM_COMMENT_FMT.format(name=name,
-                                              comment=comment,
-                                              range=range_,
-                                              scale=scale,
-                                              offset=offset)
-    member = '    {} {};'.format(signal.type_name, name)
+    member = SIGNAL_MEMBER_FMT.format(comment=comment,
+                                      range=range_,
+                                      scale=scale,
+                                      offset=offset,
+                                      type_name=signal.type_name,
+                                      name=signal.snake_name)
 
-    return comment, member
+    return member
 
 
 def _format_encode_code_mux(message,
@@ -850,25 +852,28 @@ def _format_decode_code(message, helper_kinds):
 
 
 def _generate_struct(message):
-    comments = []
     members = []
 
     for signal in message.signals:
-        comment, member = _generate_signal(signal)
-
-        if comment is not None:
-            comments.append(comment)
+        member = _generate_signal(signal)
 
         if member is not None:
             members.append(member)
 
-    if not comments:
-        comments = [' * @param dummy Dummy signal in empty message.']
-
     if not members:
-        members = ['    uint8_t dummy;']
+        members = [
+            '    /**\n'
+            '     * Dummy signal in empty message.\n'
+            '     */\n'
+            '    uint8_t dummy;'
+        ]
 
-    return comments, members
+    if message.comment is None:
+        comment = ''
+    else:
+        comment = ' * {}\n *\n'.format(message.comment)
+        
+    return comment, members
 
 
 def _format_choices(signal, signal_name):
@@ -969,13 +974,13 @@ def _generate_structs(database_name, messages):
     structs = []
 
     for message in messages:
-        comments, members = _generate_struct(message)
+        comment, members = _generate_struct(message)
         structs.append(
-            STRUCT_FMT.format(database_message_name=message.name,
+            STRUCT_FMT.format(comment=comment,
+                              database_message_name=message.name,
                               message_name=message.snake_name,
                               database_name=database_name,
-                              comments='\n'.join(comments),
-                              members='\n'.join(members)))
+                              members='\n\n'.join(members)))
 
     return '\n'.join(structs)
 

@@ -36,6 +36,7 @@ CFLAGS_EXTRA_CLANG := \
 	-Wconditional-uninitialized \
 	-Wcovered-switch-default \
 	-Wdate-time \
+	-Wdocumentation \
 	-Wduplicate-decl-specifier \
 	-Wduplicate-enum \
 	-Wduplicate-method-arg \

@@ -83,7 +83,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
 
     def test_emc32(self):
-        db = cantools.db.File()
+        db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'emc32.dbc')
 
         with open(filename, 'r') as fin:

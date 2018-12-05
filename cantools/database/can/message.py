@@ -9,14 +9,8 @@ from ..utils import encode_data
 from ..utils import decode_data
 from ..utils import create_encode_decode_formats
 from ..errors import Error
-
-
-class EncodeError(Error):
-    pass
-
-
-class DecodeError(Error):
-    pass
+from ..errors import EncodeError
+from ..errors import DecodeError
 
 
 class Message(object):

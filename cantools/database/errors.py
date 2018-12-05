@@ -7,3 +7,11 @@ class Error(_Error):
 
 class ParseError(Error):
     pass
+
+
+class EncodeError(Error):
+    pass
+
+
+class DecodeError(Error):
+    pass

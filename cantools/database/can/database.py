@@ -110,7 +110,7 @@ class Database(object):
         `encoding` specifies the file encoding.
 
         >>> db = cantools.database.Database()
-        >>> db.add_dbc_file('foo.dbc', 'r')
+        >>> db.add_dbc_file('foo.dbc')
 
         """
 

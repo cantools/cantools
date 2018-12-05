@@ -128,11 +128,7 @@ test:
 
 .PHONY: test-c
 test-c:
-	$(CC) \
-	    $(CFLAGS) \
-	    -std=c99 \
-	    -O3 \
-	    $(C_SOURCES)
+	$(CC) $(CFLAGS) -std=c99 -O3 $(C_SOURCES)
 	./a.out
 
 .PHONY: test-sdist

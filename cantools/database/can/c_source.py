@@ -111,29 +111,29 @@ struct {database_name}_{message_name}_t {{
 
 DECLARATION_FMT = '''\
 /**
- * Encode message {database_message_name}.
+ * Pack message {database_message_name}.
  *
- * @param[out] dst_p Buffer to encode the message into.
- * @param[in] src_p Data to encode.
+ * @param[out] dst_p Buffer to pack the message into.
+ * @param[in] src_p Data to pack.
  * @param[in] size Size of dst_p.
  *
- * @return Size of encoded data, or negative error code.
+ * @return Size of packed data, or negative error code.
  */
-ssize_t {database_name}_{message_name}_encode(
+ssize_t {database_name}_{message_name}_pack(
     uint8_t *dst_p,
     const struct {database_name}_{message_name}_t *src_p,
     size_t size);
 
 /**
- * Decode message {database_message_name}.
+ * Unpack message {database_message_name}.
  *
- * @param[out] dst_p Object to decode the message into.
- * @param[in] src_p Message to decode.
+ * @param[out] dst_p Object to unpack the message into.
+ * @param[in] src_p Message to unpack.
  * @param[in] size Size of src_p.
  *
  * @return zero(0) or negative error code.
  */
-int {database_name}_{message_name}_decode(
+int {database_name}_{message_name}_unpack(
     struct {database_name}_{message_name}_t *dst_p,
     const uint8_t *src_p,
     size_t size);
@@ -150,8 +150,8 @@ IS_IN_RANGE_DECLARATION_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
 '''
 
-ENCODE_HELPER_LEFT_SHIFT_FMT = '''\
-static inline uint8_t encode_left_shift_u{length}(
+PACK_HELPER_LEFT_SHIFT_FMT = '''\
+static inline uint8_t pack_left_shift_u{length}(
     {var_type} value,
     uint8_t shift,
     uint8_t mask)
@@ -160,8 +160,8 @@ static inline uint8_t encode_left_shift_u{length}(
 }}
 '''
 
-ENCODE_HELPER_RIGHT_SHIFT_FMT = '''\
-static inline uint8_t encode_right_shift_u{length}(
+PACK_HELPER_RIGHT_SHIFT_FMT = '''\
+static inline uint8_t pack_right_shift_u{length}(
     {var_type} value,
     uint8_t shift,
     uint8_t mask)
@@ -170,8 +170,8 @@ static inline uint8_t encode_right_shift_u{length}(
 }}
 '''
 
-DECODE_HELPER_LEFT_SHIFT_FMT = '''\
-static inline {var_type} decode_left_shift_u{length}(
+UNPACK_HELPER_LEFT_SHIFT_FMT = '''\
+static inline {var_type} unpack_left_shift_u{length}(
     uint8_t value,
     uint8_t shift,
     uint8_t mask)
@@ -180,8 +180,8 @@ static inline {var_type} decode_left_shift_u{length}(
 }}
 '''
 
-DECODE_HELPER_RIGHT_SHIFT_FMT = '''\
-static inline {var_type} decode_right_shift_u{length}(
+UNPACK_HELPER_RIGHT_SHIFT_FMT = '''\
+static inline {var_type} unpack_right_shift_u{length}(
     uint8_t value,
     uint8_t shift,
     uint8_t mask)
@@ -191,35 +191,35 @@ static inline {var_type} decode_right_shift_u{length}(
 '''
 
 DEFINITION_FMT = '''\
-ssize_t {database_name}_{message_name}_encode(
+ssize_t {database_name}_{message_name}_pack(
     uint8_t *dst_p,
     const struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
 {unused}\
-{encode_variables}\
+{pack_variables}\
     if (size < {message_length}u) {{
         return (-EINVAL);
     }}
 
     memset(&dst_p[0], 0, {message_length});
-{encode_body}
+{pack_body}
     return ({message_length});
 }}
 
-int {database_name}_{message_name}_decode(
+int {database_name}_{message_name}_unpack(
     struct {database_name}_{message_name}_t *dst_p,
     const uint8_t *src_p,
     size_t size)
 {{
 {unused}\
-{decode_variables}\
+{unpack_variables}\
     if (size < {message_length}u) {{
         return (-EINVAL);
     }}
 
     memset(dst_p, 0, sizeof(*dst_p));
-{decode_body}
+{unpack_body}
     return (0);
 }}
 '''
@@ -233,7 +233,7 @@ bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 '''
 
 EMPTY_DEFINITION_FMT = '''\
-ssize_t {database_name}_{message_name}_encode(
+ssize_t {database_name}_{message_name}_pack(
     uint8_t *dst_p,
     const struct {database_name}_{message_name}_t *src_p,
     size_t size)
@@ -245,7 +245,7 @@ ssize_t {database_name}_{message_name}_encode(
     return (0);
 }}
 
-int {database_name}_{message_name}_decode(
+int {database_name}_{message_name}_unpack(
     struct {database_name}_{message_name}_t *dst_p,
     const uint8_t *src_p,
     size_t size)
@@ -581,17 +581,17 @@ def _generate_signal(signal):
     return member
 
 
-def _format_encode_code_mux(message,
-                            mux,
-                            body_lines_per_index,
-                            variable_lines,
-                            helper_kinds):
+def _format_pack_code_mux(message,
+                          mux,
+                          body_lines_per_index,
+                          variable_lines,
+                          helper_kinds):
     signal_name, multiplexed_signals = list(mux.items())[0]
-    _format_encode_code_signal(message,
-                               signal_name,
-                               body_lines_per_index,
-                               variable_lines,
-                               helper_kinds)
+    _format_pack_code_signal(message,
+                             signal_name,
+                             body_lines_per_index,
+                             variable_lines,
+                             helper_kinds)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
     signal_name = _camel_to_snake_case(signal_name)
 
@@ -601,10 +601,10 @@ def _format_encode_code_mux(message,
     ]
 
     for multiplexer_id, multiplexed_signals in multiplexed_signals_per_id:
-        body_lines = _format_encode_code_level(message,
-                                               multiplexed_signals,
-                                               variable_lines,
-                                               helper_kinds)
+        body_lines = _format_pack_code_level(message,
+                                             multiplexed_signals,
+                                             variable_lines,
+                                             helper_kinds)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
 
@@ -622,11 +622,11 @@ def _format_encode_code_mux(message,
     return [('    ' + line).rstrip() for line in lines]
 
 
-def _format_encode_code_signal(message,
-                               signal_name,
-                               body_lines,
-                               variable_lines,
-                               helper_kinds):
+def _format_pack_code_signal(message,
+                             signal_name,
+                             body_lines,
+                             variable_lines,
+                             helper_kinds):
     signal = message.get_signal_by_name(signal_name)
 
     if signal.is_float or signal.is_signed:
@@ -646,9 +646,9 @@ def _format_encode_code_signal(message,
 
     for index, shift, shift_direction, mask in signal.segments(invert_shift=False):
         if signal.is_float or signal.is_signed:
-            fmt = '    dst_p[{}] |= encode_{}_shift_u{}({}, {}u, 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= pack_{}_shift_u{}({}, {}u, 0x{:02x}u);'
         else:
-            fmt = '    dst_p[{}] |= encode_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
+            fmt = '    dst_p[{}] |= pack_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
 
         line = fmt.format(index,
                           shift_direction,
@@ -660,11 +660,11 @@ def _format_encode_code_signal(message,
         helper_kinds.add((shift_direction, signal.type_length))
 
 
-def _format_encode_code_level(message,
-                              signal_names,
-                              variable_lines,
-                              helper_kinds):
-    """Format one encode level in a signal tree.
+def _format_pack_code_level(message,
+                            signal_names,
+                            variable_lines,
+                            helper_kinds):
+    """Format one pack level in a signal tree.
 
     """
 
@@ -673,18 +673,18 @@ def _format_encode_code_level(message,
 
     for signal_name in signal_names:
         if isinstance(signal_name, dict):
-            mux_lines = _format_encode_code_mux(message,
-                                                signal_name,
-                                                body_lines,
-                                                variable_lines,
-                                                helper_kinds)
+            mux_lines = _format_pack_code_mux(message,
+                                              signal_name,
+                                              body_lines,
+                                              variable_lines,
+                                              helper_kinds)
             muxes_lines += mux_lines
         else:
-            _format_encode_code_signal(message,
-                                       signal_name,
-                                       body_lines,
-                                       variable_lines,
-                                       helper_kinds)
+            _format_pack_code_signal(message,
+                                     signal_name,
+                                     body_lines,
+                                     variable_lines,
+                                     helper_kinds)
 
     body_lines = body_lines + muxes_lines
 
@@ -694,12 +694,12 @@ def _format_encode_code_level(message,
     return body_lines
 
 
-def _format_encode_code(message, helper_kinds):
+def _format_pack_code(message, helper_kinds):
     variable_lines = []
-    body_lines = _format_encode_code_level(message,
-                                           message.signal_tree,
-                                           variable_lines,
-                                           helper_kinds)
+    body_lines = _format_pack_code_level(message,
+                                         message.signal_tree,
+                                         variable_lines,
+                                         helper_kinds)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -707,13 +707,13 @@ def _format_encode_code(message, helper_kinds):
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _format_decode_code_mux(message,
+def _format_unpack_code_mux(message,
                             mux,
                             body_lines_per_index,
                             variable_lines,
                             helper_kinds):
     signal_name, multiplexed_signals = list(mux.items())[0]
-    _format_decode_code_signal(message,
+    _format_unpack_code_signal(message,
                                signal_name,
                                body_lines_per_index,
                                variable_lines,
@@ -726,7 +726,7 @@ def _format_decode_code_mux(message,
     ]
 
     for multiplexer_id, multiplexed_signals in multiplexed_signals_per_id:
-        body_lines = _format_decode_code_level(message,
+        body_lines = _format_unpack_code_level(message,
                                                multiplexed_signals,
                                                variable_lines,
                                                helper_kinds)
@@ -744,7 +744,7 @@ def _format_decode_code_mux(message,
     return [('    ' + line).rstrip() for line in lines]
 
 
-def _format_decode_code_signal(message,
+def _format_unpack_code_signal(message,
                                signal_name,
                                body_lines,
                                variable_lines,
@@ -760,9 +760,9 @@ def _format_decode_code_signal(message,
 
     for index, shift, shift_direction, mask in signal.segments(invert_shift=True):
         if signal.is_float or signal.is_signed:
-            fmt = '    {} |= decode_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            fmt = '    {} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
         else:
-            fmt = '    dst_p->{} |= decode_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            fmt = '    dst_p->{} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
         line = fmt.format(signal.snake_name,
                           shift_direction,
@@ -793,11 +793,11 @@ def _format_decode_code_signal(message,
         body_lines.append(conversion)
 
 
-def _format_decode_code_level(message,
+def _format_unpack_code_level(message,
                               signal_names,
                               variable_lines,
                               helper_kinds):
-    """Format one decode level in a signal tree.
+    """Format one unpack level in a signal tree.
 
     """
 
@@ -806,7 +806,7 @@ def _format_decode_code_level(message,
 
     for signal_name in signal_names:
         if isinstance(signal_name, dict):
-            mux_lines = _format_decode_code_mux(message,
+            mux_lines = _format_unpack_code_mux(message,
                                                 signal_name,
                                                 body_lines,
                                                 variable_lines,
@@ -817,7 +817,7 @@ def _format_decode_code_level(message,
 
             muxes_lines += mux_lines
         else:
-            _format_decode_code_signal(message,
+            _format_unpack_code_signal(message,
                                        signal_name,
                                        body_lines,
                                        variable_lines,
@@ -838,9 +838,9 @@ def _format_decode_code_level(message,
     return body_lines
 
 
-def _format_decode_code(message, helper_kinds):
+def _format_unpack_code(message, helper_kinds):
     variable_lines = []
-    body_lines = _format_decode_code_level(message,
+    body_lines = _format_unpack_code_level(message,
                                            message.signal_tree,
                                            variable_lines,
                                            helper_kinds)
@@ -1010,8 +1010,8 @@ def _generate_declarations(database_name, messages):
 
 def _generate_definitions(database_name, messages):
     definitions = []
-    encode_helper_kinds = set()
-    decode_helper_kinds = set()
+    pack_helper_kinds = set()
+    unpack_helper_kinds = set()
 
     for message in messages:
         is_in_range_definitions = []
@@ -1032,12 +1032,12 @@ def _generate_definitions(database_name, messages):
             is_in_range_definitions.append(is_in_range_definition)
 
         if message.length > 0:
-            encode_variables, encode_body = _format_encode_code(message,
-                                                                encode_helper_kinds)
-            decode_variables, decode_body = _format_decode_code(message,
-                                                                decode_helper_kinds)
+            pack_variables, pack_body = _format_pack_code(message,
+                                                          pack_helper_kinds)
+            unpack_variables, unpack_body = _format_unpack_code(message,
+                                                                unpack_helper_kinds)
 
-            if encode_body:
+            if pack_body:
                 unused = ''
             else:
                 unused = '    UNUSED(src_p);\n\n'
@@ -1047,10 +1047,10 @@ def _generate_definitions(database_name, messages):
                                                message_name=message.snake_name,
                                                message_length=message.length,
                                                unused=unused,
-                                               encode_variables=encode_variables,
-                                               encode_body=encode_body,
-                                               decode_variables=decode_variables,
-                                               decode_body=decode_body)
+                                               pack_variables=pack_variables,
+                                               pack_body=pack_body,
+                                               unpack_variables=unpack_variables,
+                                               unpack_body=unpack_body)
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                      message_name=message.snake_name)
@@ -1058,7 +1058,7 @@ def _generate_definitions(database_name, messages):
         definition += '\n' + '\n'.join(is_in_range_definitions)
         definitions.append(definition)
 
-    return '\n'.join(definitions), (encode_helper_kinds, decode_helper_kinds)
+    return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)
 
 
 def _generate_helpers_kind(kinds, left_format, right_format):
@@ -1078,14 +1078,14 @@ def _generate_helpers_kind(kinds, left_format, right_format):
 
 
 def _generate_helpers(kinds):
-    encode_helpers = _generate_helpers_kind(kinds[0],
-                                            ENCODE_HELPER_LEFT_SHIFT_FMT,
-                                            ENCODE_HELPER_RIGHT_SHIFT_FMT)
-    decode_helpers = _generate_helpers_kind(kinds[1],
-                                            DECODE_HELPER_LEFT_SHIFT_FMT,
-                                            DECODE_HELPER_RIGHT_SHIFT_FMT)
+    pack_helpers = _generate_helpers_kind(kinds[0],
+                                            PACK_HELPER_LEFT_SHIFT_FMT,
+                                            PACK_HELPER_RIGHT_SHIFT_FMT)
+    unpack_helpers = _generate_helpers_kind(kinds[1],
+                                            UNPACK_HELPER_LEFT_SHIFT_FMT,
+                                            UNPACK_HELPER_RIGHT_SHIFT_FMT)
 
-    return '\n'.join(encode_helpers + decode_helpers)
+    return '\n'.join(pack_helpers + unpack_helpers)
 
 
 def generate(database, database_name, header_name):

@@ -15,182 +15,182 @@
 static void test_motohawk_example_message(void)
 {
     struct {
-        struct motohawk_example_message_t decoded;
-        uint8_t encoded[8];
+        struct motohawk_example_message_t unpacked;
+        uint8_t packed[8];
     } datas[3] = {
         {
-            .decoded = {
+            .unpacked = {
                 .temperature = 55,
                 .average_radius = 32,
                 .enable = 1
             },
-            .encoded = "\xc0\x06\xe0\x00\x00\x00\x00\x00"
+            .packed = "\xc0\x06\xe0\x00\x00\x00\x00\x00"
         },
         {
-            .decoded = {
+            .unpacked = {
                 .temperature = -2047,
                 .average_radius = 0,
                 .enable = 0
             },
-            .encoded = "\x01\x00\x20\x00\x00\x00\x00\x00"
+            .packed = "\x01\x00\x20\x00\x00\x00\x00\x00"
         },
         {
-            .decoded = {
+            .unpacked = {
                 .temperature = -2048,
                 .average_radius = 0,
                 .enable = 0
             },
-            .encoded = "\x01\x00\x00\x00\x00\x00\x00\x00"
+            .packed = "\x01\x00\x00\x00\x00\x00\x00\x00"
         }
     };
-    struct motohawk_example_message_t decoded;
+    struct motohawk_example_message_t unpacked;
     uint8_t buf[8];
     int i;
 
     for (i = 0; i < 3; i++) {
         memset(&buf[0], 0, sizeof(buf));
-        assert(motohawk_example_message_encode(&buf[0],
-                                               &datas[i].decoded,
-                                               sizeof(buf)) == 8);
+        assert(motohawk_example_message_pack(&buf[0],
+                                             &datas[i].unpacked,
+                                             sizeof(buf)) == 8);
         assert(memcmp(&buf[0],
-                      &datas[i].encoded[0],
+                      &datas[i].packed[0],
                       sizeof(buf)) == 0);
-        memset(&decoded, 0, sizeof(decoded));
-        assert(motohawk_example_message_decode(&decoded,
+        memset(&unpacked, 0, sizeof(unpacked));
+        assert(motohawk_example_message_unpack(&unpacked,
                                                &buf[0],
                                                sizeof(buf)) == 0);
-        assert(decoded.temperature == datas[i].decoded.temperature);
-        assert(decoded.average_radius == datas[i].decoded.average_radius);
-        assert(decoded.enable == datas[i].decoded.enable);
+        assert(unpacked.temperature == datas[i].unpacked.temperature);
+        assert(unpacked.average_radius == datas[i].unpacked.average_radius);
+        assert(unpacked.enable == datas[i].unpacked.enable);
 
         assert(motohawk_example_message_enable_is_in_range(
-                   decoded.enable));
+                   unpacked.enable));
         assert(motohawk_example_message_average_radius_is_in_range(
-                   decoded.average_radius));
+                   unpacked.average_radius));
         assert(motohawk_example_message_temperature_is_in_range(
-                   decoded.temperature));
+                   unpacked.temperature));
     }
 }
 
 static void test_padding_bit_order_msg0(void)
 {
-    struct padding_bit_order_msg0_t decoded;
+    struct padding_bit_order_msg0_t unpacked;
     uint8_t buf[8];
 
-    decoded.a = 0x2c9;
-    decoded.b = 1;
-    decoded.c = 0x2c9;
-    decoded.d = 0;
+    unpacked.a = 0x2c9;
+    unpacked.b = 1;
+    unpacked.c = 0x2c9;
+    unpacked.d = 0;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(padding_bit_order_msg0_encode(&buf[0],
-                                         &decoded,
-                                         sizeof(buf)) == 8);
+    assert(padding_bit_order_msg0_pack(&buf[0],
+                                       &unpacked,
+                                       sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\x82\xc9\x00\x00\x02\xc9\x00\x00",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(padding_bit_order_msg0_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(padding_bit_order_msg0_unpack(&unpacked,
                                          &buf[0],
                                          sizeof(buf)) == 0);
-    assert(decoded.a == 0x2c9);
-    assert(decoded.b == 1);
-    assert(decoded.c == 0x2c9);
-    assert(decoded.d == 0);
+    assert(unpacked.a == 0x2c9);
+    assert(unpacked.b == 1);
+    assert(unpacked.c == 0x2c9);
+    assert(unpacked.d == 0);
 }
 
 static void test_padding_bit_order_msg1(void)
 {
-    struct padding_bit_order_msg1_t decoded;
+    struct padding_bit_order_msg1_t unpacked;
     uint8_t buf[8];
 
-    decoded.e = 1;
-    decoded.f = 0x2c9;
-    decoded.g = 0;
-    decoded.h = 0x2c9;
+    unpacked.e = 1;
+    unpacked.f = 0x2c9;
+    unpacked.g = 0;
+    unpacked.h = 0x2c9;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(padding_bit_order_msg1_encode(&buf[0],
-                                         &decoded,
-                                         sizeof(buf)) == 8);
+    assert(padding_bit_order_msg1_pack(&buf[0],
+                                       &unpacked,
+                                       sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\x93\x05\x00\x00\x92\x05\x00\x00",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(padding_bit_order_msg1_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(padding_bit_order_msg1_unpack(&unpacked,
                                          &buf[0],
                                          sizeof(buf)) == 0);
-    assert(decoded.e == 1);
-    assert(decoded.f == 0x2c9);
-    assert(decoded.g == 0);
-    assert(decoded.h == 0x2c9);
+    assert(unpacked.e == 1);
+    assert(unpacked.f == 0x2c9);
+    assert(unpacked.g == 0);
+    assert(unpacked.h == 0x2c9);
 }
 
 static void test_padding_bit_order_msg2(void)
 {
-    struct padding_bit_order_msg2_t decoded;
+    struct padding_bit_order_msg2_t unpacked;
     uint8_t buf[8];
 
-    decoded.i = 1;
-    decoded.j = 2;
-    decoded.k = 3;
+    unpacked.i = 1;
+    unpacked.j = 2;
+    unpacked.k = 3;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(padding_bit_order_msg2_encode(&buf[0],
-                                         &decoded,
-                                         sizeof(buf)) == 8);
+    assert(padding_bit_order_msg2_pack(&buf[0],
+                                       &unpacked,
+                                       sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\x21\x03\x00\x00\x00\x00\x00\x00",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(padding_bit_order_msg2_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(padding_bit_order_msg2_unpack(&unpacked,
                                          &buf[0],
                                          sizeof(buf)) == 0);
-    assert(decoded.i == 1);
-    assert(decoded.j == 2);
-    assert(decoded.k == 3);
+    assert(unpacked.i == 1);
+    assert(unpacked.j == 2);
+    assert(unpacked.k == 3);
 }
 
 static void test_padding_bit_order_msg3(void)
 {
-    struct padding_bit_order_msg3_t decoded;
+    struct padding_bit_order_msg3_t unpacked;
     uint8_t buf[8];
 
-    decoded.l = 0x0123456789abcdef;
+    unpacked.l = 0x0123456789abcdef;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(padding_bit_order_msg3_encode(&buf[0],
-                                         &decoded,
-                                         sizeof(buf)) == 8);
+    assert(padding_bit_order_msg3_pack(&buf[0],
+                                       &unpacked,
+                                       sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\x01\x23\x45\x67\x89\xab\xcd\xef",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(padding_bit_order_msg3_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(padding_bit_order_msg3_unpack(&unpacked,
                                          &buf[0],
                                          sizeof(buf)) == 0);
-    assert(decoded.l == 0x0123456789abcdef);
+    assert(unpacked.l == 0x0123456789abcdef);
 }
 
 static void test_padding_bit_order_msg4(void)
 {
-    struct padding_bit_order_msg4_t decoded;
+    struct padding_bit_order_msg4_t unpacked;
     uint8_t buf[8];
 
-    decoded.m = 0x0123456789abcdef;
+    unpacked.m = 0x0123456789abcdef;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(padding_bit_order_msg4_encode(&buf[0],
-                                         &decoded,
-                                         sizeof(buf)) == 8);
+    assert(padding_bit_order_msg4_pack(&buf[0],
+                                       &unpacked,
+                                       sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xef\xcd\xab\x89\x67\x45\x23\x01",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(padding_bit_order_msg4_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(padding_bit_order_msg4_unpack(&unpacked,
                                          &buf[0],
                                          sizeof(buf)) == 0);
-    assert(decoded.m == 0x0123456789abcdef);
+    assert(unpacked.m == 0x0123456789abcdef);
 }
 
 static void test_padding_bit_order(void)
@@ -205,31 +205,31 @@ static void test_padding_bit_order(void)
 static void test_multiplex(void)
 {
     struct {
-        struct multiplex_message1_t decoded;
-        uint8_t encoded[8];
+        struct multiplex_message1_t unpacked;
+        uint8_t packed[8];
     } datas[3] = {
         {
-            .decoded = {
+            .unpacked = {
                 .multiplexor = 8,
                 .bit_c = 1,
                 .bit_g = 1,
                 .bit_j = 1,
                 .bit_l = 1
             },
-            .encoded = "\x20\x00\x8c\x01\x00\x00\x00\x00"
+            .packed = "\x20\x00\x8c\x01\x00\x00\x00\x00"
         },
         {
-            .decoded = {
+            .unpacked = {
                 .multiplexor = 16,
                 .bit_c = 1,
                 .bit_g = 1,
                 .bit_j = 1,
                 .bit_l = 1
             },
-            .encoded = "\x40\x00\x8c\x01\x00\x00\x00\x00"
+            .packed = "\x40\x00\x8c\x01\x00\x00\x00\x00"
         },
         {
-            .decoded = {
+            .unpacked = {
                 .multiplexor = 24,
                 .bit_a = 1,
                 .bit_b = 1,
@@ -243,48 +243,48 @@ static void test_multiplex(void)
                 .bit_k = 1,
                 .bit_l = 1
             },
-            .encoded = "\x60\x00\x8c\x35\xc3\x00\x00\x00"
+            .packed = "\x60\x00\x8c\x35\xc3\x00\x00\x00"
         }
     };
-    struct multiplex_message1_t decoded;
+    struct multiplex_message1_t unpacked;
     uint8_t buf[8];
     int i;
 
     for (i = 0; i < 3; i++) {
         memset(&buf[0], 0, sizeof(buf));
-        assert(multiplex_message1_encode(&buf[0],
-                                         &datas[i].decoded,
-                                         sizeof(buf)) == 8);
+        assert(multiplex_message1_pack(&buf[0],
+                                       &datas[i].unpacked,
+                                       sizeof(buf)) == 8);
         assert(memcmp(&buf[0],
-                      &datas[i].encoded[0],
+                      &datas[i].packed[0],
                       sizeof(buf)) == 0);
-        memset(&decoded, 0, sizeof(decoded));
-        assert(multiplex_message1_decode(&decoded,
+        memset(&unpacked, 0, sizeof(unpacked));
+        assert(multiplex_message1_unpack(&unpacked,
                                          &buf[0],
                                          sizeof(buf)) == 0);
-        assert(decoded.multiplexor == datas[i].decoded.multiplexor);
-        assert(decoded.bit_a == datas[i].decoded.bit_a);
-        assert(decoded.bit_b == datas[i].decoded.bit_b);
-        assert(decoded.bit_c == datas[i].decoded.bit_c);
-        assert(decoded.bit_d == datas[i].decoded.bit_d);
-        assert(decoded.bit_e == datas[i].decoded.bit_e);
-        assert(decoded.bit_f == datas[i].decoded.bit_f);
-        assert(decoded.bit_g == datas[i].decoded.bit_g);
-        assert(decoded.bit_h == datas[i].decoded.bit_h);
-        assert(decoded.bit_j == datas[i].decoded.bit_j);
-        assert(decoded.bit_k == datas[i].decoded.bit_k);
-        assert(decoded.bit_l == datas[i].decoded.bit_l);
+        assert(unpacked.multiplexor == datas[i].unpacked.multiplexor);
+        assert(unpacked.bit_a == datas[i].unpacked.bit_a);
+        assert(unpacked.bit_b == datas[i].unpacked.bit_b);
+        assert(unpacked.bit_c == datas[i].unpacked.bit_c);
+        assert(unpacked.bit_d == datas[i].unpacked.bit_d);
+        assert(unpacked.bit_e == datas[i].unpacked.bit_e);
+        assert(unpacked.bit_f == datas[i].unpacked.bit_f);
+        assert(unpacked.bit_g == datas[i].unpacked.bit_g);
+        assert(unpacked.bit_h == datas[i].unpacked.bit_h);
+        assert(unpacked.bit_j == datas[i].unpacked.bit_j);
+        assert(unpacked.bit_k == datas[i].unpacked.bit_k);
+        assert(unpacked.bit_l == datas[i].unpacked.bit_l);
     }
 }
 
 static void test_multiplex_2_extended(void)
 {
     struct {
-        struct multiplex_2_extended_t decoded;
-        uint8_t encoded[8];
+        struct multiplex_2_extended_t unpacked;
+        uint8_t packed[8];
     } datas[3] = {
         {
-            .decoded = {
+            .unpacked = {
                 .s0 = 0,
                 .s1 = 2,
                 .s2 = 0,
@@ -295,10 +295,10 @@ static void test_multiplex_2_extended(void)
                 .s7 = 33,
                 .s8 = 0
             },
-            .encoded = "\x20\x10\x27\x00\x01\x21\x00\x00"
+            .packed = "\x20\x10\x27\x00\x01\x21\x00\x00"
         },
         {
-            .decoded = {
+            .unpacked = {
                 .s0 = 0,
                 .s1 = 0,
                 .s2 = 100,
@@ -309,10 +309,10 @@ static void test_multiplex_2_extended(void)
                 .s7 = 0,
                 .s8 = 22
             },
-            .encoded = "\x00\x64\x88\x13\x02\x16\x00\x00"
+            .packed = "\x00\x64\x88\x13\x02\x16\x00\x00"
         },
         {
-            .decoded = {
+            .unpacked = {
                 .s0 = 1,
                 .s1 = 0,
                 .s2 = 0,
@@ -323,83 +323,83 @@ static void test_multiplex_2_extended(void)
                 .s7 = 772,
                 .s8 = 0
             },
-            .encoded = "\x31\x00\x00\x00\x01\x04\x03\x00"
+            .packed = "\x31\x00\x00\x00\x01\x04\x03\x00"
         },
     };
-    struct multiplex_2_extended_t decoded;
+    struct multiplex_2_extended_t unpacked;
     uint8_t buf[8];
     int i;
 
     for (i = 0; i < 3; i++) {
         memset(&buf[0], 0, sizeof(buf));
-        assert(multiplex_2_extended_encode(&buf[0],
-                                           &datas[i].decoded,
-                                           sizeof(buf)) == 8);
+        assert(multiplex_2_extended_pack(&buf[0],
+                                         &datas[i].unpacked,
+                                         sizeof(buf)) == 8);
         assert(memcmp(&buf[0],
-                      &datas[i].encoded[0],
+                      &datas[i].packed[0],
                       sizeof(buf)) == 0);
-        memset(&decoded, 0, sizeof(decoded));
-        assert(multiplex_2_extended_decode(&decoded,
+        memset(&unpacked, 0, sizeof(unpacked));
+        assert(multiplex_2_extended_unpack(&unpacked,
                                            &buf[0],
                                            sizeof(buf)) == 0);
-        assert(decoded.s0 == datas[i].decoded.s0);
-        assert(decoded.s1 == datas[i].decoded.s1);
-        assert(decoded.s2 == datas[i].decoded.s2);
-        assert(decoded.s3 == datas[i].decoded.s3);
-        assert(decoded.s4 == datas[i].decoded.s4);
-        assert(decoded.s5 == datas[i].decoded.s5);
-        assert(decoded.s6 == datas[i].decoded.s6);
-        assert(decoded.s7 == datas[i].decoded.s7);
-        assert(decoded.s8 == datas[i].decoded.s8);
+        assert(unpacked.s0 == datas[i].unpacked.s0);
+        assert(unpacked.s1 == datas[i].unpacked.s1);
+        assert(unpacked.s2 == datas[i].unpacked.s2);
+        assert(unpacked.s3 == datas[i].unpacked.s3);
+        assert(unpacked.s4 == datas[i].unpacked.s4);
+        assert(unpacked.s5 == datas[i].unpacked.s5);
+        assert(unpacked.s6 == datas[i].unpacked.s6);
+        assert(unpacked.s7 == datas[i].unpacked.s7);
+        assert(unpacked.s8 == datas[i].unpacked.s8);
     }
 }
 
 static void test_floating_point_message1(void)
 {
     double signal1 = -129.448;
-    struct floating_point_message1_t decoded;
+    struct floating_point_message1_t unpacked;
     uint8_t buf[8];
 
-    decoded.signal1 = signal1;
+    unpacked.signal1 = signal1;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(floating_point_message1_encode(&buf[0],
-                                          &decoded,
-                                          sizeof(buf)) == 8);
+    assert(floating_point_message1_pack(&buf[0],
+                                        &unpacked,
+                                        sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\x75\x93\x18\x04\x56\x2e\x60\xc0",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(floating_point_message1_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(floating_point_message1_unpack(&unpacked,
                                           &buf[0],
                                           sizeof(buf)) == 0);
-    assert(memcmp(&decoded.signal1, &signal1, sizeof(decoded.signal1)) == 0);
+    assert(memcmp(&unpacked.signal1, &signal1, sizeof(unpacked.signal1)) == 0);
 }
 
 static void test_floating_point_message2(void)
 {
     float signal1 = 129.5f;
     float signal2 = 1234500.5f;
-    struct floating_point_message2_t decoded;
+    struct floating_point_message2_t unpacked;
     uint8_t buf[8];
 
-    decoded.signal1 = signal1;
-    decoded.signal2 = signal2;
+    unpacked.signal1 = signal1;
+    unpacked.signal2 = signal2;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(floating_point_message2_encode(&buf[0],
-                                          &decoded,
-                                          sizeof(buf)) == 8);
+    assert(floating_point_message2_pack(&buf[0],
+                                        &unpacked,
+                                        sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\x00\x80\x01\x43\x24\xb2\x96\x49",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(floating_point_message2_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(floating_point_message2_unpack(&unpacked,
                                           &buf[0],
                                           sizeof(buf)) == 0);
 
-    assert(memcmp(&decoded.signal1, &signal1, sizeof(decoded.signal1)) == 0);
-    assert(memcmp(&decoded.signal2, &signal2, sizeof(decoded.signal2)) == 0);
+    assert(memcmp(&unpacked.signal1, &signal1, sizeof(unpacked.signal1)) == 0);
+    assert(memcmp(&unpacked.signal2, &signal2, sizeof(unpacked.signal2)) == 0);
 }
 
 static void test_floating_point(void)
@@ -410,163 +410,163 @@ static void test_floating_point(void)
 
 static void test_signed_message64(void)
 {
-    struct signed_message64_t decoded;
+    struct signed_message64_t unpacked;
     uint8_t buf[8];
 
-    decoded.s64 = -5;
+    unpacked.s64 = -5;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(signed_message64_encode(&buf[0],
-                                   &decoded,
-                                   sizeof(buf)) == 8);
+    assert(signed_message64_pack(&buf[0],
+                                 &unpacked,
+                                 sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xfb\xff\xff\xff\xff\xff\xff\xff",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(signed_message64_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(signed_message64_unpack(&unpacked,
                                    &buf[0],
                                    sizeof(buf)) == 0);
-    assert(decoded.s64 == -5);
+    assert(unpacked.s64 == -5);
 }
 
 static void test_signed_message33(void)
 {
-    struct signed_message33_t decoded;
+    struct signed_message33_t unpacked;
     uint8_t buf[8];
 
-    decoded.s33 = -5;
+    unpacked.s33 = -5;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(signed_message33_encode(&buf[0],
-                                   &decoded,
-                                   sizeof(buf)) == 8);
+    assert(signed_message33_pack(&buf[0],
+                                 &unpacked,
+                                 sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xfb\xff\xff\xff\x01\x00\x00\x00",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(signed_message33_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(signed_message33_unpack(&unpacked,
                                    &buf[0],
                                    sizeof(buf)) == 0);
-    assert(decoded.s33 == -5);
+    assert(unpacked.s33 == -5);
 }
 
 static void test_signed_message32(void)
 {
-    struct signed_message32_t decoded;
+    struct signed_message32_t unpacked;
     uint8_t buf[8];
 
-    decoded.s32 = -5;
+    unpacked.s32 = -5;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(signed_message32_encode(&buf[0],
-                                   &decoded,
-                                   sizeof(buf)) == 8);
+    assert(signed_message32_pack(&buf[0],
+                                 &unpacked,
+                                 sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xfb\xff\xff\xff\x00\x00\x00\x00",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(signed_message32_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(signed_message32_unpack(&unpacked,
                                    &buf[0],
                                    sizeof(buf)) == 0);
-    assert(decoded.s32 == -5);
+    assert(unpacked.s32 == -5);
 }
 
 static void test_signed_message64big(void)
 {
-    struct signed_message64big_t decoded;
+    struct signed_message64big_t unpacked;
     uint8_t buf[8];
 
-    decoded.s64big = -5;
+    unpacked.s64big = -5;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(signed_message64big_encode(&buf[0],
-                                      &decoded,
-                                      sizeof(buf)) == 8);
+    assert(signed_message64big_pack(&buf[0],
+                                    &unpacked,
+                                    sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xff\xff\xff\xff\xff\xff\xff\xfb",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(signed_message64big_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(signed_message64big_unpack(&unpacked,
                                       &buf[0],
                                       sizeof(buf)) == 0);
-    assert(decoded.s64big == -5);
+    assert(unpacked.s64big == -5);
 }
 
 static void test_signed_message33big(void)
 {
-    struct signed_message33big_t decoded;
+    struct signed_message33big_t unpacked;
     uint8_t buf[8];
 
-    decoded.s33big = -5;
+    unpacked.s33big = -5;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(signed_message33big_encode(&buf[0],
-                                      &decoded,
-                                      sizeof(buf)) == 8);
+    assert(signed_message33big_pack(&buf[0],
+                                    &unpacked,
+                                    sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xff\xff\xff\xfd\x80\x00\x00\x00",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(signed_message33big_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(signed_message33big_unpack(&unpacked,
                                       &buf[0],
                                       sizeof(buf)) == 0);
-    assert(decoded.s33big == -5);
+    assert(unpacked.s33big == -5);
 }
 
 static void test_signed_message32big(void)
 {
-    struct signed_message32big_t decoded;
+    struct signed_message32big_t unpacked;
     uint8_t buf[8];
 
-    decoded.s32big = -5;
+    unpacked.s32big = -5;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(signed_message32big_encode(&buf[0],
-                                      &decoded,
-                                      sizeof(buf)) == 8);
+    assert(signed_message32big_pack(&buf[0],
+                                    &unpacked,
+                                    sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xff\xff\xff\xfb\x00\x00\x00\x00",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(signed_message32big_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(signed_message32big_unpack(&unpacked,
                                       &buf[0],
                                       sizeof(buf)) == 0);
-    assert(decoded.s32big == -5);
+    assert(unpacked.s32big == -5);
 }
 
 static void test_signed_message378910(void)
 {
-    struct signed_message378910_t decoded;
+    struct signed_message378910_t unpacked;
     uint8_t buf[8];
 
-    decoded.s7 = -40;
-    decoded.s8big = 0x5a;
-    decoded.s9 = 0xa5;
-    decoded.s8 = -43;
-    decoded.s3big = -4;
-    decoded.s3 = 1;
-    decoded.s10big = -253;
-    decoded.s7big = -9;
+    unpacked.s7 = -40;
+    unpacked.s8big = 0x5a;
+    unpacked.s9 = 0xa5;
+    unpacked.s8 = -43;
+    unpacked.s3big = -4;
+    unpacked.s3 = 1;
+    unpacked.s10big = -253;
+    unpacked.s7big = -9;
 
     memset(&buf[0], 0, sizeof(buf));
-    assert(signed_message378910_encode(&buf[0],
-                                       &decoded,
-                                       sizeof(buf)) == 8);
+    assert(signed_message378910_pack(&buf[0],
+                                     &unpacked,
+                                     sizeof(buf)) == 8);
     assert(memcmp(&buf[0],
                   "\xb0\xb4\x4a\x55\x87\x01\x81\xf7",
                   sizeof(buf)) == 0);
-    memset(&decoded, 0, sizeof(decoded));
-    assert(signed_message378910_decode(&decoded,
+    memset(&unpacked, 0, sizeof(unpacked));
+    assert(signed_message378910_unpack(&unpacked,
                                        &buf[0],
                                        sizeof(buf)) == 0);
-    assert(decoded.s7 == -40);
-    assert(decoded.s8big == 0x5a);
-    assert(decoded.s9 == 0xa5);
-    assert(decoded.s8 == -43);
-    assert(decoded.s3big == -4);
-    assert(decoded.s3 == 1);
-    assert(decoded.s10big == -253);
-    assert(decoded.s7big == -9);
+    assert(unpacked.s7 == -40);
+    assert(unpacked.s8big == 0x5a);
+    assert(unpacked.s9 == 0xa5);
+    assert(unpacked.s8 == -43);
+    assert(unpacked.s3big == -4);
+    assert(unpacked.s3 == 1);
+    assert(unpacked.s10big == -253);
+    assert(unpacked.s7big == -9);
 }
 
 static void test_signed(void)

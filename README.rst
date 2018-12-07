@@ -196,8 +196,6 @@ files.
 
 Known limitations:
 
-- No signal scaling.
-
 - Maximum signal size is 64 bits.
 
 The monitor subcommand

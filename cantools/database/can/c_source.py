@@ -139,7 +139,25 @@ int {database_name}_{message_name}_unpack(
     size_t size);
 '''
 
-IS_IN_RANGE_DECLARATION_FMT = '''\
+SIGNAL_DECLARATION_FMT = '''\
+/**
+ * Encode given signal by applying scaling and offset.
+ *
+ * @param[in] value Signal to encode.
+ *
+ * @return Encoded signal.
+ */
+{type_name} {database_name}_{message_name}_{signal_name}_encode(double value);
+
+/**
+ * Decode given signal by applying scaling and offset.
+ *
+ * @param[in] value Signal to decode.
+ *
+ * @return Decoded signal.
+ */
+double {database_name}_{message_name}_{signal_name}_decode({type_name} value);
+
 /**
  * Check that given signal is in allowed range.
  *
@@ -224,7 +242,17 @@ int {database_name}_{message_name}_unpack(
 }}
 '''
 
-IS_IN_RANGE_DEFINITION_FMT = '''\
+SIGNAL_DEFINITION_FMT = '''\
+{type_name} {database_name}_{message_name}_{signal_name}_encode(double value)
+{{
+    return ({type_name})({encode});
+}}
+
+double {database_name}_{message_name}_{signal_name}_decode({type_name} value)
+{{
+    return ({decode});
+}}
+
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 {{
 {unused}\
@@ -872,7 +900,7 @@ def _generate_struct(message):
         comment = ''
     else:
         comment = ' * {}\n *\n'.format(message.comment)
-        
+
     return comment, members
 
 
@@ -892,12 +920,41 @@ def _format_choices(signal, signal_name):
     return choices
 
 
+def _generate_encode_decode(message):
+    encode_decode = []
+
+    for signal in message.signals:
+        scale = signal.decimal.scale
+        offset = signal.decimal.offset
+        formatted_scale = _format_decimal(scale, is_float=True)
+        formatted_offset = _format_decimal(offset, is_float=True)
+
+        if offset == 0 and scale == 1:
+            encoding = 'value'
+            decoding = '(double)value'
+        elif offset != 0 and scale != 1:
+            encoding = '(value - {}) / {}'.format(formatted_offset,
+                                                  formatted_scale)
+            decoding = '((double)value * {}) + {}'.format(formatted_scale,
+                                                          formatted_offset)
+        elif offset != 0:
+            encoding = 'value - {}'.format(formatted_offset)
+            decoding = '(double)value + {}'.format(formatted_offset)
+        else:
+            encoding = 'value / {}'.format(formatted_scale)
+            decoding = '(double)value * {}'.format(formatted_scale)
+
+        encode_decode.append((encoding, decoding))
+
+    return encode_decode
+
+
 def _generate_is_in_range(message):
     """Generate range checks for all signals in given message.
 
     """
 
-    signals = []
+    checks = []
 
     for signal in message.signals:
         scale = signal.decimal.scale
@@ -912,32 +969,32 @@ def _generate_is_in_range(message):
             maximum = (maximum / scale - offset)
 
         suffix = signal.type_suffix
-        checks = []
+        check = []
 
         if minimum is not None:
             minimum_type_value = signal.minimum_type_value
 
             if (minimum_type_value is None) or (minimum > minimum_type_value):
                 minimum = _format_decimal(minimum, signal.is_float)
-                checks.append('(value >= {}{})'.format(minimum, suffix))
+                check.append('(value >= {}{})'.format(minimum, suffix))
 
         if maximum is not None:
             maximum_type_value = signal.maximum_type_value
 
             if (maximum_type_value is None) or (maximum < maximum_type_value):
                 maximum = _format_decimal(maximum, signal.is_float)
-                checks.append('(value <= {}{})'.format(maximum, suffix))
+                check.append('(value <= {}{})'.format(maximum, suffix))
 
-        if not checks:
-            checks = ['true']
-        elif len(checks) == 1:
-            checks = [checks[0][1:-1]]
+        if not check:
+            check = ['true']
+        elif len(check) == 1:
+            check = [check[0][1:-1]]
 
-        checks = ' && '.join(checks)
+        check = ' && '.join(check)
 
-        signals.append((signal.snake_name, signal.type_name, checks))
+        checks.append(check)
 
-    return signals
+    return checks
 
 
 def _generage_frame_id_defines(database_name, messages):
@@ -989,20 +1046,20 @@ def _generate_declarations(database_name, messages):
     declarations = []
 
     for message in messages:
-        is_in_range_declarations = []
+        signal_declarations = []
 
-        for signal_name, type_name, _ in _generate_is_in_range(message):
-            is_in_range_declaration = IS_IN_RANGE_DECLARATION_FMT.format(
+        for signal in message.signals:
+            signal_declaration = SIGNAL_DECLARATION_FMT.format(
                 database_name=database_name,
                 message_name=message.snake_name,
-                signal_name=signal_name,
-                type_name=type_name)
-            is_in_range_declarations.append(is_in_range_declaration)
+                signal_name=signal.snake_name,
+                type_name=signal.type_name)
+            signal_declarations.append(signal_declaration)
 
         declaration = DECLARATION_FMT.format(database_name=database_name,
                                              database_message_name=message.name,
                                              message_name=message.snake_name)
-        declaration += '\n' + '\n'.join(is_in_range_declarations)
+        declaration += '\n' + '\n'.join(signal_declarations)
         declarations.append(declaration)
 
     return '\n'.join(declarations)
@@ -1014,22 +1071,26 @@ def _generate_definitions(database_name, messages):
     unpack_helper_kinds = set()
 
     for message in messages:
-        is_in_range_definitions = []
+        signal_definitions = []
 
-        for signal_name, type_name, check in _generate_is_in_range(message):
+        for signal, (encode, decode), check in zip(message.signals,
+                                                   _generate_encode_decode(message),
+                                                   _generate_is_in_range(message)):
             if check == 'true':
                 unused = '    UNUSED(value);\n\n'
             else:
                 unused = ''
 
-            is_in_range_definition = IS_IN_RANGE_DEFINITION_FMT.format(
+            signal_definition = SIGNAL_DEFINITION_FMT.format(
                 database_name=database_name,
                 message_name=message.snake_name,
-                signal_name=signal_name,
-                type_name=type_name,
+                signal_name=signal.snake_name,
+                type_name=signal.type_name,
                 unused=unused,
+                encode=encode,
+                decode=decode,
                 check=check)
-            is_in_range_definitions.append(is_in_range_definition)
+            signal_definitions.append(signal_definition)
 
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,
@@ -1055,7 +1116,7 @@ def _generate_definitions(database_name, messages):
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                      message_name=message.snake_name)
 
-        definition += '\n' + '\n'.join(is_in_range_definitions)
+        definition += '\n' + '\n'.join(signal_definitions)
         definitions.append(definition)
 
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)

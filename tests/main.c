@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #include "files/c_source/motohawk.h"
 #include "files/c_source/padding_bit_order.h"
@@ -11,6 +12,11 @@
 #include "files/c_source/floating_point.h"
 #include "files/c_source/no_signals.h"
 #include "files/c_source/signed.h"
+
+static bool fequal(double v1, double v2)
+{
+    return (fabs(v1 - v2) < 0.000001);
+}
 
 static void test_motohawk_example_message(void)
 {
@@ -599,6 +605,21 @@ static void test_is_in_range(void)
     assert(motohawk_example_message_temperature_is_in_range(2048) == false);
 }
 
+static void test_encode_decode(void)
+{
+    /* Scale=1 and offset=0. */
+    assert(motohawk_example_message_enable_encode(5.0) == 5);
+    assert(fequal(motohawk_example_message_enable_decode(5), 5.0));
+
+    /* Scale=0.1 and offset=0. */
+    assert(motohawk_example_message_average_radius_encode(5.0) == 50);
+    assert(fequal(motohawk_example_message_average_radius_decode(50), 5.0));
+
+    /* Scale=0.01 and offset=250. */
+    assert(motohawk_example_message_temperature_encode(251.0) == 100);
+    assert(fequal(motohawk_example_message_temperature_decode(100), 251.0));
+}
+
 int main(void)
 {
     test_motohawk_example_message();
@@ -608,6 +629,7 @@ int main(void)
     test_floating_point();
     test_signed();
     test_is_in_range();
+    test_encode_decode();
 
     return (0);
 }

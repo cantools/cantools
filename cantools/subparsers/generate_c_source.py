@@ -10,11 +10,19 @@ def _do_generate_c_source(args):
                                encoding=args.encoding,
                                strict=not args.no_strict)
 
-    basename = os.path.basename(args.infile)
-    filename = os.path.splitext(basename)[0]
-    filename_h = filename + '.h'
-    filename_c = filename + '.c'
-    header, source = c_source.generate(dbase, filename, filename_h)
+    if args.database_name is None:
+        basename = os.path.basename(args.infile)
+        database_name = os.path.splitext(basename)[0]
+    else:
+        database_name = args.database_name
+
+    filename_h = database_name + '.h'
+    filename_c = database_name + '.c'
+
+    header, source = c_source.generate(dbase,
+                                       database_name,
+                                       filename_h,
+                                       not args.no_floating_point_numbers)
 
     with open(filename_h, 'w') as fout:
         fout.write(header)
@@ -29,6 +37,13 @@ def add_subparser(subparsers):
     generate_c_source_parser = subparsers.add_parser(
         'generate_c_source',
         description='Generate C source code from given database file.')
+    generate_c_source_parser.add_argument(
+        '--database-name',
+        help='The database name (default: input file name).')
+    generate_c_source_parser.add_argument(
+        '--no-floating-point-numbers',
+        action='store_true',
+        help='No floating point numbers in the generated code.')
     generate_c_source_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')

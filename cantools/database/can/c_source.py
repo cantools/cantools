@@ -139,7 +139,7 @@ int {database_name}_{message_name}_unpack(
     size_t size);
 '''
 
-SIGNAL_DECLARATION_FMT = '''\
+SIGNAL_DECLARATION_ENCODE_DECODE_FMT = '''\
 /**
  * Encode given signal by applying scaling and offset.
  *
@@ -158,6 +158,9 @@ SIGNAL_DECLARATION_FMT = '''\
  */
 double {database_name}_{message_name}_{signal_name}_decode({type_name} value);
 
+'''
+
+SIGNAL_DECLARATION_IS_IN_RANGE_FMT = '''\
 /**
  * Check that given signal is in allowed range.
  *
@@ -242,7 +245,7 @@ int {database_name}_{message_name}_unpack(
 }}
 '''
 
-SIGNAL_DEFINITION_FMT = '''\
+SIGNAL_DEFINITION_ENCODE_DECODE_FMT = '''\
 {type_name} {database_name}_{message_name}_{signal_name}_encode(double value)
 {{
     return ({type_name})({encode});
@@ -253,6 +256,9 @@ double {database_name}_{message_name}_{signal_name}_decode({type_name} value)
     return ({decode});
 }}
 
+'''
+
+SIGNAL_DEFINITION_IS_IN_RANGE_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 {{
 {unused}\
@@ -1042,18 +1048,28 @@ def _generate_structs(database_name, messages):
     return '\n'.join(structs)
 
 
-def _generate_declarations(database_name, messages):
+def _generate_declarations(database_name, messages, floating_point_numbers):
     declarations = []
 
     for message in messages:
         signal_declarations = []
 
         for signal in message.signals:
-            signal_declaration = SIGNAL_DECLARATION_FMT.format(
+            signal_declaration = ''
+
+            if floating_point_numbers:
+                signal_declaration = SIGNAL_DECLARATION_ENCODE_DECODE_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name,
+                    type_name=signal.type_name)
+
+            signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
                 message_name=message.snake_name,
                 signal_name=signal.snake_name,
                 type_name=signal.type_name)
+
             signal_declarations.append(signal_declaration)
 
         declaration = DECLARATION_FMT.format(database_name=database_name,
@@ -1065,7 +1081,7 @@ def _generate_declarations(database_name, messages):
     return '\n'.join(declarations)
 
 
-def _generate_definitions(database_name, messages):
+def _generate_definitions(database_name, messages, floating_point_numbers):
     definitions = []
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
@@ -1081,15 +1097,25 @@ def _generate_definitions(database_name, messages):
             else:
                 unused = ''
 
-            signal_definition = SIGNAL_DEFINITION_FMT.format(
+            signal_definition = ''
+
+            if floating_point_numbers:
+                signal_definition = SIGNAL_DEFINITION_ENCODE_DECODE_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name,
+                    type_name=signal.type_name,
+                    encode=encode,
+                    decode=decode)
+
+            signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
                 message_name=message.snake_name,
                 signal_name=signal.snake_name,
                 type_name=signal.type_name,
                 unused=unused,
-                encode=encode,
-                decode=decode,
                 check=check)
+
             signal_definitions.append(signal_definition)
 
         if message.length > 0:
@@ -1149,7 +1175,10 @@ def _generate_helpers(kinds):
     return '\n'.join(pack_helpers + unpack_helpers)
 
 
-def generate(database, database_name, header_name):
+def generate(database,
+             database_name,
+             header_name,
+             floating_point_numbers=True):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1157,6 +1186,9 @@ def generate(database, database_name, header_name):
 
     `header_name` is the file name of the C header file, which is
     included by the C source file.
+
+    Set `floating_point_numbers` to ``True`` to allow floating point
+    numbers in the generated code.
 
     This function returns a tuple of the C header and source files as
     strings.
@@ -1169,8 +1201,12 @@ def generate(database, database_name, header_name):
     frame_id_defines = _generage_frame_id_defines(database_name, messages)
     choices_defines = _generate_choices_defines(database_name, messages)
     structs = _generate_structs(database_name, messages)
-    declarations = _generate_declarations(database_name, messages)
-    definitions, helper_kinds = _generate_definitions(database_name, messages)
+    declarations = _generate_declarations(database_name,
+                                          messages,
+                                          floating_point_numbers)
+    definitions, helper_kinds = _generate_definitions(database_name,
+                                                      messages,
+                                                      floating_point_numbers)
     helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(version=__version__,

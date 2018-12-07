@@ -503,6 +503,74 @@ IO_DEBUG(
                 self.assertEqual(read_file('tests/files/c_source/' + database_c),
                                  read_file(database_c))
 
+    def test_generate_c_source_no_signal_encode_decode(self):
+        databases = [
+            'motohawk',
+        ]
+
+        for database in databases:
+            argv = [
+                'cantools',
+                'generate_c_source',
+                '--no-floating-point-numbers',
+                'tests/files/{}.dbc'.format(database)
+            ]
+
+            database_h = database + '.h'
+            database_c = database + '.c'
+            expected_database_h = database + '_no_floating_point_numbers.h'
+            expected_database_c = database + '_no_floating_point_numbers.c'
+
+            if os.path.exists(database_h):
+                os.remove(database_h)
+
+            if os.path.exists(database_c):
+                os.remove(database_c)
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            if sys.version_info[0] > 2:
+                self.assertEqual(
+                    read_file('tests/files/c_source/' + expected_database_h),
+                    read_file(database_h))
+                self.assertEqual(
+                    read_file('tests/files/c_source/' + expected_database_c),
+                    read_file(database_c))
+
+    def test_generate_c_source_database_name(self):
+        databases = [
+            'motohawk',
+        ]
+
+        for database in databases:
+            argv = [
+                'cantools',
+                'generate_c_source',
+                '--database-name', 'my_database_name',
+                'tests/files/{}.dbc'.format(database)
+            ]
+
+            database_h = 'my_database_name.h'
+            database_c = 'my_database_name.c'
+
+            if os.path.exists(database_h):
+                os.remove(database_h)
+
+            if os.path.exists(database_c):
+                os.remove(database_c)
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            if sys.version_info[0] > 2:
+                self.assertEqual(
+                    read_file('tests/files/c_source/' + database_h),
+                    read_file(database_h))
+                self.assertEqual(
+                    read_file('tests/files/c_source/' + database_c),
+                    read_file(database_c))
+
 
 if __name__ == '__main__':
     unittest.main()

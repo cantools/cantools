@@ -234,6 +234,16 @@ See `motohawk_no_floating_point_numbers.h`_ and
 `motohawk_no_floating_point_numbers.c`_ for the contents of the
 generated files.
 
+Other C code generators:
+
+- http://www.coderdbc.com
+
+- https://github.com/howerj/dbcc
+
+- https://github.com/lonkamikaze/hsk-libs/blob/master/scripts/dbc2c.awk
+
+- https://sourceforge.net/projects/comframe/
+
 The monitor subcommand
 ^^^^^^^^^^^^^^^^^^^^^^
 

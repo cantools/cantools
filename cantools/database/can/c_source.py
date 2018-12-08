@@ -597,9 +597,6 @@ def _format_range(signal):
 
 
 def _generate_signal(signal):
-    if signal.type_name is None:
-        return None
-
     comment = _format_comment(signal.comment)
     range_ = _format_range(signal)
     scale = _get(signal.scale, '-')
@@ -889,10 +886,7 @@ def _generate_struct(message):
     members = []
 
     for signal in message.signals:
-        member = _generate_signal(signal)
-
-        if member is not None:
-            members.append(member)
+        members.append(_generate_signal(signal))
 
     if not members:
         members = [

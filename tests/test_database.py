@@ -1398,14 +1398,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()
 
-        with self.assertRaises(cantools.db.ParseError) as cm:
+        with self.assertRaises(textparser.ParseError) as cm:
             db.add_sym_string('FormatVersion=6.0\n'
                               'Foo="Jopp"')
 
         self.assertEqual(
             str(cm.exception),
-            'Invalid SYM syntax at line 2, column 1: \'>!<Foo="Jopp"\': '
-            'Expected "Title".')
+            'Invalid syntax at line 2, column 1: ">>!<<Foo="Jopp""')
 
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):

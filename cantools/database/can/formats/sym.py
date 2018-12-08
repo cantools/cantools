@@ -1,26 +1,20 @@
 # Load and dump a CAN database in SYM format.
 
+import re
 import logging
 from collections import OrderedDict as odict
 from decimal import Decimal
 
-from pyparsing import Word
-from pyparsing import Literal
-from pyparsing import Keyword
-from pyparsing import Optional
-from pyparsing import Suppress
-from pyparsing import Group
-from pyparsing import QuotedString
-from pyparsing import StringEnd
-from pyparsing import printables
-from pyparsing import nums
-from pyparsing import alphas
-from pyparsing import ZeroOrMore
-from pyparsing import OneOrMore
-from pyparsing import delimitedList
-from pyparsing import dblSlashComment
-from pyparsing import ParseException
-from pyparsing import ParseSyntaxException
+import textparser
+from textparser import Sequence
+from textparser import choice
+from textparser import ZeroOrMore
+from textparser import OneOrMore
+from textparser import DelimitedList
+from textparser import tokenize_init
+from textparser import Token
+from textparser import TokenizeError
+from textparser import Optional
 
 from ..signal import Signal
 from ..signal import Decimal as SignalDecimal
@@ -34,120 +28,158 @@ from ...errors import ParseError
 LOGGER = logging.getLogger(__name__)
 
 
-def _create_grammar_6_0():
-    """Create the SYM 6.0 grammar.
+class Parser60(textparser.Parser):
+    """Create the SYM 6.0 parser.
 
     """
 
-    word = Word(printables.replace(';', '').replace(':', ''))
-    positive_integer = Word(nums)
-    number = Word(nums + '.Ee-+')
-    lp = Suppress(Literal('('))
-    rp = Suppress(Literal(')'))
-    lb = Suppress(Literal('['))
-    rb = Suppress(Literal(']'))
-    name = Word(alphas + nums + '_-').setWhitespaceChars(' ')
-    assign = Suppress(Literal('='))
-    comma = Suppress(Literal(','))
-    type_ = name
+    def tokenize(self, string):
+        keywords = set([
+            'FormatVersion',
+            'Title',
+            'Enum',
+            'Sig',
+            'ID',
+            'Len',
+            'Mux',
+            'CycleTime',
+            'Timeout',
+            'MinInterval',
+            'Sig',
+        ])
 
-    version = Group(Keyword('FormatVersion')
-                    - assign
-                    - Keyword('6.0'))
+        names = {
+            'LPAREN':      '(',
+            'RPAREN':      ')',
+            'LBRACE':      '[',
+            'RBRACE':      ']',
+            'COMMA':       ',',
+            'ASSIGN':      '=',
+            'ENUMS':       '{ENUMS}',
+            'SIGNALS':     '{SIGNALS}',
+            'SEND':        '{SEND}',
+            'RECEIVE':     '{RECEIVE}',
+            'SENDRECEIVE': '{SENDRECEIVE}',
+            'U':           '/u:',
+            'F':           '/f:',
+            'O':           '/o:',
+            'MIN':         '/min:',
+            'MAX':         '/max:',
+            'D':           '/d:',
+            'LN':          '/ln:',
+            'E':           '/e:',
+            'M':           '-m'
+        }
 
-    title = Group(Keyword('Title')
-                  - assign
-                  - QuotedString('"'))
+        token_specs = [
+            ('SKIP',        r'[ \r\n\t]+|//.*?\n'),
+            ('NUMBER',      r'-?\d+\.?\d*([eE][+-]?\d+)?'),
+            ('WORD',        r'[A-Za-z0-9_\*]+'),
+            ('STRING',      r'"(\\"|[^"])*?"'),
+            ('LPAREN',      r'\('),
+            ('RPAREN',      r'\)'),
+            ('LBRACE',      r'\['),
+            ('RBRACE',      r'\]'),
+            ('COMMA',       r','),
+            ('ASSIGN',      r'='),
+            ('ENUMS',       r'\{ENUMS\}'),
+            ('SIGNALS',     r'\{SIGNALS\}'),
+            ('SEND',        r'\{SEND\}'),
+            ('RECEIVE',     r'\{RECEIVE\}'),
+            ('SENDRECEIVE', r'\{SENDRECEIVE\}'),
+            ('U',           r'/u:'),
+            ('F',           r'/f:'),
+            ('O',           r'/o:'),
+            ('MIN',         r'/min:'),
+            ('MAX',         r'/max:'),
+            ('D',           r'/d:'),
+            ('LN',          r'/ln:'),
+            ('E',           r'/e:'),
+            ('M',           r'\-m'),
+            ('MISMATCH',    r'.')
+        ]
 
-    enum_value = Group(number
-                       + assign
-                       + QuotedString('"'))
+        tokens, token_regex = tokenize_init(token_specs)
 
-    enum = Group(Suppress(Keyword('Enum'))
-                 - assign
-                 - name
-                 - Suppress(lp)
-                 + Group(delimitedList(enum_value))
-                 - Suppress(rp))
+        for mo in re.finditer(token_regex, string, re.DOTALL):
+            kind = mo.lastgroup
 
-    sig_unit = Group(Literal('/u:') + word)
-    sig_factor = Group(Literal('/f:') + word)
-    sig_offset = Group(Literal('/o:') + word)
-    sig_min = Group(Literal('/min:') + word)
-    sig_max = Group(Literal('/max:') + word)
-    sig_default = Group(Literal('/d:') + word)
-    sig_long_name = Group(Literal('/ln:') + word)
-    sig_enum = Group(Literal('/e:') + word)
+            if kind == 'SKIP':
+                pass
+            elif kind == 'STRING':
+                value = mo.group(kind)[1:-1].replace('\\"', '"')
+                tokens.append(Token(kind, value, mo.start()))
+            elif kind != 'MISMATCH':
+                value = mo.group(kind)
 
-    signal = Group(Suppress(Keyword('Sig'))
-                   - Suppress(assign)
-                   - name
-                   - type_
-                   + Group(Optional(positive_integer))
-                   + Group(Optional(Keyword('-m')))
-                   + Group(Optional(sig_unit)
-                           + Optional(sig_factor)
-                           + Optional(sig_offset)
-                           + Optional(sig_min)
-                           + Optional(sig_max)
-                           + Optional(sig_default)
-                           + Optional(sig_long_name)
-                           + Optional(sig_enum)))
+                if value in keywords:
+                    kind = value
 
-    symbol = Group(Suppress(lb)
-                   - name
-                   - Suppress(rb)
-                   - Group(Optional(Keyword('ID')
-                                    + assign
-                                    + word))
-                   - Group(Keyword('Len')
-                           + assign
-                           + positive_integer)
-                   + Group(Optional(Keyword('Mux')
-                                    + assign
-                                    + word
-                                    + positive_integer
-                                    + comma
-                                    + positive_integer
-                                    + positive_integer))
-                   + Group(Optional(Keyword('CycleTime')
-                                    + assign
-                                    + positive_integer))
-                   + Group(Optional(Keyword('Timeout')
-                                    + assign
-                                    + positive_integer))
-                   + Group(Optional(Keyword('MinInterval')
-                                    + assign
-                                    + positive_integer))
-                   + Group(ZeroOrMore(Group(Keyword('Sig')
-                                            + assign
-                                            + name
-                                            + positive_integer))))
+                if kind in names:
+                    kind = names[kind]
 
-    enums = Group(Keyword('{ENUMS}')
-                  + Group(ZeroOrMore(enum)))
-    signals = Group(Keyword('{SIGNALS}')
-                    + Group(ZeroOrMore(signal)))
-    send = Group(Keyword('{SEND}')
-                 + Group(ZeroOrMore(symbol)))
-    receive = Group(Keyword('{RECEIVE}')
-                    + Group(ZeroOrMore(symbol)))
-    sendreceive = Group(Keyword('{SENDRECEIVE}')
-                        + Group(ZeroOrMore(symbol)))
+                tokens.append(Token(kind, value, mo.start()))
+            else:
+                raise TokenizeError(string, mo.start())
 
-    section = (enums
-               | signals
-               | send
-               | receive
-               | sendreceive)
+        return tokens
 
-    grammar = (version
-               - title
-               + Group(OneOrMore(section))
-               + StringEnd())
-    grammar.ignore(dblSlashComment)
+    def grammar(self):
+        version = Sequence('FormatVersion', '=', 'NUMBER')
+        title = Sequence('Title' , '=', 'STRING')
 
-    return grammar
+        enum_value = Sequence('NUMBER', '=', 'STRING')
+        enum = Sequence('Enum', '=', 'WORD', '(', DelimitedList(enum_value), ')')
+
+        sig_unit = Sequence('/u:', 'WORD')
+        sig_factor = Sequence('/f:', 'NUMBER')
+        sig_offset = Sequence('/o:', 'NUMBER')
+        sig_min = Sequence('/min:', 'NUMBER')
+        sig_max = Sequence('/max:', 'NUMBER')
+        sig_default = Sequence('/d:', 'NUMBER')
+        sig_long_name = Sequence('/ln:', 'STRING')
+        sig_enum = Sequence('/e:', 'WORD')
+
+        signal = Sequence('Sig', '=', 'WORD', 'WORD',
+                          Optional('NUMBER'),
+                          Optional('-m'),
+                          Optional(sig_unit),
+                          Optional(sig_factor),
+                          Optional(sig_offset),
+                          Optional(sig_min),
+                          Optional(sig_max),
+                          Optional(sig_default),
+                          Optional(sig_long_name),
+                          Optional(sig_enum))
+
+        symbol = Sequence('[', 'WORD', ']',
+                          Optional(Sequence('ID', '=', 'NUMBER', 'WORD',
+                                            Optional(Sequence('NUMBER', 'WORD')))),
+                          Sequence('Len', '=', 'NUMBER'),
+                          Optional(Sequence('Mux', '=', 'WORD', 'NUMBER', ',',
+                                            'NUMBER', 'NUMBER')),
+                          Optional(Sequence('CycleTime', '=', 'NUMBER')),
+                          Optional(Sequence('Timeout', '=', 'NUMBER')),
+                          Optional(Sequence('MinInterval', '=', 'NUMBER')),
+                          ZeroOrMore(Sequence('Sig', '=', 'WORD', 'NUMBER')))
+
+        enums = Sequence('{ENUMS}', ZeroOrMore(enum))
+        signals = Sequence('{SIGNALS}', ZeroOrMore(signal))
+        send = Sequence('{SEND}', ZeroOrMore(symbol))
+        receive = Sequence('{RECEIVE}', ZeroOrMore(symbol))
+        sendreceive = Sequence('{SENDRECEIVE}', ZeroOrMore(symbol))
+
+        section = choice(enums,
+                         signals,
+                         send,
+                         receive,
+                         sendreceive)
+
+        grammar = Sequence(version,
+                           title,
+                           OneOrMore(section))
+
+        return grammar
 
 
 def _get_section_tokens(tokens, name):
@@ -160,15 +192,15 @@ def _load_enums(tokens):
     section = _get_section_tokens(tokens, '{ENUMS}')
     enums = {}
 
-    for name, values in section:
-        enums[name] = odict((num(v[0]), v[1]) for v in values)
+    for _, _, name, _, values, _ in section:
+        enums[name] = odict((num(v[0]), v[2]) for v in values)
 
     return enums
 
 
 def _load_signal(tokens, enums):
     # Default values.
-    name = tokens[0]
+    name = tokens[2]
     is_signed = False
     is_float = False
     byte_order = 'little_endian'
@@ -180,15 +212,15 @@ def _load_signal(tokens, enums):
     enum = None
     length = 0
     decimal = SignalDecimal(Decimal(factor), Decimal(offset))
-    
+
     # Type and length.
-    type_ = tokens[1]
+    type_ = tokens[3]
 
     if type_ in 'signed':
         is_signed = True
-        length = int(tokens[2][0])
+        length = int(tokens[4][0])
     elif type_ == 'unsigned':
-        length = int(tokens[2][0])
+        length = int(tokens[4][0])
     elif type_ == 'float':
         is_float = True
         length = 32
@@ -200,13 +232,13 @@ def _load_signal(tokens, enums):
 
     # Byte order.
     try:
-        if tokens[3][0] == '-m':
+        if tokens[5][0] == '-m':
             byte_order = 'big_endian'
     except IndexError:
         pass
 
     # The rest.
-    for key, value in tokens[4]:
+    for key, value in [t[0] for t in tokens[6:] if t]:
         if key == '/u:':
             unit = value
         elif key == '/f:':
@@ -258,8 +290,8 @@ def _load_message_signal(tokens,
                          signals,
                          multiplexer_signal,
                          multiplexer_ids):
-    signal = signals[tokens[1]]
-    start = int(tokens[2])
+    signal = signals[tokens[2]]
+    start = int(tokens[3])
 
     if signal.byte_order == 'big_endian':
         start = (8 * (start // 8) + (7 - (start % 8)))
@@ -293,32 +325,33 @@ def _load_message_signals_inner(message_tokens,
                              signals,
                              multiplexer_signal,
                              multiplexer_ids)
-        for signal in message_tokens[7]
+        for signal in message_tokens[9]
     ]
 
 
 def _load_muxed_message_signals(message_tokens,
                                 message_section_tokens,
                                 signals):
-    mux_tokens = message_tokens[3]
-    multiplexer_signal = mux_tokens[1]
+    mux_tokens = message_tokens[5][0]
+    multiplexer_signal = mux_tokens[2]
     result = [
         Signal(name=multiplexer_signal,
-               start=int(mux_tokens[2]),
-               length=int(mux_tokens[3]),
+               start=int(mux_tokens[3]),
+               length=int(mux_tokens[5]),
                byte_order='little_endian',
                is_multiplexer=True)
     ]
 
-    multiplexer_ids = [int(mux_tokens[4])]
+    multiplexer_ids = [int(mux_tokens[6])]
     result += _load_message_signals_inner(message_tokens,
                                           signals,
                                           multiplexer_signal,
                                           multiplexer_ids)
 
     for tokens in message_section_tokens:
-        if tokens[0] == message_tokens[0] and tokens != message_tokens:
-            multiplexer_ids = [int(tokens[3][4])]
+        if tokens[1] == message_tokens[1] and tokens != message_tokens:
+            mux_tokens = tokens[5][0]
+            multiplexer_ids = [int(mux_tokens[6])]
             result += _load_message_signals_inner(tokens,
                                                   signals,
                                                   multiplexer_signal,
@@ -328,7 +361,7 @@ def _load_muxed_message_signals(message_tokens,
 
 
 def _is_multiplexed(message_tokens):
-    return len(message_tokens[3]) > 0
+    return len(message_tokens[5]) > 0
 
 
 def _load_message_signals(message_tokens,
@@ -350,13 +383,13 @@ def _load_message(frame_id,
                   signals,
                   strict):
     # Default values.
-    name = message_tokens[0]
-    length = int(message_tokens[2][1])
+    name = message_tokens[1]
+    length = int(message_tokens[4][2])
     cycle_time = None
 
     # Cycle time.
     try:
-        cycle_time = num(message_tokens[4][1])
+        cycle_time = num(message_tokens[6][0][2])
     except IndexError:
         pass
 
@@ -377,24 +410,27 @@ def _load_message(frame_id,
 
 def _parse_message_frame_ids(message):
     def to_int(string):
-        return int(string[:-1], 16)
+        return int(string, 16)
 
     def is_extended_frame(string):
-        return len(string) == 9
+        return len(string) == 8
 
-    if '-' in message[1][1]:
-        minimum, maximum = message[1][1].split('-')
+    message = message[3][0]
+    minimum = to_int(message[2])
+
+    if message[4]:
+        maximum = -to_int(message[4][0][0])
     else:
-        minimum = maximum = message[1][1]
+        maximum = minimum
 
-    frame_ids = range(to_int(minimum), to_int(maximum) + 1)
+    frame_ids = range(minimum, maximum + 1)
 
-    return frame_ids, is_extended_frame(minimum)
+    return frame_ids, is_extended_frame(message[2])
 
 
 def _load_message_section(section_name, tokens, signals, strict):
     def has_frame_id(message):
-        return len(message[1]) > 0
+        return len(message[3]) > 0
 
     message_section_tokens = _get_section_tokens(tokens, section_name)
     messages = []
@@ -437,17 +473,7 @@ def load_string(string, strict=True):
     if not string.startswith('FormatVersion=6.0'):
         raise ParseError('Only SYM version 6.0 is supported.')
 
-    grammar = _create_grammar_6_0()
-
-    try:
-        tokens = grammar.parseString(string)
-    except (ParseException, ParseSyntaxException) as e:
-        raise ParseError(
-            "Invalid SYM syntax at line {}, column {}: '{}': {}.".format(
-                e.lineno,
-                e.column,
-                e.markInputline(),
-                e.msg))
+    tokens = Parser60().parse(string)
 
     version = _load_version(tokens)
     enums = _load_enums(tokens)

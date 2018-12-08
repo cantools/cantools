@@ -183,8 +183,24 @@ Dump given database in a human readable format:
 The generate C source subcommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Generate `C` source code from given database. The generated code
-contains encode and decode functions for all messages.
+Generate `C` source code from given database.
+
+The generated code contains:
+
+- Message `structs`_.
+
+- Message `pack`_ and `unpack`_ functions.
+
+- Signal `encode`_ and `decode`_ functions.
+
+- Frame id and signal choices `defines`_.
+
+Known limitations:
+
+- The maximum signal size is 64 bits, which in practice is never
+  exceeded.
+
+In the examples below the database is `motohawk.dbc`_.
 
 .. code-block:: text
 
@@ -194,9 +210,29 @@ contains encode and decode functions for all messages.
 See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
 files.
 
-Known limitations:
+Use ``--database-name`` to set a custom namespace for all generated
+types, defines and functions. The output file names are also changed
+by this option.
 
-- Maximum signal size is 64 bits.
+.. code-block:: text
+
+   $ cantools generate_c_source --database-name my_database_name tests/files/motohawk.dbc
+   Successfully generated my_database_name.h and my_database_name.c.
+
+See `my_database_name.h`_ and `my_database_name.c`_ for the contents
+of the generated files.
+
+Use ``--no-floating-point-numbers`` to generate code without floating
+point types, i.e. ``float`` and ``double``.
+
+.. code-block:: text
+
+   $ cantools generate_c_source --no-floating-point-numbers tests/files/motohawk.dbc
+   Successfully generated motohawk.h and motohawk.c.
+
+See `motohawk_no_floating_point_numbers.h`_ and
+`motohawk_no_floating_point_numbers.c`_ for the contents of the
+generated files.
 
 The monitor subcommand
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -253,6 +289,8 @@ Contributing
 
 .. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.dbc
 
+.. _motohawk.dbc: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.dbc
+
 .. _python-can: https://python-can.readthedocs.io/en/master/
 
 .. _DBC: http://www.socialledge.com/sjsu/index.php?title=DBC_Format
@@ -269,6 +307,26 @@ Contributing
 
 .. _examples: https://github.com/eerimoq/cantools/blob/master/examples
 
+.. _structs: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L54
+
+.. _pack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L86
+
+.. _unpack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L100
+
+.. _encode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L112
+
+.. _decode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L121
+
+.. _defines: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L42
+
 .. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h
 
 .. _motohawk.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.c
+
+.. _my_database_name.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.h
+
+.. _my_database_name.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.c
+
+.. _motohawk_no_floating_point_numbers.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.h
+
+.. _motohawk_no_floating_point_numbers.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.c

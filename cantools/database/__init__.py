@@ -46,6 +46,23 @@ class UnsupportedDatabaseFormatError(Error):
         self.e_cdd = e_cdd
 
 
+def _resolve_database_format_and_encoding(database_format,
+                                          encoding,
+                                          filename):
+    if database_format is None:
+        database_format = os.path.splitext(filename)[1][1:]
+
+    if encoding is None:
+        try:
+            encoding = {
+                'dbc': 'cp1252'
+            }[database_format]
+        except KeyError:
+            encoding = 'utf-8'
+
+    return database_format, encoding
+
+
 def _load_file_cache(filename,
                      database_format,
                      encoding,
@@ -140,23 +157,10 @@ def load_file(filename,
 
     """
 
-    if database_format is None:
-        try:
-            database_format = {
-                '.dbc': 'dbc',
-                '.kcd': 'kcd',
-                '.sym': 'sym'
-            }[os.path.splitext(filename)[1]]
-        except KeyError:
-            pass
-
-    if encoding is None:
-        try:
-            encoding = {
-                'dbc': 'cp1252'
-            }[database_format]
-        except KeyError:
-            encoding = 'utf-8'
+    database_format, encoding = _resolve_database_format_and_encoding(
+        database_format,
+        encoding,
+        filename)
 
     if cache_dir is None:
         with fopen(filename, 'r', encoding=encoding) as fin:
@@ -171,6 +175,37 @@ def load_file(filename,
                                 frame_id_mask,
                                 strict,
                                 cache_dir)
+
+
+def dump_file(database,
+              filename,
+              database_format=None,
+              encoding=None):
+    """Dump given database `database` to given file `filename`.
+
+    See :func:`~cantools.database.load_file()` for descriptions of
+    other arguments.
+
+    >>> db = cantools.database.load_file('foo.dbc')
+    >>> cantools.database.dump_file(db, 'bar.dbc')
+
+    """
+
+    database_format, encoding = _resolve_database_format_and_encoding(
+        database_format,
+        encoding,
+        filename)
+
+    if database_format == 'dbc':
+        output = database.as_dbc_string()
+    elif database_format == 'kcd':
+        output = database.as_kcd_string()
+    else:
+        raise Error(
+            "Unsupported output database format '{}'.".format(database_format))
+
+    with fopen(filename, 'w', encoding=encoding) as fout:
+        fout.write(output)
 
 
 def load(fp,

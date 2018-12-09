@@ -16,6 +16,8 @@ Functions and classes
 
 .. autofunction:: cantools.database.load_file
 
+.. autofunction:: cantools.database.dump_file
+
 .. autofunction:: cantools.database.load_string
 
 .. autofunction:: cantools.database.load

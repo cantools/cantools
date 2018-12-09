@@ -1,9 +1,6 @@
 from __future__ import print_function
-import sys
-import os
 
 from .. import database
-from ..compat import fopen
 
 
 def _do_convert(args):
@@ -11,19 +8,10 @@ def _do_convert(args):
                                encoding=args.encoding,
                                strict=not args.no_strict)
 
-    output_format = os.path.splitext(args.outfile)[1][1:]
-
-    if output_format == 'dbc':
-        output = dbase.as_dbc_string()
-    elif output_format == 'kcd':
-        output = dbase.as_kcd_string()
-    else:
-        sys.exit(
-            "Unsupported output database format '{}'.".format(
-                output_format))
-
-    with fopen(args.outfile, 'w', encoding=args.encoding) as fout:
-        fout.write(output)
+    database.dump_file(dbase,
+                       args.outfile,
+                       database_format=None,
+                       encoding=args.encoding)
 
 
 def add_subparser(subparsers):

@@ -411,7 +411,6 @@ IO_DEBUG(
                 actual_output = stdout.getvalue()
                 self.assertEqual(actual_output, expected_output)
 
-
     def test_convert(self):
         # DBC to KCD.
         argv = [

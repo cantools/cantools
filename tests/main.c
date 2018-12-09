@@ -12,6 +12,7 @@
 #include "files/c_source/floating_point.h"
 #include "files/c_source/no_signals.h"
 #include "files/c_source/signed.h"
+#include "files/c_source/my_database_name.h"
 
 static bool fequal(double v1, double v2)
 {

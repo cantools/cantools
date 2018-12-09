@@ -12,7 +12,8 @@ C_SOURCES := \
 	tests/files/c_source/floating_point.c \
 	tests/files/c_source/no_signals.c \
 	tests/files/c_source/choices.c \
-	tests/files/c_source/signed.c
+	tests/files/c_source/signed.c \
+	tests/files/c_source/my_database_name.c
 
 CFLAGS_EXTRA := \
 	-Wduplicated-branches \

@@ -34,7 +34,6 @@
 
 #define UNUSED(x) (void)(x)
 
-
 ssize_t no_signals_message1_pack(
     uint8_t *dst_p,
     const struct no_signals_message1_t *src_p,
@@ -67,7 +66,6 @@ int no_signals_message1_unpack(
     return (0);
 }
 
-
 ssize_t no_signals_message2_pack(
     uint8_t *dst_p,
     const struct no_signals_message2_t *src_p,
@@ -92,4 +90,3 @@ int no_signals_message2_unpack(
 
     return (0);
 }
-

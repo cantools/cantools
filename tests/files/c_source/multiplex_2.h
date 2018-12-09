@@ -44,8 +44,6 @@
 #define MULTIPLEX_2_EXTENDED_FRAME_ID (0xc00fefeu)
 #define MULTIPLEX_2_EXTENDED_TYPES_FRAME_ID (0xc03fefeu)
 
-
-
 /**
  * Signals in message Shared.
  *

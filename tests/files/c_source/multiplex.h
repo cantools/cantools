@@ -41,8 +41,6 @@
 
 #define MULTIPLEX_MESSAGE1_FRAME_ID (0x123456u)
 
-
-
 /**
  * Signals in message Message1.
  *

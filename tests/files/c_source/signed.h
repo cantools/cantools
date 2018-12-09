@@ -51,8 +51,6 @@
 #define SIGNED_MESSAGE33_FRAME_ID (0x01u)
 #define SIGNED_MESSAGE32_FRAME_ID (0x00u)
 
-
-
 /**
  * Signals in message Message378910.
  *

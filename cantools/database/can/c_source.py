@@ -48,9 +48,7 @@ HEADER_FMT = '''\
 #endif
 
 {frame_id_defines}
-
 {choices_defines}
-
 {structs}
 {declarations}
 #endif
@@ -93,7 +91,7 @@ SOURCE_FMT = '''\
 
 #define UNUSED(x) (void)(x)
 
-{helpers}
+{helpers}\
 {definitions}\
 '''
 
@@ -1024,7 +1022,12 @@ def _generate_choices_defines(database_name, messages):
             ])
             choices_defines.append(signal_choices_defines)
 
-    return '\n\n'.join(choices_defines)
+    choices_defines = '\n\n'.join(choices_defines)
+
+    if choices_defines:
+        choices_defines = '\n' + choices_defines + '\n'
+
+    return choices_defines
 
 
 def _generate_structs(database_name, messages):
@@ -1069,7 +1072,10 @@ def _generate_declarations(database_name, messages, floating_point_numbers):
         declaration = DECLARATION_FMT.format(database_name=database_name,
                                              database_message_name=message.name,
                                              message_name=message.snake_name)
-        declaration += '\n' + '\n'.join(signal_declarations)
+
+        if signal_declarations:
+            declaration += '\n' + '\n'.join(signal_declarations)
+
         declarations.append(declaration)
 
     return '\n'.join(declarations)
@@ -1136,7 +1142,9 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                      message_name=message.snake_name)
 
-        definition += '\n' + '\n'.join(signal_definitions)
+        if signal_definitions:
+            definition += '\n' + '\n'.join(signal_definitions)
+
         definitions.append(definition)
 
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)
@@ -1160,13 +1168,17 @@ def _generate_helpers_kind(kinds, left_format, right_format):
 
 def _generate_helpers(kinds):
     pack_helpers = _generate_helpers_kind(kinds[0],
-                                            PACK_HELPER_LEFT_SHIFT_FMT,
-                                            PACK_HELPER_RIGHT_SHIFT_FMT)
+                                          PACK_HELPER_LEFT_SHIFT_FMT,
+                                          PACK_HELPER_RIGHT_SHIFT_FMT)
     unpack_helpers = _generate_helpers_kind(kinds[1],
                                             UNPACK_HELPER_LEFT_SHIFT_FMT,
                                             UNPACK_HELPER_RIGHT_SHIFT_FMT)
+    helpers = pack_helpers + unpack_helpers
 
-    return '\n'.join(pack_helpers + unpack_helpers)
+    if helpers:
+        helpers.append('')
+
+    return '\n'.join(helpers)
 
 
 def generate(database,

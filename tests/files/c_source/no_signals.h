@@ -42,8 +42,6 @@
 #define NO_SIGNALS_MESSAGE1_FRAME_ID (0x400u)
 #define NO_SIGNALS_MESSAGE2_FRAME_ID (0x401u)
 
-
-
 /**
  * Signals in message Message1.
  *
@@ -96,7 +94,6 @@ int no_signals_message1_unpack(
     const uint8_t *src_p,
     size_t size);
 
-
 /**
  * Pack message Message2.
  *
@@ -124,6 +121,5 @@ int no_signals_message2_unpack(
     struct no_signals_message2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
-
 
 #endif

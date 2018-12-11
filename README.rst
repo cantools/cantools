@@ -200,7 +200,8 @@ Known limitations:
 - The maximum signal size is 64 bits, which in practice is never
   exceeded.
 
-In the examples below the database is `motohawk.dbc`_.
+Below is an example of how to generate C source code from a
+database. The database is ``tests/files/motohawk.dbc``.
 
 .. code-block:: text
 
@@ -210,9 +211,9 @@ In the examples below the database is `motohawk.dbc`_.
 See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
 files.
 
-Use ``--database-name`` to set a custom namespace for all generated
-types, defines and functions. The output file names are also changed
-by this option.
+In the next example we use ``--database-name`` to set a custom
+namespace for all generated types, defines and functions. The output
+file names are also changed by this option.
 
 .. code-block:: text
 
@@ -222,8 +223,8 @@ by this option.
 See `my_database_name.h`_ and `my_database_name.c`_ for the contents
 of the generated files.
 
-Use ``--no-floating-point-numbers`` to generate code without floating
-point types, i.e. ``float`` and ``double``.
+In the last example we use ``--no-floating-point-numbers`` to generate
+code without floating point types, i.e. ``float`` and ``double``.
 
 .. code-block:: text
 

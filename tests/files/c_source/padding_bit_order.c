@@ -32,8 +32,6 @@
 
 #include "padding_bit_order.h"
 
-#define UNUSED(x) (void)(x)
-
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -457,7 +455,7 @@ double padding_bit_order_msg3_l_decode(uint64_t value)
 
 bool padding_bit_order_msg3_l_is_in_range(uint64_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -520,7 +518,7 @@ double padding_bit_order_msg4_m_decode(uint64_t value)
 
 bool padding_bit_order_msg4_m_is_in_range(uint64_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }

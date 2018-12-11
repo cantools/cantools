@@ -32,8 +32,6 @@
 
 #include "floating_point.h"
 
-#define UNUSED(x) (void)(x)
-
 static inline uint8_t pack_left_shift_u32(
     uint32_t value,
     uint8_t shift,
@@ -163,7 +161,7 @@ double floating_point_message1_signal1_decode(double value)
 
 bool floating_point_message1_signal1_is_in_range(double value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -238,7 +236,7 @@ double floating_point_message2_signal1_decode(float value)
 
 bool floating_point_message2_signal1_is_in_range(float value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -255,7 +253,7 @@ double floating_point_message2_signal2_decode(float value)
 
 bool floating_point_message2_signal2_is_in_range(float value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }

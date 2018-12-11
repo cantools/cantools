@@ -32,8 +32,6 @@
 
 #include "multiplex.h"
 
-#define UNUSED(x) (void)(x)
-
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -162,7 +160,7 @@ double multiplex_message1_multiplexor_decode(uint8_t value)
 
 bool multiplex_message1_multiplexor_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -179,7 +177,7 @@ double multiplex_message1_bit_j_decode(uint8_t value)
 
 bool multiplex_message1_bit_j_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -196,7 +194,7 @@ double multiplex_message1_bit_c_decode(uint8_t value)
 
 bool multiplex_message1_bit_c_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -213,7 +211,7 @@ double multiplex_message1_bit_g_decode(uint8_t value)
 
 bool multiplex_message1_bit_g_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -230,7 +228,7 @@ double multiplex_message1_bit_l_decode(uint8_t value)
 
 bool multiplex_message1_bit_l_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -247,7 +245,7 @@ double multiplex_message1_bit_a_decode(uint8_t value)
 
 bool multiplex_message1_bit_a_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -264,7 +262,7 @@ double multiplex_message1_bit_k_decode(uint8_t value)
 
 bool multiplex_message1_bit_k_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -281,7 +279,7 @@ double multiplex_message1_bit_e_decode(uint8_t value)
 
 bool multiplex_message1_bit_e_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -298,7 +296,7 @@ double multiplex_message1_bit_d_decode(uint8_t value)
 
 bool multiplex_message1_bit_d_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -315,7 +313,7 @@ double multiplex_message1_bit_b_decode(uint8_t value)
 
 bool multiplex_message1_bit_b_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -332,7 +330,7 @@ double multiplex_message1_bit_h_decode(uint8_t value)
 
 bool multiplex_message1_bit_h_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }
@@ -349,7 +347,7 @@ double multiplex_message1_bit_f_decode(uint8_t value)
 
 bool multiplex_message1_bit_f_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)(value);
 
     return (true);
 }

@@ -24,7 +24,8 @@ def _do_generate_c_source(args):
     header, source = generate(dbase,
                               database_name,
                               filename_h,
-                              not args.no_floating_point_numbers)
+                              not args.no_floating_point_numbers,
+                              args.bit_fields)
 
     with open(filename_h, 'w') as fout:
         fout.write(header)
@@ -46,6 +47,10 @@ def add_subparser(subparsers):
         '--no-floating-point-numbers',
         action='store_true',
         help='No floating point numbers in the generated code.')
+    generate_c_source_parser.add_argument(
+        '--bit-fields',
+        action='store_true',
+        help='Use bit fields to minimize struct sizes.')
     generate_c_source_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')

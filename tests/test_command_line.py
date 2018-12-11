@@ -576,6 +576,42 @@ IO_DEBUG(
                     read_file('tests/files/c_source/' + database_c),
                     read_file(database_c))
 
+    def test_generate_c_source_bit_fileds(self):
+        databases = [
+            'motohawk',
+            'floating_point',
+            'signed'
+        ]
+
+        for database in databases:
+            argv = [
+                'cantools',
+                'generate_c_source',
+                '--bit-fields',
+                '--database-name', '{}_bit_fields'.format(database),
+                'tests/files/{}.dbc'.format(database)
+            ]
+
+            database_h = database + '_bit_fields.h'
+            database_c = database + '_bit_fields.c'
+
+            if os.path.exists(database_h):
+                os.remove(database_h)
+
+            if os.path.exists(database_c):
+                os.remove(database_c)
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            if sys.version_info[0] > 2:
+                self.assertEqual(
+                    read_file('tests/files/c_source/' + database_h),
+                    read_file(database_h))
+                self.assertEqual(
+                    read_file('tests/files/c_source/' + database_c),
+                    read_file(database_c))
+
 
 if __name__ == '__main__':
     unittest.main()

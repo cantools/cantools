@@ -15,6 +15,12 @@ C_SOURCES := \
 	tests/files/c_source/signed.c \
 	tests/files/c_source/my_database_name.c
 
+C_SOURCES_BIT_FIELDS := \
+	tests/main_bit_fields.c \
+	tests/files/c_source/motohawk_bit_fields.c \
+	tests/files/c_source/floating_point_bit_fields.c \
+	tests/files/c_source/signed_bit_fields.c
+
 CFLAGS_EXTRA := \
 	-Wduplicated-branches \
 	-Wduplicated-cond \
@@ -106,15 +112,15 @@ CFLAGS_EXTRA_CLANG := \
 CFLAGS := \
 	-Wall \
 	-Wextra \
-	-Wpedantic \
-	-Wconversion \
 	-Wdouble-promotion \
 	-Wfloat-equal \
 	-Wformat=2 \
 	-Wshadow \
 	-Werror
-CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA))
-CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA_CLANG) -c tests/dummy.c 2> /dev/null && echo $(CFLAGS_EXTRA_CLANG))
+CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null \
+	          && echo $(CFLAGS_EXTRA))
+CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA_CLANG) -c tests/dummy.c 2> /dev/null \
+	          && echo $(CFLAGS_EXTRA_CLANG))
 
 .PHONY: test
 test:
@@ -130,8 +136,12 @@ test:
 
 .PHONY: test-c
 test-c:
-	$(CC) $(CFLAGS) -std=c99 -O3 $(C_SOURCES)
-	./a.out
+	$(CC) $(CFLAGS) -Wconversion -Wpedantic -std=c99 -O3 $(C_SOURCES) \
+	    -o main
+	./main
+	$(CC) $(CFLAGS) -fpack-struct -std=c99 -O3 $(C_SOURCES_BIT_FIELDS) \
+	    -o main_bit_fields
+	./main_bit_fields
 
 .PHONY: test-sdist
 test-sdist:

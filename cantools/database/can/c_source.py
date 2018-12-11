@@ -303,7 +303,7 @@ SIGNAL_MEMBER_FMT = '''\
      * Scale: {scale}
      * Offset: {offset}
      */
-    {type_name} {name};\
+    {type_name} {name}{length};\
 '''
 
 
@@ -592,18 +592,24 @@ def _format_range(signal):
         return '-'
 
 
-def _generate_signal(signal):
+def _generate_signal(signal, bit_fields):
     comment = _format_comment(signal.comment)
     range_ = _format_range(signal)
     scale = _get(signal.scale, '-')
     offset = _get(signal.offset, '-')
+
+    if signal.is_float or not bit_fields:
+        length = ''
+    else:
+        length = ' : {}'.format(signal.length)
 
     member = SIGNAL_MEMBER_FMT.format(comment=comment,
                                       range=range_,
                                       scale=scale,
                                       offset=offset,
                                       type_name=signal.type_name,
-                                      name=signal.snake_name)
+                                      name=signal.snake_name,
+                                      length=length)
 
     return member
 
@@ -878,11 +884,11 @@ def _format_unpack_code(message, helper_kinds):
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _generate_struct(message):
+def _generate_struct(message, bit_fields):
     members = []
 
     for signal in message.signals:
-        members.append(_generate_signal(signal))
+        members.append(_generate_signal(signal, bit_fields))
 
     if not members:
         members = [
@@ -1028,11 +1034,11 @@ def _generate_choices_defines(database_name, messages):
     return choices_defines
 
 
-def _generate_structs(database_name, messages):
+def _generate_structs(database_name, messages, bit_fields):
     structs = []
 
     for message in messages:
-        comment, members = _generate_struct(message)
+        comment, members = _generate_struct(message, bit_fields)
         structs.append(
             STRUCT_FMT.format(comment=comment,
                               database_message_name=message.name,
@@ -1182,7 +1188,8 @@ def _generate_helpers(kinds):
 def generate(database,
              database_name,
              header_name,
-             floating_point_numbers=True):
+             floating_point_numbers=True,
+             bit_fields=False):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1194,6 +1201,8 @@ def generate(database,
     Set `floating_point_numbers` to ``True`` to allow floating point
     numbers in the generated code.
 
+    Set `bit_fields` to ``True`` to generate bit fields in structs.
+
     This function returns a tuple of the C header and source files as
     strings.
 
@@ -1204,7 +1213,7 @@ def generate(database,
     include_guard = '{}_H'.format(database_name.upper())
     frame_id_defines = _generage_frame_id_defines(database_name, messages)
     choices_defines = _generate_choices_defines(database_name, messages)
-    structs = _generate_structs(database_name, messages)
+    structs = _generate_structs(database_name, messages, bit_fields)
     declarations = _generate_declarations(database_name,
                                           messages,
                                           floating_point_numbers)

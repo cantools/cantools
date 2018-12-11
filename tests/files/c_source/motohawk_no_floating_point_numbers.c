@@ -134,7 +134,7 @@ int motohawk_example_message_unpack(
 
 bool motohawk_example_message_enable_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }

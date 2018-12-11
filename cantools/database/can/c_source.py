@@ -268,9 +268,9 @@ ssize_t {database_name}_{message_name}_pack(
     const struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
-    (void)(dst_p);
-    (void)(src_p);
-    (void)(size);
+    (void)dst_p;
+    (void)src_p;
+    (void)size;
 
     return (0);
 }}
@@ -280,8 +280,8 @@ int {database_name}_{message_name}_unpack(
     const uint8_t *src_p,
     size_t size)
 {{
-    (void)(src_p);
-    (void)(size);
+    (void)src_p;
+    (void)size;
 
     memset(dst_p, 0, sizeof(*dst_p));
 
@@ -1091,7 +1091,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
                                                    _generate_encode_decode(message),
                                                    _generate_is_in_range(message)):
             if check == 'true':
-                unused = '    (void)(value);\n\n'
+                unused = '    (void)value;\n\n'
             else:
                 unused = ''
 
@@ -1125,7 +1125,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
             if pack_body:
                 unused = ''
             else:
-                unused = '    (void)(src_p);\n\n'
+                unused = '    (void)src_p;\n\n'
 
             definition = DEFINITION_FMT.format(database_name=database_name,
                                                database_message_name=message.name,

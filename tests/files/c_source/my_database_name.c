@@ -144,7 +144,7 @@ double my_database_name_example_message_enable_decode(uint8_t value)
 
 bool my_database_name_example_message_enable_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }

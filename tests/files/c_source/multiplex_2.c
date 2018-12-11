@@ -254,7 +254,7 @@ double multiplex_2_shared_s0_decode(int8_t value)
 
 bool multiplex_2_shared_s0_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -271,7 +271,7 @@ double multiplex_2_shared_s1_decode(int8_t value)
 
 bool multiplex_2_shared_s1_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -288,7 +288,7 @@ double multiplex_2_shared_s2_decode(int8_t value)
 
 bool multiplex_2_shared_s2_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -392,7 +392,7 @@ double multiplex_2_normal_s0_decode(int8_t value)
 
 bool multiplex_2_normal_s0_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -409,7 +409,7 @@ double multiplex_2_normal_s1_decode(int8_t value)
 
 bool multiplex_2_normal_s1_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -426,7 +426,7 @@ double multiplex_2_normal_s2_decode(int8_t value)
 
 bool multiplex_2_normal_s2_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -651,7 +651,7 @@ double multiplex_2_extended_s0_decode(int8_t value)
 
 bool multiplex_2_extended_s0_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -668,7 +668,7 @@ double multiplex_2_extended_s5_decode(int32_t value)
 
 bool multiplex_2_extended_s5_is_in_range(int32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -685,7 +685,7 @@ double multiplex_2_extended_s1_decode(int8_t value)
 
 bool multiplex_2_extended_s1_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -702,7 +702,7 @@ double multiplex_2_extended_s4_decode(int32_t value)
 
 bool multiplex_2_extended_s4_is_in_range(int32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -719,7 +719,7 @@ double multiplex_2_extended_s2_decode(int8_t value)
 
 bool multiplex_2_extended_s2_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -736,7 +736,7 @@ double multiplex_2_extended_s3_decode(int16_t value)
 
 bool multiplex_2_extended_s3_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -753,7 +753,7 @@ double multiplex_2_extended_s6_decode(int8_t value)
 
 bool multiplex_2_extended_s6_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -770,7 +770,7 @@ double multiplex_2_extended_s8_decode(int8_t value)
 
 bool multiplex_2_extended_s8_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -787,7 +787,7 @@ double multiplex_2_extended_s7_decode(int32_t value)
 
 bool multiplex_2_extended_s7_is_in_range(int32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -933,7 +933,7 @@ double multiplex_2_extended_types_s0_decode(int8_t value)
 
 bool multiplex_2_extended_types_s0_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }

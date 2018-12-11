@@ -161,7 +161,7 @@ double floating_point_message1_signal1_decode(double value)
 
 bool floating_point_message1_signal1_is_in_range(double value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -236,7 +236,7 @@ double floating_point_message2_signal1_decode(float value)
 
 bool floating_point_message2_signal1_is_in_range(float value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -253,7 +253,7 @@ double floating_point_message2_signal2_decode(float value)
 
 bool floating_point_message2_signal2_is_in_range(float value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }

@@ -99,7 +99,7 @@ double choices_foo_foo_decode(int8_t value)
 
 bool choices_foo_foo_is_in_range(int8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }

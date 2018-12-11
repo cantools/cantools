@@ -256,7 +256,7 @@ double vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_decode(uint8_t valu
 
 bool vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -352,7 +352,7 @@ double vehicle_rt_dl1_mk3_speed_validity_speed_decode(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_speed_validity_speed_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -369,7 +369,7 @@ double vehicle_rt_dl1_mk3_speed_accuracy_speed_decode(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_speed_accuracy_speed_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -479,7 +479,7 @@ double vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_decode(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -511,7 +511,7 @@ double vehicle_rt_dl1_mk3_gps_time_gps_week_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_gps_time_gps_week_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -718,7 +718,7 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uin
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -735,7 +735,7 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(ui
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -752,7 +752,7 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uin
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -862,7 +862,7 @@ double vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_decode(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -950,7 +950,7 @@ double vehicle_rt_ir_temp_temp_7_ir_temperature_7_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_7_ir_temperature_7_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1035,7 +1035,7 @@ double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1052,7 +1052,7 @@ double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1069,7 +1069,7 @@ double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1086,7 +1086,7 @@ double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1171,7 +1171,7 @@ double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1188,7 +1188,7 @@ double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1205,7 +1205,7 @@ double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1222,7 +1222,7 @@ double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1307,7 +1307,7 @@ double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1324,7 +1324,7 @@ double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1341,7 +1341,7 @@ double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1358,7 +1358,7 @@ double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1443,7 +1443,7 @@ double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1460,7 +1460,7 @@ double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1477,7 +1477,7 @@ double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1494,7 +1494,7 @@ double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1579,7 +1579,7 @@ double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1596,7 +1596,7 @@ double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1613,7 +1613,7 @@ double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1630,7 +1630,7 @@ double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1715,7 +1715,7 @@ double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1732,7 +1732,7 @@ double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1749,7 +1749,7 @@ double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1766,7 +1766,7 @@ double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1851,7 +1851,7 @@ double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1868,7 +1868,7 @@ double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1885,7 +1885,7 @@ double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1902,7 +1902,7 @@ double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -1987,7 +1987,7 @@ double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2004,7 +2004,7 @@ double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2021,7 +2021,7 @@ double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2038,7 +2038,7 @@ double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2096,7 +2096,7 @@ double vehicle_rt_ir_temp_temp_32_ir_temperature_32_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_32_ir_temperature_32_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2154,7 +2154,7 @@ double vehicle_rt_ir_temp_temp_31_ir_temperature_31_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_31_ir_temperature_31_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2212,7 +2212,7 @@ double vehicle_rt_ir_temp_temp_30_ir_temperature_30_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_30_ir_temperature_30_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2270,7 +2270,7 @@ double vehicle_rt_ir_temp_temp_29_ir_temperature_29_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_29_ir_temperature_29_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2328,7 +2328,7 @@ double vehicle_rt_ir_temp_temp_28_ir_temperature_28_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_28_ir_temperature_28_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2386,7 +2386,7 @@ double vehicle_rt_ir_temp_temp_27_ir_temperature_27_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_27_ir_temperature_27_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2444,7 +2444,7 @@ double vehicle_rt_ir_temp_temp_26_ir_temperature_26_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_26_ir_temperature_26_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2502,7 +2502,7 @@ double vehicle_rt_ir_temp_temp_25_ir_temperature_25_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_25_ir_temperature_25_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2560,7 +2560,7 @@ double vehicle_rt_ir_temp_temp_24_ir_temperature_24_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_24_ir_temperature_24_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2618,7 +2618,7 @@ double vehicle_rt_ir_temp_temp_22_ir_temperature_22_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_22_ir_temperature_22_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2676,7 +2676,7 @@ double vehicle_rt_ir_temp_temp_23_ir_temperature_23_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_23_ir_temperature_23_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2734,7 +2734,7 @@ double vehicle_rt_ir_temp_temp_21_ir_temperature_21_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_21_ir_temperature_21_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2792,7 +2792,7 @@ double vehicle_rt_ir_temp_temp_20_ir_temperature_20_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_20_ir_temperature_20_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2850,7 +2850,7 @@ double vehicle_rt_ir_temp_temp_19_ir_temperature_19_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_19_ir_temperature_19_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2908,7 +2908,7 @@ double vehicle_rt_ir_temp_temp_18_ir_temperature_18_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_18_ir_temperature_18_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -2966,7 +2966,7 @@ double vehicle_rt_ir_temp_temp_16_ir_temperature_16_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_16_ir_temperature_16_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3024,7 +3024,7 @@ double vehicle_rt_ir_temp_temp_15_ir_temperature_15_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_15_ir_temperature_15_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3082,7 +3082,7 @@ double vehicle_rt_ir_temp_temp_14_ir_temperature_14_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_14_ir_temperature_14_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3140,7 +3140,7 @@ double vehicle_rt_ir_temp_temp_13_ir_temperature_13_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_13_ir_temperature_13_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3198,7 +3198,7 @@ double vehicle_rt_ir_temp_temp_12_ir_temperature_12_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_12_ir_temperature_12_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3256,7 +3256,7 @@ double vehicle_rt_ir_temp_temp_11_ir_temperature_11_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_11_ir_temperature_11_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3314,7 +3314,7 @@ double vehicle_rt_ir_temp_temp_10_ir_temperature_10_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_10_ir_temperature_10_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3372,7 +3372,7 @@ double vehicle_rt_ir_temp_temp_8_ir_temperature_8_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_8_ir_temperature_8_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3430,7 +3430,7 @@ double vehicle_rt_ir_temp_temp_9_ir_temperature_9_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_9_ir_temperature_9_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3488,7 +3488,7 @@ double vehicle_rt_ir_temp_temp_17_ir_temperature_17_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_17_ir_temperature_17_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3546,7 +3546,7 @@ double vehicle_rt_ir_temp_temp_6_ir_temperature_6_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_6_ir_temperature_6_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3604,7 +3604,7 @@ double vehicle_rt_ir_temp_temp_5_ir_temperature_5_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_5_ir_temperature_5_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3662,7 +3662,7 @@ double vehicle_rt_ir_temp_temp_4_ir_temperature_4_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_4_ir_temperature_4_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3720,7 +3720,7 @@ double vehicle_rt_ir_temp_temp_3_ir_temperature_3_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_3_ir_temperature_3_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3778,7 +3778,7 @@ double vehicle_rt_ir_temp_temp_2_ir_temperature_2_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_2_ir_temperature_2_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -3836,7 +3836,7 @@ double vehicle_rt_ir_temp_temp_1_ir_temperature_1_decode(int16_t value)
 
 bool vehicle_rt_ir_temp_temp_1_ir_temperature_1_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4200,7 +4200,7 @@ double vehicle_rt_sb_trig_forward_dist_forward_distance_decode(int32_t value)
 
 bool vehicle_rt_sb_trig_forward_dist_forward_distance_is_in_range(int32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4217,7 +4217,7 @@ double vehicle_rt_sb_trig_forward_dist_deviation_distance_decode(int32_t value)
 
 bool vehicle_rt_sb_trig_forward_dist_deviation_distance_is_in_range(int32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4349,7 +4349,7 @@ double vehicle_rt_sb_trig_accel_validity_mfdd_decode(uint8_t value)
 
 bool vehicle_rt_sb_trig_accel_validity_mfdd_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4366,7 +4366,7 @@ double vehicle_rt_sb_trig_accel_validity_average_accel_decode(uint8_t value)
 
 bool vehicle_rt_sb_trig_accel_validity_average_accel_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4383,7 +4383,7 @@ double vehicle_rt_sb_trig_accel_validity_triggered_time_decode(uint8_t value)
 
 bool vehicle_rt_sb_trig_accel_validity_triggered_time_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4400,7 +4400,7 @@ double vehicle_rt_sb_trig_accel_mfdd_decode(int16_t value)
 
 bool vehicle_rt_sb_trig_accel_mfdd_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4417,7 +4417,7 @@ double vehicle_rt_sb_trig_accel_average_accel_decode(int16_t value)
 
 bool vehicle_rt_sb_trig_accel_average_accel_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4485,7 +4485,7 @@ double vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_decode(uint32_t value
 
 bool vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4538,7 +4538,7 @@ double vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_decode(uint32_t value
 
 bool vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4591,7 +4591,7 @@ double vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_decode(uint32_t value
 
 bool vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4644,7 +4644,7 @@ double vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4697,7 +4697,7 @@ double vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4750,7 +4750,7 @@ double vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4803,7 +4803,7 @@ double vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4856,7 +4856,7 @@ double vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4909,7 +4909,7 @@ double vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -4962,7 +4962,7 @@ double vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5015,7 +5015,7 @@ double vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5068,7 +5068,7 @@ double vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5119,7 +5119,7 @@ double vehicle_rt_dl1_mk3_rpm_rpm_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_rpm_rpm_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5170,7 +5170,7 @@ double vehicle_rt_dl1_mk3_freq_4_frequency_4_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_freq_4_frequency_4_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5221,7 +5221,7 @@ double vehicle_rt_dl1_mk3_freq_3_frequency_3_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_freq_3_frequency_3_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5272,7 +5272,7 @@ double vehicle_rt_dl1_mk3_freq_2_frequency_2_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_freq_2_frequency_2_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5323,7 +5323,7 @@ double vehicle_rt_dl1_mk3_misc_3_misc_3_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_misc_3_misc_3_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5374,7 +5374,7 @@ double vehicle_rt_dl1_mk3_misc_2_misc_2_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_misc_2_misc_2_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5425,7 +5425,7 @@ double vehicle_rt_dl1_mk3_misc_1_misc_1_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_misc_1_misc_1_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5476,7 +5476,7 @@ double vehicle_rt_dl1_mk3_aux_31_aux_31_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_31_aux_31_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5527,7 +5527,7 @@ double vehicle_rt_dl1_mk3_aux_30_aux_30_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_30_aux_30_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5578,7 +5578,7 @@ double vehicle_rt_dl1_mk3_aux_29_aux_29_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_29_aux_29_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5629,7 +5629,7 @@ double vehicle_rt_dl1_mk3_aux_28_aux_28_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_28_aux_28_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5680,7 +5680,7 @@ double vehicle_rt_dl1_mk3_aux_27_aux_27_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_27_aux_27_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5731,7 +5731,7 @@ double vehicle_rt_dl1_mk3_aux_26_aux_26_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_26_aux_26_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5782,7 +5782,7 @@ double vehicle_rt_dl1_mk3_aux_25_aux_25_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_25_aux_25_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5833,7 +5833,7 @@ double vehicle_rt_dl1_mk3_aux_24_aux_24_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_24_aux_24_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5884,7 +5884,7 @@ double vehicle_rt_dl1_mk3_aux_23_aux_23_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_23_aux_23_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5935,7 +5935,7 @@ double vehicle_rt_dl1_mk3_aux_22_aux_22_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_22_aux_22_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -5986,7 +5986,7 @@ double vehicle_rt_dl1_mk3_aux_21_aux_21_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_21_aux_21_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6037,7 +6037,7 @@ double vehicle_rt_dl1_mk3_aux_20_aux_20_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_20_aux_20_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6088,7 +6088,7 @@ double vehicle_rt_dl1_mk3_aux_19_aux_19_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_19_aux_19_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6139,7 +6139,7 @@ double vehicle_rt_dl1_mk3_aux_18_aux_18_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_18_aux_18_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6190,7 +6190,7 @@ double vehicle_rt_dl1_mk3_aux_17_aux_17_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_17_aux_17_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6241,7 +6241,7 @@ double vehicle_rt_dl1_mk3_aux_16_aux_16_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_16_aux_16_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6292,7 +6292,7 @@ double vehicle_rt_dl1_mk3_aux_15_aux_15_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_15_aux_15_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6343,7 +6343,7 @@ double vehicle_rt_dl1_mk3_aux_14_aux_14_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_14_aux_14_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6394,7 +6394,7 @@ double vehicle_rt_dl1_mk3_aux_13_aux_13_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_13_aux_13_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6445,7 +6445,7 @@ double vehicle_rt_dl1_mk3_aux_12_aux_12_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_12_aux_12_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6496,7 +6496,7 @@ double vehicle_rt_dl1_mk3_aux_11_aux_11_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_11_aux_11_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6547,7 +6547,7 @@ double vehicle_rt_dl1_mk3_aux_9_aux_9_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_9_aux_9_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6598,7 +6598,7 @@ double vehicle_rt_dl1_mk3_aux_10_aux_10_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_10_aux_10_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6649,7 +6649,7 @@ double vehicle_rt_dl1_mk3_aux_8_aux_8_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_8_aux_8_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6700,7 +6700,7 @@ double vehicle_rt_dl1_mk3_aux_7_aux_7_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_7_aux_7_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6751,7 +6751,7 @@ double vehicle_rt_dl1_mk3_aux_6_aux_6_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_6_aux_6_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6802,7 +6802,7 @@ double vehicle_rt_dl1_mk3_aux_5_aux_5_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_5_aux_5_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6853,7 +6853,7 @@ double vehicle_rt_dl1_mk3_aux_4_aux_4_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_4_aux_4_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6904,7 +6904,7 @@ double vehicle_rt_dl1_mk3_aux_3_aux_3_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_3_aux_3_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -6955,7 +6955,7 @@ double vehicle_rt_dl1_mk3_aux_2_aux_2_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_2_aux_2_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7006,7 +7006,7 @@ double vehicle_rt_dl1_mk3_aux_1_aux_1_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_aux_1_aux_1_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7059,7 +7059,7 @@ double vehicle_rt_dl1_mk3_pressure_5_pressure_5_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_pressure_5_pressure_5_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7112,7 +7112,7 @@ double vehicle_rt_dl1_mk3_pressure_4_pressure_4_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_pressure_4_pressure_4_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7165,7 +7165,7 @@ double vehicle_rt_dl1_mk3_pressure_3_pressure_3_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_pressure_3_pressure_3_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7218,7 +7218,7 @@ double vehicle_rt_dl1_mk3_pressure_2_pressure_2_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_pressure_2_pressure_2_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7271,7 +7271,7 @@ double vehicle_rt_dl1_mk3_pressure_1_pressure_1_decode(uint32_t value)
 
 bool vehicle_rt_dl1_mk3_pressure_1_pressure_1_is_in_range(uint32_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7329,7 +7329,7 @@ double vehicle_rt_dl1_mk3_angle_3_angle_3_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_angle_3_angle_3_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7387,7 +7387,7 @@ double vehicle_rt_dl1_mk3_angle_2_angle_2_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_angle_2_angle_2_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7445,7 +7445,7 @@ double vehicle_rt_dl1_mk3_angle_1_angle_1_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_angle_1_angle_1_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7503,7 +7503,7 @@ double vehicle_rt_dl1_mk3_temp_25_temperature_25_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_25_temperature_25_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7561,7 +7561,7 @@ double vehicle_rt_dl1_mk3_temp_24_temperature_24_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_24_temperature_24_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7619,7 +7619,7 @@ double vehicle_rt_dl1_mk3_temp_23_temperature_23_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_23_temperature_23_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7677,7 +7677,7 @@ double vehicle_rt_dl1_mk3_temp_22_temperature_22_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_22_temperature_22_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7735,7 +7735,7 @@ double vehicle_rt_dl1_mk3_temp_21_temperature_21_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_21_temperature_21_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7793,7 +7793,7 @@ double vehicle_rt_dl1_mk3_temp_20_temperature_20_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_20_temperature_20_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7851,7 +7851,7 @@ double vehicle_rt_dl1_mk3_temp_19_temperature_19_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_19_temperature_19_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7909,7 +7909,7 @@ double vehicle_rt_dl1_mk3_temp_18_temperature_18_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_18_temperature_18_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -7967,7 +7967,7 @@ double vehicle_rt_dl1_mk3_temp_17_temperature_17_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_17_temperature_17_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8025,7 +8025,7 @@ double vehicle_rt_dl1_mk3_temp_16_temperature_16_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_16_temperature_16_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8083,7 +8083,7 @@ double vehicle_rt_dl1_mk3_temp_15_temperature_15_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_15_temperature_15_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8141,7 +8141,7 @@ double vehicle_rt_dl1_mk3_temp_14_temperature_14_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_14_temperature_14_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8199,7 +8199,7 @@ double vehicle_rt_dl1_mk3_temp_13_temperature_13_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_13_temperature_13_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8257,7 +8257,7 @@ double vehicle_rt_dl1_mk3_temp_12_temperature_12_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_12_temperature_12_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8315,7 +8315,7 @@ double vehicle_rt_dl1_mk3_temp_11_temperature_11_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_11_temperature_11_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8373,7 +8373,7 @@ double vehicle_rt_dl1_mk3_temp_10_temperature_10_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_10_temperature_10_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8431,7 +8431,7 @@ double vehicle_rt_dl1_mk3_temp_9_temperature_9_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_9_temperature_9_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8489,7 +8489,7 @@ double vehicle_rt_dl1_mk3_temp_8_temperature_8_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_8_temperature_8_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8547,7 +8547,7 @@ double vehicle_rt_dl1_mk3_temp_7_temperature_7_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_7_temperature_7_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8605,7 +8605,7 @@ double vehicle_rt_dl1_mk3_temp_6_temperature_6_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_6_temperature_6_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8663,7 +8663,7 @@ double vehicle_rt_dl1_mk3_temp_5_temperature_5_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_5_temperature_5_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8721,7 +8721,7 @@ double vehicle_rt_dl1_mk3_temp_4_temperature_4_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_4_temperature_4_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8779,7 +8779,7 @@ double vehicle_rt_dl1_mk3_temp_3_temperature_3_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_3_temperature_3_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8837,7 +8837,7 @@ double vehicle_rt_dl1_mk3_temp_2_temperature_2_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_2_temperature_2_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8895,7 +8895,7 @@ double vehicle_rt_dl1_mk3_temp_1_temperature_1_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_temp_1_temperature_1_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8946,7 +8946,7 @@ double vehicle_rt_dl1_mk3_analog_32_analog_32_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_32_analog_32_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -8997,7 +8997,7 @@ double vehicle_rt_dl1_mk3_analog_31_analog_31_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_31_analog_31_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9048,7 +9048,7 @@ double vehicle_rt_dl1_mk3_analog_30_analog_30_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_30_analog_30_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9099,7 +9099,7 @@ double vehicle_rt_dl1_mk3_analog_29_analog_29_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_29_analog_29_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9150,7 +9150,7 @@ double vehicle_rt_dl1_mk3_analog_28_analog_28_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_28_analog_28_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9201,7 +9201,7 @@ double vehicle_rt_dl1_mk3_analog_27_analog_27_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_27_analog_27_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9252,7 +9252,7 @@ double vehicle_rt_dl1_mk3_analog_26_analog_26_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_26_analog_26_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9303,7 +9303,7 @@ double vehicle_rt_dl1_mk3_analog_25_analog_25_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_25_analog_25_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9354,7 +9354,7 @@ double vehicle_rt_dl1_mk3_analog_15_analog_15_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_15_analog_15_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9405,7 +9405,7 @@ double vehicle_rt_dl1_mk3_analog_14_analog_14_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_14_analog_14_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9456,7 +9456,7 @@ double vehicle_rt_dl1_mk3_analog_17_analog_17_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_17_analog_17_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9507,7 +9507,7 @@ double vehicle_rt_dl1_mk3_analog_24_analog_24_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_24_analog_24_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9558,7 +9558,7 @@ double vehicle_rt_dl1_mk3_analog_23_analog_23_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_23_analog_23_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9609,7 +9609,7 @@ double vehicle_rt_dl1_mk3_analog_22_analog_22_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_22_analog_22_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9660,7 +9660,7 @@ double vehicle_rt_dl1_mk3_analog_21_analog_21_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_21_analog_21_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9711,7 +9711,7 @@ double vehicle_rt_dl1_mk3_analog_20_analog_20_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_20_analog_20_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9762,7 +9762,7 @@ double vehicle_rt_dl1_mk3_analog_19_analog_19_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_19_analog_19_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9813,7 +9813,7 @@ double vehicle_rt_dl1_mk3_analog_16_analog_16_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_16_analog_16_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9864,7 +9864,7 @@ double vehicle_rt_dl1_mk3_analog_18_analog_18_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_18_analog_18_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9915,7 +9915,7 @@ double vehicle_rt_dl1_mk3_analog_12_analog_12_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_12_analog_12_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -9966,7 +9966,7 @@ double vehicle_rt_dl1_mk3_analog_11_analog_11_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_11_analog_11_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10017,7 +10017,7 @@ double vehicle_rt_dl1_mk3_analog_10_analog_10_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_10_analog_10_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10068,7 +10068,7 @@ double vehicle_rt_dl1_mk3_analog_9_analog_9_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_9_analog_9_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10119,7 +10119,7 @@ double vehicle_rt_dl1_mk3_analog_8_analog_8_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_8_analog_8_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10170,7 +10170,7 @@ double vehicle_rt_dl1_mk3_analog_7_analog_7_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_7_analog_7_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10221,7 +10221,7 @@ double vehicle_rt_dl1_mk3_analog_6_analog_6_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_6_analog_6_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10272,7 +10272,7 @@ double vehicle_rt_dl1_mk3_analog_5_analog_5_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_5_analog_5_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10323,7 +10323,7 @@ double vehicle_rt_dl1_mk3_analog_4_analog_4_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_4_analog_4_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10374,7 +10374,7 @@ double vehicle_rt_dl1_mk3_analog_3_analog_3_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_3_analog_3_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10425,7 +10425,7 @@ double vehicle_rt_dl1_mk3_analog_2_analog_2_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_2_analog_2_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10476,7 +10476,7 @@ double vehicle_rt_dl1_mk3_analog_1_analog_1_decode(uint16_t value)
 
 bool vehicle_rt_dl1_mk3_analog_1_analog_1_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10560,7 +10560,7 @@ double vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_decode(uint8_t value
 
 bool vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10577,7 +10577,7 @@ double vehicle_rt_dl1_mk3_accel_validity_accel_lateral_decode(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_accel_validity_accel_lateral_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10594,7 +10594,7 @@ double vehicle_rt_dl1_mk3_accel_validity_accel_vertical_decode(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_accel_validity_accel_vertical_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10611,7 +10611,7 @@ double vehicle_rt_dl1_mk3_accel_accuracy_accel_decode(uint8_t value)
 
 bool vehicle_rt_dl1_mk3_accel_accuracy_accel_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10628,7 +10628,7 @@ double vehicle_rt_dl1_mk3_accel_accel_longitudinal_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_accel_accel_longitudinal_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10645,7 +10645,7 @@ double vehicle_rt_dl1_mk3_accel_accel_lateral_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_accel_accel_lateral_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10662,7 +10662,7 @@ double vehicle_rt_dl1_mk3_accel_accel_vertical_decode(int16_t value)
 
 bool vehicle_rt_dl1_mk3_accel_accel_vertical_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10943,7 +10943,7 @@ double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10960,7 +10960,7 @@ double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -10977,7 +10977,7 @@ double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11258,7 +11258,7 @@ double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11275,7 +11275,7 @@ double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11292,7 +11292,7 @@ double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11573,7 +11573,7 @@ double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11590,7 +11590,7 @@ double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11607,7 +11607,7 @@ double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11888,7 +11888,7 @@ double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11905,7 +11905,7 @@ double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -11922,7 +11922,7 @@ double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12027,7 +12027,7 @@ double vehicle_rt_sb_ins_slip_accuracy_ins_slip_decode(uint8_t value)
 
 bool vehicle_rt_sb_ins_slip_accuracy_ins_slip_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12044,7 +12044,7 @@ double vehicle_rt_sb_ins_slip_ins_slip_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_slip_ins_slip_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12061,7 +12061,7 @@ double vehicle_rt_sb_ins_slip_accuracy_ins_squat_decode(uint8_t value)
 
 bool vehicle_rt_sb_ins_slip_accuracy_ins_squat_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12078,7 +12078,7 @@ double vehicle_rt_sb_ins_slip_ins_squat_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_slip_ins_squat_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12294,7 +12294,7 @@ double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_decode(uint8_t value
 
 bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12311,7 +12311,7 @@ double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_decode(uint8_t value
 
 bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12328,7 +12328,7 @@ double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_decode(uint8_t value
 
 bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12427,7 +12427,7 @@ double vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_decode(uint8_t value)
 
 bool vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12559,7 +12559,7 @@ double vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_decode(uint8_t value)
 
 bool vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12796,7 +12796,7 @@ double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_decode(uint8_t value
 
 bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12813,7 +12813,7 @@ double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_decode(uint8_t value
 
 bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -12830,7 +12830,7 @@ double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_decode(uint8_t value
 
 bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13052,7 +13052,7 @@ double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_decode(uint8_t 
 
 bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13069,7 +13069,7 @@ double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_decode(uint8_t
 
 bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13086,7 +13086,7 @@ double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_decode(uint8_t 
 
 bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13201,7 +13201,7 @@ double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_decode(uint8_t 
 
 bool vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13233,7 +13233,7 @@ double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_decode(uint8_t
 
 bool vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13353,7 +13353,7 @@ double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_decode(uint8_t va
 
 bool vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13385,7 +13385,7 @@ double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_decode(uint8_t v
 
 bool vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13449,7 +13449,7 @@ double vehicle_rt_sb_ins_status_ins_status_decode(uint8_t value)
 
 bool vehicle_rt_sb_ins_status_ins_status_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13578,7 +13578,7 @@ double vehicle_rt_sb_ins_attitude_accuracy_attitude_decode(uint8_t value)
 
 bool vehicle_rt_sb_ins_attitude_accuracy_attitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13595,7 +13595,7 @@ double vehicle_rt_sb_ins_attitude_attitude_yaw_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_attitude_attitude_yaw_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13612,7 +13612,7 @@ double vehicle_rt_sb_ins_attitude_attitude_pitch_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_attitude_attitude_pitch_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13629,7 +13629,7 @@ double vehicle_rt_sb_ins_attitude_attitude_roll_decode(int16_t value)
 
 bool vehicle_rt_sb_ins_attitude_attitude_roll_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13702,7 +13702,7 @@ double vehicle_rt_sb_output_status_validity_status_timestamp_decode(uint8_t valu
 
 bool vehicle_rt_sb_output_status_validity_status_timestamp_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13937,7 +13937,7 @@ double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_decode(uint8_t 
 
 bool vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -13969,7 +13969,7 @@ double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_decode(uint8_t
 
 bool vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14049,7 +14049,7 @@ double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_decode(uint8
 
 bool vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14066,7 +14066,7 @@ double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_decode(u
 
 bool vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14161,7 +14161,7 @@ double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_decode(uint8
 
 bool vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14178,7 +14178,7 @@ double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_decode(u
 
 bool vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14273,7 +14273,7 @@ double vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_decode(uint8_t
 
 bool vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14290,7 +14290,7 @@ double vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_decode(uint8_t
 
 bool vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14464,7 +14464,7 @@ double vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_decode(uint8_t value)
 
 bool vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14593,7 +14593,7 @@ double vehicle_rt_imu06_accel_validity_accel_longitudinal_decode(uint8_t value)
 
 bool vehicle_rt_imu06_accel_validity_accel_longitudinal_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14610,7 +14610,7 @@ double vehicle_rt_imu06_accel_validity_accel_lateral_decode(uint8_t value)
 
 bool vehicle_rt_imu06_accel_validity_accel_lateral_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14627,7 +14627,7 @@ double vehicle_rt_imu06_accel_validity_accel_vertical_decode(uint8_t value)
 
 bool vehicle_rt_imu06_accel_validity_accel_vertical_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14644,7 +14644,7 @@ double vehicle_rt_imu06_accel_accuracy_accel_decode(uint8_t value)
 
 bool vehicle_rt_imu06_accel_accuracy_accel_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14661,7 +14661,7 @@ double vehicle_rt_imu06_accel_accel_longitudinal_decode(int16_t value)
 
 bool vehicle_rt_imu06_accel_accel_longitudinal_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14678,7 +14678,7 @@ double vehicle_rt_imu06_accel_accel_lateral_decode(int16_t value)
 
 bool vehicle_rt_imu06_accel_accel_lateral_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14695,7 +14695,7 @@ double vehicle_rt_imu06_accel_accel_vertical_decode(int16_t value)
 
 bool vehicle_rt_imu06_accel_accel_vertical_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14761,7 +14761,7 @@ double vehicle_rt_sb_speed_validity_speed_decode(uint8_t value)
 
 bool vehicle_rt_sb_speed_validity_speed_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14778,7 +14778,7 @@ double vehicle_rt_sb_speed_accuracy_speed_decode(uint8_t value)
 
 bool vehicle_rt_sb_speed_accuracy_speed_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14917,7 +14917,7 @@ double vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_decode(uint8_t value)
 
 bool vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14934,7 +14934,7 @@ double vehicle_rt_sb_rtk_slip_rtk_slip_decode(int16_t value)
 
 bool vehicle_rt_sb_rtk_slip_rtk_slip_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14951,7 +14951,7 @@ double vehicle_rt_sb_rtk_slip_rtk_squat_decode(int16_t value)
 
 bool vehicle_rt_sb_rtk_slip_rtk_squat_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -14968,7 +14968,7 @@ double vehicle_rt_sb_rtk_slip_rtk_baseline_decode(uint16_t value)
 
 bool vehicle_rt_sb_rtk_slip_rtk_baseline_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15097,7 +15097,7 @@ double vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_decode(uint8_t value)
 
 bool vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15114,7 +15114,7 @@ double vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_decode(int16_t value)
 
 bool vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15247,7 +15247,7 @@ double vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_decode(uint8_t v
 
 bool vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15264,7 +15264,7 @@ double vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_decode(int16_t value)
 
 bool vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15342,7 +15342,7 @@ double vehicle_rt_sb_gps_status_gps_status_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_status_gps_status_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15359,7 +15359,7 @@ double vehicle_rt_sb_gps_status_firmware_version_major_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_status_firmware_version_major_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15376,7 +15376,7 @@ double vehicle_rt_sb_gps_status_firmware_version_intermediate_decode(uint8_t val
 
 bool vehicle_rt_sb_gps_status_firmware_version_intermediate_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15393,7 +15393,7 @@ double vehicle_rt_sb_gps_status_firmware_version_minor_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_status_firmware_version_minor_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15455,7 +15455,7 @@ double vehicle_rt_sb_gps_status_rtk_status_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_status_rtk_status_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15662,7 +15662,7 @@ double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_decode(uint8_t value
 
 bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15679,7 +15679,7 @@ double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_decode(uint8_t value
 
 bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15696,7 +15696,7 @@ double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_decode(uint8_t value
 
 bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15918,7 +15918,7 @@ double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uint8_t 
 
 bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15935,7 +15935,7 @@ double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(uint8_t
 
 bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -15952,7 +15952,7 @@ double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uint8_t 
 
 bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16072,7 +16072,7 @@ double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_decode(uint8_t va
 
 bool vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16104,7 +16104,7 @@ double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_decode(uint8_t v
 
 bool vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16335,7 +16335,7 @@ double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_decode(uint8_t value
 
 bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16352,7 +16352,7 @@ double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_decode(uint8_t value
 
 bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16369,7 +16369,7 @@ double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_decode(uint8_t value
 
 bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16468,7 +16468,7 @@ double vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16600,7 +16600,7 @@ double vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16725,7 +16725,7 @@ double vehicle_rt_sb_gps_speed_accuracy_gps_speed_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_speed_accuracy_gps_speed_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16850,7 +16850,7 @@ double vehicle_rt_sb_gps_time_accuracy_gps_time_decode(uint8_t value)
 
 bool vehicle_rt_sb_gps_time_accuracy_gps_time_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16882,7 +16882,7 @@ double vehicle_rt_sb_gps_time_gps_week_decode(uint16_t value)
 
 bool vehicle_rt_sb_gps_time_gps_week_is_in_range(uint16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16966,7 +16966,7 @@ double vehicle_rt_sb_accel_validity_accel_longitudinal_decode(uint8_t value)
 
 bool vehicle_rt_sb_accel_validity_accel_longitudinal_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -16983,7 +16983,7 @@ double vehicle_rt_sb_accel_validity_accel_lateral_decode(uint8_t value)
 
 bool vehicle_rt_sb_accel_validity_accel_lateral_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -17000,7 +17000,7 @@ double vehicle_rt_sb_accel_validity_accel_vertical_decode(uint8_t value)
 
 bool vehicle_rt_sb_accel_validity_accel_vertical_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -17017,7 +17017,7 @@ double vehicle_rt_sb_accel_accuracy_accel_decode(uint8_t value)
 
 bool vehicle_rt_sb_accel_accuracy_accel_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -17034,7 +17034,7 @@ double vehicle_rt_sb_accel_accel_longitudinal_decode(int16_t value)
 
 bool vehicle_rt_sb_accel_accel_longitudinal_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -17051,7 +17051,7 @@ double vehicle_rt_sb_accel_accel_lateral_decode(int16_t value)
 
 bool vehicle_rt_sb_accel_accel_lateral_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -17068,7 +17068,7 @@ double vehicle_rt_sb_accel_accel_vertical_decode(int16_t value)
 
 bool vehicle_rt_sb_accel_accel_vertical_is_in_range(int16_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }
@@ -17197,7 +17197,7 @@ double vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_decode(uint8_t value)
 
 bool vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_is_in_range(uint8_t value)
 {
-    (void)(value);
+    (void)value;
 
     return (true);
 }

@@ -32,8 +32,6 @@
 
 #include "choices.h"
 
-#define UNUSED(x) (void)(x)
-
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -101,7 +99,7 @@ double choices_foo_foo_decode(int8_t value)
 
 bool choices_foo_foo_is_in_range(int8_t value)
 {
-    UNUSED(value);
+    (void)value;
 
     return (true);
 }

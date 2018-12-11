@@ -32,8 +32,6 @@
 
 #include "my_database_name.h"
 
-#define UNUSED(x) (void)(x)
-
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -146,7 +144,7 @@ double my_database_name_example_message_enable_decode(uint8_t value)
 
 bool my_database_name_example_message_enable_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)value;
 
     return (true);
 }

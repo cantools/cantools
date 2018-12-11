@@ -32,8 +32,6 @@
 
 #include "motohawk.h"
 
-#define UNUSED(x) (void)(x)
-
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -136,7 +134,7 @@ int motohawk_example_message_unpack(
 
 bool motohawk_example_message_enable_is_in_range(uint8_t value)
 {
-    UNUSED(value);
+    (void)value;
 
     return (true);
 }

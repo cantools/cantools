@@ -32,14 +32,12 @@
 
 #include "no_signals.h"
 
-#define UNUSED(x) (void)(x)
-
 ssize_t no_signals_message1_pack(
     uint8_t *dst_p,
     const struct no_signals_message1_t *src_p,
     size_t size)
 {
-    UNUSED(src_p);
+    (void)src_p;
 
     if (size < 5u) {
         return (-EINVAL);
@@ -55,7 +53,7 @@ int no_signals_message1_unpack(
     const uint8_t *src_p,
     size_t size)
 {
-    UNUSED(src_p);
+    (void)src_p;
 
     if (size < 5u) {
         return (-EINVAL);
@@ -71,9 +69,9 @@ ssize_t no_signals_message2_pack(
     const struct no_signals_message2_t *src_p,
     size_t size)
 {
-    UNUSED(dst_p);
-    UNUSED(src_p);
-    UNUSED(size);
+    (void)dst_p;
+    (void)src_p;
+    (void)size;
 
     return (0);
 }
@@ -83,8 +81,8 @@ int no_signals_message2_unpack(
     const uint8_t *src_p,
     size_t size)
 {
-    UNUSED(src_p);
-    UNUSED(size);
+    (void)src_p;
+    (void)size;
 
     memset(dst_p, 0, sizeof(*dst_p));
 

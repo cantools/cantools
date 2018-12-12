@@ -2,7 +2,8 @@ from __future__ import print_function
 import os
 
 from .. import database
-from ..database.can import c_source
+from ..database.can.c_source import generate
+from ..database.can.c_source import camel_to_snake_case
 
 
 def _do_generate_c_source(args):
@@ -13,16 +14,17 @@ def _do_generate_c_source(args):
     if args.database_name is None:
         basename = os.path.basename(args.infile)
         database_name = os.path.splitext(basename)[0]
+        database_name = camel_to_snake_case(database_name)
     else:
         database_name = args.database_name
 
     filename_h = database_name + '.h'
     filename_c = database_name + '.c'
 
-    header, source = c_source.generate(dbase,
-                                       database_name,
-                                       filename_h,
-                                       not args.no_floating_point_numbers)
+    header, source = generate(dbase,
+                              database_name,
+                              filename_h,
+                              not args.no_floating_point_numbers)
 
     with open(filename_h, 'w') as fout:
         fout.write(header)

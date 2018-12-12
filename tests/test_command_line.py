@@ -474,18 +474,24 @@ IO_DEBUG(
             'choices',
             'multiplex',
             'multiplex_2',
-            'signed'
+            'signed',
+            ('CamelCaseEmpty', 'camel_case_empty')
         ]
 
         for database in databases:
+            if isinstance(database, tuple):
+                database, basename = database
+            else:
+                basename = database
+
             argv = [
                 'cantools',
                 'generate_c_source',
                 'tests/files/{}.dbc'.format(database)
             ]
 
-            database_h = database + '.h'
-            database_c = database + '.c'
+            database_h = basename + '.h'
+            database_c = basename + '.c'
 
             if os.path.exists(database_h):
                 os.remove(database_h)

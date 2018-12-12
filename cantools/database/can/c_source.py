@@ -311,7 +311,7 @@ class Signal(object):
 
     def __init__(self, signal):
         self._signal = signal
-        self.snake_name = _camel_to_snake_case(self.name)
+        self.snake_name = camel_to_snake_case(self.name)
 
     def __getattr__(self, name):
         return getattr(self._signal, name)
@@ -380,7 +380,7 @@ class Signal(object):
         """
 
         items = {
-            value: _camel_to_snake_case(name).upper()
+            value: camel_to_snake_case(name).upper()
             for value, name in self.choices.items()
         }
         names = list(items.values())
@@ -494,7 +494,7 @@ class Message(object):
 
     def __init__(self, message):
         self._message = message
-        self.snake_name = _camel_to_snake_case(self.name)
+        self.snake_name = camel_to_snake_case(self.name)
         self.signals = [Signal(signal)for signal in message.signals]
 
     def __getattr__(self, name):
@@ -514,7 +514,7 @@ def _canonical(value):
     return re.sub(r'[^a-zA-Z0-9]', '_', value)
 
 
-def _camel_to_snake_case(value):
+def camel_to_snake_case(value):
     value = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', value)
     value = re.sub(r'(_+)', '_', value)
     value = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', value).lower()
@@ -620,7 +620,7 @@ def _format_pack_code_mux(message,
                              variable_lines,
                              helper_kinds)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
-    signal_name = _camel_to_snake_case(signal_name)
+    signal_name = camel_to_snake_case(signal_name)
 
     lines = [
         '',
@@ -746,7 +746,7 @@ def _format_unpack_code_mux(message,
                                variable_lines,
                                helper_kinds)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
-    signal_name = _camel_to_snake_case(signal_name)
+    signal_name = camel_to_snake_case(signal_name)
 
     lines = [
         'switch (dst_p->{}) {{'.format(signal_name)

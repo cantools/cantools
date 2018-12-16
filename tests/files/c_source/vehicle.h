@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #ifndef EINVAL
-#    define EINVAL -22
+#    define EINVAL 22
 #endif
 
 #define VEHICLE_RT_SB_INS_VEL_BODY_AXES_FRAME_ID (0x9588322u)

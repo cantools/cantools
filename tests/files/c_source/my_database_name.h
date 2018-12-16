@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #ifndef EINVAL
-#    define EINVAL -22
+#    define EINVAL 22
 #endif
 
 #define MY_DATABASE_NAME_EXAMPLE_MESSAGE_FRAME_ID (0x1f0u)

@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #ifndef EINVAL
-#    define EINVAL -22
+#    define EINVAL 22
 #endif
 
 #define NO_SIGNALS_MESSAGE1_FRAME_ID (0x400u)

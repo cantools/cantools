@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #ifndef EINVAL
-#    define EINVAL -22
+#    define EINVAL 22
 #endif
 
 #define MULTIPLEX_2_SHARED_FRAME_ID (0xc02fefeu)

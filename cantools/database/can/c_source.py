@@ -44,7 +44,7 @@ HEADER_FMT = '''\
 #include <unistd.h>
 
 #ifndef EINVAL
-#    define EINVAL -22
+#    define EINVAL 22
 #endif
 
 {frame_id_defines}

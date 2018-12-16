@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #ifndef EINVAL
-#    define EINVAL -22
+#    define EINVAL 22
 #endif
 
 #define MOTOHAWK_BIT_FIELDS_EXAMPLE_MESSAGE_FRAME_ID (0x1f0u)

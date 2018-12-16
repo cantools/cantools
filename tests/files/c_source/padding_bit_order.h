@@ -36,7 +36,7 @@
 #include <unistd.h>
 
 #ifndef EINVAL
-#    define EINVAL -22
+#    define EINVAL 22
 #endif
 
 #define PADDING_BIT_ORDER_MSG0_FRAME_ID (0x01u)

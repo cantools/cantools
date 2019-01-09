@@ -1,0 +1,15 @@
+FormatVersion=6.0 // Do not edit this line!
+FloatDecimalPlaces=1
+Title="Untitled"
+
+{SIGNALS}
+Sig=Float float /p:10
+Sig=Bit bit
+Sig=Char char /ln:"CharLong"
+Sig=String string 8
+Sig=Signed signed 8
+Sig=Unsigned unsigned 8
+Sig=Enum unsigned 32
+Sig=Double double
+Sig=Raw raw 8
+

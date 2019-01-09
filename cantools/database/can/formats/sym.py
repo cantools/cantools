@@ -70,6 +70,7 @@ class Parser60(textparser.Parser):
             'D':           '/d:',
             'LN':          '/ln:',
             'E':           '/e:',
+            'P':           '/p:',
             'M':           '-m'
         }
 
@@ -97,6 +98,7 @@ class Parser60(textparser.Parser):
             ('D',           r'/d:'),
             ('LN',          r'/ln:'),
             ('E',           r'/e:'),
+            ('P',           r'/p:'),
             ('M',           r'\-m'),
             ('MISMATCH',    r'.')
         ]
@@ -144,18 +146,20 @@ class Parser60(textparser.Parser):
         sig_default = Sequence('/d:', 'NUMBER')
         sig_long_name = Sequence('/ln:', 'STRING')
         sig_enum = Sequence('/e:', 'WORD')
+        sig_places = Sequence('/p:', 'NUMBER')
 
-        signal = Sequence('Sig', '=', 'WORD', 'WORD',
+        signal = Sequence('Sig', '=', choice('WORD', 'Enum'), 'WORD',
                           Optional('NUMBER'),
                           Optional('-m'),
-                          Optional(sig_unit),
-                          Optional(sig_factor),
-                          Optional(sig_offset),
-                          Optional(sig_min),
-                          Optional(sig_max),
-                          Optional(sig_default),
-                          Optional(sig_long_name),
-                          Optional(sig_enum))
+                          ZeroOrMore(choice(sig_unit,
+                                            sig_factor,
+                                            sig_offset,
+                                            sig_min,
+                                            sig_max,
+                                            sig_default,
+                                            sig_long_name,
+                                            sig_enum,
+                                            sig_places)))
 
         symbol = Sequence('[', 'WORD', ']',
                           Optional(Sequence('ID', '=', 'NUMBER', 'WORD',
@@ -248,7 +252,7 @@ def _load_signal(tokens, enums):
         pass
 
     # The rest.
-    for key, value in [t[0] for t in tokens[6:] if t]:
+    for key, value in tokens[6]:
         if key == '/u:':
             unit = value
         elif key == '/f:':

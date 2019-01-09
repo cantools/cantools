@@ -1426,6 +1426,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 1)
         self.assertEqual(db.messages[0].name, 'Symbol1')
 
+    def test_signal_types_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'signal-types-6.0.sym')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 0)
+
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()
 

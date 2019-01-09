@@ -20,12 +20,17 @@ def _do_generate_c_source(args):
 
     filename_h = database_name + '.h'
     filename_c = database_name + '.c'
+    fuzzer_filename_c = database_name + '_fuzzer.c'
+    fuzzer_filename_mk = database_name + '_fuzzer.mk'
 
-    header, source = generate(dbase,
-                              database_name,
-                              filename_h,
-                              not args.no_floating_point_numbers,
-                              args.bit_fields)
+    header, source, fuzzer_source, fuzzer_makefile = generate(
+        dbase,
+        database_name,
+        filename_h,
+        filename_c,
+        fuzzer_filename_c,
+        not args.no_floating_point_numbers,
+        args.bit_fields)
 
     with open(filename_h, 'w') as fout:
         fout.write(header)
@@ -34,6 +39,21 @@ def _do_generate_c_source(args):
         fout.write(source)
 
     print('Successfully generated {} and {}.'.format(filename_h, filename_c))
+
+    if args.generate_fuzzer:
+        with open(fuzzer_filename_c, 'w') as fout:
+            fout.write(fuzzer_source)
+
+        with open(fuzzer_filename_mk, 'w') as fout:
+            fout.write(fuzzer_makefile)
+
+        print('Successfully generated {} and {}.'.format(fuzzer_filename_c,
+                                                         fuzzer_filename_mk))
+        print()
+        print(
+            'Run "make -f {}" to build and run the fuzzer. Requires a'.format(
+                fuzzer_filename_mk))
+        print('recent version of clang.')
 
 
 def add_subparser(subparsers):
@@ -58,6 +78,10 @@ def add_subparser(subparsers):
         '--no-strict',
         action='store_true',
         help='Skip database consistency checks.')
+    generate_c_source_parser.add_argument(
+        '-f', '--generate-fuzzer',
+        action='store_true',
+        help='Also generate fuzzer source code.')
     generate_c_source_parser.add_argument(
         'infile',
         help='Input database file.')

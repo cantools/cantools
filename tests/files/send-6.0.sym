@@ -1,0 +1,10 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Foo"
+BRS=False
+
+{SEND}
+
+[Symbol1]
+ID=000h
+Len=8
+

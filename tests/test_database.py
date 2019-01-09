@@ -1395,6 +1395,37 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded['Signal3'], 'bar')
 
+    def test_empty_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'empty-6.0.sym')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 0)
+
+    def test_send_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'send-6.0.sym')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 1)
+        self.assertEqual(db.messages[0].name, 'Symbol1')
+
+    def test_receive_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'receive-6.0.sym')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 1)
+        self.assertEqual(db.messages[0].name, 'Symbol1')
+
+    def test_sendreceive_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'sendreceive-6.0.sym')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 1)
+        self.assertEqual(db.messages[0].name, 'Symbol1')
+
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()
 

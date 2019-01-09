@@ -9,7 +9,6 @@ import textparser
 from textparser import Sequence
 from textparser import choice
 from textparser import ZeroOrMore
-from textparser import OneOrMore
 from textparser import DelimitedList
 from textparser import tokenize_init
 from textparser import Token
@@ -37,6 +36,9 @@ class Parser60(textparser.Parser):
         keywords = set([
             'FormatVersion',
             'Title',
+            'UniqueVariables',
+            'FloatDecimalPlaces',
+            'BRS',
             'Enum',
             'Sig',
             'ID',
@@ -127,6 +129,9 @@ class Parser60(textparser.Parser):
     def grammar(self):
         version = Sequence('FormatVersion', '=', 'NUMBER')
         title = Sequence('Title' , '=', 'STRING')
+        unique_variables = Sequence('UniqueVariables' , '=', 'WORD')
+        float_decimal_places = Sequence('FloatDecimalPlaces' , '=', 'NUMBER')
+        bit_rate_switch = Sequence('BRS' , '=', 'WORD')
 
         enum_value = Sequence('NUMBER', '=', 'STRING')
         enum = Sequence('Enum', '=', 'WORD', '(', DelimitedList(enum_value), ')')
@@ -176,8 +181,11 @@ class Parser60(textparser.Parser):
                          sendreceive)
 
         grammar = Sequence(version,
-                           title,
-                           OneOrMore(section))
+                           ZeroOrMore(choice(unique_variables,
+                                             float_decimal_places,
+                                             title,
+                                             bit_rate_switch)),
+                           ZeroOrMore(section))
 
         return grammar
 
@@ -186,6 +194,8 @@ def _get_section_tokens(tokens, name):
     for section in tokens[2]:
         if section[0] == name:
             return section[1]
+
+    return []
 
 
 def _load_enums(tokens):
@@ -462,7 +472,7 @@ def _load_messages(tokens, signals, strict):
 
 
 def _load_version(tokens):
-    return tokens[0][1]
+    return tokens[0][2]
 
 
 def load_string(string, strict=True):

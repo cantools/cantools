@@ -1,0 +1,12 @@
+FormatVersion=6.0 // Do not edit this line!
+UniqueVariables=True
+FloatDecimalPlaces=0
+Title="Foo"
+BRS=False
+
+{SENDRECEIVE}
+
+[Symbol1]
+ID=000h
+Len=8
+

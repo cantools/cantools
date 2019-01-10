@@ -28,6 +28,7 @@ class Monitor(can.Listener):
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,
                                          strict=not args.no_strict)
+        self._single_line = args.single_line
         self._filtered_sorted_message_names = []
         self._filter = ''
         self._compiled_filter = None
@@ -222,11 +223,15 @@ class Monitor(can.Listener):
             self._discarded += 1
             return
 
-        formatted = format_message(message, data, True, False)
-        lines = formatted.splitlines()
-        formatted = ['{:12.3f}  {}'.format(timestamp, lines[1])]
-        formatted += [14 * ' ' + line for line in lines[2:]]
-        self._formatted_messages[message.name] = formatted
+        if self._single_line:
+            formatted = format_message(message, data, True, True)
+            self._formatted_messages[message.name] = ['{:12.3f} {}'.format(timestamp, formatted)]
+        else:
+            formatted = format_message(message, data, True, False)
+            lines = formatted.splitlines()
+            formatted = ['{:12.3f}  {}'.format(timestamp, lines[1])]
+            formatted += [14 * ' ' + line for line in lines[2:]]
+            self._formatted_messages[message.name] = formatted
 
         if message.name not in self._filtered_sorted_message_names:
             self.insort_filtered(message.name)
@@ -282,6 +287,10 @@ def add_subparser(subparsers):
     monitor_parser = subparsers.add_parser(
         'monitor',
         description='Monitor CAN bus traffic in a text based user interface.')
+    monitor_parser.add_argument(
+        '-s', '--single-line',
+        action='store_true',
+        help='Print the decoded message on a single line.')
     monitor_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')

@@ -122,6 +122,20 @@ CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null \
 CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA_CLANG) -c tests/dummy.c 2> /dev/null \
 	          && echo $(CFLAGS_EXTRA_CLANG))
 
+FUZZER_CC ?= clang
+FUZZER_EXE = multiplex_2_fuzzer
+FUZZER_C_SOURCES = \
+	tests/files/c_source/multiplex_2_fuzzer.c \
+	tests/files/c_source/multiplex_2.c
+FUZZER_CFLAGS = \
+	-fprofile-instr-generate \
+	-fcoverage-mapping \
+	-Itests/files/c_source \
+	-g -fsanitize=address,fuzzer \
+	-fsanitize=signed-integer-overflow \
+	-fno-sanitize-recover=all
+FUZZER_EXECUTION_TIME ?= 30
+
 .PHONY: test
 test:
 	python2 setup.py test
@@ -142,6 +156,17 @@ test-c:
 	$(CC) $(CFLAGS) -fpack-struct -std=c99 -O3 $(C_SOURCES_BIT_FIELDS) \
 	    -o main_bit_fields
 	./main_bit_fields
+
+.PHONY: test-c-fuzzer
+test-c-fuzzer:
+	$(FUZZER_CC) $(FUZZER_CFLAGS) $(FUZZER_C_SOURCES) -o $(FUZZER_EXE)
+	rm -f $(FUZZER_EXE).profraw
+	LLVM_PROFILE_FILE="$(FUZZER_EXE).profraw" \
+	    ./$(FUZZER_EXE) \
+	    -max_total_time=$(FUZZER_EXECUTION_TIME)
+	llvm-profdata merge -sparse $(FUZZER_EXE).profraw -o $(FUZZER_EXE).profdata
+	llvm-cov show ./$(FUZZER_EXE) -instr-profile=$(FUZZER_EXE).profdata
+	llvm-cov report ./$(FUZZER_EXE) -instr-profile=$(FUZZER_EXE).profdata
 
 .PHONY: test-sdist
 test-sdist:

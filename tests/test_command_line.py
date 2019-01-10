@@ -17,7 +17,7 @@ import cantools
 
 
 def remove_date_time(string):
-    return re.sub(r' \* This file was generated.*', '', string)
+    return re.sub(r'.* This file was generated.*', '', string)
 
 
 def read_file(filename):
@@ -492,12 +492,20 @@ IO_DEBUG(
 
             database_h = basename + '.h'
             database_c = basename + '.c'
+            fuzzer_c = basename + '_fuzzer.c'
+            fuzzer_mk = basename + '_fuzzer.mk'
 
             if os.path.exists(database_h):
                 os.remove(database_h)
 
             if os.path.exists(database_c):
                 os.remove(database_c)
+
+            if os.path.exists(fuzzer_c):
+                os.remove(fuzzer_c)
+
+            if os.path.exists(fuzzer_mk):
+                os.remove(fuzzer_mk)
 
             with patch('sys.argv', argv):
                 cantools._main()
@@ -507,6 +515,9 @@ IO_DEBUG(
                                  read_file(database_h))
                 self.assertEqual(read_file('tests/files/c_source/' + database_c),
                                  read_file(database_c))
+
+            self.assertFalse(os.path.exists(fuzzer_c))
+            self.assertFalse(os.path.exists(fuzzer_mk))
 
     def test_generate_c_source_no_signal_encode_decode(self):
         databases = [
@@ -576,7 +587,7 @@ IO_DEBUG(
                     read_file('tests/files/c_source/' + database_c),
                     read_file(database_c))
 
-    def test_generate_c_source_bit_fileds(self):
+    def test_generate_c_source_bit_fields(self):
         databases = [
             'motohawk',
             'floating_point',
@@ -611,6 +622,44 @@ IO_DEBUG(
                 self.assertEqual(
                     read_file('tests/files/c_source/' + database_c),
                     read_file(database_c))
+
+    def test_generate_c_source_generate_fuzzer(self):
+        argv = [
+            'cantools',
+            'generate_c_source',
+            '--generate-fuzzer',
+            'tests/files/multiplex_2.dbc'
+        ]
+
+        database_h = 'multiplex_2.h'
+        database_c = 'multiplex_2.c'
+        fuzzer_c = 'multiplex_2_fuzzer.c'
+        fuzzer_mk = 'multiplex_2_fuzzer.mk'
+
+        if os.path.exists(database_h):
+            os.remove(database_h)
+
+        if os.path.exists(database_c):
+            os.remove(database_c)
+
+        if os.path.exists(fuzzer_c):
+            os.remove(fuzzer_c)
+
+        if os.path.exists(fuzzer_mk):
+            os.remove(fuzzer_mk)
+
+        with patch('sys.argv', argv):
+            cantools._main()
+
+        if sys.version_info[0] > 2:
+            self.assertEqual(read_file('tests/files/c_source/' + database_h),
+                             read_file(database_h))
+            self.assertEqual(read_file('tests/files/c_source/' + database_c),
+                             read_file(database_c))
+            self.assertEqual(read_file('tests/files/c_source/' + fuzzer_c),
+                             read_file(fuzzer_c))
+            self.assertEqual(read_file('tests/files/c_source/' + fuzzer_mk),
+                             read_file(fuzzer_mk))
 
 
 if __name__ == '__main__':

@@ -68,3 +68,4 @@ cantools-database-cache/
 test_command_line_convert.dbc
 test_command_line_convert.kcd
 /*.[hc]
+/*fuzzer*

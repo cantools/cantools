@@ -658,6 +658,7 @@ IO_DEBUG(
                              read_file(database_c))
             self.assertEqual(read_file('tests/files/c_source/' + fuzzer_c),
                              read_file(fuzzer_c))
+            print(os.getcwd())
             self.assertEqual(read_file('tests/files/c_source/' + fuzzer_mk),
                              read_file(fuzzer_mk))
 

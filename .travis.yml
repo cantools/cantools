@@ -26,7 +26,6 @@ script:
   - make test-c
   - CC=gcc-8 make test-c
   - CC=clang-7 make test-c
-  - FUZZER_CC=clang-7 make test-c-fuzzer
 
 after_success:
   coveralls

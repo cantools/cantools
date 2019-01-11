@@ -1,0 +1,22 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{ENUMS}
+Enum=Enum(0="Foo")
+
+{SIGNALS}
+Sig=Enum unsigned 8 /e:Enum
+
+{SENDRECEIVE}
+
+[Symbol1]
+ID=005h
+Len=7
+CycleTime=30
+Timeout=1
+MinInterval=2
+Color=800080h
+Var=Color float 22,32 -m /u:A /o:2 /ln:"Apa"
+Var=Variable2 unsigned 0,1
+Sig=Enum 2
+

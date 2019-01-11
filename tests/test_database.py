@@ -1433,6 +1433,60 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.version, '6.0')
         self.assertEqual(len(db.messages), 0)
 
+    def test_variables_color_enum_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'variables-color-enum-6.0.sym')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 1)
+
+        signal_0 = db.messages[0].signals[0]
+        self.assertEqual(signal_0.name, 'Variable2')
+        self.assertEqual(signal_0.start, 0)
+        self.assertEqual(signal_0.length, 1)
+        self.assertEqual(signal_0.receivers, [])
+        self.assertEqual(signal_0.byte_order, 'little_endian')
+        self.assertEqual(signal_0.is_signed, False)
+        self.assertEqual(signal_0.scale, 1)
+        self.assertEqual(signal_0.offset, 0)
+        self.assertEqual(signal_0.minimum, None)
+        self.assertEqual(signal_0.maximum, None)
+        self.assertEqual(signal_0.decimal.scale, 1)
+        self.assertEqual(signal_0.decimal.offset, 0)
+        self.assertEqual(signal_0.decimal.minimum, None)
+        self.assertEqual(signal_0.decimal.maximum, None)
+        self.assertEqual(signal_0.unit, None)
+        self.assertEqual(signal_0.choices, None)
+        self.assertEqual(signal_0.comment, None)
+        self.assertEqual(signal_0.is_multiplexer, False)
+        self.assertEqual(signal_0.multiplexer_ids, None)
+        self.assertEqual(signal_0.is_float, False)
+
+        signal_1 = db.messages[0].signals[1]
+        self.assertEqual(signal_1.name, 'Enum')
+
+        signal_2 = db.messages[0].signals[2]
+        self.assertEqual(signal_2.name, 'Color')
+        self.assertEqual(signal_2.start, 17)
+        self.assertEqual(signal_2.length, 32)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'big_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 2)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, 2)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, 'A')
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+        self.assertEqual(signal_2.is_float, True)
+
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()
 

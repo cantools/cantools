@@ -9,6 +9,7 @@ import textparser
 from textparser import Sequence
 from textparser import choice
 from textparser import ZeroOrMore
+from textparser import ZeroOrMoreDict
 from textparser import DelimitedList
 from textparser import tokenize_init
 from textparser import Token
@@ -32,23 +33,26 @@ class Parser60(textparser.Parser):
 
     """
 
+    KEYWORDS = set([
+        'FormatVersion',
+        'Title',
+        'UniqueVariables',
+        'FloatDecimalPlaces',
+        'BRS',
+        'Enum',
+        'Sig',
+        'ID',
+        'Len',
+        'Mux',
+        'CycleTime',
+        'Timeout',
+        'MinInterval',
+        'Sig',
+        'Color',
+        'Var'
+    ])
+
     def tokenize(self, string):
-        keywords = set([
-            'FormatVersion',
-            'Title',
-            'UniqueVariables',
-            'FloatDecimalPlaces',
-            'BRS',
-            'Enum',
-            'Sig',
-            'ID',
-            'Len',
-            'Mux',
-            'CycleTime',
-            'Timeout',
-            'MinInterval',
-            'Sig',
-        ])
 
         names = {
             'LPAREN':      '(',
@@ -116,7 +120,7 @@ class Parser60(textparser.Parser):
             elif kind != 'MISMATCH':
                 value = mo.group(kind)
 
-                if value in keywords:
+                if value in self.KEYWORDS:
                     kind = value
 
                 if kind in names:
@@ -129,26 +133,27 @@ class Parser60(textparser.Parser):
         return tokens
 
     def grammar(self):
+        word = choice('WORD', *list(self.KEYWORDS))
         version = Sequence('FormatVersion', '=', 'NUMBER')
         title = Sequence('Title' , '=', 'STRING')
-        unique_variables = Sequence('UniqueVariables' , '=', 'WORD')
+        unique_variables = Sequence('UniqueVariables' , '=', word)
         float_decimal_places = Sequence('FloatDecimalPlaces' , '=', 'NUMBER')
-        bit_rate_switch = Sequence('BRS' , '=', 'WORD')
+        bit_rate_switch = Sequence('BRS' , '=', word)
 
         enum_value = Sequence('NUMBER', '=', 'STRING')
-        enum = Sequence('Enum', '=', 'WORD', '(', DelimitedList(enum_value), ')')
+        enum = Sequence('Enum', '=', word, '(', DelimitedList(enum_value), ')')
 
-        sig_unit = Sequence('/u:', 'WORD')
+        sig_unit = Sequence('/u:', word)
         sig_factor = Sequence('/f:', 'NUMBER')
         sig_offset = Sequence('/o:', 'NUMBER')
         sig_min = Sequence('/min:', 'NUMBER')
         sig_max = Sequence('/max:', 'NUMBER')
         sig_default = Sequence('/d:', 'NUMBER')
         sig_long_name = Sequence('/ln:', 'STRING')
-        sig_enum = Sequence('/e:', 'WORD')
+        sig_enum = Sequence('/e:', word)
         sig_places = Sequence('/p:', 'NUMBER')
 
-        signal = Sequence('Sig', '=', choice('WORD', 'Enum'), 'WORD',
+        signal = Sequence('Sig', '=', word, word,
                           Optional('NUMBER'),
                           Optional('-m'),
                           ZeroOrMore(choice(sig_unit,
@@ -161,16 +166,32 @@ class Parser60(textparser.Parser):
                                             sig_enum,
                                             sig_places)))
 
-        symbol = Sequence('[', 'WORD', ']',
-                          Optional(Sequence('ID', '=', 'NUMBER', 'WORD',
-                                            Optional(Sequence('NUMBER', 'WORD')))),
+        variable = Sequence('Var', '=', word, word,
+                            'NUMBER', ',', 'NUMBER',
+                            Optional('-m'),
+                            ZeroOrMore(choice(sig_unit,
+                                              sig_factor,
+                                              sig_offset,
+                                              sig_min,
+                                              sig_max,
+                                              sig_default,
+                                              sig_long_name,
+                                              sig_enum,
+                                              sig_places)))
+
+        symbol = Sequence('[', word, ']',
+                          Optional(Sequence('ID', '=', 'NUMBER', word,
+                                            Optional(Sequence('NUMBER', word)))),
                           Sequence('Len', '=', 'NUMBER'),
-                          Optional(Sequence('Mux', '=', 'WORD', 'NUMBER', ',',
-                                            'NUMBER', 'NUMBER')),
-                          Optional(Sequence('CycleTime', '=', 'NUMBER')),
-                          Optional(Sequence('Timeout', '=', 'NUMBER')),
-                          Optional(Sequence('MinInterval', '=', 'NUMBER')),
-                          ZeroOrMore(Sequence('Sig', '=', 'WORD', 'NUMBER')))
+                          ZeroOrMoreDict(choice(
+                              Sequence('Mux', '=', word, 'NUMBER', ',',
+                                       'NUMBER', 'NUMBER'),
+                              Sequence('CycleTime', '=', 'NUMBER'),
+                              Sequence('Timeout', '=', 'NUMBER'),
+                              Sequence('MinInterval', '=', 'NUMBER'),
+                              Sequence('Color', '=', 'NUMBER', 'WORD'),
+                              variable,
+                              Sequence('Sig', '=', word, 'NUMBER'))))
 
         enums = Sequence('{ENUMS}', ZeroOrMore(enum))
         signals = Sequence('{SIGNALS}', ZeroOrMore(signal))
@@ -212,20 +233,46 @@ def _load_enums(tokens):
     return enums
 
 
-def _load_signal(tokens, enums):
+def _load_signal_attributes(tokens, enums):
     # Default values.
-    name = tokens[2]
-    is_signed = False
-    is_float = False
-    byte_order = 'little_endian'
     offset = 0
     factor = 1
     unit = None
     minimum = None
     maximum = None
     enum = None
-    length = 0
     decimal = SignalDecimal(Decimal(factor), Decimal(offset))
+
+    for key, value in tokens:
+        if key == '/u:':
+            unit = value
+        elif key == '/f:':
+            factor = num(value)
+            decimal.scale = Decimal(value)
+        elif key == '/o:':
+            offset = num(value)
+            decimal.offset = Decimal(value)
+        elif key == '/min:':
+            minimum = num(value)
+            decimal.minimum = Decimal(value)
+        elif key == '/max:':
+            maximum = num(value)
+            decimal.maximum = Decimal(value)
+        elif key == '/e:':
+            enum = enums[value]
+        else:
+            LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
+
+    return unit, factor, offset, minimum, maximum, enum, decimal
+
+
+def _load_signal(tokens, enums):
+    # Default values.
+    name = tokens[2]
+    is_signed = False
+    is_float = False
+    byte_order = 'little_endian'
+    length = 0
 
     # Type and length.
     type_ = tokens[3]
@@ -245,32 +292,12 @@ def _load_signal(tokens, enums):
         LOGGER.debug("Ignoring unsupported type '%s'.", type_)
 
     # Byte order.
-    try:
-        if tokens[5][0] == '-m':
-            byte_order = 'big_endian'
-    except IndexError:
-        pass
+    if tokens[5] == ['-m']:
+        byte_order = 'big_endian'
 
     # The rest.
-    for key, value in tokens[6]:
-        if key == '/u:':
-            unit = value
-        elif key == '/f:':
-            factor = num(value)
-            decimal.scale = Decimal(value)
-        elif key == '/o:':
-            offset = num(value)
-            decimal.offset = Decimal(value)
-        elif key == '/min:':
-            minimum = num(value)
-            decimal.minimum = Decimal(value)
-        elif key == '/max:':
-            maximum = num(value)
-            decimal.maximum = Decimal(value)
-        elif key == '/e:':
-            enum = enums[value]
-        else:
-            LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
+    unit, factor, offset, minimum, maximum, enum, decimal = _load_signal_attributes(
+        tokens[6], enums)
 
     return Signal(name=name,
                   start=offset,
@@ -330,6 +357,60 @@ def _load_message_signal(tokens,
                   decimal=signal.decimal)
 
 
+def _load_message_variable(tokens, enums):
+    # Default values.
+    name = tokens[2]
+    is_signed = False
+    is_float = False
+    byte_order = 'little_endian'
+    start = int(tokens[4])
+    length = 0
+
+    # Type and length.
+    type_ = tokens[3]
+
+    if type_ in 'signed':
+        is_signed = True
+        length = int(tokens[6])
+    elif type_ == 'unsigned':
+        length = int(tokens[6])
+    elif type_ == 'float':
+        is_float = True
+        length = 32
+    elif type_ == 'double':
+        is_float = True
+        length = 64
+    else:
+        LOGGER.debug("Ignoring unsupported type '%s'.", type_)
+
+    # Byte order.
+    if tokens[7] == ['-m']:
+        byte_order = 'big_endian'
+
+    # The rest.
+    unit, factor, offset, minimum, maximum, enum, decimal = _load_signal_attributes(
+        tokens[8], enums)
+
+    if byte_order == 'big_endian':
+        start = (8 * (start // 8) + (7 - (start % 8)))
+
+    return Signal(name=name,
+                  start=start,
+                  length=length,
+                  receivers=[],
+                  byte_order=byte_order,
+                  is_signed=is_signed,
+                  scale=factor,
+                  offset=offset,
+                  minimum=minimum,
+                  maximum=maximum,
+                  unit=unit,
+                  choices=enum,
+                  is_multiplexer=False,
+                  is_float=is_float,
+                  decimal=decimal)
+
+
 def _load_message_signals_inner(message_tokens,
                                 signals,
                                 multiplexer_signal=None,
@@ -339,14 +420,17 @@ def _load_message_signals_inner(message_tokens,
                              signals,
                              multiplexer_signal,
                              multiplexer_ids)
-        for signal in message_tokens[9]
+        for signal in message_tokens[5].get('Sig', [])
+    ] + [
+        _load_message_variable(variable, {})
+        for variable in message_tokens[5].get('Var', [])
     ]
 
 
 def _load_muxed_message_signals(message_tokens,
                                 message_section_tokens,
                                 signals):
-    mux_tokens = message_tokens[5][0]
+    mux_tokens = message_tokens[5]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
     result = [
         Signal(name=multiplexer_signal,
@@ -364,7 +448,7 @@ def _load_muxed_message_signals(message_tokens,
 
     for tokens in message_section_tokens:
         if tokens[1] == message_tokens[1] and tokens != message_tokens:
-            mux_tokens = tokens[5][0]
+            mux_tokens = tokens[5]['Mux'][0]
             multiplexer_ids = [int(mux_tokens[6])]
             result += _load_message_signals_inner(tokens,
                                                   signals,
@@ -375,7 +459,7 @@ def _load_muxed_message_signals(message_tokens,
 
 
 def _is_multiplexed(message_tokens):
-    return len(message_tokens[5]) > 0
+    return 'Mux' in message_tokens[5]
 
 
 def _load_message_signals(message_tokens,
@@ -403,8 +487,8 @@ def _load_message(frame_id,
 
     # Cycle time.
     try:
-        cycle_time = num(message_tokens[6][0][2])
-    except IndexError:
+        cycle_time = num(message_tokens[5]['CycleTime'][0][2])
+    except (KeyError, IndexError):
         pass
 
     return Message(frame_id=frame_id,

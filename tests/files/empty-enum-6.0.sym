@@ -1,0 +1,16 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{ENUMS}
+Enum=Enum1()
+
+{SIGNALS}
+Sig=Signal1 unsigned 3 /e:Enum1
+
+{SENDRECEIVE}
+
+[Symbol1]
+ID=000h
+Len=8
+Sig=Signal1 0
+

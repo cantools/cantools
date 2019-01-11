@@ -1487,6 +1487,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.multiplexer_ids, None)
         self.assertEqual(signal_2.is_float, True)
 
+    def test_empty_enum_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'empty-enum-6.0.sym')
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 1)
+
+        signal_0 = db.messages[0].signals[0]
+        self.assertEqual(signal_0.name, 'Signal1')
+        self.assertEqual(signal_0.choices, {})
+
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()
 

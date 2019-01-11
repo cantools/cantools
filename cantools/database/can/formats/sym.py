@@ -141,7 +141,8 @@ class Parser60(textparser.Parser):
         bit_rate_switch = Sequence('BRS' , '=', word)
 
         enum_value = Sequence('NUMBER', '=', 'STRING')
-        enum = Sequence('Enum', '=', word, '(', DelimitedList(enum_value), ')')
+        enum = Sequence('Enum', '=', word,
+                        '(', Optional(DelimitedList(enum_value)), ')')
 
         sig_unit = Sequence('/u:', word)
         sig_factor = Sequence('/f:', 'NUMBER')
@@ -228,6 +229,9 @@ def _load_enums(tokens):
     enums = {}
 
     for _, _, name, _, values, _ in section:
+        if values:
+            values = values[0]
+
         enums[name] = odict((num(v[0]), v[2]) for v in values)
 
     return enums

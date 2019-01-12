@@ -42,6 +42,9 @@
 #define NO_SIGNALS_MESSAGE1_FRAME_ID (0x400u)
 #define NO_SIGNALS_MESSAGE2_FRAME_ID (0x401u)
 
+#define NO_SIGNALS_MESSAGE1_DATA_LENGTH_CODE (0x05u)
+#define NO_SIGNALS_MESSAGE2_DATA_LENGTH_CODE (0x00u)
+
 /**
  * Signals in message Message1.
  *

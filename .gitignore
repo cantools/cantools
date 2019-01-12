@@ -69,3 +69,5 @@ test_command_line_convert.dbc
 test_command_line_convert.kcd
 /*.[hc]
 /*fuzzer*
+/main
+/main_bit_fields

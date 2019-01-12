@@ -1431,7 +1431,80 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
 
         self.assertEqual(db.version, '6.0')
-        self.assertEqual(len(db.messages), 0)
+        self.assertEqual(len(db.messages), 1)
+        self.assertEqual(len(db.messages[0].signals), 8)
+
+        signal_0 = db.messages[0].signals[0]
+        self.assertEqual(signal_0.name, 'Bit')
+        self.assertEqual(signal_0.start, 0)
+        self.assertEqual(signal_0.length, 1)
+        self.assertEqual(signal_0.byte_order, 'little_endian')
+        self.assertEqual(signal_0.is_signed, False)
+        self.assertEqual(signal_0.choices, None)
+        self.assertEqual(signal_0.is_float, False)
+
+        signal_1 = db.messages[0].signals[1]
+        self.assertEqual(signal_1.name, 'Char')
+        self.assertEqual(signal_1.start, 1)
+        self.assertEqual(signal_1.length, 8)
+        self.assertEqual(signal_1.byte_order, 'little_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.is_float, False)
+
+        signal_2 = db.messages[0].signals[2]
+        self.assertEqual(signal_2.name, 'Enum')
+        self.assertEqual(signal_2.start, 9)
+        self.assertEqual(signal_2.length, 4)
+        self.assertEqual(signal_2.byte_order, 'little_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.choices, {})
+        self.assertEqual(signal_2.is_float, False)
+
+        signal_3 = db.messages[0].signals[3]
+        self.assertEqual(signal_3.name, 'Signed')
+        self.assertEqual(signal_3.start, 13)
+        self.assertEqual(signal_3.length, 3)
+        self.assertEqual(signal_3.byte_order, 'little_endian')
+        self.assertEqual(signal_3.is_signed, True)
+        self.assertEqual(signal_3.choices, None)
+        self.assertEqual(signal_3.is_float, False)
+
+        signal_4 = db.messages[0].signals[4]
+        self.assertEqual(signal_4.name, 'String')
+        self.assertEqual(signal_4.start, 16)
+        self.assertEqual(signal_4.length, 16)
+        self.assertEqual(signal_4.byte_order, 'little_endian')
+        self.assertEqual(signal_4.is_signed, False)
+        self.assertEqual(signal_4.choices, None)
+        self.assertEqual(signal_4.is_float, False)
+
+        signal_5 = db.messages[0].signals[5]
+        self.assertEqual(signal_5.name, 'Raw')
+        self.assertEqual(signal_5.start, 32)
+        self.assertEqual(signal_5.length, 16)
+        self.assertEqual(signal_5.byte_order, 'little_endian')
+        self.assertEqual(signal_5.is_signed, False)
+        self.assertEqual(signal_5.choices, None)
+        self.assertEqual(signal_5.is_float, False)
+
+        signal_6 = db.messages[0].signals[6]
+        self.assertEqual(signal_6.name, 'Unsigned')
+        self.assertEqual(signal_6.start, 48)
+        self.assertEqual(signal_6.length, 2)
+        self.assertEqual(signal_6.byte_order, 'little_endian')
+        self.assertEqual(signal_6.is_signed, False)
+        self.assertEqual(signal_6.choices, None)
+        self.assertEqual(signal_6.is_float, False)
+
+        signal_7 = db.messages[0].signals[7]
+        self.assertEqual(signal_7.name, 'Enum2')
+        self.assertEqual(signal_7.start, 50)
+        self.assertEqual(signal_7.length, 3)
+        self.assertEqual(signal_7.byte_order, 'little_endian')
+        self.assertEqual(signal_7.is_signed, False)
+        self.assertEqual(signal_7.choices, None)
+        self.assertEqual(signal_7.is_float, False)
 
     def test_variables_color_enum_6_0_sym(self):
         filename = os.path.join('tests', 'files', 'variables-color-enum-6.0.sym')

@@ -2,14 +2,32 @@ FormatVersion=6.0 // Do not edit this line!
 FloatDecimalPlaces=1
 Title="Untitled"
 
+{ENUMS}
+Enum=Enum1()
+
 {SIGNALS}
 Sig=Float float /p:10
 Sig=Bit bit
 Sig=Char char /ln:"CharLong"
-Sig=String string 8
-Sig=Signed signed 8
-Sig=Unsigned unsigned 8
-Sig=Enum unsigned 32
+Sig=String string 16
+Sig=Signed signed 3
+Sig=Unsigned unsigned 2
+Sig=Enum Enum1 4
 Sig=Double double
-Sig=Raw raw 8
+Sig=Raw raw 16
+Sig=Enum2 unsigned 3
+
+{SENDRECEIVE}
+
+[Symbol1]
+ID=000h
+Len=8
+Sig=Bit 0
+Sig=Char 1
+Sig=Enum 9
+Sig=String 16
+Sig=Raw 32
+Sig=Signed 13
+Sig=Unsigned 48
+Sig=Enum2 50
 

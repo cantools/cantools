@@ -224,6 +224,13 @@ def _get_section_tokens(tokens, name):
     return []
 
 
+def _get_enum(enums, name):
+    try:
+        return enums[name]
+    except KeyError:
+        raise ParseError("Enum '{}' is not defined.".format(name))
+
+
 def _load_enums(tokens):
     section = _get_section_tokens(tokens, '{ENUMS}')
     enums = {}
@@ -237,14 +244,48 @@ def _load_enums(tokens):
     return enums
 
 
-def _load_signal_attributes(tokens, enums):
+def _load_signal_type_and_length(type_, tokens, enums):
+    # Default values.
+    is_signed = False
+    is_float = False
+    length = 0
+    enum = None
+
+    if type_ == 'signed':
+        is_signed = True
+        length = int(tokens[0])
+    elif type_ == 'unsigned':
+        length = int(tokens[0])
+    elif type_ == 'float':
+        is_float = True
+        length = 32
+    elif type_ == 'double':
+        is_float = True
+        length = 64
+    elif type_ == 'bit':
+        # As unsigned integer for now.
+        length = 1
+    elif type_ == 'char':
+        # As unsigned integer for now.
+        length = 8
+    elif type_ in ['string', 'raw']:
+        # As unsigned integer for now.
+        length = int(tokens[0])
+    else:
+        # Enum. As unsigned integer for now.
+        length = int(tokens[0])
+        enum = _get_enum(enums, type_)
+
+    return is_signed, is_float, length, enum
+
+
+def _load_signal_attributes(tokens, enum, enums):
     # Default values.
     offset = 0
     factor = 1
     unit = None
     minimum = None
     maximum = None
-    enum = None
     decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
     for key, value in tokens:
@@ -263,7 +304,7 @@ def _load_signal_attributes(tokens, enums):
             maximum = num(value)
             decimal.maximum = Decimal(value)
         elif key == '/e:':
-            enum = enums[value]
+            enum = _get_enum(enums, value)
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
 
@@ -273,27 +314,13 @@ def _load_signal_attributes(tokens, enums):
 def _load_signal(tokens, enums):
     # Default values.
     name = tokens[2]
-    is_signed = False
-    is_float = False
     byte_order = 'little_endian'
-    length = 0
 
     # Type and length.
-    type_ = tokens[3]
-
-    if type_ in 'signed':
-        is_signed = True
-        length = int(tokens[4][0])
-    elif type_ == 'unsigned':
-        length = int(tokens[4][0])
-    elif type_ == 'float':
-        is_float = True
-        length = 32
-    elif type_ == 'double':
-        is_float = True
-        length = 64
-    else:
-        LOGGER.debug("Ignoring unsupported type '%s'.", type_)
+    is_signed, is_float, length, enum = _load_signal_type_and_length(
+        tokens[3],
+        tokens[4],
+        enums)
 
     # Byte order.
     if tokens[5] == ['-m']:
@@ -301,7 +328,9 @@ def _load_signal(tokens, enums):
 
     # The rest.
     unit, factor, offset, minimum, maximum, enum, decimal = _load_signal_attributes(
-        tokens[6], enums)
+        tokens[6],
+        enum,
+        enums)
 
     return Signal(name=name,
                   start=offset,
@@ -364,28 +393,14 @@ def _load_message_signal(tokens,
 def _load_message_variable(tokens, enums):
     # Default values.
     name = tokens[2]
-    is_signed = False
-    is_float = False
     byte_order = 'little_endian'
     start = int(tokens[4])
-    length = 0
 
     # Type and length.
-    type_ = tokens[3]
-
-    if type_ in 'signed':
-        is_signed = True
-        length = int(tokens[6])
-    elif type_ == 'unsigned':
-        length = int(tokens[6])
-    elif type_ == 'float':
-        is_float = True
-        length = 32
-    elif type_ == 'double':
-        is_float = True
-        length = 64
-    else:
-        LOGGER.debug("Ignoring unsupported type '%s'.", type_)
+    is_signed, is_float, length, enum = _load_signal_type_and_length(
+        tokens[3],
+        tokens[6],
+        enums)
 
     # Byte order.
     if tokens[7] == ['-m']:
@@ -393,7 +408,9 @@ def _load_message_variable(tokens, enums):
 
     # The rest.
     unit, factor, offset, minimum, maximum, enum, decimal = _load_signal_attributes(
-        tokens[8], enums)
+        tokens[8],
+        enum,
+        enums)
 
     if byte_order == 'big_endian':
         start = (8 * (start // 8) + (7 - (start % 8)))
@@ -417,6 +434,7 @@ def _load_message_variable(tokens, enums):
 
 def _load_message_signals_inner(message_tokens,
                                 signals,
+                                enums,
                                 multiplexer_signal=None,
                                 multiplexer_ids=None):
     return [
@@ -426,14 +444,15 @@ def _load_message_signals_inner(message_tokens,
                              multiplexer_ids)
         for signal in message_tokens[5].get('Sig', [])
     ] + [
-        _load_message_variable(variable, {})
+        _load_message_variable(variable, enums)
         for variable in message_tokens[5].get('Var', [])
     ]
 
 
 def _load_muxed_message_signals(message_tokens,
                                 message_section_tokens,
-                                signals):
+                                signals,
+                                enums):
     mux_tokens = message_tokens[5]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
     result = [
@@ -447,6 +466,7 @@ def _load_muxed_message_signals(message_tokens,
     multiplexer_ids = [int(mux_tokens[6])]
     result += _load_message_signals_inner(message_tokens,
                                           signals,
+                                          enums,
                                           multiplexer_signal,
                                           multiplexer_ids)
 
@@ -456,6 +476,7 @@ def _load_muxed_message_signals(message_tokens,
             multiplexer_ids = [int(mux_tokens[6])]
             result += _load_message_signals_inner(tokens,
                                                   signals,
+                                                  enums,
                                                   multiplexer_signal,
                                                   multiplexer_ids)
 
@@ -468,14 +489,17 @@ def _is_multiplexed(message_tokens):
 
 def _load_message_signals(message_tokens,
                           message_section_tokens,
-                          signals):
+                          signals,
+                          enums):
     if _is_multiplexed(message_tokens):
         return _load_muxed_message_signals(message_tokens,
                                            message_section_tokens,
-                                           signals)
+                                           signals,
+                                           enums)
     else:
         return _load_message_signals_inner(message_tokens,
-                                           signals)
+                                           signals,
+                                           enums)
 
 
 def _load_message(frame_id,
@@ -483,6 +507,7 @@ def _load_message(frame_id,
                   message_tokens,
                   message_section_tokens,
                   signals,
+                  enums,
                   strict):
     # Default values.
     name = message_tokens[1]
@@ -504,7 +529,8 @@ def _load_message(frame_id,
                    cycle_time=cycle_time,
                    signals=_load_message_signals(message_tokens,
                                                  message_section_tokens,
-                                                 signals),
+                                                 signals,
+                                                 enums),
                    comment=None,
                    bus_name=None,
                    strict=strict)
@@ -530,7 +556,7 @@ def _parse_message_frame_ids(message):
     return frame_ids, is_extended_frame(message[2])
 
 
-def _load_message_section(section_name, tokens, signals, strict):
+def _load_message_section(section_name, tokens, signals, enums, strict):
     def has_frame_id(message):
         return len(message[3]) > 0
 
@@ -549,16 +575,17 @@ def _load_message_section(section_name, tokens, signals, strict):
                                     message_tokens,
                                     message_section_tokens,
                                     signals,
+                                    enums,
                                     strict)
             messages.append(message)
 
     return messages
 
 
-def _load_messages(tokens, signals, strict):
-    messages = _load_message_section('{SEND}', tokens, signals, strict)
-    messages += _load_message_section('{RECEIVE}', tokens, signals, strict)
-    messages += _load_message_section('{SENDRECEIVE}', tokens, signals, strict)
+def _load_messages(tokens, signals, enums, strict):
+    messages = _load_message_section('{SEND}', tokens, signals, enums, strict)
+    messages += _load_message_section('{RECEIVE}', tokens, signals, enums, strict)
+    messages += _load_message_section('{SENDRECEIVE}', tokens, signals, enums, strict)
 
     return messages
 
@@ -580,7 +607,7 @@ def load_string(string, strict=True):
     version = _load_version(tokens)
     enums = _load_enums(tokens)
     signals = _load_signals(tokens, enums)
-    messages = _load_messages(tokens, signals, strict)
+    messages = _load_messages(tokens, signals, enums, strict)
 
     return InternalDatabase(messages,
                             [],

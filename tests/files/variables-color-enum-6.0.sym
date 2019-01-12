@@ -3,6 +3,7 @@ Title="Untitled"
 
 {ENUMS}
 Enum=Enum(0="Foo")
+Enum=Enum1()
 
 {SIGNALS}
 Sig=Enum unsigned 8 /e:Enum
@@ -17,6 +18,7 @@ Timeout=1
 MinInterval=2
 Color=800080h
 Var=Color float 22,32 -m /u:A /o:2 /ln:"Apa"
-Var=Variable2 unsigned 0,1
+Var=Variable2 signed 0,2 /e:Enum
+Var=Variable1 Enum1 10,1
 Sig=Enum 2
 

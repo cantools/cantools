@@ -225,7 +225,9 @@ class Monitor(can.Listener):
 
         if self._single_line:
             formatted = format_message(message, data, True, True)
-            self._formatted_messages[message.name] = ['{:12.3f} {}'.format(timestamp, formatted)]
+            self._formatted_messages[message.name] = [
+                '{:12.3f} {}'.format(timestamp, formatted)
+            ]
         else:
             formatted = format_message(message, data, True, False)
             lines = formatted.splitlines()

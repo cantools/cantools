@@ -618,6 +618,24 @@ class Signal(object):
         else:
             return None
 
+    @property
+    def minimum_value(self):
+        if self.is_float:
+            return None
+        elif self.is_signed:
+            return -(2 ** (self.length - 1))
+        else:
+            return 0
+
+    @property
+    def maximum_value(self):
+        if self.is_float:
+            return None
+        elif self.is_signed:
+            return ((2 ** (self.length - 1)) - 1)
+        else:
+            return ((2 ** self.length) - 1)
+
     def segments(self, invert_shift):
         index, pos = divmod(self.start, 8)
         left = self.length
@@ -760,7 +778,7 @@ def _format_range(signal):
             minimum,
             signal.unit)
     elif maximum is not None:
-        return '..{} (..{} {}'.format(
+        return '..{} (..{} {})'.format(
             _format_decimal((maximum - offset) / scale),
             maximum,
             signal.unit)
@@ -1145,6 +1163,14 @@ def _generate_is_in_range(message):
 
         if maximum is not None:
             maximum = (maximum / scale - offset)
+
+        if minimum is None and signal.minimum_value is not None:
+            if signal.minimum_value > signal.minimum_type_value:
+                minimum = signal.minimum_value
+
+        if maximum is None and signal.maximum_value is not None:
+            if signal.maximum_value < signal.maximum_type_value:
+                maximum = signal.maximum_value
 
         suffix = signal.type_suffix
         check = []

@@ -13,6 +13,7 @@
 #include "files/c_source/no_signals.h"
 #include "files/c_source/signed.h"
 #include "files/c_source/my_database_name.h"
+#include "files/c_source/min_max_only_6_0.h"
 
 static bool fequal(double v1, double v2)
 {
@@ -589,10 +590,10 @@ static void test_signed(void)
 
 static void test_is_in_range(void)
 {
-    /* Missing limits. Anything allowed, byt should probably check
-       that it fits in its number of bits. */
+    /* Missing limits. Check that it fits in its number of bits. */
     assert(motohawk_example_message_enable_is_in_range(0));
     assert(motohawk_example_message_enable_is_in_range(1));
+    assert(motohawk_example_message_enable_is_in_range(2) == false);
 
     /* Unsigned value with 0 as lower limit. */
     assert(motohawk_example_message_average_radius_is_in_range(0));

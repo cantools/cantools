@@ -13,7 +13,8 @@ C_SOURCES := \
 	tests/files/c_source/no_signals.c \
 	tests/files/c_source/choices.c \
 	tests/files/c_source/signed.c \
-	tests/files/c_source/my_database_name.c
+	tests/files/c_source/my_database_name.c \
+	tests/files/c_source/min_max_only_6_0.c
 
 C_SOURCES_BIT_FIELDS := \
 	tests/main_bit_fields.c \

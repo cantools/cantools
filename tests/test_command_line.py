@@ -661,6 +661,52 @@ IO_DEBUG(
             self.assertEqual(read_file('tests/files/c_source/' + fuzzer_mk),
                              read_file(fuzzer_mk))
 
+    def test_generate_c_source_sym(self):
+        databases = [
+            ('min-max-only-6.0', 'min_max_only_6_0')
+        ]
+
+        for database in databases:
+            if isinstance(database, tuple):
+                database, basename = database
+            else:
+                basename = database
+
+            argv = [
+                'cantools',
+                'generate_c_source',
+                'tests/files/{}.sym'.format(database)
+            ]
+
+            database_h = basename + '.h'
+            database_c = basename + '.c'
+            fuzzer_c = basename + '_fuzzer.c'
+            fuzzer_mk = basename + '_fuzzer.mk'
+
+            if os.path.exists(database_h):
+                os.remove(database_h)
+
+            if os.path.exists(database_c):
+                os.remove(database_c)
+
+            if os.path.exists(fuzzer_c):
+                os.remove(fuzzer_c)
+
+            if os.path.exists(fuzzer_mk):
+                os.remove(fuzzer_mk)
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            if sys.version_info[0] > 2:
+                self.assertEqual(read_file('tests/files/c_source/' + database_h),
+                                 read_file(database_h))
+                self.assertEqual(read_file('tests/files/c_source/' + database_c),
+                                 read_file(database_c))
+
+            self.assertFalse(os.path.exists(fuzzer_c))
+            self.assertFalse(os.path.exists(fuzzer_mk))
+
 
 if __name__ == '__main__':
     unittest.main()

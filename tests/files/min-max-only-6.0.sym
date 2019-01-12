@@ -1,0 +1,20 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+BRS=False
+
+{SIGNALS}
+Sig=Signal1 unsigned 8 /max:254
+Sig=Signal2 unsigned 7 /min:5
+Sig=Signal3 signed 9 -m /min:-2
+Sig=Signal4 signed 6 /max:5
+
+{SENDRECEIVE}
+
+[Symbol1]
+ID=000h
+Len=8
+Sig=Signal1 0
+Sig=Signal2 11
+Sig=Signal3 24
+Sig=Signal4 18
+

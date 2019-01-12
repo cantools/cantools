@@ -48,6 +48,8 @@ HEADER_FMT = '''\
 #endif
 
 {frame_id_defines}
+
+{data_length_code_defines}
 {choices_defines}
 {structs}
 {declarations}
@@ -1175,7 +1177,7 @@ def _generate_is_in_range(message):
     return checks
 
 
-def _generage_frame_id_defines(database_name, messages):
+def _generate_frame_id_defines(database_name, messages):
     return '\n'.join([
         '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
             database_name.upper(),
@@ -1184,6 +1186,14 @@ def _generage_frame_id_defines(database_name, messages):
         for message in messages
     ])
 
+def _generate_data_length_code_defines(database_name, messages):
+    return '\n'.join([
+        '#define {}_{}_DATA_LENGTH_CODE (0x{:02x}u)'.format(
+            database_name.upper(),
+            message.snake_name.upper(),
+            message.length)
+        for message in messages
+    ])
 
 def _generate_choices_defines(database_name, messages):
     choices_defines = []
@@ -1428,7 +1438,8 @@ def generate(database,
     date = time.ctime()
     messages = [Message(message) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
-    frame_id_defines = _generage_frame_id_defines(database_name, messages)
+    frame_id_defines = _generate_frame_id_defines(database_name, messages)
+    data_length_code_defines = _generate_data_length_code_defines(database_name, messages)
     choices_defines = _generate_choices_defines(database_name, messages)
     structs = _generate_structs(database_name, messages, bit_fields)
     declarations = _generate_declarations(database_name,
@@ -1443,6 +1454,7 @@ def generate(database,
                                date=date,
                                include_guard=include_guard,
                                frame_id_defines=frame_id_defines,
+                               data_length_code_defines=data_length_code_defines,
                                choices_defines=choices_defines,
                                structs=structs,
                                declarations=declarations)

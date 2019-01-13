@@ -132,6 +132,58 @@ FUZZER_SOURCE_FMT = '''\
 
 #include "{header}"
 
+static void assert_first_pack(ssize_t res)
+{{
+    if (res < 0) {{
+        printf("First pack failed with %ld.\\n", res);
+        __builtin_trap();
+    }}
+}}
+
+static void assert_second_unpack(ssize_t res)
+{{
+    if (res < 0) {{
+        printf("Second unpack failed with %ld.\\n", res);
+        __builtin_trap();
+    }}
+}}
+
+static void assert_second_unpack_data(const void *unpacked_p,
+                                      const void *unpacked2_p,
+                                      size_t size)
+{{
+    if (memcmp(unpacked_p, unpacked2_p, size) != 0) {{
+        printf("Second unpacked data does not match first unpacked data.\\n");
+        __builtin_trap();
+    }}
+}}
+
+static void assert_second_pack(ssize_t res, ssize_t res2)
+{{
+    if (res != res2) {{
+        printf("Second pack result %ld does not match first pack "
+               "result %ld.\\n",
+               res,
+               res2);
+        __builtin_trap();
+    }}
+}}
+
+static void assert_second_pack_data(const uint8_t *packed_p,
+                                    const uint8_t *packed2_p,
+                                    ssize_t size)
+{{
+    ssize_t i;
+
+    if (memcmp(packed_p, packed2_p, size) != 0) {{
+        for (i = 0; i < size; i++) {{
+            printf("[%04ld]: 0x%02x 0x%02x\\n", i, packed_p[i], packed2_p[i]);
+        }}
+
+        __builtin_trap();
+    }}
+}}
+
 {tests}
 
 int LLVMFuzzerTestOneInput(const uint8_t *data_p, size_t size)
@@ -206,13 +258,13 @@ static void test_{name}(
 {{
     ssize_t res;
     ssize_t res2;
-    ssize_t i;
     uint8_t packed[size];
     uint8_t packed2[size];
     struct {name}_t unpacked;
     struct {name}_t unpacked2;
 
     memset(&unpacked, 0, sizeof(unpacked));
+
     res = {name}_unpack(
         &unpacked,
         packed_p,
@@ -224,47 +276,27 @@ static void test_{name}(
             &unpacked,
             sizeof(packed));
 
-        if (res < 0) {{
-            printf("First pack failed with %ld.\\n", res);
-            __builtin_trap();
-        }}
+        assert_first_pack(res);
 
         memset(&unpacked2, 0, sizeof(unpacked2));
+
         res2 = {name}_unpack(
             &unpacked2,
             &packed[0],
             res);
 
-        if (res2 < 0) {{
-            printf("Second unpack failed with %ld.\\n", res2);
-            __builtin_trap();
-        }}
-
-        if (memcmp(&unpacked, &unpacked2, sizeof(unpacked)) != 0) {{
-            printf("Second unpacked data does not match first unpacked data.\\n");
-            __builtin_trap();
-        }}
+        assert_second_unpack(res2);
+        assert_second_unpack_data(&unpacked,
+                                  &unpacked2,
+                                  sizeof(unpacked));
 
         res2 = {name}_pack(
             &packed2[0],
             &unpacked,
             sizeof(packed2));
 
-        if (res != res2) {{
-            printf("Second pack result %ld does not match first pack "
-                   "result %ld.\\n",
-                   res,
-                   res2);
-            __builtin_trap();
-        }}
-
-        if (memcmp(&packed[0], &packed2[0], res) != 0) {{
-            for (i = 0; i < res; i++) {{
-                printf("[%04ld]: 0x%02x 0x%02x\\n", i, packed[i], packed2[i]);
-            }}
-
-            __builtin_trap();
-        }}
+        assert_second_pack(res, res2);
+        assert_second_pack_data(&packed[0], &packed2[0], res);
     }}
 }}\
 '''

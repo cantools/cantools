@@ -495,7 +495,6 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.run()
 
         # Check mocks.
-        print(stdscr.addstr.call_args_list)
         self.assert_called(
             stdscr.addstr,
             [
@@ -618,14 +617,14 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.init_pair')
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
-    def test_reset(self,
-                   _use_default_colors,
-                   _curs_set,
-                   _init_pair,
-                   is_term_resized,
-                   color_pair,
-                   _bus,
-                   _notifier):
+    def test_play_pause(self,
+                        _use_default_colors,
+                        _curs_set,
+                        _init_pair,
+                        is_term_resized,
+                        color_pair,
+                        _bus,
+                        _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
             ' ', ' ', 'p', ' ', ' ', 'p', ' ', ' ', ' ', 'q'

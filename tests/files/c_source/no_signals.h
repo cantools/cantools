@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -75,7 +74,7 @@ struct no_signals_message2_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t no_signals_message1_pack(
+int no_signals_message1_pack(
     uint8_t *dst_p,
     const struct no_signals_message1_t *src_p,
     size_t size);
@@ -103,7 +102,7 @@ int no_signals_message1_unpack(
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t no_signals_message2_pack(
+int no_signals_message2_pack(
     uint8_t *dst_p,
     const struct no_signals_message2_t *src_p,
     size_t size);

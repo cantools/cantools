@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -214,7 +213,7 @@ struct multiplex_2_extended_types_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t multiplex_2_shared_pack(
+int multiplex_2_shared_pack(
     uint8_t *dst_p,
     const struct multiplex_2_shared_t *src_p,
     size_t size);
@@ -323,7 +322,7 @@ bool multiplex_2_shared_s2_is_in_range(int8_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t multiplex_2_normal_pack(
+int multiplex_2_normal_pack(
     uint8_t *dst_p,
     const struct multiplex_2_normal_t *src_p,
     size_t size);
@@ -432,7 +431,7 @@ bool multiplex_2_normal_s2_is_in_range(int8_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t multiplex_2_extended_pack(
+int multiplex_2_extended_pack(
     uint8_t *dst_p,
     const struct multiplex_2_extended_t *src_p,
     size_t size);
@@ -703,7 +702,7 @@ bool multiplex_2_extended_s7_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t multiplex_2_extended_types_pack(
+int multiplex_2_extended_types_pack(
     uint8_t *dst_p,
     const struct multiplex_2_extended_types_t *src_p,
     size_t size);

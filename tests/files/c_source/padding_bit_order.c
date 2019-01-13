@@ -112,7 +112,7 @@ static inline uint64_t unpack_right_shift_u64(
     return (uint64_t)((uint64_t)(value & mask) >> shift);
 }
 
-ssize_t padding_bit_order_msg0_pack(
+int padding_bit_order_msg0_pack(
     uint8_t *dst_p,
     const struct padding_bit_order_msg0_t *src_p,
     size_t size)
@@ -214,7 +214,7 @@ bool padding_bit_order_msg0_c_is_in_range(uint16_t value)
     return (value <= 32767u);
 }
 
-ssize_t padding_bit_order_msg1_pack(
+int padding_bit_order_msg1_pack(
     uint8_t *dst_p,
     const struct padding_bit_order_msg1_t *src_p,
     size_t size)
@@ -316,7 +316,7 @@ bool padding_bit_order_msg1_h_is_in_range(uint16_t value)
     return (value <= 32767u);
 }
 
-ssize_t padding_bit_order_msg2_pack(
+int padding_bit_order_msg2_pack(
     uint8_t *dst_p,
     const struct padding_bit_order_msg2_t *src_p,
     size_t size)
@@ -397,7 +397,7 @@ bool padding_bit_order_msg2_k_is_in_range(uint8_t value)
     return (value <= 15u);
 }
 
-ssize_t padding_bit_order_msg3_pack(
+int padding_bit_order_msg3_pack(
     uint8_t *dst_p,
     const struct padding_bit_order_msg3_t *src_p,
     size_t size)
@@ -460,7 +460,7 @@ bool padding_bit_order_msg3_l_is_in_range(uint64_t value)
     return (true);
 }
 
-ssize_t padding_bit_order_msg4_pack(
+int padding_bit_order_msg4_pack(
     uint8_t *dst_p,
     const struct padding_bit_order_msg4_t *src_p,
     size_t size)

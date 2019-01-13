@@ -96,7 +96,7 @@ static inline uint64_t unpack_right_shift_u64(
     return (uint64_t)((uint64_t)(value & mask) >> shift);
 }
 
-ssize_t floating_point_message1_pack(
+int floating_point_message1_pack(
     uint8_t *dst_p,
     const struct floating_point_message1_t *src_p,
     size_t size)
@@ -166,7 +166,7 @@ bool floating_point_message1_signal1_is_in_range(double value)
     return (true);
 }
 
-ssize_t floating_point_message2_pack(
+int floating_point_message2_pack(
     uint8_t *dst_p,
     const struct floating_point_message2_t *src_p,
     size_t size)

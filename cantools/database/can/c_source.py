@@ -41,7 +41,6 @@ HEADER_FMT = '''\
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -132,7 +131,7 @@ FUZZER_SOURCE_FMT = '''\
 
 #include "{header}"
 
-static void assert_first_pack(ssize_t res)
+static void assert_first_pack(int res)
 {{
     if (res < 0) {{
         printf("First pack failed with %ld.\\n", res);
@@ -140,7 +139,7 @@ static void assert_first_pack(ssize_t res)
     }}
 }}
 
-static void assert_second_unpack(ssize_t res)
+static void assert_second_unpack(int res)
 {{
     if (res < 0) {{
         printf("Second unpack failed with %ld.\\n", res);
@@ -158,7 +157,7 @@ static void assert_second_unpack_data(const void *unpacked_p,
     }}
 }}
 
-static void assert_second_pack(ssize_t res, ssize_t res2)
+static void assert_second_pack(int res, int res2)
 {{
     if (res != res2) {{
         printf("Second pack result %ld does not match first pack "
@@ -171,9 +170,9 @@ static void assert_second_pack(ssize_t res, ssize_t res2)
 
 static void assert_second_pack_data(const uint8_t *packed_p,
                                     const uint8_t *packed2_p,
-                                    ssize_t size)
+                                    int size)
 {{
-    ssize_t i;
+    int i;
 
     if (memcmp(packed_p, packed2_p, size) != 0) {{
         for (i = 0; i < size; i++) {{
@@ -256,8 +255,8 @@ static void test_{name}(
     const uint8_t *packed_p,
     size_t size)
 {{
-    ssize_t res;
-    ssize_t res2;
+    int res;
+    int res2;
     uint8_t packed[size];
     uint8_t packed2[size];
     struct {name}_t unpacked;
@@ -323,7 +322,7 @@ DECLARATION_FMT = '''\
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t {database_name}_{message_name}_pack(
+int {database_name}_{message_name}_pack(
     uint8_t *dst_p,
     const struct {database_name}_{message_name}_t *src_p,
     size_t size);
@@ -416,7 +415,7 @@ static inline {var_type} unpack_right_shift_u{length}(
 '''
 
 DEFINITION_FMT = '''\
-ssize_t {database_name}_{message_name}_pack(
+int {database_name}_{message_name}_pack(
     uint8_t *dst_p,
     const struct {database_name}_{message_name}_t *src_p,
     size_t size)
@@ -471,7 +470,7 @@ bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 '''
 
 EMPTY_DEFINITION_FMT = '''\
-ssize_t {database_name}_{message_name}_pack(
+int {database_name}_{message_name}_pack(
     uint8_t *dst_p,
     const struct {database_name}_{message_name}_t *src_p,
     size_t size)

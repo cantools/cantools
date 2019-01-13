@@ -48,7 +48,7 @@ static inline uint8_t unpack_right_shift_u8(
     return (uint8_t)((uint8_t)(value & mask) >> shift);
 }
 
-ssize_t multiplex_message1_pack(
+int multiplex_message1_pack(
     uint8_t *dst_p,
     const struct multiplex_message1_t *src_p,
     size_t size)

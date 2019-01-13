@@ -80,7 +80,7 @@ static inline uint16_t unpack_right_shift_u16(
     return (uint16_t)((uint16_t)(value & mask) >> shift);
 }
 
-ssize_t motohawk_example_message_pack(
+int motohawk_example_message_pack(
     uint8_t *dst_p,
     const struct motohawk_example_message_t *src_p,
     size_t size)

@@ -96,7 +96,7 @@ static inline uint16_t unpack_right_shift_u16(
     return (uint16_t)((uint16_t)(value & mask) >> shift);
 }
 
-ssize_t min_max_only_6_0_symbol1_pack(
+int min_max_only_6_0_symbol1_pack(
     uint8_t *dst_p,
     const struct min_max_only_6_0_symbol1_t *src_p,
     size_t size)

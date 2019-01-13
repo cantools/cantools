@@ -160,7 +160,7 @@ static inline uint64_t unpack_right_shift_u64(
     return (uint64_t)((uint64_t)(value & mask) >> shift);
 }
 
-ssize_t signed_bit_fields_message378910_pack(
+int signed_bit_fields_message378910_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message378910_t *src_p,
     size_t size)
@@ -412,7 +412,7 @@ bool signed_bit_fields_message378910_s7big_is_in_range(int8_t value)
     return ((value >= -64) && (value <= 63));
 }
 
-ssize_t signed_bit_fields_message63big_1_pack(
+int signed_bit_fields_message63big_1_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63big_1_t *src_p,
     size_t size)
@@ -485,7 +485,7 @@ bool signed_bit_fields_message63big_1_s63big_is_in_range(int64_t value)
     return ((value >= -4611686018427387904ll) && (value <= 4611686018427387903ll));
 }
 
-ssize_t signed_bit_fields_message63_1_pack(
+int signed_bit_fields_message63_1_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63_1_t *src_p,
     size_t size)
@@ -558,7 +558,7 @@ bool signed_bit_fields_message63_1_s63_is_in_range(int64_t value)
     return ((value >= -4611686018427387904ll) && (value <= 4611686018427387903ll));
 }
 
-ssize_t signed_bit_fields_message63big_pack(
+int signed_bit_fields_message63big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63big_t *src_p,
     size_t size)
@@ -631,7 +631,7 @@ bool signed_bit_fields_message63big_s63big_is_in_range(int64_t value)
     return ((value >= -4611686018427387904ll) && (value <= 4611686018427387903ll));
 }
 
-ssize_t signed_bit_fields_message63_pack(
+int signed_bit_fields_message63_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63_t *src_p,
     size_t size)
@@ -704,7 +704,7 @@ bool signed_bit_fields_message63_s63_is_in_range(int64_t value)
     return ((value >= -4611686018427387904ll) && (value <= 4611686018427387903ll));
 }
 
-ssize_t signed_bit_fields_message32big_pack(
+int signed_bit_fields_message32big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message32big_t *src_p,
     size_t size)
@@ -766,7 +766,7 @@ bool signed_bit_fields_message32big_s32big_is_in_range(int32_t value)
     return (true);
 }
 
-ssize_t signed_bit_fields_message33big_pack(
+int signed_bit_fields_message33big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message33big_t *src_p,
     size_t size)
@@ -833,7 +833,7 @@ bool signed_bit_fields_message33big_s33big_is_in_range(int64_t value)
     return ((value >= -4294967296ll) && (value <= 4294967295ll));
 }
 
-ssize_t signed_bit_fields_message64big_pack(
+int signed_bit_fields_message64big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message64big_t *src_p,
     size_t size)
@@ -903,7 +903,7 @@ bool signed_bit_fields_message64big_s64big_is_in_range(int64_t value)
     return (true);
 }
 
-ssize_t signed_bit_fields_message64_pack(
+int signed_bit_fields_message64_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message64_t *src_p,
     size_t size)
@@ -973,7 +973,7 @@ bool signed_bit_fields_message64_s64_is_in_range(int64_t value)
     return (true);
 }
 
-ssize_t signed_bit_fields_message33_pack(
+int signed_bit_fields_message33_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message33_t *src_p,
     size_t size)
@@ -1040,7 +1040,7 @@ bool signed_bit_fields_message33_s33_is_in_range(int64_t value)
     return ((value >= -4294967296ll) && (value <= 4294967295ll));
 }
 
-ssize_t signed_bit_fields_message32_pack(
+int signed_bit_fields_message32_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message32_t *src_p,
     size_t size)

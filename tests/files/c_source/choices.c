@@ -48,7 +48,7 @@ static inline uint8_t unpack_right_shift_u8(
     return (uint8_t)((uint8_t)(value & mask) >> shift);
 }
 
-ssize_t choices_foo_pack(
+int choices_foo_pack(
     uint8_t *dst_p,
     const struct choices_foo_t *src_p,
     size_t size)

@@ -36,7 +36,7 @@
 
 #include "multiplex_2.h"
 
-static void assert_first_pack(ssize_t res)
+static void assert_first_pack(int res)
 {
     if (res < 0) {
         printf("First pack failed with %ld.\n", res);
@@ -44,7 +44,7 @@ static void assert_first_pack(ssize_t res)
     }
 }
 
-static void assert_second_unpack(ssize_t res)
+static void assert_second_unpack(int res)
 {
     if (res < 0) {
         printf("Second unpack failed with %ld.\n", res);
@@ -62,7 +62,7 @@ static void assert_second_unpack_data(const void *unpacked_p,
     }
 }
 
-static void assert_second_pack(ssize_t res, ssize_t res2)
+static void assert_second_pack(int res, int res2)
 {
     if (res != res2) {
         printf("Second pack result %ld does not match first pack "
@@ -75,9 +75,9 @@ static void assert_second_pack(ssize_t res, ssize_t res2)
 
 static void assert_second_pack_data(const uint8_t *packed_p,
                                     const uint8_t *packed2_p,
-                                    ssize_t size)
+                                    int size)
 {
-    ssize_t i;
+    int i;
 
     if (memcmp(packed_p, packed2_p, size) != 0) {
         for (i = 0; i < size; i++) {
@@ -93,8 +93,8 @@ static void test_multiplex_2_shared(
     const uint8_t *packed_p,
     size_t size)
 {
-    ssize_t res;
-    ssize_t res2;
+    int res;
+    int res2;
     uint8_t packed[size];
     uint8_t packed2[size];
     struct multiplex_2_shared_t unpacked;
@@ -141,8 +141,8 @@ static void test_multiplex_2_normal(
     const uint8_t *packed_p,
     size_t size)
 {
-    ssize_t res;
-    ssize_t res2;
+    int res;
+    int res2;
     uint8_t packed[size];
     uint8_t packed2[size];
     struct multiplex_2_normal_t unpacked;
@@ -189,8 +189,8 @@ static void test_multiplex_2_extended(
     const uint8_t *packed_p,
     size_t size)
 {
-    ssize_t res;
-    ssize_t res2;
+    int res;
+    int res2;
     uint8_t packed[size];
     uint8_t packed2[size];
     struct multiplex_2_extended_t unpacked;
@@ -237,8 +237,8 @@ static void test_multiplex_2_extended_types(
     const uint8_t *packed_p,
     size_t size)
 {
-    ssize_t res;
-    ssize_t res2;
+    int res;
+    int res2;
     uint8_t packed[size];
     uint8_t packed2[size];
     struct multiplex_2_extended_types_t unpacked;

@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -263,7 +262,7 @@ struct signed_bit_fields_message32_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message378910_pack(
+int signed_bit_fields_message378910_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message378910_t *src_p,
     size_t size);
@@ -507,7 +506,7 @@ bool signed_bit_fields_message378910_s7big_is_in_range(int8_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message63big_1_pack(
+int signed_bit_fields_message63big_1_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63big_1_t *src_p,
     size_t size);
@@ -562,7 +561,7 @@ bool signed_bit_fields_message63big_1_s63big_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message63_1_pack(
+int signed_bit_fields_message63_1_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63_1_t *src_p,
     size_t size);
@@ -617,7 +616,7 @@ bool signed_bit_fields_message63_1_s63_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message63big_pack(
+int signed_bit_fields_message63big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63big_t *src_p,
     size_t size);
@@ -672,7 +671,7 @@ bool signed_bit_fields_message63big_s63big_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message63_pack(
+int signed_bit_fields_message63_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message63_t *src_p,
     size_t size);
@@ -727,7 +726,7 @@ bool signed_bit_fields_message63_s63_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message32big_pack(
+int signed_bit_fields_message32big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message32big_t *src_p,
     size_t size);
@@ -782,7 +781,7 @@ bool signed_bit_fields_message32big_s32big_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message33big_pack(
+int signed_bit_fields_message33big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message33big_t *src_p,
     size_t size);
@@ -837,7 +836,7 @@ bool signed_bit_fields_message33big_s33big_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message64big_pack(
+int signed_bit_fields_message64big_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message64big_t *src_p,
     size_t size);
@@ -892,7 +891,7 @@ bool signed_bit_fields_message64big_s64big_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message64_pack(
+int signed_bit_fields_message64_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message64_t *src_p,
     size_t size);
@@ -947,7 +946,7 @@ bool signed_bit_fields_message64_s64_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message33_pack(
+int signed_bit_fields_message33_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message33_t *src_p,
     size_t size);
@@ -1002,7 +1001,7 @@ bool signed_bit_fields_message33_s33_is_in_range(int64_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t signed_bit_fields_message32_pack(
+int signed_bit_fields_message32_pack(
     uint8_t *dst_p,
     const struct signed_bit_fields_message32_t *src_p,
     size_t size);

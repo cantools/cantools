@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -5555,7 +5554,7 @@ struct vehicle_rt_sb_gyro_rates_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vel_body_axes_pack(
+int vehicle_rt_sb_ins_vel_body_axes_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vel_body_axes_t *src_p,
     size_t size);
@@ -5718,7 +5717,7 @@ bool vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_is_in_range(int32_t va
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_speed_pack(
+int vehicle_rt_dl1_mk3_speed_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_speed_t *src_p,
     size_t size);
@@ -5827,7 +5826,7 @@ bool vehicle_rt_dl1_mk3_speed_speed_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_gps_time_pack(
+int vehicle_rt_dl1_mk3_gps_time_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_gps_time_t *src_p,
     size_t size);
@@ -5990,7 +5989,7 @@ bool vehicle_rt_dl1_mk3_gps_time_gps_week_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_gps_pos_llh_2_pack(
+int vehicle_rt_dl1_mk3_gps_pos_llh_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_gps_pos_llh_2_t *src_p,
     size_t size);
@@ -6072,7 +6071,7 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_is_in_range(int32_t v
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_gps_pos_llh_1_pack(
+int vehicle_rt_dl1_mk3_gps_pos_llh_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_gps_pos_llh_1_t *src_p,
     size_t size);
@@ -6289,7 +6288,7 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t v
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_gps_speed_pack(
+int vehicle_rt_dl1_mk3_gps_speed_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_gps_speed_t *src_p,
     size_t size);
@@ -6452,7 +6451,7 @@ bool vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_7_pack(
+int vehicle_rt_ir_temp_temp_7_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_7_t *src_p,
     size_t size);
@@ -6507,7 +6506,7 @@ bool vehicle_rt_ir_temp_temp_7_ir_temperature_7_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_rr_2_pack(
+int vehicle_rt_ir_temp_temp_rr_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_rr_2_t *src_p,
     size_t size);
@@ -6643,7 +6642,7 @@ bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_rl_2_pack(
+int vehicle_rt_ir_temp_temp_rl_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_rl_2_t *src_p,
     size_t size);
@@ -6779,7 +6778,7 @@ bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_fr_2_pack(
+int vehicle_rt_ir_temp_temp_fr_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_fr_2_t *src_p,
     size_t size);
@@ -6915,7 +6914,7 @@ bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_fl_2_pack(
+int vehicle_rt_ir_temp_temp_fl_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_fl_2_t *src_p,
     size_t size);
@@ -7051,7 +7050,7 @@ bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_rr_1_pack(
+int vehicle_rt_ir_temp_temp_rr_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_rr_1_t *src_p,
     size_t size);
@@ -7187,7 +7186,7 @@ bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_rl_1_pack(
+int vehicle_rt_ir_temp_temp_rl_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_rl_1_t *src_p,
     size_t size);
@@ -7323,7 +7322,7 @@ bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_fr_1_pack(
+int vehicle_rt_ir_temp_temp_fr_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_fr_1_t *src_p,
     size_t size);
@@ -7459,7 +7458,7 @@ bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_fl_1_pack(
+int vehicle_rt_ir_temp_temp_fl_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_fl_1_t *src_p,
     size_t size);
@@ -7595,7 +7594,7 @@ bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_32_pack(
+int vehicle_rt_ir_temp_temp_32_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_32_t *src_p,
     size_t size);
@@ -7650,7 +7649,7 @@ bool vehicle_rt_ir_temp_temp_32_ir_temperature_32_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_31_pack(
+int vehicle_rt_ir_temp_temp_31_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_31_t *src_p,
     size_t size);
@@ -7705,7 +7704,7 @@ bool vehicle_rt_ir_temp_temp_31_ir_temperature_31_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_30_pack(
+int vehicle_rt_ir_temp_temp_30_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_30_t *src_p,
     size_t size);
@@ -7760,7 +7759,7 @@ bool vehicle_rt_ir_temp_temp_30_ir_temperature_30_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_29_pack(
+int vehicle_rt_ir_temp_temp_29_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_29_t *src_p,
     size_t size);
@@ -7815,7 +7814,7 @@ bool vehicle_rt_ir_temp_temp_29_ir_temperature_29_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_28_pack(
+int vehicle_rt_ir_temp_temp_28_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_28_t *src_p,
     size_t size);
@@ -7870,7 +7869,7 @@ bool vehicle_rt_ir_temp_temp_28_ir_temperature_28_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_27_pack(
+int vehicle_rt_ir_temp_temp_27_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_27_t *src_p,
     size_t size);
@@ -7925,7 +7924,7 @@ bool vehicle_rt_ir_temp_temp_27_ir_temperature_27_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_26_pack(
+int vehicle_rt_ir_temp_temp_26_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_26_t *src_p,
     size_t size);
@@ -7980,7 +7979,7 @@ bool vehicle_rt_ir_temp_temp_26_ir_temperature_26_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_25_pack(
+int vehicle_rt_ir_temp_temp_25_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_25_t *src_p,
     size_t size);
@@ -8035,7 +8034,7 @@ bool vehicle_rt_ir_temp_temp_25_ir_temperature_25_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_24_pack(
+int vehicle_rt_ir_temp_temp_24_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_24_t *src_p,
     size_t size);
@@ -8090,7 +8089,7 @@ bool vehicle_rt_ir_temp_temp_24_ir_temperature_24_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_22_pack(
+int vehicle_rt_ir_temp_temp_22_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_22_t *src_p,
     size_t size);
@@ -8145,7 +8144,7 @@ bool vehicle_rt_ir_temp_temp_22_ir_temperature_22_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_23_pack(
+int vehicle_rt_ir_temp_temp_23_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_23_t *src_p,
     size_t size);
@@ -8200,7 +8199,7 @@ bool vehicle_rt_ir_temp_temp_23_ir_temperature_23_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_21_pack(
+int vehicle_rt_ir_temp_temp_21_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_21_t *src_p,
     size_t size);
@@ -8255,7 +8254,7 @@ bool vehicle_rt_ir_temp_temp_21_ir_temperature_21_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_20_pack(
+int vehicle_rt_ir_temp_temp_20_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_20_t *src_p,
     size_t size);
@@ -8310,7 +8309,7 @@ bool vehicle_rt_ir_temp_temp_20_ir_temperature_20_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_19_pack(
+int vehicle_rt_ir_temp_temp_19_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_19_t *src_p,
     size_t size);
@@ -8365,7 +8364,7 @@ bool vehicle_rt_ir_temp_temp_19_ir_temperature_19_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_18_pack(
+int vehicle_rt_ir_temp_temp_18_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_18_t *src_p,
     size_t size);
@@ -8420,7 +8419,7 @@ bool vehicle_rt_ir_temp_temp_18_ir_temperature_18_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_16_pack(
+int vehicle_rt_ir_temp_temp_16_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_16_t *src_p,
     size_t size);
@@ -8475,7 +8474,7 @@ bool vehicle_rt_ir_temp_temp_16_ir_temperature_16_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_15_pack(
+int vehicle_rt_ir_temp_temp_15_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_15_t *src_p,
     size_t size);
@@ -8530,7 +8529,7 @@ bool vehicle_rt_ir_temp_temp_15_ir_temperature_15_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_14_pack(
+int vehicle_rt_ir_temp_temp_14_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_14_t *src_p,
     size_t size);
@@ -8585,7 +8584,7 @@ bool vehicle_rt_ir_temp_temp_14_ir_temperature_14_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_13_pack(
+int vehicle_rt_ir_temp_temp_13_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_13_t *src_p,
     size_t size);
@@ -8640,7 +8639,7 @@ bool vehicle_rt_ir_temp_temp_13_ir_temperature_13_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_12_pack(
+int vehicle_rt_ir_temp_temp_12_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_12_t *src_p,
     size_t size);
@@ -8695,7 +8694,7 @@ bool vehicle_rt_ir_temp_temp_12_ir_temperature_12_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_11_pack(
+int vehicle_rt_ir_temp_temp_11_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_11_t *src_p,
     size_t size);
@@ -8750,7 +8749,7 @@ bool vehicle_rt_ir_temp_temp_11_ir_temperature_11_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_10_pack(
+int vehicle_rt_ir_temp_temp_10_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_10_t *src_p,
     size_t size);
@@ -8805,7 +8804,7 @@ bool vehicle_rt_ir_temp_temp_10_ir_temperature_10_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_8_pack(
+int vehicle_rt_ir_temp_temp_8_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_8_t *src_p,
     size_t size);
@@ -8860,7 +8859,7 @@ bool vehicle_rt_ir_temp_temp_8_ir_temperature_8_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_9_pack(
+int vehicle_rt_ir_temp_temp_9_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_9_t *src_p,
     size_t size);
@@ -8915,7 +8914,7 @@ bool vehicle_rt_ir_temp_temp_9_ir_temperature_9_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_17_pack(
+int vehicle_rt_ir_temp_temp_17_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_17_t *src_p,
     size_t size);
@@ -8970,7 +8969,7 @@ bool vehicle_rt_ir_temp_temp_17_ir_temperature_17_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_6_pack(
+int vehicle_rt_ir_temp_temp_6_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_6_t *src_p,
     size_t size);
@@ -9025,7 +9024,7 @@ bool vehicle_rt_ir_temp_temp_6_ir_temperature_6_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_5_pack(
+int vehicle_rt_ir_temp_temp_5_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_5_t *src_p,
     size_t size);
@@ -9080,7 +9079,7 @@ bool vehicle_rt_ir_temp_temp_5_ir_temperature_5_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_4_pack(
+int vehicle_rt_ir_temp_temp_4_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_4_t *src_p,
     size_t size);
@@ -9135,7 +9134,7 @@ bool vehicle_rt_ir_temp_temp_4_ir_temperature_4_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_3_pack(
+int vehicle_rt_ir_temp_temp_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_3_t *src_p,
     size_t size);
@@ -9190,7 +9189,7 @@ bool vehicle_rt_ir_temp_temp_3_ir_temperature_3_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_2_pack(
+int vehicle_rt_ir_temp_temp_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_2_t *src_p,
     size_t size);
@@ -9245,7 +9244,7 @@ bool vehicle_rt_ir_temp_temp_2_ir_temperature_2_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_ir_temp_temp_1_pack(
+int vehicle_rt_ir_temp_temp_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_ir_temp_temp_1_t *src_p,
     size_t size);
@@ -9300,7 +9299,7 @@ bool vehicle_rt_ir_temp_temp_1_ir_temperature_1_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_trig_final_condition_pack(
+int vehicle_rt_sb_trig_final_condition_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_trig_final_condition_t *src_p,
     size_t size);
@@ -9382,7 +9381,7 @@ bool vehicle_rt_sb_trig_final_condition_final_speed_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_trig_initial_condition_pack(
+int vehicle_rt_sb_trig_initial_condition_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_trig_initial_condition_t *src_p,
     size_t size);
@@ -9572,7 +9571,7 @@ bool vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_is_in_range(uint8_t
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_trig_direct_dist_pack(
+int vehicle_rt_sb_trig_direct_dist_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_trig_direct_dist_t *src_p,
     size_t size);
@@ -9654,7 +9653,7 @@ bool vehicle_rt_sb_trig_direct_dist_path_distance_2_d_is_in_range(uint32_t value
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_trig_forward_dist_pack(
+int vehicle_rt_sb_trig_forward_dist_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_trig_forward_dist_t *src_p,
     size_t size);
@@ -9736,7 +9735,7 @@ bool vehicle_rt_sb_trig_forward_dist_deviation_distance_is_in_range(int32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_trig_path_dist_pack(
+int vehicle_rt_sb_trig_path_dist_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_trig_path_dist_t *src_p,
     size_t size);
@@ -9791,7 +9790,7 @@ bool vehicle_rt_sb_trig_path_dist_path_distance_3_d_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_trig_accel_pack(
+int vehicle_rt_sb_trig_accel_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_trig_accel_t *src_p,
     size_t size);
@@ -9981,7 +9980,7 @@ bool vehicle_rt_sb_trig_accel_triggered_time_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_12_pack(
+int vehicle_rt_dl1_mk3_measure_time_12_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_12_t *src_p,
     size_t size);
@@ -10036,7 +10035,7 @@ bool vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_is_in_range(uint32_t va
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_11_pack(
+int vehicle_rt_dl1_mk3_measure_time_11_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_11_t *src_p,
     size_t size);
@@ -10091,7 +10090,7 @@ bool vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_is_in_range(uint32_t va
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_10_pack(
+int vehicle_rt_dl1_mk3_measure_time_10_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_10_t *src_p,
     size_t size);
@@ -10146,7 +10145,7 @@ bool vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_is_in_range(uint32_t va
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_9_pack(
+int vehicle_rt_dl1_mk3_measure_time_9_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_9_t *src_p,
     size_t size);
@@ -10201,7 +10200,7 @@ bool vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_8_pack(
+int vehicle_rt_dl1_mk3_measure_time_8_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_8_t *src_p,
     size_t size);
@@ -10256,7 +10255,7 @@ bool vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_7_pack(
+int vehicle_rt_dl1_mk3_measure_time_7_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_7_t *src_p,
     size_t size);
@@ -10311,7 +10310,7 @@ bool vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_6_pack(
+int vehicle_rt_dl1_mk3_measure_time_6_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_6_t *src_p,
     size_t size);
@@ -10366,7 +10365,7 @@ bool vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_5_pack(
+int vehicle_rt_dl1_mk3_measure_time_5_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_5_t *src_p,
     size_t size);
@@ -10421,7 +10420,7 @@ bool vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_4_pack(
+int vehicle_rt_dl1_mk3_measure_time_4_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_4_t *src_p,
     size_t size);
@@ -10476,7 +10475,7 @@ bool vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_3_pack(
+int vehicle_rt_dl1_mk3_measure_time_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_3_t *src_p,
     size_t size);
@@ -10531,7 +10530,7 @@ bool vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_2_pack(
+int vehicle_rt_dl1_mk3_measure_time_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_2_t *src_p,
     size_t size);
@@ -10586,7 +10585,7 @@ bool vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_measure_time_1_pack(
+int vehicle_rt_dl1_mk3_measure_time_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_measure_time_1_t *src_p,
     size_t size);
@@ -10641,7 +10640,7 @@ bool vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_is_in_range(uint32_t valu
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_rpm_pack(
+int vehicle_rt_dl1_mk3_rpm_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_rpm_t *src_p,
     size_t size);
@@ -10696,7 +10695,7 @@ bool vehicle_rt_dl1_mk3_rpm_rpm_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_freq_4_pack(
+int vehicle_rt_dl1_mk3_freq_4_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_freq_4_t *src_p,
     size_t size);
@@ -10751,7 +10750,7 @@ bool vehicle_rt_dl1_mk3_freq_4_frequency_4_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_freq_3_pack(
+int vehicle_rt_dl1_mk3_freq_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_freq_3_t *src_p,
     size_t size);
@@ -10806,7 +10805,7 @@ bool vehicle_rt_dl1_mk3_freq_3_frequency_3_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_freq_2_pack(
+int vehicle_rt_dl1_mk3_freq_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_freq_2_t *src_p,
     size_t size);
@@ -10861,7 +10860,7 @@ bool vehicle_rt_dl1_mk3_freq_2_frequency_2_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_misc_3_pack(
+int vehicle_rt_dl1_mk3_misc_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_misc_3_t *src_p,
     size_t size);
@@ -10916,7 +10915,7 @@ bool vehicle_rt_dl1_mk3_misc_3_misc_3_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_misc_2_pack(
+int vehicle_rt_dl1_mk3_misc_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_misc_2_t *src_p,
     size_t size);
@@ -10971,7 +10970,7 @@ bool vehicle_rt_dl1_mk3_misc_2_misc_2_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_misc_1_pack(
+int vehicle_rt_dl1_mk3_misc_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_misc_1_t *src_p,
     size_t size);
@@ -11026,7 +11025,7 @@ bool vehicle_rt_dl1_mk3_misc_1_misc_1_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_31_pack(
+int vehicle_rt_dl1_mk3_aux_31_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_31_t *src_p,
     size_t size);
@@ -11081,7 +11080,7 @@ bool vehicle_rt_dl1_mk3_aux_31_aux_31_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_30_pack(
+int vehicle_rt_dl1_mk3_aux_30_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_30_t *src_p,
     size_t size);
@@ -11136,7 +11135,7 @@ bool vehicle_rt_dl1_mk3_aux_30_aux_30_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_29_pack(
+int vehicle_rt_dl1_mk3_aux_29_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_29_t *src_p,
     size_t size);
@@ -11191,7 +11190,7 @@ bool vehicle_rt_dl1_mk3_aux_29_aux_29_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_28_pack(
+int vehicle_rt_dl1_mk3_aux_28_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_28_t *src_p,
     size_t size);
@@ -11246,7 +11245,7 @@ bool vehicle_rt_dl1_mk3_aux_28_aux_28_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_27_pack(
+int vehicle_rt_dl1_mk3_aux_27_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_27_t *src_p,
     size_t size);
@@ -11301,7 +11300,7 @@ bool vehicle_rt_dl1_mk3_aux_27_aux_27_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_26_pack(
+int vehicle_rt_dl1_mk3_aux_26_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_26_t *src_p,
     size_t size);
@@ -11356,7 +11355,7 @@ bool vehicle_rt_dl1_mk3_aux_26_aux_26_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_25_pack(
+int vehicle_rt_dl1_mk3_aux_25_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_25_t *src_p,
     size_t size);
@@ -11411,7 +11410,7 @@ bool vehicle_rt_dl1_mk3_aux_25_aux_25_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_24_pack(
+int vehicle_rt_dl1_mk3_aux_24_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_24_t *src_p,
     size_t size);
@@ -11466,7 +11465,7 @@ bool vehicle_rt_dl1_mk3_aux_24_aux_24_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_23_pack(
+int vehicle_rt_dl1_mk3_aux_23_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_23_t *src_p,
     size_t size);
@@ -11521,7 +11520,7 @@ bool vehicle_rt_dl1_mk3_aux_23_aux_23_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_22_pack(
+int vehicle_rt_dl1_mk3_aux_22_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_22_t *src_p,
     size_t size);
@@ -11576,7 +11575,7 @@ bool vehicle_rt_dl1_mk3_aux_22_aux_22_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_21_pack(
+int vehicle_rt_dl1_mk3_aux_21_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_21_t *src_p,
     size_t size);
@@ -11631,7 +11630,7 @@ bool vehicle_rt_dl1_mk3_aux_21_aux_21_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_20_pack(
+int vehicle_rt_dl1_mk3_aux_20_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_20_t *src_p,
     size_t size);
@@ -11686,7 +11685,7 @@ bool vehicle_rt_dl1_mk3_aux_20_aux_20_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_19_pack(
+int vehicle_rt_dl1_mk3_aux_19_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_19_t *src_p,
     size_t size);
@@ -11741,7 +11740,7 @@ bool vehicle_rt_dl1_mk3_aux_19_aux_19_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_18_pack(
+int vehicle_rt_dl1_mk3_aux_18_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_18_t *src_p,
     size_t size);
@@ -11796,7 +11795,7 @@ bool vehicle_rt_dl1_mk3_aux_18_aux_18_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_17_pack(
+int vehicle_rt_dl1_mk3_aux_17_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_17_t *src_p,
     size_t size);
@@ -11851,7 +11850,7 @@ bool vehicle_rt_dl1_mk3_aux_17_aux_17_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_16_pack(
+int vehicle_rt_dl1_mk3_aux_16_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_16_t *src_p,
     size_t size);
@@ -11906,7 +11905,7 @@ bool vehicle_rt_dl1_mk3_aux_16_aux_16_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_15_pack(
+int vehicle_rt_dl1_mk3_aux_15_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_15_t *src_p,
     size_t size);
@@ -11961,7 +11960,7 @@ bool vehicle_rt_dl1_mk3_aux_15_aux_15_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_14_pack(
+int vehicle_rt_dl1_mk3_aux_14_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_14_t *src_p,
     size_t size);
@@ -12016,7 +12015,7 @@ bool vehicle_rt_dl1_mk3_aux_14_aux_14_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_13_pack(
+int vehicle_rt_dl1_mk3_aux_13_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_13_t *src_p,
     size_t size);
@@ -12071,7 +12070,7 @@ bool vehicle_rt_dl1_mk3_aux_13_aux_13_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_12_pack(
+int vehicle_rt_dl1_mk3_aux_12_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_12_t *src_p,
     size_t size);
@@ -12126,7 +12125,7 @@ bool vehicle_rt_dl1_mk3_aux_12_aux_12_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_11_pack(
+int vehicle_rt_dl1_mk3_aux_11_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_11_t *src_p,
     size_t size);
@@ -12181,7 +12180,7 @@ bool vehicle_rt_dl1_mk3_aux_11_aux_11_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_9_pack(
+int vehicle_rt_dl1_mk3_aux_9_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_9_t *src_p,
     size_t size);
@@ -12236,7 +12235,7 @@ bool vehicle_rt_dl1_mk3_aux_9_aux_9_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_10_pack(
+int vehicle_rt_dl1_mk3_aux_10_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_10_t *src_p,
     size_t size);
@@ -12291,7 +12290,7 @@ bool vehicle_rt_dl1_mk3_aux_10_aux_10_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_8_pack(
+int vehicle_rt_dl1_mk3_aux_8_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_8_t *src_p,
     size_t size);
@@ -12346,7 +12345,7 @@ bool vehicle_rt_dl1_mk3_aux_8_aux_8_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_7_pack(
+int vehicle_rt_dl1_mk3_aux_7_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_7_t *src_p,
     size_t size);
@@ -12401,7 +12400,7 @@ bool vehicle_rt_dl1_mk3_aux_7_aux_7_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_6_pack(
+int vehicle_rt_dl1_mk3_aux_6_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_6_t *src_p,
     size_t size);
@@ -12456,7 +12455,7 @@ bool vehicle_rt_dl1_mk3_aux_6_aux_6_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_5_pack(
+int vehicle_rt_dl1_mk3_aux_5_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_5_t *src_p,
     size_t size);
@@ -12511,7 +12510,7 @@ bool vehicle_rt_dl1_mk3_aux_5_aux_5_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_4_pack(
+int vehicle_rt_dl1_mk3_aux_4_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_4_t *src_p,
     size_t size);
@@ -12566,7 +12565,7 @@ bool vehicle_rt_dl1_mk3_aux_4_aux_4_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_3_pack(
+int vehicle_rt_dl1_mk3_aux_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_3_t *src_p,
     size_t size);
@@ -12621,7 +12620,7 @@ bool vehicle_rt_dl1_mk3_aux_3_aux_3_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_2_pack(
+int vehicle_rt_dl1_mk3_aux_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_2_t *src_p,
     size_t size);
@@ -12676,7 +12675,7 @@ bool vehicle_rt_dl1_mk3_aux_2_aux_2_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_aux_1_pack(
+int vehicle_rt_dl1_mk3_aux_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_aux_1_t *src_p,
     size_t size);
@@ -12731,7 +12730,7 @@ bool vehicle_rt_dl1_mk3_aux_1_aux_1_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_pressure_5_pack(
+int vehicle_rt_dl1_mk3_pressure_5_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_pressure_5_t *src_p,
     size_t size);
@@ -12786,7 +12785,7 @@ bool vehicle_rt_dl1_mk3_pressure_5_pressure_5_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_pressure_4_pack(
+int vehicle_rt_dl1_mk3_pressure_4_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_pressure_4_t *src_p,
     size_t size);
@@ -12841,7 +12840,7 @@ bool vehicle_rt_dl1_mk3_pressure_4_pressure_4_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_pressure_3_pack(
+int vehicle_rt_dl1_mk3_pressure_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_pressure_3_t *src_p,
     size_t size);
@@ -12896,7 +12895,7 @@ bool vehicle_rt_dl1_mk3_pressure_3_pressure_3_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_pressure_2_pack(
+int vehicle_rt_dl1_mk3_pressure_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_pressure_2_t *src_p,
     size_t size);
@@ -12951,7 +12950,7 @@ bool vehicle_rt_dl1_mk3_pressure_2_pressure_2_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_pressure_1_pack(
+int vehicle_rt_dl1_mk3_pressure_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_pressure_1_t *src_p,
     size_t size);
@@ -13006,7 +13005,7 @@ bool vehicle_rt_dl1_mk3_pressure_1_pressure_1_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_angle_3_pack(
+int vehicle_rt_dl1_mk3_angle_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_angle_3_t *src_p,
     size_t size);
@@ -13061,7 +13060,7 @@ bool vehicle_rt_dl1_mk3_angle_3_angle_3_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_angle_2_pack(
+int vehicle_rt_dl1_mk3_angle_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_angle_2_t *src_p,
     size_t size);
@@ -13116,7 +13115,7 @@ bool vehicle_rt_dl1_mk3_angle_2_angle_2_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_angle_1_pack(
+int vehicle_rt_dl1_mk3_angle_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_angle_1_t *src_p,
     size_t size);
@@ -13171,7 +13170,7 @@ bool vehicle_rt_dl1_mk3_angle_1_angle_1_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_25_pack(
+int vehicle_rt_dl1_mk3_temp_25_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_25_t *src_p,
     size_t size);
@@ -13226,7 +13225,7 @@ bool vehicle_rt_dl1_mk3_temp_25_temperature_25_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_24_pack(
+int vehicle_rt_dl1_mk3_temp_24_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_24_t *src_p,
     size_t size);
@@ -13281,7 +13280,7 @@ bool vehicle_rt_dl1_mk3_temp_24_temperature_24_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_23_pack(
+int vehicle_rt_dl1_mk3_temp_23_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_23_t *src_p,
     size_t size);
@@ -13336,7 +13335,7 @@ bool vehicle_rt_dl1_mk3_temp_23_temperature_23_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_22_pack(
+int vehicle_rt_dl1_mk3_temp_22_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_22_t *src_p,
     size_t size);
@@ -13391,7 +13390,7 @@ bool vehicle_rt_dl1_mk3_temp_22_temperature_22_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_21_pack(
+int vehicle_rt_dl1_mk3_temp_21_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_21_t *src_p,
     size_t size);
@@ -13446,7 +13445,7 @@ bool vehicle_rt_dl1_mk3_temp_21_temperature_21_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_20_pack(
+int vehicle_rt_dl1_mk3_temp_20_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_20_t *src_p,
     size_t size);
@@ -13501,7 +13500,7 @@ bool vehicle_rt_dl1_mk3_temp_20_temperature_20_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_19_pack(
+int vehicle_rt_dl1_mk3_temp_19_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_19_t *src_p,
     size_t size);
@@ -13556,7 +13555,7 @@ bool vehicle_rt_dl1_mk3_temp_19_temperature_19_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_18_pack(
+int vehicle_rt_dl1_mk3_temp_18_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_18_t *src_p,
     size_t size);
@@ -13611,7 +13610,7 @@ bool vehicle_rt_dl1_mk3_temp_18_temperature_18_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_17_pack(
+int vehicle_rt_dl1_mk3_temp_17_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_17_t *src_p,
     size_t size);
@@ -13666,7 +13665,7 @@ bool vehicle_rt_dl1_mk3_temp_17_temperature_17_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_16_pack(
+int vehicle_rt_dl1_mk3_temp_16_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_16_t *src_p,
     size_t size);
@@ -13721,7 +13720,7 @@ bool vehicle_rt_dl1_mk3_temp_16_temperature_16_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_15_pack(
+int vehicle_rt_dl1_mk3_temp_15_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_15_t *src_p,
     size_t size);
@@ -13776,7 +13775,7 @@ bool vehicle_rt_dl1_mk3_temp_15_temperature_15_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_14_pack(
+int vehicle_rt_dl1_mk3_temp_14_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_14_t *src_p,
     size_t size);
@@ -13831,7 +13830,7 @@ bool vehicle_rt_dl1_mk3_temp_14_temperature_14_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_13_pack(
+int vehicle_rt_dl1_mk3_temp_13_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_13_t *src_p,
     size_t size);
@@ -13886,7 +13885,7 @@ bool vehicle_rt_dl1_mk3_temp_13_temperature_13_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_12_pack(
+int vehicle_rt_dl1_mk3_temp_12_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_12_t *src_p,
     size_t size);
@@ -13941,7 +13940,7 @@ bool vehicle_rt_dl1_mk3_temp_12_temperature_12_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_11_pack(
+int vehicle_rt_dl1_mk3_temp_11_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_11_t *src_p,
     size_t size);
@@ -13996,7 +13995,7 @@ bool vehicle_rt_dl1_mk3_temp_11_temperature_11_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_10_pack(
+int vehicle_rt_dl1_mk3_temp_10_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_10_t *src_p,
     size_t size);
@@ -14051,7 +14050,7 @@ bool vehicle_rt_dl1_mk3_temp_10_temperature_10_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_9_pack(
+int vehicle_rt_dl1_mk3_temp_9_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_9_t *src_p,
     size_t size);
@@ -14106,7 +14105,7 @@ bool vehicle_rt_dl1_mk3_temp_9_temperature_9_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_8_pack(
+int vehicle_rt_dl1_mk3_temp_8_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_8_t *src_p,
     size_t size);
@@ -14161,7 +14160,7 @@ bool vehicle_rt_dl1_mk3_temp_8_temperature_8_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_7_pack(
+int vehicle_rt_dl1_mk3_temp_7_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_7_t *src_p,
     size_t size);
@@ -14216,7 +14215,7 @@ bool vehicle_rt_dl1_mk3_temp_7_temperature_7_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_6_pack(
+int vehicle_rt_dl1_mk3_temp_6_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_6_t *src_p,
     size_t size);
@@ -14271,7 +14270,7 @@ bool vehicle_rt_dl1_mk3_temp_6_temperature_6_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_5_pack(
+int vehicle_rt_dl1_mk3_temp_5_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_5_t *src_p,
     size_t size);
@@ -14326,7 +14325,7 @@ bool vehicle_rt_dl1_mk3_temp_5_temperature_5_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_4_pack(
+int vehicle_rt_dl1_mk3_temp_4_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_4_t *src_p,
     size_t size);
@@ -14381,7 +14380,7 @@ bool vehicle_rt_dl1_mk3_temp_4_temperature_4_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_3_pack(
+int vehicle_rt_dl1_mk3_temp_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_3_t *src_p,
     size_t size);
@@ -14436,7 +14435,7 @@ bool vehicle_rt_dl1_mk3_temp_3_temperature_3_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_2_pack(
+int vehicle_rt_dl1_mk3_temp_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_2_t *src_p,
     size_t size);
@@ -14491,7 +14490,7 @@ bool vehicle_rt_dl1_mk3_temp_2_temperature_2_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_temp_1_pack(
+int vehicle_rt_dl1_mk3_temp_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_temp_1_t *src_p,
     size_t size);
@@ -14546,7 +14545,7 @@ bool vehicle_rt_dl1_mk3_temp_1_temperature_1_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_32_pack(
+int vehicle_rt_dl1_mk3_analog_32_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_32_t *src_p,
     size_t size);
@@ -14601,7 +14600,7 @@ bool vehicle_rt_dl1_mk3_analog_32_analog_32_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_31_pack(
+int vehicle_rt_dl1_mk3_analog_31_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_31_t *src_p,
     size_t size);
@@ -14656,7 +14655,7 @@ bool vehicle_rt_dl1_mk3_analog_31_analog_31_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_30_pack(
+int vehicle_rt_dl1_mk3_analog_30_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_30_t *src_p,
     size_t size);
@@ -14711,7 +14710,7 @@ bool vehicle_rt_dl1_mk3_analog_30_analog_30_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_29_pack(
+int vehicle_rt_dl1_mk3_analog_29_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_29_t *src_p,
     size_t size);
@@ -14766,7 +14765,7 @@ bool vehicle_rt_dl1_mk3_analog_29_analog_29_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_28_pack(
+int vehicle_rt_dl1_mk3_analog_28_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_28_t *src_p,
     size_t size);
@@ -14821,7 +14820,7 @@ bool vehicle_rt_dl1_mk3_analog_28_analog_28_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_27_pack(
+int vehicle_rt_dl1_mk3_analog_27_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_27_t *src_p,
     size_t size);
@@ -14876,7 +14875,7 @@ bool vehicle_rt_dl1_mk3_analog_27_analog_27_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_26_pack(
+int vehicle_rt_dl1_mk3_analog_26_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_26_t *src_p,
     size_t size);
@@ -14931,7 +14930,7 @@ bool vehicle_rt_dl1_mk3_analog_26_analog_26_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_25_pack(
+int vehicle_rt_dl1_mk3_analog_25_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_25_t *src_p,
     size_t size);
@@ -14986,7 +14985,7 @@ bool vehicle_rt_dl1_mk3_analog_25_analog_25_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_15_pack(
+int vehicle_rt_dl1_mk3_analog_15_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_15_t *src_p,
     size_t size);
@@ -15041,7 +15040,7 @@ bool vehicle_rt_dl1_mk3_analog_15_analog_15_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_14_pack(
+int vehicle_rt_dl1_mk3_analog_14_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_14_t *src_p,
     size_t size);
@@ -15096,7 +15095,7 @@ bool vehicle_rt_dl1_mk3_analog_14_analog_14_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_17_pack(
+int vehicle_rt_dl1_mk3_analog_17_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_17_t *src_p,
     size_t size);
@@ -15151,7 +15150,7 @@ bool vehicle_rt_dl1_mk3_analog_17_analog_17_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_24_pack(
+int vehicle_rt_dl1_mk3_analog_24_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_24_t *src_p,
     size_t size);
@@ -15206,7 +15205,7 @@ bool vehicle_rt_dl1_mk3_analog_24_analog_24_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_23_pack(
+int vehicle_rt_dl1_mk3_analog_23_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_23_t *src_p,
     size_t size);
@@ -15261,7 +15260,7 @@ bool vehicle_rt_dl1_mk3_analog_23_analog_23_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_22_pack(
+int vehicle_rt_dl1_mk3_analog_22_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_22_t *src_p,
     size_t size);
@@ -15316,7 +15315,7 @@ bool vehicle_rt_dl1_mk3_analog_22_analog_22_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_21_pack(
+int vehicle_rt_dl1_mk3_analog_21_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_21_t *src_p,
     size_t size);
@@ -15371,7 +15370,7 @@ bool vehicle_rt_dl1_mk3_analog_21_analog_21_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_20_pack(
+int vehicle_rt_dl1_mk3_analog_20_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_20_t *src_p,
     size_t size);
@@ -15426,7 +15425,7 @@ bool vehicle_rt_dl1_mk3_analog_20_analog_20_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_19_pack(
+int vehicle_rt_dl1_mk3_analog_19_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_19_t *src_p,
     size_t size);
@@ -15481,7 +15480,7 @@ bool vehicle_rt_dl1_mk3_analog_19_analog_19_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_16_pack(
+int vehicle_rt_dl1_mk3_analog_16_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_16_t *src_p,
     size_t size);
@@ -15536,7 +15535,7 @@ bool vehicle_rt_dl1_mk3_analog_16_analog_16_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_18_pack(
+int vehicle_rt_dl1_mk3_analog_18_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_18_t *src_p,
     size_t size);
@@ -15591,7 +15590,7 @@ bool vehicle_rt_dl1_mk3_analog_18_analog_18_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_12_pack(
+int vehicle_rt_dl1_mk3_analog_12_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_12_t *src_p,
     size_t size);
@@ -15646,7 +15645,7 @@ bool vehicle_rt_dl1_mk3_analog_12_analog_12_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_11_pack(
+int vehicle_rt_dl1_mk3_analog_11_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_11_t *src_p,
     size_t size);
@@ -15701,7 +15700,7 @@ bool vehicle_rt_dl1_mk3_analog_11_analog_11_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_10_pack(
+int vehicle_rt_dl1_mk3_analog_10_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_10_t *src_p,
     size_t size);
@@ -15756,7 +15755,7 @@ bool vehicle_rt_dl1_mk3_analog_10_analog_10_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_9_pack(
+int vehicle_rt_dl1_mk3_analog_9_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_9_t *src_p,
     size_t size);
@@ -15811,7 +15810,7 @@ bool vehicle_rt_dl1_mk3_analog_9_analog_9_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_8_pack(
+int vehicle_rt_dl1_mk3_analog_8_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_8_t *src_p,
     size_t size);
@@ -15866,7 +15865,7 @@ bool vehicle_rt_dl1_mk3_analog_8_analog_8_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_7_pack(
+int vehicle_rt_dl1_mk3_analog_7_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_7_t *src_p,
     size_t size);
@@ -15921,7 +15920,7 @@ bool vehicle_rt_dl1_mk3_analog_7_analog_7_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_6_pack(
+int vehicle_rt_dl1_mk3_analog_6_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_6_t *src_p,
     size_t size);
@@ -15976,7 +15975,7 @@ bool vehicle_rt_dl1_mk3_analog_6_analog_6_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_5_pack(
+int vehicle_rt_dl1_mk3_analog_5_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_5_t *src_p,
     size_t size);
@@ -16031,7 +16030,7 @@ bool vehicle_rt_dl1_mk3_analog_5_analog_5_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_4_pack(
+int vehicle_rt_dl1_mk3_analog_4_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_4_t *src_p,
     size_t size);
@@ -16086,7 +16085,7 @@ bool vehicle_rt_dl1_mk3_analog_4_analog_4_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_3_pack(
+int vehicle_rt_dl1_mk3_analog_3_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_3_t *src_p,
     size_t size);
@@ -16141,7 +16140,7 @@ bool vehicle_rt_dl1_mk3_analog_3_analog_3_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_2_pack(
+int vehicle_rt_dl1_mk3_analog_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_2_t *src_p,
     size_t size);
@@ -16196,7 +16195,7 @@ bool vehicle_rt_dl1_mk3_analog_2_analog_2_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_analog_1_pack(
+int vehicle_rt_dl1_mk3_analog_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_analog_1_t *src_p,
     size_t size);
@@ -16251,7 +16250,7 @@ bool vehicle_rt_dl1_mk3_analog_1_analog_1_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_dl1_mk3_accel_pack(
+int vehicle_rt_dl1_mk3_accel_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_dl1_mk3_accel_t *src_p,
     size_t size);
@@ -16468,7 +16467,7 @@ bool vehicle_rt_dl1_mk3_accel_accel_vertical_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_4_vel_ned_2_pack(
+int vehicle_rt_sb_ins_vpt_4_vel_ned_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_4_vel_ned_2_t *src_p,
     size_t size);
@@ -16577,7 +16576,7 @@ bool vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_is_in_range(int16_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_4_vel_ned_1_pack(
+int vehicle_rt_sb_ins_vpt_4_vel_ned_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_4_vel_ned_1_t *src_p,
     size_t size);
@@ -16659,7 +16658,7 @@ bool vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_is_in_range(int32_t v
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_4_offset_pack(
+int vehicle_rt_sb_ins_vpt_4_offset_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_4_offset_t *src_p,
     size_t size);
@@ -16768,7 +16767,7 @@ bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_is_in_range(int16_t value
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_3_vel_ned_2_pack(
+int vehicle_rt_sb_ins_vpt_3_vel_ned_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_3_vel_ned_2_t *src_p,
     size_t size);
@@ -16877,7 +16876,7 @@ bool vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_is_in_range(int16_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_3_vel_ned_1_pack(
+int vehicle_rt_sb_ins_vpt_3_vel_ned_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_3_vel_ned_1_t *src_p,
     size_t size);
@@ -16959,7 +16958,7 @@ bool vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_is_in_range(int32_t v
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_3_offset_pack(
+int vehicle_rt_sb_ins_vpt_3_offset_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_3_offset_t *src_p,
     size_t size);
@@ -17068,7 +17067,7 @@ bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_is_in_range(int16_t value
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_2_vel_ned_2_pack(
+int vehicle_rt_sb_ins_vpt_2_vel_ned_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_2_vel_ned_2_t *src_p,
     size_t size);
@@ -17177,7 +17176,7 @@ bool vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_is_in_range(int16_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_2_vel_ned_1_pack(
+int vehicle_rt_sb_ins_vpt_2_vel_ned_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_2_vel_ned_1_t *src_p,
     size_t size);
@@ -17259,7 +17258,7 @@ bool vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_is_in_range(int32_t v
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_2_offset_pack(
+int vehicle_rt_sb_ins_vpt_2_offset_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_2_offset_t *src_p,
     size_t size);
@@ -17368,7 +17367,7 @@ bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_is_in_range(int16_t value
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_1_vel_ned_2_pack(
+int vehicle_rt_sb_ins_vpt_1_vel_ned_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_1_vel_ned_2_t *src_p,
     size_t size);
@@ -17477,7 +17476,7 @@ bool vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_is_in_range(int16_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_1_vel_ned_1_pack(
+int vehicle_rt_sb_ins_vpt_1_vel_ned_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_1_vel_ned_1_t *src_p,
     size_t size);
@@ -17559,7 +17558,7 @@ bool vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_is_in_range(int32_t v
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vpt_1_offset_pack(
+int vehicle_rt_sb_ins_vpt_1_offset_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vpt_1_offset_t *src_p,
     size_t size);
@@ -17668,7 +17667,7 @@ bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_is_in_range(int16_t value
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_slip_pack(
+int vehicle_rt_sb_ins_slip_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_slip_t *src_p,
     size_t size);
@@ -17858,7 +17857,7 @@ bool vehicle_rt_sb_ins_slip_ins_squat_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vel_ecef_2_pack(
+int vehicle_rt_sb_ins_vel_ecef_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vel_ecef_2_t *src_p,
     size_t size);
@@ -17994,7 +17993,7 @@ bool vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vel_ecef_1_pack(
+int vehicle_rt_sb_ins_vel_ecef_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vel_ecef_1_t *src_p,
     size_t size);
@@ -18157,7 +18156,7 @@ bool vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vel_ned_2_pack(
+int vehicle_rt_sb_ins_vel_ned_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vel_ned_2_t *src_p,
     size_t size);
@@ -18266,7 +18265,7 @@ bool vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_vel_ned_1_pack(
+int vehicle_rt_sb_ins_vel_ned_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vel_ned_1_t *src_p,
     size_t size);
@@ -18429,7 +18428,7 @@ bool vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_pos_ecef_2_pack(
+int vehicle_rt_sb_ins_pos_ecef_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_pos_ecef_2_t *src_p,
     size_t size);
@@ -18511,7 +18510,7 @@ bool vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_pos_ecef_1_pack(
+int vehicle_rt_sb_ins_pos_ecef_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_pos_ecef_1_t *src_p,
     size_t size);
@@ -18728,7 +18727,7 @@ bool vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_pos_llh_2_pack(
+int vehicle_rt_sb_ins_pos_llh_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_pos_llh_2_t *src_p,
     size_t size);
@@ -18810,7 +18809,7 @@ bool vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_is_in_range(int32_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_pos_llh_1_pack(
+int vehicle_rt_sb_ins_pos_llh_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_pos_llh_1_t *src_p,
     size_t size);
@@ -19027,7 +19026,7 @@ bool vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_is_in_range(int32_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_heading_gradient_2_pack(
+int vehicle_rt_sb_ins_heading_gradient_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_heading_gradient_2_t *src_p,
     size_t size);
@@ -19217,7 +19216,7 @@ bool vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_is_in_range(int16_t value
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_heading_gradient_pack(
+int vehicle_rt_sb_ins_heading_gradient_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_heading_gradient_t *src_p,
     size_t size);
@@ -19407,7 +19406,7 @@ bool vehicle_rt_sb_ins_heading_gradient_ins_gradient_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_status_pack(
+int vehicle_rt_sb_ins_status_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_status_t *src_p,
     size_t size);
@@ -19462,7 +19461,7 @@ bool vehicle_rt_sb_ins_status_ins_status_is_in_range(uint8_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_ins_attitude_pack(
+int vehicle_rt_sb_ins_attitude_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_attitude_t *src_p,
     size_t size);
@@ -19679,7 +19678,7 @@ bool vehicle_rt_sb_ins_attitude_attitude_roll_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_output_status_pack(
+int vehicle_rt_sb_output_status_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_output_status_t *src_p,
     size_t size);
@@ -19977,7 +19976,7 @@ bool vehicle_rt_sb_output_status_gps_time_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_heading_gradient_2_pack(
+int vehicle_rt_sb_gps_heading_gradient_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_heading_gradient_2_t *src_p,
     size_t size);
@@ -20167,7 +20166,7 @@ bool vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_is_in_range(int16_t value
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_cumulative_distance_2_pack(
+int vehicle_rt_sb_cumulative_distance_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_cumulative_distance_2_t *src_p,
     size_t size);
@@ -20303,7 +20302,7 @@ bool vehicle_rt_sb_cumulative_distance_2_cumulative_distance_is_in_range(uint32_
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_cumulative_distance_1_pack(
+int vehicle_rt_sb_cumulative_distance_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_cumulative_distance_1_t *src_p,
     size_t size);
@@ -20439,7 +20438,7 @@ bool vehicle_rt_sb_cumulative_distance_1_cumulative_distance_is_in_range(uint32_
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_trigger_timestamp_pack(
+int vehicle_rt_sb_trigger_timestamp_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_trigger_timestamp_t *src_p,
     size_t size);
@@ -20602,7 +20601,7 @@ bool vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_is_in_range(uint64
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_imu06_gyro_rates_pack(
+int vehicle_rt_imu06_gyro_rates_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_imu06_gyro_rates_t *src_p,
     size_t size);
@@ -20819,7 +20818,7 @@ bool vehicle_rt_imu06_gyro_rates_gyro_rate_roll_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_imu06_accel_pack(
+int vehicle_rt_imu06_accel_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_imu06_accel_t *src_p,
     size_t size);
@@ -21036,7 +21035,7 @@ bool vehicle_rt_imu06_accel_accel_vertical_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_speed_pack(
+int vehicle_rt_sb_speed_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_speed_t *src_p,
     size_t size);
@@ -21145,7 +21144,7 @@ bool vehicle_rt_sb_speed_speed_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_rtk_slip_pack(
+int vehicle_rt_sb_rtk_slip_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_rtk_slip_t *src_p,
     size_t size);
@@ -21362,7 +21361,7 @@ bool vehicle_rt_sb_rtk_slip_rtk_baseline_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_rtk_attitude_pack(
+int vehicle_rt_sb_rtk_attitude_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_rtk_attitude_t *src_p,
     size_t size);
@@ -21579,7 +21578,7 @@ bool vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_mcycle_lean_pack(
+int vehicle_rt_sb_gps_mcycle_lean_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_mcycle_lean_t *src_p,
     size_t size);
@@ -21742,7 +21741,7 @@ bool vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_is_in_range(int16_t val
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_status_pack(
+int vehicle_rt_sb_gps_status_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_status_t *src_p,
     size_t size);
@@ -21986,7 +21985,7 @@ bool vehicle_rt_sb_gps_status_rtk_status_is_in_range(uint8_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_pos_ecef_2_pack(
+int vehicle_rt_sb_gps_pos_ecef_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_pos_ecef_2_t *src_p,
     size_t size);
@@ -22068,7 +22067,7 @@ bool vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_pos_ecef_1_pack(
+int vehicle_rt_sb_gps_pos_ecef_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_pos_ecef_1_t *src_p,
     size_t size);
@@ -22285,7 +22284,7 @@ bool vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_pos_llh_2_pack(
+int vehicle_rt_sb_gps_pos_llh_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_pos_llh_2_t *src_p,
     size_t size);
@@ -22367,7 +22366,7 @@ bool vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_is_in_range(int32_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_pos_llh_1_pack(
+int vehicle_rt_sb_gps_pos_llh_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_pos_llh_1_t *src_p,
     size_t size);
@@ -22584,7 +22583,7 @@ bool vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t value)
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_heading_gradient_pack(
+int vehicle_rt_sb_gps_heading_gradient_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_heading_gradient_t *src_p,
     size_t size);
@@ -22774,7 +22773,7 @@ bool vehicle_rt_sb_gps_heading_gradient_gps_gradient_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_vel_ecef_2_pack(
+int vehicle_rt_sb_gps_vel_ecef_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_vel_ecef_2_t *src_p,
     size_t size);
@@ -22910,7 +22909,7 @@ bool vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_vel_ecef_1_pack(
+int vehicle_rt_sb_gps_vel_ecef_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_vel_ecef_1_t *src_p,
     size_t size);
@@ -23073,7 +23072,7 @@ bool vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_vel_ned_2_pack(
+int vehicle_rt_sb_gps_vel_ned_2_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_vel_ned_2_t *src_p,
     size_t size);
@@ -23182,7 +23181,7 @@ bool vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_vel_ned_1_pack(
+int vehicle_rt_sb_gps_vel_ned_1_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_vel_ned_1_t *src_p,
     size_t size);
@@ -23345,7 +23344,7 @@ bool vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_is_in_range(int32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_speed_pack(
+int vehicle_rt_sb_gps_speed_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_speed_t *src_p,
     size_t size);
@@ -23508,7 +23507,7 @@ bool vehicle_rt_sb_gps_speed_gps_speed_3_d_is_in_range(uint32_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gps_time_pack(
+int vehicle_rt_sb_gps_time_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gps_time_t *src_p,
     size_t size);
@@ -23671,7 +23670,7 @@ bool vehicle_rt_sb_gps_time_gps_week_is_in_range(uint16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_accel_pack(
+int vehicle_rt_sb_accel_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_accel_t *src_p,
     size_t size);
@@ -23888,7 +23887,7 @@ bool vehicle_rt_sb_accel_accel_vertical_is_in_range(int16_t value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t vehicle_rt_sb_gyro_rates_pack(
+int vehicle_rt_sb_gyro_rates_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_gyro_rates_t *src_p,
     size_t size);

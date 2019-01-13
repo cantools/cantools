@@ -32,7 +32,7 @@
 
 #include "camel_case_empty.h"
 
-ssize_t camel_case_empty_message1_pack(
+int camel_case_empty_message1_pack(
     uint8_t *dst_p,
     const struct camel_case_empty_message1_t *src_p,
     size_t size)

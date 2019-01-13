@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -73,7 +72,7 @@ struct choices_foo_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t choices_foo_pack(
+int choices_foo_pack(
     uint8_t *dst_p,
     const struct choices_foo_t *src_p,
     size_t size);

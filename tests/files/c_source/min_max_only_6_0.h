@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -85,7 +84,7 @@ struct min_max_only_6_0_symbol1_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t min_max_only_6_0_symbol1_pack(
+int min_max_only_6_0_symbol1_pack(
     uint8_t *dst_p,
     const struct min_max_only_6_0_symbol1_t *src_p,
     size_t size);

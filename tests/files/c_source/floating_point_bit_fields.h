@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -86,7 +85,7 @@ struct floating_point_bit_fields_message2_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t floating_point_bit_fields_message1_pack(
+int floating_point_bit_fields_message1_pack(
     uint8_t *dst_p,
     const struct floating_point_bit_fields_message1_t *src_p,
     size_t size);
@@ -141,7 +140,7 @@ bool floating_point_bit_fields_message1_signal1_is_in_range(double value);
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t floating_point_bit_fields_message2_pack(
+int floating_point_bit_fields_message2_pack(
     uint8_t *dst_p,
     const struct floating_point_bit_fields_message2_t *src_p,
     size_t size);

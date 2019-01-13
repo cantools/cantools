@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #ifndef EINVAL
 #    define EINVAL 22
@@ -83,7 +82,7 @@ struct my_database_name_example_message_t {
  *
  * @return Size of packed data, or negative error code.
  */
-ssize_t my_database_name_example_message_pack(
+int my_database_name_example_message_pack(
     uint8_t *dst_p,
     const struct my_database_name_example_message_t *src_p,
     size_t size);

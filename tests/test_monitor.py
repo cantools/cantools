@@ -88,7 +88,6 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
         self.assert_called(color_pair, [call(1), call(2)])
         self.assert_called(bus, [call(bustype='socketcan', channel='vcan0')])
-        notifier.assert_called_once()
         self.assert_called(
             stdscr.addstr,
             [
@@ -271,10 +270,10 @@ class CanToolsMonitorTest(unittest.TestCase):
                     _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
-            'f', 'Y', '\n', 'f', '\b', 'E', '\n', 'q'
+            'f', 'Y', '[', '\b', '\n', 'f', '\b', 'E', '\n', 'q'
         ])
         args = Args('tests/files/motohawk.dbc')
-        color_pair.side_effect = 8 * ['green', 'cyan']
+        color_pair.side_effect = 10 * ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -318,6 +317,33 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29,
                      0,
                      'Filter:                                                         ',
+                     'cyan'),
+
+                # No match on 'Y'.
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(29,
+                     0,
+                     'Filter: Y                                                       ',
+                     'cyan'),
+
+                # Invalid filter 'Y['.
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29,
+                     0,
+                     'Filter: Y[                                                      ',
                      'cyan'),
 
                 # No match on 'Y'.
@@ -392,6 +418,336 @@ class CanToolsMonitorTest(unittest.TestCase):
                      '   TIMESTAMP  MESSAGE                                           ',
                      'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29,
+                     0,
+                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_reset(self,
+                   _use_default_colors,
+                   _curs_set,
+                   _init_pair,
+                   is_term_resized,
+                   color_pair,
+                   _bus,
+                   _notifier):
+        # Prepare mocks.
+        stdscr = StdScr(user_input=[
+            'f', 'E', '\n', 'p', ' ', 'r', 'f', '\n', 'q'
+        ])
+        args = Args('tests/files/motohawk.dbc')
+        color_pair.side_effect = 10 * ['green', 'cyan']
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=496,
+            data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
+            timestamp=3))
+
+        # Discarded.
+        monitor.on_message_received(can.Message(
+            arbitration_id=497,
+            data=b'\xc0\x06\xb0\x00\x00\x00\x00\x00',
+            timestamp=6))
+
+        monitor.tick()
+        monitor.tick()
+        monitor.tick()
+
+        # Input another before pause.
+        monitor.on_message_received(can.Message(
+            arbitration_id=496,
+            data=b'\xc0\x06\xc0\x00\x00\x00\x00\x00',
+            timestamp=7))
+
+        monitor.tick()
+
+        # Input when paused. Will not be displayed.
+        monitor.on_message_received(can.Message(
+            arbitration_id=496,
+            data=b'\xc0\x06\xd0\x00\x00\x00\x00\x00',
+            timestamp=10))
+
+        monitor.tick()
+        monitor.tick()
+        monitor.tick()
+
+        # Input after reset.
+        monitor.on_message_received(can.Message(
+            arbitration_id=496,
+            data=b'\xc0\x06\x00\x00\x00\x00\x00\x00',
+            timestamp=11))
+
+        monitor.run()
+
+        # Check mocks.
+        print(stdscr.addstr.call_args_list)
+        self.assert_called(
+            stdscr.addstr,
+            [
+                # One ok and one with bad frame id.
+                call(0, 0, 'Received: 2, Discarded: 1, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                # 'f' pressed.
+                call(0, 0, 'Received: 2, Discarded: 1, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'Filter:                                                         ',
+                     'cyan'),
+
+                # 'E' pressed.
+                call(0, 0, 'Received: 2, Discarded: 1, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'Filter: E                                                       ',
+                     'cyan'),
+
+                # '\n' pressed.
+                call(0, 0, 'Received: 3, Discarded: 1, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       4.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.54 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                # 'p' pressed. Input frame not displayed.
+
+                # 'r' pressed.
+                call(0, 0, 'Received: 0, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                # Input after reset. 'f' pressed.
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.48 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'Filter:                                                         ',
+                     'cyan'),
+
+                # '\n' pressed.
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.48 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan')
+
+                # 'q' pressed, no redraw.
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_reset(self,
+                   _use_default_colors,
+                   _curs_set,
+                   _init_pair,
+                   is_term_resized,
+                   color_pair,
+                   _bus,
+                   _notifier):
+        # Prepare mocks.
+        stdscr = StdScr(user_input=[
+            ' ', ' ', 'p', ' ', ' ', 'p', ' ', ' ', ' ', 'q'
+        ])
+        args = Args('tests/files/motohawk.dbc')
+        color_pair.side_effect = 8 * ['green', 'cyan']
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+
+        for timestamp in range(4):
+            monitor.on_message_received(can.Message(
+                arbitration_id=496,
+                data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
+                timestamp=timestamp))
+
+            monitor.tick()
+
+        # Display most recently received at unpause.
+        monitor.tick()
+        monitor.tick()
+        monitor.tick()
+
+        for timestamp in range(5, 7):
+            monitor.on_message_received(can.Message(
+                arbitration_id=496,
+                data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
+                timestamp=timestamp))
+
+            monitor.tick()
+
+        monitor.run()
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                # Received when playing.
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       1.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                call(0, 0, 'Received: 3, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       2.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                # Received when paused, displayed at unpause.
+                call(0, 0, 'Received: 4, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       3.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                # Received when playing.
+                call(0, 0, 'Received: 5, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       5.000  ExampleMessage('),
+                call(3, 0, "                  Enable: 'Enabled' -,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29
+                     ,
+                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan'),
+
+                call(0, 0, 'Received: 6, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       6.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),

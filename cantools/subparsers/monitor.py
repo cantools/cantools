@@ -69,17 +69,20 @@ class Monitor(can.Listener):
 
     def run(self):
         while True:
-            modified = self.update()
-
-            if modified:
-                self.redraw()
-
             try:
-                self.process_user_input()
+                self.tick()
             except QuitError:
                 break
 
             time.sleep(0.05)
+
+    def tick(self):
+        modified = self.update()
+
+        if modified:
+            self.redraw()
+
+        self.process_user_input()
 
     def redraw(self):
         # Clear the screen.

@@ -1618,12 +1618,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 1)
 
         signal_0 = db.messages[0].signals[0]
-        self.assertEqual(signal_0.name, 'Variable2')
-        self.assertEqual(signal_0.start, 0)
-        self.assertEqual(signal_0.length, 2)
+        self.assertEqual(signal_0.name, 'Enum')
+        self.assertEqual(signal_0.start, 5)
+        self.assertEqual(signal_0.length, 8)
         self.assertEqual(signal_0.receivers, [])
-        self.assertEqual(signal_0.byte_order, 'little_endian')
-        self.assertEqual(signal_0.is_signed, True)
+        self.assertEqual(signal_0.byte_order, 'big_endian')
+        self.assertEqual(signal_0.is_signed, False)
         self.assertEqual(signal_0.scale, 1)
         self.assertEqual(signal_0.offset, 0)
         self.assertEqual(signal_0.minimum, None)
@@ -1640,12 +1640,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.is_float, False)
 
         signal_1 = db.messages[0].signals[1]
-        self.assertEqual(signal_1.name, 'Enum')
-        self.assertEqual(signal_1.start, 2)
-        self.assertEqual(signal_1.length, 8)
+        self.assertEqual(signal_1.name, 'Variable2')
+        self.assertEqual(signal_1.start, 11)
+        self.assertEqual(signal_1.length, 10)
         self.assertEqual(signal_1.receivers, [])
-        self.assertEqual(signal_1.byte_order, 'little_endian')
-        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.byte_order, 'big_endian')
+        self.assertEqual(signal_1.is_signed, True)
         self.assertEqual(signal_1.scale, 1)
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
@@ -1663,7 +1663,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         signal_2 = db.messages[0].signals[2]
         self.assertEqual(signal_2.name, 'Variable1')
-        self.assertEqual(signal_2.start, 10)
+        self.assertEqual(signal_2.start, 12)
         self.assertEqual(signal_2.length, 1)
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')

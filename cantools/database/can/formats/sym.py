@@ -418,7 +418,7 @@ def _load_message_variable(tokens, enums):
      minimum,
      maximum,
      decimal) = _load_signal_type_and_length(tokens[3],
-                                             tokens[6],
+                                             [tokens[6]],
                                              enums)
 
     # Byte order.

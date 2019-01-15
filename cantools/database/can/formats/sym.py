@@ -149,7 +149,7 @@ class Parser60(textparser.Parser):
         sig_offset = Sequence('/o:', 'NUMBER')
         sig_min = Sequence('/min:', 'NUMBER')
         sig_max = Sequence('/max:', 'NUMBER')
-        sig_default = Sequence('/d:', 'NUMBER')
+        sig_default = Sequence('/d:', choice('NUMBER', 'WORD'))
         sig_long_name = Sequence('/ln:', 'STRING')
         sig_enum = Sequence('/e:', word)
         sig_places = Sequence('/p:', 'NUMBER')

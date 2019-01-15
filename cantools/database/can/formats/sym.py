@@ -250,6 +250,9 @@ def _load_signal_type_and_length(type_, tokens, enums):
     is_float = False
     length = 0
     enum = None
+    minimum = None
+    maximum = None
+    decimal = SignalDecimal()
 
     if type_ == 'signed':
         is_signed = True
@@ -265,6 +268,10 @@ def _load_signal_type_and_length(type_, tokens, enums):
     elif type_ == 'bit':
         # As unsigned integer for now.
         length = 1
+        minimum = 0
+        maximum = 1
+        decimal.minimum = Decimal('0')
+        decimal.maximum = Decimal('1')
     elif type_ == 'char':
         # As unsigned integer for now.
         length = 8
@@ -276,17 +283,16 @@ def _load_signal_type_and_length(type_, tokens, enums):
         length = int(tokens[0])
         enum = _get_enum(enums, type_)
 
-    return is_signed, is_float, length, enum
+    return is_signed, is_float, length, enum, minimum, maximum, decimal
 
 
-def _load_signal_attributes(tokens, enum, enums):
+def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal):
     # Default values.
-    offset = 0
     factor = 1
+    offset = 0
     unit = None
-    minimum = None
-    maximum = None
-    decimal = SignalDecimal(Decimal(factor), Decimal(offset))
+    decimal.scale = Decimal(factor)
+    decimal.offset = Decimal(offset)
 
     for key, value in tokens:
         if key == '/u:':
@@ -308,7 +314,7 @@ def _load_signal_attributes(tokens, enum, enums):
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
 
-    return unit, factor, offset, minimum, maximum, enum, decimal
+    return unit, factor, offset, enum, minimum, maximum, decimal
 
 
 def _load_signal(tokens, enums):
@@ -317,20 +323,28 @@ def _load_signal(tokens, enums):
     byte_order = 'little_endian'
 
     # Type and length.
-    is_signed, is_float, length, enum = _load_signal_type_and_length(
-        tokens[3],
-        tokens[4],
-        enums)
+    (is_signed,
+     is_float,
+     length,
+     enum,
+     minimum,
+     maximum,
+     decimal) = _load_signal_type_and_length(tokens[3],
+                                             tokens[4],
+                                             enums)
 
     # Byte order.
     if tokens[5] == ['-m']:
         byte_order = 'big_endian'
 
     # The rest.
-    unit, factor, offset, minimum, maximum, enum, decimal = _load_signal_attributes(
+    unit, factor, offset, enum, minimum, maximum, decimal = _load_signal_attributes(
         tokens[6],
         enum,
-        enums)
+        enums,
+        minimum,
+        maximum,
+        decimal)
 
     return Signal(name=name,
                   start=offset,
@@ -397,20 +411,28 @@ def _load_message_variable(tokens, enums):
     start = int(tokens[4])
 
     # Type and length.
-    is_signed, is_float, length, enum = _load_signal_type_and_length(
-        tokens[3],
-        tokens[6],
-        enums)
+    (is_signed,
+     is_float,
+     length,
+     enum,
+     minimum,
+     maximum,
+     decimal) = _load_signal_type_and_length(tokens[3],
+                                             tokens[6],
+                                             enums)
 
     # Byte order.
     if tokens[7] == ['-m']:
         byte_order = 'big_endian'
 
     # The rest.
-    unit, factor, offset, minimum, maximum, enum, decimal = _load_signal_attributes(
+    unit, factor, offset, enum, minimum, maximum, decimal = _load_signal_attributes(
         tokens[8],
         enum,
-        enums)
+        enums,
+        minimum,
+        maximum,
+        decimal)
 
     if byte_order == 'big_endian':
         start = (8 * (start // 8) + (7 - (start % 8)))

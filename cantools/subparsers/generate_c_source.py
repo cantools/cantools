@@ -30,7 +30,8 @@ def _do_generate_c_source(args):
         filename_c,
         fuzzer_filename_c,
         not args.no_floating_point_numbers,
-        args.bit_fields)
+        args.bit_fields,
+        args.generate_enums_for_choices)
 
     with open(filename_h, 'w') as fout:
         fout.write(header)
@@ -82,6 +83,10 @@ def add_subparser(subparsers):
         '-f', '--generate-fuzzer',
         action='store_true',
         help='Also generate fuzzer source code.')
+    generate_c_source_parser.add_argument(
+        '--generate_enums_for_choices',
+        action='store_true',
+        help='Generate Enums Instead of `#define` statements for signals with discrete choices')
     generate_c_source_parser.add_argument(
         'infile',
         help='Input database file.')

@@ -47,7 +47,7 @@ HEADER_FMT = '''\
 #endif
 
 {frame_id_defines}
-{choices_defines}
+{choices}
 {structs}
 {declarations}
 #endif
@@ -747,7 +747,6 @@ def camel_to_snake_case(value):
 
     return value
 
-
 def _strip_blank_lines(lines):
     try:
         while lines[0] == '':
@@ -817,7 +816,7 @@ def _format_range(signal):
         return '-'
 
 
-def _generate_signal(signal, bit_fields):
+def _generate_signal(database_name, signal, bit_fields, generate_enums_for_choices):
     comment = _format_comment(signal.comment)
     range_ = _format_range(signal)
     scale = _get(signal.scale, '-')
@@ -828,11 +827,15 @@ def _generate_signal(signal, bit_fields):
     else:
         length = ' : {}'.format(signal.length)
 
+    type_name = signal.type_name
+    if signal.choices is not None and generate_enums_for_choices:
+        type_name = _generate_enum_name(database_name, signal)
+
     member = SIGNAL_MEMBER_FMT.format(comment=comment,
                                       range=range_,
                                       scale=scale,
                                       offset=offset,
-                                      type_name=signal.type_name,
+                                      type_name=type_name,
                                       name=signal.snake_name,
                                       length=length)
 
@@ -1109,11 +1112,11 @@ def _format_unpack_code(message, helper_kinds):
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _generate_struct(message, bit_fields):
+def _generate_struct(database_name, message, bit_fields, generate_enums_for_choices):
     members = []
 
     for signal in message.signals:
-        members.append(_generate_signal(signal, bit_fields))
+        members.append(_generate_signal(database_name, signal, bit_fields, generate_enums_for_choices))
 
     if not members:
         members = [
@@ -1266,12 +1269,46 @@ def _generate_choices_defines(database_name, messages):
 
     return choices_defines
 
+def _generate_choices_enums(database_name, messages):
+    enum_strs = []
 
-def _generate_structs(database_name, messages, bit_fields):
+    for message in messages:
+        for signal in message.signals:
+            if signal.choices is None:
+                continue
+            signal_enum_str = _generate_enum(database_name, signal, signal.choices)
+            enum_strs.append(signal_enum_str)
+
+    return "\n" + '\n\n'.join(enum_strs) + "\n"
+
+def _generate_enum(database_name, signal, choices):
+    enum_str = "typedef enum {\n"
+    enum_str += '\n'.join([
+        '    {} = {},'.format(
+            enum_entry_name.replace(' ', '_'), enum_entry_val
+        )
+        for enum_entry_val, enum_entry_name in choices.items()
+    ])
+    # Remove last comma
+    if enum_str[-1] == ',':
+        enum_str = enum_str[:-1]
+    enum_str += '\n}} {};'.format(
+        _generate_enum_name(database_name, signal)
+        )
+
+    return enum_str
+
+def _generate_enum_name(database_name, signal):
+    return "{}_{}_Enum".format(
+        database_name,
+        signal.snake_name
+    )
+
+def _generate_structs(database_name, messages, bit_fields, generate_enums_for_choices):
     structs = []
 
     for message in messages:
-        comment, members = _generate_struct(message, bit_fields)
+        comment, members = _generate_struct(database_name, message, bit_fields, generate_enums_for_choices)
         structs.append(
             STRUCT_FMT.format(comment=comment,
                               database_message_name=message.name,
@@ -1457,7 +1494,8 @@ def generate(database,
              source_name,
              fuzzer_source_name,
              floating_point_numbers=True,
-             bit_fields=False):
+             bit_fields=False,
+             generate_enums_for_choices=True):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1477,6 +1515,10 @@ def generate(database,
 
     Set `bit_fields` to ``True`` to generate bit fields in structs.
 
+    Set `generate_enums_for_choices` to ``True`` to generate an enum
+    for signals that have choices (otherwise `#define` statements will
+    be generated for each choice)
+
     This function returns a tuple of the C header and source files as
     strings.
 
@@ -1486,8 +1528,10 @@ def generate(database,
     messages = [Message(message) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
     frame_id_defines = _generate_frame_id_defines(database_name, messages)
-    choices_defines = _generate_choices_defines(database_name, messages)
-    structs = _generate_structs(database_name, messages, bit_fields)
+    choices = _generate_choices_defines(database_name, messages)
+    if generate_enums_for_choices:
+        choices = _generate_choices_enums(database_name, messages)
+    structs = _generate_structs(database_name, messages, bit_fields, generate_enums_for_choices)
     declarations = _generate_declarations(database_name,
                                           messages,
                                           floating_point_numbers)
@@ -1500,7 +1544,7 @@ def generate(database,
                                date=date,
                                include_guard=include_guard,
                                frame_id_defines=frame_id_defines,
-                               choices_defines=choices_defines,
+                               choices=choices,
                                structs=structs,
                                declarations=declarations)
 

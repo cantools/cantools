@@ -1276,18 +1276,18 @@ def _generate_choices_enums(database_name, messages):
         for signal in message.signals:
             if signal.choices is None:
                 continue
-            signal_enum_str = _generate_enum(database_name, signal, signal.choices)
+            signal_enum_str = _generate_enum(database_name, signal)
             enum_strs.append(signal_enum_str)
 
     return "\n" + '\n\n'.join(enum_strs) + "\n"
 
-def _generate_enum(database_name, signal, choices):
+def _generate_enum(database_name, signal):
     enum_str = "typedef enum {\n"
     enum_str += '\n'.join([
         '    {} = {},'.format(
             enum_entry_name.replace(' ', '_'), enum_entry_val
         )
-        for enum_entry_val, enum_entry_name in choices.items()
+        for enum_entry_val, enum_entry_name in signal.choices.items()
     ])
     # Remove last comma
     if enum_str[-1] == ',':
@@ -1299,7 +1299,7 @@ def _generate_enum(database_name, signal, choices):
     return enum_str
 
 def _generate_enum_name(database_name, signal):
-    return "{}_{}_Enum".format(
+    return "{}_{}".format(
         database_name,
         signal.snake_name
     )

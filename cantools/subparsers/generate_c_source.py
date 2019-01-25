@@ -84,7 +84,7 @@ def add_subparser(subparsers):
         action='store_true',
         help='Also generate fuzzer source code.')
     generate_c_source_parser.add_argument(
-        '--generate_enums_for_choices',
+        '--generate-enums-for-choices',
         action='store_true',
         help='Generate Enums Instead of `#define` statements for signals with discrete choices')
     generate_c_source_parser.add_argument(

@@ -1,0 +1,19 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="enums"
+
+{ENUMS}
+Enum=InverterState(0="OFF", 1="NOMINAL", 2="OVERHEAT")
+Enum=SensorState(0="OK", 1="FAULTED")
+
+{SIGNALS}
+Sig=Signed_Int_Char char
+
+{SENDRECEIVE}
+
+[VehicleStatus]
+ID=000h
+Len=8
+Var=InverterState InverterState 0,8
+Var=WheelSpeedSensorState SensorState 8,8
+Sig=Signed_Int_Char 16
+

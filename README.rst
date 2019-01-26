@@ -318,17 +318,17 @@ Contributing
 
 .. _examples: https://github.com/eerimoq/cantools/blob/master/examples
 
-.. _structs: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L53
+.. _structs: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L54
 
-.. _pack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L85
+.. _pack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L86
 
-.. _unpack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L99
+.. _unpack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L100
 
-.. _encode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L111
+.. _encode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L112
 
-.. _decode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L120
+.. _decode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L121
 
-.. _defines: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L41
+.. _defines: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L42
 
 .. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h
 

@@ -1,9 +1,5 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <assert.h>
-#include <string.h>
-#include <math.h>
-
+/* Include the generated files first to test that all required header
+   files are included. */
 #include "files/c_source/motohawk.h"
 #include "files/c_source/padding_bit_order.h"
 #include "files/c_source/vehicle.h"
@@ -14,6 +10,12 @@
 #include "files/c_source/signed.h"
 #include "files/c_source/my_database_name.h"
 #include "files/c_source/min_max_only_6_0.h"
+
+#include <stdio.h>
+#include <stdint.h>
+#include <assert.h>
+#include <string.h>
+#include <math.h>
 
 static bool fequal(double v1, double v2)
 {

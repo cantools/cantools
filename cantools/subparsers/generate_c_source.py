@@ -19,14 +19,16 @@ def _do_generate_c_source(args):
         database_name = args.database_name
 
     filename_h = database_name + '.h'
+    filename_hpp = database_name + '.hpp'
     filename_c = database_name + '.c'
     fuzzer_filename_c = database_name + '_fuzzer.c'
     fuzzer_filename_mk = database_name + '_fuzzer.mk'
 
-    header, source, fuzzer_source, fuzzer_makefile = generate(
+    header, header_cpp, source, fuzzer_source, fuzzer_makefile = generate(
         dbase,
         database_name,
         filename_h,
+        filename_hpp,
         filename_c,
         fuzzer_filename_c,
         not args.no_floating_point_numbers,
@@ -34,11 +36,14 @@ def _do_generate_c_source(args):
 
     with open(filename_h, 'w') as fout:
         fout.write(header)
-
+        
+    with open(filename_hpp, 'w') as fout:
+        fout.write(header_cpp)
+        
     with open(filename_c, 'w') as fout:
         fout.write(source)
 
-    print('Successfully generated {} and {}.'.format(filename_h, filename_c))
+    print('Successfully generated {}, {}, {}.'.format(filename_h, filename_hpp, filename_c))
 
     if args.generate_fuzzer:
         with open(fuzzer_filename_c, 'w') as fout:

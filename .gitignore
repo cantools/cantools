@@ -10,6 +10,8 @@ a.out
 # Distribution / packaging
 .Python
 env/
+venv/
+.venv/
 build/
 develop-eggs/
 dist/
@@ -57,6 +59,14 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Vim IDE
+*~
+*.swp
+*.swo
+
+# IntelliJ IDEA
+.idea/
 
 # CANdb++
 /tests/files/*.ini

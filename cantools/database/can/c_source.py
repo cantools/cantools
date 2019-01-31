@@ -444,7 +444,6 @@ int {database_name}_{message_name}_unpack(
         return (-EINVAL);
     }}
 
-    memset(dst_p, 0, sizeof(*dst_p));
 {unpack_body}
     return (0);
 }}
@@ -1018,6 +1017,7 @@ def _format_unpack_code_signal(message,
         body_lines.append('    {} = 0{};'.format(signal.snake_name,
                                                  signal.conversion_type_suffix))
 
+    body_lines.append("    dst_p->{} = 0;".format(signal.snake_name))   
     for index, shift, shift_direction, mask in signal.segments(invert_shift=True):
         if signal.is_float or signal.is_signed:
             fmt = '    {} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
@@ -1030,6 +1030,7 @@ def _format_unpack_code_signal(message,
                           index,
                           shift,
                           mask)
+               
         body_lines.append(line)
         helper_kinds.add((shift_direction, signal.type_length))
 
@@ -1216,7 +1217,7 @@ def _generate_is_in_range(message):
 
             if (minimum_type_value is None) or (minimum > minimum_type_value):
                 minimum = _format_decimal(minimum, signal.is_float)
-                check.append('(value >= {}{})'.format(minimum, suffix))
+                check.append('(value >= {}{})'.format(minimum, ""))
 
         if maximum is not None:
             if not signal.is_float:
@@ -1226,7 +1227,7 @@ def _generate_is_in_range(message):
 
             if (maximum_type_value is None) or (maximum < maximum_type_value):
                 maximum = _format_decimal(maximum, signal.is_float)
-                check.append('(value <= {}{})'.format(maximum, suffix))
+                check.append('(value <= {}{})'.format(maximum, ""))
 
         if not check:
             check = ['true']

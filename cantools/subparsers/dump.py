@@ -2,6 +2,8 @@ from __future__ import print_function
 
 from .. import database
 from ..database.utils import format_and
+from ..database.can.database import Database as CanDatabase
+from ..database.diagnostics.database import Database as DiagnosticsDatabase
 from ..j1939 import is_pdu_format_1
 from ..j1939 import frame_id_unpack
 from ..j1939 import pgn_pack
@@ -31,11 +33,7 @@ def _print_j1939_frame_id(message):
     print('      Format:         {}'.format(pdu_format))
 
 
-def _do_dump(args):
-    dbase = database.load_file(args.database,
-                               encoding=args.encoding,
-                               strict=not args.no_strict)
-
+def _dump_can_database(dbase):
     print('================================= Messages =================================')
     print()
     print('  ' + 72 * '-')
@@ -84,6 +82,41 @@ def _do_dump(args):
             print()
 
         print('  ' + 72 * '-')
+
+
+def _dump_diagnostics_database(dbase):
+    print('=================================== Dids ===================================')
+    print()
+    print('  ' + 72 * '-')
+
+    for did in dbase.dids:
+        print()
+        print('  Name:       {}'.format(did.name))
+        print('  Length:     {} bytes'.format(did.length))
+        print('  Layout:')
+        print()
+
+        for data in did.datas:
+            print('    Name:      {}'.format(data.name))
+            print('    Start bit: {}'.format(data.start))
+            print('    Length:    {}'.format(data.length))
+            print()
+
+        print()
+        print('  ' + 72 * '-')
+
+
+def _do_dump(args):
+    dbase = database.load_file(args.database,
+                               encoding=args.encoding,
+                               strict=not args.no_strict)
+
+    if isinstance(dbase, CanDatabase):
+        _dump_can_database(dbase)
+    elif isinstance(dbase, DiagnosticsDatabase):
+        _dump_diagnostics_database(dbase)
+    else:
+        sys.exit('Unsupported database type.')
 
 
 def add_subparser(subparsers):

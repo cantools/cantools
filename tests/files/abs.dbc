@@ -1,0 +1,296 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ABS DRS_MM5_10
+VAL_TABLE_ ABS_fault_info 2 "active faults stored" 1 "inactive faults stored" 0 "no faults stored" ;
+VAL_TABLE_ vt_WheelSpeedQualifier 5 "InvalidUnderVoltage" 4 "NotCalculated" 3 "ReducedMonitored" 2 "Faulty" 1 "Normal" 0 "NotInitialized" ;
+
+
+BO_ 835 BREMSE_33: 8 ABS
+ SG_ whlspeed_FL : 0|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+ SG_ whlspeed_FR : 16|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+ SG_ whlspeed_RL : 32|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+ SG_ whlspeed_RR : 48|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+
+BO_ 320 BREMSE_10: 8 ABS
+
+BO_ 321 BREMSE_11: 8 ABS
+
+BO_ 322 BREMSE_12: 8 ABS
+
+BO_ 323 BREMSE_13: 8 ABS
+
+BO_ 117 DRS_RX_ID0: 8 ABS
+
+BO_ 112 MM5_10_TX1: 8 DRS_MM5_10
+ SG_ Yaw_Rate : 0|16@1+ (0.005,-163.84) [-163.84|163.83] "°/s"  ABS
+ SG_ AY1 : 32|16@1+ (0.000127465,-4.1768) [-4.1768|4.1765] "g"  ABS
+
+BO_ 128 MM5_10_TX2: 8 DRS_MM5_10
+ SG_ Roll_Rate : 0|16@1+ (0.005,-163.84) [-163.84|163.835] "°/s"  ABS
+ SG_ AX1 : 32|16@1+ (0.000127465,-4.1768) [-4.1768|4.1765] "g"  ABS
+
+BO_ 1398 MM5_10_TX3: 8 DRS_MM5_10
+ SG_ AZ : 32|16@1+ (0.000127465,-4.1768) [-4.1768|4.1765] "g"  ABS
+
+BO_ 586 BREMSE_2: 8 ABS
+ SG_ whlspeed_FL_Bremse2 : 0|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+ SG_ whlspeed_FR_Bremse2 : 16|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+ SG_ whlspeed_RL_Bremse2 : 32|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+ SG_ whlspeed_RR_Bremse2 : 48|16@1+ (0.015625,0) [0|100] "m/s" Vector__XXX
+
+BO_ 588 ABS_Switch: 8 Vector__XXX
+ SG_ ABS_Switchposition : 0|8@1+ (1,0) [0|11] ""  ABS
+
+BO_ 832 BREMSE_30: 8 ABS
+
+BO_ 833 BREMSE_31: 8 ABS
+ SG_ Idle_Time : 16|16@1+ (1,0) [0|0] "-" Vector__XXX
+
+BO_ 834 BREMSE_32: 8 ABS
+ SG_ acc_FA : 0|8@1+ (0.05,0) [0|10] "cm3" Vector__XXX
+ SG_ acc_RA : 8|8@1+ (0.05,0) [0|10] "cm3" Vector__XXX
+ SG_ WheelQuality_FL : 32|8@1+ (1,0) [0|32] "" Vector__XXX
+ SG_ WheelQuality_FR : 40|8@1+ (1,0) [0|32] "" Vector__XXX
+ SG_ WheelQuality_RL : 48|8@1+ (1,0) [0|32] "" Vector__XXX
+ SG_ WheelQuality_RR : 56|8@1+ (1,0) [0|32] "" Vector__XXX
+
+BO_ 1345 BREMSE_51: 8 ABS
+ SG_ AX1_ABS_int : 0|16@1+ (0.00012742,-4.1768) [-4.1768|4.1736697] "g" Vector__XXX
+ SG_ AY1_ABS_int : 16|16@1+ (0.00012742,-4.1768) [-4.1768|4.1765] "g" Vector__XXX
+ SG_ IF_variant : 48|6@1+ (1,0) [0|63] "" Vector__XXX
+ SG_ IF_revision : 54|6@1+ (1,0) [0|63] "" Vector__XXX
+ SG_ IF_chksum : 60|4@1+ (1,0) [0|15] "" Vector__XXX
+
+BO_ 1346 BREMSE_52: 8 ABS
+ SG_ Mplx_SW_Info M : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SW_version_High_upper m1 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SW_version_High_lower m1 : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SW_version_Mid_upper m1 : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SW_version_Mid_lower m1 : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SW_version_Low_upper m1 : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ SW_version_Low_lower m1 : 48|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ BB_dig1 m2 : 8|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ BB_dig2 m2 : 16|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ BB_dig3 m2 : 24|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ BB_dig4 m2 : 32|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ BB_dig5 m2 : 40|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ BB_dig6 m2 : 48|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ BB_dig7 m2 : 56|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_01 m3 : 8|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_02 m3 : 16|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_03 m3 : 24|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_04 m3 : 32|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_05 m3 : 40|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_06 m3 : 48|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_07 m3 : 56|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_08 m4 : 8|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_09 m4 : 16|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_10 m4 : 24|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_11 m4 : 32|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_12 m4 : 40|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_13 m4 : 48|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_Id_14 m4 : 56|8@1+ (1,0) [0|255] "ASCII" Vector__XXX
+ SG_ Appl_date_01 m5 : 8|8@1+ (1,0) [0|99] "" Vector__XXX
+ SG_ Appl_date_02 m5 : 16|8@1+ (1,0) [1|12] "" Vector__XXX
+ SG_ Appl_date_03 m5 : 24|8@1+ (1,0) [1|31] "" Vector__XXX
+ SG_ Appl_date_04 m5 : 32|8@1+ (1,0) [0|24] "" Vector__XXX
+ SG_ Appl_date_05 m5 : 40|8@1+ (1,0) [0|59] "" Vector__XXX
+ SG_ Appl_date_06 m5 : 48|8@1+ (1,0) [0|59] "" Vector__XXX
+ SG_ SW_CAN_ident m6 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ HU_date_year m7 : 8|8@1+ (1,0) [0|99] "" Vector__XXX
+ SG_ HU_date_month m7 : 16|8@1+ (1,0) [1|12] "" Vector__XXX
+ SG_ HU_date_day m7 : 24|8@1+ (1,0) [1|31] "" Vector__XXX
+ SG_ Ecu_serial m7 : 32|32@1+ (1,0) [0|99999] "" Vector__XXX
+
+BO_ 1376 BREMSE_50: 8 ABS
+ SG_ Brake_bal_at50 : 16|16@1+ (0.1,0) [0|100] "Bar" Vector__XXX
+ SG_ Brake_bal_at50_advice : 32|8@1+ (1,0) [0|100] "Bar" Vector__XXX
+ SG_ Brake_bal_pct : 40|16@1+ (0.1,0) [0|100] "%" Vector__XXX
+ SG_ Brake_bal_pct_advice : 56|8@1+ (1,0) [0|100] "%" Vector__XXX
+
+BO_ 1472 BREMSE_53: 8 ABS
+ SG_ SwitchPosition : 0|8@1+ (1,0) [1|12] "" Vector__XXX
+ SG_ P_FA : 8|16@1- (0.01526,0) [-42.5|425] "bar" Vector__XXX
+ SG_ BLS : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Bremse_53_cnt : 26|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ ABS_Malfunction : 28|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ABS_Active : 29|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EBD_Lamp : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ABS_Lamp : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Diag_FL : 32|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Diag_FR : 34|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Diag_RL : 36|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Diag_RR : 38|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Diag_ABSUnit : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Diag_FuseValve : 41|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Diag_FusePump : 42|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Diag_P_FA : 43|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Diag_P_RA : 44|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Diag_YRS : 45|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ABS_fault_info : 46|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P_RA : 48|16@1- (0.01526,0) [-42.5|425] "bar" Vector__XXX
+
+
+
+CM_ "Version 2.0";
+CM_ SG_ 835 whlspeed_FL "Radgeschwindigkeit / wheel speed absCtrl FL";
+CM_ SG_ 835 whlspeed_FR "Radgeschwindigkeit / wheel speed absCtrl FR";
+CM_ SG_ 835 whlspeed_RL "Radgeschwindigkeit / wheel speed absCtrl RL";
+CM_ SG_ 835 whlspeed_RR "Radgeschwindigkeit / wheel speed absCtrl RR";
+CM_ SG_ 112 Yaw_Rate "Measured yaw rate around the Z axle.";
+CM_ SG_ 112 AY1 "Measured lateral acceleration.";
+CM_ SG_ 128 Roll_Rate "Measured roll rate around the X axle.";
+CM_ SG_ 128 AX1 "Measured longitudional acceleration.";
+CM_ SG_ 1398 AZ "Measured vertical acceleration.";
+CM_ SG_ 586 whlspeed_FL_Bremse2 "Radgeschwindigkeit / wheel speed direct FL";
+CM_ SG_ 586 whlspeed_FR_Bremse2 "Radgeschwindigkeit / wheel speed direct FR";
+CM_ SG_ 586 whlspeed_RL_Bremse2 "Radgeschwindigkeit / wheel speed direct RL";
+CM_ SG_ 586 whlspeed_RR_Bremse2 "Radgeschwindigkeit / wheel speed direct RR";
+CM_ SG_ 588 ABS_Switchposition "Channel to send the swich position via CAN to the ABS.";
+CM_ SG_ 834 acc_FA "Fill level of the fluid reservoir of the front axle.";
+CM_ SG_ 834 acc_RA "Fill level of the fluid reservoir of the rear axle.";
+CM_ SG_ 834 WheelQuality_FL "Bit matrix
+Bit0 ( 1) Signal Reduced Monitored
+Bit1 ( 2) Reduced Accuracy
+Bit2 ( 4) Interfered
+Bit3 ( 8) Suspicious Plausibility
+Bit4 (16) Suspicious Lost
+Bit5 (32) Not Initialized
+Bit6 (64) Invalid Generic
+Bit7 (128) Invalid Individual";
+CM_ SG_ 834 WheelQuality_FR "Bit matrix
+Bit0 ( 1) Signal Reduced Monitored
+Bit1 ( 2) Reduced Accuracy
+Bit2 ( 4) Interfered
+Bit3 ( 8) Suspicious Plausibility
+Bit4 (16) Suspicious Lost
+Bit5 (32) Not Initialized
+Bit6 (64) Invalid Generic
+Bit7 (128) Invalid Individual";
+CM_ SG_ 834 WheelQuality_RL "Bit matrix
+Bit0 ( 1) Signal Reduced Monitored
+Bit1 ( 2) Reduced Accuracy
+Bit2 ( 4) Interfered
+Bit3 ( 8) Suspicious Plausibility
+Bit4 (16) Suspicious Lost
+Bit5 (32) Not Initialized
+Bit6 (64) Invalid Generic
+Bit7 (128) Invalid Individual";
+CM_ SG_ 834 WheelQuality_RR "Bit matrix
+Bit0 ( 1) Signal Reduced Monitored
+Bit1 ( 2) Reduced Accuracy
+Bit2 ( 4) Interfered
+Bit3 ( 8) Suspicious Plausibility
+Bit4 (16) Suspicious Lost
+Bit5 (32) Not Initialized
+Bit6 (64) Invalid Generic
+Bit7 (128) Invalid Individual";
+CM_ SG_ 1345 AX1_ABS_int "Used longitudional acceleration value in the ABS.";
+CM_ SG_ 1345 AY1_ABS_int "Used lateral acceleration value in the ABS.";
+CM_ SG_ 1345 IF_variant "external info to e.g. MS6 which dbc has to be used. This index increments on changes that make the MS6 interface incompatible to the predecessor CAN interface implementation";
+CM_ SG_ 1345 IF_revision "external info to e.g. MS6 which dbc has to be used. This index increments with added features (rest of MS6 interface stays intact.)";
+CM_ SG_ 1345 IF_chksum "external info to e.g. MS6 which dbc has to be used. Checksum ";
+CM_ SG_ 1346 Mplx_SW_Info "1=SW version; 2=BB#; 3,4=application name; 5=application date (UTC); 6=deviceType (SW CAN ident, ABS M5=2, ABS M6=3); 7=Serial#";
+CM_ SG_ 1346 SW_version_High_upper "version 1.0 as 0x01(upper), version 100.20 as 0x64(upper)";
+CM_ SG_ 1346 SW_version_High_lower "version 1.0 as 0x00(lower), version 100.20 as 0x14(lower)";
+CM_ SG_ 1346 SW_version_Mid_upper "version 1.0 as 0x01(upper), version 100.20 as 0x64(upper)";
+CM_ SG_ 1346 SW_version_Mid_lower "version 1.0 as 0x00(lower), version 100.20 as 0x14(lower)";
+CM_ SG_ 1346 SW_version_Low_upper "version 1.0 as 0x01(upper), version 100.20 as 0x64(upper)";
+CM_ SG_ 1346 SW_version_Low_lower "version 1.0 as 0x00(lower), version 100.20 as 0x14(lower)";
+CM_ SG_ 1346 Appl_date_01 "year";
+CM_ SG_ 1346 Appl_date_02 "month";
+CM_ SG_ 1346 Appl_date_03 "day";
+CM_ SG_ 1346 Appl_date_04 "hour";
+CM_ SG_ 1346 Appl_date_05 "minute";
+CM_ SG_ 1346 Appl_date_06 "seconds";
+CM_ SG_ 1376 Brake_bal_at50 "Calculated rear axle brake pressure if the front pressure is at 50 bar.";
+CM_ SG_ 1376 Brake_bal_at50_advice "Recommended rear axle brake pressure if the front pressure is at 50 bar.";
+CM_ SG_ 1376 Brake_bal_pct "Percental brake balance on the front axle. ";
+CM_ SG_ 1376 Brake_bal_pct_advice "Recommended percental brake balance on the front axle. ";
+CM_ SG_ 1472 SwitchPosition "Used switch position of the ABS.";
+CM_ SG_ 1472 P_FA "Brake pressure on the front axle.";
+CM_ SG_ 1472 BLS "Bit for the brake light switch.";
+CM_ SG_ 1472 ABS_Malfunction "Bit will jump to 1, if the ABS control is deactivated by a fault.";
+CM_ SG_ 1472 ABS_Active "Bit will jump to 1, when the ABS control is active.";
+CM_ SG_ 1472 EBD_Lamp "Bit will jump to 1, when the EBD is deactivated due to a fault.";
+CM_ SG_ 1472 ABS_Lamp "Bit will jump to 1, when the ABS control is deactivated due to a fault, switch to the off position or while working with RaceABS.";
+CM_ SG_ 1472 Diag_FL "Value to show faults related to the wheel speed sensor. 
+0 - Signal ok, 1 - Wiring related fault, 2 - Signal related fault";
+CM_ SG_ 1472 Diag_FR "Value to show faults related to the wheel speed sensor. 
+0 - Signal ok, 1 - Wiring related fault, 2 - Signal related fault";
+CM_ SG_ 1472 Diag_RL "Value to show faults related to the wheel speed sensor. 
+0 - Signal ok, 1 - Wiring related fault, 2 - Signal related fault";
+CM_ SG_ 1472 Diag_RR "Value to show faults related to the wheel speed sensor. 
+0 - Signal ok, 1 - Wiring related fault, 2 - Signal related fault";
+CM_ SG_ 1472 Diag_ABSUnit "Bit to show, if a ABS error related to the hydraulic unit is present";
+CM_ SG_ 1472 Diag_FuseValve "Bit to show, if a ABS error related to the fuse or power supply of the ABS valves is present.";
+CM_ SG_ 1472 Diag_FusePump "Bit to show, if a ABS error related to the fuse or power supply of the ABS pump is present.";
+CM_ SG_ 1472 Diag_P_FA "Bit to show, if the pressure sensor FA is working properly. An error is pressent, if the bit is 1.";
+CM_ SG_ 1472 Diag_P_RA "Bit to show, if the pressure sensor RA is working properly. An error is pressent, if the bit is 1.";
+CM_ SG_ 1472 Diag_YRS "Bit to show, if the yaw rate sensor is working properly. An error is pressent, if the bit is 1.";
+CM_ SG_ 1472 ABS_fault_info "Bit matrix to show if a fault or a active fault is stored in the ABS. Bit will also show minor errors which do  not shut down the ABS controller.";
+CM_ SG_ 1472 P_RA "Brake pressure on the rear axle.";
+BA_DEF_ BO_  "GenMsgCycleTime" INT 1 3000;
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "GenMsgCycleTime" 10;
+BA_DEF_DEF_  "VFrameFormat" "";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_ "BusType" "CAN";
+BA_ "VFrameFormat" BO_ 835 0;
+BA_ "VFrameFormat" BO_ 320 0;
+BA_ "VFrameFormat" BO_ 321 0;
+BA_ "VFrameFormat" BO_ 322 0;
+BA_ "VFrameFormat" BO_ 323 0;
+BA_ "VFrameFormat" BO_ 117 0;
+BA_ "VFrameFormat" BO_ 112 0;
+BA_ "VFrameFormat" BO_ 128 0;
+BA_ "VFrameFormat" BO_ 1398 0;
+BA_ "VFrameFormat" BO_ 586 0;
+BA_ "VFrameFormat" BO_ 588 0;
+BA_ "VFrameFormat" BO_ 832 0;
+BA_ "VFrameFormat" BO_ 833 0;
+BA_ "VFrameFormat" BO_ 834 0;
+BA_ "VFrameFormat" BO_ 1345 0;
+BA_ "VFrameFormat" BO_ 1346 0;
+BA_ "VFrameFormat" BO_ 1376 0;
+BA_ "VFrameFormat" BO_ 1472 0;
+VAL_ 1472 Diag_FL 2 "Signal error" 1 "Line error" 0 "Signal ok" ;
+VAL_ 1472 Diag_FR 2 "Signal error" 1 "Line error" 0 "Signal ok" ;
+VAL_ 1472 Diag_RL 2 "Signal error" 1 "Line error" 0 "Signal ok" ;
+VAL_ 1472 Diag_RR 2 "Signal error" 1 "Line error" 0 "Signal ok" ;
+VAL_ 1472 ABS_fault_info 2 "active faults stored" 1 "inactive faults stored" 0 "no faults stored" ;
+

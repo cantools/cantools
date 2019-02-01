@@ -1,6 +1,7 @@
 from __future__ import print_function
 import re
 import time
+from decimal import Decimal
 
 from ...version import __version__
 
@@ -1208,6 +1209,9 @@ def _generate_is_in_range(message):
         check = []
 
         if minimum is not None:
+            if not signal.is_float:
+                minimum = Decimal(int(minimum))
+                
             minimum_type_value = signal.minimum_type_value
 
             if (minimum_type_value is None) or (minimum > minimum_type_value):
@@ -1215,6 +1219,9 @@ def _generate_is_in_range(message):
                 check.append('(value >= {}{})'.format(minimum, suffix))
 
         if maximum is not None:
+            if not signal.is_float:
+                maximum = Decimal(int(maximum))
+
             maximum_type_value = signal.maximum_type_value
 
             if (maximum_type_value is None) or (maximum < maximum_type_value):

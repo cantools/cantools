@@ -475,7 +475,8 @@ IO_DEBUG(
             'multiplex',
             'multiplex_2',
             'signed',
-            ('CamelCaseEmpty', 'camel_case_empty')
+            ('CamelCaseEmpty', 'camel_case_empty'),
+            'abs'
         ]
 
         for database in databases:

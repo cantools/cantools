@@ -28,13 +28,6 @@ NAMESPACES = {'ns': NAMESPACE}
 ROOT_TAG = '{{{}}}NetworkDefinition'.format(NAMESPACE)
 
 
-def _start_bit(offset, byte_order):
-    if byte_order == 'big_endian':
-        return (8 * (offset // 8) + (7 - (offset % 8)))
-    else:
-        return offset
-
-
 def _get_node_name_by_id(nodes, node_id):
     for node in nodes:
         if node['id'] == node_id:
@@ -130,7 +123,7 @@ def _load_signal_element(signal, nodes):
                                                   receiver.attrib['id']))
 
     return Signal(name=name,
-                  start=_start_bit(offset, byte_order),
+                  start=offset,
                   length=length,
                   receivers=receivers,
                   byte_order=byte_order,
@@ -270,8 +263,7 @@ def _dump_notes(parent, comment):
 def _dump_signal(signal, node_refs, signal_element):
     signal_element.set('name', signal.name)
 
-    offset = _start_bit(signal.start, signal.byte_order)
-    signal_element.set('offset', str(offset))
+    signal_element.set('offset', str(signal.start))
 
     # Length.
     if signal.length != 1:

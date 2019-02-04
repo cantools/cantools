@@ -94,7 +94,7 @@ def _load_signal_element(signal, nodes):
                 intercept = num(value)
                 decimal.offset = Decimal(value)
             elif key == 'unit':
-                unit = value
+                unit = value.encode("utf8", "ignore")
             elif key == 'type':
                 is_signed = (value == 'signed')
                 is_float = (value in ['single', 'double'])

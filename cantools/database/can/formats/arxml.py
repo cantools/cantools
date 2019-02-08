@@ -63,7 +63,57 @@ UNIT_REF_XPATH = make_xpath([
     'SW-DATA-DEF-PROPS-CONDITIONAL',
     'UNIT-REF'
 ])
+COMPU_METHOD_REF_XPATH = make_xpath([
+    'PHYSICAL-PROPS',
+    'SW-DATA-DEF-PROPS-VARIANTS',
+    'SW-DATA-DEF-PROPS-CONDITIONAL',
+    'COMPU-METHOD-REF'
+])
 DISPLAY_NAME_XPATH = make_xpath(['DISPLAY-NAME'])
+CATEGORY_XPATH = make_xpath(['CATEGORY'])
+COMPU_NUMERATOR_XPATH = make_xpath([
+    'COMPU-INTERNAL-TO-PHYS',
+    'COMPU-SCALES',
+    'COMPU-SCALE',
+    'COMPU-RATIONAL-COEFFS',
+    'COMPU-NUMERATOR',
+    'V'
+])
+COMPU_DENOMINATOR_XPATH = make_xpath([
+    'COMPU-INTERNAL-TO-PHYS',
+    'COMPU-SCALES',
+    'COMPU-SCALE',
+    'COMPU-RATIONAL-COEFFS',
+    'COMPU-DENOMINATOR',
+    'V'
+])
+PHYS_LOWER_LIMIT_XPATH = make_xpath([
+    'COMPU-INTERNAL-TO-PHYS',
+    'COMPU-SCALES',
+    'COMPU-SCALE',
+    'LOWER-LIMIT'
+])
+PHYS_UPPER_LIMIT_XPATH = make_xpath([
+    'COMPU-INTERNAL-TO-PHYS',
+    'COMPU-SCALES',
+    'COMPU-SCALE',
+    'UPPER-LIMIT'
+])
+COMPU_SCALE_XPATH = make_xpath([
+    'COMPU-INTERNAL-TO-PHYS',
+    'COMPU-SCALES',
+    'COMPU-SCALE'
+])
+VT_XPATH = make_xpath([
+    'COMPU-CONST',
+    'VT'
+])
+LOWER_LIMIT_XPATH = make_xpath([
+    'LOWER-LIMIT'
+])
+UPPER_LIMIT_XPATH = make_xpath([
+    'UPPER-LIMIT'
+])
 
 
 class Loader(object):
@@ -153,6 +203,70 @@ class Loader(object):
                        bus_name=None,
                        strict=self.strict)
 
+    def load_texttable(self, compu_method, decimal):
+        # Default values.
+        minimum = None
+        maximum = None
+        choices = {}
+
+        for compu_scale in compu_method.findall(COMPU_SCALE_XPATH, NAMESPACES):
+            lower_limit = compu_scale.find(LOWER_LIMIT_XPATH, NAMESPACES)
+            upper_limit = compu_scale.find(UPPER_LIMIT_XPATH, NAMESPACES)
+            vt = compu_scale.find(VT_XPATH, NAMESPACES)
+
+            if vt is not None:
+                choices[vt.text] = int(lower_limit.text)
+            else:
+                if lower_limit is not None:
+                    decimal.minimum = Decimal(lower_limit.text)
+                    minimum = float(decimal.minimum)
+
+                if upper_limit is not None:
+                    decimal.maximum = Decimal(upper_limit.text)
+                    maximum = float(decimal.maximum)
+
+        return minimum, maximum, choices
+
+    def load_linear(self, compu_method, decimal):
+        # Minimum.
+        minimum = compu_method.find(PHYS_LOWER_LIMIT_XPATH, NAMESPACES)
+
+        if minimum is not None:
+            decimal.minimum = Decimal(minimum.text)
+            minimum = float(decimal.minimum)
+
+        # Maximum.
+        maximum = compu_method.find(PHYS_UPPER_LIMIT_XPATH, NAMESPACES)
+
+        if maximum is not None:
+            decimal.maximum = Decimal(maximum.text)
+            maximum = float(decimal.maximum)
+
+        # Factor and offset.
+        numerators = compu_method.findall(COMPU_NUMERATOR_XPATH,
+                                          NAMESPACES)
+
+        if len(numerators) != 2:
+            raise ValueError(
+                'Expected 2 numerator values for linear scaling, but '
+                'got {}.'.format(len(numerators)))
+
+        denominators = compu_method.findall(COMPU_DENOMINATOR_XPATH,
+                                            NAMESPACES)
+
+        if len(denominators) != 1:
+            raise ValueError(
+                'Expected 1 denominator value for linear scaling, but '
+                'got {}.'.format(len(denominators)))
+
+        denominator = Decimal(denominators[0].text)
+        decimal.scale = Decimal(numerators[1].text) / denominator
+        decimal.offset = Decimal(numerators[0].text) / denominator
+        factor = float(decimal.scale)
+        offset = float(decimal.offset)
+
+        return minimum, maximum, factor, offset
+
     def load_signal(self, i_signal_to_i_pdu_mapping):
         """Load given signal and return a signal object.
 
@@ -164,13 +278,13 @@ class Loader(object):
         is_float = False
         minimum = None
         maximum = None
-        slope = 1
-        intercept = 0
+        factor = 1
+        offset = 0
         unit = None
         choices = None
         comment = None
         receivers = []
-        decimal = SignalDecimal(Decimal(slope), Decimal(intercept))
+        decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
         # Name, start position and length.
         i_signal_ref_xpath = i_signal_to_i_pdu_mapping.find(
@@ -214,8 +328,29 @@ class Loader(object):
             if l_2 is not None:
                 comment = l_2.text
 
-        # ToDo: is_signed, is_float, minimum, maximum, slope,
-        #       intercept, choices, receivers
+            # Minimum and maximum.
+            compu_method_ref = system_signal.find(COMPU_METHOD_REF_XPATH,
+                                                  NAMESPACES)
+            try:
+                compu_method = self.find_compu_method(compu_method_ref.text)
+                category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text
+
+                if category == 'TEXTTABLE':
+                    minimum, maximum, choices = self.load_texttable(
+                        compu_method,
+                        decimal)
+                elif category == 'LINEAR':
+                    minimum, maximum, factor, offset = self.load_linear(
+                        compu_method,
+                        decimal)
+                else:
+                    raise NotImplementedError(
+                        'Category {} is not yet implemented.'.format(category))
+            except AttributeError:
+                pass
+
+
+        # ToDo: is_signed, is_float, receivers
 
         return Signal(name=name,
                       start=start_position,
@@ -223,8 +358,8 @@ class Loader(object):
                       receivers=receivers,
                       byte_order=byte_order,
                       is_signed=is_signed,
-                      scale=slope,
-                      offset=intercept,
+                      scale=factor,
+                      offset=offset,
                       minimum=minimum,
                       maximum=maximum,
                       unit=unit,
@@ -265,6 +400,9 @@ class Loader(object):
 
     def find_unit(self, xpath):
         return self.find('UNIT', xpath)
+
+    def find_compu_method(self, xpath):
+        return self.find('COMPU-METHOD', xpath)
 
 
 def load_string(string, strict=True):

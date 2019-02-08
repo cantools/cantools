@@ -81,16 +81,21 @@
         <I-SIGNAL>
           <SHORT-NAME>signal1</SHORT-NAME>
           <LENGTH>3</LENGTH>
-	  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal1</SYSTEM-SIGNAL-REF>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal1</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL>
           <SHORT-NAME>signal2</SHORT-NAME>
           <LENGTH>11</LENGTH>
-	  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2</SYSTEM-SIGNAL-REF>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL>
           <SHORT-NAME>signal3</SHORT-NAME>
           <LENGTH>2</LENGTH>
+        </I-SIGNAL>
+        <I-SIGNAL>
+          <SHORT-NAME>signal4</SHORT-NAME>
+          <LENGTH>4</LENGTH>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal4</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
       </ELEMENTS>
     </AR-PACKAGE>
@@ -125,6 +130,12 @@
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>6</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING>
+              <SHORT-NAME>Signal4</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal4</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>30</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
           </I-SIGNAL-TO-PDU-MAPPINGS>
         </I-SIGNAL-I-PDU>
         <I-SIGNAL-I-PDU>
@@ -143,6 +154,49 @@
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE>
+      <SHORT-NAME>CompuMethod</SHORT-NAME>
+      <ELEMENTS>
+        <COMPU-METHOD>
+          <SHORT-NAME>Signal1</SHORT-NAME>
+          <CATEGORY>LINEAR</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <UPPER-LIMIT>4</UPPER-LIMIT>
+                <COMPU-RATIONAL-COEFFS>
+                  <COMPU-NUMERATOR><V>0</V><V>10</V></COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR><V>2</V></COMPU-DENOMINATOR>
+                </COMPU-RATIONAL-COEFFS>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+        <COMPU-METHOD>
+          <SHORT-NAME>Signal4</SHORT-NAME>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <UPPER-LIMIT>3</UPPER-LIMIT>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <UPPER-LIMIT>1</UPPER-LIMIT>
+                <COMPU-CONST><VT>one</VT></COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>2</LOWER-LIMIT>
+                <UPPER-LIMIT>2</UPPER-LIMIT>
+                <COMPU-CONST><VT>two</VT></COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <AR-PACKAGE>
       <SHORT-NAME>SystemSignal</SHORT-NAME>
       <ELEMENTS>
         <SYSTEM-SIGNAL>
@@ -150,7 +204,18 @@
           <PHYSICAL-PROPS>
             <SW-DATA-DEF-PROPS-VARIANTS>
               <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Signal1</COMPU-METHOD-REF>
                 <UNIT-REF DEST="UNIT">/Unit/meters</UNIT-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+        <SYSTEM-SIGNAL>
+          <SHORT-NAME>Signal4</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Signal4</COMPU-METHOD-REF>
               </SW-DATA-DEF-PROPS-CONDITIONAL>
             </SW-DATA-DEF-PROPS-VARIANTS>
           </PHYSICAL-PROPS>

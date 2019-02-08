@@ -20,42 +20,50 @@ NAMESPACES = {'ns': NAMESPACE}
 ROOT_TAG = '{{{}}}AUTOSAR'.format(NAMESPACE)
 
 
-def make_xpath(*args):
-    return './ns:' + '/ns:'.join(args)
+def make_xpath(location):
+    return './ns:' + '/ns:'.join(location)
 
 
 # ARXML XPATHs.
-CAN_FRAME_TRIGGERINGS_XPATH = make_xpath('AR-PACKAGES',
-                                         'AR-PACKAGE',
-                                         'ELEMENTS',
-                                         'CAN-CLUSTER',
-                                         'CAN-CLUSTER-VARIANTS',
-                                         'CAN-CLUSTER-CONDITIONAL',
-                                         'PHYSICAL-CHANNELS',
-                                         'CAN-PHYSICAL-CHANNEL',
-                                         'FRAME-TRIGGERINGS',
-                                         'CAN-FRAME-TRIGGERING')
-FRAME_REF_XPATH = make_xpath('FRAME-REF')
-SHORT_NAME_XPATH = make_xpath('SHORT-NAME')
-IDENTIFIER_XPATH = make_xpath('IDENTIFIER')
-FRAME_LENGTH_XPATH = make_xpath('FRAME-LENGTH')
-CAN_ADDRESSING_MODE_XPATH = make_xpath('CAN-ADDRESSING-MODE')
-PDU_REF_XPATH = make_xpath('PDU-TO-FRAME-MAPPINGS',
-                           'PDU-TO-FRAME-MAPPING',
-                           'PDU-REF')
-I_SIGNAL_TO_I_PDU_MAPPING_XPATH = make_xpath('I-SIGNAL-TO-PDU-MAPPINGS',
-                                             'I-SIGNAL-TO-I-PDU-MAPPING')
-I_SIGNAL_REF_XPATH = make_xpath('I-SIGNAL-REF')
-START_POSITION_XPATH = make_xpath('START-POSITION')
-LENGTH_XPATH = make_xpath('LENGTH')
-PACKING_BYTE_ORDER_XPATH = make_xpath('PACKING-BYTE-ORDER')
-DESC_L_2_XPATH = make_xpath('DESC', 'L-2')
-SYSTEM_SIGNAL_REF_XPATH = make_xpath('SYSTEM-SIGNAL-REF')
-UNIT_REF_XPATH = make_xpath('PHYSICAL-PROPS',
-                            'SW-DATA-DEF-PROPS-VARIANTS',
-                            'SW-DATA-DEF-PROPS-CONDITIONAL',
-                            'UNIT-REF')
-DISPLAY_NAME_XPATH = make_xpath('DISPLAY-NAME')
+CAN_FRAME_TRIGGERINGS_XPATH = make_xpath([
+    'AR-PACKAGES',
+    'AR-PACKAGE',
+    'ELEMENTS',
+    'CAN-CLUSTER',
+    'CAN-CLUSTER-VARIANTS',
+    'CAN-CLUSTER-CONDITIONAL',
+    'PHYSICAL-CHANNELS',
+    'CAN-PHYSICAL-CHANNEL',
+    'FRAME-TRIGGERINGS',
+    'CAN-FRAME-TRIGGERING'
+])
+FRAME_REF_XPATH = make_xpath(['FRAME-REF'])
+SHORT_NAME_XPATH = make_xpath(['SHORT-NAME'])
+IDENTIFIER_XPATH = make_xpath(['IDENTIFIER'])
+FRAME_LENGTH_XPATH = make_xpath(['FRAME-LENGTH'])
+CAN_ADDRESSING_MODE_XPATH = make_xpath(['CAN-ADDRESSING-MODE'])
+PDU_REF_XPATH = make_xpath([
+    'PDU-TO-FRAME-MAPPINGS',
+    'PDU-TO-FRAME-MAPPING',
+    'PDU-REF'
+])
+I_SIGNAL_TO_I_PDU_MAPPING_XPATH = make_xpath([
+    'I-SIGNAL-TO-PDU-MAPPINGS',
+    'I-SIGNAL-TO-I-PDU-MAPPING'
+])
+I_SIGNAL_REF_XPATH = make_xpath(['I-SIGNAL-REF'])
+START_POSITION_XPATH = make_xpath(['START-POSITION'])
+LENGTH_XPATH = make_xpath(['LENGTH'])
+PACKING_BYTE_ORDER_XPATH = make_xpath(['PACKING-BYTE-ORDER'])
+DESC_L_2_XPATH = make_xpath(['DESC', 'L-2'])
+SYSTEM_SIGNAL_REF_XPATH = make_xpath(['SYSTEM-SIGNAL-REF'])
+UNIT_REF_XPATH = make_xpath([
+    'PHYSICAL-PROPS',
+    'SW-DATA-DEF-PROPS-VARIANTS',
+    'SW-DATA-DEF-PROPS-CONDITIONAL',
+    'UNIT-REF'
+])
+DISPLAY_NAME_XPATH = make_xpath(['DISPLAY-NAME'])
 
 
 class Loader(object):
@@ -226,16 +234,22 @@ class Loader(object):
                       decimal=decimal)
 
     def find(self, child_elem, xpath):
-        package_short_name, child_short_name = xpath.lstrip('/').split('/')
+        short_names = xpath.lstrip('/').split('/')
+        location = []
 
-        return self.root.find(
-            make_xpath('AR-PACKAGES',
-                       "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(
-                           package_short_name),
-                       'ELEMENTS',
-                       "{}/[ns:SHORT-NAME='{}']".format(child_elem,
-                                                        child_short_name)),
-            NAMESPACES)
+        for short_name in short_names[:-1]:
+            location += [
+                'AR-PACKAGES',
+                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(short_name)
+            ]
+
+        location += [
+            'ELEMENTS',
+            "{}/[ns:SHORT-NAME='{}']".format(child_elem,
+                                             short_names[-1])
+        ]
+
+        return self.root.find(make_xpath(location), NAMESPACES)
 
     def find_can_frame(self, xpath):
         return self.find('CAN-FRAME', xpath)

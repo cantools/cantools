@@ -86,7 +86,7 @@
         <I-SIGNAL>
           <SHORT-NAME>signal2</SHORT-NAME>
           <LENGTH>11</LENGTH>
-	  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal2</SYSTEM-SIGNAL-REF>
+	  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL>
           <SHORT-NAME>signal3</SHORT-NAME>
@@ -155,11 +155,18 @@
             </SW-DATA-DEF-PROPS-VARIANTS>
           </PHYSICAL-PROPS>
         </SYSTEM-SIGNAL>
-        <SYSTEM-SIGNAL>
-          <SHORT-NAME>Signal2</SHORT-NAME>
-          <DESC><L-2 L="FOR-ALL">Signal comment!</L-2></DESC>
-        </SYSTEM-SIGNAL>
       </ELEMENTS>
+      <AR-PACKAGES>
+        <AR-PACKAGE>
+          <SHORT-NAME>SystemSignalInner</SHORT-NAME>
+          <ELEMENTS>
+            <SYSTEM-SIGNAL>
+              <SHORT-NAME>Signal2</SHORT-NAME>
+              <DESC><L-2 L="FOR-ALL">Signal comment!</L-2></DESC>
+            </SYSTEM-SIGNAL>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
     </AR-PACKAGE>
   </AR-PACKAGES>
 </AUTOSAR>

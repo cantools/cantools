@@ -148,6 +148,31 @@ class Loader(object):
                                 buses,
                                 version)
 
+    def load_message_name(self, can_frame_triggering):
+        return can_frame_triggering.find(SHORT_NAME_XPATH, NAMESPACES).text
+
+    def load_message_frame_id(self, can_frame_triggering):
+        return int(can_frame_triggering.find(IDENTIFIER_XPATH,
+                                             NAMESPACES).text)
+
+    def load_message_length(self, can_frame):
+        return int(can_frame.find(FRAME_LENGTH_XPATH, NAMESPACES).text)
+
+    def load_message_is_extended_frame(self, can_frame_triggering):
+        can_addressing_mode = can_frame_triggering.find(
+            CAN_ADDRESSING_MODE_XPATH,
+            NAMESPACES).text
+
+        return can_addressing_mode == 'EXTENDED'
+
+    def load_message_comment(self, can_frame):
+        l_2 = can_frame.find(DESC_L_2_XPATH, NAMESPACES)
+
+        if l_2 is not None:
+            return l_2.text
+        else:
+            return None
+
     def load_message(self, can_frame_triggering):
         """Load given message and return a message object.
 
@@ -156,26 +181,18 @@ class Loader(object):
         # Default values.
         interval = None
         senders = []
-        comment = None
 
         frame_ref_xpath = can_frame_triggering.find(FRAME_REF_XPATH,
                                                     NAMESPACES).text
         can_frame = self.find_can_frame(frame_ref_xpath)
 
-        name = can_frame_triggering.find(SHORT_NAME_XPATH, NAMESPACES).text
-        frame_id = int(can_frame_triggering.find(IDENTIFIER_XPATH,
-                                                 NAMESPACES).text)
-        length = int(can_frame.find(FRAME_LENGTH_XPATH, NAMESPACES).text)
-        can_addressing_mode = can_frame_triggering.find(
-            CAN_ADDRESSING_MODE_XPATH,
-            NAMESPACES).text
-        is_extended_frame = (can_addressing_mode == 'EXTENDED')
-
-        # Comment.
-        l_2 = can_frame.find(DESC_L_2_XPATH, NAMESPACES)
-
-        if l_2 is not None:
-            comment = l_2.text
+        # Name, frame id, length, is_extended_frame and comment.
+        name = self.load_message_name(can_frame_triggering)
+        frame_id = self.load_message_frame_id(can_frame_triggering)
+        length = self.load_message_length(can_frame)
+        is_extended_frame = self.load_message_is_extended_frame(
+            can_frame_triggering)
+        comment = self.load_message_comment(can_frame)
 
         # ToDo: interval, senders
 
@@ -203,6 +220,59 @@ class Loader(object):
                        bus_name=None,
                        strict=self.strict)
 
+    def load_signal_name(self, i_signal_to_i_pdu_mapping):
+        return i_signal_to_i_pdu_mapping.find(SHORT_NAME_XPATH,
+                                              NAMESPACES).text
+
+    def load_signal_start_position(self, i_signal_to_i_pdu_mapping):
+        return int(i_signal_to_i_pdu_mapping.find(
+            START_POSITION_XPATH,
+            NAMESPACES).text)
+
+    def load_signal_length(self, i_signal):
+        return int(i_signal.find(LENGTH_XPATH, NAMESPACES).text)
+
+    def load_signal_byte_order(self, i_signal_to_i_pdu_mapping):
+        packing_byte_order = i_signal_to_i_pdu_mapping.find(
+            PACKING_BYTE_ORDER_XPATH,
+            NAMESPACES).text
+
+        if packing_byte_order == 'MOST-SIGNIFICANT-BYTE-FIRST':
+            return 'big_endian'
+        else:
+            return 'little_endian'
+
+    def load_signal_unit(self, system_signal):
+        unit_ref = system_signal.find(UNIT_REF_XPATH, NAMESPACES)
+
+        try:
+            return self.find_unit(unit_ref.text).find(DISPLAY_NAME_XPATH,
+                                                      NAMESPACES).text
+        except AttributeError:
+            return None
+
+    def load_signal_comment(self, system_signal):
+        l_2 = system_signal.find(DESC_L_2_XPATH, NAMESPACES)
+
+        if l_2 is not None:
+            return l_2.text
+        else:
+            return None
+
+    def load_minimum(self, minimum, decimal):
+        if minimum is not None:
+            decimal.minimum = Decimal(minimum.text)
+            minimum = float(decimal.minimum)
+
+        return minimum
+
+    def load_maximum(self, maximum, decimal):
+        if maximum is not None:
+            decimal.maximum = Decimal(maximum.text)
+            maximum = float(decimal.maximum)
+
+        return maximum
+
     def load_texttable(self, compu_method, decimal):
         # Default values.
         minimum = None
@@ -217,30 +287,21 @@ class Loader(object):
             if vt is not None:
                 choices[vt.text] = int(lower_limit.text)
             else:
-                if lower_limit is not None:
-                    decimal.minimum = Decimal(lower_limit.text)
-                    minimum = float(decimal.minimum)
-
-                if upper_limit is not None:
-                    decimal.maximum = Decimal(upper_limit.text)
-                    maximum = float(decimal.maximum)
+                minimum = self.load_minimum(lower_limit, decimal)
+                maximum = self.load_maximum(upper_limit, decimal)
 
         return minimum, maximum, choices
 
     def load_linear(self, compu_method, decimal):
         # Minimum.
-        minimum = compu_method.find(PHYS_LOWER_LIMIT_XPATH, NAMESPACES)
-
-        if minimum is not None:
-            decimal.minimum = Decimal(minimum.text)
-            minimum = float(decimal.minimum)
+        minimum = self.load_minimum(
+            compu_method.find(PHYS_LOWER_LIMIT_XPATH, NAMESPACES),
+            decimal)
 
         # Maximum.
-        maximum = compu_method.find(PHYS_UPPER_LIMIT_XPATH, NAMESPACES)
-
-        if maximum is not None:
-            decimal.maximum = Decimal(maximum.text)
-            maximum = float(decimal.maximum)
+        maximum = self.load_maximum(
+            compu_method.find(PHYS_UPPER_LIMIT_XPATH, NAMESPACES),
+            decimal)
 
         # Factor and offset.
         numerators = compu_method.findall(COMPU_NUMERATOR_XPATH,
@@ -273,7 +334,6 @@ class Loader(object):
         """
 
         # Default values.
-        byte_order = 'little_endian'
         is_signed = False
         is_float = False
         minimum = None
@@ -286,26 +346,17 @@ class Loader(object):
         receivers = []
         decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
-        # Name, start position and length.
-        i_signal_ref_xpath = i_signal_to_i_pdu_mapping.find(
+        i_signal_ref = i_signal_to_i_pdu_mapping.find(
             I_SIGNAL_REF_XPATH,
             NAMESPACES).text
-        i_signal = self.find_i_signal(i_signal_ref_xpath)
+        i_signal = self.find_i_signal(i_signal_ref)
 
-        name = i_signal_to_i_pdu_mapping.find(SHORT_NAME_XPATH,
-                                              NAMESPACES).text
-        start_position = int(i_signal_to_i_pdu_mapping.find(
-            START_POSITION_XPATH,
-            NAMESPACES).text)
-        length = int(i_signal.find(LENGTH_XPATH, NAMESPACES).text)
-
-        # Byte order.
-        packing_byte_order = i_signal_to_i_pdu_mapping.find(
-            PACKING_BYTE_ORDER_XPATH,
-            NAMESPACES).text
-
-        if packing_byte_order == 'MOST-SIGNIFICANT-BYTE-FIRST':
-            byte_order = 'big_endian'
+        # Name, start position, length and byte order.
+        name = self.load_signal_name(i_signal_to_i_pdu_mapping)
+        start_position = self.load_signal_start_position(
+            i_signal_to_i_pdu_mapping)
+        length = self.load_signal_length(i_signal)
+        byte_order = self.load_signal_byte_order(i_signal_to_i_pdu_mapping)
 
         system_signal_ref = i_signal.find(SYSTEM_SIGNAL_REF_XPATH,
                                           NAMESPACES)
@@ -313,24 +364,14 @@ class Loader(object):
         if system_signal_ref is not None:
             system_signal = self.find_system_signal(system_signal_ref.text)
 
-            # Unit.
-            unit_ref = system_signal.find(UNIT_REF_XPATH, NAMESPACES)
+            # Unit and comment.
+            unit = self.load_signal_unit(system_signal)
+            comment = self.load_signal_comment(system_signal)
 
-            try:
-                unit = self.find_unit(unit_ref.text).find(DISPLAY_NAME_XPATH,
-                                                          NAMESPACES).text
-            except AttributeError:
-                pass
-
-            # Comment.
-            l_2 = system_signal.find(DESC_L_2_XPATH, NAMESPACES)
-
-            if l_2 is not None:
-                comment = l_2.text
-
-            # Minimum and maximum.
+            # Minimum, maximum, factor, offset and choices.
             compu_method_ref = system_signal.find(COMPU_METHOD_REF_XPATH,
                                                   NAMESPACES)
+
             try:
                 compu_method = self.find_compu_method(compu_method_ref.text)
                 category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text

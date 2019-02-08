@@ -50,6 +50,12 @@ START_POSITION_XPATH = make_xpath('START-POSITION')
 LENGTH_XPATH = make_xpath('LENGTH')
 PACKING_BYTE_ORDER_XPATH = make_xpath('PACKING-BYTE-ORDER')
 DESC_L_2_XPATH = make_xpath('DESC', 'L-2')
+SYSTEM_SIGNAL_REF_XPATH = make_xpath('SYSTEM-SIGNAL-REF')
+UNIT_REF_XPATH = make_xpath('PHYSICAL-PROPS',
+                            'SW-DATA-DEF-PROPS-VARIANTS',
+                            'SW-DATA-DEF-PROPS-CONDITIONAL',
+                            'UNIT-REF')
+DISPLAY_NAME_XPATH = make_xpath('DISPLAY-NAME')
 
 
 class Loader(object):
@@ -154,7 +160,7 @@ class Loader(object):
         intercept = 0
         unit = None
         choices = None
-        desc = None
+        comment = None
         receivers = []
         decimal = SignalDecimal(Decimal(slope), Decimal(intercept))
 
@@ -179,8 +185,29 @@ class Loader(object):
         if packing_byte_order == 'MOST-SIGNIFICANT-BYTE-FIRST':
             byte_order = 'big_endian'
 
+        system_signal_ref = i_signal.find(SYSTEM_SIGNAL_REF_XPATH,
+                                          NAMESPACES)
+
+        if system_signal_ref is not None:
+            system_signal = self.find_system_signal(system_signal_ref.text)
+
+            # Unit.
+            unit_ref = system_signal.find(UNIT_REF_XPATH, NAMESPACES)
+
+            try:
+                unit = self.find_unit(unit_ref.text).find(DISPLAY_NAME_XPATH,
+                                                          NAMESPACES).text
+            except AttributeError:
+                pass
+
+            # Comment.
+            l_2 = system_signal.find(DESC_L_2_XPATH, NAMESPACES)
+
+            if l_2 is not None:
+                comment = l_2.text
+
         # ToDo: is_signed, is_float, minimum, maximum, slope,
-        #       intercept, unit, choices, desc, receivers
+        #       intercept, choices, receivers
 
         return Signal(name=name,
                       start=start_position,
@@ -194,7 +221,7 @@ class Loader(object):
                       maximum=maximum,
                       unit=unit,
                       choices=choices,
-                      comment=desc,
+                      comment=comment,
                       is_float=is_float,
                       decimal=decimal)
 
@@ -218,6 +245,12 @@ class Loader(object):
 
     def find_i_signal_i_pdu(self, xpath):
         return self.find('I-SIGNAL-I-PDU', xpath)
+
+    def find_system_signal(self, xpath):
+        return self.find('SYSTEM-SIGNAL', xpath)
+
+    def find_unit(self, xpath):
+        return self.find('UNIT', xpath)
 
 
 def load_string(string, strict=True):

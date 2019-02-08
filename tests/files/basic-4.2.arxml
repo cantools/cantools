@@ -81,10 +81,12 @@
         <I-SIGNAL>
           <SHORT-NAME>signal1</SHORT-NAME>
           <LENGTH>3</LENGTH>
+	  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal1</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL>
           <SHORT-NAME>signal2</SHORT-NAME>
           <LENGTH>11</LENGTH>
+	  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal2</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL>
           <SHORT-NAME>signal3</SHORT-NAME>
@@ -129,6 +131,34 @@
           <SHORT-NAME>message3</SHORT-NAME>
           <LENGTH>8</LENGTH>
         </I-SIGNAL-I-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <AR-PACKAGE>
+      <SHORT-NAME>Unit</SHORT-NAME>
+      <ELEMENTS>
+        <UNIT>
+          <SHORT-NAME>meters</SHORT-NAME>
+          <DISPLAY-NAME>m</DISPLAY-NAME>
+        </UNIT>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <AR-PACKAGE>
+      <SHORT-NAME>SystemSignal</SHORT-NAME>
+      <ELEMENTS>
+        <SYSTEM-SIGNAL>
+          <SHORT-NAME>Signal1</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <UNIT-REF DEST="UNIT">/Unit/meters</UNIT-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+        <SYSTEM-SIGNAL>
+          <SHORT-NAME>Signal2</SHORT-NAME>
+          <DESC><L-2 L="FOR-ALL">Signal comment!</L-2></DESC>
+        </SYSTEM-SIGNAL>
       </ELEMENTS>
     </AR-PACKAGE>
   </AR-PACKAGES>

@@ -105,6 +105,8 @@ class Loader(object):
             NAMESPACES).text
         is_extended_frame = (can_addressing_mode == 'EXTENDED')
 
+        # ToDo: interval, senders
+
         # Find all signals in this message.
         signals = []
 
@@ -143,8 +145,8 @@ class Loader(object):
         slope = 1
         intercept = 0
         unit = None
-        labels = None
-        notes = None
+        choices = None
+        desc = None
         receivers = []
         decimal = SignalDecimal(Decimal(slope), Decimal(intercept))
 
@@ -169,6 +171,9 @@ class Loader(object):
         if packing_byte_order == 'MOST-SIGNIFICANT-BYTE-FIRST':
             byte_order = 'big_endian'
 
+        # ToDo: is_signed, is_float, minimum, maximum, slope,
+        #       intercept, unit, choices, desc, receivers
+
         return Signal(name=name,
                       start=start_position,
                       length=length,
@@ -180,8 +185,8 @@ class Loader(object):
                       minimum=minimum,
                       maximum=maximum,
                       unit=unit,
-                      choices=labels,
-                      comment=notes,
+                      choices=choices,
+                      comment=desc,
                       is_float=is_float,
                       decimal=decimal)
 

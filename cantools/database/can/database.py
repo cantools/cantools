@@ -1,5 +1,6 @@
 import logging
 
+from .formats import arxml
 from .formats import dbc
 from .formats import kcd
 from .formats import sym
@@ -90,6 +91,40 @@ class Database(object):
         """
 
         return self._dbc
+
+    def add_arxml(self, fp):
+        """Read and parse ARXML data from given file-like object and add the
+        parsed data to the database.
+
+        """
+
+        self.add_arxml_string(fp.read())
+
+    def add_arxml_file(self, filename, encoding='utf-8'):
+        """Open, read and parse ARXML data from given file and add the parsed
+        data to the database.
+
+        `encoding` specifies the file encoding.
+
+        """
+
+        with fopen(filename, 'r', encoding=encoding) as fin:
+            self.add_arxml(fin)
+
+    def add_arxml_string(self, string):
+        """Parse given ARXML data string and add the parsed data to the
+        database.
+
+        """
+
+        database = arxml.load_string(string, self._strict)
+
+        self._messages += database.messages
+        self._nodes = database.nodes
+        self._buses = database.buses
+        self._version = database.version
+        self._dbc = database.dbc
+        self.refresh()
 
     def add_dbc(self, fp):
         """Read and parse DBC data from given file-like object and add the

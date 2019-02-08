@@ -21,8 +21,11 @@ class UnsupportedDatabaseFormatError(Error):
 
     """
 
-    def __init__(self, e_dbc, e_kcd, e_sym, e_cdd):
+    def __init__(self, e_arxml, e_dbc, e_kcd, e_sym, e_cdd):
         message = []
+
+        if e_arxml is not None:
+            message.append('ARXML: "{}"'.format(e_arxml))
 
         if e_dbc is not None:
             message.append('DBC: "{}"'.format(e_dbc))
@@ -40,6 +43,7 @@ class UnsupportedDatabaseFormatError(Error):
 
         super(UnsupportedDatabaseFormatError, self).__init__(message)
 
+        self.e_arxml = e_arxml
         self.e_dbc = e_dbc
         self.e_kcd = e_kcd
         self.e_sym = e_sym
@@ -98,13 +102,15 @@ def load_file(filename,
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
-    `database_format` is one of ``'dbc'``, ``'kcd'``, ``'sym'``,
-    ``cdd`` and ``None``. If ``None``, the database format is selected
-    based on the filename extension as in the table below.
+    `database_format` is one of ``'arxml'``, ``'dbc'``, ``'kcd'``,
+    ``'sym'``, ``cdd`` and ``None``. If ``None``, the database format
+    is selected based on the filename extension as in the table below.
 
     +-----------+-----------------+
     | Extension | Database format |
     +===========+=================+
+    | .arxml    | ``'arxml'``     |
+    +-----------+-----------------+
     | .dbc      | ``'dbc'``       |
     +-----------+-----------------+
     | .kcd      | ``'kcd'``       |
@@ -124,6 +130,8 @@ def load_file(filename,
     +-----------------+-------------------+
     | Database format | Default encoding  |
     +=================+===================+
+    | ``'arxml'``     | ``'utf-8'``       |
+    +-----------------+-------------------+
     | ``'dbc'``       | ``'cp1252'``      |
     +-----------------+-------------------+
     | ``'kcd'``       | ``'utf-8'``       |
@@ -247,8 +255,9 @@ def load_string(string,
     :class:`diagnostics.Database<.diagnostics.Database>` object with
     its contents.
 
-    `database_format` may be one of ``'dbc'``, ``'kcd'``, ``'sym'``,
-    ``'cdd'`` or ``None``, where ``None`` means transparent format.
+    `database_format` may be one of ``'arxml'``, ``'dbc'``, ``'kcd'``,
+    ``'sym'``, ``'cdd'`` or ``None``, where ``None`` means transparent
+    format.
 
     See :class:`can.Database<.can.Database>` for a description of
     `strict`.
@@ -265,11 +274,12 @@ def load_string(string,
 
     """
 
-    if database_format not in ['dbc', 'kcd', 'sym', 'cdd', None]:
+    if database_format not in ['arxml', 'dbc', 'kcd', 'sym', 'cdd', None]:
         raise ValueError(
-            "expected database format 'dbc', 'kcd', 'sym', 'cdd' or None, but "
-            "got '{}'".format(database_format))
+            "expected database format 'arxml', 'dbc', 'kcd', 'sym', 'cdd' or "
+            "None, but got '{}'".format(database_format))
 
+    e_arxml = None
     e_dbc = None
     e_kcd = None
     e_sym = None
@@ -279,7 +289,9 @@ def load_string(string,
         db = can.Database(frame_id_mask=frame_id_mask,
                           strict=strict)
 
-        if fmt == 'dbc':
+        if fmt == 'arxml':
+            db.add_arxml_string(string)
+        elif fmt == 'dbc':
             db.add_dbc_string(string)
         elif fmt == 'kcd':
             db.add_kcd_string(string)
@@ -287,6 +299,12 @@ def load_string(string,
             db.add_sym_string(string)
 
         return db
+
+    if database_format in ['arxml', None]:
+        try:
+            return load_can_database('arxml')
+        except (ElementTree.ParseError, ValueError) as e:
+            e_arxml = e
 
     if database_format in ['dbc', None]:
         try:
@@ -314,4 +332,4 @@ def load_string(string,
         except (ElementTree.ParseError, ValueError) as e:
             e_cdd = e
 
-    raise UnsupportedDatabaseFormatError(e_dbc, e_kcd, e_sym, e_cdd)
+    raise UnsupportedDatabaseFormatError(e_arxml, e_dbc, e_kcd, e_sym, e_cdd)

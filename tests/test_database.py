@@ -1234,7 +1234,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Message1.
         message_1 = db.messages[3]
-        self.assertEqual(len(message_1.signals), 2)
         self.assertEqual(message_1.frame_id, 0)
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Message1')
@@ -2239,10 +2238,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            "DBC: \"Invalid syntax at line 1, column 9: \"CM_ BO_ >>!<<\"Foo."
-            "\";\"\", KCD: \"syntax error: line 1, column 0\", SYM: \"Only SYM "
-            "version 6.0 is supported.\", CDD: \"syntax error: line 1, column "
-            "0\"")
+            "ARXML: \"syntax error: line 1, column 0\", DBC: \"Invalid syntax "
+            "at line 1, column 9: \"CM_ BO_ >>!<<\"Foo.\";\"\", KCD: \"syntax "
+            "error: line 1, column 0\", SYM: \"Only SYM version 6.0 is "
+            "supported.\", CDD: \"syntax error: line 1, column 0\"")
 
     def test_get_node_by_name(self):
         filename = os.path.join('tests', 'files', 'the_homer.kcd')
@@ -2308,8 +2307,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            "expected database format 'dbc', 'kcd', 'sym', 'cdd' or None, but "
-            "got 'bad'")
+            "expected database format 'arxml', 'dbc', 'kcd', 'sym', 'cdd' or "
+            "None, but got 'bad'")
 
     def test_load_file_encoding(self):
         filename_dbc = os.path.join('tests', 'files', 'cp1252.dbc')
@@ -3996,6 +3995,116 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(converter.long_to_short_names_dict,
                          dict(zip(long_names[2:], short_names[2:])))
+
+    def test_basic_arxml(self):
+        filename = os.path.join('tests', 'files', 'basic-4.2.arxml')
+        db = cantools.db.load_file(filename)
+
+        self.assertEqual(len(db.nodes), 0)
+
+        self.assertEqual(len(db.messages), 3)
+
+        message_1 = db.messages[0]
+        self.assertEqual(message_1.frame_id, 5)
+        self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.name, 'Message1')
+        self.assertEqual(message_1.length, 6)
+        self.assertEqual(message_1.senders, [])
+        self.assertEqual(message_1.send_type, None)
+        self.assertEqual(message_1.cycle_time, None)
+        self.assertEqual(len(message_1.signals), 1)
+        self.assertEqual(message_1.comment, None)
+        self.assertEqual(message_1.bus_name, None)
+
+        signal_1 = message_1.signals[0]
+        self.assertEqual(signal_1.name, 'Signal1')
+        self.assertEqual(signal_1.start, 8)
+        self.assertEqual(signal_1.length, 3)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, 'big_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comment, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+        self.assertEqual(signal_1.is_float, False)
+
+        message_2 = db.messages[1]
+        self.assertEqual(message_2.frame_id, 6)
+        self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.name, 'Message2')
+        self.assertEqual(message_2.length, 7)
+        self.assertEqual(message_2.senders, [])
+        self.assertEqual(message_2.send_type, None)
+        self.assertEqual(message_2.cycle_time, None)
+        self.assertEqual(len(message_2.signals), 2)
+        self.assertEqual(message_2.comment, None)
+        self.assertEqual(message_2.bus_name, None)
+
+        signal_1 = message_2.signals[0]
+        self.assertEqual(signal_1.name, 'Signal3')
+        self.assertEqual(signal_1.start, 6)
+        self.assertEqual(signal_1.length, 2)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, 'little_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comment, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+        self.assertEqual(signal_1.is_float, False)
+
+        signal_2 = message_2.signals[1]
+        self.assertEqual(signal_2.name, 'Signal2')
+        self.assertEqual(signal_2.start, 18)
+        self.assertEqual(signal_2.length, 11)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'little_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 0)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, 0)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, None)
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+        self.assertEqual(signal_2.is_float, False)
+
+        message_3 = db.messages[2]
+        self.assertEqual(message_3.frame_id, 100)
+        self.assertEqual(message_3.is_extended_frame, False)
+        self.assertEqual(message_3.name, 'Message3')
+        self.assertEqual(message_3.length, 8)
+        self.assertEqual(message_3.senders, [])
+        self.assertEqual(message_3.send_type, None)
+        self.assertEqual(message_3.cycle_time, None)
+        self.assertEqual(len(message_3.signals), 0)
+        self.assertEqual(message_3.comment, None)
+        self.assertEqual(message_3.bus_name, None)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

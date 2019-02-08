@@ -49,6 +49,7 @@ I_SIGNAL_REF_XPATH = make_xpath('I-SIGNAL-REF')
 START_POSITION_XPATH = make_xpath('START-POSITION')
 LENGTH_XPATH = make_xpath('LENGTH')
 PACKING_BYTE_ORDER_XPATH = make_xpath('PACKING-BYTE-ORDER')
+DESC_L_2_XPATH = make_xpath('DESC', 'L-2')
 
 
 class Loader(object):
@@ -91,6 +92,7 @@ class Loader(object):
         # Default values.
         interval = None
         senders = []
+        comment = None
 
         frame_ref_xpath = can_frame_triggering.find(FRAME_REF_XPATH,
                                                     NAMESPACES).text
@@ -104,6 +106,12 @@ class Loader(object):
             CAN_ADDRESSING_MODE_XPATH,
             NAMESPACES).text
         is_extended_frame = (can_addressing_mode == 'EXTENDED')
+
+        # Comment.
+        l_2 = can_frame.find(DESC_L_2_XPATH, NAMESPACES)
+
+        if l_2 is not None:
+            comment = l_2.text
 
         # ToDo: interval, senders
 
@@ -127,7 +135,7 @@ class Loader(object):
                        send_type=None,
                        cycle_time=interval,
                        signals=signals,
-                       comment=None,
+                       comment=comment,
                        bus_name=None,
                        strict=self.strict)
 

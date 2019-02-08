@@ -44,6 +44,7 @@
       <ELEMENTS>
         <CAN-FRAME>
           <SHORT-NAME>message1</SHORT-NAME>
+          <DESC><L-2 L="FOR-ALL">Comment1</L-2></DESC>
           <FRAME-LENGTH>6</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <PDU-TO-FRAME-MAPPING>

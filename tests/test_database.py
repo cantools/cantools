@@ -4013,7 +4013,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, None)
         self.assertEqual(len(message_1.signals), 1)
-        self.assertEqual(message_1.comment, None)
+        self.assertEqual(message_1.comment, 'Comment1')
         self.assertEqual(message_1.bus_name, None)
 
         signal_1 = message_1.signals[0]

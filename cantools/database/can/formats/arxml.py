@@ -72,24 +72,13 @@ COMPU_METHOD_REF_XPATH = make_xpath([
 DISPLAY_NAME_XPATH = make_xpath(['DISPLAY-NAME'])
 CATEGORY_XPATH = make_xpath(['CATEGORY'])
 COMPU_NUMERATOR_XPATH = make_xpath([
-    'COMPU-INTERNAL-TO-PHYS',
-    'COMPU-SCALES',
-    'COMPU-SCALE',
-    'COMPU-RATIONAL-COEFFS',
     'COMPU-NUMERATOR',
     'V'
 ])
 COMPU_RATIONAL_COEFFS_XPATH = make_xpath([
-    'COMPU-INTERNAL-TO-PHYS',
-    'COMPU-SCALES',
-    'COMPU-SCALE',
     'COMPU-RATIONAL-COEFFS'
 ])
 COMPU_DENOMINATOR_XPATH = make_xpath([
-    'COMPU-INTERNAL-TO-PHYS',
-    'COMPU-SCALES',
-    'COMPU-SCALE',
-    'COMPU-RATIONAL-COEFFS',
     'COMPU-DENOMINATOR',
     'V'
 ])
@@ -149,6 +138,9 @@ class SystemLoader(object):
     def __init__(self, root, strict):
         self.root = root
         self.strict = strict
+        self._system_signal_cache = {}
+        self._compu_method_cache = {}
+        self._sw_base_type_cache = {}
 
     def load(self):
         buses = []
@@ -420,26 +412,24 @@ class SystemLoader(object):
 
         return minimum, maximum, choices
 
-    def load_linear_factor_and_offset(self, compu_method, decimal):
-        compu_rational_coeffs = compu_method.find(
+    def load_linear_factor_and_offset(self, compu_scale, decimal):
+        compu_rational_coeffs = compu_scale.find(
             COMPU_RATIONAL_COEFFS_XPATH,
             NAMESPACES)
 
         if compu_rational_coeffs is None:
             return 1, 0
 
-        numerators = compu_method.findall(COMPU_NUMERATOR_XPATH,
-                                          NAMESPACES)
-        numerators = compu_method.findall(COMPU_NUMERATOR_XPATH,
-                                          NAMESPACES)
+        numerators = compu_rational_coeffs.findall(COMPU_NUMERATOR_XPATH,
+                                                   NAMESPACES)
 
         if len(numerators) != 2:
             raise ValueError(
                 'Expected 2 numerator values for linear scaling, but '
                 'got {}.'.format(len(numerators)))
 
-        denominators = compu_method.findall(COMPU_DENOMINATOR_XPATH,
-                                            NAMESPACES)
+        denominators = compu_rational_coeffs.findall(COMPU_DENOMINATOR_XPATH,
+                                                     NAMESPACES)
 
         if len(denominators) != 1:
             raise ValueError(
@@ -454,28 +444,18 @@ class SystemLoader(object):
 
 
     def load_linear(self, compu_method, decimal):
-        # Minimum.
-        minimum = self.load_minimum(
-            compu_method.find(PHYS_LOWER_LIMIT_XPATH, NAMESPACES),
+        compu_scale = compu_method.find(COMPU_SCALE_XPATH,
+                                        NAMESPACES)
+
+        lower_limit = compu_scale.find(LOWER_LIMIT_XPATH, NAMESPACES)
+        upper_limit = compu_scale.find(UPPER_LIMIT_XPATH, NAMESPACES)
+
+        minimum = self.load_minimum(lower_limit, decimal)
+        maximum = self.load_maximum(upper_limit, decimal)
+
+        factor, offset = self.load_linear_factor_and_offset(
+            compu_scale,
             decimal)
-
-        # Maximum.
-        maximum = self.load_maximum(
-            compu_method.find(PHYS_UPPER_LIMIT_XPATH, NAMESPACES),
-            decimal)
-
-        # Factor and offset.
-        compu_rational_coeffs = compu_method.find(
-            COMPU_RATIONAL_COEFFS_XPATH,
-            NAMESPACES)
-
-        if compu_rational_coeffs is not None:
-            factor, offset = self.load_linear_factor_and_offset(
-                compu_method,
-                decimal)
-        else:
-            factor = 1
-            offset = 0
 
         return minimum, maximum, factor, offset
 
@@ -497,7 +477,7 @@ class SystemLoader(object):
                 minimum = self.load_minimum(lower_limit, decimal)
                 maximum = self.load_maximum(upper_limit, decimal)
                 factor, offset = self.load_linear_factor_and_offset(
-                    compu_method,
+                    compu_scale,
                     decimal)
 
         return minimum, maximum, factor, offset, choices
@@ -555,16 +535,34 @@ class SystemLoader(object):
         return self.find('I-SIGNAL-I-PDU', xpath)
 
     def find_system_signal(self, xpath):
-        return self.find('SYSTEM-SIGNAL', xpath)
+        if xpath in self._system_signal_cache:
+            system_signal = self._system_signal_cache[xpath]
+        else:
+            system_signal = self.find('SYSTEM-SIGNAL', xpath)
+            self._system_signal_cache[xpath] = system_signal
+
+        return system_signal
 
     def find_unit(self, xpath):
         return self.find('UNIT', xpath)
 
     def find_compu_method(self, xpath):
-        return self.find('COMPU-METHOD', xpath)
+        if xpath in self._compu_method_cache:
+            compu_method = self._compu_method_cache[xpath]
+        else:
+            compu_method = self.find('COMPU-METHOD', xpath)
+            self._compu_method_cache[xpath] = compu_method
+
+        return compu_method
 
     def find_sw_base_type(self, xpath):
-        return self.find('SW-BASE-TYPE', xpath)
+        if xpath in self._sw_base_type_cache:
+            sw_base_type = self._sw_base_type_cache[xpath]
+        else:
+            sw_base_type = self.find('SW-BASE-TYPE', xpath)
+            self._sw_base_type_cache[xpath] = sw_base_type
+
+        return sw_base_type
 
 
 class EcuExtractLoader(object):

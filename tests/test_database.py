@@ -3996,7 +3996,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(converter.long_to_short_names_dict,
                          dict(zip(long_names[2:], short_names[2:])))
 
-    def test_basic_arxml(self):
+    def test_system_arxml(self):
         filename = os.path.join('tests', 'files', 'system-4.2.arxml')
         db = cantools.db.load_file(filename)
 

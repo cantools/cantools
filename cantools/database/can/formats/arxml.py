@@ -108,11 +108,14 @@ VT_XPATH = make_xpath([
     'COMPU-CONST',
     'VT'
 ])
-LOWER_LIMIT_XPATH = make_xpath([
-    'LOWER-LIMIT'
-])
-UPPER_LIMIT_XPATH = make_xpath([
-    'UPPER-LIMIT'
+LOWER_LIMIT_XPATH = make_xpath(['LOWER-LIMIT'])
+UPPER_LIMIT_XPATH = make_xpath(['UPPER-LIMIT'])
+BASE_TYPE_ENCODING_XPATH = make_xpath(['BASE-TYPE-ENCODING'])
+BASE_TYPE_REF_XPATH = make_xpath([
+    'NETWORK-REPRESENTATION-PROPS',
+    'SW-DATA-DEF-PROPS-VARIANTS',
+    'SW-DATA-DEF-PROPS-CONDITIONAL',
+    'BASE-TYPE-REF'
 ])
 
 
@@ -274,7 +277,6 @@ class Loader(object):
         return maximum
 
     def load_texttable(self, compu_method, decimal):
-        # Default values.
         minimum = None
         maximum = None
         choices = {}
@@ -328,6 +330,31 @@ class Loader(object):
 
         return minimum, maximum, factor, offset
 
+    def load_signal_type(self, i_signal):
+        is_signed = False
+        is_float = False
+
+        try:
+            base_type_ref = i_signal.find(BASE_TYPE_REF_XPATH, NAMESPACES)
+            sw_base_type = self.find_sw_base_type(base_type_ref.text)
+
+            if sw_base_type is None:
+                raise ValueError(
+                    'SW-BASE-TYPE at {} does not exist.'.format(
+                        base_type_ref.text))
+
+            base_type_encoding = sw_base_type.find(BASE_TYPE_ENCODING_XPATH,
+                                                   NAMESPACES).text
+
+            if base_type_encoding == '2C':
+                is_signed = True
+            elif base_type_encoding in 'IEE754':
+                is_float = True
+        except AttributeError:
+            pass
+
+        return is_signed, is_float
+
     def load_signal(self, i_signal_to_i_pdu_mapping):
         """Load given signal and return a signal object.
 
@@ -364,6 +391,11 @@ class Loader(object):
         if system_signal_ref is not None:
             system_signal = self.find_system_signal(system_signal_ref.text)
 
+            if system_signal is None:
+                raise ValueError(
+                    'SYSTEM-SIGNAL at {} does not exist.'.format(
+                        system_signal_ref.text))
+
             # Unit and comment.
             unit = self.load_signal_unit(system_signal)
             comment = self.load_signal_comment(system_signal)
@@ -374,6 +406,12 @@ class Loader(object):
 
             try:
                 compu_method = self.find_compu_method(compu_method_ref.text)
+
+                if compu_method is None:
+                    raise ValueError(
+                        'COMPU-METHOD at {} does not exist.'.format(
+                            compu_method_ref.text))
+
                 category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text
 
                 if category == 'TEXTTABLE':
@@ -390,8 +428,10 @@ class Loader(object):
             except AttributeError:
                 pass
 
+        # Type.
+        is_signed, is_float = self.load_signal_type(i_signal)
 
-        # ToDo: is_signed, is_float, receivers
+        # ToDo: receivers
 
         return Signal(name=name,
                       start=start_position,
@@ -444,6 +484,9 @@ class Loader(object):
 
     def find_compu_method(self, xpath):
         return self.find('COMPU-METHOD', xpath)
+
+    def find_sw_base_type(self, xpath):
+        return self.find('SW-BASE-TYPE', xpath)
 
 
 def load_string(string, strict=True):

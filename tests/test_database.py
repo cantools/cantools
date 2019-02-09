@@ -1252,6 +1252,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
         self.assertEqual(signal_1.scale, 1)
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
@@ -1265,7 +1266,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
-        self.assertEqual(signal_1.is_float, False)
 
         signal_2 = message_1.signals[1]
         self.assertEqual(signal_2.name, 'Signal2')
@@ -1274,6 +1274,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')
         self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, True)
         self.assertEqual(signal_2.scale, 1)
         self.assertEqual(signal_2.offset, 48)
         self.assertEqual(signal_2.minimum, 16)
@@ -1287,7 +1288,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.comment, None)
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
-        self.assertEqual(signal_2.is_float, True)
 
         # Message2.
         message_2 = db.messages[1]
@@ -1310,6 +1310,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'big_endian')
         self.assertEqual(signal_3.is_signed, True)
+        self.assertEqual(signal_3.is_float, False)
         self.assertEqual(signal_3.scale, 1)
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, 0)
@@ -1323,7 +1324,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)
-        self.assertEqual(signal_3.is_float, False)
 
         # Symbol2.
         signal_4 = db.messages[4].signals[0]
@@ -1333,6 +1333,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.receivers, [])
         self.assertEqual(signal_4.byte_order, 'little_endian')
         self.assertEqual(signal_4.is_signed, False)
+        self.assertEqual(signal_4.is_float, True)
         self.assertEqual(signal_4.scale, 6)
         self.assertEqual(signal_4.offset, 5)
         self.assertEqual(signal_4.minimum, -1.7e+308)
@@ -1346,7 +1347,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.comment, None)
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_ids, None)
-        self.assertEqual(signal_4.is_float, True)
 
         # Symbol3.
         symbol_3 = db.messages[5]
@@ -1440,6 +1440,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.receivers, [])
         self.assertEqual(signal_0.byte_order, 'little_endian')
         self.assertEqual(signal_0.is_signed, False)
+        self.assertEqual(signal_0.is_float, False)
         self.assertEqual(signal_0.scale, 1)
         self.assertEqual(signal_0.offset, 0)
         self.assertEqual(signal_0.minimum, 0)
@@ -1453,7 +1454,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.comment, None)
         self.assertEqual(signal_0.is_multiplexer, False)
         self.assertEqual(signal_0.multiplexer_ids, None)
-        self.assertEqual(signal_0.is_float, False)
 
         signal_1 = db.messages[0].signals[1]
         self.assertEqual(signal_1.name, 'Char')
@@ -1462,6 +1462,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
         self.assertEqual(signal_1.scale, 1)
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
@@ -1475,7 +1476,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
-        self.assertEqual(signal_1.is_float, False)
 
         signal_2 = db.messages[0].signals[2]
         self.assertEqual(signal_2.name, 'Enum')
@@ -1484,6 +1484,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')
         self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, False)
         self.assertEqual(signal_2.scale, 1)
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
@@ -1497,7 +1498,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.comment, None)
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
-        self.assertEqual(signal_2.is_float, False)
 
         signal_3 = db.messages[0].signals[3]
         self.assertEqual(signal_3.name, 'Signed')
@@ -1506,6 +1506,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'little_endian')
         self.assertEqual(signal_3.is_signed, True)
+        self.assertEqual(signal_3.is_float, False)
         self.assertEqual(signal_3.scale, 1)
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, None)
@@ -1519,7 +1520,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)
-        self.assertEqual(signal_3.is_float, False)
 
         signal_4 = db.messages[0].signals[4]
         self.assertEqual(signal_4.name, 'String')
@@ -1528,6 +1528,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.receivers, [])
         self.assertEqual(signal_4.byte_order, 'little_endian')
         self.assertEqual(signal_4.is_signed, False)
+        self.assertEqual(signal_4.is_float, False)
         self.assertEqual(signal_4.scale, 1)
         self.assertEqual(signal_4.offset, 0)
         self.assertEqual(signal_4.minimum, None)
@@ -1541,7 +1542,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.comment, None)
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_ids, None)
-        self.assertEqual(signal_4.is_float, False)
 
         signal_5 = db.messages[0].signals[5]
         self.assertEqual(signal_5.name, 'Raw')
@@ -1550,6 +1550,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_5.receivers, [])
         self.assertEqual(signal_5.byte_order, 'little_endian')
         self.assertEqual(signal_5.is_signed, False)
+        self.assertEqual(signal_5.is_float, False)
         self.assertEqual(signal_5.scale, 1)
         self.assertEqual(signal_5.offset, 0)
         self.assertEqual(signal_5.minimum, None)
@@ -1563,7 +1564,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_5.comment, None)
         self.assertEqual(signal_5.is_multiplexer, False)
         self.assertEqual(signal_5.multiplexer_ids, None)
-        self.assertEqual(signal_5.is_float, False)
 
         signal_6 = db.messages[0].signals[6]
         self.assertEqual(signal_6.name, 'Unsigned')
@@ -1572,6 +1572,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_6.receivers, [])
         self.assertEqual(signal_6.byte_order, 'little_endian')
         self.assertEqual(signal_6.is_signed, False)
+        self.assertEqual(signal_6.is_float, False)
         self.assertEqual(signal_6.scale, 1)
         self.assertEqual(signal_6.offset, 0)
         self.assertEqual(signal_6.minimum, None)
@@ -1585,7 +1586,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_6.comment, None)
         self.assertEqual(signal_6.is_multiplexer, False)
         self.assertEqual(signal_6.multiplexer_ids, None)
-        self.assertEqual(signal_6.is_float, False)
 
         signal_7 = db.messages[0].signals[7]
         self.assertEqual(signal_7.name, 'Enum2')
@@ -1594,6 +1594,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_7.receivers, [])
         self.assertEqual(signal_7.byte_order, 'little_endian')
         self.assertEqual(signal_7.is_signed, False)
+        self.assertEqual(signal_7.is_float, False)
         self.assertEqual(signal_7.scale, 1)
         self.assertEqual(signal_7.offset, 0)
         self.assertEqual(signal_7.minimum, None)
@@ -1607,7 +1608,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_7.comment, None)
         self.assertEqual(signal_7.is_multiplexer, False)
         self.assertEqual(signal_7.multiplexer_ids, None)
-        self.assertEqual(signal_7.is_float, False)
 
     def test_variables_color_enum_6_0_sym(self):
         filename = os.path.join('tests', 'files', 'variables-color-enum-6.0.sym')
@@ -1623,6 +1623,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.receivers, [])
         self.assertEqual(signal_0.byte_order, 'big_endian')
         self.assertEqual(signal_0.is_signed, False)
+        self.assertEqual(signal_0.is_float, False)
         self.assertEqual(signal_0.scale, 1)
         self.assertEqual(signal_0.offset, 0)
         self.assertEqual(signal_0.minimum, None)
@@ -1636,7 +1637,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.comment, None)
         self.assertEqual(signal_0.is_multiplexer, False)
         self.assertEqual(signal_0.multiplexer_ids, None)
-        self.assertEqual(signal_0.is_float, False)
 
         signal_1 = db.messages[0].signals[1]
         self.assertEqual(signal_1.name, 'Variable2')
@@ -1645,6 +1645,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'big_endian')
         self.assertEqual(signal_1.is_signed, True)
+        self.assertEqual(signal_1.is_float, False)
         self.assertEqual(signal_1.scale, 1)
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
@@ -1658,7 +1659,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
-        self.assertEqual(signal_1.is_float, False)
 
         signal_2 = db.messages[0].signals[2]
         self.assertEqual(signal_2.name, 'Variable1')
@@ -1667,6 +1667,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')
         self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, False)
         self.assertEqual(signal_2.scale, 1)
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
@@ -1680,7 +1681,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.comment, None)
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
-        self.assertEqual(signal_2.is_float, False)
 
         signal_3 = db.messages[0].signals[3]
         self.assertEqual(signal_3.name, 'Color')
@@ -1689,6 +1689,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'big_endian')
         self.assertEqual(signal_3.is_signed, False)
+        self.assertEqual(signal_3.is_float, True)
         self.assertEqual(signal_3.scale, 1)
         self.assertEqual(signal_3.offset, 2)
         self.assertEqual(signal_3.minimum, None)
@@ -1702,7 +1703,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)
-        self.assertEqual(signal_3.is_float, True)
 
     def test_empty_enum_6_0_sym(self):
         filename = os.path.join('tests', 'files', 'empty-enum-6.0.sym')
@@ -4012,17 +4012,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.senders, [])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, None)
-        self.assertEqual(len(message_1.signals), 1)
+        self.assertEqual(len(message_1.signals), 2)
         self.assertEqual(message_1.comment, 'Comment1')
         self.assertEqual(message_1.bus_name, None)
 
         signal_1 = message_1.signals[0]
         self.assertEqual(signal_1.name, 'Signal1')
-        self.assertEqual(signal_1.start, 8)
+        self.assertEqual(signal_1.start, 4)
         self.assertEqual(signal_1.length, 3)
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'big_endian')
         self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
         self.assertEqual(signal_1.scale, 5.0)
         self.assertEqual(signal_1.offset, 0.0)
         self.assertEqual(signal_1.minimum, 0.0)
@@ -4036,7 +4037,28 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
-        self.assertEqual(signal_1.is_float, False)
+
+        signal_2 = message_1.signals[1]
+        self.assertEqual(signal_2.name, 'Signal5')
+        self.assertEqual(signal_2.start, 16)
+        self.assertEqual(signal_2.length, 32)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'little_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, True)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 0)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, 0)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, None)
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
 
         message_2 = db.messages[1]
         self.assertEqual(message_2.frame_id, 6)
@@ -4057,6 +4079,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
         self.assertEqual(signal_1.scale, 1)
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
@@ -4070,7 +4093,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
-        self.assertEqual(signal_1.is_float, False)
 
         signal_2 = message_2.signals[1]
         self.assertEqual(signal_2.name, 'Signal2')
@@ -4078,7 +4100,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.length, 11)
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')
-        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_signed, True)
+        self.assertEqual(signal_2.is_float, False)
         self.assertEqual(signal_2.scale, 1)
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
@@ -4092,7 +4115,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.comment, 'Signal comment!')
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
-        self.assertEqual(signal_2.is_float, False)
 
         signal_3 = message_2.signals[2]
         self.assertEqual(signal_3.name, 'Signal4')
@@ -4101,6 +4123,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'little_endian')
         self.assertEqual(signal_3.is_signed, False)
+        self.assertEqual(signal_3.is_float, False)
         self.assertEqual(signal_3.scale, 1)
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, 0)
@@ -4114,7 +4137,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)
-        self.assertEqual(signal_3.is_float, False)
 
         message_3 = db.messages[2]
         self.assertEqual(message_3.frame_id, 100)

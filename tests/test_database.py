@@ -3997,7 +3997,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          dict(zip(long_names[2:], short_names[2:])))
 
     def test_basic_arxml(self):
-        filename = os.path.join('tests', 'files', 'basic-4.2.arxml')
+        filename = os.path.join('tests', 'files', 'system-4.2.arxml')
         db = cantools.db.load_file(filename)
 
         self.assertEqual(len(db.nodes), 0)
@@ -4140,6 +4140,160 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         message_3 = db.messages[2]
         self.assertEqual(message_3.frame_id, 100)
+        self.assertEqual(message_3.is_extended_frame, False)
+        self.assertEqual(message_3.name, 'Message3')
+        self.assertEqual(message_3.length, 8)
+        self.assertEqual(message_3.senders, [])
+        self.assertEqual(message_3.send_type, None)
+        self.assertEqual(message_3.cycle_time, None)
+        self.assertEqual(len(message_3.signals), 0)
+        self.assertEqual(message_3.comment, None)
+        self.assertEqual(message_3.bus_name, None)
+
+    def test_ecu_configuration_arxml(self):
+        filename = os.path.join('tests', 'files', 'ecu-extract-4.2.arxml')
+        db = cantools.db.load_file(filename)
+
+        self.assertEqual(len(db.nodes), 0)
+
+        self.assertEqual(len(db.messages), 3)
+
+        message_1 = db.messages[0]
+        self.assertEqual(message_1.frame_id, 1)  # ToDo: 5
+        self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.name, 'Message1')
+        self.assertEqual(message_1.length, 8)  # ToDo: 6
+        self.assertEqual(message_1.senders, [])
+        self.assertEqual(message_1.send_type, None)
+        self.assertEqual(message_1.cycle_time, None)
+        self.assertEqual(len(message_1.signals), 2)
+        self.assertEqual(message_1.comment, None)  # ToDo: 'Comment1'
+        self.assertEqual(message_1.bus_name, None)
+
+        signal_1 = message_1.signals[0]
+        self.assertEqual(signal_1.name, 'Signal1')
+        self.assertEqual(signal_1.start, 4)
+        self.assertEqual(signal_1.length, 3)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, 'big_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
+        self.assertEqual(signal_1.scale, 1)  # ToDo: 5.0
+        self.assertEqual(signal_1.offset, 0.0)  # ToDo: 0.0
+        self.assertEqual(signal_1.minimum, None)  # ToDo: 0.0
+        self.assertEqual(signal_1.maximum, None)  # ToDo: 4.0
+        self.assertEqual(signal_1.decimal.scale, 1)  # ToDo: 5.0
+        self.assertEqual(signal_1.decimal.offset, 0)  # ToDo: 0.0
+        self.assertEqual(signal_1.decimal.minimum, None)  # ToDo: 0.0
+        self.assertEqual(signal_1.decimal.maximum, None)  # ToDo: 4.0
+        self.assertEqual(signal_1.unit, None)  # ToDo: 'm'
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comment, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+
+        signal_2 = message_1.signals[1]
+        self.assertEqual(signal_2.name, 'Signal5')
+        self.assertEqual(signal_2.start, 16)
+        self.assertEqual(signal_2.length, 32)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'little_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, True)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 0)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, 0)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, None)
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+
+        message_2 = db.messages[1]
+        self.assertEqual(message_2.frame_id, 1)  # ToDo: 6
+        self.assertEqual(message_2.is_extended_frame, False)  # ToDo: 6
+        self.assertEqual(message_2.name, 'Message2')
+        self.assertEqual(message_2.length, 8)  # ToDo: 7
+        self.assertEqual(message_2.senders, [])
+        self.assertEqual(message_2.send_type, None)
+        self.assertEqual(message_2.cycle_time, None)
+        self.assertEqual(len(message_2.signals), 3)
+        self.assertEqual(message_2.comment, None)
+        self.assertEqual(message_2.bus_name, None)
+
+        signal_1 = message_2.signals[0]
+        self.assertEqual(signal_1.name, 'Signal3')
+        self.assertEqual(signal_1.start, 6)
+        self.assertEqual(signal_1.length, 2)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, 'little_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comment, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+
+        signal_2 = message_2.signals[1]
+        self.assertEqual(signal_2.name, 'Signal2')
+        self.assertEqual(signal_2.start, 18)
+        self.assertEqual(signal_2.length, 11)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'little_endian')
+        self.assertEqual(signal_2.is_signed, True)
+        self.assertEqual(signal_2.is_float, False)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 0)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, 0)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, None)
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, None)  # ToDo: 'Signal comment!'
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+
+        signal_3 = message_2.signals[2]
+        self.assertEqual(signal_3.name, 'Signal4')
+        self.assertEqual(signal_3.start, 30)
+        self.assertEqual(signal_3.length, 4)
+        self.assertEqual(signal_3.receivers, [])
+        self.assertEqual(signal_3.byte_order, 'little_endian')
+        self.assertEqual(signal_3.is_signed, False)
+        self.assertEqual(signal_3.is_float, False)
+        self.assertEqual(signal_3.scale, 1)
+        self.assertEqual(signal_3.offset, 0)
+        self.assertEqual(signal_3.minimum, None)  # ToDo: 0
+        self.assertEqual(signal_3.maximum, None)  # ToDo: 3
+        self.assertEqual(signal_3.decimal.scale, 1)
+        self.assertEqual(signal_3.decimal.offset, 0)
+        self.assertEqual(signal_3.decimal.minimum, None)  # ToDo: 0
+        self.assertEqual(signal_3.decimal.maximum, None)  # ToDo: 3
+        self.assertEqual(signal_3.unit, None)
+        self.assertEqual(signal_3.choices, None)  # ToDo: {'one': 1, 'two': 2}
+        self.assertEqual(signal_3.comment, None)
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_ids, None)
+
+        message_3 = db.messages[2]
+        self.assertEqual(message_3.frame_id, 1)  # ToDo: 100
         self.assertEqual(message_3.is_extended_frame, False)
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 8)

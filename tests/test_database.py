@@ -22,6 +22,7 @@ except ImportError:
 
 import cantools
 from cantools.database.can.formats import dbc
+from cantools.database import UnsupportedDatabaseFormatError
 
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -4149,6 +4150,47 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_3.signals), 0)
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, None)
+
+    def test_system_missing_factor_arxml(self):
+        filename = os.path.join('tests',
+                                'files',
+                                'system-missing-factor-4.2.arxml')
+
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'ARXML: "Expected 2 numerator values for linear scaling, but got 1."')
+
+    def test_system_missing_denominator_arxml(self):
+        filename = os.path.join('tests',
+                                'files',
+                                'system-missing-denominator-4.2.arxml')
+
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'ARXML: "Expected 1 denominator value for linear scaling, but got 0."')
+
+    def test_system_missing_rational_arxml(self):
+        filename = os.path.join('tests',
+                                'files',
+                                'system-missing-rational-4.2.arxml')
+
+        db = cantools.db.load_file(filename)
+
+        signal_1 = db.messages[0].signals[0]
+        self.assertEqual(signal_1.scale, 1.0)
+        self.assertEqual(signal_1.offset, 0.0)
+        self.assertEqual(signal_1.minimum, 0.0)
+        self.assertEqual(signal_1.maximum, 4.0)
+        self.assertEqual(signal_1.decimal.scale, 1.0)
+        self.assertEqual(signal_1.decimal.offset, 0.0)
+        self.assertEqual(signal_1.decimal.minimum, 0.0)
+        self.assertEqual(signal_1.decimal.maximum, 4.0)
 
     def test_ecu_configuration_arxml(self):
         filename = os.path.join('tests', 'files', 'ecu-extract-4.2.arxml')

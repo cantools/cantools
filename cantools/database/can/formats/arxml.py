@@ -288,7 +288,7 @@ class SystemLoader(object):
             compu_method_ref = system_signal.find(COMPU_METHOD_REF_XPATH,
                                                   NAMESPACES)
 
-            try:
+            if compu_method_ref is not None:
                 compu_method = self.find_compu_method(compu_method_ref.text)
 
                 if compu_method is None:
@@ -296,7 +296,12 @@ class SystemLoader(object):
                         'COMPU-METHOD at {} does not exist.'.format(
                             compu_method_ref.text))
 
-                category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text
+                try:
+                    category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text
+                except AttributeError:
+                    raise ValueError(
+                        'CATEGORY in {} does not exist.'.format(
+                            compu_method_ref.text))
 
                 if category == 'TEXTTABLE':
                     minimum, maximum, choices = self.load_texttable(
@@ -317,8 +322,6 @@ class SystemLoader(object):
                 else:
                     raise NotImplementedError(
                         'Category {} is not yet implemented.'.format(category))
-            except AttributeError:
-                pass
 
         # Type.
         is_signed, is_float = self.load_signal_type(i_signal)

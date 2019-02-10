@@ -122,6 +122,11 @@
             </SW-DATA-DEF-PROPS-VARIANTS>
           </NETWORK-REPRESENTATION-PROPS>
         </I-SIGNAL>
+        <I-SIGNAL>
+          <SHORT-NAME>signal6</SHORT-NAME>
+          <LENGTH>1</LENGTH>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal6</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE>
@@ -142,6 +147,12 @@
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal5</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>16</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING>
+              <SHORT-NAME>Signal6</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal6</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>0</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
           </I-SIGNAL-TO-PDU-MAPPINGS>
         </I-SIGNAL-I-PDU>
@@ -225,6 +236,27 @@
             </COMPU-SCALES>
           </COMPU-INTERNAL-TO-PHYS>
         </COMPU-METHOD>
+        <COMPU-METHOD>
+          <SHORT-NAME>Signal6</SHORT-NAME>
+          <CATEGORY>SCALE_LINEAR_AND_TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <UPPER-LIMIT>0</UPPER-LIMIT>
+                <COMPU-CONST><VT>zero</VT></COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <UPPER-LIMIT>1</UPPER-LIMIT>
+                <COMPU-RATIONAL-COEFFS>
+                  <COMPU-NUMERATOR><V>0</V><V>0.1</V></COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR><V>1</V></COMPU-DENOMINATOR>
+                </COMPU-RATIONAL-COEFFS>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE>
@@ -247,6 +279,16 @@
             <SW-DATA-DEF-PROPS-VARIANTS>
               <SW-DATA-DEF-PROPS-CONDITIONAL>
                 <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Signal4</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+        <SYSTEM-SIGNAL>
+          <SHORT-NAME>Signal6</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Signal6</COMPU-METHOD-REF>
               </SW-DATA-DEF-PROPS-CONDITIONAL>
             </SW-DATA-DEF-PROPS-VARIANTS>
           </PHYSICAL-PROPS>

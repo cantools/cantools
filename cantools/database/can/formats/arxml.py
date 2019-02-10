@@ -611,27 +611,66 @@ class EcuExtractLoader(object):
                                 buses,
                                 version)
 
-    def load_message(self, ecuc_container_value):
+    def load_message(self, com_i_pdu):
         # Default values.
         interval = None
         senders = []
-
-        # Name, frame id, length, is_extended_frame and comment.
-        name = ecuc_container_value.find(SHORT_NAME_XPATH,
-                                         NAMESPACES).text
-        frame_id = 1 # CanIf/CanIfInitCfg/CanIfTxPduCfg/CanIfTxPduCanId
-        is_extended_frame = False # CanIf/CanIfInitCfg/CanIfTxPduCfg/CanIfTxPduCanIdType
-        length = 8 # CanIf/CanIfInitCfg/CanIfTxPduCfg/CanIfTxPduDlc
         comment = None
 
-        # ToDo: interval, senders
+        # Name, frame id, length and is_extended_frame.
+        name = com_i_pdu.find(SHORT_NAME_XPATH, NAMESPACES).text
+        direction = None
+        param_values = com_i_pdu.find(PARAMETER_VALUES_XPATH,
+                                      NAMESPACES)
+
+        if param_values is None:
+            raise ValueError('PARAMETER-VALUES does not exist.')
+
+        for param_value in param_values:
+            definition_ref = param_value.find(DEFINITION_REF_XPATH,
+                                              NAMESPACES).text
+            value = param_value.find(VALUE_XPATH, NAMESPACES).text
+
+            if definition_ref.endswith('ComIPduDirection'):
+                direction = value
+                break
+
+        # ToDo: Find value_ref for /*/Com/ComConfig/ComIPdu/ComPduIdRef.
+        value_ref = None  # com_i_pdu.find()
+
+        if direction == 'SEND':
+            frame_id, length, is_extended_frame = self.load_message_tx(
+                value_ref)
+        elif direction == 'RECEIVE':
+            frame_id, length, is_extended_frame = self.load_message_rx(
+                value_ref)
+        else:
+            raise NotImplementedError(
+                'Direction {} not supported.'.format(direction))
+
+        if frame_id is None:
+            raise ValueError('No frame id found.')
+
+        if is_extended_frame is None:
+            raise ValueError('No frame type found.')
+
+        if length is None:
+            raise ValueError('No length found.')
+
+        # ToDo: interval, senders, comment
 
         # Find all signals in this message.
         signals = []
-        values = ecuc_container_value.findall(ECUC_REFERENCE_VALUE_XPATH,
-                                              NAMESPACES)
+        values = com_i_pdu.findall(ECUC_REFERENCE_VALUE_XPATH,
+                                   NAMESPACES)
 
         for value in values:
+            definition_ref = value.find(DEFINITION_REF_XPATH,
+                                        NAMESPACES).text
+
+            if not definition_ref.endswith('ComIPduSignalRef'):
+                continue
+
             value_ref = value.find(VALUE_REF_XPATH, NAMESPACES)
             signal = self.load_signal(value_ref.text)
 
@@ -649,6 +688,58 @@ class EcuExtractLoader(object):
                        comment=comment,
                        bus_name=None,
                        strict=self.strict)
+
+    def load_message_tx(self, value_ref):
+        # ToDo
+        return 1, 8, False
+
+        can_if_tx_pdu_cfg = self.find_can_if_tx_pdu_cfg(value_ref.text)
+        param_values = can_if_tx_pdu_cfg.findall(PARAMETER_VALUES_XPATH,
+                                                 NAMESPACES)
+
+        frame_id = None
+        length = None
+        is_extended_frame = None
+
+        for param_value in param_values:
+            definition_ref = param_value.find(DEFINITION_REF_XPATH,
+                                              NAMESPACES).text
+            value = param_value.find(VALUE_XPATH, NAMESPACES).text
+
+            if definition_ref.endswith('CanIfTxPduCanId'):
+                frame_id = int(value)
+            elif definition_ref.endswith('CanIfTxPduDlc'):
+                length = int(value)
+            elif definition_ref.endswith('CanIfTxPduCanIdType'):
+                is_extended_frame = (value == 'EXTENDED_CAN')
+
+        return frame_id, length, is_extended_frame
+
+    def load_message_rx(self, value_ref):
+        # ToDo
+        return 1, 8, False
+
+        can_if_rx_pdu_cfg = self.find_can_if_rx_pdu_cfg(value_ref.text)
+        param_values = can_if_rx_pdu_cfg.findall(PARAMETER_VALUES_XPATH,
+                                                 NAMESPACES)
+
+        frame_id = None
+        length = None
+        is_extended_frame = None
+
+        for param_value in param_values:
+            definition_ref = param_value.find(DEFINITION_REF_XPATH,
+                                              NAMESPACES).text
+            value = param_value.find(VALUE_XPATH, NAMESPACES).text
+
+            if definition_ref.endswith('CanIfRxPduCanId'):
+                frame_id = int(value)
+            elif definition_ref.endswith('CanIfRxPduDlc'):
+                length = int(value)
+            elif definition_ref.endswith('CanIfRxPduCanIdType'):
+                is_extended_frame = (value == 'EXTENDED_CAN')
+
+        return frame_id, length, is_extended_frame
 
     def load_signal(self, xpath):
         # Default values.

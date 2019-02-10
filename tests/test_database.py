@@ -4214,7 +4214,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.decimal.minimum, 0.0)
         self.assertEqual(signal_1.decimal.maximum, 4.0)
 
-    def test_ecu_configuration_arxml(self):
+    def test_ecu_extract_arxml(self):
         filename = os.path.join('tests', 'files', 'ecu-extract-4.2.arxml')
         db = cantools.db.load_file(filename)
 

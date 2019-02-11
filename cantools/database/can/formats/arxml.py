@@ -620,18 +620,9 @@ class EcuExtractLoader(object):
         # Name, frame id, length and is_extended_frame.
         name = com_i_pdu.find(SHORT_NAME_XPATH, NAMESPACES).text
         direction = None
-        param_values = com_i_pdu.find(PARAMETER_VALUES_XPATH,
-                                      NAMESPACES)
 
-        if param_values is None:
-            raise ValueError('PARAMETER-VALUES does not exist.')
-
-        for param_value in param_values:
-            definition_ref = param_value.find(DEFINITION_REF_XPATH,
-                                              NAMESPACES).text
-            value = param_value.find(VALUE_XPATH, NAMESPACES).text
-
-            if definition_ref.endswith('ComIPduDirection'):
+        for parameter, value in self.iter_parameter_values(com_i_pdu):
+            if parameter == 'ComIPduDirection':
                 direction = value
                 break
 
@@ -694,23 +685,17 @@ class EcuExtractLoader(object):
         return 1, 8, False
 
         can_if_tx_pdu_cfg = self.find_can_if_tx_pdu_cfg(value_ref.text)
-        param_values = can_if_tx_pdu_cfg.findall(PARAMETER_VALUES_XPATH,
-                                                 NAMESPACES)
 
         frame_id = None
         length = None
         is_extended_frame = None
 
-        for param_value in param_values:
-            definition_ref = param_value.find(DEFINITION_REF_XPATH,
-                                              NAMESPACES).text
-            value = param_value.find(VALUE_XPATH, NAMESPACES).text
-
-            if definition_ref.endswith('CanIfTxPduCanId'):
+        for parameter, value in self.iter_parameter_values(can_if_tx_pdu_cfg):
+            if parameter == 'CanIfTxPduCanId':
                 frame_id = int(value)
-            elif definition_ref.endswith('CanIfTxPduDlc'):
+            elif parameter == 'CanIfTxPduDlc':
                 length = int(value)
-            elif definition_ref.endswith('CanIfTxPduCanIdType'):
+            elif parameter == 'CanIfTxPduCanIdType':
                 is_extended_frame = (value == 'EXTENDED_CAN')
 
         return frame_id, length, is_extended_frame
@@ -720,23 +705,17 @@ class EcuExtractLoader(object):
         return 1, 8, False
 
         can_if_rx_pdu_cfg = self.find_can_if_rx_pdu_cfg(value_ref.text)
-        param_values = can_if_rx_pdu_cfg.findall(PARAMETER_VALUES_XPATH,
-                                                 NAMESPACES)
 
         frame_id = None
         length = None
         is_extended_frame = None
 
-        for param_value in param_values:
-            definition_ref = param_value.find(DEFINITION_REF_XPATH,
-                                              NAMESPACES).text
-            value = param_value.find(VALUE_XPATH, NAMESPACES).text
-
-            if definition_ref.endswith('CanIfRxPduCanId'):
+        for parameter, value in self.iter_parameter_values(can_if_rx_pdu_cfg):
+            if parameter == 'CanIfRxPduCanId':
                 frame_id = int(value)
-            elif definition_ref.endswith('CanIfRxPduDlc'):
+            elif parameter == 'CanIfRxPduDlc':
                 length = int(value)
-            elif definition_ref.endswith('CanIfRxPduCanIdType'):
+            elif parameter == 'CanIfRxPduCanIdType':
                 is_extended_frame = (value == 'EXTENDED_CAN')
 
         return frame_id, length, is_extended_frame
@@ -761,25 +740,19 @@ class EcuExtractLoader(object):
             return None
 
         name = ecuc_container_value.find(SHORT_NAME_XPATH, NAMESPACES).text
-        param_values = ecuc_container_value.find(PARAMETER_VALUES_XPATH,
-                                                 NAMESPACES)
 
         bit_position = None
         length = None
         byte_order = None
 
-        for param_value in param_values:
-            definition_ref = param_value.find(DEFINITION_REF_XPATH,
-                                              NAMESPACES).text
-            value = param_value.find(VALUE_XPATH, NAMESPACES).text
-
-            if definition_ref.endswith('ComBitPosition'):
+        for parameter, value in self.iter_parameter_values(ecuc_container_value):
+            if parameter == 'ComBitPosition':
                 bit_position = int(value)
-            elif definition_ref.endswith('ComBitSize'):
+            elif parameter == 'ComBitSize':
                 length = int(value)
-            elif definition_ref.endswith('ComSignalEndianness'):
+            elif parameter == 'ComSignalEndianness':
                 byte_order = value.lower()
-            elif definition_ref.endswith('ComSignalType'):
+            elif parameter == 'ComSignalType':
                 if value in ['SINT8', 'SINT16', 'SINT32']:
                     is_signed = True
                 elif value in ['FLOAT32', 'FLOAT64']:
@@ -834,6 +807,21 @@ class EcuExtractLoader(object):
             "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[-1])
         ]),
                               NAMESPACES)
+
+    def iter_parameter_values(self, param_conf_container):
+        parameters = param_conf_container.find(PARAMETER_VALUES_XPATH,
+                                               NAMESPACES)
+
+        if parameters is None:
+            raise ValueError('PARAMETER-VALUES does not exist.')
+
+        for parameter in parameters:
+            definition_ref = parameter.find(DEFINITION_REF_XPATH,
+                                            NAMESPACES).text
+            value = parameter.find(VALUE_XPATH, NAMESPACES).text
+            name = definition_ref.split('/')[-1]
+
+            yield name, value
 
 
 def is_ecu_extract(root):

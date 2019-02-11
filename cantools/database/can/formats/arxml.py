@@ -640,13 +640,13 @@ class EcuExtractLoader(object):
                 'Direction {} not supported.'.format(direction))
 
         if frame_id is None:
-            raise ValueError('No frame id found.')
+            raise ValueError('No frame id found for message {}.'.format(name))
 
         if is_extended_frame is None:
-            raise ValueError('No frame type found.')
+            raise ValueError('No frame type found for message {}.'.format(name))
 
         if length is None:
-            raise ValueError('No length found.')
+            raise ValueError('No length found for message {}.'.format(name))
 
         # ToDo: interval, senders, comment
 
@@ -760,13 +760,13 @@ class EcuExtractLoader(object):
                     is_float = True
 
         if bit_position is None:
-            raise ValueError('No signal bit position found.')
+            raise ValueError('No bit position found for signal {}.'.format(name))
 
         if length is None:
-            raise ValueError('No signal length found.')
+            raise ValueError('No bit size found for signal {}.'.format(name))
 
         if byte_order is None:
-            raise ValueError('No signal byte order found.')
+            raise ValueError('No endianness found for signal {}.'.format(name))
 
         # ToDo: minimum, maximum, factor, offset, unit, choices,
         #       comment and receivers.

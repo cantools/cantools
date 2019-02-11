@@ -721,6 +721,13 @@ class EcuExtractLoader(object):
         return frame_id, length, is_extended_frame
 
     def load_signal(self, xpath):
+        ecuc_container_value = self.find_value(xpath)
+
+        if ecuc_container_value is None:
+            return None
+
+        name = ecuc_container_value.find(SHORT_NAME_XPATH, NAMESPACES).text
+
         # Default values.
         is_signed = False
         is_float = False
@@ -734,13 +741,7 @@ class EcuExtractLoader(object):
         receivers = []
         decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
-        ecuc_container_value = self.find_value(xpath)
-
-        if ecuc_container_value is None:
-            return None
-
-        name = ecuc_container_value.find(SHORT_NAME_XPATH, NAMESPACES).text
-
+        # Bit position, length, byte order, is_signed and is_float.
         bit_position = None
         length = None
         byte_order = None
@@ -766,6 +767,9 @@ class EcuExtractLoader(object):
 
         if byte_order is None:
             raise ValueError('No signal byte order found.')
+
+        # ToDo: minimum, maximum, factor, offset, unit, choices,
+        #       comment and receivers.
 
         return Signal(name=name,
                       start=bit_position,

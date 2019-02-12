@@ -98,6 +98,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[1].name, 'EMV_Aktion_Status_4')
         self.assertEqual(len(db.messages[0].signals[1].receivers), 0)
 
+        self.assertEqual(len(db.dbc.environment_variables), 17)
+        env_var = db.dbc.environment_variables['EMC_Azimuth']
+        self.assertEqual(env_var.name, 'EMC_Azimuth')
+        self.assertEqual(env_var.env_type, 1)
+        self.assertEqual(env_var.minimum, -180)
+        self.assertEqual(env_var.maximum, 400)
+        self.assertEqual(env_var.unit, 'deg')
+        self.assertEqual(env_var.initial_value, 0)
+        self.assertEqual(env_var.env_id, 12)
+        self.assertEqual(env_var.access_type, 'DUMMY_NODE_VECTOR0')
+        self.assertEqual(env_var.access_node, 'Vector__XXX')
+        self.assertEqual(env_var.comment, None)
+
     def test_foobar(self):
         db = cantools.db.Database()
         filename = os.path.join('tests', 'files', 'foobar.dbc')

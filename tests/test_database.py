@@ -4243,15 +4243,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.byte_order, 'big_endian')
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
-        self.assertEqual(signal_1.scale, 1)  # ToDo: 5.0
-        self.assertEqual(signal_1.offset, 0.0)  # ToDo: 0.0
-        self.assertEqual(signal_1.minimum, None)  # ToDo: 0.0
-        self.assertEqual(signal_1.maximum, None)  # ToDo: 4.0
-        self.assertEqual(signal_1.decimal.scale, 1)  # ToDo: 5.0
-        self.assertEqual(signal_1.decimal.offset, 0)  # ToDo: 0.0
-        self.assertEqual(signal_1.decimal.minimum, None)  # ToDo: 0.0
-        self.assertEqual(signal_1.decimal.maximum, None)  # ToDo: 4.0
-        self.assertEqual(signal_1.unit, None)  # ToDo: 'm'
+        # Signal scale, offset, minimum and maximum are not part of an
+        # ECU extract it seems.
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0.0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
@@ -4331,7 +4333,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
-        self.assertEqual(signal_2.comment, None)  # ToDo: 'Signal comment!'
+        # Signal comment is not part of an ECU extract it seems.
+        self.assertEqual(signal_2.comment, None)
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
 
@@ -4343,16 +4346,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.byte_order, 'little_endian')
         self.assertEqual(signal_3.is_signed, False)
         self.assertEqual(signal_3.is_float, False)
+        # Signal scale, offset, minimum, maximum and choices are not
+        # part of an ECU extract it seems.
         self.assertEqual(signal_3.scale, 1)
         self.assertEqual(signal_3.offset, 0)
-        self.assertEqual(signal_3.minimum, None)  # ToDo: 0
-        self.assertEqual(signal_3.maximum, None)  # ToDo: 3
+        self.assertEqual(signal_3.minimum, None)
+        self.assertEqual(signal_3.maximum, None)
         self.assertEqual(signal_3.decimal.scale, 1)
         self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, None)  # ToDo: 0
-        self.assertEqual(signal_3.decimal.maximum, None)  # ToDo: 3
+        self.assertEqual(signal_3.decimal.minimum, None)
+        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
-        self.assertEqual(signal_3.choices, None)  # ToDo: {'one': 1, 'two': 2}
+        self.assertEqual(signal_3.choices, None)
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)

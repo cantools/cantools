@@ -1,0 +1,18 @@
+// ssss
+
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{SIGNALS}
+Sig="S=" unsigned 8 /u:= /ln:"="	// =
+Sig="S/" unsigned 8 -b -m /u:/ /ln:"/"	// /
+Sig="A B" unsigned 8 -h /u:"A B" /ln:"A B"	// A B
+
+{SENDRECEIVE}
+
+["A/=*"]
+ID=001h
+Sig="A B" 0
+Sig="S/" 8
+Sig="S=" 16
+

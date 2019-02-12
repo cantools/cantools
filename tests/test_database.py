@@ -1762,6 +1762,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.name, 'Signal1')
         self.assertEqual(signal_0.choices, {})
 
+    def test_special_chars_6_0_sym(self):
+        filename = os.path.join('tests', 'files', 'special-chars-6.0.sym')
+
+        # ToDo: Remove when successfully parsed. Check message
+        #       contents instead.
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.database.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'SYM: "Only SYM version 6.0 is supported."')
+
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()
 

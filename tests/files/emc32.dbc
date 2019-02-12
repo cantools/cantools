@@ -80,3 +80,5 @@ EV_ EMC_Action_2: 0 [0|1] "" 0 16 DUMMY_NODE_VECTOR0 Vector__XXX;
 EV_ EMC_Action_1: 0 [0|1] "" 0 17 DUMMY_NODE_VECTOR0 Vector__XXX;
 
 
+CM_ EV_ EMC_Azimuth "Elevation Head";
+

@@ -26,6 +26,7 @@ from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..node import Node
 from ..internal_database import InternalDatabase
+from ..environment_variable import EnvironmentVariable
 
 from .utils import num
 
@@ -315,9 +316,11 @@ class DbcSpecifics(object):
     def __init__(self,
                  attributes=None,
                  attribute_definitions=None,
+                 environment_variables=None,
                  value_tables=None):
         self._attributes = attributes
         self._attribute_definitions = attribute_definitions
+        self._environment_variables = environment_variables
 
         if value_tables is None:
             value_tables = odict()
@@ -349,6 +352,15 @@ class DbcSpecifics(object):
         """
 
         return self._value_tables
+
+    @property
+    def environment_variables(self):
+        """An ordered dictionary of all environment variables. Only valid for
+        DBC specifiers on database level.
+
+        """
+
+        return self._environment_variables
 
 
 class LongNamesConverter(object):
@@ -681,6 +693,9 @@ def _load_comments(tokens):
         elif kind == 'BU_':
             node_name = item[1]
             comments[node_name] = item[2]
+        elif kind == 'EV_':
+            environment_variable_name = item[1]
+            comments[environment_variable_name] = item[2]
 
     return comments
 
@@ -774,6 +789,26 @@ def _load_value_tables(tokens):
         value_tables[name] = choices
 
     return value_tables
+
+
+def _load_environment_variables(tokens, comments):
+    environment_variables = odict()
+
+    for env_var in tokens.get('EV_', []):
+        name = env_var[1]
+        environment_variables[name] = EnvironmentVariable(
+            name=name,
+            env_type=int(env_var[3]),
+            minimum=num(env_var[5]),
+            maximum=num(env_var[7]),
+            unit=env_var[9],
+            initial_value=num(env_var[10]),
+            env_id=int(env_var[11]),
+            access_type=env_var[12],
+            access_node=env_var[13],
+            comment=comments.get(env_var[1], None))
+
+    return environment_variables
 
 
 def _load_choices(tokens):
@@ -1299,8 +1334,10 @@ def load_string(string, strict=True):
                               strict)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
+    environment_variables = _load_environment_variables(tokens, comments)
     dbc_specifics = DbcSpecifics(attributes=attributes.get('database', None),
                                  attribute_definitions=attribute_definitions,
+                                 environment_variables=environment_variables,
                                  value_tables=value_tables)
 
     return InternalDatabase(messages,

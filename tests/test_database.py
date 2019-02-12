@@ -4216,17 +4216,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_ecu_extract_arxml(self):
         filename = os.path.join('tests', 'files', 'ecu-extract-4.2.arxml')
-        db = cantools.db.load_file(filename)
+        db = cantools.database.Database()
+        db.add_arxml_file(filename)
 
         self.assertEqual(len(db.nodes), 0)
 
         self.assertEqual(len(db.messages), 3)
 
         message_1 = db.messages[0]
-        self.assertEqual(message_1.frame_id, 1)  # ToDo: 5
+        self.assertEqual(message_1.frame_id, 5)
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Message1')
-        self.assertEqual(message_1.length, 8)  # ToDo: 6
+        self.assertEqual(message_1.length, 6)
         self.assertEqual(message_1.senders, [])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, None)
@@ -4279,10 +4280,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.multiplexer_ids, None)
 
         message_2 = db.messages[1]
-        self.assertEqual(message_2.frame_id, 1)  # ToDo: 6
-        self.assertEqual(message_2.is_extended_frame, False)  # ToDo: 6
+        self.assertEqual(message_2.frame_id, 6)
+        self.assertEqual(message_2.is_extended_frame, True)
         self.assertEqual(message_2.name, 'Message2')
-        self.assertEqual(message_2.length, 8)  # ToDo: 7
+        self.assertEqual(message_2.length, 7)
         self.assertEqual(message_2.senders, [])
         self.assertEqual(message_2.send_type, None)
         self.assertEqual(message_2.cycle_time, None)
@@ -4357,7 +4358,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.multiplexer_ids, None)
 
         message_3 = db.messages[2]
-        self.assertEqual(message_3.frame_id, 1)  # ToDo: 100
+        self.assertEqual(message_3.frame_id, 100)
         self.assertEqual(message_3.is_extended_frame, False)
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 8)

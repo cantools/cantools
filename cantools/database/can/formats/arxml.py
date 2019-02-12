@@ -131,6 +131,9 @@ VALUE_REF_XPATH = make_xpath(['VALUE-REF'])
 PARAMETER_VALUES_XPATH = make_xpath(['PARAMETER-VALUES'])
 DEFINITION_REF_XPATH = make_xpath(['DEFINITION-REF'])
 VALUE_XPATH = make_xpath(['VALUE'])
+REFERENCE_VALUES_XPATH = make_xpath([
+    'REFERENCE-VALUES'
+])
 
 
 class SystemLoader(object):
@@ -584,7 +587,6 @@ class EcuExtractLoader(object):
         values_refs = ecuc_value_collection.findall(
             ECUC_MODULE_CONFIGURATION_VALUES_REF_XPATH,
             NAMESPACES)
-
         com_xpaths = [
             value_ref.text
             for value_ref in values_refs
@@ -604,7 +606,10 @@ class EcuExtractLoader(object):
             if not definition_ref.endswith('ComIPdu'):
                 continue
 
-            messages.append(self.load_message(ecuc_container_value))
+            message = self.load_message(ecuc_container_value)
+
+            if message is not None:
+                messages.append(message)
 
         return InternalDatabase(messages,
                                 [],
@@ -626,27 +631,40 @@ class EcuExtractLoader(object):
                 direction = value
                 break
 
-        # ToDo: Find value_ref for /*/Com/ComConfig/ComIPdu/ComPduIdRef.
-        value_ref = None  # com_i_pdu.find()
+        com_pdu_id_ref = None
+
+        for reference, value in self.iter_reference_values(com_i_pdu):
+            if reference == 'ComPduIdRef':
+                com_pdu_id_ref = value
+                break
+
+        if com_pdu_id_ref is None:
+            raise ValueError('No ComPduIdRef reference found.')
 
         if direction == 'SEND':
             frame_id, length, is_extended_frame = self.load_message_tx(
-                value_ref)
+                com_pdu_id_ref)
         elif direction == 'RECEIVE':
             frame_id, length, is_extended_frame = self.load_message_rx(
-                value_ref)
+                com_pdu_id_ref)
         else:
             raise NotImplementedError(
                 'Direction {} not supported.'.format(direction))
 
         if frame_id is None:
-            raise ValueError('No frame id found for message {}.'.format(name))
+            LOGGER.warning('No frame id found for message %s.', name)
+
+            return None
 
         if is_extended_frame is None:
-            raise ValueError('No frame type found for message {}.'.format(name))
+            LOGGER.warning('No frame type found for message %s.', name)
+
+            return None
 
         if length is None:
-            raise ValueError('No length found for message {}.'.format(name))
+            LOGGER.warning('No length found for message %s.', name)
+
+            return None
 
         # ToDo: interval, senders, comment
 
@@ -680,43 +698,36 @@ class EcuExtractLoader(object):
                        bus_name=None,
                        strict=self.strict)
 
-    def load_message_tx(self, value_ref):
-        # ToDo
-        return 1, 8, False
+    def load_message_tx(self, com_pdu_id_ref):
+        return self.load_message_rx_tx(com_pdu_id_ref,
+                                       'CanIfTxPduCanId',
+                                       'CanIfTxPduDlc',
+                                       'CanIfTxPduCanIdType')
 
-        can_if_tx_pdu_cfg = self.find_can_if_tx_pdu_cfg(value_ref.text)
+    def load_message_rx(self, com_pdu_id_ref):
+        return self.load_message_rx_tx(com_pdu_id_ref,
+                                       'CanIfRxPduCanId',
+                                       'CanIfRxPduDlc',
+                                       'CanIfRxPduCanIdType')
 
+    def load_message_rx_tx(self,
+                           com_pdu_id_ref,
+                           parameter_can_id,
+                           parameter_dlc,
+                           parameter_can_id_type):
+        can_if_tx_pdu_cfg = self.find_can_if_rx_tx_pdu_cfg(com_pdu_id_ref)
         frame_id = None
         length = None
         is_extended_frame = None
 
-        for parameter, value in self.iter_parameter_values(can_if_tx_pdu_cfg):
-            if parameter == 'CanIfTxPduCanId':
-                frame_id = int(value)
-            elif parameter == 'CanIfTxPduDlc':
-                length = int(value)
-            elif parameter == 'CanIfTxPduCanIdType':
-                is_extended_frame = (value == 'EXTENDED_CAN')
-
-        return frame_id, length, is_extended_frame
-
-    def load_message_rx(self, value_ref):
-        # ToDo
-        return 1, 8, False
-
-        can_if_rx_pdu_cfg = self.find_can_if_rx_pdu_cfg(value_ref.text)
-
-        frame_id = None
-        length = None
-        is_extended_frame = None
-
-        for parameter, value in self.iter_parameter_values(can_if_rx_pdu_cfg):
-            if parameter == 'CanIfRxPduCanId':
-                frame_id = int(value)
-            elif parameter == 'CanIfRxPduDlc':
-                length = int(value)
-            elif parameter == 'CanIfRxPduCanIdType':
-                is_extended_frame = (value == 'EXTENDED_CAN')
+        if can_if_tx_pdu_cfg is not None:
+            for parameter, value in self.iter_parameter_values(can_if_tx_pdu_cfg):
+                if parameter == parameter_can_id:
+                    frame_id = int(value)
+                elif parameter == parameter_dlc:
+                    length = int(value)
+                elif parameter == parameter_can_id_type:
+                    is_extended_frame = (value == 'EXTENDED_CAN')
 
         return frame_id, length, is_extended_frame
 
@@ -760,13 +771,19 @@ class EcuExtractLoader(object):
                     is_float = True
 
         if bit_position is None:
-            raise ValueError('No bit position found for signal {}.'.format(name))
+            LOGGER.warning('No bit position found for signal %s.',name)
+
+            return None
 
         if length is None:
-            raise ValueError('No bit size found for signal {}.'.format(name))
+            LOGGER.warning('No bit size found for signal %s.', name)
+
+            return None
 
         if byte_order is None:
-            raise ValueError('No endianness found for signal {}.'.format(name))
+            LOGGER.warning('No endianness found for signal %s.', name)
+
+            return None
 
         # ToDo: minimum, maximum, factor, offset, unit, choices,
         #       comment and receivers.
@@ -802,7 +819,7 @@ class EcuExtractLoader(object):
     def find_value(self, xpath):
         return self.root.find(make_xpath([
             "AR-PACKAGES",
-            "AR-PACKAGE/[ns:SHORT-NAME='MyEcu']",
+            "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[1]),
             "ELEMENTS",
             "ECUC-MODULE-CONFIGURATION-VALUES/[ns:SHORT-NAME='Com']",
             "CONTAINERS",
@@ -811,6 +828,37 @@ class EcuExtractLoader(object):
             "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[-1])
         ]),
                               NAMESPACES)
+
+    def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref):
+        messages = self.root.findall(
+            make_xpath([
+                "AR-PACKAGES",
+                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(
+                    com_pdu_id_ref.split('/')[1]),
+                "ELEMENTS",
+                "ECUC-MODULE-CONFIGURATION-VALUES/[ns:SHORT-NAME='CanIf']",
+                'CONTAINERS',
+                "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='CanIfInitCfg']",
+                'SUB-CONTAINERS',
+                'ECUC-CONTAINER-VALUE'
+            ]),
+            NAMESPACES)
+
+        for message in messages:
+            definition_ref = message.find(DEFINITION_REF_XPATH,
+                                          NAMESPACES).text
+
+            if definition_ref.endswith('CanIfTxPduCfg'):
+                expected_reference = 'CanIfTxPduRef'
+            elif definition_ref.endswith('CanIfRxPduCfg'):
+                expected_reference = 'CanIfRxPduRef'
+            else:
+                continue
+
+            for reference, value in self.iter_reference_values(message):
+                if reference == expected_reference:
+                    if value == com_pdu_id_ref:
+                        return message
 
     def iter_parameter_values(self, param_conf_container):
         parameters = param_conf_container.find(PARAMETER_VALUES_XPATH,
@@ -823,6 +871,21 @@ class EcuExtractLoader(object):
             definition_ref = parameter.find(DEFINITION_REF_XPATH,
                                             NAMESPACES).text
             value = parameter.find(VALUE_XPATH, NAMESPACES).text
+            name = definition_ref.split('/')[-1]
+
+            yield name, value
+
+    def iter_reference_values(self, param_conf_container):
+        references = param_conf_container.find(REFERENCE_VALUES_XPATH,
+                                               NAMESPACES)
+
+        if references is None:
+            raise ValueError('REFERENCE-VALUES does not exist.')
+
+        for reference in references:
+            definition_ref = reference.find(DEFINITION_REF_XPATH,
+                                            NAMESPACES).text
+            value = reference.find(VALUE_REF_XPATH, NAMESPACES).text
             name = definition_ref.split('/')[-1]
 
             yield name, value

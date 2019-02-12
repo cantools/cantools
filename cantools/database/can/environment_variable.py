@@ -1,5 +1,3 @@
-# A CAN environment variable.
-
 class EnvironmentVariable(object):
     """A CAN environment variable.
 
@@ -34,10 +32,6 @@ class EnvironmentVariable(object):
         """
 
         return self._name
-
-    @name.setter
-    def name(self, value):
-        self._name = value
 
     @property
     def env_type(self):

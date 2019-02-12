@@ -99,17 +99,50 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages[0].signals[1].receivers), 0)
 
         self.assertEqual(len(db.dbc.environment_variables), 17)
-        env_var = db.dbc.environment_variables['EMC_Azimuth']
-        self.assertEqual(env_var.name, 'EMC_Azimuth')
-        self.assertEqual(env_var.env_type, 1)
-        self.assertEqual(env_var.minimum, -180)
-        self.assertEqual(env_var.maximum, 400)
-        self.assertEqual(env_var.unit, 'deg')
-        self.assertEqual(env_var.initial_value, 0)
-        self.assertEqual(env_var.env_id, 12)
-        self.assertEqual(env_var.access_type, 'DUMMY_NODE_VECTOR0')
-        self.assertEqual(env_var.access_node, 'Vector__XXX')
-        self.assertEqual(env_var.comment, None)
+        env_var_1 = db.dbc.environment_variables['EMC_Azimuth']
+        self.assertEqual(env_var_1.name, 'EMC_Azimuth')
+        self.assertEqual(env_var_1.env_type, 1)
+        self.assertEqual(env_var_1.minimum, -180)
+        self.assertEqual(env_var_1.maximum, 400)
+        self.assertEqual(env_var_1.unit, 'deg')
+        self.assertEqual(env_var_1.initial_value, 0)
+        self.assertEqual(env_var_1.env_id, 12)
+        self.assertEqual(env_var_1.access_type, 'DUMMY_NODE_VECTOR0')
+        self.assertEqual(env_var_1.access_node, 'Vector__XXX')
+        self.assertEqual(env_var_1.comment, 'Elevation Head')
+        self.assertEqual(
+            repr(env_var_1),
+            "environment_variable('EMC_Azimuth', 1, -180, 400, 'deg', 0, 12,"
+            " 'DUMMY_NODE_VECTOR0', 'Vector__XXX', 'Elevation Head')")
+
+        env_var_2 = db.dbc.environment_variables['EMC_TrdPower']
+        self.assertEqual(env_var_2.name, 'EMC_TrdPower')
+        self.assertEqual(env_var_2.comment, None)
+        #
+        # Test setters
+        env_var_2.env_type = 1
+        env_var_2.minimum = -180
+        env_var_2.maximum = 400
+        env_var_2.unit = 'deg'
+        env_var_2.initial_value = 0
+        env_var_2.env_id = 12
+        env_var_2.access_type = 'DUMMY_NODE_VECTOR0'
+        env_var_2.access_node = 'Vector__XXX'
+        env_var_2.comment = 'Elevation Head'
+        self.assertEqual(env_var_2.env_type, 1)
+        self.assertEqual(env_var_2.minimum, -180)
+        self.assertEqual(env_var_2.maximum, 400)
+        self.assertEqual(env_var_2.unit, 'deg')
+        self.assertEqual(env_var_2.initial_value, 0)
+        self.assertEqual(env_var_2.env_id, 12)
+        self.assertEqual(env_var_2.access_type, 'DUMMY_NODE_VECTOR0')
+        self.assertEqual(env_var_2.access_node, 'Vector__XXX')
+        self.assertEqual(env_var_2.comment, 'Elevation Head')
+        self.assertEqual(
+            repr(env_var_2),
+            "environment_variable('EMC_TrdPower', 1, -180, 400, 'deg', 0, 12,"
+            " 'DUMMY_NODE_VECTOR0', 'Vector__XXX', 'Elevation Head')")
+
 
     def test_foobar(self):
         db = cantools.db.Database()

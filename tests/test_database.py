@@ -1289,7 +1289,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, 30)
         self.assertEqual(len(message_1.signals), 2)
-        self.assertEqual(message_1.comment, None)
+        self.assertEqual(message_1.comment, 'apa')
         self.assertEqual(message_1.bus_name, None)
 
         signal_1 = message_1.signals[0]
@@ -1332,7 +1332,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.decimal.maximum, 130)
         self.assertEqual(signal_2.unit, 'V')
         self.assertEqual(signal_2.choices, None)
-        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.comment, 'bbb')
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
 
@@ -1767,12 +1767,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # ToDo: Remove when successfully parsed. Check message
         #       contents instead.
-        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+        with self.assertRaises(textparser.ParseError) as cm:
             cantools.database.load_file(filename)
 
-        self.assertEqual(
-            str(cm.exception),
-            'SYM: "Only SYM version 6.0 is supported."')
+        self.assertIn(
+            'Invalid syntax at line 7, column 21: "Sig="S=" unsigned 8 >>!<<-h '
+            '-m /u:= /o:-55 /ln:"="	// =',
+            str(cm.exception))
 
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()

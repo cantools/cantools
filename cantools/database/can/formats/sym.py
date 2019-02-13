@@ -79,9 +79,9 @@ class Parser60(textparser.Parser):
         }
 
         token_specs = [
-            ('SKIP',        r'[ \r\n\t]+|//.*?\n'),
+            ('SKIP',        r'[ \r\n\t]+'),
+            ('COMMENT',     r'//.*?\n'),
             ('NUMBER',      r'-?\d+\.?\d*([eE][+-]?\d+)?'),
-            ('WORD',        r'[A-Za-z0-9_\*]+'),
             ('STRING',      r'"(\\"|[^"])*?"'),
             ('LPAREN',      r'\('),
             ('RPAREN',      r'\)'),
@@ -104,6 +104,7 @@ class Parser60(textparser.Parser):
             ('E',           r'/e:'),
             ('P',           r'/p:'),
             ('M',           r'\-m'),
+            ('WORD',        r'[^\(\)\[\],\-=\s]+'),
             ('MISMATCH',    r'.')
         ]
 
@@ -134,7 +135,7 @@ class Parser60(textparser.Parser):
 
     def grammar(self):
         word = choice('WORD', *list(self.KEYWORDS))
-        version = Sequence('FormatVersion', '=', 'NUMBER')
+        version = Sequence('FormatVersion', '=', 'NUMBER', 'COMMENT')
         title = Sequence('Title' , '=', 'STRING')
         unique_variables = Sequence('UniqueVariables' , '=', word)
         float_decimal_places = Sequence('FloatDecimalPlaces' , '=', 'NUMBER')
@@ -142,7 +143,8 @@ class Parser60(textparser.Parser):
 
         enum_value = Sequence('NUMBER', '=', 'STRING')
         enum = Sequence('Enum', '=', word,
-                        '(', Optional(DelimitedList(enum_value)), ')')
+                        '(', Optional(DelimitedList(enum_value)), ')',
+                        Optional('COMMENT'))
 
         sig_unit = Sequence('/u:', word)
         sig_factor = Sequence('/f:', 'NUMBER')
@@ -165,7 +167,8 @@ class Parser60(textparser.Parser):
                                             sig_default,
                                             sig_long_name,
                                             sig_enum,
-                                            sig_places)))
+                                            sig_places)),
+                          Optional('COMMENT'))
 
         variable = Sequence('Var', '=', word, word,
                             'NUMBER', ',', 'NUMBER',
@@ -178,11 +181,13 @@ class Parser60(textparser.Parser):
                                               sig_default,
                                               sig_long_name,
                                               sig_enum,
-                                              sig_places)))
+                                              sig_places)),
+                            Optional('COMMENT'))
 
         symbol = Sequence('[', word, ']',
                           Optional(Sequence('ID', '=', 'NUMBER', word,
-                                            Optional(Sequence('NUMBER', word)))),
+                                            Optional(Sequence('NUMBER', word)),
+                                            Optional('COMMENT'))),
                           Sequence('Len', '=', 'NUMBER'),
                           ZeroOrMoreDict(choice(
                               Sequence('Mux', '=', word, 'NUMBER', ',',
@@ -194,11 +199,11 @@ class Parser60(textparser.Parser):
                               variable,
                               Sequence('Sig', '=', word, 'NUMBER'))))
 
-        enums = Sequence('{ENUMS}', ZeroOrMore(enum))
-        signals = Sequence('{SIGNALS}', ZeroOrMore(signal))
-        send = Sequence('{SEND}', ZeroOrMore(symbol))
-        receive = Sequence('{RECEIVE}', ZeroOrMore(symbol))
-        sendreceive = Sequence('{SENDRECEIVE}', ZeroOrMore(symbol))
+        enums = Sequence('{ENUMS}', ZeroOrMore(choice(enum, 'COMMENT')))
+        signals = Sequence('{SIGNALS}', ZeroOrMore(choice(signal, 'COMMENT')))
+        send = Sequence('{SEND}', ZeroOrMore(choice(symbol, 'COMMENT')))
+        receive = Sequence('{RECEIVE}', ZeroOrMore(choice(symbol, 'COMMENT')))
+        sendreceive = Sequence('{SENDRECEIVE}', ZeroOrMore(choice(symbol, 'COMMENT')))
 
         section = choice(enums,
                          signals,
@@ -206,7 +211,8 @@ class Parser60(textparser.Parser):
                          receive,
                          sendreceive)
 
-        grammar = Sequence(version,
+        grammar = Sequence(Optional('COMMENT'),
+                           version,
                            ZeroOrMore(choice(unique_variables,
                                              float_decimal_places,
                                              title,
@@ -217,11 +223,15 @@ class Parser60(textparser.Parser):
 
 
 def _get_section_tokens(tokens, name):
-    for section in tokens[2]:
+    for section in tokens[3]:
         if section[0] == name:
-            return section[1]
+            return [row for row in section[1] if isinstance(row, list)]
 
     return []
+
+
+def _load_comment(tokens):
+    return tokens[3:].rstrip('\r\n')
 
 
 def _get_enum(enums, name):
@@ -235,7 +245,7 @@ def _load_enums(tokens):
     section = _get_section_tokens(tokens, '{ENUMS}')
     enums = {}
 
-    for _, _, name, _, values, _ in section:
+    for _, _, name, _, values, _, _ in section:
         if values:
             values = values[0]
 
@@ -321,6 +331,7 @@ def _load_signal(tokens, enums):
     # Default values.
     name = tokens[2]
     byte_order = 'little_endian'
+    comment = None
 
     # Type and length.
     (is_signed,
@@ -336,6 +347,10 @@ def _load_signal(tokens, enums):
     # Byte order.
     if tokens[5] == ['-m']:
         byte_order = 'big_endian'
+
+    # Comment.
+    if tokens[7]:
+        comment = _load_comment(tokens[7][0])
 
     # The rest.
     unit, factor, offset, enum, minimum, maximum, decimal = _load_signal_attributes(
@@ -358,6 +373,7 @@ def _load_signal(tokens, enums):
                   maximum=maximum,
                   unit=unit,
                   choices=enum,
+                  comment=comment,
                   is_multiplexer=False,
                   is_float=is_float,
                   decimal=decimal)
@@ -409,6 +425,7 @@ def _load_message_variable(tokens, enums):
     name = tokens[2]
     byte_order = 'little_endian'
     start = int(tokens[4])
+    comment = None
 
     # Type and length.
     (is_signed,
@@ -424,6 +441,10 @@ def _load_message_variable(tokens, enums):
     # Byte order.
     if tokens[7] == ['-m']:
         byte_order = 'big_endian'
+
+    # Comment.
+    if tokens[9]:
+        comment = _load_comment(tokens[9][0])
 
     # The rest.
     unit, factor, offset, enum, minimum, maximum, decimal = _load_signal_attributes(
@@ -449,6 +470,7 @@ def _load_message_variable(tokens, enums):
                   maximum=maximum,
                   unit=unit,
                   choices=enum,
+                  comment=comment,
                   is_multiplexer=False,
                   is_float=is_float,
                   decimal=decimal)
@@ -535,12 +557,17 @@ def _load_message(frame_id,
     name = message_tokens[1]
     length = int(message_tokens[4][2])
     cycle_time = None
+    comment = None
 
     # Cycle time.
     try:
         cycle_time = num(message_tokens[5]['CycleTime'][0][2])
     except (KeyError, IndexError):
         pass
+
+    # Comment.
+    if message_tokens[3][0][-1]:
+        comment = _load_comment(message_tokens[3][0][-1][0])
 
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,
@@ -553,7 +580,7 @@ def _load_message(frame_id,
                                                  message_section_tokens,
                                                  signals,
                                                  enums),
-                   comment=None,
+                   comment=comment,
                    bus_name=None,
                    strict=strict)
 
@@ -613,7 +640,7 @@ def _load_messages(tokens, signals, enums, strict):
 
 
 def _load_version(tokens):
-    return tokens[0][2]
+    return tokens[1][2]
 
 
 def load_string(string, strict=True):
@@ -621,7 +648,7 @@ def load_string(string, strict=True):
 
     """
 
-    if not string.startswith('FormatVersion=6.0'):
+    if not re.search('^FormatVersion=6.0', string, re.MULTILINE):
         raise ParseError('Only SYM version 6.0 is supported.')
 
     tokens = Parser60().parse(string)

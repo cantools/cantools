@@ -1771,8 +1771,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             cantools.database.load_file(filename)
 
         self.assertIn(
-            'Invalid syntax at line 7, column 21: "Sig="S=" unsigned 8 >>!<<-h '
-            '-m /u:= /o:-55 /ln:"="	// =',
+            'Invalid syntax at line 19, column 21: "Mux="<Empty>" 0,0 0 >>!<<-t',
             str(cm.exception))
 
     def test_add_bad_sym_string(self):

@@ -75,7 +75,9 @@ class Parser60(textparser.Parser):
             'LN':          '/ln:',
             'E':           '/e:',
             'P':           '/p:',
-            'M':           '-m'
+            'M':           '-m',
+            'H':           '-h',
+            'B':           '-b'
         }
 
         token_specs = [
@@ -104,6 +106,8 @@ class Parser60(textparser.Parser):
             ('E',           r'/e:'),
             ('P',           r'/p:'),
             ('M',           r'\-m'),
+            ('H',           r'\-h'),
+            ('B',           r'\-b'),
             ('WORD',        r'[^\(\)\[\],\-=\s]+'),
             ('MISMATCH',    r'.')
         ]
@@ -158,6 +162,7 @@ class Parser60(textparser.Parser):
 
         signal = Sequence('Sig', '=', word, word,
                           Optional('NUMBER'),
+                          Optional(choice('-h', '-b')),
                           Optional('-m'),
                           ZeroOrMore(choice(sig_unit,
                                             sig_factor,
@@ -345,16 +350,16 @@ def _load_signal(tokens, enums):
                                              enums)
 
     # Byte order.
-    if tokens[5] == ['-m']:
+    if tokens[6] == ['-m']:
         byte_order = 'big_endian'
 
     # Comment.
-    if tokens[7]:
-        comment = _load_comment(tokens[7][0])
+    if tokens[8]:
+        comment = _load_comment(tokens[8][0])
 
     # The rest.
     unit, factor, offset, enum, minimum, maximum, decimal = _load_signal_attributes(
-        tokens[6],
+        tokens[7],
         enum,
         enums,
         minimum,

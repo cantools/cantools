@@ -1,18 +1,26 @@
-// ssss
+// ssss\ndd
 
 FormatVersion=6.0 // Do not edit this line!
 Title="Untitled"
 
 {SIGNALS}
-Sig="S=" unsigned 8 /u:= /ln:"="	// =
+Sig="S=" unsigned 8 -h -m /u:= /o:-55 /ln:"="	// =
 Sig="S/" unsigned 8 -b -m /u:/ /ln:"/"	// /
 Sig="A B" unsigned 8 -h /u:"A B" /ln:"A B"	// A B
+Sig="S{SEND}" unsigned 8 /u:{SEND} /ln:"["	// ]
+Sig="a/b" raw 8 /u:][ /ln:"ä"	// ö
 
 {SENDRECEIVE}
 
 ["A/=*"]
-ID=001h
+ID=001h	// \ndd\n
+CycleTime=5
+Color=000000h
+Mux="<Empty>" 0,0 0 -t
+Var=Variable1 bit 40,1 -v -s /u:m/s	// comment
 Sig="A B" 0
 Sig="S/" 8
 Sig="S=" 16
+Sig="S{SEND}" 24
+Sig="a/b" 32
 

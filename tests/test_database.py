@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 import math
 import os
@@ -1764,15 +1766,158 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_special_chars_6_0_sym(self):
         filename = os.path.join('tests', 'files', 'special-chars-6.0.sym')
+        db = cantools.database.load_file(filename)
 
-        # ToDo: Remove when successfully parsed. Check message
-        #       contents instead.
-        with self.assertRaises(textparser.ParseError) as cm:
-            cantools.database.load_file(filename)
+        self.assertEqual(db.version, '6.0')
+        self.assertEqual(len(db.messages), 1)
 
-        self.assertIn(
-            'Invalid syntax at line 19, column 21: "Mux="<Empty>" 0,0 0 >>!<<-t',
-            str(cm.exception))
+        message = db.messages[0]
+        self.assertEqual(message.frame_id, 1)
+        self.assertEqual(message.is_extended_frame, False)
+        self.assertEqual(message.name, 'A/=*')
+        self.assertEqual(message.length, 8)
+        self.assertEqual(message.senders, [])
+        self.assertEqual(message.send_type, None)
+        self.assertEqual(message.cycle_time, 5)
+        self.assertEqual(len(message.signals), 6)
+        self.assertEqual(message.comment, 'dd')
+        self.assertEqual(message.bus_name, None)
+        self.assertEqual(message.is_multiplexed(), False)
+
+        signal_0 = message.signals[0]
+        self.assertEqual(signal_0.name, 'A B')
+        self.assertEqual(signal_0.start, 0)
+        self.assertEqual(signal_0.length, 8)
+        self.assertEqual(signal_0.receivers, [])
+        self.assertEqual(signal_0.byte_order, 'little_endian')
+        self.assertEqual(signal_0.is_signed, False)
+        self.assertEqual(signal_0.is_float, False)
+        self.assertEqual(signal_0.scale, 1)
+        self.assertEqual(signal_0.offset, 0)
+        self.assertEqual(signal_0.minimum, None)
+        self.assertEqual(signal_0.maximum, None)
+        self.assertEqual(signal_0.decimal.scale, 1)
+        self.assertEqual(signal_0.decimal.offset, 0)
+        self.assertEqual(signal_0.decimal.minimum, None)
+        self.assertEqual(signal_0.decimal.maximum, None)
+        self.assertEqual(signal_0.unit, 'A B')
+        self.assertEqual(signal_0.choices, None)
+        self.assertEqual(signal_0.comment, 'A B')
+        self.assertEqual(signal_0.is_multiplexer, False)
+        self.assertEqual(signal_0.multiplexer_ids, None)
+
+        signal_1 = message.signals[1]
+        self.assertEqual(signal_1.name, 'S/')
+        self.assertEqual(signal_1.start, 15)
+        self.assertEqual(signal_1.length, 8)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, 'big_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, '/')
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comment, '/')
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+
+        signal_2 = message.signals[2]
+        self.assertEqual(signal_2.name, 'S=')
+        self.assertEqual(signal_2.start, 23)
+        self.assertEqual(signal_2.length, 8)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'big_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, False)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, -55)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, -55)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, '=')
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, '=')
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+
+        signal_3 = message.signals[3]
+        self.assertEqual(signal_3.name, 'S{SEND}')
+        self.assertEqual(signal_3.start, 24)
+        self.assertEqual(signal_3.length, 8)
+        self.assertEqual(signal_3.receivers, [])
+        self.assertEqual(signal_3.byte_order, 'little_endian')
+        self.assertEqual(signal_3.is_signed, False)
+        self.assertEqual(signal_3.is_float, False)
+        self.assertEqual(signal_3.scale, 1)
+        self.assertEqual(signal_3.offset, 0)
+        self.assertEqual(signal_3.minimum, None)
+        self.assertEqual(signal_3.maximum, None)
+        self.assertEqual(signal_3.decimal.scale, 1)
+        self.assertEqual(signal_3.decimal.offset, 0)
+        self.assertEqual(signal_3.decimal.minimum, None)
+        self.assertEqual(signal_3.decimal.maximum, None)
+        self.assertEqual(signal_3.unit, '{SEND}')
+        self.assertEqual(signal_3.choices, None)
+        self.assertEqual(signal_3.comment, ']')
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_ids, None)
+
+        signal_4 = message.signals[4]
+        self.assertEqual(signal_4.name, 'a/b')
+        self.assertEqual(signal_4.start, 32)
+        self.assertEqual(signal_4.length, 8)
+        self.assertEqual(signal_4.receivers, [])
+        self.assertEqual(signal_4.byte_order, 'little_endian')
+        self.assertEqual(signal_4.is_signed, False)
+        self.assertEqual(signal_4.is_float, False)
+        self.assertEqual(signal_4.scale, 1)
+        self.assertEqual(signal_4.offset, 0)
+        self.assertEqual(signal_4.minimum, None)
+        self.assertEqual(signal_4.maximum, None)
+        self.assertEqual(signal_4.decimal.scale, 1)
+        self.assertEqual(signal_4.decimal.offset, 0)
+        self.assertEqual(signal_4.decimal.minimum, None)
+        self.assertEqual(signal_4.decimal.maximum, None)
+        self.assertEqual(signal_4.unit, '][')
+        self.assertEqual(signal_4.choices, None)
+
+        if sys.version_info[0] > 2:
+            self.assertEqual(signal_4.comment, 'ö')
+
+        self.assertEqual(signal_4.is_multiplexer, False)
+        self.assertEqual(signal_4.multiplexer_ids, None)
+
+        signal_5 = message.signals[5]
+        self.assertEqual(signal_5.name, 'Variable1')
+        self.assertEqual(signal_5.start, 40)
+        self.assertEqual(signal_5.length, 1)
+        self.assertEqual(signal_5.receivers, [])
+        self.assertEqual(signal_5.byte_order, 'little_endian')
+        self.assertEqual(signal_5.is_signed, False)
+        self.assertEqual(signal_5.is_float, False)
+        self.assertEqual(signal_5.scale, 1)
+        self.assertEqual(signal_5.offset, 0)
+        self.assertEqual(signal_5.minimum, 0)
+        self.assertEqual(signal_5.maximum, 1)
+        self.assertEqual(signal_5.decimal.scale, 1)
+        self.assertEqual(signal_5.decimal.offset, 0)
+        self.assertEqual(signal_5.decimal.minimum, 0)
+        self.assertEqual(signal_5.decimal.maximum, 1)
+        self.assertEqual(signal_5.unit, 'm/s')
+        self.assertEqual(signal_5.choices, None)
+        self.assertEqual(signal_5.comment, 'comment')
+        self.assertEqual(signal_5.is_multiplexer, False)
+        self.assertEqual(signal_5.multiplexer_ids, None)
 
     def test_add_bad_sym_string(self):
         db = cantools.db.Database()

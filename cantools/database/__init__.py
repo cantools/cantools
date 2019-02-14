@@ -59,7 +59,8 @@ def _resolve_database_format_and_encoding(database_format,
     if encoding is None:
         try:
             encoding = {
-                'dbc': 'cp1252'
+                'dbc': 'cp1252',
+                'sym': 'cp1252'
             }[database_format]
         except KeyError:
             encoding = 'utf-8'
@@ -136,7 +137,7 @@ def load_file(filename,
     +-----------------+-------------------+
     | ``'kcd'``       | ``'utf-8'``       |
     +-----------------+-------------------+
-    | ``'sym'``       | ``'utf-8'``       |
+    | ``'sym'``       | ``'cp1252'``      |
     +-----------------+-------------------+
     | ``'cdd'``       | ``'utf-8'``       |
     +-----------------+-------------------+

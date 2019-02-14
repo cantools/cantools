@@ -15,6 +15,7 @@ from textparser import tokenize_init
 from textparser import Token
 from textparser import TokenizeError
 from textparser import Optional
+from textparser import Any
 
 from ..signal import Signal
 from ..signal import Decimal as SignalDecimal
@@ -47,13 +48,11 @@ class Parser60(textparser.Parser):
         'CycleTime',
         'Timeout',
         'MinInterval',
-        'Sig',
         'Color',
         'Var'
     ])
 
     def tokenize(self, string):
-
         names = {
             'LPAREN':      '(',
             'RPAREN':      ')',
@@ -77,39 +76,47 @@ class Parser60(textparser.Parser):
             'P':           '/p:',
             'M':           '-m',
             'H':           '-h',
-            'B':           '-b'
+            'B':           '-b',
+            'S':           '-s',
+            'T':           '-t',
+            'V':           '-v'
         }
 
+        re_string = r'"(\\"|[^"])*?"'
+
         token_specs = [
-            ('SKIP',        r'[ \r\n\t]+'),
-            ('COMMENT',     r'//.*?\n'),
-            ('NUMBER',      r'-?\d+\.?\d*([eE][+-]?\d+)?'),
-            ('STRING',      r'"(\\"|[^"])*?"'),
-            ('LPAREN',      r'\('),
-            ('RPAREN',      r'\)'),
-            ('LBRACE',      r'\['),
-            ('RBRACE',      r'\]'),
-            ('COMMA',       r','),
-            ('ASSIGN',      r'='),
-            ('ENUMS',       r'\{ENUMS\}'),
-            ('SIGNALS',     r'\{SIGNALS\}'),
-            ('SEND',        r'\{SEND\}'),
-            ('RECEIVE',     r'\{RECEIVE\}'),
-            ('SENDRECEIVE', r'\{SENDRECEIVE\}'),
-            ('U',           r'/u:'),
-            ('F',           r'/f:'),
-            ('O',           r'/o:'),
-            ('MIN',         r'/min:'),
-            ('MAX',         r'/max:'),
-            ('D',           r'/d:'),
-            ('LN',          r'/ln:'),
-            ('E',           r'/e:'),
-            ('P',           r'/p:'),
-            ('M',           r'\-m'),
-            ('H',           r'\-h'),
-            ('B',           r'\-b'),
-            ('WORD',        r'[^\(\)\[\],\-=\s]+'),
-            ('MISMATCH',    r'.')
+            ('SKIP',               r'[ \r\n\t]+'),
+            ('COMMENT',            r'//.*?\n'),
+            ('NUMBER',             r'-?\d+\.?\d*([eE][+-]?\d+)?'),
+            ('STRING',             re_string),
+            ('U',                  r'/u:({}|\S+)'.format(re_string)),
+            ('F',                  r'/f:'),
+            ('O',                  r'/o:'),
+            ('MIN',                r'/min:'),
+            ('MAX',                r'/max:'),
+            ('D',                  r'/d:'),
+            ('LN',                 r'/ln:'),
+            ('E',                  r'/e:'),
+            ('P',                  r'/p:'),
+            ('M',                  r'\-m'),
+            ('H',                  r'\-h'),
+            ('B',                  r'\-b'),
+            ('S',                  r'\-s'),
+            ('T',                  r'\-t'),
+            ('V',                  r'\-v'),
+            ('LPAREN',             r'\('),
+            ('RPAREN',             r'\)'),
+            ('LBRACE',             r'\['),
+            ('RBRACE',             r'\]'),
+            ('COMMA',              r','),
+            ('ASSIGN',             r'='),
+            ('ENUMS',              r'\{ENUMS\}'),
+            ('SIGNALS',            r'\{SIGNALS\}'),
+            ('SEND',               r'\{SEND\}'),
+            ('RECEIVE',            r'\{RECEIVE\}'),
+            ('SENDRECEIVE',        r'\{SENDRECEIVE\}'),
+            ('WORD',               r'[^\s=\(\]\-]+'),
+            ('MISMATCH',           r'.')
         ]
 
         tokens, token_regex = tokenize_init(token_specs)
@@ -150,7 +157,7 @@ class Parser60(textparser.Parser):
                         '(', Optional(DelimitedList(enum_value)), ')',
                         Optional('COMMENT'))
 
-        sig_unit = Sequence('/u:', word)
+        sig_unit = '/u:'
         sig_factor = Sequence('/f:', 'NUMBER')
         sig_offset = Sequence('/o:', 'NUMBER')
         sig_min = Sequence('/min:', 'NUMBER')
@@ -160,7 +167,7 @@ class Parser60(textparser.Parser):
         sig_enum = Sequence('/e:', word)
         sig_places = Sequence('/p:', 'NUMBER')
 
-        signal = Sequence('Sig', '=', word, word,
+        signal = Sequence('Sig', '=', Any(), word,
                           Optional('NUMBER'),
                           Optional(choice('-h', '-b')),
                           Optional('-m'),
@@ -175,9 +182,9 @@ class Parser60(textparser.Parser):
                                             sig_places)),
                           Optional('COMMENT'))
 
-        variable = Sequence('Var', '=', word, word,
+        variable = Sequence('Var', '=', Any(), word,
                             'NUMBER', ',', 'NUMBER',
-                            Optional('-m'),
+                            ZeroOrMore(choice('-v', '-m', '-s')),
                             ZeroOrMore(choice(sig_unit,
                                               sig_factor,
                                               sig_offset,
@@ -189,20 +196,21 @@ class Parser60(textparser.Parser):
                                               sig_places)),
                             Optional('COMMENT'))
 
-        symbol = Sequence('[', word, ']',
-                          Optional(Sequence('ID', '=', 'NUMBER', word,
-                                            Optional(Sequence('NUMBER', word)),
-                                            Optional('COMMENT'))),
-                          Sequence('Len', '=', 'NUMBER'),
+        symbol = Sequence('[', Any(), ']',
                           ZeroOrMoreDict(choice(
-                              Sequence('Mux', '=', word, 'NUMBER', ',',
-                                       'NUMBER', 'NUMBER'),
+                              Sequence('ID', '=', 'NUMBER', word,
+                                       Optional(Sequence('NUMBER', word)),
+                                       Optional('COMMENT')),
+                              Sequence('Len', '=', 'NUMBER'),
+                              Sequence('Mux', '=', Any(), 'NUMBER', ',',
+                                       'NUMBER', 'NUMBER',
+                                       Optional('-t')),
                               Sequence('CycleTime', '=', 'NUMBER'),
                               Sequence('Timeout', '=', 'NUMBER'),
                               Sequence('MinInterval', '=', 'NUMBER'),
                               Sequence('Color', '=', 'NUMBER', 'WORD'),
                               variable,
-                              Sequence('Sig', '=', word, 'NUMBER'))))
+                              Sequence('Sig', '=', Any(), 'NUMBER'))))
 
         enums = Sequence('{ENUMS}', ZeroOrMore(choice(enum, 'COMMENT')))
         signals = Sequence('{SIGNALS}', ZeroOrMore(choice(signal, 'COMMENT')))
@@ -309,25 +317,32 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal):
     decimal.scale = Decimal(factor)
     decimal.offset = Decimal(offset)
 
-    for key, value in tokens:
-        if key == '/u:':
-            unit = value
-        elif key == '/f:':
-            factor = num(value)
-            decimal.scale = Decimal(value)
-        elif key == '/o:':
-            offset = num(value)
-            decimal.offset = Decimal(value)
-        elif key == '/min:':
-            minimum = num(value)
-            decimal.minimum = Decimal(value)
-        elif key == '/max:':
-            maximum = num(value)
-            decimal.maximum = Decimal(value)
-        elif key == '/e:':
-            enum = _get_enum(enums, value)
+    for item in tokens:
+        if isinstance(item, list):
+            key, value = item
+
+            if key == '/f:':
+                factor = num(value)
+                decimal.scale = Decimal(value)
+            elif key == '/o:':
+                offset = num(value)
+                decimal.offset = Decimal(value)
+            elif key == '/min:':
+                minimum = num(value)
+                decimal.minimum = Decimal(value)
+            elif key == '/max:':
+                maximum = num(value)
+                decimal.maximum = Decimal(value)
+            elif key == '/e:':
+                enum = _get_enum(enums, value)
+            else:
+                LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
+        elif item.startswith('/u:"'):
+            unit = item[4:-1]
+        elif item.startswith('/u:'):
+            unit = item[3:]
         else:
-            LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
+            raise ParseError('Iternal error {}.'.format(item))
 
     return unit, factor, offset, enum, minimum, maximum, decimal
 
@@ -491,10 +506,10 @@ def _load_message_signals_inner(message_tokens,
                              signals,
                              multiplexer_signal,
                              multiplexer_ids)
-        for signal in message_tokens[5].get('Sig', [])
+        for signal in message_tokens[3].get('Sig', [])
     ] + [
         _load_message_variable(variable, enums)
-        for variable in message_tokens[5].get('Var', [])
+        for variable in message_tokens[3].get('Var', [])
     ]
 
 
@@ -502,14 +517,16 @@ def _load_muxed_message_signals(message_tokens,
                                 message_section_tokens,
                                 signals,
                                 enums):
-    mux_tokens = message_tokens[5]['Mux'][0]
+    mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
     result = [
         Signal(name=multiplexer_signal,
                start=int(mux_tokens[3]),
                length=int(mux_tokens[5]),
                byte_order='little_endian',
-               is_multiplexer=True)
+               is_multiplexer=True,
+               decimal=SignalDecimal(Decimal(1), Decimal(0))
+        )
     ]
 
     multiplexer_ids = [int(mux_tokens[6])]
@@ -521,7 +538,7 @@ def _load_muxed_message_signals(message_tokens,
 
     for tokens in message_section_tokens:
         if tokens[1] == message_tokens[1] and tokens != message_tokens:
-            mux_tokens = tokens[5]['Mux'][0]
+            mux_tokens = tokens[3]['Mux'][0]
             multiplexer_ids = [int(mux_tokens[6])]
             result += _load_message_signals_inner(tokens,
                                                   signals,
@@ -533,7 +550,7 @@ def _load_muxed_message_signals(message_tokens,
 
 
 def _is_multiplexed(message_tokens):
-    return 'Mux' in message_tokens[5]
+    return 'Mux' in message_tokens[3]
 
 
 def _load_message_signals(message_tokens,
@@ -558,21 +575,25 @@ def _load_message(frame_id,
                   signals,
                   enums,
                   strict):
+    #print(message_tokens)
     # Default values.
     name = message_tokens[1]
-    length = int(message_tokens[4][2])
+    length = 8
     cycle_time = None
     comment = None
 
+    if 'Len' in message_tokens[3]:
+        length = int(message_tokens[3]['Len'][0][2])
+
     # Cycle time.
     try:
-        cycle_time = num(message_tokens[5]['CycleTime'][0][2])
+        cycle_time = num(message_tokens[3]['CycleTime'][0][2])
     except (KeyError, IndexError):
         pass
 
     # Comment.
-    if message_tokens[3][0][-1]:
-        comment = _load_comment(message_tokens[3][0][-1][0])
+    if message_tokens[3]['ID'][0][-1]:
+        comment = _load_comment(message_tokens[3]['ID'][0][-1][0])
 
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,
@@ -597,7 +618,7 @@ def _parse_message_frame_ids(message):
     def is_extended_frame(string):
         return len(string) == 8
 
-    message = message[3][0]
+    message = message[3]['ID'][0]
     minimum = to_int(message[2])
 
     if message[4]:
@@ -612,7 +633,7 @@ def _parse_message_frame_ids(message):
 
 def _load_message_section(section_name, tokens, signals, enums, strict):
     def has_frame_id(message):
-        return len(message[3]) > 0
+        return 'ID' in message[3]
 
     message_section_tokens = _get_section_tokens(tokens, section_name)
     messages = []

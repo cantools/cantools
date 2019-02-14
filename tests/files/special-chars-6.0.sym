@@ -13,10 +13,9 @@ Sig="a/b" raw 8 /u:][ /ln:"ä"	// ö
 {SENDRECEIVE}
 
 ["A/=*"]
-ID=001h	// \ndd\n
+ID=001h	// dd
 CycleTime=5
 Color=000000h
-Mux="<Empty>" 0,0 0 -t
 Var=Variable1 bit 40,1 -v -s /u:m/s	// comment
 Sig="A B" 0
 Sig="S/" 8

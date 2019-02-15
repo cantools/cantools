@@ -259,6 +259,7 @@ class SystemLoader(object):
             NAMESPACES)
 
         if i_signal_ref is None:
+            # Probably a signal group (I-SIGNAL-GROUP-REF).
             return None
 
         i_signal = self.find_i_signal(i_signal_ref.text)

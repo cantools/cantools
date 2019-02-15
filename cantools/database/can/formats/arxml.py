@@ -244,8 +244,6 @@ class SystemLoader(object):
         """
 
         # Default values.
-        is_signed = False
-        is_float = False
         minimum = None
         maximum = None
         factor = 1
@@ -288,43 +286,9 @@ class SystemLoader(object):
             comment = self.load_signal_comment(system_signal)
 
             # Minimum, maximum, factor, offset and choices.
-            compu_method_ref = system_signal.find(COMPU_METHOD_REF_XPATH,
-                                                  NAMESPACES)
-
-            if compu_method_ref is not None:
-                compu_method = self.find_compu_method(compu_method_ref.text)
-
-                if compu_method is None:
-                    raise ValueError(
-                        'COMPU-METHOD at {} does not exist.'.format(
-                            compu_method_ref.text))
-
-                try:
-                    category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text
-                except AttributeError:
-                    raise ValueError(
-                        'CATEGORY in {} does not exist.'.format(
-                            compu_method_ref.text))
-
-                if category == 'TEXTTABLE':
-                    minimum, maximum, choices = self.load_texttable(
-                        compu_method,
-                        decimal)
-                elif category == 'LINEAR':
-                    minimum, maximum, factor, offset = self.load_linear(
-                        compu_method,
-                        decimal)
-                elif category == 'SCALE_LINEAR_AND_TEXTTABLE':
-                    (minimum,
-                     maximum,
-                     factor,
-                     offset,
-                     choices) = self.load_scale_linear_and_texttable(
-                         compu_method,
-                         decimal)
-                else:
-                    raise NotImplementedError(
-                        'Category {} is not yet implemented.'.format(category))
+            minimum, maximum, factor, offset, choices = self.load_system_signal(
+                system_signal,
+                decimal)
 
         # Type.
         is_signed, is_float = self.load_signal_type(i_signal)
@@ -486,6 +450,55 @@ class SystemLoader(object):
                     decimal)
 
         return minimum, maximum, factor, offset, choices
+
+    def load_system_signal(self, system_signal, decimal):
+        # Defualt.
+        minimum = None
+        maximum = None
+        factor = 1
+        offset = 0
+        choices = None
+
+        compu_method_ref = system_signal.find(COMPU_METHOD_REF_XPATH,
+                                              NAMESPACES)
+
+        if compu_method_ref is not None:
+            compu_method = self.find_compu_method(compu_method_ref.text)
+
+            if compu_method is None:
+                raise ValueError(
+                    'COMPU-METHOD at {} does not exist.'.format(
+                        compu_method_ref.text))
+
+            try:
+                category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text
+            except AttributeError:
+                raise ValueError(
+                    'CATEGORY in {} does not exist.'.format(
+                        compu_method_ref.text))
+
+            if category == 'TEXTTABLE':
+                minimum, maximum, choices = self.load_texttable(
+                    compu_method,
+                    decimal)
+            elif category == 'LINEAR':
+                minimum, maximum, factor, offset = self.load_linear(
+                    compu_method,
+                    decimal)
+            elif category == 'SCALE_LINEAR_AND_TEXTTABLE':
+                (minimum,
+                 maximum,
+                 factor,
+                 offset,
+                 choices) = self.load_scale_linear_and_texttable(
+                     compu_method,
+                     decimal)
+            else:
+                raise NotImplementedError(
+                    'Category {} is not yet implemented.'.format(category))
+
+        return minimum, maximum, factor, offset, choices
+
 
     def load_signal_type(self, i_signal):
         is_signed = False

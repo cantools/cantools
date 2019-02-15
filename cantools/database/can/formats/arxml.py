@@ -150,8 +150,8 @@ class SystemLoader(object):
         messages = []
         version = None
 
-        can_frame_triggerings = self.root.findall(CAN_FRAME_TRIGGERINGS_XPATH,
-                                                  NAMESPACES)
+        can_frame_triggerings = self.root.iterfind(CAN_FRAME_TRIGGERINGS_XPATH,
+                                                   NAMESPACES)
 
         for can_frame_triggering in can_frame_triggerings:
             messages.append(self.load_message(can_frame_triggering))
@@ -191,7 +191,7 @@ class SystemLoader(object):
         i_signal_i_pdu = self.find_i_signal_i_pdu(pdu_ref_xpath)
 
         if i_signal_i_pdu is not None:
-            i_signal_to_i_pdu_mappings = i_signal_i_pdu.findall(
+            i_signal_to_i_pdu_mappings = i_signal_i_pdu.iterfind(
                 I_SIGNAL_TO_I_PDU_MAPPING_XPATH,
                 NAMESPACES)
 
@@ -405,7 +405,7 @@ class SystemLoader(object):
         maximum = None
         choices = {}
 
-        for compu_scale in compu_method.findall(COMPU_SCALE_XPATH, NAMESPACES):
+        for compu_scale in compu_method.iterfind(COMPU_SCALE_XPATH, NAMESPACES):
             lower_limit = compu_scale.find(LOWER_LIMIT_XPATH, NAMESPACES)
             upper_limit = compu_scale.find(UPPER_LIMIT_XPATH, NAMESPACES)
             vt = compu_scale.find(VT_XPATH, NAMESPACES)
@@ -448,7 +448,6 @@ class SystemLoader(object):
 
         return float(decimal.scale), float(decimal.offset)
 
-
     def load_linear(self, compu_method, decimal):
         compu_scale = compu_method.find(COMPU_SCALE_XPATH,
                                         NAMESPACES)
@@ -472,7 +471,7 @@ class SystemLoader(object):
         offset = 0
         choices = {}
 
-        for compu_scale in compu_method.findall(COMPU_SCALE_XPATH, NAMESPACES):
+        for compu_scale in compu_method.iterfind(COMPU_SCALE_XPATH, NAMESPACES):
             lower_limit = compu_scale.find(LOWER_LIMIT_XPATH, NAMESPACES)
             upper_limit = compu_scale.find(UPPER_LIMIT_XPATH, NAMESPACES)
             vt = compu_scale.find(VT_XPATH, NAMESPACES)
@@ -584,7 +583,7 @@ class EcuExtractLoader(object):
 
         ecuc_value_collection = self.root.find(ECUC_VALUE_COLLECTION_XPATH,
                                                NAMESPACES)
-        values_refs = ecuc_value_collection.findall(
+        values_refs = ecuc_value_collection.iterfind(
             ECUC_MODULE_CONFIGURATION_VALUES_REF_XPATH,
             NAMESPACES)
         com_xpaths = [
@@ -670,8 +669,8 @@ class EcuExtractLoader(object):
 
         # Find all signals in this message.
         signals = []
-        values = com_i_pdu.findall(ECUC_REFERENCE_VALUE_XPATH,
-                                   NAMESPACES)
+        values = com_i_pdu.iterfind(ECUC_REFERENCE_VALUE_XPATH,
+                                    NAMESPACES)
 
         for value in values:
             definition_ref = value.find(DEFINITION_REF_XPATH,
@@ -830,7 +829,7 @@ class EcuExtractLoader(object):
                               NAMESPACES)
 
     def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref):
-        messages = self.root.findall(
+        messages = self.root.iterfind(
             make_xpath([
                 "AR-PACKAGES",
                 "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(

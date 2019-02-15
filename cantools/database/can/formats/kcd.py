@@ -114,7 +114,7 @@ def _load_signal_element(signal, nodes):
     if label_set is not None:
         labels = {}
 
-        for label in label_set.findall('ns:Label', NAMESPACES):
+        for label in label_set.iterfind('ns:Label', NAMESPACES):
             label_value = int(label.attrib['value'])
             label_name = label.attrib['name']
             labels[label_value] = label_name
@@ -125,7 +125,7 @@ def _load_signal_element(signal, nodes):
     consumer = signal.find('ns:Consumer', NAMESPACES)
 
     if consumer is not None:
-        for receiver in consumer.findall('ns:NodeRef', NAMESPACES):
+        for receiver in consumer.iterfind('ns:NodeRef', NAMESPACES):
             receivers.append(_get_node_name_by_id(nodes,
                                                   receiver.attrib['id']))
 
@@ -155,10 +155,10 @@ def _load_multiplex_element(mux, nodes):
     mux_signal.is_multiplexer = True
     signals = [mux_signal]
 
-    for mux_group in mux.findall('ns:MuxGroup', NAMESPACES):
+    for mux_group in mux.iterfind('ns:MuxGroup', NAMESPACES):
         multiplexer_id = mux_group.attrib['count']
 
-        for signal_element in mux_group.findall('ns:Signal', NAMESPACES):
+        for signal_element in mux_group.iterfind('ns:Signal', NAMESPACES):
             signal = _load_signal_element(signal_element, nodes)
             signal.multiplexer_ids = [int(multiplexer_id)]
             signal.multiplexer_signal = mux_signal.name
@@ -207,17 +207,17 @@ def _load_message_element(message, bus_name, nodes, strict):
     producer = message.find('ns:Producer', NAMESPACES)
 
     if producer is not None:
-        for sender in producer.findall('ns:NodeRef', NAMESPACES):
+        for sender in producer.iterfind('ns:NodeRef', NAMESPACES):
             senders.append(_get_node_name_by_id(nodes,
                                                 sender.attrib['id']))
 
     # Find all signals in this message.
     signals = []
 
-    for mux in message.findall('ns:Multiplex', NAMESPACES):
+    for mux in message.iterfind('ns:Multiplex', NAMESPACES):
         signals += _load_multiplex_element(mux, nodes)
 
-    for signal in message.findall('ns:Signal', NAMESPACES):
+    for signal in message.iterfind('ns:Signal', NAMESPACES):
         signals.append(_load_signal_element(signal, nodes))
 
     if length == 'auto':
@@ -466,7 +466,7 @@ def load_string(string, strict=True):
             'Expected root element tag {}, but got {}.'.format(ROOT_TAG,
                                                                root.tag))
 
-    nodes = [node.attrib for node in root.findall('./ns:Node', NAMESPACES)]
+    nodes = [node.attrib for node in root.iterfind('./ns:Node', NAMESPACES)]
     buses = []
     messages = []
 
@@ -476,12 +476,12 @@ def load_string(string, strict=True):
     except AttributeError:
         version = None
 
-    for bus in root.findall('ns:Bus', NAMESPACES):
+    for bus in root.iterfind('ns:Bus', NAMESPACES):
         bus_name = bus.attrib['name']
         bus_baudrate = int(bus.get('baudrate', 500000))
         buses.append(Bus(bus_name, baudrate=bus_baudrate))
 
-        for message in bus.findall('ns:Message', NAMESPACES):
+        for message in bus.iterfind('ns:Message', NAMESPACES):
             messages.append(_load_message_element(message,
                                                   bus_name,
                                                   nodes,

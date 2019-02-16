@@ -13,11 +13,11 @@ from textparser import OneOrMore
 from textparser import OneOrMoreDict
 from textparser import DelimitedList
 from textparser import Any
+from textparser import AnyUntil
 from textparser import tokenize_init
 from textparser import Token
 from textparser import TokenizeError
 from textparser import Optional
-from textparser import Not
 
 from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
@@ -194,7 +194,7 @@ class Parser(textparser.Parser):
     def grammar(self):
         version = Sequence('VERSION', 'STRING')
 
-        ns = Sequence('NS_', ':', ZeroOrMore(Sequence(Any(), Not(':'))))
+        ns = Sequence('NS_', ':', AnyUntil(Sequence(Any(), ':')))
 
         bs = Sequence('BS_', ':')
 

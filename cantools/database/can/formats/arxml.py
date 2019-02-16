@@ -519,7 +519,7 @@ class SystemLoader(object):
 
             if base_type_encoding == '2C':
                 is_signed = True
-            elif base_type_encoding in 'IEE754':
+            elif base_type_encoding in 'IEEE754':
                 is_float = True
         except AttributeError:
             pass

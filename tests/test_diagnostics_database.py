@@ -10,8 +10,8 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
     maxDiff = None
 
     def test_example_cdd(self):
-        filename = os.path.join('tests', 'files', 'example.cdd')
-        db = cantools.db.load_file(filename, encoding='iso-8859-1')
+        db = cantools.db.load_file('tests/files/cdd/example.cdd',
+                                   encoding='iso-8859-1')
         self.assertEqual(len(db.dids), 15)
         self.assertEqual([did.name for did in db.dids],
                          [
@@ -149,8 +149,8 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         self.assertEqual(decoded, decoded_did)
 
     def test_example_cdd_repr(self):
-        filename = os.path.join('tests', 'files', 'example.cdd')
-        db = cantools.db.load_file(filename, encoding='iso-8859-1')
+        db = cantools.db.load_file('tests/files/cdd/example.cdd',
+                                   encoding='iso-8859-1')
         self.assertEqual(
             repr(db),
             "did('DEFAULT_SESSION', 0x0081)\n"
@@ -242,10 +242,8 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
             "  data('_reserved', 4, 4, 'little_endian', 1, 0, 0, 255, 'None', None)\n")
 
     def test_cdd_add(self):
-        filename = os.path.join('tests', 'files', 'example.cdd')
-
         db = cantools.db.diagnostics.Database()
-        db.add_cdd_file(filename, encoding='iso-8859-1')
+        db.add_cdd_file('tests/files/cdd/example.cdd', encoding='iso-8859-1')
         self.assertEqual(len(db.dids), 15)
 
 

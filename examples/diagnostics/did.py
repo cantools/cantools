@@ -18,6 +18,7 @@ EXAMPLE_PATH = os.path.join(SCRIPT_DIR,
                             '..',
                             'tests',
                             'files',
+                            'cdd',
                             'example.cdd')
 
 database = cantools.db.load_file(EXAMPLE_PATH)

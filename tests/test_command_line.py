@@ -30,7 +30,7 @@ class CanToolsCommandLineTest(unittest.TestCase):
     maxDiff = None
 
     def test_decode(self):
-        argv = ['cantools', 'decode', 'tests/files/socialledge.dbc']
+        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
         input_data = """\
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
   vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF
@@ -82,7 +82,7 @@ IO_DEBUG(
             'cantools',
             'decode',
             '--single-line',
-            'tests/files/socialledge.dbc'
+            'tests/files/dbc/socialledge.dbc'
         ]
 
         input_data = """\
@@ -118,7 +118,7 @@ IO_DEBUG(
         argv = [
             'cantools',
             'dump',
-            'tests/files/motohawk.dbc'
+            'tests/files/dbc/motohawk.dbc'
         ]
 
         expected_output = """\
@@ -188,7 +188,7 @@ IO_DEBUG(
             'cantools',
             'dump',
             '--no-strict',
-            'tests/files/no_sender.dbc'
+            'tests/files/dbc/no_sender.dbc'
         ]
 
         expected_output = """\
@@ -232,7 +232,7 @@ IO_DEBUG(
         argv = [
             'cantools',
             'dump',
-            'tests/files/dump_signal_choices.dbc'
+            'tests/files/dbc/dump_signal_choices.dbc'
         ]
 
         expected_output = """\
@@ -310,7 +310,7 @@ IO_DEBUG(
         argv = [
             'cantools',
             'dump',
-            'tests/files/j1939.dbc'
+            'tests/files/dbc/j1939.dbc'
         ]
 
         expected_output = """\
@@ -416,7 +416,7 @@ IO_DEBUG(
         argv = [
             'cantools',
             'convert',
-            'tests/files/motohawk.dbc',
+            'tests/files/dbc/motohawk.dbc',
             'test_command_line_convert.kcd'
         ]
 
@@ -452,7 +452,7 @@ IO_DEBUG(
         argv = [
             'cantools',
             'convert',
-            'tests/files/motohawk.dbc',
+            'tests/files/dbc/motohawk.dbc',
             'test_command_line_convert.foo'
         ]
 
@@ -488,7 +488,7 @@ IO_DEBUG(
             argv = [
                 'cantools',
                 'generate_c_source',
-                'tests/files/{}.dbc'.format(database)
+                'tests/files/dbc/{}.dbc'.format(database)
             ]
 
             database_h = basename + '.h'
@@ -530,7 +530,7 @@ IO_DEBUG(
                 'cantools',
                 'generate_c_source',
                 '--no-floating-point-numbers',
-                'tests/files/{}.dbc'.format(database)
+                'tests/files/dbc/{}.dbc'.format(database)
             ]
 
             database_h = database + '.h'
@@ -565,7 +565,7 @@ IO_DEBUG(
                 'cantools',
                 'generate_c_source',
                 '--database-name', 'my_database_name',
-                'tests/files/{}.dbc'.format(database)
+                'tests/files/dbc/{}.dbc'.format(database)
             ]
 
             database_h = 'my_database_name.h'
@@ -601,7 +601,7 @@ IO_DEBUG(
                 'generate_c_source',
                 '--bit-fields',
                 '--database-name', '{}_bit_fields'.format(database),
-                'tests/files/{}.dbc'.format(database)
+                'tests/files/dbc/{}.dbc'.format(database)
             ]
 
             database_h = database + '_bit_fields.h'
@@ -629,7 +629,7 @@ IO_DEBUG(
             'cantools',
             'generate_c_source',
             '--generate-fuzzer',
-            'tests/files/multiplex_2.dbc'
+            'tests/files/dbc/multiplex_2.dbc'
         ]
 
         database_h = 'multiplex_2.h'
@@ -676,7 +676,7 @@ IO_DEBUG(
             argv = [
                 'cantools',
                 'generate_c_source',
-                'tests/files/{}.sym'.format(database)
+                'tests/files/sym/{}.sym'.format(database)
             ]
 
             database_h = basename + '.h'

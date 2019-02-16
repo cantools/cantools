@@ -72,7 +72,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                             notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
@@ -124,7 +124,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
@@ -172,7 +172,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                            _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/motohawk.dbc',
+        args = Args('tests/files/dbc/motohawk.dbc',
                     single_line=True)
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
@@ -220,7 +220,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                            _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
@@ -275,7 +275,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr(user_input=[
             'f', 'Y', '[', '\b', '\n', 'f', '\b', 'E', '\n', 'q'
         ])
-        args = Args('tests/files/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 10 * ['green', 'cyan']
         is_term_resized.return_value = False
 
@@ -450,7 +450,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr(user_input=[
             'f', 'E', '\n', 'p', ' ', 'r', 'f', '\n', 'q'
         ])
-        args = Args('tests/files/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 10 * ['green', 'cyan']
         is_term_resized.return_value = False
 
@@ -632,7 +632,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr(user_input=[
             ' ', ' ', 'p', ' ', ' ', 'p', ' ', ' ', ' ', 'q'
         ])
-        args = Args('tests/files/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 8 * ['green', 'cyan']
         is_term_resized.return_value = False
 
@@ -778,7 +778,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Prepare mocks.
         stdscr = StdScr(user_input=[' ', ' ', 'q'],
                         resolution=[(30, 40), (25, 35), (25, 35), (20, 30)])
-        args = Args('tests/files/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 3 * ['green', 'cyan']
         is_term_resized.return_value = True
 

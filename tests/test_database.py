@@ -4347,6 +4347,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.decimal.minimum, 0.0)
         self.assertEqual(signal_1.decimal.maximum, 4.0)
 
+    def test_system_bad_root_tag(self):
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_file(
+                'tests/files/arxml/system-bad-root-tag-4.2.arxml')
+
+        self.assertEqual(
+            str(cm.exception),
+            'ARXML: "Expected root element tag {http://autosar.org/schema/r4.0}'
+            'AUTOSAR, but got {http://autosar.org/schema/r4.0}NOT-AUTOSAR."')
+
     def test_ecu_extract_arxml(self):
         db = cantools.database.Database()
         db.add_arxml_file('tests/files/arxml/ecu-extract-4.2.arxml')

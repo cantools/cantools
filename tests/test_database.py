@@ -4232,7 +4232,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_2.length, 7)
         self.assertEqual(message_2.senders, [])
         self.assertEqual(message_2.send_type, None)
-        self.assertEqual(message_2.cycle_time, None)
+        self.assertEqual(message_2.cycle_time, 200)
         self.assertEqual(len(message_2.signals), 3)
         self.assertEqual(message_2.comment, None)
         self.assertEqual(message_2.bus_name, None)

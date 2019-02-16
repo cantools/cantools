@@ -51,6 +51,15 @@ I_SIGNAL_TO_I_PDU_MAPPING_XPATH = make_xpath([
     'I-SIGNAL-TO-PDU-MAPPINGS',
     'I-SIGNAL-TO-I-PDU-MAPPING'
 ])
+TIME_PERIOD_XPATH = make_xpath([
+    'I-PDU-TIMING-SPECIFICATIONS',
+    'I-PDU-TIMING',
+    'TRANSMISSION-MODE-DECLARATION',
+    'TRANSMISSION-MODE-TRUE-TIMING',
+    'CYCLIC-TIMING',
+    'TIME-PERIOD',
+    'VALUE'
+])
 I_SIGNAL_REF_XPATH = make_xpath(['I-SIGNAL-REF'])
 START_POSITION_XPATH = make_xpath(['START-POSITION'])
 LENGTH_XPATH = make_xpath(['LENGTH'])
@@ -167,7 +176,7 @@ class SystemLoader(object):
         """
 
         # Default values.
-        interval = None
+        cycle_time = None
         senders = []
 
         frame_ref_xpath = can_frame_triggering.find(FRAME_REF_XPATH,
@@ -182,7 +191,7 @@ class SystemLoader(object):
             can_frame_triggering)
         comment = self.load_message_comment(can_frame)
 
-        # ToDo: interval, senders
+        # ToDo: senders
 
         # Find all signals in this message.
         signals = []
@@ -191,6 +200,11 @@ class SystemLoader(object):
         i_signal_i_pdu = self.find_i_signal_i_pdu(pdu_ref_xpath)
 
         if i_signal_i_pdu is not None:
+            time_period = i_signal_i_pdu.find(TIME_PERIOD_XPATH, NAMESPACES)
+
+            if time_period is not None:
+                cycle_time = int(float(time_period.text) * 1000)
+
             i_signal_to_i_pdu_mappings = i_signal_i_pdu.iterfind(
                 I_SIGNAL_TO_I_PDU_MAPPING_XPATH,
                 NAMESPACES)
@@ -207,7 +221,7 @@ class SystemLoader(object):
                        length=length,
                        senders=senders,
                        send_type=None,
-                       cycle_time=interval,
+                       cycle_time=cycle_time,
                        signals=signals,
                        comment=comment,
                        bus_name=None,

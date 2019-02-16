@@ -166,6 +166,24 @@
         <I-SIGNAL-I-PDU>
           <SHORT-NAME>message2</SHORT-NAME>
           <LENGTH>7</LENGTH>
+          <I-PDU-TIMING-SPECIFICATIONS>
+            <I-PDU-TIMING>
+              <TRANSMISSION-MODE-DECLARATION>
+                <TRANSMISSION-MODE-FALSE-TIMING>
+                  <CYCLIC-TIMING>
+                    <TIME-OFFSET><VALUE>0</VALUE></TIME-OFFSET>
+                    <TIME-PERIOD><VALUE>0.1</VALUE></TIME-PERIOD>
+                  </CYCLIC-TIMING>
+                </TRANSMISSION-MODE-FALSE-TIMING>
+                <TRANSMISSION-MODE-TRUE-TIMING>
+                  <CYCLIC-TIMING>
+                    <TIME-OFFSET><VALUE>0</VALUE></TIME-OFFSET>
+                    <TIME-PERIOD><VALUE>0.2</VALUE></TIME-PERIOD>
+                  </CYCLIC-TIMING>
+                </TRANSMISSION-MODE-TRUE-TIMING>
+              </TRANSMISSION-MODE-DECLARATION>
+            </I-PDU-TIMING>
+          </I-PDU-TIMING-SPECIFICATIONS>
           <I-SIGNAL-TO-PDU-MAPPINGS>
             <I-SIGNAL-TO-I-PDU-MAPPING>
               <SHORT-NAME>Signal2</SHORT-NAME>

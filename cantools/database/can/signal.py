@@ -110,6 +110,7 @@ class Signal(object):
                  length,
                  byte_order='little_endian',
                  is_signed=False,
+                 initial=None,
                  scale=1,
                  offset=0,
                  minimum=None,
@@ -129,6 +130,7 @@ class Signal(object):
         self._length = length
         self._byte_order = byte_order
         self._is_signed = is_signed
+        self._initial = initial
         self._scale = scale
         self._offset = offset
         self._minimum = minimum
@@ -217,6 +219,18 @@ class Signal(object):
     @is_float.setter
     def is_float(self, value):
         self._is_float = value
+
+    @property
+    def initial(self):
+        """The initial value of the signal, or ``None`` if unavailable.
+
+        """
+
+        return self._initial
+
+    @initial.setter
+    def initial(self, value):
+        self._initial = value
 
     @property
     def scale(self):

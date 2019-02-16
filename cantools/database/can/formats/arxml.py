@@ -275,12 +275,7 @@ class SystemLoader(object):
                                           NAMESPACES)
 
         if system_signal_ref is not None:
-            system_signal = self.find_system_signal(system_signal_ref.text)
-
-            if system_signal is None:
-                raise ValueError(
-                    'SYSTEM-SIGNAL at {} does not exist.'.format(
-                        system_signal_ref.text))
+            system_signal = self.get_system_signal(system_signal_ref.text)
 
             # Unit and comment.
             unit = self.load_signal_unit(system_signal)
@@ -453,7 +448,6 @@ class SystemLoader(object):
         return minimum, maximum, factor, offset, choices
 
     def load_system_signal(self, system_signal, decimal):
-        # Defualt.
         minimum = None
         maximum = None
         factor = 1
@@ -464,19 +458,15 @@ class SystemLoader(object):
                                               NAMESPACES)
 
         if compu_method_ref is not None:
-            compu_method = self.find_compu_method(compu_method_ref.text)
+            compu_method = self.get_compu_method(compu_method_ref.text)
+            category = compu_method.find(CATEGORY_XPATH, NAMESPACES)
 
-            if compu_method is None:
-                raise ValueError(
-                    'COMPU-METHOD at {} does not exist.'.format(
-                        compu_method_ref.text))
-
-            try:
-                category = compu_method.find(CATEGORY_XPATH, NAMESPACES).text
-            except AttributeError:
+            if category is None:
                 raise ValueError(
                     'CATEGORY in {} does not exist.'.format(
                         compu_method_ref.text))
+
+            category = category.text
 
             if category == 'TEXTTABLE':
                 minimum, maximum, choices = self.load_texttable(
@@ -495,8 +485,7 @@ class SystemLoader(object):
                      compu_method,
                      decimal)
             else:
-                raise NotImplementedError(
-                    'Category {} is not yet implemented.'.format(category))
+                LOGGER.debug('Category %s is not yet implemented.', category)
 
         return minimum, maximum, factor, offset, choices
 
@@ -505,24 +494,24 @@ class SystemLoader(object):
         is_signed = False
         is_float = False
 
-        try:
-            base_type_ref = i_signal.find(BASE_TYPE_REF_XPATH, NAMESPACES)
-            sw_base_type = self.find_sw_base_type(base_type_ref.text)
+        base_type_ref = i_signal.find(BASE_TYPE_REF_XPATH, NAMESPACES)
 
-            if sw_base_type is None:
+        if base_type_ref is not None:
+            sw_base_type = self.get_sw_base_type(base_type_ref.text)
+            base_type_encoding = sw_base_type.find(BASE_TYPE_ENCODING_XPATH,
+                                                   NAMESPACES)
+
+            if base_type_encoding is None:
                 raise ValueError(
-                    'SW-BASE-TYPE at {} does not exist.'.format(
+                    'BASE-TYPE-ENCODING in {} does not exist.'.format(
                         base_type_ref.text))
 
-            base_type_encoding = sw_base_type.find(BASE_TYPE_ENCODING_XPATH,
-                                                   NAMESPACES).text
+            base_type_encoding = base_type_encoding.text
 
             if base_type_encoding == '2C':
                 is_signed = True
             elif base_type_encoding in 'IEEE754':
                 is_float = True
-        except AttributeError:
-            pass
 
         return is_signed, is_float
 
@@ -553,11 +542,16 @@ class SystemLoader(object):
     def find_i_signal_i_pdu(self, xpath):
         return self.find('I-SIGNAL-I-PDU', xpath)
 
-    def find_system_signal(self, xpath):
+    def get_system_signal(self, xpath):
         if xpath in self._system_signal_cache:
             system_signal = self._system_signal_cache[xpath]
         else:
             system_signal = self.find('SYSTEM-SIGNAL', xpath)
+
+            if system_signal is None:
+                raise ValueError(
+                    'SYSTEM-SIGNAL at {} does not exist.'.format(xpath))
+
             self._system_signal_cache[xpath] = system_signal
 
         return system_signal
@@ -565,20 +559,30 @@ class SystemLoader(object):
     def find_unit(self, xpath):
         return self.find('UNIT', xpath)
 
-    def find_compu_method(self, xpath):
+    def get_compu_method(self, xpath):
         if xpath in self._compu_method_cache:
             compu_method = self._compu_method_cache[xpath]
         else:
             compu_method = self.find('COMPU-METHOD', xpath)
+
+            if compu_method is None:
+                raise ValueError(
+                    'COMPU-METHOD at {} does not exist.'.format(xpath))
+
             self._compu_method_cache[xpath] = compu_method
 
         return compu_method
 
-    def find_sw_base_type(self, xpath):
+    def get_sw_base_type(self, xpath):
         if xpath in self._sw_base_type_cache:
             sw_base_type = self._sw_base_type_cache[xpath]
         else:
             sw_base_type = self.find('SW-BASE-TYPE', xpath)
+
+            if sw_base_type is None:
+                raise ValueError(
+                    'SW-BASE-TYPE at {} does not exist.'.format(xpath))
+
             self._sw_base_type_cache[xpath] = sw_base_type
 
         return sw_base_type

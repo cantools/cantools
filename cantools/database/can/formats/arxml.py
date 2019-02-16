@@ -332,11 +332,9 @@ class SystemLoader(object):
     def load_signal_unit(self, system_signal):
         unit_ref = system_signal.find(UNIT_REF_XPATH, NAMESPACES)
 
-        try:
+        if unit_ref is not None:
             return self.find_unit(unit_ref.text).find(DISPLAY_NAME_XPATH,
                                                       NAMESPACES).text
-        except AttributeError:
-            return None
 
     def load_signal_comment(self, system_signal):
         l_2 = system_signal.find(DESC_L_2_XPATH, NAMESPACES)
@@ -557,7 +555,13 @@ class SystemLoader(object):
         return system_signal
 
     def find_unit(self, xpath):
-        return self.find('UNIT', xpath)
+        unit = self.find('UNIT', xpath)
+
+        if unit is None:
+            raise ValueError(
+                'UNIT at {} does not exist.'.format(xpath))
+
+        return unit
 
     def get_compu_method(self, xpath):
         if xpath in self._compu_method_cache:

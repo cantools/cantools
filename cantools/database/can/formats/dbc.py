@@ -1021,6 +1021,14 @@ def _load_signals(tokens,
         except (KeyError, TypeError):
             return name
 
+    def get_signal_initial_value(frame_id_dbc, name):
+        signal_attributes = get_attributes(frame_id_dbc, name)
+
+        try:
+            return signal_attributes['GenSigStartValue'].value
+        except (KeyError, TypeError):
+            return None
+
     signals = []
 
     for signal in tokens:
@@ -1033,6 +1041,7 @@ def _load_signals(tokens,
                                if signal[7] == '0'
                                else 'little_endian'),
                    is_signed=(signal[8] == '-'),
+                   initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
                    scale=num(signal[10]),
                    offset=num(signal[12]),
                    minimum=get_minimum(signal[15], signal[17]),

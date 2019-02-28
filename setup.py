@@ -29,7 +29,7 @@ setup(name='cantools',
       install_requires=[
           'bitstruct>=6.0.0',
           'python-can>=2.1.0',
-          'textparser>=0.21.0',
+          'textparser>=0.21.1',
           'diskcache'
       ],
       test_suite="tests",

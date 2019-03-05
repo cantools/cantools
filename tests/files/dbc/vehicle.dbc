@@ -793,9 +793,9 @@ BO_ 2303356193 RT_IMU06_Gyro_Rates: 8 Vector__XXX
  SG_ Validity_Gyro_Rate_Yaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 2303355937 RT_IMU06_Accel: 8 Vector__XXX
- SG_ Accel_Vertical : 48|16@1- (0.001,0) [-65|65] "g" Vector__XXX
- SG_ Accel_Lateral : 32|16@1- (0.001,0) [-65|65] "g" Vector__XXX
- SG_ Accel_Longitudinal : 16|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Vertical : 48|16@1- (0.001,0) [-32.768|32.767] "g" Vector__XXX
+ SG_ Accel_Lateral : 32|16@1- (0.001,0) [-32.768|32.767] "g" Vector__XXX
+ SG_ Accel_Longitudinal : 16|16@1- (0.001,0) [-32.768|32.767] "g" Vector__XXX
  SG_ Accuracy_Accel : 8|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ Validity_Accel_Vertical : 2|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ Validity_Accel_Lateral : 1|1@1+ (1,0) [0|0] "" Vector__XXX
@@ -1044,7 +1044,7 @@ CM_ SG_ 2304273954 Validity_INS_Pos_LLH_Longitude "Valid when bit is set, invali
 CM_ SG_ 2304273954 Validity_INS_Pos_LLH_Latitude "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304278818 INS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
 CM_ SG_ 2304278818 Accuracy_INS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
-CM_ SG_ 2304278818 INS_Heading_2 "This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 2304278818 INS_Heading_2 "This is GPS heading in the range 0 - 360ï¿½, the direction that the vehicle is travelling in the local horizontal plane.";
 CM_ SG_ 2304278818 Accuracy_INS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
 CM_ SG_ 2304278818 Validity_INS_Gradient "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304278818 Validity_INS_Heading "Valid when bit is set, invalid when bit is clear.";
@@ -1066,7 +1066,7 @@ CM_ SG_ 2304208162 Status_Analogue_1 "Analogue output status for channel 1.  ";
 CM_ SG_ 2304208162 Validity_Status_Timestamp "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304148002 GPS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
 CM_ SG_ 2304148002 Accuracy_GPS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
-CM_ SG_ 2304148002 GPS_Heading_2 "This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 2304148002 GPS_Heading_2 "This is GPS heading in the range 0 - 360ï¿½, the direction that the vehicle is travelling in the local horizontal plane.";
 CM_ SG_ 2304148002 Accuracy_GPS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
 CM_ SG_ 2304148002 Validity_GPS_Gradient "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304148002 Validity_GPS_Heading "Valid when bit is set, invalid when bit is clear.";
@@ -1172,9 +1172,15 @@ CM_ SG_ 2303356194 Accuracy_Gyro_Rates "Dimensionless.  Lower values imply but d
 CM_ SG_ 2303356194 Validity_Gyro_Rate_Roll "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2303356194 Validity_Gyro_Rate_Pitch "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2303356194 Validity_Gyro_Rate_Yaw "Valid when bit is set, invalid when bit is clear.";
-
-
-
+BA_DEF_ SG_  "GenSigStartValue" INT -2147483648 2147483647;
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "GenSigStartValue" SG_ 2304279330 Validity_INS_Vel_Forwards 0;
+BA_ "GenSigStartValue" SG_ 2303355937 Accel_Vertical 16120;
+BA_ "GenSigStartValue" SG_ 2303355937 Accel_Lateral -30000;
+BA_ "GenSigStartValue" SG_ 2303355937 Accel_Longitudinal 32767;
+BA_ "GenSigStartValue" SG_ 2303355937 Accuracy_Accel 127;
+BA_ "GenSigStartValue" SG_ 2303355937 Validity_Accel_Vertical 0;
+BA_ "GenSigStartValue" SG_ 2303355937 Validity_Accel_Lateral 1;
 VAL_ 2304273442 INS_Status 2 "Converged" 1 "Initialised" 0 "Uninitialised" ;
 VAL_ 2304273698 Validity_Roll 1 "Valid" 0 "Invalid" ;
 VAL_ 2304273698 Validity_Pitch 1 "Valid" 0 "Invalid" ;

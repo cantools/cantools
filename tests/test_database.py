@@ -44,8 +44,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, True, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
-                         "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
+                         "False, 0, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
+        self.assertEqual(db.messages[0].signals[0].initial, 0)
         self.assertEqual(db.messages[0].signals[0].receivers, [])
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].send_type, None)
@@ -66,6 +67,27 @@ class CanToolsDatabaseTest(unittest.TestCase):
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_dbc_signal_initial_value(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Validity_Accel_Longitudinal').initial , None)
+        self.assertNotEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Validity_Accel_Longitudinal').initial , 0)
+        self.assertEqual(repr(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Validity_Accel_Longitudinal')),
+                         "signal('Validity_Accel_Longitudinal', 0, 1, 'little_endian', "
+                         "False, None, 1, 0, None, None, 'None', False, None, None, 'Valid when "
+                         "bit is set, invalid when bit is clear.')")
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Validity_Accel_Lateral').initial , 1)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Validity_Accel_Vertical').initial , 0)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accuracy_Accel').initial , 127)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accel_Longitudinal').initial , 32767)
+        self.assertEqual(repr(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accel_Longitudinal')),
+                         "signal('Accel_Longitudinal', 16, 16, 'little_endian', True, 32767, "
+                         "0.001, 0, -32.768, 32.767, 'g', False, None, None, "
+                         "'Longitudinal acceleration.  This is positive when the vehicle "
+                         "accelerates in a forwards direction.')")
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accel_Lateral').initial , -30000)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accel_Vertical').initial , 16120)
+        
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'
 

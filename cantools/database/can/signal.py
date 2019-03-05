@@ -397,12 +397,13 @@ class Signal(object):
                 ["{}: '{}'".format(value, text)
                  for value, text in self._choices.items()]))
 
-        return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, '{}', {}, {}, {}, {})".format(
+        return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, {}, '{}', {}, {}, {}, {})".format(
             self._name,
             self._start,
             self._length,
             self._byte_order,
             self._is_signed,
+            self._initial,
             self._scale,
             self._offset,
             self._minimum,

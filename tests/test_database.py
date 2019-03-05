@@ -82,7 +82,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accel_Longitudinal').initial , 32767)
         self.assertEqual(repr(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accel_Longitudinal')),
                          "signal('Accel_Longitudinal', 16, 16, 'little_endian', True, 32767, "
-                         "0.001, 0, -32.768, 32.767, 'g', False, None, None, "
+                         "0.001, 0, -65, 65, 'g', False, None, None, "
                          "'Longitudinal acceleration.  This is positive when the vehicle "
                          "accelerates in a forwards direction.')")
         self.assertEqual(db.get_message_by_name('RT_IMU06_Accel').get_signal_by_name('Accel_Lateral').initial , -30000)

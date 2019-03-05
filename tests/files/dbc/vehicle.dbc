@@ -793,9 +793,9 @@ BO_ 2303356193 RT_IMU06_Gyro_Rates: 8 Vector__XXX
  SG_ Validity_Gyro_Rate_Yaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 2303355937 RT_IMU06_Accel: 8 Vector__XXX
- SG_ Accel_Vertical : 48|16@1- (0.001,0) [-32.768|32.767] "g" Vector__XXX
- SG_ Accel_Lateral : 32|16@1- (0.001,0) [-32.768|32.767] "g" Vector__XXX
- SG_ Accel_Longitudinal : 16|16@1- (0.001,0) [-32.768|32.767] "g" Vector__XXX
+ SG_ Accel_Vertical : 48|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Lateral : 32|16@1- (0.001,0) [-65|65] "g" Vector__XXX
+ SG_ Accel_Longitudinal : 16|16@1- (0.001,0) [-65|65] "g" Vector__XXX
  SG_ Accuracy_Accel : 8|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ Validity_Accel_Vertical : 2|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ Validity_Accel_Lateral : 1|1@1+ (1,0) [0|0] "" Vector__XXX

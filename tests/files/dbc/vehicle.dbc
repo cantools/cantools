@@ -1172,9 +1172,15 @@ CM_ SG_ 2303356194 Accuracy_Gyro_Rates "Dimensionless.  Lower values imply but d
 CM_ SG_ 2303356194 Validity_Gyro_Rate_Roll "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2303356194 Validity_Gyro_Rate_Pitch "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2303356194 Validity_Gyro_Rate_Yaw "Valid when bit is set, invalid when bit is clear.";
-
-
-
+BA_DEF_ SG_  "GenSigStartValue" INT -2147483648 2147483647;
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "GenSigStartValue" SG_ 2304279330 Validity_INS_Vel_Forwards 0;
+BA_ "GenSigStartValue" SG_ 2303355937 Accel_Vertical 16120;
+BA_ "GenSigStartValue" SG_ 2303355937 Accel_Lateral -30000;
+BA_ "GenSigStartValue" SG_ 2303355937 Accel_Longitudinal 32767;
+BA_ "GenSigStartValue" SG_ 2303355937 Accuracy_Accel 127;
+BA_ "GenSigStartValue" SG_ 2303355937 Validity_Accel_Vertical 0;
+BA_ "GenSigStartValue" SG_ 2303355937 Validity_Accel_Lateral 1;
 VAL_ 2304273442 INS_Status 2 "Converged" 1 "Initialised" 0 "Uninitialised" ;
 VAL_ 2304273698 Validity_Roll 1 "Valid" 0 "Invalid" ;
 VAL_ 2304273698 Validity_Pitch 1 "Valid" 0 "Invalid" ;

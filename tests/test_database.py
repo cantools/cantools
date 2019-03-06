@@ -44,8 +44,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, True, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
-                         "False, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
+                         "False, 0, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
+        self.assertEqual(db.messages[0].signals[0].initial, 0)
         self.assertEqual(db.messages[0].signals[0].receivers, [])
         self.assertEqual(db.messages[0].cycle_time, None)
         self.assertEqual(db.messages[0].send_type, None)
@@ -66,6 +67,47 @@ class CanToolsDatabaseTest(unittest.TestCase):
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_dbc_signal_initial_value(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Validity_Accel_Longitudinal')
+                         .initial, None)
+        self.assertNotEqual(db.get_message_by_name('RT_IMU06_Accel')
+                            .get_signal_by_name('Validity_Accel_Longitudinal')
+                            .initial, 0)
+        self.assertEqual(repr(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Validity_Accel_Longitudinal')),
+                          "signal('Validity_Accel_Longitudinal', 0, 1, "
+                          "'little_endian', False, None, 1, 0, None, None, "
+                          "'None', False, None, None, 'Valid when bit is "
+                          "set, invalid when bit is clear.')")
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Validity_Accel_Lateral')
+                         .initial , 1)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Validity_Accel_Vertical')
+                         .initial , 0)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Accuracy_Accel')
+                         .initial , 127)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Accel_Longitudinal')
+                         .initial , 32767)
+        self.assertEqual(repr(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Accel_Longitudinal')),
+                          "signal('Accel_Longitudinal', 16, 16, "
+                          "'little_endian', True, 32767, 0.001, 0, "
+                          "-65, 65, 'g', False, None, None, 'Longitudinal"
+                          " acceleration.  This is positive when the vehicle "
+                          "accelerates in a forwards direction.')")
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Accel_Lateral')
+                         .initial , -30000)
+        self.assertEqual(db.get_message_by_name('RT_IMU06_Accel')
+                         .get_signal_by_name('Accel_Vertical')
+                         .initial , 16120)
+        
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'
 
@@ -160,29 +202,29 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "node('FUM', None)\n"
             "\n"
             "message('Foo', 0x12330, True, 8, 'Foo.')\n"
-            "  signal('Foo', 0, 12, 'big_endian', True, 0.01, "
+            "  signal('Foo', 0, 12, 'big_endian', True, None, 0.01, "
             "250, 229.53, 270.47, 'degK', False, None, None, None)\n"
-            "  signal('Bar', 24, 32, 'big_endian', True, 0.1, "
+            "  signal('Bar', 24, 32, 'big_endian', True, None, 0.1, "
             "0, 0, 5, 'm', False, None, None, 'Bar.')\n"
             "\n"
             "message('Fum', 0x12331, True, 5, None)\n"
-            "  signal('Fum', 0, 12, 'little_endian', True, 1, 0, 0, 10, "
+            "  signal('Fum', 0, 12, 'little_endian', True, None, 1, 0, 0, 10, "
             "'None', False, None, None, None)\n"
-            "  signal('Fam', 12, 12, 'little_endian', True, 1, 0, "
+            "  signal('Fam', 12, 12, 'little_endian', True, None, 1, 0, "
             "0, 8, 'None', False, None, {1: \'Enabled\', 0: \'Disabled\'}, None)\n"
             "\n"
             "message('Bar', 0x12332, True, 4, None)\n"
-            "  signal('Binary32', 0, 32, 'little_endian', True, 1, 0, None, "
+            "  signal('Binary32', 0, 32, 'little_endian', True, None, 1, 0, None, "
             "None, 'None', False, None, None, None)\n"
             "\n"
             "message('CanFd', 0x12333, True, 64, None)\n"
-            "  signal('Fie', 0, 64, 'little_endian', False, 1, 0, None, None, "
+            "  signal('Fie', 0, 64, 'little_endian', False, None, 1, 0, None, None, "
             "'None', False, None, None, None)\n"
-            "  signal('Fas', 64, 64, 'little_endian', False, 1, 0, None, None, "
+            "  signal('Fas', 64, 64, 'little_endian', False, None, 1, 0, None, None, "
             "'None', False, None, None, None)\n"
             "\n"
             "message('FOOBAR', 0x30c, False, 8, None)\n"
-            "  signal('ACC_02_CRC', 0, 12, 'little_endian', True, 1, 0, 0, 1, "
+            "  signal('ACC_02_CRC', 0, 12, 'little_endian', True, None, 1, 0, 0, 1, "
             "'None', False, None, None, None)\n")
 
         message = db.get_message_by_frame_id(0x12331)

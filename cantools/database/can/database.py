@@ -338,8 +338,6 @@ class Database(object):
         If `strict` is ``True`` all signal values must be within their
         allowed ranges, or an exception is raised.
 
-        if this frame id is not belong to this database, will return None.
-
         >>> db.encode_message(158, {'Bar': 1, 'Fum': 5.0})
         b'\\x01\\x45\\x23\\x00\\x11'
         >>> db.encode_message('Foo', {'Bar': 1, 'Fum': 5.0})
@@ -350,10 +348,7 @@ class Database(object):
         try:
             message = self._frame_id_to_message[frame_id_or_name]
         except KeyError:
-            try:
-                message = self._name_to_message[frame_id_or_name]
-            except KeyError:
-                return None
+            message = self._name_to_message[frame_id_or_name]
 
         return message.encode(data, scaling, padding, strict)
 
@@ -381,10 +376,7 @@ class Database(object):
         try:
             message = self._frame_id_to_message[frame_id_or_name]
         except KeyError:
-            try:
-                message = self._name_to_message[frame_id_or_name]
-            except KeyError:
-                return None
+            message = self._name_to_message[frame_id_or_name]
 
         return message.decode(data, decode_choices, scaling)
 

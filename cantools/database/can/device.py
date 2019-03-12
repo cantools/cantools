@@ -1,7 +1,6 @@
 import can
 from cantools import database
-from cantools.database.can import Message
-import time
+
 
 class Device(can.Listener):
     """

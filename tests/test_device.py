@@ -8,7 +8,9 @@ class CanToolsDeviceTest(unittest.TestCase):
         filename = 'tests/files/dbc/vehicle.dbc'
         dev = device.Device(filename, 'virtual', 1, 250000)
         dev1 = device.Device(filename, 'virtual', 1, 250000)
-        dev1.send_signal_by_message("RT_SB_Speed", {"Validity_Speed":1})
+        value = dev1.send_signal_by_message("RT_SB_Speed", {"Validity_Speed":1})
+        self.assertEqual(value, 1, "valid signal")
+        
         time.sleep(0.01)
         value = dev.get_signal_by_message("RT_SB_Speed", "Validity_Speed")
         self.assertEqual(value, 1, "")
@@ -17,19 +19,18 @@ class CanToolsDeviceTest(unittest.TestCase):
         value = dev.get_signal_by_message("RT_SB_Speed", "Validity_Speed")
         self.assertEqual(value, 0, "")
         
-        try:
-            value = dev.get_signal_by_message("RT_SB_Speed", "Validity_Speed1")
-        except KeyError:
-            pass
         
-        try:
-            dev.send_signal_by_message("RT_SB_Speed1", {"Validity_Speed":0})
-        except KeyError:
-            pass
+        value = dev.get_signal_by_message("RT_SB_Speed", "Validity_Speed1")
+        self.assertEqual(value, None, "invalid signal")
         
-        try:
+        value = dev.send_signal_by_message("RT_SB_Speed1", {"Validity_Speed":0})
+        self.assertEqual(value, None, "invalid signal")
+        
+        with self.assertRaises(Exception) as cm:
             dev = device.Device(filename, 'Vector', 1, 250000) 
-        except :
-            pass       
+        self.assertEqual(
+            str(cm.exception),
+            "Failed to create CAN bus with bustype='Vector' and channel='1'.")
+            
 if __name__ == '__main__':
     unittest.main()

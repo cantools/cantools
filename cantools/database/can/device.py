@@ -1,5 +1,6 @@
 import can
 from cantools import database
+from cantools.database.can import Message
 import time
 
 class Device(can.Listener):
@@ -16,6 +17,7 @@ class Device(can.Listener):
         self._formatted_messages = {}
         self._message_by_name = {}
         self._message_by_id = {}
+        self._send_message_by_name = {}
 
 
         self._bus = self.create_bus(bus_type, channel, bit_rate)
@@ -60,5 +62,31 @@ class Device(can.Listener):
             return None
 
         return value
+
+    def send_signal_by_message(self, message_name, signal_dict):
+        """
+
+        :param message_name: message name in the database
+        :param signal_dict: the signal which you want to update the value.
+               this should be a dict type:
+               {"sig1":1, "sig2":1}
+        :return: 1 means the message send without errors.
+                if message_name, signal_dict not valid in database , will return None.
+        """
+        try:
+            msg = self._dbase.get_message_by_name(message_name)
+        except KeyError:
+            return None
+        send_signal_dict = {}
+        for sig in msg.signals:
+            send_signal_dict[sig.name] = sig.initial if sig.initial != None else 0
+        self._send_message_by_name[msg.name] = send_signal_dict
+
+        for sig in signal_dict:
+            send_signal_dict[sig] = signal_dict[sig]
+        data = msg.encode(send_signal_dict)
+        message = can.Message(arbitration_id=msg.frame_id, data=data)
+        self._bus.send(message)
+        return 1
 
 

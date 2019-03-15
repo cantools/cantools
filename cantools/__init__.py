@@ -3,11 +3,7 @@ import sys
 import argparse
 
 from . import tester
-from .subparsers import decode as _decode
-from .subparsers import monitor as _monitor
-from .subparsers import dump as _dump
-from .subparsers import convert as _convert
-from .subparsers import generate_c_source as _generate_c_source
+from . import j1939
 from .errors import Error
 
 # Remove once less users are using the old package structure.
@@ -33,11 +29,19 @@ def _main():
                                        dest='subcommand')
     subparsers.required = True
 
-    _decode.add_subparser(subparsers)
-    _monitor.add_subparser(subparsers)
-    _dump.add_subparser(subparsers)
-    _convert.add_subparser(subparsers)
-    _generate_c_source.add_subparser(subparsers)
+    # Import when used for less dependencies. For example, curses is
+    # not part of all Python builds.
+    from .subparsers import decode
+    from .subparsers import monitor
+    from .subparsers import dump
+    from .subparsers import convert
+    from .subparsers import generate_c_source
+
+    decode.add_subparser(subparsers)
+    monitor.add_subparser(subparsers)
+    dump.add_subparser(subparsers)
+    convert.add_subparser(subparsers)
+    generate_c_source.add_subparser(subparsers)
 
     args = parser.parse_args()
 

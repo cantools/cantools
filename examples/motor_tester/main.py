@@ -11,7 +11,7 @@ import can
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 WASHING_MACHINE_KCD_PATH = os.path.join(SCRIPT_DIR, 'system.kcd')
 
-can.rc['interface'] = 'socketcan_native'
+can.rc['interface'] = 'socketcan'
 can.rc['channel'] = 'vcan0'
 
 can_bus = can.interface.Bus()

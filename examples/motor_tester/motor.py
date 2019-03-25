@@ -14,7 +14,7 @@ def create_message(speed, load):
 
 
 def main():
-    can.rc['interface'] = 'socketcan_native'
+    can.rc['interface'] = 'socketcan'
     can.rc['channel'] = 'vcan0'
     can_bus = can.interface.Bus()
 

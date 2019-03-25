@@ -28,7 +28,7 @@ setup(name='cantools',
       packages=find_packages(exclude=['tests']),
       install_requires=[
           'bitstruct>=6.0.0',
-          'python-can>=2.1.0',
+          'python-can>=2.2.0',
           'textparser>=0.21.1',
           'diskcache'
       ],

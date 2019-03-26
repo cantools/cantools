@@ -1,0 +1,12 @@
+VERSION ""
+
+BS_:
+
+BU_: Node TestNode
+
+
+BO_ 1024 Message1: 0 TestNode
+
+
+
+

@@ -71,6 +71,9 @@ def _decode_field(field, value, decode_choices, scaling):
 
 
 def encode_data(data, fields, formats, scaling):
+    if len(fields) == 0:
+        return 0
+
     unpacked = {
         field.name: _encode_field(field, data, scaling)
         for field in fields

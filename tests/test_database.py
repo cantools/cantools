@@ -4555,6 +4555,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, None)
 
+    def test_encode_decode_dlc_zero(self):
+        db = cantools.database.load_file('tests/files/dbc/message-dlc-zero.dbc')
+
+        self.assertEqual(db.encode_message('Message1', {}), b'')
+        self.assertEqual(db.decode_message('Message1', b''), {})
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

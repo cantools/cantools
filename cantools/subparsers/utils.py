@@ -17,8 +17,10 @@ def _format_signals(message, decoded_signals):
         if isinstance(value, str):
             value = "'{}'".format(value)
 
+        signal_name = signal.name
+
         formatted_signals.append(
-            '{}: {}{}'.format(signal.name,
+            '{}: {}{}'.format(signal_name,
                                value,
                               ''
                               if signal.unit is None
@@ -67,3 +69,28 @@ def format_message(message, data, decode_choices, single_line):
         return _format_message_single_line(message, formatted_signals)
     else:
         return _format_message_multi_line(message, formatted_signals)
+
+def format_multiplexed_name(message, data, decode_choices):
+    try:
+        decoded_signals = message.decode(data, decode_choices)
+    except Exception as e:
+        return ' ' + str(e)
+
+    # The idea here is that we rely on the sorted order of the Signals, and
+    # then simply go through each possible Multiplexer and build a composite
+    # key consisting of the Message name prepended to all the possible MUX
+    # Signals (and their values). This composite key is therefore unique for
+    # all the different possible enumerations of MUX values, which allows us
+    # to display each MUXed Message on its own separate line.
+    result = []
+    for signal in message.signals:
+        if signal.is_multiplexer:
+            if signal.name in decoded_signals:
+                result.append('_{}'.format(decoded_signals[signal.name]))
+            else:
+                if signal.initial:
+                    result.append('_{}'.format(signal.initial))
+                else:
+                    result.append('_{}'.format(0))
+
+    return '{}_{}'.format(message.name, '_'.join(result))

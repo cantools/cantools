@@ -1,0 +1,104 @@
+VERSION ""
+
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+
+BS_:
+
+BU_: BMS
+
+
+BO_ 1025 BATTERY_VT: 6 BMS
+ SG_ MODULE_TEMP_35 m35 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_34 m34 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_33 m33 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_32 m32 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_31 m31 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_30 m30 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_29 m29 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_28 m28 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_27 m27 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_26 m26 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_25 m25 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_24 m24 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_23 m23 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_22 m22 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_21 m21 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_20 m20 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_19 m19 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_18 m18 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_17 m17 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_16 m16 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_15 m15 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_14 m14 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_13 m13 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_12 m12 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_11 m11 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_10 m10 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_09 m9 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_08 m8 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_07 m7 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_06 m6 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_05 m5 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_04 m4 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_03 m3 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_02 m2 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_01 m1 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_TEMP_00 m0 : 32|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_35 m35 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_34 m34 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_33 m33 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_32 m32 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_31 m31 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_30 m30 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_29 m29 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_28 m28 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_27 m27 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_26 m26 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_25 m25 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_24 m24 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_23 m23 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_22 m22 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_21 m21 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_20 m20 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_19 m19 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_18 m18 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_17 m17 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_16 m16 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_15 m15 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_14 m14 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_13 m13 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_12 m12 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_11 m11 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_10 m10 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_09 m9 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_08 m8 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_07 m7 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_06 m6 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_05 m5 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_04 m4 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_03 m3 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_02 m2 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_01 m1 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MODULE_VOLTAGE_00 m0 : 16|16@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BATTERY_VT_INDEX M : 0|16@1+ (1,0) [0|0] "" Vector__XXX

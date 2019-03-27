@@ -14,6 +14,7 @@ except ImportError:
 import can
 from .. import database
 from .utils import format_message
+from .utils import format_multiplexed_name
 
 
 class QuitError(Exception):
@@ -226,9 +227,14 @@ class Monitor(can.Listener):
             self._discarded += 1
             return
 
+        name = message.name
+        if message.is_multiplexed():
+            name = format_multiplexed_name(message, data, True)
+
         if self._single_line:
             formatted = format_message(message, data, True, True)
-            self._formatted_messages[message.name] = [
+
+            self._formatted_messages[name] = [
                 '{:12.3f} {}'.format(timestamp, formatted)
             ]
         else:
@@ -236,10 +242,10 @@ class Monitor(can.Listener):
             lines = formatted.splitlines()
             formatted = ['{:12.3f}  {}'.format(timestamp, lines[1])]
             formatted += [14 * ' ' + line for line in lines[2:]]
-            self._formatted_messages[message.name] = formatted
+            self._formatted_messages[name] = formatted
 
-        if message.name not in self._filtered_sorted_message_names:
-            self.insort_filtered(message.name)
+        if name not in self._filtered_sorted_message_names:
+            self.insort_filtered(name)
 
     def update_messages(self):
         modified = False

@@ -210,6 +210,171 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.init_pair')
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
+    def test_display_muxed_data(self,
+                               _use_default_colors,
+                               _curs_set,
+                               _init_pair,
+                               is_term_resized,
+                               color_pair,
+                               _bus,
+                               _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/dbc/msxii_system_can.dbc')
+        color_pair.side_effect = ['green', 'cyan']
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=1025,
+            data=b'\x00\x00\x98\x98\x0b\x00'))
+        monitor.run()
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, "                  BATTERY_VT_INDEX: 0,"),
+                call(4, 0, '                  MODULE_VOLTAGE_00: 39064,'),
+                call(5, 0, '                  MODULE_TEMP_00: 11'),
+                call(6, 0, '              )'),
+                call(29,
+                     0,
+                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_display_muxed_data_single_line(self,
+                                           _use_default_colors,
+                                           _curs_set,
+                                           _init_pair,
+                                           is_term_resized,
+                                           color_pair,
+                                           _bus,
+                                           _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/dbc/msxii_system_can.dbc',
+                    single_line=True)
+        color_pair.side_effect = ['green', 'cyan']
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=1025,
+            data=b'\x00\x00\x98\x98\x0b\x00'))
+        monitor.run()
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2,
+                     0,
+                     "       0.000  BATTERY_VT(BATTERY_VT_INDEX: 0, "
+                     "MODULE_VOLTAGE_00: 39064, MODULE_TEMP_00: 11)"),
+                call(29,
+                     0,
+                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_display_muxed_data_multiple_single_line(self,
+                                           _use_default_colors,
+                                           _curs_set,
+                                           _init_pair,
+                                           is_term_resized,
+                                           color_pair,
+                                           _bus,
+                                           _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/dbc/multiplex_2.dbc',
+                    single_line=True)
+        color_pair.side_effect = ['green', 'cyan']
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=0xc00fefe,
+            data=b'\x00\x00\x00\x00\x02\x00\x00\x00',
+            timestamp=0.0))
+        monitor.on_message_received(can.Message(
+            arbitration_id=0xc00fefe,
+            data=b'\x00\x00\x00\x00\x01\x00\x00\x00',
+            timestamp=1.0))
+        monitor.on_message_received(can.Message(
+            arbitration_id=0xc00fefe,
+            data=b'\x01\x00\x00\x00\x01\x00\x00\x00',
+            timestamp=2.0))
+        monitor.on_message_received(can.Message(
+            arbitration_id=0xc00fefe,
+            data=b'\x20\x00\x00\x00\x01\x00\x00\x00',
+            timestamp=3.0))
+        monitor.run()
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 4, Discarded: 0, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(2,
+                     0,
+                     "       1.000  Extended(S0: 0, S1: 0, S2: 0, S3: 0, S6: 1, S7: 0)"),
+                call(3,
+                     0,
+                     "       0.000  Extended(S0: 0, S1: 0, S2: 0, S3: 0, S6: 2, S8: 0)"),
+                call(4,
+                     0,
+                     "       3.000  Extended(S0: 0, S1: 2, S4: 0, S6: 1, S7: 0)"),
+                call(5,
+                     0,
+                     "       2.000  Extended(S0: 1, S5: 0, S6: 1, S7: 0)"),
+                call(29,
+                     0,
+                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
     def test_display_one_frame_input_twice(self,
                                            _use_default_colors,
                                            _curs_set,

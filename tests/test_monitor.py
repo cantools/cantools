@@ -211,13 +211,13 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
     def test_display_muxed_data(self,
-                               _use_default_colors,
-                               _curs_set,
-                               _init_pair,
-                               is_term_resized,
-                               color_pair,
-                               _bus,
-                               _notifier):
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                _bus,
+                                _notifier):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/msxii_system_can.dbc')
@@ -259,13 +259,13 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
     def test_display_muxed_data_single_line(self,
-                                           _use_default_colors,
-                                           _curs_set,
-                                           _init_pair,
-                                           is_term_resized,
-                                           color_pair,
-                                           _bus,
-                                           _notifier):
+                                            _use_default_colors,
+                                            _curs_set,
+                                            _init_pair,
+                                            is_term_resized,
+                                            color_pair,
+                                            _bus,
+                                            _notifier):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/msxii_system_can.dbc',
@@ -307,13 +307,13 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
     def test_display_muxed_data_multiple_single_line(self,
-                                           _use_default_colors,
-                                           _curs_set,
-                                           _init_pair,
-                                           is_term_resized,
-                                           color_pair,
-                                           _bus,
-                                           _notifier):
+                                                     _use_default_colors,
+                                                     _curs_set,
+                                                     _init_pair,
+                                                     is_term_resized,
+                                                     color_pair,
+                                                     _bus,
+                                                     _notifier):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/multiplex_2.dbc',

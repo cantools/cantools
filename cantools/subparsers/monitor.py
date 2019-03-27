@@ -228,12 +228,12 @@ class Monitor(can.Listener):
             return
 
         name = message.name
+
         if message.is_multiplexed():
             name = format_multiplexed_name(message, data, True)
 
         if self._single_line:
             formatted = format_message(message, data, True, True)
-
             self._formatted_messages[name] = [
                 '{:12.3f} {}'.format(timestamp, formatted)
             ]

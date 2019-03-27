@@ -82,15 +82,15 @@ def format_multiplexed_name(message, data, decode_choices):
     # Signals (and their values). This composite key is therefore unique for
     # all the different possible enumerations of MUX values, which allows us
     # to display each MUXed Message on its own separate line.
-    result = []
+    result = [message.name]
+
     for signal in message.signals:
         if signal.is_multiplexer:
             if signal.name in decoded_signals:
-                result.append('_{}'.format(decoded_signals[signal.name]))
+                result.append(str(decoded_signals[signal.name]))
+            elif signal.initial is not None:
+                result.append(str(signal.initial))
             else:
-                if signal.initial:
-                    result.append('_{}'.format(signal.initial))
-                else:
-                    result.append('_{}'.format(0))
+                result.append('0')
 
-    return '{}_{}'.format(message.name, '_'.join(result))
+    return '__'.join(result)

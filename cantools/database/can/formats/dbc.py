@@ -25,6 +25,7 @@ from ..signal import Signal
 from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..node import Node
+from ..bus import Bus
 from ..internal_database import InternalDatabase
 from ..environment_variable import EnvironmentVariable
 
@@ -615,7 +616,7 @@ def _dump_attributes(database):
             for attribute in database.dbc.attributes.values():
                 fmt = 'BA_ "{name}" {value};'
                 ba.append(fmt.format(name=attribute.definition.name,
-                                    value=get_value(attribute)))
+                                     value=get_value(attribute)))
 
     for node in database.nodes:
         if node.dbc is not None:
@@ -623,9 +624,9 @@ def _dump_attributes(database):
                 for attribute in node.dbc.attributes.values():
                     fmt = 'BA_ "{name}" {kind} {node_name} {value};'
                     ba.append(fmt.format(name=attribute.definition.name,
-                                        kind=attribute.definition.kind,
-                                        node_name=node.name,
-                                        value=get_value(attribute)))
+                                         kind=attribute.definition.kind,
+                                         node_name=node.name,
+                                         value=get_value(attribute)))
 
     for message in database.messages:
         if message.dbc is not None:
@@ -633,9 +634,9 @@ def _dump_attributes(database):
                 for attribute in message.dbc.attributes.values():
                     fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
                     ba.append(fmt.format(name=attribute.definition.name,
-                                        kind=attribute.definition.kind,
-                                        frame_id=get_dbc_frame_id(message),
-                                        value=get_value(attribute)))
+                                         kind=attribute.definition.kind,
+                                         frame_id=get_dbc_frame_id(message),
+                                         value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
             if signal.dbc is not None:
@@ -643,10 +644,10 @@ def _dump_attributes(database):
                     for attribute in signal.dbc.attributes.values():
                         fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
                         ba.append(fmt.format(name=attribute.definition.name,
-                                            kind=attribute.definition.kind,
-                                            frame_id=get_dbc_frame_id(message),
-                                            signal_name=signal.name,
-                                            value=get_value(attribute)))
+                                             kind=attribute.definition.kind,
+                                             frame_id=get_dbc_frame_id(message),
+                                             signal_name=signal.name,
+                                             value=get_value(attribute)))
 
     return ba
 
@@ -1078,7 +1079,8 @@ def _load_messages(tokens,
                    message_senders,
                    signal_types,
                    signal_multiplexer_values,
-                   strict):
+                   strict,
+                   bus_name):
     """Load messages.
 
     """
@@ -1227,13 +1229,28 @@ def _load_messages(tokens,
                     signals=signals,
                     comment=get_comment(frame_id_dbc),
                     strict=strict,
-                    protocol=get_protocol(frame_id_dbc)))
+                    protocol=get_protocol(frame_id_dbc),
+                    bus_name=bus_name))
 
     return messages
 
 
 def _load_version(tokens):
     return tokens.get('VERSION', [[None, None]])[0][1]
+
+
+def _load_bus_name(attributes):
+    if attributes.get('database', {}).get('DBName'):
+        return attributes['database']['DBName'].value
+
+    return ""
+
+
+def _load_bus_baudrate(attributes):
+    if attributes.get('database', {}).get('Baudrate'):
+        return int(attributes['database']['Baudrate'].value)
+
+    return 500000  # Same default value as KCD parser
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
@@ -1327,6 +1344,8 @@ def load_string(string, strict=True):
     defaults = _load_attribute_definition_defaults(tokens)
     attribute_definitions = get_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
+    bus_name = _load_bus_name(attributes)
+    bus_baudrate = _load_bus_baudrate(attributes)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens, attributes)
@@ -1340,7 +1359,8 @@ def load_string(string, strict=True):
                               message_senders,
                               signal_types,
                               signal_multiplexer_values,
-                              strict)
+                              strict,
+                              bus_name)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments)
@@ -1351,6 +1371,6 @@ def load_string(string, strict=True):
 
     return InternalDatabase(messages,
                             nodes,
-                            [],
+                            [Bus(bus_name, baudrate=bus_baudrate)],
                             version,
                             dbc_specifics)

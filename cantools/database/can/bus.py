@@ -38,7 +38,6 @@ class Bus(object):
         return self._baudrate
 
     def __repr__(self):
-        
         return "bus('{}', {})".format(
             self._name,
             "'" + self._comment + "'" if self._comment is not None else None)

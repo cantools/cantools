@@ -111,10 +111,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with open(filename, 'r') as fin:
             db = cantools.db.load(fin)
 
+        self.assertEqual(db.buses, [])
         self.assertEqual(len(db.nodes), 2)
         self.assertEqual(db.nodes[0].name, 'PCM1')
         self.assertEqual(db.nodes[1].name, 'FOO')
         self.assertEqual(len(db.messages), 1)
+        self.assertEqual(db.messages[0].bus_name, None)
         self.assertEqual(len(db.messages[0].signals[2].receivers), 2)
         self.assertEqual(db.messages[0].signals[2].receivers[0], 'PCM1')
         self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
@@ -224,13 +226,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "  signal('ACC_02_CRC', 0, 12, 'little_endian', True, None, 1, 0, 0, 1, "
             "'None', False, None, None, None)\n")
 
+        self.assertEqual(len(db.buses), 1)
+        self.assertEqual(db.buses[0].name, 'TheBusName')
+        self.assertEqual(db.buses[0].comment, None)
+        self.assertEqual(db.buses[0].baudrate, 125000)
+
         message = db.get_message_by_frame_id(0x12331)
         self.assertEqual(message.name, 'Fum')
+        self.assertEqual(message.bus_name, 'TheBusName')
         self.assertEqual(message.senders, ['FOO'])
         self.assertEqual(message.signals[0].is_float, False)
 
         message = db.get_message_by_frame_id(0x12332)
         self.assertEqual(message.name, 'Bar')
+        self.assertEqual(message.bus_name, 'TheBusName')
         self.assertEqual(message.senders, ['FOO', 'BAR'])
         self.assertEqual(message.signals[0].receivers, [ 'FUM'])
         self.assertEqual(message.signals[0].is_float, True)
@@ -238,6 +247,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         message = db.get_message_by_frame_id(0x12333)
         self.assertEqual(message.name, 'CanFd')
+        self.assertEqual(message.bus_name, 'TheBusName')
         self.assertEqual(message.senders, ['FOO'])
         self.assertEqual(message.signals[0].receivers, ['FUM'])
         self.assertEqual(message.signals[0].is_float, False)

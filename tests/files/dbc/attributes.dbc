@@ -45,8 +45,6 @@ BO_ 42 TheOtherMessage: 8 Vector__XXX
 
 
 CM_ BU_ TheNode "TheNodeComment";
-BA_DEF_  "DBName" STRING ;
-BA_DEF_  "Baudrate" INT 0 1000000;
 BA_DEF_ SG_  "TheSignalStringAttribute" STRING ;
 BA_DEF_  "TheNetworkAttribute" INT 0 100;
 BA_DEF_ BO_  "TheUnusedAttributeDefinitionWithoutDefault" HEX 0 8;
@@ -70,8 +68,6 @@ BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotU
 BA_DEF_ SG_  "GenSigInactiveValue" INT 0 100000;
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed";
 BA_DEF_ SG_  "GenSigStartValue" FLOAT 0 100000000000;
-BA_DEF_DEF_  "DBName" "";
-BA_DEF_DEF_  "Baudrate" 125000;
 BA_DEF_DEF_  "TheSignalStringAttribute" "100";
 BA_DEF_DEF_  "TheNetworkAttribute" 50;
 BA_DEF_DEF_  "TheHexAttribute" 4;
@@ -94,8 +90,6 @@ BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
 BA_DEF_DEF_  "GenSigInactiveValue" 0;
 BA_DEF_DEF_  "GenSigSendType" "Cyclic";
 BA_DEF_DEF_  "GenSigStartValue" 0;
-BA_ "DBName" "TheBusName";
-BA_ "Baudrate" 125000;
 BA_ "TheNetworkAttribute" 51;
 BA_ "BusType" "CAN";
 BA_ "TheNodeAttribute" BU_ TheNode 99;

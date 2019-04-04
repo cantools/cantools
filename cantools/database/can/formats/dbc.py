@@ -1246,7 +1246,7 @@ def _load_bus(attributes):
         return None
 
     try:
-        bus_baudrate = int(attributes['database']['Baudrate'].value)
+        bus_baudrate = attributes['database']['Baudrate'].value
     except KeyError:
         bus_baudrate = None
 

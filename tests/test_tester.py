@@ -319,8 +319,7 @@ class CanToolsTesterTest(unittest.TestCase):
             cantools.tester.Tester('FOO', database, can_bus, 'BadBus')
 
         self.assertEqual(str(cm.exception),
-                         "expected bus name None as there are no buses defined "
-                         "in the database, but got 'BadBus'")
+                         "expected bus name in [None], but got 'BadBus'")
 
     def test_on_message(self):
         """Test the on_message callback.

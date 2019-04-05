@@ -324,6 +324,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_dbc_load_empty_choice(self):
+        filename = 'tests/files/dbc/empty_choice.dbc'
+        db = cantools.database.load_file(filename)
+
+        self.assertEqual(db.messages[0].signals[1].choices == None)
+
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.
 

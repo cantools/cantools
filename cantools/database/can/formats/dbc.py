@@ -819,6 +819,7 @@ def _load_choices(tokens):
             continue
 
         od = odict((int(''.join(v[0])), v[1]) for v in choice[3])
+
         if len(od) == 0:
             continue
 

@@ -266,7 +266,7 @@ class Parser(textparser.Parser):
             'VAL_',
             Optional('NUMBER'),
             'WORD',
-            OneOrMore(Sequence('NUMBER', 'STRING')),
+            ZeroOrMore(Sequence('NUMBER', 'STRING')),
             ';')
 
         value_table = Sequence(
@@ -811,7 +811,6 @@ def _load_environment_variables(tokens, comments):
 
     return environment_variables
 
-
 def _load_choices(tokens):
     choices = defaultdict(dict)
 
@@ -819,12 +818,14 @@ def _load_choices(tokens):
         if len(choice[1]) == 0:
             continue
 
+        od = odict((int(''.join(v[0])), v[1]) for v in choice[3])
+        if len(od) == 0:
+            continue
+
         frame_id = int(choice[1][0])
-        choices[frame_id][choice[2]] = odict(
-            (int(''.join(v[0])), v[1]) for v in choice[3])
+        choices[frame_id][choice[2]] = od
 
     return choices
-
 
 def _load_message_senders(tokens, attributes):
     """Load additional message senders.

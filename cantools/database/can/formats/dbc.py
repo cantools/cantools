@@ -77,6 +77,7 @@ DBC_FMT = (
     '\r\n'
     '\r\n'
     '{cm}\r\n'
+    '{signal_types}'
     '{ba_def}\r\n'
     '{ba_def_def}\r\n'
     '{ba}\r\n'
@@ -527,6 +528,23 @@ def _dump_comments(database):
                                      comment=signal.comment))
 
     return cm
+
+
+def _dump_signal_types(database):
+    valtype = []
+
+    for message in database.messages:
+        for signal in message.signals:
+            if signal.is_float:
+                if signal.length == 32:
+                    float_type = SIGNAL_TYPE_FLOAT
+                elif signal.length == 64:
+                    float_type = SIGNAL_TYPE_DOUBLE
+
+                fmt = 'SIG_VALTYPE_ {} {} : {};'.format(message.frame_id, signal.name, float_type)
+                valtype.append(fmt)
+
+    return valtype
 
 
 def _dump_attribute_definitions(database):
@@ -1278,6 +1296,7 @@ def dump_string(database):
     val_table = _dump_value_tables(database)
     bo = _dump_messages(database)
     cm = _dump_comments(database)
+    signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
     ba = _dump_attributes(database)
@@ -1288,6 +1307,7 @@ def dump_string(database):
                           val_table='\r\n'.join(val_table),
                           bo='\r\n\r\n'.join(bo),
                           cm='\r\n'.join(cm),
+                          signal_types='\r\n'.join(signal_types),
                           ba_def='\r\n'.join(ba_def),
                           ba_def_def='\r\n'.join(ba_def_def),
                           ba='\r\n'.join(ba),

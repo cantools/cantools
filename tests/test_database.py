@@ -4019,7 +4019,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(str(cm.exception), data.message)
 
     def test_float_dbc(self):
-        db = cantools.database.load_file('tests/files/dbc/floating_point.dbc')
+        filename = 'tests/files/dbc/floating_point.dbc'
+        db = cantools.database.load_file(filename)
 
         # Double.
         message = db.get_message_by_frame_id(1024)
@@ -4051,6 +4052,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(encoded, encoded_message)
         decoded = message.decode(encoded)
         self.assertEqual(decoded, decoded_message)
+
+        # Identity function: Ensure that loading from as_dbc_string is the same
+        new_db = cantools.database.load_string(db.as_dbc_string(), database_format='dbc')
+        message = new_db.get_message_by_frame_id(1024)
+        signal = message.get_signal_by_name('Signal1')
+        self.assertEqual(signal.is_float, True)
+        self.assertEqual(signal.length, 64)
+
+        message = new_db.get_message_by_frame_id(1025)
+        signal = message.get_signal_by_name('Signal1')
+        self.assertEqual(signal.is_float, True)
+        self.assertEqual(signal.length, 32)
+        signal = message.get_signal_by_name('Signal2')
+        self.assertEqual(signal.is_float, True)
+        self.assertEqual(signal.length, 32)
+
+        # Assert DBC contents
+        self.assertIn('SIG_VALTYPE_ 1024 Signal1 : 2;', db.as_dbc_string())
+        self.assertIn('SIG_VALTYPE_ 1025 Signal1 : 1;', db.as_dbc_string())
+        self.assertIn('SIG_VALTYPE_ 1025 Signal2 : 1;', db.as_dbc_string())
 
     def test_signed_dbc(self):
         db = cantools.database.load_file('tests/files/dbc/signed.dbc')

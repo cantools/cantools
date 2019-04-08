@@ -95,6 +95,11 @@ FLOAT_SIGNAL_TYPES = [
     SIGNAL_TYPE_DOUBLE
 ]
 
+FLOAT_LENGTH_TO_SIGNAL_TYPE = {
+    32: SIGNAL_TYPE_FLOAT,
+    64: SIGNAL_TYPE_DOUBLE
+}
+
 
 class Parser(textparser.Parser):
 
@@ -535,14 +540,13 @@ def _dump_signal_types(database):
 
     for message in database.messages:
         for signal in message.signals:
-            if signal.is_float:
-                if signal.length == 32:
-                    float_type = SIGNAL_TYPE_FLOAT
-                elif signal.length == 64:
-                    float_type = SIGNAL_TYPE_DOUBLE
+            if not signal.is_float:
+                continue
 
-                fmt = 'SIG_VALTYPE_ {} {} : {};'.format(message.frame_id, signal.name, float_type)
-                valtype.append(fmt)
+            fmt = 'SIG_VALTYPE_ {} {} : {};'
+            valtype.append(fmt.format(message.frame_id,
+                                      signal.name,
+                                      FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]))
 
     return valtype
 

@@ -41,6 +41,10 @@
 
 #define MIN_MAX_ONLY_6_0_SYMBOL1_FRAME_ID (0x00u)
 
+#define MIN_MAX_ONLY_6_0_SYMBOL1_FRAME_LEN (8u)
+
+#define MIN_MAX_ONLY_6_0_SYMBOL1_FRAME_EXTENDED (0)
+
 /**
  * Signals in message Symbol1.
  *

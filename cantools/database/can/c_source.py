@@ -49,6 +49,9 @@ HEADER_FMT = '''\
 #endif
 
 {frame_id_defines}
+{frame_length_defines}
+{frame_extended_defines}
+{frame_cycle_defines}\
 {choices_defines}
 {structs}
 {declarations}
@@ -1211,7 +1214,7 @@ def _generate_is_in_range(message):
         if minimum is not None:
             if not signal.is_float:
                 minimum = Decimal(int(minimum))
-                
+
             minimum_type_value = signal.minimum_type_value
 
             if (minimum_type_value is None) or (minimum > minimum_type_value):
@@ -1248,6 +1251,39 @@ def _generate_frame_id_defines(database_name, messages):
             message.frame_id)
         for message in messages
     ])
+
+
+def _generate_frame_length_defines(database_name, messages):
+    result = '\n'.join([
+        '#define {}_{}_FRAME_LEN ({}u)'.format(
+            database_name.upper(),
+            message.snake_name.upper(),
+            message.length)
+        for message in messages
+    ])
+    return '\n'+result if result else ''
+
+
+def _generate_frame_cycle_defines(database_name, messages):
+    result = '\n'.join([
+        '#define {}_{}_FRAME_CYCLE_MS ({}u)'.format(
+            database_name.upper(),
+            message.snake_name.upper(),
+            message.cycle_time)
+        for message in messages if message.cycle_time
+    ])
+    return '\n'+result+'\n' if result else ''
+
+
+def _generate_frame_extended_defines(database_name, messages):
+    result = '\n'.join([
+        '#define {}_{}_FRAME_EXTENDED ({})'.format(
+            database_name.upper(),
+            message.snake_name.upper(),
+            int(message.is_extended_frame))
+        for message in messages
+    ])
+    return '\n'+result if result else ''
 
 
 def _generate_choices_defines(database_name, messages):
@@ -1494,6 +1530,9 @@ def generate(database,
     messages = [Message(message) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
     frame_id_defines = _generate_frame_id_defines(database_name, messages)
+    frame_length_defines = _generate_frame_length_defines(database_name, messages)
+    frame_extended_defines = _generate_frame_extended_defines(database_name, messages)
+    frame_cycle_defines = _generate_frame_cycle_defines(database_name, messages)
     choices_defines = _generate_choices_defines(database_name, messages)
     structs = _generate_structs(database_name, messages, bit_fields)
     declarations = _generate_declarations(database_name,
@@ -1508,6 +1547,9 @@ def generate(database,
                                date=date,
                                include_guard=include_guard,
                                frame_id_defines=frame_id_defines,
+                               frame_length_defines=frame_length_defines,
+                               frame_extended_defines=frame_extended_defines,
+                               frame_cycle_defines=frame_cycle_defines,
                                choices_defines=choices_defines,
                                structs=structs,
                                declarations=declarations)

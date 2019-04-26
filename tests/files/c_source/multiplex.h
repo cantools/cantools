@@ -41,6 +41,10 @@
 
 #define MULTIPLEX_MESSAGE1_FRAME_ID (0x123456u)
 
+#define MULTIPLEX_MESSAGE1_FRAME_LEN (8u)
+
+#define MULTIPLEX_MESSAGE1_FRAME_EXTENDED (1)
+
 /**
  * Signals in message Message1.
  *

@@ -48,11 +48,21 @@ HEADER_FMT = '''\
 #    define EINVAL 22
 #endif
 
+/* Frame ids. */
 {frame_id_defines}
+
+/* Frame lengths in bytes. */
 {frame_length_defines}
-{frame_extended_defines}
-{frame_cycle_defines}\
+
+/* Extended or standard frame types. */
+{is_extended_frame_defines}
+
+/* Frame cycle times in milliseconds. */
+{frame_cycle_time_defines}
+
+/* Signal choices. */
 {choices_defines}
+
 {structs}
 {declarations}
 #endif
@@ -1262,10 +1272,10 @@ def _generate_frame_length_defines(database_name, messages):
         for message in messages
     ])
 
-    return '\n'+result if result else ''
+    return result
 
 
-def _generate_frame_cycle_defines(database_name, messages):
+def _generate_frame_cycle_time_defines(database_name, messages):
     result = '\n'.join([
         '#define {}_{}_CYCLE_TIME_MS ({}u)'.format(
             database_name.upper(),
@@ -1274,10 +1284,10 @@ def _generate_frame_cycle_defines(database_name, messages):
         for message in messages if message.cycle_time is not None
     ])
 
-    return '\n'+result+'\n' if result else ''
+    return result
 
 
-def _generate_frame_extended_defines(database_name, messages):
+def _generate_is_extended_frame_defines(database_name, messages):
     result = '\n'.join([
         '#define {}_{}_IS_EXTENDED ({})'.format(
             database_name.upper(),
@@ -1286,7 +1296,7 @@ def _generate_frame_extended_defines(database_name, messages):
         for message in messages
     ])
 
-    return '\n'+result if result else ''
+    return result
 
 
 def _generate_choices_defines(database_name, messages):
@@ -1306,12 +1316,7 @@ def _generate_choices_defines(database_name, messages):
             ])
             choices_defines.append(signal_choices_defines)
 
-    choices_defines = '\n\n'.join(choices_defines)
-
-    if choices_defines:
-        choices_defines = '\n' + choices_defines + '\n'
-
-    return choices_defines
+    return '\n\n'.join(choices_defines)
 
 
 def _generate_structs(database_name, messages, bit_fields):
@@ -1533,9 +1538,14 @@ def generate(database,
     messages = [Message(message) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
     frame_id_defines = _generate_frame_id_defines(database_name, messages)
-    frame_length_defines = _generate_frame_length_defines(database_name, messages)
-    frame_extended_defines = _generate_frame_extended_defines(database_name, messages)
-    frame_cycle_defines = _generate_frame_cycle_defines(database_name, messages)
+    frame_length_defines = _generate_frame_length_defines(database_name,
+                                                          messages)
+    is_extended_frame_defines = _generate_is_extended_frame_defines(
+        database_name,
+        messages)
+    frame_cycle_time_defines = _generate_frame_cycle_time_defines(
+        database_name,
+        messages)
     choices_defines = _generate_choices_defines(database_name, messages)
     structs = _generate_structs(database_name, messages, bit_fields)
     declarations = _generate_declarations(database_name,
@@ -1551,8 +1561,8 @@ def generate(database,
                                include_guard=include_guard,
                                frame_id_defines=frame_id_defines,
                                frame_length_defines=frame_length_defines,
-                               frame_extended_defines=frame_extended_defines,
-                               frame_cycle_defines=frame_cycle_defines,
+                               is_extended_frame_defines=is_extended_frame_defines,
+                               frame_cycle_time_defines=frame_cycle_time_defines,
                                choices_defines=choices_defines,
                                structs=structs,
                                declarations=declarations)

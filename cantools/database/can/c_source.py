@@ -1255,34 +1255,37 @@ def _generate_frame_id_defines(database_name, messages):
 
 def _generate_frame_length_defines(database_name, messages):
     result = '\n'.join([
-        '#define {}_{}_FRAME_LEN ({}u)'.format(
+        '#define {}_{}_LENGTH ({}u)'.format(
             database_name.upper(),
             message.snake_name.upper(),
             message.length)
         for message in messages
     ])
+
     return '\n'+result if result else ''
 
 
 def _generate_frame_cycle_defines(database_name, messages):
     result = '\n'.join([
-        '#define {}_{}_FRAME_CYCLE_MS ({}u)'.format(
+        '#define {}_{}_CYCLE_TIME_MS ({}u)'.format(
             database_name.upper(),
             message.snake_name.upper(),
             message.cycle_time)
-        for message in messages if message.cycle_time
+        for message in messages if message.cycle_time is not None
     ])
+
     return '\n'+result+'\n' if result else ''
 
 
 def _generate_frame_extended_defines(database_name, messages):
     result = '\n'.join([
-        '#define {}_{}_FRAME_EXTENDED ({})'.format(
+        '#define {}_{}_IS_EXTENDED ({})'.format(
             database_name.upper(),
             message.snake_name.upper(),
             int(message.is_extended_frame))
         for message in messages
     ])
+
     return '\n'+result if result else ''
 
 

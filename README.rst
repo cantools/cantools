@@ -193,7 +193,7 @@ The generated code contains:
 
 - Signal `encode`_ and `decode`_ functions.
 
-- Frame id, length, extended property, cycle time and signal choices `defines`_.
+- Frame id, length, type, cycle time and signal choices `defines`_.
 
 Known limitations:
 
@@ -318,15 +318,15 @@ Contributing
 
 .. _examples: https://github.com/eerimoq/cantools/blob/master/examples
 
-.. _structs: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L54
+.. _structs: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L58
 
-.. _pack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L86
+.. _pack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L88
 
-.. _unpack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L100
+.. _unpack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L102
 
-.. _encode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L112
+.. _encode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L116
 
-.. _decode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L121
+.. _decode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L125
 
 .. _defines: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L42
 

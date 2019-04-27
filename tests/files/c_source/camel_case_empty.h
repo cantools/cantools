@@ -41,6 +41,10 @@
 
 #define CAMEL_CASE_EMPTY_MESSAGE1_FRAME_ID (0x400u)
 
+#define CAMEL_CASE_EMPTY_MESSAGE1_LENGTH (5u)
+
+#define CAMEL_CASE_EMPTY_MESSAGE1_IS_EXTENDED (0)
+
 /**
  * Signals in message Message1.
  *

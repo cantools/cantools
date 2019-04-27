@@ -193,7 +193,7 @@ The generated code contains:
 
 - Signal `encode`_ and `decode`_ functions.
 
-- Frame id and signal choices `defines`_.
+- Frame id, length, extended property, cycle time and signal choices `defines`_.
 
 Known limitations:
 

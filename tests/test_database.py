@@ -4588,6 +4588,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.encode_message('Message1', {}), b'')
         self.assertEqual(db.decode_message('Message1', b''), {})
 
+    def test_issue_138(self):
+        """Test issue 138.
+
+        """
+
+        filename = 'tests/files/sym/issue_138.sym'
+
+        with self.assertRaises(cantools.database.errors.Error) as cm:
+            cantools.database.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'The signal M length 0 is not greater than 0 in message Status.')
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

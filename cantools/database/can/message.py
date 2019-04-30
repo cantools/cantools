@@ -843,6 +843,16 @@ class Message(object):
                 self._check_signal(message_bits,
                                    self.get_signal_by_name(signal_name))
 
+    def _check_signal_lengths(self):
+        for signal in self._signals:
+            if signal.length <= 0:
+                raise Error(
+                    'The signal {} length {} is not greater than 0 in '
+                    'message {}.'.format(
+                        signal.name,
+                        signal.length,
+                        self.name))
+
     def refresh(self, strict=None):
         """Refresh the internal message state.
 
@@ -853,6 +863,7 @@ class Message(object):
 
         """
 
+        self._check_signal_lengths()
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
 

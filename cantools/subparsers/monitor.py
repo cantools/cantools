@@ -42,7 +42,9 @@ class Monitor(can.Listener):
         self._received = 0
         self._discarded = 0
         self._basetime = None
+        self._page = 0
 
+        stdscr.keypad(True)
         stdscr.nodelay(True)
         curses.use_default_colors()
         curses.curs_set(False)
@@ -93,15 +95,23 @@ class Monitor(can.Listener):
         self.draw_stats(0)
         self.draw_title(1)
 
-        row = 2
-
+        lines = []
         for name in self._filtered_sorted_message_names:
             for line in self._formatted_messages[name]:
-                self.addstr(row, 0, line)
-                row += 1
+                lines.append(line)
 
-                if row > self._nrows - 2:
-                    break
+        # Only render the visible screen. We only have (self._nrows - 3)
+        # available rows to draw on, due to the persistent TUI features that
+        # are drawn:
+        #
+        # - line 0: stats
+        # - line 1: title
+        # - line (n - 1): menu
+        num_actual_usable_rows = self._nrows - 2 - 1
+        row = 2
+        for line in lines[num_actual_usable_rows * self._page:num_actual_usable_rows * self._page + num_actual_usable_rows]:
+            self.addstr(row, 0, line)
+            row += 1
 
         self.draw_menu(self._nrows - 1)
 
@@ -174,6 +184,7 @@ class Monitor(can.Listener):
             self._filter = ''
             self._compiled_filter = None
             self._modified = True
+            self._page = 0
 
             while not self._queue.empty():
                 self._queue.get()
@@ -181,6 +192,15 @@ class Monitor(can.Listener):
             self._show_filter = True
             self._modified = True
             curses.curs_set(True)
+        elif key in ['KEY_PPAGE']:
+            # Decrement page
+            if self._page > 0:
+                self._page -= 1
+            self._modified = True
+        elif key in ['KEY_NPAGE']:
+            # Increment page
+            self._page += 1
+            self._modified = True
 
     def compile_filter(self):
         try:

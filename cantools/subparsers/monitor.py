@@ -96,6 +96,7 @@ class Monitor(can.Listener):
         self.draw_title(1)
 
         lines = []
+
         for name in self._filtered_sorted_message_names:
             for line in self._formatted_messages[name]:
                 lines.append(line)
@@ -108,8 +109,10 @@ class Monitor(can.Listener):
         # - line 1: title
         # - line (n - 1): menu
         num_actual_usable_rows = self._nrows - 2 - 1
+        page_row = self._page * num_actual_usable_rows
         row = 2
-        for line in lines[num_actual_usable_rows * self._page:num_actual_usable_rows * self._page + num_actual_usable_rows]:
+
+        for line in lines[page_row:page_row + num_actual_usable_rows]:
             self.addstr(row, 0, line)
             row += 1
 

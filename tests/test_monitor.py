@@ -1010,7 +1010,9 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _bus,
                                 _notifier):
         # Prepare mocks.
-        stdscr = StdScr(user_input=[' ', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_PPAGE', 'q'])
+        stdscr = StdScr(user_input=[
+            ' ', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_PPAGE', 'q'
+        ])
         args = Args('tests/files/dbc/msxii_system_can.dbc')
         color_pair.side_effect = 5 * ['green', 'cyan']
         is_term_resized.return_value = False

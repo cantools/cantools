@@ -48,7 +48,7 @@ messages and signals.
 
    >>> import cantools
    >>> from pprint import pprint
-   >>> db = cantools.database.load_file('tests/files/motohawk.dbc')
+   >>> db = cantools.database.load_file('tests/files/dbc/motohawk.dbc')
    >>> db.messages
    [message('ExampleMessage', 0x1f0, False, 8, 'Example message used as template in MotoHawk models.')]
    >>> example_message = db.get_message_by_name('ExampleMessage')
@@ -91,7 +91,7 @@ Decode CAN frames captured with the Linux program ``candump``.
 
 .. code-block:: text
 
-   $ candump vcan0 | cantools decode tests/files/motohawk.dbc
+   $ candump vcan0 | cantools decode tests/files/dbc/motohawk.dbc
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
    ExampleMessage(
        Enable: 'Enabled' -,
@@ -115,7 +115,7 @@ Alternatively, the decoded message can be printed on a single line:
 
 .. code-block:: text
 
-   $ candump vcan0 | cantools decode --single-line tests/files/motohawk.dbc
+   $ candump vcan0 | cantools decode --single-line tests/files/dbc/motohawk.dbc
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
@@ -127,7 +127,7 @@ Dump given database in a human readable format:
 
 .. code-block:: text
 
-   $ cantools dump tests/files/motohawk.dbc
+   $ cantools dump tests/files/dbc/motohawk.dbc
    ================================= Messages =================================
 
      ------------------------------------------------------------------------
@@ -201,11 +201,11 @@ Known limitations:
   exceeded.
 
 Below is an example of how to generate C source code from a
-database. The database is ``tests/files/motohawk.dbc``.
+database. The database is ``tests/files/dbc/motohawk.dbc``.
 
 .. code-block:: text
 
-   $ cantools generate_c_source tests/files/motohawk.dbc
+   $ cantools generate_c_source tests/files/dbc/motohawk.dbc
    Successfully generated motohawk.h and motohawk.c.
 
 See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
@@ -217,7 +217,7 @@ file names are also changed by this option.
 
 .. code-block:: text
 
-   $ cantools generate_c_source --database-name my_database_name tests/files/motohawk.dbc
+   $ cantools generate_c_source --database-name my_database_name tests/files/dbc/motohawk.dbc
    Successfully generated my_database_name.h and my_database_name.c.
 
 See `my_database_name.h`_ and `my_database_name.c`_ for the contents
@@ -228,7 +228,7 @@ code without floating point types, i.e. ``float`` and ``double``.
 
 .. code-block:: text
 
-   $ cantools generate_c_source --no-floating-point-numbers tests/files/motohawk.dbc
+   $ cantools generate_c_source --no-floating-point-numbers tests/files/dbc/motohawk.dbc
    Successfully generated motohawk.h and motohawk.c.
 
 See `motohawk_no_floating_point_numbers.h`_ and
@@ -252,7 +252,7 @@ Monitor CAN bus traffic in a text based user interface.
 
 .. code-block:: text
 
-   $ cantools monitor tests/files/motohawk.dbc
+   $ cantools monitor tests/files/dbc/motohawk.dbc
 
 .. image:: https://github.com/eerimoq/cantools/raw/master/docs/monitor.png
 
@@ -298,9 +298,9 @@ Contributing
 .. |coverage| image:: https://coveralls.io/repos/github/eerimoq/cantools/badge.svg?branch=master
 .. _coverage: https://coveralls.io/github/eerimoq/cantools
 
-.. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.dbc
+.. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/dbc/motohawk.dbc
 
-.. _motohawk.dbc: https://github.com/eerimoq/cantools/blob/master/tests/files/motohawk.dbc
+.. _motohawk.dbc: https://github.com/eerimoq/cantools/blob/master/tests/files/dbc/motohawk.dbc
 
 .. _python-can: https://python-can.readthedocs.io/en/master/
 

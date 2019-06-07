@@ -1,7 +1,10 @@
 import os
 
+from mako.template import Template
+
 from .. import database
-from ..database.can.c_source import generate
+from ..database.can.c_source import Context
+from ..database.can.c_source import HEADER_FMT, SOURCE_FMT, FUZZER_SOURCE_FMT, FUZZER_MAKEFILE_FMT
 from ..database.can.c_source import camel_to_snake_case
 
 
@@ -17,41 +20,34 @@ def _do_generate_c_source(args):
     else:
         database_name = args.database_name
 
-    filename_h = database_name + '.h'
-    filename_c = database_name + '.c'
-    fuzzer_filename_c = database_name + '_fuzzer.c'
-    fuzzer_filename_mk = database_name + '_fuzzer.mk'
+    templates = [
+        (database_name + '.h', HEADER_FMT, True),
+        (database_name + '.c', SOURCE_FMT, True),
+        (database_name + '_fuzzer.c', FUZZER_SOURCE_FMT, args.generate_fuzzer),
+        (database_name + '_fuzzer.mk', FUZZER_MAKEFILE_FMT, args.generate_fuzzer),
+    ]
 
-    header, source, fuzzer_source, fuzzer_makefile = generate(
+    render_context = Context(
         dbase,
         database_name,
-        filename_h,
-        filename_c,
-        fuzzer_filename_c,
         not args.no_floating_point_numbers,
         args.bit_fields)
 
-    with open(filename_h, 'w') as fout:
-        fout.write(header)
+    for output_filename, template, do_generate in templates:
+        if do_generate:
+            with open(output_filename, 'wb') as fout:
+                fout.write(Template(template,
+                                    input_encoding='utf-8',  # Default encoding for templates
+                                    default_filters=['decode.cp1252'],  # Encoding of the DBC file, or eq.
+                                    output_encoding='utf-8', encoding_errors='ignore'  # Encoding of the output
+                                    ).render(ctx=render_context))
 
-    with open(filename_c, 'w') as fout:
-        fout.write(source)
-
-    print('Successfully generated {} and {}.'.format(filename_h, filename_c))
+                print('Successfully generated {}.'.format(output_filename))
 
     if args.generate_fuzzer:
-        with open(fuzzer_filename_c, 'w') as fout:
-            fout.write(fuzzer_source)
-
-        with open(fuzzer_filename_mk, 'w') as fout:
-            fout.write(fuzzer_makefile)
-
-        print('Successfully generated {} and {}.'.format(fuzzer_filename_c,
-                                                         fuzzer_filename_mk))
-        print()
         print(
-            'Run "make -f {}" to build and run the fuzzer. Requires a'.format(
-                fuzzer_filename_mk))
+            'Run "make -f {}" to build and run the fuzzer. Requires a fuzzer makefile'.format(
+                database_name + '_fuzzer.mk'))
         print('recent version of clang.')
 
 

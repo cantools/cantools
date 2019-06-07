@@ -4,3 +4,4 @@ from .message import EncodeError
 from .message import DecodeError
 from .signal import Signal
 from .node import Node
+from .c_source import Context as CContext

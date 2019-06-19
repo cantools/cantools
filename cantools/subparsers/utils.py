@@ -71,10 +71,7 @@ def format_message(message, data, decode_choices, single_line):
         return _format_message_multi_line(message, formatted_signals)
 
 def format_multiplexed_name(message, data, decode_choices):
-    try:
-        decoded_signals = message.decode(data, decode_choices)
-    except Exception as e:
-        return ' ' + str(e)
+    decoded_signals = message.decode(data, decode_choices)
 
     # The idea here is that we rely on the sorted order of the Signals, and
     # then simply go through each possible Multiplexer and build a composite

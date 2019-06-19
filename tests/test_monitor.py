@@ -211,6 +211,49 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.init_pair')
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
+    def test_reject_muxed_data_invalid_mux_index(self,
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                _bus,
+                                _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/dbc/msxii_system_can.dbc')
+        color_pair.side_effect = ['green', 'cyan']
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=1025,
+            data=b'\x24\x00\x98\x98\x0b\x00'))
+        monitor.run()
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 1, Discarded: 1, Errors: 0'),
+                call(1,
+                     0,
+                     '   TIMESTAMP  MESSAGE                                           ',
+                     'green'),
+                call(29,
+                     0,
+                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
+                     'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
     def test_display_muxed_data(self,
                                 _use_default_colors,
                                 _curs_set,

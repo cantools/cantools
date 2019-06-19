@@ -253,7 +253,15 @@ class Monitor(can.Listener):
         name = message.name
 
         if message.is_multiplexed():
-            name = format_multiplexed_name(message, data, True)
+            # Handle the case where a multiplexer index is used that isn't
+            # specified in the DBC file (ie. outside of the range). In this
+            # case, we just discard the message, like we do when the CAN
+            # message ID or length doesn't match what's specified in the DBC.
+            try:
+                name = format_multiplexed_name(message, data, True)
+            except database.DecodeError:
+                self._discarded += 1
+                return
 
         if self._single_line:
             formatted = format_message(message, data, True, True)

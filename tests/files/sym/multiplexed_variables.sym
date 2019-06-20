@@ -1,0 +1,24 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="CanMsgs"
+
+{ENUMS}
+
+{SIGNALS}
+
+{SENDRECEIVE}
+[TestAlert]
+ID=700h
+Len=2
+CycleTime=1000
+Mux=FSM 0,8 1
+Var=alert1 unsigned 8,1
+Var=alert2 unsigned 9,1
+Var=alert3 unsigned 10,1
+
+[TestAlert]
+Len=2
+CycleTime=1000
+Mux=DCM 0,8 2
+Var=alert1 bit 8,1
+Var=alert2 bit 9,1
+Var=alert3 unsigned 10,1

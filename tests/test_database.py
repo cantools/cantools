@@ -1956,6 +1956,24 @@ class CanToolsDatabaseTest(unittest.TestCase):
             str(cm.exception),
             'Invalid syntax at line 2, column 1: ">>!<<Foo="Jopp""')
 
+    def test_multiplexed_variables_sym(self):
+        db = cantools.db.Database()
+        db.add_sym_file('tests/files/sym/multiplexed_variables.sym')
+        message = db.get_message_by_name('TestAlert')
+        self.assertEqual(message.signal_tree,
+                         [
+                             {
+                                 'FSM': {
+                                     1: [
+                                         'alert1', 'alert2', 'alert3'
+                                     ],
+                                     2: [
+                                         'alert4', 'alert5', 'alert6'
+                                     ]
+                                 }
+                             }
+                         ])
+
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):
             cantools.db.load(StringIO(''))

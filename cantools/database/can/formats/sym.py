@@ -440,7 +440,10 @@ def _load_message_signal(tokens,
                   decimal=signal.decimal)
 
 
-def _load_message_variable(tokens, enums):
+def _load_message_variable(tokens,
+                           enums,
+                           multiplexer_signal,
+                           multiplexer_ids):
     # Default values.
     name = tokens[2]
     byte_order = 'little_endian'
@@ -492,6 +495,8 @@ def _load_message_variable(tokens, enums):
                   choices=enum,
                   comment=comment,
                   is_multiplexer=False,
+                  multiplexer_ids=multiplexer_ids,
+                  multiplexer_signal=multiplexer_signal,
                   is_float=is_float,
                   decimal=decimal)
 
@@ -508,7 +513,10 @@ def _load_message_signals_inner(message_tokens,
                              multiplexer_ids)
         for signal in message_tokens[3].get('Sig', [])
     ] + [
-        _load_message_variable(variable, enums)
+        _load_message_variable(variable,
+                               enums,
+                               multiplexer_signal,
+                               multiplexer_ids)
         for variable in message_tokens[3].get('Var', [])
     ]
 

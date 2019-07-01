@@ -44,6 +44,7 @@ BO_ 42 TheOtherMessage: 8 Vector__XXX
 
 
 
+
 CM_ BU_ TheNode "TheNodeComment";
 BA_DEF_ SG_  "TheSignalStringAttribute" STRING ;
 BA_DEF_  "TheNetworkAttribute" INT 0 100;

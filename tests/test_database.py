@@ -6,6 +6,7 @@ import unittest
 from decimal import Decimal
 from collections import namedtuple
 import textparser
+import os
 
 try:
     from unittest.mock import patch
@@ -4620,6 +4621,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
             str(cm.exception),
             'The signal M length 0 is not greater than 0 in message Status.')
 
+    def test_multiple_senders(self):
+        db = cantools.database.load_file('tests/files/dbc/foobar.dbc')
+        message = db.get_message_by_frame_id(0x12332)
+        self.assertEqual(message.senders, ['FOO', 'BAR'])
+
+        dumped_dbc = 'foobar_dumped.dbc'
+        if os.path.exists(dumped_dbc):
+            os.remove(dumped_dbc)
+
+        cantools.database.dump_file(db, dumped_dbc)
+
+        db = cantools.database.load_file(dumped_dbc)
+        message = db.get_message_by_frame_id(0x12332)
+        self.assertEqual(message.senders, ['FOO', 'BAR'])
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

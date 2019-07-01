@@ -45,6 +45,7 @@ BO_ 0 Message1: 8 Vector__XXX
 
 
 
+
 BA_DEF_  "BusType" STRING ;
 BA_DEF_DEF_  "BusType" "";
 

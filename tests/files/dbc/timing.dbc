@@ -45,6 +45,7 @@ BO_ 2 Bar: 8 Sender
 
 
 
+
 BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","IfActive","NoMsgSendType","NotUsed","vector_leerstring";
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 50000;
 BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";

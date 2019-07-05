@@ -43,6 +43,7 @@ BO_ 496 ExampleMessage: 8 PCM1
 
 
 
+
 CM_ BO_ 496 "Example message used as template in MotoHawk models.";
 
 

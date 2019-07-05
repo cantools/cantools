@@ -45,6 +45,7 @@ BO_ 1025 Message2: 8 TestNode
 
 
 
+
 CM_ BU_ TestNode "";
 SIG_VALTYPE_ 1024 Signal1 : 2;
 SIG_VALTYPE_ 1025 Signal1 : 1;

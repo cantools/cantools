@@ -934,6 +934,7 @@ BO_ 2303356194 RT_SB_Gyro_Rates: 8 Vector__XXX
 
 
 
+
 CM_ SG_ 2304279330 INS_Vel_Sideways_2D "Sideways Velocity in the vehicle body axes, 2D (no vertical component) .  +ve for motion to the vehicle RHS.";
 CM_ SG_ 2304279330 INS_Vel_Forwards_2D "Forwards Velocity in the vehicle body axes, 2D (no vertical component) .";
 CM_ SG_ 2304279330 Accuracy_INS_Vel_Body "Accuracy of INS body axis velocities (forward velocity and sideways velocity)";

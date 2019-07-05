@@ -74,6 +74,7 @@ DBC_FMT = (
     '\r\n'
     '{bo}\r\n'
     '\r\n'
+    '{bo_tx_bu}\r\n'
     '\r\n'
     '\r\n'
     '{cm}\r\n'
@@ -475,7 +476,7 @@ def _dump_messages(database):
 
     def format_senders(message):
         if message.senders:
-            return ' '.join(message.senders)
+            return message.senders[0]
         else:
             return 'Vector__XXX'
 
@@ -510,6 +511,18 @@ def _dump_messages(database):
     return bo
 
 
+def _dump_senders(database):
+    bo_tx_bu = []
+    fmt = 'BO_TX_BU_ {frame_id} : {senders};'
+    
+    for message in database.messages:
+        if len(message.senders) > 1:
+            bo_tx_bu.append(fmt.format(frame_id=get_dbc_frame_id(message),
+                                       senders=','.join(message.senders)))
+
+    return bo_tx_bu
+
+
 def _dump_comments(database):
     cm = []
 
@@ -517,20 +530,20 @@ def _dump_comments(database):
         if node.comment is not None:
             fmt = 'CM_ BU_ {name} "{comment}";'
             cm.append(fmt.format(name=node.name,
-                                 comment=node.comment))
+                                 comment=node.comment.replace('"', '\\"')))
 
     for message in database.messages:
         if message.comment is not None:
             fmt = 'CM_ BO_ {frame_id} "{comment}";'
             cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                                 comment=message.comment))
+                                 comment=message.comment.replace('"', '\\"')))
 
         for signal in message.signals[::-1]:
             if signal.comment is not None:
                 fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
                 cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
                                      name=signal.name,
-                                     comment=signal.comment))
+                                     comment=signal.comment.replace('"', '\\"')))
 
     return cm
 
@@ -1299,6 +1312,7 @@ def dump_string(database):
     bu = _dump_nodes(database)
     val_table = _dump_value_tables(database)
     bo = _dump_messages(database)
+    bo_tx_bu = _dump_senders(database)
     cm = _dump_comments(database)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
@@ -1310,6 +1324,7 @@ def dump_string(database):
                           bu=' '.join(bu),
                           val_table='\r\n'.join(val_table),
                           bo='\r\n\r\n'.join(bo),
+                          bo_tx_bu='\r\n'.join(bo_tx_bu),
                           cm='\r\n'.join(cm),
                           signal_types='\r\n'.join(signal_types),
                           ba_def='\r\n'.join(ba_def),

@@ -4622,19 +4622,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'The signal M length 0 is not greater than 0 in message Status.')
 
     def test_multiple_senders(self):
-        db = cantools.database.load_file('tests/files/dbc/foobar.dbc')
-        message = db.get_message_by_frame_id(0x12332)
-        self.assertEqual(message.senders, ['FOO', 'BAR'])
+        filename = 'tests/files/dbc/multiple_senders.dbc'
+        db = cantools.database.load_file(filename)
+        message = db.get_message_by_frame_id(1)
+        self.assertEqual(message.senders, ['FOO', 'BAR', 'FIE'])
 
-        dumped_dbc = 'foobar_dumped.dbc'
-        if os.path.exists(dumped_dbc):
-            os.remove(dumped_dbc)
+        with open(filename, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                print(db.as_dbc_string())
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),
+                                 fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
 
-        cantools.database.dump_file(db, dumped_dbc)
-
-        db = cantools.database.load_file(dumped_dbc)
-        message = db.get_message_by_frame_id(0x12332)
-        self.assertEqual(message.senders, ['FOO', 'BAR'])
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

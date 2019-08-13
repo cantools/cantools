@@ -17,11 +17,11 @@ import cantools
 
 
 def remove_date_time(string):
-    return re.sub(r'.* This file was generated.*', '', string)
+    return re.sub(b'.* This file was generated.*', b'', string)
 
 
 def read_file(filename):
-    with open(filename, 'r') as fin:
+    with open(filename, 'rb') as fin:
         return remove_date_time(fin.read())
 
 
@@ -1081,11 +1081,10 @@ BATTERY_VT(
             with patch('sys.argv', argv):
                 cantools._main()
 
-            if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+            self.assert_files_equal(database_h,
+                                    'tests/files/c_source/' + database_h)
+            self.assert_files_equal(database_c,
+                                    'tests/files/c_source/' + database_c)
 
             self.assertFalse(os.path.exists(fuzzer_c))
             self.assertFalse(os.path.exists(fuzzer_mk))
@@ -1117,13 +1116,12 @@ BATTERY_VT(
             with patch('sys.argv', argv):
                 cantools._main()
 
-            if sys.version_info[0] > 2:
-                self.assert_files_equal(
-                    database_h,
-                    'tests/files/c_source/' + expected_database_h)
-                self.assert_files_equal(
-                    database_c,
-                    'tests/files/c_source/' + expected_database_c)
+            self.assert_files_equal(
+                database_h,
+                'tests/files/c_source/' + expected_database_h)
+            self.assert_files_equal(
+                database_c,
+                'tests/files/c_source/' + expected_database_c)
 
     def test_generate_c_source_database_name(self):
         databases = [
@@ -1150,11 +1148,10 @@ BATTERY_VT(
             with patch('sys.argv', argv):
                 cantools._main()
 
-            if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+            self.assert_files_equal(database_h,
+                                    'tests/files/c_source/' + database_h)
+            self.assert_files_equal(database_c,
+                                    'tests/files/c_source/' + database_c)
 
     def test_generate_c_source_bit_fields(self):
         databases = [
@@ -1184,11 +1181,10 @@ BATTERY_VT(
             with patch('sys.argv', argv):
                 cantools._main()
 
-            if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+            self.assert_files_equal(database_h,
+                                    'tests/files/c_source/' + database_h)
+            self.assert_files_equal(database_c,
+                                    'tests/files/c_source/' + database_c)
 
     def test_generate_c_source_generate_fuzzer(self):
         argv = [
@@ -1218,15 +1214,14 @@ BATTERY_VT(
         with patch('sys.argv', argv):
             cantools._main()
 
-        if sys.version_info[0] > 2:
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + database_c)
-            self.assert_files_equal(fuzzer_c,
-                                    'tests/files/c_source/' + fuzzer_c)
-            self.assert_files_equal(fuzzer_mk,
-                                    'tests/files/c_source/' + fuzzer_mk)
+        self.assert_files_equal(database_h,
+                                'tests/files/c_source/' + database_h)
+        self.assert_files_equal(database_c,
+                                'tests/files/c_source/' + database_c)
+        self.assert_files_equal(fuzzer_c,
+                                'tests/files/c_source/' + fuzzer_c)
+        self.assert_files_equal(fuzzer_mk,
+                                'tests/files/c_source/' + fuzzer_mk)
 
     def test_generate_c_source_sym(self):
         databases = [
@@ -1266,11 +1261,10 @@ BATTERY_VT(
             with patch('sys.argv', argv):
                 cantools._main()
 
-            if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+            self.assert_files_equal(database_h,
+                                    'tests/files/c_source/' + database_h)
+            self.assert_files_equal(database_c,
+                                    'tests/files/c_source/' + database_c)
 
             self.assertFalse(os.path.exists(fuzzer_c))
             self.assertFalse(os.path.exists(fuzzer_mk))

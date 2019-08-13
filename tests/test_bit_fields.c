@@ -1,11 +1,11 @@
 /* Include the generated files first to test that all required header
    files are included. */
-#include "files/c_source/motohawk.h"
-#include "files/c_source/motohawk_bit_fields.h"
-#include "files/c_source/floating_point.h"
-#include "files/c_source/floating_point_bit_fields.h"
-#include "files/c_source/signed.h"
-#include "files/c_source/signed_bit_fields.h"
+#include "files/c_source/motohawk_utils.h"
+#include "files/c_source/motohawk_bit_fields_utils.h"
+#include "files/c_source/floating_point_utils.h"
+#include "files/c_source/floating_point_bit_fields_utils.h"
+#include "files/c_source/signed_utils.h"
+#include "files/c_source/signed_bit_fields_utils.h"
 
 #include <stdio.h>
 #include <stdint.h>

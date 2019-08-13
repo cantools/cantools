@@ -19,7 +19,7 @@ CAN BUS tools in Python 3.
 
 - Node `tester`_.
 
-- `C` source code generator.
+- Source code generator.
 
 - CAN bus monitor.
 
@@ -224,7 +224,9 @@ Dump given database in a human readable format:
 The generate C source subcommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Generate `C` source code from given database.
+Generate `C` source code from given database and given template files. `Mako`_
+is used as template engine and example source code templates are provided
+among the test files.
 
 The generated code contains:
 
@@ -246,11 +248,14 @@ database. The database is ``tests/files/dbc/motohawk.dbc``.
 
 .. code-block:: text
 
-   $ cantools generate_c_source tests/files/dbc/motohawk.dbc
-   Successfully generated motohawk.h and motohawk.c.
+   $ cantools generate_c_source --infile=tests/files/dbc/motohawk.dbc -- tests/files/code_templates/utils.c tests/files/code_templates/utils.h
+   Successfully generated motohawk_utils.c.
+   Successfully generated motohawk_utils.h.
 
-See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
-files.
+See `motohawk_utils.h`_ and `motohawk_utils.c`_ for the contents of the
+generated files. The output filename is constructed from the basename of the
+provided database and the template file(s). The database name is a prefix and
+the template names(s) are added as a suffix.
 
 In the next example we use ``--database-name`` to set a custom
 namespace for all generated types, defines and functions. The output
@@ -258,19 +263,21 @@ file names are also changed by this option.
 
 .. code-block:: text
 
-   $ cantools generate_c_source --database-name my_database_name tests/files/dbc/motohawk.dbc
-   Successfully generated my_database_name.h and my_database_name.c.
+   $ cantools generate_c_source --database-name my_database_name --infile=tests/files/dbc/motohawk.dbc -- tests/files/code_templates/utils.c tests/files/code_templates/utils.h
+   Successfully generated my_database_name_utils.c.
+   Successfully generated my_database_name_utils.h.
 
-See `my_database_name.h`_ and `my_database_name.c`_ for the contents
-of the generated files.
+See `my_database_name_utils.h`_ and `my_database_name_utils.c`_ for the
+contents of the generated files.
 
 In the last example we use ``--no-floating-point-numbers`` to generate
 code without floating point types, i.e. ``float`` and ``double``.
 
 .. code-block:: text
 
-   $ cantools generate_c_source --no-floating-point-numbers tests/files/dbc/motohawk.dbc
-   Successfully generated motohawk.h and motohawk.c.
+   $ cantools generate_c_source --no-floating-point-numbers --infile=tests/files/dbc/motohawk.dbc -- tests/files/code_templates/utils.c tests/files/code_templates/utils.h
+   Successfully generated motohawk_utils.c.
+   Successfully generated motohawk_utils.h.
 
 See `motohawk_no_floating_point_numbers.h`_ and
 `motohawk_no_floating_point_numbers.c`_ for the contents of the
@@ -352,6 +359,8 @@ Contributing
 
 .. _KCD: https://github.com/julietkilo/kcd
 
+.. _Mako: https://www.makotemplates.org
+
 .. _tester: http://cantools.readthedocs.io/en/latest/#cantools.tester.Tester
 
 .. _encoding: http://cantools.readthedocs.io/en/latest/#cantools.database.can.Message.encode
@@ -374,13 +383,13 @@ Contributing
 
 .. _defines: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L42
 
-.. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h
+.. _motohawk_utils.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_utils.h
 
-.. _motohawk.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.c
+.. _motohawk_utils.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_utils.c
 
-.. _my_database_name.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.h
+.. _my_database_name_utils.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name_utils.h
 
-.. _my_database_name.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.c
+.. _my_database_name_utils.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name_utils.c
 
 .. _motohawk_no_floating_point_numbers.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.h
 

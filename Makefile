@@ -3,23 +3,23 @@ CC = gcc
 endif
 
 C_SOURCES := \
-	tests/files/c_source/motohawk.c \
-	tests/files/c_source/padding_bit_order.c \
-	tests/files/c_source/vehicle.c \
-	tests/files/c_source/multiplex.c \
-	tests/files/c_source/multiplex_2.c \
-	tests/files/c_source/floating_point.c \
-	tests/files/c_source/no_signals.c \
-	tests/files/c_source/choices.c \
-	tests/files/c_source/signed.c \
-	tests/files/c_source/my_database_name.c \
-	tests/files/c_source/min_max_only_6_0.c \
-	tests/files/c_source/abs.c
+	tests/files/c_source/motohawk_utils.c \
+	tests/files/c_source/padding_bit_order_utils.c \
+	tests/files/c_source/vehicle_utils.c \
+	tests/files/c_source/multiplex_utils.c \
+	tests/files/c_source/multiplex_2_utils.c \
+	tests/files/c_source/floating_point_utils.c \
+	tests/files/c_source/no_signals_utils.c \
+	tests/files/c_source/choices_utils.c \
+	tests/files/c_source/signed_utils.c \
+	tests/files/c_source/my_database_name_utils.c \
+	tests/files/c_source/min_max_only_6_0_utils.c \
+	tests/files/c_source/abs_utils.c
 
 C_SOURCES_BIT_FIELDS := \
-	tests/files/c_source/motohawk_bit_fields.c \
-	tests/files/c_source/floating_point_bit_fields.c \
-	tests/files/c_source/signed_bit_fields.c
+	tests/files/c_source/motohawk_bit_fields_utils.c \
+	tests/files/c_source/floating_point_bit_fields_utils.c \
+	tests/files/c_source/signed_bit_fields_utils.c
 
 CFLAGS_EXTRA := \
 	-Wduplicated-branches \
@@ -126,7 +126,7 @@ FUZZER_CC ?= clang
 FUZZER_EXE = multiplex_2_fuzzer
 FUZZER_C_SOURCES = \
 	tests/files/c_source/multiplex_2_fuzzer.c \
-	tests/files/c_source/multiplex_2.c
+	tests/files/c_source/multiplex_2_utils.c
 FUZZER_CFLAGS = \
 	-fprofile-instr-generate \
 	-fcoverage-mapping \

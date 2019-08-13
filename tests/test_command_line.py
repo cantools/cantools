@@ -25,22 +25,12 @@ def read_file(filename):
         return remove_date_time(fin.read())
 
 
-def read_utf8_file(filename):
-    """Reference files are encoded with UTF-8.
-
-    """
-
-    with open(filename, 'r', encoding='utf-8') as fin:
-        return remove_date_time(fin.read())
-
-
 class CanToolsCommandLineTest(unittest.TestCase):
 
     maxDiff = None
 
     def assert_files_equal(self, actual, expected):
-        # open(expected, 'w').write(read_utf8_file(actual))
-        self.assertEqual(read_file(actual), read_utf8_file(expected))
+        self.assertEqual(read_file(actual), read_file(expected))
 
     def test_decode(self):
         argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
@@ -1058,25 +1048,20 @@ BATTERY_VT(
             argv = [
                 'cantools',
                 'generate_c_source',
-                'tests/files/dbc/{}.dbc'.format(database)
+                '--infile=tests/files/dbc/{}.dbc'.format(database),
+                '--',
+                'tests/files/code_templates/utils.c',
+                'tests/files/code_templates/utils.h',
             ]
 
-            database_h = basename + '.h'
-            database_c = basename + '.c'
-            fuzzer_c = basename + '_fuzzer.c'
-            fuzzer_mk = basename + '_fuzzer.mk'
+            database_h = basename + '_utils.h'
+            database_c = basename + '_utils.c'
 
             if os.path.exists(database_h):
                 os.remove(database_h)
 
             if os.path.exists(database_c):
                 os.remove(database_c)
-
-            if os.path.exists(fuzzer_c):
-                os.remove(fuzzer_c)
-
-            if os.path.exists(fuzzer_mk):
-                os.remove(fuzzer_mk)
 
             with patch('sys.argv', argv):
                 cantools._main()
@@ -1085,9 +1070,6 @@ BATTERY_VT(
                                     'tests/files/c_source/' + database_h)
             self.assert_files_equal(database_c,
                                     'tests/files/c_source/' + database_c)
-
-            self.assertFalse(os.path.exists(fuzzer_c))
-            self.assertFalse(os.path.exists(fuzzer_mk))
 
     def test_generate_c_source_no_signal_encode_decode(self):
         databases = [
@@ -1099,13 +1081,16 @@ BATTERY_VT(
                 'cantools',
                 'generate_c_source',
                 '--no-floating-point-numbers',
-                'tests/files/dbc/{}.dbc'.format(database)
+                '--infile=tests/files/dbc/{}.dbc'.format(database),
+                '--',
+                'tests/files/code_templates/utils.c',
+                'tests/files/code_templates/utils.h',
             ]
 
-            database_h = database + '.h'
-            database_c = database + '.c'
-            expected_database_h = database + '_no_floating_point_numbers.h'
-            expected_database_c = database + '_no_floating_point_numbers.c'
+            database_h = database + '_utils.h'
+            database_c = database + '_utils.c'
+            expected_database_h = database + '_no_floating_point_numbers_utils.h'
+            expected_database_c = database + '_no_floating_point_numbers_utils.c'
 
             if os.path.exists(database_h):
                 os.remove(database_h)
@@ -1133,11 +1118,14 @@ BATTERY_VT(
                 'cantools',
                 'generate_c_source',
                 '--database-name', 'my_database_name',
-                'tests/files/dbc/{}.dbc'.format(database)
+                '--infile=tests/files/dbc/{}.dbc'.format(database),
+                '--',
+                'tests/files/code_templates/utils.c',
+                'tests/files/code_templates/utils.h',
             ]
 
-            database_h = 'my_database_name.h'
-            database_c = 'my_database_name.c'
+            database_h = 'my_database_name_utils.h'
+            database_c = 'my_database_name_utils.c'
 
             if os.path.exists(database_h):
                 os.remove(database_h)
@@ -1166,11 +1154,14 @@ BATTERY_VT(
                 'generate_c_source',
                 '--bit-fields',
                 '--database-name', '{}_bit_fields'.format(database),
-                'tests/files/dbc/{}.dbc'.format(database)
+                '--infile=tests/files/dbc/{}.dbc'.format(database),
+                '--',
+                'tests/files/code_templates/utils.c',
+                'tests/files/code_templates/utils.h',
             ]
 
-            database_h = database + '_bit_fields.h'
-            database_c = database + '_bit_fields.c'
+            database_h = database + '_bit_fields_utils.h'
+            database_c = database + '_bit_fields_utils.c'
 
             if os.path.exists(database_h):
                 os.remove(database_h)
@@ -1190,12 +1181,16 @@ BATTERY_VT(
         argv = [
             'cantools',
             'generate_c_source',
-            '--generate-fuzzer',
-            'tests/files/dbc/multiplex_2.dbc'
+            '--infile=tests/files/dbc/multiplex_2.dbc',
+            '--',
+            'tests/files/code_templates/utils.c',
+            'tests/files/code_templates/utils.h',
+            'tests/files/code_templates/fuzzer.c',
+            'tests/files/code_templates/fuzzer.mk',
         ]
 
-        database_h = 'multiplex_2.h'
-        database_c = 'multiplex_2.c'
+        database_h = 'multiplex_2_utils.h'
+        database_c = 'multiplex_2_utils.c'
         fuzzer_c = 'multiplex_2_fuzzer.c'
         fuzzer_mk = 'multiplex_2_fuzzer.mk'
 
@@ -1238,25 +1233,20 @@ BATTERY_VT(
             argv = [
                 'cantools',
                 'generate_c_source',
-                'tests/files/sym/{}.sym'.format(database)
+                '--infile=tests/files/sym/{}.sym'.format(database),
+                '--',
+                'tests/files/code_templates/utils.c',
+                'tests/files/code_templates/utils.h',
             ]
 
-            database_h = basename + '.h'
-            database_c = basename + '.c'
-            fuzzer_c = basename + '_fuzzer.c'
-            fuzzer_mk = basename + '_fuzzer.mk'
+            database_h = basename + '_utils.h'
+            database_c = basename + '_utils.c'
 
             if os.path.exists(database_h):
                 os.remove(database_h)
 
             if os.path.exists(database_c):
                 os.remove(database_c)
-
-            if os.path.exists(fuzzer_c):
-                os.remove(fuzzer_c)
-
-            if os.path.exists(fuzzer_mk):
-                os.remove(fuzzer_mk)
 
             with patch('sys.argv', argv):
                 cantools._main()
@@ -1265,9 +1255,6 @@ BATTERY_VT(
                                     'tests/files/c_source/' + database_h)
             self.assert_files_equal(database_c,
                                     'tests/files/c_source/' + database_c)
-
-            self.assertFalse(os.path.exists(fuzzer_c))
-            self.assertFalse(os.path.exists(fuzzer_mk))
 
 
 if __name__ == '__main__':

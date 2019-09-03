@@ -102,6 +102,10 @@ FLOAT_LENGTH_TO_SIGNAL_TYPE = {
 }
 
 
+def to_int(value):
+    return int(Decimal(value))
+
+
 class Parser(textparser.Parser):
 
     def tokenize(self, string):
@@ -514,7 +518,7 @@ def _dump_messages(database):
 def _dump_senders(database):
     bo_tx_bu = []
     fmt = 'BO_TX_BU_ {frame_id} : {senders};'
-    
+
     for message in database.messages:
         if len(message.senders) > 1:
             bo_tx_bu.append(fmt.format(frame_id=get_dbc_frame_id(message),
@@ -759,7 +763,7 @@ def _load_attributes(tokens, definitions):
         definition = definitions[attribute[1]]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
-            value = int(value)
+            value = to_int(value)
         elif definition.type_name == 'FLOAT':
             value = Decimal(value)
 
@@ -1338,7 +1342,7 @@ def get_definitions_dict(definitions, defaults):
 
     def convert_value(definition, value):
         if definition.type_name in ['INT', 'HEX']:
-            value = int(value)
+            value = to_int(value)
         elif definition.type_name == 'FLOAT':
             value = Decimal(value)
 

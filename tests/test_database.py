@@ -2887,6 +2887,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with open(filename, 'rb') as fin:
             self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
 
+    def test_big_numbers(self):
+        filename = 'tests/files/dbc/big_numbers.dbc'
+
+        with open(filename, 'r') as fin:
+            db = cantools.db.load(fin)
+
+        # Node attributes.
+        node = db.nodes[0]
+        attribute = node.dbc.attributes['TheNodeAttribute']
+        self.assertEqual(attribute.name, 'TheNodeAttribute')
+        self.assertEqual(attribute.value, 99)
+        self.assertEqual(attribute.definition,
+                         db.dbc.attribute_definitions['TheNodeAttribute'])
+        self.assertEqual(attribute.definition.default_value, 100)
+        self.assertEqual(attribute.definition.kind, 'BU_')
+        self.assertEqual(attribute.definition.type_name, 'INT')
+        self.assertEqual(attribute.definition.minimum, -9223372036854780000)
+        self.assertEqual(attribute.definition.maximum, 18446744073709600000)
+        self.assertEqual(attribute.definition.choices, None)
+
     def test_setters(self):
         with open('tests/files/dbc/attributes.dbc', 'r') as fin:
             db = cantools.db.load(fin)

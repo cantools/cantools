@@ -33,57 +33,57 @@ from .utils import num
 
 
 DBC_FMT = (
-    'VERSION "{version}"\r\n'
-    '\r\n'
-    '\r\n'
-    'NS_ : \r\n'
-    '\tNS_DESC_\r\n'
-    '\tCM_\r\n'
-    '\tBA_DEF_\r\n'
-    '\tBA_\r\n'
-    '\tVAL_\r\n'
-    '\tCAT_DEF_\r\n'
-    '\tCAT_\r\n'
-    '\tFILTER\r\n'
-    '\tBA_DEF_DEF_\r\n'
-    '\tEV_DATA_\r\n'
-    '\tENVVAR_DATA_\r\n'
-    '\tSGTYPE_\r\n'
-    '\tSGTYPE_VAL_\r\n'
-    '\tBA_DEF_SGTYPE_\r\n'
-    '\tBA_SGTYPE_\r\n'
-    '\tSIG_TYPE_REF_\r\n'
-    '\tVAL_TABLE_\r\n'
-    '\tSIG_GROUP_\r\n'
-    '\tSIG_VALTYPE_\r\n'
-    '\tSIGTYPE_VALTYPE_\r\n'
-    '\tBO_TX_BU_\r\n'
-    '\tBA_DEF_REL_\r\n'
-    '\tBA_REL_\r\n'
-    '\tBA_DEF_DEF_REL_\r\n'
-    '\tBU_SG_REL_\r\n'
-    '\tBU_EV_REL_\r\n'
-    '\tBU_BO_REL_\r\n'
-    '\tSG_MUL_VAL_\r\n'
-    '\r\n'
-    'BS_:\r\n'
-    '\r\n'
-    'BU_: {bu}\r\n'
+    'VERSION "{version}"\n'
+    '\n'
+    '\n'
+    'NS_ : \n'
+    '\tNS_DESC_\n'
+    '\tCM_\n'
+    '\tBA_DEF_\n'
+    '\tBA_\n'
+    '\tVAL_\n'
+    '\tCAT_DEF_\n'
+    '\tCAT_\n'
+    '\tFILTER\n'
+    '\tBA_DEF_DEF_\n'
+    '\tEV_DATA_\n'
+    '\tENVVAR_DATA_\n'
+    '\tSGTYPE_\n'
+    '\tSGTYPE_VAL_\n'
+    '\tBA_DEF_SGTYPE_\n'
+    '\tBA_SGTYPE_\n'
+    '\tSIG_TYPE_REF_\n'
+    '\tVAL_TABLE_\n'
+    '\tSIG_GROUP_\n'
+    '\tSIG_VALTYPE_\n'
+    '\tSIGTYPE_VALTYPE_\n'
+    '\tBO_TX_BU_\n'
+    '\tBA_DEF_REL_\n'
+    '\tBA_REL_\n'
+    '\tBA_DEF_DEF_REL_\n'
+    '\tBU_SG_REL_\n'
+    '\tBU_EV_REL_\n'
+    '\tBU_BO_REL_\n'
+    '\tSG_MUL_VAL_\n'
+    '\n'
+    'BS_:\n'
+    '\n'
+    'BU_: {bu}\n'
     '{val_table}'
-    '\r\n'
-    '\r\n'
-    '{bo}\r\n'
-    '\r\n'
-    '{bo_tx_bu}\r\n'
-    '\r\n'
-    '\r\n'
-    '{cm}\r\n'
+    '\n'
+    '\n'
+    '{bo}\n'
+    '\n'
+    '{bo_tx_bu}\n'
+    '\n'
+    '\n'
+    '{cm}\n'
     '{signal_types}'
-    '{ba_def}\r\n'
-    '{ba_def_def}\r\n'
-    '{ba}\r\n'
-    '{val}\r\n'
-    '\r\n'
+    '{ba_def}\n'
+    '{ba_def_def}\n'
+    '{ba}\n'
+    '{val}\n'
+    '\n'
 )
 
 
@@ -510,7 +510,7 @@ def _dump_messages(database):
                 maximum=(0 if signal.maximum is None else signal.maximum),
                 unit='' if signal.unit is None else signal.unit))
 
-        bo.append('\r\n'.join(msg))
+        bo.append('\n'.join(msg))
 
     return bo
 
@@ -1326,15 +1326,15 @@ def dump_string(database):
 
     return DBC_FMT.format(version=database.version,
                           bu=' '.join(bu),
-                          val_table='\r\n'.join(val_table),
-                          bo='\r\n\r\n'.join(bo),
-                          bo_tx_bu='\r\n'.join(bo_tx_bu),
-                          cm='\r\n'.join(cm),
-                          signal_types='\r\n'.join(signal_types),
-                          ba_def='\r\n'.join(ba_def),
-                          ba_def_def='\r\n'.join(ba_def_def),
-                          ba='\r\n'.join(ba),
-                          val='\r\n'.join(val))
+                          val_table='\n'.join(val_table),
+                          bo='\n\n'.join(bo),
+                          bo_tx_bu='\n'.join(bo_tx_bu),
+                          cm='\n'.join(cm),
+                          signal_types='\n'.join(signal_types),
+                          ba_def='\n'.join(ba_def),
+                          ba_def_def='\n'.join(ba_def_def),
+                          ba='\n'.join(ba),
+                          val='\n'.join(val))
 
 
 def get_definitions_dict(definitions, defaults):

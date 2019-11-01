@@ -275,6 +275,8 @@ def load_string(string,
 
     """
 
+    # Accept both lower case/upper case/any combination for importing file
+    # (but don't apply conversion in exception):
     if database_format.lower() not in ['arxml', 'dbc', 'kcd', 'sym', 'cdd', None]:
         raise ValueError(
             "expected database format 'arxml', 'dbc', 'kcd', 'sym', 'cdd' or "

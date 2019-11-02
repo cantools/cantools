@@ -54,7 +54,7 @@ def _resolve_database_format_and_encoding(database_format,
                                           encoding,
                                           filename):
     if database_format is None:
-        database_format = os.path.splitext(filename)[1][1:]
+        database_format = os.path.splitext(filename)[1][1:].lower()
 
     if encoding is None:
         try:
@@ -275,9 +275,7 @@ def load_string(string,
 
     """
 
-    # Accept both lower case/upper case/any combination for importing file
-    # (but don't apply conversion in exception):
-    if database_format.lower() not in ['arxml', 'dbc', 'kcd', 'sym', 'cdd', None]:
+    if database_format not in ['arxml', 'dbc', 'kcd', 'sym', 'cdd', None]:
         raise ValueError(
             "expected database format 'arxml', 'dbc', 'kcd', 'sym', 'cdd' or "
             "None, but got '{}'".format(database_format))

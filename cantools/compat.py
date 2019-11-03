@@ -3,10 +3,11 @@ import sys
 
 class fopen(object):
 
-    def __init__(self, filename, mode, encoding):
+    def __init__(self, filename, mode, encoding, newline=None):
         self._filename = filename
         self._mode = mode
         self._encoding = encoding
+        self._newline = newline
         self._fp = None
 
     def __enter__(self):

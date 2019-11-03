@@ -4663,21 +4663,22 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.name, 'Foo')
         
     def test_issue_163_dbc_newlines(self):
-        filename_in = os.path.join('tests', 'files', 'dbc',
-                                   'issue_163_newline.dbc')
-        filename_dump = os.path.join('tests', 'files', 'dbc',
-                                     'issue_163_newline_dump.dbc')
-        
-        db = cantools.database.load_file(filename_in)
-        cantools.database.dump_file(db, filename_dump)
-        with open(filename_dump, newline='') as fin:
-            dumped_content = fin.read()
-            
-        import re
-        self.assertTrue(dumped_content.find('\r\n'))
-        self.assertFalse(re.search('\r[^\n]', dumped_content))
-        self.assertFalse(re.search('[^\r]\n', dumped_content))
-        os.remove(filename_dump)
+        if sys.version_info[0] >= 3:
+            filename_in = os.path.join('tests', 'files', 'dbc',
+                                       'issue_163_newline.dbc')
+            filename_dump = os.path.join('tests', 'files', 'dbc',
+                                         'issue_163_newline_dump.dbc')
+
+            db = cantools.database.load_file(filename_in)
+            cantools.database.dump_file(db, filename_dump)
+            with open(filename_dump, newline='') as fin:
+                dumped_content = fin.read()
+
+            import re
+            self.assertTrue(dumped_content.find('\r\n'))
+            self.assertFalse(re.search('\r[^\n]', dumped_content))
+            self.assertFalse(re.search('[^\r]\n', dumped_content))
+            os.remove(filename_dump)
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

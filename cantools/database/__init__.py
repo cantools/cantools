@@ -196,6 +196,11 @@ def dump_file(database,
     See :func:`~cantools.database.load_file()` for descriptions of
     other arguments.
 
+    If file format is 'dbc', the generated file will have newlines
+    according to Windows format (\r\n).
+    Other database formats will have newlines according to the
+    operating system's default setting.
+
     >>> db = cantools.database.load_file('foo.dbc')
     >>> cantools.database.dump_file(db, 'bar.dbc')
 
@@ -206,15 +211,18 @@ def dump_file(database,
         encoding,
         filename)
 
+    newline = None
+
     if database_format == 'dbc':
         output = database.as_dbc_string()
+        newline = ''
     elif database_format == 'kcd':
         output = database.as_kcd_string()
     else:
         raise Error(
             "Unsupported output database format '{}'.".format(database_format))
 
-    with fopen(filename, 'w', encoding=encoding) as fout:
+    with fopen(filename, 'w', encoding=encoding, newline=newline) as fout:
         fout.write(output)
 
 

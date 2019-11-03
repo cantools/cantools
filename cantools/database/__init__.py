@@ -106,8 +106,7 @@ def load_file(filename,
     `database_format` is one of ``'arxml'``, ``'dbc'``, ``'kcd'``,
     ``'sym'``, ``cdd`` and ``None``. If ``None``, the database format
     is selected based on the filename extension as in the table below.
-    Both lower case/upper case extensions are supported, they are
-    each mapped to the same database format.
+    Filename extensions are case insensitive.
 
     +-----------+-----------------+
     | Extension | Database format |

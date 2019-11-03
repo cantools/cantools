@@ -54,7 +54,7 @@ def _resolve_database_format_and_encoding(database_format,
                                           encoding,
                                           filename):
     if database_format is None:
-        database_format = os.path.splitext(filename)[1][1:]
+        database_format = os.path.splitext(filename)[1][1:].lower()
 
     if encoding is None:
         try:
@@ -106,6 +106,7 @@ def load_file(filename,
     `database_format` is one of ``'arxml'``, ``'dbc'``, ``'kcd'``,
     ``'sym'``, ``cdd`` and ``None``. If ``None``, the database format
     is selected based on the filename extension as in the table below.
+    Filename extensions are case insensitive.
 
     +-----------+-----------------+
     | Extension | Database format |

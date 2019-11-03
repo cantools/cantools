@@ -219,7 +219,7 @@ def dump_file(database,
             "Unsupported output database format '{}'.".format(database_format))
 
     with fopen(filename, 'w', encoding=encoding, newline=newline) as fout:
-fout.write(output)
+        fout.write(output)
 
 
 def load(fp,

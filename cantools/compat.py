@@ -17,6 +17,7 @@ class fopen(object):
             self._fp = open(self._filename,
                             self._mode,
                             encoding=self._encoding,
+                            newline=self._newline,
                             errors='replace')
 
         return self._fp

@@ -4655,6 +4655,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_issue_168_upper_case_file_extension(self):
+        filename = os.path.join('tests', 'files', 'dbc', 'issue_168.DBC')
+        db = cantools.db.load_file(filename)
+
+        message = db.get_message_by_name('Foo')
+        self.assertEqual(message.name, 'Foo')
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

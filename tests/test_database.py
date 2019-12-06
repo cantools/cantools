@@ -4420,6 +4420,25 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, None)
 
+    def test_system_multi_arpackages_arxml(self):
+        db = cantools.db.load_file('tests/files/arxml/system-multi-arpackages-4.2.arxml')
+
+        self.assertEqual(len(db.nodes), 0)
+
+        self.assertEqual(len(db.messages), 2)
+
+        message_1 = db.messages[0]
+        self.assertEqual(message_1.frame_id, 947)
+        self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.name, 'Message1')
+        self.assertEqual(message_1.length, 8)
+        self.assertEqual(message_1.senders, [])
+        self.assertEqual(message_1.send_type, None)
+        self.assertEqual(message_1.cycle_time, None)
+        self.assertEqual(len(message_1.signals), 0)
+        self.assertEqual(message_1.comment, None)
+        self.assertEqual(message_1.bus_name, None)
+
     def test_system_missing_factor_arxml(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(

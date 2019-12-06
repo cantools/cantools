@@ -1,0 +1,2249 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--PREEvision 8.5.16 final--><!--JDK: 1.8.0_172--><!--Autosar Release 4.2.2 Revision 0001--><!--Date: 2019.11.18 at 17:50:37--><AUTOSAR xmlns="http://autosar.org/schema/r4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://autosar.org/schema/r4.0 AUTOSAR_4-2-2.xsd">
+  <ADMIN-DATA>
+    <LANGUAGE>EN</LANGUAGE>
+    <USED-LANGUAGES>
+      <L-10 L="EN" xml:space="default"/>
+    </USED-LANGUAGES>
+  </ADMIN-DATA>
+  <AR-PACKAGES>
+    <AR-PACKAGE>
+      <SHORT-NAME>C</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE>
+          <SHORT-NAME>DT</SHORT-NAME>
+          <ELEMENTS>
+            <DATA-TRANSFORMATION-SET>
+              <SHORT-NAME>TC</SHORT-NAME>
+              <DATA-TRANSFORMATIONS>
+                <DATA-TRANSFORMATION>
+                  <SHORT-NAME>DT_CAN_LIN</SHORT-NAME>
+                  <TRANSFORMER-CHAIN-REFS>
+                    <TRANSFORMER-CHAIN-REF DEST="TRANSFORMATION-TECHNOLOGY">/C/DT/TC/T1</TRANSFORMER-CHAIN-REF>
+                  </TRANSFORMER-CHAIN-REFS>
+                </DATA-TRANSFORMATION>
+                <DATA-TRANSFORMATION>
+                  <SHORT-NAME>DT_Ethernet</SHORT-NAME>
+                  <TRANSFORMER-CHAIN-REFS>
+                    <TRANSFORMER-CHAIN-REF DEST="TRANSFORMATION-TECHNOLOGY">/C/DT/TC/T2</TRANSFORMER-CHAIN-REF>
+                  </TRANSFORMER-CHAIN-REFS>
+                </DATA-TRANSFORMATION>
+              </DATA-TRANSFORMATIONS>
+              <TRANSFORMATION-TECHNOLOGYS>
+                <TRANSFORMATION-TECHNOLOGY>
+                  <SHORT-NAME>T1</SHORT-NAME>
+                  <PROTOCOL>E2E</PROTOCOL>
+                  <TRANSFORMATION-DESCRIPTIONS>
+                    <END-TO-END-TRANSFORMATION-DESCRIPTION>
+                      <COUNTER-OFFSET>12</COUNTER-OFFSET>
+                      <CRC-OFFSET>0</CRC-OFFSET>
+                      <MAX-NO-NEW-OR-REPEATED-DATA>5</MAX-NO-NEW-OR-REPEATED-DATA>
+                      <SYNC-COUNTER-INIT>0</SYNC-COUNTER-INIT>
+                    </END-TO-END-TRANSFORMATION-DESCRIPTION>
+                  </TRANSFORMATION-DESCRIPTIONS>
+                  <TRANSFORMER-CLASS>SERIALIZER</TRANSFORMER-CLASS>
+                  <VERSION>1.0.0</VERSION>
+                </TRANSFORMATION-TECHNOLOGY>
+                <TRANSFORMATION-TECHNOLOGY>
+                  <SHORT-NAME>T2</SHORT-NAME>
+                  <PROTOCOL>E2E</PROTOCOL>
+                  <TRANSFORMATION-DESCRIPTIONS>
+                    <END-TO-END-TRANSFORMATION-DESCRIPTION>
+                      <COUNTER-OFFSET>16</COUNTER-OFFSET>
+                      <CRC-OFFSET>0</CRC-OFFSET>
+                      <MAX-NO-NEW-OR-REPEATED-DATA>5</MAX-NO-NEW-OR-REPEATED-DATA>
+                      <SYNC-COUNTER-INIT>0</SYNC-COUNTER-INIT>
+                    </END-TO-END-TRANSFORMATION-DESCRIPTION>
+                  </TRANSFORMATION-DESCRIPTIONS>
+                  <TRANSFORMER-CLASS>SERIALIZER</TRANSFORMER-CLASS>
+                  <VERSION>1.0.0</VERSION>
+                </TRANSFORMATION-TECHNOLOGY>
+              </TRANSFORMATION-TECHNOLOGYS>
+            </DATA-TRANSFORMATION-SET>
+          </ELEMENTS>
+        </AR-PACKAGE>
+
+
+        <AR-PACKAGE>
+          <SHORT-NAME>Diagnostics</SHORT-NAME>
+          <ELEMENTS>
+            <DIAGNOSTIC-CONNECTION>
+              <FUNCTIONAL-REQUEST-REFS>
+                <FUNCTIONAL-REQUEST-REF DEST="TP-CONNECTION-IDENT">/C/TP/DoIP/FuncReq</FUNCTIONAL-REQUEST-REF>
+              </FUNCTIONAL-REQUEST-REFS>
+              <PHYSICAL-REQUEST-REF DEST="TP-CONNECTION-IDENT">/C/TP/DoIP/DoIP_Tp_ICU_PhyRequest</PHYSICAL-REQUEST-REF>
+              <RESPONSE-REF DEST="TP-CONNECTION-IDENT">/C/TP/DoIP/DoIP_Tp_ICU_PhyResponse</RESPONSE-REF>
+            </DIAGNOSTIC-CONNECTION>
+            <DIAGNOSTIC-CONNECTION>
+              <FUNCTIONAL-REQUEST-REFS>
+                <FUNCTIONAL-REQUEST-REF DEST="TP-CONNECTION-IDENT">/C/TP/DoIP/FuncReq</FUNCTIONAL-REQUEST-REF>
+              </FUNCTIONAL-REQUEST-REFS>
+              <PHYSICAL-REQUEST-REF DEST="TP-CONNECTION-IDENT">/C/TP/DoIP/PhyReq</PHYSICAL-REQUEST-REF>
+              <RESPONSE-REF DEST="TP-CONNECTION-IDENT">/C/TP/DoIP/DoIP_Tp_ICU_GW_AMP_PhyResponse</RESPONSE-REF>
+            </DIAGNOSTIC-CONNECTION>
+          </ELEMENTS>
+        </AR-PACKAGE>
+
+
+
+        <AR-PACKAGE>
+          <SHORT-NAME>Frames</SHORT-NAME>
+          <ELEMENTS>
+            <CAN-FRAME>
+              <SHORT-NAME>Message1</SHORT-NAME>
+              <FRAME-LENGTH>8</FRAME-LENGTH>
+              <PDU-TO-FRAME-MAPPINGS>
+                <PDU-TO-FRAME-MAPPING>
+                  <SHORT-NAME>Message1_PDU</SHORT-NAME>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                  <PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/Message1_PDU</PDU-REF>
+                  <START-POSITION>0</START-POSITION>
+                </PDU-TO-FRAME-MAPPING>
+              </PDU-TO-FRAME-MAPPINGS>
+            </CAN-FRAME>
+            <CAN-FRAME>
+              <SHORT-NAME>CSI_1_RVC</SHORT-NAME>
+              <FRAME-LENGTH>8</FRAME-LENGTH>
+              <PDU-TO-FRAME-MAPPINGS>
+                <PDU-TO-FRAME-MAPPING>
+                  <SHORT-NAME>CSI_1_RVC_PDU</SHORT-NAME>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                  <PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/CSI_1_RVC_PDU</PDU-REF>
+                  <START-POSITION>0</START-POSITION>
+                </PDU-TO-FRAME-MAPPING>
+              </PDU-TO-FRAME-MAPPINGS>
+          </CAN-FRAME>
+          </ELEMENTS>
+        </AR-PACKAGE>
+
+
+
+        <AR-PACKAGE>
+          <SHORT-NAME>NetworkManagement</SHORT-NAME>
+          <ELEMENTS>
+            <NM-CONFIG>
+              <SHORT-NAME>ADI</SHORT-NAME>
+              <NM-CLUSTERS>
+                <CAN-NM-CLUSTER>
+                  <SHORT-NAME>ADI_CAN_ASR</SHORT-NAME>
+                  <COMMUNICATION-CLUSTER-REF DEST="CAN-CLUSTER">/Topo/Clusters/ADI_CAN</COMMUNICATION-CLUSTER-REF>
+                  <NM-NODES>
+                    <CAN-NM-NODE>
+                      <SHORT-NAME>AMP</SHORT-NAME>
+                      <NM-NODE-ID>156</NM-NODE-ID>
+                      <RX-NM-PDU-REFS>
+                        <RX-NM-PDU-REF DEST="NM-PDU">/C/PDUs/NmADIMessage_ASR</RX-NM-PDU-REF>
+                      </RX-NM-PDU-REFS>
+                      <TX-NM-PDU-REFS>
+                        <TX-NM-PDU-REF DEST="NM-PDU">/C/PDUs/NmAMPMessage_ASR</TX-NM-PDU-REF>
+                      </TX-NM-PDU-REFS>
+                      <NM-CAR-WAKE-UP-FILTER-ENABLED>false</NM-CAR-WAKE-UP-FILTER-ENABLED>
+                      <NM-CAR-WAKE-UP-RX-ENABLED>false</NM-CAR-WAKE-UP-RX-ENABLED>
+                      <NM-MSG-CYCLE-OFFSET>0</NM-MSG-CYCLE-OFFSET>
+                      <NM-RANGE-CONFIG>
+                        <LOWER-CAN-ID>1435</LOWER-CAN-ID>
+                        <UPPER-CAN-ID>1436</UPPER-CAN-ID>
+                      </NM-RANGE-CONFIG>
+                    </CAN-NM-NODE>
+                    <CAN-NM-NODE>
+                      <SHORT-NAME>ICU</SHORT-NAME>
+                      <CONTROLLER-REF DEST="CAN-COMMUNICATION-CONTROLLER">/Topo/HWComponents/Infotainment_Control_Unit/ADI_CAN_ICU</CONTROLLER-REF>
+                      <NM-COORDINATOR-ROLE>ACTIVE</NM-COORDINATOR-ROLE>
+                      <NM-IF-ECU-REF DEST="NM-ECU">/C/NetworkManagement/ADI/ICU_ADICAN_ASR</NM-IF-ECU-REF>
+                      <NM-NODE-ID>155</NM-NODE-ID>
+                      <RX-NM-PDU-REFS>
+                        <RX-NM-PDU-REF DEST="NM-PDU">/C/PDUs/NmAMPMessage_ASR</RX-NM-PDU-REF>
+                      </RX-NM-PDU-REFS>
+                      <TX-NM-PDU-REFS>
+                        <TX-NM-PDU-REF DEST="NM-PDU">/C/PDUs/NmADIMessage_ASR</TX-NM-PDU-REF>
+                      </TX-NM-PDU-REFS>
+                      <NM-CAR-WAKE-UP-FILTER-ENABLED>false</NM-CAR-WAKE-UP-FILTER-ENABLED>
+                      <NM-CAR-WAKE-UP-RX-ENABLED>false</NM-CAR-WAKE-UP-RX-ENABLED>
+                      <NM-RANGE-CONFIG>
+                        <LOWER-CAN-ID>1435</LOWER-CAN-ID>
+                        <UPPER-CAN-ID>1436</UPPER-CAN-ID>
+                      </NM-RANGE-CONFIG>
+                    </CAN-NM-NODE>
+                  </NM-NODES>
+                  <NM-CBV-POSITION>1</NM-CBV-POSITION>
+                  <NM-MSG-CYCLE-TIME>0.5</NM-MSG-CYCLE-TIME>
+                  <NM-NETWORK-TIMEOUT>5</NM-NETWORK-TIMEOUT>
+                  <NM-NID-POSITION>0</NM-NID-POSITION>
+                  <NM-REPEAT-MESSAGE-TIME>0.5</NM-REPEAT-MESSAGE-TIME>
+                  <NM-WAIT-BUS-SLEEP-TIME>5</NM-WAIT-BUS-SLEEP-TIME>
+                </CAN-NM-CLUSTER>
+              </NM-CLUSTERS>
+              <NM-IF-ECUS>
+                <NM-ECU>
+                  <SHORT-NAME>ICU_ADICAN_ASR</SHORT-NAME>
+                  <BUS-SPECIFIC-NM-ECU>
+                    <CAN-NM-ECU/>
+                  </BUS-SPECIFIC-NM-ECU>
+                  <ECU-INSTANCE-REF DEST="ECU-INSTANCE">/Topo/HWComponents/Infotainment_Control_Unit</ECU-INSTANCE-REF>
+                  <NM-COM-CONTROL-ENABLED>true</NM-COM-CONTROL-ENABLED>
+                  <NM-COORDINATOR>
+                    <NM-ACTIVE-COORDINATOR>true</NM-ACTIVE-COORDINATOR>
+                    <NM-SHUTDOWN-DELAY-TIMER>5</NM-SHUTDOWN-DELAY-TIMER>
+                  </NM-COORDINATOR>
+                  <NM-CYCLETIME-MAIN-FUNCTION>0.05</NM-CYCLETIME-MAIN-FUNCTION>
+                  <NM-PASSIVE-MODE-ENABLED>false</NM-PASSIVE-MODE-ENABLED>
+                </NM-ECU>
+              </NM-IF-ECUS>
+            </NM-CONFIG>
+            <NM-CONFIG>
+              <SHORT-NAME>Ethernet_Backbone</SHORT-NAME>
+              <NM-CLUSTERS>
+                <UDP-NM-CLUSTER>
+                  <SHORT-NAME>Udp_Nm_Cluster1</SHORT-NAME>
+                  <COMMUNICATION-CLUSTER-REF DEST="ETHERNET-CLUSTER">/Topo/Clusters/Ethernet_Backbone</COMMUNICATION-CLUSTER-REF>
+                  <NM-NODES>
+                    <UDP-NM-NODE>
+                      <SHORT-NAME>ADI</SHORT-NAME>
+                      <CONTROLLER-REF DEST="ETHERNET-COMMUNICATION-CONTROLLER">/Topo/HWComponents/Infotainment_Control_Unit/ETH_ICU</CONTROLLER-REF>
+                      <NM-IF-ECU-REF DEST="NM-ECU">/C/NetworkManagement/Ethernet_Backbone/ADI</NM-IF-ECU-REF>
+                      <NM-NODE-ID>2</NM-NODE-ID>
+                      <RX-NM-PDU-REFS>
+                        <RX-NM-PDU-REF DEST="NM-PDU">/C/PDUs/NmTCUMessage</RX-NM-PDU-REF>
+                        <RX-NM-PDU-REF DEST="NM-PDU">/C/PDUs/NmZA1Message</RX-NM-PDU-REF>
+                      </RX-NM-PDU-REFS>
+                      <TX-NM-PDU-REFS>
+                        <TX-NM-PDU-REF DEST="NM-PDU">/C/PDUs/NmADIMessage</TX-NM-PDU-REF>
+                      </TX-NM-PDU-REFS>
+                      <NM-MSG-CYCLE-OFFSET>0</NM-MSG-CYCLE-OFFSET>
+                    </UDP-NM-NODE>
+                  </NM-NODES>
+                  <NM-CBV-POSITION>1</NM-CBV-POSITION>
+                  <NM-MESSAGE-TIMEOUT-TIME>5</NM-MESSAGE-TIMEOUT-TIME>
+                  <NM-MSG-CYCLE-TIME>0.5</NM-MSG-CYCLE-TIME>
+                  <NM-NETWORK-TIMEOUT>5</NM-NETWORK-TIMEOUT>
+                  <NM-NID-POSITION>0</NM-NID-POSITION>
+                  <NM-REMOTE-SLEEP-INDICATION-TIME>0.5</NM-REMOTE-SLEEP-INDICATION-TIME>
+                  <NM-USER-DATA-LENGTH>0</NM-USER-DATA-LENGTH>
+                  <NM-WAIT-BUS-SLEEP-TIME>0.75</NM-WAIT-BUS-SLEEP-TIME>
+                </UDP-NM-CLUSTER>
+              </NM-CLUSTERS>
+              <NM-IF-ECUS>
+                <NM-ECU>
+                  <SHORT-NAME>ADI</SHORT-NAME>
+                  <BUS-SPECIFIC-NM-ECU>
+                    <UDP-NM-ECU/>
+                  </BUS-SPECIFIC-NM-ECU>
+                  <ECU-INSTANCE-REF DEST="ECU-INSTANCE">/Topo/HWComponents/Infotainment_Control_Unit</ECU-INSTANCE-REF>
+                  <NM-COORDINATOR>
+                    <NM-SHUTDOWN-DELAY-TIMER>5</NM-SHUTDOWN-DELAY-TIMER>
+                  </NM-COORDINATOR>
+                  <NM-CYCLETIME-MAIN-FUNCTION>0.05</NM-CYCLETIME-MAIN-FUNCTION>
+                  <NM-PASSIVE-MODE-ENABLED>false</NM-PASSIVE-MODE-ENABLED>
+                </NM-ECU>
+              </NM-IF-ECUS>
+            </NM-CONFIG>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        
+        
+        
+        <AR-PACKAGE>
+          <SHORT-NAME>PDUs</SHORT-NAME>
+          <ELEMENTS>
+            <DCM-I-PDU>
+              <SHORT-NAME>DiagFunctionalReq_DcmPDU</SHORT-NAME>
+              <LENGTH>7</LENGTH>
+              <DIAG-PDU-TYPE>DIAG-REQUEST</DIAG-PDU-TYPE>
+            </DCM-I-PDU>
+            <DCM-I-PDU>
+              <SHORT-NAME>DiagReqAMP_DCMPDU</SHORT-NAME>
+              <LENGTH>256</LENGTH>
+              <DIAG-PDU-TYPE>DIAG-REQUEST</DIAG-PDU-TYPE>
+            </DCM-I-PDU>
+            <GENERAL-PURPOSE-PDU>
+              <SHORT-NAME>DoIP_ICU_UDP_Request</SHORT-NAME>
+              <CATEGORY>DoIP</CATEGORY>
+              <LENGTH>8</LENGTH>
+            </GENERAL-PURPOSE-PDU>
+            <GENERAL-PURPOSE-PDU>
+              <SHORT-NAME>DoIP_ICU_UDP_Response</SHORT-NAME>
+              <CATEGORY>DoIP</CATEGORY>
+              <LENGTH>8</LENGTH>
+            </GENERAL-PURPOSE-PDU>
+            <I-SIGNAL-I-PDU>
+              <SHORT-NAME>ACF_State01_PDU</SHORT-NAME>
+              <LENGTH>2</LENGTH>
+              <I-PDU-TIMING-SPECIFICATIONS>
+                <I-PDU-TIMING>
+                  <TRANSMISSION-MODE-DECLARATION>
+                    <TRANSMISSION-MODE-CONDITIONS>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/C/PDUs/ACF_State01_PDU/BCameraFailureState</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/C/PDUs/ACF_State01_PDU/NCameraSystemState</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                    </TRANSMISSION-MODE-CONDITIONS>
+                    <TRANSMISSION-MODE-TRUE-TIMING>
+                      <CYCLIC-TIMING>
+                        <TIME-OFFSET>
+                          <VALUE>0</VALUE>
+                        </TIME-OFFSET>
+                        <TIME-PERIOD>
+                          <VALUE>0.2</VALUE>
+                        </TIME-PERIOD>
+                      </CYCLIC-TIMING>
+                    </TRANSMISSION-MODE-TRUE-TIMING>
+                  </TRANSMISSION-MODE-DECLARATION>
+                </I-PDU-TIMING>
+              </I-PDU-TIMING-SPECIFICATIONS>
+              <I-SIGNAL-TO-PDU-MAPPINGS>
+                <I-SIGNAL-TO-I-PDU-MAPPING>
+                  <SHORT-NAME>BCameraFailureState</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IBCameraFailureState</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                  <START-POSITION>0</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+                <I-SIGNAL-TO-I-PDU-MAPPING>
+                  <SHORT-NAME>NCameraSystemState</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INCameraSystemState</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                  <START-POSITION>1</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+              </I-SIGNAL-TO-PDU-MAPPINGS>
+            </I-SIGNAL-I-PDU>
+            <I-SIGNAL-I-PDU>
+              <SHORT-NAME>ACUAlarmStatus_PDU</SHORT-NAME>
+              <LENGTH>1</LENGTH>
+              <I-PDU-TIMING-SPECIFICATIONS>
+                <I-PDU-TIMING>
+                  <TRANSMISSION-MODE-DECLARATION>
+                    <TRANSMISSION-MODE-CONDITIONS>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/C/PDUs/ACUAlarmStatus_PDU/NAlarmStatus</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/C/PDUs/ACUAlarmStatus_PDU/SignalIPDUAssignment21864</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                    </TRANSMISSION-MODE-CONDITIONS>
+                    <TRANSMISSION-MODE-TRUE-TIMING>
+                      <CYCLIC-TIMING>
+                        <TIME-OFFSET>
+                          <VALUE>0</VALUE>
+                        </TIME-OFFSET>
+                        <TIME-PERIOD>
+                          <VALUE>0.1</VALUE>
+                        </TIME-PERIOD>
+                      </CYCLIC-TIMING>
+                    </TRANSMISSION-MODE-TRUE-TIMING>
+                  </TRANSMISSION-MODE-DECLARATION>
+                </I-PDU-TIMING>
+              </I-PDU-TIMING-SPECIFICATIONS>
+              <I-SIGNAL-TO-PDU-MAPPINGS>
+                <I-SIGNAL-TO-I-PDU-MAPPING>
+                  <SHORT-NAME>NAlarmStatus</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INAlarmStatus</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
+                  <START-POSITION>3</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+                <I-SIGNAL-TO-I-PDU-MAPPING>
+                  <SHORT-NAME>SignalIPDUAssignment21864</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IBAlarmSystem</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
+                  <START-POSITION>7</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+              </I-SIGNAL-TO-PDU-MAPPINGS>
+            </I-SIGNAL-I-PDU>
+            <I-SIGNAL-I-PDU-GROUP>
+              <SHORT-NAME>ADI_ETH_BODYVLAN_BODY_ISignalIPduGroup_Rx</SHORT-NAME>
+              <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+              <I-SIGNAL-I-PDUS>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/BdyClusterMessage_PDU</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/CHMSLClusterMessage_PDU</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+              </I-SIGNAL-I-PDUS>
+            </I-SIGNAL-I-PDU-GROUP>
+            <I-SIGNAL-I-PDU-GROUP>
+              <SHORT-NAME>ADI_ETH_BODYVLAN_BODY_ISignalIPduGroup_Tx</SHORT-NAME>
+              <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+              <I-SIGNAL-I-PDUS>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/NDiffusedAirProfile_PDU</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/NDriverTempSlider_PDU</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+              </I-SIGNAL-I-PDUS>
+            </I-SIGNAL-I-PDU-GROUP>
+            <I-SIGNAL-I-PDU>
+              <SHORT-NAME>HEC_MCM_PDU</SHORT-NAME>
+              <LENGTH>1</LENGTH>
+              <I-PDU-TIMING-SPECIFICATIONS>
+                <I-PDU-TIMING>
+                  <TRANSMISSION-MODE-DECLARATION>
+                    <TRANSMISSION-MODE-CONDITIONS>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/C/PDUs/HEC_MCM_PDU/Vehicle_SteerWheelPos_Status</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                    </TRANSMISSION-MODE-CONDITIONS>
+                    <TRANSMISSION-MODE-TRUE-TIMING>
+                      <CYCLIC-TIMING>
+                        <TIME-OFFSET>
+                          <VALUE>0</VALUE>
+                        </TIME-OFFSET>
+                        <TIME-PERIOD>
+                          <VALUE>1</VALUE>
+                        </TIME-PERIOD>
+                      </CYCLIC-TIMING>
+                    </TRANSMISSION-MODE-TRUE-TIMING>
+                  </TRANSMISSION-MODE-DECLARATION>
+                </I-PDU-TIMING>
+              </I-PDU-TIMING-SPECIFICATIONS>
+              <I-SIGNAL-TO-PDU-MAPPINGS>
+                <I-SIGNAL-TO-I-PDU-MAPPING>
+                  <SHORT-NAME>Vehicle_SteerWheelPos_Status</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IVehicle_SteerWheelPos_Status</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
+                  <START-POSITION>1</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+              </I-SIGNAL-TO-PDU-MAPPINGS>
+            </I-SIGNAL-I-PDU>
+            <I-SIGNAL-I-PDU>
+              <SHORT-NAME>HMA_State01_PDU</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+              <I-PDU-TIMING-SPECIFICATIONS>
+                <I-PDU-TIMING>
+                  <TRANSMISSION-MODE-DECLARATION>
+                    <TRANSMISSION-MODE-CONDITIONS>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/C/PDUs/HMA_State01_PDU/BIHC_HMA_Recommendation</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/C/PDUs/HMA_State01_PDU/NHMA_State_CRC</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                    </TRANSMISSION-MODE-CONDITIONS>
+                    <TRANSMISSION-MODE-TRUE-TIMING>
+                      <CYCLIC-TIMING>
+                        <TIME-OFFSET>
+                          <VALUE>0</VALUE>
+                        </TIME-OFFSET>
+                        <TIME-PERIOD>
+                          <VALUE>0.04</VALUE>
+                        </TIME-PERIOD>
+                      </CYCLIC-TIMING>
+                    </TRANSMISSION-MODE-TRUE-TIMING>
+                  </TRANSMISSION-MODE-DECLARATION>
+                </I-PDU-TIMING>
+              </I-PDU-TIMING-SPECIFICATIONS>
+              <I-SIGNAL-TO-PDU-MAPPINGS>
+                <I-SIGNAL-TO-I-PDU-MAPPING>
+                  <SHORT-NAME>NIHC_HMA_Status</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INIHC_HMA_Status</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                  <START-POSITION>0</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+                <I-SIGNAL-TO-I-PDU-MAPPING>
+                  <SHORT-NAME>NIHC_HMANoHBReason</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INIHC_HMANoHBReason</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                  <START-POSITION>4</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+              </I-SIGNAL-TO-PDU-MAPPINGS>
+            </I-SIGNAL-I-PDU>
+            <MULTIPLEXED-I-PDU>
+              <SHORT-NAME>NCarConfig</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+              <DYNAMIC-PARTS>
+                <DYNAMIC-PART>
+                  <SEGMENT-POSITIONS>
+                    <SEGMENT-POSITION>
+                      <SEGMENT-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</SEGMENT-BYTE-ORDER>
+                      <SEGMENT-LENGTH>64</SEGMENT-LENGTH>
+                      <SEGMENT-POSITION>7</SEGMENT-POSITION>
+                    </SEGMENT-POSITION>
+                  </SEGMENT-POSITIONS>
+                  <DYNAMIC-PART-ALTERNATIVES>
+                    <DYNAMIC-PART-ALTERNATIVE>
+                      <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/NCarConfig_MX1</I-PDU-REF>
+                      <SELECTOR-FIELD-CODE>1</SELECTOR-FIELD-CODE>
+                    </DYNAMIC-PART-ALTERNATIVE>
+                    <DYNAMIC-PART-ALTERNATIVE>
+                      <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/NCarConfig_MX2</I-PDU-REF>
+                      <SELECTOR-FIELD-CODE>2</SELECTOR-FIELD-CODE>
+                    </DYNAMIC-PART-ALTERNATIVE>
+                  </DYNAMIC-PART-ALTERNATIVES>
+                </DYNAMIC-PART>
+              </DYNAMIC-PARTS>
+              <SELECTOR-FIELD-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</SELECTOR-FIELD-BYTE-ORDER>
+              <SELECTOR-FIELD-LENGTH>3</SELECTOR-FIELD-LENGTH>
+              <SELECTOR-FIELD-START-POSITION>2</SELECTOR-FIELD-START-POSITION>
+            </MULTIPLEXED-I-PDU>
+            <MULTIPLEXED-I-PDU>
+              <SHORT-NAME>VIN</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+              <DYNAMIC-PARTS>
+                <DYNAMIC-PART>
+                  <SEGMENT-POSITIONS>
+                    <SEGMENT-POSITION>
+                      <SEGMENT-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</SEGMENT-BYTE-ORDER>
+                      <SEGMENT-LENGTH>64</SEGMENT-LENGTH>
+                      <SEGMENT-POSITION>7</SEGMENT-POSITION>
+                    </SEGMENT-POSITION>
+                  </SEGMENT-POSITIONS>
+                  <DYNAMIC-PART-ALTERNATIVES>
+                    <DYNAMIC-PART-ALTERNATIVE>
+                      <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/VIN_VIN_Bytes_8_14</I-PDU-REF>
+                      <SELECTOR-FIELD-CODE>1</SELECTOR-FIELD-CODE>
+                    </DYNAMIC-PART-ALTERNATIVE>
+                    <DYNAMIC-PART-ALTERNATIVE>
+                      <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/VIN_VIN_Bytes_1_7</I-PDU-REF>
+                      <INITIAL-DYNAMIC-PART>true</INITIAL-DYNAMIC-PART>
+                      <SELECTOR-FIELD-CODE>0</SELECTOR-FIELD-CODE>
+                    </DYNAMIC-PART-ALTERNATIVE>
+                  </DYNAMIC-PART-ALTERNATIVES>
+                </DYNAMIC-PART>
+              </DYNAMIC-PARTS>
+              <SELECTOR-FIELD-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</SELECTOR-FIELD-BYTE-ORDER>
+              <SELECTOR-FIELD-LENGTH>8</SELECTOR-FIELD-LENGTH>
+              <SELECTOR-FIELD-START-POSITION>7</SELECTOR-FIELD-START-POSITION>
+            </MULTIPLEXED-I-PDU>
+            <N-PDU>
+              <SHORT-NAME>DiagFunctionalReq_NPDU</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+            </N-PDU>
+            <N-PDU>
+              <SHORT-NAME>TestRespAMP_TP</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+            </N-PDU>
+            <NM-PDU>
+              <SHORT-NAME>NmADIMessage</SHORT-NAME>
+              <LENGTH>2</LENGTH>
+            </NM-PDU>
+            <NM-PDU>
+              <SHORT-NAME>NmADIMessage_ASR</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+            </NM-PDU>
+            <XCP-PDU>
+              <SHORT-NAME>XCP_ESW_GW_RVC_Req_PDU</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+            </XCP-PDU>
+            <XCP-PDU>
+              <SHORT-NAME>XCP_ESW_GW_RVC_Resp_PDU</SHORT-NAME>
+              <LENGTH>8</LENGTH>
+            </XCP-PDU>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        
+        
+        
+        <AR-PACKAGE>
+          <SHORT-NAME>Signals</SHORT-NAME>
+          <ELEMENTS>
+            <I-SIGNAL-GROUP>
+              <SHORT-NAME>INCruiseSwitch_Group</SHORT-NAME>
+              <I-SIGNAL-REFS>
+                <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INCruiseSwitchChecksum</I-SIGNAL-REF>
+                <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INCruiseSwitchCounter</I-SIGNAL-REF>
+              </I-SIGNAL-REFS>
+              <SYSTEM-SIGNAL-GROUP-REF DEST="SYSTEM-SIGNAL-GROUP">/C/SystemSignalGroups/NCruiseSwitch_Group</SYSTEM-SIGNAL-GROUP-REF>
+            </I-SIGNAL-GROUP>
+            <I-SIGNAL-GROUP>
+              <SHORT-NAME>INDriverModeReq_Group</SHORT-NAME>
+              <I-SIGNAL-REFS>
+                <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IBESPReducedRequested</I-SIGNAL-REF>
+                <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INChassisModeEngaged</I-SIGNAL-REF>
+              </I-SIGNAL-REFS>
+              <SYSTEM-SIGNAL-GROUP-REF DEST="SYSTEM-SIGNAL-GROUP">/C/SystemSignalGroups/NDriverModeReq_Group</SYSTEM-SIGNAL-GROUP-REF>
+            </I-SIGNAL-GROUP>
+            <I-SIGNAL>
+              <SHORT-NAME>IAMP_Audio_Balance_Status</SHORT-NAME>
+              <DATA-TYPE-POLICY>LEGACY</DATA-TYPE-POLICY>
+              <INIT-VALUE>
+                <NUMERICAL-VALUE-SPECIFICATION>
+                  <SHORT-LABEL>Signal_AMP_Audio_Balance_Status</SHORT-LABEL>
+                  <VALUE>18</VALUE>
+                </NUMERICAL-VALUE-SPECIFICATION>
+              </INIT-VALUE>
+              <LENGTH>5</LENGTH>
+              <NETWORK-REPRESENTATION-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <BASE-TYPE-REF DEST="SW-BASE-TYPE">/DataTypes/BaseTypes/uint8_M</BASE-TYPE-REF>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/AMP_Audio_Balance_Status_NW</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </NETWORK-REPRESENTATION-PROPS>
+              <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/AMP_Audio_Balance_Status</SYSTEM-SIGNAL-REF>
+            </I-SIGNAL>
+            <I-SIGNAL>
+              <SHORT-NAME>IAMP_Audio_Bass_Status</SHORT-NAME>
+              <DATA-TYPE-POLICY>LEGACY</DATA-TYPE-POLICY>
+              <INIT-VALUE>
+                <NUMERICAL-VALUE-SPECIFICATION>
+                  <SHORT-LABEL>Signal_AMP_Audio_Bass_Status</SHORT-LABEL>
+                  <VALUE>18</VALUE>
+                </NUMERICAL-VALUE-SPECIFICATION>
+              </INIT-VALUE>
+              <LENGTH>5</LENGTH>
+              <NETWORK-REPRESENTATION-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <BASE-TYPE-REF DEST="SW-BASE-TYPE">/DataTypes/BaseTypes/uint8_M</BASE-TYPE-REF>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/AMP_Audio_Bass_Status_NW</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </NETWORK-REPRESENTATION-PROPS>
+              <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/AMP_Audio_Bass_Status</SYSTEM-SIGNAL-REF>
+            </I-SIGNAL>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        
+        
+        
+        <AR-PACKAGE>
+          <SHORT-NAME>SystemSignalGroups</SHORT-NAME>
+          <ELEMENTS>
+            <SYSTEM-SIGNAL-GROUP>
+              <SHORT-NAME>NCruiseSwitch_Group</SHORT-NAME>
+              <SYSTEM-SIGNAL-REFS>
+                <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/NCruiseSwitchChecksum</SYSTEM-SIGNAL-REF>
+                <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/NCruiseSwitchCounter</SYSTEM-SIGNAL-REF>
+              </SYSTEM-SIGNAL-REFS>
+            </SYSTEM-SIGNAL-GROUP>
+            <SYSTEM-SIGNAL-GROUP>
+              <SHORT-NAME>NDriverModeReq_Group</SHORT-NAME>
+              <SYSTEM-SIGNAL-REFS>
+                <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/BESPReducedRequested</SYSTEM-SIGNAL-REF>
+                <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/NChassisModeEngaged</SYSTEM-SIGNAL-REF>
+              </SYSTEM-SIGNAL-REFS>
+            </SYSTEM-SIGNAL-GROUP>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        
+        
+        <AR-PACKAGE>
+          <SHORT-NAME>SystemSignals</SHORT-NAME>
+          <ELEMENTS>
+            <SYSTEM-SIGNAL>
+              <SHORT-NAME>AMP_Audio_Balance_Status</SHORT-NAME>
+              <PHYSICAL-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/AMP_Audio_Balance_Status_NW</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </PHYSICAL-PROPS>
+            </SYSTEM-SIGNAL>
+            <SYSTEM-SIGNAL>
+              <SHORT-NAME>AMP_Audio_Bass_Status</SHORT-NAME>
+              <PHYSICAL-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/AMP_Audio_Bass_Status_NW</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </PHYSICAL-PROPS>
+            </SYSTEM-SIGNAL>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        
+        
+        
+        <AR-PACKAGE>
+          <SHORT-NAME>TP</SHORT-NAME>
+          <ELEMENTS>
+            <CAN-TP-CONFIG >
+              <SHORT-NAME>ADI_CAN</SHORT-NAME>
+              <COMMUNICATION-CLUSTER-REF DEST="CAN-CLUSTER">/Topo/Clusters/ADI_CAN</COMMUNICATION-CLUSTER-REF>
+              <TP-CHANNELS>
+                <CAN-TP-CHANNEL >
+                  <SHORT-NAME>CAN_Tp_Functional_Channel_ADICAN</SHORT-NAME>
+                  <CHANNEL-MODE>FULL-DUPLEX-MODE</CHANNEL-MODE>
+                </CAN-TP-CHANNEL>
+                <CAN-TP-CHANNEL>
+                  <SHORT-NAME>CAN_Tp_Physical_Channel_ADICAN</SHORT-NAME>
+                  <CHANNEL-MODE>FULL-DUPLEX-MODE</CHANNEL-MODE>
+                </CAN-TP-CHANNEL>
+              </TP-CHANNELS>
+              <TP-CONNECTIONS>
+                <CAN-TP-CONNECTION>
+                  <ADDRESSING-FORMAT>STANDARD</ADDRESSING-FORMAT>
+                  <CAN-TP-CHANNEL-REF DEST="CAN-TP-CHANNEL">/C/TP/ADI_CAN/CAN_Tp_Functional_Channel_ADICAN</CAN-TP-CHANNEL-REF>
+                  <DATA-PDU-REF DEST="N-PDU">/C/PDUs/DiagFunctionalReq_NPDU</DATA-PDU-REF>
+                  <RECEIVER-REFS>
+                    <RECEIVER-REF DEST="CAN-TP-NODE">/C/TP/ADI_CAN/Audio_Amplifier_Highline_ADI_CAN</RECEIVER-REF>
+                    <RECEIVER-REF DEST="CAN-TP-NODE">/C/TP/ADI_CAN/Rear_View_Camera_ADI_CAN</RECEIVER-REF>
+                    <RECEIVER-REF DEST="CAN-TP-NODE">/C/TP/ADI_CAN/Surround_View_Camera_Controller_ADI_CAN</RECEIVER-REF>
+                  </RECEIVER-REFS>
+                  <TA-TYPE>FUNCTIONAL</TA-TYPE>
+                  <TP-SDU-REF DEST="DCM-I-PDU">/C/PDUs/DiagFunctionalReq_DcmPDU</TP-SDU-REF>
+                  <TRANSMITTER-REF DEST="CAN-TP-NODE">/C/TP/ADI_CAN/Infotainment_Control_Unit_ADI_CAN</TRANSMITTER-REF>
+                </CAN-TP-CONNECTION>
+                <CAN-TP-CONNECTION>
+                  <ADDRESSING-FORMAT>STANDARD</ADDRESSING-FORMAT>
+                  <CAN-TP-CHANNEL-REF DEST="CAN-TP-CHANNEL">/C/TP/ADI_CAN/CAN_Tp_Physical_Channel_ADICAN</CAN-TP-CHANNEL-REF>
+                  <DATA-PDU-REF DEST="N-PDU">/C/PDUs/TestRespAMP_TP</DATA-PDU-REF>
+                  <FLOW-CONTROL-PDU-REF DEST="N-PDU">/C/PDUs/TesterReqAMP_TP</FLOW-CONTROL-PDU-REF>
+                  <RECEIVER-REFS>
+                    <RECEIVER-REF DEST="CAN-TP-NODE">/C/TP/ADI_CAN/Infotainment_Control_Unit_ADI_CAN</RECEIVER-REF>
+                  </RECEIVER-REFS>
+                  <TA-TYPE>PHYSICAL</TA-TYPE>
+                  <TP-SDU-REF DEST="DCM-I-PDU">/C/PDUs/DiagRespAMP_DCMPDU</TP-SDU-REF>
+                  <TRANSMITTER-REF DEST="CAN-TP-NODE">/C/TP/ADI_CAN/Audio_Amplifier_Highline_ADI_CAN</TRANSMITTER-REF>
+                </CAN-TP-CONNECTION>
+              </TP-CONNECTIONS>
+              <TP-ECUS>
+                <CAN-TP-ECU>
+                  <ECU-INSTANCE-REF DEST="ECU-INSTANCE">/Topo/HWComponents/Infotainment_Control_Unit</ECU-INSTANCE-REF>
+                </CAN-TP-ECU>
+              </TP-ECUS>
+              <TP-NODES>
+                <CAN-TP-NODE>
+                  <SHORT-NAME>Audio_Amplifier_Highline_ADI_CAN</SHORT-NAME>
+                </CAN-TP-NODE>
+                <CAN-TP-NODE>
+                  <SHORT-NAME>Infotainment_Control_Unit_ADI_CAN</SHORT-NAME>
+                  <CONNECTOR-REF DEST="CAN-COMMUNICATION-CONNECTOR">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN</CONNECTOR-REF>
+                </CAN-TP-NODE>
+              </TP-NODES>
+            </CAN-TP-CONFIG>
+            <DO-IP-TP-CONFIG>
+              <SHORT-NAME>DoIP</SHORT-NAME>
+              <COMMUNICATION-CLUSTER-REF DEST="ETHERNET-CLUSTER">/Topo/Clusters/Ethernet_Backbone</COMMUNICATION-CLUSTER-REF>
+              <DO-IP-LOGIC-ADDRESSS>
+                <DO-IP-LOGIC-ADDRESS>
+                  <SHORT-NAME>DoIP_ICU_Func</SHORT-NAME>
+                  <ADDRESS>58368</ADDRESS>
+                </DO-IP-LOGIC-ADDRESS>
+                <DO-IP-LOGIC-ADDRESS>
+                  <SHORT-NAME>DoIP_ICU_GW_AMP_Func</SHORT-NAME>
+                  <ADDRESS>58368</ADDRESS>
+                </DO-IP-LOGIC-ADDRESS>
+              </DO-IP-LOGIC-ADDRESSS>
+              <TP-CONNECTIONS>
+                <DO-IP-TP-CONNECTION>
+                  <IDENT>
+                    <SHORT-NAME>DoIP_Tp_ICU_GW_AMP_PhyResponse</SHORT-NAME>
+                  </IDENT>
+                  <DO-IP-SOURCE-ADDRESS-REF DEST="DO-IP-LOGIC-ADDRESS">/C/TP/DoIP/DoIP_ICU_GW_AMP_Phy</DO-IP-SOURCE-ADDRESS-REF>
+                  <DO-IP-TARGET-ADDRESS-REF DEST="DO-IP-LOGIC-ADDRESS">/C/TP/DoIP/OBDTester</DO-IP-TARGET-ADDRESS-REF>
+                  <TP-SDU-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_DIAG/DoIpTp_ICU_AMP_PhysResp_DCMPDU_ETH</TP-SDU-REF>
+                </DO-IP-TP-CONNECTION>
+                <DO-IP-TP-CONNECTION>
+                  <IDENT>
+                    <SHORT-NAME>DoIP_Tp_ICU_GW_RVC_PhyResponse</SHORT-NAME>
+                  </IDENT>
+                  <DO-IP-SOURCE-ADDRESS-REF DEST="DO-IP-LOGIC-ADDRESS">/C/TP/DoIP/DoIP_ICU_GW_RVC_Phy</DO-IP-SOURCE-ADDRESS-REF>
+                  <DO-IP-TARGET-ADDRESS-REF DEST="DO-IP-LOGIC-ADDRESS">/C/TP/DoIP/OBDTester</DO-IP-TARGET-ADDRESS-REF>
+                  <TP-SDU-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_DIAG/DoIpTp_ICU_RVC_PhysResp_DCMPDU_ETH</TP-SDU-REF>
+                </DO-IP-TP-CONNECTION>
+              </TP-CONNECTIONS>
+            </DO-IP-TP-CONFIG>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+    
+    
+    
+    
+    <AR-PACKAGE>
+      <SHORT-NAME>DataConstraints</SHORT-NAME>
+      <ELEMENTS>
+        <DATA-CONSTR>
+          <SHORT-NAME>Generic_Internal_Data_Constraint216</SHORT-NAME>
+          <DATA-CONSTR-RULES>
+            <DATA-CONSTR-RULE>
+              <INTERNAL-CONSTRS>
+                <LOWER-LIMIT INTERVAL-TYPE="CLOSED">0</LOWER-LIMIT>
+                <UPPER-LIMIT INTERVAL-TYPE="CLOSED">12000</UPPER-LIMIT>
+              </INTERNAL-CONSTRS>
+            </DATA-CONSTR-RULE>
+          </DATA-CONSTR-RULES>
+        </DATA-CONSTR>
+        <DATA-CONSTR>
+          <SHORT-NAME>Generic_Internal_Data_Constraint2161</SHORT-NAME>
+          <DATA-CONSTR-RULES>
+            <DATA-CONSTR-RULE>
+              <INTERNAL-CONSTRS>
+                <LOWER-LIMIT INTERVAL-TYPE="CLOSED">0</LOWER-LIMIT>
+                <UPPER-LIMIT INTERVAL-TYPE="CLOSED">12000</UPPER-LIMIT>
+              </INTERNAL-CONSTRS>
+            </DATA-CONSTR-RULE>
+          </DATA-CONSTR-RULES>
+        </DATA-CONSTR>
+      </ELEMENTS>
+    </AR-PACKAGE>
+   
+   
+   
+    <AR-PACKAGE>
+      <SHORT-NAME>DataTypeMappingSets</SHORT-NAME>
+      <ELEMENTS>
+        <DATA-TYPE-MAPPING-SET>
+          <SHORT-NAME>ADAS_HMI_Coordinator</SHORT-NAME>
+          <DATA-TYPE-MAPS>
+            <DATA-TYPE-MAP>
+              <APPLICATION-DATA-TYPE-REF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/BACCOvertakeBoost</APPLICATION-DATA-TYPE-REF>
+              <IMPLEMENTATION-DATA-TYPE-REF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</IMPLEMENTATION-DATA-TYPE-REF>
+            </DATA-TYPE-MAP>
+            <DATA-TYPE-MAP>
+              <APPLICATION-DATA-TYPE-REF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/BACCOvertakePrevent</APPLICATION-DATA-TYPE-REF>
+              <IMPLEMENTATION-DATA-TYPE-REF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</IMPLEMENTATION-DATA-TYPE-REF>
+            </DATA-TYPE-MAP>
+          </DATA-TYPE-MAPS>
+        </DATA-TYPE-MAPPING-SET>
+        <DATA-TYPE-MAPPING-SET>
+          <SHORT-NAME>ADI_Camera_AMP_Mgr</SHORT-NAME>
+          <DATA-TYPE-MAPS>
+            <DATA-TYPE-MAP>
+              <APPLICATION-DATA-TYPE-REF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/AMP_Audio_Balance_Status</APPLICATION-DATA-TYPE-REF>
+              <IMPLEMENTATION-DATA-TYPE-REF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</IMPLEMENTATION-DATA-TYPE-REF>
+            </DATA-TYPE-MAP>
+            <DATA-TYPE-MAP>
+              <APPLICATION-DATA-TYPE-REF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/AMP_Audio_Bass_Status</APPLICATION-DATA-TYPE-REF>
+              <IMPLEMENTATION-DATA-TYPE-REF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</IMPLEMENTATION-DATA-TYPE-REF>
+            </DATA-TYPE-MAP>
+          </DATA-TYPE-MAPS>
+        </DATA-TYPE-MAPPING-SET>
+      </ELEMENTS>
+    </AR-PACKAGE>
+   
+   
+    <AR-PACKAGE>
+      <SHORT-NAME>DataTypes</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE>
+          <SHORT-NAME>ApplicationDataTypes</SHORT-NAME>
+          <ELEMENTS>
+            <APPLICATION-ARRAY-DATA-TYPE>
+              <SHORT-NAME>N_DNS_Server</SHORT-NAME>
+              <CATEGORY>ARRAY</CATEGORY>
+              <SW-DATA-DEF-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <UNIT-REF DEST="UNIT">/DataTypes/Units/NoUnit1</UNIT-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </SW-DATA-DEF-PROPS>
+              <ELEMENT>
+                <SHORT-NAME>N_DNS_Server</SHORT-NAME>
+                <CATEGORY>ARRAY</CATEGORY>
+                <TYPE-TREF DEST="APPLICATION-ARRAY-DATA-TYPE">/DataTypes/ApplicationDataTypes/N_DNS_Server_ArrayElement</TYPE-TREF>
+                <ARRAY-SIZE-SEMANTICS>FIXED-SIZE</ARRAY-SIZE-SEMANTICS>
+                <MAX-NUMBER-OF-ELEMENTS>255</MAX-NUMBER-OF-ELEMENTS>
+              </ELEMENT>
+            </APPLICATION-ARRAY-DATA-TYPE>
+            <APPLICATION-ARRAY-DATA-TYPE>
+              <SHORT-NAME>N_DNS_Server_ArrayElement</SHORT-NAME>
+              <CATEGORY>ARRAY</CATEGORY>
+              <SW-DATA-DEF-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <UNIT-REF DEST="UNIT">/DataTypes/Units/NoUnit1</UNIT-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </SW-DATA-DEF-PROPS>
+              <ELEMENT>
+                <SHORT-NAME>N_DNS_Server_ArrayElement</SHORT-NAME>
+                <CATEGORY>VALUE</CATEGORY>
+                <TYPE-TREF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/N_DNS_Server_Element</TYPE-TREF>
+                <ARRAY-SIZE-SEMANTICS>FIXED-SIZE</ARRAY-SIZE-SEMANTICS>
+                <MAX-NUMBER-OF-ELEMENTS>4</MAX-NUMBER-OF-ELEMENTS>
+              </ELEMENT>
+            </APPLICATION-ARRAY-DATA-TYPE>
+            <APPLICATION-PRIMITIVE-DATA-TYPE>
+              <SHORT-NAME>AMP_Audio_Balance_Status</SHORT-NAME>
+              <CATEGORY>VALUE</CATEGORY>
+              <SW-DATA-DEF-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/AMP_Audio_Balance_Status</COMPU-METHOD-REF>
+                    <SW-INTENDED-RESOLUTION>1.0</SW-INTENDED-RESOLUTION>
+                    <UNIT-REF DEST="UNIT">/DataTypes/Units/NoUnit1</UNIT-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </SW-DATA-DEF-PROPS>
+            </APPLICATION-PRIMITIVE-DATA-TYPE>
+            <APPLICATION-PRIMITIVE-DATA-TYPE>
+              <SHORT-NAME>AMP_Audio_Bass_Status</SHORT-NAME>
+              <CATEGORY>VALUE</CATEGORY>
+              <SW-DATA-DEF-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/AMP_Audio_Bass_Status</COMPU-METHOD-REF>
+                    <SW-INTENDED-RESOLUTION>1.0</SW-INTENDED-RESOLUTION>
+                    <UNIT-REF DEST="UNIT">/DataTypes/Units/NoUnit1</UNIT-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </SW-DATA-DEF-PROPS>
+            </APPLICATION-PRIMITIVE-DATA-TYPE>
+            <APPLICATION-RECORD-DATA-TYPE>
+              <SHORT-NAME>NCruiseSwitch_Group</SHORT-NAME>
+              <CATEGORY>STRUCTURE</CATEGORY>
+              <ELEMENTS>
+                <APPLICATION-RECORD-ELEMENT>
+                  <SHORT-NAME>NCruiseSwitchStatus</SHORT-NAME>
+                  <CATEGORY>VALUE</CATEGORY>
+                  <TYPE-TREF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/NCruiseSwitchStatus</TYPE-TREF>
+                </APPLICATION-RECORD-ELEMENT>
+                <APPLICATION-RECORD-ELEMENT>
+                  <SHORT-NAME>NIndicatorRStatus</SHORT-NAME>
+                  <CATEGORY>VALUE</CATEGORY>
+                  <TYPE-TREF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/NIlluminationActiveStatus</TYPE-TREF>
+                </APPLICATION-RECORD-ELEMENT>
+              </ELEMENTS>
+            </APPLICATION-RECORD-DATA-TYPE>
+            <APPLICATION-RECORD-DATA-TYPE>
+              <SHORT-NAME>NDriverModeReq_Group</SHORT-NAME>
+              <CATEGORY>STRUCTURE</CATEGORY>
+              <ELEMENTS>
+                <APPLICATION-RECORD-ELEMENT>
+                  <SHORT-NAME>NESPOffRequested</SHORT-NAME>
+                  <CATEGORY>VALUE</CATEGORY>
+                  <TYPE-TREF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/NESPOffRequested</TYPE-TREF>
+                </APPLICATION-RECORD-ELEMENT>
+                <APPLICATION-RECORD-ELEMENT>
+                  <SHORT-NAME>NESPModeChangeReq</SHORT-NAME>
+                  <CATEGORY>VALUE</CATEGORY>
+                  <TYPE-TREF DEST="APPLICATION-PRIMITIVE-DATA-TYPE">/DataTypes/ApplicationDataTypes/N2ModeChangeRequested</TYPE-TREF>
+                </APPLICATION-RECORD-ELEMENT>
+              </ELEMENTS>
+            </APPLICATION-RECORD-DATA-TYPE>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>BaseTypes</SHORT-NAME>
+          <ELEMENTS>
+            <SW-ADDR-METHOD>
+              <SHORT-NAME>CONST_VOLATILE</SHORT-NAME>
+            </SW-ADDR-METHOD>
+            <SW-BASE-TYPE>
+              <SHORT-NAME>uint16_M</SHORT-NAME>
+              <CATEGORY>FIXED_LENGTH</CATEGORY>
+              <BASE-TYPE-SIZE>16</BASE-TYPE-SIZE>
+              <BASE-TYPE-ENCODING>NONE</BASE-TYPE-ENCODING>
+              <MEM-ALIGNMENT>0</MEM-ALIGNMENT>
+              <BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</BYTE-ORDER>
+              <NATIVE-DECLARATION>uint16</NATIVE-DECLARATION>
+            </SW-BASE-TYPE>
+            <SW-BASE-TYPE>
+              <SHORT-NAME>uint32_M</SHORT-NAME>
+              <CATEGORY>FIXED_LENGTH</CATEGORY>
+              <BASE-TYPE-SIZE>32</BASE-TYPE-SIZE>
+              <BASE-TYPE-ENCODING>NONE</BASE-TYPE-ENCODING>
+              <MEM-ALIGNMENT>0</MEM-ALIGNMENT>
+              <BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</BYTE-ORDER>
+              <NATIVE-DECLARATION>uint32</NATIVE-DECLARATION>
+            </SW-BASE-TYPE>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>CompuMethods</SHORT-NAME>
+          <ELEMENTS>
+            <COMPU-METHOD>
+              <SHORT-NAME>AMP_Audio_Balance_Status</SHORT-NAME>
+              <CATEGORY>LINEAR</CATEGORY>
+              <COMPU-INTERNAL-TO-PHYS>
+                <COMPU-SCALES>
+                  <COMPU-SCALE>
+                    <SHORT-LABEL>AMP_Audio_Balance_Status</SHORT-LABEL>
+                    <LOWER-LIMIT INTERVAL-TYPE="CLOSED">-9</LOWER-LIMIT>
+                    <UPPER-LIMIT INTERVAL-TYPE="CLOSED">9</UPPER-LIMIT>
+                    <COMPU-RATIONAL-COEFFS>
+                      <COMPU-NUMERATOR>
+                        <V>-9.0</V>
+                        <V>1.0</V>
+                      </COMPU-NUMERATOR>
+                      <COMPU-DENOMINATOR>
+                        <V>1</V>
+                      </COMPU-DENOMINATOR>
+                    </COMPU-RATIONAL-COEFFS>
+                  </COMPU-SCALE>
+                </COMPU-SCALES>
+              </COMPU-INTERNAL-TO-PHYS>
+            </COMPU-METHOD>
+            <COMPU-METHOD>
+              <SHORT-NAME>AMP_Audio_Balance_Status_NW</SHORT-NAME>
+              <CATEGORY>SCALE_LINEAR_AND_TEXTTABLE</CATEGORY>
+              <COMPU-INTERNAL-TO-PHYS>
+                <COMPU-SCALES>
+                  <COMPU-SCALE>
+                    <SHORT-LABEL>AMP_Audio_Balance_Status_NW</SHORT-LABEL>
+                    <LOWER-LIMIT INTERVAL-TYPE="CLOSED">0</LOWER-LIMIT>
+                    <UPPER-LIMIT INTERVAL-TYPE="CLOSED">18</UPPER-LIMIT>
+                    <COMPU-RATIONAL-COEFFS>
+                      <COMPU-NUMERATOR>
+                        <V>-9.0</V>
+                        <V>1.0</V>
+                      </COMPU-NUMERATOR>
+                      <COMPU-DENOMINATOR>
+                        <V>1</V>
+                      </COMPU-DENOMINATOR>
+                    </COMPU-RATIONAL-COEFFS>
+                  </COMPU-SCALE>
+                </COMPU-SCALES>
+              </COMPU-INTERNAL-TO-PHYS>
+              <COMPU-PHYS-TO-INTERNAL>
+                <COMPU-SCALES>
+                  <COMPU-SCALE>
+                    <SHORT-LABEL>AMP_Audio_Balance_Status_NW</SHORT-LABEL>
+                    <LOWER-LIMIT INTERVAL-TYPE="CLOSED">-9</LOWER-LIMIT>
+                    <UPPER-LIMIT INTERVAL-TYPE="CLOSED">9</UPPER-LIMIT>
+                    <COMPU-RATIONAL-COEFFS>
+                      <COMPU-NUMERATOR>
+                        <V>-9.0</V>
+                        <V>1.0</V>
+                      </COMPU-NUMERATOR>
+                      <COMPU-DENOMINATOR>
+                        <V>1</V>
+                      </COMPU-DENOMINATOR>
+                    </COMPU-RATIONAL-COEFFS>
+                  </COMPU-SCALE>
+                </COMPU-SCALES>
+              </COMPU-PHYS-TO-INTERNAL>
+            </COMPU-METHOD>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>ImplementationDataTypes</SHORT-NAME>
+          <ELEMENTS>
+            <IMPLEMENTATION-DATA-TYPE>
+              <SHORT-NAME>BESPReducedRequested</SHORT-NAME>
+              <CATEGORY>VALUE</CATEGORY>
+              <SW-DATA-DEF-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <SW-ALIGNMENT>0</SW-ALIGNMENT>
+                    <BASE-TYPE-REF DEST="SW-BASE-TYPE">/DataTypes/BaseTypes/uint8_M</BASE-TYPE-REF>
+                    <SW-CALIBRATION-ACCESS>NOT-ACCESSIBLE</SW-CALIBRATION-ACCESS>
+                    <DATA-CONSTR-REF DEST="DATA-CONSTR">/DataConstraints/uint81</DATA-CONSTR-REF>
+                    <SW-REFRESH-TIMING>
+                      <CSE-CODE>3</CSE-CODE>
+                      <CSE-CODE-FACTOR>0</CSE-CODE-FACTOR>
+                    </SW-REFRESH-TIMING>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </SW-DATA-DEF-PROPS>
+            </IMPLEMENTATION-DATA-TYPE>
+            <IMPLEMENTATION-DATA-TYPE>
+              <SHORT-NAME>NChassisModeEngaged</SHORT-NAME>
+              <CATEGORY>VALUE</CATEGORY>
+              <SW-DATA-DEF-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <SW-ALIGNMENT>0</SW-ALIGNMENT>
+                    <BASE-TYPE-REF DEST="SW-BASE-TYPE">/DataTypes/BaseTypes/uint8_M</BASE-TYPE-REF>
+                    <SW-CALIBRATION-ACCESS>NOT-ACCESSIBLE</SW-CALIBRATION-ACCESS>
+                    <DATA-CONSTR-REF DEST="DATA-CONSTR">/DataConstraints/uint8_M25</DATA-CONSTR-REF>
+                    <SW-REFRESH-TIMING>
+                      <CSE-CODE>3</CSE-CODE>
+                      <CSE-CODE-FACTOR>0</CSE-CODE-FACTOR>
+                    </SW-REFRESH-TIMING>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </SW-DATA-DEF-PROPS>
+            </IMPLEMENTATION-DATA-TYPE>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>ModelManagement</SHORT-NAME>
+          <ELEMENTS>
+            <MODE-DECLARATION-GROUP>
+              <SHORT-NAME>Body_LIN_Sch_Switch</SHORT-NAME>
+              <CATEGORY>ALPHABETIC_ORDER</CATEGORY>
+              <INITIAL-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/Body_LIN_Sch_Switch/BodyLINSchedule_Normal</INITIAL-MODE-REF>
+              <MODE-DECLARATIONS>
+                <MODE-DECLARATION>
+                  <SHORT-NAME>BodyLINSchedule_LVHV</SHORT-NAME>
+                  <VALUE>2</VALUE>
+                </MODE-DECLARATION>
+                <MODE-DECLARATION>
+                  <SHORT-NAME>BodyLINSchedule_Normal</SHORT-NAME>
+                  <VALUE>1</VALUE>
+                </MODE-DECLARATION>
+              </MODE-DECLARATIONS>
+              <MODE-TRANSITIONS>
+                <MODE-TRANSITION>
+                  <SHORT-NAME>LVHV_to_Normal</SHORT-NAME>
+                  <ENTERED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/Body_LIN_Sch_Switch/BodyLINSchedule_Normal</ENTERED-MODE-REF>
+                  <EXITED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/Body_LIN_Sch_Switch/BodyLINSchedule_LVHV</EXITED-MODE-REF>
+                </MODE-TRANSITION>
+                <MODE-TRANSITION>
+                  <SHORT-NAME>Normal_to_LVHV</SHORT-NAME>
+                  <ENTERED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/Body_LIN_Sch_Switch/BodyLINSchedule_LVHV</ENTERED-MODE-REF>
+                  <EXITED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/Body_LIN_Sch_Switch/BodyLINSchedule_Normal</EXITED-MODE-REF>
+                </MODE-TRANSITION>
+              </MODE-TRANSITIONS>
+              <ON-TRANSITION-VALUE>3</ON-TRANSITION-VALUE>
+            </MODE-DECLARATION-GROUP>
+            <MODE-DECLARATION-GROUP>
+              <SHORT-NAME>DriverInterface_LIN_Sch_Switch</SHORT-NAME>
+              <CATEGORY>ALPHABETIC_ORDER</CATEGORY>
+              <INITIAL-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/DriverInterface_LIN_Sch_Switch/DriverInterface_Normal</INITIAL-MODE-REF>
+              <MODE-DECLARATIONS>
+                <MODE-DECLARATION>
+                  <SHORT-NAME>DriverInterface_Normal</SHORT-NAME>
+                  <VALUE>1</VALUE>
+                </MODE-DECLARATION>
+                <MODE-DECLARATION>
+                  <SHORT-NAME>DriverInterface_SwcEvent1</SHORT-NAME>
+                  <VALUE>2</VALUE>
+                </MODE-DECLARATION>
+              </MODE-DECLARATIONS>
+              <MODE-TRANSITIONS>
+                <MODE-TRANSITION>
+                  <SHORT-NAME>Normal_to_SwcEvent1</SHORT-NAME>
+                  <ENTERED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/DriverInterface_LIN_Sch_Switch/DriverInterface_SwcEvent1</ENTERED-MODE-REF>
+                  <EXITED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/DriverInterface_LIN_Sch_Switch/DriverInterface_Normal</EXITED-MODE-REF>
+                </MODE-TRANSITION>
+                <MODE-TRANSITION>
+                  <SHORT-NAME>SwcEvent1_to_SwcEvent2</SHORT-NAME>
+                  <ENTERED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/DriverInterface_LIN_Sch_Switch/DriverInterface_SwcEvent2</ENTERED-MODE-REF>
+                  <EXITED-MODE-REF DEST="MODE-DECLARATION">/DataTypes/ModelManagement/DriverInterface_LIN_Sch_Switch/DriverInterface_SwcEvent1</EXITED-MODE-REF>
+                </MODE-TRANSITION>
+              </MODE-TRANSITIONS>
+              <ON-TRANSITION-VALUE>4</ON-TRANSITION-VALUE>
+            </MODE-DECLARATION-GROUP>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>Units</SHORT-NAME>
+          <ELEMENTS>
+            <UNIT>
+              <SHORT-NAME>A</SHORT-NAME>
+              <DISPLAY-NAME>A</DISPLAY-NAME>
+              <FACTOR-SI-TO-UNIT>0</FACTOR-SI-TO-UNIT>
+              <OFFSET-SI-TO-UNIT>0</OFFSET-SI-TO-UNIT>
+            </UNIT>
+            <UNIT>
+              <SHORT-NAME>Amps</SHORT-NAME>
+              <DISPLAY-NAME>Amps</DISPLAY-NAME>
+              <FACTOR-SI-TO-UNIT>0</FACTOR-SI-TO-UNIT>
+              <OFFSET-SI-TO-UNIT>0</OFFSET-SI-TO-UNIT>
+            </UNIT>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+  
+  
+    <AR-PACKAGE>
+      <SHORT-NAME>SoftwareTypes</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE>
+          <SHORT-NAME>ComponentTypes</SHORT-NAME>
+          <ELEMENTS>
+            <APPLICATION-SW-COMPONENT-TYPE>
+              <SHORT-NAME>ADAS_HMI_Coordinator</SHORT-NAME>
+              <PORTS>
+                <P-PORT-PROTOTYPE>
+                  <SHORT-NAME>BCameraStatus</SHORT-NAME>
+                  <PROVIDED-COM-SPECS>
+                    <NONQUEUED-SENDER-COM-SPEC>
+                      <DATA-ELEMENT-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/BActivate_Cmd/Command</DATA-ELEMENT-REF>
+                      <INIT-VALUE>
+                        <NUMERICAL-VALUE-SPECIFICATION>
+                          <SHORT-LABEL>Zero</SHORT-LABEL>
+                          <VALUE>0</VALUE>
+                        </NUMERICAL-VALUE-SPECIFICATION>
+                      </INIT-VALUE>
+                    </NONQUEUED-SENDER-COM-SPEC>
+                  </PROVIDED-COM-SPECS>
+                  <PROVIDED-INTERFACE-TREF DEST="SENDER-RECEIVER-INTERFACE">/SoftwareTypes/Interfaces/BActivate_Cmd</PROVIDED-INTERFACE-TREF>
+                </P-PORT-PROTOTYPE>
+                <P-PORT-PROTOTYPE>
+                  <SHORT-NAME>BPDCViewActive</SHORT-NAME>
+                  <PROVIDED-COM-SPECS>
+                    <NONQUEUED-SENDER-COM-SPEC>
+                      <DATA-ELEMENT-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/BActivate_Cmd/Command</DATA-ELEMENT-REF>
+                      <INIT-VALUE>
+                        <NUMERICAL-VALUE-SPECIFICATION>
+                          <SHORT-LABEL>Zero</SHORT-LABEL>
+                          <VALUE>0</VALUE>
+                        </NUMERICAL-VALUE-SPECIFICATION>
+                      </INIT-VALUE>
+                    </NONQUEUED-SENDER-COM-SPEC>
+                  </PROVIDED-COM-SPECS>
+                  <PROVIDED-INTERFACE-TREF DEST="SENDER-RECEIVER-INTERFACE">/SoftwareTypes/Interfaces/BActivate_Cmd</PROVIDED-INTERFACE-TREF>
+                </P-PORT-PROTOTYPE>
+              </PORTS>
+              <INTERNAL-BEHAVIORS>
+                <SWC-INTERNAL-BEHAVIOR>
+                  <SHORT-NAME>ADAS_HMI_Coordinator</SHORT-NAME>
+                  <DATA-TYPE-MAPPING-REFS>
+                    <DATA-TYPE-MAPPING-REF DEST="DATA-TYPE-MAPPING-SET">/DataTypeMappingSets/ADAS_HMI_Coordinator</DATA-TYPE-MAPPING-REF>
+                  </DATA-TYPE-MAPPING-REFS>
+                  <EVENTS>
+                    <INIT-EVENT>
+                      <SHORT-NAME>ADAS_HMI_Coordinator_InitEv</SHORT-NAME>
+                      <START-ON-EVENT-REF DEST="RUNNABLE-ENTITY">/SoftwareTypes/ComponentTypes/ADAS_HMI_Coordinator/ADAS_HMI_Coordinator/InitRun_ADAS_HMI_Coordinator</START-ON-EVENT-REF>
+                    </INIT-EVENT>
+                    <TIMING-EVENT>
+                      <SHORT-NAME>ADAS_HMI_Coordinator_TimeEv</SHORT-NAME>
+                      <START-ON-EVENT-REF DEST="RUNNABLE-ENTITY">/SoftwareTypes/ComponentTypes/ADAS_HMI_Coordinator/ADAS_HMI_Coordinator/Run_ADAS_HMI_Coordinator</START-ON-EVENT-REF>
+                      <PERIOD>0.01</PERIOD>
+                    </TIMING-EVENT>
+                  </EVENTS>
+                  <RUNNABLES>
+                    <RUNNABLE-ENTITY>
+                      <SHORT-NAME>InitRun_ADAS_HMI_Coordinator</SHORT-NAME>
+                      <SYMBOL>InitRun_ADAS_HMI_Coordinator</SYMBOL>
+                    </RUNNABLE-ENTITY>
+                    <RUNNABLE-ENTITY>
+                      <SHORT-NAME>Run_ADAS_HMI_Coordinator</SHORT-NAME>
+                      <DATA-READ-ACCESSS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>BACCAcousticWarning</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADAS_HMI_Coordinator/BACCAcousticWarning</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/BActivate_Cmd/Command</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>BACCOvertakeBoost</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADAS_HMI_Coordinator/BACCOvertakeBoost</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/BACCOvertakeBoost/BACCOvertakeBoost</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                      </DATA-READ-ACCESSS>
+                      <DATA-WRITE-ACCESSS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>BCameraStatus</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="P-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADAS_HMI_Coordinator/BCameraStatus</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/BActivate_Cmd/Command</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>BPDCViewActive</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="P-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADAS_HMI_Coordinator/BPDCViewActive</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/BActivate_Cmd/Command</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                      </DATA-WRITE-ACCESSS>
+                      <SYMBOL>Run_ADAS_HMI_Coordinator</SYMBOL>
+                    </RUNNABLE-ENTITY>
+                  </RUNNABLES>
+                </SWC-INTERNAL-BEHAVIOR>
+              </INTERNAL-BEHAVIORS>
+            </APPLICATION-SW-COMPONENT-TYPE>
+            <APPLICATION-SW-COMPONENT-TYPE>
+              <SHORT-NAME>ADI_Camera_AMP_Mgr</SHORT-NAME>
+              <PORTS>
+                <P-PORT-PROTOTYPE>
+                  <SHORT-NAME>Audio_Balance_Set</SHORT-NAME>
+                  <PROVIDED-COM-SPECS>
+                    <NONQUEUED-SENDER-COM-SPEC>
+                      <DATA-ELEMENT-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/Audio_Balance_Set/Audio_Balance_Set</DATA-ELEMENT-REF>
+                      <INIT-VALUE>
+                        <NUMERICAL-VALUE-SPECIFICATION>
+                          <SHORT-LABEL>Nine</SHORT-LABEL>
+                          <VALUE>9</VALUE>
+                        </NUMERICAL-VALUE-SPECIFICATION>
+                      </INIT-VALUE>
+                    </NONQUEUED-SENDER-COM-SPEC>
+                  </PROVIDED-COM-SPECS>
+                  <PROVIDED-INTERFACE-TREF DEST="SENDER-RECEIVER-INTERFACE">/SoftwareTypes/Interfaces/Audio_Balance_Set</PROVIDED-INTERFACE-TREF>
+                </P-PORT-PROTOTYPE>
+                <P-PORT-PROTOTYPE>
+                  <SHORT-NAME>Audio_Bass_Set</SHORT-NAME>
+                  <PROVIDED-COM-SPECS>
+                    <NONQUEUED-SENDER-COM-SPEC>
+                      <DATA-ELEMENT-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/Audio_Bass_Set/Audio_Bass_Set</DATA-ELEMENT-REF>
+                      <INIT-VALUE>
+                        <NUMERICAL-VALUE-SPECIFICATION>
+                          <SHORT-LABEL>Nine</SHORT-LABEL>
+                          <VALUE>9</VALUE>
+                        </NUMERICAL-VALUE-SPECIFICATION>
+                      </INIT-VALUE>
+                    </NONQUEUED-SENDER-COM-SPEC>
+                  </PROVIDED-COM-SPECS>
+                  <PROVIDED-INTERFACE-TREF DEST="SENDER-RECEIVER-INTERFACE">/SoftwareTypes/Interfaces/Audio_Bass_Set</PROVIDED-INTERFACE-TREF>
+                </P-PORT-PROTOTYPE>
+              </PORTS>
+              <INTERNAL-BEHAVIORS>
+                <SWC-INTERNAL-BEHAVIOR>
+                  <SHORT-NAME>ADI_Camera_AMP_Mgr</SHORT-NAME>
+                  <DATA-TYPE-MAPPING-REFS>
+                    <DATA-TYPE-MAPPING-REF DEST="DATA-TYPE-MAPPING-SET">/DataTypeMappingSets/ADI_Camera_AMP_Mgr</DATA-TYPE-MAPPING-REF>
+                  </DATA-TYPE-MAPPING-REFS>
+                  <EVENTS>
+                    <INIT-EVENT>
+                      <SHORT-NAME>ADI_Camera_AMP_Mgr_InitEv</SHORT-NAME>
+                      <START-ON-EVENT-REF DEST="RUNNABLE-ENTITY">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/ADI_Camera_AMP_Mgr/InitRun_ADI_Camera_AMP_Mgr</START-ON-EVENT-REF>
+                    </INIT-EVENT>
+                    <TIMING-EVENT>
+                      <SHORT-NAME>ADI_Camera_AMP_Mgr_TimeEv</SHORT-NAME>
+                      <START-ON-EVENT-REF DEST="RUNNABLE-ENTITY">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/ADI_Camera_AMP_Mgr/Run_ADI_Camera_AMP_Mgr</START-ON-EVENT-REF>
+                      <PERIOD>0.01</PERIOD>
+                    </TIMING-EVENT>
+                  </EVENTS>
+                  <RUNNABLES>
+                    <RUNNABLE-ENTITY>
+                      <SHORT-NAME>InitRun_ADI_Camera_AMP_Mgr</SHORT-NAME>
+                      <SYMBOL>InitRun_ADI_Camera_AMP_Mgr</SYMBOL>
+                    </RUNNABLE-ENTITY>
+                    <RUNNABLE-ENTITY>
+                      <SHORT-NAME>Run_ADI_Camera_AMP_Mgr</SHORT-NAME>
+                      <DATA-READ-ACCESSS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>AMP_Audio_Balance_Status</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/AMP_Audio_Balance_Status</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/AMP_Audio_Balance_Status/AMP_Audio_Balance_Status</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>AMP_Audio_Bass_Status</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/AMP_Audio_Bass_Status</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/AMP_Audio_Bass_Status/AMP_Audio_Bass_Status</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                      </DATA-READ-ACCESSS>
+                      <DATA-WRITE-ACCESSS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>Audio_Balance_Set</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="P-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/Audio_Balance_Set</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/Audio_Balance_Set/Audio_Balance_Set</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                        <VARIABLE-ACCESS>
+                          <SHORT-NAME>Audio_Bass_Set</SHORT-NAME>
+                          <ACCESSED-VARIABLE>
+                            <AUTOSAR-VARIABLE-IREF>
+                              <PORT-PROTOTYPE-REF DEST="P-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/Audio_Bass_Set</PORT-PROTOTYPE-REF>
+                              <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/Audio_Bass_Set/Audio_Bass_Set</TARGET-DATA-PROTOTYPE-REF>
+                            </AUTOSAR-VARIABLE-IREF>
+                          </ACCESSED-VARIABLE>
+                        </VARIABLE-ACCESS>
+                      </DATA-WRITE-ACCESSS>
+                      <SYMBOL>Run_ADI_Camera_AMP_Mgr</SYMBOL>
+                    </RUNNABLE-ENTITY>
+                  </RUNNABLES>
+                </SWC-INTERNAL-BEHAVIOR>
+              </INTERNAL-BEHAVIORS>
+            </APPLICATION-SW-COMPONENT-TYPE>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>Interfaces</SHORT-NAME>
+          <ELEMENTS>
+            <CLIENT-SERVER-INTERFACE>
+              <SHORT-NAME>BCheckForUpdate</SHORT-NAME>
+              <IS-SERVICE>false</IS-SERVICE>
+              <OPERATIONS>
+                <CLIENT-SERVER-OPERATION>
+                  <SHORT-NAME>BCheckForUpdate</SHORT-NAME>
+                  <ARGUMENTS>
+                    <ARGUMENT-DATA-PROTOTYPE>
+                      <SHORT-NAME>ACKStatus_BCheckForUpdate</SHORT-NAME>
+                      <TYPE-TREF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</TYPE-TREF>
+                      <DIRECTION>OUT</DIRECTION>
+                    </ARGUMENT-DATA-PROTOTYPE>
+                  </ARGUMENTS>
+                </CLIENT-SERVER-OPERATION>
+              </OPERATIONS>
+            </CLIENT-SERVER-INTERFACE>
+            <CLIENT-SERVER-INTERFACE>
+              <SHORT-NAME>BgetSignalStrength</SHORT-NAME>
+              <IS-SERVICE>false</IS-SERVICE>
+              <OPERATIONS>
+                <CLIENT-SERVER-OPERATION>
+                  <SHORT-NAME>BgetSignalStrength</SHORT-NAME>
+                  <ARGUMENTS>
+                    <ARGUMENT-DATA-PROTOTYPE>
+                      <SHORT-NAME>SignalStrength</SHORT-NAME>
+                      <TYPE-TREF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</TYPE-TREF>
+                      <DIRECTION>IN</DIRECTION>
+                    </ARGUMENT-DATA-PROTOTYPE>
+                    <ARGUMENT-DATA-PROTOTYPE>
+                      <SHORT-NAME>RSSI</SHORT-NAME>
+                      <TYPE-TREF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</TYPE-TREF>
+                      <DIRECTION>IN</DIRECTION>
+                    </ARGUMENT-DATA-PROTOTYPE>
+                  </ARGUMENTS>
+                </CLIENT-SERVER-OPERATION>
+              </OPERATIONS>
+            </CLIENT-SERVER-INTERFACE>
+            <SENDER-RECEIVER-INTERFACE>
+              <SHORT-NAME>AMP_Audio_Balance_Status</SHORT-NAME>
+              <IS-SERVICE>false</IS-SERVICE>
+              <DATA-ELEMENTS>
+                <VARIABLE-DATA-PROTOTYPE>
+                  <SHORT-NAME>AMP_Audio_Balance_Status</SHORT-NAME>
+                  <TYPE-TREF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</TYPE-TREF>
+                </VARIABLE-DATA-PROTOTYPE>
+              </DATA-ELEMENTS>
+            </SENDER-RECEIVER-INTERFACE>
+            <SENDER-RECEIVER-INTERFACE>
+              <SHORT-NAME>AMP_Audio_Bass_Status</SHORT-NAME>
+              <IS-SERVICE>false</IS-SERVICE>
+              <DATA-ELEMENTS>
+                <VARIABLE-DATA-PROTOTYPE>
+                  <SHORT-NAME>AMP_Audio_Bass_Status</SHORT-NAME>
+                  <TYPE-TREF DEST="IMPLEMENTATION-DATA-TYPE">/DataTypes/ImplementationDataTypes/uint8_M</TYPE-TREF>
+                </VARIABLE-DATA-PROTOTYPE>
+              </DATA-ELEMENTS>
+            </SENDER-RECEIVER-INTERFACE>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+  
+  
+    <AR-PACKAGE>
+      <SHORT-NAME>System</SHORT-NAME>
+      <ELEMENTS>
+        <SYSTEM>
+          <SHORT-NAME>System</SHORT-NAME>
+          <CATEGORY>ECU_EXTRACT</CATEGORY>
+          <FIBEX-ELEMENTS>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="CAN-CLUSTER">/Topo/Clusters/ADI_CAN</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="CAN-FRAME">/C/Frames/Message1</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+          </FIBEX-ELEMENTS>
+          <MAPPINGS>
+            <SYSTEM-MAPPING>
+              <SHORT-NAME>Mapping</SHORT-NAME>
+              <DATA-MAPPINGS>
+                <CLIENT-SERVER-TO-SIGNAL-MAPPING>
+                  <CLIENT-SERVER-OPERATION-IREF>
+                    <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                    <CONTEXT-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/Some_IP_OTA_Client</CONTEXT-COMPONENT-REF>
+                    <CONTEXT-PORT-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Some_IP_OTA_Client/BCheckForUpdate</CONTEXT-PORT-REF>
+                    <TARGET-OPERATION-REF DEST="CLIENT-SERVER-OPERATION">/SoftwareTypes/Interfaces/BCheckForUpdate/BCheckForUpdate</TARGET-OPERATION-REF>
+                  </CLIENT-SERVER-OPERATION-IREF>
+                  <RETURN-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/BCheckForUpdate_return</RETURN-SIGNAL-REF>
+                </CLIENT-SERVER-TO-SIGNAL-MAPPING>
+                <CLIENT-SERVER-TO-SIGNAL-MAPPING>
+                  <CLIENT-SERVER-OPERATION-IREF>
+                    <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                    <CONTEXT-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/Some_IP_OTA_Client</CONTEXT-COMPONENT-REF>
+                    <CONTEXT-PORT-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Some_IP_OTA_Client/BpauseIVIDL</CONTEXT-PORT-REF>
+                    <TARGET-OPERATION-REF DEST="CLIENT-SERVER-OPERATION">/SoftwareTypes/Interfaces/BpauseIVIDL/BpauseIVIDL</TARGET-OPERATION-REF>
+                  </CLIENT-SERVER-OPERATION-IREF>
+                  <RETURN-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/BpauseIVIDL_return</RETURN-SIGNAL-REF>
+              </CLIENT-SERVER-TO-SIGNAL-MAPPING>
+                <SENDER-RECEIVER-TO-SIGNAL-GROUP-MAPPING>
+                  <DATA-ELEMENT-IREF>
+                    <CONTEXT-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/ADI_Ctrl_Mgr</CONTEXT-COMPONENT-REF>
+                    <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                    <CONTEXT-PORT-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Ctrl_Mgr/NCruiseSwitch_Group</CONTEXT-PORT-REF>
+                    <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/NCruiseSwitch_Group/NCruiseSwitch_Group</TARGET-DATA-PROTOTYPE-REF>
+                  </DATA-ELEMENT-IREF>
+                  <SIGNAL-GROUP-REF DEST="SYSTEM-SIGNAL-GROUP">/C/SystemSignalGroups/NCruiseSwitch_Group</SIGNAL-GROUP-REF>
+                  <TYPE-MAPPING>
+                    <SENDER-REC-RECORD-TYPE-MAPPING>
+                      <RECORD-ELEMENT-MAPPINGS>
+                        <SENDER-REC-RECORD-ELEMENT-MAPPING>
+                          <IMPLEMENTATION-RECORD-ELEMENT-REF DEST="IMPLEMENTATION-DATA-TYPE-ELEMENT">/DataTypes/ImplementationDataTypes/NCruiseSwitch_Group_IDT/NCruiseSwitchChecksum</IMPLEMENTATION-RECORD-ELEMENT-REF>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/NCruiseSwitchChecksum</SYSTEM-SIGNAL-REF>
+                        </SENDER-REC-RECORD-ELEMENT-MAPPING>
+                        <SENDER-REC-RECORD-ELEMENT-MAPPING>
+                          <IMPLEMENTATION-RECORD-ELEMENT-REF DEST="IMPLEMENTATION-DATA-TYPE-ELEMENT">/DataTypes/ImplementationDataTypes/NCruiseSwitch_Group_IDT/NIndicatorRStatus</IMPLEMENTATION-RECORD-ELEMENT-REF>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/NIndicatorRStatus</SYSTEM-SIGNAL-REF>
+                        </SENDER-REC-RECORD-ELEMENT-MAPPING>
+                      </RECORD-ELEMENT-MAPPINGS>
+                    </SENDER-REC-RECORD-TYPE-MAPPING>
+                  </TYPE-MAPPING>
+                </SENDER-RECEIVER-TO-SIGNAL-GROUP-MAPPING>
+                <SENDER-RECEIVER-TO-SIGNAL-GROUP-MAPPING>
+                  <DATA-ELEMENT-IREF>
+                    <CONTEXT-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/ADI_Ctrl_Mgr</CONTEXT-COMPONENT-REF>
+                    <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                    <CONTEXT-PORT-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Ctrl_Mgr/NDriverModeReq_Group</CONTEXT-PORT-REF>
+                    <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/NDriverModeReq_Group/NDriverModeReq_Group</TARGET-DATA-PROTOTYPE-REF>
+                  </DATA-ELEMENT-IREF>
+                  <SIGNAL-GROUP-REF DEST="SYSTEM-SIGNAL-GROUP">/C/SystemSignalGroups/NDriverModeReq_Group</SIGNAL-GROUP-REF>
+                  <TYPE-MAPPING>
+                    <SENDER-REC-RECORD-TYPE-MAPPING>
+                      <RECORD-ELEMENT-MAPPINGS>
+                        <SENDER-REC-RECORD-ELEMENT-MAPPING>
+                          <IMPLEMENTATION-RECORD-ELEMENT-REF DEST="IMPLEMENTATION-DATA-TYPE-ELEMENT">/DataTypes/ImplementationDataTypes/NDriverModeReq_Group_IDT/BESPReducedRequested</IMPLEMENTATION-RECORD-ELEMENT-REF>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/BESPReducedRequested</SYSTEM-SIGNAL-REF>
+                        </SENDER-REC-RECORD-ELEMENT-MAPPING>
+                        <SENDER-REC-RECORD-ELEMENT-MAPPING>
+                          <IMPLEMENTATION-RECORD-ELEMENT-REF DEST="IMPLEMENTATION-DATA-TYPE-ELEMENT">/DataTypes/ImplementationDataTypes/NDriverModeReq_Group_IDT/NChassisModeEngaged</IMPLEMENTATION-RECORD-ELEMENT-REF>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/NChassisModeEngaged</SYSTEM-SIGNAL-REF>
+                        </SENDER-REC-RECORD-ELEMENT-MAPPING>
+
+                      </RECORD-ELEMENT-MAPPINGS>
+                    </SENDER-REC-RECORD-TYPE-MAPPING>
+                  </TYPE-MAPPING>
+                </SENDER-RECEIVER-TO-SIGNAL-GROUP-MAPPING>
+                <SENDER-RECEIVER-TO-SIGNAL-MAPPING>
+                  <DATA-ELEMENT-IREF>
+                    <CONTEXT-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/ADI_Camera_AMP_Mgr</CONTEXT-COMPONENT-REF>
+                    <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                    <CONTEXT-PORT-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/AMP_Audio_Balance_Status</CONTEXT-PORT-REF>
+                    <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/AMP_Audio_Balance_Status/AMP_Audio_Balance_Status</TARGET-DATA-PROTOTYPE-REF>
+                  </DATA-ELEMENT-IREF>
+                  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/AMP_Audio_Balance_Status</SYSTEM-SIGNAL-REF>
+                </SENDER-RECEIVER-TO-SIGNAL-MAPPING>
+                <SENDER-RECEIVER-TO-SIGNAL-MAPPING>
+                  <DATA-ELEMENT-IREF>
+                    <CONTEXT-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/ADI_Camera_AMP_Mgr</CONTEXT-COMPONENT-REF>
+                    <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                    <CONTEXT-PORT-REF DEST="R-PORT-PROTOTYPE">/SoftwareTypes/ComponentTypes/ADI_Camera_AMP_Mgr/AMP_Audio_Bass_Status</CONTEXT-PORT-REF>
+                    <TARGET-DATA-PROTOTYPE-REF DEST="VARIABLE-DATA-PROTOTYPE">/SoftwareTypes/Interfaces/AMP_Audio_Bass_Status/AMP_Audio_Bass_Status</TARGET-DATA-PROTOTYPE-REF>
+                  </DATA-ELEMENT-IREF>
+                  <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/C/SystemSignals/AMP_Audio_Bass_Status</SYSTEM-SIGNAL-REF>
+                </SENDER-RECEIVER-TO-SIGNAL-MAPPING>
+              </DATA-MAPPINGS>
+              <SW-MAPPINGS>
+                <SWC-TO-ECU-MAPPING UUID="imex_a03278016906b52cbd2e197a9_a03278016906b52cbd2e197a8">
+                  <SHORT-NAME>Mapping_ADAS_HMI_Coordinator_Infotainment_Control_Unit</SHORT-NAME>
+                  <COMPONENT-IREFS>
+                    <COMPONENT-IREF>
+                      <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                      <TARGET-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/ADAS_HMI_Coordinator</TARGET-COMPONENT-REF>
+                    </COMPONENT-IREF>
+                  </COMPONENT-IREFS>
+                  <ECU-INSTANCE-REF DEST="ECU-INSTANCE">/Topo/HWComponents/Infotainment_Control_Unit</ECU-INSTANCE-REF>
+                </SWC-TO-ECU-MAPPING>
+                <SWC-TO-ECU-MAPPING UUID="imex_a02bb251699fb304172325d_a02bb251699fb304172323d">
+                  <SHORT-NAME>Mapping_VIN_ICU_Infotainment_Control_Unit</SHORT-NAME>
+                  <COMPONENT-IREFS>
+                    <COMPONENT-IREF>
+                      <CONTEXT-COMPOSITION-REF DEST="ROOT-SW-COMPOSITION-PROTOTYPE">/System/System/Infotainment_Control_UnitEcuComp</CONTEXT-COMPOSITION-REF>
+                      <TARGET-COMPONENT-REF DEST="SW-COMPONENT-PROTOTYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp/VIN_ICU</TARGET-COMPONENT-REF>
+                    </COMPONENT-IREF>
+                  </COMPONENT-IREFS>
+                  <ECU-INSTANCE-REF DEST="ECU-INSTANCE">/Topo/HWComponents/Infotainment_Control_Unit</ECU-INSTANCE-REF>
+                </SWC-TO-ECU-MAPPING>
+              </SW-MAPPINGS>
+            </SYSTEM-MAPPING>
+          </MAPPINGS>
+          <ROOT-SOFTWARE-COMPOSITIONS>
+            <ROOT-SW-COMPOSITION-PROTOTYPE>
+              <SHORT-NAME>Infotainment_Control_UnitEcuComp</SHORT-NAME>
+              <SOFTWARE-COMPOSITION-TREF DEST="COMPOSITION-SW-COMPONENT-TYPE">/SoftwareTypes/ComponentTypes/Infotainment_Control_UnitEcuComp</SOFTWARE-COMPOSITION-TREF>
+            </ROOT-SW-COMPOSITION-PROTOTYPE>
+          </ROOT-SOFTWARE-COMPOSITIONS>
+        </SYSTEM>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+
+
+   
+   
+    <AR-PACKAGE>
+      <SHORT-NAME>Topo</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE>
+          <SHORT-NAME>Clusters</SHORT-NAME>
+          <ELEMENTS>
+            <CAN-CLUSTER>
+              <SHORT-NAME>ADI_CAN</SHORT-NAME>
+              <CAN-CLUSTER-VARIANTS>
+                <CAN-CLUSTER-CONDITIONAL>
+                  <BAUDRATE>500000</BAUDRATE>
+                  <PHYSICAL-CHANNELS>
+                    <CAN-PHYSICAL-CHANNEL>
+                      <SHORT-NAME>ADI_CAN</SHORT-NAME>
+                      <COMM-CONNECTORS>
+                        <COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                          <COMMUNICATION-CONNECTOR-REF DEST="CAN-COMMUNICATION-CONNECTOR">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN</COMMUNICATION-CONNECTOR-REF>
+                        </COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                      </COMM-CONNECTORS>
+                      <FRAME-TRIGGERINGS>
+                        <CAN-FRAME-TRIGGERING>
+                          <SHORT-NAME>Message1_ADICAN_FrmT</SHORT-NAME>
+                          <FRAME-PORT-REFS>
+                            <FRAME-PORT-REF DEST="FRAME-PORT">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN/Message1_ADICAN_FrmT_Infotainment_Control_Unit</FRAME-PORT-REF>
+                          </FRAME-PORT-REFS>
+                          <FRAME-REF DEST="CAN-FRAME">/C/Frames/Message1</FRAME-REF>
+                          <PDU-TRIGGERINGS>
+                            <PDU-TRIGGERING-REF-CONDITIONAL>
+                              <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/Message1_ADICAN_PDUT</PDU-TRIGGERING-REF>
+                            </PDU-TRIGGERING-REF-CONDITIONAL>
+                          </PDU-TRIGGERINGS>
+                          <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                          <CAN-FRAME-RX-BEHAVIOR>CAN-20</CAN-FRAME-RX-BEHAVIOR>
+                          <CAN-FRAME-TX-BEHAVIOR>CAN-20</CAN-FRAME-TX-BEHAVIOR>
+                          <IDENTIFIER>947</IDENTIFIER>
+                        </CAN-FRAME-TRIGGERING>
+                        <CAN-FRAME-TRIGGERING>
+                          <SHORT-NAME>CSI_1_RVC_ADICAN_FrmT</SHORT-NAME>
+                          <FRAME-PORT-REFS>
+                            <FRAME-PORT-REF DEST="FRAME-PORT">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN/CSI_1_RVC_ADICAN_FrmT_Infotainment_Control_Unit</FRAME-PORT-REF>
+                          </FRAME-PORT-REFS>
+                          <FRAME-REF DEST="CAN-FRAME">/C/Frames/CSI_1_RVC</FRAME-REF>
+                          <PDU-TRIGGERINGS>
+                            <PDU-TRIGGERING-REF-CONDITIONAL>
+                              <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/CSI_1_RVC_PDU_ADICAN_PDUT</PDU-TRIGGERING-REF>
+                            </PDU-TRIGGERING-REF-CONDITIONAL>
+                          </PDU-TRIGGERINGS>
+                          <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                          <CAN-FRAME-RX-BEHAVIOR>CAN-20</CAN-FRAME-RX-BEHAVIOR>
+                          <CAN-FRAME-TX-BEHAVIOR>CAN-20</CAN-FRAME-TX-BEHAVIOR>
+                          <IDENTIFIER>341</IDENTIFIER>
+                        </CAN-FRAME-TRIGGERING>
+                      </FRAME-TRIGGERINGS>
+                      <I-SIGNAL-TRIGGERINGS>
+                        <I-SIGNAL-TRIGGERING>
+                          <SHORT-NAME>AMP_Audio_Balance_Status_ADICAN_SigTxn</SHORT-NAME>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN/AMP_Audio_Balance_Status_ADICAN_SigTxn_Infotainment_Control_Unit_ADI_CAN_in</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IAMP_Audio_Balance_Status</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+
+                        <I-SIGNAL-TRIGGERING>
+                          <SHORT-NAME>AMP_Audio_Bass_Status_ADICAN_SigTxn</SHORT-NAME>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN/AMP_Audio_Bass_Status_ADICAN_SigTxn_Infotainment_Control_Unit_ADI_CAN_in</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IAMP_Audio_Bass_Status</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+                      </I-SIGNAL-TRIGGERINGS>
+
+
+
+
+
+
+
+                      <PDU-TRIGGERINGS>
+                        <PDU-TRIGGERING>
+                          <SHORT-NAME>Message1_ADICAN_PDUT</SHORT-NAME>
+                          <I-PDU-PORT-REFS>
+                            <I-PDU-PORT-REF DEST="I-PDU-PORT">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN/Message1_PDU_Infotainment_Control_Unit_ADI_CAN</I-PDU-PORT-REF>
+                          </I-PDU-PORT-REFS>
+                          <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/Message1_PDU</I-PDU-REF>
+                          <I-SIGNAL-TRIGGERINGS>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/IPART1Totalizer_ADICAN_SigTxn</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/VBattery_ADICAN_SigTxn</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                          </I-SIGNAL-TRIGGERINGS>
+                        </PDU-TRIGGERING>
+                        <PDU-TRIGGERING>
+                          <SHORT-NAME>CSI_1_RVC_PDU_ADICAN_PDUT</SHORT-NAME>
+                          <I-PDU-PORT-REFS>
+                            <I-PDU-PORT-REF DEST="I-PDU-PORT">/Topo/HWComponents/Infotainment_Control_Unit/Infotainment_Control_Unit_ADI_CAN/CSI_1_RVC_PDU_Infotainment_Control_Unit_ADI_CAN</I-PDU-PORT-REF>
+                          </I-PDU-PORT-REFS>
+                          <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/CSI_1_RVC_PDU</I-PDU-REF>
+                          <I-SIGNAL-TRIGGERINGS>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/NRVCSystemStatus_ADICAN_SigTxn</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/NRVCameraECUStatus_ADICAN_SigTxn</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                          </I-SIGNAL-TRIGGERINGS>
+                        </PDU-TRIGGERING>
+                      </PDU-TRIGGERINGS>
+                    </CAN-PHYSICAL-CHANNEL>
+                  </PHYSICAL-CHANNELS>
+                  <PROTOCOL-NAME>CAN</PROTOCOL-NAME>
+                </CAN-CLUSTER-CONDITIONAL>
+              </CAN-CLUSTER-VARIANTS>
+            </CAN-CLUSTER>
+            <ETHERNET-CLUSTER>
+              <SHORT-NAME>Ethernet_Backbone</SHORT-NAME>
+              <ETHERNET-CLUSTER-VARIANTS>
+                <ETHERNET-CLUSTER-CONDITIONAL>
+                  <BAUDRATE>100000000</BAUDRATE>
+                  <PHYSICAL-CHANNELS>
+                    <ETHERNET-PHYSICAL-CHANNEL>
+                      <SHORT-NAME>ETH_BODY</SHORT-NAME>
+                      <COMM-CONNECTORS>
+                        <COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                          <COMMUNICATION-CONNECTOR-REF DEST="ETHERNET-COMMUNICATION-CONNECTOR">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_BODY</COMMUNICATION-CONNECTOR-REF>
+                        </COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                      </COMM-CONNECTORS>
+                      <I-SIGNAL-TRIGGERINGS>
+
+                        <I-SIGNAL-TRIGGERING>
+                          <SHORT-NAME>BeHeatedRearWindowCtrlCmd_Command_BIHC_HMA_Recommendation</SHORT-NAME>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_BODY/BeHeatedRearWindowCtrlCmd_Command_BIHC_HMA_Recommendation_ADI_ETH_BODY_in</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IBIHC_HMA_Recommendation</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+
+                        <I-SIGNAL-TRIGGERING>
+                          <SHORT-NAME>NCHMSLightClusterMessage_NCHMSLightClusterMessage</SHORT-NAME>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_BODY/NCHMSLightClusterMessage_NCHMSLightClusterMessage_ADI_ETH_BODY_in</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/INCHMSLightClusterMessage</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+
+                      </I-SIGNAL-TRIGGERINGS>
+                      <PDU-TRIGGERINGS>
+                        <PDU-TRIGGERING>
+                          <SHORT-NAME>BdyClusterMessage_PDUT</SHORT-NAME>
+                          <I-PDU-PORT-REFS>
+                            <I-PDU-PORT-REF DEST="I-PDU-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_BODY/BdyClusterMessage_PDU_ADI_ETH_BODY</I-PDU-PORT-REF>
+                          </I-PDU-PORT-REFS>
+                          <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/BdyClusterMessage_PDU</I-PDU-REF>
+                          <I-SIGNAL-TRIGGERINGS>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/NCruiseControlClusterMessage_ETH</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/NDTRLClusterMessage_NDTRLClusterMessage</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                          </I-SIGNAL-TRIGGERINGS>
+                        </PDU-TRIGGERING>
+                        <PDU-TRIGGERING>
+                          <SHORT-NAME>CHMSLClusterMessage_PDUT_ETH</SHORT-NAME>
+                          <I-PDU-PORT-REFS>
+                            <I-PDU-PORT-REF DEST="I-PDU-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_BODY/CHMSLClusterMessage_PDU_ADI_ETH_BODY</I-PDU-PORT-REF>
+                          </I-PDU-PORT-REFS>
+                          <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/CHMSLClusterMessage_PDU</I-PDU-REF>
+                          <I-SIGNAL-TRIGGERINGS>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/NCHMSLightClusterMessage_NCHMSLightClusterMessage</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/NReverseLightClusterMessage</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                          </I-SIGNAL-TRIGGERINGS>
+                        </PDU-TRIGGERING>
+
+
+
+                      </PDU-TRIGGERINGS>
+                      <NETWORK-ENDPOINTS>
+                        <NETWORK-ENDPOINT>
+                          <SHORT-NAME>ADI_Unicast_BODY_NEP</SHORT-NAME>
+                          <NETWORK-ENDPOINT-ADDRESSES>
+                            <IPV-6-CONFIGURATION>
+                              <ASSIGNMENT-PRIORITY>1</ASSIGNMENT-PRIORITY>
+                              <HOP-COUNT>0</HOP-COUNT>
+                              <IP-ADDRESS-PREFIX-LENGTH>64</IP-ADDRESS-PREFIX-LENGTH>
+                              <IPV-6-ADDRESS>FD00:0:0:0:0:0:C0A8:A05</IPV-6-ADDRESS>
+                              <IPV-6-ADDRESS-SOURCE>FIXED</IPV-6-ADDRESS-SOURCE>
+                            </IPV-6-CONFIGURATION>
+                          </NETWORK-ENDPOINT-ADDRESSES>
+                          <PRIORITY>1</PRIORITY>
+                        </NETWORK-ENDPOINT>
+                        <NETWORK-ENDPOINT>
+                          <SHORT-NAME>VLAN_BODY_MULTICAST</SHORT-NAME>
+                          <NETWORK-ENDPOINT-ADDRESSES>
+                            <IPV-6-CONFIGURATION>
+                              <ASSIGNMENT-PRIORITY>1</ASSIGNMENT-PRIORITY>
+                              <HOP-COUNT>0</HOP-COUNT>
+                              <IPV-6-ADDRESS>FF08:0:0:0:0:0:C0A8:A01</IPV-6-ADDRESS>
+                              <IPV-6-ADDRESS-SOURCE>FIXED</IPV-6-ADDRESS-SOURCE>
+                            </IPV-6-CONFIGURATION>
+                          </NETWORK-ENDPOINT-ADDRESSES>
+                          <PRIORITY>1</PRIORITY>
+                        </NETWORK-ENDPOINT>
+
+
+
+
+                      </NETWORK-ENDPOINTS>
+                      <SO-AD-CONFIG>
+                        <CONNECTION-BUNDLES>
+                          <SOCKET-CONNECTION-BUNDLE>
+                            <SHORT-NAME>ADI_BODY_Output</SHORT-NAME>
+                            <BUNDLED-CONNECTIONS>
+                              <SOCKET-CONNECTION>
+                                <CLIENT-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/VLAN_BODY_ADI_MULTICAST</CLIENT-PORT-REF>
+                                <PDUS>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40000</HEADER-ID>
+                                    <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/NHVACAutoButtonDrvr_PDUT</PDU-TRIGGERING-REF>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40017</HEADER-ID>
+                                    <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/NHVACDefrostButton_PDUT</PDU-TRIGGERING-REF>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                </PDUS>
+                              </SOCKET-CONNECTION>
+                            </BUNDLED-CONNECTIONS>
+                            <SERVER-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/ADI_BODY_DATA_Tx</SERVER-PORT-REF>
+                          </SOCKET-CONNECTION-BUNDLE>
+
+                          <SOCKET-CONNECTION-BUNDLE>
+                            <SHORT-NAME>ZC1_BODY_Output</SHORT-NAME>
+                            <BUNDLED-CONNECTIONS>
+                              <SOCKET-CONNECTION>
+                                <CLIENT-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/VLAN_BODY_ZC1_MULTICAST</CLIENT-PORT-REF>
+                                <PDUS>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40057</HEADER-ID>
+                                    <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/CHMSLClusterMessage_PDUT_ETH</PDU-TRIGGERING-REF>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40063</HEADER-ID>
+                                    <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/NRlcSafetyClusterMessage_PDT</PDU-TRIGGERING-REF>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                </PDUS>
+                              </SOCKET-CONNECTION>
+                            </BUNDLED-CONNECTIONS>
+                            <SERVER-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/ZC1_BODY_DATA_Tx</SERVER-PORT-REF>
+                          </SOCKET-CONNECTION-BUNDLE>
+
+
+
+                        </CONNECTION-BUNDLES>
+                        <SOCKET-ADDRESSS>
+
+                          <SOCKET-ADDRESS>
+                            <SHORT-NAME>ADI_BODY_DATA_Tx</SHORT-NAME>
+                            <APPLICATION-ENDPOINT>
+                              <SHORT-NAME>ADI_ETH_BODY</SHORT-NAME>
+                              <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/ADI_Unicast_BODY_NEP</NETWORK-ENDPOINT-REF>
+                              <TP-CONFIGURATION>
+                                <UDP-TP>
+                                  <UDP-TP-PORT>
+                                    <PORT-NUMBER>10</PORT-NUMBER>
+                                  </UDP-TP-PORT>
+                                </UDP-TP>
+                              </TP-CONFIGURATION>
+                            </APPLICATION-ENDPOINT>
+                            <CONNECTOR-REF DEST="ETHERNET-COMMUNICATION-CONNECTOR">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_BODY</CONNECTOR-REF>
+                          </SOCKET-ADDRESS>
+
+
+                          <SOCKET-ADDRESS>
+                            <SHORT-NAME>VLAN_BODY_ADI_MULTICAST</SHORT-NAME>
+                            <APPLICATION-ENDPOINT>
+                              <SHORT-NAME>ApplicationEndpoint145</SHORT-NAME>
+                              <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/VLAN_BODY_MULTICAST</NETWORK-ENDPOINT-REF>
+                              <TP-CONFIGURATION>
+                                <UDP-TP>
+                                  <UDP-TP-PORT>
+                                    <PORT-NUMBER>10</PORT-NUMBER>
+                                  </UDP-TP-PORT>
+                                </UDP-TP>
+                              </TP-CONFIGURATION>
+                            </APPLICATION-ENDPOINT>
+                          </SOCKET-ADDRESS>
+
+
+
+
+                        </SOCKET-ADDRESSS>
+                      </SO-AD-CONFIG>
+                      <VLAN>
+                        <SHORT-NAME>VLAN_BODY</SHORT-NAME>
+                        <VLAN-IDENTIFIER>20</VLAN-IDENTIFIER>
+                      </VLAN>
+                    </ETHERNET-PHYSICAL-CHANNEL>
+                    <ETHERNET-PHYSICAL-CHANNEL>
+                      <SHORT-NAME>ETH_CHASSIS</SHORT-NAME>
+                      <COMM-CONNECTORS>
+                        <COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                          <COMMUNICATION-CONNECTOR-REF DEST="ETHERNET-COMMUNICATION-CONNECTOR">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_CHASSIS</COMMUNICATION-CONNECTOR-REF>
+                        </COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                      </COMM-CONNECTORS>
+                      <I-SIGNAL-TRIGGERINGS>
+                        <I-SIGNAL-TRIGGERING>
+                          <SHORT-NAME>BACCOvertakeBoost</SHORT-NAME>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_CHASSIS/BACCOvertakeBoost_ADI_ETH_CHASSIS_in</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IBACCOvertakeBoost</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+                        <I-SIGNAL-TRIGGERING>
+                          <SHORT-NAME>BACCOvertakePrevent</SHORT-NAME>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_CHASSIS/BACCOvertakePrevent_ADI_ETH_CHASSIS_in</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/C/Signals/IBACCOvertakePrevent</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+                      </I-SIGNAL-TRIGGERINGS>
+                      <PDU-TRIGGERINGS>
+
+                        <PDU-TRIGGERING UUID="Oa03278016906b52cbd30f08exOa03278016906b52cbd30f64500">
+                          <SHORT-NAME>ADI_ACF_NAV01_PDUT_ETH</SHORT-NAME>
+                          <I-PDU-PORT-REFS>
+                            <I-PDU-PORT-REF DEST="I-PDU-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_CHASSIS/ADI_ACF_NAV01_PDU_ADI_ETH_CHASSIS</I-PDU-PORT-REF>
+                          </I-PDU-PORT-REFS>
+                          <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/ADI_ACF_NAV01_PDU</I-PDU-REF>
+                          <I-SIGNAL-TRIGGERINGS>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/NNavCountryCode_NNavCountryCode</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+
+
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/NTSRSpdSetpInd_NTSR_SpdSetp_MainSign1_NNavSpdLimit</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                          </I-SIGNAL-TRIGGERINGS>
+                        </PDU-TRIGGERING>
+                        <PDU-TRIGGERING UUID="Oa03278016906b52cbd30f08exN9e9021616b920731d51968b00">
+                           <SHORT-NAME>ARF_Dynamic1_PDUT_ETH</SHORT-NAME>
+                          <I-PDU-PORT-REFS>
+                            <I-PDU-PORT-REF DEST="I-PDU-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_CHASSIS/ARF_Dynamic1_PDU_ADI_ETH_CHASSIS</I-PDU-PORT-REF>
+                          </I-PDU-PORT-REFS>
+                          <I-PDU-REF DEST="I-SIGNAL-I-PDU">/C/PDUs/ARF_Dynamic1_PDU</I-PDU-REF>
+                          <I-SIGNAL-TRIGGERINGS>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/BACCOvertakeBoost</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/BACCOvertakePrevent</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                          </I-SIGNAL-TRIGGERINGS>
+                        </PDU-TRIGGERING>
+
+                      </PDU-TRIGGERINGS>
+                      <NETWORK-ENDPOINTS>
+                        <NETWORK-ENDPOINT>
+                          <SHORT-NAME>ADI_Unicast_CHASSIS_NEP</SHORT-NAME>
+                          <NETWORK-ENDPOINT-ADDRESSES>
+                            <IPV-6-CONFIGURATION>
+                              <ASSIGNMENT-PRIORITY>1</ASSIGNMENT-PRIORITY>
+                              <HOP-COUNT>0</HOP-COUNT>
+                              <IP-ADDRESS-PREFIX-LENGTH>64</IP-ADDRESS-PREFIX-LENGTH>
+                              <IPV-6-ADDRESS>FD00:0:0:0:0:0:C0A8:A35</IPV-6-ADDRESS>
+                              <IPV-6-ADDRESS-SOURCE>FIXED</IPV-6-ADDRESS-SOURCE>
+                            </IPV-6-CONFIGURATION>
+                          </NETWORK-ENDPOINT-ADDRESSES>
+                          <PRIORITY>1</PRIORITY>
+                        </NETWORK-ENDPOINT>
+                        <NETWORK-ENDPOINT>
+                          <SHORT-NAME>ZC1_Unicast_CHASSIS_NEP</SHORT-NAME>
+                          <NETWORK-ENDPOINT-ADDRESSES>
+                            <IPV-6-CONFIGURATION>
+                              <ASSIGNMENT-PRIORITY>1</ASSIGNMENT-PRIORITY>
+                              <HOP-COUNT>0</HOP-COUNT>
+                              <IP-ADDRESS-PREFIX-LENGTH>64</IP-ADDRESS-PREFIX-LENGTH>
+                              <IPV-6-ADDRESS>FD00:0:0:0:0:0:C0A8:A34</IPV-6-ADDRESS>
+                              <IPV-6-ADDRESS-SOURCE>FIXED</IPV-6-ADDRESS-SOURCE>
+                            </IPV-6-CONFIGURATION>
+                          </NETWORK-ENDPOINT-ADDRESSES>
+                          <PRIORITY>1</PRIORITY>
+                        </NETWORK-ENDPOINT>
+                      </NETWORK-ENDPOINTS>
+                      <SO-AD-CONFIG>
+                        <CONNECTION-BUNDLES>
+                          <SOCKET-CONNECTION-BUNDLE>
+                            <SHORT-NAME>ZB1_CHASSIS_Output</SHORT-NAME>
+                            <BUNDLED-CONNECTIONS>
+                              <SOCKET-CONNECTION>
+                                <CLIENT-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/VLAN_CHASSIS_ZB1_MULTICAST</CLIENT-PORT-REF>
+                                <PDUS>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40115</HEADER-ID>
+                                    <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/PCS_1_PDUT_ETH</PDU-TRIGGERING-REF>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40116</HEADER-ID>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                </PDUS>
+                              </SOCKET-CONNECTION>
+                            </BUNDLED-CONNECTIONS>
+                            <SERVER-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/ZB1_CHASSIS_DATA_Tx</SERVER-PORT-REF>
+                          </SOCKET-CONNECTION-BUNDLE>
+
+
+                           <SOCKET-CONNECTION-BUNDLE>
+                            <SHORT-NAME>ZB2_CHASSIS_Output</SHORT-NAME>
+                            <BUNDLED-CONNECTIONS>
+                              <SOCKET-CONNECTION>
+                                <CLIENT-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/VLAN_CHASSIS_ZB2_MULTICAST</CLIENT-PORT-REF>
+                                <PDUS>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40133</HEADER-ID>
+                                    <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/TPMSNWOutput_PDUT_ETH</PDU-TRIGGERING-REF>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                  <SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                    <HEADER-ID>40134</HEADER-ID>
+                                    <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/TPMS_Main_Status_PDUT_ETH</PDU-TRIGGERING-REF>
+                                  </SOCKET-CONNECTION-IPDU-IDENTIFIER>
+                                </PDUS>
+                              </SOCKET-CONNECTION>
+                            </BUNDLED-CONNECTIONS>
+                            <SERVER-PORT-REF DEST="SOCKET-ADDRESS">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/ZB2_CHASSIS_DATA_Tx</SERVER-PORT-REF>
+                          </SOCKET-CONNECTION-BUNDLE>
+                        </CONNECTION-BUNDLES>
+                        <SOCKET-ADDRESSS>
+                          <SOCKET-ADDRESS>
+                            <SHORT-NAME>ADI_CHASSIS_DATA_Tx</SHORT-NAME>
+                            <APPLICATION-ENDPOINT>
+                              <SHORT-NAME>ApplicationEndpoint75</SHORT-NAME>
+                              <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/ADI_Unicast_CHASSIS_NEP</NETWORK-ENDPOINT-REF>
+                              <TP-CONFIGURATION>
+                                <UDP-TP>
+                                  <UDP-TP-PORT>
+                                    <PORT-NUMBER>2</PORT-NUMBER>
+                                  </UDP-TP-PORT>
+                                </UDP-TP>
+                              </TP-CONFIGURATION>
+                            </APPLICATION-ENDPOINT>
+                            <CONNECTOR-REF DEST="ETHERNET-COMMUNICATION-CONNECTOR">/Topo/HWComponents/Infotainment_Control_Unit/ADI_ETH_CHASSIS</CONNECTOR-REF>
+                          </SOCKET-ADDRESS>
+                          <SOCKET-ADDRESS>
+                            <SHORT-NAME>VLAN_CHASSIS_ADI_MULTICAST</SHORT-NAME>
+                            <APPLICATION-ENDPOINT>
+                              <SHORT-NAME>ApplicationEndpoint143</SHORT-NAME>
+                              <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/VLAN_CHASSIS_MULTICAST</NETWORK-ENDPOINT-REF>
+                              <TP-CONFIGURATION>
+                                <UDP-TP>
+                                  <UDP-TP-PORT>
+                                    <PORT-NUMBER>2</PORT-NUMBER>
+                                  </UDP-TP-PORT>
+                                </UDP-TP>
+                              </TP-CONFIGURATION>
+                            </APPLICATION-ENDPOINT>
+                          </SOCKET-ADDRESS>
+                        </SOCKET-ADDRESSS>
+                      </SO-AD-CONFIG>
+                      <VLAN>
+                        <SHORT-NAME>VLAN_CHASSIS</SHORT-NAME>
+                        <VLAN-IDENTIFIER>30</VLAN-IDENTIFIER>
+                      </VLAN>
+                    </ETHERNET-PHYSICAL-CHANNEL>
+                  </PHYSICAL-CHANNELS>
+                  <COUPLING-PORT-CONNECTIONS>
+                    <COUPLING-PORT-CONNECTION>
+                      <FIRST-PORT-REF DEST="COUPLING-PORT">/Topo/HWComponents/ICU_Coupling_Element/INT_ICU_SW_MICRO</FIRST-PORT-REF>
+                      <SECOND-PORT-REF DEST="COUPLING-PORT">/Topo/HWComponents/Infotainment_Control_Unit/ETH_ICU/ETH2</SECOND-PORT-REF>
+                    </COUPLING-PORT-CONNECTION>
+                  </COUPLING-PORT-CONNECTIONS>
+                </ETHERNET-CLUSTER-CONDITIONAL>
+              </ETHERNET-CLUSTER-VARIANTS>
+            </ETHERNET-CLUSTER>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE>
+          <SHORT-NAME>HWComponents</SHORT-NAME>
+          <ELEMENTS>
+            <COUPLING-ELEMENT>
+              <SHORT-NAME>ICU_Coupling_Element</SHORT-NAME>
+              <COMMUNICATION-CLUSTER-REF DEST="ETHERNET-CLUSTER">/Topo/Clusters/Ethernet_Backbone</COMMUNICATION-CLUSTER-REF>
+              <COUPLING-PORTS>
+                <COUPLING-PORT>
+                  <SHORT-NAME>ETH_ICU_OABR_2</SHORT-NAME>
+                  <VLAN-MEMBERSHIPS>
+                    <VLAN-MEMBERSHIP>
+                      <SEND-ACTIVITY>SENT-TAGGED</SEND-ACTIVITY>
+                      <VLAN-REF DEST="ETHERNET-PHYSICAL-CHANNEL">/Topo/Clusters/Ethernet_Backbone/ETH_BODY</VLAN-REF>
+                    </VLAN-MEMBERSHIP>
+                    <VLAN-MEMBERSHIP>
+                      <SEND-ACTIVITY>SENT-TAGGED</SEND-ACTIVITY>
+                      <VLAN-REF DEST="ETHERNET-PHYSICAL-CHANNEL">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS</VLAN-REF>
+                    </VLAN-MEMBERSHIP>
+                  </VLAN-MEMBERSHIPS>
+                </COUPLING-PORT>
+                <COUPLING-PORT>
+                  <SHORT-NAME>INT_ICU_SW_MICRO</SHORT-NAME>
+                  <DEFAULT-VLAN-REF DEST="ETHERNET-PHYSICAL-CHANNEL">/Topo/Clusters/Ethernet_Backbone/ETH_POWERTRAIN</DEFAULT-VLAN-REF>
+                  <VLAN-MEMBERSHIPS>
+                    <VLAN-MEMBERSHIP>
+                      <SEND-ACTIVITY>SENT-TAGGED</SEND-ACTIVITY>
+                      <VLAN-REF DEST="ETHERNET-PHYSICAL-CHANNEL">/Topo/Clusters/Ethernet_Backbone/ETH_BODY</VLAN-REF>
+                    </VLAN-MEMBERSHIP>
+                    <VLAN-MEMBERSHIP>
+                      <SEND-ACTIVITY>SENT-TAGGED</SEND-ACTIVITY>
+                      <VLAN-REF DEST="ETHERNET-PHYSICAL-CHANNEL">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS</VLAN-REF>
+                    </VLAN-MEMBERSHIP>
+                  </VLAN-MEMBERSHIPS>
+                </COUPLING-PORT>
+              </COUPLING-PORTS>
+              <COUPLING-TYPE>SWITCH</COUPLING-TYPE>
+              <ECU-INSTANCE-REF DEST="ECU-INSTANCE">/Topo/HWComponents/Infotainment_Control_Unit</ECU-INSTANCE-REF>
+            </COUPLING-ELEMENT>
+            <ECU-INSTANCE>
+              <SHORT-NAME>Infotainment_Control_Unit</SHORT-NAME>
+              <ASSOCIATED-COM-I-PDU-GROUP-REFS>
+                <ASSOCIATED-COM-I-PDU-GROUP-REF DEST="I-SIGNAL-I-PDU-GROUP">/C/PDUs/ADI_ETH_BODYVLAN_BODY_ISignalIPduGroup_Rx</ASSOCIATED-COM-I-PDU-GROUP-REF>
+                <ASSOCIATED-COM-I-PDU-GROUP-REF DEST="I-SIGNAL-I-PDU-GROUP">/C/PDUs/ADI_ETH_BODYVLAN_BODY_ISignalIPduGroup_Tx</ASSOCIATED-COM-I-PDU-GROUP-REF>
+              </ASSOCIATED-COM-I-PDU-GROUP-REFS>
+              <COMM-CONTROLLERS>
+                <CAN-COMMUNICATION-CONTROLLER>
+                  <SHORT-NAME>ADI_CAN_ICU</SHORT-NAME>
+                </CAN-COMMUNICATION-CONTROLLER>
+                <ETHERNET-COMMUNICATION-CONTROLLER>
+                  <SHORT-NAME>ETH_ICU</SHORT-NAME>
+                  <ETHERNET-COMMUNICATION-CONTROLLER-VARIANTS>
+                    <ETHERNET-COMMUNICATION-CONTROLLER-CONDITIONAL>
+                      <COUPLING-PORTS>
+                        <COUPLING-PORT>
+                          <SHORT-NAME>ETH2</SHORT-NAME>
+                          <COUPLING-PORT-SPEED>0</COUPLING-PORT-SPEED>
+                          <PHYSICAL-LAYER-TYPE>BROAD-R-REACH</PHYSICAL-LAYER-TYPE>
+                          <VLAN-MEMBERSHIPS>
+                            <VLAN-MEMBERSHIP>
+                              <VLAN-REF DEST="ETHERNET-PHYSICAL-CHANNEL">/Topo/Clusters/Ethernet_Backbone/ETH_POWERTRAIN</VLAN-REF>
+                            </VLAN-MEMBERSHIP>
+                          </VLAN-MEMBERSHIPS>
+                        </COUPLING-PORT>
+                      </COUPLING-PORTS>
+                      <MAC-UNICAST-ADDRESS>AA:BB:CC:DD:00:06</MAC-UNICAST-ADDRESS>
+                    </ETHERNET-COMMUNICATION-CONTROLLER-CONDITIONAL>
+                  </ETHERNET-COMMUNICATION-CONTROLLER-VARIANTS>
+                </ETHERNET-COMMUNICATION-CONTROLLER>
+              </COMM-CONTROLLERS>
+              <CONNECTORS>
+                <CAN-COMMUNICATION-CONNECTOR>
+                  <SHORT-NAME>Infotainment_Control_Unit_ADI_CAN</SHORT-NAME>
+                  <COMM-CONTROLLER-REF DEST="CAN-COMMUNICATION-CONTROLLER">/Topo/HWComponents/Infotainment_Control_Unit/ADI_CAN_ICU</COMM-CONTROLLER-REF>
+                  <ECU-COMM-PORT-INSTANCES>
+                    <I-SIGNAL-PORT>
+                      <SHORT-NAME>AMP_Audio_Balance_Status_ADICAN_SigTxn_Infotainment_Control_Unit_ADI_CAN_in</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                    <I-SIGNAL-PORT>
+                      <SHORT-NAME>AMP_Audio_Bass_Status_ADICAN_SigTxn_Infotainment_Control_Unit_ADI_CAN_in</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                    <FRAME-PORT>
+                      <SHORT-NAME>Message1_ADICAN_FrmT_Infotainment_Control_Unit</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+                    </FRAME-PORT>
+                    <I-PDU-PORT>
+                      <SHORT-NAME>Message1_PDU_Infotainment_Control_Unit_ADI_CAN</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+                    </I-PDU-PORT>
+                    <FRAME-PORT>
+                      <SHORT-NAME>CSI_1_RVC_ADICAN_FrmT_Infotainment_Control_Unit</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </FRAME-PORT>
+                    <I-PDU-PORT>
+                      <SHORT-NAME>CSI_1_RVC_PDU_Infotainment_Control_Unit_ADI_CAN</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-PDU-PORT>
+
+                  </ECU-COMM-PORT-INSTANCES>
+                </CAN-COMMUNICATION-CONNECTOR>
+                <ETHERNET-COMMUNICATION-CONNECTOR>
+                  <SHORT-NAME>ADI_ETH_BODY</SHORT-NAME>
+                  <COMM-CONTROLLER-REF DEST="ETHERNET-COMMUNICATION-CONTROLLER">/Topo/HWComponents/Infotainment_Control_Unit/ETH_ICU</COMM-CONTROLLER-REF>
+                  <ECU-COMM-PORT-INSTANCES>
+                    <I-SIGNAL-PORT>
+                      <SHORT-NAME>ADI_Receiver</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                    <I-PDU-PORT>
+                      <SHORT-NAME>BdyClusterMessage_PDU_ADI_ETH_BODY</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-PDU-PORT>
+                    <I-SIGNAL-PORT>
+                      <SHORT-NAME>BeHeatedRearWindowCtrlCmd_Command_BIHC_HMA_Recommendation_ADI_ETH_BODY_in</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                    <I-PDU-PORT>
+                      <SHORT-NAME>CHMSLClusterMessage_PDU_ADI_ETH_BODY</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-PDU-PORT>
+                  </ECU-COMM-PORT-INSTANCES>
+                  <NETWORK-ENDPOINT-REFS>
+                    <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/ADI_Unicast_BODY_NEP</NETWORK-ENDPOINT-REF>
+                    <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_BODY/VLAN_BODY_MULTICAST</NETWORK-ENDPOINT-REF>
+                  </NETWORK-ENDPOINT-REFS>
+                </ETHERNET-COMMUNICATION-CONNECTOR>
+                <ETHERNET-COMMUNICATION-CONNECTOR>
+                  <SHORT-NAME>ADI_ETH_CHASSIS</SHORT-NAME>
+                  <COMM-CONTROLLER-REF DEST="ETHERNET-COMMUNICATION-CONTROLLER">/Topo/HWComponents/Infotainment_Control_Unit/ETH_ICU</COMM-CONTROLLER-REF>
+                  <ECU-COMM-PORT-INSTANCES>
+                    <I-PDU-PORT>
+                      <SHORT-NAME>ADI_ACF_NAV01_PDU_ADI_ETH_CHASSIS</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+                    </I-PDU-PORT>
+                    <I-PDU-PORT>
+                      <SHORT-NAME>ARF_Dynamic1_PDU_ADI_ETH_CHASSIS</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-PDU-PORT>
+                    <I-SIGNAL-PORT>
+                      <SHORT-NAME>BACCOvertakeBoost_ADI_ETH_CHASSIS_in</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                    <I-SIGNAL-PORT>
+                      <SHORT-NAME>BACCOvertakePrevent_ADI_ETH_CHASSIS_in</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                  </ECU-COMM-PORT-INSTANCES>
+                  <NETWORK-ENDPOINT-REFS>
+                    <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/ADI_Unicast_CHASSIS_NEP</NETWORK-ENDPOINT-REF>
+                    <NETWORK-ENDPOINT-REF DEST="NETWORK-ENDPOINT">/Topo/Clusters/Ethernet_Backbone/ETH_CHASSIS/VLAN_CHASSIS_MULTICAST</NETWORK-ENDPOINT-REF>
+                  </NETWORK-ENDPOINT-REFS>
+                </ETHERNET-COMMUNICATION-CONNECTOR>
+              </CONNECTORS>
+              <SLEEP-MODE-SUPPORTED>false</SLEEP-MODE-SUPPORTED>
+              <WAKE-UP-OVER-BUS-SUPPORTED>false</WAKE-UP-OVER-BUS-SUPPORTED>
+            </ECU-INSTANCE>
+            <GATEWAY>
+              <SHORT-NAME>GATEWAY</SHORT-NAME>
+              <ECU-REF DEST="ECU-INSTANCE">/Topo/HWComponents/Infotainment_Control_Unit</ECU-REF>
+              <I-PDU-MAPPINGS>
+                <I-PDU-MAPPING>
+                  <SOURCE-I-PDU-REF DEST="PDU-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/Diag_Response_AMP_PDUT</SOURCE-I-PDU-REF>
+                  <TARGET-I-PDU>
+                    <TARGET-I-PDU-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_DIAG/DoIpTp_ICU_AMP_PhysResp_DCMPDU_ETH</TARGET-I-PDU-REF>
+                  </TARGET-I-PDU>
+                </I-PDU-MAPPING>
+                <I-PDU-MAPPING>
+                  <SOURCE-I-PDU-REF DEST="PDU-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/Diag_Response_AMP_PDUT</SOURCE-I-PDU-REF>
+                  <TARGET-I-PDU>
+                    <TARGET-I-PDU-REF DEST="PDU-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_DIAG/InternalTesterPhyRespAMP_DCMPDU</TARGET-I-PDU-REF>
+                  </TARGET-I-PDU>
+                </I-PDU-MAPPING>
+              </I-PDU-MAPPINGS>
+              <SIGNAL-MAPPINGS>
+                <I-SIGNAL-MAPPING>
+                  <SOURCE-SIGNAL-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/NRVCSystemStatus_ADICAN_SigTxn</SOURCE-SIGNAL-REF>
+                  <TARGET-SIGNAL-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_INTERDOMAIN/NRVCSystemStatus</TARGET-SIGNAL-REF>
+                </I-SIGNAL-MAPPING>
+                <I-SIGNAL-MAPPING>
+                  <SOURCE-SIGNAL-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/ADI_CAN/ADI_CAN/NSVCSystemStatus_ADICAN_SigTxn</SOURCE-SIGNAL-REF>
+                  <TARGET-SIGNAL-REF DEST="I-SIGNAL-TRIGGERING">/Topo/Clusters/Ethernet_Backbone/ETH_INTERDOMAIN/NSVCSystemStatus</TARGET-SIGNAL-REF>
+                </I-SIGNAL-MAPPING>
+              </SIGNAL-MAPPINGS>
+            </GATEWAY>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+  </AR-PACKAGES>
+</AUTOSAR>

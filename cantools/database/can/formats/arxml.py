@@ -25,9 +25,11 @@ def make_xpath(location):
 
 
 # ARXML XPATHs.
-CAN_FRAME_TRIGGERINGS_XPATH = make_xpath([
+PACKAGES_XPATH = make_xpath([
     'AR-PACKAGES',
     'AR-PACKAGE',
+])
+CAN_FRAME_TRIGGERINGS_XPATH = make_xpath([
     'ELEMENTS',
     'CAN-CLUSTER',
     'CAN-CLUSTER-VARIANTS',
@@ -154,16 +156,20 @@ class SystemLoader(object):
         self._compu_method_cache = {}
         self._sw_base_type_cache = {}
 
+    def _load_recursive(self, root, messages):
+        for package in root:
+            messages_found = package.findall(CAN_FRAME_TRIGGERINGS_XPATH, NAMESPACES)
+            if messages_found:
+                for message in messages_found:
+                    messages.append(self.load_message(message))
+            self._load_recursive(package.iterfind(PACKAGES_XPATH, NAMESPACES), messages)
+
     def load(self):
         buses = []
         messages = []
         version = None
 
-        can_frame_triggerings = self.root.iterfind(CAN_FRAME_TRIGGERINGS_XPATH,
-                                                   NAMESPACES)
-
-        for can_frame_triggering in can_frame_triggerings:
-            messages.append(self.load_message(can_frame_triggering))
+        self._load_recursive(self.root.iterfind(PACKAGES_XPATH, NAMESPACES), messages)
 
         return InternalDatabase(messages,
                                 [],
@@ -501,7 +507,6 @@ class SystemLoader(object):
 
         return minimum, maximum, factor, offset, choices
 
-
     def load_signal_type(self, i_signal):
         is_signed = False
         is_float = False
@@ -806,7 +811,7 @@ class EcuExtractLoader(object):
                     is_float = True
 
         if bit_position is None:
-            LOGGER.warning('No bit position found for signal %s.',name)
+            LOGGER.warning('No bit position found for signal %s.', name)
 
             return None
 
@@ -849,7 +854,7 @@ class EcuExtractLoader(object):
             "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='ComConfig']",
             "SUB-CONTAINERS"
         ]),
-                              NAMESPACES)
+            NAMESPACES)
 
     def find_value(self, xpath):
         return self.root.find(make_xpath([
@@ -862,7 +867,7 @@ class EcuExtractLoader(object):
             "SUB-CONTAINERS",
             "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[-1])
         ]),
-                              NAMESPACES)
+            NAMESPACES)
 
     def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref):
         messages = self.root.iterfind(

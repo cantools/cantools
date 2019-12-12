@@ -395,7 +395,7 @@ static inline uint8_t pack_left_shift_u{length}(
     uint8_t shift,
     uint8_t mask)
 {{
-    return (uint8_t)((uint8_t)(value << shift) & mask);
+    return (uint8_t)(value << shift) & mask;
 }}
 '''
 
@@ -405,7 +405,7 @@ static inline uint8_t pack_right_shift_u{length}(
     uint8_t shift,
     uint8_t mask)
 {{
-    return (uint8_t)((uint8_t)(value >> shift) & mask);
+    return (uint8_t)(value >> shift) & mask;
 }}
 '''
 
@@ -415,7 +415,7 @@ static inline {var_type} unpack_left_shift_u{length}(
     uint8_t shift,
     uint8_t mask)
 {{
-    return ({var_type})(({var_type})(value & mask) << shift);
+    return ({var_type})(value & mask) << shift;
 }}
 '''
 
@@ -425,7 +425,7 @@ static inline {var_type} unpack_right_shift_u{length}(
     uint8_t shift,
     uint8_t mask)
 {{
-    return ({var_type})(({var_type})(value & mask) >> shift);
+    return ({var_type})(value & mask) >> shift;
 }}
 '''
 

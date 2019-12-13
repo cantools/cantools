@@ -92,6 +92,10 @@ class Database(object):
 
         return self._dbc
 
+    @dbc.setter
+    def dbc(self, value):
+        self._dbc = value
+
     def add_arxml(self, fp):
         """Read and parse ARXML data from given file-like object and add the
         parsed data to the database.

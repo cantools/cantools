@@ -1,22 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-
-
-# some local modifications:
-
-# remove cantools from module cache:
-try:
-    sys.modules.pop["cantools"]
-except:
-    pass
-
-# add repo's path to the top path for importing modules:
-local_repo_path = r"C:\Users\Wir\Documents\Programmieren\repos\cantools"
-if local_repo_path not in sys.path:
-    sys.path.insert(0, local_repo_path)
-
-
 import math
 import unittest
 from decimal import Decimal
@@ -4822,5 +4806,4 @@ class CanToolsDatabaseTest(unittest.TestCase):
 logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
-    os.chdir("..")
     unittest.main()

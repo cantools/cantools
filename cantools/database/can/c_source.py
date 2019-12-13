@@ -40,6 +40,10 @@ HEADER_FMT = '''\
 #ifndef {include_guard}
 #define {include_guard}
 
+#ifdef __cplusplus
+extern "C" {{
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -65,6 +69,11 @@ HEADER_FMT = '''\
 
 {structs}
 {declarations}
+
+#ifdef __cplusplus
+}}
+#endif
+
 #endif
 '''
 

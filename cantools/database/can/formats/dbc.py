@@ -680,10 +680,10 @@ def _dump_attribute_definitions(database):
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
-            fmt = 'BA_DEF_ {kind}  "{name}" {type_name}  {choices};'
+            fmt = 'BA_DEF_ {kind} "{name}" {type_name}  {choices};'
             choices = ','.join(['"{}"'.format(choice)
                                 for choice in definition.choices])
-            ba_def.append(fmt.format(kind=definition.kind,
+            ba_def.append(fmt.format(kind=get_kind(definition),
                                      name=definition.name,
                                      type_name=definition.type_name,
                                      choices=choices))

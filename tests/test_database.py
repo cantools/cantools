@@ -4815,7 +4815,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db_readback = cantools.database.load_string(dump, 'dbc')
         self.assertEqual(db_readback.messages[0].senders, [NODE_NAME])
 
-
+    def test_database_version_None(self):
+        db = cantools.database.Database()
+        self.assertIsNone(db.version)
+        content = db.version
+        self.assertTrue(db.as_dbc_string().startswith('VERSION ""'))
+            
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.DEBUG)

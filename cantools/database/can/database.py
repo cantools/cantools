@@ -84,6 +84,10 @@ class Database(object):
 
         return self._version
 
+    @version.setter
+    def version(self, value):
+        self._version = value
+
     @property
     def dbc(self):
         """An object containing dbc specific properties like e.g. attributes.

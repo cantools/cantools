@@ -552,8 +552,7 @@ def _dump_messages(database, name_dicts):
 
     def format_receivers(signal):
         if signal.receivers:
-            receivers_unique = [node_dict[rec] for rec in signal.receivers]
-            return ' ' + ','.join(receivers_unique)
+            return ' ' + ','.join([node_dict[rec] for rec in signal.receivers])
         else:
             return 'Vector__XXX'
 

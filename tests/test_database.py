@@ -4695,7 +4695,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         os.remove(filename_dump)
 
     def test_long_names_dict(self):
-        # uniqueNames = cantools.database.can.formats.dbc.UniqueNamesDict
         test_vectors = (
             {},
             {
@@ -4718,7 +4717,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
             },
             )
         for test_vector in test_vectors:
-            # result = uniqueNames(test_vector.keys()).unique_names_dict
             result = cantools.database.can.formats.dbc.UniqueNamesDict(
                     test_vector.keys()).unique_names_dict
             self.assertEqual(result, test_vector)

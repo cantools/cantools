@@ -2020,7 +2020,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
 
     def test_multiplex(self):
-        db = cantools.database.load_file('tests/files/dbc/multiplex.dbc')
+        db = cantools.db.load_file('tests/files/dbc/multiplex.dbc')
 
         message_1 = db.messages[0]
         self.assertTrue(message_1.is_multiplexed())
@@ -2221,7 +2221,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             '           +-- BIT_F')
 
     def test_multiplex_2(self):
-        db = cantools.database.load_file('tests/files/dbc/multiplex_2.dbc')
+        db = cantools.db.load_file('tests/files/dbc/multiplex_2.dbc')
 
         # Shared.
         message = db.messages[0]

@@ -471,9 +471,9 @@ class UniqueNamesDict(object):
                 continue
 
             i = 0
-            for key in [matching_dictkey
+            for key in sorted([matching_dictkey
                         for matching_dictkey in self._result_dict
-                        if self._result_dict[matching_dictkey] == cut_name]:
+                        if self._result_dict[matching_dictkey] == cut_name]):
                 if cut_name == self._result_dict[key]:
                     while i <= 9999:
                         target_name = '{}_{:04d}'.format(cut_name[:27], i)

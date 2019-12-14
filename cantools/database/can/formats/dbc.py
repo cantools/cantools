@@ -563,10 +563,9 @@ def _dump_messages(database, name_dicts):
                 return node_dict[message.senders[0]]
             except KeyError:
                 LOGGER.warning(
-                        """message '{}' related to unknown sender node '{}'.
-                        Sender has been removed."""
+                        "message '{}' related to unknown sender '{}'."
                         .format(message.name, message.senders[0]))
-                return 'Vector__XXX'
+                return message.senders[0]
         else:
             return 'Vector__XXX'
 
@@ -1421,7 +1420,7 @@ def create_unique_names_dicts(database):
 
     def _refresh_one_object_type(obj_type, obj_list):
         if not obj_list:
-            return
+            return dict()
 
         try:
             att_name = {'BO': ATT_NAME_LONG_MESSAGE,

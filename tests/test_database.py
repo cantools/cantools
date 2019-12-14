@@ -4695,8 +4695,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         os.remove(filename_dump)
 
     def test_long_names_dict(self):
-        uniqueNames = cantools.database.can.formats.dbc.UniqueNamesDict
+        # uniqueNames = cantools.database.can.formats.dbc.UniqueNamesDict
         test_vectors = (
+            {},
             {
             'OBJ_long9_123456789_123456789_ABC' : 'OBJ_long9_123456789_123456789_AB',
             'OBJ_long9_123456789_123456789_DEF' : 'OBJ_long9_123456789_123456789_DE',
@@ -4717,7 +4718,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
             },
             )
         for test_vector in test_vectors:
-            result = uniqueNames(test_vector.keys()).unique_names_dict
+            # result = uniqueNames(test_vector.keys()).unique_names_dict
+            result = cantools.database.can.formats.dbc.UniqueNamesDict(
+                    test_vector.keys()).unique_names_dict
             self.assertEqual(result, test_vector)
 
     def test_long_names_from_scratch(self):
@@ -4800,10 +4803,25 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertTrue('Node_6789_123456789_123456789_123456789' in senders)
         self.assertTrue('Sender_2_aaaaaaaaaaaaaaaaaaaaaaaAAAAAA' in senders)
 
+    def test_unknown_sender(self):
+        NODE_NAME = 'Node_not_in_list'
+        db = cantools.database.Database()
+        msg = cantools.database.can.message.Message(
+                frame_id=1,
+                name="msg_dummy",
+                length=8,
+                signals=[],
+                senders=[NODE_NAME])
+        db.messages.append(msg)
+        dump = db.as_dbc_string()
+        db_readback = cantools.database.load_string(dump, 'dbc')
+        self.assertEqual(db_readback.messages[0].senders, [NODE_NAME])
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
+    os.chdir("..")
     unittest.main()

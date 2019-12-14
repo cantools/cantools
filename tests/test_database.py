@@ -186,6 +186,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "environment_variable('EMC_TrdPower', 1, -180, 400, 'deg', 0, 12,"
             " 'DUMMY_NODE_VECTOR0', 'Vector__XXX', 'Elevation Head')")
 
+
     def test_foobar(self):
         db = cantools.db.Database()
         db.add_dbc_file('tests/files/dbc/foobar.dbc')
@@ -810,7 +811,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), "'Fum'")
 
     def test_cp1252_dbc(self):
-        db = cantools.db.load_file('tests/files/dbc/cp1252.dbc')
+        db = cantools.database.load_file('tests/files/dbc/cp1252.dbc')
 
         if sys.version_info[0] > 2:
             self.assertEqual(
@@ -821,7 +822,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 ])[32:].decode('cp1252'))
 
     def test_the_homer(self):
-        db = cantools.database.load_file('tests/files/kcd/the_homer.kcd')
+        db = cantools.db.load_file('tests/files/kcd/the_homer.kcd')
 
         self.assertEqual(db.version, '1.23')
         self.assertEqual(len(db.nodes), 18)
@@ -1284,7 +1285,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(decoded, decoded_message)
 
     def test_empty_kcd(self):
-        db = cantools.database.load_file('tests/files/kcd/empty.kcd')
+        db = cantools.db.load_file('tests/files/kcd/empty.kcd')
 
         self.assertEqual(db.version, None)
         self.assertEqual(db.nodes, [])
@@ -2115,7 +2116,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(decoded, decoded_message)
 
     def test_multiplex_choices(self):
-        db = cantools.database.load_file('tests/files/dbc/multiplex_choices.dbc')
+        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc')
 
         # With Multiplexor and BIT_L as strings.
         decoded_message = {
@@ -4837,5 +4838,4 @@ class CanToolsDatabaseTest(unittest.TestCase):
 logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
-    os.chdir("..")
     unittest.main()

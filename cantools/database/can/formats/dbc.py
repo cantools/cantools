@@ -503,6 +503,7 @@ def _get_node_name(attributes, name):
     except (KeyError, TypeError):
         return name
 
+
 def _get_envvar_name(attributes, name):
     try:
         return attributes['envvar'][name][ATT_NAME_LONG_ENVVAR].value

@@ -1494,7 +1494,6 @@ def dump_string(database):
     """
     name_dicts = create_unique_names_dicts(database)
 
-    version = _dump_version(database)
     bu = _dump_nodes(database, name_dicts['nodes'])
     val_table = _dump_value_tables(database)
     bo = _dump_messages(database, name_dicts)
@@ -1506,7 +1505,7 @@ def dump_string(database):
     ba = _dump_attributes(database, name_dicts)
     val = _dump_choices(database, name_dicts['sigs'])
 
-    return DBC_FMT.format(version=version,
+    return DBC_FMT.format(version=_dump_version(database),
                           bu=' '.join(bu),
                           val_table='\r\n'.join(val_table),
                           bo='\r\n\r\n'.join(bo),

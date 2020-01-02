@@ -3779,6 +3779,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         """
 
+        if sys.version_info < (3, 8):
+            return
+
         filename = 'tests/files/kcd/dump.kcd'
         db = cantools.database.load_file(filename)
 
@@ -4661,7 +4664,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         message = db.get_message_by_name('Foo')
         self.assertEqual(message.name, 'Foo')
-        
+
     def test_issue_163_dbc_newlines(self):
         if sys.version_info[0] < 3:
             return

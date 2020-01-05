@@ -45,6 +45,10 @@ class Node(object):
 
         return self._dbc
 
+    @dbc.setter
+    def dbc(self, value):
+        self._dbc = value
+
     def __repr__(self):
         return "node('{}', {})".format(
             self._name,

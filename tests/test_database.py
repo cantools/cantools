@@ -7,6 +7,7 @@ from decimal import Decimal
 from collections import namedtuple
 import textparser
 import os
+import re
 
 try:
     from unittest.mock import patch
@@ -3786,7 +3787,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
 
         with open(filename, 'rb') as fin:
-            self.assertEqual(db.as_kcd_string().encode('ascii'), fin.read())
+            # ignore '\r' in raw mode to be os independent
+            # (load_file() converts '\r\n' to '\n' on windows implicitely)
+            self.assertEqual(db.as_kcd_string().encode('ascii'),
+                             fin.read().replace(b'\r', b''))
 
     def test_issue_62(self):
         """Test issue 62.
@@ -4208,6 +4212,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(db.messages[7].signals[2].receivers,
                          ['N123456789012345678901234567890123'])
+
+        # environment variables
+        envvar_names = db.dbc.environment_variables
+        self.assertTrue('E1234567890123456789012345678901' in envvar_names)
+        self.assertFalse('E12345678901234567890123456_0000' in envvar_names)
+        self.assertTrue('E12345678901234567890123456789012' in envvar_names)
 
     def test_dbc_long_names_converter(self):
         long_names = [
@@ -4659,7 +4669,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_issue_168_upper_case_file_extension(self):
-        filename = os.path.join('tests', 'files', 'dbc', 'issue_168.DBC')
+        filename = 'tests/files/dbc/issue_168.DBC'
         db = cantools.db.load_file(filename)
 
         message = db.get_message_by_name('Foo')
@@ -4669,21 +4679,176 @@ class CanToolsDatabaseTest(unittest.TestCase):
         if sys.version_info[0] < 3:
             return
 
-        filename_in = os.path.join('tests', 'files', 'dbc',
-                                   'issue_163_newline.dbc')
-        filename_dump = os.path.join('tests', 'files', 'dbc',
-                                     'issue_163_newline_dump.dbc')
+        filename_in = 'tests/files/dbc/issue_163_newline.dbc'
+                                                           
+        filename_dump = 'tests/files/dbc/issue_163_newline_dump.dbc'
 
         db = cantools.database.load_file(filename_in)
         cantools.database.dump_file(db, filename_dump)
         with open(filename_dump, newline='') as fin:
             dumped_content = fin.read()
 
-        import re
         self.assertTrue(dumped_content.find('\r\n'))
         self.assertFalse(re.search('\r[^\n]', dumped_content))
         self.assertFalse(re.search('[^\r]\n', dumped_content))
         os.remove(filename_dump)
+
+    def test_issue_167_long_names_dict(self):
+        """Test the base function of mapping long names to unique short names.
+
+        """
+
+        test_vectors = (
+            {
+            },
+            {
+                'OBJ_long9_123456789_123456789_ABC' : 'OBJ_long9_123456789_123456789_AB',
+                'OBJ_long9_123456789_123456789_DEF' : 'OBJ_long9_123456789_123456789_DE',
+                'OBJ_short_123456789':                'OBJ_short_123456789',
+                'OBJ_56789_123456789_123456789_GH' :  'OBJ_56789_123456789_1234567_0000',
+                'OBJ_56789_123456789_123456789_GHI':  'OBJ_56789_123456789_1234567_0001',
+                'OBJ_56789_123456789_123456789_GHIJ': 'OBJ_56789_123456789_1234567_0002'
+            },
+            {
+                'OBJ_56789_123456789_1234567_0000' : 'OBJ_56789_123456789_1234567_0000',
+                'OBJ_56789_123456789_123456789_ABC': 'OBJ_56789_123456789_1234567_0001',
+                'OBJ_56789_123456789_123456789_ABD': 'OBJ_56789_123456789_1234567_0002'
+            },
+            {
+                'OBJ_56789_123456789_1234567_0001' : 'OBJ_56789_123456789_1234567_0001',
+                'OBJ_56789_123456789_123456789_ABC': 'OBJ_56789_123456789_1234567_0000',
+                'OBJ_56789_123456789_123456789_ABD': 'OBJ_56789_123456789_1234567_0002'
+            })
+        for test_vector in test_vectors:
+            result = cantools.database.can.formats.dbc.create_one_unique_names_dict(
+                    test_vector.keys())
+            self.assertEqual(result, test_vector)
+
+    def test_issue_167_long_names_from_scratch(self):
+        """Test dbc export with mixed short and long symbol names.
+        Create the database by code, i. e. start with an empty database object,
+        add nodes, messages and signals, dump that to dbc format and double
+        check that by reading it back again and comparing it with the objects
+        that had been created.
+
+        """
+
+        msg_name_long = "MSG456789_123456789_123456789_ABC"
+        msg_name_short = "MSG_short"
+        node_name_long = "NODE56789_abcdefghi_ABCDEFGHI_XYZ"
+        node_name_short = "NODE_short"
+        sig_name_long = "SIG456789_123456789_123456789_ABC"
+        sig_name_short = "SIG_short"
+
+        CAN = cantools.database.can
+        node_short = CAN.node.Node(node_name_short, '')
+        node_long = CAN.node.Node(node_name_long, '')
+        sig_short = CAN.signal.Signal(name=sig_name_short, start=1, length=8)
+        sig_long = CAN.signal.Signal(name=sig_name_long, start=9, length=8)
+
+        msg_long = CAN.message.Message(
+                frame_id=1,
+                name=msg_name_long,
+                length=8,
+                signals=[sig_long],
+                senders=[node_name_long])
+        msg_short = CAN.message.Message(
+                frame_id=2,
+                name=msg_name_short,
+                length=8,
+                signals=[sig_short],
+                senders=[node_name_short])
+        db = cantools.database.Database(
+                messages=[msg_short, msg_long],
+                nodes=[node_short, node_long],
+                version=''
+                )
+
+        db.refresh()
+        content = db.as_dbc_string()
+
+        # Check for correct dumping of long symbol names:
+        # - long names in special attribute lines only;
+        # - definition lines with names not longer than 32 chars:
+        self.assertTrue(re.search("BO_ 1 {}: ".format(msg_name_long[:32]), content))
+        self.assertTrue(re.search('BA_ "SystemMessageLongSymbol" BO_ 1 "{}";'.
+                                  format(msg_name_long), content))
+        all_nodes = re.search("^BU_: (.*)$", content, flags=re.M).group(1).split()
+        self.assertTrue(node_name_long[:32] in all_nodes)
+        self.assertTrue(re.search('BA_ "SystemNodeLongSymbol" BU_ {} "{}";'.
+                                  format(node_name_long[:32], node_name_long),
+                                  content))
+        self.assertTrue(re.search("SG_ {} :".format(sig_name_long[:32]), content))
+        self.assertTrue(re.search('BA_ "SystemSignalLongSymbol" SG_ 1 {} "{}";'.
+                                  format(sig_name_long[:32], sig_name_long),
+                                  content))
+
+        # - NO long name attributes for objects with short names
+        self.assertFalse(re.search('BA_ "SystemMessageLongSymbol" BO_ 2 ',
+                                   content))
+        self.assertFalse(re.search('BA_ "SystemNodeLongSymbol" {}'.
+                                   format(node_name_short), content))
+        self.assertFalse(re.search('BA_ "SystemSignalLongSymbol" SG_ 2 ',
+                                   content))
+
+        # double check the dumped content:
+        # import it again and compare the objects whit those created above.
+        db_readback = cantools.database.load_string(content, 'dbc')
+
+        self.assertEqual(set([msg_name_long, msg_name_short]),
+                         set([msg.name for msg in db_readback.messages]))
+        self.assertEqual(set([sig_name_long, sig_name_short]),
+                         set([sig.name for msg in db_readback.messages
+                              for sig in msg.signals]))
+        self.assertEqual(set([node_name_long, node_name_short]),
+                         set([node.name for node in db_readback.nodes]))
+
+    def test_long_names_from_file_multiple_relations(self):
+        """Test if long names are resolved correctly when message has more
+        than 1 sender.
+
+        """
+
+        filename = 'tests/files/dbc/long_names_multiple_relations.dbc'
+        db = cantools.database.load_file(filename)
+        self.assertEqual(db.get_message_by_frame_id(0).name,
+                         'Msg_Long_Name_56789_123456789_123456789')
+        self.assertEqual(db.get_message_by_frame_id(1).name,
+                         'Msg_Long_Name_56789_123456789_123456789_Copy_1')
+        senders = db.get_message_by_frame_id(6).senders
+        self.assertEqual(len(senders), 2, senders)
+        self.assertIn('Node_6789_123456789_123456789_123456789', senders)
+        self.assertIn('Sender_2_aaaaaaaaaaaaaaaaaaaaaaaAAAAAA', senders)
+
+    def test_unknown_sender(self):
+        """Test warning if message has a sender not listed in the node list.
+
+        """
+
+        node_name = 'Node_not_in_list'
+        db = cantools.database.Database()
+        msg = cantools.database.can.message.Message(
+                frame_id=1,
+                name='msg_dummy',
+                length=8,
+                signals=[],
+                senders=[node_name])
+        db.messages.append(msg)
+        dump = db.as_dbc_string()
+        db_readback = cantools.database.load_string(dump, 'dbc')
+        self.assertEqual(db_readback.messages[0].senders, [node_name])
+
+    def test_database_version(self):
+        # default value if db created from scratch (map None to ''):
+        db = cantools.database.Database()
+        self.assertIsNone(db.version)
+        self.assertTrue(db.as_dbc_string().startswith('VERSION ""'))
+
+        # write access to version attribute
+        my_version = "my_version"
+        db.version = my_version
+        self.assertTrue(db.as_dbc_string().startswith('VERSION "{}"'.
+                        format(my_version)))
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

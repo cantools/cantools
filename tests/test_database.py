@@ -4659,7 +4659,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         with open(filename, 'rb') as fin:
             if sys.version_info[0] > 2:
-                print(db.as_dbc_string())
                 self.assertEqual(db.as_dbc_string().encode('cp1252'),
                                  fin.read())
             else:
@@ -4722,84 +4721,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
             result = cantools.database.can.formats.dbc.create_one_unique_names_dict(data)
             self.assertEqual(result, data)
 
-    def test_issue_167_long_names_from_scratch(self):
-        """Test dbc export with mixed short and long symbol names. Create the
-        database by code, i. e. start with an empty database object,
-        add nodes, messages and signals, dump that to dbc format and
-        double check that by reading it back again and comparing it
-        with the objects that had been created.
-
-        """
-
-        msg_name_long = "MSG456789_123456789_123456789_ABC"
-        msg_name_short = "MSG_short"
-        node_name_long = "NODE56789_abcdefghi_ABCDEFGHI_XYZ"
-        node_name_short = "NODE_short"
-        sig_name_long = "SIG456789_123456789_123456789_ABC"
-        sig_name_short = "SIG_short"
-
-        can = cantools.database.can
-        node_short = can.node.Node(node_name_short, '')
-        node_long = can.node.Node(node_name_long, '')
-        sig_short = can.signal.Signal(name=sig_name_short, start=1, length=8)
-        sig_long = can.signal.Signal(name=sig_name_long, start=9, length=8)
-
-        msg_long = can.message.Message(
-            frame_id=1,
-            name=msg_name_long,
-            length=8,
-            signals=[sig_long],
-            senders=[node_name_long])
-        msg_short = can.message.Message(
-            frame_id=2,
-            name=msg_name_short,
-            length=8,
-            signals=[sig_short],
-            senders=[node_name_short])
-        db = cantools.database.Database(
-            messages=[msg_short, msg_long],
-            nodes=[node_short, node_long],
-            version='')
-
-        db.refresh()
-        content = db.as_dbc_string()
-
-        # Check for correct dumping of long symbol names:
-        # - long names in special attribute lines only;
-        # - definition lines with names not longer than 32 chars:
-        self.assertIn("BO_ 1 {}: ".format(msg_name_long[:32]), content)
-        self.assertIn('BA_ "SystemMessageLongSymbol" BO_ 1 "{}";'.format(msg_name_long),
-                      content)
-        all_nodes = re.search("^BU_: (.*)$", content, flags=re.M).group(1).split()
-        self.assertTrue(node_name_long[:32] in all_nodes)
-        self.assertTrue(re.search('BA_ "SystemNodeLongSymbol" BU_ {} "{}";'.
-                                  format(node_name_long[:32], node_name_long),
-                                  content))
-        self.assertTrue(re.search("SG_ {} :".format(sig_name_long[:32]), content))
-        self.assertTrue(re.search('BA_ "SystemSignalLongSymbol" SG_ 1 {} "{}";'.
-                                  format(sig_name_long[:32], sig_name_long),
-                                  content))
-
-        # - NO long name attributes for objects with short names
-        self.assertFalse(re.search('BA_ "SystemMessageLongSymbol" BO_ 2 ',
-                                   content))
-        self.assertFalse(re.search('BA_ "SystemNodeLongSymbol" {}'.
-                                   format(node_name_short), content))
-        self.assertFalse(re.search('BA_ "SystemSignalLongSymbol" SG_ 2 ',
-                                   content))
-
-        # double check the dumped content:
-        # import it again and compare the objects whit those created above.
-        db_readback = cantools.database.load_string(content, 'dbc')
-
-        self.assertEqual(set([msg_name_long, msg_name_short]),
-                         set([msg.name for msg in db_readback.messages]))
-        self.assertEqual(set([sig_name_long, sig_name_short]),
-                         set([sig.name for msg in db_readback.messages
-                              for sig in msg.signals]))
-        self.assertEqual(set([node_name_long, node_name_short]),
-                         set([node.name for node in db_readback.nodes]))
-
     def test_long_names_from_file_multiple_relations(self):
         """Test if long names are resolved correctly when message has more
         than 1 sender.
@@ -4807,15 +4728,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
         """
 
         filename = 'tests/files/dbc/long_names_multiple_relations.dbc'
+        filename_dumped = 'tests/files/dbc/long_names_multiple_relations_dumped.dbc'
         db = cantools.database.load_file(filename)
-        self.assertEqual(db.get_message_by_frame_id(0).name,
-                         'Msg_Long_Name_56789_123456789_123456789')
-        self.assertEqual(db.get_message_by_frame_id(1).name,
-                         'Msg_Long_Name_56789_123456789_123456789_Copy_1')
-        senders = db.get_message_by_frame_id(6).senders
-        self.assertEqual(len(senders), 2, senders)
-        self.assertIn('Node_6789_123456789_123456789_123456789', senders)
-        self.assertIn('Sender_2_aaaaaaaaaaaaaaaaaaaaaaaAAAAAA', senders)
+
+        with open(filename_dumped, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),
+                                 fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_unknown_sender(self):
         """Test warning if message has a sender not listed in the node list.

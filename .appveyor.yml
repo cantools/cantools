@@ -8,6 +8,9 @@ environment:
     - PYTHON: "C:\\Python37-x64"
       PYTHON_ARCH: "64"
 
+    - PYTHON: "C:\\Python38-x64"
+      PYTHON_ARCH: "64"
+
 install:
   - SET PATH=%PYTHON%;%PATH%
   - python --version

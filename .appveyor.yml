@@ -1,0 +1,17 @@
+build: off
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python37"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python37-x64"
+      PYTHON_ARCH: "64"
+
+install:
+  - SET PATH=%PYTHON%;%PATH%
+  - python --version
+  - python -m pip install -r requirements.txt
+
+test_script:
+  - python setup.py test

@@ -3788,7 +3788,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         with open(filename, 'rb') as fin:
             # ignore '\r' in raw mode to be os independent
-            # (load_file() converts '\r\n' to '\n' on windows implicitely)
+            # (load_file() converts '\r\n' to '\n' on windows implicitly)
             self.assertEqual(db.as_kcd_string().encode('ascii'),
                              fin.read().replace(b'\r', b''))
 
@@ -4680,17 +4680,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
             return
 
         filename_in = 'tests/files/dbc/issue_163_newline.dbc'
-                                                           
-        filename_dump = 'tests/files/dbc/issue_163_newline_dump.dbc'
+        filename_dump = 'issue_163_newline_dump.dbc'
 
         db = cantools.database.load_file(filename_in)
         cantools.database.dump_file(db, filename_dump)
-        with open(filename_dump, newline='') as fin:
+
+        with open(filename_dump, 'rb') as fin:
             dumped_content = fin.read()
 
-        self.assertTrue(dumped_content.find('\r\n'))
-        self.assertFalse(re.search('\r[^\n]', dumped_content))
-        self.assertFalse(re.search('[^\r]\n', dumped_content))
+        self.assertIn(b'\r\n', dumped_content)
+        self.assertFalse(re.search(br'\r[^\n]', dumped_content))
+        self.assertFalse(re.search(br'[^\r]\n', dumped_content))
         os.remove(filename_dump)
 
     def test_issue_167_long_names_dict(self):
@@ -4698,7 +4698,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         """
 
-        test_vectors = (
+        datas = [
             {
             },
             {
@@ -4718,18 +4718,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 'OBJ_56789_123456789_1234567_0001' : 'OBJ_56789_123456789_1234567_0001',
                 'OBJ_56789_123456789_123456789_ABC': 'OBJ_56789_123456789_1234567_0000',
                 'OBJ_56789_123456789_123456789_ABD': 'OBJ_56789_123456789_1234567_0002'
-            })
-        for test_vector in test_vectors:
-            result = cantools.database.can.formats.dbc.create_one_unique_names_dict(
-                    test_vector.keys())
-            self.assertEqual(result, test_vector)
+            }
+        ]
+
+        for data in datas:
+            result = cantools.database.can.formats.dbc.create_one_unique_names_dict(data)
+            self.assertEqual(result, data)
 
     def test_issue_167_long_names_from_scratch(self):
-        """Test dbc export with mixed short and long symbol names.
-        Create the database by code, i. e. start with an empty database object,
-        add nodes, messages and signals, dump that to dbc format and double
-        check that by reading it back again and comparing it with the objects
-        that had been created.
+        """Test dbc export with mixed short and long symbol names. Create the
+        database by code, i. e. start with an empty database object,
+        add nodes, messages and signals, dump that to dbc format and
+        double check that by reading it back again and comparing it
+        with the objects that had been created.
 
         """
 
@@ -4740,29 +4741,28 @@ class CanToolsDatabaseTest(unittest.TestCase):
         sig_name_long = "SIG456789_123456789_123456789_ABC"
         sig_name_short = "SIG_short"
 
-        CAN = cantools.database.can
-        node_short = CAN.node.Node(node_name_short, '')
-        node_long = CAN.node.Node(node_name_long, '')
-        sig_short = CAN.signal.Signal(name=sig_name_short, start=1, length=8)
-        sig_long = CAN.signal.Signal(name=sig_name_long, start=9, length=8)
+        can = cantools.database.can
+        node_short = can.node.Node(node_name_short, '')
+        node_long = can.node.Node(node_name_long, '')
+        sig_short = can.signal.Signal(name=sig_name_short, start=1, length=8)
+        sig_long = can.signal.Signal(name=sig_name_long, start=9, length=8)
 
-        msg_long = CAN.message.Message(
-                frame_id=1,
-                name=msg_name_long,
-                length=8,
-                signals=[sig_long],
-                senders=[node_name_long])
-        msg_short = CAN.message.Message(
-                frame_id=2,
-                name=msg_name_short,
-                length=8,
-                signals=[sig_short],
-                senders=[node_name_short])
+        msg_long = can.message.Message(
+            frame_id=1,
+            name=msg_name_long,
+            length=8,
+            signals=[sig_long],
+            senders=[node_name_long])
+        msg_short = can.message.Message(
+            frame_id=2,
+            name=msg_name_short,
+            length=8,
+            signals=[sig_short],
+            senders=[node_name_short])
         db = cantools.database.Database(
-                messages=[msg_short, msg_long],
-                nodes=[node_short, node_long],
-                version=''
-                )
+            messages=[msg_short, msg_long],
+            nodes=[node_short, node_long],
+            version='')
 
         db.refresh()
         content = db.as_dbc_string()
@@ -4770,9 +4770,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # Check for correct dumping of long symbol names:
         # - long names in special attribute lines only;
         # - definition lines with names not longer than 32 chars:
-        self.assertTrue(re.search("BO_ 1 {}: ".format(msg_name_long[:32]), content))
-        self.assertTrue(re.search('BA_ "SystemMessageLongSymbol" BO_ 1 "{}";'.
-                                  format(msg_name_long), content))
+        self.assertIn("BO_ 1 {}: ".format(msg_name_long[:32]), content)
+        self.assertIn('BA_ "SystemMessageLongSymbol" BO_ 1 "{}";'.format(msg_name_long),
+                      content)
         all_nodes = re.search("^BU_: (.*)$", content, flags=re.M).group(1).split()
         self.assertTrue(node_name_long[:32] in all_nodes)
         self.assertTrue(re.search('BA_ "SystemNodeLongSymbol" BU_ {} "{}";'.
@@ -4849,6 +4849,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.version = my_version
         self.assertTrue(db.as_dbc_string().startswith('VERSION "{}"'.
                         format(my_version)))
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

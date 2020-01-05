@@ -3786,11 +3786,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = 'tests/files/kcd/dump.kcd'
         db = cantools.database.load_file(filename)
 
-        with open(filename, 'rb') as fin:
-            # ignore '\r' in raw mode to be os independent
-            # (load_file() converts '\r\n' to '\n' on windows implicitly)
-            self.assertEqual(db.as_kcd_string().encode('ascii'),
-                             fin.read().replace(b'\r', b''))
+        with open(filename, 'r') as fin:
+            self.assertEqual(db.as_kcd_string(), fin.read())
 
     def test_issue_62(self):
         """Test issue 62.

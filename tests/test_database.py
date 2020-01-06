@@ -4216,45 +4216,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertFalse('E12345678901234567890123456_0000' in envvar_names)
         self.assertTrue('E12345678901234567890123456789012' in envvar_names)
 
-    def test_dbc_long_names_converter(self):
-        long_names = [
-            # 32 characters.
-            'M1234567890123456789012345678901',
-            'SS123456789012345678901234577890',
-            # More than 32 characters.
-            'SS12345678901234567890123458789012345',
-            'SS1234567890123456789012345778901',
-            'SS1234567890123456789012345878901234',
-            'SS12345678901234567890123456789012',
-            'S12345678901234567890123456789012',
-            'M123456789012345678901234567890123',
-            'M12345678901234567890123456789012',
-            'MM12345678901234567890123456789012'
-        ]
-
-        short_names = [
-            # 32 characters.
-            'M1234567890123456789012345678901',
-            'SS123456789012345678901234577890',
-            # More than 32 characters.
-            'SS123456789012345678901234587890',
-            'SS1234567890123456789012345_0000',
-            'SS1234567890123456789012345_0001',
-            'SS123456789012345678901234567890',
-            'S1234567890123456789012345678901',
-            'M12345678901234567890123456_0000',
-            'M12345678901234567890123456_0001',
-            'MM123456789012345678901234567890'
-        ]
-
-        converter = dbc.LongNamesConverter(long_names)
-
-        for long_name, short_name in zip(long_names, short_names):
-            self.assertEqual(converter.lookup_name(long_name), short_name)
-
-        self.assertEqual(converter.long_to_short_names_dict,
-                         dict(zip(long_names[2:], short_names[2:])))
-
     def test_system_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
 
@@ -4689,41 +4650,63 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertFalse(re.search(br'[^\r]\n', dumped_content))
         os.remove(filename_dump)
 
-    def test_issue_167_long_names_dict(self):
-        """Test the base function of mapping long names to unique short names.
+    def test_issue_167_long_names_from_scratch(self):
+        """Test dbc export with mixed short and long symbol names. Create the
+        database by code, i.e. start with an empty database object, add
+        nodes, messages and signals, dump that to dbc format. Reload
+        the dumped data and check that it matches the original data.
 
         """
 
-        datas = [
-            {
-            },
-            {
-                'OBJ_long9_123456789_123456789_ABC' : 'OBJ_long9_123456789_123456789_AB',
-                'OBJ_long9_123456789_123456789_DEF' : 'OBJ_long9_123456789_123456789_DE',
-                'OBJ_short_123456789':                'OBJ_short_123456789',
-                'OBJ_56789_123456789_123456789_GH' :  'OBJ_56789_123456789_1234567_0000',
-                'OBJ_56789_123456789_123456789_GHI':  'OBJ_56789_123456789_1234567_0001',
-                'OBJ_56789_123456789_123456789_GHIJ': 'OBJ_56789_123456789_1234567_0002'
-            },
-            {
-                'OBJ_56789_123456789_1234567_0000' : 'OBJ_56789_123456789_1234567_0000',
-                'OBJ_56789_123456789_123456789_ABC': 'OBJ_56789_123456789_1234567_0001',
-                'OBJ_56789_123456789_123456789_ABD': 'OBJ_56789_123456789_1234567_0002'
-            },
-            {
-                'OBJ_56789_123456789_1234567_0001' : 'OBJ_56789_123456789_1234567_0001',
-                'OBJ_56789_123456789_123456789_ABC': 'OBJ_56789_123456789_1234567_0000',
-                'OBJ_56789_123456789_123456789_ABD': 'OBJ_56789_123456789_1234567_0002'
-            }
-        ]
+        can = cantools.database.can
+        db = cantools.database.Database(
+            messages=[
+                can.message.Message(
+                    frame_id=1,
+                    name='MSG456789_123456789_123456789_ABC',
+                    length=8,
+                    signals=[
+                        can.signal.Signal(name='SIG456789_123456789_123456789_ABC',
+                                          start=9,
+                                          length=8)
+                    ],
+                    senders=['NODE56789_abcdefghi_ABCDEFGHI_XYZ']),
+                can.message.Message(
+                    frame_id=2,
+                    name='MSG_short',
+                    length=8,
+                    signals=[
+                        can.signal.Signal(name='SIG_short', start=1, length=8)
+                    ],
+                    senders=['NODE_short'])
+            ],
+            nodes=[
+                can.node.Node('NODE_short', None),
+                can.node.Node('NODE56789_abcdefghi_ABCDEFGHI_XYZ', None)
+            ],
+            version='')
 
-        for data in datas:
-            result = cantools.database.can.formats.dbc.create_one_unique_names_dict(data)
-            self.assertEqual(result, data)
+        db.refresh()
+        db = cantools.database.load_string(db.as_dbc_string())
 
-    def test_long_names_from_file_multiple_relations(self):
-        """Test if long names are resolved correctly when message has more
-        than 1 sender.
+        self.assertEqual(len(db.nodes), 2)
+        self.assertEqual(db.nodes[0].name, 'NODE_short')
+        self.assertEqual(db.nodes[1].name, 'NODE56789_abcdefghi_ABCDEFGHI_XYZ')
+
+        self.assertEqual(len(db.messages), 2)
+
+        message = db.messages[0]
+        self.assertEqual(message.name, 'MSG456789_123456789_123456789_ABC')
+        self.assertEqual(message.senders, ['NODE56789_abcdefghi_ABCDEFGHI_XYZ'])
+        self.assertEqual(message.signals[0].name, 'SIG456789_123456789_123456789_ABC')
+
+        message = db.messages[1]
+        self.assertEqual(message.name, 'MSG_short')
+        self.assertEqual(message.senders, ['NODE_short'])
+        self.assertEqual(message.signals[0].name, 'SIG_short')
+
+    def test_long_names_multiple_relations(self):
+        """Test if long names are resolved correctly.
 
         """
 
@@ -4737,24 +4720,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                  fin.read())
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
-
-    def test_unknown_sender(self):
-        """Test warning if message has a sender not listed in the node list.
-
-        """
-
-        node_name = 'Node_not_in_list'
-        db = cantools.database.Database()
-        msg = cantools.database.can.message.Message(
-                frame_id=1,
-                name='msg_dummy',
-                length=8,
-                signals=[],
-                senders=[node_name])
-        db.messages.append(msg)
-        dump = db.as_dbc_string()
-        db_readback = cantools.database.load_string(dump, 'dbc')
-        self.assertEqual(db_readback.messages[0].senders, [node_name])
 
     def test_database_version(self):
         # default value if db created from scratch (map None to ''):

@@ -7,6 +7,7 @@ from decimal import Decimal
 from collections import namedtuple
 import textparser
 import os
+import re
 
 try:
     from unittest.mock import patch
@@ -3785,8 +3786,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = 'tests/files/kcd/dump.kcd'
         db = cantools.database.load_file(filename)
 
-        with open(filename, 'rb') as fin:
-            self.assertEqual(db.as_kcd_string().encode('ascii'), fin.read())
+        with open(filename, 'r') as fin:
+            self.assertEqual(db.as_kcd_string(), fin.read())
 
     def test_issue_62(self):
         """Test issue 62.
@@ -4208,6 +4209,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(db.messages[7].signals[2].receivers,
                          ['N123456789012345678901234567890123'])
+
+        # environment variables
+        envvar_names = db.dbc.environment_variables
+        self.assertTrue('E1234567890123456789012345678901' in envvar_names)
+        self.assertFalse('E12345678901234567890123456_0000' in envvar_names)
+        self.assertTrue('E12345678901234567890123456789012' in envvar_names)
 
     def test_dbc_long_names_converter(self):
         long_names = [
@@ -4652,14 +4659,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         with open(filename, 'rb') as fin:
             if sys.version_info[0] > 2:
-                print(db.as_dbc_string())
                 self.assertEqual(db.as_dbc_string().encode('cp1252'),
                                  fin.read())
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
     def test_issue_168_upper_case_file_extension(self):
-        filename = os.path.join('tests', 'files', 'dbc', 'issue_168.DBC')
+        filename = 'tests/files/dbc/issue_168.DBC'
         db = cantools.db.load_file(filename)
 
         message = db.get_message_by_name('Foo')
@@ -4669,21 +4675,99 @@ class CanToolsDatabaseTest(unittest.TestCase):
         if sys.version_info[0] < 3:
             return
 
-        filename_in = os.path.join('tests', 'files', 'dbc',
-                                   'issue_163_newline.dbc')
-        filename_dump = os.path.join('tests', 'files', 'dbc',
-                                     'issue_163_newline_dump.dbc')
+        filename_in = 'tests/files/dbc/issue_163_newline.dbc'
+        filename_dump = 'issue_163_newline_dump.dbc'
 
         db = cantools.database.load_file(filename_in)
         cantools.database.dump_file(db, filename_dump)
-        with open(filename_dump, newline='') as fin:
+
+        with open(filename_dump, 'rb') as fin:
             dumped_content = fin.read()
 
-        import re
-        self.assertTrue(dumped_content.find('\r\n'))
-        self.assertFalse(re.search('\r[^\n]', dumped_content))
-        self.assertFalse(re.search('[^\r]\n', dumped_content))
+        self.assertIn(b'\r\n', dumped_content)
+        self.assertFalse(re.search(br'\r[^\n]', dumped_content))
+        self.assertFalse(re.search(br'[^\r]\n', dumped_content))
         os.remove(filename_dump)
+
+    def test_issue_167_long_names_dict(self):
+        """Test the base function of mapping long names to unique short names.
+
+        """
+
+        datas = [
+            {
+            },
+            {
+                'OBJ_long9_123456789_123456789_ABC' : 'OBJ_long9_123456789_123456789_AB',
+                'OBJ_long9_123456789_123456789_DEF' : 'OBJ_long9_123456789_123456789_DE',
+                'OBJ_short_123456789':                'OBJ_short_123456789',
+                'OBJ_56789_123456789_123456789_GH' :  'OBJ_56789_123456789_1234567_0000',
+                'OBJ_56789_123456789_123456789_GHI':  'OBJ_56789_123456789_1234567_0001',
+                'OBJ_56789_123456789_123456789_GHIJ': 'OBJ_56789_123456789_1234567_0002'
+            },
+            {
+                'OBJ_56789_123456789_1234567_0000' : 'OBJ_56789_123456789_1234567_0000',
+                'OBJ_56789_123456789_123456789_ABC': 'OBJ_56789_123456789_1234567_0001',
+                'OBJ_56789_123456789_123456789_ABD': 'OBJ_56789_123456789_1234567_0002'
+            },
+            {
+                'OBJ_56789_123456789_1234567_0001' : 'OBJ_56789_123456789_1234567_0001',
+                'OBJ_56789_123456789_123456789_ABC': 'OBJ_56789_123456789_1234567_0000',
+                'OBJ_56789_123456789_123456789_ABD': 'OBJ_56789_123456789_1234567_0002'
+            }
+        ]
+
+        for data in datas:
+            result = cantools.database.can.formats.dbc.create_one_unique_names_dict(data)
+            self.assertEqual(result, data)
+
+    def test_long_names_from_file_multiple_relations(self):
+        """Test if long names are resolved correctly when message has more
+        than 1 sender.
+
+        """
+
+        filename = 'tests/files/dbc/long_names_multiple_relations.dbc'
+        filename_dumped = 'tests/files/dbc/long_names_multiple_relations_dumped.dbc'
+        db = cantools.database.load_file(filename)
+
+        with open(filename_dumped, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),
+                                 fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
+
+    def test_unknown_sender(self):
+        """Test warning if message has a sender not listed in the node list.
+
+        """
+
+        node_name = 'Node_not_in_list'
+        db = cantools.database.Database()
+        msg = cantools.database.can.message.Message(
+                frame_id=1,
+                name='msg_dummy',
+                length=8,
+                signals=[],
+                senders=[node_name])
+        db.messages.append(msg)
+        dump = db.as_dbc_string()
+        db_readback = cantools.database.load_string(dump, 'dbc')
+        self.assertEqual(db_readback.messages[0].senders, [node_name])
+
+    def test_database_version(self):
+        # default value if db created from scratch (map None to ''):
+        db = cantools.database.Database()
+        self.assertIsNone(db.version)
+        self.assertTrue(db.as_dbc_string().startswith('VERSION ""'))
+
+        # write access to version attribute
+        my_version = "my_version"
+        db.version = my_version
+        self.assertTrue(db.as_dbc_string().startswith('VERSION "{}"'.
+                        format(my_version)))
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

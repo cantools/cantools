@@ -84,6 +84,10 @@ class Database(object):
 
         return self._version
 
+    @version.setter
+    def version(self, value):
+        self._version = value
+
     @property
     def dbc(self):
         """An object containing dbc specific properties like e.g. attributes.
@@ -91,6 +95,10 @@ class Database(object):
         """
 
         return self._dbc
+
+    @dbc.setter
+    def dbc(self, value):
+        self._dbc = value
 
     def add_arxml(self, fp):
         """Read and parse ARXML data from given file-like object and add the

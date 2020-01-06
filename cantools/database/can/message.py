@@ -234,6 +234,10 @@ class Message(object):
 
         return self._dbc
 
+    @dbc.setter
+    def dbc(self, value):
+        self._dbc = value
+
     @property
     def bus_name(self):
         """The message bus name, or ``None`` if unavailable.

@@ -1,4 +1,5 @@
 |buildstatus|_
+|appveyor|_
 |coverage|_
 
 About
@@ -294,6 +295,9 @@ Contributing
 
 .. |buildstatus| image:: https://travis-ci.org/eerimoq/cantools.svg?branch=master
 .. _buildstatus: https://travis-ci.org/eerimoq/cantools
+
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/eerimoq/cantools?svg=true
+.. _appveyor: https://ci.appveyor.com/project/eerimoq/cantools/branch/master
 
 .. |coverage| image:: https://coveralls.io/repos/github/eerimoq/cantools/badge.svg?branch=master
 .. _coverage: https://coveralls.io/github/eerimoq/cantools

@@ -25,13 +25,22 @@ def read_file(filename):
         return remove_date_time(fin.read())
 
 
+def read_utf8_file(filename):
+    """Reference files are encoded with UTF-8.
+
+    """
+
+    with open(filename, 'r', encoding='utf-8') as fin:
+        return remove_date_time(fin.read())
+
+
 class CanToolsCommandLineTest(unittest.TestCase):
 
     maxDiff = None
 
     def assert_files_equal(self, actual, expected):
-        # open(expected, 'w').write(read_file(actual))
-        self.assertEqual(read_file(actual), read_file(expected))
+        # open(expected, 'w').write(read_utf8_file(actual))
+        self.assertEqual(read_file(actual), read_utf8_file(expected))
 
     def test_decode(self):
         argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']

@@ -510,11 +510,12 @@ def _dump_messages(database):
 
     for message in database.messages:
         msg = []
-        fmt = 'BO_ {frame_id} {name}: {length} {senders}'
-        msg.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                              name=message.name,
-                              length=message.length,
-                              senders=format_senders(message)))
+        msg.append(
+            'BO_ {frame_id} {name}: {length} {senders}'.format(
+                frame_id=get_dbc_frame_id(message),
+                name=message.name,
+                length=message.length,
+                senders=format_senders(message)))
 
         for signal in message.signals[::-1]:
             fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
@@ -541,12 +542,13 @@ def _dump_messages(database):
 
 def _dump_senders(database):
     bo_tx_bu = []
-    fmt = 'BO_TX_BU_ {frame_id} : {senders};'
 
     for message in database.messages:
         if len(message.senders) > 1:
-            bo_tx_bu.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                                       senders=','.join(message.senders)))
+            bo_tx_bu.append(
+                'BO_TX_BU_ {frame_id} : {senders};'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    senders=','.join(message.senders)))
 
     return bo_tx_bu
 
@@ -556,22 +558,25 @@ def _dump_comments(database):
 
     for node in database.nodes:
         if node.comment is not None:
-            fmt = 'CM_ BU_ {name} "{comment}";'
-            cm.append(fmt.format(name=node.name,
-                                 comment=node.comment.replace('"', '\\"')))
+            cm.append(
+                'CM_ BU_ {name} "{comment}";'.format(
+                    name=node.name,
+                    comment=node.comment.replace('"', '\\"')))
 
     for message in database.messages:
         if message.comment is not None:
-            fmt = 'CM_ BO_ {frame_id} "{comment}";'
-            cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                                 comment=message.comment.replace('"', '\\"')))
+            cm.append(
+                'CM_ BO_ {frame_id} "{comment}";'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    comment=message.comment.replace('"', '\\"')))
 
         for signal in message.signals[::-1]:
             if signal.comment is not None:
-                fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
-                cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                                     name=signal.name,
-                                     comment=signal.comment.replace('"', '\\"')))
+                cm.append(
+                    'CM_ SG_ {frame_id} {name} "{comment}";'.format(
+                        frame_id=get_dbc_frame_id(message),
+                        name=signal.name,
+                        comment=signal.comment.replace('"', '\\"')))
 
     return cm
 
@@ -584,10 +589,11 @@ def _dump_signal_types(database):
             if not signal.is_float:
                 continue
 
-            fmt = 'SIG_VALTYPE_ {} {} : {};'
-            valtype.append(fmt.format(message.frame_id,
-                                      signal.name,
-                                      FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]))
+            valtype.append(
+                'SIG_VALTYPE_ {} {} : {};'.format(
+                    message.frame_id,
+                    signal.name,
+                    FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]))
 
     return valtype
 
@@ -619,25 +625,28 @@ def _dump_attribute_definitions(database):
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
-            fmt = 'BA_DEF_ {kind} "{name}" {type_name}  {choices};'
             choices = ','.join(['"{}"'.format(choice)
                                 for choice in definition.choices])
-            ba_def.append(fmt.format(kind=get_kind(definition),
-                                     name=definition.name,
-                                     type_name=definition.type_name,
-                                     choices=choices))
+            ba_def.append(
+                'BA_DEF_ {kind} "{name}" {type_name}  {choices};'.format(
+                    kind=get_kind(definition),
+                    name=definition.name,
+                    type_name=definition.type_name,
+                    choices=choices))
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-            fmt = 'BA_DEF_ {kind} "{name}" {type_name}{minimum}{maximum};'
-            ba_def.append(fmt.format(kind=get_kind(definition),
-                                     name=definition.name,
-                                     type_name=definition.type_name,
-                                     minimum=get_minimum(definition),
-                                     maximum=get_maximum(definition)))
+            ba_def.append(
+                'BA_DEF_ {kind} "{name}" {type_name}{minimum}{maximum};'.format(
+                    kind=get_kind(definition),
+                    name=definition.name,
+                    type_name=definition.type_name,
+                    minimum=get_minimum(definition),
+                    maximum=get_maximum(definition)))
         elif definition.type_name == 'STRING':
-            fmt = 'BA_DEF_ {kind} "{name}" {type_name} ;'
-            ba_def.append(fmt.format(kind=get_kind(definition),
-                                     name=definition.name,
-                                     type_name=definition.type_name))
+            ba_def.append(
+                'BA_DEF_ {kind} "{name}" {type_name} ;'.format(
+                    kind=get_kind(definition),
+                    name=definition.name,
+                    type_name=definition.type_name))
 
     return ba_def
 
@@ -677,40 +686,43 @@ def _dump_attributes(database):
     if database.dbc is not None:
         if database.dbc.attributes is not None:
             for attribute in database.dbc.attributes.values():
-                fmt = 'BA_ "{name}" {value};'
-                ba.append(fmt.format(name=attribute.definition.name,
-                                     value=get_value(attribute)))
+                ba.append(
+                    'BA_ "{name}" {value};'.format(name=attribute.definition.name,
+                                                   value=get_value(attribute)))
 
     for node in database.nodes:
         if node.dbc is not None:
             if node.dbc.attributes is not None:
                 for attribute in node.dbc.attributes.values():
-                    fmt = 'BA_ "{name}" {kind} {node_name} {value};'
-                    ba.append(fmt.format(name=attribute.definition.name,
-                                         kind=attribute.definition.kind,
-                                         node_name=node.name,
-                                         value=get_value(attribute)))
+                    ba.append(
+                        'BA_ "{name}" {kind} {node_name} {value};'.format(
+                            name=attribute.definition.name,
+                            kind=attribute.definition.kind,
+                            node_name=node.name,
+                            value=get_value(attribute)))
 
     for message in database.messages:
         if message.dbc is not None:
             if message.dbc.attributes is not None:
                 for attribute in message.dbc.attributes.values():
-                    fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
-                    ba.append(fmt.format(name=attribute.definition.name,
-                                         kind=attribute.definition.kind,
-                                         frame_id=get_dbc_frame_id(message),
-                                         value=get_value(attribute)))
+                    ba.append(
+                        'BA_ "{name}" {kind} {frame_id} {value};'.format(
+                            name=attribute.definition.name,
+                            kind=attribute.definition.kind,
+                            frame_id=get_dbc_frame_id(message),
+                            value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
             if signal.dbc is not None:
                 if signal.dbc.attributes is not None:
                     for attribute in signal.dbc.attributes.values():
-                        fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
-                        ba.append(fmt.format(name=attribute.definition.name,
-                                             kind=attribute.definition.kind,
-                                             frame_id=get_dbc_frame_id(message),
-                                             signal_name=signal.name,
-                                             value=get_value(attribute)))
+                        ba.append(
+                            'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'.format(
+                                name=attribute.definition.name,
+                                kind=attribute.definition.kind,
+                                frame_id=get_dbc_frame_id(message),
+                                signal_name=signal.name,
+                                value=get_value(attribute)))
 
     return ba
 
@@ -723,13 +735,13 @@ def _dump_choices(database):
             if signal.choices is None:
                 continue
 
-            fmt = 'VAL_ {frame_id} {name} {choices} ;'
-            val.append(fmt.format(
-                frame_id=get_dbc_frame_id(message),
-                name=signal.name,
-                choices=' '.join(['{value} "{text}"'.format(value=value,
-                                                            text=text)
-                                  for value, text in signal.choices.items()])))
+            val.append(
+                'VAL_ {frame_id} {name} {choices} ;'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    name=signal.name,
+                    choices=' '.join(['{value} "{text}"'.format(value=value,
+                                                                text=text)
+                                      for value, text in signal.choices.items()])))
 
     return val
 
@@ -1438,10 +1450,6 @@ def make_names_unique(database):
 
     """
 
-    # Make a deep copy of the database as names and attributes will be
-    # modified for items with long names.
-    database = deepcopy(database)
-
     make_node_names_unique(database)
     make_message_names_unique(database)
     make_signal_names_unique(database)
@@ -1453,6 +1461,10 @@ def dump_string(database):
     """Format database in DBC file format.
 
     """
+
+    # Make a deep copy of the database as names and attributes will be
+    # modified for items with long names.
+    database = deepcopy(database)
 
     database = make_names_unique(database)
     bu = _dump_nodes(database)

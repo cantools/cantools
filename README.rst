@@ -27,7 +27,7 @@ Python 2 support is deprecated as Python 3 has better unicode support.
 
 Project homepage: https://github.com/eerimoq/cantools
 
-Documentation: http://cantools.readthedocs.org/en/latest
+Documentation: http://cantools.readthedocs.io/en/latest/
 
 Installation
 ============

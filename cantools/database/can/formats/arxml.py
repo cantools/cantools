@@ -14,29 +14,45 @@ from ..internal_database import InternalDatabase
 LOGGER = logging.getLogger(__name__)
 
 # The ARXML XML namespace.
-NAMESPACE = 'http://autosar.org/schema/r4.0'
-NAMESPACES = {'ns': NAMESPACE}
+AUTOSAR3_NAMESPACE_CANDIDATES = [ 'http://autosar.org/schema/r3.0', 'http://autosar.org/3.1.4.DAI.4' ]
+AUTOSAR4_NAMESPACE_CANDIDATES = [ 'http://autosar.org/schema/r4.0' ]
 
-ROOT_TAG = '{{{}}}AUTOSAR'.format(NAMESPACE)
-
+def get_root_tag(namespace):
+    return '{{{}}}AUTOSAR'.format(namespace)
 
 def make_xpath(location):
     return './ns:' + '/ns:'.join(location)
 
 
 # ARXML XPATHs.
-CAN_FRAME_TRIGGERINGS_XPATH = make_xpath([
-    'AR-PACKAGES',
-    'AR-PACKAGE',
-    'ELEMENTS',
-    'CAN-CLUSTER',
-    'CAN-CLUSTER-VARIANTS',
-    'CAN-CLUSTER-CONDITIONAL',
-    'PHYSICAL-CHANNELS',
-    'CAN-PHYSICAL-CHANNEL',
-    'FRAME-TRIGGERINGS',
-    'CAN-FRAME-TRIGGERING'
-])
+def get_frame_triggerings_xpath(autosar_version):
+    if autosar_version == 4:
+        return make_xpath([
+            'AR-PACKAGES',
+            'AR-PACKAGE',
+            'ELEMENTS',
+            'CAN-CLUSTER',
+            'CAN-CLUSTER-VARIANTS',
+            'CAN-CLUSTER-CONDITIONAL',
+            'PHYSICAL-CHANNELS',
+            'CAN-PHYSICAL-CHANNEL',
+            'FRAME-TRIGGERINGS',
+            'CAN-FRAME-TRIGGERING'
+        ])
+    elif autosar_version == 3:
+        return make_xpath([
+            'TOP-LEVEL-PACKAGES',
+            'AR-PACKAGE',
+            'ELEMENTS',
+            'CAN-CLUSTER',
+            'PHYSICAL-CHANNELS',
+            'PHYSICAL-CHANNEL',
+            'FRAME-TRIGGERINGSS',
+            'CAN-FRAME-TRIGGERING'
+        ])
+    else:
+        raise ValueError("Unknown AUTOSAR version: {}".format(str(autosar_version)))
+
 FRAME_REF_XPATH = make_xpath(['FRAME-REF'])
 SHORT_NAME_XPATH = make_xpath(['SHORT-NAME'])
 IDENTIFIER_XPATH = make_xpath(['IDENTIFIER'])
@@ -147,9 +163,10 @@ REFERENCE_VALUES_XPATH = make_xpath([
 
 class SystemLoader(object):
 
-    def __init__(self, root, strict):
+    def __init__(self, root, strict, autosar_version):
         self.root = root
         self.strict = strict
+        self.autosar_version = autosar_version
         self._system_signal_cache = {}
         self._compu_method_cache = {}
         self._sw_base_type_cache = {}
@@ -159,7 +176,7 @@ class SystemLoader(object):
         messages = []
         version = None
 
-        can_frame_triggerings = self.root.iterfind(CAN_FRAME_TRIGGERINGS_XPATH,
+        can_frame_triggerings = self.root.iterfind(get_frame_triggerings_xpath(self.autosar_version),
                                                    NAMESPACES)
 
         for can_frame_triggering in can_frame_triggerings:
@@ -531,17 +548,39 @@ class SystemLoader(object):
         short_names = xpath.lstrip('/').split('/')
         location = []
 
-        for short_name in short_names[:-1]:
-            location += [
-                'AR-PACKAGES',
-                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(short_name)
-            ]
+        if self.autosar_version == 4:
+            for short_name in short_names[:-1]:
+                location += [
+                    'AR-PACKAGES',
+                    "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(short_name)
+                ]
 
-        location += [
-            'ELEMENTS',
-            "{}/[ns:SHORT-NAME='{}']".format(child_elem,
-                                             short_names[-1])
-        ]
+            location += [
+                'ELEMENTS',
+                "{}/[ns:SHORT-NAME='{}']".format(child_elem,
+                                                 short_names[-1])
+            ]
+        elif self.autosar_version == 3:
+            # in AUTOSAR3, the top level packages are located beneath
+            # the TOP-LEVEL-PACKAGES tag, and sub-packages use
+            # SUB-PACKAGES. AUTOSAR 4 always uses AR-PACKAGES.
+            location.extend([
+                "TOP-LEVEL-PACKAGES",
+                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(short_names[0]),
+            ])
+
+            for atom in short_names[1:-1]:
+                location.extend([
+                    "SUB-PACKAGES",
+                    "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(atom),
+                ])
+
+            location.extend([
+                "ELEMENTS",
+                "FRAME/[ns:SHORT-NAME='{}']".format(short_names[-1]),
+            ])
+        else:
+            raise ValueError("Unknown AUTOSAR version: {}".format(str(self.autosar_version)))
 
         return self.root.find(make_xpath(location), NAMESPACES)
 
@@ -937,17 +976,36 @@ def load_string(string, strict=True):
     """Parse given ARXML format string.
 
     """
+    global NAMESPACE, NAMESPACES
 
     root = ElementTree.fromstring(string)
+    autosar_version = None
 
     # Should be replaced with a validation using the XSD file.
-    if root.tag != ROOT_TAG:
-        raise ValueError(
-            'Expected root element tag {}, but got {}.'.format(
-                ROOT_TAG,
-                root.tag))
+
+    # check for the known AUTOSAR4 namespaces
+    for namespace in AUTOSAR4_NAMESPACE_CANDIDATES:
+        if root.tag == get_root_tag(namespace):
+            autosar_version = 4
+            NAMESPACE = namespace
+            NAMESPACES = { "ns": namespace }
+            break
+
+    # if no AUTOSAR4 namespace was found, check for AUTOSAR3
+    if autosar_version is None:
+        for namespace in AUTOSAR3_NAMESPACE_CANDIDATES:
+            if root.tag == get_root_tag(namespace):
+                autosar_version = 3
+                NAMESPACE = namespace
+                NAMESPACES = { "ns": namespace }
+                break
+
+    # if no known AUTOSAR version was found, blurb
+    if autosar_version is None:
+        raise ValueError('Root tag "{}" does not correspond to any recognized AUTOSAR namespace.'
+                         .format(ROOT_TAG))
 
     if is_ecu_extract(root):
         return EcuExtractLoader(root, strict).load()
     else:
-        return SystemLoader(root, strict).load()
+        return SystemLoader(root, strict, autosar_version).load()

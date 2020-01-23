@@ -7,6 +7,7 @@ from decimal import Decimal
 from collections import namedtuple
 import textparser
 import os
+import re
 
 try:
     from unittest.mock import patch
@@ -3779,11 +3780,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         """
 
+        if sys.version_info < (3, 8):
+            return
+
         filename = 'tests/files/kcd/dump.kcd'
         db = cantools.database.load_file(filename)
 
-        with open(filename, 'rb') as fin:
-            self.assertEqual(db.as_kcd_string().encode('ascii'), fin.read())
+        with open(filename, 'r') as fin:
+            self.assertEqual(db.as_kcd_string(), fin.read())
 
     def test_issue_62(self):
         """Test issue 62.
@@ -4206,44 +4210,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[7].signals[2].receivers,
                          ['N123456789012345678901234567890123'])
 
-    def test_dbc_long_names_converter(self):
-        long_names = [
-            # 32 characters.
-            'M1234567890123456789012345678901',
-            'SS123456789012345678901234577890',
-            # More than 32 characters.
-            'SS12345678901234567890123458789012345',
-            'SS1234567890123456789012345778901',
-            'SS1234567890123456789012345878901234',
-            'SS12345678901234567890123456789012',
-            'S12345678901234567890123456789012',
-            'M123456789012345678901234567890123',
-            'M12345678901234567890123456789012',
-            'MM12345678901234567890123456789012'
-        ]
-
-        short_names = [
-            # 32 characters.
-            'M1234567890123456789012345678901',
-            'SS123456789012345678901234577890',
-            # More than 32 characters.
-            'SS123456789012345678901234587890',
-            'SS1234567890123456789012345_0000',
-            'SS1234567890123456789012345_0001',
-            'SS123456789012345678901234567890',
-            'S1234567890123456789012345678901',
-            'M12345678901234567890123456_0000',
-            'M12345678901234567890123456_0001',
-            'MM123456789012345678901234567890'
-        ]
-
-        converter = dbc.LongNamesConverter(long_names)
-
-        for long_name, short_name in zip(long_names, short_names):
-            self.assertEqual(converter.lookup_name(long_name), short_name)
-
-        self.assertEqual(converter.long_to_short_names_dict,
-                         dict(zip(long_names[2:], short_names[2:])))
+        # environment variables
+        envvar_names = db.dbc.environment_variables
+        self.assertTrue('E1234567890123456789012345678901' in envvar_names)
+        self.assertFalse('E12345678901234567890123456_0000' in envvar_names)
+        self.assertTrue('E12345678901234567890123456789012' in envvar_names)
 
     def test_system_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
@@ -4649,11 +4620,118 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         with open(filename, 'rb') as fin:
             if sys.version_info[0] > 2:
-                print(db.as_dbc_string())
                 self.assertEqual(db.as_dbc_string().encode('cp1252'),
                                  fin.read())
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
+
+    def test_issue_168_upper_case_file_extension(self):
+        filename = 'tests/files/dbc/issue_168.DBC'
+        db = cantools.db.load_file(filename)
+
+        message = db.get_message_by_name('Foo')
+        self.assertEqual(message.name, 'Foo')
+
+    def test_issue_163_dbc_newlines(self):
+        if sys.version_info[0] < 3:
+            return
+
+        filename_in = 'tests/files/dbc/issue_163_newline.dbc'
+        filename_dump = 'issue_163_newline_dump.dbc'
+
+        db = cantools.database.load_file(filename_in)
+        cantools.database.dump_file(db, filename_dump)
+
+        with open(filename_dump, 'rb') as fin:
+            dumped_content = fin.read()
+
+        self.assertIn(b'\r\n', dumped_content)
+        self.assertFalse(re.search(br'\r[^\n]', dumped_content))
+        self.assertFalse(re.search(br'[^\r]\n', dumped_content))
+        os.remove(filename_dump)
+
+    def test_issue_167_long_names_from_scratch(self):
+        """Test dbc export with mixed short and long symbol names. Create the
+        database by code, i.e. start with an empty database object, add
+        nodes, messages and signals, dump that to dbc format. Reload
+        the dumped data and check that it matches the original data.
+
+        """
+
+        can = cantools.database.can
+        db = cantools.database.Database(
+            messages=[
+                can.message.Message(
+                    frame_id=1,
+                    name='MSG456789_123456789_123456789_ABC',
+                    length=8,
+                    signals=[
+                        can.signal.Signal(name='SIG456789_123456789_123456789_ABC',
+                                          start=9,
+                                          length=8)
+                    ],
+                    senders=['NODE56789_abcdefghi_ABCDEFGHI_XYZ']),
+                can.message.Message(
+                    frame_id=2,
+                    name='MSG_short',
+                    length=8,
+                    signals=[
+                        can.signal.Signal(name='SIG_short', start=1, length=8)
+                    ],
+                    senders=['NODE_short'])
+            ],
+            nodes=[
+                can.node.Node('NODE_short', None),
+                can.node.Node('NODE56789_abcdefghi_ABCDEFGHI_XYZ', None)
+            ],
+            version='')
+
+        db.refresh()
+        db = cantools.database.load_string(db.as_dbc_string())
+
+        self.assertEqual(len(db.nodes), 2)
+        self.assertEqual(db.nodes[0].name, 'NODE_short')
+        self.assertEqual(db.nodes[1].name, 'NODE56789_abcdefghi_ABCDEFGHI_XYZ')
+
+        self.assertEqual(len(db.messages), 2)
+
+        message = db.messages[0]
+        self.assertEqual(message.name, 'MSG456789_123456789_123456789_ABC')
+        self.assertEqual(message.senders, ['NODE56789_abcdefghi_ABCDEFGHI_XYZ'])
+        self.assertEqual(message.signals[0].name, 'SIG456789_123456789_123456789_ABC')
+
+        message = db.messages[1]
+        self.assertEqual(message.name, 'MSG_short')
+        self.assertEqual(message.senders, ['NODE_short'])
+        self.assertEqual(message.signals[0].name, 'SIG_short')
+
+    def test_long_names_multiple_relations(self):
+        """Test if long names are resolved correctly.
+
+        """
+
+        filename = 'tests/files/dbc/long_names_multiple_relations.dbc'
+        filename_dumped = 'tests/files/dbc/long_names_multiple_relations_dumped.dbc'
+        db = cantools.database.load_file(filename)
+
+        with open(filename_dumped, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),
+                                 fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
+
+    def test_database_version(self):
+        # default value if db created from scratch (map None to ''):
+        db = cantools.database.Database()
+        self.assertIsNone(db.version)
+        self.assertTrue(db.as_dbc_string().startswith('VERSION ""'))
+
+        # write access to version attribute
+        my_version = "my_version"
+        db.version = my_version
+        self.assertTrue(db.as_dbc_string().startswith('VERSION "{}"'.
+                        format(my_version)))
 
 
 # This file is not '__main__' when executed via 'python setup.py3

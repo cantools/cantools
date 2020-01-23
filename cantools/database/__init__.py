@@ -54,7 +54,7 @@ def _resolve_database_format_and_encoding(database_format,
                                           encoding,
                                           filename):
     if database_format is None:
-        database_format = os.path.splitext(filename)[1][1:]
+        database_format = os.path.splitext(filename)[1][1:].lower()
 
     if encoding is None:
         try:
@@ -106,6 +106,7 @@ def load_file(filename,
     `database_format` is one of ``'arxml'``, ``'dbc'``, ``'kcd'``,
     ``'sym'``, ``cdd`` and ``None``. If ``None``, the database format
     is selected based on the filename extension as in the table below.
+    Filename extensions are case insensitive.
 
     +-----------+-----------------+
     | Extension | Database format |
@@ -195,6 +196,10 @@ def dump_file(database,
     See :func:`~cantools.database.load_file()` for descriptions of
     other arguments.
 
+    The ``'dbc'`` database format will always have Windows-style line
+    endings (``\\r\\n``). For other database formats the line ending
+    depends on the operating system.
+
     >>> db = cantools.database.load_file('foo.dbc')
     >>> cantools.database.dump_file(db, 'bar.dbc')
 
@@ -205,15 +210,18 @@ def dump_file(database,
         encoding,
         filename)
 
+    newline = None
+
     if database_format == 'dbc':
         output = database.as_dbc_string()
+        newline = ''
     elif database_format == 'kcd':
         output = database.as_kcd_string()
     else:
         raise Error(
             "Unsupported output database format '{}'.".format(database_format))
 
-    with fopen(filename, 'w', encoding=encoding) as fout:
+    with fopen(filename, 'w', encoding=encoding, newline=newline) as fout:
         fout.write(output)
 
 

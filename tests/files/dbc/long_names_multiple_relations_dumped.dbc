@@ -1,0 +1,109 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Sender_2_aaaaaaaaaaaaaaaaaaaaaaa Receiver_2_zzzzzzzzzzzzzzzzzzzzz Receiver_1 Node_6789_123456789_123456789_12
+VAL_TABLE_ Value_Table_short 1 "Very long, long, long description for the value '0x1'" 0 "Very long, long, long description for the value '0x0'" ;
+VAL_TABLE_ Value_Table_cdefghi_ABCDEFGHI_AB 3 "Description for the value '0x3'" 2 "Description for the value '0x2'" 1 "Description for the value '0x1'" 0 "Description for the value '0x0'" ;
+
+
+BO_ 85 Msg_Long_Name_56789_123456789_12: 8 Vector__XXX
+ SG_ rx_twice_short : 16|18@1- (1,0) [0|0] "" Vector__XXX
+ SG_ rx_twice_11111111111111111111111 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_used_twice_efgh_abcdefghi_ab : 0|6@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 6 TX_twice: 2 Node_6789_123456789_123456789_12
+ SG_ rx_twice_long_yyyyyyyyyyyyyyyyyy : 8|8@1- (1,0) [0|0] ""  Receiver_1,Receiver_2_zzzzzzzzzzzzzzzzzzzzz
+ SG_ rx_twice_short : 0|8@1- (1,0) [0|0] ""  Receiver_2_zzzzzzzzzzzzzzzzzzzzz,Receiver_1
+
+BO_ 5 RX_TX_1: 8 Node_6789_123456789_123456789_12
+ SG_ Sig_used_twice_efgh_abcdefg_0000 : 0|9@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 4 MSG_CASE_TEST: 8 Vector__XXX
+
+BO_ 3 msg_case_test: 8 Vector__XXX
+
+BO_ 2 Msg_with_value_table_sigs: 3 Vector__XXX
+ SG_ Sig_with_short_val_table : 16|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_with_long_val_table_2 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_with_long_val_table_1 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1 Msg_Long_Name_56789_1234567_0000: 8 Vector__XXX
+ SG_ rx_twice_11111111111111111111111 : 8|2@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_used_twice_efgh_abcdefg_0001 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 0 Msg_Long_Name_56789_1234567_0001: 8 Vector__XXX
+ SG_ rx_twice_short : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_used_twice_efgh_abcdefg_0002 : 0|6@1- (1,0) [0|0] "" Vector__XXX
+
+BO_TX_BU_ 6 : Node_6789_123456789_123456789_12,Sender_2_aaaaaaaaaaaaaaaaaaaaaaa;
+
+
+
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","not_used","not_used","not_used","not_used","Cyclic","not_used","IfActive","NoMsgSendType";
+BA_DEF_ BU_  "NmStationAddress" HEX 0 0;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ SG_  "SystemSignalLongSymbol" STRING ;
+BA_DEF_ BO_  "SystemMessageLongSymbol" STRING ;
+BA_DEF_ BU_  "SystemNodeLongSymbol" STRING ;
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "SystemSignalLongSymbol" "";
+BA_DEF_DEF_  "SystemMessageLongSymbol" "";
+BA_DEF_DEF_  "SystemNodeLongSymbol" "";
+BA_ "DBName" "long_names_multiple_relations";
+BA_ "SystemNodeLongSymbol" BU_ Sender_2_aaaaaaaaaaaaaaaaaaaaaaa "Sender_2_aaaaaaaaaaaaaaaaaaaaaaaAAAAAA";
+BA_ "SystemNodeLongSymbol" BU_ Receiver_2_zzzzzzzzzzzzzzzzzzzzz "Receiver_2_zzzzzzzzzzzzzzzzzzzzzZZZ";
+BA_ "SystemNodeLongSymbol" BU_ Node_6789_123456789_123456789_12 "Node_6789_123456789_123456789_123456789";
+BA_ "SystemMessageLongSymbol" BO_ 85 "Msg_Long_Name_56789_123456789_123456789_Copy_2";
+BA_ "SystemSignalLongSymbol" SG_ 85 Sig_used_twice_efgh_abcdefghi_ab "Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi";
+BA_ "SystemSignalLongSymbol" SG_ 6 rx_twice_long_yyyyyyyyyyyyyyyyyy "rx_twice_long_yyyyyyyyyyyyyyyyyyYYY";
+BA_ "SystemSignalLongSymbol" SG_ 5 Sig_used_twice_efgh_abcdefg_0000 "Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi";
+BA_ "SystemMessageLongSymbol" BO_ 1 "Msg_Long_Name_56789_123456789_123456789_Copy_1";
+BA_ "SystemSignalLongSymbol" SG_ 1 Sig_used_twice_efgh_abcdefg_0001 "Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi";
+BA_ "SystemMessageLongSymbol" BO_ 0 "Msg_Long_Name_56789_123456789_123456789";
+BA_ "SystemSignalLongSymbol" SG_ 0 Sig_used_twice_efgh_abcdefg_0002 "Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi";
+VAL_ 2 Sig_with_short_val_table 1 "Very long, long, long description for the value '0x1'" 0 "Very long, long, long description for the value '0x0'" ;
+VAL_ 2 Sig_with_long_val_table_2 13 "value '0xD'" 12 "Dvalue '0xC'" 11 "value '0xB'" 10 "value '0xA'" 9 "value '0x9'" 8 "value '0x8'" 7 "value '0x7'" 6 "value '0x6'" 5 "value '0x5'" 4 "value '0x4'" 3 "value '0x3'" 2 "value '0x2'" 1 "value '0x1'" 0 "value '0x0'" ;
+VAL_ 2 Sig_with_long_val_table_1 3 "Description for the value '0x3'" 2 "Description for the value '0x2'" 1 "Description for the value '0x1'" 0 "Description for the value '0x0'" ;
+

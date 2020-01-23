@@ -522,7 +522,7 @@ class SystemLoader(object):
 
             if base_type_encoding == '2C':
                 is_signed = True
-            elif base_type_encoding in 'IEEE754':
+            elif base_type_encoding == 'IEEE754':
                 is_float = True
 
         return is_signed, is_float

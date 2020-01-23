@@ -1,0 +1,106 @@
+// A comment.
+
+VERSION "2.0" // Another comment.
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: FOO BAR FIE FUM
+VAL_TABLE_ State 1 "Enabled" 0 "Disabled" ;
+
+
+BO_ 2147558192 Foo: 8 FOO
+ SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK"  BAR
+ SG_ Bar : 24|32@0- (0.1,0) [0|5] "m"  FOO
+
+BO_ 2147558193 Fum: 5 FOO
+ SG_ Fum : 0|12@1- (1,0) [0|10] ""  BAR
+ SG_ Fam : 12|12@1- (1,0) [0|8] ""  BAR
+
+BO_ 2147558194 Bar: 4 FOO
+ SG_ Binary32 : 0|32@1- (1,0) [0|0] ""  FUM
+
+BO_ 2147558195 CanFd: 64 FOO
+ SG_ Fie : 0|64@1+ (1,0) [0|0] ""  FUM
+ SG_ Fas : 64|64@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 780 FOOBAR: 8 FIE
+ SG_ ACC_02_CRC : 0|12@1- (1,0) [0|1] ""  BAR
+
+BO_TX_BU_ 2147558194 : FOO,BAR;
+
+
+CM_ BU_ BAR "fam \"1\"";
+CM_ BO_ 2147558192 "Foo.";
+CM_ SG_ 2147558192 Bar "Bar.";
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "Baudrate" INT 0 1000000;
+BA_DEF_  "AFloat" FLOAT 0 100;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ BU_  "FOO" INT 0 100;
+BA_DEF_ BU_  "BAR" STRING ;
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD";
+BA_DEF_ BO_  "GenMsgStartValue" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 1000;
+BA_DEF_REL_ BU_SG_REL_  "AFloat2" FLOAT 0 65535;
+BA_DEF_REL_ BU_SG_REL_  "GenSigTimeoutTime" INT 0 65535;
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "Baudrate" 125000;
+BA_DEF_DEF_  "AFloat" 0;
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "FOO" 0;
+BA_DEF_DEF_  "BAR" "";
+BA_DEF_DEF_  "VFrameFormat" "ExtendedCAN_FD";
+BA_DEF_DEF_  "GenMsgStartValue" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 100;
+BA_DEF_DEF_REL_ "AFloat2" 0;
+BA_DEF_DEF_REL_ "GenSigTimeoutTime" 0;
+BA_ "DBName" "TheBusName";
+BA_ "Baudrate" 125000;
+BA_ "AFloat" 33.5;
+BA_ "BusType" "CAN FD";
+BA_ "BAR" BU_ FIE "FUM";
+BA_ "FOO" BU_ FIE 1;
+BA_ "VFrameFormat" BO_ 2147558192 1;
+BA_ "VFrameFormat" BO_ 2147558193 1;
+BA_ "GenMsgCycleTime" BO_ 2147558193 1;
+BA_ "VFrameFormat" BO_ 2147558194 1;
+BA_ "VFrameFormat" BO_ 2147558195 15;
+BA_ "VFrameFormat" BO_ 780 0;
+BA_REL_ "GenSigTimeoutTime" BU_SG_REL_ FOO SG_ 2147558192 Bar 200;
+BA_REL_ "AFloat2" BU_SG_REL_ FOO SG_ 2147558192 Bar 500;
+VAL_ 2147558193 Fam 1 "Enabled" 0 "Disabled" ;
+SIG_GROUP_ 2147558193 SigGroupName 1 : Fam Fum;
+SIG_VALTYPE_ 2147558192 Bar : 1;
+SIG_VALTYPE_ 2147558194 Binary32 : 1;
+

@@ -324,6 +324,10 @@ class Signal(object):
 
         return self._dbc
 
+    @dbc.setter
+    def dbc(self, value):
+        self._dbc = value
+
     @property
     def comment(self):
         """The signal comment, or ``None`` if unavailable.

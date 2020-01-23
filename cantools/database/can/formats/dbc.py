@@ -4,6 +4,7 @@ import re
 from collections import OrderedDict as odict
 from collections import defaultdict
 from decimal import Decimal
+from copy import deepcopy
 
 import textparser
 from textparser import Sequence
@@ -100,6 +101,24 @@ FLOAT_LENGTH_TO_SIGNAL_TYPE = {
     32: SIGNAL_TYPE_FLOAT,
     64: SIGNAL_TYPE_DOUBLE
 }
+
+ATTRIBUTE_DEFINITION_LONG_NODE_NAME = AttributeDefinition(
+    'SystemNodeLongSymbol',
+    default_value='',
+    kind='BU_',
+    type_name='STRING')
+
+ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME = AttributeDefinition(
+    'SystemMessageLongSymbol',
+    default_value='',
+    kind='BO_',
+    type_name='STRING')
+
+ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME = AttributeDefinition(
+    'SystemSignalLongSymbol',
+    default_value='',
+    kind='SG_',
+    type_name='STRING')
 
 
 def to_int(value):
@@ -330,13 +349,21 @@ class DbcSpecifics(object):
                  attribute_definitions=None,
                  environment_variables=None,
                  value_tables=None):
-        self._attributes = attributes
-        self._attribute_definitions = attribute_definitions
-        self._environment_variables = environment_variables
+        if attributes is None:
+            attributes = odict()
+
+        if attribute_definitions is None:
+            attribute_definitions = odict()
+
+        if environment_variables is None:
+            environment_variables = odict()
 
         if value_tables is None:
             value_tables = odict()
 
+        self._attributes = attributes
+        self._attribute_definitions = attribute_definitions
+        self._environment_variables = environment_variables
         self._value_tables = value_tables
 
     @property
@@ -347,6 +374,10 @@ class DbcSpecifics(object):
         """
 
         return self._attributes
+
+    @attributes.setter
+    def attributes(self, value):
+        self._attributes = value
 
     @property
     def attribute_definitions(self):
@@ -377,47 +408,29 @@ class DbcSpecifics(object):
 
 class LongNamesConverter(object):
 
-    def __init__(self, names):
-        self._long_to_short_names_dict = {}
-        next_index_per_base_name = {}
-        short_names = set()
+    def __init__(self, database):
+        self._database = database
+        self._next_index_per_cut_name = defaultdict(int)
+        self._short_names = set()
 
-        def basename(name):
-            return name[:27]
+    def convert(self, name):
+        short_name = None
 
-        for name in names:
-            if len(name) != 32:
-                continue
-
-            next_index_per_base_name[basename(name)] = 0
-            short_names.add(name)
-
-        for name in names:
-            if len(name) <= 32:
-                continue
-
-            base_name = basename(name)
+        if len(name) == 32:
+            self._short_names.add(name)
+        elif len(name) > 32:
+            cut_name = name[:27]
             short_name = name[:32]
 
-            if short_name in short_names:
-                index = next_index_per_base_name[base_name]
-                next_index_per_base_name[base_name] += 1
+            if short_name in self._short_names:
+                index = self._next_index_per_cut_name[cut_name]
+                self._next_index_per_cut_name[cut_name] += 1
                 short_name = '{}_{:04d}'.format(name[:27], index)
             else:
-                next_index_per_base_name[base_name] = 0
-                short_names.add(short_name)
+                self._next_index_per_cut_name[cut_name] = 0
+                self._short_names.add(short_name)
 
-            self._long_to_short_names_dict[name] = short_name
-
-    def lookup_name(self, name):
-        if name in self._long_to_short_names_dict:
-            name = self._long_to_short_names_dict[name]
-
-        return name
-
-    @property
-    def long_to_short_names_dict(self):
-        return self._long_to_short_names_dict
+        return short_name
 
 
 def get_dbc_frame_id(message):
@@ -434,6 +447,17 @@ def _get_node_name(attributes, name):
         return attributes['node'][name]['SystemNodeLongSymbol'].value
     except (KeyError, TypeError):
         return name
+
+
+def _get_environment_variable_name(attributes, name):
+    try:
+        return attributes['envvar'][name]['SystemEnvVarLongSymbol'].value
+    except (KeyError, TypeError):
+        return name
+
+
+def _dump_version(database):
+    return '' if database.version is None else database.version
 
 
 def _dump_nodes(database):
@@ -486,11 +510,12 @@ def _dump_messages(database):
 
     for message in database.messages:
         msg = []
-        fmt = 'BO_ {frame_id} {name}: {length} {senders}'
-        msg.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                              name=message.name,
-                              length=message.length,
-                              senders=format_senders(message)))
+        msg.append(
+            'BO_ {frame_id} {name}: {length} {senders}'.format(
+                frame_id=get_dbc_frame_id(message),
+                name=message.name,
+                length=message.length,
+                senders=format_senders(message)))
 
         for signal in message.signals[::-1]:
             fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
@@ -517,12 +542,13 @@ def _dump_messages(database):
 
 def _dump_senders(database):
     bo_tx_bu = []
-    fmt = 'BO_TX_BU_ {frame_id} : {senders};'
 
     for message in database.messages:
         if len(message.senders) > 1:
-            bo_tx_bu.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                                       senders=','.join(message.senders)))
+            bo_tx_bu.append(
+                'BO_TX_BU_ {frame_id} : {senders};'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    senders=','.join(message.senders)))
 
     return bo_tx_bu
 
@@ -532,22 +558,25 @@ def _dump_comments(database):
 
     for node in database.nodes:
         if node.comment is not None:
-            fmt = 'CM_ BU_ {name} "{comment}";'
-            cm.append(fmt.format(name=node.name,
-                                 comment=node.comment.replace('"', '\\"')))
+            cm.append(
+                'CM_ BU_ {name} "{comment}";'.format(
+                    name=node.name,
+                    comment=node.comment.replace('"', '\\"')))
 
     for message in database.messages:
         if message.comment is not None:
-            fmt = 'CM_ BO_ {frame_id} "{comment}";'
-            cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                                 comment=message.comment.replace('"', '\\"')))
+            cm.append(
+                'CM_ BO_ {frame_id} "{comment}";'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    comment=message.comment.replace('"', '\\"')))
 
         for signal in message.signals[::-1]:
             if signal.comment is not None:
-                fmt = 'CM_ SG_ {frame_id} {name} "{comment}";'
-                cm.append(fmt.format(frame_id=get_dbc_frame_id(message),
-                                     name=signal.name,
-                                     comment=signal.comment.replace('"', '\\"')))
+                cm.append(
+                    'CM_ SG_ {frame_id} {name} "{comment}";'.format(
+                        frame_id=get_dbc_frame_id(message),
+                        name=signal.name,
+                        comment=signal.comment.replace('"', '\\"')))
 
     return cm
 
@@ -560,10 +589,11 @@ def _dump_signal_types(database):
             if not signal.is_float:
                 continue
 
-            fmt = 'SIG_VALTYPE_ {} {} : {};'
-            valtype.append(fmt.format(message.frame_id,
-                                      signal.name,
-                                      FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]))
+            valtype.append(
+                'SIG_VALTYPE_ {} {} : {};'.format(
+                    message.frame_id,
+                    signal.name,
+                    FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]))
 
     return valtype
 
@@ -595,25 +625,28 @@ def _dump_attribute_definitions(database):
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
-            fmt = 'BA_DEF_ {kind}  "{name}" {type_name}  {choices};'
             choices = ','.join(['"{}"'.format(choice)
                                 for choice in definition.choices])
-            ba_def.append(fmt.format(kind=definition.kind,
-                                     name=definition.name,
-                                     type_name=definition.type_name,
-                                     choices=choices))
+            ba_def.append(
+                'BA_DEF_ {kind} "{name}" {type_name}  {choices};'.format(
+                    kind=get_kind(definition),
+                    name=definition.name,
+                    type_name=definition.type_name,
+                    choices=choices))
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-            fmt = 'BA_DEF_ {kind} "{name}" {type_name}{minimum}{maximum};'
-            ba_def.append(fmt.format(kind=get_kind(definition),
-                                     name=definition.name,
-                                     type_name=definition.type_name,
-                                     minimum=get_minimum(definition),
-                                     maximum=get_maximum(definition)))
+            ba_def.append(
+                'BA_DEF_ {kind} "{name}" {type_name}{minimum}{maximum};'.format(
+                    kind=get_kind(definition),
+                    name=definition.name,
+                    type_name=definition.type_name,
+                    minimum=get_minimum(definition),
+                    maximum=get_maximum(definition)))
         elif definition.type_name == 'STRING':
-            fmt = 'BA_DEF_ {kind} "{name}" {type_name} ;'
-            ba_def.append(fmt.format(kind=get_kind(definition),
-                                     name=definition.name,
-                                     type_name=definition.type_name))
+            ba_def.append(
+                'BA_DEF_ {kind} "{name}" {type_name} ;'.format(
+                    kind=get_kind(definition),
+                    name=definition.name,
+                    type_name=definition.type_name))
 
     return ba_def
 
@@ -653,40 +686,43 @@ def _dump_attributes(database):
     if database.dbc is not None:
         if database.dbc.attributes is not None:
             for attribute in database.dbc.attributes.values():
-                fmt = 'BA_ "{name}" {value};'
-                ba.append(fmt.format(name=attribute.definition.name,
-                                     value=get_value(attribute)))
+                ba.append(
+                    'BA_ "{name}" {value};'.format(name=attribute.definition.name,
+                                                   value=get_value(attribute)))
 
     for node in database.nodes:
         if node.dbc is not None:
             if node.dbc.attributes is not None:
                 for attribute in node.dbc.attributes.values():
-                    fmt = 'BA_ "{name}" {kind} {node_name} {value};'
-                    ba.append(fmt.format(name=attribute.definition.name,
-                                         kind=attribute.definition.kind,
-                                         node_name=node.name,
-                                         value=get_value(attribute)))
+                    ba.append(
+                        'BA_ "{name}" {kind} {node_name} {value};'.format(
+                            name=attribute.definition.name,
+                            kind=attribute.definition.kind,
+                            node_name=node.name,
+                            value=get_value(attribute)))
 
     for message in database.messages:
         if message.dbc is not None:
             if message.dbc.attributes is not None:
                 for attribute in message.dbc.attributes.values():
-                    fmt = 'BA_ "{name}" {kind} {frame_id} {value};'
-                    ba.append(fmt.format(name=attribute.definition.name,
-                                         kind=attribute.definition.kind,
-                                         frame_id=get_dbc_frame_id(message),
-                                         value=get_value(attribute)))
+                    ba.append(
+                        'BA_ "{name}" {kind} {frame_id} {value};'.format(
+                            name=attribute.definition.name,
+                            kind=attribute.definition.kind,
+                            frame_id=get_dbc_frame_id(message),
+                            value=get_value(attribute)))
 
         for signal in message.signals[::-1]:
             if signal.dbc is not None:
                 if signal.dbc.attributes is not None:
                     for attribute in signal.dbc.attributes.values():
-                        fmt = 'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'
-                        ba.append(fmt.format(name=attribute.definition.name,
-                                             kind=attribute.definition.kind,
-                                             frame_id=get_dbc_frame_id(message),
-                                             signal_name=signal.name,
-                                             value=get_value(attribute)))
+                        ba.append(
+                            'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'.format(
+                                name=attribute.definition.name,
+                                kind=attribute.definition.kind,
+                                frame_id=get_dbc_frame_id(message),
+                                signal_name=signal.name,
+                                value=get_value(attribute)))
 
     return ba
 
@@ -699,13 +735,13 @@ def _dump_choices(database):
             if signal.choices is None:
                 continue
 
-            fmt = 'VAL_ {frame_id} {name} {choices} ;'
-            val.append(fmt.format(
-                frame_id=get_dbc_frame_id(message),
-                name=signal.name,
-                choices=' '.join(['{value} "{text}"'.format(value=value,
-                                                            text=text)
-                                  for value, text in signal.choices.items()])))
+            val.append(
+                'VAL_ {frame_id} {name} {choices} ;'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    name=signal.name,
+                    choices=' '.join(['{value} "{text}"'.format(value=value,
+                                                                text=text)
+                                      for value, text in signal.choices.items()])))
 
     return val
 
@@ -807,6 +843,16 @@ def _load_attributes(tokens, definitions):
                     attributes['node'][node] = odict()
 
                 attributes['node'][node][name] = to_object(attribute)
+            elif kind == 'EV_':
+                envvar = item[1]
+
+                if 'envvar' not in attributes:
+                    attributes['envvar'] = odict()
+
+                if envvar not in attributes['envvar']:
+                    attributes['envvar'][envvar] = odict()
+
+                attributes['envvar'][envvar][name] = to_object(attribute)
         else:
             if 'database' not in attributes:
                 attributes['database'] = odict()
@@ -831,11 +877,11 @@ def _load_value_tables(tokens):
     return value_tables
 
 
-def _load_environment_variables(tokens, comments):
+def _load_environment_variables(tokens, comments, attributes):
     environment_variables = odict()
 
     for env_var in tokens.get('EV_', []):
-        name = env_var[1]
+        name = _get_environment_variable_name(attributes, env_var[1])
         environment_variables[name] = EnvironmentVariable(
             name=name,
             env_type=int(env_var[3]),
@@ -1097,9 +1143,8 @@ def _load_signals(tokens,
                    unit=(None if signal[19] == '' else signal[19]),
                    choices=get_choices(frame_id_dbc,
                                        signal[1][0]),
-                   dbc_specifics=DbcSpecifics(
-                       attributes=get_attributes(frame_id_dbc, signal[1][0]),
-                       attribute_definitions=definitions),
+                   dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
+                                              definitions),
                    comment=get_comment(frame_id_dbc,
                                        signal[1][0]),
                    is_multiplexer=get_is_multiplexer(signal),
@@ -1264,9 +1309,8 @@ def _load_messages(tokens,
                     senders=senders,
                     send_type=get_send_type(frame_id_dbc),
                     cycle_time=get_cycle_time(frame_id_dbc),
-                    dbc_specifics=DbcSpecifics(
-                        attributes=get_attributes(frame_id_dbc),
-                        attribute_definitions=definitions),
+                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc),
+                                               definitions),
                     signals=signals,
                     comment=get_comment(frame_id_dbc),
                     strict=strict,
@@ -1300,12 +1344,117 @@ def _load_nodes(tokens, comments, attributes, definitions):
     for token in tokens.get('BU_', []):
         nodes = [Node(name=_get_node_name(attributes, node),
                       comment=comments.get(node, None),
-                      dbc_specifics=DbcSpecifics(attributes['node'].get(node,
-                                                                        None),
+                      dbc_specifics=DbcSpecifics(attributes['node'].get(node, None),
                                                  definitions))
                  for node in token[2]]
 
     return nodes
+
+
+def get_attribute_definition(database, name, default):
+    if database.dbc is None:
+        database.dbc = DbcSpecifics()
+
+    if name not in database.dbc.attribute_definitions:
+        database.dbc.attribute_definitions[name] = default
+
+    return database.dbc.attribute_definitions[name]
+
+
+def get_long_node_name_attribute_definition(database):
+    return get_attribute_definition(database,
+                                    'SystemNodeLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_NODE_NAME)
+
+
+def get_long_message_name_attribute_definition(database):
+    return get_attribute_definition(database,
+                                    'SystemMessageLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME)
+
+
+def get_long_signal_name_attribute_definition(database):
+    return get_attribute_definition(database,
+                                    'SystemSignalLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME)
+
+
+def make_node_names_unique(database):
+    converter = LongNamesConverter(database)
+
+    for node in database.nodes:
+        name = converter.convert(node.name)
+
+        if name is None:
+            continue
+
+        for message in database.messages:
+            for index, sender in enumerate(message.senders):
+                if sender == node.name:
+                    message.senders[index] = name
+
+            for signal in message.signals:
+                for index, receiver in enumerate(signal.receivers):
+                    if receiver == node.name:
+                        signal.receivers[index] = name
+
+        if node.dbc is None:
+            node.dbc = DbcSpecifics()
+
+        node.dbc.attributes['SystemNodeLongSymbol'] = Attribute(
+            node.name,
+            get_long_node_name_attribute_definition(database))
+        node.name = name
+
+
+def make_message_names_unique(database):
+    converter = LongNamesConverter(database)
+
+    for message in database.messages:
+        name = converter.convert(message.name)
+
+        if name is None:
+            continue
+
+        if message.dbc is None:
+            message.dbc = DbcSpecifics()
+
+        message.dbc.attributes['SystemMessageLongSymbol'] = Attribute(
+            message.name,
+            get_long_message_name_attribute_definition(database))
+        message.name = name
+
+
+def make_signal_names_unique(database):
+    converter = LongNamesConverter(database)
+
+    for message in database.messages:
+        for signal in message.signals:
+            name = converter.convert(signal.name)
+
+            if name is None:
+                continue
+
+            if signal.dbc is None:
+                signal.dbc = DbcSpecifics()
+
+            signal.dbc.attributes['SystemSignalLongSymbol'] = Attribute(
+                signal.name,
+                get_long_signal_name_attribute_definition(database))
+            signal.name = name
+
+
+def make_names_unique(database):
+    """Make message, signal and node names unique and add attributes for
+    their long names.
+
+    """
+
+    make_node_names_unique(database)
+    make_message_names_unique(database)
+    make_signal_names_unique(database)
+
+    return database
 
 
 def dump_string(database):
@@ -1313,6 +1462,11 @@ def dump_string(database):
 
     """
 
+    # Make a deep copy of the database as names and attributes will be
+    # modified for items with long names.
+    database = deepcopy(database)
+
+    database = make_names_unique(database)
     bu = _dump_nodes(database)
     val_table = _dump_value_tables(database)
     bo = _dump_messages(database)
@@ -1324,7 +1478,7 @@ def dump_string(database):
     ba = _dump_attributes(database)
     val = _dump_choices(database)
 
-    return DBC_FMT.format(version=database.version,
+    return DBC_FMT.format(version=_dump_version(database),
                           bu=' '.join(bu),
                           val_table='\r\n'.join(val_table),
                           bo='\r\n\r\n'.join(bo),
@@ -1407,11 +1561,11 @@ def load_string(string, strict=True):
                               bus.name if bus else None)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
-    environment_variables = _load_environment_variables(tokens, comments)
-    dbc_specifics = DbcSpecifics(attributes=attributes.get('database', None),
-                                 attribute_definitions=attribute_definitions,
-                                 environment_variables=environment_variables,
-                                 value_tables=value_tables)
+    environment_variables = _load_environment_variables(tokens, comments, attributes)
+    dbc_specifics = DbcSpecifics(attributes.get('database', None),
+                                 attribute_definitions,
+                                 environment_variables,
+                                 value_tables)
 
     return InternalDatabase(messages,
                             nodes,

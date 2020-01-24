@@ -4755,10 +4755,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         with open(filename_dest, 'rb') as fin:
             if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
+                self.assertEqual(db.as_dbc_string().encode('cp1252').replace(b'\r', b''),
+                                 fin.read().replace(b'\r', b''))
             else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+                self.assertEqual(db.as_dbc_string().replace(b'\r', b''),
+                                 fin.read().replace(b'\r', b''))
 
 
 # This file is not '__main__' when executed via 'python setup.py3

@@ -1380,11 +1380,19 @@ def get_long_signal_name_attribute_definition(database):
                                     ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME)
 
 
+def try_remove_attribute(dbc, name):
+    try:
+        dbc.attributes.pop(name)
+    except (KeyError, AttributeError):
+        pass
+
+
 def make_node_names_unique(database):
     converter = LongNamesConverter(database)
 
     for node in database.nodes:
         name = converter.convert(node.name)
+        try_remove_attribute(node.dbc, 'SystemNodeLongSymbol')
 
         if name is None:
             continue
@@ -1413,6 +1421,7 @@ def make_message_names_unique(database):
 
     for message in database.messages:
         name = converter.convert(message.name)
+        try_remove_attribute(message.dbc, 'SystemMessageLongSymbol')
 
         if name is None:
             continue
@@ -1432,6 +1441,7 @@ def make_signal_names_unique(database):
     for message in database.messages:
         for signal in message.signals:
             name = converter.convert(signal.name)
+            try_remove_attribute(signal.dbc, 'SystemSignalLongSymbol')
 
             if name is None:
                 continue

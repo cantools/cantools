@@ -4733,6 +4733,34 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertTrue(db.as_dbc_string().startswith('VERSION "{}"'.
                         format(my_version)))
 
+    def test_shorten_long_names_bugfix(self):
+        """Test if modified object names are dumped correctly to dbc.
+        (Names with original length >32 and new length <= 32 chars)
+
+        """
+
+        filename_src = 'tests/files/dbc/mod_name_len_src.dbc'
+        filename_dest = 'tests/files/dbc/mod_name_len_dest.dbc'
+        db = cantools.database.load_file(filename_src)
+
+        # Now change the names (to <= 32 chars), dump and readback again:
+        msg_name_short = 'msg_now_short'
+        sig_name_short = 'sig_now_short'
+        node_name_short = 'node_now_short'
+        db.messages[0].name = msg_name_short
+        db.messages[0].signals[0].name = sig_name_short
+        db.messages[0].senders[0] = node_name_short
+        db.nodes[0].name = node_name_short
+        db.refresh()
+
+        with open(filename_dest, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252').replace(b'\r', b''),
+                                 fin.read().replace(b'\r', b''))
+            else:
+                self.assertEqual(db.as_dbc_string().replace(b'\r', b''),
+                                 fin.read().replace(b'\r', b''))
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

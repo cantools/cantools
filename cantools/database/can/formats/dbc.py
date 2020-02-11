@@ -591,7 +591,7 @@ def _dump_signal_types(database):
 
             valtype.append(
                 'SIG_VALTYPE_ {} {} : {};'.format(
-                    message.frame_id,
+                    get_dbc_frame_id(message),
                     signal.name,
                     FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]))
 

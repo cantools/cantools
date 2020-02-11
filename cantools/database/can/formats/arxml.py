@@ -1003,7 +1003,7 @@ def load_string(string, strict=True):
     # if no known AUTOSAR version was found, blurb
     if autosar_version is None:
         raise ValueError('Root tag "{}" does not correspond to any recognized AUTOSAR namespace.'
-                         .format(ROOT_TAG))
+                         .format(root.tag))
 
     if is_ecu_extract(root):
         return EcuExtractLoader(root, strict).load()

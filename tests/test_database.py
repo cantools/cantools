@@ -4430,8 +4430,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'ARXML: "Expected root element tag {http://autosar.org/schema/r4.0}'
-            'AUTOSAR, but got {http://autosar.org/schema/r4.0}NOT-AUTOSAR."')
+            'ARXML: "Root tag "{http://autosar.org/schema/r4.0}NOT-AUTOSAR" does'
+            ' not correspond to any recognized AUTOSAR namespace."')
 
     def test_ecu_extract_arxml(self):
         db = cantools.database.Database()

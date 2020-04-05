@@ -752,9 +752,9 @@ def _dump_signal_groups(database):
     sig_group = []
 
     for message in database.messages:
-        if message.sig_groups is None:
+        if message.signal_groups is None:
             continue
-        
+
         for signal_group in message.signal_groups:
             sig_group.append(
                 'SIG_GROUP_ {frame_id} {signal_group_name} {repetitions} : {signal_names};'.format(

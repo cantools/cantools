@@ -4756,6 +4756,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_dbc_with_signal_groups(self):
+        """Test the tool can obtain the signal groups of the messages in the dbc file and dump it.
+        
+        """
+        filename = r'tests\files\dbc\sig_groups.dbc'
+        filename_dump = r'tests\files\dbc\sig_groups_gen.dbc'
+        db = cantools.database.load_file(filename)
+        cantools.database.dump_file(db, filename_dump)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

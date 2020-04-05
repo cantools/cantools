@@ -421,6 +421,7 @@ class Signal(object):
 
 class SignalGroup(object):
     """A CAN signal group
+    Signal groups are used to define a group of signals within a message, e.g. to define that the signals of a group have to be updated in common.
     """
 
     def __init__(self,

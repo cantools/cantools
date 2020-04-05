@@ -4760,8 +4760,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         """Test the tool can obtain the signal groups of the messages in the dbc file and dump it.
         
         """
-        filename = r'tests\files\dbc\sig_groups.dbc'
-        filename_dump = r'tests\files\dbc\sig_groups_gen.dbc'
+
+        filename = 'tests/files/dbc/sig_groups.dbc' #r'tests\files\dbc\sig_groups.dbc'
+        filename_dump = 'tests/files/dbc/sig_groups_gen.dbc' #r'tests\files\dbc\sig_groups_gen.dbc'
         db = cantools.database.load_file(filename)
         cantools.database.dump_file(db, filename_dump)
 

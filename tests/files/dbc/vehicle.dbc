@@ -1045,7 +1045,7 @@ CM_ SG_ 2304273954 Validity_INS_Pos_LLH_Longitude "Valid when bit is set, invali
 CM_ SG_ 2304273954 Validity_INS_Pos_LLH_Latitude "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304278818 INS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
 CM_ SG_ 2304278818 Accuracy_INS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
-CM_ SG_ 2304278818 INS_Heading_2 "This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 2304278818 INS_Heading_2 "This is GPS heading in the range 0 - 360ï¿½, the direction that the vehicle is travelling in the local horizontal plane.";
 CM_ SG_ 2304278818 Accuracy_INS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
 CM_ SG_ 2304278818 Validity_INS_Gradient "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304278818 Validity_INS_Heading "Valid when bit is set, invalid when bit is clear.";
@@ -1067,7 +1067,7 @@ CM_ SG_ 2304208162 Status_Analogue_1 "Analogue output status for channel 1.  ";
 CM_ SG_ 2304208162 Validity_Status_Timestamp "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304148002 GPS_Gradient "This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).";
 CM_ SG_ 2304148002 Accuracy_GPS_Gradient "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
-CM_ SG_ 2304148002 GPS_Heading_2 "This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.";
+CM_ SG_ 2304148002 GPS_Heading_2 "This is GPS heading in the range 0 - 360ï¿½, the direction that the vehicle is travelling in the local horizontal plane.";
 CM_ SG_ 2304148002 Accuracy_GPS_Heading "Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.";
 CM_ SG_ 2304148002 Validity_GPS_Gradient "Valid when bit is set, invalid when bit is clear.";
 CM_ SG_ 2304148002 Validity_GPS_Heading "Valid when bit is set, invalid when bit is clear.";
@@ -1197,4 +1197,5 @@ VAL_ 2304208162 Status_Analogue_1 1 "Active" 0 "Inactive" ;
 VAL_ 2304207906 Trigger_Timestamp_Type 1 "Rising edge" 0 "Falling edge" ;
 VAL_ 2304142370 RTK_Status 4 "Multiple RTK solutions found" 3 "RTK solution OK" 2 "RTK solution failed" 1 "Not enough common satellites" 0 "Not attempting RTK solution" ;
 VAL_ 2304142370 GPS_Status 12 "Lock: Carrier speed and position" 11 "Lock: Doppler speed and position" 10 "Lock: Position but no speed" 9 "Unused" 8 "Unused" 7 "Unused" 6 "Unused" 5 "Exceeded max. speed or alt." 4 "Solution failed" 3 "Solution aborted" 2 "Insufficient satellites" 1 "Searching for satellites" 0 "GPS module not detected" ;
+
 

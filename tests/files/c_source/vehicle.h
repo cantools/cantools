@@ -4458,7 +4458,7 @@ struct vehicle_rt_sb_ins_heading_gradient_2_t {
     uint8_t accuracy_ins_heading;
 
     /**
-     * This is GPS heading in the range 0 - 360°, the direction that the vehicle is trelling in the local horizontal plane.
+     * This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.
      *
      * Range: 0..36000 (0..360 degrees)
      * Scale: 0.01

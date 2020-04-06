@@ -106,3 +106,5 @@ VAL_ 2 Sig_with_short_val_table 1 "Very long, long, long description for the val
 VAL_ 2 Sig_with_long_val_table_2 13 "value '0xD'" 12 "Dvalue '0xC'" 11 "value '0xB'" 10 "value '0xA'" 9 "value '0x9'" 8 "value '0x8'" 7 "value '0x7'" 6 "value '0x6'" 5 "value '0x5'" 4 "value '0x4'" 3 "value '0x3'" 2 "value '0x2'" 1 "value '0x1'" 0 "value '0x0'" ;
 VAL_ 2 Sig_with_long_val_table_1 3 "Description for the value '0x3'" 2 "Description for the value '0x2'" 1 "Description for the value '0x1'" 0 "Description for the value '0x0'" ;
 
+
+

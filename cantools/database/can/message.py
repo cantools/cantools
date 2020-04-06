@@ -34,6 +34,7 @@ class Message(object):
                  dbc_specifics=None,
                  is_extended_frame=False,
                  bus_name=None,
+                 signal_groups=None,
                  strict=True,
                  protocol=None):
         self._frame_id = frame_id
@@ -48,6 +49,7 @@ class Message(object):
         self._cycle_time = cycle_time
         self._dbc = dbc_specifics
         self._bus_name = bus_name
+        self._signal_groups = signal_groups
         self._codecs = None
         self._signal_tree = None
         self._strict = strict
@@ -190,6 +192,18 @@ class Message(object):
 
         return self._signals
 
+    @property
+    def signal_groups(self):
+        """A list of all signal groups in the message.
+
+        """
+
+        return self._signal_groups
+    
+    @signal_groups.setter
+    def signal_groups(self, value):
+        self._signal_groups = value
+    
     @property
     def comment(self):
         """The message comment, or ``None`` if unavailable.

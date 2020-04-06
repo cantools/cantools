@@ -4756,6 +4756,45 @@ class CanToolsDatabaseTest(unittest.TestCase):
             else:
                 self.assertEqual(db.as_dbc_string(), fin.read())
 
+    def test_dbc_with_signal_groups(self):
+        """Test the tool can obtain the signal groups of the messages in the dbc file and dump it.
+        
+        """
+
+        # read & dump
+        filename = 'tests/files/dbc/sig_groups.dbc'
+        db = cantools.database.load_file(filename)
+        with open(filename,'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(),fin.read())
+        
+        # delete all signal groups
+        for message in db.messages:
+            message.signal_groups = None
+        filename = 'tests/files/dbc/sig_groups_del.dbc'
+        with open(filename,'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(),fin.read())
+
+        # add signal group to all messages
+        for message in db.messages:
+            all_sig_names = list(map(lambda sig: sig.name, message.signals))
+            signal_group = cantools.database.can.signal.SignalGroup('New_Signal_Group',signal_names=all_sig_names)
+            signal_group.name = message.name
+            signal_group.repetitions = 1
+            print(signal_group)
+            message.signal_groups = [signal_group]
+        filename = 'tests/files/dbc/sig_groups_out.dbc'
+        with open(filename,'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(),fin.read())
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

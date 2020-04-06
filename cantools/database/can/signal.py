@@ -466,7 +466,7 @@ class SignalGroup(object):
 
     @signal_names.setter
     def signal_names(self, value):
-        self.signal_names = value
+        self._signal_names = value
     
     def __repr__(self):
 

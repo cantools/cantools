@@ -756,6 +756,8 @@ def _dump_signal_groups(database):
             continue
 
         for signal_group in message.signal_groups:
+            all_sig_names = list(map(lambda sig: sig.name, message.signals))
+            signal_group.signal_names = list(filter(lambda sig_name: sig_name in all_sig_names, signal_group.signal_names))
             sig_group.append(
                 'SIG_GROUP_ {frame_id} {signal_group_name} {repetitions} : {signal_names};'.format(
                     frame_id=get_dbc_frame_id(message),
@@ -1006,7 +1008,7 @@ def _load_signal_groups(tokens):
         repetitions = int(signal_group[3])
         signal_names = signal_group[5]
         
-        signal_groups[frame_id].append(SignalGroup(frame_id=frame_id, name=signal_group_name, repetitions=repetitions, signal_names=signal_names))
+        signal_groups[frame_id].append(SignalGroup(name=signal_group_name, repetitions=repetitions, signal_names=signal_names))
     
     return signal_groups
 

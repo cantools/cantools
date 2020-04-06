@@ -425,23 +425,12 @@ class SignalGroup(object):
     """
 
     def __init__(self,
-                 frame_id,
                  name,
                  repetitions=1,
                  signal_names=[]):
-        self._frame_id = frame_id
         self._name = name
         self._repetions = repetitions
         self._signal_names = signal_names
-    
-    @property
-    def frame_id(self):
-
-        return self.frame_id
-
-    @frame_id.setter
-    def frame_id(self, value):
-        self._frame_id = int(value)
     
     @property
     def name(self):

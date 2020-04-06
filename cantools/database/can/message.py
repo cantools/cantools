@@ -199,7 +199,11 @@ class Message(object):
         """
 
         return self._signal_groups
-        
+    
+    @signal_groups.setter
+    def signal_groups(self, value):
+        self._signal_groups = value
+    
     @property
     def comment(self):
         """The message comment, or ``None`` if unavailable.

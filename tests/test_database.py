@@ -32,6 +32,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
 
+    def assert_dbc_dump(self, db, filename):
+        with open(filename, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),
+                                 fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
+
     def test_vehicle(self):
         filename = 'tests/files/dbc/vehicle.dbc'
         db = cantools.database.load_file(filename)
@@ -61,13 +69,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                     i += 1
 
         self.assertEqual(i, 15)
-
-        with open(filename, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_dbc_signal_initial_value(self):
         filename = 'tests/files/dbc/vehicle.dbc'
@@ -319,12 +321,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 'Table2': {},
                 'Table1': {0: 'Zero', 1: 'One'}
             })
-
-        with open(filename, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('utf-8'), fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_dbc_load_empty_choice(self):
         filename = 'tests/files/dbc/empty_choice.dbc'
@@ -4617,13 +4614,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         message = db.get_message_by_frame_id(1)
         self.assertEqual(message.senders, ['FOO', 'BAR', 'FIE'])
-
-        with open(filename, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_issue_168_upper_case_file_extension(self):
         filename = 'tests/files/dbc/issue_168.DBC'
@@ -4713,13 +4704,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = 'tests/files/dbc/long_names_multiple_relations.dbc'
         filename_dumped = 'tests/files/dbc/long_names_multiple_relations_dumped.dbc'
         db = cantools.database.load_file(filename)
-
-        with open(filename_dumped, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename_dumped)
 
     def test_database_version(self):
         # default value if db created from scratch (map None to ''):
@@ -4750,50 +4735,60 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.nodes[0].name = 'node_now_short'
         db.refresh()
 
-        with open(filename_dest, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'), fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename_dest)
 
     def test_dbc_with_signal_groups(self):
-        """Test the tool can obtain the signal groups of the messages in the dbc file and dump it.
-        
+        """Test that signal groups can be loaded and dumped.
+
         """
 
-        # read & dump
+        # Read and dump.
         filename = 'tests/files/dbc/sig_groups.dbc'
         db = cantools.database.load_file(filename)
-        with open(filename,'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(),fin.read())
-        
-        # delete all signal groups
+
+        message = db.get_message_by_name('SGMsg_m')
+        self.assertEqual(len(message.signal_groups), 2)
+
+        signal_group = message.signal_groups[0]
+        self.assertEqual(signal_group.name, 'Sub2')
+        self.assertEqual(signal_group.repetitions, 1)
+        self.assertEqual(signal_group.signal_names, ['dupsig', 'subSig2_1'])
+
+        signal_group = message.signal_groups[1]
+        self.assertEqual(signal_group.name, 'sub1')
+        self.assertEqual(signal_group.repetitions, 1)
+        self.assertEqual(signal_group.signal_names,
+                         ['dupsig', 'subSig1_2', 'subSig1_1'])
+
+        self.assert_dbc_dump(db, filename)
+
+        # Delete all signal groups.
         for message in db.messages:
             message.signal_groups = None
-        filename = 'tests/files/dbc/sig_groups_del.dbc'
-        with open(filename,'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(),fin.read())
 
-        # add signal group to all messages
-        for message in db.messages:
-            all_sig_names = list(map(lambda sig: sig.name, message.signals))
-            signal_group = cantools.database.can.signal.SignalGroup('New_Signal_Group',signal_names=all_sig_names)
-            signal_group.name = message.name
-            signal_group.repetitions = 1
-            print(signal_group)
-            message.signal_groups = [signal_group]
+        filename = 'tests/files/dbc/sig_groups_del.dbc'
+        self.assert_dbc_dump(db, filename)
+
+        # Add one signal group to each message with all its signals.
+        for message in db.messages[:-1]:
+            message.signal_groups = [
+                cantools.database.can.signal_group.SignalGroup(
+                    message.name,
+                    signal_names=[signal.name for signal in message.signals])
+            ]
+
+        # Create the last signal group with default values and update
+        # it by changing its attributes.
+        message = db.messages[-1]
+        signal_group = cantools.database.can.signal_group.SignalGroup(
+            'New_Signal_Group')
+        signal_group.name = message.name
+        signal_group.repetitions = 1
+        signal_group.signal_names = [signal.name for signal in message.signals]
+        message.signal_groups = [signal_group]
+
         filename = 'tests/files/dbc/sig_groups_out.dbc'
-        with open(filename,'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(),fin.read())
+        self.assert_dbc_dump(db, filename)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

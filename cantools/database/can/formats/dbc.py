@@ -24,7 +24,7 @@ from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
 from ..signal import Signal
 from ..signal import Decimal as SignalDecimal
-from ..signal import SignalGroup
+from ..signal_group import SignalGroup
 from ..message import Message
 from ..node import Node
 from ..bus import Bus
@@ -765,7 +765,7 @@ def _dump_signal_groups(database):
                     repetitions=signal_group.repetitions,
                     signal_names=' '.join(signal_group.signal_names)
                 ))
-    
+
     return sig_group
 
 
@@ -1000,16 +1000,15 @@ def _load_signal_groups(tokens):
     """Load signal groups.
 
     """
+
     signal_groups = defaultdict(list)
 
     for signal_group in tokens.get('SIG_GROUP_',[]):
         frame_id = int(signal_group[1])
-        signal_group_name = signal_group[2]
-        repetitions = int(signal_group[3])
-        signal_names = signal_group[5]
-        
-        signal_groups[frame_id].append(SignalGroup(name=signal_group_name, repetitions=repetitions, signal_names=signal_names))
-    
+        signal_groups[frame_id].append(SignalGroup(name=signal_group[2],
+                                                   repetitions=int(signal_group[3]),
+                                                   signal_names=signal_group[5]))
+
     return signal_groups
 
 
@@ -1295,11 +1294,8 @@ def _load_messages(tokens,
             return message_attributes['SystemMessageLongSymbol'].value
         except (KeyError, TypeError):
             return name
-    
-    def get_signal_groups(frame_id_dbc):
-        """
-        """
 
+    def get_signal_groups(frame_id_dbc):
         try:
             return signal_groups[frame_id_dbc]
         except:

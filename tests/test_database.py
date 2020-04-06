@@ -4783,7 +4783,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # add signal group to all messages
         for message in db.messages:
             all_sig_names = list(map(lambda sig: sig.name, message.signals))
-            message.signal_groups = [cantools.database.can.signal.SignalGroup(message.name,signal_names=all_sig_names)]
+            signal_group = cantools.database.can.signal.SignalGroup('New_Signal_Group',signal_names=all_sig_names)
+            signal_group.name = message.name
+            signal_group.repetitions = 1
+            print(signal_group)
+            message.signal_groups = [signal_group]
         filename = 'tests/files/dbc/sig_groups_out.dbc'
         with open(filename,'rb') as fin:
             if sys.version_info[0] > 2:

@@ -4763,7 +4763,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # read & dump
         filename = 'tests/files/dbc/sig_groups.dbc'
-        db = cantools3.database.load_file(filename)
+        db = cantools.database.load_file(filename)
         with open(filename,'rb') as fin:
             if sys.version_info[0] > 2:
                 self.assertEqual(db.as_dbc_string().encode('cp1252'),fin.read())
@@ -4783,7 +4783,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # add signal group to all messages
         for message in db.messages:
             all_sig_names = list(map(lambda sig: sig.name, message.signals))
-            message.signal_groups = [cantools3.database.can.signal.SignalGroup(message.name,signal_names=all_sig_names)]
+            message.signal_groups = [cantools.database.can.signal.SignalGroup(message.name,signal_names=all_sig_names)]
         filename = 'tests/files/dbc/sig_groups_out.dbc'
         with open(filename,'rb') as fin:
             if sys.version_info[0] > 2:

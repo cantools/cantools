@@ -9,7 +9,7 @@ from .utils import format_message_by_frame_id
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^.*  ([0-9A-F]+)   \[\d+\]\s*([0-9A-F ]*)$')
+RE_CANDUMP = re.compile(r'^\s*\S+\s+([0-9A-F]+)\s*\[\d+\]\s*([0-9A-F ]*)$')
 
 
 def _mo_unpack(mo):

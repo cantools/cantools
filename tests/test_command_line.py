@@ -90,6 +90,29 @@ IO_DEBUG(
                     actual_output = stdout.getvalue()
                     self.assertEqual(actual_output, expected_output)
 
+    def test_decode_can_fd(self):
+        argv = ['cantools', 'decode', 'tests/files/dbc/foobar.dbc']
+        input_data = """\
+  vcan0  12333 [064]  02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+"""
+
+        expected_output = """\
+  vcan0  12333 [064]  02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ::
+CanFd(
+    Fie: 2,
+    Fas: 1
+)
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdin', StringIO(input_data)):
+            with patch('sys.stdout', stdout):
+                with patch('sys.argv', argv):
+                    cantools._main()
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
     def test_single_line_decode(self):
         argv = [
             'cantools',

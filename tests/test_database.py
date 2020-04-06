@@ -4766,7 +4766,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         with open(filename,'r') as fin:
             if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252').replace('\r\n','\n'),fin.read())
+                self.assertEqual(db.as_dbc_string().replace('\r\n','\n'),fin.read())
             else:
                 self.assertEqual(db.as_dbc_string(),fin.read())
         

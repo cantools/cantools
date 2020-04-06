@@ -4764,7 +4764,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # read & dump
         filename = 'tests/files/dbc/sig_groups.dbc'
         db = cantools.database.load_file(filename)
-        with open(filename,'rb') as fin:
+        with open(filename,'r') as fin:
             if sys.version_info[0] > 2:
                 self.assertEqual(db.as_dbc_string().encode('cp1252').replace('\r\n','\n'),fin.read())
             else:

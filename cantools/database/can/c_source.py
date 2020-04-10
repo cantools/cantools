@@ -465,8 +465,6 @@ int {database_name}_{message_name}_unpack(
     if (size < {message_length}u) {{
         return (-EINVAL);
     }}
-
-    memset(dst_p, 0, sizeof(*dst_p));
 {unpack_body}
     return (0);
 }}
@@ -1040,11 +1038,17 @@ def _format_unpack_code_signal(message,
         body_lines.append('    {} = 0{};'.format(signal.snake_name,
                                                  signal.conversion_type_suffix))
 
-    for index, shift, shift_direction, mask in signal.segments(invert_shift=True):
+    for loop, (index, shift, shift_direction, mask) in enumerate(signal.segments(invert_shift=True)):
         if signal.is_float or signal.is_signed:
-            fmt = '    {} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            if loop is 0:
+                fmt = '    {} = unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            else:
+                fmt = '    {} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
         else:
-            fmt = '    dst_p->{} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            if loop is 0:
+                fmt = '    dst_p->{} = unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            else:
+                fmt = '    dst_p->{} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
         line = fmt.format(signal.snake_name,
                           shift_direction,

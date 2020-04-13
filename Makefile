@@ -3,7 +3,6 @@ CC = gcc
 endif
 
 C_SOURCES := \
-	tests/main.c \
 	tests/files/c_source/motohawk.c \
 	tests/files/c_source/padding_bit_order.c \
 	tests/files/c_source/vehicle.c \
@@ -18,7 +17,6 @@ C_SOURCES := \
 	tests/files/c_source/abs.c
 
 C_SOURCES_BIT_FIELDS := \
-	tests/main_bit_fields.c \
 	tests/files/c_source/motohawk_bit_fields.c \
 	tests/files/c_source/floating_point_bit_fields.c \
 	tests/files/c_source/signed_bit_fields.c
@@ -152,12 +150,13 @@ test:
 
 .PHONY: test-c
 test-c:
-	$(CC) $(CFLAGS) -Wconversion -Wpedantic -std=c99 -O3 $(C_SOURCES) \
-	    -o main
-	./main
-	$(CC) $(CFLAGS) -fpack-struct -std=c99 -O3 $(C_SOURCES_BIT_FIELDS) \
-	    -o main_bit_fields
-	./main_bit_fields
+	for f in $(C_SOURCES) ; do \
+	    $(CC) $(CFLAGS) -Wconversion -Wpedantic -std=c99 -O3 -c $$f ; \
+	done
+	for f in $(C_SOURCES_BIT_FIELDS) ; do \
+	    $(CC) $(CFLAGS) -fpack-struct -std=c99 -O3 -c $$f ; \
+	done
+	$(MAKE) -C tests
 
 .PHONY: test-c-fuzzer
 test-c-fuzzer:

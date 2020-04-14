@@ -13,8 +13,7 @@ DEPS = $(OBJDEPS) $(MOCKGENDEPS)
 CFLAGS += $(INC:%=-I%)
 CFLAGS += -g
 CFLAGS += -O0
-CFLAGS += $(shell $(CC) -Werror -no-pie -c dummy.c 2> /dev/null \
-		  && echo -no-pie)
+CFLAGS += -no-pie
 CFLAGS += -coverage
 CFLAGS += -Wall
 CFLAGS += -Wextra

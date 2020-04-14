@@ -118,9 +118,9 @@ CFLAGS := \
 	-Wshadow \
 	-Werror
 CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA) -c tests/dummy.c 2> /dev/null \
-	          && echo $(CFLAGS_EXTRA))
+		  && echo $(CFLAGS_EXTRA))
 CFLAGS += $(shell $(CC) -Werror $(CFLAGS_EXTRA_CLANG) -c tests/dummy.c 2> /dev/null \
-	          && echo $(CFLAGS_EXTRA_CLANG))
+		  && echo $(CFLAGS_EXTRA_CLANG))
 
 FUZZER_CC ?= clang
 FUZZER_EXE = multiplex_2_fuzzer
@@ -157,6 +157,10 @@ test-c:
 	    $(CC) $(CFLAGS) -fpack-struct -std=c99 -O3 -c $$f ; \
 	done
 	$(MAKE) -C tests
+
+.PHONY: test-c-clean
+test-c-clean:
+	$(MAKE) -C tests clean
 
 .PHONY: test-c-fuzzer
 test-c-fuzzer:

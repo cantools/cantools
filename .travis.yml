@@ -24,11 +24,11 @@ script:
   - make test-sdist
   - env PYTHONPATH=. python examples/hello_world.py
   - env PYTHONPATH=. python examples/diagnostics/did.py
-  - if [[ "$(python --version)" =~ "Python 3" ]] ; then make clean ; fi
+  - if [[ "$(python --version)" =~ "Python 3" ]] ; then make test-c-clean ; fi
   - if [[ "$(python --version)" =~ "Python 3" ]] ; then make test-c ; fi
-  - if [[ "$(python --version)" =~ "Python 3" ]] ; then make clean ; fi
+  - if [[ "$(python --version)" =~ "Python 3" ]] ; then make test-c-clean ; fi
   - if [[ "$(python --version)" =~ "Python 3" ]] ; then CC=gcc-8 make test-c ; fi
-  - if [[ "$(python --version)" =~ "Python 3" ]] ; then make clean ; fi
+  - if [[ "$(python --version)" =~ "Python 3" ]] ; then make test-c-clean ; fi
   - if [[ "$(python --version)" =~ "Python 3" ]] ; then CC=clang-7 make test-c ; fi
 
 after_success:

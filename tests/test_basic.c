@@ -592,3 +592,47 @@ TEST(encode_decode)
     ASSERT_EQ(motohawk_example_message_temperature_encode(251.0), 100);
     ASSERT_TRUE(fequal(motohawk_example_message_temperature_decode(100), 251.0));
 }
+
+TEST(unpack_does_not_modify_other_mux_signals)
+{
+    uint8_t packed_mux_24[] = "\x60\x00\x8c\x35\xc3\x00\x00\x00";
+    uint8_t packed_mux_8[] = "\x20\x00\x00\x00\x00\x00\x00\x00";
+    struct multiplex_message1_t unpacked;
+
+    memset(&unpacked, 0, sizeof(unpacked));
+
+    /* First unpack, mux 24, which includes all signals. */
+    ASSERT_EQ(multiplex_message1_unpack(&unpacked,
+                                        &packed_mux_24[0],
+                                        sizeof(packed_mux_24)), 0);
+    ASSERT_EQ(unpacked.multiplexor, 24);
+    ASSERT_EQ(unpacked.bit_a, 1);
+    ASSERT_EQ(unpacked.bit_b, 1);
+    ASSERT_EQ(unpacked.bit_c, 1);
+    ASSERT_EQ(unpacked.bit_d, 1);
+    ASSERT_EQ(unpacked.bit_e, 1);
+    ASSERT_EQ(unpacked.bit_f, 1);
+    ASSERT_EQ(unpacked.bit_g, 1);
+    ASSERT_EQ(unpacked.bit_h, 1);
+    ASSERT_EQ(unpacked.bit_j, 1);
+    ASSERT_EQ(unpacked.bit_k, 1);
+    ASSERT_EQ(unpacked.bit_l, 1);
+
+    /* Secon unpack, mux 8, which only includes four signals, which
+       are all set to zero(0). */
+    ASSERT_EQ(multiplex_message1_unpack(&unpacked,
+                                        &packed_mux_8[0],
+                                        sizeof(packed_mux_8)), 0);
+    ASSERT_EQ(unpacked.multiplexor, 8);
+    ASSERT_EQ(unpacked.bit_a, 1);
+    ASSERT_EQ(unpacked.bit_b, 1);
+    ASSERT_EQ(unpacked.bit_c, 0);
+    ASSERT_EQ(unpacked.bit_d, 1);
+    ASSERT_EQ(unpacked.bit_e, 1);
+    ASSERT_EQ(unpacked.bit_f, 1);
+    ASSERT_EQ(unpacked.bit_g, 0);
+    ASSERT_EQ(unpacked.bit_h, 1);
+    ASSERT_EQ(unpacked.bit_j, 0);
+    ASSERT_EQ(unpacked.bit_k, 1);
+    ASSERT_EQ(unpacked.bit_l, 0);
+}

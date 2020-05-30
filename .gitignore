@@ -71,6 +71,9 @@ target/
 # CANdb++
 /tests/files/*.ini
 
+# Bazel
+bazel-*
+
 # Example outputs
 examples/dbc_io/dbc_output.dbc
 

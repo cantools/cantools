@@ -1,0 +1,90 @@
+package(default_visibility = ["//visibility:public"])
+
+load("//:index.bzl", "generate_cpp", "GENERATE_CPP_DEPS")
+load("@rules_python//python:defs.bzl", "py_test")
+
+filegroup(
+    name = "testdata",
+    srcs = glob(["files/**"]),
+)
+
+# TODO this test invokes make, not complete yet still passes
+py_test(
+    name = "test_command_line",
+    srcs = ["test_command_line.py"],
+    deps = [
+        "//cantools:cantools",
+    ],
+    data = [":testdata"],
+)
+
+py_test(
+    name = "test_database",
+    srcs = ["test_database.py"],
+    deps = [
+        "//cantools:cantools",
+    ],
+    data = [":testdata"],
+)
+
+py_test(
+    name = "test_diagnostics_database",
+    srcs = ["test_diagnostics_database.py"],
+    deps = [
+        "//cantools:cantools",
+    ],
+    data = [":testdata"],
+)
+
+py_test(
+    name = "test_monitor",
+    srcs = ["test_monitor.py"],
+    deps = [
+        "//cantools:cantools",
+    ],
+    data = [":testdata"],
+)
+
+py_test(
+    name = "test_tester",
+    srcs = ["test_tester.py"],
+    deps = [
+        "//cantools:cantools",
+    ],
+    data = [":testdata"],
+)
+
+
+filegroup(
+    name = "generate_cpp_dbc_fg",
+    srcs = [
+        "//tests:files/dbc/CSS-Electronics-SAE-J1939-DEMO.dbc",
+        "//tests:files/dbc/motohawk.dbc",
+        "//tests:files/dbc/signed.dbc",
+    ],
+)
+
+generate_cpp(
+    name = "gen_cpp_dbc",
+    dbcs = [":generate_cpp_dbc_fg"],
+)
+
+cc_library(
+    name = "gen_cpp_dbc_lib",
+    srcs = [
+        ":gen_cpp_dbc",
+    ],
+    includes = ["."],
+    deps = GENERATE_CPP_DEPS,
+)
+
+cc_test(
+    name = "test_generate_cpp",
+    srcs = [
+        "test_generate_cpp.cpp",
+    ],
+    deps = [
+        ":gen_cpp_dbc_lib",
+        "@com_google_googletest//:gtest",
+    ],
+)

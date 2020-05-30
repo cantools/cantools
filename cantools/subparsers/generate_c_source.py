@@ -32,6 +32,15 @@ def _do_generate_c_source(args):
         not args.no_floating_point_numbers,
         args.bit_fields)
 
+    if args.outdir:
+        if not os.path.exists(args.outdir):
+            print(f'Cannot generate code in a directory that does not exist: {args.outdir}')
+        filename_c = os.path.join(args.outdir, filename_c)
+        filename_h = os.path.join(args.outdir, filename_h)
+        if args.generate_fuzzer:
+            fuzzer_filename_c = os.path.join(args.outdir, fuzzer_filename_c)
+            fuzzer_filename_mk = os.path.join(args.outdir, fuzzer_filename_mk)
+
     with open(filename_h, 'w') as fout:
         fout.write(header)
 
@@ -41,6 +50,8 @@ def _do_generate_c_source(args):
     print('Successfully generated {} and {}.'.format(filename_h, filename_c))
 
     if args.generate_fuzzer:
+
+
         with open(fuzzer_filename_c, 'w') as fout:
             fout.write(fuzzer_source)
 
@@ -85,4 +96,7 @@ def add_subparser(subparsers):
     generate_c_source_parser.add_argument(
         'infile',
         help='Input database file.')
+    generate_c_source_parser.add_argument(
+        '-o', '--outdir',
+        help='Output directory.')
     generate_c_source_parser.set_defaults(func=_do_generate_c_source)

@@ -1,0 +1,29 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("@cantools_py//:requirements.bzl", cantools_requirement = "requirement")
+
+py_library(
+    name = "cantools_lib",
+    srcs = glob(
+        include = ["**/*.py"],
+        exclude = ["**/*.bazel"],
+    ),
+    deps = [
+        cantools_requirement("bitstruct"),
+        cantools_requirement("python-can"),
+        cantools_requirement("textparser"),
+        cantools_requirement("diskcache"),
+    ],
+    imports = [".", ".."],
+)
+
+py_binary(
+    name = "cantools",
+    srcs = ["__main__.py"],
+    main = "__main__.py",
+    python_version = "PY3",
+    deps = [
+        ":cantools_lib",
+    ],
+)

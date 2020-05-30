@@ -1,5 +1,5 @@
 # Execute as "python -m cantools"
 
-from . import _main as main
+from cantools import _main as main
 
 main()

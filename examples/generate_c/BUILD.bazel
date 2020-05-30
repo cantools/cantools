@@ -1,0 +1,64 @@
+package(default_visibility = ["//visibility:public"])
+
+load("//:index.bzl", "generate_c", "generate_cpp", "GENERATE_CPP_DEPS")
+
+filegroup(
+    name = "signed_dbc",
+    srcs = ["//tests:files/dbc/signed.dbc"],
+)
+
+filegroup(
+    name = "vehicle_dbc",
+    srcs = ["//tests:files/dbc/vehicle.dbc"],
+)
+
+# bazel build //examples/generate_c:test_generate_c_single
+# Will output bazel-bin/examples/generate_c/vehicle.c, vehicle.h
+generate_c(
+    name = "test_generate_c_single",
+    dbcs = [
+        ":signed_dbc",
+    ],
+    args = ["-f"],
+)
+
+# bazel build //examples/generate_c:test_generate_c_single
+# Will output bazel-bin/examples/generate_c/vehicle.cpp, vehicle.h
+generate_cpp(
+    name = "test_generate_cpp_single",
+    dbcs = [
+        ":vehicle_dbc",
+    ],
+)
+
+# Verify cc_library can build with outputs of generate_c macro
+cc_library(
+    name = "signed_lib_c",
+    srcs = [":test_generate_c_single"],
+)
+
+# Verify cc_library can build with outputs of generate_cpp macro
+cc_library(
+    name = "vehicle_lib_cpp",
+    srcs = [":test_generate_cpp_single"],
+    deps = GENERATE_CPP_DEPS,
+)
+
+# Assortment of DBC files
+filegroup(
+    name = "dbcs_misc",
+    srcs = [
+        "//tests:files/dbc/j1939.dbc",
+        "//tests:files/dbc/timing.dbc",
+        "//tests:files/dbc/foobar.dbc",
+    ],
+)
+
+
+# bazel build //examples/generate_c:test_generate_cpp
+generate_cpp(
+    name = "test_generate_cpp",
+    dbcs = [
+        ":dbcs_misc",
+    ],
+)

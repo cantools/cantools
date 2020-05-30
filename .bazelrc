@@ -1,0 +1,8 @@
+# Build opt by default
+build -c opt
+
+# Force python to py3
+build --host_force_python=PY3
+
+# Until https://github.com/bazelbuild/bazel/issues/7095 is closed, this flag prevents protobuf recompilation
+build --incompatible_strict_action_env

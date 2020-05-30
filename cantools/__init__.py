@@ -2,14 +2,14 @@ from __future__ import print_function
 import sys
 import argparse
 
-from . import tester
-from . import j1939
-from .errors import Error
+from cantools import tester
+from cantools import j1939
+from cantools.errors import Error
 
 # Remove once less users are using the old package structure.
-from . import database as db
+from cantools import database as db
 
-from .version import __version__
+from cantools.version import __version__
 
 __author__ = 'Erik Moqvist'
 
@@ -36,12 +36,14 @@ def _main():
     from .subparsers import dump
     from .subparsers import convert
     from .subparsers import generate_c_source
+    from .subparsers import generate_cpp_source
 
     decode.add_subparser(subparsers)
     monitor.add_subparser(subparsers)
     dump.add_subparser(subparsers)
     convert.add_subparser(subparsers)
     generate_c_source.add_subparser(subparsers)
+    generate_cpp_source.add_subparser(subparsers)
 
     args = parser.parse_args()
 

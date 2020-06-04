@@ -148,14 +148,18 @@ test:
 	codespell -d $$(git ls-files | grep -v \.kcd | grep -v \.[hc])
 	$(MAKE) test-c
 
-.PHONY: test-c
-test-c:
+.PHONY: test-c-src
+test-c-src:
 	for f in $(C_SOURCES) ; do \
 	    $(CC) $(CFLAGS) -Wconversion -Wpedantic -std=c99 -O3 -c $$f ; \
 	done
 	for f in $(C_SOURCES_BIT_FIELDS) ; do \
 	    $(CC) $(CFLAGS) -fpack-struct -std=c99 -O3 -c $$f ; \
 	done
+
+.PHONY: test-c
+test-c:
+	$(MAKE) -C test-c-src
 	$(MAKE) -C tests
 
 .PHONY: test-c-clean

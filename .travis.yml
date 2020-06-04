@@ -29,7 +29,7 @@ script:
   - if [[ "$(python --version)" =~ "Python 3" ]] ; then make test-c-clean ; fi
   - if [[ "$(python --version)" =~ "Python 3" ]] ; then CC=gcc-8 make test-c ; fi
   - if [[ "$(python --version)" =~ "Python 3" ]] ; then make test-c-clean ; fi
-  - if [[ "$(python --version)" =~ "Python 3" ]] ; then CC=clang-8 make test-c ; fi
+  - if [[ "$(python --version)" =~ "Python 3" ]] ; then CC=clang-8 make test-c-src ; fi
 
 after_success:
   coveralls

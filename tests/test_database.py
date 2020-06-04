@@ -297,6 +297,46 @@ class CanToolsDatabaseTest(unittest.TestCase):
             decoded = db.decode_message(name, encoded)
             self.assertEqual(decoded, decoded_message)
 
+    def test_foobar_encode_decode_frame_ids(self):
+        db = cantools.db.Database()
+        db.add_dbc_file('tests/files/dbc/foobar.dbc')
+
+        messages = [
+            (
+                0x12330,
+                {'Foo': 250, 'Bar': 0.0},
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+            ),
+            (
+                0x12331,
+                {'Fum': 9, 'Fam': 5},
+                b'\x09\x50\x00\x00\x00'
+            ),
+            (
+                0x12332,
+                {'Binary32': 1.0},
+                b'\x00\x00\x80\x3f'
+            ),
+            (
+                0x12333,
+                {'Fie': 0x123456789abcdef, 'Fas': 0xdeadbeefdeadbeef},
+                b'\xef\xcd\xab\x89\x67\x45\x23\x01'
+                b'\xef\xbe\xad\xde\xef\xbe\xad\xde'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+            )
+        ]
+
+        for frame_id, decoded_message, encoded_message in messages:
+            encoded = db.encode_message(frame_id, decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = db.decode_message(frame_id, encoded)
+            self.assertEqual(decoded, decoded_message)
+
     def test_foobar_decode_masked_frame_id(self):
         db = cantools.db.Database(frame_id_mask=0xff)
         db.add_dbc_file('tests/files/dbc/foobar.dbc')
@@ -1163,7 +1203,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_kcd_file('tests/files/kcd/the_homer.kcd')
 
         # Message 1 (binary64).
-        frame_id = 0x832
+        frame_id = 0x732
 
         decoded_message = {'AmbientLux': math.pi}
         encoded_message = b'\x18\x2d\x44\x54\xfb\x21\x09\x40'
@@ -1175,7 +1215,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(decoded, decoded_message)
 
         # Message 2 (binary32).
-        frame_id = 0x845
+        frame_id = 0x745
 
         decoded_message = {'Windshield': 3.1415927410125732}
         encoded_message = b'\xdb\x0f\x49\x40'
@@ -1219,17 +1259,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file('tests/files/kcd/the_homer.kcd')
 
         messages = [
-            (0x900, {'EnumTest': 'one'}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
-            (0x900, {'EnumTest': 'two'}, b'\xff\x00\x00\x00\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 'one'}, b'\x00\x00\x00\x43\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 'two'}, b'\x00\x00\x7f\x43\x00\x00\x00\x00'),
+            (0x700, {'EnumTest': 'one'}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
+            (0x700, {'EnumTest': 'two'}, b'\xff\x00\x00\x00\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 'one'}, b'\x00\x00\x00\x43\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 'two'}, b'\x00\x00\x7f\x43\x00\x00\x00\x00'),
 
             # Verify encode/decode using int/float to verify scaling
             # still works.
-            (0x900, {'EnumTest': 4}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 4}, b'\x00\x00\x00\x40\x00\x00\x00\x00'),
-            (0x900, {'EnumTest': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 4.0}, b'\x00\x00\x00\x40\x00\x00\x00\x00')
+            (0x700, {'EnumTest': 4}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 4}, b'\x00\x00\x00\x40\x00\x00\x00\x00'),
+            (0x700, {'EnumTest': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 4.0}, b'\x00\x00\x00\x40\x00\x00\x00\x00')
         ]
 
         for message_id, decoded_message, encoded_message in messages:
@@ -4789,6 +4829,28 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         filename = 'tests/files/dbc/sig_groups_out.dbc'
         self.assert_dbc_dump(db, filename)
+
+    def test_dbc_issue_199_more_than_11_bits_standard_frame_id(self):
+        filename = 'tests/files/dbc/issue_199.dbc'
+
+        with self.assertRaises(cantools.database.errors.Error) as cm:
+            cantools.database.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Standard frame id 0x10630000 is more than 11 bits in message '
+            'DriverDoorStatus.')
+
+    def test_dbc_issue_199_more_than_29_bits_extended_frame_id(self):
+        filename = 'tests/files/dbc/issue_199_extended.dbc'
+
+        with self.assertRaises(cantools.database.errors.Error) as cm:
+            cantools.database.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Extended frame id 0x7fffffff is more than 29 bits in message '
+            'DriverDoorStatus.')
 
 
 # This file is not '__main__' when executed via 'python setup.py3

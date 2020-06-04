@@ -602,8 +602,8 @@ BATTERY_VT(
   ------------------------------------------------------------------------
 
   Name:       Foo
-  Id:         0x40000000
-  Length:     0 bytes
+  Id:         0x1d8
+  Length:     1 bytes
   Cycle time: - ms
   Senders:    -
   Layout:

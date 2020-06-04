@@ -159,7 +159,7 @@ test-c-src:
 
 .PHONY: test-c
 test-c:
-	$(MAKE) -C test-c-src
+	$(MAKE) test-c-src
 	$(MAKE) -C tests
 
 .PHONY: test-c-clean

@@ -270,7 +270,7 @@ def _format_pack_code_signal(message,
     body_lines.append(f'    if (!{signal.name}.RawInRange({signal.snake_name}_encoded)) {{\n        return false;\n    }}')
 
     for index, shift, shift_direction, mask in signal.segments(invert_shift=False):
-        fmt = '    _buffer[{}] |= pack_{}_shift<uint{}_t>({}_encoded, {}u, 0x{:02x}u);'
+        fmt = '    buffer_[{}] |= pack_{}_shift<uint{}_t>({}_encoded, {}u, 0x{:02x}u);'
         line = fmt.format(index,
                           shift_direction,
                           signal.type_length,
@@ -353,7 +353,7 @@ def _format_unpack_code_signal(message,
     body_lines = []
 
     for index, shift, shift_direction, mask in signal.segments(invert_shift=True):
-        fmt = '    {} |= unpack_{}_shift<uint{}_t>(_buffer[{}], {}u, 0x{:02x}u);'
+        fmt = '    {} |= unpack_{}_shift<uint{}_t>(buffer_[{}], {}u, 0x{:02x}u);'
         line = fmt.format(signal.snake_name,
                           shift_direction,
                           signal.type_length,
@@ -573,7 +573,7 @@ def _generate_definitions(database_name, messages):
         for signal_iter, signal in enumerate(message.signals):
             signal_definition = f'// Signal {message.name}.{signal.name}\n'
 
-            signals_in_msg_constructor.append(f'    , {signal.name}(_buffer)')
+            signals_in_msg_constructor.append(f'    , {signal.name}(buffer_)')
 
             signal_definition += SIGNAL_DEFINITION_FMT.format(
                 name=signal.name,

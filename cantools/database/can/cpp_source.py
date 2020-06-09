@@ -156,7 +156,7 @@ bool {message_name}_{name}::RawInRange(const {type_name}& value) const {{
 
 MESSAGE_CONSTRUCTOR_DEFINITION_FMT = '''\
 {database_message_name}::{database_message_name}()
-    : Frame({id}u, "{database_message_name}", {length}u, {extended}, {cycle_time}u, {length}u)
+    : Frame({id}u, "{database_message_name}", {length}u, {extended}, {cycle_time}u)
 {signals}
 {{}}
 

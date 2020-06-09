@@ -40,55 +40,55 @@ data_type unpack_right_shift(uint16_t value, uint16_t shift, uint16_t mask)
  * Abstract base class used to define CAN Messages
  */
 
-static const uint32_t J1939_PGN_OFFSET = 8;
-static const uint32_t J1939_PGN_MASK = 0x3FFFF;
+constexpr uint32_t J1939_PGN_OFFSET = 8;
+constexpr uint32_t J1939_PGN_MASK = 0x3FFFF;
 
 class Frame {
 public:
     /** Empty buffer constructor */
-    Frame(uint32_t id, const std::string& name, const uint32_t size, const bool extended,
-          const uint32_t cycle_time, const size_t buffer_size)
+    Frame(uint32_t id, const std::string& name, const uint32_t buffer_capacity, const bool extended,
+          const uint32_t cycle_time)
         : id_(id)
         , name_(name)
-        , size_(size)
+        , buffer_capacity_(buffer_capacity)
         , extended_(extended)
         , cycle_time_(cycle_time)
-        , buffer_ptr_{new uint8_t[buffer_size]()}
+        , buffer_ptr_{new uint8_t[buffer_capacity]()}
         , buffer_{buffer_ptr_.get()}
-        , buffer_size_{buffer_size}
+        , data_length_{buffer_capacity}
     {}
 
     /** Move construct unique_ptr to buffer */
-    Frame(uint32_t id, const std::string& name, const uint32_t size, const bool extended,
+    Frame(uint32_t id, const std::string& name, const uint32_t buffer_capacity, const bool extended,
           const uint32_t cycle_time, std::unique_ptr<uint8_t[]>&& other, const size_t buffer_size)
         : id_(id)
         , name_(name)
-        , size_(size)
+        , buffer_capacity_(buffer_capacity)
         , extended_(extended)
         , cycle_time_(cycle_time)
         , buffer_ptr_{std::move(other)}
         , buffer_{buffer_ptr_.get()}
-        , buffer_size_{buffer_size}
+        , data_length_{buffer_size}
     {}
 
     /** Construct with raw pointer buffer, do not maintain ownership after object destruction */
-    Frame(uint32_t id, const std::string& name, const uint32_t size, const bool extended,
+    Frame(uint32_t id, const std::string& name, const uint32_t buffer_capacity, const bool extended,
           const uint32_t cycle_time, uint8_t* buffer, const size_t buffer_size)
         : id_(id)
         , name_(name)
-        , size_(size)
+        , buffer_capacity_(buffer_capacity)
         , extended_(extended)
         , cycle_time_(cycle_time)
         , buffer_ptr_{nullptr}
         , buffer_{buffer}
-        , buffer_size_{buffer_size}
+        , data_length_{buffer_size}
     {}
 
     /** Accesser to view buffer in string form. */
     std::string to_string() const {
         std::ostringstream oss;
         oss << std::hex << std::setfill('0');
-        for (size_t i = 0; i < buffer_size_; ++i) {{
+        for (size_t i = 0; i < data_length_; ++i) {{
             oss << std::setw(2) << (unsigned int)buffer_[i];
         }}
         return oss.str();
@@ -96,16 +96,16 @@ public:
 
     /** Clear buffer */
     void clear() {
-        std::fill_n(buffer_, buffer_size_, 0u);
+        std::fill_n(buffer_, buffer_capacity_, 0u);
     }
 
     /** Getter message ID. */
-    uint32_t ID() const {
+    uint32_t id() const {
         return id_;
     }
 
     /** Getter for PGN. */
-    uint32_t PGN() const {
+    uint32_t pgn() const {
         if (extended_) {
             return (id_ >> J1939_PGN_OFFSET) & J1939_PGN_MASK;
         } else {
@@ -119,8 +119,8 @@ public:
     }
 
     /** Getter for expected size of message buffer */
-    uint32_t size() const {
-        return size_;
+    uint32_t buffer_capacity() const {
+        return buffer_capacity_;
     }
 
     /** Check if frame is extended. For J1939 message this will always be true. */
@@ -144,8 +144,8 @@ public:
     }
 
     /** Getter for size of buffer */
-    uint32_t buffer_size() const {
-        return buffer_size_;
+    uint32_t data_length() const {
+        return data_length_;
     }
 
 private:
@@ -156,7 +156,7 @@ private:
     std::string name_;
 
     // Expected message length, bytes
-    uint32_t size_;
+    uint32_t buffer_capacity_;
 
     // Extended or standard frame type
     bool extended_;
@@ -171,8 +171,8 @@ protected:
     // Buffer containing frame
     uint8_t* buffer_;
 
-    // Buffer size
-    size_t buffer_size_;
+    // Buffer size - length of data in buffer
+    size_t data_length_;
 };
 
 /**

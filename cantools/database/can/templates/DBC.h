@@ -138,8 +138,13 @@ public:
         return cycle_time_;
     }
 
-    /** Getter beginning of underlying data buffer. */
-    const uint8_t* buffer() {
+    /** Getter to front of underlying data buffer. */
+    uint8_t* buffer() {
+        return &buffer_[0];
+    }
+
+    /** Getter to const front of underlying data buffer. */
+    const uint8_t* cbuffer() {
         return &buffer_[0];
     }
 

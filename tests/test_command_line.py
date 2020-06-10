@@ -50,7 +50,6 @@ class CanToolsCommandLineTest(unittest.TestCase):
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04
-  vcan0  1F4   [3]  01 02 03
   vcan0  1F3   [3]  01 02 03
 """
 
@@ -77,7 +76,6 @@ IO_DEBUG(
     IO_DEBUG_test_signed: 3,
     IO_DEBUG_test_float: 2.0
 )
-  vcan0  1F4   [3]  01 02 03 :: unpack requires at least 32 bits to unpack (got 24)
   vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
 """
 
@@ -127,7 +125,6 @@ CanFd(
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04
-  vcan0  1F4   [3]  01 02 03
   vcan0  1F3   [3]  01 02 03
 """
 
@@ -137,7 +134,6 @@ CanFd(
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two', IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
-  vcan0  1F4   [3]  01 02 03 :: unpack requires at least 32 bits to unpack (got 24)
   vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
 """
 

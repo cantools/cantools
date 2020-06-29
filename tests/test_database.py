@@ -4852,6 +4852,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'Extended frame id 0x7fffffff is more than 29 bits in message '
             'DriverDoorStatus.')
 
+    def test_issue_207_tolerate_plus_in_dbc_sig_def(self):
+        db = cantools.database.load_file('tests/files/dbc/issue_207_sig_plus.dbc')
+        msg = db.messages[0]
+        for sig in msg.signals:
+            self.assertEqual(sig.minimum, -128)
+            self.assertEqual(sig.maximum, 127)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

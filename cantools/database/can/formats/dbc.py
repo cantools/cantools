@@ -183,7 +183,7 @@ class Parser(textparser.Parser):
 
         token_specs = [
             ('SKIP',     r'[ \r\n\t]+|//.*?\n'),
-            ('NUMBER',   r'-?\d+\.?\d*([eE][+-]?\d+)?'),
+            ('NUMBER',   r'[-+]?\d+\.?\d*([eE][+-]?\d+)?'),
             ('WORD',     r'[A-Za-z0-9_]+'),
             ('STRING',   r'"(\\"|[^"])*?"'),
             ('LPAREN',   r'\('),

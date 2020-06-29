@@ -4854,10 +4854,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_issue_207_tolerate_plus_in_dbc_sig_def(self):
         db = cantools.database.load_file('tests/files/dbc/issue_207_sig_plus.dbc')
-        msg = db.messages[0]
-        for sig in msg.signals:
-            self.assertEqual(sig.minimum, -128)
-            self.assertEqual(sig.maximum, 127)
+        message = db.messages[0]
+
+        for signal in message.signals:
+            self.assertEqual(signal.minimum, -128)
+            self.assertEqual(signal.maximum, 127)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

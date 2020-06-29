@@ -145,7 +145,7 @@ test:
 	env PYTHONPATH=. python3 examples/hello_world.py
 	env PYTHONPATH=. python3 examples/dbc_io/main.py
 	env PYTHONPATH=. python3 examples/diagnostics/did.py
-	codespell -d $$(git ls-files | grep -v \.kcd | grep -v \.[hc])
+	codespell -L datas -d $$(git ls-files | grep -v \.kcd | grep -v \.[hc])
 	$(MAKE) test-c
 
 .PHONY: test-c-src

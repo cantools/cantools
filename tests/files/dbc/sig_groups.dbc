@@ -1,0 +1,68 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Tester
+
+
+BO_ 3 Test: 8 Tester
+ SG_ TestSig : 0|8@1- (1,0) [0|0] ""  Tester
+
+BO_ 2 SGMsg_m: 8 Vector__XXX
+ SG_ dupsig : 24|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ subSig2_1 : 16|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ subSig1_2 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ subSig1_1 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1 SGMsg: 8 Vector__XXX
+ SG_ dupsig : 16|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ SG2 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ SG1 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 0 NormalMsg: 8 Vector__XXX
+ SG_ Sig_2 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ Sig_1 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+
+
+
+
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+
+
+SIG_GROUP_ 2 Sub2 1 : dupsig subSig2_1;
+SIG_GROUP_ 2 sub1 1 : dupsig subSig1_2 subSig1_1;
+SIG_GROUP_ 1 New_Signal_Group_46 1 : SG2 SG1;
+

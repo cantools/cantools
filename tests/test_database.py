@@ -32,6 +32,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
 
+    def assert_dbc_dump(self, db, filename):
+        with open(filename, 'rb') as fin:
+            if sys.version_info[0] > 2:
+                self.assertEqual(db.as_dbc_string().encode('cp1252'),
+                                 fin.read())
+            else:
+                self.assertEqual(db.as_dbc_string(), fin.read())
+
     def test_vehicle(self):
         filename = 'tests/files/dbc/vehicle.dbc'
         db = cantools.database.load_file(filename)
@@ -61,13 +69,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                     i += 1
 
         self.assertEqual(i, 15)
-
-        with open(filename, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_dbc_signal_initial_value(self):
         filename = 'tests/files/dbc/vehicle.dbc'
@@ -295,6 +297,46 @@ class CanToolsDatabaseTest(unittest.TestCase):
             decoded = db.decode_message(name, encoded)
             self.assertEqual(decoded, decoded_message)
 
+    def test_foobar_encode_decode_frame_ids(self):
+        db = cantools.db.Database()
+        db.add_dbc_file('tests/files/dbc/foobar.dbc')
+
+        messages = [
+            (
+                0x12330,
+                {'Foo': 250, 'Bar': 0.0},
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+            ),
+            (
+                0x12331,
+                {'Fum': 9, 'Fam': 5},
+                b'\x09\x50\x00\x00\x00'
+            ),
+            (
+                0x12332,
+                {'Binary32': 1.0},
+                b'\x00\x00\x80\x3f'
+            ),
+            (
+                0x12333,
+                {'Fie': 0x123456789abcdef, 'Fas': 0xdeadbeefdeadbeef},
+                b'\xef\xcd\xab\x89\x67\x45\x23\x01'
+                b'\xef\xbe\xad\xde\xef\xbe\xad\xde'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+            )
+        ]
+
+        for frame_id, decoded_message, encoded_message in messages:
+            encoded = db.encode_message(frame_id, decoded_message)
+            self.assertEqual(encoded, encoded_message)
+            decoded = db.decode_message(frame_id, encoded)
+            self.assertEqual(decoded, decoded_message)
+
     def test_foobar_decode_masked_frame_id(self):
         db = cantools.db.Database(frame_id_mask=0xff)
         db.add_dbc_file('tests/files/dbc/foobar.dbc')
@@ -319,12 +361,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 'Table2': {},
                 'Table1': {0: 'Zero', 1: 'One'}
             })
-
-        with open(filename, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('utf-8'), fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_dbc_load_empty_choice(self):
         filename = 'tests/files/dbc/empty_choice.dbc'
@@ -1166,7 +1203,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_kcd_file('tests/files/kcd/the_homer.kcd')
 
         # Message 1 (binary64).
-        frame_id = 0x832
+        frame_id = 0x732
 
         decoded_message = {'AmbientLux': math.pi}
         encoded_message = b'\x18\x2d\x44\x54\xfb\x21\x09\x40'
@@ -1178,7 +1215,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(decoded, decoded_message)
 
         # Message 2 (binary32).
-        frame_id = 0x845
+        frame_id = 0x745
 
         decoded_message = {'Windshield': 3.1415927410125732}
         encoded_message = b'\xdb\x0f\x49\x40'
@@ -1222,17 +1259,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file('tests/files/kcd/the_homer.kcd')
 
         messages = [
-            (0x900, {'EnumTest': 'one'}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
-            (0x900, {'EnumTest': 'two'}, b'\xff\x00\x00\x00\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 'one'}, b'\x00\x00\x00\x43\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 'two'}, b'\x00\x00\x7f\x43\x00\x00\x00\x00'),
+            (0x700, {'EnumTest': 'one'}, b'\x80\x00\x00\x00\x00\x00\x00\x00'),
+            (0x700, {'EnumTest': 'two'}, b'\xff\x00\x00\x00\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 'one'}, b'\x00\x00\x00\x43\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 'two'}, b'\x00\x00\x7f\x43\x00\x00\x00\x00'),
 
             # Verify encode/decode using int/float to verify scaling
             # still works.
-            (0x900, {'EnumTest': 4}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 4}, b'\x00\x00\x00\x40\x00\x00\x00\x00'),
-            (0x900, {'EnumTest': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
-            (0x901, {'EnumTestFloat': 4.0}, b'\x00\x00\x00\x40\x00\x00\x00\x00')
+            (0x700, {'EnumTest': 4}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 4}, b'\x00\x00\x00\x40\x00\x00\x00\x00'),
+            (0x700, {'EnumTest': 4.0}, b'\x02\x00\x00\x00\x00\x00\x00\x00'),
+            (0x701, {'EnumTestFloat': 4.0}, b'\x00\x00\x00\x40\x00\x00\x00\x00')
         ]
 
         for message_id, decoded_message, encoded_message in messages:
@@ -4617,13 +4654,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         message = db.get_message_by_frame_id(1)
         self.assertEqual(message.senders, ['FOO', 'BAR', 'FIE'])
-
-        with open(filename, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_issue_168_upper_case_file_extension(self):
         filename = 'tests/files/dbc/issue_168.DBC'
@@ -4713,13 +4744,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         filename = 'tests/files/dbc/long_names_multiple_relations.dbc'
         filename_dumped = 'tests/files/dbc/long_names_multiple_relations_dumped.dbc'
         db = cantools.database.load_file(filename)
-
-        with open(filename_dumped, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename_dumped)
 
     def test_database_version(self):
         # default value if db created from scratch (map None to ''):
@@ -4750,11 +4775,82 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.nodes[0].name = 'node_now_short'
         db.refresh()
 
-        with open(filename_dest, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'), fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+        self.assert_dbc_dump(db, filename_dest)
+
+    def test_dbc_with_signal_groups(self):
+        """Test that signal groups can be loaded and dumped.
+
+        """
+
+        # Read and dump.
+        filename = 'tests/files/dbc/sig_groups.dbc'
+        db = cantools.database.load_file(filename)
+
+        message = db.get_message_by_name('SGMsg_m')
+        self.assertEqual(len(message.signal_groups), 2)
+
+        signal_group = message.signal_groups[0]
+        self.assertEqual(signal_group.name, 'Sub2')
+        self.assertEqual(signal_group.repetitions, 1)
+        self.assertEqual(signal_group.signal_names, ['dupsig', 'subSig2_1'])
+
+        signal_group = message.signal_groups[1]
+        self.assertEqual(signal_group.name, 'sub1')
+        self.assertEqual(signal_group.repetitions, 1)
+        self.assertEqual(signal_group.signal_names,
+                         ['dupsig', 'subSig1_2', 'subSig1_1'])
+
+        self.assert_dbc_dump(db, filename)
+
+        # Delete all signal groups.
+        for message in db.messages:
+            message.signal_groups = None
+
+        filename = 'tests/files/dbc/sig_groups_del.dbc'
+        self.assert_dbc_dump(db, filename)
+
+        # Add one signal group to each message with all its signals.
+        for message in db.messages[:-1]:
+            message.signal_groups = [
+                cantools.database.can.signal_group.SignalGroup(
+                    message.name,
+                    signal_names=[signal.name for signal in message.signals])
+            ]
+
+        # Create the last signal group with default values and update
+        # it by changing its attributes.
+        message = db.messages[-1]
+        signal_group = cantools.database.can.signal_group.SignalGroup(
+            'New_Signal_Group')
+        signal_group.name = message.name
+        signal_group.repetitions = 1
+        signal_group.signal_names = [signal.name for signal in message.signals]
+        message.signal_groups = [signal_group]
+
+        filename = 'tests/files/dbc/sig_groups_out.dbc'
+        self.assert_dbc_dump(db, filename)
+
+    def test_dbc_issue_199_more_than_11_bits_standard_frame_id(self):
+        filename = 'tests/files/dbc/issue_199.dbc'
+
+        with self.assertRaises(cantools.database.errors.Error) as cm:
+            cantools.database.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Standard frame id 0x10630000 is more than 11 bits in message '
+            'DriverDoorStatus.')
+
+    def test_dbc_issue_199_more_than_29_bits_extended_frame_id(self):
+        filename = 'tests/files/dbc/issue_199_extended.dbc'
+
+        with self.assertRaises(cantools.database.errors.Error) as cm:
+            cantools.database.load_file(filename)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Extended frame id 0x7fffffff is more than 29 bits in message '
+            'DriverDoorStatus.')
 
 
 # This file is not '__main__' when executed via 'python setup.py3

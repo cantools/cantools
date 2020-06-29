@@ -24,6 +24,7 @@ from ..attribute_definition import AttributeDefinition
 from ..attribute import Attribute
 from ..signal import Signal
 from ..signal import Decimal as SignalDecimal
+from ..signal_group import SignalGroup
 from ..message import Message
 from ..node import Node
 from ..bus import Bus
@@ -84,6 +85,7 @@ DBC_FMT = (
     '{ba_def_def}\r\n'
     '{ba}\r\n'
     '{val}\r\n'
+    '{sig_group}\r\n'
     '\r\n'
 )
 
@@ -746,6 +748,27 @@ def _dump_choices(database):
     return val
 
 
+def _dump_signal_groups(database):
+    sig_group = []
+
+    for message in database.messages:
+        if message.signal_groups is None:
+            continue
+
+        for signal_group in message.signal_groups:
+            all_sig_names = list(map(lambda sig: sig.name, message.signals))
+            signal_group.signal_names = list(filter(lambda sig_name: sig_name in all_sig_names, signal_group.signal_names))
+            sig_group.append(
+                'SIG_GROUP_ {frame_id} {signal_group_name} {repetitions} : {signal_names};'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    signal_group_name=signal_group.name,
+                    repetitions=signal_group.repetitions,
+                    signal_names=' '.join(signal_group.signal_names)
+                ))
+
+    return sig_group
+
+
 def _load_comments(tokens):
     comments = defaultdict(dict)
 
@@ -973,6 +996,22 @@ def _load_signal_multiplexer_values(tokens):
     return signal_multiplexer_values
 
 
+def _load_signal_groups(tokens):
+    """Load signal groups.
+
+    """
+
+    signal_groups = defaultdict(list)
+
+    for signal_group in tokens.get('SIG_GROUP_',[]):
+        frame_id = int(signal_group[1])
+        signal_groups[frame_id].append(SignalGroup(name=signal_group[2],
+                                                   repetitions=int(signal_group[3]),
+                                                   signal_names=signal_group[5]))
+
+    return signal_groups
+
+
 def _load_signals(tokens,
                   comments,
                   attributes,
@@ -1166,7 +1205,8 @@ def _load_messages(tokens,
                    signal_types,
                    signal_multiplexer_values,
                    strict,
-                   bus_name):
+                   bus_name,
+                   signal_groups):
     """Load messages.
 
     """
@@ -1255,6 +1295,12 @@ def _load_messages(tokens,
         except (KeyError, TypeError):
             return name
 
+    def get_signal_groups(frame_id_dbc):
+        try:
+            return signal_groups[frame_id_dbc]
+        except:
+            return None
+
     messages = []
 
     for message in tokens.get('BO_', []):
@@ -1315,7 +1361,8 @@ def _load_messages(tokens,
                     comment=get_comment(frame_id_dbc),
                     strict=strict,
                     protocol=get_protocol(frame_id_dbc),
-                    bus_name=bus_name))
+                    bus_name=bus_name,
+                    signal_groups=get_signal_groups(frame_id_dbc)))
 
     return messages
 
@@ -1487,6 +1534,7 @@ def dump_string(database):
     ba_def_def = _dump_attribute_definition_defaults(database)
     ba = _dump_attributes(database)
     val = _dump_choices(database)
+    sig_group = _dump_signal_groups(database)
 
     return DBC_FMT.format(version=_dump_version(database),
                           bu=' '.join(bu),
@@ -1498,7 +1546,8 @@ def dump_string(database):
                           ba_def='\r\n'.join(ba_def),
                           ba_def_def='\r\n'.join(ba_def_def),
                           ba='\r\n'.join(ba),
-                          val='\r\n'.join(val))
+                          val='\r\n'.join(val),
+                          sig_group='\r\n'.join(sig_group))
 
 
 def get_definitions_dict(definitions, defaults):
@@ -1559,6 +1608,7 @@ def load_string(string, strict=True):
     message_senders = _load_message_senders(tokens, attributes)
     signal_types = _load_signal_types(tokens)
     signal_multiplexer_values = _load_signal_multiplexer_values(tokens)
+    signal_groups = _load_signal_groups(tokens)
     messages = _load_messages(tokens,
                               comments,
                               attributes,
@@ -1568,7 +1618,8 @@ def load_string(string, strict=True):
                               signal_types,
                               signal_multiplexer_values,
                               strict,
-                              bus.name if bus else None)
+                              bus.name if bus else None,
+                              signal_groups)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes)

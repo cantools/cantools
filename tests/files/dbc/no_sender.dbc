@@ -36,12 +36,12 @@ BS_:
 BU_:
 
 
-BO_ 3221225472 Foo: 0 Vector__XXX
+BO_ 472 Foo: 1 Vector__XXX
  SG_ signal_without_sender : 0|8@1- (1,0) [0|0] "" Vector__XXX
 
 
 
-CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
+CM_ BO_ 472 "No sender message.";
 BA_DEF_  "BusType" STRING ;
 BA_DEF_DEF_  "BusType" "";
 

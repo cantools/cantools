@@ -34,8 +34,21 @@ class Message(object):
                  dbc_specifics=None,
                  is_extended_frame=False,
                  bus_name=None,
+                 signal_groups=None,
                  strict=True,
                  protocol=None):
+        frame_id_bit_length = frame_id.bit_length()
+
+        if is_extended_frame:
+            if frame_id_bit_length > 29:
+                raise Error(
+                    'Extended frame id 0x{:x} is more than 29 bits in '
+                    'message {}.'.format(frame_id, name))
+        elif frame_id_bit_length > 11:
+            raise Error(
+                'Standard frame id 0x{:x} is more than 11 bits in '
+                'message {}.'.format(frame_id, name))
+
         self._frame_id = frame_id
         self._is_extended_frame = is_extended_frame
         self._name = name
@@ -48,6 +61,7 @@ class Message(object):
         self._cycle_time = cycle_time
         self._dbc = dbc_specifics
         self._bus_name = bus_name
+        self._signal_groups = signal_groups
         self._codecs = None
         self._signal_tree = None
         self._strict = strict
@@ -189,6 +203,18 @@ class Message(object):
         """
 
         return self._signals
+
+    @property
+    def signal_groups(self):
+        """A list of all signal groups in the message.
+
+        """
+
+        return self._signal_groups
+
+    @signal_groups.setter
+    def signal_groups(self, value):
+        self._signal_groups = value
 
     @property
     def comment(self):

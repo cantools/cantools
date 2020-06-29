@@ -393,7 +393,6 @@ class Signal(object):
                 return choice_number
 
     def __repr__(self):
-
         if self._choices is None:
             choices = None
         else:

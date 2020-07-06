@@ -1,8 +1,8 @@
-from __future__ import print_function
 import sys
 import re
 import binascii
 import struct
+from argparse_addons import Integer
 
 from .. import database
 from .utils import format_message_by_frame_id
@@ -75,7 +75,7 @@ def add_subparser(subparsers):
         help='Skip database consistency checks.')
     decode_parser.add_argument(
         '-m', '--frame-id-mask',
-        type=lambda x: int(x, 0),
+        type=Integer(0),
         help=('Only compare selected frame id bits to find the message in the '
               'database. By default the candump and database frame ids must '
               'be equal for a match.'))

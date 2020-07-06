@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from .. import database
 from ..database.utils import format_and
 from ..database.can.database import Database as CanDatabase

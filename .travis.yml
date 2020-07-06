@@ -23,12 +23,12 @@ script:
   - make test-sdist
   - env PYTHONPATH=. python examples/hello_world.py
   - env PYTHONPATH=. python examples/diagnostics/did.py
-  - make test-c-clean ; fi
-  - make test-c ; fi
-  - make test-c-clean ; fi
-  - CC=gcc-8 make test-c ; fi
-  - make test-c-clean ; fi
-  - CC=clang-8 make test-c-src ; fi
+  - make test-c-clean
+  - make test-c
+  - make test-c-clean
+  - CC=gcc-8 make test-c
+  - make test-c-clean
+  - CC=clang-8 make test-c-src
 
 after_success:
   coveralls

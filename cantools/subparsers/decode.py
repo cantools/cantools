@@ -10,6 +10,8 @@ from .utils import format_message_by_frame_id
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
 RE_CANDUMP = re.compile(r'^\s*\S+\s+([0-9A-F]+)\s*\[\d+\]\s*([0-9A-F ]*)$')
+# Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
+RE_CANDUMP_LOG = re.compile(r'^\(\d+\.\d+\)\s+\S+\s+([\dA-F]+)#([\dA-F]*)$')
 
 
 def _mo_unpack(mo):
@@ -30,6 +32,7 @@ def _do_decode(args):
                                frame_id_mask=args.frame_id_mask,
                                strict=not args.no_strict)
     decode_choices = not args.no_decode_choices
+    re_format = None
 
     while True:
         line = sys.stdin.readline()
@@ -39,7 +42,17 @@ def _do_decode(args):
             break
 
         line = line.strip('\r\n')
-        mo = RE_CANDUMP.match(line)
+        
+        if re_format is None:  # Auto-detect on first valid line
+            mo = RE_CANDUMP.match(line)
+            if mo:
+                re_format = RE_CANDUMP
+            else:
+                mo = RE_CANDUMP_LOG.match(line)
+                if mo:
+                    re_format = RE_CANDUMP_LOG
+        else:
+            mo = re_format.match(line)
 
         if mo:
             frame_id, data = _mo_unpack(mo)

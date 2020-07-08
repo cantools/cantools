@@ -115,7 +115,6 @@ CanFd(
         argv = [
             'cantools',
             'decode',
-            '--log-format',
             'tests/files/dbc/socialledge.dbc'
         ]
         input_data = """\
@@ -202,7 +201,6 @@ IO_DEBUG(
             'cantools',
             'decode',
             '--single-line',
-            '--log-format',
             'tests/files/dbc/socialledge.dbc'
         ]
 

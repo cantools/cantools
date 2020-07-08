@@ -32,7 +32,7 @@ def _do_decode(args):
                                frame_id_mask=args.frame_id_mask,
                                strict=not args.no_strict)
     decode_choices = not args.no_decode_choices
-    re_format = RE_CANDUMP_LOG if args.log_format else RE_CANDUMP
+    re_format = None
 
     while True:
         line = sys.stdin.readline()
@@ -42,7 +42,17 @@ def _do_decode(args):
             break
 
         line = line.strip('\r\n')
-        mo = re_format.match(line)
+        
+        if re_format is None:  # Auto-detect on first valid line
+            mo = RE_CANDUMP.match(line)
+            if mo:
+                re_format = RE_CANDUMP
+            else:
+                mo = RE_CANDUMP_LOG.match(line)
+                if mo:
+                    re_format = RE_CANDUMP_LOG
+        else:
+            mo = re_format.match(line)
 
         if mo:
             frame_id, data = _mo_unpack(mo)
@@ -82,10 +92,6 @@ def add_subparser(subparsers):
         help=('Only compare selected frame id bits to find the message in the '
               'database. By default the candump and database frame ids must '
               'be equal for a match.'))
-    decode_parser.add_argument(
-        '-l', '--log-format',
-        action='store_true',
-        help='Use candump log format.')
     decode_parser.add_argument(
         'database',
         help='Database file.')

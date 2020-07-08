@@ -42,13 +42,16 @@ def _do_decode(args):
             break
 
         line = line.strip('\r\n')
-        
-        if re_format is None:  # Auto-detect on first valid line
+
+        # Auto-detect on first valid line.
+        if re_format is None:
             mo = RE_CANDUMP.match(line)
+
             if mo:
                 re_format = RE_CANDUMP
             else:
                 mo = RE_CANDUMP_LOG.match(line)
+
                 if mo:
                     re_format = RE_CANDUMP_LOG
         else:

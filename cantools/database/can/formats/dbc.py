@@ -558,6 +558,12 @@ def _dump_senders(database):
 def _dump_comments(database):
     cm = []
 
+    for bus in database.buses:
+        if bus.comment is not None:
+            cm.append(
+                'CM_ "{comment}";'.format(
+                    comment=bus.comment.replace('"', '\\"')))
+
     for node in database.nodes:
         if node.comment is not None:
             cm.append(
@@ -774,6 +780,7 @@ def _load_comments(tokens):
 
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
+            comments['database'] = comment[1]
             continue
 
         item = comment[1]
@@ -1371,18 +1378,23 @@ def _load_version(tokens):
     return tokens.get('VERSION', [[None, None]])[0][1]
 
 
-def _load_bus(attributes):
+def _load_bus(comments, attributes):
     try:
         bus_name = attributes['database']['DBName'].value
     except KeyError:
         return None
 
     try:
+        comment = comments['database']
+    except KeyError:
+        comment = None
+
+    try:
         bus_baudrate = attributes['database']['Baudrate'].value
     except KeyError:
         bus_baudrate = None
 
-    return Bus(bus_name, baudrate=bus_baudrate)
+    return Bus(bus_name, comment, baudrate=bus_baudrate)
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
@@ -1602,7 +1614,7 @@ def load_string(string, strict=True):
     defaults = _load_attribute_definition_defaults(tokens)
     attribute_definitions = get_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
-    bus = _load_bus(attributes)
+    bus = _load_bus(comments, attributes)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens, attributes)

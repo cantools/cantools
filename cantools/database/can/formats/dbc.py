@@ -350,7 +350,8 @@ class DbcSpecifics(object):
                  attributes=None,
                  attribute_definitions=None,
                  environment_variables=None,
-                 value_tables=None):
+                 value_tables=None,
+                 comment=None):
         if attributes is None:
             attributes = odict()
 
@@ -367,6 +368,7 @@ class DbcSpecifics(object):
         self._attribute_definitions = attribute_definitions
         self._environment_variables = environment_variables
         self._value_tables = value_tables
+        self._comment = comment
 
     @property
     def attributes(self):
@@ -380,6 +382,18 @@ class DbcSpecifics(object):
     @attributes.setter
     def attributes(self, value):
         self._attributes = value
+
+    @property
+    def comment(self):
+        """The DBC specific comment as a string.
+
+        """
+
+        return self._comment
+
+    @comment.setter
+    def comment(self, value):
+        self._comment = value
 
     @property
     def attribute_definitions(self):
@@ -557,6 +571,13 @@ def _dump_senders(database):
 
 def _dump_comments(database):
     cm = []
+
+    if database.dbc is not None:
+        if database.dbc.comment is not None:
+            cm.append(
+                'CM_ "{comment}";'.format(
+                    #comment=database.dbc.comment.replace('"', '\\"')))
+                    comment=database.dbc.comment) )
 
     for node in database.nodes:
         if node.comment is not None:
@@ -774,6 +795,10 @@ def _load_comments(tokens):
 
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
+            if comments['database']:
+                comments['database'] += comment[1]
+            else:
+                comments['database'] = comment[1]
             continue
 
         item = comment[1]
@@ -1626,7 +1651,8 @@ def load_string(string, strict=True):
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
                                  attribute_definitions,
                                  environment_variables,
-                                 value_tables)
+                                 value_tables,
+                                 comments.get('database', None))
 
     return InternalDatabase(messages,
                             nodes,

@@ -2,8 +2,11 @@
 
 from setuptools import setup
 from setuptools import find_packages
+import sys
 import re
 
+if sys.version_info < (3, 6):
+    sys.exit('Sorry, Python < 3.6 is not supported')
 
 def find_version():
     return re.search(r"^__version__ = '(.*)'$",
@@ -12,6 +15,7 @@ def find_version():
 
 
 setup(name='cantools',
+      python_requires='>3.6.0',
       version=find_version(),
       description='CAN BUS tools.',
       long_description=open('README.rst', 'r').read(),

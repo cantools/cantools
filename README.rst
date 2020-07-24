@@ -24,8 +24,6 @@ CAN BUS tools in Python 3.
 
 - CAN bus monitor.
 
-Python 2 support is deprecated as Python 3 has better unicode support.
-
 Project homepage: https://github.com/eerimoq/cantools
 
 Documentation: https://cantools.readthedocs.io

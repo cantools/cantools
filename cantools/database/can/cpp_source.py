@@ -119,8 +119,8 @@ public:
 
 {signal_setters}
 
-public:
 {signals}
+{static_vars}
 }};
 '''
 
@@ -131,6 +131,7 @@ bool set_{name}(const double& value);
 MESSAGE_DEFINITION_FMT = '''\
 {signal_definitions}
 {constructor}
+{static_vars}
 {signal_setters}
 '''
 
@@ -421,7 +422,12 @@ def _generate_message_declaration(message):
     else:
         comment = ' * {}\n *\n'.format(message.comment)
 
-    return signal_constructors, comment, signal_setters, signals
+    static_vars = f'\n    // Public static accessor for const message attributes (cycle time, ID, etc.)\n' \
+                  f'    static const uint32_t cycle_time_ms;\n' \
+                  f'    static const uint32_t ID;\n'
+    if message.protocol == 'j1939':
+        static_vars += f'    static const uint32_t PGN;\n'
+    return signal_constructors, comment, signal_setters, signals, static_vars
 
 
 # TODO signal choices not implemented, should support??
@@ -544,7 +550,7 @@ def _generate_declarations(database_name, messages):
     classes = []
 
     for message in messages:
-        signal_constructors, comment, signal_setters, signals = _generate_message_declaration(message)
+        signal_constructors, comment, signal_setters, signals, static_vars = _generate_message_declaration(message)
         classes.append(
             MESSAGE_DECLARATION_FMT.format(
                 signal_constructors='\n'.join(signal_constructors),
@@ -552,9 +558,17 @@ def _generate_declarations(database_name, messages):
                 database_message_name=message.name,
                 message_name=message.snake_name,
                 signal_setters='\n'.join(signal_setters),
-                signals='\n'.join(signals)))
+                signals='\n'.join(signals),
+                static_vars=static_vars))
         
     return '\n'.join(classes)
+
+
+def _compute_pgn(id: int):
+    PGN_OFFSET = 8
+    PGN_MASK = 0x3FFFF
+    pgn = (id >> PGN_OFFSET) & PGN_MASK
+    return f'{hex(pgn)}'
 
 
 def _generate_definitions(database_name, messages):
@@ -600,18 +614,26 @@ def _generate_definitions(database_name, messages):
                 name=signal.name,
                 contents = pack[signal.name]))
 
+        cycle_time = message.cycle_time if message.cycle_time else '0'
+        frame_id = '0x{:02x}'.format(message.frame_id)
         constructor = f'// Message {message.name}\n'
         constructor += MESSAGE_CONSTRUCTOR_DEFINITION_FMT.format(
             database_message_name=message.name,
-            id='0x{:02x}'.format(message.frame_id),
+            id=frame_id,
             length=message.length,
             extended=str(message.is_extended_frame).lower(),
-            cycle_time=message.cycle_time if message.cycle_time else '0',
+            cycle_time=cycle_time,
             signals='\n'.join(signals_in_msg_constructor))
+
+        static_vars = f'const uint32_t {message.name}::cycle_time_ms = {cycle_time};\n'
+        static_vars += f'const uint32_t {message.name}::ID = {frame_id}u;\n'
+        if message.protocol == 'j1939':
+            static_vars += f'const uint32_t {message.name}::PGN = {_compute_pgn(message.frame_id)};\n'
 
         definition = MESSAGE_DEFINITION_FMT.format(
             signal_definitions='\n'.join(signal_definitions),
             constructor=constructor,
+            static_vars=static_vars,
             signal_setters='\n'.join(signal_setters))
         
         definitions.append(definition)

@@ -3,7 +3,11 @@
 import binascii
 from decimal import Decimal
 from collections import namedtuple
-import bitstruct
+
+try:
+    import bitstruct.c
+except ImportError:
+    import bitstruct
 
 
 Formats = namedtuple('Formats',
@@ -52,7 +56,7 @@ def _encode_field(field, data, scaling):
         else:
             value = (Decimal(value) - Decimal(field.offset)) / Decimal(field.scale)
 
-            return value.to_integral()
+            return int(value.to_integral())
     else:
         return value
 
@@ -87,8 +91,8 @@ def encode_data(data, fields, formats, scaling):
 
 
 def decode_data(data, fields, formats, decode_choices, scaling):
-    unpacked = formats.big_endian.unpack(data)
-    unpacked.update(formats.little_endian.unpack(data[::-1]))
+    unpacked = formats.big_endian.unpack(bytes(data))
+    unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
 
     return {
         field.name: _decode_field(field,
@@ -136,7 +140,7 @@ def create_encode_decode_formats(datas, number_of_bytes):
             return 0
 
     def create_big():
-        items = [('>', '', None)]
+        items = []
         start = 0
 
         for data in datas:
@@ -158,7 +162,7 @@ def create_encode_decode_formats(datas, number_of_bytes):
         return fmt(items), padding_mask(items), names(items)
 
     def create_little():
-        items = [('>', '', None)]
+        items = []
         end = format_length
 
         for data in datas[::-1]:
@@ -188,6 +192,16 @@ def create_encode_decode_formats(datas, number_of_bytes):
     big_fmt, big_padding_mask, big_names = create_big()
     little_fmt, little_padding_mask, little_names = create_little()
 
-    return Formats(bitstruct.compile(big_fmt, big_names),
-                   bitstruct.compile(little_fmt, little_names),
+    try:
+        big_compiled = bitstruct.c.compile(big_fmt, big_names)
+    except Exception as e:
+        big_compiled = bitstruct.compile(big_fmt, big_names)
+
+    try:
+        little_compiled = bitstruct.c.compile(little_fmt, little_names)
+    except Exception as e:
+        little_compiled = bitstruct.compile(little_fmt, little_names)
+
+    return Formats(big_compiled,
+                   little_compiled,
                    big_padding_mask & little_padding_mask)

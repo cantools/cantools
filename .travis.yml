@@ -1,7 +1,6 @@
 language: python
 
 python:
-  - "2.7"
   - "3.6"
   - "3.8"
 
@@ -12,7 +11,7 @@ addons:
       - llvm-toolchain-trusty-7
       - ubuntu-toolchain-r-test
     packages:
-      - clang-7
+      - clang-8
       - gcc-8
 
 install:
@@ -24,9 +23,12 @@ script:
   - make test-sdist
   - env PYTHONPATH=. python examples/hello_world.py
   - env PYTHONPATH=. python examples/diagnostics/did.py
+  - make test-c-clean
   - make test-c
+  - make test-c-clean
   - CC=gcc-8 make test-c
-  - CC=clang-7 make test-c
+  - make test-c-clean
+  - CC=clang-8 make test-c-src
 
 after_success:
   coveralls

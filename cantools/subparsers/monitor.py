@@ -1,17 +1,11 @@
-from __future__ import print_function
 import re
 import time
 import curses
 import bisect
-
-try:
-    from queue import Queue
-    from queue import Empty as QueueEmpty
-except ImportError:
-    from Queue import Queue
-    from Queue import Empty as QueueEmpty
+import queue
 
 import can
+from argparse_addons import Integer
 from .. import database
 from .utils import format_message
 from .utils import format_multiplexed_name
@@ -37,7 +31,7 @@ class Monitor(can.Listener):
         self._playing = True
         self._modified = True
         self._show_filter = False
-        self._queue = Queue()
+        self._queue = queue.Queue()
         self._nrows, self._ncols = stdscr.getmaxyx()
         self._received = 0
         self._discarded = 0
@@ -285,7 +279,7 @@ class Monitor(can.Listener):
             while True:
                 self.try_update_message()
                 modified = True
-        except QueueEmpty:
+        except queue.Empty:
             pass
 
         return modified
@@ -342,7 +336,7 @@ def add_subparser(subparsers):
         help='Skip database consistency checks.')
     monitor_parser.add_argument(
         '-m', '--frame-id-mask',
-        type=lambda x: int(x, 0),
+        type=Integer(0),
         help=('Only compare selected frame id bits to find the message in the '
               'database. By default the received and database frame ids must '
               'be equal for a match.'))

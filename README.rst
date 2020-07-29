@@ -1,6 +1,7 @@
 |buildstatus|_
 |appveyor|_
 |coverage|_
+|nala|_
 
 About
 =====
@@ -22,8 +23,6 @@ CAN BUS tools in Python 3.
 - `C` source code generator.
 
 - CAN bus monitor.
-
-Python 2 support is deprecated as Python 3 has better unicode support.
 
 Project homepage: https://github.com/eerimoq/cantools
 
@@ -301,6 +300,9 @@ Contributing
 
 .. |coverage| image:: https://coveralls.io/repos/github/eerimoq/cantools/badge.svg?branch=master
 .. _coverage: https://coveralls.io/github/eerimoq/cantools
+
+.. |nala| image:: https://img.shields.io/badge/nala-test-blue.svg
+.. _nala: https://github.com/eerimoq/nala
 
 .. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/dbc/motohawk.dbc
 

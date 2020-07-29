@@ -1,4 +1,3 @@
-from __future__ import print_function
 import re
 import time
 from decimal import Decimal
@@ -444,7 +443,7 @@ int {database_name}_{message_name}_pack(
     const struct {database_name}_{message_name}_t *src_p,
     size_t size)
 {{
-{unused}\
+{pack_unused}\
 {pack_variables}\
     if (size < {message_length}u) {{
         return (-EINVAL);
@@ -460,13 +459,11 @@ int {database_name}_{message_name}_unpack(
     const uint8_t *src_p,
     size_t size)
 {{
-{unused}\
+{unpack_unused}\
 {unpack_variables}\
     if (size < {message_length}u) {{
         return (-EINVAL);
     }}
-
-    memset(dst_p, 0, sizeof(*dst_p));
 {unpack_body}
     return (0);
 }}
@@ -511,10 +508,9 @@ int {database_name}_{message_name}_unpack(
     const uint8_t *src_p,
     size_t size)
 {{
+    (void)dst_p;
     (void)src_p;
     (void)size;
-
-    memset(dst_p, 0, sizeof(*dst_p));
 
     return (0);
 }}
@@ -1037,16 +1033,17 @@ def _format_unpack_code_signal(message,
     if signal.is_float or signal.is_signed:
         variable = '    {} {};'.format(conversion_type_name, signal.snake_name)
         variable_lines.append(variable)
-        body_lines.append('    {} = 0{};'.format(signal.snake_name,
-                                                 signal.conversion_type_suffix))
 
-    for index, shift, shift_direction, mask in signal.segments(invert_shift=True):
+    segments = signal.segments(invert_shift=True)
+
+    for i, (index, shift, shift_direction, mask) in enumerate(segments):
         if signal.is_float or signal.is_signed:
-            fmt = '    {} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            fmt = '    {} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
         else:
-            fmt = '    dst_p->{} |= unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
         line = fmt.format(signal.snake_name,
+                          '=' if i == 0 else '|=',
                           shift_direction,
                           signal.type_length,
                           index,
@@ -1421,17 +1418,22 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
                                                           pack_helper_kinds)
             unpack_variables, unpack_body = _format_unpack_code(message,
                                                                 unpack_helper_kinds)
+            pack_unused = ''
+            unpack_unused = ''
 
-            if pack_body:
-                unused = ''
-            else:
-                unused = '    (void)src_p;\n\n'
+            if not pack_body:
+                pack_unused += '    (void)src_p;\n\n'
+
+            if not unpack_body:
+                unpack_unused += '    (void)dst_p;\n'
+                unpack_unused += '    (void)src_p;\n\n'
 
             definition = DEFINITION_FMT.format(database_name=database_name,
                                                database_message_name=message.name,
                                                message_name=message.snake_name,
                                                message_length=message.length,
-                                               unused=unused,
+                                               pack_unused=pack_unused,
+                                               unpack_unused=unpack_unused,
                                                pack_variables=pack_variables,
                                                pack_body=pack_body,
                                                unpack_variables=unpack_variables,

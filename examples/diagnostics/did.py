@@ -6,7 +6,6 @@
 # Decoded: {'Country_variant': 'Europe', 'Vehicle_type': 'Sedan', 'Special_setting': 3}
 #
 
-from __future__ import print_function
 import os
 from binascii import hexlify
 import cantools

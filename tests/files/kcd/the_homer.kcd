@@ -357,7 +357,7 @@
       <Signal name="Guidance" offset="2" length="8"/>
     </Message>
 
-    <Message id="0x832" name="Luminosity" interval="100">
+    <Message id="0x732" name="Luminosity" interval="100">
       <Producer>
         <NodeRef id="16"/>
       </Producer>
@@ -366,7 +366,7 @@
       </Signal>
     </Message>
 
-    <Message id="0x845" name="Humidity" interval="100">
+    <Message id="0x745" name="Humidity" interval="100">
       <Producer>
         <NodeRef id="16"/>
       </Producer>
@@ -432,7 +432,7 @@
       <Signal name="B" offset="0" length="2" endianess="little"/>
     </Message>
 
-    <Message id="0x900" length="8" name="EnumTestMessage">
+    <Message id="0x700" length="8" name="EnumTestMessage">
       <Producer>
         <NodeRef id="1"/>
       </Producer>
@@ -445,7 +445,7 @@
       </Signal>
    </Message>
     
-  <Message id="0x901" length="8" name="EnumTestFloatMessage">
+  <Message id="0x701" length="8" name="EnumTestFloatMessage">
     <Producer>
       <NodeRef id="1"/>
     </Producer>

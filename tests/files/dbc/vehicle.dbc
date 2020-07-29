@@ -1198,3 +1198,4 @@ VAL_ 2304207906 Trigger_Timestamp_Type 1 "Rising edge" 0 "Falling edge" ;
 VAL_ 2304142370 RTK_Status 4 "Multiple RTK solutions found" 3 "RTK solution OK" 2 "RTK solution failed" 1 "Not enough common satellites" 0 "Not attempting RTK solution" ;
 VAL_ 2304142370 GPS_Status 12 "Lock: Carrier speed and position" 11 "Lock: Doppler speed and position" 10 "Lock: Position but no speed" 9 "Unused" 8 "Unused" 7 "Unused" 6 "Unused" 5 "Exceeded max. speed or alt." 4 "Solution failed" 3 "Solution aborted" 2 "Insufficient satellites" 1 "Searching for satellites" 0 "GPS module not detected" ;
 
+

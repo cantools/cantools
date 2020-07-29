@@ -50,7 +50,6 @@ class CanToolsCommandLineTest(unittest.TestCase):
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04
-  vcan0  1F4   [3]  01 02 03
   vcan0  1F3   [3]  01 02 03
 """
 
@@ -77,8 +76,80 @@ IO_DEBUG(
     IO_DEBUG_test_signed: 3,
     IO_DEBUG_test_float: 2.0
 )
-  vcan0  1F4   [3]  01 02 03 :: unpack requires at least 32 bits to unpack (got 24)
   vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdin', StringIO(input_data)):
+            with patch('sys.stdout', stdout):
+                with patch('sys.argv', argv):
+                    cantools._main()
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+    def test_decode_can_fd(self):
+        argv = ['cantools', 'decode', 'tests/files/dbc/foobar.dbc']
+        input_data = """\
+  vcan0  12333 [064]  02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+"""
+
+        expected_output = """\
+  vcan0  12333 [064]  02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ::
+CanFd(
+    Fie: 2,
+    Fas: 1
+)
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdin', StringIO(input_data)):
+            with patch('sys.stdout', stdout):
+                with patch('sys.argv', argv):
+                    cantools._main()
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+    def test_decode_log_format(self):
+        argv = [
+            'cantools',
+            'decode',
+            'tests/files/dbc/socialledge.dbc'
+        ]
+        input_data = """\
+(1594172461.968006) vcan0 0C8#F000000000000000
+(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF
+(1594172462.127684) vcan0 ERROR
+
+(1594172462.356874) vcan0 1F4#01020304
+(1594172462.688432) vcan0 1F3#010203
+"""
+
+        expected_output = """\
+(1594172461.968006) vcan0 0C8#F000000000000000 ::
+SENSOR_SONARS(
+    SENSOR_SONARS_mux: 0,
+    SENSOR_SONARS_err_count: 15,
+    SENSOR_SONARS_left: 0.0,
+    SENSOR_SONARS_middle: 0.0,
+    SENSOR_SONARS_right: 0.0,
+    SENSOR_SONARS_rear: 0.0
+)
+(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF ::
+DRIVER_HEARTBEAT(
+    DRIVER_HEARTBEAT_cmd: 240
+)
+(1594172462.127684) vcan0 ERROR
+
+(1594172462.356874) vcan0 1F4#01020304 ::
+IO_DEBUG(
+    IO_DEBUG_test_unsigned: 1,
+    IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two',
+    IO_DEBUG_test_signed: 3,
+    IO_DEBUG_test_float: 2.0
+)
+(1594172462.688432) vcan0 1F3#010203 :: Unknown frame id 499 (0x1f3)
 """
 
         stdout = StringIO()
@@ -104,7 +175,6 @@ IO_DEBUG(
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04
-  vcan0  1F4   [3]  01 02 03
   vcan0  1F3   [3]  01 02 03
 """
 
@@ -114,8 +184,42 @@ IO_DEBUG(
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two', IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
-  vcan0  1F4   [3]  01 02 03 :: unpack requires at least 32 bits to unpack (got 24)
   vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdin', StringIO(input_data)):
+            with patch('sys.stdout', stdout):
+                with patch('sys.argv', argv):
+                    cantools._main()
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+    def test_single_line_decode_log_format(self):
+        argv = [
+            'cantools',
+            'decode',
+            '--single-line',
+            'tests/files/dbc/socialledge.dbc'
+        ]
+
+        input_data = """\
+(1594172461.968006) vcan0 0C8#F000000000000000
+(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF
+(1594172462.127684) vcan0 ERROR
+
+(1594172462.356874) vcan0 1F4#01020304
+(1594172462.688432) vcan0 1F3#010203
+"""
+
+        expected_output = """\
+(1594172461.968006) vcan0 0C8#F000000000000000 :: SENSOR_SONARS(SENSOR_SONARS_mux: 0, SENSOR_SONARS_err_count: 15, SENSOR_SONARS_left: 0.0, SENSOR_SONARS_middle: 0.0, SENSOR_SONARS_right: 0.0, SENSOR_SONARS_rear: 0.0)
+(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
+(1594172462.127684) vcan0 ERROR
+
+(1594172462.356874) vcan0 1F4#01020304 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two', IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
+(1594172462.688432) vcan0 1F3#010203 :: Unknown frame id 499 (0x1f3)
 """
 
         stdout = StringIO()
@@ -579,8 +683,8 @@ BATTERY_VT(
   ------------------------------------------------------------------------
 
   Name:       Foo
-  Id:         0x40000000
-  Length:     0 bytes
+  Id:         0x1d8
+  Length:     1 bytes
   Cycle time: - ms
   Senders:    -
   Layout:

@@ -769,67 +769,61 @@ def _dump_signal_groups(database):
     return sig_group
 
 
+def _is_extended_mux_needed(messages):
+    """Check for messages with more than one mux signal or signals with
+    more than one multiplexer value.
+
+    """
+
+    for message in messages:
+        multiplexers = [
+            signal.name
+            for signal in message.signals
+            if signal.is_multiplexer
+        ]
+
+        if len(multiplexers) > 1:
+            return True
+
+        for signal in message.signals:
+            if signal.multiplexer_ids:
+                if len(signal.multiplexer_ids) > 1:
+                    return True
+
+    return False
+
+
+def _create_mux_ranges(multiplexer_ids):
+    """Create a list of ranges based on a list of single values.
+
+    Example:
+        Input:  [1, 2, 3, 5,      7, 8, 9]
+        Output: [[1, 3], [5, 5], [7, 9]]
+
+    """
+
+    ordered = sorted(multiplexer_ids)
+    # Anything but ordered[0] - 1
+    prev_value = ordered[0]
+    ranges = []
+
+    for value in ordered:
+        if value == prev_value + 1:
+            ranges[-1][1] = value
+        else:
+            ranges.append([value, value])
+
+        prev_value = value
+
+    return ranges
+
 def _dump_signal_mux_values(database):
     """Create multiplex entries ("SG_MUL_VAL_") if extended multiplexing
     is used.
 
     """
 
-    def is_extended_mux_needed():
-        """Check for messages with more than one mux signal or signals with
-        more than one multiplexer value.
-
-        """
-
-        for message in database.messages:
-            multiplexers = [
-                signal.name
-                for signal in message.signals
-                if signal.is_multiplexer
-            ]
-
-            if len(multiplexers) > 1:
-                return True
-
-            for signal in message.signals:
-                if signal.multiplexer_ids:
-                    if len(signal.multiplexer_ids) > 1:
-                        return True
-
-        return False
-
-    def get_ranges_from_list(lst):
-        """Create a list of ranges based on a list of single values.
-
-        Example:
-            Input:  [1, 2, 3, 5,      7, 8, 9]
-            Output: [[1, 3], [5, 5], [7, 9]]
-
-        """
-
-        ordered = sorted(lst)
-        ranges = []
-
-        last_value = ordered[0]
-        ranges.append([last_value, last_value])
-        del ordered[0]
-
-        while ordered:
-            new_value = ordered[0]
-
-            if new_value == last_value+1:
-                # update last range
-                ranges[-1][1] = new_value
-            else:
-                # create new range
-                ranges.append([new_value, new_value])
-
-            last_value = new_value
-            del ordered[0]
-
-        return ranges
-
-    if not is_extended_mux_needed():
+    if not _is_extended_mux_needed(database.messages):
         return []
 
     sig_mux_values = []
@@ -839,15 +833,17 @@ def _dump_signal_mux_values(database):
             if not signal.multiplexer_ids:
                 continue
 
-            ranges = get_ranges_from_list(signal.multiplexer_ids)
-            ranges_str = ', '.join(['{}-{}'.format(r[0], r[1])
-                                    for r in ranges])
+            ranges = ', '.join([
+                '{}-{}'.format(minimum, maximum)
+                for minimum, maximum in _create_mux_ranges(signal.multiplexer_ids)
+            ])
+
             sig_mux_values.append(
                 'SG_MUL_VAL_ {frame_id} {name} {multiplexer} {ranges};'.format(
                     frame_id=get_dbc_frame_id(message),
                     name=signal.name,
                     multiplexer=signal.multiplexer_signal,
-                    ranges=ranges_str))
+                    ranges=ranges))
 
     return sig_mux_values
 

@@ -4860,6 +4860,24 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(signal.minimum, -128)
             self.assertEqual(signal.maximum, 127)
 
+    def test_issue_184_multi_mux_values(self):
+        filename = 'tests/files/dbc/issue_184_ext_MUX_multiple_values.dbc'
+        filename_dumped = 'tests/files/dbc/issue_184_ext_MUX_multiple_values_dumped.dbc'
+        db = cantools.database.load_file(filename)
+        self.assert_dbc_dump(db, filename_dumped)
+
+    def test_issue_184_indep_multiplexors(self):
+        filename = 'tests/files/dbc/issue_184_ext_MUX_independent_multiplexors.dbc'
+        filename_dumped = 'tests/files/dbc/issue_184_ext_MUX_independent_multiplexors_dumped.dbc'
+        db = cantools.database.load_file(filename)
+        self.assert_dbc_dump(db, filename_dumped)
+
+    def test_issue_184_cascaded_multiplexors(self):
+        filename = 'tests/files/dbc/issue_184_ext_MUX_cascaded.dbc'
+        filename_dumped = 'tests/files/dbc/issue_184_ext_MUX_cascaded_dumped.dbc'
+        db = cantools.database.load_file(filename)
+        self.assert_dbc_dump(db, filename_dumped)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

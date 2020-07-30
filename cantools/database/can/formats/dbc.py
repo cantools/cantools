@@ -817,6 +817,7 @@ def _create_mux_ranges(multiplexer_ids):
 
     return ranges
 
+
 def _dump_signal_mux_values(database):
     """Create multiplex entries ("SG_MUL_VAL_") if extended multiplexing
     is used.

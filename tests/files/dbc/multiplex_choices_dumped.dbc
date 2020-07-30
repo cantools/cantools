@@ -1,0 +1,129 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: 
+
+
+BO_ 2148676694 Message1: 8 Vector__XXX
+ SG_ BIT_F m24 : 39|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_H m24 : 38|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_B m24 : 33|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_D m24 : 32|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_E m24 : 29|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_K m24 : 28|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_A m24 : 26|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_L m8 : 24|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_G m8 : 23|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_C m8 : 19|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_J m8 : 18|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Multiplexor M : 2|6@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 2148676695 Message2: 8 Vector__XXX
+ SG_ BIT_F m24 : 39|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_H m24 : 38|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_B m24 : 33|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_D m24 : 32|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_E m24 : 29|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_K m24 : 28|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_A m24 : 26|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_L m8 : 24|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_G m8 : 23|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_C m8 : 19|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_J m8 : 18|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Multiplexor M : 2|6@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 2148676696 Message3: 8 Vector__XXX
+ SG_ BIT_L m8 : 24|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_G m8 : 23|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_C m8 : 19|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_J m8 : 18|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Multiplexor M : 2|6@1+ (1,0) [0|0] "" Vector__XXX
+
+
+
+
+CM_ SG_ 2148676694 Multiplexor "Defines data content for response messages.";
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","not_used","not_used","not_used","not_used","Cyclic","not_used","IfActive","NoMsgSendType";
+BA_DEF_ BU_  "NmStationAddress" HEX 0 0;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "VFrameFormat" "J1939PG";
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "BusType" "CAN";
+BA_ "BusType" "CAN";
+BA_ "DBName" "Network_A";
+BA_ "VFrameFormat" BO_ 2148676694 3;
+BA_ "VFrameFormat" BO_ 2148676695 3;
+BA_ "VFrameFormat" BO_ 2148676696 3;
+VAL_ 2148676694 BIT_L 0 "Off" 1 "On" ;
+VAL_ 2148676694 Multiplexor 8 "MULTIPLEXOR_8" 16 "MULTIPLEXOR_16" 24 "MULTIPLEXOR_24" ;
+VAL_ 2148676695 Multiplexor 4 "MULTIPLEXOR_4_NO_SIGNALS" 8 "MULTIPLEXOR_8" 16 "MULTIPLEXOR_16" 24 "MULTIPLEXOR_24" ;
+
+
+SG_MUL_VAL_ 2148676694 BIT_J Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_C Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_G Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_L Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_A Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_K Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_E Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_D Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_B Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_H Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_F Multiplexor 24-24;
+SG_MUL_VAL_ 2148676695 BIT_J Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676695 BIT_C Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676695 BIT_G Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676695 BIT_L Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676695 BIT_A Multiplexor 24-24;
+SG_MUL_VAL_ 2148676695 BIT_K Multiplexor 24-24;
+SG_MUL_VAL_ 2148676695 BIT_E Multiplexor 24-24;
+SG_MUL_VAL_ 2148676695 BIT_D Multiplexor 24-24;
+SG_MUL_VAL_ 2148676695 BIT_B Multiplexor 24-24;
+SG_MUL_VAL_ 2148676695 BIT_H Multiplexor 24-24;
+SG_MUL_VAL_ 2148676695 BIT_F Multiplexor 24-24;
+SG_MUL_VAL_ 2148676696 BIT_J Multiplexor 8-8;
+SG_MUL_VAL_ 2148676696 BIT_C Multiplexor 8-8;
+SG_MUL_VAL_ 2148676696 BIT_G Multiplexor 8-8;
+SG_MUL_VAL_ 2148676696 BIT_L Multiplexor 8-8;

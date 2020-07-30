@@ -33,12 +33,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
     maxDiff = None
 
     def assert_dbc_dump(self, db, filename):
+        actual = db.as_dbc_string()
+        # open(filename, 'wb').write(actual.encode('cp1252'))
+
         with open(filename, 'rb') as fin:
-            if sys.version_info[0] > 2:
-                self.assertEqual(db.as_dbc_string().encode('cp1252'),
-                                 fin.read())
-            else:
-                self.assertEqual(db.as_dbc_string(), fin.read())
+            expected = fin.read().decode('cp1252')
+
+        self.assertEqual(actual, expected)
 
     def test_vehicle(self):
         filename = 'tests/files/dbc/vehicle.dbc'
@@ -126,8 +127,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[2].receivers[1], 'FOO')
         self.assertEqual(db.messages[0].signals[1].receivers, [])
 
-        with open(filename, 'rb') as fin:
-            self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_emc32(self):
         db = cantools.db.Database()
@@ -850,13 +850,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_cp1252_dbc(self):
         db = cantools.database.load_file('tests/files/dbc/cp1252.dbc')
 
-        if sys.version_info[0] > 2:
-            self.assertEqual(
-                db.nodes[0].comment,
-                bytearray([
-                    v for v in range(256)
-                    if v not in [34, 129, 141, 143, 144, 157]
-                ])[32:].decode('cp1252'))
+        self.assertEqual(
+            db.nodes[0].comment,
+            bytearray([
+                v for v in range(256)
+                if v not in [34, 129, 141, 143, 144, 157]
+            ])[32:].decode('cp1252'))
 
     def test_the_homer(self):
         db = cantools.db.load_file('tests/files/kcd/the_homer.kcd')
@@ -1955,9 +1954,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.decimal.maximum, None)
         self.assertEqual(signal_4.unit, '][')
         self.assertEqual(signal_4.choices, None)
-
-        if sys.version_info[0] > 2:
-            self.assertEqual(signal_4.comment, 'ö')
+        self.assertEqual(signal_4.comment, 'ö')
 
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_ids, None)
@@ -2053,8 +2050,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.cycle_time, 0)
         self.assertEqual(message.send_type, 'NoMsgSendType')
 
-        with open(filename, 'rb') as fin:
-            self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_multiplex(self):
         db = cantools.db.load_file('tests/files/dbc/multiplex.dbc')
@@ -2151,6 +2147,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(encoded, encoded_message)
             decoded = message_1.decode(encoded)
             self.assertEqual(decoded, decoded_message)
+
+        self.assert_dbc_dump(db, 'tests/files/dbc/multiplex_dumped.dbc')
 
     def test_multiplex_choices(self):
         db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc')
@@ -2257,6 +2255,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             '           +-- BIT_H\n'
             '           +-- BIT_F')
 
+        self.assert_dbc_dump(db, 'tests/files/dbc/multiplex_choices_dumped.dbc')
+
     def test_multiplex_2(self):
         db = cantools.db.load_file('tests/files/dbc/multiplex_2.dbc')
 
@@ -2333,6 +2333,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                  }
                              }
                          ])
+
+        self.assert_dbc_dump(db, 'tests/files/dbc/multiplex_2_dumped.dbc')
 
     def test_multiplex_extended(self):
         #            tree              |  bits
@@ -2600,19 +2602,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file('tests/files/dbc/cp1252.dbc',
                                          encoding='utf-8')
 
-        if sys.version_info[0] > 2:
-            replaced = 123 * b'\xef\xbf\xbd'.decode('utf-8')
-        else:
-            replaced = (
-                '\x80\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8e\x91'
-                '\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9e\x9f\xa0'
-                '\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae'
-                '\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc'
-                '\xbd\xbe\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca'
-                '\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8'
-                '\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6'
-                '\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4'
-                '\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff')
+        replaced = 123 * b'\xef\xbf\xbd'.decode('utf-8')
 
         self.assertEqual(
             db.nodes[0].comment,
@@ -2922,8 +2912,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.cycle_time, 1000)
         self.assertEqual(message.send_type, 'Cyclic')
 
-        with open(filename, 'rb') as fin:
-            self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_big_numbers(self):
         filename = 'tests/files/dbc/big_numbers.dbc'
@@ -4133,8 +4122,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = message.decode(encoded)
         self.assertEqual(decoded, decoded_message)
 
-        with open(filename, 'rb') as fin:
-            self.assertEqual(db.as_dbc_string().encode('ascii'), fin.read())
+        self.assert_dbc_dump(db, filename)
 
     def test_signed_dbc(self):
         db = cantools.database.load_file('tests/files/dbc/signed.dbc')
@@ -4664,9 +4652,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.name, 'Foo')
 
     def test_issue_163_dbc_newlines(self):
-        if sys.version_info[0] < 3:
-            return
-
         filename_in = 'tests/files/dbc/issue_163_newline.dbc'
         filename_dump = 'issue_163_newline_dump.dbc'
 
@@ -4860,23 +4845,76 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(signal.minimum, -128)
             self.assertEqual(signal.maximum, 127)
 
-    def test_issue_184_multi_mux_values(self):
-        filename = 'tests/files/dbc/issue_184_ext_MUX_multiple_values.dbc'
-        filename_dumped = 'tests/files/dbc/issue_184_ext_MUX_multiple_values_dumped.dbc'
-        db = cantools.database.load_file(filename)
-        self.assert_dbc_dump(db, filename_dumped)
+    def test_issue_184_multiple_mux_values(self):
+        db = cantools.database.load_file(
+            'tests/files/dbc/issue_184_extended_mux_multiple_values.dbc')
 
-    def test_issue_184_indep_multiplexors(self):
-        filename = 'tests/files/dbc/issue_184_ext_MUX_independent_multiplexors.dbc'
-        filename_dumped = 'tests/files/dbc/issue_184_ext_MUX_independent_multiplexors_dumped.dbc'
-        db = cantools.database.load_file(filename)
-        self.assert_dbc_dump(db, filename_dumped)
+        self.assertEqual(db.messages[0].signal_tree,
+                         [
+                             {
+                                 'MUX': {
+                                     0: ['muxed_0_3_4_5'],
+                                     1: ['muxed_1'],
+                                     2: ['muxed_2'],
+                                     3: ['muxed_0_3_4_5'],
+                                     4: ['muxed_0_3_4_5'],
+                                     5: ['muxed_0_3_4_5']
+                                 }
+                             }
+                         ])
+
+        self.assert_dbc_dump(
+            db,
+            'tests/files/dbc/issue_184_extended_mux_multiple_values_dumped.dbc')
+
+    def test_issue_184_independent_multiplexors(self):
+        db = cantools.database.load_file(
+            'tests/files/dbc/issue_184_extended_mux_independent_multiplexors.dbc')
+
+        self.assertEqual(db.messages[0].signal_tree,
+                         [
+                             {
+                                 'MUX_A': {
+                                     0: ['muxed_A_0'],
+                                     1: ['muxed_A_1']
+                                 }
+                             },
+                             {
+                                 'MUX_B': {
+                                     1: ['muxed_B_1'],
+                                     2: ['muxed_B_2']
+                                 }
+                             }
+                         ])
+
+        self.assert_dbc_dump(
+            db,
+            'tests/files/dbc/issue_184_extended_mux_independent_multiplexors_dumped.dbc')
 
     def test_issue_184_cascaded_multiplexors(self):
-        filename = 'tests/files/dbc/issue_184_ext_MUX_cascaded.dbc'
-        filename_dumped = 'tests/files/dbc/issue_184_ext_MUX_cascaded_dumped.dbc'
-        db = cantools.database.load_file(filename)
-        self.assert_dbc_dump(db, filename_dumped)
+        db = cantools.database.load_file(
+            'tests/files/dbc/issue_184_extended_mux_cascaded.dbc')
+
+        self.assertEqual(db.messages[0].signal_tree,
+                         [
+                             {
+                                 'MUX_A': {
+                                     1: ['muxed_A_1'],
+                                     2: [
+                                         {
+                                             'muxed_A_2_MUX_B': {
+                                                 0: ['muxed_B_0'],
+                                                 1: ['muxed_B_1']
+                                             }
+                                         }
+                                     ]
+                                 }
+                             }
+                         ])
+
+        self.assert_dbc_dump(
+            db,
+            'tests/files/dbc/issue_184_extended_mux_cascaded_dumped.dbc')
 
 
 # This file is not '__main__' when executed via 'python setup.py3

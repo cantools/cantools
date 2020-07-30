@@ -108,3 +108,4 @@ VAL_ 2 Sig_with_long_val_table_2 13 "value '0xD'" 12 "Dvalue '0xC'" 11 "value '0
 VAL_ 2 Sig_with_long_val_table_1 3 "Description for the value '0x3'" 2 "Description for the value '0x2'" 1 "Description for the value '0x1'" 0 "Description for the value '0x0'" ;
 
 
+

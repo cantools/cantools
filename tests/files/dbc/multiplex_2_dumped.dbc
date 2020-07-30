@@ -36,17 +36,39 @@ BS_:
 BU_: 
 
 
-BO_ 2147483649 ext_MUX_multiple_values: 8 Vector__XXX
- SG_ muxed_0_3_4_5 m0 : 8|8@1- (1,0) [0|0] "" Vector__XXX
- SG_ muxed_1 m1 : 8|8@1- (1,0) [0|0] "" Vector__XXX
- SG_ muxed_2 m2 : 8|8@1- (1,0) [0|0] "" Vector__XXX
- SG_ MUX M : 0|8@1- (1,0) [0|0] "" Vector__XXX
+BO_ 2349006590 Shared: 8 Vector__XXX
+ SG_ S2 m2 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S1 m1 : 4|4@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S0 M : 0|4@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 2348941054 Normal: 8 Vector__XXX
+ SG_ S2 m1 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S1 m0 : 4|4@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S0 M : 0|4@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 2348875518 Extended: 8 Vector__XXX
+ SG_ S7 m1 : 40|24@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S8 m2 : 40|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S6 M : 32|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S3 m0 : 16|16@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S2 m0 : 8|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S4 m2 : 8|24@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S1 M : 4|4@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S5 m1 : 4|28@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S0 M : 0|4@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 2349072126 ExtendedTypes: 8 Vector__XXX
+ SG_ S9 m5 : 24|32@1- (1,0) [-1.34|1235] "" Vector__XXX
+ SG_ S10 m0 : 16|32@1- (1,0) [-3.4e+38|3.4e+38] "" Vector__XXX
+ SG_ S0 M : 8|4@1- (1,0) [0|0] "" Vector__XXX
+ SG_ S11 M : 0|5@1+ (1,0) [2|6] "" Vector__XXX
 
 
 
 
 
-BA_DEF_ SG_  "SigType" ENUM  "Default","Range","RangeSigned","ASCII","Discrete","Control","ReferencePGN","DTC","StringDelimiter","StringLength","StringLengthControl";
+BA_DEF_ BO_  "TpJ1939VarDlc" ENUM  "No","Yes";
+BA_DEF_ SG_  "SigType" ENUM  "Default","Range","RangeSigned","ASCII","Discrete","Control","ReferencePGN","DTC","StringDelimiter","StringLength","StringLengthControl","MessageCounter","MessageChecksum";
 BA_DEF_ SG_  "GenSigEVName" STRING ;
 BA_DEF_ SG_  "GenSigILSupport" ENUM  "No","Yes";
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
@@ -54,7 +76,7 @@ BA_DEF_ BO_  "GenMsgFastOnStart" INT 0 100000;
 BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
 BA_DEF_ BO_  "GenMsgCycleTimeFast" INT 0 3600000;
 BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 1000000;
-BA_DEF_ SG_  "GenSigStartValue" INT 0 10000;
+BA_DEF_ SG_  "GenSigStartValue" INT 0 2147483647;
 BA_DEF_ BO_  "GenMsgDelayTime" INT 0 1000;
 BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
 BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 100000;
@@ -78,6 +100,7 @@ BA_DEF_  "DBName" STRING ;
 BA_DEF_  "BusType" STRING ;
 BA_DEF_  "ProtocolType" STRING ;
 BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
+BA_DEF_DEF_  "TpJ1939VarDlc" "No";
 BA_DEF_DEF_  "SigType" "Default";
 BA_DEF_DEF_  "GenSigEVName" "Env@Nodename_@Signame";
 BA_DEF_DEF_  "GenSigILSupport" "Yes";
@@ -110,10 +133,27 @@ BA_DEF_DEF_  "DBName" "";
 BA_DEF_DEF_  "BusType" "CAN";
 BA_DEF_DEF_  "ProtocolType" "J1939";
 BA_DEF_DEF_  "VFrameFormat" "J1939PG";
-BA_ "DBName" "ext_MUX_multiple_values";
-BA_ "VFrameFormat" BO_ 2147483649 1;
+BA_ "DBName" "foo";
+BA_ "VFrameFormat" BO_ 2349006590 3;
+BA_ "VFrameFormat" BO_ 2348941054 3;
+BA_ "VFrameFormat" BO_ 2348875518 3;
+BA_ "VFrameFormat" BO_ 2349072126 3;
+BA_ "GenSigStartValue" SG_ 2349072126 S11 2;
 
+SIG_VALTYPE_ 2349072126 S10 : 1;
+SIG_VALTYPE_ 2349072126 S9 : 1;
 
-SG_MUL_VAL_ 2147483649 muxed_2 MUX 2-2;
-SG_MUL_VAL_ 2147483649 muxed_1 MUX 1-1;
-SG_MUL_VAL_ 2147483649 muxed_0_3_4_5 MUX 0-0, 3-5;
+SG_MUL_VAL_ 2349006590 S1 S0 1-1, 3-3;
+SG_MUL_VAL_ 2349006590 S2 S0 2-5;
+SG_MUL_VAL_ 2348941054 S1 S0 0-0;
+SG_MUL_VAL_ 2348941054 S2 S0 1-1;
+SG_MUL_VAL_ 2348875518 S5 S0 1-1;
+SG_MUL_VAL_ 2348875518 S1 S0 0-0;
+SG_MUL_VAL_ 2348875518 S4 S1 2-2;
+SG_MUL_VAL_ 2348875518 S2 S1 0-0;
+SG_MUL_VAL_ 2348875518 S3 S1 0-0;
+SG_MUL_VAL_ 2348875518 S8 S6 2-2;
+SG_MUL_VAL_ 2348875518 S7 S6 1-1;
+SG_MUL_VAL_ 2349072126 S0 S11 3-3;
+SG_MUL_VAL_ 2349072126 S10 S0 0-0;
+SG_MUL_VAL_ 2349072126 S9 S11 5-5;

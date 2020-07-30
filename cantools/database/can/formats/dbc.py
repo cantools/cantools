@@ -80,11 +80,11 @@ DBC_FMT = (
     '\r\n'
     '\r\n'
     '{cm}\r\n'
-    '{signal_types}'
     '{ba_def}\r\n'
     '{ba_def_def}\r\n'
     '{ba}\r\n'
     '{val}\r\n'
+    '{signal_types}\r\n'
     '{sig_group}\r\n'
     '{mux}\r\n'
 )

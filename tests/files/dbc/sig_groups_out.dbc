@@ -62,6 +62,7 @@ BA_DEF_  "BusType" STRING ;
 BA_DEF_DEF_  "BusType" "CAN";
 
 
+
 SIG_GROUP_ 3 Test 1 : TestSig;
 SIG_GROUP_ 2 SGMsg_m 1 : subSig1_1 subSig1_2 subSig2_1 dupsig;
 SIG_GROUP_ 1 SGMsg 1 : SG1 SG2 dupsig;

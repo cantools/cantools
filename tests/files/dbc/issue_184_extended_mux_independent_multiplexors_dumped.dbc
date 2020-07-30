@@ -36,11 +36,12 @@ BS_:
 BU_: 
 
 
-BO_ 2147483649 ext_MUX_cascaded: 8 Vector__XXX
+BO_ 2147483650 ext_MUX_indep_multiplexors: 8 Vector__XXX
  SG_ muxed_B_1 m1 : 24|8@1- (1,0) [0|0] "" Vector__XXX
- SG_ muxed_B_0 m0 : 16|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ muxed_B_2 m2 : 24|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ MUX_B M : 16|8@1- (1,0) [0|0] "" Vector__XXX
+ SG_ muxed_A_0 m0 : 8|8@1- (1,0) [0|0] "" Vector__XXX
  SG_ muxed_A_1 m1 : 8|8@1- (1,0) [0|0] "" Vector__XXX
- SG_ muxed_A_2_MUX_B M : 8|8@1- (1,0) [0|0] "" Vector__XXX
  SG_ MUX_A M : 0|8@1- (1,0) [0|0] "" Vector__XXX
 
 
@@ -111,11 +112,12 @@ BA_DEF_DEF_  "DBName" "";
 BA_DEF_DEF_  "BusType" "CAN";
 BA_DEF_DEF_  "ProtocolType" "J1939";
 BA_DEF_DEF_  "VFrameFormat" "J1939PG";
-BA_ "DBName" "ext_MUX_multiple_values";
-BA_ "VFrameFormat" BO_ 2147483649 1;
+BA_ "DBName" "ext_MUX_independent_multiplexors";
+BA_ "VFrameFormat" BO_ 2147483650 1;
 
 
-SG_MUL_VAL_ 2147483649 muxed_A_2_MUX_B MUX_A 2-2;
-SG_MUL_VAL_ 2147483649 muxed_A_1 MUX_A 1-1;
-SG_MUL_VAL_ 2147483649 muxed_B_0 muxed_A_2_MUX_B 0-0;
-SG_MUL_VAL_ 2147483649 muxed_B_1 muxed_A_2_MUX_B 1-1;
+
+SG_MUL_VAL_ 2147483650 muxed_A_1 MUX_A 1-1;
+SG_MUL_VAL_ 2147483650 muxed_A_0 MUX_A 0-0;
+SG_MUL_VAL_ 2147483650 muxed_B_2 MUX_B 2-2;
+SG_MUL_VAL_ 2147483650 muxed_B_1 MUX_B 1-1;

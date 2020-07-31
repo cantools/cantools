@@ -19,6 +19,7 @@ def _camel_to_snake_case(value):
     is_upper = False
     is_lower = False
     is_digit = False
+    first_iter = True
 
     for letter in value.elems()[1:]:
         is_upper = letter.isupper()
@@ -30,13 +31,18 @@ def _camel_to_snake_case(value):
         if (prev_is_upper and is_lower) or (prev_is_lower and is_upper) or (prev_is_digit and is_upper):
             last_char = outname[-1]
             outname = outname.rstrip(last_char)
-            outname = outname + '_'  + last_char
+            # If first iteration, do not add _ in beginning
+            if first_iter:
+                outname = outname + last_char
+            else:
+                outname = outname + '_' + last_char
 
         outname += letter
         prev_is_upper = is_upper
         prev_is_lower = is_lower
         prev_is_digit = is_digit
-
+        if first_iter:
+            first_iter = False
     return outname.lower()
 
 def _generate_c_impl(ctx):

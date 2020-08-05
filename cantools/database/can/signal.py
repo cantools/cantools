@@ -391,7 +391,7 @@ class Signal(object):
 
     @property
     def spn(self):
-        """The SPN (Suspect Parameter Number) value if the signal
+        """The J1939 Suspect Parameter Number (SPN) value if the signal
         has this attribute, ``None`` otherwise.
         
         """

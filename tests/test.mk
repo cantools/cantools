@@ -18,7 +18,7 @@ CFLAGS += -coverage
 CFLAGS += -Wall
 CFLAGS += -Wextra
 CFLAGS += -Wpedantic
-CFLAGS += -Werror
+# CFLAGS += -Werror
 CFLAGS += -Wno-unused-command-line-argument
 ifeq ($(SANITIZE), yes)
 CFLAGS += -fsanitize=address

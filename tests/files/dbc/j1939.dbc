@@ -115,4 +115,4 @@ BA_ "DBName" "foo";
 BA_ "NmStationAddress" BU_ Node2 2;
 BA_ "NmStationAddress" BU_ Node1 1;
 BA_ "VFrameFormat" BO_ 2503213569 3;
-
+BA_ "SPN" SG_ 2503213569 Signal1 500;

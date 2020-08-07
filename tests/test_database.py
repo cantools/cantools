@@ -2967,6 +2967,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.messages[0].signals[0].is_multiplexer = True
         db.messages[0].signals[0].multiplexer_signal = db.messages[0].signals[0]
         db.messages[0].signals[0].comment = 'TheNewComment'
+        db.messages[0].signals[0].spn = 500
 
     def test_refresh(self):
         with open('tests/files/dbc/attributes.dbc', 'r') as fin:
@@ -3879,6 +3880,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].name, 'Message1')
         self.assertEqual(db.messages[0].frame_id, 0x15340201)
         self.assertEqual(db.messages[0].protocol, 'j1939')
+
+    def test_j1939_spn_attribute(self):
+        db = cantools.database.load_file('tests/files/dbc/j1939.dbc')
+        signal = db.messages[0].signals[0]
+        self.assertEqual(signal.spn, 500)
 
     def test_j1939_frame_id_pack_unpack(self):
         Data = namedtuple('Data',

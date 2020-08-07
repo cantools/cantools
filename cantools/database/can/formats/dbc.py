@@ -1236,6 +1236,14 @@ def _load_signals(tokens,
         except (KeyError, TypeError):
             return None
 
+    def get_signal_spn(frame_id_dbc, name):
+        signal_attributes = get_attributes(frame_id_dbc, name)
+        
+        try:
+            return signal_attributes['SPN'].value
+        except (KeyError, TypeError):
+            return None
+
     signals = []
 
     for signal in tokens:
@@ -1260,6 +1268,7 @@ def _load_signals(tokens,
                                          get_maximum_decimal(signal[15],
                                                              signal[17])),
                    unit=(None if signal[19] == '' else signal[19]),
+                   spn=get_signal_spn(frame_id_dbc, signal[1][0]),
                    choices=get_choices(frame_id_dbc,
                                        signal[1][0]),
                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),

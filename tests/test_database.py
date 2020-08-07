@@ -55,7 +55,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, True, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
-                         "False, 0, 1, 0, 0, 1, 'None', False, None, None, 'Valid when "
+                         "False, 0, 1, 0, 0, 1, 'None', False, None, None, None, 'Valid when "
                          "bit is set, invalid when bit is clear.')")
         self.assertEqual(db.messages[0].signals[0].initial, 0)
         self.assertEqual(db.messages[0].signals[0].receivers, [])
@@ -83,7 +83,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(
             repr(signal),
             "signal('Validity_Accel_Longitudinal', 0, 1, 'little_endian', False, "
-            "None, 1, 0, None, None, 'None', False, None, None, 'Valid when bit is "
+            "None, 1, 0, None, None, 'None', False, None, None, None, 'Valid when bit is "
             "set, invalid when bit is clear.')")
 
         signal = message.get_signal_by_name('Validity_Accel_Lateral')
@@ -100,7 +100,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(
             repr(signal),
             "signal('Accel_Longitudinal', 16, 16, 'little_endian', True, 32767, "
-            "0.001, 0, -65, 65, 'g', False, None, None, 'Longitudinal "
+            "0.001, 0, -65, 65, 'g', False, None, None, None, 'Longitudinal "
             "acceleration.  This is positive when the vehicle accelerates in a "
             "forwards direction.')")
 
@@ -206,29 +206,29 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "\n"
             "message('Foo', 0x12330, True, 8, 'Foo.')\n"
             "  signal('Foo', 0, 12, 'big_endian', True, None, 0.01, "
-            "250, 229.53, 270.47, 'degK', False, None, None, None)\n"
+            "250, 229.53, 270.47, 'degK', False, None, None, None, None)\n"
             "  signal('Bar', 24, 32, 'big_endian', True, None, 0.1, "
-            "0, 0, 5, 'm', False, None, None, 'Bar.')\n"
+            "0, 0, 5, 'm', False, None, None, None, 'Bar.')\n"
             "\n"
             "message('Fum', 0x12331, True, 5, None)\n"
             "  signal('Fum', 0, 12, 'little_endian', True, None, 1, 0, 0, 10, "
-            "'None', False, None, None, None)\n"
+            "'None', False, None, None, None, None)\n"
             "  signal('Fam', 12, 12, 'little_endian', True, None, 1, 0, "
-            "0, 8, 'None', False, None, {1: \'Enabled\', 0: \'Disabled\'}, None)\n"
+            "0, 8, 'None', False, None, {1: \'Enabled\', 0: \'Disabled\'}, None, None)\n"
             "\n"
             "message('Bar', 0x12332, True, 4, None)\n"
             "  signal('Binary32', 0, 32, 'little_endian', True, None, 1, 0, None, "
-            "None, 'None', False, None, None, None)\n"
+            "None, 'None', False, None, None, None, None)\n"
             "\n"
             "message('CanFd', 0x12333, True, 64, None)\n"
             "  signal('Fie', 0, 64, 'little_endian', False, None, 1, 0, None, None, "
-            "'None', False, None, None, None)\n"
+            "'None', False, None, None, None, None)\n"
             "  signal('Fas', 64, 64, 'little_endian', False, None, 1, 0, None, None, "
-            "'None', False, None, None, None)\n"
+            "'None', False, None, None, None, None)\n"
             "\n"
             "message('FOOBAR', 0x30c, False, 8, None)\n"
             "  signal('ACC_02_CRC', 0, 12, 'little_endian', True, None, 1, 0, 0, 1, "
-            "'None', False, None, None, None)\n")
+            "'None', False, None, None, None, None)\n")
 
         self.assertEqual(len(db.buses), 1)
         self.assertEqual(db.buses[0].name, 'TheBusName')
@@ -2967,6 +2967,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.messages[0].signals[0].is_multiplexer = True
         db.messages[0].signals[0].multiplexer_signal = db.messages[0].signals[0]
         db.messages[0].signals[0].comment = 'TheNewComment'
+        db.messages[0].signals[0].spn = 500
 
     def test_refresh(self):
         with open('tests/files/dbc/attributes.dbc', 'r') as fin:
@@ -3879,6 +3880,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].name, 'Message1')
         self.assertEqual(db.messages[0].frame_id, 0x15340201)
         self.assertEqual(db.messages[0].protocol, 'j1939')
+
+    def test_j1939_spn_attribute(self):
+        db = cantools.database.load_file('tests/files/dbc/j1939.dbc')
+        signal = db.messages[0].signals[0]
+        self.assertEqual(signal.spn, 500)
 
     def test_j1939_frame_id_pack_unpack(self):
         Data = namedtuple('Data',

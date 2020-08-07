@@ -124,7 +124,8 @@ class Signal(object):
                  multiplexer_ids=None,
                  multiplexer_signal=None,
                  is_float=False,
-                 decimal=None):
+                 decimal=None,
+                 spn=None):
         self._name = name
         self._start = start
         self._length = length
@@ -145,6 +146,7 @@ class Signal(object):
         self._multiplexer_ids = multiplexer_ids
         self._multiplexer_signal = multiplexer_signal
         self._is_float = is_float
+        self._spn = spn
 
     @property
     def name(self):
@@ -387,6 +389,19 @@ class Signal(object):
     def multiplexer_signal(self, value):
         self._multiplexer_signal = value
 
+    @property
+    def spn(self):
+        """The J1939 Suspect Parameter Number (SPN) value if the signal
+        has this attribute, ``None`` otherwise.
+        
+        """
+
+        return self._spn
+
+    @spn.setter
+    def spn(self, value):
+        self._spn = value
+
     def choice_string_to_number(self, string):
         for choice_number, choice_string in self.choices.items():
             if choice_string == string:
@@ -400,7 +415,7 @@ class Signal(object):
                 ["{}: '{}'".format(value, text)
                  for value, text in self._choices.items()]))
 
-        return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, {}, '{}', {}, {}, {}, {})".format(
+        return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, {}, '{}', {}, {}, {}, {}, {})".format(
             self._name,
             self._start,
             self._length,
@@ -415,4 +430,5 @@ class Signal(object):
             self._is_multiplexer,
             self._multiplexer_ids,
             choices,
+            self._spn,
             "'" + self._comment + "'" if self._comment is not None else None)

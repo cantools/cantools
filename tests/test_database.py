@@ -3881,8 +3881,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].frame_id, 0x15340201)
         self.assertEqual(db.messages[0].protocol, 'j1939')
 
-    def test_j1939_spn_attribute(self):
-        db = cantools.database.load_file('tests/files/dbc/j1939.dbc')
         signal = db.messages[0].signals[0]
         self.assertEqual(signal.spn, 500)
 

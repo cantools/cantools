@@ -3884,6 +3884,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         signal = db.messages[0].signals[0]
         self.assertEqual(signal.spn, 500)
 
+        signal = db.messages[1].signals[0]
+        self.assertEqual(signal.spn, None)
+
     def test_j1939_frame_id_pack_unpack(self):
         Data = namedtuple('Data',
                           [

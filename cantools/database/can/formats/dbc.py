@@ -350,8 +350,7 @@ class DbcSpecifics(object):
                  attributes=None,
                  attribute_definitions=None,
                  environment_variables=None,
-                 value_tables=None,
-                 comment=None):
+                 value_tables=None):
         if attributes is None:
             attributes = odict()
 
@@ -368,7 +367,6 @@ class DbcSpecifics(object):
         self._attribute_definitions = attribute_definitions
         self._environment_variables = environment_variables
         self._value_tables = value_tables
-        self._comment = comment
 
     @property
     def attributes(self):
@@ -382,18 +380,6 @@ class DbcSpecifics(object):
     @attributes.setter
     def attributes(self, value):
         self._attributes = value
-
-    @property
-    def comment(self):
-        """The DBC specific comment as a string.
-
-        """
-
-        return self._comment
-
-    @comment.setter
-    def comment(self, value):
-        self._comment = value
 
     @property
     def attribute_definitions(self):
@@ -572,12 +558,11 @@ def _dump_senders(database):
 def _dump_comments(database):
     cm = []
 
-    if database.dbc is not None:
-        if database.dbc.comment is not None:
+    for bus in database.buses:
+        if bus.comment is not None:
             cm.append(
                 'CM_ "{comment}";'.format(
-                    #comment=database.dbc.comment.replace('"', '\\"')))
-                    comment=database.dbc.comment) )
+                    comment=bus.comment) )
 
     for node in database.nodes:
         if node.comment is not None:
@@ -795,10 +780,7 @@ def _load_comments(tokens):
 
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
-            if comments['database']:
-                comments['database'] += comment[1]
-            else:
-                comments['database'] = comment[1]
+            comments['bus'] = comment[1]
             continue
 
         item = comment[1]
@@ -1396,7 +1378,7 @@ def _load_version(tokens):
     return tokens.get('VERSION', [[None, None]])[0][1]
 
 
-def _load_bus(attributes):
+def _load_bus(attributes, comments):
     try:
         bus_name = attributes['database']['DBName'].value
     except KeyError:
@@ -1407,7 +1389,12 @@ def _load_bus(attributes):
     except KeyError:
         bus_baudrate = None
 
-    return Bus(bus_name, baudrate=bus_baudrate)
+    try:
+        bus_comment = comments['bus']
+    except KeyError:
+        bus_comment = None
+
+    return Bus(bus_name, baudrate=bus_baudrate, comment = bus_comment)
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
@@ -1627,7 +1614,7 @@ def load_string(string, strict=True):
     defaults = _load_attribute_definition_defaults(tokens)
     attribute_definitions = get_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
-    bus = _load_bus(attributes)
+    bus = _load_bus(attributes, comments)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens, attributes)
@@ -1651,8 +1638,7 @@ def load_string(string, strict=True):
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
                                  attribute_definitions,
                                  environment_variables,
-                                 value_tables,
-                                 comments.get('database', None))
+                                 value_tables)
 
     return InternalDatabase(messages,
                             nodes,

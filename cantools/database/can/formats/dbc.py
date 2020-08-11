@@ -1382,7 +1382,7 @@ def _load_bus(attributes, comments):
     try:
         bus_name = attributes['database']['DBName'].value
     except KeyError:
-        return None
+        bus_name = None
 
     try:
         bus_baudrate = attributes['database']['Baudrate'].value

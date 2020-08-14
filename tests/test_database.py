@@ -4923,6 +4923,37 @@ class CanToolsDatabaseTest(unittest.TestCase):
             db,
             'tests/files/dbc/issue_184_extended_mux_cascaded_dumped.dbc')
 
+    def test_floating_point_limits(self):
+        """Test correct handling of limits in `can.Message.encode` if they
+           are floating point.
+        """
+
+        dbc_content = """
+VERSION "1337"
+
+BS_:
+
+BU_: XYY XYZ
+
+BO_ 123 Message_1: 6 XYY
+  SG_ Alpha : 7|8@0+ (1,0) [0|255] "" XYZ
+  SG_ Bravo : 9|2@0+ (1,0) [0|3] "" XYZ
+  SG_ Charlie : 15|4@0+ (1,0) [0|14] "" XYZ
+  SG_ Delta : 23|8@0+ (0.394,0) [0.394|100.076] "" XYZ
+        """
+        db = cantools.database.load_string(dbc_content, 'dbc')
+        message = db.get_message_by_name('Message_1')
+        data_min = { signal.name: signal.decimal.minimum for signal in message.signals }
+        message.encode(data_min)
+        data_max = { signal.name: signal.decimal.maximum for signal in message.signals }
+        message.encode(data_max)
+
+        # outside of lower bound for Delta
+        with self.assertRaises(cantools.database.EncodeError):
+            message.encode({ **data_min, 'Delta': data_min['Delta']-Decimal('0.001') })
+        # outside of high bound for Delta
+        with self.assertRaises(cantools.database.EncodeError):
+            message.encode({ **data_max, 'Delta': data_max['Delta']+Decimal('0.001') })
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

@@ -16,8 +16,8 @@ TEST(motohawk_dbc, struct_unpack) {
     EXPECT_EQ(32, m.AverageRadius.Raw());
     EXPECT_EQ(55, m.Temperature.Raw());
 
-    // Confirm buffer to_string() accuracy
-    auto str = m.to_string();
+    // Confirm buffer ToString() accuracy
+    auto str = m.ToString();
     EXPECT_EQ(str, "c006e00000000000");
     
     // Confirm input buffer equal to buffer accessor
@@ -61,10 +61,10 @@ TEST(signed_dbc, struct_pack) {
     EXPECT_TRUE(m.set_s64(-5));
     EXPECT_EQ(-5, m.s64.Raw());
     EXPECT_EQ(-5, m.s64.Real());
-    EXPECT_EQ("fbffffffffffffff", m.to_string());
+    EXPECT_EQ("fbffffffffffffff", m.ToString());
 
-    m.clear();
-    EXPECT_EQ("0000000000000000", m.to_string());
+    m.Clear();
+    EXPECT_EQ("0000000000000000", m.ToString());
 }
 
 TEST(css__electronics_sae_j1939_demo, spns) {

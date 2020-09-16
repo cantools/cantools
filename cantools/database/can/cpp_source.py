@@ -424,6 +424,7 @@ def _generate_message_declaration(message):
 
     static_vars = f'\n    // Public static accessor for const message attributes (cycle time, ID, etc.)\n' \
                   f'    static const uint32_t cycle_time_ms;\n' \
+                  f'    static const uint8_t length;\n' \
                   f'    static const uint32_t ID;\n'
     if message.protocol == 'j1939':
         static_vars += f'    static const uint32_t PGN;\n'
@@ -626,6 +627,7 @@ def _generate_definitions(database_name, messages):
             signals='\n'.join(signals_in_msg_constructor))
 
         static_vars = f'const uint32_t {message.name}::cycle_time_ms = {cycle_time};\n'
+        static_vars += f'const uint8_t {message.name}::length = {message.length}u;\n'
         static_vars += f'const uint32_t {message.name}::ID = {frame_id}u;\n'
         if message.protocol == 'j1939':
             static_vars += f'const uint32_t {message.name}::PGN = {_compute_pgn(message.frame_id)};\n'

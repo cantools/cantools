@@ -98,7 +98,7 @@ class {message_name}_{name} : public Signal<{type_name}, double> {{
 public:
     {message_name}_{name}(const uint8_t* buffer);
 
-    virtual {type_name} Raw() override;
+    virtual {type_name} Raw() const override;
     virtual bool RawInRange(const {type_name}& value) const override;
 }};
 '''
@@ -143,7 +143,7 @@ SIGNAL_DEFINITION_FMT = '''\
 '''
 
 SIGNAL_DEFINITION_RAW_FMT = '''\
-{type_name} {message_name}_{name}::Raw() {{
+{type_name} {message_name}_{name}::Raw() const {{
 {contents}
 }}
 
@@ -280,7 +280,7 @@ def _format_pack_code_signal(message,
                           mask)
         body_lines.append(line)
     body_lines.append('    return true;')
-    return pack_content + '\n'.join(body_lines) 
+    return pack_content + '\n'.join(body_lines)
 
 
 def _format_pack_code_level(message,
@@ -381,7 +381,7 @@ def _format_unpack_code_signal(message,
         conversion = '    return {0};'.format(signal.snake_name)
         body_lines.append(conversion)
 
-    return pack_content + '\n'.join(body_lines) 
+    return pack_content + '\n'.join(body_lines)
 
 
 def _format_unpack_code_level(message,
@@ -561,7 +561,7 @@ def _generate_declarations(database_name, messages):
                 signal_setters='\n'.join(signal_setters),
                 signals='\n'.join(signals),
                 static_vars=static_vars))
-        
+
     return '\n'.join(classes)
 
 
@@ -637,7 +637,7 @@ def _generate_definitions(database_name, messages):
             constructor=constructor,
             static_vars=static_vars,
             signal_setters='\n'.join(signal_setters))
-        
+
         definitions.append(definition)
 
     return '\n'.join(definitions)
@@ -665,7 +665,7 @@ def generate(database,
     messages = [Message(message) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
     declarations = _generate_declarations(database_name, messages)
-    
+
     definitions = _generate_definitions(database_name, messages)
 
     header = HEADER_FMT.format(version=__version__,

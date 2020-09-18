@@ -184,16 +184,16 @@ class Signal {
         spn_(spn) {}
 
   /** Unpack signal from buffer */
-  virtual RawDataType Raw() = 0;
+  virtual RawDataType Raw() const = 0;
 
   /** Confirm if raw signal within acceptable range */
   virtual bool RawInRange(const RawDataType& value) const = 0;
 
   /** Unpacked signal from buffer, decoded and converted to physical engineering units */
-  PhysicalDataType Real() { return Decode(Raw()); }
+  PhysicalDataType Real() const { return Decode(Raw()); }
 
   /** Confirm if physical engineering units value in range */
-  bool InRange(const PhysicalDataType& value) {
+  bool InRange(const PhysicalDataType& value) const {
     RawDataType enable = Encode(value);
     return RawInRange(enable);
   }

@@ -109,7 +109,7 @@ class Frame {
   uint32_t pgn() const { return pgn_; }
 
   /** Getter for message name. */
-  std::string name() const { return name_; }
+  std::string message_name() const { return name_; }
 
   /** Getter for expected size of message buffer */
   uint32_t buffer_capacity() const { return buffer_capacity_; }
@@ -124,10 +124,10 @@ class Frame {
   uint32_t cycle_time() const { return cycle_time_; }
 
   /** Getter to front of underlying data buffer. */
-  uint8_t* buffer() { return &buffer_[0]; }
+  uint8_t* buffer() const { return &buffer_[0]; }
 
   /** Getter to const front of underlying data buffer. */
-  const uint8_t* cbuffer() { return &buffer_[0]; }
+  const uint8_t* cbuffer() const { return &buffer_[0]; }
 
   /** Getter for size of buffer */
   uint32_t data_length() const { return data_length_; }

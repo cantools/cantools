@@ -209,15 +209,17 @@ class Message(UserDict, object):
     def _prepare_initial_signal_values(self):
         initial_sig_values = dict()
         for signal in self.database.signals:
+            minimum = 0 if not signal.minimum else signal.minimum
+            maximum = 0 if not signal.maximum else signal.maximum
             if signal.initial:
                 # use initial signal value (if set)
                 initial_sig_values[signal.name] = signal.initial
-            elif signal.minimum <= 0 <= signal.maximum:
+            elif minimum <= 0 <= maximum:
                 # use 0 if in allowed range
-                initial_sig_values[signal.name] = signal.initial
+                initial_sig_values[signal.name] = 0
             else:
                 # set at least some default value
-                initial_sig_values[signal.name] = signal.minimum
+                initial_sig_values[signal.name] = minimum
         return initial_sig_values
 
 

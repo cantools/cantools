@@ -91,7 +91,7 @@ class Message(UserDict, object):
         self.enabled = True
         self._can_message = None
         self._periodic_task = None
-        self.update({signal.name: 0 for signal in database.signals})
+        self.update(self._prepare_initial_signal_values())
 
     @property
     def periodic(self):
@@ -205,6 +205,22 @@ class Message(UserDict, object):
 
         if self._periodic_task is not None:
             self._periodic_task.modify_data(self._can_message)
+
+    def _prepare_initial_signal_values(self):
+        initial_sig_values = dict()
+        for signal in self.database.signals:
+            minimum = 0 if not signal.minimum else signal.minimum
+            maximum = 0 if not signal.maximum else signal.maximum
+            if signal.initial:
+                # use initial signal value (if set)
+                initial_sig_values[signal.name] = signal.initial
+            elif minimum <= 0 <= maximum:
+                # use 0 if in allowed range
+                initial_sig_values[signal.name] = 0
+            else:
+                # set at least some default value
+                initial_sig_values[signal.name] = minimum
+        return initial_sig_values
 
 
 class Tester(object):

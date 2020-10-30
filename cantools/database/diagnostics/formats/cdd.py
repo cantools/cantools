@@ -158,6 +158,7 @@ def _load_did_element(did, data_types):
     offset = 0
     datas = []
     data_objs = did.findall('SIMPLECOMPCONT/DATAOBJ')
+    data_objs += did.findall('SIMPLECOMPCONT/STRUCT/DATAOBJ')
     data_objs += did.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
 
     for data_obj in data_objs:

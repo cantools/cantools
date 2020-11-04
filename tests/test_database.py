@@ -4248,6 +4248,46 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertFalse('E12345678901234567890123456_0000' in envvar_names)
         self.assertTrue('E12345678901234567890123456789012' in envvar_names)
 
+    def test_illegal_namespace(self):
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            db = cantools.db.load_file('tests/files/arxml/system-illegal-namespace-4.2.arxml')
+
+        self.assertEqual(
+            str(cm.exception),
+            'ARXML: "Unrecognized XML namespace \'http://autosar.org/schema/argh4.2.1\'"')
+
+        root = ElementTree.parse('tests/files/arxml/system-illegal-namespace-4.2.arxml').getroot()
+        with self.assertRaises(ValueError) as cm:
+            loader = cantools.db.can.formats.arxml.SystemLoader(root, strict=False)
+
+        self.assertEqual(
+            str(cm.exception),
+            'Unrecognized AUTOSAR XML namespace \'http://autosar.org/schema/argh4.2.1\'')
+
+    def test_illegal_root(self):
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            db = cantools.db.load_file('tests/files/arxml/system-illegal-root-4.2.arxml')
+
+        self.assertEqual(
+            str(cm.exception),
+            'ARXML: "No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.2.1}AUTOSARGH\'"')
+
+        root = ElementTree.parse('tests/files/arxml/system-illegal-root-4.2.arxml').getroot()
+        with self.assertRaises(ValueError) as cm:
+            loader = cantools.db.can.formats.arxml.SystemLoader(root, strict=False)
+
+        self.assertEqual(
+            str(cm.exception),
+            'No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.2.1}AUTOSARGH\'')
+
+    def test_illegal_version(self):
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            db = cantools.db.load_file('tests/files/arxml/system-illegal-version-4.2.2.1.0.arxml')
+
+        self.assertEqual(
+            str(cm.exception),
+            'ARXML: "Could not parse AUTOSAR version \'4.2.2.1.0\'"')
+
     def test_system_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
 
@@ -4440,7 +4480,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # test multiple child node matches
         children1 = loader.get_arxml_children(loader.root, ["AR-PACKAGES", "*AR-PACKAGE"])
         childen1_short_names = \
-            list(map(lambda x: x.find("ns:SHORT-NAME", cantools.db.formats.arxml.NAMESPACES).text, children1))
+            list(map(lambda x: x.find("ns:SHORT-NAME", loader._xml_namespaces).text, children1))
 
         self.assertEqual(childen1_short_names,
                          [
@@ -4508,8 +4548,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'ARXML: "Expected root element tag {http://autosar.org/schema/r4.0}'
-            'AUTOSAR, but got {http://autosar.org/schema/r4.0}NOT-AUTOSAR."')
+            'ARXML: "No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.0}NOT-AUTOSAR\'"')
 
     def test_ecu_extract_arxml(self):
         db = cantools.database.Database()

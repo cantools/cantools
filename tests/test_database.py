@@ -55,8 +55,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          "message('RT_SB_INS_Vel_Body_Axes', 0x9588322, True, 8, None)")
         self.assertEqual(repr(db.messages[0].signals[0]),
                          "signal('Validity_INS_Vel_Forwards', 0, 1, 'little_endian', "
-                         "False, 0, 1, 0, 0, 1, 'None', False, None, None, None, 'Valid when "
-                         "bit is set, invalid when bit is clear.')")
+                         "False, 0, 1, 0, 0, 1, 'None', False, None, None, None, {None: 'Valid when "
+                         "bit is set, invalid when bit is clear.'})")
         self.assertEqual(db.messages[0].signals[0].initial, 0)
         self.assertEqual(db.messages[0].signals[0].receivers, [])
         self.assertEqual(db.messages[0].cycle_time, None)
@@ -83,8 +83,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(
             repr(signal),
             "signal('Validity_Accel_Longitudinal', 0, 1, 'little_endian', False, "
-            "None, 1, 0, None, None, 'None', False, None, None, None, 'Valid when bit is "
-            "set, invalid when bit is clear.')")
+            "None, 1, 0, None, None, 'None', False, None, None, None, {None: 'Valid when bit is "
+            "set, invalid when bit is clear.'})")
 
         signal = message.get_signal_by_name('Validity_Accel_Lateral')
         self.assertEqual(signal.initial , 1)
@@ -100,9 +100,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(
             repr(signal),
             "signal('Accel_Longitudinal', 16, 16, 'little_endian', True, 32767, "
-            "0.001, 0, -65, 65, 'g', False, None, None, None, 'Longitudinal "
+            "0.001, 0, -65, 65, 'g', False, None, None, None, {None: 'Longitudinal "
             "acceleration.  This is positive when the vehicle accelerates in a "
-            "forwards direction.')")
+            "forwards direction.'})")
 
         signal = message.get_signal_by_name('Accel_Lateral')
         self.assertEqual(signal.initial , -30000)
@@ -204,11 +204,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "node('FIE', None)\n"
             "node('FUM', None)\n"
             "\n"
-            "message('Foo', 0x12330, True, 8, 'Foo.')\n"
+            "message('Foo', 0x12330, True, 8, {None: 'Foo.'})\n"
             "  signal('Foo', 0, 12, 'big_endian', True, None, 0.01, "
             "250, 229.53, 270.47, 'degK', False, None, None, None, None)\n"
             "  signal('Bar', 24, 32, 'big_endian', True, None, 0.1, "
-            "0, 0, 5, 'm', False, None, None, None, 'Bar.')\n"
+            "0, 0, 5, 'm', False, None, None, None, {None: 'Bar.'})\n"
             "\n"
             "message('Fum', 0x12331, True, 5, None)\n"
             "  signal('Fum', 0, 12, 'little_endian', True, None, 1, 0, 0, 10, "
@@ -4320,9 +4320,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, None)
         self.assertEqual(len(message_1.signals), 3)
-        self.assertEqual(message_1.comment, 'Comment1')
+        self.assertEqual(message_1.comments["DE"], 'Kommentar1')
+        self.assertEqual(message_1.comments["EN"], 'Comment1')
         self.assertEqual(message_1.bus_name, None)
+        self.assertEqual(message_1.comment, 'Comment1')
+        message_1.comments = {'DE': 'Kommentar eins', 'EN': 'Comment one'}
+        self.assertEqual(message_1.comments,
+                         {
+                             'DE': 'Kommentar eins',
+                             'EN' : 'Comment one'
+                         })
 
+        
         signal_1 = message_1.signals[0]
         self.assertEqual(signal_1.name, 'signal6')
         self.assertEqual(signal_1.start, 0)
@@ -4363,7 +4372,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.decimal.maximum, 4.0)
         self.assertEqual(signal_2.unit, 'm')
         self.assertEqual(signal_2.choices, None)
-        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.comments["EN"],'Signal comment!' )
+        self.assertEqual(signal_2.comments["DE"],'Signalkommentar!' )
+        self.assertEqual(signal_2.comment, 'Signal comment!')
+        signal_2.comments = {'DE': 'Kein Kommentar!', 'EN': 'No comment!'}
+        self.assertEqual(signal_2.comments,
+                         {
+                             'DE': 'Kein Kommentar!',
+                             'EN': 'No comment!'
+                         })
+
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
 
@@ -4441,7 +4459,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
-        self.assertEqual(signal_2.comment, 'Signal comment!')
+        self.assertEqual(signal_2.comments["FOR-ALL"], 'Signal comment!')
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
 

@@ -140,7 +140,19 @@ class Signal(object):
         self._unit = unit
         self._choices = choices
         self._dbc = dbc_specifics
-        self._comment = comment
+
+        # if the 'comment' argument is a string, we assume that is an
+        # english comment. this is slightly hacky because the
+        # function's behavior depends on the type of the passed
+        # argument, but it is quite convenient...
+        if isinstance(comment, str):
+            # use the first comment in the dictionary as "The" comment
+            self._comments = { None: comment }
+        else:
+            # assume that we have either no comment at all or a
+            # multi-lingual dictionary
+            self._comments = comment
+
         self._receivers = [] if receivers is None else receivers
         self._is_multiplexer = is_multiplexer
         self._multiplexer_ids = multiplexer_ids
@@ -334,13 +346,32 @@ class Signal(object):
     def comment(self):
         """The signal comment, or ``None`` if unavailable.
 
+        Note that we implicitly try to return the comment's language
+        to be English comment if multiple languages were specified.
+    
         """
+        if self._comments is None:
+            return None
+        elif self._comments.get(None) is not None:
+            return self._comments.get(None)
 
-        return self._comment
+        return self._comments.get('EN', None)
+
+    @property
+    def comments(self):
+        """The dictionary with the descriptions of the signal in multiple
+        languages. ``None`` if unavailable.
+
+        """
+        return self._comments
 
     @comment.setter
     def comment(self, value):
-        self._comment = value
+        self._comments = { None: value }
+
+    @comments.setter
+    def comments(self, value):
+        self._comments = value
 
     @property
     def receivers(self):
@@ -431,4 +462,4 @@ class Signal(object):
             self._multiplexer_ids,
             choices,
             self._spn,
-            "'" + self._comment + "'" if self._comment is not None else None)
+            self._comments)

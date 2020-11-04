@@ -55,7 +55,19 @@ class Message(object):
         self._length = length
         self._signals = signals
         self._signals.sort(key=start_bit)
-        self._comment = comment
+
+        # if the 'comment' argument is a string, we assume that is an
+        # english comment. this is slightly hacky because the
+        # function's behavior depends on the type of the passed
+        # argument, but it is quite convenient...
+        if isinstance(comment, str):
+            # use the first comment in the dictionary as "The" comment
+            self._comments = { None: comment }
+        else:
+            # assume that we have either no comment at all or a
+            # multi-lingual dictionary
+            self._comments = comment
+
         self._senders = senders if senders else []
         self._send_type = send_type
         self._cycle_time = cycle_time
@@ -220,13 +232,31 @@ class Message(object):
     def comment(self):
         """The message comment, or ``None`` if unavailable.
 
-        """
+        Note that we implicitly try to return the comment's language
+        to be English comment if multiple languages were specified.
 
-        return self._comment
+        """
+        if self._comments is None:
+            return None
+        elif self._comments.get(None) is not None:
+            return self._comments.get(None)
+
+        return self._comments.get('EN', None)
+
+    @property
+    def comments(self):
+        """The dictionary with the descriptions of the message in multiple languages. ``None`` if unavailable.
+
+        """
+        return self._comments
 
     @comment.setter
     def comment(self, value):
-        self._comment = value
+        self._comments = { None: value }
+
+    @comments.setter
+    def comments(self, value):
+        self._comments = value
 
     @property
     def senders(self):
@@ -910,4 +940,4 @@ class Message(object):
             self._frame_id,
             self._is_extended_frame,
             self._length,
-            "'" + self._comment + "'" if self._comment is not None else None)
+            self._comments)

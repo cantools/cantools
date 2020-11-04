@@ -44,7 +44,10 @@
       <ELEMENTS>
         <CAN-FRAME>
           <SHORT-NAME>Message1</SHORT-NAME>
-          <DESC><L-2 L="FOR-ALL">Comment1</L-2></DESC>
+          <DESC>
+            <L-2 L="EN">Comment1</L-2>
+            <L-2 L="DE">Kommentar1</L-2>
+          </DESC>
           <FRAME-LENGTH>6</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <PDU-TO-FRAME-MAPPING>
@@ -289,6 +292,10 @@
       <ELEMENTS>
         <SYSTEM-SIGNAL>
           <SHORT-NAME>Signal1</SHORT-NAME>
+          <DESC>
+            <L-2 L="EN">Signal comment!</L-2>
+            <L-2 L="DE">Signalkommentar!</L-2>
+          </DESC>
           <PHYSICAL-PROPS>
             <SW-DATA-DEF-PROPS-VARIANTS>
               <SW-DATA-DEF-PROPS-CONDITIONAL>

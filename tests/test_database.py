@@ -4490,11 +4490,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # a base node must always be specified
         with self.assertRaises(ValueError) as cm:
-            no_base_elem = loader.get_arxml_children(None, ["AR-PACKAGES", "*AR-PACKAGE"])
+            no_base_elem = loader._get_arxml_children(None, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "Cannot retrieve a child element of a non-existing node!")
 
         # test multiple child node matches
-        children1 = loader.get_arxml_children(loader.root, ["AR-PACKAGES", "*AR-PACKAGE"])
+        children1 = loader._get_arxml_children(loader._root, ["AR-PACKAGES", "*AR-PACKAGE"])
         childen1_short_names = \
             list(map(lambda x: x.find("ns:SHORT-NAME", loader._xml_namespaces).text, children1))
 
@@ -4512,17 +4512,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # test unique location specifier if child nodes exist
         with self.assertRaises(ValueError) as cm:
-            non_unique = loader.get_arxml_children(loader.root, ["AR-PACKAGES", "AR-PACKAGE"])
+            non_unique = loader._get_arxml_children(loader._root, ["AR-PACKAGES", "AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "Encountered a a non-unique child node of type AR-PACKAGE which ought to be unique")
 
         # test the reference cache
-        foo = loader.follow_arxml_reference(loader.root, "/CanFrame/Message1", "CAN-FRAME")
-        bar = loader.follow_arxml_reference(loader.root, "/CanFrame/Message1", "CAN-FRAME")
+        foo = loader._follow_arxml_reference(loader._root, "/CanFrame/Message1", "CAN-FRAME")
+        bar = loader._follow_arxml_reference(loader._root, "/CanFrame/Message1", "CAN-FRAME")
         self.assertEqual(foo, bar)
 
         # test non-unique location while assuming that it is unque
         with self.assertRaises(ValueError) as cm:
-            no_base_elem = loader.get_unique_arxml_child(loader.root, ["AR-PACKAGES", "*AR-PACKAGE"])
+            no_base_elem = loader._get_unique_arxml_child(loader._root, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "['AR-PACKAGES', '*AR-PACKAGE'] does not resolve into a unique node")
         
     def test_system_missing_factor_arxml(self):

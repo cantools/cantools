@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AUTOSAR xsi:schemaLocation="http://autosar.org/schema/r4.2.1 AUTOSAR_00046.xsd" xmlns="http://autosar.org/schema/r4.2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <AR-PACKAGES>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="4f17ec0cd204bc161e791f669540c652">
       <SHORT-NAME>Cluster</SHORT-NAME>
       <ELEMENTS>
-        <CAN-CLUSTER>
+        <CAN-CLUSTER UUID="3cd9c2f3aada9a66711bbe3efb74a27c">
           <SHORT-NAME>Cluster0</SHORT-NAME>
           <CAN-CLUSTER-VARIANTS>
             <CAN-CLUSTER-CONDITIONAL>
               <BAUDRATE>500000</BAUDRATE>
               <PHYSICAL-CHANNELS>
-                <CAN-PHYSICAL-CHANNEL>
+                <CAN-PHYSICAL-CHANNEL UUID="7c3e0498d9012ebe0ccd83818229e62b">
                   <SHORT-NAME>Pch0</SHORT-NAME>
                   <FRAME-TRIGGERINGS>
-                    <CAN-FRAME-TRIGGERING>
+                    <CAN-FRAME-TRIGGERING UUID="0dbdf42579d12a756d1c553d93d2ca3f">
                       <SHORT-NAME>message1</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message1</FRAME-REF>
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
                       <IDENTIFIER>5</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
-                    <CAN-FRAME-TRIGGERING>
+                    <CAN-FRAME-TRIGGERING UUID="410f9abc19e780b784a1859287e92401">
                       <SHORT-NAME>message2</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message2</FRAME-REF>
                       <CAN-ADDRESSING-MODE>EXTENDED</CAN-ADDRESSING-MODE>
                       <IDENTIFIER>6</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
-                    <CAN-FRAME-TRIGGERING>
+                    <CAN-FRAME-TRIGGERING UUID="87601843097fe48c02bd86fc2e627fda">
                       <SHORT-NAME>message3</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message3</FRAME-REF>
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
                       <IDENTIFIER>100</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
-                    <CAN-FRAME-TRIGGERING>
+                    <CAN-FRAME-TRIGGERING UUID="3cd8bf4ce5a5da700d900bc50f5d5abb">
                       <SHORT-NAME>message4</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message4</FRAME-REF>
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
@@ -45,10 +45,10 @@
         </CAN-CLUSTER>
       </ELEMENTS>
     </AR-PACKAGE>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="ad137c9540ff1f063e71b152f2b2eed4">
       <SHORT-NAME>CanFrame</SHORT-NAME>
       <ELEMENTS>
-        <CAN-FRAME>
+        <CAN-FRAME UUID="d7f932589036ffcbeac9310d12ae7c6f">
           <SHORT-NAME>Message1</SHORT-NAME>
           <DESC>
             <L-2 L="EN">Comment1</L-2>
@@ -56,37 +56,37 @@
           </DESC>
           <FRAME-LENGTH>6</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
-            <PDU-TO-FRAME-MAPPING>
+            <PDU-TO-FRAME-MAPPING UUID="1e160eb8bcb7a75f054eccbf6f47fe9f">
               <SHORT-NAME>message1</SHORT-NAME>
               <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message1</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
           </PDU-TO-FRAME-MAPPINGS>
         </CAN-FRAME>
-        <CAN-FRAME>
+        <CAN-FRAME UUID="bb7120bcea6463cd026e3e38a8f125ee">
           <SHORT-NAME>Message2</SHORT-NAME>
           <FRAME-LENGTH>7</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
-            <PDU-TO-FRAME-MAPPING>
+            <PDU-TO-FRAME-MAPPING UUID="0975182fd4d92f032d3745070ad3e9e4">
               <SHORT-NAME>message2</SHORT-NAME>
               <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message2</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
           </PDU-TO-FRAME-MAPPINGS>
         </CAN-FRAME>
-        <CAN-FRAME>
+        <CAN-FRAME UUID="02f3b1a9e14f4f2167bde58cfcdc00a0">
           <SHORT-NAME>Message3</SHORT-NAME>
           <FRAME-LENGTH>8</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
-            <PDU-TO-FRAME-MAPPING>
+            <PDU-TO-FRAME-MAPPING UUID="c2102052cd836391401149341e964b5f">
               <SHORT-NAME>message3</SHORT-NAME>
               <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message3</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
           </PDU-TO-FRAME-MAPPINGS>
         </CAN-FRAME>
-        <CAN-FRAME>
+        <CAN-FRAME UUID="a8a450a9f6629117e08bacfa5c00a1d9">
           <SHORT-NAME>Message4</SHORT-NAME>
           <FRAME-LENGTH>6</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
-            <PDU-TO-FRAME-MAPPING>
+            <PDU-TO-FRAME-MAPPING UUID="d72e8210132053aec881a2030f14b07c">
               <SHORT-NAME>message4</SHORT-NAME>
               <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message4</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
@@ -94,15 +94,15 @@
         </CAN-FRAME>
       </ELEMENTS>
     </AR-PACKAGE>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="ad92e778fa18ac4adcc838f9235de7f0">
       <SHORT-NAME>ISignal</SHORT-NAME>
       <ELEMENTS>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="52b93c1cec70bd40a590ece0b3893c0d">
           <SHORT-NAME>signal1</SHORT-NAME>
           <LENGTH>3</LENGTH>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal1</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="b077fb759e9e255d0ddb6e6ab49b8d7c">
           <SHORT-NAME>signal2</SHORT-NAME>
           <LENGTH>11</LENGTH>
           <NETWORK-REPRESENTATION-PROPS>
@@ -114,7 +114,7 @@
           </NETWORK-REPRESENTATION-PROPS>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="1b81d9d6c79916117b4848178814a31a">
           <SHORT-NAME>signal2_1c</SHORT-NAME>
           <LENGTH>11</LENGTH>
           <NETWORK-REPRESENTATION-PROPS>
@@ -126,7 +126,7 @@
           </NETWORK-REPRESENTATION-PROPS>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2_1C</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="d35893354ec1e3462f96c9ce6d7ebee1">
           <SHORT-NAME>signal2_sm</SHORT-NAME>
           <LENGTH>11</LENGTH>
           <NETWORK-REPRESENTATION-PROPS>
@@ -138,11 +138,11 @@
           </NETWORK-REPRESENTATION-PROPS>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2_SM</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="6969295f5e3be5a3793d83fdf08b59d9">
           <SHORT-NAME>signal3</SHORT-NAME>
           <LENGTH>2</LENGTH>
         </I-SIGNAL>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="6dff9fae234d76914c01911cd954980f">
           <SHORT-NAME>signal4</SHORT-NAME>
           <LENGTH>4</LENGTH>
           <NETWORK-REPRESENTATION-PROPS>
@@ -154,7 +154,7 @@
           </NETWORK-REPRESENTATION-PROPS>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal4</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="5199cf91ef1a71ce2397b2d59082c513">
           <SHORT-NAME>signal5</SHORT-NAME>
           <LENGTH>32</LENGTH>
           <NETWORK-REPRESENTATION-PROPS>
@@ -165,40 +165,40 @@
             </SW-DATA-DEF-PROPS-VARIANTS>
           </NETWORK-REPRESENTATION-PROPS>
         </I-SIGNAL>
-        <I-SIGNAL>
+        <I-SIGNAL UUID="7ac5ce20002a1a4a3c4beb72b17bc1b5">
           <SHORT-NAME>signal6</SHORT-NAME>
           <LENGTH>1</LENGTH>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal6</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
       </ELEMENTS>
     </AR-PACKAGE>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="bf5ded8d0c2d7bd37cfb17f2525d7208">
       <SHORT-NAME>ISignalIPdu</SHORT-NAME>
       <ELEMENTS>
-        <I-SIGNAL-I-PDU>
+        <I-SIGNAL-I-PDU UUID="3dcbb5ec811c3944980fc28bd7f5a483">
           <SHORT-NAME>message1</SHORT-NAME>
           <LENGTH>6</LENGTH>
           <I-SIGNAL-TO-PDU-MAPPINGS>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="ce8b5fec4f2b524050a02a84410cce80">
               <SHORT-NAME>Signal1</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal1</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
               <START-POSITION>4</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="be19c22b8bc86ed477d522cde2937b71">
               <SHORT-NAME>Signal5</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal5</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>16</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="9c9ed58f86bfc363a231c97532be961f">
               <SHORT-NAME>Signal6</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal6</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>0</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
             <!-- Groups are ignored. -->
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="3340618ec8eee41339e501f512bc5cc3">
               <SHORT-NAME>SignalGroup</SHORT-NAME>
               <I-SIGNAL-GROUP-REF DEST="I-SIGNAL-GROUP">/ISignal/todo</I-SIGNAL-GROUP-REF>
               <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
@@ -206,7 +206,7 @@
             </I-SIGNAL-TO-I-PDU-MAPPING>
           </I-SIGNAL-TO-PDU-MAPPINGS>
         </I-SIGNAL-I-PDU>
-        <I-SIGNAL-I-PDU>
+        <I-SIGNAL-I-PDU UUID="e91fb393016ab8af97dbc5d512740456">
           <SHORT-NAME>message2</SHORT-NAME>
           <LENGTH>7</LENGTH>
           <I-PDU-TIMING-SPECIFICATIONS>
@@ -228,19 +228,19 @@
             </I-PDU-TIMING>
           </I-PDU-TIMING-SPECIFICATIONS>
           <I-SIGNAL-TO-PDU-MAPPINGS>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="41ab710d99bc61b31db0b8c8ba41fc20">
               <SHORT-NAME>Signal2</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal2</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>18</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="cf1a8ce3303d48609c94ebb5692faae9">
               <SHORT-NAME>Signal3</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal3</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>6</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="0c5987189dd3deedc3b41713344ef692">
               <SHORT-NAME>Signal4</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal4</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
@@ -248,27 +248,27 @@
             </I-SIGNAL-TO-I-PDU-MAPPING>
           </I-SIGNAL-TO-PDU-MAPPINGS>
         </I-SIGNAL-I-PDU>
-        <I-SIGNAL-I-PDU>
+        <I-SIGNAL-I-PDU UUID="12619847f5492c041fa73a13194455fc">
           <SHORT-NAME>message3</SHORT-NAME>
           <LENGTH>8</LENGTH>
         </I-SIGNAL-I-PDU>
-       <I-SIGNAL-I-PDU>
+       <I-SIGNAL-I-PDU UUID="c81f3b83acabf97610a32ccf5121f972">
           <SHORT-NAME>message4</SHORT-NAME>
           <LENGTH>6</LENGTH>
           <I-SIGNAL-TO-PDU-MAPPINGS>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="15a877489f7cd36cb6340a342a9c0ff8">
               <SHORT-NAME>Signal2</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal2</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>0</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="3b31368d008926598d9ff2667267a36a">
               <SHORT-NAME>Signal2_1C</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal2_1c</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
               <START-POSITION>16</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
-            <I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="a2228fa6345b3606559d2245f00001a7">
               <SHORT-NAME>Signal2_SM</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal2_sm</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
@@ -278,19 +278,19 @@
         </I-SIGNAL-I-PDU>
       </ELEMENTS>
     </AR-PACKAGE>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="47ae85547001ace893b86f31210e679f">
       <SHORT-NAME>Unit</SHORT-NAME>
       <ELEMENTS>
-        <UNIT>
+        <UNIT UUID="2c36c2ed019502d74d412747c9c19aa6">
           <SHORT-NAME>meters</SHORT-NAME>
           <DISPLAY-NAME>m</DISPLAY-NAME>
         </UNIT>
       </ELEMENTS>
     </AR-PACKAGE>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="bbcd842e7758802dad86635f98742e1c">
       <SHORT-NAME>CompuMethod</SHORT-NAME>
       <ELEMENTS>
-        <COMPU-METHOD>
+        <COMPU-METHOD UUID="e00081bacca8f50be8ca0bd672f69a7e">
           <SHORT-NAME>Signal1</SHORT-NAME>
           <CATEGORY>LINEAR</CATEGORY>
           <COMPU-INTERNAL-TO-PHYS>
@@ -306,7 +306,7 @@
             </COMPU-SCALES>
           </COMPU-INTERNAL-TO-PHYS>
         </COMPU-METHOD>
-        <COMPU-METHOD>
+        <COMPU-METHOD UUID="103035ce2d0c0f33e9456fe127790243">
           <SHORT-NAME>Signal4</SHORT-NAME>
           <CATEGORY>TEXTTABLE</CATEGORY>
           <COMPU-INTERNAL-TO-PHYS>
@@ -328,7 +328,7 @@
             </COMPU-SCALES>
           </COMPU-INTERNAL-TO-PHYS>
         </COMPU-METHOD>
-        <COMPU-METHOD>
+        <COMPU-METHOD UUID="dbb4bf17606b4bbaf59ccbdf80769edc">
           <SHORT-NAME>Signal6</SHORT-NAME>
           <CATEGORY>SCALE_LINEAR_AND_TEXTTABLE</CATEGORY>
           <COMPU-INTERNAL-TO-PHYS>
@@ -351,10 +351,10 @@
         </COMPU-METHOD>
       </ELEMENTS>
     </AR-PACKAGE>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="e112f3e8fe0f74df3a6e34687da13681">
       <SHORT-NAME>SystemSignal</SHORT-NAME>
       <ELEMENTS>
-        <SYSTEM-SIGNAL>
+        <SYSTEM-SIGNAL UUID="536b81878eef939e2a2784502096da1e">
           <SHORT-NAME>Signal1</SHORT-NAME>
           <DESC>
             <L-2 L="EN">Signal comment!</L-2>
@@ -369,7 +369,7 @@
             </SW-DATA-DEF-PROPS-VARIANTS>
           </PHYSICAL-PROPS>
         </SYSTEM-SIGNAL>
-        <SYSTEM-SIGNAL>
+        <SYSTEM-SIGNAL UUID="d8bad425d9d16b1813a7572e64df27ad">
           <SHORT-NAME>Signal4</SHORT-NAME>
           <PHYSICAL-PROPS>
             <SW-DATA-DEF-PROPS-VARIANTS>
@@ -379,7 +379,7 @@
             </SW-DATA-DEF-PROPS-VARIANTS>
           </PHYSICAL-PROPS>
         </SYSTEM-SIGNAL>
-        <SYSTEM-SIGNAL>
+        <SYSTEM-SIGNAL UUID="d08928330ad4b1d3e0c26f72e6e022a0">
           <SHORT-NAME>Signal6</SHORT-NAME>
           <PHYSICAL-PROPS>
             <SW-DATA-DEF-PROPS-VARIANTS>
@@ -391,18 +391,18 @@
         </SYSTEM-SIGNAL>
       </ELEMENTS>
       <AR-PACKAGES>
-        <AR-PACKAGE>
+        <AR-PACKAGE UUID="576861032fd8ade5b7675f18d54bbee4">
           <SHORT-NAME>SystemSignalInner</SHORT-NAME>
           <ELEMENTS>
-            <SYSTEM-SIGNAL>
+            <SYSTEM-SIGNAL UUID="090ec74285ec66986afd658e7735d84a">
               <SHORT-NAME>Signal2</SHORT-NAME>
               <DESC><L-2 L="FOR-ALL">Signal comment!</L-2></DESC>
             </SYSTEM-SIGNAL>
-            <SYSTEM-SIGNAL>
+            <SYSTEM-SIGNAL UUID="16625563aabba9041984761308071610">
               <SHORT-NAME>Signal2_1C</SHORT-NAME>
               <DESC><L-2 L="FOR-ALL">Signal comment! (1-Complement)</L-2></DESC>
             </SYSTEM-SIGNAL>
-            <SYSTEM-SIGNAL>
+            <SYSTEM-SIGNAL UUID="842b775bb4f05d19a94baa8cac26cf4e">
               <SHORT-NAME>Signal2_SM</SHORT-NAME>
               <DESC><L-2 L="FOR-ALL">Signal comment! (Sign+Magnitude)</L-2></DESC>
             </SYSTEM-SIGNAL>
@@ -410,34 +410,34 @@
         </AR-PACKAGE>
       </AR-PACKAGES>
     </AR-PACKAGE>
-    <AR-PACKAGE>
+    <AR-PACKAGE UUID="546aa662e80b68d418a83ab15ef52a73">
       <SHORT-NAME>SwBaseType</SHORT-NAME>
       <ELEMENTS>
-        <SW-BASE-TYPE>
+        <SW-BASE-TYPE UUID="39efda70beacb86e5e3160ccfadc7023">
           <SHORT-NAME>S16</SHORT-NAME>
           <CATEGORY>FIXED_LENGTH</CATEGORY>
           <BASE-TYPE-SIZE>16</BASE-TYPE-SIZE>
           <BASE-TYPE-ENCODING>2C</BASE-TYPE-ENCODING>
         </SW-BASE-TYPE>
-        <SW-BASE-TYPE>
+        <SW-BASE-TYPE UUID="a566a3a65c99f067af1347710de0c1ed">
           <SHORT-NAME>S16_1C</SHORT-NAME>
           <CATEGORY>FIXED_LENGTH</CATEGORY>
           <BASE-TYPE-SIZE>16</BASE-TYPE-SIZE>
           <BASE-TYPE-ENCODING>1C</BASE-TYPE-ENCODING>
         </SW-BASE-TYPE>
-        <SW-BASE-TYPE>
+        <SW-BASE-TYPE UUID="645f69992433ffaf45281d1b3dbad85d">
           <SHORT-NAME>S16_SM</SHORT-NAME>
           <CATEGORY>FIXED_LENGTH</CATEGORY>
           <BASE-TYPE-SIZE>16</BASE-TYPE-SIZE>
           <BASE-TYPE-ENCODING>SM</BASE-TYPE-ENCODING>
         </SW-BASE-TYPE>
-        <SW-BASE-TYPE>
+        <SW-BASE-TYPE UUID="129ce2ee75d6c1f6c1ec30736a480dab">
           <SHORT-NAME>U8</SHORT-NAME>
           <CATEGORY>FIXED_LENGTH</CATEGORY>
           <BASE-TYPE-SIZE>8</BASE-TYPE-SIZE>
           <BASE-TYPE-ENCODING>NONE</BASE-TYPE-ENCODING>
         </SW-BASE-TYPE>
-        <SW-BASE-TYPE>
+        <SW-BASE-TYPE UUID="20f469928d0a7642cea9fb75fbc2aec4">
           <SHORT-NAME>float</SHORT-NAME>
           <CATEGORY>FIXED_LENGTH</CATEGORY>
           <BASE-TYPE-SIZE>32</BASE-TYPE-SIZE>

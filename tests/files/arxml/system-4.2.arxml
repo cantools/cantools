@@ -31,6 +31,12 @@
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
                       <IDENTIFIER>100</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
+                    <CAN-FRAME-TRIGGERING>
+                      <SHORT-NAME>message4</SHORT-NAME>
+                      <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message4</FRAME-REF>
+                      <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <IDENTIFIER>101</IDENTIFIER>
+                    </CAN-FRAME-TRIGGERING>
                   </FRAME-TRIGGERINGS>
                 </CAN-PHYSICAL-CHANNEL>
               </PHYSICAL-CHANNELS>
@@ -76,6 +82,16 @@
             </PDU-TO-FRAME-MAPPING>
           </PDU-TO-FRAME-MAPPINGS>
         </CAN-FRAME>
+        <CAN-FRAME>
+          <SHORT-NAME>Message4</SHORT-NAME>
+          <FRAME-LENGTH>6</FRAME-LENGTH>
+          <PDU-TO-FRAME-MAPPINGS>
+            <PDU-TO-FRAME-MAPPING>
+              <SHORT-NAME>message4</SHORT-NAME>
+              <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message4</PDU-REF>
+            </PDU-TO-FRAME-MAPPING>
+          </PDU-TO-FRAME-MAPPINGS>
+        </CAN-FRAME>
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE>
@@ -97,6 +113,30 @@
             </SW-DATA-DEF-PROPS-VARIANTS>
           </NETWORK-REPRESENTATION-PROPS>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+        <I-SIGNAL>
+          <SHORT-NAME>signal2_1c</SHORT-NAME>
+          <LENGTH>11</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16_1C</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2_1C</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+        <I-SIGNAL>
+          <SHORT-NAME>signal2_sm</SHORT-NAME>
+          <LENGTH>11</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16_SM</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2_SM</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL>
           <SHORT-NAME>signal3</SHORT-NAME>
@@ -211,6 +251,30 @@
         <I-SIGNAL-I-PDU>
           <SHORT-NAME>message3</SHORT-NAME>
           <LENGTH>8</LENGTH>
+        </I-SIGNAL-I-PDU>
+       <I-SIGNAL-I-PDU>
+          <SHORT-NAME>message4</SHORT-NAME>
+          <LENGTH>6</LENGTH>
+          <I-SIGNAL-TO-PDU-MAPPINGS>
+            <I-SIGNAL-TO-I-PDU-MAPPING>
+              <SHORT-NAME>Signal2</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal2</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>0</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING>
+              <SHORT-NAME>Signal2_1C</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal2_1c</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>16</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING>
+              <SHORT-NAME>Signal2_SM</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal2_sm</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>32</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+          </I-SIGNAL-TO-PDU-MAPPINGS>
         </I-SIGNAL-I-PDU>
       </ELEMENTS>
     </AR-PACKAGE>
@@ -334,6 +398,14 @@
               <SHORT-NAME>Signal2</SHORT-NAME>
               <DESC><L-2 L="FOR-ALL">Signal comment!</L-2></DESC>
             </SYSTEM-SIGNAL>
+            <SYSTEM-SIGNAL>
+              <SHORT-NAME>Signal2_1C</SHORT-NAME>
+              <DESC><L-2 L="FOR-ALL">Signal comment! (1-Complement)</L-2></DESC>
+            </SYSTEM-SIGNAL>
+            <SYSTEM-SIGNAL>
+              <SHORT-NAME>Signal2_SM</SHORT-NAME>
+              <DESC><L-2 L="FOR-ALL">Signal comment! (Sign+Magnitude)</L-2></DESC>
+            </SYSTEM-SIGNAL>
           </ELEMENTS>
         </AR-PACKAGE>
       </AR-PACKAGES>
@@ -346,6 +418,18 @@
           <CATEGORY>FIXED_LENGTH</CATEGORY>
           <BASE-TYPE-SIZE>16</BASE-TYPE-SIZE>
           <BASE-TYPE-ENCODING>2C</BASE-TYPE-ENCODING>
+        </SW-BASE-TYPE>
+        <SW-BASE-TYPE>
+          <SHORT-NAME>S16_1C</SHORT-NAME>
+          <CATEGORY>FIXED_LENGTH</CATEGORY>
+          <BASE-TYPE-SIZE>16</BASE-TYPE-SIZE>
+          <BASE-TYPE-ENCODING>1C</BASE-TYPE-ENCODING>
+        </SW-BASE-TYPE>
+        <SW-BASE-TYPE>
+          <SHORT-NAME>S16_SM</SHORT-NAME>
+          <CATEGORY>FIXED_LENGTH</CATEGORY>
+          <BASE-TYPE-SIZE>16</BASE-TYPE-SIZE>
+          <BASE-TYPE-ENCODING>SM</BASE-TYPE-ENCODING>
         </SW-BASE-TYPE>
         <SW-BASE-TYPE>
           <SHORT-NAME>U8</SHORT-NAME>

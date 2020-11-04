@@ -279,7 +279,7 @@ class SystemLoader(object):
         i_signal = self.find_i_signal(i_signal_ref.text)
 
         # Name, start position, length and byte order.
-        name = self.load_signal_name(i_signal_to_i_pdu_mapping)
+        name = self.load_signal_name(i_signal)
         start_position = self.load_signal_start_position(
             i_signal_to_i_pdu_mapping)
         length = self.load_signal_length(i_signal)

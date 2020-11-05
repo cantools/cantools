@@ -237,6 +237,7 @@ class SystemLoader(object):
             return None
 
         # Default values.
+        initial = None
         minimum = None
         maximum = None
         factor = 1
@@ -265,6 +266,20 @@ class SystemLoader(object):
             minimum, maximum, factor, offset, choices = \
                 self._load_system_signal(system_signal, decimal, is_float)
 
+        # loading constants is way too complicated, so it it is the job of a separate method
+        initial = self._load_arxml_init_value_string(i_signal)
+
+        if initial is not None:
+            if is_float:
+                initial = float(initial)
+            elif initial.strip().lower() == "true":
+                initial = True
+            elif initial.strip().lower() == "false":
+                initial = False
+            # TODO: strings?
+            else:
+                initial = int(initial)
+
         # ToDo: receivers
 
         return Signal(name=name,
@@ -275,6 +290,7 @@ class SystemLoader(object):
                       is_signed=is_signed,
                       scale=factor,
                       offset=offset,
+                      initial=initial,
                       minimum=minimum,
                       maximum=maximum,
                       unit=unit,
@@ -298,6 +314,51 @@ class SystemLoader(object):
             return int(i_signal_length.text)
 
         return None # error?!
+
+    def _load_arxml_init_value_string(self, base_elem):
+        """"Load the initial value of a signal
+
+        Supported mechanisms are references to constants and direct
+        specifcation of the value. Note that this method returns a
+        string which must be converted into the signal's data type by
+        the calling code.
+        """
+        if base_elem is None:
+            return None
+
+        value_elem = self._get_unique_arxml_child(base_elem,
+                                                      [
+                                                          'INIT-VALUE',
+                                                          'NUMERICAL-VALUE-SPECIFICATION',
+                                                          'VALUE'
+                                                      ])
+        if value_elem is not None:
+            # initial value is specified directly.
+            return value_elem.text
+
+        const_ref = self._get_unique_arxml_child(base_elem,
+                                                      [
+                                                          'INIT-VALUE',
+                                                          'CONSTANT-REFERENCE',
+                                                          'CONSTANT-REF'
+                                                      ])
+        if const_ref is not None:
+            # initial value is specified via a constant reference
+            const_spec_elem = self._follow_arxml_reference(base_elem, const_ref.text, const_ref.attrib['DEST'])
+            if const_spec_elem is None:
+                return None
+
+            value_elem = self._get_unique_arxml_child(const_spec_elem,
+                                                      [
+                                                          'VALUE-SPEC',
+                                                          'NUMERICAL-VALUE-SPECIFICATION',
+                                                          'VALUE'
+                                                      ])
+            return None if value_elem is None else value_elem.text
+
+        # no initial value specified or specified in a way which we
+        # don't recognize
+        return None
 
     def _load_signal_byte_order(self, i_signal_to_i_pdu_mapping):
         packing_byte_order = \
@@ -541,8 +602,10 @@ class SystemLoader(object):
         is_absolute_path = arxml_path.startswith('/')
 
         if is_absolute_path and arxml_path in self._arxml_reference_cache:
+            # absolute paths are globally unique and thus can be cached
             return self._arxml_reference_cache[arxml_path]
 
+        # TODO (?): for relative paths, we need to find the corresponding package tag for each base element!
         base_elem = self._root if is_absolute_path else base_elem
         if not base_elem:
             raise ValueError(
@@ -696,9 +759,6 @@ class SystemLoader(object):
                                                 '&PDU-TO-FRAME-MAPPING',
                                                 '&PDU'
                                             ])
-
-    def _get_system_signal(self, i_signal):
-        return self._get_unique_arxml_child(i_signal, '&SYSTEM-SIGNAL')
 
     def _get_compu_method(self, system_signal):
         return self._get_unique_arxml_child(system_signal,

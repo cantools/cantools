@@ -47,6 +47,44 @@ class SystemLoader(object):
 
         self._arxml_reference_cache = {}
 
+    def autosar_version_newer(self, major, minor=None, patch=None):
+        """Returns true iff the AUTOSAR version specified in the ARXML it at
+        least as the version specified by the function parameters
+
+        If a part of the specified version is 'None', it and the
+        'lesser' parts of the version are not considered. Also, the
+        major version number *must* be specified.
+        """
+
+        if self.autosar_version_major > major:
+            return True
+        elif self.autosar_version_major < major:
+            return False
+
+        # the major part of the queried version is identical to the
+        # one used by the ARXML
+        if minor is None:
+            # don't care
+            return True
+        elif self.autosar_version_minor > minor:
+            return True
+        elif self.autosar_version_minor < minor:
+            return False
+
+        # the major and minor parts of the queried version are identical
+        # to the one used by the ARXML
+        if patch is None:
+            # don't care
+            return True
+        elif self.autosar_version_patch > patch:
+            return True
+        elif self.autosar_version_patch < patch:
+            return False
+
+        # all parts of the queried version are identical to the one
+        # actually used by the ARXML
+        return True
+
     def load(self):
         buses = []
         messages = []

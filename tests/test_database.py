@@ -4288,6 +4288,22 @@ class CanToolsDatabaseTest(unittest.TestCase):
             str(cm.exception),
             'ARXML: "Could not parse AUTOSAR version \'4.2.2.1.0\'"')
 
+    def test_arxml_version(self):
+        root = ElementTree.parse('tests/files/arxml/system-4.2.arxml').getroot()
+        loader = cantools.db.can.formats.arxml.SystemLoader(root, strict=False)
+
+        self.assertEqual(loader.autosar_version_newer(3), True)
+        self.assertEqual(loader.autosar_version_newer(4), True)
+        self.assertEqual(loader.autosar_version_newer(5), False)
+
+        self.assertEqual(loader.autosar_version_newer(4,1), True)
+        self.assertEqual(loader.autosar_version_newer(4,2), True)
+        self.assertEqual(loader.autosar_version_newer(4,3), False)
+
+        self.assertEqual(loader.autosar_version_newer(4,2,0), True)
+        self.assertEqual(loader.autosar_version_newer(4,2,1), True)
+        self.assertEqual(loader.autosar_version_newer(4,2,2), False)
+
     def test_system_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
 

@@ -221,6 +221,21 @@ class SystemLoader(object):
 
         """
 
+        i_signal = self._get_i_signal(i_signal_to_i_pdu_mapping)
+
+        if i_signal is None:
+            # No I-SIGNAL found, i.e. this i-signal-to-i-pdu-mapping is
+            # probably a i-signal group. According to the XSD, I-SIGNAL and
+            # I-SIGNAL-GROUP-REF are mutually exclusive...
+            return None
+
+        # Get the system signal XML node. This may also be a system signal
+        # group, in which case we have ignore it if the XSD is to be believed.
+        # ARXML is great!
+        system_signal = self._get_unique_arxml_child(i_signal, '&SYSTEM-SIGNAL')
+        if system_signal is not None and system_signal.tag != f'{{{self.xml_namespace}}}SYSTEM-SIGNAL':
+            return None
+
         # Default values.
         minimum = None
         maximum = None
@@ -232,19 +247,11 @@ class SystemLoader(object):
         receivers = []
         decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
-        i_signal = self._get_i_signal(i_signal_to_i_pdu_mapping)
-
-        if i_signal is None:
-            # Probably a signal group (I-SIGNAL-GROUP).
-            return None
-
         # Name, start position, length and byte order.
         name = self._load_signal_name(i_signal)
         start_position = self._load_signal_start_position(i_signal_to_i_pdu_mapping)
-        length = self._load_signal_length(i_signal)
+        length = self._load_signal_length(i_signal, system_signal)
         byte_order = self._load_signal_byte_order(i_signal_to_i_pdu_mapping)
-
-        system_signal = self._get_system_signal(i_signal)
 
         if system_signal is not None:
             # Unit and comment.
@@ -284,8 +291,13 @@ class SystemLoader(object):
         return int(self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                                 'START-POSITION').text)
 
-    def _load_signal_length(self, i_signal):
-        return int(self._get_unique_arxml_child(i_signal, 'LENGTH').text)
+    def _load_signal_length(self, i_signal, system_signal):
+        i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
+
+        if i_signal_length is not None:
+            return int(i_signal_length.text)
+
+        return None # error?!
 
     def _load_signal_byte_order(self, i_signal_to_i_pdu_mapping):
         packing_byte_order = \

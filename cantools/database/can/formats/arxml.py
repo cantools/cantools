@@ -253,6 +253,9 @@ class SystemLoader(object):
         length = self._load_signal_length(i_signal, system_signal)
         byte_order = self._load_signal_byte_order(i_signal_to_i_pdu_mapping)
 
+        # Type.
+        is_signed, is_float = self._load_signal_type(i_signal)
+
         if system_signal is not None:
             # Unit and comment.
             unit = self._load_signal_unit(system_signal)
@@ -260,10 +263,7 @@ class SystemLoader(object):
 
             # Minimum, maximum, factor, offset and choices.
             minimum, maximum, factor, offset, choices = \
-                self._load_system_signal(system_signal, decimal)
-
-        # Type.
-        is_signed, is_float = self._load_signal_type(i_signal)
+                self._load_system_signal(system_signal, decimal, is_float)
 
         # ToDo: receivers
 
@@ -333,24 +333,12 @@ class SystemLoader(object):
             return None
         return result
 
-    def _load_minimum(self, minimum, decimal):
-        if minimum is not None:
-            decimal.minimum = Decimal(minimum.text)
-            minimum = float(decimal.minimum)
-
-        return minimum
-
-    def _load_maximum(self, maximum, decimal):
-        if maximum is not None:
-            decimal.maximum = Decimal(maximum.text)
-            maximum = float(decimal.maximum)
-
-        return maximum
-
-    def _load_texttable(self, compu_method, decimal):
+    def _load_texttable(self, compu_method, decimal, is_float):
         minimum = None
         maximum = None
         choices = {}
+
+        text_to_num_fn = float if is_float else int
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -362,12 +350,18 @@ class SystemLoader(object):
             upper_limit = self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
 
+            minimum_scale = None if lower_limit is None else text_to_num_fn(lower_limit.text)
+            maximum_scale = None if upper_limit is None else text_to_num_fn(upper_limit.text)
+
+            if minimum is None: minimum = minimum_scale
+            elif minimum_scale is not None: minimum = min(minimum, minimum_scale)
+            if maximum is None: maximum = maximum_scale
+            elif maximum_scale is not None: maximum = max(maximum, maximum_scale)
             if vt is not None:
                 choices[vt.text] = int(lower_limit.text)
-            else:
-                minimum = self._load_minimum(lower_limit, decimal)
-                maximum = self._load_maximum(upper_limit, decimal)
 
+        decimal.minimum = minimum
+        decimal.maximum = maximum
         return minimum, maximum, choices
 
     def _load_linear_factor_and_offset(self, compu_scale, decimal):
@@ -375,7 +369,7 @@ class SystemLoader(object):
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
 
         if compu_rational_coeffs is None:
-            return 1, 0
+            return None, None
 
         numerators = self._get_arxml_children(compu_rational_coeffs,
                                               ['&COMPU-NUMERATOR', '*&V'])
@@ -399,7 +393,7 @@ class SystemLoader(object):
 
         return float(decimal.scale), float(decimal.offset)
 
-    def _load_linear(self, compu_method, decimal):
+    def _load_linear(self, compu_method, decimal, is_float):
         compu_scale = self._get_unique_arxml_child(compu_method,
                                                    [
                                                        'COMPU-INTERNAL-TO-PHYS',
@@ -410,21 +404,24 @@ class SystemLoader(object):
         lower_limit = self._get_unique_arxml_child(compu_scale, '&LOWER-LIMIT')
         upper_limit = self._get_unique_arxml_child(compu_scale, '&UPPER-LIMIT')
 
-        minimum = self._load_minimum(lower_limit, decimal)
-        maximum = self._load_maximum(upper_limit, decimal)
+        text_to_num_fn = float if is_float else int
+        minimum = None if lower_limit is None else text_to_num_fn(lower_limit.text)
+        maximum = None if upper_limit is None else text_to_num_fn(upper_limit.text)
 
-        factor, offset = self._load_linear_factor_and_offset(
-            compu_scale,
-            decimal)
+        factor, offset = self._load_linear_factor_and_offset(compu_scale, decimal)
 
+        decimal.minimum = None if minimum is None else Decimal(minimum)
+        decimal.maximum = None if maximum is None else Decimal(maximum)
         return minimum, maximum, factor, offset
 
-    def _load_scale_linear_and_texttable(self, compu_method, decimal):
+    def _load_scale_linear_and_texttable(self, compu_method, decimal, is_float):
         minimum = None
         maximum = None
         factor = 1
         offset = 0
         choices = {}
+
+        text_to_num_fn = float if is_float else int
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -437,18 +434,32 @@ class SystemLoader(object):
             upper_limit = self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
 
-            if vt is not None:
-                choices[vt.text] = int(lower_limit.text)
-            else:
-                minimum = self._load_minimum(lower_limit, decimal)
-                maximum = self._load_maximum(upper_limit, decimal)
-                factor, offset = self._load_linear_factor_and_offset(
-                    compu_scale,
-                    decimal)
+            minimum_scale = None if lower_limit is None else text_to_num_fn(lower_limit.text)
+            maximum_scale = None if upper_limit is None else text_to_num_fn(upper_limit.text)
 
+            if minimum is None: minimum = minimum_scale
+            elif minimum_scale is not None: minimum = min(minimum, minimum_scale)
+            if maximum is None: maximum = maximum_scale
+            elif maximum_scale is not None: maximum = max(maximum, maximum_scale)
+
+            # TODO: make sure that no conflicting scaling factors and offsets
+            # are specified. For now, let's just assume that the ARXML file is
+            # well formed.
+            factor_scale, offset_scale = self._load_linear_factor_and_offset(compu_scale, decimal)
+            if factor_scale is not None:
+                factor = factor_scale
+            if offset_scale is not None:
+                offset = offset_scale
+
+            if vt is not None:
+                assert(minimum_scale is not None and minimum_scale == maximum_scale)
+                choices[vt.text] = int(minimum_scale)
+
+        decimal.minimum = Decimal(minimum)
+        decimal.maximum = Decimal(maximum)
         return minimum, maximum, factor, offset, choices
 
-    def _load_system_signal(self, system_signal, decimal):
+    def _load_system_signal(self, system_signal, decimal, is_float):
         minimum = None
         maximum = None
         factor = 1
@@ -469,23 +480,23 @@ class SystemLoader(object):
 
             if category == 'TEXTTABLE':
                 minimum, maximum, choices = \
-                    self._load_texttable(compu_method, decimal)
+                    self._load_texttable(compu_method, decimal,  is_float)
             elif category == 'LINEAR':
                 minimum, maximum, factor, offset = \
-                    self._load_linear(compu_method, decimal)
+                    self._load_linear(compu_method, decimal,  is_float)
             elif category == 'SCALE_LINEAR_AND_TEXTTABLE':
                 (minimum,
                  maximum,
                  factor,
                  offset,
                  choices) = self._load_scale_linear_and_texttable(compu_method,
-                                                                  decimal)
+                                                                  decimal,
+                                                                  is_float)
             else:
                 LOGGER.debug('Compu method category %s is not yet implemented.',
                              category)
 
-        return minimum, maximum, factor, offset, choices
-
+        return minimum, maximum, 1 if factor is None else factor, 0 if offset is None else offset, choices
 
     def _load_signal_type(self, i_signal):
         is_signed = False

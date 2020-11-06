@@ -1,4 +1,4 @@
-VERSION "2.0"
+VERSION ""
 
 
 NS_ : 
@@ -33,73 +33,58 @@ NS_ :
 
 BS_:
 
-BU_: FOO BAR FIE FUM
-VAL_TABLE_ State 1 "Enabled" 0 "Disabled" ;
+BU_: 
 
 
-BO_ 2147558192 Foo: 8 FOO
- SG_ Foo : 0|12@0- (0.01,250) [229.53|270.47] "degK"  BAR
- SG_ Bar : 24|32@0- (0.1,0) [0|5] "m"  FOO
+BO_ 2148676694 Message1: 8 Vector__XXX
+ SG_ BIT_F m24 : 39|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_H m24 : 38|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_B m24 : 33|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_D m24 : 32|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_E m24 : 29|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_K m24 : 28|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_A m24 : 26|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_L m8 : 24|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_G m8 : 23|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_C m8 : 19|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ BIT_J m8 : 18|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Multiplexor M : 2|6@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 2147558193 Fum: 5 FOO
- SG_ Fum : 0|12@1- (1,0) [0|10] ""  BAR
- SG_ Fam : 12|12@1- (1,0) [0|8] ""  BAR
 
-BO_ 2147558194 Bar: 4 FOO
- SG_ Binary32 : 0|32@1- (1,0) [0|0] ""  FUM
-
-BO_ 2147558195 CanFd: 64 FOO
- SG_ Fie : 0|64@1+ (1,0) [0|0] ""  FUM
- SG_ Fas : 64|64@1+ (1,0) [0|0] "" Vector__XXX
-
-BO_ 780 FOOBAR: 8 FIE
- SG_ ACC_02_CRC : 0|12@1- (1,0) [0|1] ""  BAR
-
-BO_TX_BU_ 2147558194 : FOO,BAR;
 
 
 CM_ "SpecialRelease";
-CM_ BU_ BAR "fam \"1\"";
-CM_ BO_ 2147558192 "Foo.";
-CM_ SG_ 2147558192 Bar "Bar.";
+CM_ SG_ 2148676694 Multiplexor "Defines data content for response messages.";
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","not_used","not_used","not_used","not_used","Cyclic","not_used","IfActive","NoMsgSendType";
+BA_DEF_ BU_  "NmStationAddress" HEX 0 0;
 BA_DEF_  "DBName" STRING ;
-BA_DEF_  "Baudrate" INT 0 1000000;
-BA_DEF_  "AFloat" FLOAT 0 100;
 BA_DEF_  "BusType" STRING ;
-BA_DEF_ BU_  "FOO" INT 0 100;
-BA_DEF_ BU_  "BAR" STRING ;
-BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD";
-BA_DEF_ BO_  "GenMsgStartValue" STRING ;
-BA_DEF_ BO_  "GenMsgCycleTime" INT 0 1000;
-BA_DEF_REL_ BU_SG_REL_  "AFloat2" FLOAT 0 65535;
-BA_DEF_REL_ BU_SG_REL_  "GenSigTimeoutTime" INT 0 65535;
+BA_DEF_DEF_  "VFrameFormat" "J1939PG";
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "NmStationAddress" 0;
 BA_DEF_DEF_  "DBName" "";
-BA_DEF_DEF_  "Baudrate" 125000;
-BA_DEF_DEF_  "AFloat" 0;
-BA_DEF_DEF_  "BusType" "";
-BA_DEF_DEF_  "FOO" 0;
-BA_DEF_DEF_  "BAR" "";
-BA_DEF_DEF_  "VFrameFormat" "ExtendedCAN_FD";
-BA_DEF_DEF_  "GenMsgStartValue" "";
-BA_DEF_DEF_  "GenMsgCycleTime" 100;
-BA_DEF_DEF_REL_ "AFloat2" 0;
-BA_DEF_DEF_REL_ "GenSigTimeoutTime" 0;
-BA_ "BusType" "CAN FD";
-BA_ "AFloat" 33.5;
-BA_ "Baudrate" 125000;
-BA_ "DBName" "TheBusName";
-BA_ "FOO" BU_ FIE 1;
-BA_ "BAR" BU_ FIE "FUM";
-BA_ "VFrameFormat" BO_ 2147558192 1;
-BA_ "GenMsgCycleTime" BO_ 2147558193 1;
-BA_ "VFrameFormat" BO_ 2147558193 1;
-BA_ "VFrameFormat" BO_ 2147558194 1;
-BA_ "VFrameFormat" BO_ 2147558195 15;
-BA_ "VFrameFormat" BO_ 780 0;
-BA_REL_ "AFloat2" BU_SG_REL_ FOO SG_ 2147558192 Bar 500;
-BA_REL_ "GenSigTimeoutTime" BU_SG_REL_ FOO SG_ 2147558192 Bar 200;
-VAL_ 2147558193 Fam 1 "Enabled" 0 "Disabled" ;
-SIG_GROUP_ 2147558193 SigGroupName 1 : Fam Fum;
-SIG_VALTYPE_ 2147558192 Bar : 1;
-SIG_VALTYPE_ 2147558194 Binary32 : 1;
+BA_DEF_DEF_  "BusType" "CAN";
+BA_ "BusType" "CAN";
+BA_ "DBName" "Network_A";
+BA_ "VFrameFormat" BO_ 2148676694 3;
 
+
+
+SG_MUL_VAL_ 2148676694 BIT_J Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_C Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_G Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_L Multiplexor 8-8, 16-16, 24-24;
+SG_MUL_VAL_ 2148676694 BIT_A Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_K Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_E Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_D Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_B Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_H Multiplexor 24-24;
+SG_MUL_VAL_ 2148676694 BIT_F Multiplexor 24-24;

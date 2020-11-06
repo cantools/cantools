@@ -4956,10 +4956,9 @@ BO_ 123 Message_1: 6 XYY
             message.encode({ **data_max, 'Delta': data_max['Delta']+Decimal('0.001') })
     def test_bus_comment(self):
         filename = 'tests/files/dbc/bus_comment.dbc'
-        db1 = cantools.database.load_file(filename)
-        self.assertEqual(db1.buses[0].comment, 'SpecialRelease')
-        db2 = cantools.database.load_string( db1.as_dbc_string() )
-        self.assertEqual( db2.buses[0].comment, 'SpecialRelease' )
+        db = cantools.database.load_file(filename)
+        self.assertEqual(db.buses[0].comment, 'SpecialRelease')
+        self.assert_dbc_dump(db, filename)
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.DEBUG)

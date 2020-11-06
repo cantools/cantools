@@ -319,7 +319,7 @@ class Parser(textparser.Parser):
             'BO_TX_BU_', 'NUMBER', ':', DelimitedList('WORD'), ';')
 
         signal_group = Sequence(
-            'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', OneOrMore('WORD'), ';')
+            'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', ZeroOrMore('WORD'), ';')
 
         return OneOrMoreDict(
             choice(

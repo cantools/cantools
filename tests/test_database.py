@@ -4821,6 +4821,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         filename = 'tests/files/dbc/sig_groups_out.dbc'
         self.assert_dbc_dump(db, filename)
+        
+    def test_dbc_issue_228_empty_signal_groups(self):
+        filename = 'tests/files/dbc/issue_228.dbc'
+
+        db = cantools.database.load_file(filename)
+        message = db.get_message_by_name('SGMsg')
+        signal_group = message.signal_groups[0]
+        self.assertEqual(signal_group.name, 'Empty_Signal_Group')
+        self.assertEqual(signal_group.repetitions, 1)
+        self.assertEqual(signal_group.signal_names, [])
 
     def test_dbc_issue_199_more_than_11_bits_standard_frame_id(self):
         filename = 'tests/files/dbc/issue_199.dbc'

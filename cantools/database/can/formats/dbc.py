@@ -861,6 +861,7 @@ def _load_comments(tokens):
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
             comments['database']['bus'] = comment[1]
+            continue
 
         item = comment[1]
         kind = item[0]
@@ -1482,7 +1483,7 @@ def _load_bus(attributes, comments):
     except KeyError:
         bus_comment = None
 
-    return Bus(bus_name, baudrate=bus_baudrate, comment = bus_comment)
+    return Bus(bus_name, baudrate=bus_baudrate, comment=bus_comment)
 
 
 def _load_nodes(tokens, comments, attributes, definitions):

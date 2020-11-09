@@ -656,21 +656,21 @@ class Message(object):
             if isinstance(value, str):
                 continue
 
-            if signal.decimal.minimum is not None:
-                if value < signal.decimal.minimum:
+            if signal.minimum is not None:
+                if value < signal.minimum:
                     raise EncodeError(
                         "Expected signal '{}' value greater than or equal to "
                         "{} in message '{}', but got {}.".format(signal.name,
-                                                                 signal.decimal.minimum,
+                                                                 signal.minimum,
                                                                  self._name,
                                                                  value))
 
-            if signal.decimal.maximum is not None:
-                if value > signal.decimal.maximum:
+            if signal.maximum is not None:
+                if value > signal.maximum:
                     raise EncodeError(
                         "Expected signal '{}' value less than or equal to "
                         "{} in message '{}', but got {}.".format(signal.name,
-                                                                 signal.decimal.maximum,
+                                                                 signal.maximum,
                                                                  self.name,
                                                                  value))
 

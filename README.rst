@@ -292,8 +292,8 @@ Contributing
 
 #. Create a pull request.
 
-.. |buildstatus| image:: https://travis-ci.org/eerimoq/cantools.svg?branch=master
-.. _buildstatus: https://travis-ci.org/eerimoq/cantools
+.. |buildstatus| image:: https://travis-ci.com/eerimoq/cantools.svg?branch=master
+.. _buildstatus: https://travis-ci.com/eerimoq/cantools
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/eerimoq/cantools?svg=true
 .. _appveyor: https://ci.appveyor.com/project/eerimoq/cantools/branch/master

@@ -54,6 +54,9 @@ class Monitor(can.Listener):
         if args.bit_rate is not None:
             kwargs['bitrate'] = int(args.bit_rate)
 
+        if args.fd:
+            kwargs['fd'] = True
+
         try:
             return can.Bus(bustype=args.bus_type,
                            channel=args.channel,
@@ -351,6 +354,10 @@ def add_subparser(subparsers):
     monitor_parser.add_argument(
         '-B', '--bit-rate',
         help='Python CAN bus bit rate.')
+    monitor_parser.add_argument(
+        '-f', '--fd',
+        action='store_true',
+        help='Python CAN CAN-FD bus.')
     monitor_parser.add_argument(
         'database',
         help='Database file.')

@@ -25,6 +25,7 @@ class Args(object):
         self.no_strict = False
         self.single_line = single_line
         self.bit_rate = None
+        self.fd = False
         self.bus_type = 'socketcan'
         self.channel = 'vcan0'
 

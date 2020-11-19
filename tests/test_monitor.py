@@ -117,13 +117,13 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
     def test_can_fd(self,
-                            use_default_colors,
-                            curs_set,
-                            init_pair,
-                            is_term_resized,
-                            color_pair,
-                            bus,
-                            notifier):
+                    use_default_colors,
+                    curs_set,
+                    init_pair,
+                    is_term_resized,
+                    color_pair,
+                    bus,
+                    notifier):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/motohawk.dbc')

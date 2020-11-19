@@ -25,6 +25,7 @@ class Args(object):
         self.no_strict = False
         self.single_line = single_line
         self.bit_rate = None
+        self.fd = False
         self.bus_type = 'socketcan'
         self.channel = 'vcan0'
 
@@ -107,6 +108,34 @@ class CanToolsMonitorTest(unittest.TestCase):
                      'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan')
             ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_can_fd(self,
+                    use_default_colors,
+                    curs_set,
+                    init_pair,
+                    is_term_resized,
+                    color_pair,
+                    bus,
+                    notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/dbc/motohawk.dbc')
+        args.fd = True
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.run()
+
+        # Check mocks.
+        self.assert_called(bus, [call(bustype='socketcan', channel='vcan0', fd=True)])
 
     @patch('can.Notifier')
     @patch('can.Bus')

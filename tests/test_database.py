@@ -4268,7 +4268,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.bus_name, None)
 
         signal_1 = message_1.signals[0]
-        self.assertEqual(signal_1.name, 'Signal6')
+        self.assertEqual(signal_1.name, 'signal6')
         self.assertEqual(signal_1.start, 0)
         self.assertEqual(signal_1.length, 1)
         self.assertEqual(signal_1.receivers, [])
@@ -4290,7 +4290,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.multiplexer_ids, None)
 
         signal_2 = message_1.signals[1]
-        self.assertEqual(signal_2.name, 'Signal1')
+        self.assertEqual(signal_2.name, 'signal1')
         self.assertEqual(signal_2.start, 4)
         self.assertEqual(signal_2.length, 3)
         self.assertEqual(signal_2.receivers, [])
@@ -4312,7 +4312,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.multiplexer_ids, None)
 
         signal_3 = message_1.signals[2]
-        self.assertEqual(signal_3.name, 'Signal5')
+        self.assertEqual(signal_3.name, 'signal5')
         self.assertEqual(signal_3.start, 16)
         self.assertEqual(signal_3.length, 32)
         self.assertEqual(signal_3.receivers, [])
@@ -4346,7 +4346,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_2.bus_name, None)
 
         signal_1 = message_2.signals[0]
-        self.assertEqual(signal_1.name, 'Signal3')
+        self.assertEqual(signal_1.name, 'signal3')
         self.assertEqual(signal_1.start, 6)
         self.assertEqual(signal_1.length, 2)
         self.assertEqual(signal_1.receivers, [])
@@ -4368,7 +4368,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.multiplexer_ids, None)
 
         signal_2 = message_2.signals[1]
-        self.assertEqual(signal_2.name, 'Signal2')
+        self.assertEqual(signal_2.name, 'signal2')
         self.assertEqual(signal_2.start, 18)
         self.assertEqual(signal_2.length, 11)
         self.assertEqual(signal_2.receivers, [])
@@ -4390,7 +4390,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.multiplexer_ids, None)
 
         signal_3 = message_2.signals[2]
-        self.assertEqual(signal_3.name, 'Signal4')
+        self.assertEqual(signal_3.name, 'signal4')
         self.assertEqual(signal_3.start, 30)
         self.assertEqual(signal_3.length, 4)
         self.assertEqual(signal_3.receivers, [])

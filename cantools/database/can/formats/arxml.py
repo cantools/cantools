@@ -229,7 +229,8 @@ class SystemLoader(object):
             self.get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                         'PACKING-BYTE-ORDER')
 
-        if packing_byte_order is not None and packing_byte_order.text == 'MOST-SIGNIFICANT-BYTE-FIRST':
+        if packing_byte_order is not None \
+           and packing_byte_order.text == 'MOST-SIGNIFICANT-BYTE-FIRST':
             return 'big_endian'
         else:
             return 'little_endian'
@@ -283,7 +284,7 @@ class SystemLoader(object):
                                                    ]):
             lower_limit = self.get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
             upper_limit = self.get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
-            vt = self.get_unique_arxml_child(compu_scale, [ '&COMPU-CONST', 'VT' ])
+            vt = self.get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
 
             if vt is not None:
                 choices[vt.text] = int(lower_limit.text)
@@ -356,7 +357,7 @@ class SystemLoader(object):
 
             lower_limit = self.get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
             upper_limit = self.get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
-            vt = self.get_unique_arxml_child(compu_scale, [ '&COMPU-CONST', 'VT' ])
+            vt = self.get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
 
             if vt is not None:
                 choices[vt.text] = int(lower_limit.text)
@@ -389,17 +390,21 @@ class SystemLoader(object):
             category = category.text
 
             if category == 'TEXTTABLE':
-                minimum, maximum, choices = self.load_texttable(compu_method, decimal)
+                minimum, maximum, choices = \
+                    self.load_texttable(compu_method, decimal)
             elif category == 'LINEAR':
-                minimum, maximum, factor, offset = self.load_linear(compu_method, decimal)
+                minimum, maximum, factor, offset = \
+                    self.load_linear(compu_method, decimal)
             elif category == 'SCALE_LINEAR_AND_TEXTTABLE':
                 (minimum,
                  maximum,
                  factor,
                  offset,
-                 choices) = self.load_scale_linear_and_texttable(compu_method, decimal)
+                 choices) = self.load_scale_linear_and_texttable(compu_method,
+                                                                 decimal)
             else:
-                LOGGER.debug('Compu method category %s is not yet implemented.', category)
+                LOGGER.debug('Compu method category %s is not yet implemented.',
+                             category)
 
         return minimum, maximum, factor, offset, choices
 
@@ -444,7 +449,8 @@ class SystemLoader(object):
         base_elem = self.root if is_absolute_path else base_elem
         if not base_elem:
             raise ValueError(
-                'Tried to dereference a relative ARXML path without a specifying the base location.')
+                'Tried to dereference a relative ARXML path without '
+                'specifying the base location.')
 
         short_names = arxml_path.lstrip('/').split('/')
         location = []
@@ -491,16 +497,19 @@ class SystemLoader(object):
         # channel and its individual frame triggerings can be
         # references
         loader.get_arxml_children(can_cluster,
-                                   [ 'CAN-CLUSTER-VARIANTS',
-                                     '*&CAN-CLUSTER-CONDITIONAL',
-                                     'PHYSICAL-CHANNELS',
-                                     '*&CAN-PHYSICAL-CHANNEL',
-                                     'FRAME-TRIGGERINGS',
-                                     '*&CAN-FRAME-TRIGGERING'])
+                                   [
+                                       'CAN-CLUSTER-VARIANTS',
+                                       '*&CAN-CLUSTER-CONDITIONAL',
+                                       'PHYSICAL-CHANNELS',
+                                       '*&CAN-PHYSICAL-CHANNEL',
+                                       'FRAME-TRIGGERINGS',
+                                       '*&CAN-FRAME-TRIGGERING'
+                                   ])
         """
 
         if base_elems is None:
-            raise ValueError('Cannot retrieve a child element of a non-existing node!')
+            raise ValueError(
+                'Cannot retrieve a child element of a non-existing node!')
 
         # make sure that the children_location is a list. for convenience we
         # also allow it to be a string. In this case we take it that a
@@ -536,14 +545,21 @@ class SystemLoader(object):
                     if child_elem.tag == f'{{{NAMESPACE}}}{child_tag_name}':
                         local_result.append(child_elem)
                     elif child_elem.tag == f'{{{NAMESPACE}}}{child_tag_name}-REF':
-                        tmp = self.follow_arxml_reference(base_elem, child_elem.text, child_elem.attrib.get('DEST'))
+                        tmp = self.follow_arxml_reference(base_elem,
+                                                          child_elem.text,
+                                                          child_elem.attrib.get('DEST'))
+
                         if tmp is None:
-                            raise ValueError(f'Encountered dangling reference {child_tag_name}-REF: {child_elem.text}')
+                            raise ValueError(f'Encountered dangling reference '
+                                             f'{child_tag_name}-REF: '
+                                             f'{child_elem.text}')
 
                         local_result.append(tmp)
 
                 if not is_nodeset and len(local_result) > 1:
-                    raise ValueError(f'Encountered a a non-unique child node of type {child_tag_name} which ought to be unique')
+                    raise ValueError(f'Encountered a a non-unique child node '
+                                     f'of type {child_tag_name} which ought to '
+                                     f'be unique')
 
                 result.extend(local_result)
 

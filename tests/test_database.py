@@ -4423,6 +4423,52 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, None)
 
+    def test_system_arxml_traversal(self):
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.db.load_file(
+                'tests/files/arxml/system-dangling-reference-4.2.arxml')
+        self.assertEqual(str(cm.exception), "ARXML: \"Encountered dangling reference FRAME-REF: /PackageDoesNotExist/Message1\"")
+
+        root = ElementTree.parse('tests/files/arxml/system-4.2.arxml').getroot()
+        loader = cantools.db.can.formats.arxml.SystemLoader(root, strict=True)
+
+        # a base node must always be specified
+        with self.assertRaises(ValueError) as cm:
+            no_base_elem = loader.get_arxml_children(None, ["AR-PACKAGES", "*AR-PACKAGE"])
+        self.assertEqual(str(cm.exception), "Cannot retrieve a child element of a non-existing node!")
+
+        # test multiple child node matches
+        children1 = loader.get_arxml_children(loader.root, ["AR-PACKAGES", "*AR-PACKAGE"])
+        childen1_short_names = \
+            list(map(lambda x: x.find("ns:SHORT-NAME", cantools.db.formats.arxml.NAMESPACES).text, children1))
+
+        self.assertEqual(childen1_short_names,
+                         [
+                             'Cluster',
+                             'CanFrame',
+                             'ISignal',
+                             'ISignalIPdu',
+                             'Unit',
+                             'CompuMethod',
+                             'SystemSignal',
+                             'SwBaseType'
+                         ])
+
+        # test unique location specifier if child nodes exist
+        with self.assertRaises(ValueError) as cm:
+            non_unique = loader.get_arxml_children(loader.root, ["AR-PACKAGES", "AR-PACKAGE"])
+        self.assertEqual(str(cm.exception), "Encountered a a non-unique child node of type AR-PACKAGE which ought to be unique")
+
+        # test the reference cache
+        foo = loader.follow_arxml_reference(loader.root, "/CanFrame/Message1", "CAN-FRAME")
+        bar = loader.follow_arxml_reference(loader.root, "/CanFrame/Message1", "CAN-FRAME")
+        self.assertEqual(foo, bar)
+
+        # test non-unique location while assuming that it is unque
+        with self.assertRaises(ValueError) as cm:
+            no_base_elem = loader.get_unique_arxml_child(loader.root, ["AR-PACKAGES", "*AR-PACKAGE"])
+        self.assertEqual(str(cm.exception), "['AR-PACKAGES', '*AR-PACKAGE'] does not resolve into a unique node")
+        
     def test_system_missing_factor_arxml(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(

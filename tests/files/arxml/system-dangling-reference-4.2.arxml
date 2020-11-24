@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AUTOSAR xsi:schemaLocation="http://autosar.org/schema/r4.0 AUTOSAR_00046.xsd" xmlns="http://autosar.org/schema/r4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <AR-PACKAGES>
+    <AR-PACKAGE>
+      <SHORT-NAME>Cluster</SHORT-NAME>
+      <ELEMENTS>
+        <CAN-CLUSTER>
+          <SHORT-NAME>Cluster0</SHORT-NAME>
+          <CAN-CLUSTER-VARIANTS>
+            <CAN-CLUSTER-CONDITIONAL>
+              <BAUDRATE>500000</BAUDRATE>
+              <PHYSICAL-CHANNELS>
+                <CAN-PHYSICAL-CHANNEL>
+                  <SHORT-NAME>Pch0</SHORT-NAME>
+                  <FRAME-TRIGGERINGS>
+                    <CAN-FRAME-TRIGGERING>
+                      <SHORT-NAME>message1</SHORT-NAME>
+                      <FRAME-REF DEST="CAN-FRAME">/PackageDoesNotExist/Message1</FRAME-REF>
+                      <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <IDENTIFIER>5</IDENTIFIER>
+                    </CAN-FRAME-TRIGGERING>
+                  </FRAME-TRIGGERINGS>
+                </CAN-PHYSICAL-CHANNEL>
+              </PHYSICAL-CHANNELS>
+            </CAN-CLUSTER-CONDITIONAL>
+          </CAN-CLUSTER-VARIANTS>
+        </CAN-CLUSTER>
+      </ELEMENTS>
+    </AR-PACKAGE>
+  </AR-PACKAGES>
+</AUTOSAR>

@@ -183,6 +183,10 @@ class SystemLoader(object):
                                                     NAMESPACES).text
         can_frame = self.find_can_frame(frame_ref_xpath)
 
+        if can_frame is None:
+            # dangling reference to the can frame object.
+            raise ValueError(f"Encountered dangling reference FRAME-REF: {frame_ref_xpath}")
+
         # Name, frame id, length, is_extended_frame and comment.
         name = self.load_message_name(can_frame)
         frame_id = self.load_message_frame_id(can_frame_triggering)

@@ -1,5 +1,6 @@
 # Load and dump a CAN database in ARXML format.
 
+import re
 import logging
 from decimal import Decimal
 
@@ -13,17 +14,76 @@ from ..internal_database import InternalDatabase
 
 LOGGER = logging.getLogger(__name__)
 
-# The ARXML XML namespace.
-NAMESPACE = 'http://autosar.org/schema/r4.0'
-NAMESPACES = {'ns': NAMESPACE}
-
-ROOT_TAG = '{{{}}}AUTOSAR'.format(NAMESPACE)
-
 class SystemLoader(object):
     def __init__(self, root, strict):
         self.root = root
         self.strict = strict
+
+        m = re.match('^\\{(.*)\\}AUTOSAR$', self.root.tag)
+        if not m:
+            raise ValueError(f"No XML namespace specified or illegal root tag name '{self.root.tag}'")
+
+        xml_namespace = m.group(1)
+        self.xml_namespace = xml_namespace
+        self._xml_namespaces = { 'ns': xml_namespace }
+
+        m = re.match('^http://autosar\.org/schema/r(4\..*)$', xml_namespace)
+        if m:
+            # AUTOSAR 4
+            autosar_version_string = m.group(1)
+        else:
+            raise ValueError(f"Unrecognized AUTOSAR XML namespace '{xml_namespace}'")
+
+        m = re.match('^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
+        if not m:
+            raise ValueError(f"Could not parse AUTOSAR version '{autosar_version_string}'")
+
+        self.autosar_version_major = int(m.group(1))
+        self.autosar_version_minor = 0 if m.group(2) is None else int(m.group(2)[1:])
+        self.autosar_version_patch = 0 if m.group(3) is None else int(m.group(3)[1:])
+
+        if self.autosar_version_major != 4 and self.autosar_version_major != 3:
+            raise ValueError('This class only supports AUTOSAR versions 3 and 4')
+
         self._arxml_reference_cache = {}
+
+    def autosar_version_newer(self, major, minor=None, patch=None):
+        """Returns true iff the AUTOSAR version specified in the ARXML it at
+        least as the version specified by the function parameters
+
+        If a part of the specified version is 'None', it and the
+        'lesser' parts of the version are not considered. Also, the
+        major version number *must* be specified.
+        """
+
+        if self.autosar_version_major > major:
+            return True
+        elif self.autosar_version_major < major:
+            return False
+
+        # the major part of the queried version is identical to the
+        # one used by the ARXML
+        if minor is None:
+            # don't care
+            return True
+        elif self.autosar_version_minor > minor:
+            return True
+        elif self.autosar_version_minor < minor:
+            return False
+
+        # the major and minor parts of the queried version are identical
+        # to the one used by the ARXML
+        if patch is None:
+            # don't care
+            return True
+        elif self.autosar_version_patch > patch:
+            return True
+        elif self.autosar_version_patch < patch:
+            return False
+
+        # all parts of the queried version are identical to the one
+        # actually used by the ARXML
+        return True
 
     def load(self):
         buses = []
@@ -467,7 +527,7 @@ class SystemLoader(object):
                                              short_names[-1])
         ]
 
-        result = base_elem.find(make_xpath(location), NAMESPACES)
+        result = base_elem.find(make_xpath(location), self._xml_namespaces)
 
         if is_absolute_path:
             self._arxml_reference_cache[arxml_path] = result
@@ -542,9 +602,9 @@ class SystemLoader(object):
                 local_result = []
 
                 for child_elem in base_elem:
-                    if child_elem.tag == f'{{{NAMESPACE}}}{child_tag_name}':
+                    if child_elem.tag == f'{{{self.xml_namespace}}}{child_tag_name}':
                         local_result.append(child_elem)
-                    elif child_elem.tag == f'{{{NAMESPACE}}}{child_tag_name}-REF':
+                    elif child_elem.tag == f'{{{self.xml_namespace}}}{child_tag_name}-REF':
                         tmp = self.follow_arxml_reference(base_elem,
                                                           child_elem.text,
                                                           child_elem.attrib.get('DEST'))
@@ -622,10 +682,16 @@ class SystemLoader(object):
                                            ])
 
 
+# The ARXML XML namespace for the EcuExtractLoader
+NAMESPACE = 'http://autosar.org/schema/r4.0'
+NAMESPACES = {'ns': NAMESPACE}
+
+ROOT_TAG = '{{{}}}AUTOSAR'.format(NAMESPACE)
+
+# ARXML XPATHs used by the EcuExtractLoader
 def make_xpath(location):
     return './ns:' + '/ns:'.join(location)
 
-# ARXML XPATHs for the EcuExtractLoader
 ECUC_VALUE_COLLECTION_XPATH = make_xpath([
     'AR-PACKAGES',
     'AR-PACKAGE',
@@ -984,14 +1050,26 @@ def load_string(string, strict=True):
 
     root = ElementTree.fromstring(string)
 
+    m = re.match("{(.*)}AUTOSAR", root.tag)
+    if not m:
+        raise ValueError(f"No XML namespace specified or illegal root tag name '{root.tag}'")
+    xml_namespace = m.group(1)
+
     # Should be replaced with a validation using the XSD file.
-    if root.tag != ROOT_TAG:
-        raise ValueError(
-            'Expected root element tag {}, but got {}.'.format(
-                ROOT_TAG,
-                root.tag))
+    recognized_namespace = False
+    if re.match("http://autosar.org/schema/r(.*)", xml_namespace):
+        recognized_namespace = True
+
+    if not recognized_namespace:
+        raise ValueError(f"Unrecognized XML namespace '{xml_namespace}'")
 
     if is_ecu_extract(root):
+        if root.tag != ROOT_TAG:
+            raise ValueError(
+                'Expected root element tag {}, but got {}.'.format(
+                    ROOT_TAG,
+                    root.tag))
+
         return EcuExtractLoader(root, strict).load()
     else:
         return SystemLoader(root, strict).load()

@@ -43,8 +43,8 @@ class SystemLoader(object):
         self.autosar_version_minor = 0 if m.group(2) is None else int(m.group(2)[1:])
         self.autosar_version_patch = 0 if m.group(3) is None else int(m.group(3)[1:])
 
-        if self.autosar_version_major != 4 and self.autosar_version_major != 3:
-            raise ValueError('This class only supports AUTOSAR versions 3 and 4')
+        if self.autosar_version_major != 4:
+            raise ValueError('This class only supports AUTOSAR version 4')
 
         self._arxml_reference_cache = {}
 
@@ -562,7 +562,7 @@ class SystemLoader(object):
         # CAN cluster, where each conditional, each the physical
         # channel and its individual frame triggerings can be
         # references
-        loader.get_arxml_children(can_cluster,
+        loader._get_arxml_children(can_cluster,
                                    [
                                        'CAN-CLUSTER-VARIANTS',
                                        '*&CAN-CLUSTER-CONDITIONAL',

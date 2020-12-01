@@ -4309,7 +4309,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(len(db.nodes), 0)
 
-        self.assertEqual(len(db.messages), 3)
+        self.assertEqual(len(db.messages), 4)
 
         message_1 = db.messages[0]
         self.assertEqual(message_1.frame_id, 5)
@@ -4496,6 +4496,34 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_3.signals), 0)
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, None)
+
+        # message 4 tests different base encodings
+        message_4 = db.messages[3]
+        self.assertEqual(message_4.frame_id, 101)
+        self.assertEqual(message_4.is_extended_frame, False)
+        self.assertEqual(message_4.name, 'Message4')
+        self.assertEqual(message_4.length, 6)
+        self.assertEqual(message_4.senders, [])
+        self.assertEqual(message_4.send_type, None)
+        self.assertEqual(message_4.cycle_time, None)
+        self.assertEqual(len(message_4.signals), 3)
+        self.assertEqual(message_4.comment, None)
+        self.assertEqual(message_4.bus_name, None)
+
+        signal_2 = message_4.signals[0]
+        self.assertEqual(signal_2.name, 'signal2')
+        self.assertEqual(signal_2.is_signed, True)
+        self.assertEqual(signal_2.is_float, False)
+
+        signal_2_1c = message_4.signals[1]
+        self.assertEqual(signal_2_1c.name, 'signal2_1c')
+        self.assertEqual(signal_2_1c.is_signed, True)
+        self.assertEqual(signal_2_1c.is_float, False)
+
+        signal_2_sm = message_4.signals[2]
+        self.assertEqual(signal_2_sm.name, 'signal2_sm')
+        self.assertEqual(signal_2_sm.is_signed, True)
+        self.assertEqual(signal_2_sm.is_float, False)
 
     def test_system_arxml_traversal(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:

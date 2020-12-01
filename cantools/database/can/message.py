@@ -707,10 +707,13 @@ class Message(object):
     def _check_signals(self, signals, data, scaling):
         for signal in signals:
             if signal.name not in data:
-                raise EncodeError(
-                    "Expected signal value for '{}' in data, but got {}.".format(
-                        signal.name,
-                        data))
+                if signal.initial is not None:
+                    data[signal.name] = signal.initial
+                else:
+                    raise EncodeError(
+                        "Expected signal value for '{}' in data, but got {}.".format(
+                            signal.name,
+                            data))
 
         if scaling:
             self._check_signals_ranges_scaling(signals, data)

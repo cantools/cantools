@@ -1,4 +1,6 @@
 # A CAN signal.
+from ..errors import EncodeError
+
 
 class Decimal(object):
     """Holds the same values as
@@ -437,6 +439,33 @@ class Signal(object):
         for choice_number, choice_string in self.choices.items():
             if choice_string == string:
                 return choice_number
+
+    def encode(self, message, data=None, scaling=True, padding=False, strict=True):
+        """
+        Encode a signal directly
+
+        This will encode a message where all other signals in the message have initial
+        values set and you want to ue those initial values. If there is a multiplexer_signal
+        for this signal then that will also get set to this signal name
+
+        :param message: The message this signal is apart of
+        :param data: the data to set or None if there has been an initial value set and that is what is to be used
+        :type data: optional, any
+        """
+        if data is None:
+            if self.initial is not None:
+                data = {self.name: self.initial}
+            else:
+                raise EncodeError(
+                    "You must supply a signal value for signal {0}".format(self.name)
+                )
+        else:
+            data = {self.name: data}
+
+        if self.multiplexer_signal is not None:
+            data[self.multiplexer_signal] = self.name
+
+        return message.encode(data, scaling=scaling, padding=padding, strict=strict)
 
     def __repr__(self):
         if self._choices is None:

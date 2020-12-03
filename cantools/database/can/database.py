@@ -310,8 +310,9 @@ class Database(object):
 
         for message in self.messages:
             if (
-                    'UseGMParameterIDs' in message.dbc.attributes and
-                    message.dbc.attributes['UseGMParameterIDs'].value == 1
+                message.dbc.attributes is not None and
+                'UseGMParameterIDs' in message.dbc.attributes and
+                message.dbc.attributes['UseGMParameterIDs'].value == 1
             ):
                 # convert to GM Parameter Id
                 id_ = (frame_id >> 13 & 0x1FFF) << 13
@@ -320,8 +321,8 @@ class Database(object):
                     return message
 
             elif (
-                    message.frame_format is not None and
-                    message.frame_format.startswith('J1939')
+                message.frame_format is not None and
+                message.frame_format.startswith('J1939')
             ):
                 # convert to J1939 paramter group
                 id_ = ((frame_id >> 8) & 0x3FFFF) << 8

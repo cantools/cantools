@@ -1359,15 +1359,14 @@ def _load_messages(tokens,
         result = None
         message_attributes = get_attributes(frame_id_dbc)
 
-        try:
+        if 'GenMsgSendType' in message_attributes:
             result = message_attributes['GenMsgSendType'].value
             # Resolve ENUM index to ENUM text
-            result = definitions['GenMsgSendType'].choices[int(result)]
-        except (KeyError, TypeError):
-            try:
-                result = definitions['GenMsgSendType'].default_value
-            except (KeyError, TypeError):
-                result = None
+
+            if isinstance(result, int) or result.isdigit():
+                result = definitions['GenMsgSendType'].choices[int(result)]
+        else:
+            result = None
 
         return result
 
@@ -1378,13 +1377,14 @@ def _load_messages(tokens,
 
         message_attributes = get_attributes(frame_id_dbc)
 
-        try:
-            return int(message_attributes['GenMsgCycleTime'].value)
-        except (KeyError, TypeError):
-            try:
-                return int(definitions['GenMsgCycleTime'].default_value)
-            except (KeyError, TypeError):
-                return None
+        if 'GenMsgCycleTime' in message_attributes:
+            result = message_attributes['GenMsgCycleTime'].value
+            if isinstance(result, int) or result.isdigit():
+                result = int(result)
+        else:
+            result = None
+
+        return result
 
     def get_frame_format(frame_id_dbc):
         """Gets the frame format for a given message
@@ -1394,7 +1394,9 @@ def _load_messages(tokens,
 
         if 'VFrameFormat' in message_attributes:
             frame_format = message_attributes['VFrameFormat'].value
-            frame_format = message_attributes['VFrameFormat'].definition.choices[frame_format]
+            
+            if isinstance(frame_format, int) or frame_format.isdigit():
+                frame_format = message_attributes['VFrameFormat'].definition.choices[int(frame_format)]
         else:
             frame_format = None
 
@@ -1528,7 +1530,7 @@ def _load_nodes(tokens, comments, attributes, definitions):
         for k, v in definitions.items():
             attrib[k] = Attribute(v.default_value, v)
 
-        if'node' in attributes and node in attributes[node]:
+        if'node' in attributes and node in attributes['node']:
             for k, v in attributes['node'][node].items():
                 attrib[k] = v
 

@@ -702,6 +702,9 @@ def _dump_attributes(database):
         if node.dbc is not None:
             if node.dbc.attributes is not None:
                 for attribute in node.dbc.attributes.values():
+                    if attribute.value == attribute.definition.default_value:
+                        continue
+
                     ba.append(
                         'BA_ "{name}" {kind} {node_name} {value};'.format(
                             name=attribute.definition.name,
@@ -713,6 +716,9 @@ def _dump_attributes(database):
         if message.dbc is not None:
             if message.dbc.attributes is not None:
                 for attribute in message.dbc.attributes.values():
+                    if attribute.value == attribute.definition.default_value:
+                        continue
+
                     ba.append(
                         'BA_ "{name}" {kind} {frame_id} {value};'.format(
                             name=attribute.definition.name,
@@ -724,6 +730,9 @@ def _dump_attributes(database):
             if signal.dbc is not None:
                 if signal.dbc.attributes is not None:
                     for attribute in signal.dbc.attributes.values():
+                        if attribute.value == attribute.definition.default_value:
+                            continue
+
                         ba.append(
                             'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'.format(
                                 name=attribute.definition.name,
@@ -1124,10 +1133,20 @@ def _load_signals(tokens,
 
         """
 
-        try:
-            return attributes[frame_id_dbc]['signal'][signal]
-        except KeyError:
-            return None
+        attrib = odict()
+
+        for k, v in definitions.items():
+            attrib[k] = Attribute(v.default_value, v)
+
+        if (
+            frame_id_dbc in attributes and
+            'signal' in attributes[frame_id_dbc] and
+            signal in attributes[frame_id_dbc]['signal']
+        ):
+            for k, v in attributes[frame_id_dbc]['signal'][signal].items():
+                attrib[k] = v
+
+        return attrib
 
     def get_comment(frame_id_dbc, signal):
         """Get comment for given signal.
@@ -1311,11 +1330,16 @@ def _load_messages(tokens,
         """Get attributes for given message.
 
         """
+        attrib = odict()
 
-        try:
-            return attributes[frame_id_dbc]['message']
-        except KeyError:
-            return None
+        for k, v in definitions.items():
+            attrib[k] = Attribute(v.default_value, v)
+
+        if frame_id_dbc in attributes and 'message' in attributes[frame_id_dbc]:
+            for k, v in attributes[frame_id_dbc]['message'].items():
+                attrib[k] = v
+
+        return attrib
 
     def get_comment(frame_id_dbc):
         """Get comment for given message.
@@ -1362,6 +1386,20 @@ def _load_messages(tokens,
             except (KeyError, TypeError):
                 return None
 
+    def get_frame_format(frame_id_dbc):
+        """Gets the frame format for a given message
+
+        """
+        message_attributes = get_attributes(frame_id_dbc)
+
+        if 'VFrameFormat' in message_attributes:
+            frame_format = message_attributes['VFrameFormat'].value
+            frame_format = message_attributes['VFrameFormat'].definition.choices[frame_format]
+        else:
+            frame_format = None
+
+        return frame_format
+
     def get_protocol(frame_id_dbc):
         """Get protocol for a given message.
 
@@ -1369,19 +1407,12 @@ def _load_messages(tokens,
 
         message_attributes = get_attributes(frame_id_dbc)
 
-        try:
-            frame_format = message_attributes['VFrameFormat'].value
-            frame_format = definitions['VFrameFormat'].choices[frame_format]
-        except (KeyError, TypeError):
-            try:
-                frame_format = definitions['VFrameFormat'].default_value
-            except (KeyError, TypeError):
-                frame_format = None
-
-        if frame_format == 'J1939PG':
-            return 'j1939'
+        if 'ProtocolType' in message_attributes:
+            protocol_type = message_attributes['ProtocolType'].value
         else:
-            return None
+            protocol_type = None
+
+        return protocol_type
 
     def get_message_name(frame_id_dbc, name):
         message_attributes = get_attributes(frame_id_dbc)
@@ -1457,6 +1488,7 @@ def _load_messages(tokens,
                     comment=get_comment(frame_id_dbc),
                     strict=strict,
                     protocol=get_protocol(frame_id_dbc),
+                    frame_format=get_frame_format(frame_id_dbc),
                     bus_name=bus_name,
                     signal_groups=get_signal_groups(frame_id_dbc)))
 
@@ -1489,12 +1521,28 @@ def _load_bus(attributes, comments):
 def _load_nodes(tokens, comments, attributes, definitions):
     nodes = None
 
+    def get_attributes(node):
+
+        attrib = odict()
+
+        for k, v in definitions.items():
+            attrib[k] = Attribute(v.default_value, v)
+
+        if'node' in attributes and node in attributes[node]:
+            for k, v in attributes['node'][node].items():
+                attrib[k] = v
+
+        return attrib
+
     for token in tokens.get('BU_', []):
-        nodes = [Node(name=_get_node_name(attributes, node),
-                      comment=comments.get(node, None),
-                      dbc_specifics=DbcSpecifics(attributes['node'].get(node, None),
-                                                 definitions))
-                 for node in token[2]]
+        for node in token[2]:
+            nodes += [
+                Node(
+                    name=_get_node_name(attributes, node),
+                    comment=comments.get(node, None),
+                    dbc_specifics=DbcSpecifics(get_attributes(node), definitions)
+                )
+            ]
 
     return nodes
 

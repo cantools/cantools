@@ -305,7 +305,30 @@ class Database(object):
 
         """
 
-        return self._frame_id_to_message[frame_id & self._frame_id_mask]
+        if frame_id & self._frame_id_mask in self._frame_id_to_message:
+            return self._frame_id_to_message[frame_id & self._frame_id_mask]
+
+        for message in self.messages:
+            if (
+                    'UseGMParameterIDs' in message.dbc.attributes and
+                    message.dbc.attributes['UseGMParameterIDs'].value == 1
+            ):
+                # convert to GM Parameter Id
+                id_ = (frame_id >> 13 & 0x1FFF) << 13
+
+                if message.frame_id == id_:
+                    return message
+
+            elif (
+                    message.frame_format is not None and
+                    message.frame_format.startswith('J1939')
+            ):
+                # convert to J1939 paramter group
+                id_ = ((frame_id >> 8) & 0x3FFFF) << 8
+                if message.frame_id == id_:
+                    return message
+
+        raise KeyError(frame_id)
 
     def get_node_by_name(self, name):
         """Find the node object for given name `name`.
@@ -354,9 +377,9 @@ class Database(object):
         """
 
         try:
-            message = self._frame_id_to_message[frame_id_or_name]
+            message = self.get_message_by_frame_id(frame_id_or_name)
         except KeyError:
-            message = self._name_to_message[frame_id_or_name]
+            message = self.get_message_by_name(frame_id_or_name)
 
         return message.encode(data, scaling, padding, strict)
 
@@ -382,9 +405,9 @@ class Database(object):
         """
 
         try:
-            message = self._frame_id_to_message[frame_id_or_name]
+            message = self.get_message_by_frame_id(frame_id_or_name)
         except KeyError:
-            message = self._name_to_message[frame_id_or_name]
+            message = self.get_message_by_name(frame_id_or_name)
 
         return message.decode(data, decode_choices, scaling)
 

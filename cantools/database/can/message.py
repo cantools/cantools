@@ -36,7 +36,8 @@ class Message(object):
                  bus_name=None,
                  signal_groups=None,
                  strict=True,
-                 protocol=None):
+                 protocol=None,
+                 frame_format=None):
         frame_id_bit_length = frame_id.bit_length()
 
         if is_extended_frame:
@@ -78,6 +79,7 @@ class Message(object):
         self._signal_tree = None
         self._strict = strict
         self._protocol = protocol
+        self._frame_format = frame_format
         self.refresh()
 
     def _create_codec(self, parent_signal=None, multiplexer_id=None):
@@ -307,10 +309,31 @@ class Message(object):
         self._bus_name = value
 
     @property
-    def protocol(self):
-        """The message protocol, or ``None`` if unavailable. Only one protocol
-        is currently supported; ``'j1939'``.
+    def frame_format(self):
+        """
+        The message format, or ``None`` if unavailable.
 
+        Only one format is currently supported; ``'j1939'``.
+        """
+        return self._frame_format
+
+    @frame_format.setter
+    def frame_format(self, value):
+        self._frame_format = value
+
+    @property
+    def protocol(self):
+        """
+        The message protocol, or ``None`` if unavailable.
+
+        This tells us the protocol being used for the
+        data contained within the messge.
+
+        some examples would be
+
+        ``"CAN"``
+        ``"OBD2"``
+        ``"GMLAN"``
         """
 
         return self._protocol

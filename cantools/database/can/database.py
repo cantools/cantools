@@ -310,6 +310,7 @@ class Database(object):
 
         for message in self.messages:
             if (
+                message.dbc is not None and
                 message.dbc.attributes is not None and
                 'UseGMParameterIDs' in message.dbc.attributes and
                 message.dbc.attributes['UseGMParameterIDs'].value == 1

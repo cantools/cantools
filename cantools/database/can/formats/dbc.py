@@ -1394,7 +1394,7 @@ def _load_messages(tokens,
 
         if 'VFrameFormat' in message_attributes:
             frame_format = message_attributes['VFrameFormat'].value
-            
+
             if isinstance(frame_format, int) or frame_format.isdigit():
                 frame_format = message_attributes['VFrameFormat'].definition.choices[int(frame_format)]
         else:
@@ -1521,7 +1521,7 @@ def _load_bus(attributes, comments):
 
 
 def _load_nodes(tokens, comments, attributes, definitions):
-    nodes = None
+    nodes = []
 
     def get_attributes(node):
 

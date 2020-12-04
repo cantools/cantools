@@ -304,6 +304,8 @@ class Database(object):
         """Find the message object for given frame id `frame_id`.
 
         """
+        if not isinstance(frame_id, int):
+            raise KeyError(frame_id)
 
         if frame_id & self._frame_id_mask in self._frame_id_to_message:
             return self._frame_id_to_message[frame_id & self._frame_id_mask]

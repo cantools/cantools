@@ -54,23 +54,22 @@ BO_ 2148676694 Message1: 8 Vector__XXX
 
 
 CM_ SG_ 2148676694 Multiplexor "Defines data content for response messages.";
-BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
-BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
-BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
-BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
-BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","not_used","not_used","not_used","not_used","Cyclic","not_used","IfActive","NoMsgSendType";
-BA_DEF_ BU_  "NmStationAddress" HEX 0 0;
 BA_DEF_  "DBName" STRING ;
 BA_DEF_  "BusType" STRING ;
-BA_DEF_DEF_  "VFrameFormat" "J1939PG";
-BA_DEF_DEF_  "GenSigSendType" "Cyclic";
-BA_DEF_DEF_  "GenSigInactiveValue" 0;
-BA_DEF_DEF_  "GenMsgCycleTime" 0;
-BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
-BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_ BU_  "NmStationAddress" HEX 0 0;
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","J1939PG";
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","not_used","not_used","not_used","not_used","Cyclic","not_used","IfActive","NoMsgSendType";
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 0;
 BA_DEF_DEF_  "DBName" "";
 BA_DEF_DEF_  "BusType" "CAN";
-BA_ "BusType" "CAN";
+BA_DEF_DEF_  "NmStationAddress" 0;
+BA_DEF_DEF_  "VFrameFormat" "J1939PG";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "GenSigSendType" "Cyclic";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
 BA_ "DBName" "Network_A";
 BA_ "VFrameFormat" BO_ 2148676694 3;
 

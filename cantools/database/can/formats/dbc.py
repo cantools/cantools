@@ -446,16 +446,26 @@ def get_dbc_frame_id(message):
 
 def _get_node_name(attributes, name):
     try:
-        return attributes['node'][name]['SystemNodeLongSymbol'].value
+        result = attributes['node'][name]['SystemNodeLongSymbol'].value
     except (KeyError, TypeError):
-        return name
+        result = ''
+
+    if not result:
+        result = name
+
+    return result
 
 
 def _get_environment_variable_name(attributes, name):
     try:
-        return attributes['envvar'][name]['SystemEnvVarLongSymbol'].value
+        result = attributes['envvar'][name]['SystemEnvVarLongSymbol'].value
     except (KeyError, TypeError):
-        return name
+        result = ''
+
+    if not result:
+        result = name
+
+    return result
 
 
 def _dump_version(database):
@@ -691,9 +701,13 @@ def _dump_attributes(database):
 
         return result
 
+
     if database.dbc is not None:
         if database.dbc.attributes is not None:
             for attribute in database.dbc.attributes.values():
+                if attribute.value == attribute.definition.default_value:
+                    continue
+
                 ba.append(
                     'BA_ "{name}" {value};'.format(name=attribute.definition.name,
                                                    value=get_value(attribute)))
@@ -912,10 +926,10 @@ def _load_attributes(tokens, definitions):
     attributes = odict()
     attributes['node'] = odict()
 
-    def to_object(attribute):
+    def to_object(definition, attribute):
         value = attribute[3]
 
-        definition = definitions[attribute[1]]
+        definition = definition[attribute[1]]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
             value = to_int(value)
@@ -946,7 +960,7 @@ def _load_attributes(tokens, definitions):
                 if signal not in attributes[frame_id_dbc]['signal']:
                     attributes[frame_id_dbc]['signal'][signal] = odict()
 
-                attributes[frame_id_dbc]['signal'][signal][name] = to_object(attribute)
+                attributes[frame_id_dbc]['signal'][signal][name] = to_object(definitions['signal'], attribute)
             elif kind == 'BO_':
                 frame_id_dbc = int(item[1])
 
@@ -954,14 +968,14 @@ def _load_attributes(tokens, definitions):
                     attributes[frame_id_dbc] = {}
                     attributes[frame_id_dbc]['message'] = odict()
 
-                attributes[frame_id_dbc]['message'][name] = to_object(attribute)
+                attributes[frame_id_dbc]['message'][name] = to_object(definitions['message'], attribute)
             elif kind == 'BU_':
                 node = item[1]
 
                 if node not in attributes['node']:
                     attributes['node'][node] = odict()
 
-                attributes['node'][node][name] = to_object(attribute)
+                attributes['node'][node][name] = to_object(definitions['node'], attribute)
             elif kind == 'EV_':
                 envvar = item[1]
 
@@ -971,12 +985,12 @@ def _load_attributes(tokens, definitions):
                 if envvar not in attributes['envvar']:
                     attributes['envvar'][envvar] = odict()
 
-                attributes['envvar'][envvar][name] = to_object(attribute)
+                attributes['envvar'][envvar][name] = to_object(definitions['envvar'], attribute)
         else:
             if 'database' not in attributes:
                 attributes['database'] = odict()
 
-            attributes['database'][name] = to_object(attribute)
+            attributes['database'][name] = to_object(definitions['database'], attribute)
 
     return attributes
 
@@ -1135,7 +1149,7 @@ def _load_signals(tokens,
 
         attrib = odict()
 
-        for k, v in definitions.items():
+        for k, v in definitions['signal'].items():
             attrib[k] = Attribute(v.default_value, v)
 
         if (
@@ -1249,10 +1263,15 @@ def _load_signals(tokens,
     def get_signal_name(frame_id_dbc, name):
         signal_attributes = get_attributes(frame_id_dbc, name)
 
-        try:
-            return signal_attributes['SystemSignalLongSymbol'].value
-        except (KeyError, TypeError):
-            return name
+        if 'SystemSignalLongSymbol' in signal_attributes:
+            result = signal_attributes['SystemSignalLongSymbol'].value
+        else:
+            result = ''
+
+        if not result:
+            result = name
+
+        return result
 
     def get_signal_initial_value(frame_id_dbc, name):
         signal_attributes = get_attributes(frame_id_dbc, name)
@@ -1271,6 +1290,11 @@ def _load_signals(tokens,
             return None
 
     signals = []
+
+    defs = odict()
+    for vals in definitions.values():
+        for k, v in vals.items():
+            defs[k] = v
 
     for signal in tokens:
         signals.append(
@@ -1298,7 +1322,7 @@ def _load_signals(tokens,
                    choices=get_choices(frame_id_dbc,
                                        signal[1][0]),
                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
-                                              definitions),
+                                              defs),
                    comment=get_comment(frame_id_dbc,
                                        signal[1][0]),
                    is_multiplexer=get_is_multiplexer(signal),
@@ -1332,7 +1356,7 @@ def _load_messages(tokens,
         """
         attrib = odict()
 
-        for k, v in definitions.items():
+        for k, v in definitions['message'].items():
             attrib[k] = Attribute(v.default_value, v)
 
         if frame_id_dbc in attributes and 'message' in attributes[frame_id_dbc]:
@@ -1364,7 +1388,7 @@ def _load_messages(tokens,
             # Resolve ENUM index to ENUM text
 
             if isinstance(result, int) or result.isdigit():
-                result = definitions['GenMsgSendType'].choices[int(result)]
+                result = message_attributes['GenMsgSendType'].definition.choices[int(result)]
         else:
             result = None
 
@@ -1419,10 +1443,15 @@ def _load_messages(tokens,
     def get_message_name(frame_id_dbc, name):
         message_attributes = get_attributes(frame_id_dbc)
 
-        try:
-            return message_attributes['SystemMessageLongSymbol'].value
-        except (KeyError, TypeError):
-            return name
+        if 'SystemMessageLongSymbol' in message_attributes:
+            result = message_attributes['SystemMessageLongSymbol'].value
+        else:
+            result = ""
+
+        if not result:
+            result = name
+
+        return result
 
     def get_signal_groups(frame_id_dbc):
         try:
@@ -1476,6 +1505,11 @@ def _load_messages(tokens,
                                 frame_id_dbc,
                                 multiplexer_signal)
 
+        defs = odict()
+        for vals in definitions.values():
+            for k, v in vals.items():
+                defs[k] = v
+
         messages.append(
             Message(frame_id=frame_id,
                     is_extended_frame=is_extended_frame,
@@ -1485,7 +1519,7 @@ def _load_messages(tokens,
                     send_type=get_send_type(frame_id_dbc),
                     cycle_time=get_cycle_time(frame_id_dbc),
                     dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc),
-                                               definitions),
+                                               defs),
                     signals=signals,
                     comment=get_comment(frame_id_dbc),
                     strict=strict,
@@ -1527,14 +1561,19 @@ def _load_nodes(tokens, comments, attributes, definitions):
 
         attrib = odict()
 
-        for k, v in definitions.items():
+        for k, v in definitions['node'].items():
             attrib[k] = Attribute(v.default_value, v)
 
-        if'node' in attributes and node in attributes['node']:
+        if 'node' in attributes and node in attributes['node']:
             for k, v in attributes['node'][node].items():
                 attrib[k] = v
 
         return attrib
+
+    defs = odict()
+    for vals in definitions.values():
+        for k, v in vals.items():
+            defs[k] = v
 
     for token in tokens.get('BU_', []):
         for node in token[2]:
@@ -1542,7 +1581,7 @@ def _load_nodes(tokens, comments, attributes, definitions):
                 Node(
                     name=_get_node_name(attributes, node),
                     comment=comments.get(node, None),
-                    dbc_specifics=DbcSpecifics(get_attributes(node), definitions)
+                    dbc_specifics=DbcSpecifics(get_attributes(node), defs)
                 )
             ]
 
@@ -1705,6 +1744,11 @@ def dump_string(database):
 
 def get_definitions_dict(definitions, defaults):
     result = odict()
+    result['envvar'] = odict()
+    result['database'] = odict()
+    result['node'] = odict()
+    result['message'] = odict()
+    result['signal'] = odict()
 
     def convert_value(definition, value):
         if definition.type_name in ['INT', 'HEX']:
@@ -1738,7 +1782,16 @@ def get_definitions_dict(definitions, defaults):
         except KeyError:
             definition.default_value = None
 
-        result[definition.name] = definition
+        if definition.kind is None:
+            result['database'][definition.name] = definition
+        elif definition.kind == 'BO_':
+            result['message'][definition.name] = definition
+        elif definition.kind == 'SG_':
+            result['signal'][definition.name] = definition
+        elif definition.kind == 'BU_':
+            result['node'][definition.name] = definition
+        elif definition.kind == 'EV_':
+            result['envvar'][definition.name] = definition
 
     return result
 
@@ -1776,8 +1829,14 @@ def load_string(string, strict=True):
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes)
+
+    defs = odict()
+    for vals in attribute_definitions.values():
+        for k, v in vals.items():
+            defs[k] = v
+
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
-                                 attribute_definitions,
+                                 defs,
                                  environment_variables,
                                  value_tables)
 

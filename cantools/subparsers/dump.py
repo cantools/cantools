@@ -1,3 +1,5 @@
+import sys
+
 from .. import database
 from ..database.utils import format_and
 from ..database.can.database import Database as CanDatabase
@@ -50,7 +52,8 @@ def _dump_can_database(dbase):
         print('  Name:       {}'.format(message.name))
         print('  Id:         0x{:x}'.format(message.frame_id))
 
-        if message.protocol == 'j1939':
+        frame_format = message.frame_format
+        if frame_format is not None and frame_format.startswith('J1939'):
             _print_j1939_frame_id(message)
 
         print('  Length:     {} bytes'.format(message.length))

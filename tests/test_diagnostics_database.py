@@ -4,17 +4,19 @@ import logging
 
 import cantools
 
+BASE_PATH = os.path.dirname(__file__)
+
 
 class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
 
     def test_example_cdd(self):
-        db = cantools.db.load_file('tests/files/cdd/example.cdd',
-                                   encoding='iso-8859-1')
-        self.assertEqual(len(db.dids), 15)
-        self.assertEqual([did.name for did in db.dids],
-                         [
+        filename = os.path.join(BASE_PATH, 'files/cdd/example.cdd')
+
+        db = cantools.db.load_file(filename, encoding='iso-8859-1')
+        self.assertEqual(15, len(db.dids))
+        self.assertEqual([
                              'DEFAULT_SESSION',
                              'ProgrammingSession',
                              'ECU_Identification',
@@ -30,33 +32,34 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
                              'TestData',
                              'Coding',
                              'InputOutput'
-                         ])
+                         ],
+                         [did.name for did in db.dids])
 
         # ECU_Identification DID structure.
         did = db.get_did_by_name('ECU_Identification')
-        self.assertEqual(did.name, 'ECU_Identification')
-        self.assertEqual(did.identifier, 144)
-        self.assertEqual(did.length, 10)
-        self.assertEqual([data.name for data in did.datas],
-                         [
+        self.assertEqual('ECU_Identification', did.name)
+        self.assertEqual(144, did.identifier)
+        self.assertEqual(10, did.length)
+        self.assertEqual([
                              'Ident_Number_7_6',
                              'Ident_Number_5_4',
                              'Ident_Number_3_2',
                              'Ident_Number_1_0',
                              'Diagnostic_Identification'
-                         ])
+                         ],
+                         [data.name for data in did.datas])
 
         data = did.get_data_by_name('Diagnostic_Identification')
-        self.assertEqual(data.name, 'Diagnostic_Identification')
-        self.assertEqual(data.start, 64)
-        self.assertEqual(data.length, 16)
-        self.assertEqual(data.byte_order, 'little_endian')
-        self.assertEqual(data.scale, 1)
-        self.assertEqual(data.offset, 0)
-        self.assertEqual(data.minimum, 0)
-        self.assertEqual(data.maximum, 255)
-        self.assertEqual(data.unit, None)
-        self.assertEqual(data.choices, None)
+        self.assertEqual('Diagnostic_Identification', data.name)
+        self.assertEqual(64, data.start)
+        self.assertEqual(16, data.length)
+        self.assertEqual('little_endian', data.byte_order)
+        self.assertEqual(1, data.scale)
+        self.assertEqual(0, data.offset)
+        self.assertEqual(0, data.minimum)
+        self.assertEqual(255, data.maximum)
+        self.assertEqual(None, data.unit)
+        self.assertEqual(None, data.choices)
 
         decoded_did = {
             'Ident_Number_7_6': 0x1234,
@@ -68,13 +71,13 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         encoded_did = b'\x34\x12\x78\x56\x12\x90\x56\x34\xcd\xab'
 
         encoded = did.encode(decoded_did)
-        self.assertEqual(encoded, encoded_did)
+        self.assertEqual(encoded_did, encoded)
         decoded = did.decode(encoded)
-        self.assertEqual(decoded, decoded_did)
+        self.assertEqual(decoded_did, decoded)
 
         # SawTooth DID structure.
         did = db.get_did_by_identifier(244)
-        self.assertEqual(did.identifier, 244)
+        self.assertEqual(244, did.identifier)
 
         decoded_did = {
             'ampl': 1,
@@ -84,24 +87,24 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         encoded_did = b'\x01\x02\x03'
 
         encoded = did.encode(decoded_did)
-        self.assertEqual(encoded, encoded_did)
+        self.assertEqual(encoded_did, encoded)
         decoded = did.decode(encoded)
-        self.assertEqual(decoded, decoded_did)
+        self.assertEqual(decoded_did, decoded)
 
         # Sine DID structure.
         did = db.get_did_by_name('Sine')
-        self.assertEqual(len(did.datas), 3)
-        self.assertEqual([data.name for data in did.datas],
-                         [
+        self.assertEqual(3, len(did.datas))
+        self.assertEqual([
                              'ampl',
                              'period',
                              'value'
-                         ])
-        self.assertEqual(did.identifier, 243)
-        self.assertEqual(did.datas[1].name, 'period')
-        self.assertEqual(did.datas[1].unit, 'sec')
-        self.assertEqual(did.datas[1].scale, 20)
-        self.assertEqual(did.datas[1].offset, 0)
+                         ],
+                         [data.name for data in did.datas])
+        self.assertEqual(243, did.identifier)
+        self.assertEqual('period', did.datas[1].name)
+        self.assertEqual('sec', did.datas[1].unit)
+        self.assertEqual(20, did.datas[1].scale)
+        self.assertEqual(0, did.datas[1].offset)
 
         decoded_did = {
             'ampl': 1,
@@ -111,30 +114,30 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         encoded_did = b'\x01\x02\x03'
 
         encoded = did.encode(decoded_did)
-        self.assertEqual(encoded, encoded_did)
+        self.assertEqual(encoded_did, encoded)
         decoded = did.decode(encoded)
-        self.assertEqual(decoded, decoded_did)
+        self.assertEqual(decoded_did, decoded)
 
         # Coding DID structure.
         did = db.get_did_by_name('Coding')
-        self.assertEqual(len(did.datas), 3)
-        self.assertEqual([data.name for data in did.datas],
-                         [
+        self.assertEqual(3, len(did.datas))
+        self.assertEqual([
                              'Country_variant',
                              'Vehicle_type',
                              'Special_setting'
-                         ])
-        self.assertEqual(did.identifier, 160)
-        self.assertEqual(did.datas[1].name, 'Vehicle_type')
-        self.assertEqual(did.datas[1].choices,
-                         {
+                         ],
+                         [data.name for data in did.datas])
+        self.assertEqual(160, did.identifier)
+        self.assertEqual('Vehicle_type', did.datas[1].name)
+        self.assertEqual({
                              0: '(not defined)',
                              1: 'Coupe',
                              2: 'Sedan',
                              3: 'Transporter'
-                         })
-        self.assertEqual(did.datas[2].name, 'Special_setting')
-        self.assertEqual(did.datas[2].choices, None)
+                         },
+                         did.datas[1].choices)
+        self.assertEqual('Special_setting', did.datas[2].name)
+        self.assertEqual(None, did.datas[2].choices)
 
         decoded_did = {
             'Country_variant': 'Europe',
@@ -144,15 +147,15 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         encoded_did = b'\x21\x03'
 
         encoded = did.encode(decoded_did)
-        self.assertEqual(encoded, encoded_did)
+        self.assertEqual(encoded_did, encoded)
         decoded = did.decode(encoded)
-        self.assertEqual(decoded, decoded_did)
+        self.assertEqual(decoded_did, decoded)
 
     def test_example_cdd_repr(self):
-        db = cantools.db.load_file('tests/files/cdd/example.cdd',
-                                   encoding='iso-8859-1')
+        filename = os.path.join(BASE_PATH, 'files/cdd/example.cdd')
+
+        db = cantools.db.load_file(filename, encoding='iso-8859-1')
         self.assertEqual(
-            repr(db),
             "did('DEFAULT_SESSION', 0x0081)\n"
             "\n"
             "did('ProgrammingSession', 0x0085)\n"
@@ -239,12 +242,15 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
             "  data('Door_contact_front_right', 1, 1, 'little_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})\n"
             "  data('Door_contact_rear_left', 2, 1, 'little_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})\n"
             "  data('Door_contact_rear_right', 3, 1, 'little_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})\n"
-            "  data('_reserved', 4, 4, 'little_endian', 1, 0, 0, 255, 'None', None)\n")
+            "  data('_reserved', 4, 4, 'little_endian', 1, 0, 0, 255, 'None', None)\n",
+            repr(db))
 
     def test_cdd_add(self):
         db = cantools.db.diagnostics.Database()
-        db.add_cdd_file('tests/files/cdd/example.cdd', encoding='iso-8859-1')
-        self.assertEqual(len(db.dids), 15)
+        filename = os.path.join(BASE_PATH, 'files/cdd/example.cdd')
+
+        db.add_cdd_file(filename, encoding='iso-8859-1')
+        self.assertEqual(15, len(db.dids))
 
 
 # This file is not '__main__' when executed via 'python setup.py3

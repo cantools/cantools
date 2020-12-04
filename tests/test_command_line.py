@@ -16,11 +16,16 @@ except ImportError:
 import cantools
 
 
+BASE_PATH = os.path.dirname(__file__)
+
+
 def remove_date_time(string):
     return re.sub(r'.* This file was generated.*', '', string)
 
 
 def read_file(filename):
+    filename = os.path.join(BASE_PATH, filename.replace('tests/', ''))
+
     with open(filename, 'r') as fin:
         return remove_date_time(fin.read())
 
@@ -29,6 +34,7 @@ def read_utf8_file(filename):
     """Reference files are encoded with UTF-8.
 
     """
+    filename = os.path.join(BASE_PATH, filename.replace('tests/', ''))
 
     with open(filename, 'r', encoding='utf-8') as fin:
         return remove_date_time(fin.read())
@@ -43,7 +49,9 @@ class CanToolsCommandLineTest(unittest.TestCase):
         self.assertEqual(read_file(actual), read_utf8_file(expected))
 
     def test_decode(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        filename = os.path.join(BASE_PATH, 'files/dbc/socialledge.dbc')
+
+        argv = ['cantools', 'decode', filename]
         input_data = """\
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
   vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF
@@ -89,7 +97,9 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_can_fd(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/foobar.dbc']
+        filename = os.path.join(BASE_PATH, 'files/dbc/foobar.dbc')
+
+        argv = ['cantools', 'decode', filename]
         input_data = """\
   vcan0  12333 [064]  02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 """
@@ -112,10 +122,12 @@ CanFd(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_log_format(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/socialledge.dbc')
+
         argv = [
             'cantools',
             'decode',
-            'tests/files/dbc/socialledge.dbc'
+            filename
         ]
         input_data = """\
 (1594172461.968006) vcan0 0C8#F000000000000000
@@ -162,11 +174,13 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_single_line_decode(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/socialledge.dbc')
+
         argv = [
             'cantools',
             'decode',
             '--single-line',
-            'tests/files/dbc/socialledge.dbc'
+            filename
         ]
 
         input_data = """\
@@ -197,11 +211,13 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_single_line_decode_log_format(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/socialledge.dbc')
+
         argv = [
             'cantools',
             'decode',
             '--single-line',
-            'tests/files/dbc/socialledge.dbc'
+            filename
         ]
 
         input_data = """\
@@ -232,10 +248,12 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_muxed_data(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/msxii_system_can.dbc')
+
         argv = [
             'cantools',
             'decode',
-            'tests/files/dbc/msxii_system_can.dbc'
+            filename
         ]
 
         input_data = """\
@@ -506,11 +524,13 @@ BATTERY_VT(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_single_line_muxed_data(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/msxii_system_can.dbc')
+
         argv = [
             'cantools',
             'decode',
             '--single-line',
-            'tests/files/dbc/msxii_system_can.dbc'
+            filename
         ]
 
         input_data = """\
@@ -601,10 +621,12 @@ BATTERY_VT(
                     self.assertEqual(actual_output, expected_output)
 
     def test_dump(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/motohawk.dbc')
+
         argv = [
             'cantools',
             'dump',
-            'tests/files/dbc/motohawk.dbc'
+            filename
         ]
 
         expected_output = """\
@@ -670,11 +692,13 @@ BATTERY_VT(
                 self.assertEqual(actual_output, expected_output)
 
     def test_dump_no_sender(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/no_sender.dbc')
+
         argv = [
             'cantools',
             'dump',
             '--no-strict',
-            'tests/files/dbc/no_sender.dbc'
+            filename
         ]
 
         expected_output = """\
@@ -715,10 +739,12 @@ BATTERY_VT(
                 self.assertEqual(actual_output, expected_output)
 
     def test_dump_signal_choices(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/dump_signal_choices.dbc')
+
         argv = [
             'cantools',
             'dump',
-            'tests/files/dbc/dump_signal_choices.dbc'
+            filename
         ]
 
         expected_output = """\
@@ -793,10 +819,12 @@ BATTERY_VT(
                 self.assertEqual(actual_output, expected_output)
 
     def test_dump_j1939(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/j1939.dbc')
+
         argv = [
             'cantools',
             'dump',
-            'tests/files/dbc/j1939.dbc'
+            filename
         ]
 
         expected_output = """\
@@ -895,51 +923,61 @@ BATTERY_VT(
             with patch('sys.argv', argv):
                 cantools._main()
                 actual_output = stdout.getvalue()
-                self.assertEqual(actual_output, expected_output)
+
+        self.assertEqual(expected_output, actual_output)
 
     def test_convert(self):
+        filename_in = os.path.join(BASE_PATH, 'files/dbc/motohawk.dbc')
+        filename_out = os.path.join(BASE_PATH, 'test_command_line_convert.kcd')
+
         # DBC to KCD.
         argv = [
             'cantools',
             'convert',
-            'tests/files/dbc/motohawk.dbc',
-            'test_command_line_convert.kcd'
+            filename_in,
+            filename_out
         ]
 
-        if os.path.exists('test_command_line_convert.kcd'):
-            os.remove('test_command_line_convert.kcd')
+        if os.path.exists(filename_out):
+            os.remove(filename_out)
 
         with patch('sys.argv', argv):
             cantools._main()
 
         db = cantools.database.Database()
-        db.add_kcd_file('test_command_line_convert.kcd')
+        db.add_kcd_file(filename_out)
         self.assertEqual(db.version, '1.0')
+
+        filename_in = filename_out
+        filename_out = os.path.join(BASE_PATH, 'test_command_line_convert.dbc')
 
         # KCD to DBC.
         argv = [
             'cantools',
             'convert',
-            'test_command_line_convert.kcd',
-            'test_command_line_convert.dbc'
+            filename_in,
+            filename_out
         ]
 
-        if os.path.exists('test_command_line_convert.dbc'):
-            os.remove('test_command_line_convert.dbc')
+        if os.path.exists(filename_out):
+            os.remove(filename_out)
 
         with patch('sys.argv', argv):
             cantools._main()
 
         db = cantools.database.Database()
-        db.add_dbc_file('test_command_line_convert.dbc')
+        db.add_dbc_file(filename_out)
         self.assertEqual(db.version, '1.0')
 
     def test_convert_bad_outfile(self):
+        filename_in = os.path.join(BASE_PATH, 'files/dbc/motohawk.dbc')
+        filename_out = os.path.join(BASE_PATH, 'test_command_line_convert.foo')
+
         argv = [
             'cantools',
             'convert',
-            'tests/files/dbc/motohawk.dbc',
-            'test_command_line_convert.foo'
+            filename_in,
+            filename_out
         ]
 
         with patch('sys.argv', argv):
@@ -970,11 +1008,12 @@ BATTERY_VT(
                 database, basename = database
             else:
                 basename = database
+            filename = os.path.join(BASE_PATH, 'files/dbc/{}.dbc'.format(database))
 
             argv = [
                 'cantools',
                 'generate_c_source',
-                'tests/files/dbc/{}.dbc'.format(database)
+                filename
             ]
 
             database_h = basename + '.h'
@@ -998,10 +1037,12 @@ BATTERY_VT(
                 cantools._main()
 
             if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_h)
+
+                self.assert_files_equal(database_h, filename)
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_c)
+
+                self.assert_files_equal(database_c, filename)
 
             self.assertFalse(os.path.exists(fuzzer_c))
             self.assertFalse(os.path.exists(fuzzer_mk))
@@ -1012,11 +1053,13 @@ BATTERY_VT(
         ]
 
         for database in databases:
+            filename = os.path.join(BASE_PATH, 'files/dbc/{}.dbc'.format(database))
+
             argv = [
                 'cantools',
                 'generate_c_source',
                 '--no-floating-point-numbers',
-                'tests/files/dbc/{}.dbc'.format(database)
+                filename
             ]
 
             database_h = database + '.h'
@@ -1034,12 +1077,13 @@ BATTERY_VT(
                 cantools._main()
 
             if sys.version_info[0] > 2:
-                self.assert_files_equal(
-                    database_h,
-                    'tests/files/c_source/' + expected_database_h)
-                self.assert_files_equal(
-                    database_c,
-                    'tests/files/c_source/' + expected_database_c)
+                filename = os.path.join(BASE_PATH, 'files/c_source', expected_database_h)
+
+                self.assert_files_equal(database_h, filename)
+
+                filename = os.path.join(BASE_PATH, 'files/c_source', expected_database_c)
+
+                self.assert_files_equal(database_c, filename)
 
     def test_generate_c_source_database_name(self):
         databases = [
@@ -1047,11 +1091,13 @@ BATTERY_VT(
         ]
 
         for database in databases:
+            filename = os.path.join(BASE_PATH, 'files/dbc/{}.dbc'.format(database))
+
             argv = [
                 'cantools',
                 'generate_c_source',
                 '--database-name', 'my_database_name',
-                'tests/files/dbc/{}.dbc'.format(database)
+                filename
             ]
 
             database_h = 'my_database_name.h'
@@ -1067,10 +1113,13 @@ BATTERY_VT(
                 cantools._main()
 
             if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_h)
+
+                self.assert_files_equal(database_h, filename)
+
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_c)
+
+                self.assert_files_equal(database_c, filename)
 
     def test_generate_c_source_bit_fields(self):
         databases = [
@@ -1080,12 +1129,14 @@ BATTERY_VT(
         ]
 
         for database in databases:
+            filename = os.path.join(BASE_PATH, 'files/dbc/{}.dbc'.format(database))
+
             argv = [
                 'cantools',
                 'generate_c_source',
                 '--bit-fields',
                 '--database-name', '{}_bit_fields'.format(database),
-                'tests/files/dbc/{}.dbc'.format(database)
+                filename
             ]
 
             database_h = database + '_bit_fields.h'
@@ -1101,17 +1152,22 @@ BATTERY_VT(
                 cantools._main()
 
             if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_h)
+
+                self.assert_files_equal(database_h, filename)
+
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_c)
+
+                self.assert_files_equal(database_c, filename)
 
     def test_generate_c_source_generate_fuzzer(self):
+        filename = os.path.join(BASE_PATH, 'files/dbc/multiplex_2.dbc')
+
         argv = [
             'cantools',
             'generate_c_source',
             '--generate-fuzzer',
-            'tests/files/dbc/multiplex_2.dbc'
+            filename
         ]
 
         database_h = 'multiplex_2.h'
@@ -1135,14 +1191,22 @@ BATTERY_VT(
             cantools._main()
 
         if sys.version_info[0] > 2:
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + database_c)
-            self.assert_files_equal(fuzzer_c,
-                                    'tests/files/c_source/' + fuzzer_c)
-            self.assert_files_equal(fuzzer_mk,
-                                    'tests/files/c_source/' + fuzzer_mk)
+            filename = os.path.join(BASE_PATH, 'files/c_source', database_h)
+
+            self.assert_files_equal(database_h, filename)
+
+            filename = os.path.join(BASE_PATH, 'files/c_source', database_c)
+
+            self.assert_files_equal(database_c, filename)
+
+            filename = os.path.join(BASE_PATH, 'files/c_source', fuzzer_c)
+
+            self.assert_files_equal(fuzzer_c, filename)
+
+            filename = os.path.join(BASE_PATH, 'files/c_source', fuzzer_mk)
+
+            self.assert_files_equal(fuzzer_mk, filename)
+
 
     def test_generate_c_source_sym(self):
         databases = [
@@ -1156,10 +1220,12 @@ BATTERY_VT(
             else:
                 basename = database
 
+            filename = os.path.join(BASE_PATH, 'files/sym/{}.sym'.format(database))
+
             argv = [
                 'cantools',
                 'generate_c_source',
-                'tests/files/sym/{}.sym'.format(database)
+                filename
             ]
 
             database_h = basename + '.h'
@@ -1183,10 +1249,13 @@ BATTERY_VT(
                 cantools._main()
 
             if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_h)
+
+                self.assert_files_equal(database_h, filename)
+
+                filename = os.path.join(BASE_PATH, 'files/c_source', database_c)
+
+                self.assert_files_equal(database_c, filename)
 
             self.assertFalse(os.path.exists(fuzzer_c))
             self.assertFalse(os.path.exists(fuzzer_mk))

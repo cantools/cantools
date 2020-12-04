@@ -12,6 +12,8 @@ except ImportError:
 
 import cantools
 
+BASE_PATH = os.path.dirname(__file__)
+
 
 class CanBus(object):
 
@@ -21,6 +23,9 @@ class CanBus(object):
         self._periodic_queue = Queue()
         self._input_queue = Queue()
         self._periodic_stop_queue = Queue()
+
+    def fileno(self):
+        return None
 
     def stop(self):
         self._periodic_stop_queue.put(None)
@@ -56,7 +61,9 @@ def setup_tester(dut_name,
                  on_message=None,
                  decode_choices=False,
                  scaling=False):
-    database = cantools.db.load_file('tests/files/kcd/tester.kcd')
+
+    filename = os.path.join(BASE_PATH, 'files/kcd/tester.kcd')
+    database = cantools.db.load_file(filename)
     can_bus = CanBus()
     tester = cantools.tester.Tester(dut_name,
                                     database,
@@ -88,9 +95,9 @@ class CanToolsTesterTest(unittest.TestCase):
         tester.start()
 
         message, period = can_bus.wait_for_send_periodic()
-        self.assertEqual(message.arbitration_id, 1)
-        self.assertEqual(message.data, b'\x03\x00')
-        self.assertEqual(period, 0.05)
+        self.assertEqual(1, message.arbitration_id)
+        self.assertEqual(b'\x03\x00', message.data)
+        self.assertEqual(0.05, period)
 
         tester.stop()
         can_bus.wait_for_periodic_stop()
@@ -133,9 +140,9 @@ class CanToolsTesterTest(unittest.TestCase):
         tester.enable('PeriodicMessage1')
 
         message, period = can_bus.wait_for_send_periodic()
-        self.assertEqual(message.arbitration_id, 1)
-        self.assertEqual(message.data, b'\x00\x00')
-        self.assertEqual(period, 0.05)
+        self.assertEqual(1, message.arbitration_id)
+        self.assertEqual(b'\x00\x00', message.data)
+        self.assertEqual(0.05, period)
 
         tester.disable('PeriodicMessage1')
         can_bus.wait_for_periodic_stop()
@@ -157,15 +164,15 @@ class CanToolsTesterTest(unittest.TestCase):
 
         # Expect Message1 with no filtering.
         message = tester.expect('Message1')
-        self.assertEqual(message, {'Signal1': 0, 'Signal2': 0})
+        self.assertEqual({'Signal1': 0, 'Signal2': 0}, message)
 
         # Expect Message1 with Signal1 filtering.
         message = tester.expect('Message1', {'Signal1': 0})
-        self.assertEqual(message, {'Signal1': 0, 'Signal2': 1})
+        self.assertEqual({'Signal1': 0, 'Signal2': 1}, message)
 
         # Expect Message1 with Signal1 and Signal2 filtering.
         message = tester.expect('Message1', {'Signal1': 2, 'Signal2': 3})
-        self.assertEqual(message, {'Signal1': 2, 'Signal2': 3})
+        self.assertEqual({'Signal1': 2, 'Signal2': 3}, message)
 
         # Expect Message1 with timeout.
         message = tester.expect('Message1', timeout=0.5)
@@ -189,13 +196,13 @@ class CanToolsTesterTest(unittest.TestCase):
         can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x04\x00\x00'))
         can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x05\x00'))
         message = tester.expect('Message1', discard_other_messages=False)
-        self.assertEqual(message, {'Signal1': 5, 'Signal2': 0})
+        self.assertEqual({'Signal1': 5, 'Signal2': 0}, message)
         message = tester.expect('Message1', timeout=0.0, discard_other_messages=False)
         self.assertIsNone(message)
         message = tester.expect('Message2', discard_other_messages=False)
-        self.assertEqual(message, {'Signal1': 3, 'Signal2': 0, 'Signal3': 0})
+        self.assertEqual({'Signal1': 3, 'Signal2': 0, 'Signal3': 0}, message)
         message = tester.expect('Message2', discard_other_messages=False)
-        self.assertEqual(message, {'Signal1': 4, 'Signal2': 0, 'Signal3': 0})
+        self.assertEqual({'Signal1': 4, 'Signal2': 0, 'Signal3': 0}, message)
         message = tester.expect('Message1', timeout=0.0)
         self.assertIsNone(message)
         message = tester.expect('Message2', timeout=0.0)
@@ -231,20 +238,20 @@ class CanToolsTesterTest(unittest.TestCase):
         # Without signals.
         tester.send('Message1')
         message = can_bus.wait_for_send()
-        self.assertEqual(message.arbitration_id, 0x101)
-        self.assertEqual(message.data, b'\x00\x00')
+        self.assertEqual(0x101, message.arbitration_id)
+        self.assertEqual(b'\x00\x00', message.data)
 
         # With a signal.
         tester.send('Message1', {'Signal1': 1})
         message = can_bus.wait_for_send()
-        self.assertEqual(message.arbitration_id, 0x101)
-        self.assertEqual(message.data, b'\x01\x00')
+        self.assertEqual(0x101, message.arbitration_id)
+        self.assertEqual(b'\x01\x00', message.data)
 
         # Without signals again.
         tester.send('Message1')
         message = can_bus.wait_for_send()
-        self.assertEqual(message.arbitration_id, 0x101)
-        self.assertEqual(message.data, b'\x01\x00')
+        self.assertEqual(0x101, message.arbitration_id)
+        self.assertEqual(b'\x01\x00', message.data)
 
         tester.stop()
 
@@ -258,8 +265,8 @@ class CanToolsTesterTest(unittest.TestCase):
 
         tester.send('Message1')
         message = can_bus.wait_for_send()
-        self.assertEqual(message.arbitration_id, 0x101)
-        self.assertEqual(message.data, b'\x0a\x00')
+        self.assertEqual(0x101, message.arbitration_id)
+        self.assertEqual(b'\x0a\x00', message.data)
 
         tester.stop()
 
@@ -283,8 +290,8 @@ class CanToolsTesterTest(unittest.TestCase):
         """The DUT must exist in the database.
 
         """
-
-        database = cantools.db.load_file('tests/files/kcd/tester.kcd')
+        filename = os.path.join(BASE_PATH, 'files/kcd/tester.kcd')
+        database = cantools.db.load_file(filename)
         can_bus = CanBus()
 
         with self.assertRaises(cantools.tester.Error) as cm:
@@ -297,8 +304,8 @@ class CanToolsTesterTest(unittest.TestCase):
         """The bus must exist in the database.
 
         """
-
-        database = cantools.db.load_file('tests/files/kcd/tester.kcd')
+        filename = os.path.join(BASE_PATH, 'files/kcd/tester.kcd')
+        database = cantools.db.load_file(filename)
         can_bus = CanBus()
 
         with self.assertRaises(cantools.tester.Error) as cm:
@@ -311,8 +318,8 @@ class CanToolsTesterTest(unittest.TestCase):
         """The bus name should be None if no bus is given in the database.
 
         """
-
-        database = cantools.db.load_file('tests/files/dbc/foobar.dbc')
+        filename = os.path.join(BASE_PATH, 'files/dbc/foobar.dbc')
+        database = cantools.db.load_file(filename)
         can_bus = CanBus()
 
         with self.assertRaises(cantools.tester.Error) as cm:
@@ -346,8 +353,8 @@ class CanToolsTesterTest(unittest.TestCase):
 
         # Check that only the good message was passed to on_message().
         decoded_message = message_queue.get()
-        self.assertEqual(decoded_message.name, 'Message1')
-        self.assertEqual(decoded_message.signals, {'Signal1': 0, 'Signal2': 0})
+        self.assertEqual('Message1', decoded_message.name)
+        self.assertEqual({'Signal1': 0, 'Signal2': 0}, decoded_message.signals)
         self.assertTrue(message_queue.empty())
 
         tester.stop()

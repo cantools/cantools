@@ -50,8 +50,8 @@ BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotU
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 50000;
 BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
 BA_DEF_DEF_  "GenMsgCycleTime" 0;
-BA_ "GenMsgCycleTime" BO_ 1 200;
 BA_ "GenMsgSendType" BO_ 1 0;
+BA_ "GenMsgCycleTime" BO_ 1 200;
 
 
 

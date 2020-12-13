@@ -335,7 +335,7 @@ struct {database_name}_{message_name}_t {{
 }};
 '''
 
-DECLARATION_FMT = '''\
+DECLARATION_PACK_FMT = '''\
 /**
  * Pack message {database_message_name}.
  *
@@ -350,6 +350,9 @@ int {database_name}_{message_name}_pack(
     const struct {database_name}_{message_name}_t *src_p,
     size_t size);
 
+'''
+
+DECLARATION_UNPACK_FMT = '''\
 /**
  * Unpack message {database_message_name}.
  *
@@ -365,7 +368,7 @@ int {database_name}_{message_name}_unpack(
     size_t size);
 '''
 
-SIGNAL_DECLARATION_ENCODE_DECODE_FMT = '''\
+SIGNAL_DECLARATION_ENCODE_FMT = '''\
 /**
  * Encode given signal by applying scaling and offset.
  *
@@ -375,6 +378,9 @@ SIGNAL_DECLARATION_ENCODE_DECODE_FMT = '''\
  */
 {type_name} {database_name}_{message_name}_{signal_name}_encode({floating_point_type} value);
 
+'''
+
+SIGNAL_DECLARATION_DECODE_FMT = '''\
 /**
  * Decode given signal by applying scaling and offset.
  *
@@ -437,7 +443,7 @@ static inline {var_type} unpack_right_shift_u{length}(
 }}
 '''
 
-DEFINITION_FMT = '''\
+DEFINITION_PACK_FMT = '''\
 int {database_name}_{message_name}_pack(
     uint8_t *dst_p,
     const struct {database_name}_{message_name}_t *src_p,
@@ -454,6 +460,9 @@ int {database_name}_{message_name}_pack(
     return ({message_length});
 }}
 
+'''
+
+DEFINITION_UNPACK_FMT = '''\
 int {database_name}_{message_name}_unpack(
     struct {database_name}_{message_name}_t *dst_p,
     const uint8_t *src_p,
@@ -469,12 +478,15 @@ int {database_name}_{message_name}_unpack(
 }}
 '''
 
-SIGNAL_DEFINITION_ENCODE_DECODE_FMT = '''\
+SIGNAL_DEFINITION_ENCODE_FMT = '''\
 {type_name} {database_name}_{message_name}_{signal_name}_encode({floating_point_type} value)
 {{
     return ({type_name})({encode});
 }}
 
+'''
+
+SIGNAL_DEFINITION_DECODE_FMT = '''\
 {floating_point_type} {database_name}_{message_name}_{signal_name}_decode({type_name} value)
 {{
     return ({decode});
@@ -1341,11 +1353,16 @@ def _generate_structs(database_name, messages, bit_fields):
 
     return '\n'.join(structs)
 
+def _is_sender(message, node_name):
+    return node_name is None or node_name in message.senders
+
+def _is_receiver(message, node_name):
+    return node_name is None or node_name not in message.senders
 
 def _get_floating_point_type(use_float):
     return 'float' if use_float else 'double'
 
-def _generate_declarations(database_name, messages, floating_point_numbers, use_float):
+def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name):
     declarations = []
 
     for message in messages:
@@ -1355,12 +1372,20 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
             signal_declaration = ''
 
             if floating_point_numbers:
-                signal_declaration = SIGNAL_DECLARATION_ENCODE_DECODE_FMT.format(
-                    database_name=database_name,
-                    message_name=message.snake_name,
-                    signal_name=signal.snake_name,
-                    type_name=signal.type_name,
-                    floating_point_type=_get_floating_point_type(use_float))
+                if _is_sender(message, node_name):
+                    signal_declaration += SIGNAL_DECLARATION_ENCODE_FMT.format(
+                        database_name=database_name,
+                        message_name=message.snake_name,
+                        signal_name=signal.snake_name,
+                        type_name=signal.type_name,
+                        floating_point_type=_get_floating_point_type(use_float))
+                if _is_receiver(message, node_name):
+                    signal_declaration += SIGNAL_DECLARATION_DECODE_FMT.format(
+                        database_name=database_name,
+                        message_name=message.snake_name,
+                        signal_name=signal.snake_name,
+                        type_name=signal.type_name,
+                        floating_point_type=_get_floating_point_type(use_float))
 
             signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
@@ -1369,10 +1394,15 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                 type_name=signal.type_name)
 
             signal_declarations.append(signal_declaration)
-
-        declaration = DECLARATION_FMT.format(database_name=database_name,
-                                             database_message_name=message.name,
-                                             message_name=message.snake_name)
+        declaration = ""
+        if _is_sender(message, node_name):
+            declaration += DECLARATION_PACK_FMT.format(database_name=database_name,
+                                                       database_message_name=message.name,
+                                                       message_name=message.snake_name)
+        if _is_receiver(message, node_name):
+            declaration += DECLARATION_UNPACK_FMT.format(database_name=database_name,
+                                                         database_message_name=message.name,
+                                                         message_name=message.snake_name)
 
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
@@ -1382,7 +1412,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
     return '\n'.join(declarations)
 
 
-def _generate_definitions(database_name, messages, floating_point_numbers, use_float):
+def _generate_definitions(database_name, messages, floating_point_numbers, use_float, node_name):
     definitions = []
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
@@ -1401,14 +1431,22 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
             signal_definition = ''
 
             if floating_point_numbers:
-                signal_definition = SIGNAL_DEFINITION_ENCODE_DECODE_FMT.format(
-                    database_name=database_name,
-                    message_name=message.snake_name,
-                    signal_name=signal.snake_name,
-                    type_name=signal.type_name,
-                    encode=encode,
-                    decode=decode,
-                    floating_point_type=_get_floating_point_type(use_float))
+                if _is_sender(message, node_name):
+                    signal_definition += SIGNAL_DEFINITION_ENCODE_FMT.format(
+                        database_name=database_name,
+                        message_name=message.snake_name,
+                        signal_name=signal.snake_name,
+                        type_name=signal.type_name,
+                        encode=encode,
+                        floating_point_type=_get_floating_point_type(use_float))
+                if _is_receiver(message, node_name):
+                    signal_definition += SIGNAL_DEFINITION_DECODE_FMT.format(
+                        database_name=database_name,
+                        message_name=message.snake_name,
+                        signal_name=signal.snake_name,
+                        type_name=signal.type_name,
+                        decode=decode,
+                        floating_point_type=_get_floating_point_type(use_float))
 
             signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
@@ -1435,16 +1473,23 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                 unpack_unused += '    (void)dst_p;\n'
                 unpack_unused += '    (void)src_p;\n\n'
 
-            definition = DEFINITION_FMT.format(database_name=database_name,
-                                               database_message_name=message.name,
-                                               message_name=message.snake_name,
-                                               message_length=message.length,
-                                               pack_unused=pack_unused,
-                                               unpack_unused=unpack_unused,
-                                               pack_variables=pack_variables,
-                                               pack_body=pack_body,
-                                               unpack_variables=unpack_variables,
-                                               unpack_body=unpack_body)
+            definition = ""
+            if _is_sender(message, node_name):
+                definition += DEFINITION_PACK_FMT.format(database_name=database_name,
+                                                         database_message_name=message.name,
+                                                         message_name=message.snake_name,
+                                                         message_length=message.length,
+                                                         pack_unused=pack_unused,
+                                                         pack_variables=pack_variables,
+                                                         pack_body=pack_body)
+            if _is_receiver(message, node_name):
+                definition += DEFINITION_UNPACK_FMT.format(database_name=database_name,
+                                                           database_message_name=message.name,
+                                                           message_name=message.snake_name,
+                                                           message_length=message.length,
+                                                           unpack_unused=unpack_unused,
+                                                           unpack_variables=unpack_variables,
+                                                           unpack_body=unpack_body)
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                      message_name=message.snake_name)
@@ -1528,7 +1573,8 @@ def generate(database,
              fuzzer_source_name,
              floating_point_numbers=True,
              bit_fields=False,
-             use_float=False):
+             use_float=False,
+             node_name=None):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1550,6 +1596,10 @@ def generate(database,
     
     Set `use_float` to ``True`` to prefer the `float` type instead
     of the `double` type for floating point numbers.
+
+    `node_name` specifies the node for which message packers will be generated.
+    For all other messages, unpackers will be generated. If `node_name` is not
+    provided, both packers and unpackers will be generated. 
 
     This function returns a tuple of the C header and source files as
     strings.
@@ -1573,11 +1623,13 @@ def generate(database,
     declarations = _generate_declarations(database_name,
                                           messages,
                                           floating_point_numbers,
-                                          use_float)
+                                          use_float,
+                                          node_name)
     definitions, helper_kinds = _generate_definitions(database_name,
                                                       messages,
                                                       floating_point_numbers,
-                                                      use_float)
+                                                      use_float,
+                                                      node_name)
     helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(version=__version__,

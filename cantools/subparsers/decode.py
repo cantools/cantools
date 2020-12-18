@@ -9,7 +9,7 @@ from .utils import format_message_by_frame_id
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^\s*\S+\s+([0-9A-F]+)\s*\[\d+\]\s*([0-9A-F ]*)$')
+RE_CANDUMP = re.compile(r'^\s*(?:\(.*?\))?\s*\S+\s+([0-9A-F]+)\s*\[\d+\]\s*([0-9A-F ]*)$')
 # Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
 RE_CANDUMP_LOG = re.compile(r'^\(\d+\.\d+\)\s+\S+\s+([\dA-F]+)#([\dA-F]*)$')
 

@@ -88,6 +88,90 @@ IO_DEBUG(
                     actual_output = stdout.getvalue()
                     self.assertEqual(actual_output, expected_output)
 
+    def test_decode_timestamp_absolute(self):
+        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        input_data = """\
+ (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
+ (2020-12-19 12:04:48.597222)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF
+ (2020-12-19 12:04:56.805087)  vcan0  1F4   [4]  01 02 03 04
+ (2020-12-19 12:04:59.085517)  vcan0  1F3   [3]  01 02 03
+"""
+
+        expected_output = """\
+ (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 ::
+SENSOR_SONARS(
+    SENSOR_SONARS_mux: 0,
+    SENSOR_SONARS_err_count: 15,
+    SENSOR_SONARS_left: 0.0,
+    SENSOR_SONARS_middle: 0.0,
+    SENSOR_SONARS_right: 0.0,
+    SENSOR_SONARS_rear: 0.0
+)
+ (2020-12-19 12:04:48.597222)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF ::
+DRIVER_HEARTBEAT(
+    DRIVER_HEARTBEAT_cmd: 240
+)
+ (2020-12-19 12:04:56.805087)  vcan0  1F4   [4]  01 02 03 04 ::
+IO_DEBUG(
+    IO_DEBUG_test_unsigned: 1,
+    IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two',
+    IO_DEBUG_test_signed: 3,
+    IO_DEBUG_test_float: 2.0
+)
+ (2020-12-19 12:04:59.085517)  vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdin', StringIO(input_data)):
+            with patch('sys.stdout', stdout):
+                with patch('sys.argv', argv):
+                    cantools._main()
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+    def test_decode_timestamp_zero(self):
+        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        input_data = """\
+ (000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
+ (002.047817)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF
+ (012.831664)  vcan0  1F4   [4]  01 02 03 04
+ (015.679614)  vcan0  1F3   [3]  01 02 03
+"""
+
+        expected_output = """\
+ (000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 ::
+SENSOR_SONARS(
+    SENSOR_SONARS_mux: 0,
+    SENSOR_SONARS_err_count: 15,
+    SENSOR_SONARS_left: 0.0,
+    SENSOR_SONARS_middle: 0.0,
+    SENSOR_SONARS_right: 0.0,
+    SENSOR_SONARS_rear: 0.0
+)
+ (002.047817)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF ::
+DRIVER_HEARTBEAT(
+    DRIVER_HEARTBEAT_cmd: 240
+)
+ (012.831664)  vcan0  1F4   [4]  01 02 03 04 ::
+IO_DEBUG(
+    IO_DEBUG_test_unsigned: 1,
+    IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two',
+    IO_DEBUG_test_signed: 3,
+    IO_DEBUG_test_float: 2.0
+)
+ (015.679614)  vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdin', StringIO(input_data)):
+            with patch('sys.stdout', stdout):
+                with patch('sys.argv', argv):
+                    cantools._main()
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
     def test_decode_can_fd(self):
         argv = ['cantools', 'decode', 'tests/files/dbc/foobar.dbc']
         input_data = """\

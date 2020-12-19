@@ -3,7 +3,7 @@ name: Python package
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -34,3 +34,32 @@ jobs:
         CC=clang-8 make test-c-src
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
+
+  release:
+    needs: [test]
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      if: startsWith(github.ref, 'refs/tags')
+      uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      if: startsWith(github.ref, 'refs/tags')
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+    - name: Install pypa/build
+      if: startsWith(github.ref, 'refs/tags')
+      run: |
+        python -m pip install build --user
+    - name: Build a binary wheel and a source tarball
+      if: startsWith(github.ref, 'refs/tags')
+      run: |
+        git clean -dfx
+        python -m build --sdist --wheel --outdir dist/ .
+    - name: Publish distribution 📦 to PyPI
+      if: startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        skip_existing: true
+        password: ${{ secrets.pypi_password }}

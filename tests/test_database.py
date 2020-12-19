@@ -4566,7 +4566,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         bar = loader._follow_arxml_reference(loader._root, "/CanFrame/Message1", "CAN-FRAME")
         self.assertEqual(foo, bar)
 
-        # test non-unique location while assuming that it is unque
+        # test non-unique location while assuming that it is unique
         with self.assertRaises(ValueError) as cm:
             no_base_elem = loader._get_unique_arxml_child(loader._root, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "['AR-PACKAGES', '*AR-PACKAGE'] does not resolve into a unique node")

@@ -1259,6 +1259,7 @@ BATTERY_VT(
             'motohawk',
             'padding_bit_order',
             'vehicle',
+            'open_actuator',
             'floating_point',
             'floating_point_use_float',
             'no_signals',
@@ -1440,10 +1441,12 @@ BATTERY_VT(
 
     def test_generate_c_source_sender_node(self):
         databases = [
-            'motohawk'
+            'motohawk',
+            'open_actuator'
         ]
         nodes = [
-          'PCM1'
+          'PCM1',
+          'Actuator'
         ]
 
         for database, node in zip(databases, nodes):

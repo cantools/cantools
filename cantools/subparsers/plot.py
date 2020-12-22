@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 from .. import database
 
 #TODO: implement --show-* arguments
-#TODO: use timestamps if existing
 #TODO: allow output of decode as input
 #TODO: optionally write result to output file
 #TODO: customizable line formats

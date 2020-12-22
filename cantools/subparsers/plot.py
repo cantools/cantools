@@ -41,6 +41,10 @@ class TimestampParser:
 
     def parse_timestamp(self, timestamp, linenumber):
         if self.use_timestamp is None:
+            if timestamp is None:
+                self.use_timestamp = False
+                return linenumber
+
             try:
                 out = self.parse_iso_timestamp(timestamp)
                 self.use_timestamp = True
@@ -57,6 +61,8 @@ class TimestampParser:
                 return out
             except ValueError:
                 pass
+
+            self.use_timestamp = False
 
         if self.use_timestamp:
             return self._parse_timestamp(timestamp)

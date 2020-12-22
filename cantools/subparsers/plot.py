@@ -127,7 +127,7 @@ class Plotter:
         self.show_invalid_syntax = args.show_invalid_syntax
         self.show_unknown_frames = args.show_unknown_frames
         self.show_invalid_data = args.show_invalid_data
-        self.signals = Signals(args.signals)
+        self.signals = Signals(args.signals, args.case_sensitive)
 
         self.x_invalid_syntax = []
         self.x_unknown_frames = []
@@ -172,10 +172,11 @@ class Signals:
     WILDCARD_MANY = re.escape('*')
     WILDCARD_ONE  = re.escape('?')
 
-    def __init__(self, signals):
+    def __init__(self, signals, case_sensitive):
         self.args = signals
         self.signals = []
         self.values = {}
+        self.re_flags = 0 if case_sensitive else re.I
 
         if signals:
             for sg in signals:
@@ -190,7 +191,7 @@ class Signals:
         signal = signal.replace(self.WILDCARD_MANY, '.*')
         signal = signal.replace(self.WILDCARD_ONE, '.')
         signal += '$'
-        reo = re.compile(signal)
+        reo = re.compile(signal, self.re_flags)
         self.signals.append(reo)
 
     def add_value(self, signal, x, y):
@@ -248,6 +249,10 @@ def add_subparser(subparsers):
         help=('Only compare selected frame id bits to find the message in the '
               'database. By default the candump and database frame ids must '
               'be equal for a match.'))
+    decode_parser.add_argument(
+        '-I', '--case-sensitive',
+        action='store_true',
+        help='Match the signal names case sensitive.')
     decode_parser.add_argument(
         '--show-invalid-syntax',
         action='store_true',

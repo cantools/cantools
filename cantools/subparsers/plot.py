@@ -135,8 +135,7 @@ def _do_decode(args):
         elif RE_DECODE.match(line):
             continue
         else:
-            plotter.failed_to_parse_line(line_number)
-            print("failed to parse line: %r" % line)
+            plotter.failed_to_parse_line(line_number, line)
 
         line_number += 1
 
@@ -151,6 +150,9 @@ class Plotter:
         self.show_invalid_syntax = args.show_invalid_syntax
         self.show_unknown_frames = args.show_unknown_frames
         self.show_invalid_data = args.show_invalid_data
+        self.ignore_invalid_syntax = args.ignore_invalid_syntax
+        self.ignore_unknown_frames = args.ignore_unknown_frames
+        self.ignore_invalid_data = args.ignore_invalid_data
         self.signals = Signals(args.signals, args.case_sensitive, args.break_time)
 
         self.x_invalid_syntax = []
@@ -163,7 +165,8 @@ class Plotter:
         except KeyError:
             if self.show_unknown_frames:
                 self.x_unknown_frames.append(timestamp)
-            print('Unknown frame id {0} (0x{0:x})'.format(frame_id))
+            if not self.ignore_unknown_frames:
+                print('Unknown frame id {0} (0x{0:x})'.format(frame_id))
             return
 
         try:
@@ -171,7 +174,8 @@ class Plotter:
         except Exception as e:
             if self.show_invalid_data:
                 self.x_invalid_data.append(timestamp)
-            print('Failed to parse data of frame id {0} (0x{0:x}): {1}'.format(frame_id, e))
+            if not self.ignore_invalid_data:
+                print('Failed to parse data of frame id {0} (0x{0:x}): {1}'.format(frame_id, e))
             return
 
         for signal in decoded_signals:
@@ -180,9 +184,11 @@ class Plotter:
             signal = message.name + '.' + signal
             self.signals.add_value(signal, x, y)
 
-    def failed_to_parse_line(self, timestamp):
+    def failed_to_parse_line(self, timestamp, line):
         if self.show_invalid_syntax:
             self.x_invalid_syntax.append(timestamp)
+        if not self.ignore_invalid_syntax:
+            print("failed to parse line: %r" % line)
 
     def plot(self, xlabel):
         self.signals.plot()
@@ -305,6 +311,7 @@ def add_subparser(subparsers):
               'the line in the plot will be interrupted. The value is given in seconds '
               '(if timestamps are used) or input lines (if line numbers are used). '
               '-1 means infinite. '))
+
     decode_parser.add_argument(
         '--show-invalid-syntax',
         action='store_true',
@@ -317,6 +324,20 @@ def add_subparser(subparsers):
         '--show-invalid-data',
         action='store_true',
         help='Show a marker for messages with data which could not be parsed.')
+
+    decode_parser.add_argument(
+        '--ignore-invalid-syntax',
+        action='store_true',
+        help='Don\'t print an error message for lines which could not be parsed.')
+    decode_parser.add_argument(
+        '--ignore-unknown-frames',
+        action='store_true',
+        help='Don\'t print an error message for messages which are not contained in the database file.')
+    decode_parser.add_argument(
+        '--ignore-invalid-data',
+        action='store_true',
+        help='Don\'t print an error message for messages with data which could not be parsed.')
+
     decode_parser.add_argument(
         'database',
         help='Database file.')

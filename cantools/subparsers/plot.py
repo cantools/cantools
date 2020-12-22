@@ -2,6 +2,7 @@ import sys
 import re
 import binascii
 import struct
+import datetime
 from argparse_addons import Integer
 from matplotlib import pyplot as plt
 
@@ -15,22 +16,59 @@ from .. import database
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^\s*(?:\(.*?\))?\s*\S+\s+([0-9A-F]+)\s*\[\d+\]\s*([0-9A-F ]*)$')
+RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)$')
 # Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
-RE_CANDUMP_LOG = re.compile(r'^\(\d+\.\d+\)\s+\S+\s+([\dA-F]+)#([\dA-F]*)$')
+RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?P<data>[\dA-F]*)$')
 
 
 def _mo_unpack(mo):
-    frame_id = mo.group(1)
+    timestamp = mo.group('time')
+    frame_id = mo.group('frameid')
     frame_id = '0' * (8 - len(frame_id)) + frame_id
     frame_id = binascii.unhexlify(frame_id)
     frame_id = struct.unpack('>I', frame_id)[0]
-    data = mo.group(2)
+    data = mo.group('data')
     data = data.replace(' ', '')
     data = binascii.unhexlify(data)
 
-    return frame_id, data
+    return timestamp, frame_id, data
 
+class TimestampParser:
+
+    def __init__(self):
+        self.use_timestamp = None
+        self._parse_timestamp = None
+
+    def parse_timestamp(self, timestamp, linenumber):
+        if self.use_timestamp is None:
+            try:
+                out = self.parse_iso_timestamp(timestamp)
+                self.use_timestamp = True
+                self._parse_timestamp = self.parse_iso_timestamp
+                return out
+            except ValueError:
+                pass
+
+            try:
+                out = self.parse_seconds(timestamp)
+                self.use_timestamp = True
+                self._parse_timestamp = self.parse_seconds
+                return out
+            except ValueError:
+                pass
+
+        if self.use_timestamp:
+            return self._parse_timestamp(timestamp)
+        else:
+            return linenumber
+
+    @staticmethod
+    def parse_iso_timestamp(timestamp):
+        return datetime.datetime.fromisoformat(timestamp)
+
+    @staticmethod
+    def parse_seconds(timestamp):
+        return float(timestamp)
 
 def _do_decode(args):
     dbase = database.load_file(args.database,
@@ -38,6 +76,10 @@ def _do_decode(args):
                                frame_id_mask=args.frame_id_mask,
                                strict=not args.no_strict)
     re_format = None
+    timestamp_parser = TimestampParser()
+    if args.show_invalid_syntax:
+        # we cannot use a timestamp if we have failed to parse the line
+        timestamp_parser.use_timestamp = False
 
     plotter = Plotter(dbase, args)
 
@@ -67,8 +109,9 @@ def _do_decode(args):
             mo = re_format.match(line)
 
         if mo:
-            frame_id, data = _mo_unpack(mo)
-            plotter.add_msg(line_number, frame_id, data)
+            timestamp, frame_id, data = _mo_unpack(mo)
+            timestamp = timestamp_parser.parse_timestamp(timestamp, line_number)
+            plotter.add_msg(timestamp, frame_id, data)
         else:
             plotter.failed_to_parse_line(line_number)
             print("failed to parse line: %r" % line)

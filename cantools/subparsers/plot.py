@@ -36,6 +36,7 @@ class TimestampParser:
 
     def __init__(self):
         self.use_timestamp = None
+        self.unit = None
         self._parse_timestamp = None
 
     def parse_timestamp(self, timestamp, linenumber):
@@ -51,6 +52,7 @@ class TimestampParser:
             try:
                 out = self.parse_seconds(timestamp)
                 self.use_timestamp = True
+                self.unit = "s"
                 self._parse_timestamp = self.parse_seconds
                 return out
             except ValueError:
@@ -68,6 +70,17 @@ class TimestampParser:
     @staticmethod
     def parse_seconds(timestamp):
         return float(timestamp)
+
+    def get_label(self):
+        if self.use_timestamp:
+            label = "time"
+        else:
+            label = "line number"
+
+        if self.unit:
+            label += " / " + self.unit
+
+        return label
 
 def _do_decode(args):
     dbase = database.load_file(args.database,
@@ -115,7 +128,7 @@ def _do_decode(args):
             plotter.failed_to_parse_line(line_number)
             print("failed to parse line: %r" % line)
 
-    plotter.plot()
+    plotter.plot(timestamp_parser.get_label())
 
 
 class Plotter:
@@ -159,9 +172,10 @@ class Plotter:
         if self.show_invalid_syntax:
             self.x_invalid_syntax.append(timestamp)
 
-    def plot(self):
+    def plot(self, xlabel):
         self.signals.plot()
         plt.figlegend()
+        plt.xlabel(xlabel)
         plt.show()
 
 class Signals:

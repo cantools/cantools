@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 from .. import database
 
 #TODO: implement --show-* arguments
-#TODO: optionally write result to output file
 #TODO: customizable line formats
 
 
@@ -153,6 +152,7 @@ class Plotter:
         self.ignore_invalid_syntax = args.ignore_invalid_syntax
         self.ignore_unknown_frames = args.ignore_unknown_frames
         self.ignore_invalid_data = args.ignore_invalid_data
+        self.output_filename = args.output_file
         self.signals = Signals(args.signals, args.case_sensitive, args.break_time)
 
         self.x_invalid_syntax = []
@@ -194,7 +194,11 @@ class Plotter:
         self.signals.plot()
         plt.figlegend()
         plt.xlabel(xlabel)
-        plt.show()
+        if self.output_filename:
+            plt.savefig(self.output_filename)
+            print("result written to %s" % self.output_filename)
+        else:
+            plt.show()
 
 class Signals:
 
@@ -337,6 +341,10 @@ def add_subparser(subparsers):
         '--ignore-invalid-data',
         action='store_true',
         help='Don\'t print an error message for messages with data which could not be parsed.')
+
+    decode_parser.add_argument(
+        '-o', '--output-file',
+        help='A file to write the plot to instead of displaying it in a window.')
 
     decode_parser.add_argument(
         'database',

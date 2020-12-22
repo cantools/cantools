@@ -9,13 +9,14 @@ from matplotlib import pyplot as plt
 from .. import database
 
 #TODO: implement --show-* arguments
-#TODO: allow output of decode as input
 #TODO: optionally write result to output file
 #TODO: customizable line formats
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)$')
+RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)(?:\s*::.*)?$')
+# Matches 'cantools decode' output, i.e. ")" or "   voltage: 0 V,".
+RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s+[0-9.+-]+(\s+.*)?,?|\)')
 # Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
 RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?P<data>[\dA-F]*)$')
 
@@ -101,16 +102,17 @@ def _do_decode(args):
 
     plotter = Plotter(dbase, args)
 
-    line_number = 0
+    line_number = 1
     while True:
         line = sys.stdin.readline()
-        line_number += 1
 
         # Break at EOF.
         if not line:
             break
 
         line = line.strip('\r\n')
+        if not line:
+            continue
 
         # Auto-detect on first valid line.
         if re_format is None:
@@ -130,9 +132,13 @@ def _do_decode(args):
             timestamp, frame_id, data = _mo_unpack(mo)
             timestamp = timestamp_parser.parse_timestamp(timestamp, line_number)
             plotter.add_msg(timestamp, frame_id, data)
+        elif RE_DECODE.match(line):
+            continue
         else:
             plotter.failed_to_parse_line(line_number)
             print("failed to parse line: %r" % line)
+
+        line_number += 1
 
     plotter.plot(timestamp_parser.get_label())
 

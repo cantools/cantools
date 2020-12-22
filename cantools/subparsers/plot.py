@@ -126,7 +126,7 @@ class Plotter:
         self.show_invalid_syntax = args.show_invalid_syntax
         self.show_unknown_frames = args.show_unknown_frames
         self.show_invalid_data = args.show_invalid_data
-        self.signals = Signals(args.signals, args.case_sensitive)
+        self.signals = Signals(args.signals, args.case_sensitive, args.break_time)
 
         self.x_invalid_syntax = []
         self.x_unknown_frames = []
@@ -171,17 +171,29 @@ class Signals:
     WILDCARD_MANY = re.escape('*')
     WILDCARD_ONE  = re.escape('?')
 
-    def __init__(self, signals, case_sensitive):
+    def __init__(self, signals, case_sensitive, break_time):
         self.args = signals
         self.signals = []
         self.values = {}
         self.re_flags = 0 if case_sensitive else re.I
+        self.break_time = break_time
+        self.break_time_uninit = True
 
         if signals:
             for sg in signals:
                 self.add_signal(sg)
         else:
             self.add_signal('*')
+
+    def init_break_time(self, datatype):
+        if self.break_time <= 0:
+            self.break_time = None
+        elif datatype == datetime.datetime:
+            self.half_break_time = datetime.timedelta(seconds=self.break_time/2)
+            self.break_time = datetime.timedelta(seconds=self.break_time)
+        else:
+            self.half_break_time = self.break_time / 2
+        self.break_time_uninit = False
 
     def add_signal(self, signal):
         signal = re.escape(signal)
@@ -202,6 +214,13 @@ class Signals:
             self.values[signal] = graph
         else:
             graph = self.values[signal]
+            last_x = graph.x[-1]
+            if self.break_time_uninit:
+                self.init_break_time(type(x))
+            if self.break_time and last_x + self.break_time < x:
+                x_break = last_x + self.half_break_time
+                graph.x.append(x_break)
+                graph.y.append(None)
         graph.x.append(x)
         graph.y.append(y)
 
@@ -252,6 +271,14 @@ def add_subparser(subparsers):
         '-I', '--case-sensitive',
         action='store_true',
         help='Match the signal names case sensitive.')
+    decode_parser.add_argument(
+        '-t', '--break-time',
+        default=100,
+        type=float,
+        help=('If the time distance between two consecutive signals is longer than this value '
+              'the line in the plot will be interrupted. The value is given in seconds '
+              '(if timestamps are used) or input lines (if line numbers are used). '
+              '-1 means infinite. '))
     decode_parser.add_argument(
         '--show-invalid-syntax',
         action='store_true',

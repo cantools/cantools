@@ -385,6 +385,7 @@ class Signals:
                     splot.set_xlabel(xlabel)
                 splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes)
 
+            plotted = False
             for signal_name, graph in self.values.items():
                 if not sgo.match(signal_name):
                     continue
@@ -397,6 +398,10 @@ class Signals:
                 x = graph.x
                 y = graph.y
                 sgo.plt_func(x, y, sgo.fmt, label=signal_name)
+                plotted = True
+
+            if not plotted:
+                print("WARNING: signal %r with format %r was not plotted." % (sgo.reo.pattern, sgo.fmt))
 
         splot.legend()
         splot.set_xlabel(xlabel)

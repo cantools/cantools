@@ -153,6 +153,8 @@ def _do_decode(args):
     if args.show_invalid_syntax:
         # we cannot use a timestamp if we have failed to parse the line
         timestamp_parser.use_timestamp = False
+    if args.line_numbers:
+        timestamp_parser.use_timestamp = False
 
     plotter = Plotter(dbase, args)
 
@@ -489,6 +491,10 @@ def add_subparser(subparsers):
         '-I', '--case-sensitive',
         action='store_true',
         help='Match the signal names case sensitive.')
+    decode_parser.add_argument(
+        '-l', '--line-numbers',
+        action='store_true',
+        help='Use line numbers instead of time stamps on the horizontal axis (useful with `candump -td`).')
     decode_parser.add_argument(
         '-t', '--break-time',
         default=100,

@@ -1,3 +1,46 @@
+
+'''
+Decode "candump" CAN frames or the output of "cantools decode"
+read from standard input and plot them using matplotlib.
+You can select which signals to plot by specifying them on the command line.
+Each signal is one argument and has the pattern "[bo.]sg[:fmt]"
+where bo is the name of the message, sg is the name of the signal
+and fmt is the format of the graph.
+The wildcards * (any number of any character)
+and ? (exactly one arbitrary character)
+can be used inside of sg and bo.
+If bo is omitted it defaults to *.
+
+fmt is passed to matplotlib and can be used to specify
+the line style, markers and color.
+For example the following values can be combined:
+Line style:
+    '-'  solid line style,
+    '--' dashed line style,
+    '-.' dash-dot line style and
+    ':'  dotted line style.
+Markers:
+    '.' point marker,
+    ',' pixel marker,
+    'o' circle marker,
+    's' square marker,
+    'D' diamond marker,
+    'x' x marker
+    and many more.
+Colors:
+    'b' blue,
+    'g' green,
+    'r' red,
+    'c' cyan,
+    'm' magenta,
+    'y' yellow,
+    'k' black and
+    'w' white.
+https://matplotlib.org/2.1.2/api/_as_gen/matplotlib.pyplot.plot.html.
+
+If the first character of fmt is a '|' stem is used instead of plot.
+'''
+
 import sys
 import re
 import binascii
@@ -410,8 +453,7 @@ def add_subparser(subparsers):
     '''
     decode_parser = subparsers.add_parser(
         'plot',
-        description=('Decode "candump" CAN frames or the output of cantools decode '
-                     'read from standard input and plot them using matplotlib.'))
+        description=__doc__)
     decode_parser.add_argument(
         '-c', '--no-decode-choices',
         action='store_true',

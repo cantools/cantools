@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 from .. import database
 
 #TODO: implement --show-* arguments
-#TODO: customizable line formats
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -216,9 +215,7 @@ class Plotter:
     # ------- at end -------
 
     def plot(self, xlabel):
-        self.signals.plot()
-        plt.figlegend()
-        plt.xlabel(xlabel)
+        self.signals.plot(xlabel)
         if self.output_filename:
             plt.savefig(self.output_filename)
             print("result written to %s" % self.output_filename)
@@ -234,6 +231,13 @@ class Signals:
     Plots the values using matplotlib.pyplot.
     '''
 
+    # before re.escape
+    SEP_SUBPLOT = '-'
+
+    SEP_FMT = ':'
+    FMT_STEM = '|'
+
+    # after re.escape
     SEP_SG = re.escape('.')
 
     WILDCARD_MANY = re.escape('*')
@@ -248,6 +252,7 @@ class Signals:
         self.re_flags = 0 if case_sensitive else re.I
         self.break_time = break_time
         self.break_time_uninit = True
+        self.subplot = 1
 
         if signals:
             for sg in signals:
@@ -266,6 +271,21 @@ class Signals:
         self.break_time_uninit = False
 
     def add_signal(self, signal):
+        if signal == self.SEP_SUBPLOT:
+            self.subplot += 1
+            return
+
+        if self.SEP_FMT in signal:
+            signal, fmt = signal.split(self.SEP_FMT, 1)
+            if fmt.startswith(self.FMT_STEM):
+                fmt = fmt[len(self.FMT_STEM):]
+                plt_func = plt.stem
+            else:
+                plt_func = plt.plot
+        else:
+            fmt = ''
+            plt_func = plt.plot
+
         signal = re.escape(signal)
         if self.SEP_SG not in signal:
             signal = self.WILDCARD_MANY + self.SEP_SG + signal
@@ -273,7 +293,9 @@ class Signals:
         signal = signal.replace(self.WILDCARD_ONE, '.')
         signal += '$'
         reo = re.compile(signal, self.re_flags)
-        self.signals.append(reo)
+
+        sgo = Signal(reo, self.subplot, plt_func, fmt)
+        self.signals.append(sgo)
 
     # ------- while reading data -------
 
@@ -304,24 +326,80 @@ class Signals:
 
     # ------- at end -------
 
-    def plot(self):
-        for sg in self.values:
-            x = self.values[sg].x
-            y = self.values[sg].y
-            plt.plot(x, y, label=sg)
+    def plot(self, xlabel):
+        splot = None
+        last_subplot = 0
+        for sgo in self.signals:
+            if sgo.subplot > last_subplot:
+                last_subplot = sgo.subplot
+                if splot is None:
+                    axes = None
+                else:
+                    axes = splot.axes
+                    splot.legend()
+                    splot.set_xlabel(xlabel)
+                splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes)
+
+            for signal_name, graph in self.values.items():
+                if sgo.subplot in graph.plotted_on:
+                    continue
+                if not sgo.match(signal_name):
+                    continue
+                graph.plotted_on.add(sgo.subplot)
+
+                x = graph.x
+                y = graph.y
+                sgo.plt_func(x, y, sgo.fmt, label=signal_name)
+
+        splot.legend()
+        splot.set_xlabel(xlabel)
+
+
+class Signal:
+
+    '''
+    Stores meta information about signals to be plotted:
+    - a regex matching all signals it refers to
+    - the format how it should be plotted
+    - the subplot in which to display the signal
+
+    It does *not* store the values to be plotted.
+    They are stored in Graph.
+    Signal and Graph have a one-to-many-relationship.
+    '''
+
+    # ------- initialization -------
+
+    def __init__(self, reo, subplot, plt_func, fmt):
+        self.reo = reo
+        self.subplot = subplot
+        self.plt_func = plt_func
+        self.fmt = fmt
+
+    # ------- while reading data -------
+
+    def match(self, signal):
+        return self.reo.match(signal)
 
 class Graph:
 
     '''
     A container for the values to be plotted.
     The corrsponding signal names are the keys in Signals.values.
+    The format how to plot this data is stored in Signals.signals (a list of Signal objects).
+
+    plotted_on stores on which subplots this graph has been plotted already
+    to avoid plotting the same graph twice on the same subplot in case the user
+    gives two regex matching the same signal, one more specific with a special format
+    and one more generic with another format.
     '''
 
-    __slots__ = ('x', 'y')
+    __slots__ = ('x', 'y', 'plotted_on')
 
     def __init__(self):
         self.x = []
         self.y = []
+        self.plotted_on = set()
 
 
 def add_subparser(subparsers):

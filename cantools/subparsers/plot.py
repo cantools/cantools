@@ -21,6 +21,7 @@ RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F
 
 
 def _mo_unpack(mo):
+    '''extract the data from a re match object'''
     timestamp = mo.group('time')
     frame_id = mo.group('frameid')
     frame_id = '0' * (8 - len(frame_id)) + frame_id
@@ -33,6 +34,13 @@ def _mo_unpack(mo):
     return timestamp, frame_id, data
 
 class TimestampParser:
+
+    '''
+    Parses the values for the horizontal axis
+    and generates the corresponding axis label.
+    Preferably timestamps are used but if none
+    are given it falls back to line numbers.
+    '''
 
     def __init__(self):
         self.use_timestamp = None
@@ -89,6 +97,11 @@ class TimestampParser:
         return label
 
 def _do_decode(args):
+    '''
+    The entry point of the program.
+    It iterates over all input lines, parses them
+    and passes the data to a Plotter object.
+    '''
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
@@ -143,6 +156,14 @@ def _do_decode(args):
 
 class Plotter:
 
+    '''
+    Decodes the data received from _do_decode further
+    and stores them in a Signals object.
+    Shows or exports the data plotted by Signals.
+    '''
+
+    # ------- initialization -------
+
     def __init__(self, dbase, args):
         self.dbase = dbase
         self.decode_choices = not args.no_decode_choices
@@ -158,6 +179,8 @@ class Plotter:
         self.x_invalid_syntax = []
         self.x_unknown_frames = []
         self.x_invalid_data = []
+
+    # ------- while reading data -------
 
     def add_msg(self, timestamp, frame_id, data):
         try:
@@ -190,6 +213,8 @@ class Plotter:
         if not self.ignore_invalid_syntax:
             print("failed to parse line: %r" % line)
 
+    # ------- at end -------
+
     def plot(self, xlabel):
         self.signals.plot()
         plt.figlegend()
@@ -202,10 +227,19 @@ class Plotter:
 
 class Signals:
 
+    '''
+    Parses the command line options which signals should be plotted
+    and saves the corresponding values in Graph objects.
+    Automatically inserts None values as specified by break_time.
+    Plots the values using matplotlib.pyplot.
+    '''
+
     SEP_SG = re.escape('.')
 
     WILDCARD_MANY = re.escape('*')
     WILDCARD_ONE  = re.escape('?')
+
+    # ------- initialization -------
 
     def __init__(self, signals, case_sensitive, break_time):
         self.args = signals
@@ -241,6 +275,8 @@ class Signals:
         reo = re.compile(signal, self.re_flags)
         self.signals.append(reo)
 
+    # ------- while reading data -------
+
     def add_value(self, signal, x, y):
         if not self.is_displayed_signal(signal):
             return
@@ -266,6 +302,8 @@ class Signals:
                 return True
         return False
 
+    # ------- at end -------
+
     def plot(self):
         for sg in self.values:
             x = self.values[sg].x
@@ -273,6 +311,11 @@ class Signals:
             plt.plot(x, y, label=sg)
 
 class Graph:
+
+    '''
+    A container for the values to be plotted.
+    The corrsponding signal names are the keys in Signals.values.
+    '''
 
     __slots__ = ('x', 'y')
 
@@ -282,6 +325,11 @@ class Graph:
 
 
 def add_subparser(subparsers):
+    '''
+    Is called from ../__init__.py.
+    It adds the options for this subprogram to the argparse parser.
+    It sets the entry point for this subprogram by setting a default values for func.
+    '''
     decode_parser = subparsers.add_parser(
         'plot',
         description=('Decode "candump" CAN frames or the output of cantools decode '

@@ -142,6 +142,15 @@ def _do_decode(args):
     It iterates over all input lines, parses them
     and passes the data to a Plotter object.
     '''
+    if args.show_errors:
+        args.show_invalid_syntax = True
+        args.show_unknown_frames = True
+        args.show_invalid_data = True
+    if args.quiet:
+        args.ignore_invalid_syntax = True
+        args.ignore_unknown_frames = True
+        args.ignore_invalid_data = True
+
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
@@ -536,6 +545,10 @@ def add_subparser(subparsers):
         '--show-invalid-data',
         action='store_true',
         help='Show a marker for messages with data which could not be parsed.')
+    decode_parser.add_argument(
+        '-s', '--show-errors',
+        action='store_true',
+        help='Show all error messages in the plot. This is an abbreviation for all --show-* options.')
 
     decode_parser.add_argument(
         '--ignore-invalid-syntax',
@@ -549,6 +562,10 @@ def add_subparser(subparsers):
         '--ignore-invalid-data',
         action='store_true',
         help='Don\'t print an error message for messages with data which could not be parsed.')
+    decode_parser.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help='Don\'t print any error messages. This is an abbreviation for all --ignore-* options.')
 
     decode_parser.add_argument(
         '-o', '--output-file',

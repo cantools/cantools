@@ -384,11 +384,13 @@ class Signals:
                 splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes)
 
             for signal_name, graph in self.values.items():
-                if sgo.subplot in graph.plotted_on:
-                    continue
                 if not sgo.match(signal_name):
                     continue
-                graph.plotted_on.add(sgo.subplot)
+                if graph.plotted_signal:
+                    if not self.is_replotting_desired(sgo, graph.plotted_signal):
+                        continue
+                else:
+                    graph.plotted_signal = sgo
 
                 x = graph.x
                 y = graph.y
@@ -396,6 +398,18 @@ class Signals:
 
         splot.legend()
         splot.set_xlabel(xlabel)
+
+    def is_replotting_desired(self, current_signal, previously_plotted_signal):
+        if current_signal.reo.pattern == previously_plotted_signal.reo.pattern:
+            # if the user bothers to type out the same regex twice
+            # it is probably intended to be plotted twice
+            return True
+        if '.' not in current_signal.reo.pattern:
+            # if the user bothers to type out a complete signal name without wildcards
+            # he/she probably means to plot this signal even if it has been plotted already
+            return True
+
+        return False
 
 
 class Signal:
@@ -431,18 +445,18 @@ class Graph:
     The corrsponding signal names are the keys in Signals.values.
     The format how to plot this data is stored in Signals.signals (a list of Signal objects).
 
-    plotted_on stores on which subplots this graph has been plotted already
-    to avoid plotting the same graph twice on the same subplot in case the user
-    gives two regex matching the same signal, one more specific with a special format
-    and one more generic with another format.
+    plotted_signal stores a Signal object with which this graph has been plotted already
+    to avoid undesired replotting of the same data in case the user gives two regex
+    matching the same signal, one more specific to match a certain signal with a special format
+    and one more generic matching the rest with another format.
     '''
 
-    __slots__ = ('x', 'y', 'plotted_on')
+    __slots__ = ('x', 'y', 'plotted_signal')
 
     def __init__(self):
         self.x = []
         self.y = []
-        self.plotted_on = set()
+        self.plotted_signal = None
 
 
 def add_subparser(subparsers):

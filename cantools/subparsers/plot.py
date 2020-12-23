@@ -51,8 +51,6 @@ from matplotlib import pyplot as plt
 
 from .. import database
 
-#TODO: implement --show-* arguments
-
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
 RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)(?:\s*::.*)?$')
@@ -260,7 +258,7 @@ class Plotter:
     # ------- at end -------
 
     def plot(self, xlabel):
-        self.signals.plot(xlabel)
+        self.signals.plot(xlabel, self.x_invalid_syntax, self.x_unknown_frames, self.x_invalid_data)
         if self.output_filename:
             plt.savefig(self.output_filename)
             print("result written to %s" % self.output_filename)
@@ -287,6 +285,11 @@ class Signals:
 
     WILDCARD_MANY = re.escape('*')
     WILDCARD_ONE  = re.escape('?')
+
+    COLOR_INVALID_SYNTAX = '#ff0000'
+    COLOR_UNKNOWN_FRAMES = '#ffab00'
+    COLOR_INVALID_DATA   = '#ff00ff'
+    ERROR_LINEWIDTH = 1
 
     # ------- initialization -------
 
@@ -371,7 +374,7 @@ class Signals:
 
     # ------- at end -------
 
-    def plot(self, xlabel):
+    def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
         splot = None
         last_subplot = 0
         for sgo in self.signals:
@@ -403,8 +406,20 @@ class Signals:
             if not plotted:
                 print("WARNING: signal %r with format %r was not plotted." % (sgo.reo.pattern, sgo.fmt))
 
+        self.plot_error(splot, x_invalid_syntax, 'invalid syntax', self.COLOR_INVALID_SYNTAX)
+        self.plot_error(splot, x_unknown_frames, 'unknown frames', self.COLOR_UNKNOWN_FRAMES)
+        self.plot_error(splot, x_invalid_data, 'invalid data', self.COLOR_INVALID_DATA)
+
         splot.legend()
         splot.set_xlabel(xlabel)
+
+    def plot_error(self, splot, xs, label, color):
+        if xs:
+            label += " (%s)" % len(xs)
+            xs = iter(xs)
+            splot.axvline(next(xs), color=color, linewidth=self.ERROR_LINEWIDTH, label=label)
+            for x in xs:
+                splot.axvline(x, color=color, linewidth=self.ERROR_LINEWIDTH)
 
     def is_replotting_desired(self, current_signal, previously_plotted_signal):
         if current_signal.reo.pattern == previously_plotted_signal.reo.pattern:

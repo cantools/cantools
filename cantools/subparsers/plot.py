@@ -536,7 +536,7 @@ def add_subparser(subparsers):
     decode_parser.add_argument(
         '--show-invalid-syntax',
         action='store_true',
-        help='Show a marker for lines which could not be parsed.')
+        help='Show a marker for lines which could not be parsed. This implies -l.')
     decode_parser.add_argument(
         '--show-unknown-frames',
         action='store_true',
@@ -548,7 +548,7 @@ def add_subparser(subparsers):
     decode_parser.add_argument(
         '-s', '--show-errors',
         action='store_true',
-        help='Show all error messages in the plot. This is an abbreviation for all --show-* options.')
+        help='Show all error messages in the plot. This is an abbreviation for all --show-* options. This implies -l.')
 
     decode_parser.add_argument(
         '--ignore-invalid-syntax',

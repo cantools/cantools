@@ -337,12 +337,12 @@ class Signals:
             signal, fmt = signal.split(self.SEP_FMT, 1)
             if fmt.startswith(self.FMT_STEM):
                 fmt = fmt[len(self.FMT_STEM):]
-                plt_func = plt.stem
+                plt_func = 'stem'
             else:
-                plt_func = plt.plot
+                plt_func = 'plot'
         else:
             fmt = ''
-            plt_func = plt.plot
+            plt_func = 'plot'
 
         signal = re.escape(signal)
         if self.SEP_SG not in signal:
@@ -410,7 +410,7 @@ class Signals:
 
                 x = graph.x
                 y = graph.y
-                sgo.plt_func(x, y, sgo.fmt, label=signal_name)
+                getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
                 plotted = True
 
             if not plotted:

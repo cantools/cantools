@@ -46,6 +46,7 @@ import re
 import binascii
 import struct
 import datetime
+import argparse
 from argparse_addons import Integer
 from matplotlib import pyplot as plt
 
@@ -498,7 +499,8 @@ def add_subparser(subparsers):
     '''
     decode_parser = subparsers.add_parser(
         'plot',
-        description=__doc__)
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     decode_parser.add_argument(
         '-c', '--no-decode-choices',
         action='store_true',

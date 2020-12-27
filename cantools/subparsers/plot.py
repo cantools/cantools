@@ -387,6 +387,7 @@ class Signals:
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
         splot = None
         last_subplot = 0
+        sorted_signal_names = sorted(self.values.keys())
         for sgo in self.signals:
             if sgo.subplot > last_subplot:
                 last_subplot = sgo.subplot
@@ -399,7 +400,8 @@ class Signals:
                 splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes)
 
             plotted = False
-            for signal_name, graph in self.values.items():
+            for signal_name in sorted_signal_names:
+                graph = self.values[signal_name]
                 if not sgo.match(signal_name):
                     continue
                 if graph.plotted_signal:

@@ -2,17 +2,8 @@
 
 import os
 import unittest
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-
+from unittest import mock
+from io import StringIO
 import cantools
 import matplotlib.pyplot
 

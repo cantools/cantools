@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import datetime
 import re
 import unittest
 from unittest import mock
 from io import StringIO
 import cantools
-import matplotlib.pyplot
 
+matplotlib_mock = mock.Mock()
+sys.modules['matplotlib'] = matplotlib_mock
+plt = matplotlib_mock.pyplot
 
 class CanToolsPlotTest(unittest.TestCase):
 
     DBC_FILE = os.path.join(os.path.split(__file__)[0], 'files/dbc/abs.dbc')
     REO_TIMESTAMP = re.compile('\(([^)]+)\)')
+
+    def setUp(self):
+        plt.reset_mock()
 
     def test_plot_tA(self):
         argv = ['cantools', 'plot', self.DBC_FILE]
@@ -48,10 +54,9 @@ class CanToolsPlotTest(unittest.TestCase):
         ]
 
         with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('matplotlib.pyplot') as plt:
-                with mock.patch('sys.argv', argv):
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     def test_plot_ta(self):
@@ -86,10 +91,9 @@ class CanToolsPlotTest(unittest.TestCase):
         ]
 
         with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('matplotlib.pyplot') as plt:
-                with mock.patch('sys.argv', argv):
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     def parse_time(self, log, parse):

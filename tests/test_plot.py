@@ -17,6 +17,7 @@ class CanToolsPlotTest(unittest.TestCase):
 
     DBC_FILE = os.path.join(os.path.split(__file__)[0], 'files/dbc/abs.dbc')
     REO_TIMESTAMP = re.compile('\(([^)]+)\)')
+    FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
     def setUp(self):
         plt.reset_mock()
@@ -39,7 +40,7 @@ class CanToolsPlotTest(unittest.TestCase):
  (2020-12-27 11:59:23.836636)  vcan0  00000343   [8]  A7 03 BC 03 AE 03 BC 03
 """
 
-        xs = self.parse_time(input_data, datetime.datetime.fromisoformat)
+        xs = self.parse_time(input_data, self.parse_absolute_time)
         ys_whlspeed_fl = [18.75, 18.359375, 17.828125, 17.578125, 17.171875, 16.5, 15.5625, 15.28125, 15.28125, 14.609375]
         ys_whlspeed_fr = [18.75, 18.921875, 18.0625, 17.359375, 16.9375, 16.5, 15.671875, 15.171875, 15.5, 14.9375]
         ys_whlspeed_rl = [18.75, 18.46875, 17.828125, 17.578125, 16.71875, 16.390625, 16.0, 15.5, 14.828125, 14.71875]
@@ -114,7 +115,7 @@ class CanToolsPlotTest(unittest.TestCase):
  (009.014779)  vcan0  00000343   [8]  CB 02 BC 02 B5 02 D2 02
 """
 
-        xs = self.parse_time(input_data, float)
+        xs = self.parse_time(input_data, self.parse_seconds)
         ys_whlspeed_fl = [19.078125, 17.640625, 16.640625, 15.9375, 15.46875, 13.96875, 13.578125, 12.359375, 12.0, 11.171875]
         ys_whlspeed_fr = [18.859375, 17.640625, 16.75, 16.5, 15.25, 14.078125, 12.921875, 12.921875, 11.78125, 10.9375]
         ys_whlspeed_rl = [18.421875, 17.859375, 16.640625, 16.5, 15.25, 14.1875, 13.25, 12.8125, 12.328125, 10.828125]
@@ -151,7 +152,7 @@ class CanToolsPlotTest(unittest.TestCase):
  (001.001847)  vcan0  00000343   [8]  90 00 97 00 97 00 89 00
 """
 
-        xs = self.parse_time(input_data, float)
+        xs = self.parse_time(input_data, self.parse_seconds)
         xs = list(range(1, len(xs)+1))
         ys_whlspeed_fl = [19.03125, 18.1875, 16.640625, 14.03125, 12.328125, 10.828125, 8.0625, 5.5625, 2.25]
         ys_whlspeed_fr = [19.140625, 18.1875, 16.078125, 14.359375, 12.21875, 10.71875, 7.828125, 5.671875, 2.359375]
@@ -194,8 +195,8 @@ class CanToolsPlotTest(unittest.TestCase):
  (2020-12-28 09:52:16.188405)  vcan0  0000024A   [8]  9B 05 9B 05 77 05 9B 05
 """
 
-        xs2  = self.parse_time(input_data, datetime.datetime.fromisoformat, 2, 1)
-        xs33 = self.parse_time(input_data, datetime.datetime.fromisoformat, 2, 0)
+        xs2  = self.parse_time(input_data, self.parse_absolute_time, 2, 1)
+        xs33 = self.parse_time(input_data, self.parse_absolute_time, 2, 0)
         whlspeed_fl_bremse2 = [19.78125, 21.140625, 21.890625, 21.921875, 22.421875]
         whlspeed_fl = [18.828125, 17.859375, 16.671875, 14.859375, 14.03125]
 
@@ -236,8 +237,8 @@ class CanToolsPlotTest(unittest.TestCase):
  (2020-12-28 09:52:16.188405)  vcan0  0000024A   [8]  9B 05 9B 05 77 05 9B 05
 """
 
-        xs2  = self.parse_time(input_data, datetime.datetime.fromisoformat, 2, 1)
-        xs33 = self.parse_time(input_data, datetime.datetime.fromisoformat, 2, 0)
+        xs2  = self.parse_time(input_data, self.parse_absolute_time, 2, 1)
+        xs33 = self.parse_time(input_data, self.parse_absolute_time, 2, 0)
         whlspeed_fl_bremse2 = [19.78125, 21.140625, 21.890625, 21.921875, 22.421875]
         whlspeed_fr_bremse2 = [19.890625, 20.6875, 21.4375, 22.03125, 22.421875]
         whlspeed_rl_bremse2 = [19.890625, 20.6875, 22.0, 22.359375, 21.859375]
@@ -302,6 +303,12 @@ class CanToolsPlotTest(unittest.TestCase):
                 out.append(parse(timestamp))
             ln_num += 1
         return out
+
+    def parse_absolute_time(self, timestamp):
+        return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
+
+    def parse_seconds(self, timestamp):
+        return float(timestamp)
 
 
 if __name__ == '__main__':

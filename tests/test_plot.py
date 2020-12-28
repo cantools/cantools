@@ -96,6 +96,83 @@ class CanToolsPlotTest(unittest.TestCase):
                 self.assertListEqual(plt.mock_calls, expected_calls)
 
 
+    def test_plot_tz(self):
+        argv = ['cantools', 'plot', self.DBC_FILE]
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  C5 04 B7 04 9B 04 C5 04
+ (001.001787)  vcan0  00000343   [8]  69 04 69 04 77 04 7E 04
+ (002.003592)  vcan0  00000343   [8]  29 04 30 04 29 04 22 04
+ (003.005400)  vcan0  00000343   [8]  FC 03 20 04 20 04 FC 03
+ (004.006942)  vcan0  00000343   [8]  DE 03 D0 03 D0 03 C9 03
+ (005.008400)  vcan0  00000343   [8]  7E 03 85 03 8C 03 77 03
+ (006.009926)  vcan0  00000343   [8]  65 03 3B 03 50 03 65 03
+ (007.011457)  vcan0  00000343   [8]  17 03 3B 03 34 03 10 03
+ (008.013215)  vcan0  00000343   [8]  00 03 F2 02 15 03 F9 02
+ (009.014779)  vcan0  00000343   [8]  CB 02 BC 02 B5 02 D2 02
+"""
+
+        xs = self.parse_time(input_data, float)
+        ys_whlspeed_fl = [19.078125, 17.640625, 16.640625, 15.9375, 15.46875, 13.96875, 13.578125, 12.359375, 12.0, 11.171875]
+        ys_whlspeed_fr = [18.859375, 17.640625, 16.75, 16.5, 15.25, 14.078125, 12.921875, 12.921875, 11.78125, 10.9375]
+        ys_whlspeed_rl = [18.421875, 17.859375, 16.640625, 16.5, 15.25, 14.1875, 13.25, 12.8125, 12.328125, 10.828125]
+        ys_whlspeed_rr = [19.078125, 17.96875, 16.53125, 15.9375, 15.140625, 13.859375, 13.578125, 12.25, 11.890625, 11.28125]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel('time / s'),
+            mock.call.show(),
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+
+
+    def test_plot_td(self):
+        argv = ['cantools', 'plot', '--line-numbers', self.DBC_FILE]
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  C2 04 C9 04 D0 04 C2 04
+ (001.001586)  vcan0  00000343   [8]  8C 04 8C 04 94 04 9B 04
+ (001.001788)  vcan0  00000343   [8]  29 04 05 04 30 04 14 04
+ (001.001798)  vcan0  00000343   [8]  82 03 97 03 89 03 9E 03
+ (001.001807)  vcan0  00000343   [8]  15 03 0E 03 2B 03 2B 03
+ (001.001802)  vcan0  00000343   [8]  B5 02 AE 02 A0 02 92 02
+ (001.001795)  vcan0  00000343   [8]  04 02 F5 01 12 02 F5 01
+ (001.001800)  vcan0  00000343   [8]  64 01 6B 01 6B 01 47 01
+ (001.001847)  vcan0  00000343   [8]  90 00 97 00 97 00 89 00
+"""
+
+        xs = self.parse_time(input_data, float)
+        xs = list(range(1, len(xs)+1))
+        ys_whlspeed_fl = [19.03125, 18.1875, 16.640625, 14.03125, 12.328125, 10.828125, 8.0625, 5.5625, 2.25]
+        ys_whlspeed_fr = [19.140625, 18.1875, 16.078125, 14.359375, 12.21875, 10.71875, 7.828125, 5.671875, 2.359375]
+        ys_whlspeed_rl = [19.25, 18.3125, 16.75, 14.140625, 12.671875, 10.5, 8.28125, 5.671875, 2.359375]
+        ys_whlspeed_rr = [19.03125, 18.421875, 16.3125, 14.46875, 12.671875, 10.28125, 7.828125, 5.109375, 2.140625]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel('line number'),
+            mock.call.show(),
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+
+
+
     def parse_time(self, log, parse):
         out = []
         for ln in log.splitlines():

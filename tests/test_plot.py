@@ -21,6 +21,9 @@ class CanToolsPlotTest(unittest.TestCase):
     def setUp(self):
         plt.reset_mock()
 
+
+    # ------- test different timestamp formats -------
+
     def test_plot_tA(self):
         argv = ['cantools', 'plot', self.DBC_FILE]
         input_data = """\
@@ -172,15 +175,90 @@ class CanToolsPlotTest(unittest.TestCase):
                 self.assertListEqual(plt.mock_calls, expected_calls)
 
 
+    # ------- test signal command line argument(s) -------
+    # stem, format
+    # --case-sensitive
 
-    def parse_time(self, log, parse):
+    def test_subplots(self):
+        argv = ['cantools', 'plot', self.DBC_FILE, 'BREMSE_33.*', '-', 'BREMSE_2.*']
+        input_data = """\
+ (2020-12-28 09:52:12.179240)  vcan0  00000343   [8]  B5 04 AE 04 A7 04 8B 04
+ (2020-12-28 09:52:12.179530)  vcan0  0000024A   [8]  F2 04 F9 04 F9 04 F2 04
+ (2020-12-28 09:52:13.181317)  vcan0  00000343   [8]  77 04 70 04 62 04 77 04
+ (2020-12-28 09:52:13.181980)  vcan0  0000024A   [8]  49 05 2C 05 2C 05 2C 05
+ (2020-12-28 09:52:14.183770)  vcan0  00000343   [8]  2B 04 39 04 2B 04 2B 04
+ (2020-12-28 09:52:14.184460)  vcan0  0000024A   [8]  79 05 5C 05 80 05 64 05
+ (2020-12-28 09:52:15.185272)  vcan0  00000343   [8]  B7 03 D4 03 CC 03 BE 03
+ (2020-12-28 09:52:15.185895)  vcan0  0000024A   [8]  7B 05 82 05 97 05 7B 05
+ (2020-12-28 09:52:16.187696)  vcan0  00000343   [8]  82 03 89 03 65 03 74 03
+ (2020-12-28 09:52:16.188405)  vcan0  0000024A   [8]  9B 05 9B 05 77 05 9B 05
+"""
+
+        xs2  = self.parse_time(input_data, datetime.datetime.fromisoformat, 2, 1)
+        xs33 = self.parse_time(input_data, datetime.datetime.fromisoformat, 2, 0)
+        whlspeed_fl_bremse2 = [19.78125, 21.140625, 21.890625, 21.921875, 22.421875]
+        whlspeed_fr_bremse2 = [19.890625, 20.6875, 21.4375, 22.03125, 22.421875]
+        whlspeed_rl_bremse2 = [19.890625, 20.6875, 22.0, 22.359375, 21.859375]
+        whlspeed_rr_bremse2 = [19.78125, 20.6875, 21.5625, 21.921875, 22.421875]
+        whlspeed_fl = [18.828125, 17.859375, 16.671875, 14.859375, 14.03125]
+        whlspeed_fr = [18.71875, 17.75, 16.890625, 15.3125, 14.140625]
+        whlspeed_rl = [18.609375, 17.53125, 16.671875, 15.1875, 13.578125]
+        whlspeed_rr = [18.171875, 17.859375, 16.671875, 14.96875, 13.8125]
+
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(2,1,1, sharex=None),
+            mock.call.subplot(2,1,2, sharex=subplots[0].axes),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs33, whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(xs33, whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(xs33, whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(xs33, whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+            [
+                mock.call.plot(xs2, whlspeed_fl_bremse2, '', label='BREMSE_2.whlspeed_FL_Bremse2'),
+                mock.call.plot(xs2, whlspeed_fr_bremse2, '', label='BREMSE_2.whlspeed_FR_Bremse2'),
+                mock.call.plot(xs2, whlspeed_rl_bremse2, '', label='BREMSE_2.whlspeed_RL_Bremse2'),
+                mock.call.plot(xs2, whlspeed_rr_bremse2, '', label='BREMSE_2.whlspeed_RR_Bremse2'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+                for i in range(len(expected_subplot_calls)):
+                    self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    # ------- test error handling --ignore+/--show* -------
+    # -q, -s
+
+    # ------- test other command line options -------
+    # --no-decode-choices
+    # --break-time
+    # --output-file
+
+    # ------- auxiliary functions -------
+
+    def parse_time(self, log, parse, mod=1, offset=0):
         out = []
+        ln_num = 0
         for ln in log.splitlines():
             if not ln:
                 continue
-            m = self.REO_TIMESTAMP.search(ln)
-            timestamp = m.group(1)
-            out.append(parse(timestamp))
+            if ln_num % mod == offset:
+                m = self.REO_TIMESTAMP.search(ln)
+                timestamp = m.group(1)
+                out.append(parse(timestamp))
+            ln_num += 1
         return out
 
 

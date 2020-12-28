@@ -83,6 +83,8 @@ class TimestampParser:
     are given it falls back to line numbers.
     '''
 
+    FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
+
     def __init__(self):
         self.use_timestamp = None
         self.unit = None
@@ -95,9 +97,9 @@ class TimestampParser:
                 return linenumber
 
             try:
-                out = self.parse_iso_timestamp(timestamp)
+                out = self.parse_absolute_timestamp(timestamp)
                 self.use_timestamp = True
-                self._parse_timestamp = self.parse_iso_timestamp
+                self._parse_timestamp = self.parse_absolute_timestamp
                 return out
             except ValueError:
                 pass
@@ -118,9 +120,8 @@ class TimestampParser:
         else:
             return linenumber
 
-    @staticmethod
-    def parse_iso_timestamp(timestamp):
-        return datetime.datetime.fromisoformat(timestamp)
+    def parse_absolute_timestamp(self, timestamp):
+        return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
 
     @staticmethod
     def parse_seconds(timestamp):

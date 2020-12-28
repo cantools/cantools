@@ -8,7 +8,7 @@ import cantools
 import matplotlib.pyplot
 
 
-class CanToolsCommandLineTest(unittest.TestCase):
+class CanToolsPlotTest(unittest.TestCase):
 
     DBC_FILE = os.path.join(os.path.split(__file__)[0], 'files/dbc/abs.dbc')
 

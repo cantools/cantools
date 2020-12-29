@@ -179,7 +179,6 @@ class CanToolsPlotTest(unittest.TestCase):
 
 
     # ------- test signal command line argument(s) -------
-    # --case-sensitive
 
     def test_wildcards_caseinsensitive(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '*fl*']
@@ -387,6 +386,43 @@ class CanToolsPlotTest(unittest.TestCase):
                 self.assertListEqual(plt.mock_calls, expected_calls)
                 for i in range(len(expected_subplot_calls)):
                     self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    def test_case_sensitive(self):
+        argv = ['cantools', 'plot', '--case-sensitive', self.DBC_FILE, '*fl*']
+        input_data = """\
+ (2020-12-29 11:18:10.989297)  vcan0  00000343   [8]  C4 04 A7 04 BC 04 A0 04
+ (2020-12-29 11:18:11.991153)  vcan0  00000343   [8]  95 04 95 04 87 04 72 04
+ (2020-12-29 11:18:12.993029)  vcan0  00000343   [8]  52 04 6E 04 75 04 52 04
+"""
+
+        expected_output = r"WARNING: signal '.*\\..*fl.*$' with format '' was not plotted." + "\n"
+
+        subplots = [mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        stdout = StringIO()
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
 
     # ------- test error handling --ignore+/--show* -------

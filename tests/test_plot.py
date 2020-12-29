@@ -16,6 +16,7 @@ plt = matplotlib_mock.pyplot
 class CanToolsPlotTest(unittest.TestCase):
 
     DBC_FILE = os.path.join(os.path.split(__file__)[0], 'files/dbc/abs.dbc')
+    DBC_FILE_CHOICES = os.path.join(os.path.split(__file__)[0], 'files/dbc/choices.dbc')
     REO_TIMESTAMP = re.compile('\(([^)]+)\)')
     FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
@@ -177,7 +178,7 @@ class CanToolsPlotTest(unittest.TestCase):
 
 
     # ------- test signal command line argument(s) -------
-    # stem, format
+    # format
     # --case-sensitive
 
     def test_wildcards_caseinsensitive(self):
@@ -280,6 +281,50 @@ class CanToolsPlotTest(unittest.TestCase):
                 self.assertListEqual(plt.mock_calls, expected_calls)
                 for i in range(len(expected_subplot_calls)):
                     self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    def test_choices_stem(self):
+        argv = ['cantools', 'plot', self.DBC_FILE_CHOICES, 'Foo:|']
+        input_data = """\
+ (2020-12-29 08:48:04.568726)  vcan0  00000000   [8]  01 00 00 00 00 00 00 00
+ (2020-12-29 08:48:08.733416)  vcan0  00000000   [8]  02 00 00 00 00 00 00 00
+ (2020-12-29 08:48:12.317636)  vcan0  00000000   [8]  FB 00 00 00 00 00 00 00
+ (2020-12-29 08:48:14.590522)  vcan0  00000000   [8]  05 00 00 00 00 00 00 00
+ (2020-12-29 08:48:18.555082)  vcan0  00000000   [8]  00 00 00 00 00 00 00 00
+ (2020-12-29 08:48:21.305794)  vcan0  00000000   [8]  02 00 00 00 00 00 00 00
+ (2020-12-29 08:48:22.807889)  vcan0  00000000   [8]  05 00 00 00 00 00 00 00
+ (2020-12-29 08:48:25.879604)  vcan0  00000000   [8]  00 00 00 00 00 00 00 00
+ (2020-12-29 08:48:30.484820)  vcan0  00000000   [8]  02 00 00 00 00 00 00 00
+ (2020-12-29 08:48:34.369165)  vcan0  00000000   [8]  06 00 00 00 00 00 00 00
+"""
+
+        db = cantools.db.load_file(self.DBC_FILE_CHOICES)
+        choices = db.get_message_by_name("Foo").get_signal_by_name("Foo").choices
+
+        xs  = self.parse_time(input_data, self.parse_absolute_time)
+        ys = [1, 2, -5, 5, 0, 2, 5, 0, 2, 6]
+        ys = [choices[y] for y in ys]
+
+        subplots = [mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.stem(xs, ys, '', label='Foo.Foo'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+                for i in range(len(expected_subplot_calls)):
+                    self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
 
     # ------- test error handling --ignore+/--show* -------
     # -q, -s

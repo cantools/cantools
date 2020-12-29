@@ -470,7 +470,7 @@ invalid syntax
 Failed to parse line: 'invalid syntax'
 Unknown frame id 268436042 (0x1000024a)
 Unknown frame id 268436042 (0x1000024a)
-Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse data of frame id 586 (0x24a): ...
 Failed to parse line: 'invalid syntax'
 '''
 
@@ -500,7 +500,7 @@ Failed to parse line: 'invalid syntax'
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -514,7 +514,7 @@ Failed to parse line: 'invalid syntax'
         expected_output = '''\
 Unknown frame id 268436042 (0x1000024a)
 Unknown frame id 268436042 (0x1000024a)
-Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse data of frame id 586 (0x24a): ...
 '''
 
         data = self.data_error_handling
@@ -543,7 +543,7 @@ Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits t
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -553,7 +553,7 @@ Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits t
         argv = ['cantools', 'plot', '--ignore-unknown-frames', self.DBC_FILE, '*33.*']
         expected_output = '''\
 Failed to parse line: 'invalid syntax'
-Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse data of frame id 586 (0x24a): ...
 Failed to parse line: 'invalid syntax'
 '''
 
@@ -583,7 +583,7 @@ Failed to parse line: 'invalid syntax'
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -624,7 +624,7 @@ Failed to parse line: 'invalid syntax'
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -676,7 +676,7 @@ Failed to parse line: 'invalid syntax'
 Failed to parse line: 'invalid syntax'
 Unknown frame id 268436042 (0x1000024a)
 Unknown frame id 268436042 (0x1000024a)
-Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse data of frame id 586 (0x24a): ...
 Failed to parse line: 'invalid syntax'
 '''
 
@@ -709,7 +709,7 @@ Failed to parse line: 'invalid syntax'
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -721,7 +721,7 @@ Failed to parse line: 'invalid syntax'
 Failed to parse line: 'invalid syntax'
 Unknown frame id 268436042 (0x1000024a)
 Unknown frame id 268436042 (0x1000024a)
-Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse data of frame id 586 (0x24a): ...
 Failed to parse line: 'invalid syntax'
 '''
 
@@ -756,7 +756,7 @@ Failed to parse line: 'invalid syntax'
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -768,7 +768,7 @@ Failed to parse line: 'invalid syntax'
 Failed to parse line: 'invalid syntax'
 Unknown frame id 268436042 (0x1000024a)
 Unknown frame id 268436042 (0x1000024a)
-Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse data of frame id 586 (0x24a): ...
 Failed to parse line: 'invalid syntax'
 '''
 
@@ -803,7 +803,7 @@ Failed to parse line: 'invalid syntax'
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -815,7 +815,7 @@ Failed to parse line: 'invalid syntax'
 Failed to parse line: 'invalid syntax'
 Unknown frame id 268436042 (0x1000024a)
 Unknown frame id 268436042 (0x1000024a)
-Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse data of frame id 586 (0x24a): ...
 Failed to parse line: 'invalid syntax'
 '''
 
@@ -856,7 +856,7 @@ Failed to parse line: 'invalid syntax'
                     cantools._main()
 
                     actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+                    self.assertLinesMatch(actual_output, expected_output)
 
                     self.assertListEqual(plt.mock_calls, expected_calls)
                     for i in range(len(expected_subplot_calls)):
@@ -888,6 +888,24 @@ Failed to parse line: 'invalid syntax'
 
     def parse_seconds(self, timestamp):
         return float(timestamp)
+
+
+    ELLIPSIS = "..."
+    LEN_ELLIPSIS = len(ELLIPSIS)
+    def assertLinesMatch(self, actual_output, expected_output):
+        """
+        Compares two strings line by line.
+        Differs from assertEqual in that it allows to abbreviate lines
+        in expected_output by letting them end on ELLIPSIS.
+        """
+        actual_output = actual_output.splitlines()
+        expected_output = expected_output.splitlines()
+        for ln_actual, ln_expected in zip(actual_output, expected_output):
+            if ln_expected.endswith(self.ELLIPSIS):
+                ln_expected = ln_expected[:-self.LEN_ELLIPSIS]
+                ln_actual = ln_actual[:len(ln_expected)]
+            self.assertEqual(ln_expected, ln_actual)
+        self.assertEqual(len(actual_output), len(expected_output))
 
 
 if __name__ == '__main__':

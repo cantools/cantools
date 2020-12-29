@@ -428,6 +428,79 @@ class CanToolsPlotTest(unittest.TestCase):
     # ------- test error handling --ignore+/--show* -------
     # -q, -s
 
+    class data_error_handling:
+        input_data = '''\
+ (2020-12-29 11:33:24.285921)  vcan0  00000343   [8]  69 05 5B 05 5B 05 69 05
+invalid syntax
+ (2020-12-29 11:33:24.286209)  vcan0  1000024A   [8]  1B 05 22 05 1B 05 22 05
+ (2020-12-29 11:33:25.288070)  vcan0  00000343   [8]  EE 05 D9 05 D9 05 F5 05
+ (2020-12-29 11:33:25.288811)  vcan0  1000024A   [8]  25 05 34 05 2C 05 49 05
+ (2020-12-29 11:33:26.290617)  vcan0  00000343   [8]  8B 06 AE 06 B5 06 8B 06
+ (2020-12-29 11:33:26.291364)  vcan0  0000024A   [8]  32 05 47 05 55 05 40
+ (2020-12-29 11:33:27.292325)  vcan0  00000343   [8]  37 07 45 07 37 07 3E 07
+invalid syntax
+ (2020-12-29 11:33:27.293045)  vcan0  0000024A   [8]  85 05 7E 05 7E 05 94 05
+ (2020-12-29 11:33:28.294690)  vcan0  00000343   [8]  E0 07 04 08 FC 07 E0 07
+ (2020-12-29 11:33:28.295229)  vcan0  0000024A   [8]  CC 05 CC 05 E9 05 DB 05
+'''
+        xs33 = [
+            datetime.datetime(2020, 12, 29, 11, 33, 24, 285921),
+            datetime.datetime(2020, 12, 29, 11, 33, 25, 288070),
+            datetime.datetime(2020, 12, 29, 11, 33, 26, 290617),
+            datetime.datetime(2020, 12, 29, 11, 33, 27, 292325),
+            datetime.datetime(2020, 12, 29, 11, 33, 28, 294690),
+        ]
+        whlspeed_fl_bremse2 = [20.421875, 20.578125, 20.78125, 22.078125, 23.1875]
+        whlspeed_fr_bremse2 = [20.53125, 20.8125, 21.109375, 21.96875, 23.1875]
+        whlspeed_rl_bremse2 = [20.421875, 20.6875, 21.328125, 21.96875, 23.640625]
+        whlspeed_rr_bremse2 = [20.53125, 21.140625, 21.0, 22.3125, 23.421875]
+        whlspeed_fl = [21.640625, 23.71875, 26.171875, 28.859375, 31.5]
+        whlspeed_fr = [21.421875, 23.390625, 26.71875, 29.078125, 32.0625]
+        whlspeed_rl = [21.421875, 23.390625, 26.828125, 28.859375, 31.9375]
+        whlspeed_rr = [21.640625, 23.828125, 26.171875, 28.96875, 31.5]
+
+    def test_error_messages(self):
+        argv = ['cantools', 'plot', self.DBC_FILE, '*33.*']
+        expected_output = '''\
+Failed to parse line: 'invalid syntax'
+Unknown frame id 268436042 (0x1000024a)
+Unknown frame id 268436042 (0x1000024a)
+Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse line: 'invalid syntax'
+'''
+
+        data = self.data_error_handling
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(data.xs33, data.whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(data.xs33, data.whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        stdout = StringIO()
+
+        with mock.patch('sys.stdin', StringIO(data.input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
     # ------- test other command line options -------
     # --no-decode-choices
     # --break-time

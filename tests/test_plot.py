@@ -179,7 +179,6 @@ class CanToolsPlotTest(unittest.TestCase):
 
 
     # ------- test signal command line argument(s) -------
-    # format
     # --case-sensitive
 
     def test_wildcards_caseinsensitive(self):
@@ -273,6 +272,69 @@ class CanToolsPlotTest(unittest.TestCase):
                 mock.call.plot(xs2, whlspeed_rr_bremse2, '', label='BREMSE_2.whlspeed_RR_Bremse2'),
                 mock.call.legend(),
                 mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+                for i in range(len(expected_subplot_calls)):
+                    self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    def test_format(self):
+        col_33 = "b"
+        col_2  = "r"
+        line_fl = "-<"
+        line_fr = "-->"
+        line_rl = "-.<"
+        line_rr = ":>"
+        argv = ['cantools', 'plot', self.DBC_FILE,
+            '*33.*FL:'+col_33+line_fl, '*33.*FR:'+col_33+line_fr,'*33.*RL:'+col_33+line_rl,'*33.*RR:'+col_33+line_rr,
+            '*2.*FL*:'+col_2+line_fl, '*2.*FR*:'+col_2+line_fr,'*2.*RL*:'+col_2+line_rl,'*2.*RR*:'+col_2+line_rr,
+        ]
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  64 04 79 04 6B 04 5C 04
+ (000.000304)  vcan0  0000024A   [8]  10 05 E5 04 02 05 10 05
+ (001.002101)  vcan0  00000343   [8]  E9 03 DB 03 F7 03 E9 03
+ (001.002815)  vcan0  0000024A   [8]  29 05 3E 05 30 05 1B 05
+ (002.004611)  vcan0  00000343   [8]  B0 03 A2 03 8C 03 94 03
+ (002.005398)  vcan0  0000024A   [8]  AB 05 8E 05 A4 05 95 05
+ (003.007227)  vcan0  00000343   [8]  20 03 27 03 35 03 0B 03
+ (003.007945)  vcan0  0000024A   [8]  F0 05 F0 05 14 06 F7 05
+ (004.009759)  vcan0  00000343   [8]  9B 02 A2 02 94 02 94 02
+ (004.010451)  vcan0  0000024A   [8]  50 06 50 06 50 06 50 06
+"""
+
+        xs2  = self.parse_time(input_data, self.parse_seconds, 2, 1)
+        xs33 = self.parse_time(input_data, self.parse_seconds, 2, 0)
+        whlspeed_fl_bremse2 = [20.25, 20.640625, 22.671875, 23.75, 25.25]
+        whlspeed_fr_bremse2 = [19.578125, 20.96875, 22.21875, 23.75, 25.25]
+        whlspeed_rl_bremse2 = [20.03125, 20.75, 22.5625, 24.3125, 25.25]
+        whlspeed_rr_bremse2 = [20.25, 20.421875, 22.328125, 23.859375, 25.25]
+        whlspeed_fl = [17.5625, 15.640625, 14.75, 12.5, 10.421875]
+        whlspeed_fr = [17.890625, 15.421875, 14.53125, 12.609375, 10.53125]
+        whlspeed_rl = [17.671875, 15.859375, 14.1875, 12.828125, 10.3125]
+        whlspeed_rr = [17.4375, 15.640625, 14.3125, 12.171875, 10.3125]
+
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs33, whlspeed_fl, col_33+line_fl, label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(xs33, whlspeed_fr, col_33+line_fr, label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(xs33, whlspeed_rl, col_33+line_rl, label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(xs33, whlspeed_rr, col_33+line_rr, label='BREMSE_33.whlspeed_RR'),
+                mock.call.plot(xs2, whlspeed_fl_bremse2, col_2+line_fl, label='BREMSE_2.whlspeed_FL_Bremse2'),
+                mock.call.plot(xs2, whlspeed_fr_bremse2, col_2+line_fr, label='BREMSE_2.whlspeed_FR_Bremse2'),
+                mock.call.plot(xs2, whlspeed_rl_bremse2, col_2+line_rl, label='BREMSE_2.whlspeed_RL_Bremse2'),
+                mock.call.plot(xs2, whlspeed_rr_bremse2, col_2+line_rr, label='BREMSE_2.whlspeed_RR_Bremse2'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time / s'),
             ],
         ]
 

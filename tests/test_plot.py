@@ -501,6 +501,164 @@ Failed to parse line: 'invalid syntax'
                     for i in range(len(expected_subplot_calls)):
                         self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
+    def test_ignore_invalid_syntax(self):
+        argv = ['cantools', 'plot', '--ignore-invalid-syntax', self.DBC_FILE, '*33.*']
+        expected_output = '''\
+Unknown frame id 268436042 (0x1000024a)
+Unknown frame id 268436042 (0x1000024a)
+Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+'''
+
+        data = self.data_error_handling
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(data.xs33, data.whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(data.xs33, data.whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        stdout = StringIO()
+
+        with mock.patch('sys.stdin', StringIO(data.input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    def test_ignore_unknown_frameid(self):
+        argv = ['cantools', 'plot', '--ignore-unknown-frames', self.DBC_FILE, '*33.*']
+        expected_output = '''\
+Failed to parse line: 'invalid syntax'
+Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse line: 'invalid syntax'
+'''
+
+        data = self.data_error_handling
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(data.xs33, data.whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(data.xs33, data.whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        stdout = StringIO()
+
+        with mock.patch('sys.stdin', StringIO(data.input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    def test_ignore_invalid_data(self):
+        argv = ['cantools', 'plot', '--ignore-invalid-data', self.DBC_FILE, '*33.*']
+        expected_output = '''\
+Failed to parse line: 'invalid syntax'
+Unknown frame id 268436042 (0x1000024a)
+Unknown frame id 268436042 (0x1000024a)
+Failed to parse line: 'invalid syntax'
+'''
+
+        data = self.data_error_handling
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(data.xs33, data.whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(data.xs33, data.whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        stdout = StringIO()
+
+        with mock.patch('sys.stdin', StringIO(data.input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    def test_quiet(self):
+        argv = ['cantools', 'plot', '-q', self.DBC_FILE, '*33.*']
+        expected_output = '''\
+'''
+
+        data = self.data_error_handling
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(data.xs33, data.whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(data.xs33, data.whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time'),
+            ],
+        ]
+
+        stdout = StringIO()
+
+        with mock.patch('sys.stdin', StringIO(data.input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
     # ------- test other command line options -------
     # --no-decode-choices
     # --break-time

@@ -809,6 +809,59 @@ Failed to parse line: 'invalid syntax'
                     for i in range(len(expected_subplot_calls)):
                         self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
+    def test_show_all_errors(self):
+        argv = ['cantools', 'plot', '-s', self.DBC_FILE, '*33.*']
+        expected_output = '''\
+Failed to parse line: 'invalid syntax'
+Unknown frame id 268436042 (0x1000024a)
+Unknown frame id 268436042 (0x1000024a)
+Failed to parse data of frame id 586 (0x24a): unpack requires at least 64 bits to unpack (got 56)
+Failed to parse line: 'invalid syntax'
+'''
+
+        xis0 = 2
+        xis1 = 9
+        xuf0 = 3
+        xuf1 = 5
+        xid0 = 7
+
+        data = self.data_error_handling
+        subplots = [mock.Mock(), mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(data.xs33_ln, data.whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(data.xs33_ln, data.whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(data.xs33_ln, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(data.xs33_ln, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.axvline(xis0, color=self.COLOR_INVALID_SYNTAX, linewidth=self.ERROR_LINEWIDTH, label='invalid syntax (2)'),
+                mock.call.axvline(xis1, color=self.COLOR_INVALID_SYNTAX, linewidth=self.ERROR_LINEWIDTH),
+                mock.call.axvline(xuf0, color=self.COLOR_UNKNOWN_FRAMES, linewidth=self.ERROR_LINEWIDTH, label='unknown frames (2)'),
+                mock.call.axvline(xuf1, color=self.COLOR_UNKNOWN_FRAMES, linewidth=self.ERROR_LINEWIDTH),
+                mock.call.axvline(xid0, color=self.COLOR_INVALID_DATA, linewidth=self.ERROR_LINEWIDTH, label='invalid data (1)'),
+                mock.call.legend(),
+                mock.call.set_xlabel('line number'),
+            ],
+        ]
+
+        stdout = StringIO()
+
+        with mock.patch('sys.stdin', StringIO(data.input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+
+                    actual_output = stdout.getvalue()
+                    self.assertEqual(actual_output, expected_output)
+
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
 
     # ------- test other command line options -------
     # --no-decode-choices

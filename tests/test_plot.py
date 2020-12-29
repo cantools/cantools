@@ -21,7 +21,8 @@ class CanToolsPlotTest(unittest.TestCase):
     FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
     def setUp(self):
-        plt.reset_mock()
+        plt.reset_mock(return_value=True, side_effect=True)
+        plt._mock_children.clear()
 
 
     # ------- test different timestamp formats -------

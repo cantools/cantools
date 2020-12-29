@@ -264,7 +264,7 @@ class Plotter:
         if self.show_invalid_syntax:
             self.x_invalid_syntax.append(timestamp)
         if not self.ignore_invalid_syntax:
-            print("failed to parse line: %r" % line)
+            print("Failed to parse line: %r" % line)
 
     # ------- at end -------
 
@@ -272,7 +272,7 @@ class Plotter:
         self.signals.plot(xlabel, self.x_invalid_syntax, self.x_unknown_frames, self.x_invalid_data)
         if self.output_filename:
             plt.savefig(self.output_filename)
-            print("result written to %s" % self.output_filename)
+            print("Result written to %s" % self.output_filename)
         else:
             plt.show()
 

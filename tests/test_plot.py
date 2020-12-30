@@ -865,8 +865,70 @@ Failed to parse line: 'invalid syntax'
 
     # ------- test other command line options -------
     # --no-decode-choices
-    # --break-time
     # --output-file
+
+    def test_break_time(self):
+        argv = ['cantools', 'plot', '--break-time', '5', self.DBC_FILE]
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  C7 04 CE 04 EB 04 EB 04
+ (001.001788)  vcan0  00000343   [8]  75 04 75 04 99 04 99 04
+ (002.003649)  vcan0  00000343   [8]  2C 04 34 04 10 04 25 04
+ (003.005497)  vcan0  00000343   [8]  AC 03 BB 03 AC 03 BB 03
+ (004.007213)  vcan0  00000343   [8]  70 03 45 03 45 03 5B 03
+ (015.495473)  vcan0  00000343   [8]  AC 04 BB 04 C2 04 D0 04
+ (016.497347)  vcan0  00000343   [8]  75 04 6E 04 6E 04 6E 04
+ (017.499210)  vcan0  00000343   [8]  19 04 35 04 2E 04 35 04
+ (018.501066)  vcan0  00000343   [8]  AB 03 C0 03 C7 03 AB 03
+ (019.502899)  vcan0  00000343   [8]  50 03 5E 03 42 03 49 03
+"""
+
+        xs = self.parse_time(input_data, self.parse_seconds)
+
+        ys_whlspeed_fl_0 = [19.109375, 17.828125, 16.6875, 14.6875, 13.75]
+        ys_whlspeed_fr_0 = [19.21875, 17.828125, 16.8125, 14.921875, 13.078125]
+        ys_whlspeed_rl_0 = [19.671875, 18.390625, 16.25, 14.6875, 13.078125]
+        ys_whlspeed_rr_0 = [19.671875, 18.390625, 16.578125, 14.921875, 13.421875]
+        ys_whlspeed_fl_1 = [18.6875, 17.828125, 16.390625, 14.671875, 13.25]
+        ys_whlspeed_fr_1 = [18.921875, 17.71875, 16.828125, 15.0, 13.46875]
+        ys_whlspeed_rl_1 = [19.03125, 17.71875, 16.71875, 15.109375, 13.03125]
+        ys_whlspeed_rr_1 = [19.25, 17.71875, 16.828125, 14.671875, 13.140625]
+        whlspeed_0 = [ys_whlspeed_fl_0, ys_whlspeed_fr_0, ys_whlspeed_rl_0, ys_whlspeed_rr_0]
+        whlspeed_1 = [ys_whlspeed_fl_1, ys_whlspeed_fr_1, ys_whlspeed_rl_1, ys_whlspeed_rr_1]
+
+        subplots = [mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+                subplot = subplots[0]
+                for i in range(len(whlspeed_0)):
+                    call = subplot.mock_calls[i]
+                    actual_xs = call[1][0]
+                    actual_ys = call[1][1]
+                    label = call[2]['label']
+
+                    n0 = len(whlspeed_0[i])
+                    n1 = len(whlspeed_1[i])
+                    self.assertEqual(len(actual_xs), len(actual_ys), "numbers of actual x and y values do not match for signal %s" % label)
+                    self.assertEqual(len(actual_xs), len(xs)+1, "number of x values does not match for signal %s" % label)
+                    self.assertEqual(len(actual_ys), n0+n1+1, "number of y values does not match for signal %s" % label)
+
+                    for j in range(1, len(actual_xs)):
+                        self.assertLess(actual_xs[j-1], actual_xs[j], "actual x values are not strictly increasing for signal %s" % label)
+                    self.assertEqual(actual_xs[:n0], xs[:n0], "first half of x values does not match for signal %s" % label)
+                    self.assertEqual(actual_xs[-n1:], xs[-n1:], "second half of x values does not match for signal %s" % label)
+
+                    self.assertEqual(actual_ys[:n0], whlspeed_0[i], "first half of y values does not match for signal %s" % label)
+                    self.assertEqual(actual_ys[n0], None, "expected separating value is not at it's place for signal %s" % label)
+                    self.assertEqual(actual_ys[-n1:], whlspeed_1[i], "second half of y values does not match for signal %s" % label)
+                    #self.assertEqual(actual_ys[-n1:], actual_ys[n1+1:], "this test is a duplicate of len == n0+n1+1")
+
 
     # ------- auxiliary functions -------
 

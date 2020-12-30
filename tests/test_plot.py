@@ -929,6 +929,55 @@ Failed to parse line: 'invalid syntax'
                     self.assertEqual(actual_ys[-n1:], whlspeed_1[i], "second half of y values does not match for signal %s" % label)
                     #self.assertEqual(actual_ys[-n1:], actual_ys[n1+1:], "this test is a duplicate of len == n0+n1+1")
 
+    def test_break_time_none(self):
+        argv = ['cantools', 'plot', '--break-time', '-1', self.DBC_FILE]
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  C7 04 CE 04 EB 04 EB 04
+ (001.001788)  vcan0  00000343   [8]  75 04 75 04 99 04 99 04
+ (002.003649)  vcan0  00000343   [8]  2C 04 34 04 10 04 25 04
+ (003.005497)  vcan0  00000343   [8]  AC 03 BB 03 AC 03 BB 03
+ (004.007213)  vcan0  00000343   [8]  70 03 45 03 45 03 5B 03
+ (015.495473)  vcan0  00000343   [8]  AC 04 BB 04 C2 04 D0 04
+ (016.497347)  vcan0  00000343   [8]  75 04 6E 04 6E 04 6E 04
+ (017.499210)  vcan0  00000343   [8]  19 04 35 04 2E 04 35 04
+ (018.501066)  vcan0  00000343   [8]  AB 03 C0 03 C7 03 AB 03
+ (019.502899)  vcan0  00000343   [8]  50 03 5E 03 42 03 49 03
+"""
+
+        xs = self.parse_time(input_data, self.parse_seconds)
+
+        ys_whlspeed_fl = [19.109375, 17.828125, 16.6875, 14.6875, 13.75]
+        ys_whlspeed_fr = [19.21875, 17.828125, 16.8125, 14.921875, 13.078125]
+        ys_whlspeed_rl = [19.671875, 18.390625, 16.25, 14.6875, 13.078125]
+        ys_whlspeed_rr = [19.671875, 18.390625, 16.578125, 14.921875, 13.421875]
+        ys_whlspeed_fl += [18.6875, 17.828125, 16.390625, 14.671875, 13.25]
+        ys_whlspeed_fr += [18.921875, 17.71875, 16.828125, 15.0, 13.46875]
+        ys_whlspeed_rl += [19.03125, 17.71875, 16.71875, 15.109375, 13.03125]
+        ys_whlspeed_rr += [19.25, 17.71875, 16.828125, 14.671875, 13.140625]
+
+        subplots = [mock.Mock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel('time / s'),
+            ],
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+                for i in range(len(expected_subplot_calls)):
+                    self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
     # ------- auxiliary functions -------
 

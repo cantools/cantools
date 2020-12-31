@@ -318,6 +318,7 @@ class Signals:
                 self.add_signal(sg)
         else:
             self.add_signal('*')
+        self.compile_reo()
 
     def init_break_time(self, datatype):
         if self.break_time <= 0:
@@ -356,6 +357,9 @@ class Signals:
         sgo = Signal(reo, self.subplot, plt_func, fmt)
         self.signals.append(sgo)
 
+    def compile_reo(self):
+        self.reo = re.compile('|'.join(sg.reo.pattern for sg in self.signals), re.I)
+
     # ------- while reading data -------
 
     def add_value(self, signal, x, y):
@@ -378,10 +382,7 @@ class Signals:
         graph.y.append(y)
 
     def is_displayed_signal(self, signal):
-        for reo in self.signals:
-            if reo.match(signal):
-                return True
-        return False
+        return self.reo.match(signal)
 
     # ------- at end -------
 

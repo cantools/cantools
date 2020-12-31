@@ -216,6 +216,39 @@ class CanToolsPlotTest(unittest.TestCase):
                 self.assertListEqual(plt.mock_calls, expected_calls)
 
 
+    def test_plot_no_timestamps(self):
+        argv = ['cantools', 'plot', self.DBC_FILE]
+        input_data = """\
+  vcan0  00000343   [8]  7C 05 7C 05 84 05 67 05
+  vcan0  00000343   [8]  19 06 20 06 12 06 20 06
+  vcan0  00000343   [8]  77 06 94 06 8C 06 77 06
+  vcan0  00000343   [8]  25 07 10 07 02 07 1E 07
+  vcan0  00000343   [8]  E2 07 F0 07 CC 07 E9 07
+"""
+
+        xs = list(range(1, 5+1))
+        ys_whlspeed_fl = [21.9375, 24.390625, 25.859375, 28.578125, 31.53125]
+        ys_whlspeed_fr = [21.9375, 24.5, 26.3125, 28.25, 31.75]
+        ys_whlspeed_rl = [22.0625, 24.28125, 26.1875, 28.03125, 31.1875]
+        ys_whlspeed_rr = [21.609375, 24.5, 25.859375, 28.46875, 31.640625]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel('line number'),
+            mock.call.show(),
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+
+
     # ------- test signal command line argument(s) -------
 
     def test_wildcards_caseinsensitive(self):

@@ -183,6 +183,39 @@ class CanToolsPlotTest(unittest.TestCase):
                 self.assertListEqual(plt.mock_calls, expected_calls)
 
 
+    def test_plot_l(self):
+        argv = ['cantools', 'plot', self.DBC_FILE]
+        input_data = """\
+(1609395080.446193) vcan0 00000343#B504CB04AE04BC04
+(1609395081.447989) vcan0 00000343#650457045E047404
+(1609395082.449807) vcan0 00000343#1504240415043204
+(1609395083.451020) vcan0 00000343#DB03DB03DB03C503
+(1609395084.452815) vcan0 00000343#6903850369037703
+"""
+
+        xs = self.parse_time(input_data, self.parse_seconds)
+        ys_whlspeed_fl = [18.828125, 17.578125, 16.328125, 15.421875, 13.640625]
+        ys_whlspeed_fr = [19.171875, 17.359375, 16.5625, 15.421875, 14.078125]
+        ys_whlspeed_rl = [18.71875, 17.46875, 16.328125, 15.421875, 13.640625]
+        ys_whlspeed_rr = [18.9375, 17.8125, 16.78125, 15.078125, 13.859375]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel('time / s'),
+            mock.call.show(),
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
+
+
     # ------- test signal command line argument(s) -------
 
     def test_wildcards_caseinsensitive(self):

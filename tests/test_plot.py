@@ -248,6 +248,60 @@ class CanToolsPlotTest(unittest.TestCase):
                 cantools._main()
                 self.assertListEqual(plt.mock_calls, expected_calls)
 
+    def test_plot_cantools_decode(self):
+        argv = ['cantools', 'plot', self.DBC_FILE]
+        input_data = """\
+ (2021-01-02 18:45:26.313349)  vcan0  00000343   [8]  DA 04 DA 04 E8 04 C4 04 ::
+BREMSE_33(
+    whlspeed_FL: 19.40625 m/s,
+    whlspeed_FR: 19.40625 m/s,
+    whlspeed_RL: 19.625 m/s,
+    whlspeed_RR: 19.0625 m/s
+)
+ (2021-01-02 18:45:27.314717)  vcan0  00000343   [8]  22 05 14 05 F8 04 0D 05 ::
+BREMSE_33(
+    whlspeed_FL: 20.53125 m/s,
+    whlspeed_FR: 20.3125 m/s,
+    whlspeed_RL: 19.875 m/s,
+    whlspeed_RR: 20.203125 m/s
+)
+ (2021-01-02 18:45:28.316559)  vcan0  00000343   [8]  61 05 53 05 68 05 4C 05 ::
+BREMSE_33(
+    whlspeed_FL: 21.515625 m/s,
+    whlspeed_FR: 21.296875 m/s,
+    whlspeed_RL: 21.625 m/s,
+    whlspeed_RR: 21.1875 m/s
+)
+"""
+
+        xs = ('2021-01-02 18:45:26.313349', '2021-01-02 18:45:27.314717', '2021-01-02 18:45:28.316559')
+        xs = [self.parse_absolute_time(t) for t in xs]
+        ys_whlspeed_fl = [19.40625, 20.53125, 21.515625]
+        ys_whlspeed_fr = [19.40625, 20.3125, 21.296875]
+        ys_whlspeed_rl = [19.625, 19.875, 21.625]
+        ys_whlspeed_rr = [19.0625, 20.203125, 21.1875]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel('time'),
+            mock.call.show(),
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    cantools._main()
+                    self.assertEqual(stdout.getvalue(), expected_output)
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+
 
     # ------- test signal command line argument(s) -------
 

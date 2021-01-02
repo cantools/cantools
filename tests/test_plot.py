@@ -25,9 +25,9 @@ class CanToolsPlotTest(unittest.TestCase):
     COLOR_INVALID_DATA   = '#ff00ff'
     ERROR_LINEWIDTH = 1
 
-    XLABEL_tA = "time"
-    XLABEL_ta = "time / s"
-    XLABEL_tz = XLABEL_ta
+    XLABEL_tA = "absolute time"
+    XLABEL_ta = XLABEL_tA
+    XLABEL_tz = "relative time"
     XLABEL_l  = XLABEL_ta
     XLABEL_LINE_NUMBER = "line number"
 
@@ -91,6 +91,7 @@ class CanToolsPlotTest(unittest.TestCase):
 """
 
         xs = [x+1608822980 for x in (.872678, .873316, .873745, .874138, .874524, .874921, .875305, .875685, .876130)]
+        xs = [datetime.datetime.fromtimestamp(x) for x in xs]
         ys_fl = [20.328125, 22.109375, 21.671875, 20.78125,  20.390625, 18.109375, 14.4375,   10.609375, 3.78125 ]
         ys_fr = [20.21875,  22.328125, 22.21875,  21.21875,  20.390625, 18.0,      14.4375,   10.9375,   3.671875]
         ys_rl = [20.4375,   22.328125, 21.671875, 21.21875,  20.71875,  18.0,      14.328125, 10.5,      3.671875]
@@ -199,7 +200,7 @@ class CanToolsPlotTest(unittest.TestCase):
 (1609395084.452815) vcan0 00000343#6903850369037703
 """
 
-        xs = self.parse_time(input_data, self.parse_seconds)
+        xs = self.parse_time(input_data, self.parse_absolute_seconds)
         ys_whlspeed_fl = [18.828125, 17.578125, 16.328125, 15.421875, 13.640625]
         ys_whlspeed_fr = [19.171875, 17.359375, 16.5625, 15.421875, 14.078125]
         ys_whlspeed_rl = [18.71875, 17.46875, 16.328125, 15.421875, 13.640625]
@@ -1208,9 +1209,11 @@ Failed to parse line: 'invalid syntax'
     def parse_absolute_time(self, timestamp):
         return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
 
-    def parse_seconds(self, timestamp):
-        return float(timestamp)
+    def parse_absolute_seconds(self, timestamp):
+        return datetime.datetime.fromtimestamp(float(timestamp))
 
+    def parse_seconds(self, timestamp):
+        return datetime.timedelta(seconds=float(timestamp))
 
     ELLIPSIS = "..."
     LEN_ELLIPSIS = len(ELLIPSIS)

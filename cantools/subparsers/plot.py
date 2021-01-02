@@ -83,10 +83,20 @@ class TimestampParser:
     are given it falls back to line numbers.
     '''
 
+    # candump -ta, -tz and -td have the same timestamp syntax: a floating number in seconds.
+    # In case of -td using timestamps does not seem useful and a user should use --line-numbers.
+    # The following constant shall distinguish between -ta and -tz.
+    # If the first timestamp is bigger than THRESHOLD_ABSOLUTE_SECONDS I am assuming -ta is used
+    # and convert timestamps to datetime objects which will print a date.
+    # Otherwise I'll assume -tz is used and convert them to timedelta objects.
+    # I am not using zero to compare against in case the beginning of the log file is stripped.
+    THRESHOLD_ABSOLUTE_SECONDS = 60*60*24*7
+
     FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
     def __init__(self):
         self.use_timestamp = None
+        self.relative = None
         self.unit = None
         self._parse_timestamp = None
 
@@ -99,16 +109,23 @@ class TimestampParser:
             try:
                 out = self.parse_absolute_timestamp(timestamp)
                 self.use_timestamp = True
+                self.relative = False
                 self._parse_timestamp = self.parse_absolute_timestamp
                 return out
             except ValueError:
                 pass
 
             try:
-                out = self.parse_seconds(timestamp)
+                if float(timestamp) > self.THRESHOLD_ABSOLUTE_SECONDS:
+                    out = self.parse_absolute_seconds(timestamp)
+                    self.relative = False
+                    self._parse_timestamp = self.parse_absolute_seconds
+                else:
+                    out = self.parse_seconds(timestamp)
+                    self.relative = True
+                    self._parse_timestamp = self.parse_seconds
+
                 self.use_timestamp = True
-                self.unit = "s"
-                self._parse_timestamp = self.parse_seconds
                 return out
             except ValueError:
                 pass
@@ -124,12 +141,19 @@ class TimestampParser:
         return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
 
     @staticmethod
+    def parse_absolute_seconds(timestamp):
+        return datetime.datetime.fromtimestamp(float(timestamp))
+
+    @staticmethod
     def parse_seconds(timestamp):
-        return float(timestamp)
+        return datetime.timedelta(seconds=float(timestamp))
 
     def get_label(self):
         if self.use_timestamp:
-            label = "time"
+            if self.relative:
+                label = "relative time"
+            else:
+                label = "absolute time"
         else:
             label = "line number"
 
@@ -323,7 +347,7 @@ class Signals:
     def init_break_time(self, datatype):
         if self.break_time <= 0:
             self.break_time = None
-        elif datatype == datetime.datetime:
+        elif datatype == datetime.datetime or datatype == datetime.timedelta:
             self.half_break_time = datetime.timedelta(seconds=self.break_time/2)
             self.break_time = datetime.timedelta(seconds=self.break_time)
         else:

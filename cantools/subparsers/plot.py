@@ -92,7 +92,7 @@ class TimestampParser:
     # The following constant shall distinguish between -ta and -tz.
     # If the first timestamp is bigger than THRESHOLD_ABSOLUTE_SECONDS I am assuming -ta is used
     # and convert timestamps to datetime objects which will print a date.
-    # Otherwise I'll assume -tz is used and convert them to timedelta objects.
+    # Otherwise I'll assume -tz is used and format them using timedelta objects.
     # I am not using zero to compare against in case the beginning of the log file is stripped.
     THRESHOLD_ABSOLUTE_SECONDS = 60*60*24*7
 
@@ -150,7 +150,7 @@ class TimestampParser:
 
     @staticmethod
     def parse_seconds(timestamp):
-        return datetime.timedelta(seconds=float(timestamp))
+        return float(timestamp)
 
     def get_label(self):
         if self.use_timestamp:
@@ -351,7 +351,7 @@ class Signals:
     def init_break_time(self, datatype):
         if self.break_time <= 0:
             self.break_time = None
-        elif datatype == datetime.datetime or datatype == datetime.timedelta:
+        elif datatype == datetime.datetime:
             self.half_break_time = datetime.timedelta(seconds=self.break_time/2)
             self.break_time = datetime.timedelta(seconds=self.break_time)
         else:
@@ -417,6 +417,7 @@ class Signals:
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
         splot = None
         last_subplot = 0
+        axis_format_uninitialized = True
         sorted_signal_names = sorted(self.values.keys())
         for sgo in self.signals:
             if sgo.subplot > last_subplot:
@@ -442,6 +443,10 @@ class Signals:
 
                 x = graph.x
                 y = graph.y
+                if axis_format_uninitialized and x:
+                    if isinstance(x[0], float):
+                        splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
+                    axis_format_uninitialized = False
                 getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
                 plotted = True
 

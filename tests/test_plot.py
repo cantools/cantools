@@ -14,6 +14,12 @@ sys.modules['matplotlib'] = matplotlib_mock
 plt = matplotlib_mock.pyplot
 plt.rcParams = mock.MagicMock(name='not-a-child')
 
+
+class SubplotMock(mock.Mock):
+
+    axes = mock.Mock(name="axes-mock")
+
+
 class CanToolsPlotTest(unittest.TestCase):
 
     DBC_FILE = os.path.join(os.path.split(__file__)[0], 'files/dbc/abs.dbc')
@@ -136,21 +142,27 @@ class CanToolsPlotTest(unittest.TestCase):
         ys_whlspeed_rl = [18.421875, 17.859375, 16.640625, 16.5, 15.25, 14.1875, 13.25, 12.8125, 12.328125, 10.828125]
         ys_whlspeed_rr = [19.078125, 17.96875, 16.53125, 15.9375, 15.140625, 13.859375, 13.578125, 12.25, 11.890625, 11.28125]
 
+        subplots = [SubplotMock()]
+        plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
-            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
-            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
-            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
-            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
-            mock.call.subplot().legend(),
-            mock.call.subplot().set_xlabel(self.XLABEL_tz),
             mock.call.show(),
         ]
+        expected_subplot_calls = [[
+            mock.call.plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.legend(),
+            mock.call.set_xlabel(self.XLABEL_tz),
+        ]]
 
         with mock.patch('sys.stdin', StringIO(input_data)):
             with mock.patch('sys.argv', argv):
                 cantools._main()
                 self.assertListEqual(plt.mock_calls, expected_calls)
+                for i in range(len(expected_subplot_calls)):
+                    self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
 
     def test_plot_td(self):
@@ -333,7 +345,7 @@ BREMSE_33(
         whlspeed_fl_bremse2 = [19.78125, 21.140625, 21.890625, 21.921875, 22.421875]
         whlspeed_fl = [18.828125, 17.859375, 16.671875, 14.859375, 14.03125]
 
-        subplots = [mock.Mock()]
+        subplots = [SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -381,7 +393,7 @@ BREMSE_33(
         whlspeed_rl = [18.609375, 17.53125, 16.671875, 15.1875, 13.578125]
         whlspeed_rr = [18.171875, 17.859375, 16.671875, 14.96875, 13.8125]
 
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(2,1,1, sharex=None),
@@ -449,7 +461,7 @@ BREMSE_33(
         whlspeed_rl = [17.671875, 15.859375, 14.1875, 12.828125, 10.3125]
         whlspeed_rr = [17.4375, 15.640625, 14.3125, 12.171875, 10.3125]
 
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -499,7 +511,7 @@ BREMSE_33(
         ys = [1, 2, -5, 5, 0, 2, 5, 0, 2, 6]
         ys = [choices[y] for y in ys]
 
-        subplots = [mock.Mock()]
+        subplots = [SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -541,7 +553,7 @@ BREMSE_33(
         xs  = self.parse_time(input_data, self.parse_absolute_time)
         ys = [1, 2, -5, 5, 0, 2, 5, 0, 2, 6]
 
-        subplots = [mock.Mock()]
+        subplots = [SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -572,7 +584,7 @@ BREMSE_33(
 
         expected_output = r"WARNING: signal '.*\\..*fl.*$' with format '' was not plotted." + "\n"
 
-        subplots = [mock.Mock()]
+        subplots = [SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -645,7 +657,7 @@ Failed to parse line: 'invalid syntax'
 '''
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -688,7 +700,7 @@ Failed to parse data of frame id 586 (0x24a): ...
 '''
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -728,7 +740,7 @@ Failed to parse line: 'invalid syntax'
 '''
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -769,7 +781,7 @@ Failed to parse line: 'invalid syntax'
 '''
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -806,7 +818,7 @@ Failed to parse line: 'invalid syntax'
 '''
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -853,7 +865,7 @@ Failed to parse line: 'invalid syntax'
         x0 = self.parse_absolute_time('2020-12-29 11:33:26.291364')
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -899,7 +911,7 @@ Failed to parse line: 'invalid syntax'
         x1 = self.parse_absolute_time('2020-12-29 11:33:25.288811')
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -946,7 +958,7 @@ Failed to parse line: 'invalid syntax'
         x1 = 9
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -996,7 +1008,7 @@ Failed to parse line: 'invalid syntax'
         xid0 = 7
 
         data = self.data_error_handling
-        subplots = [mock.Mock(), mock.Mock()]
+        subplots = [SubplotMock(), SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -1063,7 +1075,7 @@ Failed to parse line: 'invalid syntax'
         whlspeed_0 = [ys_whlspeed_fl_0, ys_whlspeed_fr_0, ys_whlspeed_rl_0, ys_whlspeed_rr_0]
         whlspeed_1 = [ys_whlspeed_fl_1, ys_whlspeed_fr_1, ys_whlspeed_rl_1, ys_whlspeed_rr_1]
 
-        subplots = [mock.Mock()]
+        subplots = [SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -1123,7 +1135,7 @@ Failed to parse line: 'invalid syntax'
         ys_whlspeed_rl += [19.03125, 17.71875, 16.71875, 15.109375, 13.03125]
         ys_whlspeed_rr += [19.25, 17.71875, 16.828125, 14.671875, 13.140625]
 
-        subplots = [mock.Mock()]
+        subplots = [SubplotMock()]
         plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
@@ -1214,7 +1226,7 @@ Failed to parse line: 'invalid syntax'
         return datetime.datetime.fromtimestamp(float(timestamp))
 
     def parse_seconds(self, timestamp):
-        return datetime.timedelta(seconds=float(timestamp))
+        return float(timestamp)
 
     ELLIPSIS = "..."
     LEN_ELLIPSIS = len(ELLIPSIS)

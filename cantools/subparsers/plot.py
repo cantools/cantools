@@ -53,6 +53,10 @@ from matplotlib import pyplot as plt
 from .. import database
 
 
+plt.rcParams["date.autoformatter.hour"] = "%H:%M"
+plt.rcParams["date.autoformatter.minute"] = "%H:%M"
+
+
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
 RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)(?:\s*::.*)?$')
 # Matches 'cantools decode' output, i.e. ")" or "   voltage: 0 V,".

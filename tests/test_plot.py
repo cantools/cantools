@@ -12,6 +12,7 @@ import cantools
 matplotlib_mock = mock.Mock()
 sys.modules['matplotlib'] = matplotlib_mock
 plt = matplotlib_mock.pyplot
+plt.rcParams = mock.MagicMock(name='not-a-child')
 
 class CanToolsPlotTest(unittest.TestCase):
 

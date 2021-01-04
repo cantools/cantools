@@ -1341,6 +1341,52 @@ Failed to parse line: 'invalid syntax'
                         for i in range(len(expected_subplot_calls)):
                             self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
+    def test_do_replot(self):
+        argv = ['cantools', 'plot', self.DBC_FILE_CHOICES, "Foo:b-", "Foo:rd"]
+        input_data = """\
+ (000.000000)  vcan0  00000000   [8]  06 00 00 00 00 00 00 00
+ (004.212794)  vcan0  00000000   [8]  05 00 00 00 00 00 00 00
+ (006.264802)  vcan0  00000000   [8]  00 00 00 00 00 00 00 00
+ (010.569680)  vcan0  00000000   [8]  00 00 00 00 00 00 00 00
+ (012.432106)  vcan0  00000000   [8]  00 00 00 00 00 00 00 00
+"""
+
+        db = cantools.db.load_file(self.DBC_FILE_CHOICES)
+        choices = db.get_message_by_name("Foo").get_signal_by_name("Foo").choices
+
+        xs = self.parse_time(input_data, self.parse_seconds)
+        ys = [6, 5, 0, 0, 0]
+        ys = [choices[y] for y in ys]
+
+        subplots = [SubplotMock()]
+        plt = PyplotMock()
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs, ys, 'b-', label='Foo.Foo'),
+                mock.call.plot(xs, ys, 'rd', label='Foo.Foo'),
+                mock.call.legend(),
+                mock.call.set_xlabel(self.XLABEL_tz),
+            ],
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+                        for i in range(len(expected_subplot_calls)):
+                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+
     # ------- auxiliary functions -------
 
     def parse_time(self, log, parse, mod=1, offset=0):

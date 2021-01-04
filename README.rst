@@ -124,9 +124,9 @@ Alternatively, the decoded message can be printed on a single line:
 The plot subcommand
 ^^^^^^^^^^^^^^^^^^^
 
-The plot subcommand is similar to the decode subcommand but messages are visualized using `matplotlib`_ instead of printed to stdout.
+The plot subcommand is similar to the decode subcommand but messages are visualized using `matplotlib`_ instead of being printed to stdout.
 
-.. code-block:: text
+.. code-block:: bash
 
     $ cat candump-2021-01-04_180521.log
     (1609779922.655421) vcan0 00000343#B204B9049C049C04
@@ -149,7 +149,7 @@ A ``*`` can stand for any number of any character, a ``?`` for exactly one arbit
 Signals separated by a ``-`` are displayed in separate subplots.
 Optionally a format can be specified after a signal, separated by a colon.
 
-.. code-block:: text
+.. code-block:: bash
 
     $ cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc '*33.*fl:-<' '*33.*fr:->' - '*33.*rl:-<' '*33.*rr:->'
 
@@ -157,7 +157,7 @@ Optionally a format can be specified after a signal, separated by a colon.
 
 For more information see
 
-.. code-block:: text
+.. code-block:: bash
 
     $ cantools plot --help
 

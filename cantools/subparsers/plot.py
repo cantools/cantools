@@ -55,6 +55,7 @@ from .. import database
 
 plt.rcParams["date.autoformatter.hour"] = "%H:%M"
 plt.rcParams["date.autoformatter.minute"] = "%H:%M"
+plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".

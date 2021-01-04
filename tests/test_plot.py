@@ -1295,6 +1295,51 @@ Failed to parse line: 'invalid syntax'
                         cantools._main()
                         self.assertListEqual(plt.mock_calls, expected_calls)
 
+    def test_do_not_replot(self):
+        argv = ['cantools', 'plot', self.DBC_FILE, '*fl:-o', '*:o']
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  80 05 64 05 5C 05 64 05
+ (001.001805)  vcan0  00000343   [8]  A0 05 92 05 A0 05 99 05
+ (002.003656)  vcan0  00000343   [8]  1B 06 FE 05 F0 05 F7 05
+ (003.005470)  vcan0  00000343   [8]  54 06 54 06 54 06 4C 06
+ (004.007317)  vcan0  00000343   [8]  DB 06 BE 06 C5 06 B7 06
+"""
+
+        xs = self.parse_time(input_data, self.parse_seconds)
+        ys_whlspeed_fl = [22.0, 22.5, 24.421875, 25.3125, 27.421875]
+        ys_whlspeed_fr = [21.5625, 22.28125, 23.96875, 25.3125, 26.96875]
+        ys_whlspeed_rl = [21.4375, 22.5, 23.75, 25.3125, 27.078125]
+        ys_whlspeed_rr = [21.5625, 22.390625, 23.859375, 25.1875, 26.859375]
+
+        subplots = [SubplotMock()]
+        plt = PyplotMock()
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs, ys_whlspeed_fl, '-o', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot(xs, ys_whlspeed_fr, 'o', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot(xs, ys_whlspeed_rl, 'o', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot(xs, ys_whlspeed_rr, 'o', label='BREMSE_33.whlspeed_RR'),
+                mock.call.legend(),
+                mock.call.set_xlabel(self.XLABEL_tz),
+            ],
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+                        for i in range(len(expected_subplot_calls)):
+                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
     # ------- auxiliary functions -------
 

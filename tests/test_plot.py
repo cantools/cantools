@@ -1264,6 +1264,38 @@ Failed to parse line: 'invalid syntax'
                         self.assertEqual(stdout.getvalue(), expected_output)
 
 
+    # ------- other tests -------
+
+    def test_empty_line(self):
+        argv = ['cantools', 'plot', self.DBC_FILE, '*fl']
+        input_data = """\
+ (2020-12-27 11:59:14.820230)  vcan0  00000343   [8]  B0 04 B0 04 B0 04 D4 04
+
+ (2020-12-27 11:59:16.823895)  vcan0  00000343   [8]  75 04 84 04 75 04 6E 04
+"""
+
+        xs = self.parse_time(input_data, self.parse_absolute_time)
+        ys_whlspeed_fl = [18.75, 17.828125]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
+            mock.call.show(),
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with PyplotMock() as plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+
+
     # ------- auxiliary functions -------
 
     def parse_time(self, log, parse, mod=1, offset=0):

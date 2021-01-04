@@ -102,7 +102,6 @@ class TimestampParser:
     def __init__(self):
         self.use_timestamp = None
         self.relative = None
-        self.unit = None
         self._parse_timestamp = None
         self.first_timestamp = None
 
@@ -164,9 +163,6 @@ class TimestampParser:
                 label = "absolute time"
         else:
             label = "line number"
-
-        if self.unit:
-            label += " / " + self.unit
 
         if isinstance(self.first_timestamp, datetime.datetime):
             label += self.first_timestamp.strftime(" (start: %d.%m.%Y)")

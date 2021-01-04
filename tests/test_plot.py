@@ -53,7 +53,7 @@ class CanToolsPlotTest(unittest.TestCase):
     COLOR_INVALID_DATA   = '#ff00ff'
     ERROR_LINEWIDTH = 1
 
-    XLABEL_tA = "absolute time"
+    XLABEL_tA = "absolute time (start: %s)"
     XLABEL_ta = XLABEL_tA
     XLABEL_tz = "relative time"
     XLABEL_l  = XLABEL_ta
@@ -90,7 +90,7 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
             mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
             mock.call.subplot().legend(),
-            mock.call.subplot().set_xlabel(self.XLABEL_tA),
+            mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.show(),
         ]
 
@@ -129,7 +129,7 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.subplot().plot(xs, ys_rl, '', label='BREMSE_33.whlspeed_RL'),
             mock.call.subplot().plot(xs, ys_rr, '', label='BREMSE_33.whlspeed_RR'),
             mock.call.subplot().legend(),
-            mock.call.subplot().set_xlabel(self.XLABEL_ta),
+            mock.call.subplot().set_xlabel(self.XLABEL_ta % "24.12.2020"),
             mock.call.show(),
         ]
 
@@ -248,7 +248,7 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
             mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
             mock.call.subplot().legend(),
-            mock.call.subplot().set_xlabel(self.XLABEL_l),
+            mock.call.subplot().set_xlabel(self.XLABEL_l % "31.12.2020"),
             mock.call.show(),
         ]
 
@@ -332,7 +332,7 @@ BREMSE_33(
             mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
             mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
             mock.call.subplot().legend(),
-            mock.call.subplot().set_xlabel(self.XLABEL_tA),
+            mock.call.subplot().set_xlabel(self.XLABEL_tA % "02.01.2021"),
             mock.call.show(),
         ]
 
@@ -382,7 +382,7 @@ BREMSE_33(
                 mock.call.plot(xs2, whlspeed_fl_bremse2, '', label='BREMSE_2.whlspeed_FL_Bremse2'),
                 mock.call.plot(xs33, whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "28.12.2020"),
             ],
         ]
 
@@ -435,7 +435,7 @@ BREMSE_33(
                 mock.call.plot(xs33, whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
                 mock.call.plot(xs33, whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "28.12.2020"),
             ],
             [
                 mock.call.plot(xs2, whlspeed_fl_bremse2, '', label='BREMSE_2.whlspeed_FL_Bremse2'),
@@ -443,7 +443,7 @@ BREMSE_33(
                 mock.call.plot(xs2, whlspeed_rl_bremse2, '', label='BREMSE_2.whlspeed_RL_Bremse2'),
                 mock.call.plot(xs2, whlspeed_rr_bremse2, '', label='BREMSE_2.whlspeed_RR_Bremse2'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "28.12.2020"),
             ],
         ]
 
@@ -553,7 +553,7 @@ BREMSE_33(
             [
                 mock.call.stem(xs, ys, '', label='Foo.Foo'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -597,7 +597,7 @@ BREMSE_33(
             [
                 mock.call.stem(xs, ys, '', label='Foo.Foo'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -629,7 +629,7 @@ BREMSE_33(
         expected_subplot_calls = [
             [
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -708,7 +708,7 @@ Failed to parse line: 'invalid syntax'
                 mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
                 mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -753,7 +753,7 @@ Failed to parse data of frame id 586 (0x24a): ...
                 mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
                 mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -795,7 +795,7 @@ Failed to parse line: 'invalid syntax'
                 mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
                 mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -838,7 +838,7 @@ Failed to parse line: 'invalid syntax'
                 mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
                 mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -877,7 +877,7 @@ Failed to parse line: 'invalid syntax'
                 mock.call.plot(data.xs33, data.whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
                 mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -927,7 +927,7 @@ Failed to parse line: 'invalid syntax'
                 mock.call.plot(data.xs33, data.whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
                 mock.call.axvline(x0, color=self.COLOR_INVALID_DATA, linewidth=self.ERROR_LINEWIDTH, label='invalid data (1)'),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -976,7 +976,7 @@ Failed to parse line: 'invalid syntax'
                 mock.call.axvline(x0, color=self.COLOR_UNKNOWN_FRAMES, linewidth=self.ERROR_LINEWIDTH, label='unknown frames (2)'),
                 mock.call.axvline(x1, color=self.COLOR_UNKNOWN_FRAMES, linewidth=self.ERROR_LINEWIDTH),
                 mock.call.legend(),
-                mock.call.set_xlabel(self.XLABEL_tA),
+                mock.call.set_xlabel(self.XLABEL_tA % "29.12.2020"),
             ],
         ]
 
@@ -1248,7 +1248,7 @@ Failed to parse line: 'invalid syntax'
             mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
             mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
             mock.call.subplot().legend(),
-            mock.call.subplot().set_xlabel(self.XLABEL_tA),
+            mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.savefig(fn),
         ]
 

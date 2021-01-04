@@ -104,6 +104,7 @@ class TimestampParser:
         self.relative = None
         self.unit = None
         self._parse_timestamp = None
+        self.first_timestamp = None
 
     def parse_timestamp(self, timestamp, linenumber):
         if self.use_timestamp is None:
@@ -115,6 +116,7 @@ class TimestampParser:
                 out = self.parse_absolute_timestamp(timestamp)
                 self.use_timestamp = True
                 self.relative = False
+                self.first_timestamp = out
                 self._parse_timestamp = self.parse_absolute_timestamp
                 return out
             except ValueError:
@@ -124,6 +126,7 @@ class TimestampParser:
                 if float(timestamp) > self.THRESHOLD_ABSOLUTE_SECONDS:
                     out = self.parse_absolute_seconds(timestamp)
                     self.relative = False
+                    self.first_timestamp = out
                     self._parse_timestamp = self.parse_absolute_seconds
                 else:
                     out = self.parse_seconds(timestamp)
@@ -164,6 +167,9 @@ class TimestampParser:
 
         if self.unit:
             label += " / " + self.unit
+
+        if isinstance(self.first_timestamp, datetime.datetime):
+            label += self.first_timestamp.strftime(" (start: %d.%m.%Y)")
 
         return label
 

@@ -480,11 +480,16 @@ class Signals:
 
     def finish_subplot(self, splot, subplot_args):
         splot.legend()
+
         if subplot_args.xlabel is not None:
             xlabel = subplot_args.xlabel
         else:
             xlabel = self.default_xlabel
         splot.set_xlabel(xlabel)
+
+        if subplot_args.ymin is not None or subplot_args.ymax is not None:
+            splot.axes.set_ylim(subplot_args.ymin, subplot_args.ymax)
+
 
     def plot_error(self, splot, xs, label, color):
         if xs:
@@ -657,8 +662,8 @@ These options must be separated from the above listed options by a --.
     arg_group.add_argument('--title')
     arg_group.add_argument('--xlabel')
     arg_group.add_argument('--ylabel')
-    arg_group.add_argument('--ymin')
-    arg_group.add_argument('--ymax')
+    arg_group.add_argument('--ymin', type=float)
+    arg_group.add_argument('--ymax', type=float)
     arg_group.add_argument('signals', nargs='*')
     return parser
 subplot_argparser = create_subplot_argparser()

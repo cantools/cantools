@@ -1392,6 +1392,84 @@ Failed to parse line: 'invalid syntax'
                             self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
                         self.assertEqual(stdout.getvalue(), expected_output)
 
+    def test_ymin(self):
+        argv = ['cantools', 'plot', self.DBC_FILE, '--', '--ymin', '0']
+        input_data = """\
+ (1610201351.380913)  vcan0  00000343   [8]  0B 05 FC 04 FC 04 12 05
+ (1610201352.382425)  vcan0  00000343   [8]  D2 04 E0 04 CB 04 E7 04
+ (1610201353.384263)  vcan0  00000343   [8]  D7 04 E5 04 F4 04 E5 04
+ (1610201354.386109)  vcan0  00000343   [8]  17 05 2C 05 2C 05 17 05
+ (1610201355.387956)  vcan0  00000343   [8]  69 05 85 05 69 05 77 05
+"""
+
+        xs = self.parse_time(input_data, self.parse_absolute_seconds)
+        ys_whlspeed_fl = [20.171875, 19.28125, 19.359375, 20.359375, 21.640625]
+        ys_whlspeed_fr = [19.9375, 19.5, 19.578125, 20.6875, 22.078125]
+        ys_whlspeed_rl = [19.9375, 19.171875, 19.8125, 20.6875, 21.640625]
+        ys_whlspeed_rr = [20.28125, 19.609375, 19.578125, 20.359375, 21.859375]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel(self.XLABEL_ta % "09.01.2021"),
+            mock.call.subplot().axes.set_ylim(0.0, None),
+            mock.call.show(),
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with PyplotMock() as plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+                        self.assertEqual(stdout.getvalue(), expected_output)
+
+    def test_ymax(self):
+        argv = ['cantools', 'plot', self.DBC_FILE, '--', '--ymin', '20', '--ymax', '40']
+        input_data = """\
+ (1610201742.935542)  vcan0  00000343   [8]  87 05 6B 05 6B 05 6B 05
+ (1610201743.937287)  vcan0  00000343   [8]  3B 06 3B 06 42 06 3B 06
+ (1610201744.939105)  vcan0  00000343   [8]  1E 07 1E 07 FF FF 2C 07
+ (1610201745.940906)  vcan0  00000343   [8]  2B 08 39 08 40 08 39 08
+ (1610201746.942730)  vcan0  00000343   [8]  6B 09 64 09 47 09 64 09
+"""
+
+        xs = self.parse_time(input_data, self.parse_absolute_seconds)
+        ys_whlspeed_fl = [22.109375, 24.921875, 28.46875, 32.671875, 37.671875]
+        ys_whlspeed_fr = [21.671875, 24.921875, 28.46875, 32.890625, 37.5625]
+        ys_whlspeed_rl = [21.671875, 25.03125, 1023.984375, 33.0, 37.109375]
+        ys_whlspeed_rr = [21.671875, 24.921875, 28.6875, 32.890625, 37.5625]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
+            mock.call.subplot().legend(),
+            mock.call.subplot().set_xlabel(self.XLABEL_ta % "09.01.2021"),
+            mock.call.subplot().axes.set_ylim(20.0, 40.0),
+            mock.call.show(),
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with PyplotMock() as plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+                        self.assertEqual(stdout.getvalue(), expected_output)
+
 
     # ------- other tests -------
 

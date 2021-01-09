@@ -345,8 +345,6 @@ class Signals:
         self.subplot = 1
         self.subplot_kw = dict()
 
-        if not signals:
-            signals = ['*']
         i0 = 0
         while True:
             try:
@@ -365,6 +363,9 @@ class Signals:
 
             self.subplot += 1
             i0 = i1 + 1
+
+        if not self.signals:
+            self.add_signal('*')
 
         self.compile_reo()
 

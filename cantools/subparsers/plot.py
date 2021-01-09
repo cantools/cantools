@@ -343,7 +343,7 @@ class Signals:
         self.break_time = break_time
         self.break_time_uninit = True
         self.subplot = 1
-        self.subplot_kw = dict()
+        self.subplot_args = dict()
 
         i0 = 0
         while True:
@@ -353,9 +353,9 @@ class Signals:
                 i1 = None
 
             subplot_signals = signals[i0:i1]
-            subplot_args, subplot_signals = subplot_argparser.parse_known_args(subplot_signals)
-            self.subplot_kw[self.subplot] = subplot_args
-            for sg in subplot_signals:
+            subplot_args = subplot_argparser.parse_args(subplot_signals)
+            self.subplot_args[self.subplot] = subplot_args
+            for sg in subplot_args.signals:
                 self.add_signal(sg)
 
             if i1 is None:
@@ -431,6 +431,7 @@ class Signals:
 
     # ------- at end -------
 
+    SUBPLOT_DIRECT_NAMES = ('title', 'ylabel')
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
         splot = None
         last_subplot = 0
@@ -445,7 +446,8 @@ class Signals:
                     axes = splot.axes
                     splot.legend()
                     splot.set_xlabel(xlabel)
-                splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes)
+                kw = {key:val for key,val in vars(self.subplot_args[sgo.subplot]).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
+                splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes, **kw)
 
             plotted = False
             for signal_name in sorted_signal_names:
@@ -552,6 +554,7 @@ def add_subparser(subparsers):
     It sets the entry point for this subprogram by setting a default values for func.
     '''
     epilog = subplot_argparser.format_help()[len(subplot_argparser.format_usage()):].lstrip('\n')
+    epilog = epilog[:epilog.rindex('\n', 0, -1)]
     decode_parser = subparsers.add_parser(
         'plot',
         description=__doc__,
@@ -649,5 +652,6 @@ These options must be separated from the above listed options by a --.
     arg_group.add_argument('--ylabel')
     arg_group.add_argument('--ymin')
     arg_group.add_argument('--ymax')
+    arg_group.add_argument('signals', nargs='*')
     return parser
 subplot_argparser = create_subplot_argparser()

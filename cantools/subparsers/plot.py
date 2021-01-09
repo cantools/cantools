@@ -433,21 +433,22 @@ class Signals:
 
     SUBPLOT_DIRECT_NAMES = ('title', 'ylabel')
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
+        self.default_xlabel = xlabel
         splot = None
         last_subplot = 0
         axis_format_uninitialized = True
         sorted_signal_names = sorted(self.values.keys())
         for sgo in self.signals:
             if sgo.subplot > last_subplot:
-                last_subplot = sgo.subplot
                 if splot is None:
                     axes = None
                 else:
                     axes = splot.axes
-                    splot.legend()
-                    splot.set_xlabel(xlabel)
+                    self.finish_subplot(splot, self.subplot_args[last_subplot])
+
                 kw = {key:val for key,val in vars(self.subplot_args[sgo.subplot]).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
                 splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes, **kw)
+                last_subplot = sgo.subplot
 
             plotted = False
             for signal_name in sorted_signal_names:
@@ -475,8 +476,14 @@ class Signals:
         self.plot_error(splot, x_invalid_syntax, 'invalid syntax', self.COLOR_INVALID_SYNTAX)
         self.plot_error(splot, x_unknown_frames, 'unknown frames', self.COLOR_UNKNOWN_FRAMES)
         self.plot_error(splot, x_invalid_data, 'invalid data', self.COLOR_INVALID_DATA)
+        self.finish_subplot(splot, self.subplot_args[last_subplot])
 
+    def finish_subplot(self, splot, subplot_args):
         splot.legend()
+        if subplot_args.xlabel is not None:
+            xlabel = subplot_args.xlabel
+        else:
+            xlabel = self.default_xlabel
         splot.set_xlabel(xlabel)
 
     def plot_error(self, splot, xs, label, color):

@@ -258,7 +258,7 @@ class Plotter:
         self.ignore_unknown_frames = args.ignore_unknown_frames
         self.ignore_invalid_data = args.ignore_invalid_data
         self.output_filename = args.output_file
-        self.signals = Signals(args.signals, args.case_sensitive, args.break_time)
+        self.signals = Signals(args.signals, args.case_sensitive, args.break_time, args)
 
         self.x_invalid_syntax = []
         self.x_unknown_frames = []
@@ -335,8 +335,9 @@ class Signals:
 
     # ------- initialization -------
 
-    def __init__(self, signals, case_sensitive, break_time):
+    def __init__(self, signals, case_sensitive, break_time, global_subplot_args):
         self.args = signals
+        self.global_subplot_args = global_subplot_args
         self.signals = []
         self.values = {}
         self.re_flags = 0 if case_sensitive else re.I
@@ -436,6 +437,9 @@ class Signals:
 
     SUBPLOT_DIRECT_NAMES = ('title', 'ylabel')
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
+        title = self.global_subplot_args.title
+        self.global_subplot_args.title = None
+
         self.default_xlabel = xlabel
         splot = None
         last_subplot = 0
@@ -450,6 +454,11 @@ class Signals:
                     self.finish_subplot(splot, self.subplot_args[last_subplot])
 
                 kw = {key:val for key,val in vars(self.subplot_args[sgo.subplot]).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
+                for key in self.SUBPLOT_DIRECT_NAMES:
+                    if key not in kw:
+                        val = getattr(self.global_subplot_args, key)
+                        if val is not None:
+                            kw[key] = val
                 splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes, **kw)
                 last_subplot = sgo.subplot
 
@@ -481,15 +490,24 @@ class Signals:
         self.plot_error(splot, x_invalid_data, 'invalid data', self.COLOR_INVALID_DATA)
         self.finish_subplot(splot, self.subplot_args[last_subplot])
 
+        if title is not None:
+            plt.title(title)
+
     def finish_subplot(self, splot, subplot_args):
         splot.legend()
 
         if subplot_args.xlabel is not None:
             xlabel = subplot_args.xlabel
+        elif self.global_subplot_args.xlabel is not None:
+            xlabel = self.global_subplot_args.xlabel
         else:
             xlabel = self.default_xlabel
         splot.set_xlabel(xlabel)
 
+        if subplot_args.ymin is None:
+            subplot_args.ymin = self.global_subplot_args.ymin
+        if subplot_args.ymax is None:
+            subplot_args.ymax = self.global_subplot_args.ymax
         if subplot_args.ymin is not None or subplot_args.ymax is not None:
             splot.axes.set_ylim(subplot_args.ymin, subplot_args.ymax)
 

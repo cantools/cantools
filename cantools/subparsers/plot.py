@@ -344,6 +344,9 @@ class Signals:
         self.break_time_uninit = True
         self.subplot = 1
         self.subplot_args = dict()
+        self.subplot_argparser = argparse.ArgumentParser()
+        self.subplot_argparser.add_argument('signals', nargs='*')
+        add_subplot_options(self.subplot_argparser)
 
         i0 = 0
         while True:
@@ -353,7 +356,7 @@ class Signals:
                 i1 = None
 
             subplot_signals = signals[i0:i1]
-            subplot_args = subplot_argparser.parse_args(subplot_signals)
+            subplot_args = self.subplot_argparser.parse_args(subplot_signals)
             self.subplot_args[self.subplot] = subplot_args
             for sg in subplot_args.signals:
                 self.add_signal(sg)
@@ -565,12 +568,9 @@ def add_subparser(subparsers):
     It adds the options for this subprogram to the argparse parser.
     It sets the entry point for this subprogram by setting a default values for func.
     '''
-    epilog = subplot_argparser.format_help()[len(subplot_argparser.format_usage()):].lstrip('\n')
-    epilog = epilog[:epilog.rindex('\n', 0, -1)]
     decode_parser = subparsers.add_parser(
         'plot',
         description=__doc__,
-        epilog=epilog,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     decode_parser.add_argument(
         '-c', '--no-decode-choices',
@@ -653,17 +653,18 @@ def add_subparser(subparsers):
         help='The signals to be plotted.')
     decode_parser.set_defaults(func=_do_decode)
 
-def create_subplot_argparser():
-    parser = argparse.ArgumentParser(add_help=False)
-    arg_group = parser.add_argument_group('subplot arguments',
-'''The following options can be placed in front of a signal in order to customize the corresponding subplot.
-These options must be separated from the above listed options by a --.
+    subplot_arggroup = decode_parser.add_argument_group('subplot arguments',
+        '''\
+The following options can be used to configure the subplots.
+If they shall apply to a specific subplot they must be placed among the signals for that subplot and a -- must mark the end of the global optional arguments.
+Otherwise they apply to the entire figure or as a default value for each subplot.
 ''')
+    add_subplot_options(subplot_arggroup)
+
+def add_subplot_options(arg_group):
     arg_group.add_argument('--title')
     arg_group.add_argument('--xlabel')
     arg_group.add_argument('--ylabel')
     arg_group.add_argument('--ymin', type=float)
     arg_group.add_argument('--ymax', type=float)
-    arg_group.add_argument('signals', nargs='*')
-    return parser
-subplot_argparser = create_subplot_argparser()
+    return arg_group

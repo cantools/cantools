@@ -333,6 +333,8 @@ class Signals:
     COLOR_INVALID_DATA   = '#ff00ff'
     ERROR_LINEWIDTH = 1
 
+    FIRST_SUBPLOT = 1
+
     # ------- initialization -------
 
     def __init__(self, signals, case_sensitive, break_time, global_subplot_args):
@@ -343,7 +345,7 @@ class Signals:
         self.re_flags = 0 if case_sensitive else re.I
         self.break_time = break_time
         self.break_time_uninit = True
-        self.subplot = 1
+        self.subplot = self.FIRST_SUBPLOT
         self.subplot_args = dict()
         self.subplot_argparser = argparse.ArgumentParser()
         self.subplot_argparser.add_argument('signals', nargs='*')
@@ -437,8 +439,9 @@ class Signals:
 
     SUBPLOT_DIRECT_NAMES = ('title', 'ylabel')
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
-        title = self.global_subplot_args.title
-        self.global_subplot_args.title = None
+        if self.global_subplot_args.title is not None:
+            self.subplot_args[self.FIRST_SUBPLOT].title = self.global_subplot_args.title
+            self.global_subplot_args.title = None
 
         self.default_xlabel = xlabel
         splot = None
@@ -489,9 +492,6 @@ class Signals:
         self.plot_error(splot, x_unknown_frames, 'unknown frames', self.COLOR_UNKNOWN_FRAMES)
         self.plot_error(splot, x_invalid_data, 'invalid data', self.COLOR_INVALID_DATA)
         self.finish_subplot(splot, self.subplot_args[last_subplot])
-
-        if title is not None:
-            plt.title(title)
 
     def finish_subplot(self, splot, subplot_args):
         splot.legend()
@@ -675,7 +675,8 @@ def add_subparser(subparsers):
         '''\
 The following options can be used to configure the subplots.
 If they shall apply to a specific subplot they must be placed among the signals for that subplot and a -- must mark the end of the global optional arguments.
-Otherwise they apply to the entire figure or as a default value for each subplot.
+Otherwise they are used as default value for each subplot.
+An exception is --title, which if used as global option is equivalent to passing it for the first (top most) subplot only.
 ''')
     add_subplot_options(subplot_arggroup)
 

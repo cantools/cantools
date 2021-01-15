@@ -1530,11 +1530,10 @@ Failed to parse line: 'invalid syntax'
         ys_whlspeed_fl = [18.75, 17.828125]
 
         expected_calls = [
-            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot(1,1,1, sharex=None, title='Test'),
             mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
             mock.call.subplot().legend(),
             mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
-            mock.call.title('Test'),
             mock.call.show(),
         ]
 
@@ -1548,6 +1547,60 @@ Failed to parse line: 'invalid syntax'
                         cantools._main()
                         self.assertListEqual(plt.mock_calls, expected_calls)
                         self.assertEqual(stdout.getvalue(), expected_output)
+
+    def test_global_title_2_subplots(self):
+        argv = ['cantools', 'plot', '--title', 'Bremsen', '--', self.DBC_FILE, '*fl', '-', '*fl?*']
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  FC 04 0B 05 04 05 EE 04
+ (000.000297)  vcan0  0000024A   [8]  52 04 59 04 60 04 75 04
+ (001.002087)  vcan0  00000343   [8]  15 05 2B 05 2B 05 32 05
+ (001.002847)  vcan0  0000024A   [8]  AB 03 80 03 87 03 87 03
+ (002.004729)  vcan0  00000343   [8]  0E 05 F2 04 F9 04 0E 05
+ (002.005430)  vcan0  0000024A   [8]  CB 02 CB 02 A7 02 CB 02
+ (003.007302)  vcan0  00000343   [8]  A7 04 99 04 A0 04 92 04
+ (003.008002)  vcan0  0000024A   [8]  00 02 15 02 2B 02 2B 02
+ (004.009859)  vcan0  00000343   [8]  72 04 5C 04 79 04 55 04
+ (004.010753)  vcan0  0000024A   [8]  80 01 80 01 55 01 6B 01
+"""
+
+        xs_33 = self.parse_time(input_data, self.parse_seconds, 2, 0)
+        xs_2  = self.parse_time(input_data, self.parse_seconds, 2, 1)
+        ys_whlspeed_fl_bremse2 = [17.28125, 14.671875, 11.171875, 8.0, 6.0]
+        ys_whlspeed_fl = [19.9375, 20.328125, 20.21875, 18.609375, 17.78125]
+
+        subplots = [SubplotMock(), SubplotMock()]
+        plt = PyplotMock()
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(2,1,1, sharex=None, title='Bremsen'),
+            mock.call.subplot(2,1,2, sharex=subplots[0].axes),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs_33, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.legend(),
+                mock.call.set_xlabel(self.XLABEL_tz),
+            ], [
+                mock.call.plot(xs_2, ys_whlspeed_fl_bremse2, '', label='BREMSE_2.whlspeed_FL_Bremse2'),
+                mock.call.legend(),
+                mock.call.set_xlabel(self.XLABEL_tz),
+            ]
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+                        for i in range(len(expected_subplot_calls)):
+                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+                        self.assertEqual(stdout.getvalue(), expected_output)
+
 
     def test_global_xlabel(self):
         argv = ['cantools', 'plot', '--xlabel', '', self.DBC_FILE, '*fl', '-', '*fl?*']

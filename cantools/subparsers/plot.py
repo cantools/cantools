@@ -439,10 +439,6 @@ class Signals:
 
     SUBPLOT_DIRECT_NAMES = ('title', 'ylabel')
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
-        if self.global_subplot_args.title is not None:
-            self.subplot_args[self.FIRST_SUBPLOT].title = self.global_subplot_args.title
-            self.global_subplot_args.title = None
-
         self.default_xlabel = xlabel
         splot = None
         last_subplot = 0
@@ -676,7 +672,6 @@ def add_subparser(subparsers):
 The following options can be used to configure the subplots.
 If they shall apply to a specific subplot they must be placed among the signals for that subplot and a -- must mark the end of the global optional arguments.
 Otherwise they are used as default value for each subplot.
-An exception is --title, which if used as global option is equivalent to passing it for the first (top most) subplot only.
 ''')
     add_subplot_options(subplot_arggroup)
 

@@ -99,45 +99,103 @@ class TimestampParser:
 
     FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
-    def __init__(self):
+    def __init__(self, args):
         self.use_timestamp = None
         self.relative = None
         self._parse_timestamp = None
         self.first_timestamp = None
+        self.args = args
+
+    def init_start_stop(self, x0):
+        if self.use_timestamp and self.relative:
+            parse = self.parse_user_input_relative_time
+        elif self.use_timestamp:
+            parse = self.parse_user_input_absolute_time
+        else:
+            parse = lambda s,x0: int(s)
+
+        if self.args.start is not None:
+            self.args.start = parse(self.args.start, x0)
+        if self.args.stop is not None:
+            self.args.stop = parse(self.args.stop, x0)
+
+    def parse_user_input_relative_time(self, user_input, first_timestamp):
+        pass
+
+    def parse_user_input_absolute_time(self, user_input, first_timestamp):
+        patterns_year = ['%Y-%m-%d', '%d.%m.%Y']
+        patterns_month = ['%m-%d', '%d.%m.']
+        patterns_day = ['%d.']
+        patterns_hour = ['%H:%M:', '%H%:%M:%S', '%H:%M:%S.%f']
+        patterns_minute = [':%M:%S', '%M:%S.', '%M:%S.%f']
+        patterns_second = ['%S', '%S.%f']
+
+        date_time_sep = ' '
+        for patterns in (patterns_year, patterns_month, patterns_day):
+            for pattern_date in tuple(patterns):
+                for pattern_time in ['%H:%M']+patterns_hour:
+                    patterns.append(pattern_date+date_time_sep+pattern_time)
+
+
+        for attrs, patterns in [
+            (['year', 'month', 'day', 'hour', 'minute'], patterns_second),
+            (['year', 'month', 'day', 'hour'], patterns_minute),
+            (['year', 'month', 'day'], patterns_hour),
+            (['year', 'month'], patterns_day),
+            (['year'], patterns_month),
+            ([], patterns_year),
+        ]:
+            for p in patterns:
+                try:
+                    out = datetime.datetime.strptime(user_input, p)
+                except ValueError:
+                    pass
+                else:
+                    kw = {a:getattr(first_timestamp,a) for a in attrs}
+                    out = out.replace(**kw)
+                    return out
+
+        raise ValueError("Failed to parse relative time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
+
+    def first_parse_timestamp(self, timestamp, linenumber):
+        if timestamp is None:
+            self.use_timestamp = False
+            return linenumber
+
+        try:
+            out = self.parse_absolute_timestamp(timestamp)
+            self.use_timestamp = True
+            self.relative = False
+            self.first_timestamp = out
+            self._parse_timestamp = self.parse_absolute_timestamp
+            return out
+        except ValueError:
+            pass
+
+        try:
+            if float(timestamp) > self.THRESHOLD_ABSOLUTE_SECONDS:
+                out = self.parse_absolute_seconds(timestamp)
+                self.relative = False
+                self.first_timestamp = out
+                self._parse_timestamp = self.parse_absolute_seconds
+            else:
+                out = self.parse_seconds(timestamp)
+                self.relative = True
+                self._parse_timestamp = self.parse_seconds
+
+            self.use_timestamp = True
+            return out
+        except ValueError:
+            pass
+
+        self.use_timestamp = False
+        return linenumber
 
     def parse_timestamp(self, timestamp, linenumber):
         if self.use_timestamp is None:
-            if timestamp is None:
-                self.use_timestamp = False
-                return linenumber
-
-            try:
-                out = self.parse_absolute_timestamp(timestamp)
-                self.use_timestamp = True
-                self.relative = False
-                self.first_timestamp = out
-                self._parse_timestamp = self.parse_absolute_timestamp
-                return out
-            except ValueError:
-                pass
-
-            try:
-                if float(timestamp) > self.THRESHOLD_ABSOLUTE_SECONDS:
-                    out = self.parse_absolute_seconds(timestamp)
-                    self.relative = False
-                    self.first_timestamp = out
-                    self._parse_timestamp = self.parse_absolute_seconds
-                else:
-                    out = self.parse_seconds(timestamp)
-                    self.relative = True
-                    self._parse_timestamp = self.parse_seconds
-
-                self.use_timestamp = True
-                return out
-            except ValueError:
-                pass
-
-            self.use_timestamp = False
+            x = self.first_parse_timestamp(timestamp, linenumber)
+            self.init_start_stop(x)
+            return x
 
         if self.use_timestamp:
             return self._parse_timestamp(timestamp)
@@ -189,7 +247,7 @@ def _do_decode(args):
                                frame_id_mask=args.frame_id_mask,
                                strict=not args.no_strict)
     re_format = None
-    timestamp_parser = TimestampParser()
+    timestamp_parser = TimestampParser(args)
     if args.show_invalid_syntax:
         # we cannot use a timestamp if we have failed to parse the line
         timestamp_parser.use_timestamp = False
@@ -227,6 +285,11 @@ def _do_decode(args):
         if mo:
             timestamp, frame_id, data = _mo_unpack(mo)
             timestamp = timestamp_parser.parse_timestamp(timestamp, line_number)
+            if args.start is not None and timestamp < args.start:
+                line_number += 1
+                continue
+            elif args.stop is not None and timestamp > args.stop:
+                break
             plotter.add_msg(timestamp, frame_id, data)
         elif RE_DECODE.match(line):
             continue
@@ -657,6 +720,13 @@ def add_subparser(subparsers):
     decode_parser.add_argument(
         '-o', '--output-file',
         help='A file to write the plot to instead of displaying it in a window.')
+
+    decode_parser.add_argument(
+        '-ss', '--start',
+        help='A start time or line number. Everything before is ignored.')
+    decode_parser.add_argument(
+        '-to', '--stop',
+        help='An end time or line number. Everything after is ignored.')
 
     decode_parser.add_argument(
         'database',

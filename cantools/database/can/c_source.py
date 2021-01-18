@@ -536,9 +536,13 @@ SIGNAL_MEMBER_FMT = '''\
 
 class Signal(object):
 
-    def __init__(self, signal):
+    def __init__(self, signal, disable_snake_case_conversion):
         self._signal = signal
-        self.snake_name = camel_to_snake_case(self.name)
+
+        if disable_snake_case_conversion:
+            self.exported_name = _canonical(self.name)
+        else:
+            self.exported_name = camel_to_snake_case(self.name)
 
     def __getattr__(self, name):
         return getattr(self._signal, name)
@@ -737,10 +741,13 @@ class Signal(object):
 
 class Message(object):
 
-    def __init__(self, message):
+    def __init__(self, message, disable_snake_case_conversion):
         self._message = message
-        self.snake_name = camel_to_snake_case(self.name)
-        self.signals = [Signal(signal)for signal in message.signals]
+        if disable_snake_case_conversion:
+            self.exported_name = _canonical(self.name)
+        else:
+            self.exported_name = camel_to_snake_case(self.name)
+        self.signals = [Signal(signal, disable_snake_case_conversion)for signal in message.signals]
 
     def __getattr__(self, name):
         return getattr(self._message, name)
@@ -853,7 +860,7 @@ def _generate_signal(signal, bit_fields):
                                       scale=scale,
                                       offset=offset,
                                       type_name=signal.type_name,
-                                      name=signal.snake_name,
+                                      name=signal.exported_name,
                                       length=length)
 
     return member
@@ -863,15 +870,20 @@ def _format_pack_code_mux(message,
                           mux,
                           body_lines_per_index,
                           variable_lines,
-                          helper_kinds):
+                          helper_kinds,
+                          disable_snake_case_conversion):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_pack_code_signal(message,
                              signal_name,
                              body_lines_per_index,
                              variable_lines,
-                             helper_kinds)
+                             helper_kinds,
+                             disable_snake_case_conversion)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
-    signal_name = camel_to_snake_case(signal_name)
+    if disable_snake_case_conversion:
+        signal_name = _canonical(signal_name)
+    else:
+        signal_name = camel_to_snake_case(signal_name)
 
     lines = [
         '',
@@ -882,7 +894,8 @@ def _format_pack_code_mux(message,
         body_lines = _format_pack_code_level(message,
                                              multiplexed_signals,
                                              variable_lines,
-                                             helper_kinds)
+                                             helper_kinds,
+                                             disable_snake_case_conversion)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
 
@@ -904,19 +917,20 @@ def _format_pack_code_signal(message,
                              signal_name,
                              body_lines,
                              variable_lines,
-                             helper_kinds):
+                             helper_kinds,
+                             disable_snake_case_conversion):
     signal = message.get_signal_by_name(signal_name)
 
     if signal.is_float or signal.is_signed:
         variable = '    uint{}_t {};'.format(signal.type_length,
-                                             signal.snake_name)
+                                             signal.exported_name)
 
         if signal.is_float:
             conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
-                signal.snake_name)
+                signal.exported_name)
         else:
             conversion = '    {0} = (uint{1}_t)src_p->{0};'.format(
-                signal.snake_name,
+                signal.exported_name,
                 signal.type_length)
 
         variable_lines.append(variable)
@@ -931,7 +945,7 @@ def _format_pack_code_signal(message,
         line = fmt.format(index,
                           shift_direction,
                           signal.type_length,
-                          signal.snake_name,
+                          signal.exported_name,
                           shift,
                           mask)
         body_lines.append(line)
@@ -941,7 +955,8 @@ def _format_pack_code_signal(message,
 def _format_pack_code_level(message,
                             signal_names,
                             variable_lines,
-                            helper_kinds):
+                            helper_kinds,
+                            disable_snake_case_conversion):
     """Format one pack level in a signal tree.
 
     """
@@ -955,14 +970,16 @@ def _format_pack_code_level(message,
                                               signal_name,
                                               body_lines,
                                               variable_lines,
-                                              helper_kinds)
+                                              helper_kinds,
+                                              disable_snake_case_conversion)
             muxes_lines += mux_lines
         else:
             _format_pack_code_signal(message,
                                      signal_name,
                                      body_lines,
                                      variable_lines,
-                                     helper_kinds)
+                                     helper_kinds,
+                                     disable_snake_case_conversion)
 
     body_lines = body_lines + muxes_lines
 
@@ -972,12 +989,13 @@ def _format_pack_code_level(message,
     return body_lines
 
 
-def _format_pack_code(message, helper_kinds):
+def _format_pack_code(message, helper_kinds, disable_snake_case_conversion):
     variable_lines = []
     body_lines = _format_pack_code_level(message,
                                          message.signal_tree,
                                          variable_lines,
-                                         helper_kinds)
+                                         helper_kinds,
+                                         disable_snake_case_conversion)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -989,7 +1007,8 @@ def _format_unpack_code_mux(message,
                             mux,
                             body_lines_per_index,
                             variable_lines,
-                            helper_kinds):
+                            helper_kinds,
+                            disable_snake_case_conversion):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_unpack_code_signal(message,
                                signal_name,
@@ -997,7 +1016,10 @@ def _format_unpack_code_mux(message,
                                variable_lines,
                                helper_kinds)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
-    signal_name = camel_to_snake_case(signal_name)
+    if disable_snake_case_conversion:
+        signal_name = _canonical(signal_name)
+    else:
+        signal_name = camel_to_snake_case(signal_name)
 
     lines = [
         'switch (dst_p->{}) {{'.format(signal_name)
@@ -1007,7 +1029,8 @@ def _format_unpack_code_mux(message,
         body_lines = _format_unpack_code_level(message,
                                                multiplexed_signals,
                                                variable_lines,
-                                               helper_kinds)
+                                               helper_kinds,
+                                               disable_snake_case_conversion)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
         lines.extend(_strip_blank_lines(body_lines))
@@ -1031,7 +1054,7 @@ def _format_unpack_code_signal(message,
     conversion_type_name = 'uint{}_t'.format(signal.type_length)
 
     if signal.is_float or signal.is_signed:
-        variable = '    {} {};'.format(conversion_type_name, signal.snake_name)
+        variable = '    {} {};'.format(conversion_type_name, signal.exported_name)
         variable_lines.append(variable)
 
     segments = signal.segments(invert_shift=True)
@@ -1042,7 +1065,7 @@ def _format_unpack_code_signal(message,
         else:
             fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
-        line = fmt.format(signal.snake_name,
+        line = fmt.format(signal.exported_name,
                           '=' if i == 0 else '|=',
                           shift_direction,
                           signal.type_length,
@@ -1054,20 +1077,20 @@ def _format_unpack_code_signal(message,
 
     if signal.is_float:
         conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
-            signal.snake_name)
+            signal.exported_name)
         body_lines.append(conversion)
     elif signal.is_signed:
         mask = ((1 << (signal.type_length - signal.length)) - 1)
 
         if mask != 0:
             mask <<= signal.length
-            formatted = SIGN_EXTENSION_FMT.format(name=signal.snake_name,
+            formatted = SIGN_EXTENSION_FMT.format(name=signal.exported_name,
                                                   shift=signal.length - 1,
                                                   mask=mask,
                                                   suffix=signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
 
-        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal.snake_name,
+        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal.exported_name,
                                                               signal.type_length)
         body_lines.append(conversion)
 
@@ -1075,7 +1098,8 @@ def _format_unpack_code_signal(message,
 def _format_unpack_code_level(message,
                               signal_names,
                               variable_lines,
-                              helper_kinds):
+                              helper_kinds,
+                              disable_snake_case_conversion):
     """Format one unpack level in a signal tree.
 
     """
@@ -1089,7 +1113,8 @@ def _format_unpack_code_level(message,
                                                 signal_name,
                                                 body_lines,
                                                 variable_lines,
-                                                helper_kinds)
+                                                helper_kinds,
+                                                disable_snake_case_conversion)
 
             if muxes_lines:
                 muxes_lines.append('')
@@ -1117,12 +1142,13 @@ def _format_unpack_code_level(message,
     return body_lines
 
 
-def _format_unpack_code(message, helper_kinds):
+def _format_unpack_code(message, helper_kinds, disable_snake_case_conversion):
     variable_lines = []
     body_lines = _format_unpack_code_level(message,
                                            message.signal_tree,
                                            variable_lines,
-                                           helper_kinds)
+                                           helper_kinds,
+                                           disable_snake_case_conversion)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -1263,7 +1289,7 @@ def _generate_frame_id_defines(database_name, messages):
     return '\n'.join([
         '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.exported_name.upper(),
             message.frame_id)
         for message in messages
     ])
@@ -1273,7 +1299,7 @@ def _generate_frame_length_defines(database_name, messages):
     result = '\n'.join([
         '#define {}_{}_LENGTH ({}u)'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.exported_name.upper(),
             message.length)
         for message in messages
     ])
@@ -1285,7 +1311,7 @@ def _generate_frame_cycle_time_defines(database_name, messages):
     result = '\n'.join([
         '#define {}_{}_CYCLE_TIME_MS ({}u)'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.exported_name.upper(),
             message.cycle_time)
         for message in messages if message.cycle_time is not None
     ])
@@ -1297,7 +1323,7 @@ def _generate_is_extended_frame_defines(database_name, messages):
     result = '\n'.join([
         '#define {}_{}_IS_EXTENDED ({})'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.exported_name.upper(),
             int(message.is_extended_frame))
         for message in messages
     ])
@@ -1313,10 +1339,10 @@ def _generate_choices_defines(database_name, messages):
             if signal.choices is None:
                 continue
 
-            choices = _format_choices(signal, signal.snake_name)
+            choices = _format_choices(signal, signal.exported_name)
             signal_choices_defines = '\n'.join([
                 '#define {}_{}_{}'.format(database_name.upper(),
-                                          message.snake_name.upper(),
+                                          message.exported_name.upper(),
                                           choice)
                 for choice in choices
             ])
@@ -1333,7 +1359,7 @@ def _generate_structs(database_name, messages, bit_fields):
         structs.append(
             STRUCT_FMT.format(comment=comment,
                               database_message_name=message.name,
-                              message_name=message.snake_name,
+                              message_name=message.exported_name,
                               database_name=database_name,
                               members='\n\n'.join(members)))
 
@@ -1352,21 +1378,21 @@ def _generate_declarations(database_name, messages, floating_point_numbers):
             if floating_point_numbers:
                 signal_declaration = SIGNAL_DECLARATION_ENCODE_DECODE_FMT.format(
                     database_name=database_name,
-                    message_name=message.snake_name,
-                    signal_name=signal.snake_name,
+                    message_name=message.exported_name,
+                    signal_name=signal.exported_name,
                     type_name=signal.type_name)
 
             signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
-                message_name=message.snake_name,
-                signal_name=signal.snake_name,
+                message_name=message.exported_name,
+                signal_name=signal.exported_name,
                 type_name=signal.type_name)
 
             signal_declarations.append(signal_declaration)
 
         declaration = DECLARATION_FMT.format(database_name=database_name,
                                              database_message_name=message.name,
-                                             message_name=message.snake_name)
+                                             message_name=message.exported_name)
 
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
@@ -1376,7 +1402,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers):
     return '\n'.join(declarations)
 
 
-def _generate_definitions(database_name, messages, floating_point_numbers):
+def _generate_definitions(database_name, messages, floating_point_numbers, disable_snake_case_conversion=False):
     definitions = []
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
@@ -1397,16 +1423,16 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
             if floating_point_numbers:
                 signal_definition = SIGNAL_DEFINITION_ENCODE_DECODE_FMT.format(
                     database_name=database_name,
-                    message_name=message.snake_name,
-                    signal_name=signal.snake_name,
+                    message_name=message.exported_name,
+                    signal_name=signal.exported_name,
                     type_name=signal.type_name,
                     encode=encode,
                     decode=decode)
 
             signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
-                message_name=message.snake_name,
-                signal_name=signal.snake_name,
+                message_name=message.exported_name,
+                signal_name=signal.exported_name,
                 type_name=signal.type_name,
                 unused=unused,
                 check=check)
@@ -1415,9 +1441,11 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
 
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,
-                                                          pack_helper_kinds)
+                                                          pack_helper_kinds,
+                                                          disable_snake_case_conversion)
             unpack_variables, unpack_body = _format_unpack_code(message,
-                                                                unpack_helper_kinds)
+                                                                unpack_helper_kinds,
+                                                                disable_snake_case_conversion)
             pack_unused = ''
             unpack_unused = ''
 
@@ -1430,7 +1458,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
 
             definition = DEFINITION_FMT.format(database_name=database_name,
                                                database_message_name=message.name,
-                                               message_name=message.snake_name,
+                                               message_name=message.exported_name,
                                                message_length=message.length,
                                                pack_unused=pack_unused,
                                                unpack_unused=unpack_unused,
@@ -1440,7 +1468,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
                                                unpack_body=unpack_body)
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
-                                                     message_name=message.snake_name)
+                                                     message_name=message.exported_name)
 
         if signal_definitions:
             definition += '\n' + '\n'.join(signal_definitions)
@@ -1520,7 +1548,8 @@ def generate(database,
              source_name,
              fuzzer_source_name,
              floating_point_numbers=True,
-             bit_fields=False):
+             bit_fields=False,
+             disable_snake_case_conversion=False):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1540,13 +1569,17 @@ def generate(database,
 
     Set `bit_fields` to ``True`` to generate bit fields in structs.
 
+    Set `disable_snake_case_conversion` to ``True`` to preseve
+    message and signal names from the DBC databse to the extent
+    possible while still remaining legal python identifiers.
+
     This function returns a tuple of the C header and source files as
     strings.
 
     """
 
     date = time.ctime()
-    messages = [Message(message) for message in database.messages]
+    messages = [Message(message, disable_snake_case_conversion) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
     frame_id_defines = _generate_frame_id_defines(database_name, messages)
     frame_length_defines = _generate_frame_length_defines(database_name,
@@ -1564,7 +1597,8 @@ def generate(database,
                                           floating_point_numbers)
     definitions, helper_kinds = _generate_definitions(database_name,
                                                       messages,
-                                                      floating_point_numbers)
+                                                      floating_point_numbers,
+                                                      disable_snake_case_conversion)
     helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(version=__version__,

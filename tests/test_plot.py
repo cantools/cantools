@@ -1341,6 +1341,10 @@ Failed to parse line: 'invalid syntax'
                         self.assertListEqual(plt.mock_calls, expected_calls)
                         self.assertEqual(stdout.getvalue(), expected_output)
 
+
+    #TODO: test --stop depends on --start
+    #TODO: xlabel shows --start
+
     #TODO: test relative time
 
 

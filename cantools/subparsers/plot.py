@@ -120,6 +120,8 @@ class TimestampParser:
 
         if self.args.start is not None:
             self.args.start = parse(self.args.start, x0)
+            x0 = self.args.start
+            self.first_timestamp = x0
         if self.args.stop is not None:
             self.args.stop = parse(self.args.stop, x0)
 

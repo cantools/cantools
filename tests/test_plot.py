@@ -40,6 +40,14 @@ class SubplotMock(mock.Mock):
 
     axes = mock.Mock(name="axes-mock")
 
+    def __init__(self, ignore_set=True):
+        mock.Mock.__init__(self)
+        if ignore_set:
+            self.set = mock.Mock(name="set-mock")
+
+    def _get_child_mock(self, **kw):
+        return mock.Mock(**kw)
+
 
 class CanToolsPlotTest(unittest.TestCase):
 
@@ -1288,6 +1296,7 @@ Failed to parse line: 'invalid syntax'
             mock.call.subplot(1,1,1, sharex=None),
             mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
             mock.call.subplot().legend(),
+            mock.call.subplot().set(ylabel='*FL'),
             mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.show(),
         ]
@@ -1326,6 +1335,7 @@ Failed to parse line: 'invalid syntax'
             mock.call.subplot(1,1,1, sharex=None),
             mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
             mock.call.subplot().legend(),
+            mock.call.subplot().set(ylabel='*FL'),
             mock.call.subplot().set_xlabel(self.XLABEL_LINE_NUMBER),
             mock.call.show(),
         ]
@@ -1366,7 +1376,7 @@ Failed to parse line: 'invalid syntax'
         ys_whlspeed_rl = [22.078125, 23.671875, 24.8125, 25.9375, 26.25]
         ys_whlspeed_rr = [21.640625, 23.5625, 25.140625, 25.5, 25.578125]
 
-        subplots = [SubplotMock()]
+        subplots = [SubplotMock(ignore_set=False)]
         plt = PyplotMock()
         plt.subplot.side_effect = subplots
         expected_calls = [
@@ -1410,7 +1420,7 @@ Failed to parse line: 'invalid syntax'
             mock.call.subplot(1,1,1, sharex=None),
             mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
             mock.call.subplot().legend(),
-            mock.call.subplot().set(title='Test'),
+            mock.call.subplot().set(title='Test', ylabel='*fl'),
             mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.show(),
         ]
@@ -1576,7 +1586,7 @@ Failed to parse line: 'invalid syntax'
         ys_whlspeed_rl = [22.078125, 23.671875, 24.8125, 25.9375, 26.25]
         ys_whlspeed_rr = [21.640625, 23.5625, 25.140625, 25.5, 25.578125]
 
-        subplots = [SubplotMock()]
+        subplots = [SubplotMock(ignore_set=False)]
         plt = PyplotMock()
         plt.subplot.side_effect = subplots
         expected_calls = [
@@ -1620,7 +1630,7 @@ Failed to parse line: 'invalid syntax'
             mock.call.subplot(1,1,1, sharex=None),
             mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
             mock.call.subplot().legend(),
-            mock.call.subplot().set(title='Test'),
+            mock.call.subplot().set(title='Test', ylabel='*fl'),
             mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.show(),
         ]
@@ -1781,13 +1791,18 @@ Failed to parse line: 'invalid syntax'
         xs = self.parse_time(input_data, self.parse_absolute_time)
         ys_whlspeed_fl = [18.75, 17.828125]
 
+        subplots = [SubplotMock()]
+        plt = PyplotMock()
+        plt.subplot.side_effect = subplots
         expected_calls = [
             mock.call.subplot(1,1,1, sharex=None),
-            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
-            mock.call.subplot().legend(),
-            mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.show(),
         ]
+        expected_subplot_calls = [[
+            mock.call.plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.legend(),
+            mock.call.set_xlabel(self.XLABEL_tA % "27.12.2020"),
+        ]]
 
         stdout = StringIO()
         expected_output = ""
@@ -1795,9 +1810,11 @@ Failed to parse line: 'invalid syntax'
         with mock.patch('sys.stdin', StringIO(input_data)):
             with mock.patch('sys.stdout', stdout):
                 with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
+                    with plt:
                         cantools._main()
                         self.assertListEqual(plt.mock_calls, expected_calls)
+                        for i in range(len(expected_subplot_calls)):
+                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
     def test_do_not_replot(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '*fl:-o', '*:o']

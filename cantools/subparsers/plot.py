@@ -390,6 +390,9 @@ class Signals:
     Plots the values using matplotlib.pyplot.
     '''
 
+    # added between signal names used as default ylabel
+    YLABEL_SEP = ', '
+
     # before re.escape
     SEP_SUBPLOT = '-'
     SEP_AXES = ','
@@ -445,8 +448,11 @@ class Signals:
             subplot_signals = signals[i0:i1]
             subplot_args = self.subplot_argparser.parse_args(subplot_signals)
             self.subplot_args[(self.subplot, self.subplot_axis)] = subplot_args
+            self._ylabel = ""
             for sg in subplot_args.signals:
                 self.add_signal(sg)
+            if subplot_args.ylabel is None and self._ylabel:
+                subplot_args.ylabel = self._ylabel
 
             if i1 is None:
                 break
@@ -484,6 +490,10 @@ class Signals:
         else:
             fmt = ''
             plt_func = 'plot'
+
+        if self._ylabel:
+            self._ylabel += self.YLABEL_SEP
+        self._ylabel += signal
 
         signal = re.escape(signal)
         if self.SEP_SG not in signal:

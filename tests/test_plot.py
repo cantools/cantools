@@ -1370,7 +1370,7 @@ Failed to parse line: 'invalid syntax'
         plt = PyplotMock()
         plt.subplot.side_effect = subplots
         expected_calls = [
-            mock.call.subplot(1,1,1, sharex=None, ylabel='wheel speed'),
+            mock.call.subplot(1,1,1, sharex=None),
             mock.call.show(),
         ]
         expected_subplot_calls = [[
@@ -1379,6 +1379,7 @@ Failed to parse line: 'invalid syntax'
             mock.call.plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
             mock.call.plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
             mock.call.legend(),
+            mock.call.set(ylabel='wheel speed'),
             mock.call.set_xlabel(self.XLABEL_tz),
         ]]
 
@@ -1406,9 +1407,10 @@ Failed to parse line: 'invalid syntax'
         ys_whlspeed_fl = [18.75, 17.828125]
 
         expected_calls = [
-            mock.call.subplot(1,1,1, sharex=None, title='Test'),
+            mock.call.subplot(1,1,1, sharex=None),
             mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
             mock.call.subplot().legend(),
+            mock.call.subplot().set(title='Test'),
             mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.show(),
         ]
@@ -1578,7 +1580,7 @@ Failed to parse line: 'invalid syntax'
         plt = PyplotMock()
         plt.subplot.side_effect = subplots
         expected_calls = [
-            mock.call.subplot(1,1,1, sharex=None, ylabel='wheel speed'),
+            mock.call.subplot(1,1,1, sharex=None),
             mock.call.show(),
         ]
         expected_subplot_calls = [[
@@ -1587,6 +1589,7 @@ Failed to parse line: 'invalid syntax'
             mock.call.plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL'),
             mock.call.plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR'),
             mock.call.legend(),
+            mock.call.set(ylabel='wheel speed'),
             mock.call.set_xlabel(self.XLABEL_tz),
         ]]
 
@@ -1614,9 +1617,10 @@ Failed to parse line: 'invalid syntax'
         ys_whlspeed_fl = [18.75, 17.828125]
 
         expected_calls = [
-            mock.call.subplot(1,1,1, sharex=None, title='Test'),
+            mock.call.subplot(1,1,1, sharex=None),
             mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
             mock.call.subplot().legend(),
+            mock.call.subplot().set(title='Test'),
             mock.call.subplot().set_xlabel(self.XLABEL_tA % "27.12.2020"),
             mock.call.show(),
         ]

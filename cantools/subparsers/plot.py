@@ -541,13 +541,7 @@ class Signals:
                     axes = splot.axes
                     self.finish_subplot(splot, self.subplot_args[(last_subplot, last_axis)])
 
-                kw = {key:val for key,val in vars(self.subplot_args[(sgo.subplot, sgo.axis)]).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
-                for key in self.SUBPLOT_DIRECT_NAMES:
-                    if key not in kw:
-                        val = getattr(self.global_subplot_args, key)
-                        if val is not None:
-                            kw[key] = val
-                splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes, **kw)
+                splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes)
 
                 last_subplot = sgo.subplot
                 last_axis = sgo.axis
@@ -586,6 +580,15 @@ class Signals:
 
     def finish_subplot(self, splot, subplot_args):
         splot.legend()
+
+        kw = {key:val for key,val in vars(subplot_args).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
+        for key in self.SUBPLOT_DIRECT_NAMES:
+            if key not in kw:
+                val = getattr(self.global_subplot_args, key)
+                if val is not None:
+                    kw[key] = val
+        if kw:
+            splot.set(**kw)
 
         if subplot_args.xlabel is not None:
             xlabel = subplot_args.xlabel

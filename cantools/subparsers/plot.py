@@ -53,6 +53,10 @@ from matplotlib import pyplot as plt
 from .. import database
 
 
+#TODO: I am not allowing "%H:%M" as input (for --start or --stop) because it could be misinterpreted as "%M:%S". Should this output format be changed?
+# I don't think the ambiguity is a problem for the output because if it is not obvious from the context it can be easily clarified with --xlabel.
+# However, it seems very unintuitive if the same format which is used for output is not allowed for input.
+# If you do change it, remember to uncomment the tests in test_plot_unittests.py.
 plt.rcParams["date.autoformatter.hour"] = "%H:%M"
 plt.rcParams["date.autoformatter.minute"] = "%H:%M"
 plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
@@ -126,7 +130,7 @@ class TimestampParser:
         patterns_year = ['%Y-%m-%d', '%d.%m.%Y']
         patterns_month = ['%m-%d', '%d.%m.']
         patterns_day = ['%d.']
-        patterns_hour = ['%H:%M:', '%H%:%M:%S', '%H:%M:%S.%f']
+        patterns_hour = ['%H:%M:', '%H:%M:%S', '%H:%M:%S.%f']
         patterns_minute = [':%M:%S', '%M:%S.', '%M:%S.%f']
         patterns_second = ['%S', '%S.%f']
 
@@ -136,6 +140,7 @@ class TimestampParser:
                 for pattern_time in ['%H:%M']+patterns_hour:
                     patterns.append(pattern_date+date_time_sep+pattern_time)
 
+        patterns_year.append('%Y-%m')
 
         for attrs, patterns in [
             (['year', 'month', 'day', 'hour', 'minute'], patterns_second),

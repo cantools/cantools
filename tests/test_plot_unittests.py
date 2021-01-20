@@ -28,6 +28,28 @@ class CanToolsPlotUnittests(unittest.TestCase):
             actual = sut.parse_user_input_absolute_time(user_input, first_timestamp)
             self.assertEqual(actual, expected)
 
+    def test_parse_user_input_absolute_time_output_formats(self):
+        sut = plot.TimestampParser(None)
+        for scope, first_timestamp, expected in [
+            # if the user_input is an integer I think it's more likely to be a second than a year
+            #('year', '2019-02-03 04:05:06', '2021-01-01 00:00:00'),
+            ('month', '2021-02-03 04:05:06', '2021-04-01 00:00:00'),
+            ('day', '2021-02-03 04:05:06', '2021-02-06 00:00:00'),
+            # I am not allowing '%H:%M' as input because it could be meant as '%M:%S'.
+            # That is probably why matplotlib is using '%m-%d %H' and '%d %H:%M' by default.
+            # I changed that because it seems rather unintuitive.
+            #('hour', '2021-02-03 04:05:06', '2021-02-03 08:00:00'),
+            #('minute', '2021-02-03 04:05:06', '2021-02-03 04:30:00'),
+            ('second', '2021-02-03 04:05:06', '2021-02-03 04:05:42'),
+            ('microsecond', '2021-02-03 04:05:06.000007', '2021-02-03 04:05:06.0042'),
+        ]:
+            pattern = plot.plt.rcParams["date.autoformatter.%s" % scope]
+            first_timestamp = self.parse_time(first_timestamp)
+            expected = self.parse_time(expected)
+            user_input = expected.strftime(pattern)
+            actual = sut.parse_user_input_absolute_time(user_input, first_timestamp)
+            self.assertEqual(actual, expected)
+
     def test_parse_user_input_absolute_time_invalid_input(self):
         sut = plot.TimestampParser(None)
         with self.assertRaises(ValueError):

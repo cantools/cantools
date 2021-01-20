@@ -55,6 +55,10 @@ class CanToolsPlotUnittests(unittest.TestCase):
         with self.assertRaises(ValueError):
             sut.parse_user_input_absolute_time('12:43', None)
 
+
+    #TODO: relative time
+
+
     # ------- auxiliary functions -------
 
     def parse_time(self, s):

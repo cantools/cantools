@@ -124,6 +124,7 @@ class TimestampParser:
             self.args.stop = parse(self.args.stop, x0)
 
     def parse_user_input_relative_time(self, user_input, first_timestamp):
+        #TODO
         pass
 
     def parse_user_input_absolute_time(self, user_input, first_timestamp):

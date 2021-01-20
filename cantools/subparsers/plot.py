@@ -39,6 +39,9 @@ Colors:
 https://matplotlib.org/2.1.2/api/_as_gen/matplotlib.pyplot.plot.html.
 
 If the first character of fmt is a '|' stem is used instead of plot.
+
+TODO: separate signals with a '-' to put them in different subplots
+TODO: separate signals with a ',' to put them on different axes
 '''
 
 import sys
@@ -389,6 +392,7 @@ class Signals:
 
     # before re.escape
     SEP_SUBPLOT = '-'
+    SEP_AXES = ','
 
     SEP_FMT = ':'
     FMT_STEM = '|'
@@ -405,6 +409,7 @@ class Signals:
     ERROR_LINEWIDTH = 1
 
     FIRST_SUBPLOT = 1
+    FIRST_AXIS = 0
 
     # ------- initialization -------
 
@@ -417,6 +422,7 @@ class Signals:
         self.break_time = break_time
         self.break_time_uninit = True
         self.subplot = self.FIRST_SUBPLOT
+        self.subplot_axis = self.FIRST_AXIS
         self.subplot_args = dict()
         self.subplot_argparser = argparse.ArgumentParser()
         self.subplot_argparser.add_argument('signals', nargs='*')
@@ -429,16 +435,27 @@ class Signals:
             except ValueError:
                 i1 = None
 
+            try:
+                i12 = signals.index(self.SEP_AXES, i0)
+            except ValueError:
+                i12 = None
+            if i1 is None or i12 is not None and i12 < i1:
+                i1 = i12
+
             subplot_signals = signals[i0:i1]
             subplot_args = self.subplot_argparser.parse_args(subplot_signals)
-            self.subplot_args[self.subplot] = subplot_args
+            self.subplot_args[(self.subplot, self.subplot_axis)] = subplot_args
             for sg in subplot_args.signals:
                 self.add_signal(sg)
 
             if i1 is None:
                 break
 
-            self.subplot += 1
+            if signals[i1] == self.SEP_SUBPLOT:
+                self.subplot += 1
+                self.subplot_axis = self.FIRST_AXIS
+            else:
+                self.subplot_axis += 1
             i0 = i1 + 1
 
         if not self.signals:
@@ -476,7 +493,7 @@ class Signals:
         signal += '$'
         reo = re.compile(signal, self.re_flags)
 
-        sgo = Signal(reo, self.subplot, plt_func, fmt)
+        sgo = Signal(reo, self.subplot, self.subplot_axis, plt_func, fmt)
         self.signals.append(sgo)
 
     def compile_reo(self):
@@ -512,7 +529,8 @@ class Signals:
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
         self.default_xlabel = xlabel
         splot = None
-        last_subplot = 0
+        last_subplot = self.FIRST_SUBPLOT - 1
+        last_axis = None
         axis_format_uninitialized = True
         sorted_signal_names = sorted(self.values.keys())
         for sgo in self.signals:
@@ -521,16 +539,22 @@ class Signals:
                     axes = None
                 else:
                     axes = splot.axes
-                    self.finish_subplot(splot, self.subplot_args[last_subplot])
+                    self.finish_subplot(splot, self.subplot_args[(last_subplot, last_axis)])
 
-                kw = {key:val for key,val in vars(self.subplot_args[sgo.subplot]).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
+                kw = {key:val for key,val in vars(self.subplot_args[(sgo.subplot, sgo.axis)]).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
                 for key in self.SUBPLOT_DIRECT_NAMES:
                     if key not in kw:
                         val = getattr(self.global_subplot_args, key)
                         if val is not None:
                             kw[key] = val
                 splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes, **kw)
+
                 last_subplot = sgo.subplot
+                last_axis = sgo.axis
+            elif sgo.axis > last_axis:
+                self.finish_axis(splot, self.subplot_args[(last_subplot, last_axis)])
+                splot = splot.twinx()
+                last_axis = sgo.axis
 
             plotted = False
             for signal_name in sorted_signal_names:
@@ -558,7 +582,7 @@ class Signals:
         self.plot_error(splot, x_invalid_syntax, 'invalid syntax', self.COLOR_INVALID_SYNTAX)
         self.plot_error(splot, x_unknown_frames, 'unknown frames', self.COLOR_UNKNOWN_FRAMES)
         self.plot_error(splot, x_invalid_data, 'invalid data', self.COLOR_INVALID_DATA)
-        self.finish_subplot(splot, self.subplot_args[last_subplot])
+        self.finish_subplot(splot, self.subplot_args[(last_subplot, last_axis)])
 
     def finish_subplot(self, splot, subplot_args):
         splot.legend()
@@ -577,6 +601,9 @@ class Signals:
             subplot_args.ymax = self.global_subplot_args.ymax
         if subplot_args.ymin is not None or subplot_args.ymax is not None:
             splot.axes.set_ylim(subplot_args.ymin, subplot_args.ymax)
+
+    def finish_axis(self, splot, subplot_args):
+        self.finish_subplot(splot, subplot_args)
 
 
     def plot_error(self, splot, xs, label, color):
@@ -615,9 +642,10 @@ class Signal:
 
     # ------- initialization -------
 
-    def __init__(self, reo, subplot, plt_func, fmt):
+    def __init__(self, reo, subplot, axis, plt_func, fmt):
         self.reo = reo
         self.subplot = subplot
+        self.axis = axis
         self.plt_func = plt_func
         self.fmt = fmt
 

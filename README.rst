@@ -155,6 +155,8 @@ Optionally a format can be specified after a signal, separated by a colon.
 
 .. image:: docs/plot-2.png
 
+TODO: show different vertical axes for same subplot, signals are separated by comma
+
 For more information see
 
 .. code-block:: bash

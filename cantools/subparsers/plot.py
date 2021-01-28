@@ -543,6 +543,8 @@ class Signals:
         last_axis = None
         axis_format_uninitialized = True
         sorted_signal_names = sorted(self.values.keys())
+        self.legend_handles = []
+        self.legend_labels = []
         for sgo in self.signals:
             if sgo.subplot > last_subplot:
                 if splot is None:
@@ -588,9 +590,7 @@ class Signals:
         self.plot_error(splot, x_invalid_data, 'invalid data', self.COLOR_INVALID_DATA)
         self.finish_subplot(splot, self.subplot_args[(last_subplot, last_axis)])
 
-    def finish_subplot(self, splot, subplot_args):
-        splot.legend()
-
+    def finish_axis(self, splot, subplot_args):
         kw = {key:val for key,val in vars(subplot_args).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
         for key in self.SUBPLOT_DIRECT_NAMES:
             if key not in kw:
@@ -615,9 +615,15 @@ class Signals:
         if subplot_args.ymin is not None or subplot_args.ymax is not None:
             splot.axes.set_ylim(subplot_args.ymin, subplot_args.ymax)
 
-    def finish_axis(self, splot, subplot_args):
-        self.finish_subplot(splot, subplot_args)
+        handles, labels = splot.get_legend_handles_labels()
+        self.legend_handles.extend(handles)
+        self.legend_labels.extend(labels)
 
+    def finish_subplot(self, splot, subplot_args):
+        self.finish_axis(splot, subplot_args)
+        splot.legend(self.legend_handles, self.legend_labels)
+        self.legend_handles.clear()
+        self.legend_labels.clear()
 
     def plot_error(self, splot, xs, label, color):
         if xs:

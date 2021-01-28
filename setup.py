@@ -32,7 +32,6 @@ setup(name='cantools',
           'textparser>=0.21.1',
           'diskcache',
           'argparse_addons',
-          'matplotlib'
       ],
       test_suite="tests",
       entry_points = {

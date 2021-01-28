@@ -48,7 +48,10 @@ import struct
 import datetime
 import argparse
 from argparse_addons import Integer
-from matplotlib import pyplot as plt
+try:
+    from matplotlib import pyplot as plt
+except ImportError:
+    print("matplotlib package not installed. Required for producing plots.")
 
 from .. import database
 

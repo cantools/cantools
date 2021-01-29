@@ -99,6 +99,11 @@
       <ELEMENTS>
         <I-SIGNAL UUID="52b93c1cec70bd40a590ece0b3893c0d">
           <SHORT-NAME>signal1</SHORT-NAME>
+          <INIT-VALUE>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <VALUE>5</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </INIT-VALUE>
           <LENGTH>3</LENGTH>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal1</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
@@ -167,9 +172,28 @@
         </I-SIGNAL>
         <I-SIGNAL UUID="7ac5ce20002a1a4a3c4beb72b17bc1b5">
           <SHORT-NAME>signal6</SHORT-NAME>
+          <INIT-VALUE>
+            <CONSTANT-REFERENCE>
+              <CONSTANT-REF DEST="CONSTANT-SPECIFICATION">/Constants/BooleanFalse</CONSTANT-REF>
+            </CONSTANT-REFERENCE>
+          </INIT-VALUE>
           <LENGTH>1</LENGTH>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal6</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <AR-PACKAGE UUID="89cb5634c5ae4850b6dd0ba310fbc247">
+      <SHORT-NAME>Constants</SHORT-NAME>
+      <ELEMENTS>
+        <CONSTANT-SPECIFICATION UUID="0778143a6fc7ae0b1bcc9670853fe048">
+          <SHORT-NAME>BooleanFalse</SHORT-NAME>
+          <VALUE-SPEC>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <SHORT-LABEL>literal</SHORT-LABEL>
+              <VALUE>false</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </VALUE-SPEC>
+        </CONSTANT-SPECIFICATION>
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE UUID="bf5ded8d0c2d7bd37cfb17f2525d7208">

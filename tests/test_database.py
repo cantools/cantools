@@ -4336,6 +4336,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.name, 'signal6')
         self.assertEqual(signal_1.start, 0)
         self.assertEqual(signal_1.length, 1)
+        self.assertEqual(signal_1.initial, False)
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
@@ -4358,6 +4359,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.name, 'signal1')
         self.assertEqual(signal_2.start, 4)
         self.assertEqual(signal_2.length, 3)
+        self.assertEqual(signal_2.initial, 5)
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'big_endian')
         self.assertEqual(signal_2.is_signed, False)
@@ -4388,6 +4390,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         signal_3 = message_1.signals[2]
         self.assertEqual(signal_3.name, 'signal5')
         self.assertEqual(signal_3.start, 16)
+        self.assertEqual(signal_3.initial, None)
         self.assertEqual(signal_3.length, 32)
         self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'little_endian')
@@ -4549,6 +4552,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'Cluster',
                              'CanFrame',
                              'ISignal',
+                             'Constants',
                              'ISignalIPdu',
                              'Unit',
                              'CompuMethod',

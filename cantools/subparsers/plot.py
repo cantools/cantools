@@ -52,6 +52,7 @@ try:
     from matplotlib import pyplot as plt
 except ImportError:
     print("matplotlib package not installed. Required for producing plots.")
+    raise ImportError("matplotlib not installed")
 
 from .. import database
 

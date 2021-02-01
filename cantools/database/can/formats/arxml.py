@@ -101,14 +101,46 @@ class SystemLoader(object):
         messages = []
         version = None
 
-        # This code inspects the top level packages. Packages in
-        # sub-packages are not treated yet.  This might or might not
-        # be necessary.
+        # recursively extract all CAN clusters of all AUTOSAR packages
+        # in the XML tree
+        def handle_package_list(package_list):
+            # load all packages of an XML package list tag
+            for package in package_list.iterfind('./ns:AR-PACKAGE',
+                                                 self._xml_namespaces):
+                # deal with the package contents
+                self._load_package_contents(package, messages)
+
+                # load all sub-packages
+                if self.autosar_version_newer(4):
+                    sub_package_list = package.find('./ns:AR-PACKAGES',
+                                                self._xml_namespaces)
+                else:
+                    # AUTOSAR 3
+                    sub_package_list = package.find('./ns:SUB-PACKAGES',
+                                                    self._xml_namespaces)
+                if sub_package_list is not None:
+                    handle_package_list(sub_package_list)
+
+        if self.autosar_version_newer(4):
+            handle_package_list(self._root.find("./ns:AR-PACKAGES",
+                                                self._xml_namespaces))
+        else:
+            # AUTOSAR3 puts the top level packages beneath the
+            # TOP-LEVEL-PACKAGES XML tag.
+            handle_package_list(self._root.find("./ns:TOP-LEVEL-PACKAGES",
+                                                self._xml_namespaces))
+
+        return InternalDatabase(messages,
+                                [],
+                                buses,
+                                version)
+
+    def _load_package_contents(self, package_elem, messages):
+        # This code extracts the information about CAN clusters of an
+        # individual AR package. TODO: deal with the individual buses
         if self.autosar_version_newer(4):
             frame_triggerings_spec = \
                 [
-                    'AR-PACKAGES',
-                    '*AR-PACKAGE',
                     'ELEMENTS',
                     '*&CAN-CLUSTER',
                     'CAN-CLUSTER-VARIANTS',
@@ -121,8 +153,6 @@ class SystemLoader(object):
         else: # AUTOSAR 3
             frame_triggerings_spec = \
                 [
-                    'TOP-LEVEL-PACKAGES',
-                    '*AR-PACKAGE',
                     'ELEMENTS',
                     '*&CAN-CLUSTER',
                     'PHYSICAL-CHANNELS',
@@ -137,15 +167,10 @@ class SystemLoader(object):
                 ]
 
         can_frame_triggerings = \
-            self._get_arxml_children(self._root, frame_triggerings_spec)
+            self._get_arxml_children(package_elem, frame_triggerings_spec)
 
         for can_frame_triggering in can_frame_triggerings:
             messages.append(self._load_message(can_frame_triggering))
-
-        return InternalDatabase(messages,
-                                [],
-                                buses,
-                                version)
 
     def _load_message(self, can_frame_triggering):
         """Load given message and return a message object.

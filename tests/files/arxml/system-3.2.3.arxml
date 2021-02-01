@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <AUTOSAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://autosar.org/3.2.3">
-   <TOP-LEVEL-PACKAGES>
+  <TOP-LEVEL-PACKAGES>
     <AR-PACKAGE UUID="596d57028f777bc4cc548334060522b4">
       <SHORT-NAME>DataTypes</SHORT-NAME>
       <ELEMENTS>
@@ -76,7 +76,7 @@
             </COMPU-SCALES>
           </COMPU-INTERNAL-TO-PHYS>
         </COMPU-METHOD>
-       </ELEMENTS>
+      </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE UUID="0a2e07bb2ca11243a466a8743ba9774c">
       <SHORT-NAME>SystemSignals</SHORT-NAME>
@@ -168,138 +168,143 @@
     </AR-PACKAGE>
     <AR-PACKAGE UUID="89a48947c1ebc60fbfd68acf9b5bb63a">
       <SHORT-NAME>Network</SHORT-NAME>
-      <ELEMENTS>
-        <CAN-CLUSTER UUID="37b6a814c9d49141840f6a238912b103">
-          <SHORT-NAME>Network</SHORT-NAME>
-          <MAX-FRAME-LENGTH>8</MAX-FRAME-LENGTH>
-          <PHYSICAL-CHANNELS>
-            <PHYSICAL-CHANNEL UUID="9f949c1c11494bbffbcda6a8941467d7">
-              <SHORT-NAME>Network</SHORT-NAME>
-              <FRAME-TRIGGERINGSS>
-                <CAN-FRAME-TRIGGERING UUID="b1b7f42b0cee5f5530f20281823762aa">
-                  <SHORT-NAME>StatusTriggering</SHORT-NAME>
-                  <FRAME-REF DEST="FRAME">/Network/CAN/Frames/Status</FRAME-REF>
-                  <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
-                  <IDENTIFIER>123</IDENTIFIER>
-                </CAN-FRAME-TRIGGERING>
-              </FRAME-TRIGGERINGSS>
-            </PHYSICAL-CHANNEL>
-          </PHYSICAL-CHANNELS>
-          <PROTOCOL-NAME>CAN</PROTOCOL-NAME>
-          <PROTOCOL-VERSION>can2.0b</PROTOCOL-VERSION>
-          <SPEED>250000</SPEED>
-        </CAN-CLUSTER>
-      </ELEMENTS>
       <SUB-PACKAGES>
-        <AR-PACKAGE UUID="6ec93102d5795011e5ca9e32a6d1223c">
-          <SHORT-NAME>CAN</SHORT-NAME>
+        <AR-PACKAGE UUID="8bd55efe25f0d03d0fe19af528366101">
+          <SHORT-NAME>CanCluster</SHORT-NAME>
+          <ELEMENTS>
+            <CAN-CLUSTER UUID="37b6a814c9d49141840f6a238912b103">
+              <SHORT-NAME>Network</SHORT-NAME>
+              <MAX-FRAME-LENGTH>8</MAX-FRAME-LENGTH>
+              <PHYSICAL-CHANNELS>
+                <PHYSICAL-CHANNEL UUID="9f949c1c11494bbffbcda6a8941467d7">
+                  <SHORT-NAME>Network</SHORT-NAME>
+                  <FRAME-TRIGGERINGSS>
+                    <CAN-FRAME-TRIGGERING UUID="b1b7f42b0cee5f5530f20281823762aa">
+                      <SHORT-NAME>StatusTriggering</SHORT-NAME>
+                      <FRAME-REF DEST="FRAME">/Network/CanCluster/CAN/Frames/Status</FRAME-REF>
+                      <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <IDENTIFIER>123</IDENTIFIER>
+                    </CAN-FRAME-TRIGGERING>
+                  </FRAME-TRIGGERINGSS>
+                </PHYSICAL-CHANNEL>
+              </PHYSICAL-CHANNELS>
+              <PROTOCOL-NAME>CAN</PROTOCOL-NAME>
+              <PROTOCOL-VERSION>can2.0b</PROTOCOL-VERSION>
+              <SPEED>250000</SPEED>
+            </CAN-CLUSTER>
+          </ELEMENTS>
           <SUB-PACKAGES>
-            <AR-PACKAGE UUID="439568a2dd0a71ae803672f4bb077940">
-              <SHORT-NAME>PDUs</SHORT-NAME>
-              <ELEMENTS>
-                <SIGNAL-I-PDU UUID="02a323c0ebfeeb13c5ac0f42488d767d">
-                  <SHORT-NAME>Status</SHORT-NAME>
-                  <LENGTH>1</LENGTH>
-                  <I-PDU-TIMING-SPECIFICATION>
-                    <CYCLIC-TIMING>
-                      <REPEATING-TIME>
-                        <VALUE>0.5</VALUE>
-                      </REPEATING-TIME>
-                    </CYCLIC-TIMING>
-                    <EVENT-CONTROLLED-TIMING>
-                      <NUMBER-OF-REPEATS>0</NUMBER-OF-REPEATS>
-                    </EVENT-CONTROLLED-TIMING>
-                    <MINIMUM-DELAY>0.01</MINIMUM-DELAY>
-                  </I-PDU-TIMING-SPECIFICATION>
-                  <SIGNAL-TO-PDU-MAPPINGS>
-                    <I-SIGNAL-TO-I-PDU-MAPPING UUID="193a3a3d59ef551a4007497ed778baeb">
-                      <SHORT-NAME>AliveMapping</SHORT-NAME>
-                      <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-                      <SIGNAL-REF DEST="I-SIGNAL">/Network/CAN/ISignals/Status/Alive</SIGNAL-REF>
-                      <START-POSITION>0</START-POSITION>
-                    </I-SIGNAL-TO-I-PDU-MAPPING>
-                    <I-SIGNAL-TO-I-PDU-MAPPING UUID="193a3a3d59ef551a4007497ed778baeb">
-                      <SHORT-NAME>SleepMapping</SHORT-NAME>
-                      <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-                      <SIGNAL-REF DEST="I-SIGNAL">/Network/CAN/ISignals/Status/Sleeps</SIGNAL-REF>
-                      <START-POSITION>1</START-POSITION>
-                    </I-SIGNAL-TO-I-PDU-MAPPING>
-                    <I-SIGNAL-TO-I-PDU-MAPPING UUID="8662b1aff79c78cca00b319a89f42fd7">
-                      <SHORT-NAME>PositionMapping</SHORT-NAME>
-                      <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-                      <SIGNAL-REF DEST="I-SIGNAL">/Network/CAN/ISignals/Status/Position</SIGNAL-REF>
-                      <START-POSITION>3</START-POSITION>
-                    </I-SIGNAL-TO-I-PDU-MAPPING>
-                    <I-SIGNAL-TO-I-PDU-MAPPING UUID="1af43965e283bd5921b9832d183832c1">
-                      <SHORT-NAME>MovementMapping</SHORT-NAME>
-                      <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-                      <SIGNAL-REF DEST="I-SIGNAL">/Network/CAN/ISignals/Status/Movement</SIGNAL-REF>
-                      <START-POSITION>5</START-POSITION>
-                    </I-SIGNAL-TO-I-PDU-MAPPING>
-                    <I-SIGNAL-TO-I-PDU-MAPPING UUID="ae3fc5e7d33ace46bb8db8ef9d1b32f3">
-                      <SHORT-NAME>PositionMovementGroupMapping</SHORT-NAME>
-                      <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-                      <SIGNAL-REF DEST="I-SIGNAL">/Network/CAN/ISignals/Status/PositionMovement</SIGNAL-REF>
-                    </I-SIGNAL-TO-I-PDU-MAPPING>
-                  </SIGNAL-TO-PDU-MAPPINGS>
-                </SIGNAL-I-PDU>
-              </ELEMENTS>
-            </AR-PACKAGE>
-            <AR-PACKAGE UUID="1934e8176691c23b7ea8dd899afb3801">
-              <SHORT-NAME>ISignals</SHORT-NAME>
+            <AR-PACKAGE UUID="6ec93102d5795011e5ca9e32a6d1223c">
+              <SHORT-NAME>CAN</SHORT-NAME>
               <SUB-PACKAGES>
-                <AR-PACKAGE UUID="d092f91b9733319fe3599c2d991c1c80">
-                  <SHORT-NAME>Status</SHORT-NAME>
+                <AR-PACKAGE UUID="439568a2dd0a71ae803672f4bb077940">
+                  <SHORT-NAME>PDUs</SHORT-NAME>
                   <ELEMENTS>
-                    <I-SIGNAL UUID="8889d143c798e7d0bd8cc6b91c0de364">
-                      <SHORT-NAME>Alive</SHORT-NAME>
+                    <SIGNAL-I-PDU UUID="02a323c0ebfeeb13c5ac0f42488d767d">
+                      <SHORT-NAME>Status</SHORT-NAME>
+                      <LENGTH>1</LENGTH>
+                      <I-PDU-TIMING-SPECIFICATION>
+                        <CYCLIC-TIMING>
+                          <REPEATING-TIME>
+                            <VALUE>0.5</VALUE>
+                          </REPEATING-TIME>
+                        </CYCLIC-TIMING>
+                        <EVENT-CONTROLLED-TIMING>
+                          <NUMBER-OF-REPEATS>0</NUMBER-OF-REPEATS>
+                        </EVENT-CONTROLLED-TIMING>
+                        <MINIMUM-DELAY>0.01</MINIMUM-DELAY>
+                      </I-PDU-TIMING-SPECIFICATION>
+                      <SIGNAL-TO-PDU-MAPPINGS>
+                        <I-SIGNAL-TO-I-PDU-MAPPING UUID="193a3a3d59ef551a4007497ed778baeb">
+                          <SHORT-NAME>AliveMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Alive</SIGNAL-REF>
+                          <START-POSITION>0</START-POSITION>
+                        </I-SIGNAL-TO-I-PDU-MAPPING>
+                        <I-SIGNAL-TO-I-PDU-MAPPING UUID="193a3a3d59ef551a4007497ed778baeb">
+                          <SHORT-NAME>SleepMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Sleeps</SIGNAL-REF>
+                          <START-POSITION>1</START-POSITION>
+                        </I-SIGNAL-TO-I-PDU-MAPPING>
+                        <I-SIGNAL-TO-I-PDU-MAPPING UUID="8662b1aff79c78cca00b319a89f42fd7">
+                          <SHORT-NAME>PositionMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Position</SIGNAL-REF>
+                          <START-POSITION>3</START-POSITION>
+                        </I-SIGNAL-TO-I-PDU-MAPPING>
+                        <I-SIGNAL-TO-I-PDU-MAPPING UUID="1af43965e283bd5921b9832d183832c1">
+                          <SHORT-NAME>MovementMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Movement</SIGNAL-REF>
+                          <START-POSITION>5</START-POSITION>
+                        </I-SIGNAL-TO-I-PDU-MAPPING>
+                        <I-SIGNAL-TO-I-PDU-MAPPING UUID="ae3fc5e7d33ace46bb8db8ef9d1b32f3">
+                          <SHORT-NAME>PositionMovementGroupMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/PositionMovement</SIGNAL-REF>
+                        </I-SIGNAL-TO-I-PDU-MAPPING>
+                      </SIGNAL-TO-PDU-MAPPINGS>
+                    </SIGNAL-I-PDU>
+                  </ELEMENTS>
+                </AR-PACKAGE>
+                <AR-PACKAGE UUID="1934e8176691c23b7ea8dd899afb3801">
+                  <SHORT-NAME>ISignals</SHORT-NAME>
+                  <SUB-PACKAGES>
+                    <AR-PACKAGE UUID="d092f91b9733319fe3599c2d991c1c80">
+                      <SHORT-NAME>Status</SHORT-NAME>
+                      <ELEMENTS>
+                        <I-SIGNAL UUID="8889d143c798e7d0bd8cc6b91c0de364">
+                          <SHORT-NAME>Alive</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="DE">Lebt!</L-2>
+                            <L-2 L="EN">Is alive!</L-2>
+                          </DESC>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/IsAlive</SYSTEM-SIGNAL-REF>
+                        </I-SIGNAL>
+                        <I-SIGNAL UUID="8889d143c798e7d0bd8cc6b91c0de364">
+                          <SHORT-NAME>Sleeps</SHORT-NAME>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/IsAsleep</SYSTEM-SIGNAL-REF>
+                        </I-SIGNAL>
+                        <I-SIGNAL UUID="e4c24ffa18328108d9efd3c61da552b2">
+                          <SHORT-NAME>Position</SHORT-NAME>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/Position</SYSTEM-SIGNAL-REF>
+                        </I-SIGNAL>
+                        <I-SIGNAL UUID="cea9809898332ae973fe7302290723ee">
+                          <SHORT-NAME>Movement</SHORT-NAME>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/Movement</SYSTEM-SIGNAL-REF>
+                        </I-SIGNAL>
+                        <I-SIGNAL UUID="84894b12d79934a10df9f3d153841ced">
+                          <SHORT-NAME>PositionMovement</SHORT-NAME>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL-GROUP">/SystemSignals/PositionMovementGroup</SYSTEM-SIGNAL-REF>
+                        </I-SIGNAL>
+                      </ELEMENTS>
+                    </AR-PACKAGE>
+                  </SUB-PACKAGES>
+                </AR-PACKAGE>
+                <AR-PACKAGE UUID="a91cc39bee2148e9f2b39b3269fee849">
+                  <SHORT-NAME>Frames</SHORT-NAME>
+                  <ELEMENTS>
+                    <FRAME UUID="d9f2b086297df956a9b50f7399041012">
+                      <SHORT-NAME>Status</SHORT-NAME>
                       <DESC>
-                        <L-2 L="DE">Lebt!</L-2>
-                        <L-2 L="EN">Is alive!</L-2>
+                        <L-2>The lonely frame description</L-2>
                       </DESC>
-                      <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/IsAlive</SYSTEM-SIGNAL-REF>
-                    </I-SIGNAL>
-                    <I-SIGNAL UUID="8889d143c798e7d0bd8cc6b91c0de364">
-                      <SHORT-NAME>Sleeps</SHORT-NAME>
-                      <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/IsAsleep</SYSTEM-SIGNAL-REF>
-                    </I-SIGNAL>
-                    <I-SIGNAL UUID="e4c24ffa18328108d9efd3c61da552b2">
-                      <SHORT-NAME>Position</SHORT-NAME>
-                      <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/Position</SYSTEM-SIGNAL-REF>
-                    </I-SIGNAL>
-                    <I-SIGNAL UUID="cea9809898332ae973fe7302290723ee">
-                      <SHORT-NAME>Movement</SHORT-NAME>
-                      <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/Movement</SYSTEM-SIGNAL-REF>
-                    </I-SIGNAL>
-                    <I-SIGNAL UUID="84894b12d79934a10df9f3d153841ced">
-                      <SHORT-NAME>PositionMovement</SHORT-NAME>
-                      <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL-GROUP">/SystemSignals/PositionMovementGroup</SYSTEM-SIGNAL-REF>
-                    </I-SIGNAL>
+                      <FRAME-LENGTH>1</FRAME-LENGTH>
+                      <PDU-TO-FRAME-MAPPINGS>
+                        <PDU-TO-FRAME-MAPPING UUID="d95c16e24ffdc90dd424ded01440bc9c">
+                          <SHORT-NAME>StatusMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <PDU-REF DEST="SIGNAL-I-PDU">/Network/CanCluster/CAN/PDUs/Status</PDU-REF>
+                          <START-POSITION>0</START-POSITION>
+                        </PDU-TO-FRAME-MAPPING>
+                      </PDU-TO-FRAME-MAPPINGS>
+                    </FRAME>
                   </ELEMENTS>
                 </AR-PACKAGE>
               </SUB-PACKAGES>
             </AR-PACKAGE>
-            <AR-PACKAGE UUID="a91cc39bee2148e9f2b39b3269fee849">
-              <SHORT-NAME>Frames</SHORT-NAME>
-              <ELEMENTS>
-                <FRAME UUID="d9f2b086297df956a9b50f7399041012">
-                  <SHORT-NAME>Status</SHORT-NAME>
-                  <DESC>
-                    <L-2>The lonely frame description</L-2>
-                  </DESC>
-                  <FRAME-LENGTH>1</FRAME-LENGTH>
-                  <PDU-TO-FRAME-MAPPINGS>
-                    <PDU-TO-FRAME-MAPPING UUID="d95c16e24ffdc90dd424ded01440bc9c">
-                      <SHORT-NAME>StatusMapping</SHORT-NAME>
-                      <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-                      <PDU-REF DEST="SIGNAL-I-PDU">/Network/CAN/PDUs/Status</PDU-REF>
-                      <START-POSITION>0</START-POSITION>
-                    </PDU-TO-FRAME-MAPPING>
-                  </PDU-TO-FRAME-MAPPINGS>
-                </FRAME>
-              </ELEMENTS>
-            </AR-PACKAGE>
-           </SUB-PACKAGES>
+          </SUB-PACKAGES>
         </AR-PACKAGE>
       </SUB-PACKAGES>
     </AR-PACKAGE>

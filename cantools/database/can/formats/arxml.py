@@ -28,12 +28,22 @@ class SystemLoader(object):
         self.xml_namespace = xml_namespace
         self._xml_namespaces = { 'ns': xml_namespace }
 
-        m = re.match('^http://autosar\.org/schema/r(4\..*)$', xml_namespace)
+        m = re.match('^http://autosar\.org/schema/r(4\.[0-9.]*)$', xml_namespace)
         if m:
             # AUTOSAR 4
             autosar_version_string = m.group(1)
         else:
-            raise ValueError(f"Unrecognized AUTOSAR XML namespace '{xml_namespace}'")
+            m = re.match('^http://autosar\.org/(3\.[0-9.]*)$', xml_namespace)
+            if m:
+                # AUTOSAR 3
+                autosar_version_string = m.group(1)
+            else:
+                m = re.match('^http://autosar\.org/([0-9.]*)\.DAI\.[0-9]$', xml_namespace)
+                if m:
+                    # Daimler (for some model ranges)
+                    autosar_version_string = m.group(1)
+                else:
+                    raise ValueError(f"Unrecognized AUTOSAR XML namespace '{xml_namespace}'")
 
         m = re.match('^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
         if not m:
@@ -43,8 +53,8 @@ class SystemLoader(object):
         self.autosar_version_minor = 0 if m.group(2) is None else int(m.group(2)[1:])
         self.autosar_version_patch = 0 if m.group(3) is None else int(m.group(3)[1:])
 
-        if self.autosar_version_major != 4:
-            raise ValueError('This class only supports AUTOSAR version 4')
+        if self.autosar_version_major != 4 and self.autosar_version_major != 3:
+            raise ValueError('This class only supports AUTOSAR versions 3 and 4')
 
         self._arxml_reference_cache = {}
 
@@ -94,20 +104,41 @@ class SystemLoader(object):
         # This code inspects the top level packages. Packages in
         # sub-packages are not treated yet.  This might or might not
         # be necessary.
+        if self.autosar_version_newer(4):
+            frame_triggerings_spec = \
+                [
+                    'AR-PACKAGES',
+                    '*AR-PACKAGE',
+                    'ELEMENTS',
+                    '*&CAN-CLUSTER',
+                    'CAN-CLUSTER-VARIANTS',
+                    '*&CAN-CLUSTER-CONDITIONAL',
+                    'PHYSICAL-CHANNELS',
+                    '*&CAN-PHYSICAL-CHANNEL',
+                    'FRAME-TRIGGERINGS',
+                    '*&CAN-FRAME-TRIGGERING'
+                ]
+        else: # AUTOSAR 3
+            frame_triggerings_spec = \
+                [
+                    'TOP-LEVEL-PACKAGES',
+                    '*AR-PACKAGE',
+                    'ELEMENTS',
+                    '*&CAN-CLUSTER',
+                    'PHYSICAL-CHANNELS',
+                    '*&PHYSICAL-CHANNEL',
+
+                    # ATTENTION! The trailig 'S' here is in purpose:
+                    # It appears in the AUTOSAR 3.2 XSD, but it still
+                    # seems to be a typo in the spec...
+                    'FRAME-TRIGGERINGSS',
+
+                    '*&CAN-FRAME-TRIGGERING'
+                ]
+
         can_frame_triggerings = \
-            self._get_arxml_children(self._root,
-                                     [
-                                         'AR-PACKAGES',
-                                         '*AR-PACKAGE',
-                                         'ELEMENTS',
-                                         '*&CAN-CLUSTER',
-                                         'CAN-CLUSTER-VARIANTS',
-                                         '*&CAN-CLUSTER-CONDITIONAL',
-                                         'PHYSICAL-CHANNELS',
-                                         '*&CAN-PHYSICAL-CHANNEL',
-                                         'FRAME-TRIGGERINGS',
-                                         '*&CAN-FRAME-TRIGGERING'
-                                     ])
+            self._get_arxml_children(self._root, frame_triggerings_spec)
+
         for can_frame_triggering in can_frame_triggerings:
             messages.append(self._load_message(can_frame_triggering))
 
@@ -145,27 +176,44 @@ class SystemLoader(object):
         pdu = self._get_pdu(can_frame)
 
         if pdu is not None:
-            time_period = \
-                self._get_unique_arxml_child(pdu,
-                                             [
-                                                 'I-PDU-TIMING-SPECIFICATIONS',
-                                                 'I-PDU-TIMING',
-                                                 'TRANSMISSION-MODE-DECLARATION',
-                                                 'TRANSMISSION-MODE-TRUE-TIMING',
-                                                 'CYCLIC-TIMING',
-                                                 'TIME-PERIOD',
-                                                 'VALUE'
-                                             ])
+            if self.autosar_version_newer(4):
+                time_period_location = [
+                    'I-PDU-TIMING-SPECIFICATIONS',
+                    'I-PDU-TIMING',
+                    'TRANSMISSION-MODE-DECLARATION',
+                    'TRANSMISSION-MODE-TRUE-TIMING',
+                    'CYCLIC-TIMING',
+                    'TIME-PERIOD',
+                    'VALUE'
+                ]
+            else:
+                time_period_location = [
+                    'I-PDU-TIMING-SPECIFICATION',
+                    'CYCLIC-TIMING',
+                    'REPEATING-TIME',
+                    'VALUE'
+                ]
+            time_period = self._get_unique_arxml_child(pdu, time_period_location)
 
             if time_period is not None:
                 cycle_time = int(float(time_period.text) * 1000)
 
+            if self.autosar_version_newer(4):
+                i_signal_to_i_pdu_mappings_location = \
+                    [
+                        'I-SIGNAL-TO-PDU-MAPPINGS',
+                        '*&I-SIGNAL-TO-I-PDU-MAPPING'
+                    ]
+            else:
+                i_signal_to_i_pdu_mappings_location = \
+                    [
+                        'SIGNAL-TO-PDU-MAPPINGS',
+                        '*&I-SIGNAL-TO-I-PDU-MAPPING'
+                    ]
+
             i_signal_to_i_pdu_mappings = \
                 self._get_arxml_children(pdu,
-                                         [
-                                             'I-SIGNAL-TO-PDU-MAPPINGS',
-                                             '*&I-SIGNAL-TO-I-PDU-MAPPING'
-                                         ])
+                                         i_signal_to_i_pdu_mappings_location)
 
             for i_signal_to_i_pdu_mapping in i_signal_to_i_pdu_mappings:
                 signal = self._load_signal(i_signal_to_i_pdu_mapping)
@@ -248,6 +296,8 @@ class SystemLoader(object):
         receivers = []
         decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
+        i_signal = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
+                                                 '&I-SIGNAL' if self.autosar_version_newer(4) else '&SIGNAL')
         # Name, start position, length and byte order.
         name = self._load_signal_name(i_signal)
         start_position = self._load_signal_start_position(i_signal_to_i_pdu_mapping)
@@ -266,15 +316,16 @@ class SystemLoader(object):
             minimum, maximum, factor, offset, choices = \
                 self._load_system_signal(system_signal, decimal, is_float)
 
-        # loading constants is way too complicated, so it it is the job of a separate method
-        initial = self._load_arxml_init_value_string(i_signal)
+        # loading initial values is way too complicated, so it is the
+        # job of a separate method
+        initial = self._load_arxml_init_value_string(i_signal, system_signal)
 
         if initial is not None:
             if is_float:
                 initial = float(initial)
-            elif initial.strip().lower() == "true":
+            elif initial.strip().lower() == 'true':
                 initial = True
-            elif initial.strip().lower() == "false":
+            elif initial.strip().lower() == 'false':
                 initial = False
             # TODO: strings?
             else:
@@ -313,9 +364,18 @@ class SystemLoader(object):
         if i_signal_length is not None:
             return int(i_signal_length.text)
 
+        if not self.autosar_version_newer(4) and system_signal is not None:
+            # AUTOSAR3 supports specifying the signal length via the
+            # system signal. (AR4 does not.)
+            system_signal_length = self._get_unique_arxml_child(system_signal,
+                                                                'LENGTH')
+            if system_signal_length is not None:
+                # get the length from the system signal.
+                return int(system_signal_length.text)
+
         return None # error?!
 
-    def _load_arxml_init_value_string(self, base_elem):
+    def _load_arxml_init_value_string(self, i_signal, system_signal):
         """"Load the initial value of a signal
 
         Supported mechanisms are references to constants and direct
@@ -323,42 +383,76 @@ class SystemLoader(object):
         string which must be converted into the signal's data type by
         the calling code.
         """
-        if base_elem is None:
-            return None
+        # AUTOSAR3 specifies the signal's initial value via
+        # the system signal via the i-signal...
+        if self.autosar_version_newer(4):
+            if i_signal is None:
+                return None
+           
+            return self._load_arxml_init_value_string_helper(i_signal)
+        else:
+            if system_signal is None:
+                return None
 
-        value_elem = self._get_unique_arxml_child(base_elem,
-                                                      [
-                                                          'INIT-VALUE',
-                                                          'NUMERICAL-VALUE-SPECIFICATION',
-                                                          'VALUE'
-                                                      ])
-        if value_elem is not None:
-            # initial value is specified directly.
-            return value_elem.text
+            return self._load_arxml_init_value_string_helper(system_signal)
 
-        const_ref = self._get_unique_arxml_child(base_elem,
+    def _load_arxml_init_value_string_helper(self, signal_elem):
+        """"Helper function for loading thge initial value of a signal
+
+        This function avoids code duplication between loading the
+        initial signal value from the ISignal and the
+        SystemSignal. (The latter is only supported by AUTOSAR 3.)
+        """
+        if self.autosar_version_newer(4):
+            value_elem = \
+                self._get_unique_arxml_child(signal_elem,
+                                             [
+                                                 'INIT-VALUE',
+                                                 'NUMERICAL-VALUE-SPECIFICATION',
+                                                 'VALUE'
+                                             ])
+            if value_elem is not None:
+                # initial value is specified directly.
+                return value_elem.text
+
+            value_elem = self._get_unique_arxml_child(signal_elem,
                                                       [
                                                           'INIT-VALUE',
                                                           'CONSTANT-REFERENCE',
-                                                          'CONSTANT-REF'
-                                                      ])
-        if const_ref is not None:
-            # initial value is specified via a constant reference
-            const_spec_elem = self._follow_arxml_reference(base_elem, const_ref.text, const_ref.attrib['DEST'])
-            if const_spec_elem is None:
-                return None
-
-            value_elem = self._get_unique_arxml_child(const_spec_elem,
-                                                      [
+                                                          '&CONSTANT',
                                                           'VALUE-SPEC',
                                                           'NUMERICAL-VALUE-SPECIFICATION',
                                                           'VALUE'
                                                       ])
-            return None if value_elem is None else value_elem.text
+            if value_elem is not None:
+                # initial value is specified via a reference to a constant.
+                return value_elem.text
 
-        # no initial value specified or specified in a way which we
-        # don't recognize
-        return None
+            # no initial value specified or specified in a way which we
+            # don't recognize
+            return None
+
+        else:
+            # AUTOSAR3: AR3 seems to specify initial values by means
+            # of INIT-VALUE-REF elements. Unfortunately, these are not
+            # standard references so we have to go down a separate
+            # code path...
+            ref_elem = signal_elem.find(f'./ns:INIT-VALUE-REF', self._xml_namespaces)
+            if ref_elem is None:
+                # no initial value found here
+                return None
+
+            literal_spec = \
+                self._follow_arxml3_const_reference(signal_elem,
+                                                    ref_elem.text,
+                                                    ref_elem.attrib.get('DEST', ''))
+            if literal_spec is None:
+                # dangling reference...
+                return None
+
+            literal_value = \
+                literal_spec.find(f'./ns:VALUE', self._xml_namespaces)
+            return None if literal_value is None else literal_value.text
 
     def _load_signal_byte_order(self, i_signal_to_i_pdu_mapping):
         packing_byte_order = \
@@ -410,7 +504,6 @@ class SystemLoader(object):
             lower_limit = self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
             upper_limit = self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
-
             minimum_scale = None if lower_limit is None else text_to_num_fn(lower_limit.text)
             maximum_scale = None if upper_limit is None else text_to_num_fn(upper_limit.text)
 
@@ -615,17 +708,34 @@ class SystemLoader(object):
         short_names = arxml_path.lstrip('/').split('/')
         location = []
 
-        for short_name in short_names[:-1]:
-            location += [
-                'AR-PACKAGES',
-                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(short_name)
-            ]
+        # in AUTOSAR3, the top level packages are located beneath the
+        # TOP-LEVEL-PACKAGES tag, and sub-packages use
+        # SUB-PACKAGES. AUTOSAR 4 always uses AR-PACKAGES.
+        if self.autosar_version_newer(4):
+            for atom in short_names[:-1]:
+                location += [
+                    'AR-PACKAGES',
+                    "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(atom)
+                ]
 
-        location += [
-            'ELEMENTS',
-            "{}/[ns:SHORT-NAME='{}']".format(child_tag_name,
-                                             short_names[-1])
-        ]
+            location += [
+                'ELEMENTS',
+                "{}/[ns:SHORT-NAME='{}']".format(child_tag_name,
+                                                 short_names[-1]) ]
+        else:
+            location = [
+                'TOP-LEVEL-PACKAGES',
+                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(short_names[0]) ]
+
+            for atom in short_names[1:-1]:
+                location += [
+                    'SUB-PACKAGES',
+                    "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(atom),
+                ]
+
+            location += [
+                'ELEMENTS',
+                "{}/[ns:SHORT-NAME='{}']".format(child_tag_name, short_names[-1]) ]
 
         result = base_elem.find(make_xpath(location), self._xml_namespaces)
 
@@ -633,6 +743,34 @@ class SystemLoader(object):
             self._arxml_reference_cache[arxml_path] = result
 
         return result
+
+    def _follow_arxml3_const_reference(self, base_elem, arxml_const_path, child_tag_name):
+        """This method is does the same as _follow_arxml_ref() but for constant specifications.
+
+        This method is necessary because in AUTOSAR3, constants are
+        referenced differently than anything else. (AUTOSAR4 fixes
+        this issue.)
+        """
+
+        arxml_const_path_tuple = arxml_const_path.split('/')
+
+        c_spec = \
+            self._follow_arxml_reference(base_elem,
+                                         '/'.join(arxml_const_path_tuple[:-1]),
+                                         'CONSTANT-SPECIFICATION')
+        if c_spec is None:
+            raise ValueError(f'No constant specification found for constant {arxml_const_path}')
+
+        val_node = c_spec.find('./ns:VALUE', self._xml_namespaces)
+        if val_node is None:
+            raise ValueError(f'Constant specification of constant '
+                             f'{arxml_const_path} does not exhibit a '
+                             f'VALUE sub-tag')
+
+        literal = val_node.find(f"./ns:{child_tag_name}/"
+                                f"[ns:SHORT-NAME='{arxml_const_path_tuple[-1]}']",
+                                self._xml_namespaces)
+        return literal
 
     def _get_arxml_children(self, base_elems, children_location):
         """Locate a set of ElementTree child nodes at a given location.
@@ -749,8 +887,12 @@ class SystemLoader(object):
         return self._get_unique_arxml_child(can_frame_triggering, '&FRAME')
 
     def _get_i_signal(self, i_signal_to_i_pdu_mapping):
-        return self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
-                                            'I-SIGNAL')
+        if self.autosar_version_newer(4):
+            return self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
+                                                '&I-SIGNAL')
+        else:
+            return self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
+                                                '&SIGNAL')
 
     def _get_pdu(self, can_frame):
         return self._get_unique_arxml_child(can_frame,
@@ -761,13 +903,21 @@ class SystemLoader(object):
                                             ])
 
     def _get_compu_method(self, system_signal):
-        return self._get_unique_arxml_child(system_signal,
-                                            [
-                                                '&PHYSICAL-PROPS',
-                                                'SW-DATA-DEF-PROPS-VARIANTS',
-                                                '&SW-DATA-DEF-PROPS-CONDITIONAL',
-                                                '&COMPU-METHOD'
-                                            ])
+        if self.autosar_version_newer(4):
+            return self._get_unique_arxml_child(system_signal,
+                                                [
+                                                    '&PHYSICAL-PROPS',
+                                                    'SW-DATA-DEF-PROPS-VARIANTS',
+                                                    '&SW-DATA-DEF-PROPS-CONDITIONAL',
+                                                    '&COMPU-METHOD'
+                                                ])
+        else:
+            return self._get_unique_arxml_child(system_signal,
+                                                [
+                                                    '&DATA-TYPE',
+                                                    'SW-DATA-DEF-PROPS',
+                                                    '&COMPU-METHOD'
+                                                ])
 
     def _get_sw_base_type(self, i_signal):
         return self._get_unique_arxml_child(i_signal,
@@ -1153,7 +1303,9 @@ def load_string(string, strict=True):
 
     # Should be replaced with a validation using the XSD file.
     recognized_namespace = False
-    if re.match("http://autosar.org/schema/r(.*)", xml_namespace):
+    if re.match("http://autosar.org/schema/r(4.*)", xml_namespace) \
+       or re.match("http://autosar.org/(3.*)", xml_namespace) \
+       or re.match("http://autosar.org/(.*)\.DAI\.[0-9]", xml_namespace):
         recognized_namespace = True
 
     if not recognized_namespace:

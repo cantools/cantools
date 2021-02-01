@@ -7,7 +7,7 @@ About
 
 CAN BUS tools in Python 3.
 
-- `DBC`_, `KCD`_, SYM, ARXML 4 and CDD file parsing.
+- `DBC`_, `KCD`_, SYM, ARXML 3&4 and CDD file parsing.
 
 - CAN message encoding and decoding.
 

@@ -38,7 +38,12 @@ class SystemLoader(object):
                 # AUTOSAR 3
                 autosar_version_string = m.group(1)
             else:
-                raise ValueError(f"Unrecognized AUTOSAR XML namespace '{xml_namespace}'")
+                m = re.match('^http://autosar\.org/([0-9.]*)\.DAI\.[0-9]$', xml_namespace)
+                if m:
+                    # Daimler (for some model ranges)
+                    autosar_version_string = m.group(1)
+                else:
+                    raise ValueError(f"Unrecognized AUTOSAR XML namespace '{xml_namespace}'")
 
         m = re.match('^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
         if not m:
@@ -1299,7 +1304,8 @@ def load_string(string, strict=True):
     # Should be replaced with a validation using the XSD file.
     recognized_namespace = False
     if re.match("http://autosar.org/schema/r(4.*)", xml_namespace) \
-       or re.match("http://autosar.org/(3.*)", xml_namespace):
+       or re.match("http://autosar.org/(3.*)", xml_namespace) \
+       or re.match("http://autosar.org/(.*)\.DAI\.[0-9]", xml_namespace):
         recognized_namespace = True
 
     if not recognized_namespace:

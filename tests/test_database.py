@@ -4304,6 +4304,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(loader.autosar_version_newer(4,2,1), True)
         self.assertEqual(loader.autosar_version_newer(4,2,2), False)
 
+    def test_DAI_namespace(self):
+        db = cantools.db.load_file('tests/files/arxml/system-DAI-3.1.2.arxml')
+
     def test_system_3_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-3.2.3.arxml')
 

@@ -6,5 +6,4 @@ textparser
 diskcache
 mako
 nala; python_version >= '3.6'
-argparse_addons
 matplotlib

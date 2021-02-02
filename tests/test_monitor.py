@@ -12,14 +12,13 @@ except ImportError:
 
 import can
 from cantools.subparsers.monitor import Monitor
+from cantools.database import load_file
 
 
 class Args(object):
 
     def __init__(self,
-                 database,
                  single_line=False):
-        self.database = database
         self.encoding = None
         self.frame_id_mask = None
         self.no_strict = False
@@ -74,12 +73,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                             notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.run()
 
         # Check mocks.
@@ -126,12 +126,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                     notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         args.fd = True
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.run()
 
         # Check mocks.
@@ -154,12 +155,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                                _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
@@ -202,13 +204,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                                            _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/motohawk.dbc',
-                    single_line=True)
+        args = Args(single_line=True)
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
@@ -241,21 +243,22 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
     def test_reject_muxed_data_invalid_mux_index(self,
-                                _use_default_colors,
-                                _curs_set,
-                                _init_pair,
-                                is_term_resized,
-                                color_pair,
-                                _bus,
-                                _notifier):
+                                                 _use_default_colors,
+                                                 _curs_set,
+                                                 _init_pair,
+                                                 is_term_resized,
+                                                 color_pair,
+                                                 _bus,
+                                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/msxii_system_can.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/msxii_system_can.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
             data=b'\x24\x00\x98\x98\x0b\x00'))
@@ -293,12 +296,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/msxii_system_can.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/msxii_system_can.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
             data=b'\x00\x00\x98\x98\x0b\x00'))
@@ -341,13 +345,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                                             _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/msxii_system_can.dbc',
-                    single_line=True)
+        args = Args(single_line=True)
+        dbase = load_file('tests/files/dbc/msxii_system_can.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
             data=b'\x00\x00\x98\x98\x0b\x00'))
@@ -389,13 +393,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                                                      _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/multiplex_2.dbc',
-                    single_line=True)
+        args = Args(single_line=True)
+        dbase = load_file('tests/files/dbc/multiplex_2.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=0xc00fefe,
             data=b'\x00\x00\x00\x00\x02\x00\x00\x00',
@@ -458,12 +462,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                                            _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
@@ -513,12 +518,13 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr(user_input=[
             'f', 'Y', '[', '\b', '\n', 'f', '\b', 'E', '\n', 'q'
         ])
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 10 * ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
@@ -688,12 +694,13 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr(user_input=[
             'f', 'E', '\n', 'p', ' ', 'r', 'f', '\n', 'q'
         ])
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 10 * ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
@@ -750,8 +757,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -766,8 +772,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'Filter:                                                         ',
                      'cyan'),
 
@@ -782,8 +787,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'Filter: E                                                       ',
                      'cyan'),
 
@@ -798,8 +802,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.54 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -811,8 +814,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                      0,
                      '   TIMESTAMP  MESSAGE                                           ',
                      'green'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -827,8 +829,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.48 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'Filter:                                                         ',
                      'cyan'),
 
@@ -843,8 +844,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.48 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan')
 
@@ -870,12 +870,13 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr(user_input=[
             ' ', ' ', 'p', ' ', ' ', 'p', ' ', ' ', ' ', 'q'
         ])
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 8 * ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
 
         for timestamp in range(4):
             monitor.on_message_received(can.Message(
@@ -915,8 +916,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -930,8 +930,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -945,8 +944,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -961,8 +959,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -977,8 +974,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
+                call(29,
                      0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
                      'cyan'),
 
@@ -1016,12 +1012,13 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Prepare mocks.
         stdscr = StdScr(user_input=[' ', ' ', 'q'],
                         resolution=[(30, 40), (25, 35), (25, 35), (20, 30)])
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = 3 * ['green', 'cyan']
         is_term_resized.return_value = True
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
 
         monitor.on_message_received(can.Message(
             arbitration_id=496,
@@ -1074,23 +1071,24 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
     def test_display_paginated_data(self,
-                                _use_default_colors,
-                                _curs_set,
-                                _init_pair,
-                                is_term_resized,
-                                color_pair,
-                                _bus,
-                                _notifier):
+                                    _use_default_colors,
+                                    _curs_set,
+                                    _init_pair,
+                                    is_term_resized,
+                                    color_pair,
+                                    _bus,
+                                    _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
             ' ', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_PPAGE', 'q'
         ])
-        args = Args('tests/files/dbc/msxii_system_can.dbc')
+        args = Args()
+        dbase = load_file('tests/files/dbc/msxii_system_can.dbc')
         color_pair.side_effect = 5 * ['green', 'cyan']
         is_term_resized.return_value = False
 
         # Run monitor.
-        monitor = Monitor(stdscr, args)
+        monitor = Monitor(stdscr, dbase, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
             data=b'\x00\x00\x98\x98\x0b\x00',
@@ -1171,7 +1169,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.run()
 
         self.maxDiff = None
-        unittest.util._MAX_LENGTH=20000
+        unittest.util._MAX_LENGTH = 20000
 
         # Check mocks.
         self.assert_called(

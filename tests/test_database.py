@@ -87,16 +87,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "set, invalid when bit is clear.'})")
 
         signal = message.get_signal_by_name('Validity_Accel_Lateral')
-        self.assertEqual(signal.initial , 1)
+        self.assertEqual(signal.initial, 1)
 
         signal = message.get_signal_by_name('Validity_Accel_Vertical')
         self.assertEqual(signal.initial, 0)
 
         signal = message.get_signal_by_name('Accuracy_Accel')
-        self.assertEqual(signal.initial , 127)
+        self.assertEqual(signal.initial, 127)
 
         signal = message.get_signal_by_name('Accel_Longitudinal')
-        self.assertEqual(signal.initial , 32767)
+        self.assertEqual(signal.initial, 32767)
         self.assertEqual(
             repr(signal),
             "signal('Accel_Longitudinal', 16, 16, 'little_endian', True, 32767, "
@@ -105,10 +105,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "forwards direction.'})")
 
         signal = message.get_signal_by_name('Accel_Lateral')
-        self.assertEqual(signal.initial , -30000)
+        self.assertEqual(signal.initial, -30000)
 
         signal = message.get_signal_by_name('Accel_Vertical')
-        self.assertEqual(signal.initial , 16120)
+        self.assertEqual(signal.initial, 16120)
 
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'
@@ -188,7 +188,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "environment_variable('EMC_TrdPower', 1, -180, 400, 'deg', 0, 12,"
             " 'DUMMY_NODE_VECTOR0', 'Vector__XXX', 'Elevation Head')")
 
-
     def test_foobar(self):
         db = cantools.db.Database()
         db.add_dbc_file('tests/files/dbc/foobar.dbc')
@@ -245,7 +244,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.name, 'Bar')
         self.assertEqual(message.bus_name, 'TheBusName')
         self.assertEqual(message.senders, ['FOO', 'BAR'])
-        self.assertEqual(message.signals[0].receivers, [ 'FUM'])
+        self.assertEqual(message.signals[0].receivers, ['FUM'])
         self.assertEqual(message.signals[0].is_float, True)
         self.assertEqual(message.signals[0].length, 32)
 
@@ -1059,7 +1058,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'OutsideTemp',
                              'SpeedKm',
                              'Handbrake'
-                         ])
+        ])
 
         self.assertEqual(
             db.messages[1].signal_tree_string(),
@@ -1229,18 +1228,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.db.load_file('tests/files/kcd/the_homer.kcd')
 
         messages = [
-            (         {'EngagedGear': 'disengaged'}, b'\x00\x00'),
-            (                  {'EngagedGear': '1'}, b'\x00\x10'),
-            (                  {'EngagedGear': '2'}, b'\x00\x20'),
-            (                  {'EngagedGear': '3'}, b'\x00\x30'),
-            (                  {'EngagedGear': '4'}, b'\x00\x40'),
-            (                  {'EngagedGear': '5'}, b'\x00\x50'),
-            (                  {'EngagedGear': '6'}, b'\x00\x60'),
-            (                    {'EngagedGear': 7}, b'\x00\x70'),
-            (                    {'EngagedGear': 8}, b'\x00\x80'),
-            (                    {'EngagedGear': 9}, b'\x00\x90'),
-            (            {'EngagedGear': 'reverse'}, b'\x00\xa0'),
-            (   {'EngagedGear': 'Unspecific error'}, b'\x00\xf0')
+            ({'EngagedGear': 'disengaged'}, b'\x00\x00'),
+            ({'EngagedGear': '1'}, b'\x00\x10'),
+            ({'EngagedGear': '2'}, b'\x00\x20'),
+            ({'EngagedGear': '3'}, b'\x00\x30'),
+            ({'EngagedGear': '4'}, b'\x00\x40'),
+            ({'EngagedGear': '5'}, b'\x00\x50'),
+            ({'EngagedGear': '6'}, b'\x00\x60'),
+            ({'EngagedGear': 7}, b'\x00\x70'),
+            ({'EngagedGear': 8}, b'\x00\x80'),
+            ({'EngagedGear': 9}, b'\x00\x90'),
+            ({'EngagedGear': 'reverse'}, b'\x00\xa0'),
+            ({'EngagedGear': 'Unspecific error'}, b'\x00\xf0')
         ]
 
         for decoded_message, encoded_message in messages:
@@ -1273,7 +1272,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         for message_id, decoded_message, encoded_message in messages:
             encoded = db.encode_message(message_id, decoded_message)
-            self.assertEqual(encoded,encoded_message)
+            self.assertEqual(encoded, encoded_message)
             decoded = db.decode_message(message_id, encoded)
             self.assertEqual(decoded, decoded_message)
 
@@ -2979,7 +2978,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.refresh()
         message = db.get_message_by_frame_id(0x40)
         self.assertEqual(message.name, 'TheMessage')
-        self.assertEqual(message.frame_id,0x40)
+        self.assertEqual(message.frame_id, 0x40)
 
         message.name = 'TheNewMessage'
         db.refresh()

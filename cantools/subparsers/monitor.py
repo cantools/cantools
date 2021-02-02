@@ -5,7 +5,6 @@ import bisect
 import queue
 
 import can
-from argparse_addons import Integer
 from .. import database
 from .utils import format_message
 from .utils import format_multiplexed_name
@@ -17,12 +16,9 @@ class QuitError(Exception):
 
 class Monitor(can.Listener):
 
-    def __init__(self, stdscr, args):
+    def __init__(self, stdscr, dbase, args):
         self._stdscr = stdscr
-        self._dbase = database.load_file(args.database,
-                                         encoding=args.encoding,
-                                         frame_id_mask=args.frame_id_mask,
-                                         strict=not args.no_strict)
+        self._dbase = dbase
         self._single_line = args.single_line
         self._filtered_sorted_message_names = []
         self._filter = ''
@@ -312,9 +308,9 @@ class Monitor(can.Listener):
         self._queue.put(msg)
 
 
-def _do_monitor(args):
+def _do_monitor(dbase, args):
     def monitor(stdscr):
-        Monitor(stdscr, args).run()
+        Monitor(stdscr, dbase, args).run()
 
     try:
         curses.wrapper(monitor)
@@ -331,19 +327,6 @@ def add_subparser(subparsers):
         action='store_true',
         help='Print the decoded message on a single line.')
     monitor_parser.add_argument(
-        '-e', '--encoding',
-        help='File encoding.')
-    monitor_parser.add_argument(
-        '--no-strict',
-        action='store_true',
-        help='Skip database consistency checks.')
-    monitor_parser.add_argument(
-        '-m', '--frame-id-mask',
-        type=Integer(0),
-        help=('Only compare selected frame id bits to find the message in the '
-              'database. By default the received and database frame ids must '
-              'be equal for a match.'))
-    monitor_parser.add_argument(
         '-b', '--bus-type',
         default='socketcan',
         help='Python CAN bus type (default: socketcan).')
@@ -358,7 +341,4 @@ def add_subparser(subparsers):
         '-f', '--fd',
         action='store_true',
         help='Python CAN CAN-FD bus.')
-    monitor_parser.add_argument(
-        'database',
-        help='Database file.')
     monitor_parser.set_defaults(func=_do_monitor)

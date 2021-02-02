@@ -2,38 +2,29 @@ import sys
 import re
 import binascii
 import struct
-from argparse_addons import Integer
 
 from .. import database
 from .utils import format_message_by_frame_id
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^\s*(?:\(.*?\))?\s*\S+\s+([0-9A-F]+)\s*\[\d+\]\s*([0-9A-F ]*)$')
-# Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
-RE_CANDUMP_LOG = re.compile(r'^\(\d+\.\d+\)\s+\S+\s+([\dA-F]+)#([\dA-F]*)$')
+RE_CANDUMP = re.compile(r'^.*?(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*)$')
+RE_CANDUMP_LOG = re.compile(
+    r'^.*?(?P<can_id>[0-9A-F]+)##?(?P<can_data>[0-9A-F]*)$')
 
 
 def _mo_unpack(mo):
-    frame_id = mo.group(1)
-    frame_id = '0' * (8 - len(frame_id)) + frame_id
-    frame_id = binascii.unhexlify(frame_id)
-    frame_id = struct.unpack('>I', frame_id)[0]
-    data = mo.group(2)
+    frame_id = int(mo.group('can_id'), 16)
+    data = mo.group('can_data')
     data = data.replace(' ', '')
     data = binascii.unhexlify(data)
 
     return frame_id, data
 
 
-def _do_decode(args):
-    dbase = database.load_file(args.database,
-                               encoding=args.encoding,
-                               frame_id_mask=args.frame_id_mask,
-                               strict=not args.no_strict)
+def _do_decode(dbase, args):
     decode_choices = not args.no_decode_choices
-    re_format = None
-
+    pattern = None
     while True:
         line = sys.stdin.readline()
 
@@ -43,20 +34,17 @@ def _do_decode(args):
 
         line = line.strip('\r\n')
 
-        # Auto-detect on first valid line.
-        if re_format is None:
-            mo = RE_CANDUMP.match(line)
-
-            if mo:
-                re_format = RE_CANDUMP
-            else:
-                mo = RE_CANDUMP_LOG.match(line)
+        if pattern is None:
+            for p in [RE_CANDUMP, RE_CANDUMP_LOG]:
+                mo = p.match(line)
 
                 if mo:
-                    re_format = RE_CANDUMP_LOG
-        else:
-            mo = re_format.match(line)
+                    pattern = p
+                    break
+        if pattern is None:
+            continue
 
+        mo = pattern.match(line)
         if mo:
             frame_id, data = _mo_unpack(mo)
             line += ' ::'
@@ -82,20 +70,4 @@ def add_subparser(subparsers):
         '-s', '--single-line',
         action='store_true',
         help='Print the decoded message on a single line.')
-    decode_parser.add_argument(
-        '-e', '--encoding',
-        help='File encoding.')
-    decode_parser.add_argument(
-        '--no-strict',
-        action='store_true',
-        help='Skip database consistency checks.')
-    decode_parser.add_argument(
-        '-m', '--frame-id-mask',
-        type=Integer(0),
-        help=('Only compare selected frame id bits to find the message in the '
-              'database. By default the candump and database frame ids must '
-              'be equal for a match.'))
-    decode_parser.add_argument(
-        'database',
-        help='Database file.')
     decode_parser.set_defaults(func=_do_decode)

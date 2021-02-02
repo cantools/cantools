@@ -205,3 +205,13 @@ def create_encode_decode_formats(datas, number_of_bytes):
     return Formats(big_compiled,
                    little_compiled,
                    big_padding_mask & little_padding_mask)
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'

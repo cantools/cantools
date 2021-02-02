@@ -47,7 +47,6 @@ import binascii
 import struct
 import datetime
 import argparse
-from argparse_addons import Integer
 try:
     from matplotlib import pyplot as plt
 except ImportError:
@@ -62,7 +61,8 @@ plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)(?:\s*::.*)?$')
+RE_CANDUMP = re.compile(
+    r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)(?:\s*::.*)?$')
 # Matches 'cantools decode' output, i.e. ")" or "   voltage: 0 V,".
 RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s+[0-9.+-]+(\s+.*)?,?|\)')
 # Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
@@ -81,6 +81,7 @@ def _mo_unpack(mo):
     data = binascii.unhexlify(data)
 
     return timestamp, frame_id, data
+
 
 class TimestampParser:
 
@@ -172,7 +173,8 @@ class TimestampParser:
 
         return label
 
-def _do_decode(args):
+
+def _do_decode(dbase, args):
     '''
     The entry point of the program.
     It iterates over all input lines, parses them
@@ -187,10 +189,6 @@ def _do_decode(args):
         args.ignore_unknown_frames = True
         args.ignore_invalid_data = True
 
-    dbase = database.load_file(args.database,
-                               encoding=args.encoding,
-                               frame_id_mask=args.frame_id_mask,
-                               strict=not args.no_strict)
     re_format = None
     timestamp_parser = TimestampParser()
     if args.show_invalid_syntax:
@@ -309,6 +307,7 @@ class Plotter:
             print("Result written to %s" % self.output_filename)
         else:
             plt.show()
+
 
 class Signals:
 
@@ -513,6 +512,7 @@ class Signal:
     def match(self, signal):
         return self.reo.match(signal)
 
+
 class Graph:
 
     '''
@@ -548,19 +548,6 @@ def add_subparser(subparsers):
         '-c', '--no-decode-choices',
         action='store_true',
         help='Do not convert scaled values to choice strings.')
-    decode_parser.add_argument(
-        '-e', '--encoding',
-        help='File encoding of dbc file.')
-    decode_parser.add_argument(
-        '--no-strict',
-        action='store_true',
-        help='Skip database consistency checks.')
-    decode_parser.add_argument(
-        '-m', '--frame-id-mask',
-        type=Integer(0),
-        help=('Only compare selected frame id bits to find the message in the '
-              'database. By default the candump and database frame ids must '
-              'be equal for a match.'))
     decode_parser.add_argument(
         '-I', '--case-sensitive',
         action='store_true',
@@ -616,9 +603,6 @@ def add_subparser(subparsers):
         '-o', '--output-file',
         help='A file to write the plot to instead of displaying it in a window.')
 
-    decode_parser.add_argument(
-        'database',
-        help='Database file.')
     decode_parser.add_argument(
         'signals',
         nargs='*',

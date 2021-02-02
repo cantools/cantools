@@ -1,4 +1,5 @@
 import logging
+import re
 
 from .formats import arxml
 from .formats import dbc
@@ -32,6 +33,8 @@ class Database(object):
                  version=None,
                  dbc_specifics=None,
                  frame_id_mask=None,
+                 msg_pattern=None,
+                 msg_antipattern=None,
                  strict=True):
         self._messages = messages if messages else []
         self._nodes = nodes if nodes else []
@@ -45,6 +48,8 @@ class Database(object):
             frame_id_mask = 0xffffffff
 
         self._frame_id_mask = frame_id_mask
+        self.msg_pattern = msg_pattern
+        self.msg_antipattern = msg_antipattern
         self._strict = strict
         self.refresh()
 
@@ -58,7 +63,16 @@ class Database(object):
 
         """
 
-        return self._messages
+        def do_show_msg(message):
+            if self.msg_pattern is None and self.msg_antipattern is None:
+                return True
+            elif self.msg_pattern is not None and re.match(self.msg_pattern, message.name):
+                return True
+            elif self.msg_antipattern is not None and not re.match(self.msg_antipattern, message.name):
+                return True
+            return False
+
+        return list(filter(do_show_msg, self._messages))
 
     @property
     def nodes(self):
@@ -276,7 +290,7 @@ class Database(object):
 
         """
 
-        return dbc.dump_string(InternalDatabase(self._messages,
+        return dbc.dump_string(InternalDatabase(self.messages,
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
@@ -287,7 +301,7 @@ class Database(object):
 
         """
 
-        return kcd.dump_string(InternalDatabase(self._messages,
+        return kcd.dump_string(InternalDatabase(self.messages,
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
@@ -400,7 +414,7 @@ class Database(object):
         self._name_to_message = {}
         self._frame_id_to_message = {}
 
-        for message in self._messages:
+        for message in self.messages:
             message.refresh(self._strict)
             self._add_message(message)
 
@@ -416,7 +430,7 @@ class Database(object):
 
             lines.append('')
 
-        for message in self._messages:
+        for message in self.messages:
             lines.append(repr(message))
 
             for signal in message.signals:

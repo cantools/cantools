@@ -68,34 +68,12 @@ def _resolve_database_format_and_encoding(database_format,
     return database_format, encoding
 
 
-def _load_file_cache(filename,
-                     database_format,
-                     encoding,
-                     frame_id_mask,
-                     strict,
-                     cache_dir):
-    with open(filename, 'rb') as fin:
-        key = fin.read()
-
-    cache = diskcache.Cache(cache_dir)
-
-    try:
-        return cache[key]
-    except KeyError:
-        with fopen(filename, 'r', encoding=encoding) as fin:
-            database = load(fin,
-                            database_format,
-                            frame_id_mask,
-                            strict)
-        cache[key] = database
-
-        return database
-
-
 def load_file(filename,
               database_format=None,
               encoding=None,
               frame_id_mask=None,
+              msg_pattern=None,
+              msg_antipattern=None,
               strict=True,
               cache_dir=None):
     """Open, read and parse given database file and return a
@@ -172,19 +150,27 @@ def load_file(filename,
         encoding,
         filename)
 
-    if cache_dir is None:
-        with fopen(filename, 'r', encoding=encoding) as fin:
-            return load(fin,
-                        database_format,
-                        frame_id_mask,
-                        strict)
-    else:
-        return _load_file_cache(filename,
-                                database_format,
-                                encoding,
-                                frame_id_mask,
-                                strict,
-                                cache_dir)
+    cache = None
+    if cache_dir is not None:
+        with open(filename, 'rb') as fin:
+            key = fin.read()
+
+        cache = diskcache.Cache(cache_dir)
+        if key in cache:
+            return cache[key]
+
+    with fopen(filename, 'r', encoding=encoding) as fin:
+            database = load(fin,
+                            database_format,
+                            frame_id_mask,
+                            msg_pattern,
+                            msg_antipattern,
+                            strict)
+
+    if cache is not None:
+        cache[key] = database
+
+    return database
 
 
 def dump_file(database,
@@ -228,6 +214,8 @@ def dump_file(database,
 def load(fp,
          database_format=None,
          frame_id_mask=None,
+         msg_pattern=None,
+         msg_antipattern=None,
          strict=True):
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
@@ -252,12 +240,16 @@ def load(fp,
     return load_string(fp.read(),
                        database_format,
                        frame_id_mask,
+                       msg_pattern,
+                       msg_antipattern,
                        strict)
 
 
 def load_string(string,
                 database_format=None,
                 frame_id_mask=None,
+                msg_pattern=None,
+                msg_antipattern=None,
                 strict=True):
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
@@ -296,6 +288,8 @@ def load_string(string,
 
     def load_can_database(fmt):
         db = can.Database(frame_id_mask=frame_id_mask,
+                          msg_pattern=msg_pattern,
+                          msg_antipattern=msg_antipattern,
                           strict=strict)
 
         if fmt == 'arxml':

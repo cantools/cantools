@@ -2,12 +2,14 @@
 
 import binascii
 from copy import deepcopy
+import textwrap
 
 from ..utils import format_or
 from ..utils import start_bit
 from ..utils import encode_data
 from ..utils import decode_data
 from ..utils import create_encode_decode_formats
+from ..utils import bcolors
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
@@ -97,7 +99,7 @@ class Message(object):
                 continue
 
             if ((multiplexer_id is not None)
-                and (multiplexer_id not in signal.multiplexer_ids)):
+                    and (multiplexer_id not in signal.multiplexer_ids)):
                 continue
 
             if signal.is_multiplexer:
@@ -335,7 +337,7 @@ class Message(object):
 
         return self._signal_tree
 
-    def signal_tree_string(self):
+    def signal_tree_string(self, console_width=80, with_comments=False):
         """Returns the message signal tree as a string.
 
         """
@@ -371,7 +373,19 @@ class Message(object):
                     signal_lines = add_prefix(get_prefix(index, len(signal_names)),
                                               signal_lines)
                 else:
-                    signal_name_line = '+-- {}'.format(signal_name)
+                    siginst = self.get_signal_by_name(signal_name)
+                    signal_name_line = signal_name
+
+                    if with_comments:
+                        com = []
+                        if siginst.comment:
+                            com.append(siginst.comment)
+                        if siginst.unit:
+                            com.append('[{}]'.format(siginst.unit))
+                        signal_name_line = '{} {}{}{}'.format(signal_name, bcolors.OKBLUE, ' '.join(com), bcolors.ENDC)
+                    signal_name_line = textwrap.wrap(signal_name_line, width=console_width - 2, initial_indent='+-- ',
+                                                     subsequent_indent=(' ' * (8 + len(signal_name)) + bcolors.OKBLUE))
+                    signal_name_line = '\n'.join(signal_name_line)
                     signal_lines = []
 
                 lines.append(signal_name_line)

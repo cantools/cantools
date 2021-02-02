@@ -33,7 +33,11 @@ class CanToolsCommandLineTest(unittest.TestCase):
         self.assertEqual(read_file(actual), read_file(expected))
 
     def test_decode(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        argv = [
+            'cantools',
+                '--database=tests/files/dbc/socialledge.dbc',
+                'decode',
+                ]
         input_data = """\
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
   vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF
@@ -79,7 +83,12 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_timestamp_absolute(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        argv = [
+            'cantools',
+            '--database',
+            'tests/files/dbc/socialledge.dbc',
+            'decode',
+        ]
         input_data = """\
  (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
  (2020-12-19 12:04:48.597222)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF
@@ -121,7 +130,12 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_timestamp_zero(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        argv = [
+            'cantools',
+            '--database',
+            'tests/files/dbc/socialledge.dbc',
+            'decode',
+        ]
         input_data = """\
  (000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
  (002.047817)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF
@@ -163,7 +177,12 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_can_fd(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/foobar.dbc']
+        argv = [
+            'cantools',
+            '--database',
+            'tests/files/dbc/foobar.dbc',
+            'decode',
+        ]
         input_data = """\
   vcan0  12333 [064]  02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 """
@@ -188,8 +207,9 @@ CanFd(
     def test_decode_log_format(self):
         argv = [
             'cantools',
+            '--database',
+            'tests/files/dbc/socialledge.dbc',
             'decode',
-            'tests/files/dbc/socialledge.dbc'
         ]
         input_data = """\
 (1594172461.968006) vcan0 0C8#F000000000000000
@@ -238,9 +258,9 @@ IO_DEBUG(
     def test_single_line_decode(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/socialledge.dbc',
             'decode',
             '--single-line',
-            'tests/files/dbc/socialledge.dbc'
         ]
 
         input_data = """\
@@ -273,9 +293,10 @@ IO_DEBUG(
     def test_single_line_decode_log_format(self):
         argv = [
             'cantools',
+            '--database',
+            'tests/files/dbc/socialledge.dbc',
             'decode',
             '--single-line',
-            'tests/files/dbc/socialledge.dbc'
         ]
 
         input_data = """\
@@ -308,8 +329,8 @@ IO_DEBUG(
     def test_decode_muxed_data(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/msxii_system_can.dbc',
             'decode',
-            'tests/files/dbc/msxii_system_can.dbc'
         ]
 
         input_data = """\
@@ -582,9 +603,9 @@ BATTERY_VT(
     def test_decode_single_line_muxed_data(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/msxii_system_can.dbc',
             'decode',
             '--single-line',
-            'tests/files/dbc/msxii_system_can.dbc'
         ]
 
         input_data = """\
@@ -677,8 +698,8 @@ BATTERY_VT(
     def test_dump(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/motohawk.dbc',
             'dump',
-            'tests/files/dbc/motohawk.dbc'
         ]
 
         expected_output = """\
@@ -746,9 +767,9 @@ BATTERY_VT(
     def test_dump_no_sender(self):
         argv = [
             'cantools',
-            'dump',
+            '--database=tests/files/dbc/no_sender.dbc',
             '--no-strict',
-            'tests/files/dbc/no_sender.dbc'
+            'dump',
         ]
 
         expected_output = """\
@@ -791,8 +812,8 @@ BATTERY_VT(
     def test_dump_signal_choices(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/dump_signal_choices.dbc',
             'dump',
-            'tests/files/dbc/dump_signal_choices.dbc'
         ]
 
         expected_output = """\
@@ -869,8 +890,8 @@ BATTERY_VT(
     def test_dump_j1939(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/j1939.dbc',
             'dump',
-            'tests/files/dbc/j1939.dbc'
         ]
 
         expected_output = """\
@@ -975,9 +996,9 @@ BATTERY_VT(
         # DBC to KCD.
         argv = [
             'cantools',
+            '--database=tests/files/dbc/motohawk.dbc',
             'convert',
-            'tests/files/dbc/motohawk.dbc',
-            'test_command_line_convert.kcd'
+            'test_command_line_convert.kcd',
         ]
 
         if os.path.exists('test_command_line_convert.kcd'):
@@ -993,9 +1014,9 @@ BATTERY_VT(
         # KCD to DBC.
         argv = [
             'cantools',
+            '--database=test_command_line_convert.kcd',
             'convert',
-            'test_command_line_convert.kcd',
-            'test_command_line_convert.dbc'
+            'test_command_line_convert.dbc',
         ]
 
         if os.path.exists('test_command_line_convert.dbc'):
@@ -1011,18 +1032,18 @@ BATTERY_VT(
     def test_convert_bad_outfile(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/motohawk.dbc',
             'convert',
-            'tests/files/dbc/motohawk.dbc',
-            'test_command_line_convert.foo'
+            'test_command_line_convert.foo',
         ]
 
         with patch('sys.argv', argv):
-            with self.assertRaises(SystemExit) as cm:
+            with self.assertRaises(cantools.database.errors.Error) as cm:
                 cantools._main()
 
             self.assertEqual(
                 str(cm.exception),
-                "error: Unsupported output database format 'foo'.")
+                "Unsupported output database format 'foo'.")
 
     def test_generate_c_source(self):
         databases = [
@@ -1047,8 +1068,8 @@ BATTERY_VT(
 
             argv = [
                 'cantools',
+                '--database=tests/files/dbc/{}.dbc'.format(database),
                 'generate_c_source',
-                '--infile=tests/files/dbc/{}.dbc'.format(database),
                 '--',
                 'tests/files/code_templates/utils.c',
                 'tests/files/code_templates/utils.h',
@@ -1079,9 +1100,9 @@ BATTERY_VT(
         for database in databases:
             argv = [
                 'cantools',
+                '--database=tests/files/dbc/{}.dbc'.format(database),
                 'generate_c_source',
                 '--no-floating-point-numbers',
-                '--infile=tests/files/dbc/{}.dbc'.format(database),
                 '--',
                 'tests/files/code_templates/utils.c',
                 'tests/files/code_templates/utils.h',
@@ -1116,9 +1137,9 @@ BATTERY_VT(
         for database in databases:
             argv = [
                 'cantools',
-                'generate_c_source',
                 '--database-name', 'my_database_name',
-                '--infile=tests/files/dbc/{}.dbc'.format(database),
+                '--database=tests/files/dbc/{}.dbc'.format(database),
+                'generate_c_source',
                 '--',
                 'tests/files/code_templates/utils.c',
                 'tests/files/code_templates/utils.h',
@@ -1151,10 +1172,10 @@ BATTERY_VT(
         for database in databases:
             argv = [
                 'cantools',
+                '--database-name', '{}_bit_fields'.format(database),
+                '--database=tests/files/dbc/{}.dbc'.format(database),
                 'generate_c_source',
                 '--bit-fields',
-                '--database-name', '{}_bit_fields'.format(database),
-                '--infile=tests/files/dbc/{}.dbc'.format(database),
                 '--',
                 'tests/files/code_templates/utils.c',
                 'tests/files/code_templates/utils.h',
@@ -1180,8 +1201,8 @@ BATTERY_VT(
     def test_generate_c_source_generate_fuzzer(self):
         argv = [
             'cantools',
+            '--database=tests/files/dbc/multiplex_2.dbc',
             'generate_c_source',
-            '--infile=tests/files/dbc/multiplex_2.dbc',
             '--',
             'tests/files/code_templates/utils.c',
             'tests/files/code_templates/utils.h',
@@ -1232,8 +1253,8 @@ BATTERY_VT(
 
             argv = [
                 'cantools',
+                '--database=tests/files/sym/{}.sym'.format(database),
                 'generate_c_source',
-                '--infile=tests/files/sym/{}.sym'.format(database),
                 '--',
                 'tests/files/code_templates/utils.c',
                 'tests/files/code_templates/utils.h',

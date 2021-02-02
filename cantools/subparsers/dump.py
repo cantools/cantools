@@ -1,4 +1,7 @@
+import curses
+
 from .. import database
+from .. import errors
 from ..database.utils import format_and
 from ..database.can.database import Database as CanDatabase
 from ..database.diagnostics.database import Database as DiagnosticsDatabase
@@ -31,11 +34,15 @@ def _print_j1939_frame_id(message):
     print('      Format:         {}'.format(pdu_format))
 
 
-def _dump_can_database(dbase):
+def _dump_can_database(dbase, with_comments=False):
+
+    _stdscr = curses.initscr()
+    HEIGHT, WIDTH = _stdscr.getmaxyx()
+    curses.endwin()
+
     print('================================= Messages =================================')
     print()
     print('  ' + 72 * '-')
-
     for message in dbase.messages:
         cycle_time = message.cycle_time
         signal_choices_string = message.signal_choices_string()
@@ -67,7 +74,7 @@ def _dump_can_database(dbase):
         print()
         print('\n'.join([
             ('    ' + line).rstrip()
-            for line in message.signal_tree_string().splitlines()
+            for line in message.signal_tree_string(WIDTH, with_comments=with_comments).splitlines()
         ]))
         print()
 
@@ -104,31 +111,19 @@ def _dump_diagnostics_database(dbase):
         print('  ' + 72 * '-')
 
 
-def _do_dump(args):
-    dbase = database.load_file(args.database,
-                               encoding=args.encoding,
-                               strict=not args.no_strict)
-
+def _do_dump(dbase, args):
     if isinstance(dbase, CanDatabase):
-        _dump_can_database(dbase)
+        _dump_can_database(dbase, args.with_comments)
     elif isinstance(dbase, DiagnosticsDatabase):
         _dump_diagnostics_database(dbase)
     else:
-        sys.exit('Unsupported database type.')
+        raise errors.Error('Unsupported database type.')
 
 
 def add_subparser(subparsers):
     dump_parser = subparsers.add_parser(
         'dump',
         description='Dump given database in a human readable format.')
-    dump_parser.add_argument(
-        '-e', '--encoding',
-        help='File encoding.')
-    dump_parser.add_argument(
-        '--no-strict',
-        action='store_true',
-        help='Skip database consistency checks.')
-    dump_parser.add_argument(
-        'database',
-        help='Database file.')
+    dump_parser.add_argument('--with-comments', action='store_true', default=False)
+
     dump_parser.set_defaults(func=_do_dump)

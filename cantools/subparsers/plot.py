@@ -59,7 +59,7 @@ from .. import errors
 
 class MatplotlibNotInstalledError(errors.Error):
     def __init__(self):
-        super(MatplotlibNotInstalledError, self).__init__(
+        super().__init__(
             "The matplotlib package not installed and is required for producing plots.",
         )
 

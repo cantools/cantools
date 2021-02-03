@@ -51,14 +51,23 @@ from argparse_addons import Integer
 try:
     from matplotlib import pyplot as plt
 except ImportError:
-    print("matplotlib package not installed. Required for producing plots.")
+    plt = None
 
 from .. import database
+from .. import errors
 
 
-plt.rcParams["date.autoformatter.hour"] = "%H:%M"
-plt.rcParams["date.autoformatter.minute"] = "%H:%M"
-plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
+class MatplotlibNotInstalledError(errors.Error):
+    def __init__(self):
+        super(MatplotlibNotInstalledError, self).__init__(
+            "The matplotlib package not installed and is required for producing plots.",
+        )
+
+
+if plt is not None:
+    plt.rcParams["date.autoformatter.hour"] = "%H:%M"
+    plt.rcParams["date.autoformatter.minute"] = "%H:%M"
+    plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -178,6 +187,10 @@ def _do_decode(args):
     It iterates over all input lines, parses them
     and passes the data to a Plotter object.
     '''
+    
+    if plt is None:
+        raise MatplotlibNotInstalledError()
+
     if args.show_errors:
         args.show_invalid_syntax = True
         args.show_unknown_frames = True

@@ -1180,8 +1180,8 @@ BATTERY_VT(
             if os.path.exists(database_c):
                 os.remove(database_c)
             
-            if os.path.exists(some_dir):
-                os.rmdir(some_dir)
+            if os.path.exists(output_directory):
+                os.rmdir(output_directory)
 
             with patch('sys.argv', argv):
                 cantools._main()

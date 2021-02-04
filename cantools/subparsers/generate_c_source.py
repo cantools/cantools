@@ -1,4 +1,5 @@
 import os
+import os.path
 
 from .. import database
 from ..database.can.c_source import generate
@@ -31,6 +32,8 @@ def _do_generate_c_source(args):
         not args.no_floating_point_numbers,
         args.bit_fields)
 
+    os.makedirs(args.output_directory, exist_ok=True)
+    
     path_h = os.path.join(args.output_directory, filename_h)
     
     with open(path_h, 'w') as fout:

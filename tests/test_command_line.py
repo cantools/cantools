@@ -1157,39 +1157,36 @@ BATTERY_VT(
                                         'tests/files/c_source/' + database_c)
 
     def test_generate_c_source_output_directory(self):
-        databases = [
-            'motohawk',
-        ]
+        database = 'motohawk'
         
         output_directory = 'some_dir'
 
-        for database in databases:
-            argv = [
-                'cantools',
-                'generate_c_source',
-                '--output-directory', output_directory,
-                'tests/files/dbc/{}.dbc'.format(database)
-            ]
+        argv = [
+            'cantools',
+            'generate_c_source',
+            '--output-directory', output_directory,
+            'tests/files/dbc/{}.dbc'.format(database)
+        ]
 
-            database_h = os.path.join(output_directory, f'{database}.h')
-            database_c = os.path.join(output_directory, f'{database}.c')
+        database_h = os.path.join(output_directory, f'{database}.h')
+        database_c = os.path.join(output_directory, f'{database}.c')
 
-            if os.path.exists(database_h):
-                os.remove(database_h)
+        if os.path.exists(database_h):
+            os.remove(database_h)
 
-            if os.path.exists(database_c):
-                os.remove(database_c)
-            
-            if os.path.exists(output_directory):
-                os.rmdir(output_directory)
+        if os.path.exists(database_c):
+            os.remove(database_c)
 
-            with patch('sys.argv', argv):
-                cantools._main()
+        if os.path.exists(output_directory):
+            os.rmdir(output_directory)
 
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + os.path.basename(database_h))
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + os.path.basename(database_c))
+        with patch('sys.argv', argv):
+            cantools._main()
+
+        self.assert_files_equal(database_h,
+                                'tests/files/c_source/' + os.path.basename(database_h))
+        self.assert_files_equal(database_c,
+                                'tests/files/c_source/' + os.path.basename(database_c))
 
     def test_generate_c_source_bit_fields(self):
         databases = [

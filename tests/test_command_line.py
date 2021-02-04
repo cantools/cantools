@@ -1171,8 +1171,8 @@ BATTERY_VT(
                 'tests/files/dbc/{}.dbc'.format(database)
             ]
 
-            database_h = os.path.join(output_directory, 'my_database_name.h')
-            database_c = os.path.join(output_directory, 'my_database_name.c')
+            database_h = os.path.join(output_directory, f'{database}.h')
+            database_c = os.path.join(output_directory, f'{database}.c')
 
             if os.path.exists(database_h):
                 os.remove(database_h)

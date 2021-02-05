@@ -19,6 +19,7 @@ class Monitor(can.Listener):
 
     def __init__(self, stdscr, args):
         self._stdscr = stdscr
+        print(f'Reading bus description file "{args.database}"...\r')
         self._dbase = database.load_file(args.database,
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,

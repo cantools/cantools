@@ -622,8 +622,8 @@ class Signals:
     def finish_subplot(self, splot, subplot_args):
         self.finish_axis(splot, subplot_args)
         splot.legend(self.legend_handles, self.legend_labels)
-        self.legend_handles.clear()
-        self.legend_labels.clear()
+        self.legend_handles = list()
+        self.legend_labels = list()
 
     def plot_error(self, splot, xs, label, color):
         if xs:

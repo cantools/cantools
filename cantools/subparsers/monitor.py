@@ -27,6 +27,7 @@ class Monitor(can.Listener):
         self._single_line = args.single_line
         self._filtered_sorted_message_names = []
         self._filter = ''
+        self._filter_cursor_pos = 0
         self._compiled_filter = None
         self._formatted_messages = {}
         self._playing = True
@@ -45,6 +46,7 @@ class Monitor(can.Listener):
         curses.curs_set(False)
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
         curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
+        curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
         bus = self.create_bus(args)
         self._notifier = can.Notifier(bus, [self])
@@ -132,17 +134,49 @@ class Monitor(can.Listener):
 
     def draw_menu(self, row):
         if self._show_filter:
-            text = 'Filter: ' + self._filter
+            col = 0
+
+            # text before cursor
+            text = 'Filter regex: ' + self._filter[:self._filter_cursor_pos]
+            self.addstr_color(row,
+                              col,
+                              text,
+                              curses.color_pair(2))
+
+            col = len(text)
+
+            # cursor
+            if self._filter_cursor_pos >= len(self._filter):
+                c = " "
+            else:
+                c = self._filter[self._filter_cursor_pos]
+            self.addstr_color(row,
+                              col,
+                              c,
+                              curses.color_pair(3))
+            col += 1
+
+            # text after cursor
+            text = self._filter[self._filter_cursor_pos + 1:]
+            if len(text) > 0:
+                self.addstr_color(row,
+                                  col,
+                                  text,
+                                  curses.color_pair(2))
+                col += len(text)
+
+            # fill rest of line
+            self.addstr_color(row,
+                              col,
+                              ' '*(self._ncols - col),
+                              curses.color_pair(2))
         else:
             text = 'q: Quit, f: Filter, p: Play/Pause, r: Reset'
 
-        self.addstr_color(row,
-                          0,
-                          self.stretch(text),
-                          curses.color_pair(2))
-
-        if self._show_filter:
-            self._stdscr.move(row, len(text))
+            self.addstr_color(row,
+                              0,
+                              self.stretch(text),
+                              curses.color_pair(2))
 
     def addstr(self, row, col, text):
         try:
@@ -191,6 +225,7 @@ class Monitor(can.Listener):
                 self._queue.get()
         elif key in ['f', '/']:
             self._show_filter = True
+            self._filter_cursor_pos = len(self._filter)
             self._modified = True
             curses.curs_set(True)
         elif key in ['KEY_PPAGE']:
@@ -219,12 +254,32 @@ class Monitor(can.Listener):
             self._filter = ""
             curses.curs_set(False)
         elif key in ['KEY_BACKSPACE', '\b']:
-            self._filter = self._filter[:-1]
+            if self._filter_cursor_pos > 0:
+                self._filter = \
+                    self._filter[:self._filter_cursor_pos - 1] + \
+                    self._filter[self._filter_cursor_pos:]
+                self._filter_cursor_pos -= 1
+        elif key == 'KEY_DC':
+            # delete key
+            if self._filter_cursor_pos < len(self._filter):
+                self._filter = \
+                    self._filter[:self._filter_cursor_pos] + \
+                    self._filter[self._filter_cursor_pos + 1:]
+        elif key == 'KEY_LEFT':
+            if self._filter_cursor_pos > 0:
+                self._filter_cursor_pos -= 1
+        elif key == 'KEY_RIGHT':
+            if self._filter_cursor_pos < len(self._filter):
+                self._filter_cursor_pos += 1
         else:
             # we ignore keys with more than one character here. These
             # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.
             if len(key) == 1:
-                self._filter += key
+                self._filter = \
+                    self._filter[:self._filter_cursor_pos] + \
+                    key + \
+                    self._filter[self._filter_cursor_pos:]
+                self._filter_cursor_pos += 1
 
         self.compile_filter()
         self._filtered_sorted_message_names = []

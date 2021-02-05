@@ -55,7 +55,7 @@ class CanToolsMonitorTest(unittest.TestCase):
 
     maxDiff = None
 
-    color_pair_side_effect = [ "default", "green", "cyan" ]
+    color_pair_side_effect = [ "default", "green", "cyan", "cyan inverted" ]
 
     def assert_called(self, mock, expected, verbose=False):
         try:
@@ -102,7 +102,8 @@ class CanToolsMonitorTest(unittest.TestCase):
             init_pair,
             [
                 call(1, curses.COLOR_BLACK, curses.COLOR_GREEN),
-                call(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
+                call(2, curses.COLOR_BLACK, curses.COLOR_CYAN),
+                call(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
             ])
         self.assert_called(color_pair, [call(1), call(2)])
         self.assert_called(bus, [call(bustype='socketcan', channel='vcan0')])
@@ -543,143 +544,97 @@ class CanToolsMonitorTest(unittest.TestCase):
             [
                 # No filter.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29,
-                     0,
-                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
 
                 # 'f' pressed.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29,
-                     0,
-                     'Filter:                                                         ',
-                     'cyan'),
+                call(29, 0, 'Filter regex: ', 'cyan'),
+                call(29, 14, ' ', 'cyan inverted'),
+                call(29, 15, '                                                 ', 'cyan'),
 
                 # No match on 'Y'.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
-                call(29,
-                     0,
-                     'Filter: Y                                                       ',
-                     'cyan'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(29, 0, 'Filter regex: Y', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
 
                 # Invalid filter 'Y['.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29,
-                     0,
-                     'Filter: Y[                                                      ',
-                     'cyan'),
+                call(29, 0, 'Filter regex: Y[', 'cyan'),
+                call(29, 16, ' ', 'cyan inverted'),
+                call(29, 17, '                                               ', 'cyan'),
 
                 # No match on 'Y'.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
-                call(29,
-                     0,
-                     'Filter: Y                                                       ',
-                     'cyan'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(29, 0, 'Filter regex: Y', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
 
                 # Hit enter to hide filter.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
-                call(29,
-                     0,
-                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
 
                 # 'f' pressed again.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
-                call(29,
-                     0,
-                     'Filter: Y                                                       ',
-                     'cyan'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(29, 0, 'Filter regex: Y', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
 
                 # Backspace.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29,
-                     0,
-                     'Filter:                                                         ',
-                     'cyan'),
+                call(29, 0, 'Filter regex: ', 'cyan'),
+                call(29, 14, ' ', 'cyan inverted'),
+                call(29, 15, '                                                 ', 'cyan'),
 
                 # Match on 'E'.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29,
-                     0,
-                     'Filter: E                                                       ',
-                     'cyan'),
+                call(29, 0, 'Filter regex: E', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
 
                 # Hit enter to hide filter.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29,
-                     0,
-                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan')
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
             ])
 
     @patch('can.Notifier')
@@ -754,112 +709,76 @@ class CanToolsMonitorTest(unittest.TestCase):
             [
                 # One ok and one with bad frame id.
                 call(0, 0, 'Received: 2, Discarded: 1, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
-                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
 
                 # 'f' pressed.
                 call(0, 0, 'Received: 2, Discarded: 1, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
-                     0, 'Filter:                                                         ',
-                     'cyan'),
-
+                call(29, 0, 'Filter regex: ', 'cyan'),
+                call(29, 14, ' ', 'cyan inverted'),
+                call(29, 15, '                                                 ', 'cyan'),
+                
                 # 'E' pressed.
                 call(0, 0, 'Received: 2, Discarded: 1, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.55 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
-                     0, 'Filter: E                                                       ',
-                     'cyan'),
+                call(29, 0, 'Filter regex: E', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
 
                 # '\n' pressed.
                 call(0, 0, 'Received: 3, Discarded: 1, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       4.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.54 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
-                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
 
                 # 'p' pressed. Input frame not displayed.
 
                 # 'r' pressed.
                 call(0, 0, 'Received: 0, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
-                call(29
-                     ,
-                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
 
                 # Input after reset. 'f' pressed.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.48 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
-                     0, 'Filter:                                                         ',
-                     'cyan'),
+                call(29, 0, 'Filter regex: ', 'cyan'),
+                call(29, 14, ' ', 'cyan inverted'),
+                call(29, 15, '                                                 ', 'cyan'),
 
                 # '\n' pressed.
                 call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
                 call(4, 0, '                  AverageRadius: 3.2 m,'),
                 call(5, 0, '                  Temperature: 250.48 degK'),
                 call(6, 0, '              )'),
-                call(29
-                     ,
-                     0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan')
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
 
                 # 'q' pressed, no redraw.
             ])

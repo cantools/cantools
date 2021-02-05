@@ -271,6 +271,15 @@ class Monitor(can.Listener):
         elif key == 'KEY_RIGHT':
             if self._filter_cursor_pos < len(self._filter):
                 self._filter_cursor_pos += 1
+        elif key in ['KEY_PPAGE']:
+            # Decrement page
+            if self._page > 0:
+                self._page -= 1
+            self._modified = True
+        elif key in ['KEY_NPAGE']:
+            # Increment page
+            self._page += 1
+            self._modified = True
         else:
             # we ignore keys with more than one character here. These
             # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.

@@ -122,9 +122,11 @@ class Monitor(can.Listener):
         self._stdscr.refresh()
 
     def draw_stats(self, row):
-        self.addstr(row, 0, 'Received: {}, Discarded: {}, Errors: 0'.format(
-            self._received,
-            self._discarded))
+        status_text = \
+            f'Received: {self._received}, Discarded: {self._discarded}, Errors: 0'
+        if self._filter:
+            status_text += f', Filter: {self._filter}'
+        self.addstr(row, 0, status_text)
 
     def draw_title(self, row):
         self.addstr_color(row,

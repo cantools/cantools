@@ -565,14 +565,14 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 15, '                                                 ', 'cyan'),
 
                 # No match on 'Y'.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: Y'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(29, 0, 'Filter regex: Y', 'cyan'),
                 call(29, 15, ' ', 'cyan inverted'),
                 call(29, 16, '                                                ', 'cyan'),
 
                 # Invalid filter 'Y['.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: Y['),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
@@ -584,19 +584,19 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 17, '                                               ', 'cyan'),
 
                 # No match on 'Y'.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: Y'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(29, 0, 'Filter regex: Y', 'cyan'),
                 call(29, 15, ' ', 'cyan inverted'),
                 call(29, 16, '                                                ', 'cyan'),
 
-                # Hit enter to hide filter.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                # Hit enter to hide filter prompt.
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: Y'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
 
                 # 'f' pressed again.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: Y'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(29, 0, 'Filter regex: Y', 'cyan'),
                 call(29, 15, ' ', 'cyan inverted'),
@@ -615,7 +615,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 15, '                                                 ', 'cyan'),
 
                 # Match on 'E'.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: E'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
@@ -627,7 +627,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 16, '                                                ', 'cyan'),
 
                 # Hit enter to hide filter.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: E'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
@@ -730,7 +730,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 15, '                                                 ', 'cyan'),
                 
                 # 'E' pressed.
-                call(0, 0, 'Received: 2, Discarded: 1, Errors: 0'),
+                call(0, 0, 'Received: 2, Discarded: 1, Errors: 0, Filter: E'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),
@@ -742,7 +742,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 16, '                                                ', 'cyan'),
 
                 # '\n' pressed.
-                call(0, 0, 'Received: 3, Discarded: 1, Errors: 0'),
+                call(0, 0, 'Received: 3, Discarded: 1, Errors: 0, Filter: E'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       4.000  ExampleMessage('),
                 call(3, 0, "                  Enable: 'Enabled' -,"),

@@ -216,7 +216,10 @@ class Monitor(can.Listener):
         elif key in ['KEY_BACKSPACE', '\b']:
             self._filter = self._filter[:-1]
         else:
-            self._filter += key
+            # we ignore keys with more than one character here. These
+            # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.
+            if len(key) == 1:
+                self._filter += key
 
         self.compile_filter()
         self._filtered_sorted_message_names = []

@@ -38,7 +38,7 @@ class Monitor(can.Listener):
         self._received = 0
         self._discarded = 0
         self._basetime = None
-        self._page = 0
+        self._page_first_row = 0
 
         stdscr.keypad(True)
         stdscr.nodelay(True)
@@ -109,10 +109,15 @@ class Monitor(can.Listener):
         # - line 1: title
         # - line (n - 1): menu
         num_actual_usable_rows = self._nrows - 2 - 1
-        page_row = self._page * num_actual_usable_rows
         row = 2
 
-        for line in lines[page_row:page_row + num_actual_usable_rows]:
+        # make sure that we don't overshoot the last line of
+        # content. this is a bit of a hack, because manipulation of
+        # the controls is not supposed to happen within this method
+        if len(lines) < self._page_first_row + num_actual_usable_rows:
+            self._page_first_row = max(0, len(lines) - num_actual_usable_rows)
+
+        for line in lines[self._page_first_row:self._page_first_row + num_actual_usable_rows]:
             self.addstr(row, 0, line)
             row += 1
 
@@ -231,15 +236,56 @@ class Monitor(can.Listener):
             self._filter_cursor_pos = len(self._filter)
             self._modified = True
             curses.curs_set(True)
+        elif key in ['KEY_UP']:
+            self.line_up()
+        elif key in ['KEY_DOWN']:
+            self.line_down()
         elif key in ['KEY_PPAGE']:
-            # Decrement page
-            if self._page > 0:
-                self._page -= 1
-            self._modified = True
+            self.page_up()
         elif key in ['KEY_NPAGE']:
-            # Increment page
-            self._page += 1
-            self._modified = True
+            self.page_down()
+
+    def line_down(self):
+        # Increment line
+        self._page_first_row += 1
+
+        self._modified = True
+
+    def line_up(self):
+        # Decrement line
+        if self._page_first_row > 0:
+            self._page_first_row -= 1
+        else:
+            self._page_first_row = 0
+
+        self._modified = True
+
+    def page_down(self):
+        num_actual_usable_rows = self._nrows - 2 - 1
+
+        # Increment page
+        self._page_first_row += num_actual_usable_rows
+
+        self._modified = True
+
+    def page_up(self):
+        num_actual_usable_rows = self._nrows - 2 - 1
+
+        # Decrement page
+        if self._page_first_row > num_actual_usable_rows:
+            self._page_first_row -= num_actual_usable_rows
+        else:
+            self._page_first_row = 0
+
+        self._modified = True
+
+    def page_down(self):
+        num_actual_usable_rows = self._nrows - 2 - 1
+
+        # Increment page
+        self._page_first_row += num_actual_usable_rows
+
+        self._modified = True
 
     def compile_filter(self):
         try:
@@ -275,15 +321,14 @@ class Monitor(can.Listener):
         elif key == 'KEY_RIGHT':
             if self._filter_cursor_pos < len(self._filter):
                 self._filter_cursor_pos += 1
+        elif key in ['KEY_UP']:
+            self.line_up()
+        elif key in ['KEY_DOWN']:
+            self.line_down()
         elif key in ['KEY_PPAGE']:
-            # Decrement page
-            if self._page > 0:
-                self._page -= 1
-            self._modified = True
+            self.page_up()
         elif key in ['KEY_NPAGE']:
-            # Increment page
-            self._page += 1
-            self._modified = True
+            self.page_down()
         else:
             # we ignore keys with more than one character here. These
             # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.

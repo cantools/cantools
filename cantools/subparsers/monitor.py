@@ -70,22 +70,22 @@ class Monitor(can.Listener):
                 "channel='{}'.".format(args.bus_type,
                                        args.channel))
 
-    def run(self):
+    def run(self, max_num_keys_per_tick=-1):
         while True:
             try:
-                self.tick()
+                self.tick(max_num_keys_per_tick)
             except QuitError:
                 break
 
             time.sleep(0.05)
 
-    def tick(self):
+    def tick(self, max_num_keys=-1):
         modified = self.update()
 
         if modified:
             self.redraw()
 
-        self.process_user_input()
+        self.process_user_input(max_num_keys)
 
     def redraw(self):
         # Clear the screen.
@@ -200,16 +200,18 @@ class Monitor(can.Listener):
     def stretch(self, text):
         return text + ' ' * (self._ncols - len(text))
 
-    def process_user_input(self):
-        try:
-            key = self._stdscr.getkey()
-        except curses.error:
-            return
+    def process_user_input(self, max_num_keys=-1):
+        while max_num_keys < 0 or max_num_keys > 0:
+            max_num_keys -= 1
+            try:
+                key = self._stdscr.getkey()
+            except curses.error:
+                return
 
-        if self._show_filter:
-            self.process_user_input_filter(key)
-        else:
-            self.process_user_input_menu(key)
+            if self._show_filter:
+                self.process_user_input_filter(key)
+            else:
+                self.process_user_input_menu(key)
 
     def process_user_input_menu(self, key):
         if key == 'q':

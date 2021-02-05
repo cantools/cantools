@@ -93,7 +93,7 @@ class CanToolsMonitorTest(unittest.TestCase):
 
         # Run monitor.
         monitor = Monitor(stdscr, args)
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(use_default_colors, [call()])
@@ -146,7 +146,7 @@ class CanToolsMonitorTest(unittest.TestCase):
 
         # Run monitor.
         monitor = Monitor(stdscr, args)
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(bus, [call(bustype='socketcan', channel='vcan0', fd=True)])
@@ -177,7 +177,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -226,7 +226,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -273,7 +273,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
             data=b'\x24\x00\x98\x98\x0b\x00'))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -316,7 +316,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
             data=b'\x00\x00\x98\x98\x0b\x00'))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -365,7 +365,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
             data=b'\x00\x00\x98\x98\x0b\x00'))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -426,7 +426,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             arbitration_id=0xc00fefe,
             data=b'\x20\x00\x00\x00\x01\x00\x00\x00',
             timestamp=3.0))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -486,7 +486,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             arbitration_id=496,
             data=b'\xc0\x06\xd0\x00\x00\x00\x00\x00',
             timestamp=2.1))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -536,7 +536,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.on_message_received(can.Message(
             arbitration_id=496,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -673,9 +673,9 @@ class CanToolsMonitorTest(unittest.TestCase):
             data=b'\xc0\x06\xb0\x00\x00\x00\x00\x00',
             timestamp=6))
 
-        monitor.tick()
-        monitor.tick()
-        monitor.tick()
+        monitor.tick(1)
+        monitor.tick(1)
+        monitor.tick(1)
 
         # Input another before pause.
         monitor.on_message_received(can.Message(
@@ -683,7 +683,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             data=b'\xc0\x06\xc0\x00\x00\x00\x00\x00',
             timestamp=7))
 
-        monitor.tick()
+        monitor.tick(1)
 
         # Input when paused. Will not be displayed.
         monitor.on_message_received(can.Message(
@@ -691,9 +691,9 @@ class CanToolsMonitorTest(unittest.TestCase):
             data=b'\xc0\x06\xd0\x00\x00\x00\x00\x00',
             timestamp=10))
 
-        monitor.tick()
-        monitor.tick()
-        monitor.tick()
+        monitor.tick(1)
+        monitor.tick(1)
+        monitor.tick(1)
 
         # Input after reset.
         monitor.on_message_received(can.Message(
@@ -701,7 +701,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             data=b'\xc0\x06\x00\x00\x00\x00\x00\x00',
             timestamp=11))
 
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -815,12 +815,12 @@ class CanToolsMonitorTest(unittest.TestCase):
                 data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
                 timestamp=timestamp))
 
-            monitor.tick()
+            monitor.tick(1)
 
         # Display most recently received at unpause.
-        monitor.tick()
-        monitor.tick()
-        monitor.tick()
+        monitor.tick(1)
+        monitor.tick(1)
+        monitor.tick(1)
 
         for timestamp in range(5, 7):
             monitor.on_message_received(can.Message(
@@ -828,9 +828,9 @@ class CanToolsMonitorTest(unittest.TestCase):
                 data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
                 timestamp=timestamp))
 
-            monitor.tick()
+            monitor.tick(1)
 
-        monitor.run()
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -960,8 +960,8 @@ class CanToolsMonitorTest(unittest.TestCase):
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
             timestamp=1))
 
-        monitor.tick()
-        monitor.run()
+        monitor.tick(1)
+        monitor.run(1)
 
         # Check mocks.
         self.assert_called(
@@ -1099,8 +1099,8 @@ class CanToolsMonitorTest(unittest.TestCase):
             arbitration_id=1025,
             data=b'\x12\x00\x98\x98\x0b\x00',
             timestamp=18))
-        monitor.tick()
-        monitor.run()
+        monitor.tick(1)
+        monitor.run(1)
 
         self.maxDiff = None
         unittest.util._MAX_LENGTH=20000

@@ -213,6 +213,11 @@ class Monitor(can.Listener):
         if key == '\n':
             self._show_filter = False
             curses.curs_set(False)
+        elif key == chr(27):
+            # Escape
+            self._show_filter = False
+            self._filter = ""
+            curses.curs_set(False)
         elif key in ['KEY_BACKSPACE', '\b']:
             self._filter = self._filter[:-1]
         else:

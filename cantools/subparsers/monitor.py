@@ -224,6 +224,7 @@ class Monitor(can.Listener):
             while not self._queue.empty():
                 self._queue.get()
         elif key in ['f', '/']:
+            self._old_filter = self._filter
             self._show_filter = True
             self._filter_cursor_pos = len(self._filter)
             self._modified = True
@@ -251,7 +252,8 @@ class Monitor(can.Listener):
         elif key == chr(27):
             # Escape
             self._show_filter = False
-            self._filter = ""
+            self._filter = self._old_filter
+            del self._old_filter
             curses.curs_set(False)
         elif key in ['KEY_BACKSPACE', '\b']:
             if self._filter_cursor_pos > 0:

@@ -1411,9 +1411,45 @@ Failed to parse line: 'invalid syntax'
                         self.assertListEqual(plt.mock_calls, expected_calls)
                         self.assertEqual(stdout.getvalue(), expected_output)
 
+    def test_stop_is_based_on_start_and_xlabel_shows_start(self):
+        argv = ['cantools', 'plot', '--start', '6.2.', '--stop', '13:00:', '--break-time', '-1', self.DBC_FILE, '*FL']
+        input_data = """\
+ (2021-02-05 12:00:00.833823)  vcan0  00000343   [8]  50 05 65 05 65 05 6C 05
+ (2021-02-05 18:00:00.835761)  vcan0  00000343   [8]  D5 05 D5 05 B2 05 AB 05
+ (2021-02-06 00:00:00.837663)  vcan0  00000343   [8]  07 06 1C 06 07 06 2B 06
+ (2021-02-06 06:00:00.838797)  vcan0  00000343   [8]  6E 06 6E 06 75 06 60 06
+ (2021-02-06 12:00:00.840644)  vcan0  00000343   [8]  C4 06 CB 06 A7 06 AE 06
+ (2021-02-06 18:00:00.842506)  vcan0  00000343   [8]  05 07 05 07 05 07 29 07
+ (2021-02-07 00:00:00.844313)  vcan0  00000343   [8]  A0 07 84 07 99 07 99 07
+ (2021-02-07 06:00:00.846156)  vcan0  00000343   [8]  E5 07 DE 07 D0 07 E5 07
+ (2021-02-07 12:00:00.847953)  vcan0  00000343   [8]  17 08 FB 07 09 08 10 08
+ (2021-02-07 18:00:00.849762)  vcan0  00000343   [8]  1E 08 25 08 10 08 1E 08
+"""
 
-    #TODO: test --stop depends on --start
-    #TODO: xlabel shows --start
+        xs = self.parse_time(input_data, self.parse_absolute_time)
+        ys_whlspeed_fl = [21.25, 23.328125, 24.109375, 25.71875, 27.0625, 28.078125, 30.5, 31.578125, 32.359375, 32.46875]
+        ys_whlspeed_fl = ys_whlspeed_fl[2:5]
+        xs = xs[2:5]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().set(ylabel='*FL'),
+            mock.call.subplot().set_xlabel(self.XLABEL_tA % "06.02.2021"),
+            mock.call.show(),
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with PyplotMock() as plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+                        self.assertEqual(stdout.getvalue(), expected_output)
+
 
     #TODO: test relative time
 

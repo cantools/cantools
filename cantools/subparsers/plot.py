@@ -36,6 +36,7 @@ Colors:
     'y' yellow,
     'k' black and
     'w' white.
+    'C0'...'C9' the colors defined by the current style
 https://matplotlib.org/2.1.2/api/_as_gen/matplotlib.pyplot.plot.html.
 
 If the first character of fmt is a '|' stem is used instead of plot.
@@ -304,6 +305,9 @@ def _do_decode(args):
         timestamp_parser.use_timestamp = False
     if args.line_numbers:
         timestamp_parser.use_timestamp = False
+
+    if args.style is not None:
+        plt.style.use(args.style)
 
     plotter = Plotter(dbase, args)
 
@@ -822,6 +826,10 @@ def add_subparser(subparsers):
     decode_parser.add_argument(
         '-to', '--stop',
         help='An end time or line number. Everything after is ignored.')
+
+    decode_parser.add_argument(
+        '--style',
+        help='The matplotlib style to be used.')
 
     decode_parser.add_argument(
         'database',

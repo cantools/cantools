@@ -1491,9 +1491,6 @@ Failed to parse line: 'invalid syntax'
                         self.assertEqual(stdout.getvalue(), expected_output)
 
 
-    #TODO: test relative time
-
-
     # ------- subplot options -------
 
     def test_ylabel(self):

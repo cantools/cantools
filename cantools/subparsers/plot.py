@@ -206,7 +206,7 @@ class TimestampParser:
                     out = out.replace(**kw)
                     return out
 
-        raise ValueError("Failed to parse relative time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
+        raise ValueError("Failed to parse absolute time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
 
     def first_parse_timestamp(self, timestamp, linenumber):
         if timestamp is None:

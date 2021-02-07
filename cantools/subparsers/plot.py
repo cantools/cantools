@@ -285,6 +285,12 @@ def _do_decode(args):
     It iterates over all input lines, parses them
     and passes the data to a Plotter object.
     '''
+    if args.list_styles:
+        print("available matplotlib styles:")
+        for style in plt.style.available:
+            print("- %s" % style)
+        return
+
     if args.show_errors:
         args.show_invalid_syntax = True
         args.show_unknown_frames = True
@@ -830,6 +836,10 @@ def add_subparser(subparsers):
     decode_parser.add_argument(
         '--style',
         help='The matplotlib style to be used.')
+    decode_parser.add_argument(
+        '--list-styles',
+        action='store_true',
+        help='Print all available matplotlib styles without drawing a plot.')
 
     decode_parser.add_argument(
         'database',

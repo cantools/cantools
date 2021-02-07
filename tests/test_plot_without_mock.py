@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 from io import StringIO
 import cantools
+import matplotlib.pyplot as plt
 
 
 class CanToolsPlotTest(unittest.TestCase):
@@ -59,6 +60,20 @@ class CanToolsPlotTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.FN_OUT))
         os.remove(self.FN_OUT)
 
+    def test_plot_style(self):
+        self.assertFalse(os.path.exists(self.FN_OUT))
+        argv = ['cantools', 'plot', '--list-styles', '']
+        stdout = StringIO()
+
+        expected = "available matplotlib styles:"
+        expected += "".join("\n- %s" % s for s in plt.style.available)
+        expected += "\n"
+
+        with mock.patch('sys.stdout', stdout):
+            with mock.patch('sys.argv', argv):
+                cantools._main()
+
+        self.assertEqual(stdout.getvalue(), expected)
 
 if __name__ == '__main__':
     unittest.main()

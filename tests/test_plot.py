@@ -1411,6 +1411,46 @@ Failed to parse line: 'invalid syntax'
                         self.assertListEqual(plt.mock_calls, expected_calls)
                         self.assertEqual(stdout.getvalue(), expected_output)
 
+    def test_start_stop_relative(self):
+        argv = ['cantools', 'plot', '--start', '86400', '--stop', '2 days', '--break-time', '-1', self.DBC_FILE, '*FL']
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  27 05 2E 05 44 05 44 05
+ (28800.001831)  vcan0  00000343   [8]  8C 05 94 05 9B 05 77 05
+ (57600.003677)  vcan0  00000343   [8]  B5 05 A7 05 A7 05 BC 05
+ (86400.005531)  vcan0  00000343   [8]  BE 05 A9 05 BE 05 A2 05
+ (115200.007377)  vcan0  00000343   [8]  8E 05 AB 05 95 05 9C 05
+ (144000.009221)  vcan0  00000343   [8]  9B 05 B0 05 85 05 94 05
+ (172800.011064)  vcan0  00000343   [8]  CB 05 B5 05 D2 05 D2 05
+ (201600.012905)  vcan0  00000343   [8]  E2 05 F0 05 F0 05 DB 05
+ (230400.014772)  vcan0  00000343   [8]  FB 05 DE 05 E5 05 F4 05
+ (259200.016617)  vcan0  00000343   [8]  FB 05 FB 05 FB 05 FB 05
+"""
+
+        xs = self.parse_time(input_data, self.parse_seconds)
+        ys_whlspeed_fl = [20.609375, 22.1875, 22.828125, 22.96875, 22.21875, 22.421875, 23.171875, 23.53125, 23.921875, 23.921875]
+        ys_whlspeed_fl = ys_whlspeed_fl[3:6]
+        xs = xs[3:6]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+            mock.call.subplot().set(ylabel='*FL'),
+            mock.call.subplot().set_xlabel(self.XLABEL_tz),
+            mock.call.show(),
+        ]
+
+        stdout = StringIO()
+        expected_output = ""
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.stdout', stdout):
+                with mock.patch('sys.argv', argv):
+                    with PyplotMock(ignore_axes=True) as plt:
+                        cantools._main()
+                        self.assertListEqual(plt.mock_calls, expected_calls)
+                        self.assertEqual(stdout.getvalue(), expected_output)
+
+
     def test_stop_is_based_on_start_and_xlabel_shows_start(self):
         argv = ['cantools', 'plot', '--start', '6.2.', '--stop', '13:00:', '--break-time', '-1', self.DBC_FILE, '*FL']
         input_data = """\

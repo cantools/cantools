@@ -129,8 +129,48 @@ class TimestampParser:
             self.args.stop = parse(self.args.stop, x0)
 
     def parse_user_input_relative_time(self, user_input, first_timestamp):
-        #TODO
-        pass
+        try:
+            return float(user_input)
+        except:
+            pass
+
+        patterns_hour = ['%H:%M:', '%H:%M:%S', '%H:%M:%S.%f']
+        patterns_minute = [':%M:%S', '%M:%S.', '%M:%S.%f']
+        patterns_day = ['%d day', '%d days']
+
+        day_time_sep = ', '
+        for pattern_day in tuple(patterns_day):
+            for pattern_time in ['%H:%M']+patterns_hour:
+                patterns_day.append(pattern_day+day_time_sep+pattern_time)
+
+        for pattern in patterns_minute + patterns_hour + patterns_day:
+            t = self.strptimedelta_in_seconds(user_input, pattern)
+            if t is not None:
+                return t
+
+        raise ValueError("Failed to parse relative time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
+
+    def strptimedelta_in_seconds(self, user_input, pattern):
+        '''
+        Parse the string representation of a time delta object.
+        Return value: int in seconds or None if parsing failed.
+        '''
+        # I cannot use `datetime.datetime.strptime(user_input, pattern) - datetime.datetime.strptime("", "")` because it treats no day as 1 day
+        p = re.escape(pattern)
+        p = p.replace('%H', '(?P<hour>[0-9][0-9]?)')
+        p = p.replace('%M', '(?P<min>[0-9][0-9]?)')
+        p = p.replace('%S', '(?P<s>[0-9][0-9]?)')
+        p = p.replace('%f', '(?P<ms>[0-9]+)')
+        p = p.replace('%d', '(?P<day>[0-9][0-9]?)')
+        p += '$'
+        m = re.match(p, user_input)
+        if m is None:
+            return None
+
+        d = m.groupdict('0')
+        seconds = float(d.pop('s','0') + '.' + d.pop('ms','0'))
+        d = {key:int(d[key]) for key in d}
+        return ((d.pop('day',0)*24 + d.pop('hour',0))*60 + d.pop('min',0))*60 + seconds
 
     def parse_user_input_absolute_time(self, user_input, first_timestamp):
         patterns_year = ['%Y-%m-%d', '%d.%m.%Y']

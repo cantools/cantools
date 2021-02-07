@@ -56,7 +56,21 @@ class CanToolsPlotUnittests(unittest.TestCase):
             sut.parse_user_input_absolute_time('12:43', None)
 
 
-    #TODO: relative time
+    def test_parse_user_input_relative_time(self):
+        sut = plot.TimestampParser(None)
+        for user_input, expected in [
+            ('4242', 4242),
+            ('42.42', 42.42),
+            ('12:34.', 12*60+34),
+            (':12:34', 12*60+34),
+            ('1:30:00',  1*60**2+30*60),
+            ('1 day', 24*60*60),
+            ('2 days', 2*24*60*60),
+            ('1 day, 3:00', 1*24*60**2+3*60**2),
+            ('3 days, 4:56:01.12', 3*24*60**2 + 4*60**2 + 56*60 + 1.12),
+        ]:
+            actual = sut.parse_user_input_relative_time(user_input, first_timestamp=0)
+            self.assertEqual(actual, expected, "unexpected result for %r" % user_input)
 
 
     # ------- auxiliary functions -------

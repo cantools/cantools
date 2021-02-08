@@ -48,10 +48,13 @@ class SubplotMock(mock.Mock):
         mock.Mock.__init__(self)
         self.__legend_labels = []
         self.plot.side_effect = self.__plot
+        self.stem.side_effect = self.__stem
         self.twinx.side_effect = self.__twinx
 
         if 'ignore_legend' not in kw:
             kw['ignore_legend'] = True
+
+        self.__ignore_color = kw.pop('ignore_color', ignore)
 
         key_pattern = 'ignore_%s'
         self.__kw = dict()
@@ -80,6 +83,24 @@ class SubplotMock(mock.Mock):
     def __plot(self, xs, ys, fmt, *, label=None):
         if label:
             self.__legend_labels.append(label)
+
+        out = [mock.Mock()]
+        if not self.__ignore_color:
+            for i, m in enumerate(out):
+                self.attach_mock(m, 'plot()[%s]' % i)
+
+        return out
+
+    def __stem(self, xs, ys, fmt, *, label=None):
+        if label:
+            self.__legend_labels.append(label)
+
+        out = [mock.Mock() for i in range(3)]
+        if not self.__ignore_color:
+            for i, m in enumerate(out):
+                self.attach_mock(m, 'stem()[%s]' % i)
+
+        return out
 
     def __twinx(self):
         return type(self)(parent=self, **self.__kw)

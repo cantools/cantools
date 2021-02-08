@@ -632,10 +632,11 @@ class Signals:
                     if isinstance(x[0], float):
                         splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
                     axis_format_uninitialized = False
-                p, = getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
+                l = getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
                 color = self.subplot_args[(sgo.subplot, sgo.axis)].color
                 if color is not None and self.contains_no_color(sgo.fmt):
-                    p.set_color(color)
+                    for p in l:
+                        p.set_color(color)
                 plotted = True
 
             if not plotted:

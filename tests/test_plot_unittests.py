@@ -7,9 +7,6 @@ import cantools.subparsers.plot as plot
 
 class CanToolsPlotUnittests(unittest.TestCase):
 
-    def test_parse_user_input_relative_time(self):
-        pass
-
     def test_parse_user_input_absolute_time(self):
         sut = plot.TimestampParser(None)
         for user_input, first_timestamp, expected in [

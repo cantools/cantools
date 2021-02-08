@@ -126,6 +126,9 @@ class CanToolsPlotTest(unittest.TestCase):
     XLABEL_LINE_NUMBER = "line number"
 
 
+    maxDiff = None
+
+
     # ------- test different timestamp formats -------
 
     def test_plot_tA(self):

@@ -60,7 +60,7 @@ class CanToolsPlotTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.FN_OUT))
         os.remove(self.FN_OUT)
 
-    def test_plot_style(self):
+    def test_plot_list_styles(self):
         self.assertFalse(os.path.exists(self.FN_OUT))
         argv = ['cantools', 'plot', '--list-styles', '']
         stdout = StringIO()

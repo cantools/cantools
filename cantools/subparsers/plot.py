@@ -57,6 +57,9 @@ from matplotlib import pyplot as plt
 from .. import database
 
 
+PYPLOT_BASE_COLORS = "bgrcmykwC"
+
+
 #TODO: I am not allowing "%H:%M" as input (for --start or --stop) because it could be misinterpreted as "%M:%S". Should this output format be changed?
 # I don't think the ambiguity is a problem for the output because if it is not obvious from the context it can be easily clarified with --xlabel.
 # However, it seems very unintuitive if the same format which is used for output is not allowed for input.
@@ -629,7 +632,10 @@ class Signals:
                     if isinstance(x[0], float):
                         splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
                     axis_format_uninitialized = False
-                getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
+                p, = getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
+                color = self.subplot_args[(sgo.subplot, sgo.axis)].color
+                if color is not None and self.contains_no_color(sgo.fmt):
+                    p.set_color(color)
                 plotted = True
 
             if not plotted:
@@ -665,6 +671,9 @@ class Signals:
         if subplot_args.ymin is not None or subplot_args.ymax is not None:
             splot.axes.set_ylim(subplot_args.ymin, subplot_args.ymax)
 
+        if subplot_args.color is not None:
+            splot.yaxis.label.set_color(subplot_args.color)
+
         handles, labels = splot.get_legend_handles_labels()
         self.legend_handles.extend(handles)
         self.legend_labels.extend(labels)
@@ -674,6 +683,12 @@ class Signals:
         splot.legend(self.legend_handles, self.legend_labels)
         self.legend_handles = list()
         self.legend_labels = list()
+
+    def contains_no_color(self, fmt):
+        for c in fmt:
+            if c in PYPLOT_BASE_COLORS:
+                return False
+        return True
 
     def plot_error(self, splot, xs, label, color):
         if xs:
@@ -860,6 +875,8 @@ Otherwise they are used as default value for each subplot.
 
 def add_subplot_options(arg_group):
     arg_group.add_argument('--title')
+    arg_group.add_argument('--color',
+        help='The color to be used for the ylabel and the signals (unless a different color is given for the signal).')
     arg_group.add_argument('--xlabel')
     arg_group.add_argument('--ylabel')
     arg_group.add_argument('--ymin', type=float)

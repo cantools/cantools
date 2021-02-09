@@ -1,3 +1,5 @@
+import argparse
+
 from .. import database
 
 
@@ -15,7 +17,8 @@ def _do_convert(args):
 def add_subparser(subparsers):
     convert_parser = subparsers.add_parser(
         'convert',
-        description='Convert given database from one format to another.')
+        description='Convert given database from one format to another.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     convert_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')

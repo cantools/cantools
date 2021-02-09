@@ -15,7 +15,9 @@ __author__ = 'Erik Moqvist'
 
 def _main():
     parser = argparse.ArgumentParser(
-        description='Various CAN utilities.')
+        description='Various CAN utilities.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('--version',

@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import shutil
 import unittest
 
 try:
@@ -1171,14 +1172,7 @@ BATTERY_VT(
         database_h = os.path.join(output_directory, f'{database}.h')
         database_c = os.path.join(output_directory, f'{database}.c')
 
-        if os.path.exists(database_h):
-            os.remove(database_h)
-
-        if os.path.exists(database_c):
-            os.remove(database_c)
-
-        if os.path.exists(output_directory):
-            os.rmdir(output_directory)
+        shutil.rmtree(output_directory)
 
         with patch('sys.argv', argv):
             cantools._main()

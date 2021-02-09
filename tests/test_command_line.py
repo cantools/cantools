@@ -1172,7 +1172,7 @@ BATTERY_VT(
         database_h = os.path.join(output_directory, f'{database}.h')
         database_c = os.path.join(output_directory, f'{database}.c')
 
-        shutil.rmtree(output_directory)
+        shutil.rmtree(output_directory, ignore_errors=True)
 
         with patch('sys.argv', argv):
             cantools._main()

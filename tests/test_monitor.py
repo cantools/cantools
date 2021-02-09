@@ -55,6 +55,8 @@ class CanToolsMonitorTest(unittest.TestCase):
 
     maxDiff = None
 
+    color_pair_side_effect = [ "default", "green", "cyan" ]
+
     def assert_called(self, mock, expected, verbose=False):
         try:
             self.assertEqual(mock.call_args_list, expected)
@@ -86,7 +88,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/motohawk.dbc')
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -166,7 +168,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/motohawk.dbc')
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -215,7 +217,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr()
         args = Args('tests/files/dbc/motohawk.dbc',
                     single_line=True)
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -262,7 +264,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/msxii_system_can.dbc')
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -305,7 +307,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/msxii_system_can.dbc')
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -354,7 +356,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr()
         args = Args('tests/files/dbc/msxii_system_can.dbc',
                     single_line=True)
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -402,7 +404,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr()
         args = Args('tests/files/dbc/multiplex_2.dbc',
                     single_line=True)
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -470,7 +472,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Prepare mocks.
         stdscr = StdScr()
         args = Args('tests/files/dbc/motohawk.dbc')
-        color_pair.side_effect = ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -525,7 +527,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             'f', 'Y', '[', '\b', '\n', 'f', '\b', 'E', '\n', 'q'
         ])
         args = Args('tests/files/dbc/motohawk.dbc')
-        color_pair.side_effect = 10 * ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -700,7 +702,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             'f', 'E', '\n', 'p', ' ', 'r', 'f', '\n', 'q'
         ])
         args = Args('tests/files/dbc/motohawk.dbc')
-        color_pair.side_effect = 10 * ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -882,7 +884,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ' ', ' ', 'p', ' ', ' ', 'p', ' ', ' ', ' ', 'q'
         ])
         args = Args('tests/files/dbc/motohawk.dbc')
-        color_pair.side_effect = 8 * ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.
@@ -1028,7 +1030,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         stdscr = StdScr(user_input=[' ', ' ', 'q'],
                         resolution=[(30, 40), (25, 35), (25, 35), (20, 30)])
         args = Args('tests/files/dbc/motohawk.dbc')
-        color_pair.side_effect = 3 * ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = True
 
         # Run monitor.
@@ -1097,7 +1099,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ' ', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_NPAGE', 'KEY_PPAGE', 'q'
         ])
         args = Args('tests/files/dbc/msxii_system_can.dbc')
-        color_pair.side_effect = 5 * ['green', 'cyan']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
         # Run monitor.

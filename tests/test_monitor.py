@@ -1,5 +1,6 @@
 import unittest
 import curses
+import traceback
 
 try:
     from unittest.mock import Mock
@@ -54,8 +55,18 @@ class CanToolsMonitorTest(unittest.TestCase):
 
     maxDiff = None
 
-    def assert_called(self, mock, expected):
-        self.assertEqual(mock.call_args_list, expected)
+    def assert_called(self, mock, expected, verbose=False):
+        try:
+            self.assertEqual(mock.call_args_list, expected)
+        except AssertionError as e:
+            if verbose:
+                nl = ",\n "
+                print(f"Assertation failed:")
+                print(f"Expected: {nl.join(map(lambda x: str(x), expected))}")
+                print(f"Got: {nl.join(map(lambda x: str(x), mock.call_args_list))}")
+                print("Traceback:")
+                traceback.print_stack()
+            raise e
 
     @patch('can.Notifier')
     @patch('can.Bus')

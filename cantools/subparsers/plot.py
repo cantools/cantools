@@ -160,12 +160,18 @@ class TimestampParser:
         Return value: int in seconds or None if parsing failed.
         '''
         # I cannot use `datetime.datetime.strptime(user_input, pattern) - datetime.datetime.strptime("", "")` because it treats no day as 1 day
-        p = re.escape(pattern)
-        p = p.replace('%H', '(?P<hour>[0-9][0-9]?)')
-        p = p.replace('%M', '(?P<min>[0-9][0-9]?)')
-        p = p.replace('%S', '(?P<s>[0-9][0-9]?)')
-        p = p.replace('%f', '(?P<ms>[0-9]+)')
-        p = p.replace('%d', '(?P<day>[0-9][0-9]?)')
+        p = pattern
+        p = p.replace('%H', '{hour}')
+        p = p.replace('%M', '{min}')
+        p = p.replace('%S', '{s}')
+        p = p.replace('%f', '{ms}')
+        p = p.replace('%d', '{day}')
+        p = re.escape(p)
+        p = p.replace(r'\{hour\}', '(?P<hour>[0-9][0-9]?)')
+        p = p.replace(r'\{min\}', '(?P<min>[0-9][0-9]?)')
+        p = p.replace(r'\{s\}', '(?P<s>[0-9][0-9]?)')
+        p = p.replace(r'\{ms\}', '(?P<ms>[0-9]+)')
+        p = p.replace(r'\{day\}', '(?P<day>[0-9][0-9]?)')
         p += '$'
         m = re.match(p, user_input)
         if m is None:

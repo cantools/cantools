@@ -34,7 +34,7 @@ Installation
 
 .. code-block:: python
 
-    pip install cantools
+    python3 -m pip install cantools
 
 Example usage
 =============
@@ -92,7 +92,7 @@ Decode CAN frames captured with the Linux program ``candump``.
 
 .. code-block:: text
 
-   $ candump vcan0 | cantools decode tests/files/dbc/motohawk.dbc
+   $ candump vcan0 | python3 -m cantools decode tests/files/dbc/motohawk.dbc
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
    ExampleMessage(
        Enable: 'Enabled' -,
@@ -116,7 +116,7 @@ Alternatively, the decoded message can be printed on a single line:
 
 .. code-block:: text
 
-   $ candump vcan0 | cantools decode --single-line tests/files/dbc/motohawk.dbc
+   $ candump vcan0 | python3 -m cantools decode --single-line tests/files/dbc/motohawk.dbc
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
@@ -140,7 +140,7 @@ The plot subcommand is similar to the decode subcommand but messages are visuali
     (1609779926.664191) vcan0 00000343#BC03B503A703BC03
     (1609779926.664751) vcan0 0000024A#A006A706C406C406
 
-    $ cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc
+    $ cat candump-2021-01-04_180521.log | python3 -m cantools plot tests/files/dbc/abs.dbc
 
 .. image:: docs/plot-1.png
 
@@ -151,7 +151,7 @@ Optionally a format can be specified after a signal, separated by a colon.
 
 .. code-block:: bash
 
-    $ cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc '*33.*fl:-<' '*33.*fr:->' - '*33.*rl:-<' '*33.*rr:->'
+    $ cat candump-2021-01-04_180521.log | python3 -m cantools plot tests/files/dbc/abs.dbc '*33.*fl:-<' '*33.*fr:->' - '*33.*rl:-<' '*33.*rr:->'
 
 .. image:: docs/plot-2.png
 
@@ -159,7 +159,7 @@ For more information see
 
 .. code-block:: bash
 
-    $ cantools plot --help
+    $ python3 -m cantools plot --help
 
 The dump subcommand
 ^^^^^^^^^^^^^^^^^^^
@@ -168,7 +168,7 @@ Dump given database in a human readable format:
 
 .. code-block:: text
 
-   $ cantools dump tests/files/dbc/motohawk.dbc
+   $ python3 -m cantools dump tests/files/dbc/motohawk.dbc
    ================================= Messages =================================
 
      ------------------------------------------------------------------------
@@ -246,7 +246,7 @@ database. The database is ``tests/files/dbc/motohawk.dbc``.
 
 .. code-block:: text
 
-   $ cantools generate_c_source tests/files/dbc/motohawk.dbc
+   $ python3 -m cantools generate_c_source tests/files/dbc/motohawk.dbc
    Successfully generated motohawk.h and motohawk.c.
 
 See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
@@ -258,7 +258,7 @@ file names are also changed by this option.
 
 .. code-block:: text
 
-   $ cantools generate_c_source --database-name my_database_name tests/files/dbc/motohawk.dbc
+   $ python3 -m cantools generate_c_source --database-name my_database_name tests/files/dbc/motohawk.dbc
    Successfully generated my_database_name.h and my_database_name.c.
 
 See `my_database_name.h`_ and `my_database_name.c`_ for the contents
@@ -269,7 +269,7 @@ code without floating point types, i.e. ``float`` and ``double``.
 
 .. code-block:: text
 
-   $ cantools generate_c_source --no-floating-point-numbers tests/files/dbc/motohawk.dbc
+   $ python3 -m cantools generate_c_source --no-floating-point-numbers tests/files/dbc/motohawk.dbc
    Successfully generated motohawk.h and motohawk.c.
 
 See `motohawk_no_floating_point_numbers.h`_ and
@@ -293,7 +293,7 @@ Monitor CAN bus traffic in a text based user interface.
 
 .. code-block:: text
 
-   $ cantools monitor tests/files/dbc/motohawk.dbc
+   $ python3 -m cantools monitor tests/files/dbc/motohawk.dbc
 
 .. image:: https://github.com/eerimoq/cantools/raw/master/docs/monitor.png
 
@@ -318,7 +318,7 @@ Contributing
 
    .. code-block:: text
 
-      pip install -r requirements.txt
+      python3 -m pip install -r requirements.txt
 
 #. Implement the new feature or bug fix.
 

@@ -19,6 +19,7 @@ class Monitor(can.Listener):
 
     def __init__(self, stdscr, args):
         self._stdscr = stdscr
+        print(f'Reading bus description file "{args.database}"...\r')
         self._dbase = database.load_file(args.database,
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,
@@ -26,6 +27,7 @@ class Monitor(can.Listener):
         self._single_line = args.single_line
         self._filtered_sorted_message_names = []
         self._filter = ''
+        self._filter_cursor_pos = 0
         self._compiled_filter = None
         self._formatted_messages = {}
         self._playing = True
@@ -36,7 +38,7 @@ class Monitor(can.Listener):
         self._received = 0
         self._discarded = 0
         self._basetime = None
-        self._page = 0
+        self._page_first_row = 0
 
         stdscr.keypad(True)
         stdscr.nodelay(True)
@@ -44,6 +46,7 @@ class Monitor(can.Listener):
         curses.curs_set(False)
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
         curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
+        curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
         bus = self.create_bus(args)
         self._notifier = can.Notifier(bus, [self])
@@ -67,22 +70,22 @@ class Monitor(can.Listener):
                 "channel='{}'.".format(args.bus_type,
                                        args.channel))
 
-    def run(self):
+    def run(self, max_num_keys_per_tick=-1):
         while True:
             try:
-                self.tick()
+                self.tick(max_num_keys_per_tick)
             except QuitError:
                 break
 
             time.sleep(0.05)
 
-    def tick(self):
+    def tick(self, max_num_keys=-1):
         modified = self.update()
 
         if modified:
             self.redraw()
 
-        self.process_user_input()
+        self.process_user_input(max_num_keys)
 
     def redraw(self):
         # Clear the screen.
@@ -106,10 +109,15 @@ class Monitor(can.Listener):
         # - line 1: title
         # - line (n - 1): menu
         num_actual_usable_rows = self._nrows - 2 - 1
-        page_row = self._page * num_actual_usable_rows
         row = 2
 
-        for line in lines[page_row:page_row + num_actual_usable_rows]:
+        # make sure that we don't overshoot the last line of
+        # content. this is a bit of a hack, because manipulation of
+        # the controls is not supposed to happen within this method
+        if len(lines) < self._page_first_row + num_actual_usable_rows:
+            self._page_first_row = max(0, len(lines) - num_actual_usable_rows)
+
+        for line in lines[self._page_first_row:self._page_first_row + num_actual_usable_rows]:
             self.addstr(row, 0, line)
             row += 1
 
@@ -119,9 +127,11 @@ class Monitor(can.Listener):
         self._stdscr.refresh()
 
     def draw_stats(self, row):
-        self.addstr(row, 0, 'Received: {}, Discarded: {}, Errors: 0'.format(
-            self._received,
-            self._discarded))
+        status_text = \
+            f'Received: {self._received}, Discarded: {self._discarded}, Errors: 0'
+        if self._filter:
+            status_text += f', Filter: {self._filter}'
+        self.addstr(row, 0, status_text)
 
     def draw_title(self, row):
         self.addstr_color(row,
@@ -131,17 +141,49 @@ class Monitor(can.Listener):
 
     def draw_menu(self, row):
         if self._show_filter:
-            text = 'Filter: ' + self._filter
+            col = 0
+
+            # text before cursor
+            text = 'Filter regex: ' + self._filter[:self._filter_cursor_pos]
+            self.addstr_color(row,
+                              col,
+                              text,
+                              curses.color_pair(2))
+
+            col = len(text)
+
+            # cursor
+            if self._filter_cursor_pos >= len(self._filter):
+                c = " "
+            else:
+                c = self._filter[self._filter_cursor_pos]
+            self.addstr_color(row,
+                              col,
+                              c,
+                              curses.color_pair(3))
+            col += 1
+
+            # text after cursor
+            text = self._filter[self._filter_cursor_pos + 1:]
+            if len(text) > 0:
+                self.addstr_color(row,
+                                  col,
+                                  text,
+                                  curses.color_pair(2))
+                col += len(text)
+
+            # fill rest of line
+            self.addstr_color(row,
+                              col,
+                              ' '*(self._ncols - col),
+                              curses.color_pair(2))
         else:
             text = 'q: Quit, f: Filter, p: Play/Pause, r: Reset'
 
-        self.addstr_color(row,
-                          0,
-                          self.stretch(text),
-                          curses.color_pair(2))
-
-        if self._show_filter:
-            self._stdscr.move(row, len(text))
+            self.addstr_color(row,
+                              0,
+                              self.stretch(text),
+                              curses.color_pair(2))
 
     def addstr(self, row, col, text):
         try:
@@ -158,16 +200,18 @@ class Monitor(can.Listener):
     def stretch(self, text):
         return text + ' ' * (self._ncols - len(text))
 
-    def process_user_input(self):
-        try:
-            key = self._stdscr.getkey()
-        except curses.error:
-            return
+    def process_user_input(self, max_num_keys=-1):
+        while max_num_keys < 0 or max_num_keys > 0:
+            max_num_keys -= 1
+            try:
+                key = self._stdscr.getkey()
+            except curses.error:
+                return
 
-        if self._show_filter:
-            self.process_user_input_filter(key)
-        else:
-            self.process_user_input_menu(key)
+            if self._show_filter:
+                self.process_user_input_filter(key)
+            else:
+                self.process_user_input_menu(key)
 
     def process_user_input_menu(self, key):
         if key == 'q':
@@ -189,18 +233,61 @@ class Monitor(can.Listener):
             while not self._queue.empty():
                 self._queue.get()
         elif key in ['f', '/']:
+            self._old_filter = self._filter
             self._show_filter = True
+            self._filter_cursor_pos = len(self._filter)
             self._modified = True
             curses.curs_set(True)
+        elif key in ['KEY_UP']:
+            self.line_up()
+        elif key in ['KEY_DOWN']:
+            self.line_down()
         elif key in ['KEY_PPAGE']:
-            # Decrement page
-            if self._page > 0:
-                self._page -= 1
-            self._modified = True
+            self.page_up()
         elif key in ['KEY_NPAGE']:
-            # Increment page
-            self._page += 1
-            self._modified = True
+            self.page_down()
+
+    def line_down(self):
+        # Increment line
+        self._page_first_row += 1
+
+        self._modified = True
+
+    def line_up(self):
+        # Decrement line
+        if self._page_first_row > 0:
+            self._page_first_row -= 1
+        else:
+            self._page_first_row = 0
+
+        self._modified = True
+
+    def page_down(self):
+        num_actual_usable_rows = self._nrows - 2 - 1
+
+        # Increment page
+        self._page_first_row += num_actual_usable_rows
+
+        self._modified = True
+
+    def page_up(self):
+        num_actual_usable_rows = self._nrows - 2 - 1
+
+        # Decrement page
+        if self._page_first_row > num_actual_usable_rows:
+            self._page_first_row -= num_actual_usable_rows
+        else:
+            self._page_first_row = 0
+
+        self._modified = True
+
+    def page_down(self):
+        num_actual_usable_rows = self._nrows - 2 - 1
+
+        # Increment page
+        self._page_first_row += num_actual_usable_rows
+
+        self._modified = True
 
     def compile_filter(self):
         try:
@@ -212,10 +299,47 @@ class Monitor(can.Listener):
         if key == '\n':
             self._show_filter = False
             curses.curs_set(False)
+        elif key == chr(27):
+            # Escape
+            self._show_filter = False
+            self._filter = self._old_filter
+            del self._old_filter
+            curses.curs_set(False)
         elif key in ['KEY_BACKSPACE', '\b']:
-            self._filter = self._filter[:-1]
+            if self._filter_cursor_pos > 0:
+                self._filter = \
+                    self._filter[:self._filter_cursor_pos - 1] + \
+                    self._filter[self._filter_cursor_pos:]
+                self._filter_cursor_pos -= 1
+        elif key == 'KEY_DC':
+            # delete key
+            if self._filter_cursor_pos < len(self._filter):
+                self._filter = \
+                    self._filter[:self._filter_cursor_pos] + \
+                    self._filter[self._filter_cursor_pos + 1:]
+        elif key == 'KEY_LEFT':
+            if self._filter_cursor_pos > 0:
+                self._filter_cursor_pos -= 1
+        elif key == 'KEY_RIGHT':
+            if self._filter_cursor_pos < len(self._filter):
+                self._filter_cursor_pos += 1
+        elif key in ['KEY_UP']:
+            self.line_up()
+        elif key in ['KEY_DOWN']:
+            self.line_down()
+        elif key in ['KEY_PPAGE']:
+            self.page_up()
+        elif key in ['KEY_NPAGE']:
+            self.page_down()
         else:
-            self._filter += key
+            # we ignore keys with more than one character here. These
+            # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.
+            if len(key) == 1:
+                self._filter = \
+                    self._filter[:self._filter_cursor_pos] + \
+                    key + \
+                    self._filter[self._filter_cursor_pos:]
+                self._filter_cursor_pos += 1
 
         self.compile_filter()
         self._filtered_sorted_message_names = []

@@ -87,7 +87,7 @@ class SubplotMock(mock.Mock):
         out = [mock.Mock()]
         if not self.__ignore_color:
             for i, m in enumerate(out):
-                self.attach_mock(m, 'plot()[%s]' % i)
+                self.attach_mock(m, 'plot()._getitem_%s' % i)
 
         return out
 
@@ -553,6 +553,61 @@ BREMSE_33(
                 mock.call.set(ylabel='*_2.*fl*'),
                 mock.call.set_xlabel(self.XLABEL_tA % "30.01.2021"),
                 mock.call.legend([None, None], ['BREMSE_33.whlspeed_FL', 'BREMSE_2.whlspeed_FL_Bremse2']),
+            ],
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                with plt:
+                    cantools._main()
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
+    def test_color(self):
+        argv = ['cantools', 'plot', self.DBC_FILE, '--', '--color', 'C0', '--ylabel', 'Bremse 33', '*_33.*fl*', ',', '--color', 'C1', '--ylabel', 'Bremse 2', '*_2.*fl*']
+        input_data = """\
+ (1612000388.291144)  vcan0  00000343   [8]  6B 04 87 04 8E 04 87 04
+ (1612000388.291593)  vcan0  0000024A   [8]  7C 0A 75 0A 75 0A 8B 0A
+ (1612000389.293447)  vcan0  00000343   [8]  F9 03 EB 03 00 04 F9 03
+ (1612000389.294203)  vcan0  0000024A   [8]  35 0B 52 0B 44 0B 60 0B
+ (1612000390.296045)  vcan0  00000343   [8]  CE 03 C0 03 CE 03 CE 03
+ (1612000390.296759)  vcan0  0000024A   [8]  75 0C 8B 0C 60 0C 84 0C
+ (1612000391.298606)  vcan0  00000343   [8]  80 03 AB 03 80 03 A4 03
+ (1612000391.299380)  vcan0  0000024A   [8]  4B 0D 52 0D 59 0D 3C 0D
+ (1612000392.301223)  vcan0  00000343   [8]  75 03 60 03 6E 03 60 03
+ (1612000392.301991)  vcan0  0000024A   [8]  B9 0D B2 0D D5 0D B9 0D
+"""
+
+        xs2  = self.parse_time(input_data, self.parse_absolute_seconds, 2, 1)
+        xs33 = self.parse_time(input_data, self.parse_absolute_seconds, 2, 0)
+        whlspeed_fl_bremse2 = [41.9375, 44.828125, 49.828125, 53.171875, 54.890625]
+        whlspeed_fl = [17.671875, 15.890625, 15.21875, 14.0, 13.828125]
+
+        plt = PyplotMock()
+        subplots = [SubplotMock(ignore=False, ignore_color=False) for i in range(2)]
+        plt.subplot.side_effect = subplots[:1]
+        subplots[0].twinx.side_effect = subplots[1:]
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs33, whlspeed_fl, '', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot()._getitem_0.set_color('C0'),
+                mock.call.set(ylabel='Bremse 33'),
+                mock.call.set_xlabel(self.XLABEL_tA % "30.01.2021"),
+                mock.call.yaxis.label.set_color('C0'),
+                mock.call.tick_params(axis='y', which='both', colors='C0'),
+                mock.call.twinx(),
+            ], [
+                mock.call.plot(xs2, whlspeed_fl_bremse2, '', label='BREMSE_2.whlspeed_FL_Bremse2'),
+                mock.call.plot()._getitem_0.set_color('C1'),
+                mock.call.set(ylabel='Bremse 2'),
+                mock.call.set_xlabel(self.XLABEL_tA % "30.01.2021"),
+                mock.call.yaxis.label.set_color('C1'),
+                mock.call.tick_params(axis='y', which='both', colors='C1'),
             ],
         ]
 

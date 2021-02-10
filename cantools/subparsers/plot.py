@@ -680,6 +680,7 @@ class Signals:
 
         if subplot_args.color is not None:
             splot.yaxis.label.set_color(subplot_args.color)
+            splot.tick_params(axis='y', which='both', colors=subplot_args.color)
 
         handles, labels = splot.get_legend_handles_labels()
         self.legend_handles.extend(handles)

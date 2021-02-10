@@ -619,6 +619,82 @@ BREMSE_33(
                     for i in range(len(expected_subplot_calls)):
                         self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
 
+    def test_autocolor(self):
+        self.maxDiff = None
+        argv = ['cantools', 'plot', '--auto-color', self.DBC_FILE, '--',
+                '--ylabel', 'Bremse 33', '*_33.*fl*:-<', '*_33.*fr*:>', '*_33.*rl*:3', '*_33.*rr*:4', ',',
+                '--ylabel', 'Bremse 2', '*_2.*fl*:-<', '*_2.*fr*:>', '*_2.*rl*:3', '*_2.*rr*:4']
+        input_data = """\
+(1609779922.655421) vcan0 00000343#B204B9049C049C04
+(1609779922.655735) vcan0 0000024A#120527052E051905
+(1609779923.657524) vcan0 00000343#C404C404CB04C404
+(1609779923.658086) vcan0 0000024A#8B058B058B059205
+(1609779924.659912) vcan0 00000343#5C04790479045504
+(1609779924.660471) vcan0 0000024A#44064B0659064406
+(1609779925.662277) vcan0 00000343#15040704F203F203
+(1609779925.662837) vcan0 0000024A#8B069906A706A706
+(1609779926.664191) vcan0 00000343#BC03B503A703BC03
+(1609779926.664751) vcan0 0000024A#A006A706C406C406
+"""
+
+        xs33 = self.parse_time(input_data, self.parse_absolute_seconds, 2, 0)
+        xs2  = self.parse_time(input_data, self.parse_absolute_seconds, 2, 1)
+        whlspeed_fl =  [18.78125, 19.0625, 17.4375, 16.328125, 14.9375]
+        whlspeed_fr = [18.890625, 19.0625, 17.890625, 16.109375, 14.828125]
+        whlspeed_rl = [18.4375, 19.171875, 17.890625, 15.78125, 14.609375]
+        whlspeed_rr = [18.4375, 19.0625, 17.328125, 15.78125, 14.9375]
+        whlspeed_fl_bremse2 = [20.28125, 22.171875, 25.0625, 26.171875, 26.5]
+        whlspeed_fr_bremse2 =  [20.609375, 22.171875, 25.171875, 26.390625, 26.609375]
+        whlspeed_rl_bremse2 = [20.71875, 22.171875, 25.390625, 26.609375, 27.0625]
+        whlspeed_rr_bremse2 = [20.390625, 22.28125, 25.0625, 26.609375, 27.0625]
+
+        plt = PyplotMock()
+        subplots = [SubplotMock(ignore=False, ignore_color=False) for i in range(2)]
+        plt.subplot.side_effect = subplots[:1]
+        subplots[0].twinx.side_effect = subplots[1:]
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            [
+                mock.call.plot(xs33, whlspeed_fl, '-<', label='BREMSE_33.whlspeed_FL'),
+                mock.call.plot()._getitem_0.set_color('C0'),
+                mock.call.plot(xs33, whlspeed_fr, '>', label='BREMSE_33.whlspeed_FR'),
+                mock.call.plot()._getitem_0.set_color('C0'),
+                mock.call.plot(xs33, whlspeed_rl, '3', label='BREMSE_33.whlspeed_RL'),
+                mock.call.plot()._getitem_0.set_color('C0'),
+                mock.call.plot(xs33, whlspeed_rr, '4', label='BREMSE_33.whlspeed_RR'),
+                mock.call.plot()._getitem_0.set_color('C0'),
+                mock.call.set(ylabel='Bremse 33'),
+                mock.call.set_xlabel(self.XLABEL_tA % "04.01.2021"),
+                mock.call.yaxis.label.set_color('C0'),
+                mock.call.tick_params(axis='y', which='both', colors='C0'),
+                mock.call.twinx(),
+            ], [
+                mock.call.plot(xs2, whlspeed_fl_bremse2, '-<', label='BREMSE_2.whlspeed_FL_Bremse2'),
+                mock.call.plot()._getitem_0.set_color('C1'),
+                mock.call.plot(xs2, whlspeed_fr_bremse2, '>', label='BREMSE_2.whlspeed_FR_Bremse2'),
+                mock.call.plot()._getitem_0.set_color('C1'),
+                mock.call.plot(xs2, whlspeed_rl_bremse2, '3', label='BREMSE_2.whlspeed_RL_Bremse2'),
+                mock.call.plot()._getitem_0.set_color('C1'),
+                mock.call.plot(xs2, whlspeed_rr_bremse2, '4', label='BREMSE_2.whlspeed_RR_Bremse2'),
+                mock.call.plot()._getitem_0.set_color('C1'),
+                mock.call.set(ylabel='Bremse 2'),
+                mock.call.set_xlabel(self.XLABEL_tA % "04.01.2021"),
+                mock.call.yaxis.label.set_color('C1'),
+                mock.call.tick_params(axis='y', which='both', colors='C1'),
+            ],
+        ]
+
+        with mock.patch('sys.stdin', StringIO(input_data)):
+            with mock.patch('sys.argv', argv):
+                with plt:
+                    cantools._main()
+                    self.assertListEqual(plt.mock_calls, expected_calls)
+                    for i in range(len(expected_subplot_calls)):
+                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg="calls don't match for subplot %s" % i)
+
     def test_format(self):
         col_33 = "b"
         col_2  = "r"

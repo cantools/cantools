@@ -391,7 +391,7 @@ class Plotter:
         self.ignore_unknown_frames = args.ignore_unknown_frames
         self.ignore_invalid_data = args.ignore_invalid_data
         self.output_filename = args.output_file
-        self.signals = Signals(args.signals, args.case_sensitive, args.break_time, args)
+        self.signals = Signals(args.signals, args.case_sensitive, args.break_time, args, args.auto_color_ylabels)
 
         self.x_invalid_syntax = []
         self.x_unknown_frames = []
@@ -475,7 +475,7 @@ class Signals:
 
     # ------- initialization -------
 
-    def __init__(self, signals, case_sensitive, break_time, global_subplot_args):
+    def __init__(self, signals, case_sensitive, break_time, global_subplot_args, auto_color_ylabels):
         self.args = signals
         self.global_subplot_args = global_subplot_args
         self.signals = []
@@ -506,6 +506,8 @@ class Signals:
 
             subplot_signals = signals[i0:i1]
             subplot_args = self.subplot_argparser.parse_args(subplot_signals)
+            if auto_color_ylabels and subplot_args.color is None:
+                subplot_args.color = "C%s" % self.subplot_axis
             self.subplot_args[(self.subplot, self.subplot_axis)] = subplot_args
             self._ylabel = ""
             for sg in subplot_args.signals:
@@ -863,6 +865,10 @@ def add_subparser(subparsers):
         '--list-styles',
         action='store_true',
         help='Print all available matplotlib styles without drawing a plot.')
+    decode_parser.add_argument(
+        '-ac', '--auto-color-ylabels',
+        action='store_true',
+        help='This is equivalent to applying --color C0 to the first axes, --color C1 to the second and so on.')
 
     decode_parser.add_argument(
         'database',

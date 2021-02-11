@@ -128,6 +128,7 @@ The plot subcommand is similar to the decode subcommand but messages are visuali
 
 .. code-block:: bash
 
+    $ candump -l vcan0
     $ cat candump-2021-01-04_180521.log
     (1609779922.655421) vcan0 00000343#B204B9049C049C04
     (1609779922.655735) vcan0 0000024A#120527052E051905

@@ -156,7 +156,15 @@ Optionally a format can be specified after a signal, separated by a colon.
 
 .. image:: docs/plot-2.png
 
-TODO: show different vertical axes for same subplot, signals are separated by comma
+Signals with a different range of values can be displayed in the same subplot on different vertical axes by separating them with a comma.
+
+.. code-block:: bash
+
+   $ cat candump-2021-01-04_180521.log | cantools plot --auto-color tests/files/dbc/abs.dbc -- \
+      --ylabel 'Bremse 33' '*_33.*fl*:-<' '*_33.*fr*:>' '*_33.*rl*:3' '*_33.*rr*:4' , \
+      --ylabel 'Bremse 2' '*_2.*fl*:-<' '*_2.*fr*:>' '*_2.*rl*:3' '*_2.*rr*:4'
+
+.. image:: docs/plot-2-axes.png
 
 For more information see
 

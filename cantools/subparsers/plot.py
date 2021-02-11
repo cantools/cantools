@@ -41,8 +41,12 @@ https://matplotlib.org/2.1.2/api/_as_gen/matplotlib.pyplot.plot.html.
 
 If the first character of fmt is a '|' stem is used instead of plot.
 
-TODO: separate signals with a '-' to put them in different subplots
-TODO: separate signals with a ',' to put them on different axes
+Signals can be separated by a '-' to show them in different subplots.
+
+Signals can be separated by a ',' to make them refer to different vertical axes in the same subplot.
+I recommend using this with the option --auto-color-ylabels.
+
+All signals (independent of the subplot and vertical axis) share the same horizontal axis.
 '''
 
 import sys
@@ -881,9 +885,9 @@ def add_subparser(subparsers):
 
     subplot_arggroup = decode_parser.add_argument_group('subplot arguments',
         '''\
-The following options can be used to configure the subplots.
-If they shall apply to a specific subplot they must be placed among the signals for that subplot and a -- must mark the end of the global optional arguments.
-Otherwise they are used as default value for each subplot.
+The following options can be used to configure the subplots/axes.
+If they shall apply to a specific subplot/axis they must be placed among the signals for that subplot/axis and a -- must mark the end of the global optional arguments.
+Otherwise they are used as default value for each subplot/axis.
 ''')
     add_subplot_options(subplot_arggroup)
 

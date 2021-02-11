@@ -166,6 +166,22 @@ Signals with a different range of values can be displayed in the same subplot on
 
 .. image:: docs/plot-2-axes.png
 
+Matplotlib comes with different preinstalled styles that you can use:
+
+.. code-block:: bash
+
+   $ cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc --style seaborn
+
+.. image:: docs/plot-seaborn.png
+
+You can try all available styles with
+
+.. code-block:: bash
+
+   $ cantools plot --list-styles . | sed -n '/^- /s/^- //p' | while IFS= read -r style; do
+         cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc --style "$style" --title "--style '$style'"
+     done
+
 For more information see
 
 .. code-block:: bash

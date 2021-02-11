@@ -868,7 +868,7 @@ def add_subparser(subparsers):
     decode_parser.add_argument(
         '-ac', '--auto-color-ylabels',
         action='store_true',
-        help='This is equivalent to applying --color C0 to the first axes, --color C1 to the second and so on.')
+        help='This is equivalent to applying --color C0 to the first yaxis, --color C1 to the second and so on.')
 
     decode_parser.add_argument(
         'database',

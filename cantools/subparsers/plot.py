@@ -37,7 +37,7 @@ Colors:
     'k' black and
     'w' white.
     'C0'...'C9' the colors defined by the current style
-https://matplotlib.org/2.1.2/api/_as_gen/matplotlib.pyplot.plot.html.
+https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
 
 If the first character of fmt is a '|' stem is used instead of plot.
 

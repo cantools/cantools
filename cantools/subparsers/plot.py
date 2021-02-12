@@ -896,7 +896,8 @@ Otherwise they are used as default value for each subplot/axis.
 def add_subplot_options(arg_group):
     arg_group.add_argument('--title')
     arg_group.add_argument('--color',
-        help='The color to be used for the ylabel and the signals (unless a different color is given for the signal).')
+        help='The color to be used for the ylabel and the signals (unless a different color is given for the signal). '
+             'All string formats explained in the following link are allowed: https://matplotlib.org/tutorials/colors/colors.html')
     arg_group.add_argument('--xlabel')
     arg_group.add_argument('--ylabel')
     arg_group.add_argument('--ymin', type=float)

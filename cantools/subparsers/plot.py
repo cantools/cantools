@@ -874,7 +874,7 @@ def add_subparser(subparsers):
     decode_parser.add_argument(
         '-ac', '--auto-color-ylabels',
         action='store_true',
-        help='This is equivalent to applying --color C0 to the first yaxis, --color C1 to the second and so on.')
+        help='This is equivalent to applying --color C0 to the first y-axis, --color C1 to the second and so on.')
 
     decode_parser.add_argument(
         'database',
@@ -896,7 +896,7 @@ Otherwise they are used as default value for each subplot/axis.
 def add_subplot_options(arg_group):
     arg_group.add_argument('--title')
     arg_group.add_argument('--color',
-        help='The color to be used for the ylabel and the signals (unless a different color is given for the signal). '
+        help='The color to be used for the y-label and the signals (unless a different color is given for the signal). '
              'All string formats explained in the following link are allowed: https://matplotlib.org/tutorials/colors/colors.html')
     arg_group.add_argument('--xlabel')
     arg_group.add_argument('--ylabel')

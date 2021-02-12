@@ -154,7 +154,7 @@ Optionally a format can be specified after a signal, separated by a colon.
 
     $ cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc '*33.*fl:-<' '*33.*fr:->' - '*33.*rl:-<' '*33.*rr:->'
 
-.. image:: docs/plot-2.png
+.. image:: docs/plot-2-subplots.png
 
 Signals with a different range of values can be displayed in the same subplot on different vertical axes by separating them with a comma.
 

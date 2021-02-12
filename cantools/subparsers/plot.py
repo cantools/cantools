@@ -857,10 +857,12 @@ def add_subparser(subparsers):
 
     decode_parser.add_argument(
         '-ss', '--start',
-        help='A start time or line number. Everything before is ignored.')
+        help='A start time or line number. Everything before is ignored. '
+             'This filters the lines/messages to be processed. It does *not* set the minimum value of the x-axis.')
     decode_parser.add_argument(
         '-to', '--stop',
-        help='An end time or line number. Everything after is ignored.')
+        help='An end time or line number. Everything after is ignored. '
+             'This filters the lines/messages to be processed. It does *not* set the maximum value of the x-axis.')
 
     decode_parser.add_argument(
         '--style',

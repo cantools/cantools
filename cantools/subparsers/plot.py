@@ -56,21 +56,33 @@ import struct
 import datetime
 import argparse
 from argparse_addons import Integer
-from matplotlib import pyplot as plt
+try:
+    from matplotlib import pyplot as plt
+except ImportError:
+    plt = None
 
 from .. import database
+from .. import errors
 
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
 
 
-#TODO: I am not allowing "%H:%M" as input (for --start or --stop) because it could be misinterpreted as "%M:%S". Should this output format be changed?
-# I don't think the ambiguity is a problem for the output because if it is not obvious from the context it can be easily clarified with --xlabel.
-# However, it seems very unintuitive if the same format which is used for output is not allowed for input.
-# If you do change it, remember to uncomment the tests in test_plot_unittests.py.
-plt.rcParams["date.autoformatter.hour"] = "%H:%M"
-plt.rcParams["date.autoformatter.minute"] = "%H:%M"
-plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
+class MatplotlibNotInstalledError(errors.Error):
+
+    def __init__(self):
+        super().__init__("The matplotlib package not installed and is required "
+                         "for producing plots.")
+
+
+if plt is not None:
+    #TODO: I am not allowing "%H:%M" as input (for --start or --stop) because it could be misinterpreted as "%M:%S". Should this output format be changed?
+    # I don't think the ambiguity is a problem for the output because if it is not obvious from the context it can be easily clarified with --xlabel.
+    # However, it seems very unintuitive if the same format which is used for output is not allowed for input.
+    # If you do change it, remember to uncomment the tests in test_plot_unittests.py.
+    plt.rcParams["date.autoformatter.hour"] = "%H:%M"
+    plt.rcParams["date.autoformatter.minute"] = "%H:%M"
+    plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
 
 
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
@@ -298,6 +310,9 @@ def _do_decode(args):
     It iterates over all input lines, parses them
     and passes the data to a Plotter object.
     '''
+    if plt is None:
+        raise MatplotlibNotInstalledError()
+
     if args.list_styles:
         print("available matplotlib styles:")
         for style in plt.style.available:

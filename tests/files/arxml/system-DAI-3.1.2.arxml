@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<AUTOSAR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://autosar.org/3.1.2.DAI.2" xsi:schemaLocation="http://autosar.org/3.1.2.DAI.2 AUTOSAR_312_DAI2.xsd">
+   <TOP-LEVEL-PACKAGES>
+  </TOP-LEVEL-PACKAGES>
+</AUTOSAR>

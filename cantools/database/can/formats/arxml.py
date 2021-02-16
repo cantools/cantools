@@ -14,6 +14,17 @@ from ..internal_database import InternalDatabase
 
 LOGGER = logging.getLogger(__name__)
 
+def parse_int_string(in_string):
+    in_string = in_string.strip()
+    if not in_string:
+        return 0
+    elif in_string[0] == '0' and in_string[1:2].isdigit():
+        # interpret strings starting with a 0 as octal because
+        # python's int(*, 0) does not for some reason.
+        return int(in_string, 8)
+
+    return int(in_string, 0) # autodetect the base
+
 class SystemLoader(object):
     def __init__(self, root, strict):
         self._root = root
@@ -263,12 +274,12 @@ class SystemLoader(object):
                                             'SHORT-NAME').text
 
     def _load_message_frame_id(self, can_frame_triggering):
-        return int(self._get_unique_arxml_child(can_frame_triggering,
-                                                'IDENTIFIER').text)
+        return parse_int_string(self._get_unique_arxml_child(can_frame_triggering,
+                                                             'IDENTIFIER').text)
 
     def _load_message_length(self, can_frame):
-        return int(self._get_unique_arxml_child(can_frame,
-                                                'FRAME-LENGTH').text)
+        return parse_int_string(self._get_unique_arxml_child(can_frame,
+                                                             'FRAME-LENGTH').text)
 
     def _load_message_is_extended_frame(self, can_frame_triggering):
         can_addressing_mode = \
@@ -354,7 +365,7 @@ class SystemLoader(object):
                 initial = False
             # TODO: strings?
             else:
-                initial = int(initial)
+                initial = parse_int_string(initial)
 
         # ToDo: receivers
 
@@ -380,14 +391,15 @@ class SystemLoader(object):
                                             'SHORT-NAME').text
 
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping):
-        return int(self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
-                                                'START-POSITION').text)
+        pos = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
+                                           'START-POSITION').text
+        return parse_int_string(pos)
 
     def _load_signal_length(self, i_signal, system_signal):
         i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
 
         if i_signal_length is not None:
-            return int(i_signal_length.text)
+            return parse_int_string(i_signal_length.text)
 
         if not self.autosar_version_newer(4) and system_signal is not None:
             # AUTOSAR3 supports specifying the signal length via the
@@ -396,7 +408,7 @@ class SystemLoader(object):
                                                                 'LENGTH')
             if system_signal_length is not None:
                 # get the length from the system signal.
-                return int(system_signal_length.text)
+                return parse_int_string(system_signal_length.text)
 
         return None # error?!
 
@@ -518,7 +530,7 @@ class SystemLoader(object):
         maximum = None
         choices = {}
 
-        text_to_num_fn = float if is_float else int
+        text_to_num_fn = float if is_float else parse_int_string
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -537,7 +549,7 @@ class SystemLoader(object):
             if maximum is None: maximum = maximum_scale
             elif maximum_scale is not None: maximum = max(maximum, maximum_scale)
             if vt is not None:
-                choices[vt.text] = int(lower_limit.text)
+                choices[vt.text] = text_to_num_fn(lower_limit.text)
 
         decimal.minimum = minimum
         decimal.maximum = maximum
@@ -583,7 +595,7 @@ class SystemLoader(object):
         lower_limit = self._get_unique_arxml_child(compu_scale, '&LOWER-LIMIT')
         upper_limit = self._get_unique_arxml_child(compu_scale, '&UPPER-LIMIT')
 
-        text_to_num_fn = float if is_float else int
+        text_to_num_fn = float if is_float else parse_int_string
         minimum = None if lower_limit is None else text_to_num_fn(lower_limit.text)
         maximum = None if upper_limit is None else text_to_num_fn(upper_limit.text)
 
@@ -600,7 +612,7 @@ class SystemLoader(object):
         offset = 0
         choices = {}
 
-        text_to_num_fn = float if is_float else int
+        text_to_num_fn = float if is_float else parse_int_string
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -632,7 +644,7 @@ class SystemLoader(object):
 
             if vt is not None:
                 assert(minimum_scale is not None and minimum_scale == maximum_scale)
-                choices[vt.text] = int(minimum_scale)
+                choices[vt.text] = minimum_scale
 
         decimal.minimum = Decimal(minimum)
         decimal.maximum = Decimal(maximum)

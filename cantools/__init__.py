@@ -28,8 +28,6 @@ def _main():
                                        dest='subcommand')
     subparsers.required = True
 
-    # Import when used for less dependencies. For example, curses is
-    # not part of all Python builds.
     from .subparsers import decode
     from .subparsers import monitor
     from .subparsers import dump

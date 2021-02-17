@@ -63,7 +63,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         except AssertionError as e:
             if verbose:
                 nl = ",\n "
-                print(f"Assertation failed:")
+                print(f"Assertion failed:")
                 print(f"Expected: {nl.join(map(lambda x: str(x), expected))}")
                 print(f"Got: {nl.join(map(lambda x: str(x), mock.call_args_list))}")
                 print("Traceback:")

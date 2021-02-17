@@ -32,6 +32,9 @@ setup(name='cantools',
           'diskcache',
           'argparse_addons',
       ],
+      extras_require=dict(
+          plot=['matplotlib'],
+      ),
       test_suite="tests",
       entry_points = {
           'console_scripts': ['cantools=cantools.__init__:_main']

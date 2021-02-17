@@ -161,6 +161,13 @@ For more information see
 
     $ python3 -m cantools plot --help
 
+Note that by default matplotlib is not installed with cantools. But it can be by specifying an extra
+at installation:
+
+.. code-block:: python
+
+    python3 -m pip install cantools[plot]
+
 The dump subcommand
 ^^^^^^^^^^^^^^^^^^^
 

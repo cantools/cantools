@@ -1,14 +1,25 @@
 import re
 import time
-import curses
 import bisect
 import queue
+try:
+    # Curses is not necessarily available in all python installations
+    import curses
+except ImportError:
+    curses = None
 
 import can
 from argparse_addons import Integer
-from .. import database
+from .. import database, errors
 from .utils import format_message
 from .utils import format_multiplexed_name
+
+
+class NoCursesError(errors.Error):
+
+    def __init__(self):
+        super().__init__("Your python installation does not provide the curses"
+                         "module. Monitor command needs that module to work.")
 
 
 class QuitError(Exception):
@@ -437,6 +448,9 @@ class Monitor(can.Listener):
 
 
 def _do_monitor(args):
+    if curses is None:
+        raise NoCursesError()
+
     def monitor(stdscr):
         Monitor(stdscr, args).run()
 

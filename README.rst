@@ -166,7 +166,7 @@ at installation:
 
 .. code-block:: python
 
-    python3 -m pip install cantools[plot]
+    $ python3 -m pip install cantools[plot]
 
 The dump subcommand
 ^^^^^^^^^^^^^^^^^^^

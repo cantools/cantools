@@ -36,9 +36,17 @@ Colors:
     'y' yellow,
     'k' black and
     'w' white.
-https://matplotlib.org/2.1.2/api/_as_gen/matplotlib.pyplot.plot.html.
+    'C0'...'C9' the colors defined by the current style
+https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
 
 If the first character of fmt is a '|' stem is used instead of plot.
+
+Signals can be separated by a '-' to show them in different subplots.
+
+Signals can be separated by a ',' to make them refer to different vertical axes in the same subplot.
+I recommend using this with the option --auto-color-ylabels.
+
+All signals (independent of the subplot and vertical axis) share the same horizontal axis.
 '''
 
 import sys
@@ -57,6 +65,9 @@ from .. import database
 from .. import errors
 
 
+PYPLOT_BASE_COLORS = "bgrcmykwC"
+
+
 class MatplotlibNotInstalledError(errors.Error):
 
     def __init__(self):
@@ -65,6 +76,10 @@ class MatplotlibNotInstalledError(errors.Error):
 
 
 if plt is not None:
+    #TODO: I am not allowing "%H:%M" as input (for --start or --stop) because it could be misinterpreted as "%M:%S". Should this output format be changed?
+    # I don't think the ambiguity is a problem for the output because if it is not obvious from the context it can be easily clarified with --xlabel.
+    # However, it seems very unintuitive if the same format which is used for output is not allowed for input.
+    # If you do change it, remember to uncomment the tests in test_plot_unittests.py.
     plt.rcParams["date.autoformatter.hour"] = "%H:%M"
     plt.rcParams["date.autoformatter.minute"] = "%H:%M"
     plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
@@ -111,45 +126,153 @@ class TimestampParser:
 
     FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
-    def __init__(self):
+    def __init__(self, args):
         self.use_timestamp = None
         self.relative = None
         self._parse_timestamp = None
         self.first_timestamp = None
+        self.args = args
+
+    def init_start_stop(self, x0):
+        if self.use_timestamp and self.relative:
+            parse = self.parse_user_input_relative_time
+        elif self.use_timestamp:
+            parse = self.parse_user_input_absolute_time
+        else:
+            parse = lambda s,x0: int(s)
+
+        if self.args.start is not None:
+            self.args.start = parse(self.args.start, x0)
+            x0 = self.args.start
+            self.first_timestamp = x0
+        if self.args.stop is not None:
+            self.args.stop = parse(self.args.stop, x0)
+
+    def parse_user_input_relative_time(self, user_input, first_timestamp):
+        try:
+            return float(user_input)
+        except:
+            pass
+
+        patterns_hour = ['%H:%M:', '%H:%M:%S', '%H:%M:%S.%f']
+        patterns_minute = [':%M:%S', '%M:%S.', '%M:%S.%f']
+        patterns_day = ['%d day', '%d days']
+
+        day_time_sep = ', '
+        for pattern_day in tuple(patterns_day):
+            for pattern_time in ['%H:%M']+patterns_hour:
+                patterns_day.append(pattern_day+day_time_sep+pattern_time)
+
+        for pattern in patterns_minute + patterns_hour + patterns_day:
+            t = self.strptimedelta_in_seconds(user_input, pattern)
+            if t is not None:
+                return t
+
+        raise ValueError("Failed to parse relative time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
+
+    def strptimedelta_in_seconds(self, user_input, pattern):
+        '''
+        Parse the string representation of a time delta object.
+        Return value: int in seconds or None if parsing failed.
+        '''
+        # I cannot use `datetime.datetime.strptime(user_input, pattern) - datetime.datetime.strptime("", "")` because it treats no day as 1 day
+        p = pattern
+        p = p.replace('%H', '{hour}')
+        p = p.replace('%M', '{min}')
+        p = p.replace('%S', '{s}')
+        p = p.replace('%f', '{ms}')
+        p = p.replace('%d', '{day}')
+        p = re.escape(p)
+        p = p.replace(r'\{hour\}', '(?P<hour>[0-9][0-9]?)')
+        p = p.replace(r'\{min\}', '(?P<min>[0-9][0-9]?)')
+        p = p.replace(r'\{s\}', '(?P<s>[0-9][0-9]?)')
+        p = p.replace(r'\{ms\}', '(?P<ms>[0-9]+)')
+        p = p.replace(r'\{day\}', '(?P<day>[0-9][0-9]?)')
+        p += '$'
+        m = re.match(p, user_input)
+        if m is None:
+            return None
+
+        d = m.groupdict('0')
+        seconds = float(d.pop('s','0') + '.' + d.pop('ms','0'))
+        d = {key:int(d[key]) for key in d}
+        return ((d.pop('day',0)*24 + d.pop('hour',0))*60 + d.pop('min',0))*60 + seconds
+
+    def parse_user_input_absolute_time(self, user_input, first_timestamp):
+        patterns_year = ['%Y-%m-%d', '%d.%m.%Y']
+        patterns_month = ['%m-%d', '%d.%m.']
+        patterns_day = ['%d.']
+        patterns_hour = ['%H:%M:', '%H:%M:%S', '%H:%M:%S.%f']
+        patterns_minute = [':%M:%S', '%M:%S.', '%M:%S.%f']
+        patterns_second = ['%S', '%S.%f']
+
+        date_time_sep = ' '
+        for patterns in (patterns_year, patterns_month, patterns_day):
+            for pattern_date in tuple(patterns):
+                for pattern_time in ['%H:%M']+patterns_hour:
+                    patterns.append(pattern_date+date_time_sep+pattern_time)
+
+        patterns_year.append('%Y-%m')
+
+        for attrs, patterns in [
+            (['year', 'month', 'day', 'hour', 'minute'], patterns_second),
+            (['year', 'month', 'day', 'hour'], patterns_minute),
+            (['year', 'month', 'day'], patterns_hour),
+            (['year', 'month'], patterns_day),
+            (['year'], patterns_month),
+            ([], patterns_year),
+        ]:
+            for p in patterns:
+                try:
+                    out = datetime.datetime.strptime(user_input, p)
+                except ValueError:
+                    pass
+                else:
+                    kw = {a:getattr(first_timestamp,a) for a in attrs}
+                    out = out.replace(**kw)
+                    return out
+
+        raise ValueError("Failed to parse absolute time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
+
+    def first_parse_timestamp(self, timestamp, linenumber):
+        if timestamp is None:
+            self.use_timestamp = False
+            return linenumber
+
+        try:
+            out = self.parse_absolute_timestamp(timestamp)
+            self.use_timestamp = True
+            self.relative = False
+            self.first_timestamp = out
+            self._parse_timestamp = self.parse_absolute_timestamp
+            return out
+        except ValueError:
+            pass
+
+        try:
+            if float(timestamp) > self.THRESHOLD_ABSOLUTE_SECONDS:
+                out = self.parse_absolute_seconds(timestamp)
+                self.relative = False
+                self.first_timestamp = out
+                self._parse_timestamp = self.parse_absolute_seconds
+            else:
+                out = self.parse_seconds(timestamp)
+                self.relative = True
+                self._parse_timestamp = self.parse_seconds
+
+            self.use_timestamp = True
+            return out
+        except ValueError:
+            pass
+
+        self.use_timestamp = False
+        return linenumber
 
     def parse_timestamp(self, timestamp, linenumber):
         if self.use_timestamp is None:
-            if timestamp is None:
-                self.use_timestamp = False
-                return linenumber
-
-            try:
-                out = self.parse_absolute_timestamp(timestamp)
-                self.use_timestamp = True
-                self.relative = False
-                self.first_timestamp = out
-                self._parse_timestamp = self.parse_absolute_timestamp
-                return out
-            except ValueError:
-                pass
-
-            try:
-                if float(timestamp) > self.THRESHOLD_ABSOLUTE_SECONDS:
-                    out = self.parse_absolute_seconds(timestamp)
-                    self.relative = False
-                    self.first_timestamp = out
-                    self._parse_timestamp = self.parse_absolute_seconds
-                else:
-                    out = self.parse_seconds(timestamp)
-                    self.relative = True
-                    self._parse_timestamp = self.parse_seconds
-
-                self.use_timestamp = True
-                return out
-            except ValueError:
-                pass
-
-            self.use_timestamp = False
+            x = self.first_parse_timestamp(timestamp, linenumber)
+            self.init_start_stop(x)
+            return x
 
         if self.use_timestamp:
             return self._parse_timestamp(timestamp)
@@ -187,9 +310,14 @@ def _do_decode(args):
     It iterates over all input lines, parses them
     and passes the data to a Plotter object.
     '''
-    
     if plt is None:
         raise MatplotlibNotInstalledError()
+
+    if args.list_styles:
+        print("available matplotlib styles:")
+        for style in plt.style.available:
+            print("- %s" % style)
+        return
 
     if args.show_errors:
         args.show_invalid_syntax = True
@@ -205,12 +333,15 @@ def _do_decode(args):
                                frame_id_mask=args.frame_id_mask,
                                strict=not args.no_strict)
     re_format = None
-    timestamp_parser = TimestampParser()
+    timestamp_parser = TimestampParser(args)
     if args.show_invalid_syntax:
         # we cannot use a timestamp if we have failed to parse the line
         timestamp_parser.use_timestamp = False
     if args.line_numbers:
         timestamp_parser.use_timestamp = False
+
+    if args.style is not None:
+        plt.style.use(args.style)
 
     plotter = Plotter(dbase, args)
 
@@ -243,6 +374,11 @@ def _do_decode(args):
         if mo:
             timestamp, frame_id, data = _mo_unpack(mo)
             timestamp = timestamp_parser.parse_timestamp(timestamp, line_number)
+            if args.start is not None and timestamp < args.start:
+                line_number += 1
+                continue
+            elif args.stop is not None and timestamp > args.stop:
+                break
             plotter.add_msg(timestamp, frame_id, data)
         elif RE_DECODE.match(line):
             continue
@@ -274,7 +410,7 @@ class Plotter:
         self.ignore_unknown_frames = args.ignore_unknown_frames
         self.ignore_invalid_data = args.ignore_invalid_data
         self.output_filename = args.output_file
-        self.signals = Signals(args.signals, args.case_sensitive, args.break_time)
+        self.signals = Signals(args.signals, args.case_sensitive, args.break_time, args, args.auto_color_ylabels)
 
         self.x_invalid_syntax = []
         self.x_unknown_frames = []
@@ -332,8 +468,12 @@ class Signals:
     Plots the values using matplotlib.pyplot.
     '''
 
+    # added between signal names used as default ylabel
+    YLABEL_SEP = ', '
+
     # before re.escape
     SEP_SUBPLOT = '-'
+    SEP_AXES = ','
 
     SEP_FMT = ':'
     FMT_STEM = '|'
@@ -349,22 +489,64 @@ class Signals:
     COLOR_INVALID_DATA   = '#ff00ff'
     ERROR_LINEWIDTH = 1
 
+    FIRST_SUBPLOT = 1
+    FIRST_AXIS = 0
+
     # ------- initialization -------
 
-    def __init__(self, signals, case_sensitive, break_time):
+    def __init__(self, signals, case_sensitive, break_time, global_subplot_args, auto_color_ylabels):
         self.args = signals
+        self.global_subplot_args = global_subplot_args
         self.signals = []
         self.values = {}
         self.re_flags = 0 if case_sensitive else re.I
         self.break_time = break_time
         self.break_time_uninit = True
-        self.subplot = 1
+        self.subplot = self.FIRST_SUBPLOT
+        self.subplot_axis = self.FIRST_AXIS
+        self.subplot_args = dict()
+        self.subplot_argparser = argparse.ArgumentParser()
+        self.subplot_argparser.add_argument('signals', nargs='*')
+        add_subplot_options(self.subplot_argparser)
 
-        if signals:
-            for sg in signals:
+        i0 = 0
+        while True:
+            try:
+                i1 = signals.index(self.SEP_SUBPLOT, i0)
+            except ValueError:
+                i1 = None
+
+            try:
+                i12 = signals.index(self.SEP_AXES, i0)
+            except ValueError:
+                i12 = None
+            if i1 is None or i12 is not None and i12 < i1:
+                i1 = i12
+
+            subplot_signals = signals[i0:i1]
+            subplot_args = self.subplot_argparser.parse_args(subplot_signals)
+            if auto_color_ylabels and subplot_args.color is None:
+                subplot_args.color = "C%s" % self.subplot_axis
+            self.subplot_args[(self.subplot, self.subplot_axis)] = subplot_args
+            self._ylabel = ""
+            for sg in subplot_args.signals:
                 self.add_signal(sg)
-        else:
+            if subplot_args.ylabel is None and self._ylabel:
+                subplot_args.ylabel = self._ylabel
+
+            if i1 is None:
+                break
+
+            if signals[i1] == self.SEP_SUBPLOT:
+                self.subplot += 1
+                self.subplot_axis = self.FIRST_AXIS
+            else:
+                self.subplot_axis += 1
+            i0 = i1 + 1
+
+        if not self.signals:
             self.add_signal('*')
+
         self.compile_reo()
 
     def init_break_time(self, datatype):
@@ -378,10 +560,6 @@ class Signals:
         self.break_time_uninit = False
 
     def add_signal(self, signal):
-        if signal == self.SEP_SUBPLOT:
-            self.subplot += 1
-            return
-
         if self.SEP_FMT in signal:
             signal, fmt = signal.split(self.SEP_FMT, 1)
             if fmt.startswith(self.FMT_STEM):
@@ -393,6 +571,10 @@ class Signals:
             fmt = ''
             plt_func = 'plot'
 
+        if self._ylabel:
+            self._ylabel += self.YLABEL_SEP
+        self._ylabel += signal
+
         signal = re.escape(signal)
         if self.SEP_SG not in signal:
             signal = self.WILDCARD_MANY + self.SEP_SG + signal
@@ -401,7 +583,7 @@ class Signals:
         signal += '$'
         reo = re.compile(signal, self.re_flags)
 
-        sgo = Signal(reo, self.subplot, plt_func, fmt)
+        sgo = Signal(reo, self.subplot, self.subplot_axis, plt_func, fmt)
         self.signals.append(sgo)
 
     def compile_reo(self):
@@ -433,21 +615,32 @@ class Signals:
 
     # ------- at end -------
 
+    SUBPLOT_DIRECT_NAMES = ('title', 'ylabel')
     def plot(self, xlabel, x_invalid_syntax, x_unknown_frames, x_invalid_data):
+        self.default_xlabel = xlabel
         splot = None
-        last_subplot = 0
+        last_subplot = self.FIRST_SUBPLOT - 1
+        last_axis = None
         axis_format_uninitialized = True
         sorted_signal_names = sorted(self.values.keys())
+        self.legend_handles = []
+        self.legend_labels = []
         for sgo in self.signals:
             if sgo.subplot > last_subplot:
-                last_subplot = sgo.subplot
                 if splot is None:
                     axes = None
                 else:
                     axes = splot.axes
-                    splot.legend()
-                    splot.set_xlabel(xlabel)
+                    self.finish_subplot(splot, self.subplot_args[(last_subplot, last_axis)])
+
                 splot = plt.subplot(self.subplot, 1, sgo.subplot, sharex=axes)
+
+                last_subplot = sgo.subplot
+                last_axis = sgo.axis
+            elif sgo.axis > last_axis:
+                self.finish_axis(splot, self.subplot_args[(last_subplot, last_axis)])
+                splot = splot.twinx()
+                last_axis = sgo.axis
 
             plotted = False
             for signal_name in sorted_signal_names:
@@ -466,7 +659,11 @@ class Signals:
                     if isinstance(x[0], float):
                         splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
                     axis_format_uninitialized = False
-                getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
+                l = getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
+                color = self.subplot_args[(sgo.subplot, sgo.axis)].color
+                if color is not None and self.contains_no_color(sgo.fmt):
+                    for p in l:
+                        p.set_color(color)
                 plotted = True
 
             if not plotted:
@@ -475,9 +672,52 @@ class Signals:
         self.plot_error(splot, x_invalid_syntax, 'invalid syntax', self.COLOR_INVALID_SYNTAX)
         self.plot_error(splot, x_unknown_frames, 'unknown frames', self.COLOR_UNKNOWN_FRAMES)
         self.plot_error(splot, x_invalid_data, 'invalid data', self.COLOR_INVALID_DATA)
+        self.finish_subplot(splot, self.subplot_args[(last_subplot, last_axis)])
 
-        splot.legend()
+    def finish_axis(self, splot, subplot_args):
+        kw = {key:val for key,val in vars(subplot_args).items() if val is not None and key in self.SUBPLOT_DIRECT_NAMES}
+        for key in self.SUBPLOT_DIRECT_NAMES:
+            if key not in kw:
+                val = getattr(self.global_subplot_args, key)
+                if val is not None:
+                    kw[key] = val
+        if kw:
+            splot.set(**kw)
+
+        if subplot_args.xlabel is not None:
+            xlabel = subplot_args.xlabel
+        elif self.global_subplot_args.xlabel is not None:
+            xlabel = self.global_subplot_args.xlabel
+        else:
+            xlabel = self.default_xlabel
         splot.set_xlabel(xlabel)
+
+        if subplot_args.ymin is None:
+            subplot_args.ymin = self.global_subplot_args.ymin
+        if subplot_args.ymax is None:
+            subplot_args.ymax = self.global_subplot_args.ymax
+        if subplot_args.ymin is not None or subplot_args.ymax is not None:
+            splot.axes.set_ylim(subplot_args.ymin, subplot_args.ymax)
+
+        if subplot_args.color is not None:
+            splot.yaxis.label.set_color(subplot_args.color)
+            splot.tick_params(axis='y', which='both', colors=subplot_args.color)
+
+        handles, labels = splot.get_legend_handles_labels()
+        self.legend_handles.extend(handles)
+        self.legend_labels.extend(labels)
+
+    def finish_subplot(self, splot, subplot_args):
+        self.finish_axis(splot, subplot_args)
+        splot.legend(self.legend_handles, self.legend_labels)
+        self.legend_handles = list()
+        self.legend_labels = list()
+
+    def contains_no_color(self, fmt):
+        for c in fmt:
+            if c in PYPLOT_BASE_COLORS:
+                return False
+        return True
 
     def plot_error(self, splot, xs, label, color):
         if xs:
@@ -515,9 +755,10 @@ class Signal:
 
     # ------- initialization -------
 
-    def __init__(self, reo, subplot, plt_func, fmt):
+    def __init__(self, reo, subplot, axis, plt_func, fmt):
         self.reo = reo
         self.subplot = subplot
+        self.axis = axis
         self.plt_func = plt_func
         self.fmt = fmt
 
@@ -630,6 +871,27 @@ def add_subparser(subparsers):
         help='A file to write the plot to instead of displaying it in a window.')
 
     decode_parser.add_argument(
+        '-ss', '--start',
+        help='A start time or line number. Everything before is ignored. '
+             'This filters the lines/messages to be processed. It does *not* set the minimum value of the x-axis.')
+    decode_parser.add_argument(
+        '-to', '--stop',
+        help='An end time or line number. Everything after is ignored. '
+             'This filters the lines/messages to be processed. It does *not* set the maximum value of the x-axis.')
+
+    decode_parser.add_argument(
+        '--style',
+        help='The matplotlib style to be used.')
+    decode_parser.add_argument(
+        '--list-styles',
+        action='store_true',
+        help='Print all available matplotlib styles without drawing a plot.')
+    decode_parser.add_argument(
+        '-ac', '--auto-color-ylabels',
+        action='store_true',
+        help='This is equivalent to applying --color C0 to the first y-axis, --color C1 to the second and so on.')
+
+    decode_parser.add_argument(
         'database',
         help='Database file.')
     decode_parser.add_argument(
@@ -637,3 +899,22 @@ def add_subparser(subparsers):
         nargs='*',
         help='The signals to be plotted.')
     decode_parser.set_defaults(func=_do_decode)
+
+    subplot_arggroup = decode_parser.add_argument_group('subplot arguments',
+        '''\
+The following options can be used to configure the subplots/axes.
+If they shall apply to a specific subplot/axis they must be placed among the signals for that subplot/axis and a -- must mark the end of the global optional arguments.
+Otherwise they are used as default value for each subplot/axis.
+''')
+    add_subplot_options(subplot_arggroup)
+
+def add_subplot_options(arg_group):
+    arg_group.add_argument('--title')
+    arg_group.add_argument('--color',
+        help='The color to be used for the y-label and the signals (unless a different color is given for the signal). '
+             'All string formats explained in the following link are allowed: https://matplotlib.org/tutorials/colors/colors.html')
+    arg_group.add_argument('--xlabel')
+    arg_group.add_argument('--ylabel')
+    arg_group.add_argument('--ymin', type=float)
+    arg_group.add_argument('--ymax', type=float)
+    return arg_group

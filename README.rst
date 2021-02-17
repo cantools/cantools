@@ -128,6 +128,7 @@ The plot subcommand is similar to the decode subcommand but messages are visuali
 
 .. code-block:: bash
 
+    $ candump -l vcan0
     $ cat candump-2021-01-04_180521.log
     (1609779922.655421) vcan0 00000343#B204B9049C049C04
     (1609779922.655735) vcan0 0000024A#120527052E051905
@@ -153,7 +154,33 @@ Optionally a format can be specified after a signal, separated by a colon.
 
     $ cat candump-2021-01-04_180521.log | python3 -m cantools plot tests/files/dbc/abs.dbc '*33.*fl:-<' '*33.*fr:->' - '*33.*rl:-<' '*33.*rr:->'
 
-.. image:: docs/plot-2.png
+.. image:: docs/plot-2-subplots.png
+
+Signals with a different range of values can be displayed in the same subplot on different vertical axes by separating them with a comma.
+
+.. code-block:: bash
+
+   $ cat candump-2021-01-04_180521.log | cantools plot --auto-color tests/files/dbc/abs.dbc -- \
+      --ylabel 'Bremse 33' '*_33.*fl*:-<' '*_33.*fr*:>' '*_33.*rl*:3' '*_33.*rr*:4' , \
+      --ylabel 'Bremse 2' '*_2.*fl*:-<' '*_2.*fr*:>' '*_2.*rl*:3' '*_2.*rr*:4'
+
+.. image:: docs/plot-2-axes.png
+
+Matplotlib comes with different preinstalled styles that you can use:
+
+.. code-block:: bash
+
+   $ cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc --style seaborn
+
+.. image:: docs/plot-seaborn.png
+
+You can try all available styles with
+
+.. code-block:: bash
+
+   $ cantools plot --list-styles . | sed -n '/^- /s/^- //p' | while IFS= read -r style; do
+         cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc --style "$style" --title "--style '$style'"
+     done
 
 For more information see
 

@@ -515,7 +515,11 @@ class SystemLoader(object):
                                                    'DISPLAY-NAME'
                                                ])
 
-        return None if res is None else res.text
+        ignorelist = ( "NoUnit", )
+
+        if res is None or res.text in ignorelist:
+            return None
+        return res.text
 
     def _load_system_signal_comments(self, system_signal):
         result = {}

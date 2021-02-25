@@ -344,12 +344,8 @@ class SystemLoader(object):
         is_signed, is_float = self._load_signal_type(i_signal)
 
         if system_signal is not None:
-            # Unit and comment.
-            unit = self._load_signal_unit(system_signal)
-            comments = self._load_signal_comments(system_signal)
-
             # Minimum, maximum, factor, offset and choices.
-            minimum, maximum, factor, offset, choices = \
+            minimum, maximum, factor, offset, choices, unit, comments = \
                 self._load_system_signal(system_signal, decimal, is_float)
 
         # loading initial values is way too complicated, so it is the
@@ -425,7 +421,7 @@ class SystemLoader(object):
         if self.autosar_version_newer(4):
             if i_signal is None:
                 return None
-           
+
             return self._load_arxml_init_value_string_helper(i_signal)
         else:
             if system_signal is None:
@@ -502,7 +498,7 @@ class SystemLoader(object):
         else:
             return 'little_endian'
 
-    def _load_signal_unit(self, system_signal):
+    def _load_system_signal_unit(self, system_signal, compu_method):
         res = self._get_unique_arxml_child(system_signal,
                                            [
                                                'PHYSICAL-PROPS',
@@ -511,10 +507,17 @@ class SystemLoader(object):
                                                '&UNIT',
                                                'DISPLAY-NAME'
                                            ])
+        if res is None and compu_method is not None:
+            # try to go via the compu_method
+            res = self._get_unique_arxml_child(compu_method,
+                                               [
+                                                   '&UNIT',
+                                                   'DISPLAY-NAME'
+                                               ])
 
         return None if res is None else res.text
 
-    def _load_signal_comments(self, system_signal):
+    def _load_system_signal_comments(self, system_signal):
         result = {}
 
         for l_2 in self._get_arxml_children(system_signal, ['DESC', '*L-2']):
@@ -659,6 +662,10 @@ class SystemLoader(object):
 
         compu_method = self._get_compu_method(system_signal)
 
+        # Unit and comment.
+        unit = self._load_system_signal_unit(system_signal, compu_method)
+        comments = self._load_system_signal_comments(system_signal)
+
         if compu_method is not None:
             category = self._get_unique_arxml_child(compu_method, 'CATEGORY')
 
@@ -687,7 +694,14 @@ class SystemLoader(object):
                 LOGGER.debug('Compu method category %s is not yet implemented.',
                              category)
 
-        return minimum, maximum, 1 if factor is None else factor, 0 if offset is None else offset, choices
+        return \
+            minimum, \
+            maximum, \
+            1 if factor is None else factor, \
+            0 if offset is None else offset, \
+            choices, \
+            unit, \
+            comments
 
     def _load_signal_type(self, i_signal):
         is_signed = False

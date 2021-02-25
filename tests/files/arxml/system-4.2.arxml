@@ -309,6 +309,10 @@
           <SHORT-NAME>meters</SHORT-NAME>
           <DISPLAY-NAME>m</DISPLAY-NAME>
         </UNIT>
+        <UNIT UUID="9a4019793b04d83fe7000deaf4f84144">
+          <SHORT-NAME>wizepoo</SHORT-NAME>
+          <DISPLAY-NAME>wp</DISPLAY-NAME>
+        </UNIT>
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE UUID="bbcd842e7758802dad86635f98742e1c">
@@ -355,6 +359,7 @@
         <COMPU-METHOD UUID="dbb4bf17606b4bbaf59ccbdf80769edc">
           <SHORT-NAME>Signal6</SHORT-NAME>
           <CATEGORY>SCALE_LINEAR_AND_TEXTTABLE</CATEGORY>
+          <UNIT-REF DEST="UNIT">/Unit/wizepoo</UNIT-REF>
           <COMPU-INTERNAL-TO-PHYS>
             <COMPU-SCALES>
               <COMPU-SCALE>

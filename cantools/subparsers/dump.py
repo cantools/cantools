@@ -1,5 +1,3 @@
-import curses
-
 from .. import database
 from ..database.utils import format_and
 from ..database.can.database import Database as CanDatabase
@@ -35,12 +33,18 @@ def _print_j1939_frame_id(message):
 
 def _dump_can_database(dbase, with_comments=False):
 
+    WIDTH = 80
     try:
-        _stdscr = curses.initscr()
-        _, WIDTH = _stdscr.getmaxyx()
-        curses.endwin()
-    except Exception as e:
-        WIDTH = 80
+        import curses
+    except ModuleNotFoundError:
+        pass  # pragma: no cover
+    else:
+        try:
+            _stdscr = curses.initscr()
+            _, WIDTH = _stdscr.getmaxyx()  # pragma: no cover
+            curses.endwin()  # pragma: no cover
+        except Exception as e:
+            pass
 
     print('================================= Messages =================================')
     print()

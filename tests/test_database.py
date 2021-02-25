@@ -3821,9 +3821,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.decimal.minimum, 0)
         self.assertEqual(signal_3.decimal.maximum, 2)
         self.assertEqual(signal_3.unit, None)
-        self.assertEqual(signal_3.choices, {'STANDARD_POSITION': 0,
-                                            'FORWARD_POSITION': 1,
-                                            'BACKWARD_POSITION': 2})
+        self.assertEqual(signal_3.choices, { 0: 'STANDARD_POSITION',
+                                             1: 'FORWARD_POSITION',
+                                             2: 'BACKWARD_POSITION'})
         self.assertEqual(signal_3.comments, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)
@@ -3895,7 +3895,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.decimal.minimum, 0)
         self.assertEqual(signal_1.decimal.maximum, 1)
         self.assertEqual(signal_1.unit, "wp")
-        self.assertEqual(signal_1.choices, {'zero': 0})
+        self.assertEqual(signal_1.choices, {0: 'zero'})
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
@@ -4028,7 +4028,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.decimal.minimum, 0)
         self.assertEqual(signal_3.decimal.maximum, 3)
         self.assertEqual(signal_3.unit, None)
-        self.assertEqual(signal_3.choices, {'one': 1, 'two': 2})
+        self.assertEqual(signal_3.choices, {1: 'one', 2: 'two'})
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)

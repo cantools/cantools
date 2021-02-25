@@ -556,7 +556,7 @@ class SystemLoader(object):
             if maximum is None: maximum = maximum_scale
             elif maximum_scale is not None: maximum = max(maximum, maximum_scale)
             if vt is not None:
-                choices[vt.text] = text_to_num_fn(lower_limit.text)
+                choices[int(lower_limit.text)] = vt.text
 
         decimal.minimum = minimum
         decimal.maximum = maximum
@@ -651,7 +651,7 @@ class SystemLoader(object):
 
             if vt is not None:
                 assert(minimum_scale is not None and minimum_scale == maximum_scale)
-                choices[vt.text] = minimum_scale
+                choices[int(minimum_scale)] = vt.text
 
         decimal.minimum = Decimal(minimum)
         decimal.maximum = Decimal(maximum)

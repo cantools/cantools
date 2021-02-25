@@ -753,6 +753,178 @@ BATTERY_VT(
                 actual_output = stdout.getvalue()
                 self.assertEqual(actual_output, expected_output)
 
+    def test_dump_with_comments(self):
+        argv = [
+            'cantools',
+            'dump',
+            '--with-comments',
+            'tests/files/dbc/motohawk_with_comments.dbc'
+        ]
+
+        expected_output = """\
+================================= Messages =================================
+
+  ------------------------------------------------------------------------
+
+  Name:       ExampleMessage
+  Id:         0x1f0
+  Length:     8 bytes
+  Cycle time: - ms
+  Senders:    PCM1
+  Layout:
+
+                          Bit
+
+             7   6   5   4   3   2   1   0
+           +---+---+---+---+---+---+---+---+
+         0 |<-x|<---------------------x|<--|
+           +---+---+---+---+---+---+---+---+
+             |                       +-- AverageRadius
+             +-- Enable
+           +---+---+---+---+---+---+---+---+
+         1 |-------------------------------|
+           +---+---+---+---+---+---+---+---+
+         2 |----------x|   |   |   |   |   |
+     B     +---+---+---+---+---+---+---+---+
+     y               +-- Temperature
+     t     +---+---+---+---+---+---+---+---+
+     e   3 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         4 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         5 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         6 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         7 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+
+  Signal tree:
+
+    -- {root}
+       +-- Enable [94mEnable signal comment [-][0m
+       +-- AverageRadius [94mAverageRadius signal comment [m][0m
+       +-- Temperature [94mTemperature with a really long and complicated comment
+                       that probably require many many lines in a decently wide
+                       terminal [degK][0m
+
+  Signal choices:
+
+    Enable
+        0 Disabled
+        1 Enabled
+
+  ------------------------------------------------------------------------
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdout', stdout):
+            with patch('sys.argv', argv):
+                cantools._main()
+                actual_output = stdout.getvalue()
+                self.assertEqual(actual_output, expected_output)
+
+    def test_dump_with_comments_mux(self):
+        argv = [
+            'cantools',
+            'dump',
+            '--with-comments',
+            'tests/files/dbc/bus_comment.dbc'
+        ]
+
+        expected_output = """\
+================================= Messages =================================
+
+  ------------------------------------------------------------------------
+
+  Name:       Message1
+  Id:         0x123456
+      Priority:       0
+      PGN:            0x01200
+      Source:         0x56
+      Destination:    0x34
+      Format:         PDU 1
+  Length:     8 bytes
+  Cycle time: 0 ms
+  Senders:    -
+  Layout:
+
+                          Bit
+
+             7   6   5   4   3   2   1   0
+           +---+---+---+---+---+---+---+---+
+         0 |<---------------------x|   |   |
+           +---+---+---+---+---+---+---+---+
+             +-- Multiplexor
+           +---+---+---+---+---+---+---+---+
+         1 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         2 |<-x|   |   |   |<-x|<-x|   |   |
+           +---+---+---+---+---+---+---+---+
+             |               |   +-- BIT_J
+             |               +-- BIT_C
+             +-- BIT_G
+           +---+---+---+---+---+---+---+---+
+         3 |   |   |<-x|<-x|   |<-x|   |<-x|
+     B     +---+---+---+---+---+---+---+---+
+     y               |   |       |       +-- BIT_L
+     t               |   |       +-- BIT_A
+     e               |   +-- BIT_K
+                     +-- BIT_E
+           +---+---+---+---+---+---+---+---+
+         4 |<-x|<-x|   |   |   |   |<-x|<-x|
+           +---+---+---+---+---+---+---+---+
+             |   |                   |   +-- BIT_D
+             |   |                   +-- BIT_B
+             |   +-- BIT_H
+             +-- BIT_F
+           +---+---+---+---+---+---+---+---+
+         5 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         6 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+         7 |   |   |   |   |   |   |   |   |
+           +---+---+---+---+---+---+---+---+
+
+  Signal tree:
+
+    -- {root}
+       +-- Multiplexor [94mDefines data content for response messages.[0m
+           +-- 8
+           |   +-- BIT_J
+           |   +-- BIT_C
+           |   +-- BIT_G
+           |   +-- BIT_L
+           +-- 16
+           |   +-- BIT_J
+           |   +-- BIT_C
+           |   +-- BIT_G
+           |   +-- BIT_L
+           +-- 24
+               +-- BIT_J
+               +-- BIT_C
+               +-- BIT_G
+               +-- BIT_L
+               +-- BIT_A
+               +-- BIT_K
+               +-- BIT_E
+               +-- BIT_D
+               +-- BIT_B
+               +-- BIT_H
+               +-- BIT_F
+
+  ------------------------------------------------------------------------
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdout', stdout):
+            with patch('sys.argv', argv):
+                cantools._main()
+                actual_output = stdout.getvalue()
+                self.assertEqual(actual_output, expected_output)
+
     def test_dump_no_sender(self):
         argv = [
             'cantools',

@@ -1,3 +1,5 @@
+import curses
+
 from .. import database
 from ..database.utils import format_and
 from ..database.can.database import Database as CanDatabase
@@ -31,7 +33,15 @@ def _print_j1939_frame_id(message):
     print('      Format:         {}'.format(pdu_format))
 
 
-def _dump_can_database(dbase):
+def _dump_can_database(dbase, with_comments=False):
+
+    try:
+        _stdscr = curses.initscr()
+        _, WIDTH = _stdscr.getmaxyx()
+        curses.endwin()
+    except Exception as e:
+        WIDTH = 80
+
     print('================================= Messages =================================')
     print()
     print('  ' + 72 * '-')
@@ -67,7 +77,7 @@ def _dump_can_database(dbase):
         print()
         print('\n'.join([
             ('    ' + line).rstrip()
-            for line in message.signal_tree_string().splitlines()
+            for line in message.signal_tree_string(WIDTH, with_comments=with_comments).splitlines()
         ]))
         print()
 
@@ -110,7 +120,7 @@ def _do_dump(args):
                                strict=not args.no_strict)
 
     if isinstance(dbase, CanDatabase):
-        _dump_can_database(dbase)
+        _dump_can_database(dbase, args.with_comments)
     elif isinstance(dbase, DiagnosticsDatabase):
         _dump_diagnostics_database(dbase)
     else:
@@ -131,4 +141,5 @@ def add_subparser(subparsers):
     dump_parser.add_argument(
         'database',
         help='Database file.')
+    dump_parser.add_argument('--with-comments', action='store_true', default=False)
     dump_parser.set_defaults(func=_do_dump)

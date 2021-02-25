@@ -1,0 +1,56 @@
+VERSION "1.0"
+
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: PCM1 FOO
+
+
+BO_ 496 ExampleMessage: 8 PCM1
+ SG_ Temperature : 0|12@0- (0.01,250) [229.52|270.47] "degK"  PCM1,FOO
+ SG_ AverageRadius : 6|6@0+ (0.1,0) [0|5] "m" Vector__XXX
+ SG_ Enable : 7|1@0+ (1,0) [0|0] "-" Vector__XXX
+
+
+
+
+CM_ BO_ 496 "Example message used as template in MotoHawk models.";
+CM_ SG_ 496 Temperature "Temperature with a really long and complicated comment that probably require many many lines in a decently wide terminal";
+CM_ SG_ 496 AverageRadius "AverageRadius signal comment";
+CM_ SG_ 496 Enable "Enable signal comment";
+
+
+VAL_ 496 Enable 0 "Disabled" 1 "Enabled" ;
+
+
+

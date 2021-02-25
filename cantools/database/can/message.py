@@ -2,12 +2,14 @@
 
 import binascii
 from copy import deepcopy
+import textwrap
 
 from ..utils import format_or
 from ..utils import start_bit
 from ..utils import encode_data
 from ..utils import decode_data
 from ..utils import create_encode_decode_formats
+from ..utils import Colors
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
@@ -335,7 +337,7 @@ class Message(object):
 
         return self._signal_tree
 
-    def signal_tree_string(self):
+    def signal_tree_string(self, console_width=80, with_comments=False):
         """Returns the message signal tree as a string.
 
         """
@@ -349,6 +351,27 @@ class Message(object):
         def add_prefix(prefix, lines):
             return [prefix + line for line in lines]
 
+        def format_signal_line(signal_name):
+            siginst = self.get_signal_by_name(signal_name)
+            signal_name_line = signal_name
+
+            if with_comments:
+                com = []
+                if siginst.comment:
+                    com.append(siginst.comment)
+                if siginst.unit:
+                    com.append(f'[{siginst.unit}]')
+
+                comstr = ' '.join(com)
+                if len(comstr) > 0:
+                    signal_name_line = f'{signal_name} {Colors.OKBLUE}{comstr}{Colors.ENDC}'
+
+            signal_name_line = textwrap.wrap(signal_name_line, width=console_width - 2, initial_indent='+-- ',
+                                                subsequent_indent=(' ' * (8 + len(signal_name))))
+            signal_name_line = '\n'.join(signal_name_line)
+
+            return signal_name_line
+
         def format_mux(mux):
             signal_name, multiplexed_signals = list(mux.items())[0]
             multiplexed_signals = sorted(list(multiplexed_signals.items()))
@@ -360,7 +383,7 @@ class Message(object):
                 lines += add_prefix(get_prefix(index, len(multiplexed_signals)),
                                     format_level_lines(signal_names))
 
-            return '+-- {}'.format(signal_name), lines
+            return format_signal_line(signal_name), lines
 
         def format_level_lines(signal_names):
             lines = []
@@ -371,7 +394,7 @@ class Message(object):
                     signal_lines = add_prefix(get_prefix(index, len(signal_names)),
                                               signal_lines)
                 else:
-                    signal_name_line = '+-- {}'.format(signal_name)
+                    signal_name_line = format_signal_line(signal_name)
                     signal_lines = []
 
                 lines.append(signal_name_line)

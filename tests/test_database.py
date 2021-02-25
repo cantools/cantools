@@ -21,11 +21,25 @@ except ImportError:
 import cantools
 from cantools.database.can.formats import dbc
 from cantools.database import UnsupportedDatabaseFormatError
-
-
+from cantools.database.can.signal import NamedSignalValue
+  
 class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
+
+    def assertEqualChoicesDictHelper_(self, have, expect):
+        if have.keys() != expect.keys():
+            raise AssertationError(f'keys differ: {have} != {expect}')
+
+        for key in have.keys():
+            self.assertEqual(str(have[key]), str(expect[key]))
+
+    def assertEqualChoicesDict(self, have, expect):
+        if have.keys() != expect.keys():
+            raise AssertationError(f'keys differ: {have.keys()} != {expect.keys()}')
+
+        for key in have.keys():
+            self.assertEqualChoicesDictHelper_(have[key], expect[key])
 
     def assert_dbc_dump(self, db, filename):
         actual = db.as_dbc_string()
@@ -4029,6 +4043,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.decimal.maximum, 3)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, {1: 'one', 2: 'two'})
+        self.assertEqual(signal_3.choices[1].comments,
+                         {'EN': 'One Comment', 'DE': 'Ein Kommentar'})
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)

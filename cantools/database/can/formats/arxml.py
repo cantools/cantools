@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from xml.etree import ElementTree
 
-from ..signal import Signal
+from ..signal import Signal, NamedSignalValue
 from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..internal_database import InternalDatabase
@@ -199,7 +199,7 @@ class SystemLoader(object):
         frame_id = self._load_message_frame_id(can_frame_triggering)
         length = self._load_message_length(can_frame)
         is_extended_frame = self._load_message_is_extended_frame(can_frame_triggering)
-        comments = self._load_message_comments(can_frame)
+        comments = self._load_comments(can_frame)
 
         # ToDo: senders
 
@@ -289,10 +289,10 @@ class SystemLoader(object):
         return False if can_addressing_mode is None \
                      else can_addressing_mode.text == 'EXTENDED'
 
-    def _load_message_comments(self, can_frame):
+    def _load_comments(self, node):
         result = {}
 
-        for l_2 in self._get_arxml_children(can_frame, ['DESC', '*L-2']):
+        for l_2 in self._get_arxml_children(node, ['DESC', '*L-2']):
             lang = l_2.attrib.get('L', 'EN')
             result[lang] = l_2.text
 
@@ -521,17 +521,6 @@ class SystemLoader(object):
             return None
         return res.text
 
-    def _load_system_signal_comments(self, system_signal):
-        result = {}
-
-        for l_2 in self._get_arxml_children(system_signal, ['DESC', '*L-2']):
-            lang = l_2.attrib.get('L', 'EN')
-            result[lang] = l_2.text
-
-        if len(result) == 0:
-            return None
-        return result
-
     def _load_texttable(self, compu_method, decimal, is_float):
         minimum = None
         maximum = None
@@ -550,13 +539,16 @@ class SystemLoader(object):
             vt = self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
             minimum_scale = None if lower_limit is None else text_to_num_fn(lower_limit.text)
             maximum_scale = None if upper_limit is None else text_to_num_fn(upper_limit.text)
+            comments = self._load_comments(compu_scale)
 
             if minimum is None: minimum = minimum_scale
             elif minimum_scale is not None: minimum = min(minimum, minimum_scale)
             if maximum is None: maximum = maximum_scale
             elif maximum_scale is not None: maximum = max(maximum, maximum_scale)
             if vt is not None:
-                choices[int(lower_limit.text)] = vt.text
+                value = int(lower_limit.text)
+                name = vt.text
+                choices[value] = NamedSignalValue(value, name, comments)
 
         decimal.minimum = minimum
         decimal.maximum = maximum
@@ -634,6 +626,7 @@ class SystemLoader(object):
 
             minimum_scale = None if lower_limit is None else text_to_num_fn(lower_limit.text)
             maximum_scale = None if upper_limit is None else text_to_num_fn(upper_limit.text)
+            comments = self._load_comments(compu_scale)
 
             if minimum is None: minimum = minimum_scale
             elif minimum_scale is not None: minimum = min(minimum, minimum_scale)
@@ -651,7 +644,9 @@ class SystemLoader(object):
 
             if vt is not None:
                 assert(minimum_scale is not None and minimum_scale == maximum_scale)
-                choices[int(minimum_scale)] = vt.text
+                value = int(minimum_scale)
+                name = vt.text
+                choices[value] = NamedSignalValue(value, name, comments)
 
         decimal.minimum = Decimal(minimum)
         decimal.maximum = Decimal(maximum)
@@ -668,7 +663,7 @@ class SystemLoader(object):
 
         # Unit and comment.
         unit = self._load_system_signal_unit(system_signal, compu_method)
-        comments = self._load_system_signal_comments(system_signal)
+        comments = self._load_comments(system_signal)
 
         if compu_method is not None:
             category = self._get_unique_arxml_child(compu_method, 'CATEGORY')
@@ -852,19 +847,21 @@ class SystemLoader(object):
 
         Example:
 
-        # Return all frame triggerings in any physical channel of a
-        # CAN cluster, where each conditional, each the physical
-        # channel and its individual frame triggerings can be
-        # references
-        loader._get_arxml_children(can_cluster,
-                                   [
-                                       'CAN-CLUSTER-VARIANTS',
-                                       '*&CAN-CLUSTER-CONDITIONAL',
-                                       'PHYSICAL-CHANNELS',
-                                       '*&CAN-PHYSICAL-CHANNEL',
-                                       'FRAME-TRIGGERINGS',
-                                       '*&CAN-FRAME-TRIGGERING'
-                                   ])
+        .. code:: text
+
+          # Return all frame triggerings in any physical channel of a
+          # CAN cluster, where each conditional, each the physical
+          # channel and its individual frame triggerings can be
+          # references
+          loader._get_arxml_children(can_cluster,
+                                     [
+                                         'CAN-CLUSTER-VARIANTS',
+                                         '*&CAN-CLUSTER-CONDITIONAL',
+                                         'PHYSICAL-CHANNELS',
+                                         '*&CAN-PHYSICAL-CHANNEL',
+                                         'FRAME-TRIGGERINGS',
+                                         '*&CAN-FRAME-TRIGGERING'
+                                     ])
         """
 
         if base_elems is None:

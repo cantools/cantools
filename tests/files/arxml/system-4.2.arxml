@@ -351,6 +351,10 @@
               <COMPU-SCALE>
                 <LOWER-LIMIT>1</LOWER-LIMIT>
                 <UPPER-LIMIT>1</UPPER-LIMIT>
+                <DESC>
+                  <L-2 L="EN">One Comment</L-2>
+                  <L-2 L="DE">Ein Kommentar</L-2>
+                </DESC>
                 <COMPU-CONST><VT>one</VT></COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>
@@ -370,6 +374,10 @@
               <COMPU-SCALE>
                 <LOWER-LIMIT>0</LOWER-LIMIT>
                 <UPPER-LIMIT>0</UPPER-LIMIT>
+                <DESC>
+                  <L-2 L="EN">Nothing</L-2>
+                  <L-2 L="DE">Nichts</L-2>
+                </DESC>
                 <COMPU-CONST><VT>zero</VT></COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>

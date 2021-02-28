@@ -9,11 +9,6 @@ import textparser
 import os
 import re
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
-
 import logging
 from xml.etree import ElementTree
 import timeit
@@ -87,16 +82,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "set, invalid when bit is clear.'})")
 
         signal = message.get_signal_by_name('Validity_Accel_Lateral')
-        self.assertEqual(signal.initial , 1)
+        self.assertEqual(signal.initial, 1)
 
         signal = message.get_signal_by_name('Validity_Accel_Vertical')
         self.assertEqual(signal.initial, 0)
 
         signal = message.get_signal_by_name('Accuracy_Accel')
-        self.assertEqual(signal.initial , 127)
+        self.assertEqual(signal.initial, 127)
 
         signal = message.get_signal_by_name('Accel_Longitudinal')
-        self.assertEqual(signal.initial , 32767)
+        self.assertEqual(signal.initial, 32767)
         self.assertEqual(
             repr(signal),
             "signal('Accel_Longitudinal', 16, 16, 'little_endian', True, 32767, "
@@ -105,10 +100,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "forwards direction.'})")
 
         signal = message.get_signal_by_name('Accel_Lateral')
-        self.assertEqual(signal.initial , -30000)
+        self.assertEqual(signal.initial, -30000)
 
         signal = message.get_signal_by_name('Accel_Vertical')
-        self.assertEqual(signal.initial , 16120)
+        self.assertEqual(signal.initial, 16120)
 
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'
@@ -188,7 +183,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "environment_variable('EMC_TrdPower', 1, -180, 400, 'deg', 0, 12,"
             " 'DUMMY_NODE_VECTOR0', 'Vector__XXX', 'Elevation Head')")
 
-
     def test_foobar(self):
         db = cantools.db.Database()
         db.add_dbc_file('tests/files/dbc/foobar.dbc')
@@ -245,7 +239,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.name, 'Bar')
         self.assertEqual(message.bus_name, 'TheBusName')
         self.assertEqual(message.senders, ['FOO', 'BAR'])
-        self.assertEqual(message.signals[0].receivers, [ 'FUM'])
+        self.assertEqual(message.signals[0].receivers, ['FUM'])
         self.assertEqual(message.signals[0].is_float, True)
         self.assertEqual(message.signals[0].length, 32)
 
@@ -1059,27 +1053,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'OutsideTemp',
                              'SpeedKm',
                              'Handbrake'
-                         ])
-
-        self.assertEqual(
-            db.messages[1].signal_tree_string(),
-            '-- {root}\n'
-            '   +-- ABS_InfoMux\n'
-            '   |   +-- 0\n'
-            '   |   |   +-- Info0\n'
-            '   |   |   +-- Info1\n'
-            '   |   +-- 1\n'
-            '   |   |   +-- Info2\n'
-            '   |   |   +-- Info3\n'
-            '   |   +-- 2\n'
-            '   |   |   +-- Info4\n'
-            '   |   |   +-- Info5\n'
-            '   |   +-- 3\n'
-            '   |       +-- Info6\n'
-            '   |       +-- Info7\n'
-            '   +-- OutsideTemp\n'
-            '   +-- SpeedKm\n'
-            '   +-- Handbrake')
+        ])
 
         ambient_lux = db.messages[24].signals[0]
 
@@ -1229,18 +1203,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.db.load_file('tests/files/kcd/the_homer.kcd')
 
         messages = [
-            (         {'EngagedGear': 'disengaged'}, b'\x00\x00'),
-            (                  {'EngagedGear': '1'}, b'\x00\x10'),
-            (                  {'EngagedGear': '2'}, b'\x00\x20'),
-            (                  {'EngagedGear': '3'}, b'\x00\x30'),
-            (                  {'EngagedGear': '4'}, b'\x00\x40'),
-            (                  {'EngagedGear': '5'}, b'\x00\x50'),
-            (                  {'EngagedGear': '6'}, b'\x00\x60'),
-            (                    {'EngagedGear': 7}, b'\x00\x70'),
-            (                    {'EngagedGear': 8}, b'\x00\x80'),
-            (                    {'EngagedGear': 9}, b'\x00\x90'),
-            (            {'EngagedGear': 'reverse'}, b'\x00\xa0'),
-            (   {'EngagedGear': 'Unspecific error'}, b'\x00\xf0')
+            ({'EngagedGear': 'disengaged'}, b'\x00\x00'),
+            ({'EngagedGear': '1'}, b'\x00\x10'),
+            ({'EngagedGear': '2'}, b'\x00\x20'),
+            ({'EngagedGear': '3'}, b'\x00\x30'),
+            ({'EngagedGear': '4'}, b'\x00\x40'),
+            ({'EngagedGear': '5'}, b'\x00\x50'),
+            ({'EngagedGear': '6'}, b'\x00\x60'),
+            ({'EngagedGear': 7}, b'\x00\x70'),
+            ({'EngagedGear': 8}, b'\x00\x80'),
+            ({'EngagedGear': 9}, b'\x00\x90'),
+            ({'EngagedGear': 'reverse'}, b'\x00\xa0'),
+            ({'EngagedGear': 'Unspecific error'}, b'\x00\xf0')
         ]
 
         for decoded_message, encoded_message in messages:
@@ -1273,7 +1247,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         for message_id, decoded_message, encoded_message in messages:
             encoded = db.encode_message(message_id, decoded_message)
-            self.assertEqual(encoded,encoded_message)
+            self.assertEqual(encoded, encoded_message)
             decoded = db.decode_message(message_id, encoded)
             self.assertEqual(decoded, decoded_message)
 
@@ -2077,33 +2051,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              }
                          ])
 
-        self.assertEqual(
-            message_1.signal_tree_string(),
-            '-- {root}\n'
-            '   +-- Multiplexor\n'
-            '       +-- 8\n'
-            '       |   +-- BIT_J\n'
-            '       |   +-- BIT_C\n'
-            '       |   +-- BIT_G\n'
-            '       |   +-- BIT_L\n'
-            '       +-- 16\n'
-            '       |   +-- BIT_J\n'
-            '       |   +-- BIT_C\n'
-            '       |   +-- BIT_G\n'
-            '       |   +-- BIT_L\n'
-            '       +-- 24\n'
-            '           +-- BIT_J\n'
-            '           +-- BIT_C\n'
-            '           +-- BIT_G\n'
-            '           +-- BIT_L\n'
-            '           +-- BIT_A\n'
-            '           +-- BIT_K\n'
-            '           +-- BIT_E\n'
-            '           +-- BIT_D\n'
-            '           +-- BIT_B\n'
-            '           +-- BIT_H\n'
-            '           +-- BIT_F')
-
         signal_multiplexor = message_1.signals[0]
         self.assertEqual(signal_multiplexor.is_multiplexer, True)
 
@@ -2181,19 +2128,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = message_1.decode(encoded, decode_choices=False)
         self.assertEqual(decoded, decoded_message)
 
-        self.assertEqual(
-            message_1.signal_choices_string(),
-            '\n'
-            'Multiplexor\n'
-            '    8 MULTIPLEXOR_8\n'
-            '    16 MULTIPLEXOR_16\n'
-            '    24 MULTIPLEXOR_24\n'
-            '\n'
-            'BIT_L\n'
-            '    0 Off\n'
-            '    1 On'
-        )
-
         # With Multiplexor as the only signal.
         decoded_message = {
             'Multiplexor': 4
@@ -2226,34 +2160,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                  }
                              }
                          ])
-
-        self.assertEqual(
-            message_2.signal_tree_string(),
-            '-- {root}\n'
-            '   +-- Multiplexor\n'
-            '       +-- 4\n'
-            '       +-- 8\n'
-            '       |   +-- BIT_J\n'
-            '       |   +-- BIT_C\n'
-            '       |   +-- BIT_G\n'
-            '       |   +-- BIT_L\n'
-            '       +-- 16\n'
-            '       |   +-- BIT_J\n'
-            '       |   +-- BIT_C\n'
-            '       |   +-- BIT_G\n'
-            '       |   +-- BIT_L\n'
-            '       +-- 24\n'
-            '           +-- BIT_J\n'
-            '           +-- BIT_C\n'
-            '           +-- BIT_G\n'
-            '           +-- BIT_L\n'
-            '           +-- BIT_A\n'
-            '           +-- BIT_K\n'
-            '           +-- BIT_E\n'
-            '           +-- BIT_D\n'
-            '           +-- BIT_B\n'
-            '           +-- BIT_H\n'
-            '           +-- BIT_F')
 
         self.assert_dbc_dump(db, 'tests/files/dbc/multiplex_choices_dumped.dbc')
 
@@ -2430,25 +2336,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                  }
                              }
                          ])
-
-        self.assertEqual(
-            message.signal_tree_string(),
-            '-- {root}\n'
-            '   +-- S0\n'
-            '   |   +-- 0\n'
-            '   |   |   +-- S1\n'
-            '   |   |       +-- 0\n'
-            '   |   |       |   +-- S2\n'
-            '   |   |       |   +-- S3\n'
-            '   |   |       +-- 2\n'
-            '   |   |           +-- S4\n'
-            '   |   +-- 1\n'
-            '   |       +-- S5\n'
-            '   +-- S6\n'
-            '       +-- 1\n'
-            '       |   +-- S7\n'
-            '       +-- 2\n'
-            '           +-- S8')
 
         # Encode and decode a few messages with different
         # multiplexing.
@@ -2979,7 +2866,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.refresh()
         message = db.get_message_by_frame_id(0x40)
         self.assertEqual(message.name, 'TheMessage')
-        self.assertEqual(message.frame_id,0x40)
+        self.assertEqual(message.frame_id, 0x40)
 
         message.name = 'TheNewMessage'
         db.refresh()
@@ -3355,426 +3242,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(str(cm.exception),
                          'The signal S does not fit in message M.')
 
-    def test_message_layout(self):
-        db = cantools.database.load_file('tests/files/kcd/message_layout.kcd',
-                                         strict=False)
-
-        # Message 1.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B',
-            ' y',
-            ' t',
-            ' e'
-        ]
-
-        actual = db.get_message_by_name('Message1').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 2.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B   0 |<-----------------------------x|',
-            ' y     +---+---+---+---+---+---+---+---+',
-            ' t                                   +-- Signal1',
-            ' e'
-        ]
-
-        actual = db.get_message_by_name('Message2').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 3.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B   0 |   |   |   |   |   |   |   |<--|',
-            ' y     +---+---+---+---+---+---+---+---+',
-            ' t   1 |--x|   |   |   |   |   |   |   |',
-            ' e     +---+---+---+---+---+---+---+---+',
-            '         +-- Signal1',
-        ]
-
-        actual = db.get_message_by_name('Message3').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 4.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            '     0 |   |   |   |   |   |   |   |<--|',
-            ' B     +---+---+---+---+---+---+---+---+',
-            ' y   1 |--x|   |   |   |   |   |   |   |',
-            ' t     +---+---+---+---+---+---+---+---+',
-            ' e       +-- Signal1',
-            '       +---+---+---+---+---+---+---+---+',
-            '     2 |   |   |   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+'
-        ]
-
-        actual = db.get_message_by_name('Message4').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 5.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            '     0 |<---XXXXXXX-------x|XXX|   |   |',
-            '       +---+---+---+---+---+---+---+---+',
-            '                 |       |   +-- Signal7',
-            '                 |       |   +-- Signal8',
-            '                 |       +-- Signal1',
-            ' B               +-- Signal2',
-            ' y     +---+---+---+---+---+---+---+---+',
-            ' t   1 |   |   |   |   |   |<-x|XXXXXXX|',
-            ' e     +---+---+---+---+---+---+---+---+',
-            '                             |   +-- Signal4',
-            '                             +-- Signal6',
-            '       +---+---+---+---+---+---+---+---+',
-            '     2 |XXX---x|   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+',
-            '         |   +-- Signal5',
-            '         +-- Signal3'
-        ]
-
-        actual = db.get_message_by_name('Message5').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 6.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            '     0 |   |   |   |   |   |<----------|',
-            '       +---+---+---+---+---+---+---+---+',
-            '     1 |------x|   |   |   |   |<-x|   |',
-            '       +---+---+---+---+---+---+---+---+',
-            '             |                   +-- Signal2',
-            '             +-- Signal1',
-            '       +---+---+---+---+---+---+---+---+',
-            '     2 |   |   |   |   |   |   |   |   |',
-            ' B     +---+---+---+---+---+---+---+---+',
-            ' y   3 |--------------x|   |   |   |   |',
-            ' t     +---+---+---+---+---+---+---+---+',
-            ' e   4 |-------------------------------|',
-            '       +---+---+---+---+---+---+---+---+',
-            '     5 |   |   |<----------------------|',
-            '       +---+---+---+---+---+---+---+---+',
-            '                 +-- Signal3',
-            '       +---+---+---+---+---+---+---+---+',
-            '     6 |   |   |   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+',
-            '     7 |   |   |   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+'
-        ]
-
-        actual = db.get_message_by_name('Message6').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 7.
-        expected_lines = [
-            '                       Bit',
-            '',
-            '          7   6   5   4   3   2   1   0',
-            '        +---+---+---+---+---+---+---+---+',
-            '      0 |------------------------------x|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      1 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      2 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      3 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      4 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      5 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      6 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            ' B    7 |-------------------------------|',
-            ' y      +---+---+---+---+---+---+---+---+',
-            ' t    8 |-------------------------------|',
-            ' e      +---+---+---+---+---+---+---+---+',
-            '      9 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     10 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     11 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     12 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     13 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     14 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     15 |<------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '          +-- Signal1'
-        ]
-
-        actual = db.get_message_by_name('Message7').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 8.
-        expected_lines = [
-            '                       Bit',
-            '',
-            '          7   6   5   4   3   2   1   0',
-            '        +---+---+---+---+---+---+---+---+',
-            '      0 |<------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      1 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      2 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      3 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      4 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      5 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      6 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            ' B    7 |-------------------------------|',
-            ' y      +---+---+---+---+---+---+---+---+',
-            ' t    8 |-------------------------------|',
-            ' e      +---+---+---+---+---+---+---+---+',
-            '      9 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     10 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     11 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     12 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     13 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     14 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     15 |------------------------------x|',
-            '        +---+---+---+---+---+---+---+---+',
-            '                                      +-- Signal1'
-        ]
-
-        actual = db.get_message_by_name('Message8').layout_string()
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-    def test_message_layout_without_signal_names(self):
-        db = cantools.database.load_file('tests/files/kcd/message_layout.kcd',
-                                         strict=False)
-
-        # Message 1.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B',
-            ' y',
-            ' t',
-            ' e'
-        ]
-
-        message = db.get_message_by_name('Message1')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 2.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B   0 |<-----------------------------x|',
-            ' y     +---+---+---+---+---+---+---+---+',
-            ' t',
-            ' e'
-        ]
-
-        message = db.get_message_by_name('Message2')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 3.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B   0 |   |   |   |   |   |   |   |<--|',
-            ' y     +---+---+---+---+---+---+---+---+',
-            ' t   1 |--x|   |   |   |   |   |   |   |',
-            ' e     +---+---+---+---+---+---+---+---+'
-        ]
-
-        message = db.get_message_by_name('Message3')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 4.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B   0 |   |   |   |   |   |   |   |<--|',
-            ' y     +---+---+---+---+---+---+---+---+',
-            ' t   1 |--x|   |   |   |   |   |   |   |',
-            ' e     +---+---+---+---+---+---+---+---+',
-            '     2 |   |   |   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+'
-        ]
-
-        message = db.get_message_by_name('Message4')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 5.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            ' B   0 |<---XXXXXXX-------x|XXX|   |   |',
-            ' y     +---+---+---+---+---+---+---+---+',
-            ' t   1 |   |   |   |   |   |<-x|XXXXXXX|',
-            ' e     +---+---+---+---+---+---+---+---+',
-            '     2 |XXX---x|   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+'
-        ]
-
-        message = db.get_message_by_name('Message5')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 6.
-        expected_lines = [
-            '                      Bit',
-            '',
-            '         7   6   5   4   3   2   1   0',
-            '       +---+---+---+---+---+---+---+---+',
-            '     0 |   |   |   |   |   |<----------|',
-            '       +---+---+---+---+---+---+---+---+',
-            '     1 |------x|   |   |   |   |<-x|   |',
-            '       +---+---+---+---+---+---+---+---+',
-            '     2 |   |   |   |   |   |   |   |   |',
-            ' B     +---+---+---+---+---+---+---+---+',
-            ' y   3 |--------------x|   |   |   |   |',
-            ' t     +---+---+---+---+---+---+---+---+',
-            ' e   4 |-------------------------------|',
-            '       +---+---+---+---+---+---+---+---+',
-            '     5 |   |   |<----------------------|',
-            '       +---+---+---+---+---+---+---+---+',
-            '     6 |   |   |   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+',
-            '     7 |   |   |   |   |   |   |   |   |',
-            '       +---+---+---+---+---+---+---+---+'
-        ]
-
-        message = db.get_message_by_name('Message6')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 7.
-        expected_lines = [
-            '                       Bit',
-            '',
-            '          7   6   5   4   3   2   1   0',
-            '        +---+---+---+---+---+---+---+---+',
-            '      0 |------------------------------x|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      1 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      2 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      3 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      4 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      5 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      6 |-------------------------------|',
-            ' B      +---+---+---+---+---+---+---+---+',
-            ' y    7 |-------------------------------|',
-            ' t      +---+---+---+---+---+---+---+---+',
-            ' e    8 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      9 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     10 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     11 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     12 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     13 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     14 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     15 |<------------------------------|',
-            '        +---+---+---+---+---+---+---+---+'
-        ]
-
-        message = db.get_message_by_name('Message7')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
-        # Message 8.
-        expected_lines = [
-            '                       Bit',
-            '',
-            '          7   6   5   4   3   2   1   0',
-            '        +---+---+---+---+---+---+---+---+',
-            '      0 |<------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      1 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      2 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      3 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      4 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      5 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      6 |-------------------------------|',
-            ' B      +---+---+---+---+---+---+---+---+',
-            ' y    7 |-------------------------------|',
-            ' t      +---+---+---+---+---+---+---+---+',
-            ' e    8 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '      9 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     10 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     11 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     12 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     13 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     14 |-------------------------------|',
-            '        +---+---+---+---+---+---+---+---+',
-            '     15 |------------------------------x|',
-            '        +---+---+---+---+---+---+---+---+'
-        ]
-
-        message = db.get_message_by_name('Message8')
-        actual = message.layout_string(signal_names=False)
-        self.assertEqual(actual, '\n'.join(expected_lines))
-
     def test_add_two_dbc_files(self):
         """Test adding two DBC-files to the same database.
 
@@ -3838,41 +3305,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
             str(cm.exception),
             'The signals HtrRes and MaxRes are overlapping in message '
             'AFT1PSI2.')
-
-        db = cantools.database.load_file(filename, strict=False)
-        self.assertEqual(
-            db.messages[0].layout_string(),
-            '                      Bit\n'
-            '\n'
-            '         7   6   5   4   3   2   1   0\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '     0 |   |   |<-----x|<-------------x|\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '                 |       +-- DetectionStatus\n'
-            '                 +-- PwrSupply\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '     1 |<-----------------------------x|\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '         +-- RegenFailedCount\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '     2 |------------------------------x|\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            ' B   3 |<------------------------------|\n'
-            ' y     +---+---+---+---+---+---+---+---+\n'
-            ' t       +-- Temp\n'
-            ' e     +---+---+---+---+---+---+---+---+\n'
-            '     4 |------------------------------x|\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '     5 |XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '         +-- MaxRes\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '     6 |<------------------------------|\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '         +-- HtrRes\n'
-            '       +---+---+---+---+---+---+---+---+\n'
-            '     7 |   |   |   |   |   |   |   |   |\n'
-            '       +---+---+---+---+---+---+---+---+')
 
     def test_j1939_dbc(self):
         db = cantools.database.load_file('tests/files/dbc/j1939.dbc')
@@ -4296,13 +3728,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(loader.autosar_version_newer(4), True)
         self.assertEqual(loader.autosar_version_newer(5), False)
 
-        self.assertEqual(loader.autosar_version_newer(4,1), True)
-        self.assertEqual(loader.autosar_version_newer(4,2), True)
-        self.assertEqual(loader.autosar_version_newer(4,3), False)
+        self.assertEqual(loader.autosar_version_newer(4, 1), True)
+        self.assertEqual(loader.autosar_version_newer(4, 2), True)
+        self.assertEqual(loader.autosar_version_newer(4, 3), False)
 
-        self.assertEqual(loader.autosar_version_newer(4,2,0), True)
-        self.assertEqual(loader.autosar_version_newer(4,2,1), True)
-        self.assertEqual(loader.autosar_version_newer(4,2,2), False)
+        self.assertEqual(loader.autosar_version_newer(4, 2, 0), True)
+        self.assertEqual(loader.autosar_version_newer(4, 2, 1), True)
+        self.assertEqual(loader.autosar_version_newer(4, 2, 2), False)
 
     def test_DAI_namespace(self):
         db = cantools.db.load_file('tests/files/arxml/system-DAI-3.1.2.arxml')
@@ -4442,10 +3874,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.comments,
                          {
                              'DE': 'Kommentar eins',
-                             'EN' : 'Comment one'
+                             'EN': 'Comment one'
                          })
 
-        
         signal_1 = message_1.signals[0]
         self.assertEqual(signal_1.name, 'signal6')
         self.assertEqual(signal_1.start, 0)
@@ -4488,8 +3919,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.decimal.maximum, 4.0)
         self.assertEqual(signal_2.unit, 'm')
         self.assertEqual(signal_2.choices, None)
-        self.assertEqual(signal_2.comments["EN"],'Signal comment!' )
-        self.assertEqual(signal_2.comments["DE"],'Signalkommentar!' )
+        self.assertEqual(signal_2.comments["EN"], 'Signal comment!')
+        self.assertEqual(signal_2.comments["DE"], 'Signalkommentar!')
         self.assertEqual(signal_2.comment, 'Signal comment!')
         signal_2.comments = {'DE': 'Kein Kommentar!', 'EN': 'No comment!'}
         self.assertEqual(signal_2.comments,
@@ -4646,7 +4077,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(
                 'tests/files/arxml/system-dangling-reference-4.2.arxml')
-        self.assertEqual(str(cm.exception), "ARXML: \"Encountered dangling reference FRAME-REF: /PackageDoesNotExist/Message1\"")
+        self.assertEqual(str(cm.exception),
+                         "ARXML: \"Encountered dangling reference FRAME-REF: /PackageDoesNotExist/Message1\"")
 
         root = ElementTree.parse('tests/files/arxml/system-4.2.arxml').getroot()
         loader = cantools.db.can.formats.arxml.SystemLoader(root, strict=True)
@@ -4677,7 +4109,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # test unique location specifier if child nodes exist
         with self.assertRaises(ValueError) as cm:
             non_unique = loader._get_arxml_children(loader._root, ["AR-PACKAGES", "AR-PACKAGE"])
-        self.assertEqual(str(cm.exception), "Encountered a a non-unique child node of type AR-PACKAGE which ought to be unique")
+        self.assertEqual(str(cm.exception),
+                         "Encountered a a non-unique child node of type AR-PACKAGE which ought to be unique")
 
         # test the reference cache
         foo = loader._follow_arxml_reference(loader._root, "/CanFrame/Message1", "CAN-FRAME")
@@ -4688,7 +4121,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             no_base_elem = loader._get_unique_arxml_child(loader._root, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "['AR-PACKAGES', '*AR-PACKAGE'] does not resolve into a unique node")
-        
+
     def test_system_missing_factor_arxml(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(
@@ -5013,7 +4446,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         my_version = "my_version"
         db.version = my_version
         self.assertTrue(db.as_dbc_string().startswith('VERSION "{}"'.
-                        format(my_version)))
+                                                      format(my_version)))
 
     def test_dbc_modify_names(self):
         """Test that modified object names are dumped correctly to dbc.
@@ -5143,7 +4576,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                      5: ['muxed_0_3_4_5']
                                  }
                              }
-                         ])
+        ])
 
         self.assert_dbc_dump(
             db,
@@ -5167,7 +4600,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                      2: ['muxed_B_2']
                                  }
                              }
-                         ])
+        ])
 
         self.assert_dbc_dump(
             db,
@@ -5192,7 +4625,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                      ]
                                  }
                              }
-                         ])
+        ])
 
         self.assert_dbc_dump(
             db,
@@ -5203,6 +4636,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         self.assertEqual(db.buses[0].comment, 'SpecialRelease')
         self.assert_dbc_dump(db, filename)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

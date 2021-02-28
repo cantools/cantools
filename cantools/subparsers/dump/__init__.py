@@ -1,10 +1,11 @@
-from .. import database
-from ..database.utils import format_and
-from ..database.can.database import Database as CanDatabase
-from ..database.diagnostics.database import Database as DiagnosticsDatabase
-from ..j1939 import is_pdu_format_1
-from ..j1939 import frame_id_unpack
-from ..j1939 import pgn_pack
+from . import formatting
+from ... import database
+from ...database.utils import format_and
+from ...database.can.database import Database as CanDatabase
+from ...database.diagnostics.database import Database as DiagnosticsDatabase
+from ...j1939 import is_pdu_format_1
+from ...j1939 import frame_id_unpack
+from ...j1939 import pgn_pack
 
 
 def _print_j1939_frame_id(message):
@@ -36,8 +37,8 @@ def _dump_can_database(dbase, with_comments=False):
     WIDTH = 80
     try:
         import curses
-    except ModuleNotFoundError:
-        pass  # pragma: no cover
+    except ModuleNotFoundError:  # pragma: no cover
+        pass
     else:
         try:
             _stdscr = curses.initscr()
@@ -52,7 +53,7 @@ def _dump_can_database(dbase, with_comments=False):
 
     for message in dbase.messages:
         cycle_time = message.cycle_time
-        signal_choices_string = message.signal_choices_string()
+        signal_choices_string = formatting.signal_choices_string(message)
 
         if cycle_time is None:
             cycle_time = '-'
@@ -74,14 +75,14 @@ def _dump_can_database(dbase, with_comments=False):
         print()
         print('\n'.join([
             ('    ' + line).rstrip()
-            for line in message.layout_string().splitlines()
+            for line in formatting.layout_string(message).splitlines()
         ]))
         print()
         print('  Signal tree:')
         print()
         print('\n'.join([
             ('    ' + line).rstrip()
-            for line in message.signal_tree_string(WIDTH, with_comments=with_comments).splitlines()
+            for line in formatting.signal_tree_string(message, WIDTH, with_comments=with_comments).splitlines()
         ]))
         print()
 

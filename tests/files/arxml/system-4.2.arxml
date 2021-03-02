@@ -101,15 +101,15 @@
           <SHORT-NAME>signal1</SHORT-NAME>
           <INIT-VALUE>
             <NUMERICAL-VALUE-SPECIFICATION>
-              <VALUE>5</VALUE>
+              <VALUE>0b101</VALUE>
             </NUMERICAL-VALUE-SPECIFICATION>
           </INIT-VALUE>
-          <LENGTH>3</LENGTH>
+          <LENGTH>0b11</LENGTH>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal1</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL UUID="b077fb759e9e255d0ddb6e6ab49b8d7c">
           <SHORT-NAME>signal2</SHORT-NAME>
-          <LENGTH>11</LENGTH>
+          <LENGTH>0xb</LENGTH>
           <NETWORK-REPRESENTATION-PROPS>
             <SW-DATA-DEF-PROPS-VARIANTS>
               <SW-DATA-DEF-PROPS-CONDITIONAL>
@@ -121,7 +121,7 @@
         </I-SIGNAL>
         <I-SIGNAL UUID="1b81d9d6c79916117b4848178814a31a">
           <SHORT-NAME>signal2_1c</SHORT-NAME>
-          <LENGTH>11</LENGTH>
+          <LENGTH>013</LENGTH>
           <NETWORK-REPRESENTATION-PROPS>
             <SW-DATA-DEF-PROPS-VARIANTS>
               <SW-DATA-DEF-PROPS-CONDITIONAL>

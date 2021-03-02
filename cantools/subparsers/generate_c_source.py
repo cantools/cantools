@@ -29,7 +29,8 @@ def _do_generate_c_source(args):
         filename_c,
         fuzzer_filename_c,
         not args.no_floating_point_numbers,
-        args.bit_fields)
+        args.bit_fields,
+        args.disable_snake_case_conversion)
 
     with open(filename_h, 'w') as fout:
         fout.write(header)
@@ -81,6 +82,10 @@ def add_subparser(subparsers):
         '-f', '--generate-fuzzer',
         action='store_true',
         help='Also generate fuzzer source code.')
+    generate_c_source_parser.add_argument(
+        '--disable-snake-case-conversion',
+        action='store_true',
+        help='Disables the default behaviour of converting message and signal names to snake_case.')
     generate_c_source_parser.add_argument(
         'infile',
         help='Input database file.')

@@ -3,6 +3,7 @@ import argparse
 
 from . import tester
 from . import j1939
+from . import logreader
 from .errors import Error
 
 # Remove once less users are using the old package structure.

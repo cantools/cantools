@@ -48,9 +48,9 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
 
         data = did.get_data_by_name('Diagnostic_Identification')
         self.assertEqual(data.name, 'Diagnostic_Identification')
-        self.assertEqual(data.start, 64)
+        self.assertEqual(data.start, 71)
         self.assertEqual(data.length, 16)
-        self.assertEqual(data.byte_order, 'little_endian')
+        self.assertEqual(data.byte_order, 'big_endian')
         self.assertEqual(data.scale, 1)
         self.assertEqual(data.offset, 0)
         self.assertEqual(data.minimum, 0)
@@ -65,7 +65,7 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
             'Ident_Number_1_0': 0x3456,
             'Diagnostic_Identification': 0xabcd
         }
-        encoded_did = b'\x34\x12\x78\x56\x12\x90\x56\x34\xcd\xab'
+        encoded_did = b'\x12\x34\x56\x78\x90\x12\x34\x56\xab\xcd'
 
         encoded = did.encode(decoded_did)
         self.assertEqual(encoded, encoded_did)
@@ -141,7 +141,7 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
             'Vehicle_type': 'Sedan',
             'Special_setting': 3
         }
-        encoded_did = b'\x21\x03'
+        encoded_did = b'\x12\x03'
 
         encoded = did.encode(decoded_did)
         self.assertEqual(encoded, encoded_did)
@@ -151,95 +151,95 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
     def test_example_cdd_repr(self):
         db = cantools.db.load_file('tests/files/cdd/example.cdd',
                                    encoding='iso-8859-1')
-        self.assertEqual(
-            repr(db),
-            "did('DEFAULT_SESSION', 0x0081)\n"
-            "\n"
-            "did('ProgrammingSession', 0x0085)\n"
-            "\n"
-            "did('ECU_Identification', 0x0090)\n"
-            "  data('Ident_Number_7_6', 0, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('Ident_Number_5_4', 16, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('Ident_Number_3_2', 32, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('Ident_Number_1_0', 48, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('Diagnostic_Identification', 64, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('Development_Data', 0x0091)\n"
-            "  data('Operating_System_Version', 0, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('CAN_Driver_Version', 16, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('NM_Version', 32, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('Diagnostic_Module_Version', 48, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('Transport_Layer_Version', 64, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('Serial_Number', 0x0092)\n"
-            "  data('Serial_Number', 0, 32, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('REQUEST_SEED_SERVICE', 0x0001)\n"
-            "  data('SEED', 0, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('SUBMIT_KEY_SERVICE', 0x0002)\n"
-            "  data('KEY', 0, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('A_D_Werte', 0x0040)\n"
-            "  data('Voltage', 0, 8, 'little_endian', 0.1, 0.0, 0, 255, 'V', None)\n"
-            "  data('Current', 8, 8, 'little_endian', 0.1, 0.0, 0, 255, 'A', None)\n"
-            "  data('Resistance', 16, 16, 'little_endian', 10.0, 0.0, 0, 255, 'Ohm', None)\n"
-            "\n"
-            "did('SawTooth', 0x00f4)\n"
-            "  data('ampl', 0, 8, 'little_endian', 1.0, 0.0, 0, 255, 'None', None)\n"
-            "  data('period', 8, 8, 'little_endian', 20.0, 0.0, 0, 255, 'sec', None)\n"
-            "  data('value', 16, 8, 'little_endian', 1.0, 0.0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('Sine', 0x00f3)\n"
-            "  data('ampl', 0, 8, 'little_endian', 1.0, 0.0, 0, 255, 'None', None)\n"
-            "  data('period', 8, 8, 'little_endian', 20.0, 0.0, 0, 255, 'sec', None)\n"
-            "  data('value', 16, 8, 'little_endian', 1.0, 0.0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('FaultMemory_identified', 0x00f2)\n"
-            "  data('Number', 0, 8, 'little_endian', 1.0, 0.0, 0, 255, 'None', None)\n"
-            "  data('DTC_1', 8, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_1', 24, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_2', 32, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_2', 48, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_3', 56, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_3', 72, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_4', 80, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_4', 96, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_5', 104, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_5', 120, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_6', 128, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_6', 144, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('FaultMemory_supported', 0x00f1)\n"
-            "  data('Number', 0, 8, 'little_endian', 1.0, 0.0, 0, 255, 'None', None)\n"
-            "  data('DTC_1', 8, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_1', 24, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_2', 32, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_2', 48, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_3', 56, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_3', 72, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_4', 80, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_4', 96, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_5', 104, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_5', 120, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('DTC_6', 128, 16, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "  data('StatusOfDTC_6', 144, 8, 'little_endian', 1, 0, 0, 255, 'None', None)\n"
-            "\n"
-            "did('TestData', 0x0041)\n"
-            "  data('DATA_0', 0, 8, 'little_endian', 1, 0, 1, 1, 'None', None)\n"
-            "  data('DATA_1', 8, 8, 'little_endian', 1, 0, 1, 1, 'None', None)\n"
-            "\n"
-            "did('Coding', 0x00a0)\n"
-            "  data('Country_variant', 0, 4, 'little_endian', 1, 0, 1, 1, 'None', {0: '(not defined)', 1: 'Europe', 2: 'USA', 3: 'Japan', 4: '(others)'})\n"
-            "  data('Vehicle_type', 4, 4, 'little_endian', 1, 0, 1, 1, 'None', {0: '(not defined)', 1: 'Coupe', 2: 'Sedan', 3: 'Transporter'})\n"
-            "  data('Special_setting', 8, 8, 'little_endian', 1, 0, 1, 1, 'None', None)\n"
-            "\n"
-            "did('InputOutput', 0x0080)\n"
-            "  data('Door_contact_front_left', 0, 1, 'little_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})\n"
-            "  data('Door_contact_front_right', 1, 1, 'little_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})\n"
-            "  data('Door_contact_rear_left', 2, 1, 'little_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})\n"
-            "  data('Door_contact_rear_right', 3, 1, 'little_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})\n"
-            "  data('_reserved', 4, 4, 'little_endian', 1, 0, 0, 255, 'None', None)\n")
+
+        self.assertEqual(repr(db), '''did('DEFAULT_SESSION', 0x0081)
+
+did('ProgrammingSession', 0x0085)
+
+did('ECU_Identification', 0x0090)
+  data('Ident_Number_7_6', 7, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('Ident_Number_5_4', 23, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('Ident_Number_3_2', 39, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('Ident_Number_1_0', 55, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('Diagnostic_Identification', 71, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+
+did('Development_Data', 0x0091)
+  data('Operating_System_Version', 7, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('CAN_Driver_Version', 23, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('NM_Version', 39, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('Diagnostic_Module_Version', 55, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('Transport_Layer_Version', 71, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+
+did('Serial_Number', 0x0092)
+  data('Serial_Number', 7, 32, 'big_endian', 1, 0, 0, 255, 'None', None)
+
+did('REQUEST_SEED_SERVICE', 0x0001)
+  data('SEED', 7, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+
+did('SUBMIT_KEY_SERVICE', 0x0002)
+  data('KEY', 7, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+
+did('A_D_Werte', 0x0040)
+  data('Voltage', 7, 8, 'big_endian', 0.1, 0.0, 0, 255, 'V', None)
+  data('Current', 15, 8, 'big_endian', 0.1, 0.0, 0, 255, 'A', None)
+  data('Resistance', 23, 16, 'big_endian', 10.0, 0.0, 0, 255, 'Ohm', None)
+
+did('SawTooth', 0x00f4)
+  data('ampl', 7, 8, 'big_endian', 1.0, 0.0, 0, 255, 'None', None)
+  data('period', 15, 8, 'big_endian', 20.0, 0.0, 0, 255, 'sec', None)
+  data('value', 23, 8, 'big_endian', 1.0, 0.0, 0, 255, 'None', None)
+
+did('Sine', 0x00f3)
+  data('ampl', 7, 8, 'big_endian', 1.0, 0.0, 0, 255, 'None', None)
+  data('period', 15, 8, 'big_endian', 20.0, 0.0, 0, 255, 'sec', None)
+  data('value', 23, 8, 'big_endian', 1.0, 0.0, 0, 255, 'None', None)
+
+did('FaultMemory_identified', 0x00f2)
+  data('Number', 7, 8, 'big_endian', 1.0, 0.0, 0, 255, 'None', None)
+  data('DTC_1', 15, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_1', 31, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_2', 39, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_2', 55, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_3', 63, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_3', 79, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_4', 87, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_4', 103, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_5', 111, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_5', 127, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_6', 135, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_6', 151, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+
+did('FaultMemory_supported', 0x00f1)
+  data('Number', 7, 8, 'big_endian', 1.0, 0.0, 0, 255, 'None', None)
+  data('DTC_1', 15, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_1', 31, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_2', 39, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_2', 55, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_3', 63, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_3', 79, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_4', 87, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_4', 103, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_5', 111, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_5', 127, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('DTC_6', 135, 16, 'big_endian', 1, 0, 0, 255, 'None', None)
+  data('StatusOfDTC_6', 151, 8, 'big_endian', 1, 0, 0, 255, 'None', None)
+
+did('TestData', 0x0041)
+  data('DATA_0', 7, 8, 'big_endian', 1, 0, 1, 1, 'None', None)
+  data('DATA_1', 15, 8, 'big_endian', 1, 0, 1, 1, 'None', None)
+
+did('Coding', 0x00a0)
+  data('Country_variant', 7, 4, 'big_endian', 1, 0, 1, 1, 'None', {0: '(not defined)', 1: 'Europe', 2: 'USA', 3: 'Japan', 4: '(others)'})
+  data('Vehicle_type', 3, 4, 'big_endian', 1, 0, 1, 1, 'None', {0: '(not defined)', 1: 'Coupe', 2: 'Sedan', 3: 'Transporter'})
+  data('Special_setting', 15, 8, 'big_endian', 1, 0, 1, 1, 'None', None)
+
+did('InputOutput', 0x0080)
+  data('Door_contact_front_left', 7, 1, 'big_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})
+  data('Door_contact_front_right', 6, 1, 'big_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})
+  data('Door_contact_rear_left', 5, 1, 'big_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})
+  data('Door_contact_rear_right', 4, 1, 'big_endian', 1, 0, 1, 1, 'None', {0: 'closed', 1: 'open'})
+  data('_reserved', 3, 4, 'big_endian', 1, 0, 0, 255, 'None', None)
+''')
 
     def test_cdd_add(self):
         db = cantools.db.diagnostics.Database()

@@ -1,5 +1,4 @@
 import re
-import dataclasses
 import enum
 import binascii
 import datetime
@@ -11,13 +10,17 @@ class TimestampFormat(enum.Enum):
     MISSING = 3
 
 
-@dataclasses.dataclass
 class DataFrame:
-    channel: str
-    frame_id: int
-    data: bytes
-    timestamp: datetime.datetime
-    timestamp_format: TimestampFormat
+    def __init__(self, channel: str,
+                 frame_id: int,
+                 data: bytes,
+                 timestamp: datetime.datetime,
+                 timestamp_format: TimestampFormat):
+        self.channel = channel
+        self.frame_id = frame_id
+        self.data = data
+        self.timestamp = timestamp
+        self.timestamp_format = timestamp_format
 
 
 class BasePattern:

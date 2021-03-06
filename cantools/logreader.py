@@ -5,17 +5,31 @@ import datetime
 
 
 class TimestampFormat(enum.Enum):
+    """Describes a type of timestamp. ABSOLUTE is referring to UNIX time
+    (seconds since epoch). RELATIVE is seconds since start of log, or time
+    since last frame depending of the contents of the log file. MISSING means
+    that no timestamps is present in the log."""
     ABSOLUTE = 1
     RELATIVE = 2
     MISSING = 3
 
 
 class DataFrame:
+    """Container for a parsed log entry (ie. a CAN frame)."""
+
     def __init__(self, channel: str,
                  frame_id: int,
                  data: bytes,
                  timestamp: datetime.datetime,
                  timestamp_format: TimestampFormat):
+        """Constructor for DataFrame
+
+        :param channel: A string representation of the channel, eg. 'can0'
+        :param frame_id: The numeric CAN frame ID :param data: The actual data
+        :param timestamp: A timestamp, datetime.datetime if absolute, or
+            datetime.timedelta if relative, None if missing
+        :param timestamp_format: The format of the timestamp
+        : """
         self.channel = channel
         self.frame_id = frame_id
         self.data = data
@@ -111,6 +125,16 @@ class CandumpAbsoluteLogPattern(BasePattern):
 
 
 class Parser:
+    """A CAN log file parser.
+
+    Automatically detects the format of the logfile by trying parser patterns
+    until the first successful match.
+
+    >>> with open('candump.log') as fd:
+            for frame in cantools.logreader.Parser(fd):
+                print(f'{frame.timestamp}: {frame.frame_id}')
+    """
+
     def __init__(self, stream=None):
         self.stream = stream
         self.pattern = None
@@ -130,6 +154,11 @@ class Parser:
         return self.pattern.match(line)
 
     def iterlines(self, keep_unknowns=False):
+        """Returns an generator that yields (str, DataFrame) tuples with the
+        raw log entry and a parsed log entry. If keep_unknowns=True, (str,
+        None) tuples will be returned for log entries that couldn't be decoded.
+        If keep_unknowns=False, non-parseable log entries is discarded.
+        """
         if self.stream is None:
             return
         while True:
@@ -146,5 +175,7 @@ class Parser:
                 continue
 
     def __iter__(self):
+        """Returns DataFrame log entries. Non-parseable log entries is
+        discarded."""
         for _, frame in self.iterlines():
             yield frame

@@ -98,7 +98,11 @@ def _load_data_types(ecu_doc):
                 LOGGER.debug("Ignoring unsupported attribute '%s'.", key)
 
         if ctype.attrib['bo'] == '21':
+            byte_order = 'big_endian'
+        elif ctype.attrib['bo'] == '12':
             byte_order = 'little_endian'
+        else:
+            raise Error("Unknown byte order code: %s" % ctype.attrib['bo'])
 
         # Load from P-type element.
         ptype_unit = data_type.find('PVALUETYPE/UNIT')
@@ -135,13 +139,19 @@ def _load_data_element(data, offset, data_types):
     """Load given signal element and return a signal object.
 
     """
-
     data_type = data_types[data.attrib['dtref']]
 
+    if data_type.byte_order == "big_endian":
+        # BigEndian fields located by MSBit sawtooth position
+        start = (8 * (offset // 8)) + min(7, (offset % 8) + data_type.bit_length - 1)
+    else:
+        # LitteleEndian fields located by LSBit sawtooth position
+        start = offset
+
     return Data(name=data.find('QUAL').text,
-                start=offset,
+                start = start,
                 length=data_type.bit_length,
-                byte_order='little_endian',
+                byte_order = data_type.byte_order,
                 scale=data_type.factor,
                 offset=data_type.offset,
                 minimum=data_type.minimum,

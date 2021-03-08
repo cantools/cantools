@@ -103,6 +103,16 @@ def decode_data(data, fields, formats, decode_choices, scaling):
     }
 
 
+def sawtooth_to_network_bitnum(sawtooth_bitnum):
+    '''Convert SawTooth bit number to Network bit number
+
+    Byte     |   0   |   1   |
+    Sawtooth |7 ... 0|15... 8|
+    Network  |0 ... 7|8 ...15|
+    '''
+    return (8 * (sawtooth_bitnum // 8)) + (7 - (sawtooth_bitnum % 8))
+
+
 def create_encode_decode_formats(datas, number_of_bytes):
     format_length = (8 * number_of_bytes)
 
@@ -143,9 +153,13 @@ def create_encode_decode_formats(datas, number_of_bytes):
         items = []
         start = 0
 
-        for data in datas:
-            if data.byte_order == 'little_endian':
-                continue
+        # Map BE fields only
+        be_datas = [data for data in datas if data.byte_order == "big_endian"]
+
+        # Ensure that BE fields are sorted in network order
+        sorted_datas = sorted(be_datas, key = lambda data: sawtooth_to_network_bitnum(data.start))
+
+        for data in sorted_datas:
 
             padding_length = (start_bit(data) - start)
 

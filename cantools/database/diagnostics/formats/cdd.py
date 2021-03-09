@@ -6,7 +6,7 @@ from xml.etree import ElementTree
 from ..data import Data
 from ..did import Did
 from ..internal_database import InternalDatabase
-
+from ...utils import cdd_offset_to_dbc_start_bit
 
 LOGGER = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ def _load_data_types(ecu_doc):
         elif ctype.attrib['bo'] == '12':
             byte_order = 'little_endian'
         else:
-            raise Error("Unknown byte order code: %s" % ctype.attrib['bo'])
+            raise ParseError("Unknown byte order code: %s" % ctype.attrib['bo'])
 
         # Load from P-type element.
         ptype_unit = data_type.find('PVALUETYPE/UNIT')
@@ -139,17 +139,17 @@ def _load_data_element(data, offset, data_types):
     """Load given signal element and return a signal object.
 
     """
+
     data_type = data_types[data.attrib['dtref']]
 
-    if data_type.byte_order == "big_endian":
-        # BigEndian fields located by MSBit sawtooth position
-        start = (8 * (offset // 8)) + min(7, (offset % 8) + data_type.bit_length - 1)
-    else:
-        # LitteleEndian fields located by LSBit sawtooth position
-        start = offset
+    # Map CDD/c-style field offset to the DBC/can.Signal.start bit numbering
+    # convention for compatability with can.Signal objects and the shared codec
+    # infrastructure.
+    #
+    dbc_start_bitnum = cdd_offset_to_dbc_start_bit(offset, data_type.bit_length, data_type.byte_order)
 
     return Data(name=data.find('QUAL').text,
-                start = start,
+                start = dbc_start_bitnum,
                 length=data_type.bit_length,
                 byte_order = data_type.byte_order,
                 scale=data_type.factor,

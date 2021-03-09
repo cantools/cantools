@@ -1,3 +1,4 @@
+import argparse
 import re
 import time
 import curses
@@ -449,7 +450,8 @@ def _do_monitor(args):
 def add_subparser(subparsers):
     monitor_parser = subparsers.add_parser(
         'monitor',
-        description='Monitor CAN bus traffic in a text based user interface.')
+        description='Monitor CAN bus traffic in a text based user interface.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     monitor_parser.add_argument(
         '-s', '--single-line',
         action='store_true',
@@ -470,11 +472,11 @@ def add_subparser(subparsers):
     monitor_parser.add_argument(
         '-b', '--bus-type',
         default='socketcan',
-        help='Python CAN bus type (default: socketcan).')
+        help='Python CAN bus type.')
     monitor_parser.add_argument(
         '-c', '--channel',
         default='vcan0',
-        help='Python CAN bus channel (default: vcan0).')
+        help='Python CAN bus channel.')
     monitor_parser.add_argument(
         '-B', '--bit-rate',
         help='Python CAN bus bit rate.')

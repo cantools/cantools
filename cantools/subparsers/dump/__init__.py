@@ -1,3 +1,5 @@
+import argparse
+
 from . import formatting
 from ... import database
 from ...database.utils import format_and
@@ -135,7 +137,8 @@ def _do_dump(args):
 def add_subparser(subparsers):
     dump_parser = subparsers.add_parser(
         'dump',
-        description='Dump given database in a human readable format.')
+        description='Dump given database in a human readable format.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     dump_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')

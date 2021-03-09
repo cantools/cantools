@@ -1,3 +1,4 @@
+import argparse
 import os
 import os.path
 
@@ -69,10 +70,12 @@ def _do_generate_c_source(args):
 def add_subparser(subparsers):
     generate_c_source_parser = subparsers.add_parser(
         'generate_c_source',
-        description='Generate C source code from given database file.')
+        description='Generate C source code from given database file.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     generate_c_source_parser.add_argument(
         '--database-name',
-        help='The database name (default: input file name).')
+        help=('The database name.  Uses the stem of the input file name if not'
+              ' specified.'))
     generate_c_source_parser.add_argument(
         '--no-floating-point-numbers',
         action='store_true',

@@ -788,6 +788,11 @@ class Graph:
         self.plotted_signal = None
 
 
+class RawDescriptionArgumentDefaultsHelpFormatter(
+    argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+    pass
+
+
 def add_subparser(subparsers):
     '''
     Is called from ../__init__.py.
@@ -797,7 +802,7 @@ def add_subparser(subparsers):
     decode_parser = subparsers.add_parser(
         'plot',
         description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter)
+        formatter_class=RawDescriptionArgumentDefaultsHelpFormatter)
     decode_parser.add_argument(
         '-c', '--no-decode-choices',
         action='store_true',

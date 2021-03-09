@@ -1,3 +1,4 @@
+import argparse
 import sys
 from argparse_addons import Integer
 
@@ -28,7 +29,8 @@ def add_subparser(subparsers):
     decode_parser = subparsers.add_parser(
         'decode',
         description=('Decode "candump" CAN frames read from standard input '
-                     'and print them in a human readable format.'))
+                     'and print them in a human readable format.'),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     decode_parser.add_argument(
         '-c', '--no-decode-choices',
         action='store_true',

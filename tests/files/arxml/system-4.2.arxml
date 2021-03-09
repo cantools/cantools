@@ -309,6 +309,14 @@
           <SHORT-NAME>meters</SHORT-NAME>
           <DISPLAY-NAME>m</DISPLAY-NAME>
         </UNIT>
+        <UNIT UUID="9a4019793b04d83fe7000deaf4f84144">
+          <SHORT-NAME>wizepoo</SHORT-NAME>
+          <DISPLAY-NAME>wp</DISPLAY-NAME>
+        </UNIT>
+        <UNIT UUID="1ee6f401e0b5c0bad9d7a02ac4c64098">
+          <SHORT-NAME>zilch</SHORT-NAME>
+          <DISPLAY-NAME>NoUnit</DISPLAY-NAME>
+        </UNIT>
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE UUID="bbcd842e7758802dad86635f98742e1c">
@@ -333,6 +341,7 @@
         <COMPU-METHOD UUID="103035ce2d0c0f33e9456fe127790243">
           <SHORT-NAME>Signal4</SHORT-NAME>
           <CATEGORY>TEXTTABLE</CATEGORY>
+          <UNIT-REF DEST="UNIT">/Unit/zilch</UNIT-REF>
           <COMPU-INTERNAL-TO-PHYS>
             <COMPU-SCALES>
               <COMPU-SCALE>
@@ -355,6 +364,7 @@
         <COMPU-METHOD UUID="dbb4bf17606b4bbaf59ccbdf80769edc">
           <SHORT-NAME>Signal6</SHORT-NAME>
           <CATEGORY>SCALE_LINEAR_AND_TEXTTABLE</CATEGORY>
+          <UNIT-REF DEST="UNIT">/Unit/wizepoo</UNIT-REF>
           <COMPU-INTERNAL-TO-PHYS>
             <COMPU-SCALES>
               <COMPU-SCALE>

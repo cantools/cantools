@@ -3894,7 +3894,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.decimal.offset, 0.0)
         self.assertEqual(signal_1.decimal.minimum, 0)
         self.assertEqual(signal_1.decimal.maximum, 1)
-        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.unit, "wp")
         self.assertEqual(signal_1.choices, {'zero': 0})
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)

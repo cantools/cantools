@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import shutil
 import unittest
 
 try:
@@ -1327,6 +1328,31 @@ BATTERY_VT(
                                         'tests/files/c_source/' + database_h)
                 self.assert_files_equal(database_c,
                                         'tests/files/c_source/' + database_c)
+
+    def test_generate_c_source_output_directory(self):
+        database = 'motohawk'
+        
+        output_directory = 'some_dir'
+
+        argv = [
+            'cantools',
+            'generate_c_source',
+            '--output-directory', output_directory,
+            'tests/files/dbc/{}.dbc'.format(database)
+        ]
+
+        database_h = os.path.join(output_directory, f'{database}.h')
+        database_c = os.path.join(output_directory, f'{database}.c')
+
+        shutil.rmtree(output_directory, ignore_errors=True)
+
+        with patch('sys.argv', argv):
+            cantools._main()
+
+        self.assert_files_equal(database_h,
+                                'tests/files/c_source/' + os.path.basename(database_h))
+        self.assert_files_equal(database_c,
+                                'tests/files/c_source/' + os.path.basename(database_c))
 
     def test_generate_c_source_bit_fields(self):
         databases = [

@@ -6,6 +6,7 @@ from xml.etree import ElementTree
 from ..data import Data
 from ..did import Did
 from ..internal_database import InternalDatabase
+from ...errors import ParseError
 from ...utils import cdd_offset_to_dbc_start_bit
 
 LOGGER = logging.getLogger(__name__)

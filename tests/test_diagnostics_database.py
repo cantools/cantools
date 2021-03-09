@@ -483,6 +483,14 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         db.add_cdd_file('tests/files/cdd/le-example.cdd', encoding = 'iso-8859-1')
         self.assertEqual(len(db.dids), 15)
 
+    def test_unknown_byteorder(self):
+        db = cantools.db.diagnostics.Database()
+
+        with self.assertRaises(cantools.database.ParseError) as pe:
+            db.add_cdd_file('tests/files/cdd/invalid-bo-example.cdd', encoding = 'iso-8859-1')
+
+        self.assertEqual(str(pe.exception), "Unknown byte order code: 4321")
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

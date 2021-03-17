@@ -23,6 +23,7 @@ class _ErrorSubparser:
         err_parser = \
             subparser_list.add_parser(self.subparser_name,
                                       description = self.error_message)
+        err_parser.add_argument("args", nargs="*")
 
         err_parser.set_defaults(func=self._print_error)
 

@@ -38,7 +38,7 @@ def _load_subparser(subparser_name, subparsers):
 
     try:
         result = importlib.import_module(f'.subparsers.{subparser_name}',
-                                         package=__loader__.name)
+                                         package='cantools')
         result.add_subparser(subparsers)
 
     except ImportError as e:

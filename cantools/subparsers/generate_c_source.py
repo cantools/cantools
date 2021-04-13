@@ -31,6 +31,7 @@ def _do_generate_c_source(args):
         filename_c,
         fuzzer_filename_c,
         not args.no_floating_point_numbers,
+        args.single_precision_floating_point,
         args.bit_fields)
 
     os.makedirs(args.output_directory, exist_ok=True)
@@ -80,6 +81,11 @@ def add_subparser(subparsers):
         '--no-floating-point-numbers',
         action='store_true',
         help='No floating point numbers in the generated code.')
+    generate_c_source_parser.add_argument(
+        '--single-precision-floating-point',
+        action='store_true',
+        help=('Use single precision floating point numbers in the generated '
+              'code (use float instead double).'))
     generate_c_source_parser.add_argument(
         '--bit-fields',
         action='store_true',

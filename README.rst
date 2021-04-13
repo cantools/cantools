@@ -298,6 +298,14 @@ file names are also changed by this option.
 See `my_database_name.h`_ and `my_database_name.c`_ for the contents
 of the generated files.
 
+In this example we use ``--single-precision-floating-point`` so floating point numbers in the generated
+code are single precision (float) instead of double precision (double).
+
+.. code-block:: text
+
+   $ python3 -m cantools generate_c_source --single-precision-floating-point tests/files/dbc/motohawk.dbc
+   Successfully generated motohawk.h and motohawk.c.
+
 In the last example we use ``--no-floating-point-numbers`` to generate
 code without floating point types, i.e. ``float`` and ``double``.
 

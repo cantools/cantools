@@ -301,24 +301,6 @@ int open_actuator_control_cmd_unpack(
     size_t size);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_cmd_crc8_cmd1_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_cmd_crc8_cmd1_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -326,24 +308,6 @@ double open_actuator_control_cmd_crc8_cmd1_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_control_cmd_crc8_cmd1_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_cmd_target_mode_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_cmd_target_mode_decode(uint8_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -355,24 +319,6 @@ double open_actuator_control_cmd_target_mode_decode(uint8_t value);
 bool open_actuator_control_cmd_target_mode_is_in_range(uint8_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_cmd_target_motor_id_cmd1_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_cmd_target_motor_id_cmd1_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -380,24 +326,6 @@ double open_actuator_control_cmd_target_motor_id_cmd1_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_control_cmd_target_motor_id_cmd1_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-int16_t open_actuator_control_cmd_position_cmd_64_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_cmd_position_cmd_64_decode(int16_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -409,24 +337,6 @@ double open_actuator_control_cmd_position_cmd_64_decode(int16_t value);
 bool open_actuator_control_cmd_position_cmd_64_is_in_range(int16_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-int16_t open_actuator_control_cmd_torque_command_8_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_cmd_torque_command_8_decode(int16_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -436,24 +346,6 @@ double open_actuator_control_cmd_torque_command_8_decode(int16_t value);
 bool open_actuator_control_cmd_torque_command_8_is_in_range(int16_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_cmd_torque_close_loop_max_32_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_cmd_torque_close_loop_max_32_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -461,24 +353,6 @@ double open_actuator_control_cmd_torque_close_loop_max_32_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_cmd_counter_cmd1_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_cmd_counter_cmd1_decode(uint8_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -518,24 +392,6 @@ int open_actuator_limits_cmd_unpack(
     size_t size);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_limits_cmd_crc8_cmd2_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_limits_cmd_crc8_cmd2_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -543,24 +399,6 @@ double open_actuator_limits_cmd_crc8_cmd2_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_limits_cmd_crc8_cmd2_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_limits_cmd_counter_cmd2_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_limits_cmd_counter_cmd2_decode(uint8_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -572,24 +410,6 @@ double open_actuator_limits_cmd_counter_cmd2_decode(uint8_t value);
 bool open_actuator_limits_cmd_counter_cmd2_is_in_range(uint8_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint16_t open_actuator_limits_cmd_velocity_limit_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_limits_cmd_velocity_limit_decode(uint16_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -597,24 +417,6 @@ double open_actuator_limits_cmd_velocity_limit_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_limits_cmd_velocity_limit_is_in_range(uint16_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint16_t open_actuator_limits_cmd_accel_limit_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_limits_cmd_accel_limit_decode(uint16_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -654,24 +456,6 @@ int open_actuator_control_status_unpack(
     size_t size);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_status_crc8_stat1_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_status_crc8_stat1_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -679,24 +463,6 @@ double open_actuator_control_status_crc8_stat1_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_control_status_crc8_stat1_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_status_counter_stat1_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_status_counter_stat1_decode(uint8_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -708,24 +474,6 @@ double open_actuator_control_status_counter_stat1_decode(uint8_t value);
 bool open_actuator_control_status_counter_stat1_is_in_range(uint8_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-int16_t open_actuator_control_status_torque_actual_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_status_torque_actual_decode(int16_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -733,24 +481,6 @@ double open_actuator_control_status_torque_actual_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_control_status_torque_actual_is_in_range(int16_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_control_status_torque_close_loop_actual_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_control_status_torque_close_loop_actual_decode(uint8_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -790,24 +520,6 @@ int open_actuator_system_status_unpack(
     size_t size);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_system_status_crc8_stat2_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_system_status_crc8_stat2_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -817,24 +529,6 @@ double open_actuator_system_status_crc8_stat2_decode(uint8_t value);
 bool open_actuator_system_status_crc8_stat2_is_in_range(uint8_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_system_status_counter_stat2_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_system_status_counter_stat2_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -842,24 +536,6 @@ double open_actuator_system_status_counter_stat2_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_system_status_counter_stat2_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_system_status_chip_temp_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_system_status_chip_temp_decode(uint8_t value);
 
 /**
  * Check that given signal is in allowed range.
@@ -899,24 +575,6 @@ int open_actuator_torque_sensor_data_unpack(
     size_t size);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_torque_sensor_data_crc8_data1_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_torque_sensor_data_crc8_data1_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -926,24 +584,6 @@ double open_actuator_torque_sensor_data_crc8_data1_decode(uint8_t value);
 bool open_actuator_torque_sensor_data_crc8_data1_is_in_range(uint8_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t open_actuator_torque_sensor_data_counter_data1_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_torque_sensor_data_counter_data1_decode(uint8_t value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -951,24 +591,6 @@ double open_actuator_torque_sensor_data_counter_data1_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_torque_sensor_data_counter_data1_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-int16_t open_actuator_torque_sensor_data_torque_sense_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double open_actuator_torque_sensor_data_torque_sense_decode(int16_t value);
 
 /**
  * Check that given signal is in allowed range.

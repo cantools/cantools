@@ -118,15 +118,6 @@ int motohawk_example_message_unpack(
     size_t size);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t motohawk_example_message_enable_encode(double value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -136,15 +127,6 @@ uint8_t motohawk_example_message_enable_encode(double value);
 bool motohawk_example_message_enable_is_in_range(uint8_t value);
 
 /**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-uint8_t motohawk_example_message_average_radius_encode(double value);
-
-/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -152,24 +134,6 @@ uint8_t motohawk_example_message_average_radius_encode(double value);
  * @return true if in range, false otherwise.
  */
 bool motohawk_example_message_average_radius_is_in_range(uint8_t value);
-
-/**
- * Encode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to encode.
- *
- * @return Encoded signal.
- */
-int16_t motohawk_example_message_temperature_encode(double value);
-
-/**
- * Decode given signal by applying scaling and offset.
- *
- * @param[in] value Signal to decode.
- *
- * @return Decoded signal.
- */
-double motohawk_example_message_temperature_decode(int16_t value);
 
 /**
  * Check that given signal is in allowed range.

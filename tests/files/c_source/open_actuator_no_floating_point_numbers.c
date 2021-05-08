@@ -141,16 +141,6 @@ int open_actuator_control_cmd_unpack(
     return (0);
 }
 
-uint8_t open_actuator_control_cmd_crc8_cmd1_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_control_cmd_crc8_cmd1_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_control_cmd_crc8_cmd1_is_in_range(uint8_t value)
 {
     (void)value;
@@ -158,29 +148,9 @@ bool open_actuator_control_cmd_crc8_cmd1_is_in_range(uint8_t value)
     return (true);
 }
 
-uint8_t open_actuator_control_cmd_target_mode_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_control_cmd_target_mode_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_control_cmd_target_mode_is_in_range(uint8_t value)
 {
     return (value <= 3u);
-}
-
-uint8_t open_actuator_control_cmd_target_motor_id_cmd1_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_control_cmd_target_motor_id_cmd1_decode(uint8_t value)
-{
-    return ((double)value);
 }
 
 bool open_actuator_control_cmd_target_motor_id_cmd1_is_in_range(uint8_t value)
@@ -188,29 +158,9 @@ bool open_actuator_control_cmd_target_motor_id_cmd1_is_in_range(uint8_t value)
     return (value <= 3u);
 }
 
-int16_t open_actuator_control_cmd_position_cmd_64_encode(double value)
-{
-    return (int16_t)(value / 0.0154286);
-}
-
-double open_actuator_control_cmd_position_cmd_64_decode(int16_t value)
-{
-    return ((double)value * 0.0154286);
-}
-
 bool open_actuator_control_cmd_position_cmd_64_is_in_range(int16_t value)
 {
     return ((value >= -29166) && (value <= 29166));
-}
-
-int16_t open_actuator_control_cmd_torque_command_8_encode(double value)
-{
-    return (int16_t)(value / 0.0166667);
-}
-
-double open_actuator_control_cmd_torque_command_8_decode(int16_t value)
-{
-    return ((double)value * 0.0166667);
 }
 
 bool open_actuator_control_cmd_torque_command_8_is_in_range(int16_t value)
@@ -218,29 +168,9 @@ bool open_actuator_control_cmd_torque_command_8_is_in_range(int16_t value)
     return ((value >= -479) && (value <= 479));
 }
 
-uint8_t open_actuator_control_cmd_torque_close_loop_max_32_encode(double value)
-{
-    return (uint8_t)(value / 0.186666);
-}
-
-double open_actuator_control_cmd_torque_close_loop_max_32_decode(uint8_t value)
-{
-    return ((double)value * 0.186666);
-}
-
 bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_range(uint8_t value)
 {
     return (value <= 42u);
-}
-
-uint8_t open_actuator_control_cmd_counter_cmd1_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_control_cmd_counter_cmd1_decode(uint8_t value)
-{
-    return ((double)value);
 }
 
 bool open_actuator_control_cmd_counter_cmd1_is_in_range(uint8_t value)
@@ -288,16 +218,6 @@ int open_actuator_limits_cmd_unpack(
     return (0);
 }
 
-uint8_t open_actuator_limits_cmd_crc8_cmd2_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_limits_cmd_crc8_cmd2_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_limits_cmd_crc8_cmd2_is_in_range(uint8_t value)
 {
     (void)value;
@@ -305,29 +225,9 @@ bool open_actuator_limits_cmd_crc8_cmd2_is_in_range(uint8_t value)
     return (true);
 }
 
-uint8_t open_actuator_limits_cmd_counter_cmd2_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_limits_cmd_counter_cmd2_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_limits_cmd_counter_cmd2_is_in_range(uint8_t value)
 {
     return (value <= 15u);
-}
-
-uint16_t open_actuator_limits_cmd_velocity_limit_encode(double value)
-{
-    return (uint16_t)(value);
-}
-
-double open_actuator_limits_cmd_velocity_limit_decode(uint16_t value)
-{
-    return ((double)value);
 }
 
 bool open_actuator_limits_cmd_velocity_limit_is_in_range(uint16_t value)
@@ -335,16 +235,6 @@ bool open_actuator_limits_cmd_velocity_limit_is_in_range(uint16_t value)
     (void)value;
 
     return (true);
-}
-
-uint16_t open_actuator_limits_cmd_accel_limit_encode(double value)
-{
-    return (uint16_t)(value);
-}
-
-double open_actuator_limits_cmd_accel_limit_decode(uint16_t value)
-{
-    return ((double)value);
 }
 
 bool open_actuator_limits_cmd_accel_limit_is_in_range(uint16_t value)
@@ -403,16 +293,6 @@ int open_actuator_control_status_unpack(
     return (0);
 }
 
-uint8_t open_actuator_control_status_crc8_stat1_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_control_status_crc8_stat1_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_control_status_crc8_stat1_is_in_range(uint8_t value)
 {
     (void)value;
@@ -420,44 +300,14 @@ bool open_actuator_control_status_crc8_stat1_is_in_range(uint8_t value)
     return (true);
 }
 
-uint8_t open_actuator_control_status_counter_stat1_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_control_status_counter_stat1_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_control_status_counter_stat1_is_in_range(uint8_t value)
 {
     return (value <= 15u);
 }
 
-int16_t open_actuator_control_status_torque_actual_encode(double value)
-{
-    return (int16_t)(value / 0.015625);
-}
-
-double open_actuator_control_status_torque_actual_decode(int16_t value)
-{
-    return ((double)value * 0.015625);
-}
-
 bool open_actuator_control_status_torque_actual_is_in_range(int16_t value)
 {
     return ((value >= -512) && (value <= 512));
-}
-
-uint8_t open_actuator_control_status_torque_close_loop_actual_encode(double value)
-{
-    return (uint8_t)(value / 0.125);
-}
-
-double open_actuator_control_status_torque_close_loop_actual_decode(uint8_t value)
-{
-    return ((double)value * 0.125);
 }
 
 bool open_actuator_control_status_torque_close_loop_actual_is_in_range(uint8_t value)
@@ -499,16 +349,6 @@ int open_actuator_system_status_unpack(
     return (0);
 }
 
-uint8_t open_actuator_system_status_crc8_stat2_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_system_status_crc8_stat2_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_system_status_crc8_stat2_is_in_range(uint8_t value)
 {
     (void)value;
@@ -516,29 +356,9 @@ bool open_actuator_system_status_crc8_stat2_is_in_range(uint8_t value)
     return (true);
 }
 
-uint8_t open_actuator_system_status_counter_stat2_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_system_status_counter_stat2_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_system_status_counter_stat2_is_in_range(uint8_t value)
 {
     return (value <= 15u);
-}
-
-uint8_t open_actuator_system_status_chip_temp_encode(double value)
-{
-    return (uint8_t)(value - -60.0);
-}
-
-double open_actuator_system_status_chip_temp_decode(uint8_t value)
-{
-    return ((double)value + -60.0);
 }
 
 bool open_actuator_system_status_chip_temp_is_in_range(uint8_t value)
@@ -595,16 +415,6 @@ int open_actuator_torque_sensor_data_unpack(
     return (0);
 }
 
-uint8_t open_actuator_torque_sensor_data_crc8_data1_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_torque_sensor_data_crc8_data1_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_torque_sensor_data_crc8_data1_is_in_range(uint8_t value)
 {
     (void)value;
@@ -612,29 +422,9 @@ bool open_actuator_torque_sensor_data_crc8_data1_is_in_range(uint8_t value)
     return (true);
 }
 
-uint8_t open_actuator_torque_sensor_data_counter_data1_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
-double open_actuator_torque_sensor_data_counter_data1_decode(uint8_t value)
-{
-    return ((double)value);
-}
-
 bool open_actuator_torque_sensor_data_counter_data1_is_in_range(uint8_t value)
 {
     return (value <= 15u);
-}
-
-int16_t open_actuator_torque_sensor_data_torque_sense_encode(double value)
-{
-    return (int16_t)(value / 0.01);
-}
-
-double open_actuator_torque_sensor_data_torque_sense_decode(int16_t value)
-{
-    return ((double)value * 0.01);
 }
 
 bool open_actuator_torque_sensor_data_torque_sense_is_in_range(int16_t value)

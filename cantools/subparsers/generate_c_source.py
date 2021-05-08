@@ -117,5 +117,5 @@ def add_subparser(subparsers):
         help='Input database file.')
     generate_c_source_parser.add_argument(
         '--node',
-        help='Generate pack functions for messages sent from given node, and unpack functions for other messages.')
+        help='Generate pack/unpack functions only for messages sent/received by the node.')
     generate_c_source_parser.set_defaults(func=_do_generate_c_source)

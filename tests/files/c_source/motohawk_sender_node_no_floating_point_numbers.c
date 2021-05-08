@@ -129,34 +129,14 @@ int motohawk_example_message_unpack(
     return (0);
 }
 
-uint8_t motohawk_example_message_enable_encode(double value)
-{
-    return (uint8_t)(value);
-}
-
 bool motohawk_example_message_enable_is_in_range(uint8_t value)
 {
     return (value <= 1u);
 }
 
-uint8_t motohawk_example_message_average_radius_encode(double value)
-{
-    return (uint8_t)(value / 0.1);
-}
-
 bool motohawk_example_message_average_radius_is_in_range(uint8_t value)
 {
     return (value <= 50u);
-}
-
-int16_t motohawk_example_message_temperature_encode(double value)
-{
-    return (int16_t)((value - 250.0) / 0.01);
-}
-
-double motohawk_example_message_temperature_decode(int16_t value)
-{
-    return (((double)value * 0.01) + 250.0);
 }
 
 bool motohawk_example_message_temperature_is_in_range(int16_t value)

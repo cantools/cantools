@@ -1317,6 +1317,7 @@ BATTERY_VT(
     def test_generate_c_source_no_signal_encode_decode(self):
         databases = [
             'motohawk',
+            'open_actuator'
         ]
 
         for database in databases:
@@ -1348,6 +1349,47 @@ BATTERY_VT(
                 self.assert_files_equal(
                     database_c,
                     'tests/files/c_source/' + expected_database_c)
+
+
+    def test_generate_c_source_sender_node_no_signal_encode_decode(self):
+        databases = [
+            'motohawk',
+            'open_actuator'
+        ]
+        nodes = [
+          'PCM1',
+          'Actuator'
+        ]
+
+        for database, node in zip(databases, nodes):
+            argv = [
+                'cantools',
+                'generate_c_source',
+                '--no-floating-point-numbers',
+                '--node', node,
+                'tests/files/dbc/{}.dbc'.format(database)
+            ]
+
+            database_h = database + '.h'
+            database_c = database + '.c'
+            expected_database_h = database + '_sender_node_no_floating_point_numbers.h'
+            expected_database_c = database + '_sender_node_no_floating_point_numbers.c'
+
+            if os.path.exists(database_h):
+                os.remove(database_h)
+
+            if os.path.exists(database_c):
+                os.remove(database_c)
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            if sys.version_info[0] > 2:
+                self.assert_files_equal(database_h,
+                                        'tests/files/c_source/' + expected_database_h)
+                self.assert_files_equal(database_c,
+                                        'tests/files/c_source/' + expected_database_c)
+
 
     def test_generate_c_source_database_name(self):
         databases = [

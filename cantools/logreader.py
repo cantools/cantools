@@ -142,6 +142,24 @@ class CandumpAbsoluteLogPattern(BasePattern):
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
+class CandumpAsciiAbsoluteLogPattern(BasePattern):
+    # (2020-12-19 12:04:45.485261)  can1  051F0506   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'
+    pattern = re.compile(
+        r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*)\s+\'.*\'$')
+
+    @staticmethod
+    def unpack(match_object):
+        channel = match_object.group('channel')
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp_format = TimestampFormat.ABSOLUTE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
 class CandumpAsciiAbsoluteTimestampedPattern(BasePattern):
     # (1621270556.960879)  can1  051F0506   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'
     pattern = re.compile(
@@ -183,7 +201,7 @@ class Parser:
 
     @staticmethod
     def detect_pattern(line):
-        for p in [CandumpDefaultPattern, CandumpDefaultAsciiPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern, CandumpAsciiAbsoluteTimestampedPattern]:
+        for p in [CandumpDefaultPattern, CandumpDefaultAsciiPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern, CandumpAsciiAbsoluteTimestampedPattern, CandumpAsciiAbsoluteLogPattern]:
             mo = p.pattern.match(line)
             if mo:
                 return p

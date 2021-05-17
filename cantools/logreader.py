@@ -63,6 +63,24 @@ class CandumpDefaultPattern(BasePattern):
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
+class CandumpDefaultAsciiPattern(BasePattern):
+    # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1   '.......Á'
+    pattern = re.compile(
+        r'^\s*?(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*)\s+\'.*\'$')
+
+    @staticmethod
+    def unpack(match_object):
+        channel = match_object.group('channel')
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        timestamp = None
+        timestamp_format = TimestampFormat.MISSING
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
 class CandumpTimestampedPattern(BasePattern):
     # (000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
     pattern = re.compile(
@@ -124,6 +142,30 @@ class CandumpAbsoluteLogPattern(BasePattern):
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
+class CandumpAsciiAbsoluteTimestampedPattern(BasePattern):
+    # (1621270556.960879)  can1  051F0506   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'
+    pattern = re.compile(
+        r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*)\s+\'.*\'$')
+
+    @staticmethod
+    def unpack(match_object):
+        channel = match_object.group('channel')
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+
+        seconds = float(match_object.group('timestamp'))
+        if seconds < 662688000:  # 1991-01-01 00:00:00, "Released in 1991, the Mercedes-Benz W140 was the first production vehicle to feature a CAN-based multiplex wiring system."
+            timestamp = datetime.timedelta(seconds=seconds)
+            timestamp_format = TimestampFormat.RELATIVE
+        else:
+            timestamp = datetime.datetime.utcfromtimestamp(seconds)
+            timestamp_format = TimestampFormat.ABSOLUTE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
 class Parser:
     """A CAN log file parser.
 
@@ -141,7 +183,7 @@ class Parser:
 
     @staticmethod
     def detect_pattern(line):
-        for p in [CandumpDefaultPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern]:
+        for p in [CandumpDefaultPattern, CandumpDefaultAsciiPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern, CandumpAsciiAbsoluteTimestampedPattern]:
             mo = p.pattern.match(line)
             if mo:
                 return p

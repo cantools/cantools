@@ -13,17 +13,20 @@ class Converter:
 
     ext = ".tex"
 
-    document_pattern = r"""% !TeX program = pdflatex
+    before_document = r"""
+% !TeX program = pdflatex
 
-\documentclass[a4paper]{{article}}
-\usepackage{{hyperref}}
+\documentclass[a4paper]{article}
+\usepackage{hyperref}
 
-\providecommand{{\degree}}{{\ensuremath{{^\circ}}}}
+\providecommand{\degree}{\ensuremath{^\circ}}
 
-\begin{{document}}
-{document}
-\end{{document}}
+\begin{document}
+""".lstrip()
+    after_document = r"""
+\end{document}
 """
+
     msg_pattern = r"""
 \section{{0x{frame_id:03X} {name}}}
 \begin{{tabular}}{{{colspec}}}
@@ -38,7 +41,7 @@ class Converter:
             f.write(self.create_tex_document(db, args))
 
     def create_tex_document(self, db, args):
-        return self.document_pattern.format(document=self.format_db(db, args))
+        return self.before_document + self.format_db(db, args) + self.after_document
 
     def format_db(self, db, args):
         out = []

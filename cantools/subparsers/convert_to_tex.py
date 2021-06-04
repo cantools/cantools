@@ -84,7 +84,7 @@ class Converter:
     def get_colspec(self, signals):
         coltypes = self.colspec_dict()
         out = []
-        for col in self.sig_pattern.split("&"):
+        for col in self.sig_pattern.rstrip("\\").split("&"):
             col = col.strip()
             col = col[1:][:-1]
             alignment = coltypes.get(col, "l")

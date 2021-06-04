@@ -51,6 +51,7 @@ class Converter:
         return self.before_document + self.format_db(db, args) + self.after_document
 
     def format_db(self, db, args):
+        self.none = "{%s}" % args.none
         out = []
         for msg in sorted(db.messages, key=self.msg_sort_key(args.msg_sort_key)):
             out.append(self.format_message(msg, args.sig_sort_key))
@@ -213,7 +214,7 @@ class Converter:
 
     def texify(self, val):
         if val is None:
-            return ""
+            return self.none
         if isinstance(val, int):
             return val
 
@@ -245,3 +246,4 @@ def add_argument_group(parser):
     group = parser.add_argument_group("TeX converter options")
     group.add_argument("--msg-sort", dest="msg_sort_key", choices=Converter.MSG_SORT_KEYS, default=Converter.MSG_SORT_KEY_ID)
     group.add_argument("--sig-sort", dest="sig_sort_key", choices=Converter.SIG_SORT_KEYS, default=Converter.SIG_SORT_KEY_START_BIT)
+    group.add_argument("--none", default="--", help="a symbol to print if a value is None")

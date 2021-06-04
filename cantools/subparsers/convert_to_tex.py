@@ -22,6 +22,7 @@ class Converter:
 \usepackage{hyperref}
 
 \providecommand{\degree}{\ensuremath{^\circ}}
+\newcommand{\thead}[1]{#1}
 
 \begin{document}
 """.lstrip()
@@ -178,7 +179,7 @@ class Converter:
             'multiplexer_signal' : 'Multiplexer signal',
         }
         out = {key:self.texify(val) for key,val in out.items()}
-        out = {key: r"{%s}" % val for key,val in out.items()}
+        out = {key: r"{\thead{%s}}" % val for key,val in out.items()}
         return out
 
     def signal_format_dict(self, sig):

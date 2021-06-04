@@ -18,6 +18,7 @@ class Converter:
 
 \documentclass[a4paper]{article}
 \usepackage{booktabs}
+\usepackage{siunitx}
 \usepackage{hyperref}
 
 \providecommand{\degree}{\ensuremath{^\circ}}
@@ -67,7 +68,7 @@ class Converter:
             return lambda sig: sig.start
 
     def format_message(self, msg, sig_sort_key):
-        return self.msg_pattern.format(colspec=self.get_colspec(), header=self.format_header(), signals=self.format_signals(msg.signals, sig_sort_key), **self.message_format_dict(msg))
+        return self.msg_pattern.format(colspec=self.get_colspec(msg.signals), header=self.format_header(), signals=self.format_signals(msg.signals, sig_sort_key), **self.message_format_dict(msg))
 
     def message_format_dict(self, msg):
         out = {
@@ -79,14 +80,37 @@ class Converter:
         out = {key:self.texify(val) for key,val in out.items()}
         return out
 
-    def get_colspec(self):
+    def get_colspec(self, signals):
         coltypes = self.colspec_dict()
         out = []
         for col in self.sig_pattern.split("&"):
             col = col.strip()
             col = col[1:][:-1]
-            out.append(coltypes.get(col, "l"))
+            alignment = coltypes.get(col, "l")
+            if alignment == "S":
+                alignment = self.measure_s_column(col, signals)
+            out.append(alignment)
         return "".join(out)
+
+    def measure_s_column(self, col, signals):
+        max_left = 0
+        max_right = 0
+        for sig in signals:
+            val = getattr(sig, col)
+            if val is None:
+                val = 0
+            val = "{:0f}".format(val).rstrip("0")
+            if "." in val:
+                val = val.split(".", 1)
+                left, right = len(val[0]), len(val[1])
+            else:
+                left = len(val)
+                right = 0
+            if left > max_left:
+                max_left = left
+            if right > max_right:
+                max_right = right
+        return "S[table-format=%s.%s]" % (max_left, max_right)
 
     def format_header(self):
         return self.sig_pattern.format(**self.header_format_dict())
@@ -99,7 +123,7 @@ class Converter:
 
     def colspec_dict(self):
         text = 'c'
-        num = 'r'
+        num = 'S'
         out = {
             'name' : 'l',
             'start' : num,
@@ -154,6 +178,7 @@ class Converter:
             'multiplexer_signal' : 'Multiplexer signal',
         }
         out = {key:self.texify(val) for key,val in out.items()}
+        out = {key: r"{%s}" % val for key,val in out.items()}
         return out
 
     def signal_format_dict(self, sig):

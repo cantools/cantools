@@ -13,8 +13,19 @@ class Converter:
 
     ext = ".tex"
 
+    document_pattern = r"""% !TeX program = pdflatex
+
+\documentclass[a4paper]{{article}}
+\usepackage{{hyperref}}
+
+\providecommand{{\degree}}{{\ensuremath{{^\circ}}}}
+
+\begin{{document}}
+{document}
+\end{{document}}
+"""
     msg_pattern = r"""
-\section{{0x{msg.frame_id:03X} {msg.name}}}
+\section{{0x{frame_id:03X} {name}}}
 \begin{{tabular}}{{{colspec}}}
 {signals}
 \end{{tabular}}
@@ -24,7 +35,10 @@ class Converter:
 
     def save(self, fn, db, args):
         with open(fn, 'wt') as f:
-            f.write(self.format_db(db, args))
+            f.write(self.create_tex_document(db, args))
+
+    def create_tex_document(self, db, args):
+        return self.document_pattern.format(document=self.format_db(db, args))
 
     def format_db(self, db, args):
         out = []
@@ -45,7 +59,17 @@ class Converter:
             return lambda sig: sig.start
 
     def format_message(self, msg, sig_sort_key):
-        return self.msg_pattern.format(msg=msg, colspec=self.get_colspec(), signals=self.format_signals(msg.signals, sig_sort_key))
+        return self.msg_pattern.format(colspec=self.get_colspec(), signals=self.format_signals(msg.signals, sig_sort_key), **self.message_format_dict(msg))
+
+    def message_format_dict(self, msg):
+        out = {
+            'name' : msg.name,
+            'frame_id' : msg.frame_id,
+            'is_extended_frame' : msg.is_extended_frame,
+            'length' : msg.length,
+        }
+        out = {key:self.texify(val) for key,val in out.items()}
+        return out
 
     def get_colspec(self):
         return "*{%s}{l}" % (self.sig_pattern.count("&")+1)
@@ -57,7 +81,7 @@ class Converter:
         return "\n".join(out)
 
     def signal_format_dict(self, sig):
-        return {
+        out = {
             'name' : sig.name,
             'start' : sig.start,
             'length' : sig.length,
@@ -82,6 +106,29 @@ class Converter:
             'multiplexer_ids' : sig.multiplexer_ids,
             'multiplexer_signal' : sig.multiplexer_signal,
         }
+        out = {key:self.texify(val) for key,val in out.items()}
+        return out
+
+    def texify(self, val):
+        if val is None:
+            return ""
+        if isinstance(val, int):
+            return val
+
+        val = str(val)
+        val = val.replace("\\", r"\textbackslash ")
+        val = val.replace("{", r"\{")
+        val = val.replace("}", r"\}")
+        val = val.replace("$", r"\$")
+        val = val.replace("&", r"\&")
+        val = val.replace("#", r"\#")
+        val = val.replace("^", r"\string^")
+        val = val.replace("_", r"\_")
+        val = val.replace("~", r"\string~")
+        val = val.replace("%", r"\%")
+
+        val = val.replace("°", r"\degree ")
+        return val
 
     def get_datatype(self, sig):
         if sig.is_float:

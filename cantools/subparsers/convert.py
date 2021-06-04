@@ -1,12 +1,17 @@
 import argparse
 
 from .. import database
+from . import convert_to_tex
 
 
 def _do_convert(args):
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
                                strict=not args.no_strict)
+
+    if args.outfile.endswith(convert_to_tex.Converter.ext):
+        convert_to_tex.Converter().save(args.outfile, dbase, args)
+        return
 
     database.dump_file(dbase,
                        args.outfile,
@@ -33,3 +38,4 @@ def add_subparser(subparsers):
         'outfile',
         help='Output database file.')
     convert_parser.set_defaults(func=_do_convert)
+    convert_to_tex.add_argument_group(convert_parser)

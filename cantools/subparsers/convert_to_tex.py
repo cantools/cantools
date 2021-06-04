@@ -24,6 +24,12 @@ class Converter:
 \providecommand{\degree}{\ensuremath{^\circ}}
 \newcommand{\thead}[1]{#1}
 
+\iffalse
+	\usepackage[table]{xcolor}
+	\catcode`*=\active
+	\def*{\rowcolor{green!20}}
+\fi
+
 \begin{document}
 """.lstrip()
     after_document = r"""

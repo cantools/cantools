@@ -17,6 +17,7 @@ class Converter:
 % !TeX program = pdflatex
 
 \documentclass[a4paper]{article}
+\usepackage{booktabs}
 \usepackage{hyperref}
 
 \providecommand{\degree}{\ensuremath{^\circ}}
@@ -30,7 +31,11 @@ class Converter:
     msg_pattern = r"""
 \section{{0x{frame_id:03X} {name}}}
 \begin{{tabular}}{{{colspec}}}
+\toprule
+{header}
+\midrule
 {signals}
+\bottomrule
 \end{{tabular}}
 """
     sig_pattern = "\t{name} & {start} & {scale} & {offset} & {minimum} & {maximum} & {unit} \\\\"
@@ -62,7 +67,7 @@ class Converter:
             return lambda sig: sig.start
 
     def format_message(self, msg, sig_sort_key):
-        return self.msg_pattern.format(colspec=self.get_colspec(), signals=self.format_signals(msg.signals, sig_sort_key), **self.message_format_dict(msg))
+        return self.msg_pattern.format(colspec=self.get_colspec(), header=self.format_header(), signals=self.format_signals(msg.signals, sig_sort_key), **self.message_format_dict(msg))
 
     def message_format_dict(self, msg):
         out = {
@@ -77,11 +82,43 @@ class Converter:
     def get_colspec(self):
         return "*{%s}{l}" % (self.sig_pattern.count("&")+1)
 
+    def format_header(self):
+        return self.sig_pattern.format(**self.header_format_dict())
+
     def format_signals(self, signals, sort_key):
         out = []
         for sig in sorted(signals, key=self.sig_sort_key(sort_key)):
             out.append(self.sig_pattern.format(**self.signal_format_dict(sig)))
         return "\n".join(out)
+
+    def header_format_dict(self):
+        out = {
+            'name' : 'Name',
+            'start' : 'Start',
+            'length' : 'Length',
+            'byte_order' : 'Byte order',
+
+            'datatype' : 'Datatype',
+            'is_float' : 'Float?',
+            'is_signed' : 'Digned?',
+
+            'initial' : 'Initial',
+            'scale' : 'Scale',
+            'offset' : 'Offset',
+            'minimum' : 'Minimum',
+            'maximum' : 'Maximum',
+            'unit' : 'Unit',
+
+            'choices' : 'Choices',
+            'comment' : 'Comment',
+            'comments' : 'Comments',
+
+            'is_multiplexer' : 'Multiplexer?',
+            'multiplexer_ids' : 'Multiplexer IDs',
+            'multiplexer_signal' : 'Multiplexer signal',
+        }
+        out = {key:self.texify(val) for key,val in out.items()}
+        return out
 
     def signal_format_dict(self, sig):
         out = {

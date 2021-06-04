@@ -80,7 +80,13 @@ class Converter:
         return out
 
     def get_colspec(self):
-        return "*{%s}{l}" % (self.sig_pattern.count("&")+1)
+        coltypes = self.colspec_dict()
+        out = []
+        for col in self.sig_pattern.split("&"):
+            col = col.strip()
+            col = col[1:][:-1]
+            out.append(coltypes.get(col, "l"))
+        return "".join(out)
 
     def format_header(self):
         return self.sig_pattern.format(**self.header_format_dict())
@@ -90,6 +96,36 @@ class Converter:
         for sig in sorted(signals, key=self.sig_sort_key(sort_key)):
             out.append(self.sig_pattern.format(**self.signal_format_dict(sig)))
         return "\n".join(out)
+
+    def colspec_dict(self):
+        text = 'c'
+        num = 'r'
+        out = {
+            'name' : 'l',
+            'start' : num,
+            'length' : num,
+            'byte_order' : text,
+
+            'datatype' : text,
+            'is_float' : text,
+            'is_signed' : text,
+
+            'initial' : num,
+            'scale' : num,
+            'offset' : num,
+            'minimum' : num,
+            'maximum' : num,
+            'unit' : text,
+
+            'choices' : text,
+            'comment' : text,
+            'comments' : text,
+
+            'is_multiplexer' : text,
+            'multiplexer_ids' : text,
+            'multiplexer_signal' : text,
+        }
+        return out
 
     def header_format_dict(self):
         out = {

@@ -201,7 +201,7 @@ class Converter:
             'length' : 'Length',
             'byte_order' : 'Byte order',
 
-            'datatype' : 'Datatype',
+            'datatype' : 'Type',
             'is_float' : 'Float?',
             'is_signed' : 'Digned?',
 
@@ -278,9 +278,9 @@ class Converter:
         if sig.is_float:
             return "float"
         elif sig.is_signed:
-            return "signed int"
+            return "int"
         else:
-            return "unsigned int"
+            return "uint"
 
 
 def add_argument_group(parser):

@@ -110,9 +110,9 @@ class Converter:
     def msg_sort_key(self, args):
         key = args.msg_sort_key
         if key == self.MSG_SORT_KEY_NAME:
-            return lambda msg: msg.id
-        else:
             return lambda msg: msg.name
+        else:
+            return lambda msg: msg.frame_id
 
     def sig_sort_key(self, args):
         key = args.sig_sort_key

@@ -21,6 +21,8 @@ class Converter:
 \usepackage{siunitx}
 \usepackage{hyperref}
 
+\setcounter{secnumdepth}{0}
+
 \providecommand{\degree}{\ensuremath{^\circ}}
 \newcommand{\thead}[1]{#1}
 

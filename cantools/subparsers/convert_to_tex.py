@@ -100,13 +100,22 @@ class Converter:
 \providecommand{\degree}{\ensuremath{^\circ}}
 \newcommand{\thead}[1]{#1}
 
+\makeatletter
+\renewcommand{\maketitle}{%
+    \begin{center}%
+        \Large
+        \@title
+    \end{center}%
+}
+\makeatother
+
 \iffalse
 	\usepackage[table]{xcolor}
 	\catcode`*=\active
 	\def*{\rowcolor{green!20}}
 \fi
 """
-    begin_document = r"\begin{document}"
+    begin_document = r"\begin{document}\maketitle"
     table_of_contents = r"\tableofcontents"
     end_document = r"\end{document}"
 
@@ -164,12 +173,35 @@ DLC = {length}
         if env_usepackage:
             out.append(env_usepackage)
         out.append("")
+        out.append(r"\title{%s}" % self.texify(self.get_title(args)))
         out.append(self.begin_document)
         if args.toc:
             out.append(self.table_of_contents)
         out.append(self.format_db(db, args))
         out.append(self.end_document)
         return "\n".join(out)
+
+    def get_title(self, args):
+        if args.title:
+            return args.title
+        title = args.outfile
+        title = title.rsplit(os.extsep, 1)[0]
+        title = title.replace("_", " ")
+        title = title[0:1].upper() + title[1:]
+        title = self.capitalize_after(title, " ")
+        title = self.capitalize_after(title, "-")
+        return title
+
+    @staticmethod
+    def capitalize_after(text, c):
+        i = 0
+        while True:
+            i = text.find(c, i)
+            if i < 0:
+                break
+            text = text[:i+1] + text[i+1:i+2].upper() + text[i+2:]
+            i += 1
+        return text
 
     def format_db(self, db, args):
         self.none = "{%s}" % args.none
@@ -400,3 +432,4 @@ def add_argument_group(parser):
 
     group.add_argument("--toc", action="store_true", help="insert a table of contents")
     group.add_argument("--env", type=Environmet, choices=Converter.ENVS, default=Converter.ENVS[0], help="the environment to use for the signals")
+    group.add_argument("--title")

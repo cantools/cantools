@@ -21,6 +21,7 @@ class Converter:
 \usepackage{siunitx}
 \usepackage{hyperref}
 
+\hypersetup{hidelinks}
 \setcounter{secnumdepth}{0}
 
 \providecommand{\degree}{\ensuremath{^\circ}}
@@ -33,6 +34,7 @@ class Converter:
 \fi
 
 \begin{document}
+\tableofcontents
 """.lstrip()
     after_document = r"""
 \end{document}

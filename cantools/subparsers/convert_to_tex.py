@@ -204,7 +204,7 @@ DLC = {length}
             out += "{%s}" % self.sig_width
         out += r"{%s}" % self.get_colspec(signals, args)
         out += "\n\\toprule"
-        out += self.format_header()
+        out += "\n" + self.format_header()
         out += "\n\\midrule"
         return out
 

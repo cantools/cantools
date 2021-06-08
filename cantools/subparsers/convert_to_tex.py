@@ -138,7 +138,7 @@ class Converter:
         out = r"\begin{%s}" % self.get_env_name(args)
         if self.does_env_need_width(args):
             out += "{%s}" % self.sig_width
-        out += r"{%s}" % self.get_colspec(signals)
+        out += r"{%s}" % self.get_colspec(signals, args)
         out += "\n\\toprule"
         out += self.format_header()
         out += "\n\\midrule"
@@ -171,6 +171,10 @@ class Converter:
             return True
         return False
 
+    def supports_x_column(self, args):
+        return self.does_env_need_width(args)
+
+
     def message_format_dict(self, msg):
         out = {
             'name' : msg.name,
@@ -181,8 +185,8 @@ class Converter:
         out = {key:self.texify(val) for key,val in out.items()}
         return out
 
-    def get_colspec(self, signals):
-        coltypes = self.colspec_dict()
+    def get_colspec(self, signals, args):
+        coltypes = self.colspec_dict(args)
         out = []
         for col in self.sig_pattern.rstrip("\\").split("&"):
             col = col.strip()
@@ -224,11 +228,12 @@ class Converter:
         out.append(self.get_end_table(args))
         return "\n".join(out)
 
-    def colspec_dict(self):
+    def colspec_dict(self, args):
         text = 'c'
         num = 'S'
+        x = 'X' if self.supports_x_column(args) else 'l'
         out = {
-            'name' : 'l',
+            'name' : x,
             'start' : num,
             'length' : num,
             'byte_order' : text,

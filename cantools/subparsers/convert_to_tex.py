@@ -26,6 +26,7 @@ class Converter:
 % !TeX program = pdflatex
 
 \documentclass[a4paper]{article}
+\usepackage[DIV=12]{typearea}
 \usepackage{booktabs}
 \usepackage{siunitx}
 \usepackage{hyperref}

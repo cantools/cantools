@@ -40,6 +40,11 @@ class Environmet:
     def supports_x_column(self):
         return self.needs_width()
 
+    def number_required_runs(self):
+        if self.name == self.ENV_LTABLEX:
+            return 3
+        return 1
+
     def __str__(self):
         return self.name
 
@@ -126,9 +131,11 @@ class Converter:
             shutil.move(fn_out, fn)
 
     def get_number_runs(self, args):
-        n = 1
+        # for pdf outline (hyperref)
+        n = 2
         if args.toc:
             n = 2
+        n = max(n, args.env.number_required_runs())
         return n
 
     def save_tex(self, fn, db, args):

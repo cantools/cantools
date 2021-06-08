@@ -95,6 +95,7 @@ class Converter:
 \usepackage{siunitx}
 \usepackage{fancyhdr}
 \usepackage{lastpage}
+\usepackage{url}
 \usepackage{hyperref}
 
 \hypersetup{hidelinks}
@@ -114,6 +115,9 @@ class Converter:
         \thetitle
     \end{center}%
 }
+
+\newcommand{\sig}[1]{#1}
+\DeclareUrlCommand\sig{\urlstyle{rm}}
 
 \iffalse
 	\usepackage[table]{xcolor}
@@ -396,7 +400,6 @@ DLC = {length}
 
     def signal_format_dict(self, sig):
         out = {
-            'name' : sig.name,
             'start' : sig.start,
             'length' : sig.length,
             'byte_order' : sig.byte_order,
@@ -421,6 +424,7 @@ DLC = {length}
             'multiplexer_signal' : sig.multiplexer_signal,
         }
         out = {key:self.texify(val) for key,val in out.items()}
+        out['name'] = r'\sig{%s}' % sig.name
         return out
 
     def texify(self, val):

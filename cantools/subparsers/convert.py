@@ -9,9 +9,10 @@ def _do_convert(args):
                                encoding=args.encoding,
                                strict=not args.no_strict)
 
-    if args.outfile.endswith(convert_to_tex.Converter.ext):
-        convert_to_tex.Converter().save(args.outfile, dbase, args)
-        return
+    for ext in convert_to_tex.Converter.supported_extensions:
+        if args.outfile.endswith(ext):
+            convert_to_tex.Converter().save(args.outfile, dbase, args)
+            return
 
     database.dump_file(dbase,
                        args.outfile,

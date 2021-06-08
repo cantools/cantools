@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+import os
+import shutil
+import tempfile
+import subprocess
+
 
 class Converter:
 
@@ -11,7 +16,11 @@ class Converter:
     SIG_SORT_KEY_NAME = "name"
     SIG_SORT_KEYS = (SIG_SORT_KEY_START_BIT, SIG_SORT_KEY_NAME)
 
-    ext = ".tex"
+    ext_tex = ".tex"
+    ext_pdf = ".pdf"
+    supported_extensions = (ext_tex, ext_pdf)
+
+    cmd_tex = ["pdflatex", "-interaction=nonstop"]
 
     before_document = r"""
 % !TeX program = pdflatex
@@ -54,6 +63,27 @@ class Converter:
 
 
     def save(self, fn, db, args):
+        if fn.endswith(self.ext_pdf):
+            self.save_pdf(fn, db, args)
+        else:
+            self.save_tex(fn, db, args)
+
+    def save_pdf(self, fn, db, args):
+        with tempfile.TemporaryDirectory() as path:
+            tmpfn = "main"
+            cwd = os.getcwd()
+            os.chdir(path)
+            fn_in = os.path.join(path, tmpfn + self.ext_tex)
+            fn_out = os.path.join(path, tmpfn + self.ext_pdf)
+            self.save_tex(fn_in, db, args)
+            cmd = self.cmd_tex + [fn_in]
+            subprocess.run(cmd)
+            # run a second time for the table of contents
+            subprocess.run(cmd)
+            os.chdir(cwd)
+            shutil.move(fn_out, fn)
+
+    def save_tex(self, fn, db, args):
         with open(fn, 'wt') as f:
             f.write(self.create_tex_document(db, args))
 

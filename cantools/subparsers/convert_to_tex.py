@@ -89,7 +89,7 @@ class Converter:
 % !TeX program = pdflatex
 
 \documentclass[a4paper]{article}
-\usepackage[DIV=12]{typearea}
+\usepackage{typearea}
 \usepackage{parskip}
 \usepackage{booktabs}
 \usepackage{siunitx}
@@ -182,6 +182,8 @@ DLC = {length}
         env_usepackage = args.env.get_usepackage()
         if env_usepackage:
             out.append(env_usepackage)
+        out.append("")
+        out.append(r"\KOMAoption{DIV}{%s}" % args.div)
         out.append("")
         out.append(r"\title{%s}" % self.texify(self.get_title(args)))
         out.append(r"\date{%s}" % self.texify(self.get_date(args)))
@@ -465,6 +467,7 @@ def add_argument_group(parser):
 
     group.add_argument("--toc", action="store_true", help="insert a table of contents")
     group.add_argument("--env", type=Environmet, choices=Converter.ENVS, default=Converter.ENVS[0], help="the environment to use for the signals")
+    group.add_argument("--div", default=12, help="the bigger this factor, the bigger the text body. see https://ctan.org/pkg/typearea")
     group.add_argument("--title")
     group.add_argument("--date")
     group.add_argument("--date-format", default="%d.%m.%Y")

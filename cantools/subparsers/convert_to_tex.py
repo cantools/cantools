@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import subprocess
+import datetime
 
 
 class Environmet:
@@ -92,6 +93,8 @@ class Converter:
 \usepackage{parskip}
 \usepackage{booktabs}
 \usepackage{siunitx}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
 \usepackage{hyperref}
 
 \hypersetup{hidelinks}
@@ -101,13 +104,16 @@ class Converter:
 \newcommand{\thead}[1]{#1}
 
 \makeatletter
+    \newcommand{\thetitle}{\@title}
+    \newcommand{\thedate}{\@date}
+    \newcommand{\theauthor}{\@author}
+\makeatother
 \renewcommand{\maketitle}{%
     \begin{center}%
         \Large
-        \@title
+        \thetitle
     \end{center}%
 }
-\makeatother
 
 \iffalse
 	\usepackage[table]{xcolor}
@@ -155,7 +161,7 @@ DLC = {length}
             shutil.move(fn_out, fn)
 
     def get_number_runs(self, args):
-        # for pdf outline (hyperref)
+        # for pdf outline (hyperref) and lastpage
         n = 2
         if args.toc:
             n = 2
@@ -174,6 +180,10 @@ DLC = {length}
             out.append(env_usepackage)
         out.append("")
         out.append(r"\title{%s}" % self.texify(self.get_title(args)))
+        out.append(r"\date{%s}" % self.texify(self.get_date(args)))
+        out.append(r"\newcommand{\infile}{%s}" % self.texify(args.infile))
+        out.append(r"\newcommand{\outfile}{%s}" % self.texify(args.outfile))
+        out.append(self.get_header_footer(args))
         out.append(self.begin_document)
         if args.toc:
             out.append(self.table_of_contents)
@@ -191,6 +201,25 @@ DLC = {length}
         title = self.capitalize_after(title, " ")
         title = self.capitalize_after(title, "-")
         return title
+
+    def get_header_footer(self, args):
+        out = []
+        out.append(r"")
+        out.append(r"\fancyhead{}")
+        out.append(r"\fancyhead[ol,er]{%s}" % args.header_left)
+        out.append(r"\fancyhead[or,el]{%s}" % args.header_right)
+        out.append(r"\renewcommand{\headrulewidth}{0pt}")
+        out.append(r"\fancyfoot{}")
+        out.append(r"\fancyfoot[ol,er]{%s}" % args.footer_left)
+        out.append(r"\fancyfoot[or,el]{%s}" % args.footer_right)
+        out.append(r"\pagestyle{fancy}")
+        out.append(r"")
+        return "\n".join(out)
+
+    def get_date(self, args):
+        if args.date:
+            return args.date
+        return datetime.date.today().strftime(args.date_format)
 
     @staticmethod
     def capitalize_after(text, c):
@@ -433,3 +462,9 @@ def add_argument_group(parser):
     group.add_argument("--toc", action="store_true", help="insert a table of contents")
     group.add_argument("--env", type=Environmet, choices=Converter.ENVS, default=Converter.ENVS[0], help="the environment to use for the signals")
     group.add_argument("--title")
+    group.add_argument("--date")
+    group.add_argument("--date-format", default="%d.%m.%Y")
+    group.add_argument("--header-left", default=r"")
+    group.add_argument("--header-right", default=r"")
+    group.add_argument("--footer-left", default=r"Created from \infile, \thedate")
+    group.add_argument("--footer-right", default=r"Page \thepage\ of \pageref{LastPage}")

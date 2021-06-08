@@ -60,7 +60,7 @@ class Converter:
 \bottomrule
 \end{{tabular}}
 """
-    sig_pattern = "\t{name} && {start} & {length} && {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
+    sig_pattern = "\t{name} && {start} & {length} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
 
 
     def save(self, fn, db, args):

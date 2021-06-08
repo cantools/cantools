@@ -6,6 +6,49 @@ import tempfile
 import subprocess
 
 
+class Environmet:
+
+    ENV_TABULAR = "tabular"
+    ENV_TABULARX = "tabularx"
+    ENV_LTABLEX = "ltablex"
+
+    def __init__(self, name):
+        self.name = name
+
+    def get_usepackage(self):
+        env = self.name
+        if env == self.ENV_TABULARX:
+            return r"\usepackage{tabularx}"
+        if env == self.ENV_LTABLEX:
+            return r"\usepackage{ltablex}"
+        return None
+
+    def get_env_name(self):
+        env = self.name
+        if env == self.ENV_LTABLEX:
+            env = "tabularx"
+        return env
+
+    def needs_width(self):
+        env = self.name
+        if env == self.ENV_TABULARX:
+            return True
+        if env == self.ENV_LTABLEX:
+            return True
+        return False
+
+    def supports_x_column(self):
+        return self.needs_width()
+
+    def __str__(self):
+        return self.name
+
+    def __eq__(self, other):
+        if not isinstance(other, Environmet):
+            return NotImplemented
+        return self.name == other.name
+
+
 class Converter:
 
     MSG_SORT_KEY_ID = "id"
@@ -16,10 +59,11 @@ class Converter:
     SIG_SORT_KEY_NAME = "name"
     SIG_SORT_KEYS = (SIG_SORT_KEY_START_BIT, SIG_SORT_KEY_NAME)
 
-    ENV_TABULAR = "tabular"
-    ENV_TABULARX = "tabularx"
-    ENV_LTABLEX = "ltablex"
-    ENVS = (ENV_TABULAR, ENV_TABULARX, ENV_LTABLEX)
+    ENVS = (
+        Environmet(Environmet.ENV_TABULAR),
+        Environmet(Environmet.ENV_TABULARX),
+        Environmet(Environmet.ENV_LTABLEX),
+    )
 
     ext_tex = ".tex"
     ext_pdf = ".pdf"
@@ -94,7 +138,7 @@ class Converter:
     def create_tex_document(self, db, args):
         out = []
         out.append(self.preamble)
-        env_usepackage = self.get_env_usepackage(args)
+        env_usepackage = args.env.get_usepackage()
         if env_usepackage:
             out.append(env_usepackage)
         out.append("")
@@ -135,8 +179,8 @@ class Converter:
         return "\n".join(out)
 
     def get_begin_table(self, signals, args):
-        out = r"\begin{%s}" % self.get_env_name(args)
-        if self.does_env_need_width(args):
+        out = r"\begin{%s}" % args.env.get_env_name()
+        if args.env.needs_width():
             out += "{%s}" % self.sig_width
         out += r"{%s}" % self.get_colspec(signals, args)
         out += "\n\\toprule"
@@ -146,34 +190,8 @@ class Converter:
 
     def get_end_table(self, args):
         out = "\\bottomrule\n"
-        out += r"\end{%s}" % self.get_env_name(args)
+        out += r"\end{%s}" % args.env.get_env_name()
         return out
-
-    def get_env_usepackage(self, args):
-        env = args.env
-        if env == self.ENV_TABULARX:
-            return r"\usepackage{tabularx}"
-        if env == self.ENV_LTABLEX:
-            return r"\usepackage{ltablex}"
-        return None
-
-    def get_env_name(self, args):
-        env = args.env
-        if env == self.ENV_LTABLEX:
-            env = "tabularx"
-        return env
-
-    def does_env_need_width(self, args):
-        env = args.env
-        if env == self.ENV_TABULARX:
-            return True
-        if env == self.ENV_LTABLEX:
-            return True
-        return False
-
-    def supports_x_column(self, args):
-        return self.does_env_need_width(args)
-
 
     def message_format_dict(self, msg):
         out = {
@@ -231,7 +249,7 @@ class Converter:
     def colspec_dict(self, args):
         text = 'c'
         num = 'S'
-        x = 'X' if self.supports_x_column(args) else 'l'
+        x = 'X' if args.env.supports_x_column() else 'l'
         out = {
             'name' : x,
             'start' : num,
@@ -355,4 +373,4 @@ def add_argument_group(parser):
     group.add_argument("--none", default="--", help="a symbol to print if a value is None")
 
     group.add_argument("--toc", action="store_true", help="insert a table of contents")
-    group.add_argument("--env", choices=Converter.ENVS, default=Converter.ENV_TABULAR, help="the environment to use for the signals")
+    group.add_argument("--env", type=Environmet, choices=Converter.ENVS, default=Converter.ENVS[0], help="the environment to use for the signals")

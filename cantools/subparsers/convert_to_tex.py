@@ -89,6 +89,7 @@ class Converter:
 
 \documentclass[a4paper]{article}
 \usepackage[DIV=12]{typearea}
+\usepackage{parskip}
 \usepackage{booktabs}
 \usepackage{siunitx}
 \usepackage{hyperref}
@@ -121,6 +122,7 @@ DLC = {length}
 
     sig_width = r"\linewidth"
     sig_pattern = "\t{name} && {start} & {length} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
+    sig_none = "This message has no signals."
 
 
     def save(self, fn, db, args):
@@ -260,6 +262,9 @@ DLC = {length}
         return self.sig_pattern.format(**self.header_format_dict())
 
     def format_signals(self, signals, args):
+        if not signals:
+            return self.sig_none
+
         out = []
         out.append(self.get_begin_table(signals, args))
         for sig in sorted(signals, key=self.sig_sort_key(args)):

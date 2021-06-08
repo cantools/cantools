@@ -111,8 +111,13 @@ class Converter:
 
     begin_msg = r"""
 \section{{0x{frame_id:03X} {name}}}
+{extended_or_base} \\
+DLC = {length}
 """
     end_msg = ""
+
+    base_frame = "Base frame"
+    extended_frame = "Extended frame"
 
     sig_width = r"\linewidth"
     sig_pattern = "\t{name} && {start} & {length} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
@@ -213,6 +218,7 @@ class Converter:
             'name' : msg.name,
             'frame_id' : msg.frame_id,
             'is_extended_frame' : msg.is_extended_frame,
+            'extended_or_base' : self.extended_frame if msg.is_extended_frame else self.base_frame,
             'length' : msg.length,
         }
         out = {key:self.texify(val) for key,val in out.items()}

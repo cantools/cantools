@@ -16,6 +16,11 @@ class Converter:
     SIG_SORT_KEY_NAME = "name"
     SIG_SORT_KEYS = (SIG_SORT_KEY_START_BIT, SIG_SORT_KEY_NAME)
 
+    ENV_TABULAR = "tabular"
+    ENV_TABULARX = "tabularx"
+    ENV_LTABLEX = "ltablex"
+    ENVS = (ENV_TABULAR, ENV_TABULARX, ENV_LTABLEX)
+
     ext_tex = ".tex"
     ext_pdf = ".pdf"
     supported_extensions = (ext_tex, ext_pdf)
@@ -47,16 +52,12 @@ class Converter:
     table_of_contents = r"\tableofcontents"
     end_document = r"\end{document}"
 
-    msg_pattern = r"""
+    begin_msg = r"""
 \section{{0x{frame_id:03X} {name}}}
-\begin{{tabular}}{{{colspec}}}
-\toprule
-{header}
-\midrule
-{signals}
-\bottomrule
-\end{{tabular}}
 """
+    end_msg = ""
+
+    sig_width = r"\linewidth"
     sig_pattern = "\t{name} && {start} & {length} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
 
 
@@ -93,6 +94,10 @@ class Converter:
     def create_tex_document(self, db, args):
         out = []
         out.append(self.preamble)
+        env_usepackage = self.get_env_usepackage(args)
+        if env_usepackage:
+            out.append(env_usepackage)
+        out.append("")
         out.append(self.begin_document)
         if args.toc:
             out.append(self.table_of_contents)
@@ -122,7 +127,49 @@ class Converter:
             return lambda sig: sig.start
 
     def format_message(self, msg, args):
-        return self.msg_pattern.format(colspec=self.get_colspec(msg.signals), header=self.format_header(), signals=self.format_signals(msg.signals, args), **self.message_format_dict(msg))
+        format_dict = self.message_format_dict(msg)
+        out = []
+        out.append(self.begin_msg.format(**format_dict))
+        out.append(self.format_signals(msg.signals, args))
+        out.append(self.end_msg.format(**format_dict))
+        return "\n".join(out)
+
+    def get_begin_table(self, signals, args):
+        out = r"\begin{%s}" % self.get_env_name(args)
+        if self.does_env_need_width(args):
+            out += "{%s}" % self.sig_width
+        out += r"{%s}" % self.get_colspec(signals)
+        out += "\n\\toprule"
+        out += self.format_header()
+        out += "\n\\midrule"
+        return out
+
+    def get_end_table(self, args):
+        out = "\\bottomrule\n"
+        out += r"\end{%s}" % self.get_env_name(args)
+        return out
+
+    def get_env_usepackage(self, args):
+        env = args.env
+        if env == self.ENV_TABULARX:
+            return r"\usepackage{tabularx}"
+        if env == self.ENV_LTABLEX:
+            return r"\usepackage{ltablex}"
+        return None
+
+    def get_env_name(self, args):
+        env = args.env
+        if env == self.ENV_LTABLEX:
+            env = "tabularx"
+        return env
+
+    def does_env_need_width(self, args):
+        env = args.env
+        if env == self.ENV_TABULARX:
+            return True
+        if env == self.ENV_LTABLEX:
+            return True
+        return False
 
     def message_format_dict(self, msg):
         out = {
@@ -169,10 +216,12 @@ class Converter:
     def format_header(self):
         return self.sig_pattern.format(**self.header_format_dict())
 
-    def format_signals(self, signals, sort_key):
+    def format_signals(self, signals, args):
         out = []
-        for sig in sorted(signals, key=self.sig_sort_key(sort_key)):
+        out.append(self.get_begin_table(signals, args))
+        for sig in sorted(signals, key=self.sig_sort_key(args)):
             out.append(self.sig_pattern.format(**self.signal_format_dict(sig)))
+        out.append(self.get_end_table(args))
         return "\n".join(out)
 
     def colspec_dict(self):
@@ -301,3 +350,4 @@ def add_argument_group(parser):
     group.add_argument("--none", default="--", help="a symbol to print if a value is None")
 
     group.add_argument("--toc", action="store_true", help="insert a table of contents")
+    group.add_argument("--env", choices=Converter.ENVS, default=Converter.ENV_TABULAR, help="the environment to use for the signals")

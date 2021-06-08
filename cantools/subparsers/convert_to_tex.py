@@ -22,7 +22,7 @@ class Converter:
 
     cmd_tex = ["pdflatex", "-interaction=nonstop"]
 
-    before_document = r"""
+    preamble = r"""
 % !TeX program = pdflatex
 
 \documentclass[a4paper]{article}
@@ -42,13 +42,10 @@ class Converter:
 	\catcode`*=\active
 	\def*{\rowcolor{green!20}}
 \fi
-
-\begin{document}
-\tableofcontents
-""".lstrip()
-    after_document = r"""
-\end{document}
 """
+    begin_document = r"\begin{document}"
+    table_of_contents = r"\tableofcontents"
+    end_document = r"\end{document}"
 
     msg_pattern = r"""
 \section{{0x{frame_id:03X} {name}}}
@@ -78,18 +75,30 @@ class Converter:
             fn_out = os.path.join(path, tmpfn + self.ext_pdf)
             self.save_tex(fn_in, db, args)
             cmd = self.cmd_tex + [fn_in]
-            subprocess.run(cmd)
-            # run a second time for the table of contents
-            subprocess.run(cmd)
+            for i in range(self.get_number_runs(args)):
+                subprocess.run(cmd)
             os.chdir(cwd)
             shutil.move(fn_out, fn)
+
+    def get_number_runs(self, args):
+        n = 1
+        if args.toc:
+            n = 2
+        return n
 
     def save_tex(self, fn, db, args):
         with open(fn, 'wt') as f:
             f.write(self.create_tex_document(db, args))
 
     def create_tex_document(self, db, args):
-        return self.before_document + self.format_db(db, args) + self.after_document
+        out = []
+        out.append(self.preamble)
+        out.append(self.begin_document)
+        if args.toc:
+            out.append(self.table_of_contents)
+        out.append(self.format_db(db, args))
+        out.append(self.end_document)
+        return "\n".join(out)
 
     def format_db(self, db, args):
         self.none = "{%s}" % args.none
@@ -288,3 +297,5 @@ def add_argument_group(parser):
     group.add_argument("--msg-sort", dest="msg_sort_key", choices=Converter.MSG_SORT_KEYS, default=Converter.MSG_SORT_KEY_ID)
     group.add_argument("--sig-sort", dest="sig_sort_key", choices=Converter.SIG_SORT_KEYS, default=Converter.SIG_SORT_KEY_START_BIT)
     group.add_argument("--none", default="--", help="a symbol to print if a value is None")
+
+    group.add_argument("--toc", action="store_true", help="insert a table of contents")

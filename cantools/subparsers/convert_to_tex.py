@@ -11,6 +11,7 @@ class Environmet:
     ENV_TABULAR = "tabular"
     ENV_TABULARX = "tabularx"
     ENV_LTABLEX = "ltablex"
+    ENV_LTABLEX_KEEP_X = "ltablex-keep-x"
 
     def __init__(self, name):
         self.name = name
@@ -21,11 +22,13 @@ class Environmet:
             return r"\usepackage{tabularx}"
         if env == self.ENV_LTABLEX:
             return r"\usepackage{ltablex}"
+        if env == self.ENV_LTABLEX_KEEP_X:
+            return r"\usepackage{ltablex}" + "\n" + r"\keepXColumns"
         return None
 
     def get_env_name(self):
         env = self.name
-        if env == self.ENV_LTABLEX:
+        if env in (self.ENV_LTABLEX, self.ENV_LTABLEX_KEEP_X):
             env = "tabularx"
         return env
 
@@ -35,6 +38,8 @@ class Environmet:
             return True
         if env == self.ENV_LTABLEX:
             return True
+        if env == self.ENV_LTABLEX_KEEP_X:
+            return True
         return False
 
     def supports_x_column(self):
@@ -42,6 +47,8 @@ class Environmet:
 
     def number_required_runs(self):
         if self.name == self.ENV_LTABLEX:
+            return 3
+        if self.name == self.ENV_LTABLEX_KEEP_X:
             return 3
         return 1
 
@@ -68,6 +75,7 @@ class Converter:
         Environmet(Environmet.ENV_TABULAR),
         Environmet(Environmet.ENV_TABULARX),
         Environmet(Environmet.ENV_LTABLEX),
+        Environmet(Environmet.ENV_LTABLEX_KEEP_X),
     )
 
     ext_tex = ".tex"

@@ -103,24 +103,26 @@ class Converter:
     def format_db(self, db, args):
         self.none = "{%s}" % args.none
         out = []
-        for msg in sorted(db.messages, key=self.msg_sort_key(args.msg_sort_key)):
-            out.append(self.format_message(msg, args.sig_sort_key))
+        for msg in sorted(db.messages, key=self.msg_sort_key(args)):
+            out.append(self.format_message(msg, args))
         return "\n".join(out)
 
-    def msg_sort_key(self, key):
+    def msg_sort_key(self, args):
+        key = args.msg_sort_key
         if key == self.MSG_SORT_KEY_NAME:
             return lambda msg: msg.id
         else:
             return lambda msg: msg.name
 
-    def sig_sort_key(self, key):
+    def sig_sort_key(self, args):
+        key = args.sig_sort_key
         if key == self.SIG_SORT_KEY_NAME:
             return lambda sig: sig.name
         else:
             return lambda sig: sig.start
 
-    def format_message(self, msg, sig_sort_key):
-        return self.msg_pattern.format(colspec=self.get_colspec(msg.signals), header=self.format_header(), signals=self.format_signals(msg.signals, sig_sort_key), **self.message_format_dict(msg))
+    def format_message(self, msg, args):
+        return self.msg_pattern.format(colspec=self.get_colspec(msg.signals), header=self.format_header(), signals=self.format_signals(msg.signals, args), **self.message_format_dict(msg))
 
     def message_format_dict(self, msg):
         out = {

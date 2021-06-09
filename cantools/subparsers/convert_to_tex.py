@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import subprocess
 import datetime
+import re
 
 
 CANTOOLS_LITTLE_ENDIAN = "little_endian"
@@ -148,7 +149,6 @@ DLC = {length}
     little_endian_abbr = "LE"
     big_endian_abbr = "BE"
 
-    sig_width = r"\linewidth"
     sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
     sig_none = "This message has no signals."
 
@@ -279,7 +279,7 @@ DLC = {length}
     def get_begin_table(self, signals, args):
         out = r"\begin{%s}" % args.env.get_env_name()
         if args.env.needs_width():
-            out += "{%s}" % self.sig_width
+            out += "{%s}" % args.sig_width
         out += r"{%s}" % self.get_colspec(signals, args)
         out += "\n\\toprule"
         out += "\n" + self.format_header()
@@ -488,6 +488,10 @@ DLC = {length}
 
 
 def add_argument_group(parser):
+    def length(val):
+        if re.match(r"^\d*([.,]\d*)?$", val):
+            val += r"\linewidth"
+        return val
     group = parser.add_argument_group("TeX converter options")
     group.add_argument("--msg-sort", dest="msg_sort_key", choices=Converter.MSG_SORT_KEYS, default=Converter.MSG_SORT_KEY_ID)
     group.add_argument("--sig-sort", dest="sig_sort_key", choices=Converter.SIG_SORT_KEYS, default=Converter.SIG_SORT_KEY_START_BIT)
@@ -503,3 +507,5 @@ def add_argument_group(parser):
     group.add_argument("--header-right", default=r"")
     group.add_argument("--footer-left", default=r"Created from \infile, \thedate")
     group.add_argument("--footer-right", default=r"Page \thepage\ of \pageref{LastPage}")
+
+    group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")

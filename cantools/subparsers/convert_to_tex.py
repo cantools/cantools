@@ -164,9 +164,6 @@ DLC = {length}
     little_endian_abbr = "LE"
     big_endian_abbr = "BE"
 
-    sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
-    sig_none = "This message has no signals."
-
 
     def save(self, fn, db, args):
         if fn.endswith(self.ext_pdf):
@@ -297,7 +294,7 @@ DLC = {length}
             out += "{%s}" % args.sig_width
         out += r"{%s}" % self.get_colspec(signals, args)
 
-        header = self.format_header()
+        header = self.format_header(args)
         if not args.env.is_long():
             out += "\n\\toprule"
             out += "\n" + header
@@ -322,7 +319,7 @@ DLC = {length}
         return out
 
     def get_indentation(self, args):
-        pattern = self.sig_pattern
+        pattern = args.sig_pattern
         i = 0
         n = len(pattern)
         while i<n and pattern[i].isspace():
@@ -350,7 +347,7 @@ DLC = {length}
     def get_colspec(self, signals, args):
         coltypes = self.colspec_dict(args)
         out = []
-        for col in self.sig_pattern.rstrip("\\").split("&"):
+        for col in args.sig_pattern.rstrip("\\").split("&"):
             col = col.strip()
             col = col[1:][:-1]
             alignment = coltypes.get(col, "l")
@@ -379,17 +376,17 @@ DLC = {length}
                 max_right = right
         return "S[table-format=%s.%s]" % (max_left, max_right)
 
-    def format_header(self):
-        return self.sig_pattern.format(**self.header_format_dict())
+    def format_header(self, args):
+        return args.sig_pattern.format(**self.header_format_dict())
 
     def format_signals(self, signals, args):
         if not signals:
-            return self.sig_none
+            return args.sig_none
 
         out = []
         out.append(self.get_begin_table(signals, args))
         for sig in sorted(signals, key=self.sig_sort_key(args)):
-            out.append(self.sig_pattern.format(**self.signal_format_dict(sig)))
+            out.append(args.sig_pattern.format(**self.signal_format_dict(sig)))
         out.append(self.get_end_table(args))
         return "\n".join(out)
 
@@ -556,3 +553,6 @@ def add_argument_group(parser):
     group.add_argument("--table-break-text-align", default="r", help=r"the column specification for --table-break-text, e.g. r, l or c")
 
     group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")
+    default_sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
+    group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
+    group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")

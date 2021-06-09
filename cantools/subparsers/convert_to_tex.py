@@ -18,6 +18,7 @@ class Environmet:
     ENV_TABULARX = "tabularx"
     ENV_LTABLEX = "ltablex"
     ENV_LTABLEX_KEEP_X = "ltablex-keep-x"
+    ENV_XLTABULAR = "xltabular"
 
     def __init__(self, name):
         self.name = name
@@ -30,6 +31,8 @@ class Environmet:
             return r"\usepackage{ltablex}"
         if env == self.ENV_LTABLEX_KEEP_X:
             return r"\usepackage{ltablex}" + "\n" + r"\keepXColumns"
+        if env == self.ENV_XLTABULAR:
+            return r"\usepackage{xltabular}"
         return None
 
     def get_env_name(self):
@@ -45,6 +48,8 @@ class Environmet:
         if env == self.ENV_LTABLEX:
             return True
         if env == self.ENV_LTABLEX_KEEP_X:
+            return True
+        if env == self.ENV_XLTABULAR:
             return True
         return False
 
@@ -62,6 +67,8 @@ class Environmet:
         if self.name == self.ENV_LTABLEX:
             return True
         if self.name == self.ENV_LTABLEX_KEEP_X:
+            return True
+        if self.name == self.ENV_XLTABULAR:
             return True
         return False
 
@@ -89,6 +96,7 @@ class Converter:
         Environmet(Environmet.ENV_TABULARX),
         Environmet(Environmet.ENV_LTABLEX),
         Environmet(Environmet.ENV_LTABLEX_KEEP_X),
+        Environmet(Environmet.ENV_XLTABULAR),
     )
 
     ext_tex = ".tex"

@@ -395,8 +395,8 @@ DLC = {length}
             'initial' : 'Initial',
             'scale' : 'Scale',
             'offset' : 'Offset',
-            'minimum' : 'Minimum',
-            'maximum' : 'Maximum',
+            'minimum' : 'Min',
+            'maximum' : 'Max',
             'unit' : 'Unit',
 
             'choices' : 'Choices',

@@ -384,7 +384,7 @@ DLC = {length}
         out = {
             'name' : 'Name',
             'start' : 'Start',
-            'length' : 'Length',
+            'length' : 'Bits',
             'byte_order' : 'Byte order',
             'byte_order_abbr' : 'E',
 

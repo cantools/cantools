@@ -58,6 +58,13 @@ class Environmet:
             return 3
         return 1
 
+    def is_long(self):
+        if self.name == self.ENV_LTABLEX:
+            return True
+        if self.name == self.ENV_LTABLEX_KEEP_X:
+            return True
+        return False
+
     def __str__(self):
         return self.name
 
@@ -281,13 +288,43 @@ DLC = {length}
         if args.env.needs_width():
             out += "{%s}" % args.sig_width
         out += r"{%s}" % self.get_colspec(signals, args)
-        out += "\n\\toprule"
-        out += "\n" + self.format_header()
-        out += "\n\\midrule"
+
+        header = self.format_header()
+        if not args.env.is_long():
+            out += "\n\\toprule"
+            out += "\n" + header
+            out += "\n\\midrule"
+        else:
+            indentation = self.get_indentation(args)
+            out += "\n" + indentation + r"\toprule"
+            out += "\n" + indentation + header
+            out += "\n" + indentation + r"\midrule"
+            out += "\n" + r"\endfirsthead"
+            out += "\n" + indentation + header
+            out += "\n" + indentation + r"\midrule"
+            out += "\n" + r"\endhead"
+            out += "\n" + indentation + r"\midrule"
+            if args.table_break_text:
+                out += "\n" + indentation + indentation + r"\multicolumn{\expandafter\the\csname LT@cols\endcsname}{%s}{%s} \\" % (args.table_break_text_align, args.table_break_text)
+            out += "\n" + r"\endfoot"
+            out += "\n" + indentation + r"\bottomrule"
+            out += "\n" + r"\endlastfoot"
+            out += "\n"
+
         return out
 
+    def get_indentation(self, args):
+        pattern = self.sig_pattern
+        i = 0
+        n = len(pattern)
+        while i<n and pattern[i].isspace():
+            i += 1
+        return pattern[:i]
+
     def get_end_table(self, args):
-        out = "\\bottomrule\n"
+        out = ""
+        if not args.env.is_long():
+            out += "\\bottomrule\n"
         out += r"\end{%s}" % args.env.get_env_name()
         return out
 
@@ -507,5 +544,7 @@ def add_argument_group(parser):
     group.add_argument("--header-right", default=r"")
     group.add_argument("--footer-left", default=r"Created from \infile, \thedate")
     group.add_argument("--footer-right", default=r"Page \thepage\ of \pageref{LastPage}")
+    group.add_argument("--table-break-text", default="(continued on next page)", help=r"a text shown at the bottom of a page where a long table is broken")
+    group.add_argument("--table-break-text-align", default="r", help=r"the column specification for --table-break-text, e.g. r, l or c")
 
     group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")

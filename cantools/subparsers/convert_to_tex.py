@@ -211,6 +211,11 @@ DLC = {length}
         out.append(r"\newcommand{\infile}{%s}" % self.texify(args.infile))
         out.append(r"\newcommand{\outfile}{%s}" % self.texify(args.outfile))
         out.append(self.get_header_footer(args))
+        out.append("")
+        out.append(r"\makeatletter")
+        out.append(r"\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%s}" % "".join(r"\do %s" % chr(c) for c in range(ord('a'), ord('z')+1)))
+        out.append(r"\makeatother")
+        out.append("")
         out.append(self.begin_document)
         if args.toc:
             out.append(self.table_of_contents)

@@ -7,6 +7,10 @@ import subprocess
 import datetime
 
 
+CANTOOLS_LITTLE_ENDIAN = "little_endian"
+CANTOOLS_BIG_ENDIAN = "big_endian"
+
+
 class Environmet:
 
     ENV_TABULAR = "tabular"
@@ -139,8 +143,13 @@ DLC = {length}
     base_frame = "Base frame"
     extended_frame = "Extended frame"
 
+    little_endian = "little-endian"
+    big_endian = "big-endian"
+    little_endian_abbr = "LE"
+    big_endian_abbr = "BE"
+
     sig_width = r"\linewidth"
-    sig_pattern = "\t{name} && {start} & {length} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
+    sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
     sig_none = "This message has no signals."
 
 
@@ -348,6 +357,7 @@ DLC = {length}
             'start' : num,
             'length' : num,
             'byte_order' : text,
+            'byte_order_abbr' : text,
 
             'datatype' : text,
             'is_float' : text,
@@ -376,6 +386,7 @@ DLC = {length}
             'start' : 'Start',
             'length' : 'Length',
             'byte_order' : 'Byte order',
+            'byte_order_abbr' : 'E',
 
             'datatype' : 'Type',
             'is_float' : 'Float?',
@@ -404,7 +415,8 @@ DLC = {length}
         out = {
             'start' : sig.start,
             'length' : sig.length,
-            'byte_order' : sig.byte_order,
+            'byte_order' : self.get_byte_order(sig),
+            'byte_order_abbr' : self.get_byte_order_abbr(sig),
 
             'datatype' : self.get_datatype(sig),
             'is_float' : sig.is_float,
@@ -457,6 +469,22 @@ DLC = {length}
             return "int"
         else:
             return "uint"
+
+    def get_byte_order(self, sig):
+        if sig.byte_order == CANTOOLS_LITTLE_ENDIAN:
+            return self.little_endian
+        elif sig.byte_order == CANTOOLS_BIG_ENDIAN:
+            return self.big_endian
+        else:
+            raise ValueError("invalid value for {sig.name}.byte_order: {sig.byte_order}".format(sig=sig))
+
+    def get_byte_order_abbr(self, sig):
+        if sig.byte_order == CANTOOLS_LITTLE_ENDIAN:
+            return self.little_endian_abbr
+        elif sig.byte_order == CANTOOLS_BIG_ENDIAN:
+            return self.big_endian_abbr
+        else:
+            raise ValueError("invalid value for {sig.name}.byte_order: {sig.byte_order}".format(sig=sig))
 
 
 def add_argument_group(parser):

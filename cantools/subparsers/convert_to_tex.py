@@ -72,7 +72,7 @@ class Environmet:
             return True
         return False
 
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
     def __eq__(self, other):

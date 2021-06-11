@@ -219,7 +219,7 @@ DLC = {length}
             out.append(r"\DeclareUrlCommand\sig{\urlstyle{rm}}")
             out.append("")
         else:
-            macrodef = r"\def%s{\discretionary{}{}{}}" % self.optional_line_break
+            macrodef = r"\def%s{\discretionary{%s}{%s}{}}" % (self.optional_line_break, args.sig_name_before_break_character, args.sig_name_after_break_character)
             out.append(r"\newcommand{\sig}[1]{{%s#1}}" % macrodef)
             out.append("")
 
@@ -594,3 +594,5 @@ def add_argument_group(parser):
     group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")
     group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")
+    group.add_argument("--sig-name-before-break-character", default="-", help=r"inserted before a line break inside of a signal name (only without --sig-name-break-anywhere)")
+    group.add_argument("--sig-name-after-break-character", default=r"\hbox{\footnotesize$\hookrightarrow$ }", help=r"inserted after a line break inside of a signal name (only without --sig-name-break-anywhere)")

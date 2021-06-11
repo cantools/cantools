@@ -301,7 +301,12 @@ DLC = {length}
         return "\n".join(out)
 
     def get_begin_table(self, signals, args):
-        out = r"\begin{%s}" % args.env.get_env_name()
+        out = ""
+        if args.sig_format:
+            out += r"\begingroup" + "\n"
+            out += args.sig_format + "\n"
+
+        out += r"\begin{%s}" % args.env.get_env_name()
         if args.env.needs_width():
             out += "{%s}" % args.sig_width
         out += r"{%s}" % self.get_colspec(signals, args)
@@ -343,6 +348,9 @@ DLC = {length}
         if not args.env.is_long():
             out += "\\bottomrule\n"
         out += r"\end{%s}" % args.env.get_env_name()
+        if args.sig_format:
+            out += "\n" + r"\par"
+            out += "\n" + r"\endgroup"
         return out
 
     def message_format_dict(self, msg):
@@ -590,6 +598,7 @@ def add_argument_group(parser):
     group.add_argument("--table-break-text-align", default="r", help=r"the column specification for --table-break-text, e.g. r, l or c")
 
     group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")
+    group.add_argument("--sig-format", default=r"\centering", help=r"TeX code put before each signal table inside of a group")
     default_sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
     group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")

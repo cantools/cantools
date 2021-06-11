@@ -105,10 +105,8 @@ class Converter:
 
     cmd_tex = ["pdflatex", "-interaction=nonstop"]
 
+    magic_comment = r"% !TeX program = pdflatex"
     preamble = r"""
-% !TeX program = pdflatex
-
-\documentclass[a4paper]{article}
 \usepackage{typearea}
 \usepackage{parskip}
 \usepackage{booktabs}
@@ -197,6 +195,8 @@ DLC = {length}
 
     def create_tex_document(self, db, args):
         out = []
+        out.append(self.magic_comment)
+        out.append(r"\documentclass[%s]{%s}" % (", ".join(args.class_options), args.document_class))
         out.append(self.preamble)
         env_usepackage = args.env.get_usepackage()
         if env_usepackage:
@@ -582,6 +582,9 @@ def add_argument_group(parser):
     group.add_argument("--sig-sort", dest="sig_sort_key", choices=Converter.SIG_SORT_KEYS, default=Converter.SIG_SORT_KEY_START_BIT)
     group.add_argument("--none", default="--", help="a symbol to print if a value is None")
 
+    group.add_argument("--document-class", default='article')
+    group.add_argument("--class-option", dest="class_options", default=['a4paper'], action="append", help="")
+    group.add_argument("--landscape", dest="class_options", const="landscape", action="append_const", help="a shortcut for `--class-option landscape`")
     group.add_argument("--toc", action="store_true", help="insert a table of contents")
     group.add_argument("--env", type=Environmet, choices=Converter.ENVS, default=Converter.ENVS[0], help="the environment to use for the signals")
     group.add_argument("--div", default=12, help="the bigger this factor, the bigger the text body. see https://ctan.org/pkg/typearea")

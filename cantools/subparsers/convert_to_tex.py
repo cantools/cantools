@@ -115,7 +115,6 @@ class Converter:
 \usepackage{siunitx}
 \usepackage{fancyhdr}
 \usepackage{lastpage}
-\usepackage{url}
 \usepackage{hyperref}
 
 \hypersetup{hidelinks}
@@ -135,9 +134,6 @@ class Converter:
         \thetitle
     \end{center}%
 }
-
-\newcommand{\sig}[1]{#1}
-\DeclareUrlCommand\sig{\urlstyle{rm}}
 
 \iffalse
 	\usepackage[table]{xcolor}
@@ -163,6 +159,8 @@ DLC = {length}
     big_endian = "big-endian"
     little_endian_abbr = "LE"
     big_endian_abbr = "BE"
+
+    optional_line_break = r"\-"
 
 
     def save(self, fn, db, args):
@@ -212,10 +210,19 @@ DLC = {length}
         out.append(r"\newcommand{\outfile}{%s}" % self.texify(args.outfile))
         out.append(self.get_header_footer(args))
         out.append("")
-        out.append(r"\makeatletter")
-        out.append(r"\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%s}" % "".join(r"\do %s" % chr(c) for c in range(ord('a'), ord('z')+1)))
-        out.append(r"\makeatother")
-        out.append("")
+        if args.sig_name_break_anywhere:
+            out.append(r"\usepackage{url}")
+            out.append(r"\makeatletter")
+            out.append(r"\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%s}" % "".join(r"\do %s" % chr(c) for c in range(ord('a'), ord('z')+1)))
+            out.append(r"\makeatother")
+            out.append(r"\newcommand{\sig}[1]{#1}")
+            out.append(r"\DeclareUrlCommand\sig{\urlstyle{rm}}")
+            out.append("")
+        else:
+            macrodef = r"\def%s{\discretionary{}{}{}}" % self.optional_line_break
+            out.append(r"\newcommand{\sig}[1]{{%s#1}}" % macrodef)
+            out.append("")
+
         out.append(self.begin_document)
         if args.toc:
             out.append(self.table_of_contents)
@@ -391,7 +398,7 @@ DLC = {length}
         out = []
         out.append(self.get_begin_table(signals, args))
         for sig in sorted(signals, key=self.sig_sort_key(args)):
-            out.append(args.sig_pattern.format(**self.signal_format_dict(sig)))
+            out.append(args.sig_pattern.format(**self.signal_format_dict(sig, args)))
         out.append(self.get_end_table(args))
         return "\n".join(out)
 
@@ -458,7 +465,7 @@ DLC = {length}
         out = {key: r"{\thead{%s}}" % val for key,val in out.items()}
         return out
 
-    def signal_format_dict(self, sig):
+    def signal_format_dict(self, sig, args):
         out = {
             'start' : sig.start,
             'length' : sig.length,
@@ -485,7 +492,10 @@ DLC = {length}
             'multiplexer_signal' : sig.multiplexer_signal,
         }
         out = {key:self.texify(val) for key,val in out.items()}
-        out['name'] = r'\sig{%s}' % sig.name
+        if args.sig_name_break_anywhere:
+            out['name'] = r'\sig{%s}' % sig.name
+        else:
+            out['name'] = r'\sig{%s}' % self.break_sig_name(self.texify(sig.name))
         return out
 
     def texify(self, val):
@@ -508,6 +518,28 @@ DLC = {length}
 
         val = val.replace("°", r"\degree ")
         return val
+
+    @classmethod
+    def break_sig_name(cls, name):
+        # I'm starting and ending +/-1 to avoid trouble with look ahead and look back
+        # I wouldn't want a line break before the first or last character, anyway
+        i = 1
+        n = len(name) - 1
+        while i < n:
+            # "CamelCase" -> "Camel\-Case", "CANMessage" -> "CAN\-Message"
+            if name[i].isupper() and name[i+1].islower():
+                name = name[:i] + cls.optional_line_break + name[i:]
+                i += len(cls.optional_line_break)
+            # "CommandID" -> "Command\-ID"
+            if name[i].isupper() and name[i-1].islower():
+                name = name[:i] + cls.optional_line_break + name[i:]
+                i += len(cls.optional_line_break)
+            # "snake\_case" -> "snake\_\-case"
+            if name[i] != "\\" and not name[i].isalpha() and name[i+1].isalpha():
+                name = name[:i+1] + cls.optional_line_break + name[i+1:]
+                i += len(cls.optional_line_break)
+            i += 1
+        return name
 
     def get_datatype(self, sig):
         if sig.is_float:
@@ -561,3 +593,4 @@ def add_argument_group(parser):
     default_sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
     group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")
+    group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")

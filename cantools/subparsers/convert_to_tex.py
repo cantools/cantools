@@ -380,11 +380,18 @@ DLC = {length}
     def measure_s_column(self, col, signals, args):
         max_left = 0
         max_right = 0
+        max_exp = 0
         for sig in signals:
             val = self.signal_format_dict(sig, args)[col]
             if val is None:
                 val = 0
-            val = "{:0f}".format(val).rstrip("0")
+            val = str(val)
+            if "E" in val:
+                val, exp = val.split("E", 1)
+                exp = len(exp)
+            else:
+                exp = 0
+
             if "." in val:
                 val = val.split(".", 1)
                 left, right = len(val[0]), len(val[1])
@@ -395,7 +402,11 @@ DLC = {length}
                 max_left = left
             if right > max_right:
                 max_right = right
-        return "S[table-format=%s.%s]" % (max_left, max_right)
+            if exp > max_exp:
+                max_exp = exp
+
+        max_exp = "E%s" % max_exp if max_exp else ""
+        return "S[table-format=%s.%s%s]" % (max_left, max_right, max_exp)
 
     def format_header(self, args):
         return args.sig_pattern.format(**self.header_format_dict())

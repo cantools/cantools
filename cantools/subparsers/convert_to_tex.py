@@ -631,7 +631,7 @@ def add_argument_group(parser):
     group.add_argument("--class-option", dest="class_options", default=['a4paper'], action="append", help="")
     group.add_argument("--landscape", dest="class_options", const="landscape", action="append_const", help="a shortcut for `--class-option landscape`")
     group.add_argument("--toc", action="store_true", help="insert a table of contents")
-    group.add_argument("--env", type=Environmet, choices=Converter.ENVS, default=Converter.ENVS[0], help="the environment to use for the signals")
+    group.add_argument("--env", type=Environmet, choices=Converter.ENVS, default=Converter.ENVS[-1], help="the environment to use for the signals")
     group.add_argument("--div", default=12, help="the bigger this factor, the bigger the text body. see https://ctan.org/pkg/typearea")
     group.add_argument("--title")
     group.add_argument("--date")

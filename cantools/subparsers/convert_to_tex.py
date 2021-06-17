@@ -424,6 +424,8 @@ DLC = {length}
 
     def get_sig_pattern(self, args, is_muxed):
         if is_muxed:
+            if not args.sig_pattern_mux:
+                args.sig_pattern_mux = args.sig_pattern.replace("{name}", "{name} & {mux}")
             return args.sig_pattern_mux
         else:
             return args.sig_pattern
@@ -638,10 +640,9 @@ def add_argument_group(parser):
     group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")
     group.add_argument("--sig-before-tabular", default="\\begingroup\n\\centering", help=r"TeX code put before each signal table")
     group.add_argument("--sig-after-tabular", default="\\par\n\\endgroup", help=r"TeX code put after each signal table")
-    default_sig_pattern_mux = "\t{name} & {mux} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
-    default_sig_pattern = default_sig_pattern_mux.replace(" & {mux}", "")
+    default_sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
     group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
-    group.add_argument("--sig-pattern-mux", default=default_sig_pattern_mux, help=r"used instead of --sig-pattern if message contains multiplexed signals")
+    group.add_argument("--sig-pattern-mux", help=r"used instead of --sig-pattern if message contains multiplexed signals. If this is empty the value of --sig-pattern is used and a column {mux} is added after {name}.")
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")
     group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")
     group.add_argument("--sig-name-before-break-character", default="-", help=r"inserted before a line break inside of a signal name (only without --sig-name-break-anywhere)")

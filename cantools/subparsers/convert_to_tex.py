@@ -415,11 +415,20 @@ DLC = {length}
         if not signals:
             return args.sig_none
 
+        signals = list(signals)
+        signals.sort(key=self.sig_sort_key(args))
+
         out = []
         out.append(self.get_begin_table(signals, args, is_muxed))
-        for sig in sorted(signals, key=self.sig_sort_key(args)):
+        for sig in signals:
             out.append(self.get_sig_pattern(args, is_muxed).format(**self.signal_format_dict(sig, args)))
         out.append(self.get_end_table(args))
+
+        details = self.get_details(signals, args)
+        if details:
+            out.append("\n")
+            out.append(details)
+
         return "\n".join(out)
 
     def get_sig_pattern(self, args, is_muxed):
@@ -617,6 +626,69 @@ DLC = {length}
         return out
 
 
+    def get_details(self, signals, args):
+        out = []
+        for sig in signals:
+            details = self.get_signal_details(sig, args)
+            if details:
+                out.append(args.detail_item_pattern.format(**self.signal_format_dict(sig, args)) + details)
+        if out:
+            out.insert(0, args.details_header)
+            out.insert(1, args.before_details)
+            out.append(args.after_details)
+        return "\n".join(out)
+
+    def get_signal_details(self, sig, args):
+        if not sig.multiplexer_ids and not sig.comment and not sig.choices:
+            return ""
+
+        out = []
+
+        multiplexer_ids = sig.multiplexer_ids
+        if multiplexer_ids:
+            multiplexer_ids = tuple(args.mux_id_pattern.format(muxid) for muxid in multiplexer_ids)
+            multiplexer_signal = self.texify(sig.multiplexer_signal)
+            if len(multiplexer_ids) == 1:
+                multiplexer_id = multiplexer_ids[0]
+                multiplexer_id = self.texify(multiplexer_id)
+                out.append(args.mux_pattern_one.format(multiplexer_signal=multiplexer_signal, multiplexer_id=multiplexer_id))
+            else:
+                sep = args.mux_sep
+                last_sep = args.mux_sep_last
+                multiplexer_ids = sep.join(multiplexer_ids[:-1]) + last_sep + multiplexer_ids[-1]
+                multiplexer_ids = self.texify(multiplexer_ids)
+                out.append(args.mux_pattern_many.format(multiplexer_signal=multiplexer_signal, multiplexer_ids=multiplexer_ids))
+            out.append("")
+        elif args.mux_pattern_none:
+            out.append(args.mux_pattern_none)
+            out.append("")
+
+        if sig.comment:
+            out.append(self.texify(sig.comment).replace('\n', r'\\'))
+            out.append("")
+
+        if sig.choices:
+            choices_str = ""
+            choices_str += args.before_choices_header
+            choices_str += args.choices_header
+            choices_str += args.before_choices
+
+            if not args.choice_sep:
+                args.choice_sep = "\n"
+            choices = list(sig.choices.items())
+            choices_str_inner = args.choice_sep.join(args.choice_pattern.format(num_value=num_value, str_value=str_value) for num_value, str_value in choices[:-1])
+            if choices_str_inner:
+                choices_str_inner += args.choice_sep_last
+            choices_str_inner += args.choice_pattern.format(num_value=choices[-1][0], str_value=choices[-1][1])
+            choices_str += choices_str_inner
+
+            choices_str += args.after_choices
+            out.append(choices_str)
+            out.append("")
+
+        return "\n".join(out)
+
+
 def add_argument_group(parser):
     def length(val):
         if re.match(r"^\d*([.,]\d*)?$", val):
@@ -642,6 +714,26 @@ def add_argument_group(parser):
     group.add_argument("--footer-right", default=r"Page \thepage\ of \pageref{LastPage}")
     group.add_argument("--table-break-text", default="(continued on next page)", help=r"a text shown at the bottom of a page where a long table is broken")
     group.add_argument("--table-break-text-align", default="r", help=r"the column specification for --table-break-text, e.g. r, l or c")
+
+    group.add_argument("--details-header", default=r"%\subsection{Comments, allowed values and multiplexing details}", help=r"header of a list showing comments, values and multiplexing details")
+    group.add_argument("--before-details", default=r"\begin{description}")
+    group.add_argument("--detail-item-pattern", default=r"\item[{name}] ", help=r"the item label in a list showing comments, values and multiplexing details")
+    group.add_argument("--after-details", default=r"\end{description}")
+
+    group.add_argument("--before-choices-header", default="\t\\begin{tabular}{@{}l@{ }l}\n\t\multicolumn{2}{@{}l}{")
+    group.add_argument("--choices-header", default="Allowed values:")
+    group.add_argument("--before-choices", default="} \\\\\n")
+    group.add_argument("--choice-pattern", default="\t"+r"\quad\textbullet~0x{num_value:x} & {str_value} \\")
+    group.add_argument("--choice-sep", default="\n")
+    group.add_argument("--choice-sep-last", default="\n")
+    group.add_argument("--after-choices", default="\n\t\\end{tabular}")
+
+    group.add_argument("--mux-pattern-none", default="~")
+    group.add_argument("--mux-pattern-one", default=r"This signal is available only if {multiplexer_signal} has the value {multiplexer_id}.")
+    group.add_argument("--mux-pattern-many", default=r"This signal is available only if {multiplexer_signal} has one of the values {multiplexer_ids}.")
+    group.add_argument("--mux-id-pattern", default=r"0x{:x}")
+    group.add_argument("--mux-sep", default=r", ")
+    group.add_argument("--mux-sep-last", default=r" or ")
 
     group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")
     group.add_argument("--sig-before-tabular", default="\\begingroup\n\\centering", help=r"TeX code put before each signal table")

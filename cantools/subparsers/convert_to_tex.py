@@ -299,11 +299,11 @@ DLC = {length}
         format_dict = self.message_format_dict(msg)
         out = []
         out.append(self.begin_msg.format(**format_dict))
-        out.append(self.format_signals(msg.signals, args))
+        out.append(self.format_signals(msg.signals, args, msg.is_multiplexed()))
         out.append(self.end_msg.format(**format_dict))
         return "\n".join(out)
 
-    def get_begin_table(self, signals, args):
+    def get_begin_table(self, signals, args, is_muxed):
         out = ""
         if args.sig_before_tabular:
             out += args.sig_before_tabular + "\n"
@@ -311,9 +311,9 @@ DLC = {length}
         out += r"\begin{%s}" % args.env.get_env_name()
         if args.env.needs_width():
             out += "{%s}" % args.sig_width
-        out += r"{%s}" % self.get_colspec(signals, args)
+        out += r"{%s}" % self.get_colspec(signals, args, is_muxed)
 
-        header = self.format_header(args)
+        header = self.format_header(args, is_muxed)
         if not args.env.is_long():
             out += "\n\\toprule"
             out += "\n" + header
@@ -365,10 +365,10 @@ DLC = {length}
         out = {key:self.texify(val) for key,val in out.items()}
         return out
 
-    def get_colspec(self, signals, args):
+    def get_colspec(self, signals, args, is_muxed):
         coltypes = self.colspec_dict(args)
         out = []
-        for col in args.sig_pattern.rstrip("\\").split("&"):
+        for col in self.get_sig_pattern(args, is_muxed).rstrip("\\").split("&"):
             col = col.strip()
             col = col[1:][:-1]
             alignment = coltypes.get(col, "l")
@@ -408,19 +408,25 @@ DLC = {length}
         max_exp = "E%s" % max_exp if max_exp else ""
         return "S[table-format=%s.%s%s]" % (max_left, max_right, max_exp)
 
-    def format_header(self, args):
-        return args.sig_pattern.format(**self.header_format_dict())
+    def format_header(self, args, is_muxed):
+        return self.get_sig_pattern(args, is_muxed).format(**self.header_format_dict())
 
-    def format_signals(self, signals, args):
+    def format_signals(self, signals, args, is_muxed):
         if not signals:
             return args.sig_none
 
         out = []
-        out.append(self.get_begin_table(signals, args))
+        out.append(self.get_begin_table(signals, args, is_muxed))
         for sig in sorted(signals, key=self.sig_sort_key(args)):
-            out.append(args.sig_pattern.format(**self.signal_format_dict(sig, args)))
+            out.append(self.get_sig_pattern(args, is_muxed).format(**self.signal_format_dict(sig, args)))
         out.append(self.get_end_table(args))
         return "\n".join(out)
+
+    def get_sig_pattern(self, args, is_muxed):
+        if is_muxed:
+            return args.sig_pattern_mux
+        else:
+            return args.sig_pattern
 
     def colspec_dict(self, args):
         text = 'c'
@@ -632,8 +638,10 @@ def add_argument_group(parser):
     group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")
     group.add_argument("--sig-before-tabular", default="\\begingroup\n\\centering", help=r"TeX code put before each signal table")
     group.add_argument("--sig-after-tabular", default="\\par\n\\endgroup", help=r"TeX code put after each signal table")
-    default_sig_pattern = "\t{name} & {mux} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
+    default_sig_pattern_mux = "\t{name} & {mux} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
+    default_sig_pattern = default_sig_pattern_mux.replace(" & {mux}", "")
     group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
+    group.add_argument("--sig-pattern-mux", default=default_sig_pattern_mux, help=r"used instead of --sig-pattern if message contains multiplexed signals")
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")
     group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")
     group.add_argument("--sig-name-before-break-character", default="-", help=r"inserted before a line break inside of a signal name (only without --sig-name-break-anywhere)")

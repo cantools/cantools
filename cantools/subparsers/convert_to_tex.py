@@ -177,7 +177,10 @@ DLC = {length}
             self.save_tex(fn_in, db, args)
             cmd = self.cmd_tex + [fn_in]
             for i in range(self.get_number_runs(args)):
-                subprocess.run(cmd)
+                p = subprocess.run(cmd)
+                if p.returncode != 0:
+                    print("\n! Not rerunning %s because an error occurred" % cmd[0])
+                    break
             os.chdir(cwd)
             shutil.move(fn_out, fn)
 

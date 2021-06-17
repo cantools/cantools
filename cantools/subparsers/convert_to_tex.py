@@ -426,8 +426,12 @@ DLC = {length}
         if is_muxed:
             if not args.sig_pattern_mux:
                 args.sig_pattern_mux = args.sig_pattern.replace("{name}", "{name} & {mux}")
+            if not r'\\' in args.sig_pattern_mux:
+                args.sig_pattern_mux += r' \\'
             return args.sig_pattern_mux
         else:
+            if not r'\\' in args.sig_pattern:
+                args.sig_pattern += r' \\'
             return args.sig_pattern
 
     def colspec_dict(self, args):
@@ -641,7 +645,7 @@ def add_argument_group(parser):
     group.add_argument("--sig-before-tabular", default="\\begingroup\n\\centering", help=r"TeX code put before each signal table")
     group.add_argument("--sig-after-tabular", default="\\par\n\\endgroup", help=r"TeX code put after each signal table")
     default_sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
-    group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
+    group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like")
     group.add_argument("--sig-pattern-mux", help=r"used instead of --sig-pattern if message contains multiplexed signals. If this is empty the value of --sig-pattern is used and a column {mux} is added after {name}.")
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")
     group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")

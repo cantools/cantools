@@ -451,6 +451,7 @@ DLC = {length}
             'is_multiplexer' : text,
             'multiplexer_ids' : text,
             'multiplexer_signal' : text,
+            'mux' : text,
         }
         return out
 
@@ -480,6 +481,7 @@ DLC = {length}
             'is_multiplexer' : 'Multiplexer?',
             'multiplexer_ids' : 'Multiplexer IDs',
             'multiplexer_signal' : 'Multiplexer signal',
+            'mux' : 'Mux',
         }
         out = {key:self.texify(val) for key,val in out.items()}
         out = {key: r"{\thead{%s}}" % val for key,val in out.items()}
@@ -510,6 +512,7 @@ DLC = {length}
             'is_multiplexer' : sig.is_multiplexer,
             'multiplexer_ids' : sig.multiplexer_ids,
             'multiplexer_signal' : sig.multiplexer_signal,
+            'mux' : self.get_mux(sig)
         }
         out = {key:self.texify(val) for key,val in out.items()}
         if args.sig_name_break_anywhere:
@@ -585,6 +588,20 @@ DLC = {length}
         else:
             raise ValueError("invalid value for {sig.name}.byte_order: {sig.byte_order}".format(sig=sig))
 
+    def get_mux(self, sig):
+        out = ""
+
+        if sig.multiplexer_ids:
+            if len(sig.multiplexer_ids) == 1:
+                out += "m%s" % sig.multiplexer_ids[0]
+            else:
+                out += "mx"
+
+        if sig.is_multiplexer:
+            out += "M"
+
+        return out
+
 
 def add_argument_group(parser):
     def length(val):
@@ -615,7 +632,7 @@ def add_argument_group(parser):
     group.add_argument("--sig-width", default="1", type=length, help=r"if --env needs a width, this is it's argument. If no unit is specified \linewidth is assumed.")
     group.add_argument("--sig-before-tabular", default="\\begingroup\n\\centering", help=r"TeX code put before each signal table")
     group.add_argument("--sig-after-tabular", default="\\par\n\\endgroup", help=r"TeX code put after each signal table")
-    default_sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
+    default_sig_pattern = "\t{name} & {mux} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
     group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. Must contain the \\. Remember that your shell may require to escape a backslash.")
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")
     group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")

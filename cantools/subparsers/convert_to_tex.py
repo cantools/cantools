@@ -319,7 +319,7 @@ DLC = {length}
             out += "\n" + header
             out += "\n\\midrule"
         else:
-            indentation = self.get_indentation(args)
+            indentation = self.get_indentation(args, is_muxed)
             out += "\n" + indentation + r"\toprule"
             out += "\n" + indentation + header
             out += "\n" + indentation + r"\midrule"
@@ -337,8 +337,8 @@ DLC = {length}
 
         return out
 
-    def get_indentation(self, args):
-        pattern = args.sig_pattern
+    def get_indentation(self, args, is_muxed):
+        pattern = self.get_sig_pattern(args, is_muxed)
         i = 0
         n = len(pattern)
         while i<n and pattern[i].isspace():

@@ -293,7 +293,7 @@ DLC = {length}
         if key == self.SIG_SORT_KEY_NAME:
             return lambda sig: sig.name
         else:
-            return lambda sig: sig.start
+            return lambda sig: (sig.start, sig.multiplexer_ids[0] if sig.multiplexer_ids else 0)
 
     def format_message(self, msg, args):
         format_dict = self.message_format_dict(msg)

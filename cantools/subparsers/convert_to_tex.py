@@ -373,15 +373,15 @@ DLC = {length}
             col = col[1:][:-1]
             alignment = coltypes.get(col, "l")
             if alignment == "S":
-                alignment = self.measure_s_column(col, signals)
+                alignment = self.measure_s_column(col, signals, args)
             out.append(alignment)
         return "".join(out)
 
-    def measure_s_column(self, col, signals):
+    def measure_s_column(self, col, signals, args):
         max_left = 0
         max_right = 0
         for sig in signals:
-            val = getattr(sig, col)
+            val = self.signal_format_dict(sig, args)[col]
             if val is None:
                 val = 0
             val = "{:0f}".format(val).rstrip("0")

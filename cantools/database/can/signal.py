@@ -174,8 +174,10 @@ class Signal(object):
 
     @property
     def start(self):
-        """The start bit position of the signal within its message.
+        """The start bit position of the signal within its message as it is saved in the dbc file.
 
+        lsb in case of little_endian,
+        msb in case of big_endian.
         """
 
         return self._start
@@ -183,6 +185,27 @@ class Signal(object):
     @start.setter
     def start(self, value):
         self._start = value
+
+    @property
+    def lsb(self):
+        """The Startbit as displayed in Vector CANdb++.
+
+        The position of the least significant bit of this signal.
+        This is equivalent to start iff byte_order == little_endian.
+        """
+
+        if self.byte_order == 'big_endian':
+            i = self.start
+            for j in range(self.length-1):
+                if i % 8 == 0:
+                    i += 16
+                i -= 1
+            return i
+        elif self.byte_order == 'little_endian':
+            return self.start
+        else:
+            raise ValueError("invalid value for byte_order: %s" % self.byte_order)
+
 
     @property
     def length(self):

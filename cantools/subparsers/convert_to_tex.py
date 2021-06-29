@@ -6,6 +6,7 @@ import tempfile
 import subprocess
 import datetime
 import re
+import argparse
 
 
 CANTOOLS_LITTLE_ENDIAN = "little_endian"
@@ -88,8 +89,9 @@ class Converter:
     MSG_SORT_KEYS = (MSG_SORT_KEY_ID, MSG_SORT_KEY_NAME)
 
     SIG_SORT_KEY_START_BIT = "start"
+    SIG_SORT_KEY_LSB = "lsb"
     SIG_SORT_KEY_NAME = "name"
-    SIG_SORT_KEYS = (SIG_SORT_KEY_START_BIT, SIG_SORT_KEY_NAME)
+    SIG_SORT_KEYS = (SIG_SORT_KEY_START_BIT, SIG_SORT_KEY_LSB, SIG_SORT_KEY_NAME)
 
     ENVS = (
         Environmet(Environmet.ENV_TABULAR),
@@ -292,6 +294,8 @@ DLC = {length}
         key = args.sig_sort_key
         if key == self.SIG_SORT_KEY_NAME:
             return lambda sig: sig.name
+        elif key == self.SIG_SORT_KEY_LSB:
+            return lambda sig: (sig.lsb, sig.multiplexer_ids[0] if sig.multiplexer_ids else 0)
         else:
             return lambda sig: (sig.start, sig.multiplexer_ids[0] if sig.multiplexer_ids else 0)
 
@@ -452,6 +456,7 @@ DLC = {length}
         out = {
             'name' : x,
             'start' : num,
+            'lsb' : num,
             'length' : num,
             'byte_order' : text,
             'byte_order_abbr' : text,
@@ -482,6 +487,7 @@ DLC = {length}
         out = {
             'name' : 'Name',
             'start' : 'Start',
+            'lsb' : 'Startbit',
             'length' : 'Bits',
             'byte_order' : 'Byte order',
             'byte_order_abbr' : 'E',
@@ -513,6 +519,7 @@ DLC = {length}
     def signal_format_dict(self, sig, args):
         out = {
             'start' : sig.start,
+            'lsb' : sig.lsb,
             'length' : sig.length,
             'byte_order' : self.get_byte_order(sig),
             'byte_order_abbr' : self.get_byte_order_abbr(sig),
@@ -694,6 +701,22 @@ def add_argument_group(parser):
         if re.match(r"^\d*([.,]\d*)?$", val):
             val += r"\linewidth"
         return val
+
+    class SwitchToVectorOutput(argparse.Action):
+
+        def __init__(self, *l, **kw):
+            kw.setdefault('nargs', 0)
+            super().__init__(*l, **kw)
+
+        def __call__(self, parser, args, values, option_string=None):
+            if args.sig_pattern:
+                args.sig_pattern = args.sig_pattern.replace('{start}', '{lsb}')
+            if args.sig_pattern_mux:
+                args.sig_pattern_mux = args.sig_pattern_mux.replace('{start}', '{lsb}')
+            if args.sig_sort_key == Converter.SIG_SORT_KEY_START_BIT:
+                args.sig_sort_key = Converter.SIG_SORT_KEY_LSB
+
+
     group = parser.add_argument_group("TeX converter options")
     group.add_argument("--msg-sort", dest="msg_sort_key", choices=Converter.MSG_SORT_KEYS, default=Converter.MSG_SORT_KEY_ID)
     group.add_argument("--sig-sort", dest="sig_sort_key", choices=Converter.SIG_SORT_KEYS, default=Converter.SIG_SORT_KEY_START_BIT)
@@ -741,6 +764,7 @@ def add_argument_group(parser):
     default_sig_pattern = "\t{name} && {start} & {length} & {byte_order_abbr} && {datatype} & {scale} & {offset} && {minimum} & {maximum} & {unit} \\\\"
     group.add_argument("--sig-pattern", default=default_sig_pattern, help=r"a pattern specifying how a row in the table of signals is supposed to look like. If this is empty --sig-pattern-mux is used instead.")
     group.add_argument("--sig-pattern-mux", help=r"used instead of --sig-pattern if message contains multiplexed signals. If this is empty the value of --sig-pattern is used and a column {mux} is added after {name}.")
+    group.add_argument("--vector", action=SwitchToVectorOutput, help=r"Output start bit as Vector CANdb++ does it. Replaces {start} with {lsb} in --sig-pattern and --sig-pattern-mux and --sig-sort to %(lsb)s if it is %(start)s" % dict(lsb=Converter.SIG_SORT_KEY_LSB, start=Converter.SIG_SORT_KEY_START_BIT))
     group.add_argument("--sig-none", default="This message has no signals.", help=r"a text to be printed instead of the signals table if no signals are defined for that message")
     group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")
     group.add_argument("--sig-name-before-break-character", default="-", help=r"inserted before a line break inside of a signal name (only without --sig-name-break-anywhere)")

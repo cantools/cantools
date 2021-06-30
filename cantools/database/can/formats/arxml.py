@@ -674,9 +674,14 @@ class SystemLoader(object):
             category = self._get_unique_arxml_child(compu_method, 'CATEGORY')
 
             if category is None:
-                raise ValueError(
-                    'CATEGORY in compu method {} does not exist.'.format(
-                        compu_method.find('SHORT-NAME').text))
+                # if no category is specified, we assume that the
+                # physical value of the signal corresponds to its
+                # binary representation.
+                return (minimum,
+                        maximum,
+                        factor,
+                        offset,
+                        choices)
 
             category = category.text
 
@@ -720,7 +725,7 @@ class SystemLoader(object):
             if base_type_encoding is None:
                 raise ValueError(
                     'BASE-TYPE-ENCODING in base type {} does not exist.'.format(
-                        base_type.find('SHORT-NAME').text))
+                        base_type.find('./ns:SHORT-NAME', self._xml_namespaces).text))
 
             base_type_encoding = base_type_encoding.text
 

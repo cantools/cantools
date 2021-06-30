@@ -34,20 +34,23 @@ def _print_j1939_frame_id(message):
     print('      Format:         {}'.format(pdu_format))
 
 
-def _dump_can_database(dbase, with_comments=False):
+def _dump_can_database(dbase, with_comments=False, width=None):
 
-    WIDTH = 80
-    try:
-        import curses
-    except ModuleNotFoundError:  # pragma: no cover
-        pass
-    else:
+    if width is None:
+        WIDTH = 80
         try:
-            _stdscr = curses.initscr()
-            _, WIDTH = _stdscr.getmaxyx()  # pragma: no cover
-            curses.endwin()  # pragma: no cover
-        except Exception as e:
+            import curses
+        except ModuleNotFoundError:  # pragma: no cover
             pass
+        else:
+            try:
+                _stdscr = curses.initscr()
+                _, WIDTH = _stdscr.getmaxyx()  # pragma: no cover
+                curses.endwin()  # pragma: no cover
+            except Exception as e:
+                pass
+    else:
+        WIDTH = width
 
     print('================================= Messages =================================')
     print()
@@ -127,7 +130,7 @@ def _do_dump(args):
                                strict=not args.no_strict)
 
     if isinstance(dbase, CanDatabase):
-        _dump_can_database(dbase, args.with_comments)
+        _dump_can_database(dbase, args.with_comments, args.width)
     elif isinstance(dbase, DiagnosticsDatabase):
         _dump_diagnostics_database(dbase)
     else:
@@ -146,6 +149,10 @@ def add_subparser(subparsers):
         '--no-strict',
         action='store_true',
         help='Skip database consistency checks.')
+    dump_parser.add_argument(
+        '--width',
+        type=int,
+        help='max width of the output')
     dump_parser.add_argument(
         'database',
         help='Database file.')

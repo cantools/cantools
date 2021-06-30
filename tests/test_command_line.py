@@ -759,6 +759,7 @@ BATTERY_VT(
             'cantools',
             'dump',
             '--with-comments',
+            '--width', '80',
             'tests/files/dbc/motohawk_with_comments.dbc'
         ]
 

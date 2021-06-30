@@ -20,6 +20,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install coveralls
+        apt install gcc-8
     - name: Test
       run: |
         coverage run --source=cantools setup.py test

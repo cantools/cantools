@@ -385,7 +385,10 @@ DLC = {length}
         max_left = 0
         max_right = 0
         max_exp = 0
+        contains_dec = False
         for sig in signals:
+            if self.is_hex(sig, col, args):
+                continue
             val = self.signal_format_dict(sig, args)[col]
             if val is None:
                 val = 0
@@ -408,6 +411,10 @@ DLC = {length}
                 max_right = right
             if exp > max_exp:
                 max_exp = exp
+            contains_dec = True
+
+        if not contains_dec:
+            return args.hex_alignment
 
         max_exp = "E%s" % max_exp if max_exp else ""
         return "S[table-format=%s.%s%s]" % (max_left, max_right, max_exp)
@@ -516,6 +523,7 @@ DLC = {length}
         out = {key: r"{\thead{%s}}" % val for key,val in out.items()}
         return out
 
+    keys_hex = ('initial', 'minimum', 'maximum')
     def signal_format_dict(self, sig, args):
         out = {
             'start' : sig.start,
@@ -544,12 +552,23 @@ DLC = {length}
             'multiplexer_signal' : sig.multiplexer_signal,
             'mux' : self.get_mux(sig)
         }
-        out = {key:self.texify(val) for key,val in out.items()}
+        for key, val in out.items():
+            if val is not None and self.is_hex(sig, key, args) and int(val) == val:
+                out[key] = "{%s}" % args.hex_format % int(val)
+            else:
+                out[key] = self.texify(val)
         if args.sig_name_break_anywhere:
             out['name'] = r'\sig{%s}' % sig.name
         else:
             out['name'] = r'\sig{%s}' % self.break_sig_name(self.texify(sig.name))
         return out
+
+    def is_hex(self, sig, col, args):
+        if col not in self.keys_hex:
+            return False
+        if args.hex is None:
+            return not bool(sig.unit)
+        return args.hex
 
     def texify(self, val):
         if val is None:
@@ -769,3 +788,7 @@ def add_argument_group(parser):
     group.add_argument("--sig-name-break-anywhere", action="store_true", help=r"use the url package to allow a line break in a signal name after any character")
     group.add_argument("--sig-name-before-break-character", default="-", help=r"inserted before a line break inside of a signal name (only without --sig-name-break-anywhere)")
     group.add_argument("--sig-name-after-break-character", default=r"\hbox{\footnotesize$\hookrightarrow$ }", help=r"inserted after a line break inside of a signal name (only without --sig-name-break-anywhere)")
+    group.add_argument("--hex", action='store_true', default=None, help="print all values of the columns %s as hexadecimal numbers" % ", ".join(Converter.keys_hex))
+    group.add_argument("--dec", action='store_false', default=None, dest="hex", help="print all values of the columns %s as decimal numbers" % ", ".join(Converter.keys_hex))
+    group.add_argument("--hex-format", default=r"\texttt{0x%02X}", help="how to format hexadecimal numbers")
+    group.add_argument("--hex-alignment", default="c", help="the column specification of columns containing only hexadecimal numbers")

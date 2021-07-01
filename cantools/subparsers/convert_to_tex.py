@@ -701,11 +701,15 @@ DLC = {length}
 
             if not args.choice_sep:
                 args.choice_sep = "\n"
+            def fmt_num(num_value):
+                if self.is_hex(sig, self.keys_hex[0], args):
+                    num_value = args.hex_format % num_value
+                return num_value
             choices = list(sig.choices.items())
-            choices_str_inner = args.choice_sep.join(args.choice_pattern.format(num_value=num_value, str_value=str_value) for num_value, str_value in choices[:-1])
+            choices_str_inner = args.choice_sep.join(args.choice_pattern.format(num_value=fmt_num(num_value), str_value=str_value) for num_value, str_value in choices[:-1])
             if choices_str_inner:
                 choices_str_inner += args.choice_sep_last
-            choices_str_inner += args.choice_pattern.format(num_value=choices[-1][0], str_value=choices[-1][1])
+            choices_str_inner += args.choice_pattern.format(num_value=fmt_num(choices[-1][0]), str_value=choices[-1][1])
             choices_str += choices_str_inner
 
             choices_str += args.after_choices
@@ -765,7 +769,7 @@ def add_argument_group(parser):
     group.add_argument("--before-choices-header", default="\t\\begin{tabular}{@{}l@{ }l}\n\t\multicolumn{2}{@{}l}{")
     group.add_argument("--choices-header", default="Allowed values:")
     group.add_argument("--before-choices", default="} \\\\\n")
-    group.add_argument("--choice-pattern", default="\t"+r"\quad\textbullet~0x{num_value:x} & {str_value} \\")
+    group.add_argument("--choice-pattern", default="\t"+r"\quad\textbullet~{num_value} & {str_value} \\")
     group.add_argument("--choice-sep", default="\n")
     group.add_argument("--choice-sep-last", default="\n")
     group.add_argument("--after-choices", default="\n\t\\end{tabular}")

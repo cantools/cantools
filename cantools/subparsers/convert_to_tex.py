@@ -705,11 +705,13 @@ DLC = {length}
                 if self.is_hex(sig, self.keys_hex[0], args):
                     num_value = args.hex_format % num_value
                 return num_value
+            def fmt_str(str_value):
+                return self.texify(str_value)
             choices = list(sig.choices.items())
-            choices_str_inner = args.choice_sep.join(args.choice_pattern.format(num_value=fmt_num(num_value), str_value=str_value) for num_value, str_value in choices[:-1])
+            choices_str_inner = args.choice_sep.join(args.choice_pattern.format(num_value=fmt_num(num_value), str_value=fmt_str(str_value)) for num_value, str_value in choices[:-1])
             if choices_str_inner:
                 choices_str_inner += args.choice_sep_last
-            choices_str_inner += args.choice_pattern.format(num_value=fmt_num(choices[-1][0]), str_value=choices[-1][1])
+            choices_str_inner += args.choice_pattern.format(num_value=fmt_num(choices[-1][0]), str_value=fmt_str(choices[-1][1]))
             choices_str += choices_str_inner
 
             choices_str += args.after_choices

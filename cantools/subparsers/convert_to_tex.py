@@ -8,6 +8,8 @@ import datetime
 import re
 import argparse
 
+from . import utils_argparse
+
 
 CANTOOLS_LITTLE_ENDIAN = "little_endian"
 CANTOOLS_BIG_ENDIAN = "big_endian"
@@ -722,9 +724,11 @@ DLC = {length}
 
 
 def add_argument_group(parser):
+    parser.formatter_class = utils_argparse.RawDescriptionArgumentDefaultsHelpFormatter
     parser.description += """
+
 Aside from machine readable formats you can also convert a database to pdf.
-This requires pdflatex with the packages:
+This requires pdflatex with the following packages:
 - typearea
 - parskip
 - booktabs
@@ -733,7 +737,7 @@ This requires pdflatex with the packages:
 - lastpage
 - hyperref
 - xltabular, ltablex or tabularx depending on --env
-- url if you use --sig-name-break-anywhere.
+- url if you use --sig-name-break-anywhere
 
 If you want to modify the LaTeX code before converting it to pdf
 you can also skip that conversion and export it to a tex-file.

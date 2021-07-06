@@ -29,9 +29,9 @@ jobs:
         make test-c-clean
         make test-c
         make test-c-clean
-        CC=gcc-8 make test-c
+        CC=gcc make test-c
         make test-c-clean
-        CC=clang-8 make test-c-src
+        CC=clang make test-c-src
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
 

@@ -722,6 +722,26 @@ DLC = {length}
 
 
 def add_argument_group(parser):
+    parser.description += """
+Aside from machine readable formats you can also convert a database to pdf.
+This requires pdflatex with the packages:
+- typearea
+- parskip
+- booktabs
+- siunitx
+- fancyhdr
+- lastpage
+- hyperref
+- xltabular, ltablex or tabularx depending on --env
+- url if you use --sig-name-break-anywhere.
+
+If you want to modify the LaTeX code before converting it to pdf
+you can also skip that conversion and export it to a tex-file.
+
+Running LaTeX will fail if the database contains invalid characters.
+So make sure -e is set correctly if necessary.
+"""
+
     def length(val):
         if re.match(r"^\d*([.,]\d*)?$", val):
             val += r"\linewidth"

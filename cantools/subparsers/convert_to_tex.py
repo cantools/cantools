@@ -56,6 +56,13 @@ class Environmet:
             return True
         return False
 
+    def fixed_width(self):
+        if not self.needs_width():
+            return False
+        if self.name == self.ENV_LTABLEX:
+            return False
+        return True
+
     def supports_x_column(self):
         return self.needs_width()
 
@@ -723,6 +730,20 @@ DLC = {length}
         return "\n".join(out)
 
 
+def get_description_envs():
+    out = [("--env", "takes width?", "fixed width?", "page break possible?")]
+    for env in Converter.ENVS:
+        out.append((env.name, str(env.needs_width()), str(env.fixed_width()), str(env.is_long())))
+    col_widths = [len(max((out[row][col] for row in range(len(out))), key=len)) for col in range(len(out[0]))]
+    col_fmt = ["%-" + str(w) + "s" for w in col_widths]
+    out = ["| %s |" % " | ".join(col_fmt[col] % ln[col] for col in range(len(ln))) for ln in out]
+    hline = "-" * len(out[0])
+    out.insert(0, hline)
+    out.insert(2, hline)
+    out.append(hline)
+    out = "\n".join(out)
+    return out
+
 def add_argument_group(parser):
     parser.formatter_class = utils_argparse.RawDescriptionArgumentDefaultsHelpFormatter
     parser.description += """
@@ -744,7 +765,19 @@ you can also skip that conversion and export it to a tex-file.
 
 Running LaTeX will fail if the database contains invalid characters.
 So make sure -e is set correctly if necessary.
+
+LaTeX has different environments to create tables.
+You can choose which one to use with the --env option.
+The following choices are available:
 """
+    parser.description += get_description_envs()
+    parser.description += """
+Tables which take no width are as wide as their content requires it.
+For tables which take a width a (max) width can be specified with --sig-width.
+If a table has a fixed width it is exactly as wide as specified with --sig-width.
+If a table takes a width but has no fixed width it can be narrower than --sig-width.
+"""
+
 
     def length(val):
         if re.match(r"^\d*([.,]\d*)?$", val):

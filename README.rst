@@ -255,6 +255,18 @@ Dump given database in a human readable format:
 
      ------------------------------------------------------------------------
 
+The convert subcommand
+^^^^^^^^^^^^^^^^^^^^^^
+
+Convert a database file from one format to another.
+Aside from machine readable formats you can also convert a database to tex or pdf (requires pdflatex).
+The desired output format is derived from the extension of outfile.
+
+.. code-block:: text
+
+   $ python3 -m cantools convert [options] infile outfile
+   $ python3 -m cantools convert --help
+
 The generate C source subcommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

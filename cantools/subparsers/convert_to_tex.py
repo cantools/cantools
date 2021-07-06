@@ -572,6 +572,38 @@ DLC = {length}
             out['name'] = r'\sig{%s}' % self.break_sig_name(self.texify(sig.name))
         return out
 
+    @staticmethod
+    def help_dict():
+        out = {
+            'name' : 'the name of the signal',
+            'start' : 'the start bit as it is saved in the dbc file: LSB if byte_order == little_endian, MSB if byte_order == big_endian',
+            'lsb' : 'the start bit as it is displayed by Vector CANdb++, the least significant bit',
+            'length' : 'the number of data bytes',
+            'byte_order' : 'the endianness',
+            'byte_order_abbr' : '{le} for little_endian or {be} for big_endian'.format(le=Converter.little_endian_abbr, be=Converter.big_endian_abbr),
+
+            'datatype' : 'a combination of is_float and is_signed',
+            'is_float' : '',
+            'is_signed' : '',
+
+            'initial' : '',
+            'scale' : '',
+            'offset' : '',
+            'minimum' : '',
+            'maximum' : '',
+            'unit' : '',
+
+            'choices' : '',
+            'comment' : '',
+            'comments' : '',
+
+            'is_multiplexer' : 'if True the value of this signal decides over other signals in this message',
+            'multiplexer_ids' : 'this signal applies only if multiplexer_signal has one of these values',
+            'multiplexer_signal' : 'another signal in this message which decides over this signal',
+            'mux' : '"mx" if this signal is multiplexed where the "x" is replaced by the multiplexer id if there is only one multiplexer id, "M" if this signal is a multiplexer',
+        }
+        return out
+
     def is_hex(self, sig, col, args):
         if col not in self.keys_hex:
             return False
@@ -744,6 +776,16 @@ def get_description_envs():
     out = "\n".join(out)
     return out
 
+def get_description_signal_pattern():
+    out = []
+    for key, helpstr in Converter.help_dict().items():
+        ln = "- {%s}" % key
+        if helpstr:
+            helpstr = helpstr[0].upper() + helpstr[1:]
+            ln += ": %s" % helpstr
+        out.append(ln)
+    return "\n".join(out)
+
 def add_argument_group(parser):
     parser.formatter_class = utils_argparse.RawDescriptionArgumentDefaultsHelpFormatter
     parser.description += """
@@ -776,7 +818,14 @@ Tables which take no width are as wide as their content requires it.
 For tables which take a width a (max) width can be specified with --sig-width.
 If a table has a fixed width it is exactly as wide as specified with --sig-width.
 If a table takes a width but has no fixed width it can be narrower than --sig-width.
+
+The content of the tables can be customized using --sig-pattern and --sig-pattern-mux.
+Different columns are separated by a `&`.
+If you want more space between two columns you can insert an empty column by using `&&`.
+The column specifications are generated automatically.
+You can use the following wild cards:
 """
+    parser.description += get_description_signal_pattern()
 
 
     def length(val):

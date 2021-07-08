@@ -681,7 +681,9 @@ class SystemLoader(object):
                         maximum,
                         factor,
                         offset,
-                        choices)
+                        choices,
+                        unit,
+                        comments)
 
             category = category.text
 

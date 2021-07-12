@@ -608,7 +608,7 @@ DLC = {length}
         if col not in self.keys_hex:
             return False
         if args.hex is None:
-            return not bool(sig.unit)
+            return not bool(sig.unit) and not sig.is_signed and not sig.is_float
         return args.hex
 
     def texify(self, val):

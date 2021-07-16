@@ -3,6 +3,8 @@ import os
 import re
 import shutil
 import unittest
+import types
+import functools
 
 try:
     from unittest.mock import patch
@@ -15,6 +17,35 @@ except ImportError:
     from io import StringIO
 
 import cantools
+
+
+def with_fake_screen_width(screen_width):
+    def decorator(test_method):
+        @functools.wraps(test_method)
+        def wrapper(*args, **kwargs):
+            default_curses = None
+            try:
+                import curses
+            except ImportError:
+                pass
+            else:
+                default_curses = curses
+                curses_mock_name = 'curses_mock'
+                curses_mock = types.ModuleType(curses_mock_name)
+                sys.modules['curses'] = curses_mock
+                curses_mock.initscr = lambda: types.SimpleNamespace(getmaxyx=lambda: (0, screen_width))
+                curses_mock.endwin = lambda: None
+
+            test_method_return = test_method(*args, **kwargs)
+
+            if default_curses is not None:
+                sys.modules['curses'] = default_curses
+
+            # A test method doesn't return anything, but return anyway to be
+            # completely transparent.
+            return test_method_return
+        return wrapper
+    return decorator
 
 
 def remove_date_time(string):
@@ -754,6 +785,7 @@ BATTERY_VT(
                 actual_output = stdout.getvalue()
                 self.assertEqual(actual_output, expected_output)
 
+    @with_fake_screen_width(screen_width=80)
     def test_dump_with_comments(self):
         argv = [
             'cantools',
@@ -826,6 +858,7 @@ BATTERY_VT(
                 actual_output = stdout.getvalue()
                 self.assertEqual(actual_output, expected_output)
 
+    @with_fake_screen_width(screen_width=80)
     def test_dump_with_comments_mux(self):
         argv = [
             'cantools',

@@ -849,7 +849,7 @@ def _dump_signal_mux_values(database):
                 'SG_MUL_VAL_ {frame_id} {name} {multiplexer} {ranges};'.format(
                     frame_id=get_dbc_frame_id(message),
                     name=signal.name,
-                    multiplexer=signal.multiplexer_signal,
+                    multiplexer=signal.multiplexer_signal.name,
                     ranges=ranges))
 
     return sig_mux_values

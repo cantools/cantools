@@ -4122,6 +4122,50 @@ class CanToolsDatabaseTest(unittest.TestCase):
             no_base_elem = loader._get_unique_arxml_child(loader._root, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "['AR-PACKAGES', '*AR-PACKAGE'] does not resolve into a unique node")
 
+    def test_no_compu_method_category_arxml(self):
+        db = cantools.db.load_file('tests/files/arxml/compu_method_no_category.arxml')
+
+        self.assertEqual(len(db.nodes), 0)
+
+        self.assertEqual(len(db.messages), 1)
+
+        # message
+        message_1 = db.messages[0]
+        self.assertEqual(message_1.frame_id, 0x5f0)
+        self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.name, 'MY_MESSAGE_XIX_MY_CLUSTER')
+        self.assertEqual(message_1.length, 8)
+        self.assertEqual(message_1.senders, [])
+        self.assertEqual(message_1.send_type, None)
+        self.assertEqual(message_1.cycle_time, 200)
+        self.assertEqual(message_1.comments, None)
+        self.assertEqual(message_1.bus_name, None)
+        self.assertEqual(len(message_1.signals), 1)
+
+        # signal
+        signal_1 = message_1.signals[0]
+        self.assertEqual(signal_1.name, "MY_SIGNAL_XIX_MY_MESSAGE_XIX_MY_CLUSTER")
+        self.assertEqual(signal_1.start, 15)
+        self.assertEqual(signal_1.length, 1)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, "little_endian")
+        self.assertEqual(signal_1.initial, 0)
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comments, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+
     def test_system_missing_factor_arxml(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(

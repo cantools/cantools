@@ -110,6 +110,7 @@ CFLAGS_EXTRA_CLANG := \
 	-Wzero-length-array
 
 CFLAGS := \
+	-std=c99 \
 	-Wall \
 	-Wextra \
 	-Wdouble-promotion \

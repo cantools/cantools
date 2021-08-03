@@ -771,7 +771,7 @@ class Graph:
 
     '''
     A container for the values to be plotted.
-    The corrsponding signal names are the keys in Signals.values.
+    The corresponding signal names are the keys in Signals.values.
     The format how to plot this data is stored in Signals.signals (a list of Signal objects).
 
     plotted_signal stores a Signal object with which this graph has been plotted already

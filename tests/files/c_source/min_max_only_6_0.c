@@ -156,6 +156,91 @@ int min_max_only_6_0_symbol1_unpack(
     return (0);
 }
 
+static int min_max_only_6_0_symbol1_check_ranges(struct min_max_only_6_0_symbol1_t *msg)
+{
+    int idx = 1;
+
+    if (!min_max_only_6_0_symbol1_signal1_is_in_range(msg->signal1))
+        return idx;
+
+    idx++;
+
+    if (!min_max_only_6_0_symbol1_signal2_is_in_range(msg->signal2))
+        return idx;
+
+    idx++;
+
+    if (!min_max_only_6_0_symbol1_signal4_is_in_range(msg->signal4))
+        return idx;
+
+    idx++;
+
+    if (!min_max_only_6_0_symbol1_signal3_is_in_range(msg->signal3))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int min_max_only_6_0_symbol1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double signal1,
+    double signal2,
+    double signal4,
+    double signal3)
+{
+    struct min_max_only_6_0_symbol1_t msg;
+
+    msg.signal1 = min_max_only_6_0_symbol1_signal1_encode(signal1);
+    msg.signal2 = min_max_only_6_0_symbol1_signal2_encode(signal2);
+    msg.signal4 = min_max_only_6_0_symbol1_signal4_encode(signal4);
+    msg.signal3 = min_max_only_6_0_symbol1_signal3_encode(signal3);
+
+    int ret = min_max_only_6_0_symbol1_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = min_max_only_6_0_symbol1_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int min_max_only_6_0_symbol1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *signal1,
+    double *signal2,
+    double *signal4,
+    double *signal3)
+{
+    struct min_max_only_6_0_symbol1_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (min_max_only_6_0_symbol1_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = min_max_only_6_0_symbol1_check_ranges(&msg);
+
+    if (signal1)
+        *signal1 = min_max_only_6_0_symbol1_signal1_decode(msg.signal1);
+
+    if (signal2)
+        *signal2 = min_max_only_6_0_symbol1_signal2_decode(msg.signal2);
+
+    if (signal4)
+        *signal4 = min_max_only_6_0_symbol1_signal4_decode(msg.signal4);
+
+    if (signal3)
+        *signal3 = min_max_only_6_0_symbol1_signal3_decode(msg.signal3);
+
+    return ret;
+}
+
 uint8_t min_max_only_6_0_symbol1_signal1_encode(double value)
 {
     return (uint8_t)(value);

@@ -172,6 +172,91 @@ int abs_bremse_33_unpack(
     return (0);
 }
 
+static int abs_bremse_33_check_ranges(struct abs_bremse_33_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_33_whlspeed_fl_is_in_range(msg->whlspeed_fl))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_33_whlspeed_fr_is_in_range(msg->whlspeed_fr))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_33_whlspeed_rl_is_in_range(msg->whlspeed_rl))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_33_whlspeed_rr_is_in_range(msg->whlspeed_rr))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_33_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double whlspeed_fl,
+    double whlspeed_fr,
+    double whlspeed_rl,
+    double whlspeed_rr)
+{
+    struct abs_bremse_33_t msg;
+
+    msg.whlspeed_fl = abs_bremse_33_whlspeed_fl_encode(whlspeed_fl);
+    msg.whlspeed_fr = abs_bremse_33_whlspeed_fr_encode(whlspeed_fr);
+    msg.whlspeed_rl = abs_bremse_33_whlspeed_rl_encode(whlspeed_rl);
+    msg.whlspeed_rr = abs_bremse_33_whlspeed_rr_encode(whlspeed_rr);
+
+    int ret = abs_bremse_33_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_33_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_33_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *whlspeed_fl,
+    double *whlspeed_fr,
+    double *whlspeed_rl,
+    double *whlspeed_rr)
+{
+    struct abs_bremse_33_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_33_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_33_check_ranges(&msg);
+
+    if (whlspeed_fl)
+        *whlspeed_fl = abs_bremse_33_whlspeed_fl_decode(msg.whlspeed_fl);
+
+    if (whlspeed_fr)
+        *whlspeed_fr = abs_bremse_33_whlspeed_fr_decode(msg.whlspeed_fr);
+
+    if (whlspeed_rl)
+        *whlspeed_rl = abs_bremse_33_whlspeed_rl_decode(msg.whlspeed_rl);
+
+    if (whlspeed_rr)
+        *whlspeed_rr = abs_bremse_33_whlspeed_rr_decode(msg.whlspeed_rr);
+
+    return ret;
+}
+
 uint16_t abs_bremse_33_whlspeed_fl_encode(double value)
 {
     return (uint16_t)(value / 0.015625);
@@ -263,6 +348,49 @@ int abs_bremse_10_unpack(
     return (0);
 }
 
+static int abs_bremse_10_check_ranges(struct abs_bremse_10_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int abs_bremse_10_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct abs_bremse_10_t msg;
+
+
+    int ret = abs_bremse_10_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_10_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_10_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct abs_bremse_10_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_10_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_10_check_ranges(&msg);
+
+    return ret;
+}
+
 int abs_bremse_11_pack(
     uint8_t *dst_p,
     const struct abs_bremse_11_t *src_p,
@@ -292,6 +420,49 @@ int abs_bremse_11_unpack(
     }
 
     return (0);
+}
+
+static int abs_bremse_11_check_ranges(struct abs_bremse_11_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int abs_bremse_11_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct abs_bremse_11_t msg;
+
+
+    int ret = abs_bremse_11_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_11_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_11_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct abs_bremse_11_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_11_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_11_check_ranges(&msg);
+
+    return ret;
 }
 
 int abs_bremse_12_pack(
@@ -325,6 +496,49 @@ int abs_bremse_12_unpack(
     return (0);
 }
 
+static int abs_bremse_12_check_ranges(struct abs_bremse_12_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int abs_bremse_12_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct abs_bremse_12_t msg;
+
+
+    int ret = abs_bremse_12_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_12_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_12_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct abs_bremse_12_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_12_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_12_check_ranges(&msg);
+
+    return ret;
+}
+
 int abs_bremse_13_pack(
     uint8_t *dst_p,
     const struct abs_bremse_13_t *src_p,
@@ -356,6 +570,49 @@ int abs_bremse_13_unpack(
     return (0);
 }
 
+static int abs_bremse_13_check_ranges(struct abs_bremse_13_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int abs_bremse_13_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct abs_bremse_13_t msg;
+
+
+    int ret = abs_bremse_13_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_13_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_13_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct abs_bremse_13_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_13_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_13_check_ranges(&msg);
+
+    return ret;
+}
+
 int abs_drs_rx_id0_pack(
     uint8_t *dst_p,
     const struct abs_drs_rx_id0_t *src_p,
@@ -385,6 +642,49 @@ int abs_drs_rx_id0_unpack(
     }
 
     return (0);
+}
+
+static int abs_drs_rx_id0_check_ranges(struct abs_drs_rx_id0_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int abs_drs_rx_id0_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct abs_drs_rx_id0_t msg;
+
+
+    int ret = abs_drs_rx_id0_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_drs_rx_id0_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_drs_rx_id0_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct abs_drs_rx_id0_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_drs_rx_id0_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_drs_rx_id0_check_ranges(&msg);
+
+    return ret;
 }
 
 int abs_mm5_10_tx1_pack(
@@ -421,6 +721,69 @@ int abs_mm5_10_tx1_unpack(
     dst_p->ay1 |= unpack_left_shift_u16(src_p[5], 8u, 0xffu);
 
     return (0);
+}
+
+static int abs_mm5_10_tx1_check_ranges(struct abs_mm5_10_tx1_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_mm5_10_tx1_yaw_rate_is_in_range(msg->yaw_rate))
+        return idx;
+
+    idx++;
+
+    if (!abs_mm5_10_tx1_ay1_is_in_range(msg->ay1))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_mm5_10_tx1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double yaw_rate,
+    double ay1)
+{
+    struct abs_mm5_10_tx1_t msg;
+
+    msg.yaw_rate = abs_mm5_10_tx1_yaw_rate_encode(yaw_rate);
+    msg.ay1 = abs_mm5_10_tx1_ay1_encode(ay1);
+
+    int ret = abs_mm5_10_tx1_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_mm5_10_tx1_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_mm5_10_tx1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *yaw_rate,
+    double *ay1)
+{
+    struct abs_mm5_10_tx1_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_mm5_10_tx1_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_mm5_10_tx1_check_ranges(&msg);
+
+    if (yaw_rate)
+        *yaw_rate = abs_mm5_10_tx1_yaw_rate_decode(msg.yaw_rate);
+
+    if (ay1)
+        *ay1 = abs_mm5_10_tx1_ay1_decode(msg.ay1);
+
+    return ret;
 }
 
 uint16_t abs_mm5_10_tx1_yaw_rate_encode(double value)
@@ -489,6 +852,69 @@ int abs_mm5_10_tx2_unpack(
     return (0);
 }
 
+static int abs_mm5_10_tx2_check_ranges(struct abs_mm5_10_tx2_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_mm5_10_tx2_roll_rate_is_in_range(msg->roll_rate))
+        return idx;
+
+    idx++;
+
+    if (!abs_mm5_10_tx2_ax1_is_in_range(msg->ax1))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_mm5_10_tx2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double roll_rate,
+    double ax1)
+{
+    struct abs_mm5_10_tx2_t msg;
+
+    msg.roll_rate = abs_mm5_10_tx2_roll_rate_encode(roll_rate);
+    msg.ax1 = abs_mm5_10_tx2_ax1_encode(ax1);
+
+    int ret = abs_mm5_10_tx2_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_mm5_10_tx2_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_mm5_10_tx2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *roll_rate,
+    double *ax1)
+{
+    struct abs_mm5_10_tx2_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_mm5_10_tx2_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_mm5_10_tx2_check_ranges(&msg);
+
+    if (roll_rate)
+        *roll_rate = abs_mm5_10_tx2_roll_rate_decode(msg.roll_rate);
+
+    if (ax1)
+        *ax1 = abs_mm5_10_tx2_ax1_decode(msg.ax1);
+
+    return ret;
+}
+
 uint16_t abs_mm5_10_tx2_roll_rate_encode(double value)
 {
     return (uint16_t)((value - -163.84) / 0.005);
@@ -553,6 +979,58 @@ int abs_mm5_10_tx3_unpack(
     return (0);
 }
 
+static int abs_mm5_10_tx3_check_ranges(struct abs_mm5_10_tx3_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_mm5_10_tx3_az_is_in_range(msg->az))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_mm5_10_tx3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double az)
+{
+    struct abs_mm5_10_tx3_t msg;
+
+    msg.az = abs_mm5_10_tx3_az_encode(az);
+
+    int ret = abs_mm5_10_tx3_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_mm5_10_tx3_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_mm5_10_tx3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *az)
+{
+    struct abs_mm5_10_tx3_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_mm5_10_tx3_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_mm5_10_tx3_check_ranges(&msg);
+
+    if (az)
+        *az = abs_mm5_10_tx3_az_decode(msg.az);
+
+    return ret;
+}
+
 uint16_t abs_mm5_10_tx3_az_encode(double value)
 {
     return (uint16_t)((value - -4.1768) / 0.000127465);
@@ -610,6 +1088,91 @@ int abs_bremse_2_unpack(
     dst_p->whlspeed_rr_bremse2 |= unpack_left_shift_u16(src_p[7], 8u, 0xffu);
 
     return (0);
+}
+
+static int abs_bremse_2_check_ranges(struct abs_bremse_2_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_2_whlspeed_fl_bremse2_is_in_range(msg->whlspeed_fl_bremse2))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_2_whlspeed_fr_bremse2_is_in_range(msg->whlspeed_fr_bremse2))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_2_whlspeed_rl_bremse2_is_in_range(msg->whlspeed_rl_bremse2))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_2_whlspeed_rr_bremse2_is_in_range(msg->whlspeed_rr_bremse2))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double whlspeed_fl_bremse2,
+    double whlspeed_fr_bremse2,
+    double whlspeed_rl_bremse2,
+    double whlspeed_rr_bremse2)
+{
+    struct abs_bremse_2_t msg;
+
+    msg.whlspeed_fl_bremse2 = abs_bremse_2_whlspeed_fl_bremse2_encode(whlspeed_fl_bremse2);
+    msg.whlspeed_fr_bremse2 = abs_bremse_2_whlspeed_fr_bremse2_encode(whlspeed_fr_bremse2);
+    msg.whlspeed_rl_bremse2 = abs_bremse_2_whlspeed_rl_bremse2_encode(whlspeed_rl_bremse2);
+    msg.whlspeed_rr_bremse2 = abs_bremse_2_whlspeed_rr_bremse2_encode(whlspeed_rr_bremse2);
+
+    int ret = abs_bremse_2_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_2_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *whlspeed_fl_bremse2,
+    double *whlspeed_fr_bremse2,
+    double *whlspeed_rl_bremse2,
+    double *whlspeed_rr_bremse2)
+{
+    struct abs_bremse_2_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_2_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_2_check_ranges(&msg);
+
+    if (whlspeed_fl_bremse2)
+        *whlspeed_fl_bremse2 = abs_bremse_2_whlspeed_fl_bremse2_decode(msg.whlspeed_fl_bremse2);
+
+    if (whlspeed_fr_bremse2)
+        *whlspeed_fr_bremse2 = abs_bremse_2_whlspeed_fr_bremse2_decode(msg.whlspeed_fr_bremse2);
+
+    if (whlspeed_rl_bremse2)
+        *whlspeed_rl_bremse2 = abs_bremse_2_whlspeed_rl_bremse2_decode(msg.whlspeed_rl_bremse2);
+
+    if (whlspeed_rr_bremse2)
+        *whlspeed_rr_bremse2 = abs_bremse_2_whlspeed_rr_bremse2_decode(msg.whlspeed_rr_bremse2);
+
+    return ret;
 }
 
 uint16_t abs_bremse_2_whlspeed_fl_bremse2_encode(double value)
@@ -702,6 +1265,58 @@ int abs_abs_switch_unpack(
     return (0);
 }
 
+static int abs_abs_switch_check_ranges(struct abs_abs_switch_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_abs_switch_abs_switchposition_is_in_range(msg->abs_switchposition))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_abs_switch_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double abs_switchposition)
+{
+    struct abs_abs_switch_t msg;
+
+    msg.abs_switchposition = abs_abs_switch_abs_switchposition_encode(abs_switchposition);
+
+    int ret = abs_abs_switch_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_abs_switch_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_abs_switch_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *abs_switchposition)
+{
+    struct abs_abs_switch_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_abs_switch_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_abs_switch_check_ranges(&msg);
+
+    if (abs_switchposition)
+        *abs_switchposition = abs_abs_switch_abs_switchposition_decode(msg.abs_switchposition);
+
+    return ret;
+}
+
 uint8_t abs_abs_switch_abs_switchposition_encode(double value)
 {
     return (uint8_t)(value);
@@ -748,6 +1363,49 @@ int abs_bremse_30_unpack(
     return (0);
 }
 
+static int abs_bremse_30_check_ranges(struct abs_bremse_30_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int abs_bremse_30_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct abs_bremse_30_t msg;
+
+
+    int ret = abs_bremse_30_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_30_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_30_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct abs_bremse_30_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_30_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_30_check_ranges(&msg);
+
+    return ret;
+}
+
 int abs_bremse_31_pack(
     uint8_t *dst_p,
     const struct abs_bremse_31_t *src_p,
@@ -778,6 +1436,58 @@ int abs_bremse_31_unpack(
     dst_p->idle_time |= unpack_left_shift_u16(src_p[3], 8u, 0xffu);
 
     return (0);
+}
+
+static int abs_bremse_31_check_ranges(struct abs_bremse_31_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_31_idle_time_is_in_range(msg->idle_time))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_31_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double idle_time)
+{
+    struct abs_bremse_31_t msg;
+
+    msg.idle_time = abs_bremse_31_idle_time_encode(idle_time);
+
+    int ret = abs_bremse_31_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_31_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_31_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *idle_time)
+{
+    struct abs_bremse_31_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_31_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_31_check_ranges(&msg);
+
+    if (idle_time)
+        *idle_time = abs_bremse_31_idle_time_decode(msg.idle_time);
+
+    return ret;
 }
 
 uint16_t abs_bremse_31_idle_time_encode(double value)
@@ -835,6 +1545,113 @@ int abs_bremse_32_unpack(
     dst_p->wheel_quality_rr = unpack_right_shift_u8(src_p[7], 0u, 0xffu);
 
     return (0);
+}
+
+static int abs_bremse_32_check_ranges(struct abs_bremse_32_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_32_acc_fa_is_in_range(msg->acc_fa))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_32_acc_ra_is_in_range(msg->acc_ra))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_32_wheel_quality_fl_is_in_range(msg->wheel_quality_fl))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_32_wheel_quality_fr_is_in_range(msg->wheel_quality_fr))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_32_wheel_quality_rl_is_in_range(msg->wheel_quality_rl))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_32_wheel_quality_rr_is_in_range(msg->wheel_quality_rr))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_32_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double acc_fa,
+    double acc_ra,
+    double wheel_quality_fl,
+    double wheel_quality_fr,
+    double wheel_quality_rl,
+    double wheel_quality_rr)
+{
+    struct abs_bremse_32_t msg;
+
+    msg.acc_fa = abs_bremse_32_acc_fa_encode(acc_fa);
+    msg.acc_ra = abs_bremse_32_acc_ra_encode(acc_ra);
+    msg.wheel_quality_fl = abs_bremse_32_wheel_quality_fl_encode(wheel_quality_fl);
+    msg.wheel_quality_fr = abs_bremse_32_wheel_quality_fr_encode(wheel_quality_fr);
+    msg.wheel_quality_rl = abs_bremse_32_wheel_quality_rl_encode(wheel_quality_rl);
+    msg.wheel_quality_rr = abs_bremse_32_wheel_quality_rr_encode(wheel_quality_rr);
+
+    int ret = abs_bremse_32_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_32_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_32_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *acc_fa,
+    double *acc_ra,
+    double *wheel_quality_fl,
+    double *wheel_quality_fr,
+    double *wheel_quality_rl,
+    double *wheel_quality_rr)
+{
+    struct abs_bremse_32_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_32_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_32_check_ranges(&msg);
+
+    if (acc_fa)
+        *acc_fa = abs_bremse_32_acc_fa_decode(msg.acc_fa);
+
+    if (acc_ra)
+        *acc_ra = abs_bremse_32_acc_ra_decode(msg.acc_ra);
+
+    if (wheel_quality_fl)
+        *wheel_quality_fl = abs_bremse_32_wheel_quality_fl_decode(msg.wheel_quality_fl);
+
+    if (wheel_quality_fr)
+        *wheel_quality_fr = abs_bremse_32_wheel_quality_fr_decode(msg.wheel_quality_fr);
+
+    if (wheel_quality_rl)
+        *wheel_quality_rl = abs_bremse_32_wheel_quality_rl_decode(msg.wheel_quality_rl);
+
+    if (wheel_quality_rr)
+        *wheel_quality_rr = abs_bremse_32_wheel_quality_rr_decode(msg.wheel_quality_rr);
+
+    return ret;
 }
 
 uint8_t abs_bremse_32_acc_fa_encode(double value)
@@ -969,6 +1786,102 @@ int abs_bremse_51_unpack(
     dst_p->if_chksum = unpack_right_shift_u8(src_p[7], 4u, 0xf0u);
 
     return (0);
+}
+
+static int abs_bremse_51_check_ranges(struct abs_bremse_51_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_51_ax1_abs_int_is_in_range(msg->ax1_abs_int))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_51_ay1_abs_int_is_in_range(msg->ay1_abs_int))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_51_if_variant_is_in_range(msg->if_variant))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_51_if_revision_is_in_range(msg->if_revision))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_51_if_chksum_is_in_range(msg->if_chksum))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_51_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ax1_abs_int,
+    double ay1_abs_int,
+    double if_variant,
+    double if_revision,
+    double if_chksum)
+{
+    struct abs_bremse_51_t msg;
+
+    msg.ax1_abs_int = abs_bremse_51_ax1_abs_int_encode(ax1_abs_int);
+    msg.ay1_abs_int = abs_bremse_51_ay1_abs_int_encode(ay1_abs_int);
+    msg.if_variant = abs_bremse_51_if_variant_encode(if_variant);
+    msg.if_revision = abs_bremse_51_if_revision_encode(if_revision);
+    msg.if_chksum = abs_bremse_51_if_chksum_encode(if_chksum);
+
+    int ret = abs_bremse_51_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_51_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_51_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ax1_abs_int,
+    double *ay1_abs_int,
+    double *if_variant,
+    double *if_revision,
+    double *if_chksum)
+{
+    struct abs_bremse_51_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_51_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_51_check_ranges(&msg);
+
+    if (ax1_abs_int)
+        *ax1_abs_int = abs_bremse_51_ax1_abs_int_decode(msg.ax1_abs_int);
+
+    if (ay1_abs_int)
+        *ay1_abs_int = abs_bremse_51_ay1_abs_int_decode(msg.ay1_abs_int);
+
+    if (if_variant)
+        *if_variant = abs_bremse_51_if_variant_decode(msg.if_variant);
+
+    if (if_revision)
+        *if_revision = abs_bremse_51_if_revision_decode(msg.if_revision);
+
+    if (if_chksum)
+        *if_chksum = abs_bremse_51_if_chksum_decode(msg.if_chksum);
+
+    return ret;
 }
 
 uint16_t abs_bremse_51_ax1_abs_int_encode(double value)
@@ -1214,6 +2127,476 @@ int abs_bremse_52_unpack(
     }
 
     return (0);
+}
+
+static int abs_bremse_52_check_ranges(struct abs_bremse_52_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_52_mplx_sw_info_is_in_range(msg->mplx_sw_info))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_sw_version_high_upper_is_in_range(msg->sw_version_high_upper))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_bb_dig1_is_in_range(msg->bb_dig1))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_01_is_in_range(msg->appl_id_01))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_08_is_in_range(msg->appl_id_08))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_date_01_is_in_range(msg->appl_date_01))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_sw_can_ident_is_in_range(msg->sw_can_ident))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_hu_date_year_is_in_range(msg->hu_date_year))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_sw_version_high_lower_is_in_range(msg->sw_version_high_lower))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_bb_dig2_is_in_range(msg->bb_dig2))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_02_is_in_range(msg->appl_id_02))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_09_is_in_range(msg->appl_id_09))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_date_02_is_in_range(msg->appl_date_02))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_hu_date_month_is_in_range(msg->hu_date_month))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_sw_version_mid_upper_is_in_range(msg->sw_version_mid_upper))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_bb_dig3_is_in_range(msg->bb_dig3))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_03_is_in_range(msg->appl_id_03))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_10_is_in_range(msg->appl_id_10))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_date_03_is_in_range(msg->appl_date_03))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_hu_date_day_is_in_range(msg->hu_date_day))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_sw_version_mid_lower_is_in_range(msg->sw_version_mid_lower))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_bb_dig4_is_in_range(msg->bb_dig4))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_04_is_in_range(msg->appl_id_04))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_11_is_in_range(msg->appl_id_11))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_date_04_is_in_range(msg->appl_date_04))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_ecu_serial_is_in_range(msg->ecu_serial))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_sw_version_low_upper_is_in_range(msg->sw_version_low_upper))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_bb_dig5_is_in_range(msg->bb_dig5))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_05_is_in_range(msg->appl_id_05))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_12_is_in_range(msg->appl_id_12))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_date_05_is_in_range(msg->appl_date_05))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_sw_version_low_lower_is_in_range(msg->sw_version_low_lower))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_bb_dig6_is_in_range(msg->bb_dig6))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_06_is_in_range(msg->appl_id_06))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_13_is_in_range(msg->appl_id_13))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_date_06_is_in_range(msg->appl_date_06))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_bb_dig7_is_in_range(msg->bb_dig7))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_07_is_in_range(msg->appl_id_07))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_52_appl_id_14_is_in_range(msg->appl_id_14))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_52_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double mplx_sw_info,
+    double sw_version_high_upper,
+    double bb_dig1,
+    double appl_id_01,
+    double appl_id_08,
+    double appl_date_01,
+    double sw_can_ident,
+    double hu_date_year,
+    double sw_version_high_lower,
+    double bb_dig2,
+    double appl_id_02,
+    double appl_id_09,
+    double appl_date_02,
+    double hu_date_month,
+    double sw_version_mid_upper,
+    double bb_dig3,
+    double appl_id_03,
+    double appl_id_10,
+    double appl_date_03,
+    double hu_date_day,
+    double sw_version_mid_lower,
+    double bb_dig4,
+    double appl_id_04,
+    double appl_id_11,
+    double appl_date_04,
+    double ecu_serial,
+    double sw_version_low_upper,
+    double bb_dig5,
+    double appl_id_05,
+    double appl_id_12,
+    double appl_date_05,
+    double sw_version_low_lower,
+    double bb_dig6,
+    double appl_id_06,
+    double appl_id_13,
+    double appl_date_06,
+    double bb_dig7,
+    double appl_id_07,
+    double appl_id_14)
+{
+    struct abs_bremse_52_t msg;
+
+    msg.mplx_sw_info = abs_bremse_52_mplx_sw_info_encode(mplx_sw_info);
+    msg.sw_version_high_upper = abs_bremse_52_sw_version_high_upper_encode(sw_version_high_upper);
+    msg.bb_dig1 = abs_bremse_52_bb_dig1_encode(bb_dig1);
+    msg.appl_id_01 = abs_bremse_52_appl_id_01_encode(appl_id_01);
+    msg.appl_id_08 = abs_bremse_52_appl_id_08_encode(appl_id_08);
+    msg.appl_date_01 = abs_bremse_52_appl_date_01_encode(appl_date_01);
+    msg.sw_can_ident = abs_bremse_52_sw_can_ident_encode(sw_can_ident);
+    msg.hu_date_year = abs_bremse_52_hu_date_year_encode(hu_date_year);
+    msg.sw_version_high_lower = abs_bremse_52_sw_version_high_lower_encode(sw_version_high_lower);
+    msg.bb_dig2 = abs_bremse_52_bb_dig2_encode(bb_dig2);
+    msg.appl_id_02 = abs_bremse_52_appl_id_02_encode(appl_id_02);
+    msg.appl_id_09 = abs_bremse_52_appl_id_09_encode(appl_id_09);
+    msg.appl_date_02 = abs_bremse_52_appl_date_02_encode(appl_date_02);
+    msg.hu_date_month = abs_bremse_52_hu_date_month_encode(hu_date_month);
+    msg.sw_version_mid_upper = abs_bremse_52_sw_version_mid_upper_encode(sw_version_mid_upper);
+    msg.bb_dig3 = abs_bremse_52_bb_dig3_encode(bb_dig3);
+    msg.appl_id_03 = abs_bremse_52_appl_id_03_encode(appl_id_03);
+    msg.appl_id_10 = abs_bremse_52_appl_id_10_encode(appl_id_10);
+    msg.appl_date_03 = abs_bremse_52_appl_date_03_encode(appl_date_03);
+    msg.hu_date_day = abs_bremse_52_hu_date_day_encode(hu_date_day);
+    msg.sw_version_mid_lower = abs_bremse_52_sw_version_mid_lower_encode(sw_version_mid_lower);
+    msg.bb_dig4 = abs_bremse_52_bb_dig4_encode(bb_dig4);
+    msg.appl_id_04 = abs_bremse_52_appl_id_04_encode(appl_id_04);
+    msg.appl_id_11 = abs_bremse_52_appl_id_11_encode(appl_id_11);
+    msg.appl_date_04 = abs_bremse_52_appl_date_04_encode(appl_date_04);
+    msg.ecu_serial = abs_bremse_52_ecu_serial_encode(ecu_serial);
+    msg.sw_version_low_upper = abs_bremse_52_sw_version_low_upper_encode(sw_version_low_upper);
+    msg.bb_dig5 = abs_bremse_52_bb_dig5_encode(bb_dig5);
+    msg.appl_id_05 = abs_bremse_52_appl_id_05_encode(appl_id_05);
+    msg.appl_id_12 = abs_bremse_52_appl_id_12_encode(appl_id_12);
+    msg.appl_date_05 = abs_bremse_52_appl_date_05_encode(appl_date_05);
+    msg.sw_version_low_lower = abs_bremse_52_sw_version_low_lower_encode(sw_version_low_lower);
+    msg.bb_dig6 = abs_bremse_52_bb_dig6_encode(bb_dig6);
+    msg.appl_id_06 = abs_bremse_52_appl_id_06_encode(appl_id_06);
+    msg.appl_id_13 = abs_bremse_52_appl_id_13_encode(appl_id_13);
+    msg.appl_date_06 = abs_bremse_52_appl_date_06_encode(appl_date_06);
+    msg.bb_dig7 = abs_bremse_52_bb_dig7_encode(bb_dig7);
+    msg.appl_id_07 = abs_bremse_52_appl_id_07_encode(appl_id_07);
+    msg.appl_id_14 = abs_bremse_52_appl_id_14_encode(appl_id_14);
+
+    int ret = abs_bremse_52_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_52_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_52_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *mplx_sw_info,
+    double *sw_version_high_upper,
+    double *bb_dig1,
+    double *appl_id_01,
+    double *appl_id_08,
+    double *appl_date_01,
+    double *sw_can_ident,
+    double *hu_date_year,
+    double *sw_version_high_lower,
+    double *bb_dig2,
+    double *appl_id_02,
+    double *appl_id_09,
+    double *appl_date_02,
+    double *hu_date_month,
+    double *sw_version_mid_upper,
+    double *bb_dig3,
+    double *appl_id_03,
+    double *appl_id_10,
+    double *appl_date_03,
+    double *hu_date_day,
+    double *sw_version_mid_lower,
+    double *bb_dig4,
+    double *appl_id_04,
+    double *appl_id_11,
+    double *appl_date_04,
+    double *ecu_serial,
+    double *sw_version_low_upper,
+    double *bb_dig5,
+    double *appl_id_05,
+    double *appl_id_12,
+    double *appl_date_05,
+    double *sw_version_low_lower,
+    double *bb_dig6,
+    double *appl_id_06,
+    double *appl_id_13,
+    double *appl_date_06,
+    double *bb_dig7,
+    double *appl_id_07,
+    double *appl_id_14)
+{
+    struct abs_bremse_52_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_52_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_52_check_ranges(&msg);
+
+    if (mplx_sw_info)
+        *mplx_sw_info = abs_bremse_52_mplx_sw_info_decode(msg.mplx_sw_info);
+
+    if (sw_version_high_upper)
+        *sw_version_high_upper = abs_bremse_52_sw_version_high_upper_decode(msg.sw_version_high_upper);
+
+    if (bb_dig1)
+        *bb_dig1 = abs_bremse_52_bb_dig1_decode(msg.bb_dig1);
+
+    if (appl_id_01)
+        *appl_id_01 = abs_bremse_52_appl_id_01_decode(msg.appl_id_01);
+
+    if (appl_id_08)
+        *appl_id_08 = abs_bremse_52_appl_id_08_decode(msg.appl_id_08);
+
+    if (appl_date_01)
+        *appl_date_01 = abs_bremse_52_appl_date_01_decode(msg.appl_date_01);
+
+    if (sw_can_ident)
+        *sw_can_ident = abs_bremse_52_sw_can_ident_decode(msg.sw_can_ident);
+
+    if (hu_date_year)
+        *hu_date_year = abs_bremse_52_hu_date_year_decode(msg.hu_date_year);
+
+    if (sw_version_high_lower)
+        *sw_version_high_lower = abs_bremse_52_sw_version_high_lower_decode(msg.sw_version_high_lower);
+
+    if (bb_dig2)
+        *bb_dig2 = abs_bremse_52_bb_dig2_decode(msg.bb_dig2);
+
+    if (appl_id_02)
+        *appl_id_02 = abs_bremse_52_appl_id_02_decode(msg.appl_id_02);
+
+    if (appl_id_09)
+        *appl_id_09 = abs_bremse_52_appl_id_09_decode(msg.appl_id_09);
+
+    if (appl_date_02)
+        *appl_date_02 = abs_bremse_52_appl_date_02_decode(msg.appl_date_02);
+
+    if (hu_date_month)
+        *hu_date_month = abs_bremse_52_hu_date_month_decode(msg.hu_date_month);
+
+    if (sw_version_mid_upper)
+        *sw_version_mid_upper = abs_bremse_52_sw_version_mid_upper_decode(msg.sw_version_mid_upper);
+
+    if (bb_dig3)
+        *bb_dig3 = abs_bremse_52_bb_dig3_decode(msg.bb_dig3);
+
+    if (appl_id_03)
+        *appl_id_03 = abs_bremse_52_appl_id_03_decode(msg.appl_id_03);
+
+    if (appl_id_10)
+        *appl_id_10 = abs_bremse_52_appl_id_10_decode(msg.appl_id_10);
+
+    if (appl_date_03)
+        *appl_date_03 = abs_bremse_52_appl_date_03_decode(msg.appl_date_03);
+
+    if (hu_date_day)
+        *hu_date_day = abs_bremse_52_hu_date_day_decode(msg.hu_date_day);
+
+    if (sw_version_mid_lower)
+        *sw_version_mid_lower = abs_bremse_52_sw_version_mid_lower_decode(msg.sw_version_mid_lower);
+
+    if (bb_dig4)
+        *bb_dig4 = abs_bremse_52_bb_dig4_decode(msg.bb_dig4);
+
+    if (appl_id_04)
+        *appl_id_04 = abs_bremse_52_appl_id_04_decode(msg.appl_id_04);
+
+    if (appl_id_11)
+        *appl_id_11 = abs_bremse_52_appl_id_11_decode(msg.appl_id_11);
+
+    if (appl_date_04)
+        *appl_date_04 = abs_bremse_52_appl_date_04_decode(msg.appl_date_04);
+
+    if (ecu_serial)
+        *ecu_serial = abs_bremse_52_ecu_serial_decode(msg.ecu_serial);
+
+    if (sw_version_low_upper)
+        *sw_version_low_upper = abs_bremse_52_sw_version_low_upper_decode(msg.sw_version_low_upper);
+
+    if (bb_dig5)
+        *bb_dig5 = abs_bremse_52_bb_dig5_decode(msg.bb_dig5);
+
+    if (appl_id_05)
+        *appl_id_05 = abs_bremse_52_appl_id_05_decode(msg.appl_id_05);
+
+    if (appl_id_12)
+        *appl_id_12 = abs_bremse_52_appl_id_12_decode(msg.appl_id_12);
+
+    if (appl_date_05)
+        *appl_date_05 = abs_bremse_52_appl_date_05_decode(msg.appl_date_05);
+
+    if (sw_version_low_lower)
+        *sw_version_low_lower = abs_bremse_52_sw_version_low_lower_decode(msg.sw_version_low_lower);
+
+    if (bb_dig6)
+        *bb_dig6 = abs_bremse_52_bb_dig6_decode(msg.bb_dig6);
+
+    if (appl_id_06)
+        *appl_id_06 = abs_bremse_52_appl_id_06_decode(msg.appl_id_06);
+
+    if (appl_id_13)
+        *appl_id_13 = abs_bremse_52_appl_id_13_decode(msg.appl_id_13);
+
+    if (appl_date_06)
+        *appl_date_06 = abs_bremse_52_appl_date_06_decode(msg.appl_date_06);
+
+    if (bb_dig7)
+        *bb_dig7 = abs_bremse_52_bb_dig7_decode(msg.bb_dig7);
+
+    if (appl_id_07)
+        *appl_id_07 = abs_bremse_52_appl_id_07_decode(msg.appl_id_07);
+
+    if (appl_id_14)
+        *appl_id_14 = abs_bremse_52_appl_id_14_decode(msg.appl_id_14);
+
+    return ret;
 }
 
 uint8_t abs_bremse_52_mplx_sw_info_encode(double value)
@@ -1899,6 +3282,91 @@ int abs_bremse_50_unpack(
     return (0);
 }
 
+static int abs_bremse_50_check_ranges(struct abs_bremse_50_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_50_brake_bal_at50_is_in_range(msg->brake_bal_at50))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_50_brake_bal_at50_advice_is_in_range(msg->brake_bal_at50_advice))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_50_brake_bal_pct_is_in_range(msg->brake_bal_pct))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_50_brake_bal_pct_advice_is_in_range(msg->brake_bal_pct_advice))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_50_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double brake_bal_at50,
+    double brake_bal_at50_advice,
+    double brake_bal_pct,
+    double brake_bal_pct_advice)
+{
+    struct abs_bremse_50_t msg;
+
+    msg.brake_bal_at50 = abs_bremse_50_brake_bal_at50_encode(brake_bal_at50);
+    msg.brake_bal_at50_advice = abs_bremse_50_brake_bal_at50_advice_encode(brake_bal_at50_advice);
+    msg.brake_bal_pct = abs_bremse_50_brake_bal_pct_encode(brake_bal_pct);
+    msg.brake_bal_pct_advice = abs_bremse_50_brake_bal_pct_advice_encode(brake_bal_pct_advice);
+
+    int ret = abs_bremse_50_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_50_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_50_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *brake_bal_at50,
+    double *brake_bal_at50_advice,
+    double *brake_bal_pct,
+    double *brake_bal_pct_advice)
+{
+    struct abs_bremse_50_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_50_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_50_check_ranges(&msg);
+
+    if (brake_bal_at50)
+        *brake_bal_at50 = abs_bremse_50_brake_bal_at50_decode(msg.brake_bal_at50);
+
+    if (brake_bal_at50_advice)
+        *brake_bal_at50_advice = abs_bremse_50_brake_bal_at50_advice_decode(msg.brake_bal_at50_advice);
+
+    if (brake_bal_pct)
+        *brake_bal_pct = abs_bremse_50_brake_bal_pct_decode(msg.brake_bal_pct);
+
+    if (brake_bal_pct_advice)
+        *brake_bal_pct_advice = abs_bremse_50_brake_bal_pct_advice_decode(msg.brake_bal_pct_advice);
+
+    return ret;
+}
+
 uint16_t abs_bremse_50_brake_bal_at50_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -2039,6 +3507,267 @@ int abs_bremse_53_unpack(
     dst_p->p_ra = (int16_t)p_ra;
 
     return (0);
+}
+
+static int abs_bremse_53_check_ranges(struct abs_bremse_53_t *msg)
+{
+    int idx = 1;
+
+    if (!abs_bremse_53_switch_position_is_in_range(msg->switch_position))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_p_fa_is_in_range(msg->p_fa))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_bls_is_in_range(msg->bls))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_bremse_53_cnt_is_in_range(msg->bremse_53_cnt))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_abs_malfunction_is_in_range(msg->abs_malfunction))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_abs_active_is_in_range(msg->abs_active))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_ebd_lamp_is_in_range(msg->ebd_lamp))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_abs_lamp_is_in_range(msg->abs_lamp))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_fl_is_in_range(msg->diag_fl))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_fr_is_in_range(msg->diag_fr))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_rl_is_in_range(msg->diag_rl))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_rr_is_in_range(msg->diag_rr))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_abs_unit_is_in_range(msg->diag_abs_unit))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_fuse_valve_is_in_range(msg->diag_fuse_valve))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_fuse_pump_is_in_range(msg->diag_fuse_pump))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_p_fa_is_in_range(msg->diag_p_fa))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_p_ra_is_in_range(msg->diag_p_ra))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_diag_yrs_is_in_range(msg->diag_yrs))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_abs_fault_info_is_in_range(msg->abs_fault_info))
+        return idx;
+
+    idx++;
+
+    if (!abs_bremse_53_p_ra_is_in_range(msg->p_ra))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int abs_bremse_53_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double switch_position,
+    double p_fa,
+    double bls,
+    double bremse_53_cnt,
+    double abs_malfunction,
+    double abs_active,
+    double ebd_lamp,
+    double abs_lamp,
+    double diag_fl,
+    double diag_fr,
+    double diag_rl,
+    double diag_rr,
+    double diag_abs_unit,
+    double diag_fuse_valve,
+    double diag_fuse_pump,
+    double diag_p_fa,
+    double diag_p_ra,
+    double diag_yrs,
+    double abs_fault_info,
+    double p_ra)
+{
+    struct abs_bremse_53_t msg;
+
+    msg.switch_position = abs_bremse_53_switch_position_encode(switch_position);
+    msg.p_fa = abs_bremse_53_p_fa_encode(p_fa);
+    msg.bls = abs_bremse_53_bls_encode(bls);
+    msg.bremse_53_cnt = abs_bremse_53_bremse_53_cnt_encode(bremse_53_cnt);
+    msg.abs_malfunction = abs_bremse_53_abs_malfunction_encode(abs_malfunction);
+    msg.abs_active = abs_bremse_53_abs_active_encode(abs_active);
+    msg.ebd_lamp = abs_bremse_53_ebd_lamp_encode(ebd_lamp);
+    msg.abs_lamp = abs_bremse_53_abs_lamp_encode(abs_lamp);
+    msg.diag_fl = abs_bremse_53_diag_fl_encode(diag_fl);
+    msg.diag_fr = abs_bremse_53_diag_fr_encode(diag_fr);
+    msg.diag_rl = abs_bremse_53_diag_rl_encode(diag_rl);
+    msg.diag_rr = abs_bremse_53_diag_rr_encode(diag_rr);
+    msg.diag_abs_unit = abs_bremse_53_diag_abs_unit_encode(diag_abs_unit);
+    msg.diag_fuse_valve = abs_bremse_53_diag_fuse_valve_encode(diag_fuse_valve);
+    msg.diag_fuse_pump = abs_bremse_53_diag_fuse_pump_encode(diag_fuse_pump);
+    msg.diag_p_fa = abs_bremse_53_diag_p_fa_encode(diag_p_fa);
+    msg.diag_p_ra = abs_bremse_53_diag_p_ra_encode(diag_p_ra);
+    msg.diag_yrs = abs_bremse_53_diag_yrs_encode(diag_yrs);
+    msg.abs_fault_info = abs_bremse_53_abs_fault_info_encode(abs_fault_info);
+    msg.p_ra = abs_bremse_53_p_ra_encode(p_ra);
+
+    int ret = abs_bremse_53_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = abs_bremse_53_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int abs_bremse_53_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *switch_position,
+    double *p_fa,
+    double *bls,
+    double *bremse_53_cnt,
+    double *abs_malfunction,
+    double *abs_active,
+    double *ebd_lamp,
+    double *abs_lamp,
+    double *diag_fl,
+    double *diag_fr,
+    double *diag_rl,
+    double *diag_rr,
+    double *diag_abs_unit,
+    double *diag_fuse_valve,
+    double *diag_fuse_pump,
+    double *diag_p_fa,
+    double *diag_p_ra,
+    double *diag_yrs,
+    double *abs_fault_info,
+    double *p_ra)
+{
+    struct abs_bremse_53_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (abs_bremse_53_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = abs_bremse_53_check_ranges(&msg);
+
+    if (switch_position)
+        *switch_position = abs_bremse_53_switch_position_decode(msg.switch_position);
+
+    if (p_fa)
+        *p_fa = abs_bremse_53_p_fa_decode(msg.p_fa);
+
+    if (bls)
+        *bls = abs_bremse_53_bls_decode(msg.bls);
+
+    if (bremse_53_cnt)
+        *bremse_53_cnt = abs_bremse_53_bremse_53_cnt_decode(msg.bremse_53_cnt);
+
+    if (abs_malfunction)
+        *abs_malfunction = abs_bremse_53_abs_malfunction_decode(msg.abs_malfunction);
+
+    if (abs_active)
+        *abs_active = abs_bremse_53_abs_active_decode(msg.abs_active);
+
+    if (ebd_lamp)
+        *ebd_lamp = abs_bremse_53_ebd_lamp_decode(msg.ebd_lamp);
+
+    if (abs_lamp)
+        *abs_lamp = abs_bremse_53_abs_lamp_decode(msg.abs_lamp);
+
+    if (diag_fl)
+        *diag_fl = abs_bremse_53_diag_fl_decode(msg.diag_fl);
+
+    if (diag_fr)
+        *diag_fr = abs_bremse_53_diag_fr_decode(msg.diag_fr);
+
+    if (diag_rl)
+        *diag_rl = abs_bremse_53_diag_rl_decode(msg.diag_rl);
+
+    if (diag_rr)
+        *diag_rr = abs_bremse_53_diag_rr_decode(msg.diag_rr);
+
+    if (diag_abs_unit)
+        *diag_abs_unit = abs_bremse_53_diag_abs_unit_decode(msg.diag_abs_unit);
+
+    if (diag_fuse_valve)
+        *diag_fuse_valve = abs_bremse_53_diag_fuse_valve_decode(msg.diag_fuse_valve);
+
+    if (diag_fuse_pump)
+        *diag_fuse_pump = abs_bremse_53_diag_fuse_pump_decode(msg.diag_fuse_pump);
+
+    if (diag_p_fa)
+        *diag_p_fa = abs_bremse_53_diag_p_fa_decode(msg.diag_p_fa);
+
+    if (diag_p_ra)
+        *diag_p_ra = abs_bremse_53_diag_p_ra_decode(msg.diag_p_ra);
+
+    if (diag_yrs)
+        *diag_yrs = abs_bremse_53_diag_yrs_decode(msg.diag_yrs);
+
+    if (abs_fault_info)
+        *abs_fault_info = abs_bremse_53_abs_fault_info_decode(msg.abs_fault_info);
+
+    if (p_ra)
+        *p_ra = abs_bremse_53_p_ra_decode(msg.p_ra);
+
+    return ret;
 }
 
 uint8_t abs_bremse_53_switch_position_encode(double value)

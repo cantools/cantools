@@ -1218,6 +1218,41 @@ double abs_bremse_33_whlspeed_rr_decode(uint16_t value);
 bool abs_bremse_33_whlspeed_rr_is_in_range(uint16_t value);
 
 /**
+ * Create message BREMSE_33 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_33_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double whlspeed_fl,
+    double whlspeed_fr,
+    double whlspeed_rl,
+    double whlspeed_rr);
+
+/**
+ * unpack message BREMSE_33 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_33_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *whlspeed_fl,
+    double *whlspeed_fr,
+    double *whlspeed_rl,
+    double *whlspeed_rr);
+
+/**
  * Pack message BREMSE_10.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1244,6 +1279,33 @@ int abs_bremse_10_unpack(
     struct abs_bremse_10_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Create message BREMSE_10 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_10_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message BREMSE_10 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_10_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
 
 /**
  * Pack message BREMSE_11.
@@ -1274,6 +1336,33 @@ int abs_bremse_11_unpack(
     size_t size);
 
 /**
+ * Create message BREMSE_11 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_11_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message BREMSE_11 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_11_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
+
+/**
  * Pack message BREMSE_12.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1300,6 +1389,33 @@ int abs_bremse_12_unpack(
     struct abs_bremse_12_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Create message BREMSE_12 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_12_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message BREMSE_12 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_12_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
 
 /**
  * Pack message BREMSE_13.
@@ -1330,6 +1446,33 @@ int abs_bremse_13_unpack(
     size_t size);
 
 /**
+ * Create message BREMSE_13 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_13_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message BREMSE_13 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_13_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
+
+/**
  * Pack message DRS_RX_ID0.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1356,6 +1499,33 @@ int abs_drs_rx_id0_unpack(
     struct abs_drs_rx_id0_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Create message DRS_RX_ID0 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_drs_rx_id0_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message DRS_RX_ID0 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_drs_rx_id0_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
 
 /**
  * Pack message MM5_10_TX1.
@@ -1440,6 +1610,37 @@ double abs_mm5_10_tx1_ay1_decode(uint16_t value);
 bool abs_mm5_10_tx1_ay1_is_in_range(uint16_t value);
 
 /**
+ * Create message MM5_10_TX1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_mm5_10_tx1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double yaw_rate,
+    double ay1);
+
+/**
+ * unpack message MM5_10_TX1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_mm5_10_tx1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *yaw_rate,
+    double *ay1);
+
+/**
  * Pack message MM5_10_TX2.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1522,6 +1723,37 @@ double abs_mm5_10_tx2_ax1_decode(uint16_t value);
 bool abs_mm5_10_tx2_ax1_is_in_range(uint16_t value);
 
 /**
+ * Create message MM5_10_TX2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_mm5_10_tx2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double roll_rate,
+    double ax1);
+
+/**
+ * unpack message MM5_10_TX2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_mm5_10_tx2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *roll_rate,
+    double *ax1);
+
+/**
  * Pack message MM5_10_TX3.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1575,6 +1807,35 @@ double abs_mm5_10_tx3_az_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_mm5_10_tx3_az_is_in_range(uint16_t value);
+
+/**
+ * Create message MM5_10_TX3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_mm5_10_tx3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double az);
+
+/**
+ * unpack message MM5_10_TX3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_mm5_10_tx3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *az);
 
 /**
  * Pack message BREMSE_2.
@@ -1713,6 +1974,41 @@ double abs_bremse_2_whlspeed_rr_bremse2_decode(uint16_t value);
 bool abs_bremse_2_whlspeed_rr_bremse2_is_in_range(uint16_t value);
 
 /**
+ * Create message BREMSE_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double whlspeed_fl_bremse2,
+    double whlspeed_fr_bremse2,
+    double whlspeed_rl_bremse2,
+    double whlspeed_rr_bremse2);
+
+/**
+ * unpack message BREMSE_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *whlspeed_fl_bremse2,
+    double *whlspeed_fr_bremse2,
+    double *whlspeed_rl_bremse2,
+    double *whlspeed_rr_bremse2);
+
+/**
  * Pack message ABS_Switch.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1768,6 +2064,35 @@ double abs_abs_switch_abs_switchposition_decode(uint8_t value);
 bool abs_abs_switch_abs_switchposition_is_in_range(uint8_t value);
 
 /**
+ * Create message ABS_Switch if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_abs_switch_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double abs_switchposition);
+
+/**
+ * unpack message ABS_Switch and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_abs_switch_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *abs_switchposition);
+
+/**
  * Pack message BREMSE_30.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1794,6 +2119,33 @@ int abs_bremse_30_unpack(
     struct abs_bremse_30_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Create message BREMSE_30 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_30_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message BREMSE_30 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_30_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
 
 /**
  * Pack message BREMSE_31.
@@ -1849,6 +2201,35 @@ double abs_bremse_31_idle_time_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_31_idle_time_is_in_range(uint16_t value);
+
+/**
+ * Create message BREMSE_31 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_31_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double idle_time);
+
+/**
+ * unpack message BREMSE_31 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_31_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *idle_time);
 
 /**
  * Pack message BREMSE_32.
@@ -2041,6 +2422,45 @@ double abs_bremse_32_wheel_quality_rr_decode(uint8_t value);
 bool abs_bremse_32_wheel_quality_rr_is_in_range(uint8_t value);
 
 /**
+ * Create message BREMSE_32 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_32_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double acc_fa,
+    double acc_ra,
+    double wheel_quality_fl,
+    double wheel_quality_fr,
+    double wheel_quality_rl,
+    double wheel_quality_rr);
+
+/**
+ * unpack message BREMSE_32 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_32_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *acc_fa,
+    double *acc_ra,
+    double *wheel_quality_fl,
+    double *wheel_quality_fr,
+    double *wheel_quality_rl,
+    double *wheel_quality_rr);
+
+/**
  * Pack message BREMSE_51.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -2202,6 +2622,43 @@ double abs_bremse_51_if_chksum_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_51_if_chksum_is_in_range(uint8_t value);
+
+/**
+ * Create message BREMSE_51 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_51_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ax1_abs_int,
+    double ay1_abs_int,
+    double if_variant,
+    double if_revision,
+    double if_chksum);
+
+/**
+ * unpack message BREMSE_51 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_51_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ax1_abs_int,
+    double *ay1_abs_int,
+    double *if_variant,
+    double *if_revision,
+    double *if_chksum);
 
 /**
  * Pack message BREMSE_52.
@@ -3285,6 +3742,111 @@ double abs_bremse_52_appl_id_14_decode(uint8_t value);
 bool abs_bremse_52_appl_id_14_is_in_range(uint8_t value);
 
 /**
+ * Create message BREMSE_52 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_52_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double mplx_sw_info,
+    double sw_version_high_upper,
+    double bb_dig1,
+    double appl_id_01,
+    double appl_id_08,
+    double appl_date_01,
+    double sw_can_ident,
+    double hu_date_year,
+    double sw_version_high_lower,
+    double bb_dig2,
+    double appl_id_02,
+    double appl_id_09,
+    double appl_date_02,
+    double hu_date_month,
+    double sw_version_mid_upper,
+    double bb_dig3,
+    double appl_id_03,
+    double appl_id_10,
+    double appl_date_03,
+    double hu_date_day,
+    double sw_version_mid_lower,
+    double bb_dig4,
+    double appl_id_04,
+    double appl_id_11,
+    double appl_date_04,
+    double ecu_serial,
+    double sw_version_low_upper,
+    double bb_dig5,
+    double appl_id_05,
+    double appl_id_12,
+    double appl_date_05,
+    double sw_version_low_lower,
+    double bb_dig6,
+    double appl_id_06,
+    double appl_id_13,
+    double appl_date_06,
+    double bb_dig7,
+    double appl_id_07,
+    double appl_id_14);
+
+/**
+ * unpack message BREMSE_52 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_52_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *mplx_sw_info,
+    double *sw_version_high_upper,
+    double *bb_dig1,
+    double *appl_id_01,
+    double *appl_id_08,
+    double *appl_date_01,
+    double *sw_can_ident,
+    double *hu_date_year,
+    double *sw_version_high_lower,
+    double *bb_dig2,
+    double *appl_id_02,
+    double *appl_id_09,
+    double *appl_date_02,
+    double *hu_date_month,
+    double *sw_version_mid_upper,
+    double *bb_dig3,
+    double *appl_id_03,
+    double *appl_id_10,
+    double *appl_date_03,
+    double *hu_date_day,
+    double *sw_version_mid_lower,
+    double *bb_dig4,
+    double *appl_id_04,
+    double *appl_id_11,
+    double *appl_date_04,
+    double *ecu_serial,
+    double *sw_version_low_upper,
+    double *bb_dig5,
+    double *appl_id_05,
+    double *appl_id_12,
+    double *appl_date_05,
+    double *sw_version_low_lower,
+    double *bb_dig6,
+    double *appl_id_06,
+    double *appl_id_13,
+    double *appl_date_06,
+    double *bb_dig7,
+    double *appl_id_07,
+    double *appl_id_14);
+
+/**
  * Pack message BREMSE_50.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -3419,6 +3981,41 @@ double abs_bremse_50_brake_bal_pct_advice_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_50_brake_bal_pct_advice_is_in_range(uint8_t value);
+
+/**
+ * Create message BREMSE_50 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_50_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double brake_bal_at50,
+    double brake_bal_at50_advice,
+    double brake_bal_pct,
+    double brake_bal_pct_advice);
+
+/**
+ * unpack message BREMSE_50 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_50_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *brake_bal_at50,
+    double *brake_bal_at50_advice,
+    double *brake_bal_pct,
+    double *brake_bal_pct_advice);
 
 /**
  * Pack message BREMSE_53.
@@ -3987,6 +4584,73 @@ double abs_bremse_53_p_ra_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_53_p_ra_is_in_range(int16_t value);
+
+/**
+ * Create message BREMSE_53 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int abs_bremse_53_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double switch_position,
+    double p_fa,
+    double bls,
+    double bremse_53_cnt,
+    double abs_malfunction,
+    double abs_active,
+    double ebd_lamp,
+    double abs_lamp,
+    double diag_fl,
+    double diag_fr,
+    double diag_rl,
+    double diag_rr,
+    double diag_abs_unit,
+    double diag_fuse_valve,
+    double diag_fuse_pump,
+    double diag_p_fa,
+    double diag_p_ra,
+    double diag_yrs,
+    double abs_fault_info,
+    double p_ra);
+
+/**
+ * unpack message BREMSE_53 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int abs_bremse_53_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *switch_position,
+    double *p_fa,
+    double *bls,
+    double *bremse_53_cnt,
+    double *abs_malfunction,
+    double *abs_active,
+    double *ebd_lamp,
+    double *abs_lamp,
+    double *diag_fl,
+    double *diag_fr,
+    double *diag_rl,
+    double *diag_rr,
+    double *diag_abs_unit,
+    double *diag_fuse_valve,
+    double *diag_fuse_pump,
+    double *diag_p_fa,
+    double *diag_p_ra,
+    double *diag_yrs,
+    double *abs_fault_info,
+    double *p_ra);
 
 
 #ifdef __cplusplus

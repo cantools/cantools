@@ -152,6 +152,35 @@ double floating_point_bit_fields_message1_signal1_decode(double value);
 bool floating_point_bit_fields_message1_signal1_is_in_range(double value);
 
 /**
+ * Create message Message1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int floating_point_bit_fields_message1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double signal1);
+
+/**
+ * unpack message Message1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int floating_point_bit_fields_message1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *signal1);
+
+/**
  * Pack message Message2.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -232,6 +261,37 @@ double floating_point_bit_fields_message2_signal2_decode(float value);
  * @return true if in range, false otherwise.
  */
 bool floating_point_bit_fields_message2_signal2_is_in_range(float value);
+
+/**
+ * Create message Message2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int floating_point_bit_fields_message2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double signal1,
+    double signal2);
+
+/**
+ * unpack message Message2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int floating_point_bit_fields_message2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *signal1,
+    double *signal2);
 
 
 #ifdef __cplusplus

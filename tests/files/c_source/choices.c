@@ -84,6 +84,58 @@ int choices_foo_unpack(
     return (0);
 }
 
+static int choices_foo_check_ranges(struct choices_foo_t *msg)
+{
+    int idx = 1;
+
+    if (!choices_foo_foo_is_in_range(msg->foo))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int choices_foo_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double foo)
+{
+    struct choices_foo_t msg;
+
+    msg.foo = choices_foo_foo_encode(foo);
+
+    int ret = choices_foo_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = choices_foo_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int choices_foo_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *foo)
+{
+    struct choices_foo_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (choices_foo_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = choices_foo_check_ranges(&msg);
+
+    if (foo)
+        *foo = choices_foo_foo_decode(msg.foo);
+
+    return ret;
+}
+
 int8_t choices_foo_foo_encode(double value)
 {
     return (int8_t)(value);

@@ -114,6 +114,33 @@ int no_signals_message1_unpack(
     size_t size);
 
 /**
+ * Create message Message1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int no_signals_message1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message Message1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int no_signals_message1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
+
+/**
  * Pack message Message2.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -140,6 +167,33 @@ int no_signals_message2_unpack(
     struct no_signals_message2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Create message Message2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int no_signals_message2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message Message2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int no_signals_message2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
 
 
 #ifdef __cplusplus

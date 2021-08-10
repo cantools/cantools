@@ -62,3 +62,46 @@ int camel_case_empty_message1_unpack(
 
     return (0);
 }
+
+static int camel_case_empty_message1_check_ranges(struct camel_case_empty_message1_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int camel_case_empty_message1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct camel_case_empty_message1_t msg;
+
+
+    int ret = camel_case_empty_message1_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = camel_case_empty_message1_pack(outbuf, &msg, outbuf_sz);
+    if (5 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int camel_case_empty_message1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct camel_case_empty_message1_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (camel_case_empty_message1_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = camel_case_empty_message1_check_ranges(&msg);
+
+    return ret;
+}

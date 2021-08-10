@@ -62,3 +62,46 @@ int letter_terminated_can_id_6_0_symbol1_unpack(
 
     return (0);
 }
+
+static int letter_terminated_can_id_6_0_symbol1_check_ranges(struct letter_terminated_can_id_6_0_symbol1_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int letter_terminated_can_id_6_0_symbol1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct letter_terminated_can_id_6_0_symbol1_t msg;
+
+
+    int ret = letter_terminated_can_id_6_0_symbol1_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = letter_terminated_can_id_6_0_symbol1_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int letter_terminated_can_id_6_0_symbol1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct letter_terminated_can_id_6_0_symbol1_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (letter_terminated_can_id_6_0_symbol1_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = letter_terminated_can_id_6_0_symbol1_check_ranges(&msg);
+
+    return ret;
+}

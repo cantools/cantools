@@ -341,6 +341,39 @@ double multiplex_2_shared_s2_decode(int8_t value);
 bool multiplex_2_shared_s2_is_in_range(int8_t value);
 
 /**
+ * Create message Shared if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_shared_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s1,
+    double s2);
+
+/**
+ * unpack message Shared and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_shared_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s1,
+    double *s2);
+
+/**
  * Pack message Normal.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -448,6 +481,39 @@ double multiplex_2_normal_s2_decode(int8_t value);
  * @return true if in range, false otherwise.
  */
 bool multiplex_2_normal_s2_is_in_range(int8_t value);
+
+/**
+ * Create message Normal if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_normal_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s1,
+    double s2);
+
+/**
+ * unpack message Normal and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_normal_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s1,
+    double *s2);
 
 /**
  * Pack message Extended.
@@ -721,6 +787,51 @@ double multiplex_2_extended_s7_decode(int32_t value);
 bool multiplex_2_extended_s7_is_in_range(int32_t value);
 
 /**
+ * Create message Extended if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_extended_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s5,
+    double s1,
+    double s4,
+    double s2,
+    double s3,
+    double s6,
+    double s8,
+    double s7);
+
+/**
+ * unpack message Extended and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_extended_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s5,
+    double *s1,
+    double *s4,
+    double *s2,
+    double *s3,
+    double *s6,
+    double *s8,
+    double *s7);
+
+/**
  * Pack message ExtendedTypes.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -855,6 +966,41 @@ double multiplex_2_extended_types_s9_decode(float value);
  * @return true if in range, false otherwise.
  */
 bool multiplex_2_extended_types_s9_is_in_range(float value);
+
+/**
+ * Create message ExtendedTypes if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_extended_types_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s11,
+    double s0,
+    double s10,
+    double s9);
+
+/**
+ * unpack message ExtendedTypes and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_extended_types_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s11,
+    double *s0,
+    double *s10,
+    double *s9);
 
 
 #ifdef __cplusplus

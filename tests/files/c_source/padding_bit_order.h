@@ -333,6 +333,41 @@ double padding_bit_order_msg0_c_decode(uint16_t value);
 bool padding_bit_order_msg0_c_is_in_range(uint16_t value);
 
 /**
+ * Create message MSG0 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int padding_bit_order_msg0_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double b,
+    double a,
+    double d,
+    double c);
+
+/**
+ * unpack message MSG0 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int padding_bit_order_msg0_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *b,
+    double *a,
+    double *d,
+    double *c);
+
+/**
  * Pack message MSG1.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -469,6 +504,41 @@ double padding_bit_order_msg1_h_decode(uint16_t value);
 bool padding_bit_order_msg1_h_is_in_range(uint16_t value);
 
 /**
+ * Create message MSG1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int padding_bit_order_msg1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double e,
+    double f,
+    double g,
+    double h);
+
+/**
+ * unpack message MSG1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int padding_bit_order_msg1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *e,
+    double *f,
+    double *g,
+    double *h);
+
+/**
  * Pack message MSG2.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -578,6 +648,39 @@ double padding_bit_order_msg2_k_decode(uint8_t value);
 bool padding_bit_order_msg2_k_is_in_range(uint8_t value);
 
 /**
+ * Create message MSG2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int padding_bit_order_msg2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double i,
+    double j,
+    double k);
+
+/**
+ * unpack message MSG2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int padding_bit_order_msg2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *i,
+    double *j,
+    double *k);
+
+/**
  * Pack message MSG3.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -633,6 +736,35 @@ double padding_bit_order_msg3_l_decode(uint64_t value);
 bool padding_bit_order_msg3_l_is_in_range(uint64_t value);
 
 /**
+ * Create message MSG3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int padding_bit_order_msg3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double l);
+
+/**
+ * unpack message MSG3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int padding_bit_order_msg3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *l);
+
+/**
  * Pack message MSG4.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -686,6 +818,35 @@ double padding_bit_order_msg4_m_decode(uint64_t value);
  * @return true if in range, false otherwise.
  */
 bool padding_bit_order_msg4_m_is_in_range(uint64_t value);
+
+/**
+ * Create message MSG4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int padding_bit_order_msg4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double m);
+
+/**
+ * unpack message MSG4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int padding_bit_order_msg4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *m);
 
 
 #ifdef __cplusplus

@@ -146,6 +146,58 @@ int floating_point_message1_unpack(
     return (0);
 }
 
+static int floating_point_message1_check_ranges(struct floating_point_message1_t *msg)
+{
+    int idx = 1;
+
+    if (!floating_point_message1_signal1_is_in_range(msg->signal1))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int floating_point_message1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double signal1)
+{
+    struct floating_point_message1_t msg;
+
+    msg.signal1 = floating_point_message1_signal1_encode(signal1);
+
+    int ret = floating_point_message1_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = floating_point_message1_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int floating_point_message1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *signal1)
+{
+    struct floating_point_message1_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (floating_point_message1_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = floating_point_message1_check_ranges(&msg);
+
+    if (signal1)
+        *signal1 = floating_point_message1_signal1_decode(msg.signal1);
+
+    return ret;
+}
+
 double floating_point_message1_signal1_encode(double value)
 {
     return (double)(value);
@@ -215,6 +267,69 @@ int floating_point_message2_unpack(
     memcpy(&dst_p->signal2, &signal2, sizeof(dst_p->signal2));
 
     return (0);
+}
+
+static int floating_point_message2_check_ranges(struct floating_point_message2_t *msg)
+{
+    int idx = 1;
+
+    if (!floating_point_message2_signal1_is_in_range(msg->signal1))
+        return idx;
+
+    idx++;
+
+    if (!floating_point_message2_signal2_is_in_range(msg->signal2))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int floating_point_message2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double signal1,
+    double signal2)
+{
+    struct floating_point_message2_t msg;
+
+    msg.signal1 = floating_point_message2_signal1_encode(signal1);
+    msg.signal2 = floating_point_message2_signal2_encode(signal2);
+
+    int ret = floating_point_message2_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = floating_point_message2_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int floating_point_message2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *signal1,
+    double *signal2)
+{
+    struct floating_point_message2_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (floating_point_message2_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = floating_point_message2_check_ranges(&msg);
+
+    if (signal1)
+        *signal1 = floating_point_message2_signal1_decode(msg.signal1);
+
+    if (signal2)
+        *signal2 = floating_point_message2_signal2_decode(msg.signal2);
+
+    return ret;
 }
 
 float floating_point_message2_signal1_encode(double value)

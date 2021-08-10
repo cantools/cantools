@@ -129,6 +129,80 @@ int motohawk_example_message_unpack(
     return (0);
 }
 
+static int motohawk_example_message_check_ranges(struct motohawk_example_message_t *msg)
+{
+    int idx = 1;
+
+    if (!motohawk_example_message_enable_is_in_range(msg->enable))
+        return idx;
+
+    idx++;
+
+    if (!motohawk_example_message_average_radius_is_in_range(msg->average_radius))
+        return idx;
+
+    idx++;
+
+    if (!motohawk_example_message_temperature_is_in_range(msg->temperature))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int motohawk_example_message_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double enable,
+    double average_radius,
+    double temperature)
+{
+    struct motohawk_example_message_t msg;
+
+    msg.enable = motohawk_example_message_enable_encode(enable);
+    msg.average_radius = motohawk_example_message_average_radius_encode(average_radius);
+    msg.temperature = motohawk_example_message_temperature_encode(temperature);
+
+    int ret = motohawk_example_message_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = motohawk_example_message_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int motohawk_example_message_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *enable,
+    double *average_radius,
+    double *temperature)
+{
+    struct motohawk_example_message_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (motohawk_example_message_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = motohawk_example_message_check_ranges(&msg);
+
+    if (enable)
+        *enable = motohawk_example_message_enable_decode(msg.enable);
+
+    if (average_radius)
+        *average_radius = motohawk_example_message_average_radius_decode(msg.average_radius);
+
+    if (temperature)
+        *temperature = motohawk_example_message_temperature_decode(msg.temperature);
+
+    return ret;
+}
+
 bool motohawk_example_message_enable_is_in_range(uint8_t value)
 {
     return (value <= 1u);

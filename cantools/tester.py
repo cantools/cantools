@@ -1,7 +1,6 @@
 # The tester module.
 
 import time
-import decimal
 
 try:
     from collections import UserDict
@@ -214,7 +213,7 @@ class Message(UserDict, object):
             maximum = 0 if not signal.maximum else signal.maximum
             if signal.initial:
                 # use initial signal value (if set)
-                initial_sig_values[signal.name] = (signal.initial * decimal.Decimal(signal.scale)) + decimal.Decimal(signal.offset)
+                initial_sig_values[signal.name] = (signal.initial * signal.decimal.scale) + signal.decimal.offset
             elif minimum <= 0 <= maximum:
                 # use 0 if in allowed range
                 initial_sig_values[signal.name] = 0

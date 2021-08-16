@@ -150,9 +150,13 @@ def create_encode_decode_formats(datas, number_of_bytes):
         items = []
         start = 0
 
-        for data in datas:
-            if data.byte_order == 'little_endian':
-                continue
+        # Select BE fields
+        be_datas = [data for data in datas if data.byte_order == "big_endian"]
+
+        # Ensure BE fields are sorted in network order
+        sorted_datas = sorted(be_datas, key = lambda data: sawtooth_to_network_bitnum(data.start))
+
+        for data in sorted_datas:
 
             padding_length = (start_bit(data) - start)
 
@@ -212,3 +216,26 @@ def create_encode_decode_formats(datas, number_of_bytes):
     return Formats(big_compiled,
                    little_compiled,
                    big_padding_mask & little_padding_mask)
+
+
+def sawtooth_to_network_bitnum(sawtooth_bitnum):
+    '''Convert SawTooth bit number to Network bit number
+
+    Byte     |   0   |   1   |
+    Sawtooth |7 ... 0|15... 8|
+    Network  |0 ... 7|8 ...15|
+    '''
+    return (8 * (sawtooth_bitnum // 8)) + (7 - (sawtooth_bitnum % 8))
+
+
+def cdd_offset_to_dbc_start_bit(cdd_offset, bit_length, byte_order):
+    '''Convert CDD/c-style field bit offset to DBC field start bit convention.
+
+    BigEndian (BE) fields are located by their MSBit's sawtooth index.
+    LitteleEndian (LE) fields located by their LSBit's sawtooth index.
+    '''
+    if byte_order == "big_endian":
+        # Note: Allow for BE fields that are smaller or larger than 8 bits.
+        return (8 * (cdd_offset // 8)) + min(7, (cdd_offset % 8) + bit_length - 1)
+    else:
+        return cdd_offset

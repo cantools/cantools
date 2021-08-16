@@ -6,7 +6,8 @@ from xml.etree import ElementTree
 from ..data import Data
 from ..did import Did
 from ..internal_database import InternalDatabase
-
+from ...errors import ParseError
+from ...utils import cdd_offset_to_dbc_start_bit
 
 LOGGER = logging.getLogger(__name__)
 
@@ -98,7 +99,11 @@ def _load_data_types(ecu_doc):
                 LOGGER.debug("Ignoring unsupported attribute '%s'.", key)
 
         if ctype.attrib['bo'] == '21':
+            byte_order = 'big_endian'
+        elif ctype.attrib['bo'] == '12':
             byte_order = 'little_endian'
+        else:
+            raise ParseError("Unknown byte order code: %s" % ctype.attrib['bo'])
 
         # Load from P-type element.
         ptype_unit = data_type.find('PVALUETYPE/UNIT')
@@ -138,10 +143,16 @@ def _load_data_element(data, offset, data_types):
 
     data_type = data_types[data.attrib['dtref']]
 
+    # Map CDD/c-style field offset to the DBC/can.Signal.start bit numbering
+    # convention for compatability with can.Signal objects and the shared codec
+    # infrastructure.
+    #
+    dbc_start_bitnum = cdd_offset_to_dbc_start_bit(offset, data_type.bit_length, data_type.byte_order)
+
     return Data(name=data.find('QUAL').text,
-                start=offset,
+                start = dbc_start_bitnum,
                 length=data_type.bit_length,
-                byte_order='little_endian',
+                byte_order = data_type.byte_order,
                 scale=data_type.factor,
                 offset=data_type.offset,
                 minimum=data_type.minimum,

@@ -255,6 +255,32 @@ Dump given database in a human readable format:
 
      ------------------------------------------------------------------------
 
+The list subcommand
+^^^^^^^^^^^^^^^^^^^
+
+Print all information of a given database in a human readable
+format. This is very similar to the "dump" subcommand, but the output
+is less pretty, slightly more comprehensive and easier to parse by
+shell scripts:
+
+.. code-block:: bash
+
+    $ python3 -m cantools list -a tests/files/dbc/motohawk.dbc
+    ExampleMessage:
+      Comment[None]: Example message used as template in MotoHawk models.
+      Frame ID: 0x1f0 (496)
+      Size: 8 bytes
+      Is extended frame: False
+      Signals:
+        Enable:
+          Type: Integer
+          Start bit: 7
+          Length: 1 bits
+          Unit: -
+          Is signed: False
+          Named values:
+            0: Disabled
+
 The generate C source subcommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

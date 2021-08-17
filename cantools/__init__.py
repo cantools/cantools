@@ -67,6 +67,7 @@ def _main():
     _load_subparser('decode', subparsers)
     _load_subparser('monitor', subparsers)
     _load_subparser('dump', subparsers)
+    _load_subparser('list', subparsers)
     _load_subparser('convert', subparsers)
     _load_subparser('generate_c_source', subparsers)
     _load_subparser('plot', subparsers)

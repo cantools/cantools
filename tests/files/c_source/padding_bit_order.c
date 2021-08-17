@@ -32,6 +32,9 @@
 
 #include "padding_bit_order.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -247,6 +250,14 @@ double padding_bit_order_msg0_b_decode(uint8_t value)
     return ((double)value);
 }
 
+double padding_bit_order_msg0_b_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool padding_bit_order_msg0_b_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -260,6 +271,14 @@ uint16_t padding_bit_order_msg0_a_encode(double value)
 double padding_bit_order_msg0_a_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double padding_bit_order_msg0_a_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 32767.0);
+    return ret;
 }
 
 bool padding_bit_order_msg0_a_is_in_range(uint16_t value)
@@ -277,6 +296,14 @@ double padding_bit_order_msg0_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double padding_bit_order_msg0_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool padding_bit_order_msg0_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -290,6 +317,14 @@ uint16_t padding_bit_order_msg0_c_encode(double value)
 double padding_bit_order_msg0_c_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double padding_bit_order_msg0_c_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 32767.0);
+    return ret;
 }
 
 bool padding_bit_order_msg0_c_is_in_range(uint16_t value)
@@ -432,6 +467,14 @@ double padding_bit_order_msg1_e_decode(uint8_t value)
     return ((double)value);
 }
 
+double padding_bit_order_msg1_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool padding_bit_order_msg1_e_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -445,6 +488,14 @@ uint16_t padding_bit_order_msg1_f_encode(double value)
 double padding_bit_order_msg1_f_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double padding_bit_order_msg1_f_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 32767.0);
+    return ret;
 }
 
 bool padding_bit_order_msg1_f_is_in_range(uint16_t value)
@@ -462,6 +513,14 @@ double padding_bit_order_msg1_g_decode(uint8_t value)
     return ((double)value);
 }
 
+double padding_bit_order_msg1_g_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool padding_bit_order_msg1_g_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -475,6 +534,14 @@ uint16_t padding_bit_order_msg1_h_encode(double value)
 double padding_bit_order_msg1_h_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double padding_bit_order_msg1_h_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 32767.0);
+    return ret;
 }
 
 bool padding_bit_order_msg1_h_is_in_range(uint16_t value)
@@ -600,6 +667,14 @@ double padding_bit_order_msg2_i_decode(uint8_t value)
     return ((double)value);
 }
 
+double padding_bit_order_msg2_i_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 15.0);
+    return ret;
+}
+
 bool padding_bit_order_msg2_i_is_in_range(uint8_t value)
 {
     return (value <= 15u);
@@ -615,6 +690,14 @@ double padding_bit_order_msg2_j_decode(uint8_t value)
     return ((double)value);
 }
 
+double padding_bit_order_msg2_j_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 15.0);
+    return ret;
+}
+
 bool padding_bit_order_msg2_j_is_in_range(uint8_t value)
 {
     return (value <= 15u);
@@ -628,6 +711,14 @@ uint8_t padding_bit_order_msg2_k_encode(double value)
 double padding_bit_order_msg2_k_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double padding_bit_order_msg2_k_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 15.0);
+    return ret;
 }
 
 bool padding_bit_order_msg2_k_is_in_range(uint8_t value)
@@ -739,6 +830,14 @@ uint64_t padding_bit_order_msg3_l_encode(double value)
 double padding_bit_order_msg3_l_decode(uint64_t value)
 {
     return ((double)value);
+}
+
+double padding_bit_order_msg3_l_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 18446744073709551615.0);
+    return ret;
 }
 
 bool padding_bit_order_msg3_l_is_in_range(uint64_t value)
@@ -854,9 +953,20 @@ double padding_bit_order_msg4_m_decode(uint64_t value)
     return ((double)value);
 }
 
+double padding_bit_order_msg4_m_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 18446744073709551615.0);
+    return ret;
+}
+
 bool padding_bit_order_msg4_m_is_in_range(uint64_t value)
 {
     (void)value;
 
     return (true);
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

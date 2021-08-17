@@ -1128,6 +1128,13 @@ uint16_t abs_bremse_33_whlspeed_fl_encode(double value);
 double abs_bremse_33_whlspeed_fl_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_33_whlspeed_fl_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -1153,6 +1160,13 @@ uint16_t abs_bremse_33_whlspeed_fr_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_33_whlspeed_fr_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_33_whlspeed_fr_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -1182,6 +1196,13 @@ uint16_t abs_bremse_33_whlspeed_rl_encode(double value);
 double abs_bremse_33_whlspeed_rl_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_33_whlspeed_rl_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -1207,6 +1228,13 @@ uint16_t abs_bremse_33_whlspeed_rr_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_33_whlspeed_rr_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_33_whlspeed_rr_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -1574,6 +1602,13 @@ uint16_t abs_mm5_10_tx1_yaw_rate_encode(double value);
 double abs_mm5_10_tx1_yaw_rate_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_mm5_10_tx1_yaw_rate_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -1599,6 +1634,13 @@ uint16_t abs_mm5_10_tx1_ay1_encode(double value);
  * @return Decoded signal.
  */
 double abs_mm5_10_tx1_ay1_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_mm5_10_tx1_ay1_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -1687,6 +1729,13 @@ uint16_t abs_mm5_10_tx2_roll_rate_encode(double value);
 double abs_mm5_10_tx2_roll_rate_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_mm5_10_tx2_roll_rate_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -1712,6 +1761,13 @@ uint16_t abs_mm5_10_tx2_ax1_encode(double value);
  * @return Decoded signal.
  */
 double abs_mm5_10_tx2_ax1_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_mm5_10_tx2_ax1_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -1800,6 +1856,13 @@ uint16_t abs_mm5_10_tx3_az_encode(double value);
 double abs_mm5_10_tx3_az_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_mm5_10_tx3_az_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -1884,6 +1947,13 @@ uint16_t abs_bremse_2_whlspeed_fl_bremse2_encode(double value);
 double abs_bremse_2_whlspeed_fl_bremse2_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_2_whlspeed_fl_bremse2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -1909,6 +1979,13 @@ uint16_t abs_bremse_2_whlspeed_fr_bremse2_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_2_whlspeed_fr_bremse2_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_2_whlspeed_fr_bremse2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -1938,6 +2015,13 @@ uint16_t abs_bremse_2_whlspeed_rl_bremse2_encode(double value);
 double abs_bremse_2_whlspeed_rl_bremse2_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_2_whlspeed_rl_bremse2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -1963,6 +2047,13 @@ uint16_t abs_bremse_2_whlspeed_rr_bremse2_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_2_whlspeed_rr_bremse2_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_2_whlspeed_rr_bremse2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2053,6 +2144,13 @@ uint8_t abs_abs_switch_abs_switchposition_encode(double value);
  * @return Decoded signal.
  */
 double abs_abs_switch_abs_switchposition_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_abs_switch_abs_switchposition_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2194,6 +2292,13 @@ uint16_t abs_bremse_31_idle_time_encode(double value);
 double abs_bremse_31_idle_time_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_31_idle_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2278,6 +2383,13 @@ uint8_t abs_bremse_32_acc_fa_encode(double value);
 double abs_bremse_32_acc_fa_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_32_acc_fa_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2303,6 +2415,13 @@ uint8_t abs_bremse_32_acc_ra_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_32_acc_ra_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_32_acc_ra_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2332,6 +2451,13 @@ uint8_t abs_bremse_32_wheel_quality_fl_encode(double value);
 double abs_bremse_32_wheel_quality_fl_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_32_wheel_quality_fl_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2357,6 +2483,13 @@ uint8_t abs_bremse_32_wheel_quality_fr_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_32_wheel_quality_fr_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_32_wheel_quality_fr_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2386,6 +2519,13 @@ uint8_t abs_bremse_32_wheel_quality_rl_encode(double value);
 double abs_bremse_32_wheel_quality_rl_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_32_wheel_quality_rl_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2411,6 +2551,13 @@ uint8_t abs_bremse_32_wheel_quality_rr_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_32_wheel_quality_rr_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_32_wheel_quality_rr_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2507,6 +2654,13 @@ uint16_t abs_bremse_51_ax1_abs_int_encode(double value);
 double abs_bremse_51_ax1_abs_int_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_51_ax1_abs_int_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2532,6 +2686,13 @@ uint16_t abs_bremse_51_ay1_abs_int_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_51_ay1_abs_int_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_51_ay1_abs_int_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2561,6 +2722,13 @@ uint8_t abs_bremse_51_if_variant_encode(double value);
 double abs_bremse_51_if_variant_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_51_if_variant_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2588,6 +2756,13 @@ uint8_t abs_bremse_51_if_revision_encode(double value);
 double abs_bremse_51_if_revision_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_51_if_revision_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2613,6 +2788,13 @@ uint8_t abs_bremse_51_if_chksum_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_51_if_chksum_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_51_if_chksum_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2707,6 +2889,13 @@ uint8_t abs_bremse_52_mplx_sw_info_encode(double value);
 double abs_bremse_52_mplx_sw_info_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_mplx_sw_info_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2732,6 +2921,13 @@ uint8_t abs_bremse_52_sw_version_high_upper_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_sw_version_high_upper_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_sw_version_high_upper_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2761,6 +2957,13 @@ uint8_t abs_bremse_52_bb_dig1_encode(double value);
 double abs_bremse_52_bb_dig1_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_bb_dig1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2786,6 +2989,13 @@ uint8_t abs_bremse_52_appl_id_01_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_id_01_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_01_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2815,6 +3025,13 @@ uint8_t abs_bremse_52_appl_id_08_encode(double value);
 double abs_bremse_52_appl_id_08_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_08_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2840,6 +3057,13 @@ uint8_t abs_bremse_52_appl_date_01_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_date_01_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_date_01_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2869,6 +3093,13 @@ uint8_t abs_bremse_52_sw_can_ident_encode(double value);
 double abs_bremse_52_sw_can_ident_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_sw_can_ident_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2894,6 +3125,13 @@ uint8_t abs_bremse_52_hu_date_year_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_hu_date_year_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_hu_date_year_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2923,6 +3161,13 @@ uint8_t abs_bremse_52_sw_version_high_lower_encode(double value);
 double abs_bremse_52_sw_version_high_lower_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_sw_version_high_lower_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -2948,6 +3193,13 @@ uint8_t abs_bremse_52_bb_dig2_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_bb_dig2_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_bb_dig2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -2977,6 +3229,13 @@ uint8_t abs_bremse_52_appl_id_02_encode(double value);
 double abs_bremse_52_appl_id_02_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_02_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3002,6 +3261,13 @@ uint8_t abs_bremse_52_appl_id_09_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_id_09_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_09_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3031,6 +3297,13 @@ uint8_t abs_bremse_52_appl_date_02_encode(double value);
 double abs_bremse_52_appl_date_02_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_date_02_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3056,6 +3329,13 @@ uint8_t abs_bremse_52_hu_date_month_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_hu_date_month_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_hu_date_month_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3085,6 +3365,13 @@ uint8_t abs_bremse_52_sw_version_mid_upper_encode(double value);
 double abs_bremse_52_sw_version_mid_upper_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_sw_version_mid_upper_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3110,6 +3397,13 @@ uint8_t abs_bremse_52_bb_dig3_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_bb_dig3_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_bb_dig3_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3139,6 +3433,13 @@ uint8_t abs_bremse_52_appl_id_03_encode(double value);
 double abs_bremse_52_appl_id_03_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_03_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3164,6 +3465,13 @@ uint8_t abs_bremse_52_appl_id_10_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_id_10_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_10_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3193,6 +3501,13 @@ uint8_t abs_bremse_52_appl_date_03_encode(double value);
 double abs_bremse_52_appl_date_03_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_date_03_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3218,6 +3533,13 @@ uint8_t abs_bremse_52_hu_date_day_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_hu_date_day_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_hu_date_day_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3247,6 +3569,13 @@ uint8_t abs_bremse_52_sw_version_mid_lower_encode(double value);
 double abs_bremse_52_sw_version_mid_lower_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_sw_version_mid_lower_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3272,6 +3601,13 @@ uint8_t abs_bremse_52_bb_dig4_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_bb_dig4_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_bb_dig4_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3301,6 +3637,13 @@ uint8_t abs_bremse_52_appl_id_04_encode(double value);
 double abs_bremse_52_appl_id_04_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_04_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3326,6 +3669,13 @@ uint8_t abs_bremse_52_appl_id_11_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_id_11_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_11_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3355,6 +3705,13 @@ uint8_t abs_bremse_52_appl_date_04_encode(double value);
 double abs_bremse_52_appl_date_04_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_date_04_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3380,6 +3737,13 @@ uint32_t abs_bremse_52_ecu_serial_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_ecu_serial_decode(uint32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_ecu_serial_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3409,6 +3773,13 @@ uint8_t abs_bremse_52_sw_version_low_upper_encode(double value);
 double abs_bremse_52_sw_version_low_upper_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_sw_version_low_upper_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3434,6 +3805,13 @@ uint8_t abs_bremse_52_bb_dig5_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_bb_dig5_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_bb_dig5_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3463,6 +3841,13 @@ uint8_t abs_bremse_52_appl_id_05_encode(double value);
 double abs_bremse_52_appl_id_05_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_05_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3488,6 +3873,13 @@ uint8_t abs_bremse_52_appl_id_12_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_id_12_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_12_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3517,6 +3909,13 @@ uint8_t abs_bremse_52_appl_date_05_encode(double value);
 double abs_bremse_52_appl_date_05_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_date_05_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3542,6 +3941,13 @@ uint8_t abs_bremse_52_sw_version_low_lower_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_sw_version_low_lower_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_sw_version_low_lower_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3571,6 +3977,13 @@ uint8_t abs_bremse_52_bb_dig6_encode(double value);
 double abs_bremse_52_bb_dig6_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_bb_dig6_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3596,6 +4009,13 @@ uint8_t abs_bremse_52_appl_id_06_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_id_06_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_06_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3625,6 +4045,13 @@ uint8_t abs_bremse_52_appl_id_13_encode(double value);
 double abs_bremse_52_appl_id_13_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_13_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3650,6 +4077,13 @@ uint8_t abs_bremse_52_appl_date_06_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_date_06_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_date_06_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3679,6 +4113,13 @@ uint8_t abs_bremse_52_bb_dig7_encode(double value);
 double abs_bremse_52_bb_dig7_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_bb_dig7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3706,6 +4147,13 @@ uint8_t abs_bremse_52_appl_id_07_encode(double value);
 double abs_bremse_52_appl_id_07_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_07_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3731,6 +4179,13 @@ uint8_t abs_bremse_52_appl_id_14_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_52_appl_id_14_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_52_appl_id_14_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3893,6 +4348,13 @@ uint16_t abs_bremse_50_brake_bal_at50_encode(double value);
 double abs_bremse_50_brake_bal_at50_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_50_brake_bal_at50_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3918,6 +4380,13 @@ uint8_t abs_bremse_50_brake_bal_at50_advice_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_50_brake_bal_at50_advice_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_50_brake_bal_at50_advice_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -3947,6 +4416,13 @@ uint16_t abs_bremse_50_brake_bal_pct_encode(double value);
 double abs_bremse_50_brake_bal_pct_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_50_brake_bal_pct_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -3972,6 +4448,13 @@ uint8_t abs_bremse_50_brake_bal_pct_advice_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_50_brake_bal_pct_advice_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_50_brake_bal_pct_advice_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4064,6 +4547,13 @@ uint8_t abs_bremse_53_switch_position_encode(double value);
 double abs_bremse_53_switch_position_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_switch_position_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4089,6 +4579,13 @@ int16_t abs_bremse_53_p_fa_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_p_fa_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_p_fa_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4118,6 +4615,13 @@ uint8_t abs_bremse_53_bls_encode(double value);
 double abs_bremse_53_bls_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_bls_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4143,6 +4647,13 @@ uint8_t abs_bremse_53_bremse_53_cnt_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_bremse_53_cnt_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_bremse_53_cnt_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4172,6 +4683,13 @@ uint8_t abs_bremse_53_abs_malfunction_encode(double value);
 double abs_bremse_53_abs_malfunction_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_abs_malfunction_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4197,6 +4715,13 @@ uint8_t abs_bremse_53_abs_active_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_abs_active_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_abs_active_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4226,6 +4751,13 @@ uint8_t abs_bremse_53_ebd_lamp_encode(double value);
 double abs_bremse_53_ebd_lamp_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_ebd_lamp_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4251,6 +4783,13 @@ uint8_t abs_bremse_53_abs_lamp_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_abs_lamp_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_abs_lamp_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4280,6 +4819,13 @@ uint8_t abs_bremse_53_diag_fl_encode(double value);
 double abs_bremse_53_diag_fl_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_fl_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4305,6 +4851,13 @@ uint8_t abs_bremse_53_diag_fr_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_diag_fr_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_fr_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4334,6 +4887,13 @@ uint8_t abs_bremse_53_diag_rl_encode(double value);
 double abs_bremse_53_diag_rl_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_rl_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4359,6 +4919,13 @@ uint8_t abs_bremse_53_diag_rr_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_diag_rr_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_rr_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4388,6 +4955,13 @@ uint8_t abs_bremse_53_diag_abs_unit_encode(double value);
 double abs_bremse_53_diag_abs_unit_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_abs_unit_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4413,6 +4987,13 @@ uint8_t abs_bremse_53_diag_fuse_valve_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_diag_fuse_valve_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_fuse_valve_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4442,6 +5023,13 @@ uint8_t abs_bremse_53_diag_fuse_pump_encode(double value);
 double abs_bremse_53_diag_fuse_pump_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_fuse_pump_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4467,6 +5055,13 @@ uint8_t abs_bremse_53_diag_p_fa_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_diag_p_fa_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_p_fa_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4496,6 +5091,13 @@ uint8_t abs_bremse_53_diag_p_ra_encode(double value);
 double abs_bremse_53_diag_p_ra_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_p_ra_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4521,6 +5123,13 @@ uint8_t abs_bremse_53_diag_yrs_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_diag_yrs_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_diag_yrs_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -4550,6 +5159,13 @@ uint8_t abs_bremse_53_abs_fault_info_encode(double value);
 double abs_bremse_53_abs_fault_info_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_abs_fault_info_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -4575,6 +5191,13 @@ int16_t abs_bremse_53_p_ra_encode(double value);
  * @return Decoded signal.
  */
 double abs_bremse_53_p_ra_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double abs_bremse_53_p_ra_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.

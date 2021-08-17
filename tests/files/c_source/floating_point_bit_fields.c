@@ -32,6 +32,9 @@
 
 #include "floating_point_bit_fields.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u32(
     uint32_t value,
     uint8_t shift,
@@ -208,6 +211,14 @@ double floating_point_bit_fields_message1_signal1_decode(double value)
     return ((double)value);
 }
 
+double floating_point_bit_fields_message1_signal1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool floating_point_bit_fields_message1_signal1_is_in_range(double value)
 {
     (void)value;
@@ -342,6 +353,14 @@ double floating_point_bit_fields_message2_signal1_decode(float value)
     return ((double)value);
 }
 
+double floating_point_bit_fields_message2_signal1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool floating_point_bit_fields_message2_signal1_is_in_range(float value)
 {
     (void)value;
@@ -359,9 +378,20 @@ double floating_point_bit_fields_message2_signal2_decode(float value)
     return ((double)value);
 }
 
+double floating_point_bit_fields_message2_signal2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool floating_point_bit_fields_message2_signal2_is_in_range(float value)
 {
     (void)value;
 
     return (true);
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

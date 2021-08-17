@@ -32,6 +32,9 @@
 
 #include "no_signals.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 int no_signals_message1_pack(
     uint8_t *dst_p,
     const struct no_signals_message1_t *src_p,
@@ -129,3 +132,6 @@ int no_signals_message2_unpack(
 
     return (0);
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

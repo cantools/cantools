@@ -198,6 +198,13 @@ uint8_t multiplex_message1_multiplexor_encode(double value);
 double multiplex_message1_multiplexor_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_multiplexor_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -223,6 +230,13 @@ uint8_t multiplex_message1_bit_j_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_message1_bit_j_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_j_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -252,6 +266,13 @@ uint8_t multiplex_message1_bit_c_encode(double value);
 double multiplex_message1_bit_c_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_c_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -277,6 +298,13 @@ uint8_t multiplex_message1_bit_g_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_message1_bit_g_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_g_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -306,6 +334,13 @@ uint8_t multiplex_message1_bit_l_encode(double value);
 double multiplex_message1_bit_l_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_l_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -331,6 +366,13 @@ uint8_t multiplex_message1_bit_a_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_message1_bit_a_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_a_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -360,6 +402,13 @@ uint8_t multiplex_message1_bit_k_encode(double value);
 double multiplex_message1_bit_k_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_k_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -385,6 +434,13 @@ uint8_t multiplex_message1_bit_e_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_message1_bit_e_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_e_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -414,6 +470,13 @@ uint8_t multiplex_message1_bit_d_encode(double value);
 double multiplex_message1_bit_d_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -439,6 +502,13 @@ uint8_t multiplex_message1_bit_b_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_message1_bit_b_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_b_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -468,6 +538,13 @@ uint8_t multiplex_message1_bit_h_encode(double value);
 double multiplex_message1_bit_h_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_h_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -493,6 +570,13 @@ uint8_t multiplex_message1_bit_f_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_message1_bit_f_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_message1_bit_f_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.

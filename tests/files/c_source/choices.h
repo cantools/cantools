@@ -126,6 +126,13 @@ int8_t choices_foo_foo_encode(double value);
 double choices_foo_foo_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double choices_foo_foo_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.

@@ -111,8 +111,14 @@ SOURCE_FMT = '''\
 
 #include "{header}"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 {helpers}\
 {definitions}\
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN
 '''
 
 FUZZER_SOURCE_FMT = '''\
@@ -428,6 +434,16 @@ SIGNAL_DECLARATION_IS_IN_RANGE_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
 '''
 
+SIGNAL_DECLARATION_CLAMP_FMT = '''\
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double {database_name}_{message_name}_{signal_name}_clamp(double val);
+
+'''
+
 PACK_HELPER_LEFT_SHIFT_FMT = '''\
 static inline uint8_t pack_left_shift_u{length}(
     {var_type} value,
@@ -558,6 +574,17 @@ SIGNAL_DEFINITION_ENCODE_DECODE_FMT = '''\
 double {database_name}_{message_name}_{signal_name}_decode({type_name} value)
 {{
     return ({decode});
+}}
+
+'''
+
+SIGNAL_DEFINITION_CLAMP_FMT = '''\
+double {database_name}_{message_name}_{signal_name}_clamp(double val)
+{{
+    double ret = val;
+{clamp_min}
+{clamp_max}
+    return ret;
 }}
 
 '''
@@ -1436,6 +1463,11 @@ def _generate_declarations(database_name, messages, floating_point_numbers):
                     signal_name=signal.snake_name,
                     type_name=signal.type_name)
 
+                signal_declaration += SIGNAL_DECLARATION_CLAMP_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name)
+
             signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
                 message_name=message.snake_name,
@@ -1467,7 +1499,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers):
             database_name=database_name,
             message_name=message.snake_name,
             database_message_name=message.name,
-            message_params_decl = message_params_decl)
+            message_params_decl=message_params_decl)
 
         declaration += '\n' + MESSAGE_WRAP_UNPACK_DECLARATION_FMT.format(
             database_name=database_name,
@@ -1506,6 +1538,36 @@ def _generate_definitions(database_name, messages, floating_point_numbers):
                     type_name=signal.type_name,
                     encode=encode,
                     decode=decode)
+
+                # 'signal.is_float' means something else!
+                if signal.minimum is not None:
+                    if ('e' in str(signal.minimum)) or ('.' in str(signal.minimum)):
+                        suff = ""
+                    else:
+                        suff = ".0"
+
+                    clamp_min = "    ret = CTOOLS_MAX(ret, {}{});" \
+                        .format(signal.minimum, suff)
+                else:
+                    clamp_min = ""
+
+                if signal.maximum is not None:
+                    if ('e' in str(signal.maximum)) or ('.' in str(signal.maximum)):
+                        suff = ""
+                    else:
+                        suff = ".0"
+
+                    clamp_max = "    ret = CTOOLS_MIN(ret, {}{});" \
+                        .format(signal.maximum, suff)
+                else:
+                    clamp_max = ""
+
+                signal_definition += SIGNAL_DEFINITION_CLAMP_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name,
+                    clamp_max=clamp_max,
+                    clamp_min=clamp_min)
 
             signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,

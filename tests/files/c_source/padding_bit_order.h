@@ -243,6 +243,13 @@ uint8_t padding_bit_order_msg0_b_encode(double value);
 double padding_bit_order_msg0_b_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg0_b_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -268,6 +275,13 @@ uint16_t padding_bit_order_msg0_a_encode(double value);
  * @return Decoded signal.
  */
 double padding_bit_order_msg0_a_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg0_a_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -297,6 +311,13 @@ uint8_t padding_bit_order_msg0_d_encode(double value);
 double padding_bit_order_msg0_d_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg0_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -322,6 +343,13 @@ uint16_t padding_bit_order_msg0_c_encode(double value);
  * @return Decoded signal.
  */
 double padding_bit_order_msg0_c_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg0_c_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -414,6 +442,13 @@ uint8_t padding_bit_order_msg1_e_encode(double value);
 double padding_bit_order_msg1_e_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg1_e_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -439,6 +474,13 @@ uint16_t padding_bit_order_msg1_f_encode(double value);
  * @return Decoded signal.
  */
 double padding_bit_order_msg1_f_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg1_f_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -468,6 +510,13 @@ uint8_t padding_bit_order_msg1_g_encode(double value);
 double padding_bit_order_msg1_g_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg1_g_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -493,6 +542,13 @@ uint16_t padding_bit_order_msg1_h_encode(double value);
  * @return Decoded signal.
  */
 double padding_bit_order_msg1_h_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg1_h_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -585,6 +641,13 @@ uint8_t padding_bit_order_msg2_i_encode(double value);
 double padding_bit_order_msg2_i_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg2_i_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -612,6 +675,13 @@ uint8_t padding_bit_order_msg2_j_encode(double value);
 double padding_bit_order_msg2_j_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg2_j_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -637,6 +707,13 @@ uint8_t padding_bit_order_msg2_k_encode(double value);
  * @return Decoded signal.
  */
 double padding_bit_order_msg2_k_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg2_k_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -727,6 +804,13 @@ uint64_t padding_bit_order_msg3_l_encode(double value);
 double padding_bit_order_msg3_l_decode(uint64_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg3_l_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -809,6 +893,13 @@ uint64_t padding_bit_order_msg4_m_encode(double value);
  * @return Decoded signal.
  */
 double padding_bit_order_msg4_m_decode(uint64_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double padding_bit_order_msg4_m_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.

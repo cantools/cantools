@@ -143,6 +143,13 @@ double floating_point_bit_fields_message1_signal1_encode(double value);
 double floating_point_bit_fields_message1_signal1_decode(double value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double floating_point_bit_fields_message1_signal1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -227,6 +234,13 @@ float floating_point_bit_fields_message2_signal1_encode(double value);
 double floating_point_bit_fields_message2_signal1_decode(float value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double floating_point_bit_fields_message2_signal1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -252,6 +266,13 @@ float floating_point_bit_fields_message2_signal2_encode(double value);
  * @return Decoded signal.
  */
 double floating_point_bit_fields_message2_signal2_decode(float value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double floating_point_bit_fields_message2_signal2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.

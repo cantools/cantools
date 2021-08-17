@@ -32,6 +32,9 @@
 
 #include "letter_terminated_can_id_6_0.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 int letter_terminated_can_id_6_0_symbol1_pack(
     uint8_t *dst_p,
     const struct letter_terminated_can_id_6_0_symbol1_t *src_p,
@@ -105,3 +108,6 @@ int letter_terminated_can_id_6_0_symbol1_wrap_unpack(
 
     return ret;
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

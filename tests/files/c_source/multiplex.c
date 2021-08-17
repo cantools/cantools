@@ -32,6 +32,9 @@
 
 #include "multiplex.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -329,6 +332,14 @@ double multiplex_message1_multiplexor_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_message1_multiplexor_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_message1_multiplexor_is_in_range(uint8_t value)
 {
     return (value <= 63u);
@@ -342,6 +353,14 @@ uint8_t multiplex_message1_bit_j_encode(double value)
 double multiplex_message1_bit_j_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_message1_bit_j_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_message1_bit_j_is_in_range(uint8_t value)
@@ -359,6 +378,14 @@ double multiplex_message1_bit_c_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_message1_bit_c_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_message1_bit_c_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -372,6 +399,14 @@ uint8_t multiplex_message1_bit_g_encode(double value)
 double multiplex_message1_bit_g_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_message1_bit_g_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_message1_bit_g_is_in_range(uint8_t value)
@@ -389,6 +424,14 @@ double multiplex_message1_bit_l_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_message1_bit_l_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_message1_bit_l_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -402,6 +445,14 @@ uint8_t multiplex_message1_bit_a_encode(double value)
 double multiplex_message1_bit_a_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_message1_bit_a_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_message1_bit_a_is_in_range(uint8_t value)
@@ -419,6 +470,14 @@ double multiplex_message1_bit_k_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_message1_bit_k_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_message1_bit_k_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -432,6 +491,14 @@ uint8_t multiplex_message1_bit_e_encode(double value)
 double multiplex_message1_bit_e_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_message1_bit_e_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_message1_bit_e_is_in_range(uint8_t value)
@@ -449,6 +516,14 @@ double multiplex_message1_bit_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_message1_bit_d_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_message1_bit_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -462,6 +537,14 @@ uint8_t multiplex_message1_bit_b_encode(double value)
 double multiplex_message1_bit_b_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_message1_bit_b_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_message1_bit_b_is_in_range(uint8_t value)
@@ -479,6 +562,14 @@ double multiplex_message1_bit_h_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_message1_bit_h_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_message1_bit_h_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -494,7 +585,18 @@ double multiplex_message1_bit_f_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_message1_bit_f_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_message1_bit_f_is_in_range(uint8_t value)
 {
     return (value <= 1u);
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

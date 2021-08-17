@@ -32,6 +32,9 @@
 
 #include "motohawk.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -217,3 +220,6 @@ bool motohawk_example_message_temperature_is_in_range(int16_t value)
 {
     return ((value >= -2048) && (value <= 2047));
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

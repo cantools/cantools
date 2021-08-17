@@ -32,6 +32,9 @@
 
 #include "vehicle.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -316,6 +319,14 @@ double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -331,6 +342,14 @@ double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -344,6 +363,14 @@ uint8_t vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_encode(double valu
 double vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_is_in_range(uint8_t value)
@@ -363,6 +390,14 @@ double vehicle_rt_sb_ins_vel_body_axes_ins_vel_forwards_2_d_decode(int32_t value
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vel_body_axes_ins_vel_forwards_2_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_body_axes_ins_vel_forwards_2_d_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -376,6 +411,14 @@ int32_t vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_encode(double value
 double vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_is_in_range(int32_t value)
@@ -513,6 +556,14 @@ double vehicle_rt_dl1_mk3_speed_validity_speed_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_speed_validity_speed_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_speed_validity_speed_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -526,6 +577,14 @@ uint8_t vehicle_rt_dl1_mk3_speed_accuracy_speed_encode(double value)
 double vehicle_rt_dl1_mk3_speed_accuracy_speed_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_speed_accuracy_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_speed_accuracy_speed_is_in_range(uint8_t value)
@@ -543,6 +602,14 @@ int32_t vehicle_rt_dl1_mk3_speed_speed_encode(double value)
 double vehicle_rt_dl1_mk3_speed_speed_decode(int32_t value)
 {
     return ((double)value * 0.00001);
+}
+
+double vehicle_rt_dl1_mk3_speed_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -20000.0);
+    ret = CTOOLS_MIN(ret, 20000.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_speed_speed_is_in_range(int32_t value)
@@ -702,6 +769,14 @@ double vehicle_rt_dl1_mk3_gps_time_validity_gps_time_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_time_validity_gps_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_time_validity_gps_time_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -717,6 +792,14 @@ double vehicle_rt_dl1_mk3_gps_time_validity_gps_week_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_time_validity_gps_week_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_time_validity_gps_week_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -730,6 +813,14 @@ uint8_t vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_encode(double value)
 double vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_is_in_range(uint8_t value)
@@ -749,6 +840,14 @@ double vehicle_rt_dl1_mk3_gps_time_gps_time_decode(uint32_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_gps_time_gps_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 604800.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_time_gps_time_is_in_range(uint32_t value)
 {
     return (value <= 604800000u);
@@ -762,6 +861,14 @@ uint16_t vehicle_rt_dl1_mk3_gps_time_gps_week_encode(double value)
 double vehicle_rt_dl1_mk3_gps_time_gps_week_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_gps_time_gps_week_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 65535.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_time_gps_week_is_in_range(uint16_t value)
@@ -898,6 +1005,14 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_decode(int32_t val
     return ((double)value * 1E-7);
 }
 
+double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_is_in_range(int32_t value)
 {
     return ((value >= -1800000000) && (value <= 1800000000));
@@ -911,6 +1026,14 @@ int32_t vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_encode(double valu
 double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_decode(int32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -1000.0);
+    ret = CTOOLS_MIN(ret, 100000.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_is_in_range(int32_t value)
@@ -1100,6 +1223,14 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_decode(uin
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -1113,6 +1244,14 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_encode(d
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_is_in_range(uint8_t value)
@@ -1130,6 +1269,14 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_decode(uin
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -1143,6 +1290,14 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_encode(do
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_is_in_range(uint8_t value)
@@ -1162,6 +1317,14 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(ui
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_is_in_range(uint8_t value)
 {
     (void)value;
@@ -1179,6 +1342,14 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uin
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_is_in_range(uint8_t value)
 {
     (void)value;
@@ -1194,6 +1365,14 @@ int32_t vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_encode(double valu
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t value)
 {
     return ((double)value * 1E-7);
+}
+
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t value)
@@ -1353,6 +1532,14 @@ double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -1368,6 +1555,14 @@ double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -1381,6 +1576,14 @@ uint8_t vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_encode(double value)
 double vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_is_in_range(uint8_t value)
@@ -1400,6 +1603,14 @@ double vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_decode(uint32_t value)
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1675.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_is_in_range(uint32_t value)
 {
     return (value <= 16750000u);
@@ -1413,6 +1624,14 @@ uint32_t vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_encode(double value)
 double vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_decode(uint32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1675.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_is_in_range(uint32_t value)
@@ -1518,6 +1737,14 @@ int16_t vehicle_rt_ir_temp_temp_7_ir_temperature_7_encode(double value)
 double vehicle_rt_ir_temp_temp_7_ir_temperature_7_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_7_ir_temperature_7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_7_ir_temperature_7_is_in_range(int16_t value)
@@ -1684,6 +1911,14 @@ double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_is_in_range(int16_t value)
 {
     (void)value;
@@ -1699,6 +1934,14 @@ int16_t vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_encode(double value)
 double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_is_in_range(int16_t value)
@@ -1718,6 +1961,14 @@ double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_is_in_range(int16_t value)
 {
     (void)value;
@@ -1733,6 +1984,14 @@ int16_t vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_encode(double value)
 double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_is_in_range(int16_t value)
@@ -1899,6 +2158,14 @@ double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_is_in_range(int16_t value)
 {
     (void)value;
@@ -1914,6 +2181,14 @@ int16_t vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_encode(double value)
 double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_is_in_range(int16_t value)
@@ -1933,6 +2208,14 @@ double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_is_in_range(int16_t value)
 {
     (void)value;
@@ -1948,6 +2231,14 @@ int16_t vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_encode(double value)
 double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_is_in_range(int16_t value)
@@ -2114,6 +2405,14 @@ double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_is_in_range(int16_t value)
 {
     (void)value;
@@ -2129,6 +2428,14 @@ int16_t vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_encode(double value)
 double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_is_in_range(int16_t value)
@@ -2148,6 +2455,14 @@ double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_is_in_range(int16_t value)
 {
     (void)value;
@@ -2163,6 +2478,14 @@ int16_t vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_encode(double value)
 double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_is_in_range(int16_t value)
@@ -2329,6 +2652,14 @@ double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_is_in_range(int16_t value)
 {
     (void)value;
@@ -2344,6 +2675,14 @@ int16_t vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_encode(double value)
 double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_is_in_range(int16_t value)
@@ -2363,6 +2702,14 @@ double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_is_in_range(int16_t value)
 {
     (void)value;
@@ -2378,6 +2725,14 @@ int16_t vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_encode(double value)
 double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_is_in_range(int16_t value)
@@ -2544,6 +2899,14 @@ double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_is_in_range(int16_t value)
 {
     (void)value;
@@ -2559,6 +2922,14 @@ int16_t vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_encode(double value)
 double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_is_in_range(int16_t value)
@@ -2578,6 +2949,14 @@ double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_is_in_range(int16_t value)
 {
     (void)value;
@@ -2593,6 +2972,14 @@ int16_t vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_encode(double value)
 double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_is_in_range(int16_t value)
@@ -2759,6 +3146,14 @@ double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_is_in_range(int16_t value)
 {
     (void)value;
@@ -2774,6 +3169,14 @@ int16_t vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_encode(double value)
 double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_is_in_range(int16_t value)
@@ -2793,6 +3196,14 @@ double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_is_in_range(int16_t value)
 {
     (void)value;
@@ -2808,6 +3219,14 @@ int16_t vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_encode(double value)
 double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_is_in_range(int16_t value)
@@ -2974,6 +3393,14 @@ double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_is_in_range(int16_t value)
 {
     (void)value;
@@ -2989,6 +3416,14 @@ int16_t vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_encode(double value)
 double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_is_in_range(int16_t value)
@@ -3008,6 +3443,14 @@ double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_is_in_range(int16_t value)
 {
     (void)value;
@@ -3023,6 +3466,14 @@ int16_t vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_encode(double value)
 double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_is_in_range(int16_t value)
@@ -3189,6 +3640,14 @@ double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_is_in_range(int16_t value)
 {
     (void)value;
@@ -3204,6 +3663,14 @@ int16_t vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_encode(double value)
 double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_is_in_range(int16_t value)
@@ -3223,6 +3690,14 @@ double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_is_in_range(int16_t value)
 {
     (void)value;
@@ -3238,6 +3713,14 @@ int16_t vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_encode(double value)
 double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_is_in_range(int16_t value)
@@ -3347,6 +3830,14 @@ double vehicle_rt_ir_temp_temp_32_ir_temperature_32_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_32_ir_temperature_32_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_32_ir_temperature_32_is_in_range(int16_t value)
 {
     (void)value;
@@ -3452,6 +3943,14 @@ int16_t vehicle_rt_ir_temp_temp_31_ir_temperature_31_encode(double value)
 double vehicle_rt_ir_temp_temp_31_ir_temperature_31_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_31_ir_temperature_31_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_31_ir_temperature_31_is_in_range(int16_t value)
@@ -3561,6 +4060,14 @@ double vehicle_rt_ir_temp_temp_30_ir_temperature_30_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_30_ir_temperature_30_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_30_ir_temperature_30_is_in_range(int16_t value)
 {
     (void)value;
@@ -3666,6 +4173,14 @@ int16_t vehicle_rt_ir_temp_temp_29_ir_temperature_29_encode(double value)
 double vehicle_rt_ir_temp_temp_29_ir_temperature_29_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_29_ir_temperature_29_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_29_ir_temperature_29_is_in_range(int16_t value)
@@ -3775,6 +4290,14 @@ double vehicle_rt_ir_temp_temp_28_ir_temperature_28_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_28_ir_temperature_28_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_28_ir_temperature_28_is_in_range(int16_t value)
 {
     (void)value;
@@ -3880,6 +4403,14 @@ int16_t vehicle_rt_ir_temp_temp_27_ir_temperature_27_encode(double value)
 double vehicle_rt_ir_temp_temp_27_ir_temperature_27_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_27_ir_temperature_27_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_27_ir_temperature_27_is_in_range(int16_t value)
@@ -3989,6 +4520,14 @@ double vehicle_rt_ir_temp_temp_26_ir_temperature_26_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_26_ir_temperature_26_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_26_ir_temperature_26_is_in_range(int16_t value)
 {
     (void)value;
@@ -4094,6 +4633,14 @@ int16_t vehicle_rt_ir_temp_temp_25_ir_temperature_25_encode(double value)
 double vehicle_rt_ir_temp_temp_25_ir_temperature_25_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_25_ir_temperature_25_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_25_ir_temperature_25_is_in_range(int16_t value)
@@ -4203,6 +4750,14 @@ double vehicle_rt_ir_temp_temp_24_ir_temperature_24_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_24_ir_temperature_24_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_24_ir_temperature_24_is_in_range(int16_t value)
 {
     (void)value;
@@ -4308,6 +4863,14 @@ int16_t vehicle_rt_ir_temp_temp_22_ir_temperature_22_encode(double value)
 double vehicle_rt_ir_temp_temp_22_ir_temperature_22_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_22_ir_temperature_22_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_22_ir_temperature_22_is_in_range(int16_t value)
@@ -4417,6 +4980,14 @@ double vehicle_rt_ir_temp_temp_23_ir_temperature_23_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_23_ir_temperature_23_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_23_ir_temperature_23_is_in_range(int16_t value)
 {
     (void)value;
@@ -4522,6 +5093,14 @@ int16_t vehicle_rt_ir_temp_temp_21_ir_temperature_21_encode(double value)
 double vehicle_rt_ir_temp_temp_21_ir_temperature_21_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_21_ir_temperature_21_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_21_ir_temperature_21_is_in_range(int16_t value)
@@ -4631,6 +5210,14 @@ double vehicle_rt_ir_temp_temp_20_ir_temperature_20_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_20_ir_temperature_20_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_20_ir_temperature_20_is_in_range(int16_t value)
 {
     (void)value;
@@ -4736,6 +5323,14 @@ int16_t vehicle_rt_ir_temp_temp_19_ir_temperature_19_encode(double value)
 double vehicle_rt_ir_temp_temp_19_ir_temperature_19_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_19_ir_temperature_19_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_19_ir_temperature_19_is_in_range(int16_t value)
@@ -4845,6 +5440,14 @@ double vehicle_rt_ir_temp_temp_18_ir_temperature_18_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_18_ir_temperature_18_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_18_ir_temperature_18_is_in_range(int16_t value)
 {
     (void)value;
@@ -4950,6 +5553,14 @@ int16_t vehicle_rt_ir_temp_temp_16_ir_temperature_16_encode(double value)
 double vehicle_rt_ir_temp_temp_16_ir_temperature_16_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_16_ir_temperature_16_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_16_ir_temperature_16_is_in_range(int16_t value)
@@ -5059,6 +5670,14 @@ double vehicle_rt_ir_temp_temp_15_ir_temperature_15_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_15_ir_temperature_15_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_15_ir_temperature_15_is_in_range(int16_t value)
 {
     (void)value;
@@ -5164,6 +5783,14 @@ int16_t vehicle_rt_ir_temp_temp_14_ir_temperature_14_encode(double value)
 double vehicle_rt_ir_temp_temp_14_ir_temperature_14_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_14_ir_temperature_14_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_14_ir_temperature_14_is_in_range(int16_t value)
@@ -5273,6 +5900,14 @@ double vehicle_rt_ir_temp_temp_13_ir_temperature_13_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_13_ir_temperature_13_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_13_ir_temperature_13_is_in_range(int16_t value)
 {
     (void)value;
@@ -5378,6 +6013,14 @@ int16_t vehicle_rt_ir_temp_temp_12_ir_temperature_12_encode(double value)
 double vehicle_rt_ir_temp_temp_12_ir_temperature_12_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_12_ir_temperature_12_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_12_ir_temperature_12_is_in_range(int16_t value)
@@ -5487,6 +6130,14 @@ double vehicle_rt_ir_temp_temp_11_ir_temperature_11_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_11_ir_temperature_11_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_11_ir_temperature_11_is_in_range(int16_t value)
 {
     (void)value;
@@ -5592,6 +6243,14 @@ int16_t vehicle_rt_ir_temp_temp_10_ir_temperature_10_encode(double value)
 double vehicle_rt_ir_temp_temp_10_ir_temperature_10_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_10_ir_temperature_10_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_10_ir_temperature_10_is_in_range(int16_t value)
@@ -5701,6 +6360,14 @@ double vehicle_rt_ir_temp_temp_8_ir_temperature_8_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_8_ir_temperature_8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_8_ir_temperature_8_is_in_range(int16_t value)
 {
     (void)value;
@@ -5806,6 +6473,14 @@ int16_t vehicle_rt_ir_temp_temp_9_ir_temperature_9_encode(double value)
 double vehicle_rt_ir_temp_temp_9_ir_temperature_9_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_9_ir_temperature_9_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_9_ir_temperature_9_is_in_range(int16_t value)
@@ -5915,6 +6590,14 @@ double vehicle_rt_ir_temp_temp_17_ir_temperature_17_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_17_ir_temperature_17_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_17_ir_temperature_17_is_in_range(int16_t value)
 {
     (void)value;
@@ -6020,6 +6703,14 @@ int16_t vehicle_rt_ir_temp_temp_6_ir_temperature_6_encode(double value)
 double vehicle_rt_ir_temp_temp_6_ir_temperature_6_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_6_ir_temperature_6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_6_ir_temperature_6_is_in_range(int16_t value)
@@ -6129,6 +6820,14 @@ double vehicle_rt_ir_temp_temp_5_ir_temperature_5_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_5_ir_temperature_5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_5_ir_temperature_5_is_in_range(int16_t value)
 {
     (void)value;
@@ -6234,6 +6933,14 @@ int16_t vehicle_rt_ir_temp_temp_4_ir_temperature_4_encode(double value)
 double vehicle_rt_ir_temp_temp_4_ir_temperature_4_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_4_ir_temperature_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_4_ir_temperature_4_is_in_range(int16_t value)
@@ -6343,6 +7050,14 @@ double vehicle_rt_ir_temp_temp_3_ir_temperature_3_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_3_ir_temperature_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_3_ir_temperature_3_is_in_range(int16_t value)
 {
     (void)value;
@@ -6450,6 +7165,14 @@ double vehicle_rt_ir_temp_temp_2_ir_temperature_2_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_ir_temp_temp_2_ir_temperature_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_ir_temp_temp_2_ir_temperature_2_is_in_range(int16_t value)
 {
     (void)value;
@@ -6555,6 +7278,14 @@ int16_t vehicle_rt_ir_temp_temp_1_ir_temperature_1_encode(double value)
 double vehicle_rt_ir_temp_temp_1_ir_temperature_1_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_ir_temp_temp_1_ir_temperature_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_ir_temp_temp_1_ir_temperature_1_is_in_range(int16_t value)
@@ -6673,6 +7404,14 @@ double vehicle_rt_sb_trig_final_condition_validity_final_speed_decode(uint8_t va
     return ((double)value);
 }
 
+double vehicle_rt_sb_trig_final_condition_validity_final_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_final_condition_validity_final_speed_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -6686,6 +7425,14 @@ uint32_t vehicle_rt_sb_trig_final_condition_final_speed_encode(double value)
 double vehicle_rt_sb_trig_final_condition_final_speed_decode(uint32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_trig_final_condition_final_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1675.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_final_condition_final_speed_is_in_range(uint32_t value)
@@ -6862,6 +7609,14 @@ double vehicle_rt_sb_trig_initial_condition_validity_initial_speed_decode(uint8_
     return ((double)value);
 }
 
+double vehicle_rt_sb_trig_initial_condition_validity_initial_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_initial_condition_validity_initial_speed_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -6875,6 +7630,14 @@ uint8_t vehicle_rt_sb_trig_initial_condition_validity_initial_heading_encode(dou
 double vehicle_rt_sb_trig_initial_condition_validity_initial_heading_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_trig_initial_condition_validity_initial_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_initial_condition_validity_initial_heading_is_in_range(uint8_t value)
@@ -6892,6 +7655,14 @@ double vehicle_rt_sb_trig_initial_condition_initial_speed_decode(uint32_t value)
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_trig_initial_condition_initial_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1675.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_initial_condition_initial_speed_is_in_range(uint32_t value)
 {
     return (value <= 16750000u);
@@ -6905,6 +7676,14 @@ int16_t vehicle_rt_sb_trig_initial_condition_initial_heading_encode(double value
 double vehicle_rt_sb_trig_initial_condition_initial_heading_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_trig_initial_condition_initial_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_initial_condition_initial_heading_is_in_range(int16_t value)
@@ -6922,6 +7701,14 @@ double vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 100.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_is_in_range(uint8_t value)
 {
     return (value <= 100u);
@@ -6935,6 +7722,14 @@ uint8_t vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_encode(double va
 double vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 100.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_is_in_range(uint8_t value)
@@ -7059,6 +7854,14 @@ double vehicle_rt_sb_trig_direct_dist_direct_distance_decode(uint32_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_trig_direct_dist_direct_distance_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 4294967.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_direct_dist_direct_distance_is_in_range(uint32_t value)
 {
     return (value <= 4294967000u);
@@ -7072,6 +7875,14 @@ uint32_t vehicle_rt_sb_trig_direct_dist_path_distance_2_d_encode(double value)
 double vehicle_rt_sb_trig_direct_dist_path_distance_2_d_decode(uint32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_trig_direct_dist_path_distance_2_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 4294967.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_direct_dist_path_distance_2_d_is_in_range(uint32_t value)
@@ -7206,6 +8017,14 @@ double vehicle_rt_sb_trig_forward_dist_forward_distance_decode(int32_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_trig_forward_dist_forward_distance_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -2147483.648);
+    ret = CTOOLS_MIN(ret, 2147483.647);
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_forward_dist_forward_distance_is_in_range(int32_t value)
 {
     (void)value;
@@ -7221,6 +8040,14 @@ int32_t vehicle_rt_sb_trig_forward_dist_deviation_distance_encode(double value)
 double vehicle_rt_sb_trig_forward_dist_deviation_distance_decode(int32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_trig_forward_dist_deviation_distance_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -2147483.648);
+    ret = CTOOLS_MIN(ret, 2147483.647);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_forward_dist_deviation_distance_is_in_range(int32_t value)
@@ -7326,6 +8153,14 @@ uint32_t vehicle_rt_sb_trig_path_dist_path_distance_3_d_encode(double value)
 double vehicle_rt_sb_trig_path_dist_path_distance_3_d_decode(uint32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_trig_path_dist_path_distance_3_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 4294967.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_path_dist_path_distance_3_d_is_in_range(uint32_t value)
@@ -7508,6 +8343,14 @@ double vehicle_rt_sb_trig_accel_validity_mfdd_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_trig_accel_validity_mfdd_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_accel_validity_mfdd_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -7521,6 +8364,14 @@ uint8_t vehicle_rt_sb_trig_accel_validity_average_accel_encode(double value)
 double vehicle_rt_sb_trig_accel_validity_average_accel_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_trig_accel_validity_average_accel_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_accel_validity_average_accel_is_in_range(uint8_t value)
@@ -7538,6 +8389,14 @@ double vehicle_rt_sb_trig_accel_validity_triggered_time_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_trig_accel_validity_triggered_time_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_accel_validity_triggered_time_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -7551,6 +8410,14 @@ int16_t vehicle_rt_sb_trig_accel_mfdd_encode(double value)
 double vehicle_rt_sb_trig_accel_mfdd_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_trig_accel_mfdd_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_accel_mfdd_is_in_range(int16_t value)
@@ -7570,6 +8437,14 @@ double vehicle_rt_sb_trig_accel_average_accel_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_trig_accel_average_accel_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trig_accel_average_accel_is_in_range(int16_t value)
 {
     (void)value;
@@ -7585,6 +8460,14 @@ uint32_t vehicle_rt_sb_trig_accel_triggered_time_encode(double value)
 double vehicle_rt_sb_trig_accel_triggered_time_decode(uint32_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_trig_accel_triggered_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 167772.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trig_accel_triggered_time_is_in_range(uint32_t value)
@@ -7688,6 +8571,14 @@ double vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_decode(uint32_t value
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -7787,6 +8678,14 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_encode(double value
 double vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_decode(uint32_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_is_in_range(uint32_t value)
@@ -7890,6 +8789,14 @@ double vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_decode(uint32_t value
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -7989,6 +8896,14 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_encode(double value)
 double vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_decode(uint32_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_is_in_range(uint32_t value)
@@ -8092,6 +9007,14 @@ double vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_decode(uint32_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -8191,6 +9114,14 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_encode(double value)
 double vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_decode(uint32_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_is_in_range(uint32_t value)
@@ -8294,6 +9225,14 @@ double vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_decode(uint32_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -8393,6 +9332,14 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_encode(double value)
 double vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_decode(uint32_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_is_in_range(uint32_t value)
@@ -8496,6 +9443,14 @@ double vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_decode(uint32_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -8595,6 +9550,14 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_encode(double value)
 double vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_decode(uint32_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_is_in_range(uint32_t value)
@@ -8698,6 +9661,14 @@ double vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_decode(uint32_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -8799,6 +9770,14 @@ double vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_decode(uint32_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -8896,6 +9875,14 @@ uint16_t vehicle_rt_dl1_mk3_rpm_rpm_encode(double value)
 double vehicle_rt_dl1_mk3_rpm_rpm_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_rpm_rpm_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_rpm_rpm_is_in_range(uint16_t value)
@@ -8999,6 +9986,14 @@ double vehicle_rt_dl1_mk3_freq_4_frequency_4_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_freq_4_frequency_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_freq_4_frequency_4_is_in_range(uint16_t value)
 {
     (void)value;
@@ -9098,6 +10093,14 @@ uint16_t vehicle_rt_dl1_mk3_freq_3_frequency_3_encode(double value)
 double vehicle_rt_dl1_mk3_freq_3_frequency_3_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_freq_3_frequency_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_freq_3_frequency_3_is_in_range(uint16_t value)
@@ -9201,6 +10204,14 @@ double vehicle_rt_dl1_mk3_freq_2_frequency_2_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_freq_2_frequency_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_freq_2_frequency_2_is_in_range(uint16_t value)
 {
     (void)value;
@@ -9300,6 +10311,14 @@ uint16_t vehicle_rt_dl1_mk3_misc_3_misc_3_encode(double value)
 double vehicle_rt_dl1_mk3_misc_3_misc_3_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_misc_3_misc_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_misc_3_misc_3_is_in_range(uint16_t value)
@@ -9403,6 +10422,14 @@ double vehicle_rt_dl1_mk3_misc_2_misc_2_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_misc_2_misc_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_misc_2_misc_2_is_in_range(uint16_t value)
 {
     (void)value;
@@ -9502,6 +10529,14 @@ uint16_t vehicle_rt_dl1_mk3_misc_1_misc_1_encode(double value)
 double vehicle_rt_dl1_mk3_misc_1_misc_1_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_misc_1_misc_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_misc_1_misc_1_is_in_range(uint16_t value)
@@ -9605,6 +10640,14 @@ double vehicle_rt_dl1_mk3_aux_31_aux_31_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_31_aux_31_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_31_aux_31_is_in_range(uint16_t value)
 {
     (void)value;
@@ -9704,6 +10747,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_30_aux_30_encode(double value)
 double vehicle_rt_dl1_mk3_aux_30_aux_30_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_30_aux_30_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_30_aux_30_is_in_range(uint16_t value)
@@ -9807,6 +10858,14 @@ double vehicle_rt_dl1_mk3_aux_29_aux_29_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_29_aux_29_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_29_aux_29_is_in_range(uint16_t value)
 {
     (void)value;
@@ -9906,6 +10965,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_28_aux_28_encode(double value)
 double vehicle_rt_dl1_mk3_aux_28_aux_28_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_28_aux_28_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_28_aux_28_is_in_range(uint16_t value)
@@ -10009,6 +11076,14 @@ double vehicle_rt_dl1_mk3_aux_27_aux_27_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_27_aux_27_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_27_aux_27_is_in_range(uint16_t value)
 {
     (void)value;
@@ -10108,6 +11183,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_26_aux_26_encode(double value)
 double vehicle_rt_dl1_mk3_aux_26_aux_26_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_26_aux_26_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_26_aux_26_is_in_range(uint16_t value)
@@ -10211,6 +11294,14 @@ double vehicle_rt_dl1_mk3_aux_25_aux_25_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_25_aux_25_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_25_aux_25_is_in_range(uint16_t value)
 {
     (void)value;
@@ -10310,6 +11401,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_24_aux_24_encode(double value)
 double vehicle_rt_dl1_mk3_aux_24_aux_24_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_24_aux_24_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_24_aux_24_is_in_range(uint16_t value)
@@ -10413,6 +11512,14 @@ double vehicle_rt_dl1_mk3_aux_23_aux_23_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_23_aux_23_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_23_aux_23_is_in_range(uint16_t value)
 {
     (void)value;
@@ -10512,6 +11619,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_22_aux_22_encode(double value)
 double vehicle_rt_dl1_mk3_aux_22_aux_22_decode(uint16_t value)
 {
     return ((double)value * 10.0);
+}
+
+double vehicle_rt_dl1_mk3_aux_22_aux_22_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_22_aux_22_is_in_range(uint16_t value)
@@ -10615,6 +11730,14 @@ double vehicle_rt_dl1_mk3_aux_21_aux_21_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_21_aux_21_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_21_aux_21_is_in_range(uint16_t value)
 {
     (void)value;
@@ -10714,6 +11837,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_20_aux_20_encode(double value)
 double vehicle_rt_dl1_mk3_aux_20_aux_20_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_20_aux_20_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_20_aux_20_is_in_range(uint16_t value)
@@ -10817,6 +11948,14 @@ double vehicle_rt_dl1_mk3_aux_19_aux_19_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_19_aux_19_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_19_aux_19_is_in_range(uint16_t value)
 {
     (void)value;
@@ -10916,6 +12055,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_18_aux_18_encode(double value)
 double vehicle_rt_dl1_mk3_aux_18_aux_18_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_18_aux_18_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_18_aux_18_is_in_range(uint16_t value)
@@ -11019,6 +12166,14 @@ double vehicle_rt_dl1_mk3_aux_17_aux_17_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_17_aux_17_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_17_aux_17_is_in_range(uint16_t value)
 {
     (void)value;
@@ -11118,6 +12273,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_16_aux_16_encode(double value)
 double vehicle_rt_dl1_mk3_aux_16_aux_16_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_16_aux_16_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_16_aux_16_is_in_range(uint16_t value)
@@ -11221,6 +12384,14 @@ double vehicle_rt_dl1_mk3_aux_15_aux_15_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_15_aux_15_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_15_aux_15_is_in_range(uint16_t value)
 {
     (void)value;
@@ -11320,6 +12491,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_14_aux_14_encode(double value)
 double vehicle_rt_dl1_mk3_aux_14_aux_14_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_14_aux_14_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_14_aux_14_is_in_range(uint16_t value)
@@ -11423,6 +12602,14 @@ double vehicle_rt_dl1_mk3_aux_13_aux_13_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_13_aux_13_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_13_aux_13_is_in_range(uint16_t value)
 {
     (void)value;
@@ -11522,6 +12709,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_12_aux_12_encode(double value)
 double vehicle_rt_dl1_mk3_aux_12_aux_12_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_12_aux_12_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_12_aux_12_is_in_range(uint16_t value)
@@ -11625,6 +12820,14 @@ double vehicle_rt_dl1_mk3_aux_11_aux_11_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_11_aux_11_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_11_aux_11_is_in_range(uint16_t value)
 {
     (void)value;
@@ -11724,6 +12927,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_9_aux_9_encode(double value)
 double vehicle_rt_dl1_mk3_aux_9_aux_9_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_9_aux_9_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_9_aux_9_is_in_range(uint16_t value)
@@ -11827,6 +13038,14 @@ double vehicle_rt_dl1_mk3_aux_10_aux_10_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_10_aux_10_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_10_aux_10_is_in_range(uint16_t value)
 {
     (void)value;
@@ -11926,6 +13145,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_8_aux_8_encode(double value)
 double vehicle_rt_dl1_mk3_aux_8_aux_8_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_8_aux_8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_8_aux_8_is_in_range(uint16_t value)
@@ -12029,6 +13256,14 @@ double vehicle_rt_dl1_mk3_aux_7_aux_7_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_7_aux_7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_7_aux_7_is_in_range(uint16_t value)
 {
     (void)value;
@@ -12128,6 +13363,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_6_aux_6_encode(double value)
 double vehicle_rt_dl1_mk3_aux_6_aux_6_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_6_aux_6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_6_aux_6_is_in_range(uint16_t value)
@@ -12231,6 +13474,14 @@ double vehicle_rt_dl1_mk3_aux_5_aux_5_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_5_aux_5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_5_aux_5_is_in_range(uint16_t value)
 {
     (void)value;
@@ -12330,6 +13581,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_4_aux_4_encode(double value)
 double vehicle_rt_dl1_mk3_aux_4_aux_4_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_4_aux_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_4_aux_4_is_in_range(uint16_t value)
@@ -12433,6 +13692,14 @@ double vehicle_rt_dl1_mk3_aux_3_aux_3_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_3_aux_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_3_aux_3_is_in_range(uint16_t value)
 {
     (void)value;
@@ -12534,6 +13801,14 @@ double vehicle_rt_dl1_mk3_aux_2_aux_2_decode(uint16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_aux_2_aux_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_aux_2_aux_2_is_in_range(uint16_t value)
 {
     (void)value;
@@ -12633,6 +13908,14 @@ uint16_t vehicle_rt_dl1_mk3_aux_1_aux_1_encode(double value)
 double vehicle_rt_dl1_mk3_aux_1_aux_1_decode(uint16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_aux_1_aux_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_aux_1_aux_1_is_in_range(uint16_t value)
@@ -12738,6 +14021,14 @@ double vehicle_rt_dl1_mk3_pressure_5_pressure_5_decode(uint32_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_pressure_5_pressure_5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_pressure_5_pressure_5_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -12837,6 +14128,14 @@ uint32_t vehicle_rt_dl1_mk3_pressure_4_pressure_4_encode(double value)
 double vehicle_rt_dl1_mk3_pressure_4_pressure_4_decode(uint32_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_pressure_4_pressure_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_pressure_4_pressure_4_is_in_range(uint32_t value)
@@ -12940,6 +14239,14 @@ double vehicle_rt_dl1_mk3_pressure_3_pressure_3_decode(uint32_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_pressure_3_pressure_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_pressure_3_pressure_3_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -13041,6 +14348,14 @@ double vehicle_rt_dl1_mk3_pressure_2_pressure_2_decode(uint32_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_pressure_2_pressure_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_pressure_2_pressure_2_is_in_range(uint32_t value)
 {
     return (value <= 16777215u);
@@ -13140,6 +14455,14 @@ uint32_t vehicle_rt_dl1_mk3_pressure_1_pressure_1_encode(double value)
 double vehicle_rt_dl1_mk3_pressure_1_pressure_1_decode(uint32_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_pressure_1_pressure_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_pressure_1_pressure_1_is_in_range(uint32_t value)
@@ -13245,6 +14568,14 @@ int16_t vehicle_rt_dl1_mk3_angle_3_angle_3_encode(double value)
 double vehicle_rt_dl1_mk3_angle_3_angle_3_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_angle_3_angle_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_angle_3_angle_3_is_in_range(int16_t value)
@@ -13354,6 +14685,14 @@ double vehicle_rt_dl1_mk3_angle_2_angle_2_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_angle_2_angle_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_angle_2_angle_2_is_in_range(int16_t value)
 {
     (void)value;
@@ -13459,6 +14798,14 @@ int16_t vehicle_rt_dl1_mk3_angle_1_angle_1_encode(double value)
 double vehicle_rt_dl1_mk3_angle_1_angle_1_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_angle_1_angle_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_angle_1_angle_1_is_in_range(int16_t value)
@@ -13568,6 +14915,14 @@ double vehicle_rt_dl1_mk3_temp_25_temperature_25_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_25_temperature_25_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_25_temperature_25_is_in_range(int16_t value)
 {
     (void)value;
@@ -13673,6 +15028,14 @@ int16_t vehicle_rt_dl1_mk3_temp_24_temperature_24_encode(double value)
 double vehicle_rt_dl1_mk3_temp_24_temperature_24_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_24_temperature_24_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_24_temperature_24_is_in_range(int16_t value)
@@ -13782,6 +15145,14 @@ double vehicle_rt_dl1_mk3_temp_23_temperature_23_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_23_temperature_23_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_23_temperature_23_is_in_range(int16_t value)
 {
     (void)value;
@@ -13887,6 +15258,14 @@ int16_t vehicle_rt_dl1_mk3_temp_22_temperature_22_encode(double value)
 double vehicle_rt_dl1_mk3_temp_22_temperature_22_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_22_temperature_22_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_22_temperature_22_is_in_range(int16_t value)
@@ -13996,6 +15375,14 @@ double vehicle_rt_dl1_mk3_temp_21_temperature_21_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_21_temperature_21_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_21_temperature_21_is_in_range(int16_t value)
 {
     (void)value;
@@ -14101,6 +15488,14 @@ int16_t vehicle_rt_dl1_mk3_temp_20_temperature_20_encode(double value)
 double vehicle_rt_dl1_mk3_temp_20_temperature_20_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_20_temperature_20_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_20_temperature_20_is_in_range(int16_t value)
@@ -14210,6 +15605,14 @@ double vehicle_rt_dl1_mk3_temp_19_temperature_19_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_19_temperature_19_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_19_temperature_19_is_in_range(int16_t value)
 {
     (void)value;
@@ -14315,6 +15718,14 @@ int16_t vehicle_rt_dl1_mk3_temp_18_temperature_18_encode(double value)
 double vehicle_rt_dl1_mk3_temp_18_temperature_18_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_18_temperature_18_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_18_temperature_18_is_in_range(int16_t value)
@@ -14424,6 +15835,14 @@ double vehicle_rt_dl1_mk3_temp_17_temperature_17_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_17_temperature_17_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_17_temperature_17_is_in_range(int16_t value)
 {
     (void)value;
@@ -14529,6 +15948,14 @@ int16_t vehicle_rt_dl1_mk3_temp_16_temperature_16_encode(double value)
 double vehicle_rt_dl1_mk3_temp_16_temperature_16_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_16_temperature_16_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_16_temperature_16_is_in_range(int16_t value)
@@ -14638,6 +16065,14 @@ double vehicle_rt_dl1_mk3_temp_15_temperature_15_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_15_temperature_15_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_15_temperature_15_is_in_range(int16_t value)
 {
     (void)value;
@@ -14743,6 +16178,14 @@ int16_t vehicle_rt_dl1_mk3_temp_14_temperature_14_encode(double value)
 double vehicle_rt_dl1_mk3_temp_14_temperature_14_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_14_temperature_14_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_14_temperature_14_is_in_range(int16_t value)
@@ -14852,6 +16295,14 @@ double vehicle_rt_dl1_mk3_temp_13_temperature_13_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_13_temperature_13_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_13_temperature_13_is_in_range(int16_t value)
 {
     (void)value;
@@ -14957,6 +16408,14 @@ int16_t vehicle_rt_dl1_mk3_temp_12_temperature_12_encode(double value)
 double vehicle_rt_dl1_mk3_temp_12_temperature_12_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_12_temperature_12_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_12_temperature_12_is_in_range(int16_t value)
@@ -15066,6 +16525,14 @@ double vehicle_rt_dl1_mk3_temp_11_temperature_11_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_11_temperature_11_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_11_temperature_11_is_in_range(int16_t value)
 {
     (void)value;
@@ -15171,6 +16638,14 @@ int16_t vehicle_rt_dl1_mk3_temp_10_temperature_10_encode(double value)
 double vehicle_rt_dl1_mk3_temp_10_temperature_10_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_10_temperature_10_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_10_temperature_10_is_in_range(int16_t value)
@@ -15280,6 +16755,14 @@ double vehicle_rt_dl1_mk3_temp_9_temperature_9_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_9_temperature_9_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_9_temperature_9_is_in_range(int16_t value)
 {
     (void)value;
@@ -15385,6 +16868,14 @@ int16_t vehicle_rt_dl1_mk3_temp_8_temperature_8_encode(double value)
 double vehicle_rt_dl1_mk3_temp_8_temperature_8_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_8_temperature_8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_8_temperature_8_is_in_range(int16_t value)
@@ -15494,6 +16985,14 @@ double vehicle_rt_dl1_mk3_temp_7_temperature_7_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_7_temperature_7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_7_temperature_7_is_in_range(int16_t value)
 {
     (void)value;
@@ -15599,6 +17098,14 @@ int16_t vehicle_rt_dl1_mk3_temp_6_temperature_6_encode(double value)
 double vehicle_rt_dl1_mk3_temp_6_temperature_6_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_6_temperature_6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_6_temperature_6_is_in_range(int16_t value)
@@ -15708,6 +17215,14 @@ double vehicle_rt_dl1_mk3_temp_5_temperature_5_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_5_temperature_5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_5_temperature_5_is_in_range(int16_t value)
 {
     (void)value;
@@ -15813,6 +17328,14 @@ int16_t vehicle_rt_dl1_mk3_temp_4_temperature_4_encode(double value)
 double vehicle_rt_dl1_mk3_temp_4_temperature_4_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_4_temperature_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_4_temperature_4_is_in_range(int16_t value)
@@ -15922,6 +17445,14 @@ double vehicle_rt_dl1_mk3_temp_3_temperature_3_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_3_temperature_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_3_temperature_3_is_in_range(int16_t value)
 {
     (void)value;
@@ -16027,6 +17558,14 @@ int16_t vehicle_rt_dl1_mk3_temp_2_temperature_2_encode(double value)
 double vehicle_rt_dl1_mk3_temp_2_temperature_2_decode(int16_t value)
 {
     return ((double)value * 0.1);
+}
+
+double vehicle_rt_dl1_mk3_temp_2_temperature_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_temp_2_temperature_2_is_in_range(int16_t value)
@@ -16136,6 +17675,14 @@ double vehicle_rt_dl1_mk3_temp_1_temperature_1_decode(int16_t value)
     return ((double)value * 0.1);
 }
 
+double vehicle_rt_dl1_mk3_temp_1_temperature_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_temp_1_temperature_1_is_in_range(int16_t value)
 {
     (void)value;
@@ -16235,6 +17782,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_32_analog_32_encode(double value)
 double vehicle_rt_dl1_mk3_analog_32_analog_32_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_32_analog_32_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_32_analog_32_is_in_range(uint16_t value)
@@ -16338,6 +17893,14 @@ double vehicle_rt_dl1_mk3_analog_31_analog_31_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_31_analog_31_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_31_analog_31_is_in_range(uint16_t value)
 {
     (void)value;
@@ -16437,6 +18000,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_30_analog_30_encode(double value)
 double vehicle_rt_dl1_mk3_analog_30_analog_30_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_30_analog_30_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_30_analog_30_is_in_range(uint16_t value)
@@ -16540,6 +18111,14 @@ double vehicle_rt_dl1_mk3_analog_29_analog_29_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_29_analog_29_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_29_analog_29_is_in_range(uint16_t value)
 {
     (void)value;
@@ -16639,6 +18218,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_28_analog_28_encode(double value)
 double vehicle_rt_dl1_mk3_analog_28_analog_28_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_28_analog_28_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_28_analog_28_is_in_range(uint16_t value)
@@ -16742,6 +18329,14 @@ double vehicle_rt_dl1_mk3_analog_27_analog_27_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_27_analog_27_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_27_analog_27_is_in_range(uint16_t value)
 {
     (void)value;
@@ -16841,6 +18436,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_26_analog_26_encode(double value)
 double vehicle_rt_dl1_mk3_analog_26_analog_26_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_26_analog_26_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_26_analog_26_is_in_range(uint16_t value)
@@ -16944,6 +18547,14 @@ double vehicle_rt_dl1_mk3_analog_25_analog_25_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_25_analog_25_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_25_analog_25_is_in_range(uint16_t value)
 {
     (void)value;
@@ -17043,6 +18654,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_15_analog_15_encode(double value)
 double vehicle_rt_dl1_mk3_analog_15_analog_15_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_15_analog_15_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_15_analog_15_is_in_range(uint16_t value)
@@ -17146,6 +18765,14 @@ double vehicle_rt_dl1_mk3_analog_14_analog_14_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_14_analog_14_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_14_analog_14_is_in_range(uint16_t value)
 {
     (void)value;
@@ -17245,6 +18872,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_17_analog_17_encode(double value)
 double vehicle_rt_dl1_mk3_analog_17_analog_17_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_17_analog_17_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_17_analog_17_is_in_range(uint16_t value)
@@ -17348,6 +18983,14 @@ double vehicle_rt_dl1_mk3_analog_24_analog_24_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_24_analog_24_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_24_analog_24_is_in_range(uint16_t value)
 {
     (void)value;
@@ -17447,6 +19090,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_23_analog_23_encode(double value)
 double vehicle_rt_dl1_mk3_analog_23_analog_23_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_23_analog_23_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_23_analog_23_is_in_range(uint16_t value)
@@ -17550,6 +19201,14 @@ double vehicle_rt_dl1_mk3_analog_22_analog_22_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_22_analog_22_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_22_analog_22_is_in_range(uint16_t value)
 {
     (void)value;
@@ -17649,6 +19308,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_21_analog_21_encode(double value)
 double vehicle_rt_dl1_mk3_analog_21_analog_21_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_21_analog_21_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_21_analog_21_is_in_range(uint16_t value)
@@ -17752,6 +19419,14 @@ double vehicle_rt_dl1_mk3_analog_20_analog_20_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_20_analog_20_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_20_analog_20_is_in_range(uint16_t value)
 {
     (void)value;
@@ -17851,6 +19526,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_19_analog_19_encode(double value)
 double vehicle_rt_dl1_mk3_analog_19_analog_19_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_19_analog_19_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_19_analog_19_is_in_range(uint16_t value)
@@ -17954,6 +19637,14 @@ double vehicle_rt_dl1_mk3_analog_16_analog_16_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_16_analog_16_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_16_analog_16_is_in_range(uint16_t value)
 {
     (void)value;
@@ -18053,6 +19744,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_18_analog_18_encode(double value)
 double vehicle_rt_dl1_mk3_analog_18_analog_18_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_18_analog_18_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_18_analog_18_is_in_range(uint16_t value)
@@ -18156,6 +19855,14 @@ double vehicle_rt_dl1_mk3_analog_12_analog_12_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_12_analog_12_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_12_analog_12_is_in_range(uint16_t value)
 {
     (void)value;
@@ -18255,6 +19962,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_11_analog_11_encode(double value)
 double vehicle_rt_dl1_mk3_analog_11_analog_11_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_11_analog_11_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_11_analog_11_is_in_range(uint16_t value)
@@ -18358,6 +20073,14 @@ double vehicle_rt_dl1_mk3_analog_10_analog_10_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_10_analog_10_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_10_analog_10_is_in_range(uint16_t value)
 {
     (void)value;
@@ -18457,6 +20180,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_9_analog_9_encode(double value)
 double vehicle_rt_dl1_mk3_analog_9_analog_9_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_9_analog_9_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_9_analog_9_is_in_range(uint16_t value)
@@ -18560,6 +20291,14 @@ double vehicle_rt_dl1_mk3_analog_8_analog_8_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_8_analog_8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_8_analog_8_is_in_range(uint16_t value)
 {
     (void)value;
@@ -18659,6 +20398,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_7_analog_7_encode(double value)
 double vehicle_rt_dl1_mk3_analog_7_analog_7_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_7_analog_7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_7_analog_7_is_in_range(uint16_t value)
@@ -18762,6 +20509,14 @@ double vehicle_rt_dl1_mk3_analog_6_analog_6_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_6_analog_6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_6_analog_6_is_in_range(uint16_t value)
 {
     (void)value;
@@ -18861,6 +20616,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_5_analog_5_encode(double value)
 double vehicle_rt_dl1_mk3_analog_5_analog_5_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_5_analog_5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_5_analog_5_is_in_range(uint16_t value)
@@ -18964,6 +20727,14 @@ double vehicle_rt_dl1_mk3_analog_4_analog_4_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_4_analog_4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_4_analog_4_is_in_range(uint16_t value)
 {
     (void)value;
@@ -19063,6 +20834,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_3_analog_3_encode(double value)
 double vehicle_rt_dl1_mk3_analog_3_analog_3_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_3_analog_3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_3_analog_3_is_in_range(uint16_t value)
@@ -19166,6 +20945,14 @@ double vehicle_rt_dl1_mk3_analog_2_analog_2_decode(uint16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_analog_2_analog_2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_analog_2_analog_2_is_in_range(uint16_t value)
 {
     (void)value;
@@ -19265,6 +21052,14 @@ uint16_t vehicle_rt_dl1_mk3_analog_1_analog_1_encode(double value)
 double vehicle_rt_dl1_mk3_analog_1_analog_1_decode(uint16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_analog_1_analog_1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_analog_1_analog_1_is_in_range(uint16_t value)
@@ -19464,6 +21259,14 @@ double vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -19477,6 +21280,14 @@ uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_lateral_encode(double value)
 double vehicle_rt_dl1_mk3_accel_validity_accel_lateral_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_accel_validity_accel_lateral_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_accel_validity_accel_lateral_is_in_range(uint8_t value)
@@ -19494,6 +21305,14 @@ double vehicle_rt_dl1_mk3_accel_validity_accel_vertical_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_dl1_mk3_accel_validity_accel_vertical_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_accel_validity_accel_vertical_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -19507,6 +21326,14 @@ uint8_t vehicle_rt_dl1_mk3_accel_accuracy_accel_encode(double value)
 double vehicle_rt_dl1_mk3_accel_accuracy_accel_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_dl1_mk3_accel_accuracy_accel_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_accel_accuracy_accel_is_in_range(uint8_t value)
@@ -19526,6 +21353,14 @@ double vehicle_rt_dl1_mk3_accel_accel_longitudinal_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_accel_accel_longitudinal_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_accel_accel_longitudinal_is_in_range(int16_t value)
 {
     (void)value;
@@ -19543,6 +21378,14 @@ double vehicle_rt_dl1_mk3_accel_accel_lateral_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_dl1_mk3_accel_accel_lateral_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_dl1_mk3_accel_accel_lateral_is_in_range(int16_t value)
 {
     (void)value;
@@ -19558,6 +21401,14 @@ int16_t vehicle_rt_dl1_mk3_accel_accel_vertical_encode(double value)
 double vehicle_rt_dl1_mk3_accel_accel_vertical_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_dl1_mk3_accel_accel_vertical_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
 }
 
 bool vehicle_rt_dl1_mk3_accel_accel_vertical_is_in_range(int16_t value)
@@ -19712,6 +21563,14 @@ double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_vel_ned_d_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_vel_ned_d_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -19727,6 +21586,14 @@ double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_heading_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_heading_is_in_range(int16_t value)
 {
     return ((value >= -18000) && (value <= 18000));
@@ -19740,6 +21607,14 @@ int16_t vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_encode(double value)
 double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_is_in_range(int16_t value)
@@ -19880,6 +21755,14 @@ double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_n_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_n_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -19893,6 +21776,14 @@ int32_t vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_is_in_range(int32_t value)
@@ -20038,6 +21929,14 @@ double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_is_in_range(int16_t value)
 {
     (void)value;
@@ -20055,6 +21954,14 @@ double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_is_in_range(int16_t value)
 {
     (void)value;
@@ -20070,6 +21977,14 @@ int16_t vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_encode(double value)
 double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_is_in_range(int16_t value)
@@ -20224,6 +22139,14 @@ double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_vel_ned_d_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_vel_ned_d_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -20239,6 +22162,14 @@ double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_heading_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_heading_is_in_range(int16_t value)
 {
     return ((value >= -18000) && (value <= 18000));
@@ -20252,6 +22183,14 @@ int16_t vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_encode(double value)
 double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_is_in_range(int16_t value)
@@ -20392,6 +22331,14 @@ double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_n_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_n_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -20405,6 +22352,14 @@ int32_t vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_is_in_range(int32_t value)
@@ -20550,6 +22505,14 @@ double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_is_in_range(int16_t value)
 {
     (void)value;
@@ -20567,6 +22530,14 @@ double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_is_in_range(int16_t value)
 {
     (void)value;
@@ -20582,6 +22553,14 @@ int16_t vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_encode(double value)
 double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_is_in_range(int16_t value)
@@ -20736,6 +22715,14 @@ double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_vel_ned_d_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_vel_ned_d_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -20751,6 +22738,14 @@ double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_heading_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_heading_is_in_range(int16_t value)
 {
     return ((value >= -18000) && (value <= 18000));
@@ -20764,6 +22759,14 @@ int16_t vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_encode(double value)
 double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_is_in_range(int16_t value)
@@ -20904,6 +22907,14 @@ double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_n_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_n_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -20917,6 +22928,14 @@ int32_t vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_is_in_range(int32_t value)
@@ -21062,6 +23081,14 @@ double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_is_in_range(int16_t value)
 {
     (void)value;
@@ -21079,6 +23106,14 @@ double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_is_in_range(int16_t value)
 {
     (void)value;
@@ -21094,6 +23129,14 @@ int16_t vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_encode(double value)
 double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_is_in_range(int16_t value)
@@ -21248,6 +23291,14 @@ double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_vel_ned_d_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_vel_ned_d_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -21263,6 +23314,14 @@ double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_heading_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_heading_is_in_range(int16_t value)
 {
     return ((value >= -18000) && (value <= 18000));
@@ -21276,6 +23335,14 @@ int16_t vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_encode(double value)
 double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_is_in_range(int16_t value)
@@ -21416,6 +23483,14 @@ double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_n_decode(int32_t valu
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_n_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -21429,6 +23504,14 @@ int32_t vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_is_in_range(int32_t value)
@@ -21574,6 +23657,14 @@ double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_is_in_range(int16_t value)
 {
     (void)value;
@@ -21591,6 +23682,14 @@ double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_is_in_range(int16_t value)
 {
     (void)value;
@@ -21606,6 +23705,14 @@ int16_t vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_encode(double value)
 double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -32.768);
+    ret = CTOOLS_MIN(ret, 32.767);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_is_in_range(int16_t value)
@@ -21786,6 +23893,14 @@ double vehicle_rt_sb_ins_slip_validity_ins_slip_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_slip_validity_ins_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_slip_validity_ins_slip_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -21801,6 +23916,14 @@ double vehicle_rt_sb_ins_slip_validity_ins_squat_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_slip_validity_ins_squat_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_slip_validity_ins_squat_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -21814,6 +23937,14 @@ uint8_t vehicle_rt_sb_ins_slip_accuracy_ins_slip_encode(double value)
 double vehicle_rt_sb_ins_slip_accuracy_ins_slip_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_slip_accuracy_ins_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_slip_accuracy_ins_slip_is_in_range(uint8_t value)
@@ -21833,6 +23964,14 @@ double vehicle_rt_sb_ins_slip_ins_slip_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_slip_ins_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_slip_ins_slip_is_in_range(int16_t value)
 {
     (void)value;
@@ -21850,6 +23989,14 @@ double vehicle_rt_sb_ins_slip_accuracy_ins_squat_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_slip_accuracy_ins_squat_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_slip_accuracy_ins_squat_is_in_range(uint8_t value)
 {
     (void)value;
@@ -21865,6 +24012,14 @@ int16_t vehicle_rt_sb_ins_slip_ins_squat_encode(double value)
 double vehicle_rt_sb_ins_slip_ins_squat_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_slip_ins_squat_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_slip_ins_squat_is_in_range(int16_t value)
@@ -22033,6 +24188,14 @@ double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -22046,6 +24209,14 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_encode(double value
 double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_is_in_range(uint8_t value)
@@ -22063,6 +24234,14 @@ double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_y_decode(int32_t value)
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_y_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -22076,6 +24255,14 @@ int32_t vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_encode(double value)
 double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_is_in_range(int32_t value)
@@ -22242,6 +24429,14 @@ double vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -22255,6 +24450,14 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_encode(double value
 double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_is_in_range(uint8_t value)
@@ -22274,6 +24477,14 @@ double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_is_in_range(uint8_t value)
 {
     (void)value;
@@ -22291,6 +24502,14 @@ double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_is_in_range(uint8_t value)
 {
     (void)value;
@@ -22306,6 +24525,14 @@ int32_t vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_encode(double value)
 double vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_is_in_range(int32_t value)
@@ -22446,6 +24673,14 @@ double vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -22459,6 +24694,14 @@ uint8_t vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_encode(double value)
 double vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_is_in_range(uint8_t value)
@@ -22476,6 +24719,14 @@ int32_t vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_encode(double value)
 double vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_is_in_range(int32_t value)
@@ -22655,6 +24906,14 @@ double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -22670,6 +24929,14 @@ double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -22683,6 +24950,14 @@ uint8_t vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_encode(double value)
 double vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_is_in_range(uint8_t value)
@@ -22702,6 +24977,14 @@ double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_n_decode(int32_t value)
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_n_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -22715,6 +24998,14 @@ int32_t vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_encode(double value)
 double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_is_in_range(int32_t value)
@@ -22849,6 +25140,14 @@ double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_y_decode(int32_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -10000000.0);
+    ret = CTOOLS_MIN(ret, 10000000.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_y_is_in_range(int32_t value)
 {
     return ((value >= -1000000000) && (value <= 1000000000));
@@ -22862,6 +25161,14 @@ int32_t vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_encode(double value)
 double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_decode(int32_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -10000000.0);
+    ret = CTOOLS_MIN(ret, 10000000.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_is_in_range(int32_t value)
@@ -23051,6 +25358,14 @@ double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -23064,6 +25379,14 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_encode(double value
 double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_is_in_range(uint8_t value)
@@ -23081,6 +25404,14 @@ double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -23094,6 +25425,14 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_encode(double value
 double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_is_in_range(uint8_t value)
@@ -23113,6 +25452,14 @@ double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_is_in_range(uint8_t value)
 {
     (void)value;
@@ -23130,6 +25477,14 @@ double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_is_in_range(uint8_t value)
 {
     (void)value;
@@ -23145,6 +25500,14 @@ int32_t vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_encode(double value)
 double vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_decode(int32_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -10000000.0);
+    ret = CTOOLS_MIN(ret, 10000000.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_is_in_range(int32_t value)
@@ -23279,6 +25642,14 @@ double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_decode(int32_t value)
     return ((double)value * 1E-7);
 }
 
+double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_is_in_range(int32_t value)
 {
     return ((value >= -1800000000) && (value <= 1800000000));
@@ -23292,6 +25663,14 @@ int32_t vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_encode(double value)
 double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_decode(int32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -1000.0);
+    ret = CTOOLS_MIN(ret, 100000.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_is_in_range(int32_t value)
@@ -23481,6 +25860,14 @@ double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -23494,6 +25881,14 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_encode(double
 double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_is_in_range(uint8_t value)
@@ -23511,6 +25906,14 @@ double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -23524,6 +25927,14 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_encode(double 
 double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_is_in_range(uint8_t value)
@@ -23543,6 +25954,14 @@ double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_decode(uint8_t
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_is_in_range(uint8_t value)
 {
     (void)value;
@@ -23560,6 +25979,14 @@ double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_is_in_range(uint8_t value)
 {
     (void)value;
@@ -23575,6 +26002,14 @@ int32_t vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_encode(double value)
 double vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_decode(int32_t value)
 {
     return ((double)value * 1E-7);
+}
+
+double vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_is_in_range(int32_t value)
@@ -23749,6 +26184,14 @@ double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -23764,6 +26207,14 @@ double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_decode(uint8_t
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -23777,6 +26228,14 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_encode(double 
 double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_is_in_range(uint8_t value)
@@ -23796,6 +26255,14 @@ double vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_decode(uint16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_is_in_range(uint16_t value)
 {
     return (value <= 36000u);
@@ -23809,6 +26276,14 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_encode(double
 double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_is_in_range(uint8_t value)
@@ -23826,6 +26301,14 @@ int16_t vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_encode(double value)
 double vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_is_in_range(int16_t value)
@@ -24004,6 +26487,14 @@ double vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_decode(uint8_t va
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24019,6 +26510,14 @@ double vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_decode(uint8_t v
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24032,6 +26531,14 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_encode(double va
 double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_is_in_range(uint8_t value)
@@ -24051,6 +26558,14 @@ double vehicle_rt_sb_ins_heading_gradient_ins_heading_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_heading_gradient_ins_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_heading_gradient_ins_heading_is_in_range(int16_t value)
 {
     return ((value >= -18000) && (value <= 18000));
@@ -24064,6 +26579,14 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_encode(double v
 double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_is_in_range(uint8_t value)
@@ -24081,6 +26604,14 @@ int16_t vehicle_rt_sb_ins_heading_gradient_ins_gradient_encode(double value)
 double vehicle_rt_sb_ins_heading_gradient_ins_gradient_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_heading_gradient_ins_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_heading_gradient_ins_gradient_is_in_range(int16_t value)
@@ -24178,6 +26709,14 @@ uint8_t vehicle_rt_sb_ins_status_ins_status_encode(double value)
 double vehicle_rt_sb_ins_status_ins_status_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_status_ins_status_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_status_ins_status_is_in_range(uint8_t value)
@@ -24377,6 +26916,14 @@ double vehicle_rt_sb_ins_attitude_validity_yaw_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_attitude_validity_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_attitude_validity_yaw_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24390,6 +26937,14 @@ uint8_t vehicle_rt_sb_ins_attitude_validity_pitch_encode(double value)
 double vehicle_rt_sb_ins_attitude_validity_pitch_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_attitude_validity_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_attitude_validity_pitch_is_in_range(uint8_t value)
@@ -24407,6 +26962,14 @@ double vehicle_rt_sb_ins_attitude_validity_roll_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_ins_attitude_validity_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_attitude_validity_roll_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24420,6 +26983,14 @@ uint8_t vehicle_rt_sb_ins_attitude_accuracy_attitude_encode(double value)
 double vehicle_rt_sb_ins_attitude_accuracy_attitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_ins_attitude_accuracy_attitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_attitude_accuracy_attitude_is_in_range(uint8_t value)
@@ -24439,6 +27010,14 @@ double vehicle_rt_sb_ins_attitude_attitude_yaw_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_attitude_attitude_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_attitude_attitude_yaw_is_in_range(int16_t value)
 {
     (void)value;
@@ -24456,6 +27035,14 @@ double vehicle_rt_sb_ins_attitude_attitude_pitch_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_ins_attitude_attitude_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_ins_attitude_attitude_pitch_is_in_range(int16_t value)
 {
     (void)value;
@@ -24471,6 +27058,14 @@ int16_t vehicle_rt_sb_ins_attitude_attitude_roll_encode(double value)
 double vehicle_rt_sb_ins_attitude_attitude_roll_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_ins_attitude_attitude_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_ins_attitude_attitude_roll_is_in_range(int16_t value)
@@ -24695,6 +27290,14 @@ double vehicle_rt_sb_output_status_validity_status_timestamp_decode(uint8_t valu
     return ((double)value);
 }
 
+double vehicle_rt_sb_output_status_validity_status_timestamp_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_output_status_validity_status_timestamp_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24708,6 +27311,14 @@ uint8_t vehicle_rt_sb_output_status_status_analogue_1_encode(double value)
 double vehicle_rt_sb_output_status_status_analogue_1_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_output_status_status_analogue_1_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_output_status_status_analogue_1_is_in_range(uint8_t value)
@@ -24725,6 +27336,14 @@ double vehicle_rt_sb_output_status_status_analogue_2_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_output_status_status_analogue_2_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_output_status_status_analogue_2_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24738,6 +27357,14 @@ uint8_t vehicle_rt_sb_output_status_status_analogue_3_encode(double value)
 double vehicle_rt_sb_output_status_status_analogue_3_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_output_status_status_analogue_3_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_output_status_status_analogue_3_is_in_range(uint8_t value)
@@ -24755,6 +27382,14 @@ double vehicle_rt_sb_output_status_status_analogue_4_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_output_status_status_analogue_4_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_output_status_status_analogue_4_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24768,6 +27403,14 @@ uint8_t vehicle_rt_sb_output_status_status_pulse_output_encode(double value)
 double vehicle_rt_sb_output_status_status_pulse_output_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_output_status_status_pulse_output_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_output_status_status_pulse_output_is_in_range(uint8_t value)
@@ -24785,6 +27428,14 @@ double vehicle_rt_sb_output_status_status_serial_output_1_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_output_status_status_serial_output_1_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_output_status_status_serial_output_1_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24798,6 +27449,14 @@ uint8_t vehicle_rt_sb_output_status_status_serial_output_2_encode(double value)
 double vehicle_rt_sb_output_status_status_serial_output_2_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_output_status_status_serial_output_2_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_output_status_status_serial_output_2_is_in_range(uint8_t value)
@@ -24815,6 +27474,14 @@ double vehicle_rt_sb_output_status_status_trigger_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_output_status_status_trigger_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_output_status_status_trigger_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -24828,6 +27495,14 @@ uint32_t vehicle_rt_sb_output_status_gps_time_encode(double value)
 double vehicle_rt_sb_output_status_gps_time_decode(uint32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_output_status_gps_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 604800.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_output_status_gps_time_is_in_range(uint32_t value)
@@ -25002,6 +27677,14 @@ double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25017,6 +27700,14 @@ double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_decode(uint8_t
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25030,6 +27721,14 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_encode(double 
 double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_is_in_range(uint8_t value)
@@ -25049,6 +27748,14 @@ double vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_decode(uint16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_is_in_range(uint16_t value)
 {
     return (value <= 36000u);
@@ -25062,6 +27769,14 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_encode(double
 double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_is_in_range(uint8_t value)
@@ -25079,6 +27794,14 @@ int16_t vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_encode(double value)
 double vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_is_in_range(int16_t value)
@@ -25227,6 +27950,14 @@ double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_decode(uint8
     return ((double)value);
 }
 
+double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25240,6 +27971,14 @@ uint8_t vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_encode(
 double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_is_in_range(uint8_t value)
@@ -25257,6 +27996,14 @@ double vehicle_rt_sb_cumulative_distance_2_cumulative_time_decode(uint32_t value
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_cumulative_distance_2_cumulative_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 167772.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_cumulative_distance_2_cumulative_time_is_in_range(uint32_t value)
 {
     return (value <= 16777200u);
@@ -25270,6 +28017,14 @@ uint32_t vehicle_rt_sb_cumulative_distance_2_cumulative_distance_encode(double v
 double vehicle_rt_sb_cumulative_distance_2_cumulative_distance_decode(uint32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_cumulative_distance_2_cumulative_distance_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 4294967.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_cumulative_distance_2_cumulative_distance_is_in_range(uint32_t value)
@@ -25418,6 +28173,14 @@ double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_decode(uint8
     return ((double)value);
 }
 
+double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25431,6 +28194,14 @@ uint8_t vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_encode(
 double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_is_in_range(uint8_t value)
@@ -25448,6 +28219,14 @@ double vehicle_rt_sb_cumulative_distance_1_cumulative_time_decode(uint32_t value
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_cumulative_distance_1_cumulative_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 167772.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_cumulative_distance_1_cumulative_time_is_in_range(uint32_t value)
 {
     return (value <= 16777200u);
@@ -25461,6 +28240,14 @@ uint32_t vehicle_rt_sb_cumulative_distance_1_cumulative_distance_encode(double v
 double vehicle_rt_sb_cumulative_distance_1_cumulative_distance_decode(uint32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_cumulative_distance_1_cumulative_distance_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 4294967.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_cumulative_distance_1_cumulative_distance_is_in_range(uint32_t value)
@@ -25620,6 +28407,14 @@ double vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_decode(uint8_t
     return ((double)value);
 }
 
+double vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25633,6 +28428,14 @@ uint8_t vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_encode(double
 double vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_is_in_range(uint8_t value)
@@ -25652,6 +28455,14 @@ double vehicle_rt_sb_trigger_timestamp_trigger_number_decode(uint8_t value)
     return ((double)value + 1.0);
 }
 
+double vehicle_rt_sb_trigger_timestamp_trigger_number_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 128.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trigger_timestamp_trigger_number_is_in_range(uint8_t value)
 {
     return (value <= 127u);
@@ -25667,6 +28478,14 @@ double vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_decode(uint8_t val
     return ((double)value);
 }
 
+double vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25680,6 +28499,14 @@ uint64_t vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_encode(double 
 double vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_decode(uint64_t value)
 {
     return ((double)value * 0.000001);
+}
+
+double vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 604800.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_is_in_range(uint64_t value)
@@ -25877,6 +28704,14 @@ double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25890,6 +28725,14 @@ uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_encode(double value
 double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_is_in_range(uint8_t value)
@@ -25907,6 +28750,14 @@ double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -25920,6 +28771,14 @@ uint8_t vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_encode(double value)
 double vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_is_in_range(uint8_t value)
@@ -25939,6 +28798,14 @@ double vehicle_rt_imu06_gyro_rates_gyro_rate_yaw_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_imu06_gyro_rates_gyro_rate_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -327.0);
+    ret = CTOOLS_MIN(ret, 327.0);
+    return ret;
+}
+
 bool vehicle_rt_imu06_gyro_rates_gyro_rate_yaw_is_in_range(int16_t value)
 {
     return ((value >= -32700) && (value <= 32700));
@@ -25954,6 +28821,14 @@ double vehicle_rt_imu06_gyro_rates_gyro_rate_pitch_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_imu06_gyro_rates_gyro_rate_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -327.0);
+    ret = CTOOLS_MIN(ret, 327.0);
+    return ret;
+}
+
 bool vehicle_rt_imu06_gyro_rates_gyro_rate_pitch_is_in_range(int16_t value)
 {
     return ((value >= -32700) && (value <= 32700));
@@ -25967,6 +28842,14 @@ int16_t vehicle_rt_imu06_gyro_rates_gyro_rate_roll_encode(double value)
 double vehicle_rt_imu06_gyro_rates_gyro_rate_roll_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_imu06_gyro_rates_gyro_rate_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -327.0);
+    ret = CTOOLS_MIN(ret, 327.0);
+    return ret;
 }
 
 bool vehicle_rt_imu06_gyro_rates_gyro_rate_roll_is_in_range(int16_t value)
@@ -26164,6 +29047,14 @@ double vehicle_rt_imu06_accel_validity_accel_longitudinal_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_imu06_accel_validity_accel_longitudinal_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_imu06_accel_validity_accel_longitudinal_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -26177,6 +29068,14 @@ uint8_t vehicle_rt_imu06_accel_validity_accel_lateral_encode(double value)
 double vehicle_rt_imu06_accel_validity_accel_lateral_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_imu06_accel_validity_accel_lateral_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_imu06_accel_validity_accel_lateral_is_in_range(uint8_t value)
@@ -26194,6 +29093,14 @@ double vehicle_rt_imu06_accel_validity_accel_vertical_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_imu06_accel_validity_accel_vertical_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_imu06_accel_validity_accel_vertical_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -26207,6 +29114,14 @@ uint8_t vehicle_rt_imu06_accel_accuracy_accel_encode(double value)
 double vehicle_rt_imu06_accel_accuracy_accel_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_imu06_accel_accuracy_accel_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_imu06_accel_accuracy_accel_is_in_range(uint8_t value)
@@ -26226,6 +29141,14 @@ double vehicle_rt_imu06_accel_accel_longitudinal_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_imu06_accel_accel_longitudinal_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_imu06_accel_accel_longitudinal_is_in_range(int16_t value)
 {
     (void)value;
@@ -26243,6 +29166,14 @@ double vehicle_rt_imu06_accel_accel_lateral_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_imu06_accel_accel_lateral_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_imu06_accel_accel_lateral_is_in_range(int16_t value)
 {
     (void)value;
@@ -26258,6 +29189,14 @@ int16_t vehicle_rt_imu06_accel_accel_vertical_encode(double value)
 double vehicle_rt_imu06_accel_accel_vertical_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_imu06_accel_accel_vertical_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
 }
 
 bool vehicle_rt_imu06_accel_accel_vertical_is_in_range(int16_t value)
@@ -26397,6 +29336,14 @@ double vehicle_rt_sb_speed_validity_speed_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_speed_validity_speed_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_speed_validity_speed_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -26410,6 +29357,14 @@ uint8_t vehicle_rt_sb_speed_accuracy_speed_encode(double value)
 double vehicle_rt_sb_speed_accuracy_speed_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_speed_accuracy_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_speed_accuracy_speed_is_in_range(uint8_t value)
@@ -26427,6 +29382,14 @@ int32_t vehicle_rt_sb_speed_speed_encode(double value)
 double vehicle_rt_sb_speed_speed_decode(int32_t value)
 {
     return ((double)value * 0.00001);
+}
+
+double vehicle_rt_sb_speed_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -20000.0);
+    ret = CTOOLS_MIN(ret, 20000.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_speed_speed_is_in_range(int32_t value)
@@ -26620,6 +29583,14 @@ double vehicle_rt_sb_rtk_slip_validity_rtk_slip_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_rtk_slip_validity_rtk_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_slip_validity_rtk_slip_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -26633,6 +29604,14 @@ uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_squat_encode(double value)
 double vehicle_rt_sb_rtk_slip_validity_rtk_squat_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_rtk_slip_validity_rtk_squat_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_rtk_slip_validity_rtk_squat_is_in_range(uint8_t value)
@@ -26650,6 +29629,14 @@ double vehicle_rt_sb_rtk_slip_validity_rtk_baseline_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_rtk_slip_validity_rtk_baseline_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_slip_validity_rtk_baseline_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -26663,6 +29650,14 @@ uint8_t vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_encode(double value)
 double vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_is_in_range(uint8_t value)
@@ -26682,6 +29677,14 @@ double vehicle_rt_sb_rtk_slip_rtk_slip_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_rtk_slip_rtk_slip_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_slip_rtk_slip_is_in_range(int16_t value)
 {
     (void)value;
@@ -26699,6 +29702,14 @@ double vehicle_rt_sb_rtk_slip_rtk_squat_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_rtk_slip_rtk_squat_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_slip_rtk_squat_is_in_range(int16_t value)
 {
     (void)value;
@@ -26714,6 +29725,14 @@ uint16_t vehicle_rt_sb_rtk_slip_rtk_baseline_encode(double value)
 double vehicle_rt_sb_rtk_slip_rtk_baseline_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_rtk_slip_rtk_baseline_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 65535.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_rtk_slip_rtk_baseline_is_in_range(uint16_t value)
@@ -26913,6 +29932,14 @@ double vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -26926,6 +29953,14 @@ uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_encode(double value)
 double vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_is_in_range(uint8_t value)
@@ -26943,6 +29978,14 @@ double vehicle_rt_sb_rtk_attitude_validity_rtk_roll_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_rtk_attitude_validity_rtk_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_attitude_validity_rtk_roll_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -26956,6 +29999,14 @@ uint8_t vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_encode(double value)
 double vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_is_in_range(uint8_t value)
@@ -26975,6 +30026,14 @@ double vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -360.0);
+    ret = CTOOLS_MIN(ret, 360.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_is_in_range(int16_t value)
 {
     (void)value;
@@ -26992,6 +30051,14 @@ double vehicle_rt_sb_rtk_attitude_rtk_attitude_pitch_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_rtk_attitude_rtk_attitude_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_rtk_attitude_rtk_attitude_pitch_is_in_range(int16_t value)
 {
     return ((value >= -9000) && (value <= 9000));
@@ -27005,6 +30072,14 @@ int16_t vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_encode(double value)
 double vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_is_in_range(int16_t value)
@@ -27170,6 +30245,14 @@ double vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_decode(uint8_t v
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -27185,6 +30268,14 @@ double vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_decode(uint8_t val
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -27198,6 +30289,14 @@ uint8_t vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_encode(double v
 double vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_is_in_range(uint8_t value)
@@ -27217,6 +30316,14 @@ double vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_is_in_range(int16_t value)
 {
     (void)value;
@@ -27232,6 +30339,14 @@ int16_t vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_encode(double value)
 double vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_is_in_range(int16_t value)
@@ -27422,6 +30537,14 @@ double vehicle_rt_sb_gps_status_gps_status_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_status_gps_status_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_status_gps_status_is_in_range(uint8_t value)
 {
     (void)value;
@@ -27437,6 +30560,14 @@ uint8_t vehicle_rt_sb_gps_status_firmware_version_major_encode(double value)
 double vehicle_rt_sb_gps_status_firmware_version_major_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_status_firmware_version_major_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_status_firmware_version_major_is_in_range(uint8_t value)
@@ -27456,6 +30587,14 @@ double vehicle_rt_sb_gps_status_firmware_version_intermediate_decode(uint8_t val
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_status_firmware_version_intermediate_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_status_firmware_version_intermediate_is_in_range(uint8_t value)
 {
     (void)value;
@@ -27471,6 +30610,14 @@ uint8_t vehicle_rt_sb_gps_status_firmware_version_minor_encode(double value)
 double vehicle_rt_sb_gps_status_firmware_version_minor_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_status_firmware_version_minor_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_status_firmware_version_minor_is_in_range(uint8_t value)
@@ -27490,6 +30637,14 @@ double vehicle_rt_sb_gps_status_gps_n_sv_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_status_gps_n_sv_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 16.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_status_gps_n_sv_is_in_range(uint8_t value)
 {
     return (value <= 16u);
@@ -27503,6 +30658,14 @@ uint8_t vehicle_rt_sb_gps_status_gps_n_sv_2_encode(double value)
 double vehicle_rt_sb_gps_status_gps_n_sv_2_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_status_gps_n_sv_2_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 16.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_status_gps_n_sv_2_is_in_range(uint8_t value)
@@ -27520,6 +30683,14 @@ double vehicle_rt_sb_gps_status_gps_n_sv_rtk_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_status_gps_n_sv_rtk_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 16.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_status_gps_n_sv_rtk_is_in_range(uint8_t value)
 {
     return (value <= 16u);
@@ -27533,6 +30704,14 @@ uint8_t vehicle_rt_sb_gps_status_rtk_status_encode(double value)
 double vehicle_rt_sb_gps_status_rtk_status_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_status_rtk_status_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_status_rtk_status_is_in_range(uint8_t value)
@@ -27669,6 +30848,14 @@ double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_y_decode(int32_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -10000000.0);
+    ret = CTOOLS_MIN(ret, 10000000.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_y_is_in_range(int32_t value)
 {
     return ((value >= -1000000000) && (value <= 1000000000));
@@ -27682,6 +30869,14 @@ int32_t vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_encode(double value)
 double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_decode(int32_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -10000000.0);
+    ret = CTOOLS_MIN(ret, 10000000.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_is_in_range(int32_t value)
@@ -27871,6 +31066,14 @@ double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -27884,6 +31087,14 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_encode(double value
 double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_is_in_range(uint8_t value)
@@ -27901,6 +31112,14 @@ double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -27914,6 +31133,14 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_encode(double value
 double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_is_in_range(uint8_t value)
@@ -27933,6 +31160,14 @@ double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_is_in_range(uint8_t value)
 {
     (void)value;
@@ -27950,6 +31185,14 @@ double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_is_in_range(uint8_t value)
 {
     (void)value;
@@ -27965,6 +31208,14 @@ int32_t vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_encode(double value)
 double vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_decode(int32_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -10000000.0);
+    ret = CTOOLS_MIN(ret, 10000000.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_is_in_range(int32_t value)
@@ -28099,6 +31350,14 @@ double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_decode(int32_t value)
     return ((double)value * 1E-7);
 }
 
+double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_is_in_range(int32_t value)
 {
     return ((value >= -1800000000) && (value <= 1800000000));
@@ -28112,6 +31371,14 @@ int32_t vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_encode(double value)
 double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_decode(int32_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -1000.0);
+    ret = CTOOLS_MIN(ret, 100000.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_is_in_range(int32_t value)
@@ -28301,6 +31568,14 @@ double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -28314,6 +31589,14 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_encode(double
 double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_is_in_range(uint8_t value)
@@ -28331,6 +31614,14 @@ double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -28344,6 +31635,14 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_encode(double 
 double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_is_in_range(uint8_t value)
@@ -28363,6 +31662,14 @@ double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(uint8_t
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_is_in_range(uint8_t value)
 {
     (void)value;
@@ -28380,6 +31687,14 @@ double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uint8_t 
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_is_in_range(uint8_t value)
 {
     (void)value;
@@ -28395,6 +31710,14 @@ int32_t vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_encode(double value)
 double vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t value)
 {
     return ((double)value * 1E-7);
+}
+
+double vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t value)
@@ -28573,6 +31896,14 @@ double vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_decode(uint8_t va
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -28588,6 +31919,14 @@ double vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_decode(uint8_t v
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -28601,6 +31940,14 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_encode(double va
 double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_is_in_range(uint8_t value)
@@ -28620,6 +31967,14 @@ double vehicle_rt_sb_gps_heading_gradient_gps_heading_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_gps_heading_gradient_gps_heading_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -180.0);
+    ret = CTOOLS_MIN(ret, 180.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_heading_gradient_gps_heading_is_in_range(int16_t value)
 {
     return ((value >= -18000) && (value <= 18000));
@@ -28633,6 +31988,14 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_encode(double v
 double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_is_in_range(uint8_t value)
@@ -28650,6 +32013,14 @@ int16_t vehicle_rt_sb_gps_heading_gradient_gps_gradient_encode(double value)
 double vehicle_rt_sb_gps_heading_gradient_gps_gradient_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_gps_heading_gradient_gps_gradient_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -90.0);
+    ret = CTOOLS_MIN(ret, 90.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_heading_gradient_gps_gradient_is_in_range(int16_t value)
@@ -28816,6 +32187,14 @@ double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -28829,6 +32208,14 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_encode(double value
 double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_is_in_range(uint8_t value)
@@ -28846,6 +32233,14 @@ double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_y_decode(int32_t value)
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_y_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -28859,6 +32254,14 @@ int32_t vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_encode(double value)
 double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_is_in_range(int32_t value)
@@ -29025,6 +32428,14 @@ double vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29038,6 +32449,14 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_encode(double value
 double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_is_in_range(uint8_t value)
@@ -29057,6 +32476,14 @@ double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_is_in_range(uint8_t value)
 {
     (void)value;
@@ -29074,6 +32501,14 @@ double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_decode(uint8_t value
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_is_in_range(uint8_t value)
 {
     (void)value;
@@ -29089,6 +32524,14 @@ int32_t vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_encode(double value)
 double vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_is_in_range(int32_t value)
@@ -29229,6 +32672,14 @@ double vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29242,6 +32693,14 @@ uint8_t vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_encode(double value)
 double vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_is_in_range(uint8_t value)
@@ -29259,6 +32718,14 @@ int32_t vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_encode(double value)
 double vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_is_in_range(int32_t value)
@@ -29438,6 +32905,14 @@ double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29453,6 +32928,14 @@ double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29466,6 +32949,14 @@ uint8_t vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_encode(double value)
 double vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_is_in_range(uint8_t value)
@@ -29485,6 +32976,14 @@ double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_n_decode(int32_t value)
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_n_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_n_is_in_range(int32_t value)
 {
     return ((value >= -8380000) && (value <= 8380000));
@@ -29498,6 +32997,14 @@ int32_t vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_encode(double value)
 double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_decode(int32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -838.0);
+    ret = CTOOLS_MIN(ret, 838.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_is_in_range(int32_t value)
@@ -29657,6 +33164,14 @@ double vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29672,6 +33187,14 @@ double vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29685,6 +33208,14 @@ uint8_t vehicle_rt_sb_gps_speed_accuracy_gps_speed_encode(double value)
 double vehicle_rt_sb_gps_speed_accuracy_gps_speed_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_speed_accuracy_gps_speed_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_speed_accuracy_gps_speed_is_in_range(uint8_t value)
@@ -29704,6 +33235,14 @@ double vehicle_rt_sb_gps_speed_gps_speed_2_d_decode(uint32_t value)
     return ((double)value * 0.0001);
 }
 
+double vehicle_rt_sb_gps_speed_gps_speed_2_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1675.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_speed_gps_speed_2_d_is_in_range(uint32_t value)
 {
     return (value <= 16750000u);
@@ -29717,6 +33256,14 @@ uint32_t vehicle_rt_sb_gps_speed_gps_speed_3_d_encode(double value)
 double vehicle_rt_sb_gps_speed_gps_speed_3_d_decode(uint32_t value)
 {
     return ((double)value * 0.0001);
+}
+
+double vehicle_rt_sb_gps_speed_gps_speed_3_d_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1675.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_speed_gps_speed_3_d_is_in_range(uint32_t value)
@@ -29876,6 +33423,14 @@ double vehicle_rt_sb_gps_time_validity_gps_time_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_time_validity_gps_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_time_validity_gps_time_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29891,6 +33446,14 @@ double vehicle_rt_sb_gps_time_validity_gps_week_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gps_time_validity_gps_week_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_time_validity_gps_week_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -29904,6 +33467,14 @@ uint8_t vehicle_rt_sb_gps_time_accuracy_gps_time_encode(double value)
 double vehicle_rt_sb_gps_time_accuracy_gps_time_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_time_accuracy_gps_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_time_accuracy_gps_time_is_in_range(uint8_t value)
@@ -29923,6 +33494,14 @@ double vehicle_rt_sb_gps_time_gps_time_decode(uint32_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_gps_time_gps_time_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 604800.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gps_time_gps_time_is_in_range(uint32_t value)
 {
     return (value <= 604800000u);
@@ -29936,6 +33515,14 @@ uint16_t vehicle_rt_sb_gps_time_gps_week_encode(double value)
 double vehicle_rt_sb_gps_time_gps_week_decode(uint16_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gps_time_gps_week_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 65535.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gps_time_gps_week_is_in_range(uint16_t value)
@@ -30135,6 +33722,14 @@ double vehicle_rt_sb_accel_validity_accel_longitudinal_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_accel_validity_accel_longitudinal_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_accel_validity_accel_longitudinal_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -30148,6 +33743,14 @@ uint8_t vehicle_rt_sb_accel_validity_accel_lateral_encode(double value)
 double vehicle_rt_sb_accel_validity_accel_lateral_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_accel_validity_accel_lateral_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_sb_accel_validity_accel_lateral_is_in_range(uint8_t value)
@@ -30165,6 +33768,14 @@ double vehicle_rt_sb_accel_validity_accel_vertical_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_accel_validity_accel_vertical_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool vehicle_rt_sb_accel_validity_accel_vertical_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -30178,6 +33789,14 @@ uint8_t vehicle_rt_sb_accel_accuracy_accel_encode(double value)
 double vehicle_rt_sb_accel_accuracy_accel_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_accel_accuracy_accel_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 255.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_accel_accuracy_accel_is_in_range(uint8_t value)
@@ -30197,6 +33816,14 @@ double vehicle_rt_sb_accel_accel_longitudinal_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_accel_accel_longitudinal_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_accel_accel_longitudinal_is_in_range(int16_t value)
 {
     (void)value;
@@ -30214,6 +33841,14 @@ double vehicle_rt_sb_accel_accel_lateral_decode(int16_t value)
     return ((double)value * 0.001);
 }
 
+double vehicle_rt_sb_accel_accel_lateral_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_accel_accel_lateral_is_in_range(int16_t value)
 {
     (void)value;
@@ -30229,6 +33864,14 @@ int16_t vehicle_rt_sb_accel_accel_vertical_encode(double value)
 double vehicle_rt_sb_accel_accel_vertical_decode(int16_t value)
 {
     return ((double)value * 0.001);
+}
+
+double vehicle_rt_sb_accel_accel_vertical_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -65.0);
+    ret = CTOOLS_MIN(ret, 65.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_accel_accel_vertical_is_in_range(int16_t value)
@@ -30428,6 +34071,14 @@ double vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -30441,6 +34092,14 @@ uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_encode(double value)
 double vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_is_in_range(uint8_t value)
@@ -30458,6 +34117,14 @@ double vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_decode(uint8_t value)
     return ((double)value);
 }
 
+double vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 1.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -30471,6 +34138,14 @@ uint8_t vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_encode(double value)
 double vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_is_in_range(uint8_t value)
@@ -30490,6 +34165,14 @@ double vehicle_rt_sb_gyro_rates_gyro_rate_yaw_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_gyro_rates_gyro_rate_yaw_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -327.0);
+    ret = CTOOLS_MIN(ret, 327.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gyro_rates_gyro_rate_yaw_is_in_range(int16_t value)
 {
     return ((value >= -32700) && (value <= 32700));
@@ -30503,6 +34186,14 @@ int16_t vehicle_rt_sb_gyro_rates_gyro_rate_pitch_encode(double value)
 double vehicle_rt_sb_gyro_rates_gyro_rate_pitch_decode(int16_t value)
 {
     return ((double)value * 0.01);
+}
+
+double vehicle_rt_sb_gyro_rates_gyro_rate_pitch_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -327.0);
+    ret = CTOOLS_MIN(ret, 327.0);
+    return ret;
 }
 
 bool vehicle_rt_sb_gyro_rates_gyro_rate_pitch_is_in_range(int16_t value)
@@ -30520,7 +34211,18 @@ double vehicle_rt_sb_gyro_rates_gyro_rate_roll_decode(int16_t value)
     return ((double)value * 0.01);
 }
 
+double vehicle_rt_sb_gyro_rates_gyro_rate_roll_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -327.0);
+    ret = CTOOLS_MIN(ret, 327.0);
+    return ret;
+}
+
 bool vehicle_rt_sb_gyro_rates_gyro_rate_roll_is_in_range(int16_t value)
 {
     return ((value >= -32700) && (value <= 32700));
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

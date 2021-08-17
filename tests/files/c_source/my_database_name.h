@@ -136,6 +136,13 @@ uint8_t my_database_name_example_message_enable_encode(double value);
 double my_database_name_example_message_enable_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double my_database_name_example_message_enable_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -163,6 +170,13 @@ uint8_t my_database_name_example_message_average_radius_encode(double value);
 double my_database_name_example_message_average_radius_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double my_database_name_example_message_average_radius_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -188,6 +202,13 @@ int16_t my_database_name_example_message_temperature_encode(double value);
  * @return Decoded signal.
  */
 double my_database_name_example_message_temperature_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double my_database_name_example_message_temperature_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.

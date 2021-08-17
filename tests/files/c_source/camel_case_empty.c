@@ -32,6 +32,9 @@
 
 #include "camel_case_empty.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 int camel_case_empty_message1_pack(
     uint8_t *dst_p,
     const struct camel_case_empty_message1_t *src_p,
@@ -105,3 +108,6 @@ int camel_case_empty_message1_wrap_unpack(
 
     return ret;
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

@@ -32,6 +32,9 @@
 
 #include "multiplex_2.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -317,6 +320,14 @@ double multiplex_2_shared_s0_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_shared_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_shared_s0_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -332,6 +343,14 @@ double multiplex_2_shared_s1_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_shared_s1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_shared_s1_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -345,6 +364,14 @@ int8_t multiplex_2_shared_s2_encode(double value)
 double multiplex_2_shared_s2_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_shared_s2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_shared_s2_is_in_range(int8_t value)
@@ -520,6 +547,14 @@ double multiplex_2_normal_s0_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_normal_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_normal_s0_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -535,6 +570,14 @@ double multiplex_2_normal_s1_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_normal_s1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_normal_s1_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -548,6 +591,14 @@ int8_t multiplex_2_normal_s2_encode(double value)
 double multiplex_2_normal_s2_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_normal_s2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_normal_s2_is_in_range(int8_t value)
@@ -904,6 +955,14 @@ double multiplex_2_extended_s0_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s0_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -917,6 +976,14 @@ int32_t multiplex_2_extended_s5_encode(double value)
 double multiplex_2_extended_s5_decode(int32_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s5_is_in_range(int32_t value)
@@ -934,6 +1001,14 @@ double multiplex_2_extended_s1_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s1_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -949,6 +1024,14 @@ double multiplex_2_extended_s4_decode(int32_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s4_is_in_range(int32_t value)
 {
     return ((value >= -8388608) && (value <= 8388607));
@@ -962,6 +1045,14 @@ int8_t multiplex_2_extended_s2_encode(double value)
 double multiplex_2_extended_s2_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s2_is_in_range(int8_t value)
@@ -981,6 +1072,14 @@ double multiplex_2_extended_s3_decode(int16_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s3_is_in_range(int16_t value)
 {
     (void)value;
@@ -996,6 +1095,14 @@ int8_t multiplex_2_extended_s6_encode(double value)
 double multiplex_2_extended_s6_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s6_is_in_range(int8_t value)
@@ -1015,6 +1122,14 @@ double multiplex_2_extended_s8_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s8_is_in_range(int8_t value)
 {
     (void)value;
@@ -1030,6 +1145,14 @@ int32_t multiplex_2_extended_s7_encode(double value)
 double multiplex_2_extended_s7_decode(int32_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s7_is_in_range(int32_t value)
@@ -1241,6 +1364,14 @@ double multiplex_2_extended_types_s11_decode(uint8_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_types_s11_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 2.0);
+    ret = CTOOLS_MIN(ret, 6.0);
+    return ret;
+}
+
 bool multiplex_2_extended_types_s11_is_in_range(uint8_t value)
 {
     return ((value >= 2u) && (value <= 6u));
@@ -1254,6 +1385,14 @@ int8_t multiplex_2_extended_types_s0_encode(double value)
 double multiplex_2_extended_types_s0_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_types_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_types_s0_is_in_range(int8_t value)
@@ -1271,6 +1410,14 @@ double multiplex_2_extended_types_s10_decode(float value)
     return ((double)value);
 }
 
+double multiplex_2_extended_types_s10_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -3.4e+38);
+    ret = CTOOLS_MIN(ret, 3.4e+38);
+    return ret;
+}
+
 bool multiplex_2_extended_types_s10_is_in_range(float value)
 {
     return ((value >= -340000000000000000000000000000000000000.0f) && (value <= 340000000000000000000000000000000000000.0f));
@@ -1286,7 +1433,18 @@ double multiplex_2_extended_types_s9_decode(float value)
     return ((double)value);
 }
 
+double multiplex_2_extended_types_s9_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -1.34);
+    ret = CTOOLS_MIN(ret, 1235.0);
+    return ret;
+}
+
 bool multiplex_2_extended_types_s9_is_in_range(float value)
 {
     return ((value >= -1.34f) && (value <= 1235.0f));
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

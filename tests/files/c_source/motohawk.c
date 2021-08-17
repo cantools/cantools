@@ -32,6 +32,9 @@
 
 #include "motohawk.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -213,6 +216,14 @@ double motohawk_example_message_enable_decode(uint8_t value)
     return ((double)value);
 }
 
+double motohawk_example_message_enable_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool motohawk_example_message_enable_is_in_range(uint8_t value)
 {
     return (value <= 1u);
@@ -226,6 +237,14 @@ uint8_t motohawk_example_message_average_radius_encode(double value)
 double motohawk_example_message_average_radius_decode(uint8_t value)
 {
     return ((double)value * 0.1);
+}
+
+double motohawk_example_message_average_radius_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 5.0);
+    return ret;
 }
 
 bool motohawk_example_message_average_radius_is_in_range(uint8_t value)
@@ -243,7 +262,18 @@ double motohawk_example_message_temperature_decode(int16_t value)
     return (((double)value * 0.01) + 250.0);
 }
 
+double motohawk_example_message_temperature_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 229.52);
+    ret = CTOOLS_MIN(ret, 270.47);
+    return ret;
+}
+
 bool motohawk_example_message_temperature_is_in_range(int16_t value)
 {
     return ((value >= -2048) && (value <= 2047));
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

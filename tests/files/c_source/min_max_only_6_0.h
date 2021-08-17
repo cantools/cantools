@@ -140,6 +140,13 @@ uint8_t min_max_only_6_0_symbol1_signal1_encode(double value);
 double min_max_only_6_0_symbol1_signal1_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double min_max_only_6_0_symbol1_signal1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -165,6 +172,13 @@ uint8_t min_max_only_6_0_symbol1_signal2_encode(double value);
  * @return Decoded signal.
  */
 double min_max_only_6_0_symbol1_signal2_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double min_max_only_6_0_symbol1_signal2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -194,6 +208,13 @@ int8_t min_max_only_6_0_symbol1_signal4_encode(double value);
 double min_max_only_6_0_symbol1_signal4_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double min_max_only_6_0_symbol1_signal4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -219,6 +240,13 @@ int16_t min_max_only_6_0_symbol1_signal3_encode(double value);
  * @return Decoded signal.
  */
 double min_max_only_6_0_symbol1_signal3_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double min_max_only_6_0_symbol1_signal3_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.

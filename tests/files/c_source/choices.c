@@ -32,6 +32,9 @@
 
 #include "choices.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -146,9 +149,20 @@ double choices_foo_foo_decode(int8_t value)
     return ((double)value);
 }
 
+double choices_foo_foo_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -128.0);
+    ret = CTOOLS_MIN(ret, 127.0);
+    return ret;
+}
+
 bool choices_foo_foo_is_in_range(int8_t value)
 {
     (void)value;
 
     return (true);
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

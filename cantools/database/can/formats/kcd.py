@@ -10,6 +10,7 @@ from xml.etree.ElementTree import Element
 from xml.etree.ElementTree import SubElement
 
 from ..signal import Signal
+from ..signal import NamedSignalValue
 from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..node import Node
@@ -117,7 +118,7 @@ def _load_signal_element(signal, nodes):
         for label in label_set.iterfind('ns:Label', NAMESPACES):
             label_value = int(label.attrib['value'])
             label_name = label.attrib['name']
-            labels[label_value] = label_name
+            labels[label_value] = NamedSignalValue(label_value, label_name)
 
         # TODO: Label groups.
 
@@ -333,7 +334,7 @@ def _dump_signal(signal, node_refs, signal_element):
         label_set = SubElement(signal_element, 'LabelSet')
 
         for value, name in signal.choices.items():
-            SubElement(label_set, 'Label', name=name, value=str(value))
+            SubElement(label_set, 'Label', name=str(name), value=str(value))
 
 
 def _dump_mux_group(multiplexer_id,

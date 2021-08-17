@@ -67,6 +67,69 @@ class Decimal(object):
     def maximum(self, value):
         self._maximum = value
 
+class NamedSignalValue(object):
+    """Represents a named value of a signal.
+
+    Named values map an integer number to a human-readable
+    string. Some file formats like ARXML support specifying
+    descriptions for the named value.
+    """
+
+    def __init__(self, value, name, comments = {}):
+        self._name = name
+        self._value = value
+        self._comments = comments
+
+    @property
+    def name(self):
+        """The text intended for human consumption which the specified integer
+        is mapped to.
+        """
+
+        return self._name
+
+    @property
+    def value(self):
+        """The integer value that gets mapped
+        """
+
+        return self._value
+
+    @property
+    def comments(self):
+        """The descriptions of the named value
+
+        This is a dictionary containing the descriptions in multiple
+        languagues. The dictionary is indexed by the language.
+
+        Example:
+
+        .. code:: text
+
+          # retrieve the English comment of the named value or an empty
+          # string if none was specified.
+          named_value.comments.get("EN", "")
+
+        """
+
+        return self._comments
+
+    def __str__(self):
+        return self._name
+
+    def __repr__(self):
+        return f"{self._name}"
+
+    def __eq__(self, x):
+        if isinstance(x, NamedSignalValue):
+            return \
+                x.value == self.value \
+                and x.name == self.name \
+                and x.comments == self.comments
+        elif isinstance(x, str):
+            return x == self.name
+
+        return False
 
 class Signal(object):
     """A CAN signal with position, size, unit and other information. A
@@ -434,8 +497,8 @@ class Signal(object):
         self._spn = value
 
     def choice_string_to_number(self, string):
-        for choice_number, choice_string in self.choices.items():
-            if choice_string == string:
+        for choice_number, choice_value in self.choices.items():
+            if str(choice_value) == str(string):
                 return choice_number
 
     def __repr__(self):

@@ -68,9 +68,9 @@ def _decode_field(field, value, decode_choices, scaling):
         except (KeyError, TypeError):
             pass
 
-    is_int = \
-        lambda x: x is isinstance(x, int) or (isinstance(x, float) and x.is_integer())
     if scaling:
+        is_int = \
+            lambda x: isinstance(x, int) or (isinstance(x, float) and x.is_integer())
         if field.is_float \
            or not is_int(field.scale) \
            or not is_int(field.offset):

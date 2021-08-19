@@ -62,19 +62,18 @@ def _encode_field(field, data, scaling):
 
 
 def _decode_field(field, value, decode_choices, scaling):
-    if decode_choices:
-        try:
-            return field.choices[value]
-        except (KeyError, TypeError):
-            pass
-
-    if scaling:
-        is_int = \
-            lambda x: isinstance(x, int) or (isinstance(x, float) and x.is_integer())
-        if field.is_float \
-           or not is_int(field.scale) \
-           or not is_int(field.offset):
-            return (field.scale * value + field.offset)
+    if decode_choices and field.choices:
+        return field.choices.get(value, value)
+    elif scaling:
+        is_int = lambda x: isinstance(x, int) or (
+            isinstance(x, float) and x.is_integer()
+        )
+        if (
+            field.is_float
+            or not is_int(field.scale)
+            or not is_int(field.offset)
+        ):
+            return field.scale * value + field.offset
         else:
             return int(field.scale * value + field.offset)
     else:

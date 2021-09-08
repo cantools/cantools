@@ -393,5 +393,10 @@ bool floating_point_message2_signal2_is_in_range(float value)
     return (true);
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

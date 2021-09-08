@@ -81,6 +81,8 @@ extern "C" {
 #define SIGNED_MESSAGE64_IS_EXTENDED (0)
 #define SIGNED_MESSAGE33_IS_EXTENDED (0)
 #define SIGNED_MESSAGE32_IS_EXTENDED (0)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 

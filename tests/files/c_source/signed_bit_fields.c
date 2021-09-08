@@ -1858,5 +1858,10 @@ bool signed_bit_fields_message32_s32_is_in_range(int32_t value)
     return (true);
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

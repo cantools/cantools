@@ -336,5 +336,10 @@ bool min_max_only_6_0_symbol1_signal3_is_in_range(int16_t value)
     return ((value >= -2) && (value <= 255));
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

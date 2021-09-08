@@ -164,5 +164,10 @@ bool choices_foo_foo_is_in_range(int8_t value)
     return (true);
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

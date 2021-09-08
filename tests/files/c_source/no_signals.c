@@ -133,5 +133,10 @@ int no_signals_message2_unpack(
     return (0);
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

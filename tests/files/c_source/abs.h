@@ -102,6 +102,8 @@ extern "C" {
 #define ABS_BREMSE_52_IS_EXTENDED (0)
 #define ABS_BREMSE_50_IS_EXTENDED (0)
 #define ABS_BREMSE_53_IS_EXTENDED (0)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 #define ABS_BREMSE_33_CYCLE_TIME_MS (10u)

@@ -109,5 +109,10 @@ int letter_terminated_can_id_6_0_symbol1_wrap_unpack(
     return ret;
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

@@ -51,6 +51,8 @@ extern "C" {
 
 /* Extended or standard frame types. */
 #define MULTIPLEX_MESSAGE1_IS_EXTENDED (1)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 #define MULTIPLEX_MESSAGE1_CYCLE_TIME_MS (0u)

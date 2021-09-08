@@ -221,5 +221,10 @@ bool motohawk_example_message_temperature_is_in_range(int16_t value)
     return ((value >= -2048) && (value <= 2047));
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

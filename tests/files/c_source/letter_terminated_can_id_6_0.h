@@ -51,6 +51,8 @@ extern "C" {
 
 /* Extended or standard frame types. */
 #define LETTER_TERMINATED_CAN_ID_6_0_SYMBOL1_IS_EXTENDED (0)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 

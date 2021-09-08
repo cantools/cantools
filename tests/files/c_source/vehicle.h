@@ -699,6 +699,8 @@ extern "C" {
 #define VEHICLE_RT_SB_GPS_TIME_IS_EXTENDED (1)
 #define VEHICLE_RT_SB_ACCEL_IS_EXTENDED (1)
 #define VEHICLE_RT_SB_GYRO_RATES_IS_EXTENDED (1)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 

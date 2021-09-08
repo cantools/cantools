@@ -4785,5 +4785,10 @@ bool abs_bremse_53_p_ra_is_in_range(int16_t value)
     return ((value >= -2785) && (value <= 27850));
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

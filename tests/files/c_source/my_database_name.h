@@ -51,6 +51,8 @@ extern "C" {
 
 /* Extended or standard frame types. */
 #define MY_DATABASE_NAME_EXAMPLE_MESSAGE_IS_EXTENDED (0)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 

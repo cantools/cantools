@@ -1446,5 +1446,10 @@ bool multiplex_2_extended_types_s9_is_in_range(float value)
     return ((value >= -1.34f) && (value <= 1235.0f));
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return true;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

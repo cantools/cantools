@@ -109,5 +109,10 @@ int camel_case_empty_message1_wrap_unpack(
     return ret;
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

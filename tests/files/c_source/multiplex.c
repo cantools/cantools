@@ -598,5 +598,10 @@ bool multiplex_message1_bit_f_is_in_range(uint8_t value)
     return (value <= 1u);
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return true;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

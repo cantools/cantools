@@ -63,6 +63,8 @@ extern "C" {
 #define PADDING_BIT_ORDER_MSG2_IS_EXTENDED (0)
 #define PADDING_BIT_ORDER_MSG3_IS_EXTENDED (0)
 #define PADDING_BIT_ORDER_MSG4_IS_EXTENDED (0)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 

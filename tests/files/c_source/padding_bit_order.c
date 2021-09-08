@@ -968,5 +968,10 @@ bool padding_bit_order_msg4_m_is_in_range(uint64_t value)
     return (true);
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

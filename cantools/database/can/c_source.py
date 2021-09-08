@@ -59,6 +59,8 @@ extern "C" {{
 
 /* Extended or standard frame types. */
 {is_extended_frame_defines}
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 {frame_cycle_time_defines}
@@ -116,6 +118,7 @@ SOURCE_FMT = '''\
 
 {helpers}\
 {definitions}\
+{extended_impl}\
 
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN
@@ -1690,6 +1693,41 @@ def _generate_helpers(kinds):
     return '\n'.join(helpers)
 
 
+def _generate_extended_impl(db_name, messages):
+    def line(m):
+        return "    case {}_{}_FRAME_ID:".format(db_name.upper(), m.snake_name.upper())
+
+    extended = "\n".join([line(msg) for msg in messages if msg.is_extended_frame])
+    standard = "\n".join([line(msg) for msg in messages if not msg.is_extended_frame])
+
+    if extended and standard:
+        ret = """
+bool is_extended_frame(uint32_t frame_id)
+{{
+    switch(frame_id) {{
+{extended}
+        return true;
+
+{standard}
+    default:
+        return false;
+    }}
+}}
+""".format(extended=extended, standard=standard)
+
+    else:
+        all_extended = "true" if not standard else "false"
+
+        ret = """
+bool is_extended_frame(uint32_t frame_id)
+{{
+    return {all_extended};
+}}
+""".format(all_extended = all_extended)
+
+    return ret
+
+
 def _generate_fuzzer_source(database_name,
                             messages,
                             date,
@@ -1775,6 +1813,7 @@ def generate(database,
                                                       messages,
                                                       floating_point_numbers)
     helpers = _generate_helpers(helper_kinds)
+    extended_impl = _generate_extended_impl(database_name, messages)
 
     header = HEADER_FMT.format(version=__version__,
                                date=date,
@@ -1791,7 +1830,8 @@ def generate(database,
                                date=date,
                                header=header_name,
                                helpers=helpers,
-                               definitions=definitions)
+                               definitions=definitions,
+                               extended_impl=extended_impl)
 
     fuzzer_source, fuzzer_makefile = _generate_fuzzer_source(
         database_name,

@@ -60,6 +60,8 @@ extern "C" {
 #define MULTIPLEX_2_NORMAL_IS_EXTENDED (1)
 #define MULTIPLEX_2_EXTENDED_IS_EXTENDED (1)
 #define MULTIPLEX_2_EXTENDED_TYPES_IS_EXTENDED (1)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 #define MULTIPLEX_2_SHARED_CYCLE_TIME_MS (0u)

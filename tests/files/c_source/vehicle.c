@@ -34224,5 +34224,10 @@ bool vehicle_rt_sb_gyro_rates_gyro_rate_roll_is_in_range(int16_t value)
     return ((value >= -32700) && (value <= 32700));
 }
 
+bool is_extended_frame(uint32_t frame_id)
+{
+    return true;
+}
+
 #undef CTOOLS_MAX
 #undef CTOOLS_MIN

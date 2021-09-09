@@ -267,6 +267,20 @@ The desired output format is derived from the extension of outfile.
    $ python3 -m cantools convert [options] infile outfile
    $ python3 -m cantools convert --help
 
+
+You can install pdflatex with the packages required for converting dbc files to pdf with:
+
+.. code-block:: bash
+
+   $ sudo apt install texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science
+
+or
+
+.. code-block:: bash
+
+   $ sudo pacman -S texlive-core texlive-latexextra texlive-science
+
+
 The generate C source subcommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

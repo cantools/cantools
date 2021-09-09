@@ -803,6 +803,10 @@ This requires pdflatex with the following packages:
 - hyperref
 - xltabular, ltablex or tabularx depending on --env
 - url if you use --sig-name-break-anywhere
+You can install them on Linux with:
+$ sudo apt install texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science
+or
+$ sudo pacman -S texlive-core texlive-latexextra texlive-science
 
 If you want to modify the LaTeX code before converting it to pdf
 you can also skip that conversion and export it to a tex-file.

@@ -720,7 +720,7 @@ DLC = 8
     def test_comments(self):
         dbc = self.DBC_FILE_COMMENTS
         fn_out = self.get_out_file_name(dbc)
-        argv = ['cantools', 'convert', '--env', 'ltablex-keep-x', dbc, fn_out]
+        argv = ['cantools', 'convert', '--env', 'ltablex-keep-x', '--title', 'Testing comments', dbc, fn_out]
 
         expected_content = r'''
 % !TeX program = pdflatex
@@ -763,7 +763,7 @@ DLC = 8
 
 \KOMAoption{DIV}{12}
 
-\title{Motohawk With Comments}
+\title{Testing comments}
 \date{09.09.2021}
 \newcommand{\infile}{motohawk\_with\_comments.dbc}
 \newcommand{\outfile}{motohawk\_with\_comments.tex}

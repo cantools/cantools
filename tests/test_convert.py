@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import re
+import datetime
 
 import unittest
 from unittest import mock
@@ -51,6 +52,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
         if key in ('infile', 'outfile'):
             val = os.path.split(val)[1]
         elif key == 'date':
+            expected_date = datetime.datetime.now().strftime('%d.%m.%Y')
+            self.assertEqual(expected_date, val)
             val = '09.09.2021'
         elif key == 'title':
             val = os.path.split(val)[1]

@@ -152,7 +152,7 @@ class Converter:
 """
     begin_document = r"\begin{document}" + "\n" + r"\maketitle"
     table_of_contents = r"\tableofcontents"
-    end_document = r"\end{document}"
+    end_document = r"\end{document}" + "\n"
 
     begin_msg = r"""
 \section{{0x{frame_id:03X} {name}}}

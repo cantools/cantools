@@ -42,7 +42,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
     def get_golden_master_file_name(self, fn_dbc):
         return os.path.splitext(fn_dbc)[0] + '.tex'
 
-    def assert_file_content_equal(self, content_expected, fn_is):
+    def assert_file_content_equal(self, content_expected, fn_is, *, fixed_date=False):
+        self._fixed_date = fixed_date
         read_is = lambda f: [self.reo_lines_that_are_expected_to_differ.sub(self.sub_line, ln).rstrip('\n') for ln in f]
 
         with open(fn_is, 'rt') as f:
@@ -55,9 +56,10 @@ class CanToolsConvertFullTest(unittest.TestCase):
         if key in ('infile', 'outfile'):
             val = os.path.split(val)[1]
         elif key == 'date':
-            expected_date = datetime.datetime.now().strftime('%d.%m.%Y')
-            self.assertEqual(expected_date, val)
-            val = '09.09.2021'
+            if not self._fixed_date:
+                expected_date = datetime.datetime.now().strftime('%d.%m.%Y')
+                self.assertEqual(expected_date, val)
+                val = '09.09.2021'
         elif key == 'title':
             val = os.path.split(val)[1]
             val = val[0].upper() + val[1:]
@@ -720,7 +722,7 @@ DLC = 8
     def test_comments(self):
         dbc = self.DBC_FILE_COMMENTS
         fn_out = self.get_out_file_name(dbc)
-        argv = ['cantools', 'convert', '--env', 'ltablex-keep-x', '--title', 'Testing comments', dbc, fn_out]
+        argv = ['cantools', 'convert', '--env', 'ltablex-keep-x', '--title', 'Testing comments', '--date', '25.02.2021', dbc, fn_out]
 
         expected_content = r'''
 % !TeX program = pdflatex
@@ -764,7 +766,7 @@ DLC = 8
 \KOMAoption{DIV}{12}
 
 \title{Testing comments}
-\date{09.09.2021}
+\date{25.02.2021}
 \newcommand{\infile}{motohawk\_with\_comments.dbc}
 \newcommand{\outfile}{motohawk\_with\_comments.tex}
 
@@ -839,7 +841,7 @@ Enable signal comment
         with mock.patch('sys.argv', argv):
             cantools._main()
 
-        self.assert_file_content_equal(expected_content, fn_out)
+        self.assert_file_content_equal(expected_content, fn_out, fixed_date=True)
 
 
 if __name__ == '__main__':

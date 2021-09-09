@@ -451,11 +451,11 @@ DLC = 8
     def test_vector(self):
         dbc = self.DBC_FILE_SIGNED
         fn_out = self.get_out_file_name(dbc)
-        argv = ['cantools', 'convert', '--vector', dbc, fn_out]
+        argv = ['cantools', 'convert', '--vector', '--landscape', dbc, fn_out]
 
         expected_content = r'''
 % !TeX program = pdflatex
-\documentclass[a4paper]{article}
+\documentclass[a4paper, landscape]{article}
 
 \usepackage{typearea}
 \usepackage{parskip}

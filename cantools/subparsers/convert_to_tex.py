@@ -227,7 +227,10 @@ DLC = {length}
         if args.sig_name_break_anywhere:
             out.append(r"\usepackage{url}")
             out.append(r"\makeatletter")
-            out.append(r"\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%s}" % "".join(r"\do %s" % chr(c) for c in range(ord('a'), ord('z')+1)))
+            characters =  list(range(ord('a'), ord('z')+1))
+            characters += list(range(ord('A'), ord('Z')+1))
+            characters += list(range(ord('0'), ord('9')+1))
+            out.append(r"\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks%s}" % "".join(r"\do %s" % chr(c) for c in characters))
             out.append(r"\makeatother")
             out.append(r"\newcommand{\sig}[1]{#1}")
             out.append(r"\DeclareUrlCommand\sig{\urlstyle{rm}}")

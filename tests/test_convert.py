@@ -451,7 +451,7 @@ DLC = 8
     def test_vector(self):
         dbc = self.DBC_FILE_SIGNED
         fn_out = self.get_out_file_name(dbc)
-        argv = ['cantools', 'convert', '--vector', '--landscape', dbc, fn_out]
+        argv = ['cantools', 'convert', '--vector', '--landscape', '--env', 'tabular', dbc, fn_out]
 
         expected_content = r'''
 % !TeX program = pdflatex
@@ -489,7 +489,6 @@ DLC = 8
 	\def*{\rowcolor{green!20}}
 \fi
 
-\usepackage{xltabular}
 
 \KOMAoption{DIV}{12}
 
@@ -519,22 +518,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s32} && 0 & 32 & LE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -545,22 +535,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=11.0]S[table-format=10.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=11.0]S[table-format=10.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s33} && 0 & 33 & LE && int & 1 & 0 && -4294967296 & 4294967295 & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -571,22 +552,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=2.14E3]S[table-format=1.14E3]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=2.14E3]S[table-format=1.14E3]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s64} && 0 & 64 & LE && int & 1 & 0 && -9.22337203685478E+18 & 9.22337203685478E+18 & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -597,22 +569,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s64\-big} && 56 & 64 & BE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -623,22 +586,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s33\-big} && 39 & 33 & BE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -649,22 +603,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s32\-big} && 24 & 32 & BE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -675,22 +620,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s63} && 0 & 63 & LE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -701,22 +637,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s63\-big} && 57 & 63 & BE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -727,22 +654,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s63} && 1 & 63 & LE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -753,22 +671,13 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s63\-big} && 56 & 63 & BE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 
@@ -779,20 +688,10 @@ DLC = 8
 
 \begingroup
 \centering
-\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
-	\toprule
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endfirsthead
-		{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
-	\midrule
-\endhead
-	\midrule
-		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
-\endfoot
-	\bottomrule
-\endlastfoot
-
+\begin{tabular}{llS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+\toprule
+	{\thead{Name}} && {\thead{Startbit}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
 	\sig{s7} && 1 & 7 & LE && int & 1 & 0 && {--} & {--} & {--} \\
 	\sig{s8\-big} && 9 & 8 & BE && int & 1 & 0 && {--} & {--} & {--} \\
 	\sig{s9} && 17 & 9 & LE && int & 1 & 0 && {--} & {--} & {--} \\
@@ -801,7 +700,8 @@ DLC = 8
 	\sig{s3\-big} && 37 & 3 & BE && int & 1 & 0 && {--} & {--} & {--} \\
 	\sig{s7\-big} && 56 & 7 & BE && int & 1 & 0 && {--} & {--} & {--} \\
 	\sig{s10\-big} && 63 & 10 & BE && int & 1 & 0 && {--} & {--} & {--} \\
-\end{xltabular}
+\bottomrule
+\end{tabular}
 \par
 \endgroup
 

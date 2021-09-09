@@ -19,6 +19,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
     DBC_FILE_SIGNED = os.path.join(os.path.split(__file__)[0], 'files/dbc/signed.dbc')
     DBC_FILE_COMMENTS = os.path.join(os.path.split(__file__)[0], 'files/dbc/motohawk_with_comments.dbc')
     DBC_FILE_MSG_WITHOUT_SIG = os.path.join(os.path.split(__file__)[0], 'files/dbc/add_two_dbc_files_2.dbc')
+    DBC_FILE_LONG_SIGNAL_NAMES = os.path.join(os.path.split(__file__)[0], 'files/dbc/long_names_multiple_relations.dbc')
 
     reo_lines_that_are_expected_to_differ = re.compile(
             r'^\\newcommand{\\(?P<key0>infile|outfile)}{(?P<val0>.*?)}|'
@@ -917,6 +918,253 @@ Base frame \\
 DLC = 8
 
 This message has no signals.
+
+\end{document}
+'''.lstrip('\n')
+
+        with mock.patch('sys.argv', argv):
+            cantools._main()
+
+        self.assert_file_content_equal(expected_content, fn_out, fixed_date=True)
+
+
+    # ------- test break signal name anywhere -------
+
+    def test_break_signal_name_anywhere(self):
+        dbc = self.DBC_FILE_LONG_SIGNAL_NAMES
+        fn_out = self.get_out_file_name(dbc)
+        argv = ['cantools', 'convert', '--class-option', 'a5paper', '--toc', '--env', 'tabularx', '--sig-name-break-anywhere', '--sig-pattern', '{name} & {datatype} & {initial} & {minimum} & {maximum} & {unit}', '--hex', dbc, fn_out]
+
+        expected_content = r'''
+% !TeX program = pdflatex
+\documentclass[a4paper, a5paper]{article}
+
+\usepackage{typearea}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{hyperref}
+
+\hypersetup{hidelinks}
+\setcounter{secnumdepth}{0}
+
+\providecommand{\degree}{\ensuremath{^\circ}}
+\newcommand{\thead}[1]{#1}
+
+\makeatletter
+    \newcommand{\thetitle}{\@title}
+    \newcommand{\thedate}{\@date}
+    \newcommand{\theauthor}{\@author}
+\makeatother
+\renewcommand{\maketitle}{%
+    \begin{center}%
+        \Large
+        \thetitle
+    \end{center}%
+}
+
+\iffalse
+	\usepackage[table]{xcolor}
+	\catcode`*=\active
+	\def*{\rowcolor{green!20}}
+\fi
+
+\usepackage{tabularx}
+
+\KOMAoption{DIV}{12}
+
+\title{Long Names Multiple Relations}
+\date{09.09.2021}
+\newcommand{\infile}{long\_names\_multiple\_relations.dbc}
+\newcommand{\outfile}{long\_names\_multiple\_relations.tex}
+
+\fancyhead{}
+\fancyhead[ol,er]{}
+\fancyhead[or,el]{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+\fancyfoot[ol,er]{Created from \infile, \thedate}
+\fancyfoot[or,el]{Page \thepage\ of \pageref{LastPage}}
+\pagestyle{fancy}
+
+
+\usepackage{url}
+\makeatletter
+\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks\do a\do b\do c\do d\do e\do f\do g\do h\do i\do j\do k\do l\do m\do n\do o\do p\do q\do r\do s\do t\do u\do v\do w\do x\do y\do z}
+\makeatother
+\newcommand{\sig}[1]{#1}
+\DeclareUrlCommand\sig{\urlstyle{rm}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{0x000 Msg\_Long\_Name\_56789\_123456789\_123456789}
+Base frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{tabularx}{1\linewidth}{Xccccc}
+\toprule
+{\thead{Name}} & {\thead{Type}} & {\thead{Initial}} & {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
+\sig{Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi} & int & {--} & {--} & {--} & {--} \\
+\sig{rx_twice_short} & int & {--} & {--} & {--} & {--} \\
+\bottomrule
+\end{tabularx}
+\par
+\endgroup
+
+
+\section{0x001 Msg\_Long\_Name\_56789\_123456789\_123456789\_Copy\_1}
+Base frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{tabularx}{1\linewidth}{Xccccc}
+\toprule
+{\thead{Name}} & {\thead{Type}} & {\thead{Initial}} & {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
+\sig{Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi} & int & {--} & {--} & {--} & {--} \\
+\sig{rx_twice_11111111111111111111111} & int & {--} & {--} & {--} & {--} \\
+\bottomrule
+\end{tabularx}
+\par
+\endgroup
+
+
+\section{0x002 Msg\_with\_value\_table\_sigs}
+Base frame \\
+DLC = 3
+
+\begingroup
+\centering
+\begin{tabularx}{1\linewidth}{Xccccc}
+\toprule
+{\thead{Name}} & {\thead{Type}} & {\thead{Initial}} & {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
+\sig{Sig_with_long_val_table_1} & int & {--} & {--} & {--} & {--} \\
+\sig{Sig_with_long_val_table_2} & int & {--} & {--} & {--} & {--} \\
+\sig{Sig_with_short_val_table} & int & {--} & {--} & {--} & {--} \\
+\bottomrule
+\end{tabularx}
+\par
+\endgroup
+
+
+%\subsection{Comments, allowed values and multiplexing details}
+\begin{description}
+\item[\sig{Sig_with_long_val_table_1}] ~
+
+	\begin{tabular}{@{}l@{ }l}
+	\multicolumn{2}{@{}l}{Allowed values:} \\
+	\quad\textbullet~\texttt{0x03} & Description for the value '0x3' \\
+	\quad\textbullet~\texttt{0x02} & Description for the value '0x2' \\
+	\quad\textbullet~\texttt{0x01} & Description for the value '0x1' \\
+	\quad\textbullet~\texttt{0x00} & Description for the value '0x0' \\
+	\end{tabular}
+
+\item[\sig{Sig_with_long_val_table_2}] ~
+
+	\begin{tabular}{@{}l@{ }l}
+	\multicolumn{2}{@{}l}{Allowed values:} \\
+	\quad\textbullet~\texttt{0x0D} & value '0xD' \\
+	\quad\textbullet~\texttt{0x0C} & Dvalue '0xC' \\
+	\quad\textbullet~\texttt{0x0B} & value '0xB' \\
+	\quad\textbullet~\texttt{0x0A} & value '0xA' \\
+	\quad\textbullet~\texttt{0x09} & value '0x9' \\
+	\quad\textbullet~\texttt{0x08} & value '0x8' \\
+	\quad\textbullet~\texttt{0x07} & value '0x7' \\
+	\quad\textbullet~\texttt{0x06} & value '0x6' \\
+	\quad\textbullet~\texttt{0x05} & value '0x5' \\
+	\quad\textbullet~\texttt{0x04} & value '0x4' \\
+	\quad\textbullet~\texttt{0x03} & value '0x3' \\
+	\quad\textbullet~\texttt{0x02} & value '0x2' \\
+	\quad\textbullet~\texttt{0x01} & value '0x1' \\
+	\quad\textbullet~\texttt{0x00} & value '0x0' \\
+	\end{tabular}
+
+\item[\sig{Sig_with_short_val_table}] ~
+
+	\begin{tabular}{@{}l@{ }l}
+	\multicolumn{2}{@{}l}{Allowed values:} \\
+	\quad\textbullet~\texttt{0x01} & Very long, long, long description for the value '0x1' \\
+	\quad\textbullet~\texttt{0x00} & Very long, long, long description for the value '0x0' \\
+	\end{tabular}
+
+\end{description}
+
+
+\section{0x003 msg\_case\_test}
+Base frame \\
+DLC = 8
+
+This message has no signals.
+
+
+\section{0x004 MSG\_CASE\_TEST}
+Base frame \\
+DLC = 8
+
+This message has no signals.
+
+
+\section{0x005 RX\_TX\_1}
+Base frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{tabularx}{1\linewidth}{Xccccc}
+\toprule
+{\thead{Name}} & {\thead{Type}} & {\thead{Initial}} & {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
+\sig{Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi} & int & {--} & {--} & {--} & {--} \\
+\bottomrule
+\end{tabularx}
+\par
+\endgroup
+
+
+\section{0x006 TX\_twice}
+Base frame \\
+DLC = 2
+
+\begingroup
+\centering
+\begin{tabularx}{1\linewidth}{Xccccc}
+\toprule
+{\thead{Name}} & {\thead{Type}} & {\thead{Initial}} & {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
+\sig{rx_twice_short} & int & {--} & {--} & {--} & {--} \\
+\sig{rx_twice_long_yyyyyyyyyyyyyyyyyyYYY} & int & {--} & {--} & {--} & {--} \\
+\bottomrule
+\end{tabularx}
+\par
+\endgroup
+
+
+\section{0x055 Msg\_Long\_Name\_56789\_123456789\_123456789\_Copy\_2}
+Base frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{tabularx}{1\linewidth}{Xccccc}
+\toprule
+{\thead{Name}} & {\thead{Type}} & {\thead{Initial}} & {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+\midrule
+\sig{Sig_used_twice_efgh_abcdefghi_abcdefghi_abcdefghi} & int & {--} & {--} & {--} & {--} \\
+\sig{rx_twice_11111111111111111111111} & int & {--} & {--} & {--} & {--} \\
+\sig{rx_twice_short} & int & {--} & {--} & {--} & {--} \\
+\bottomrule
+\end{tabularx}
+\par
+\endgroup
 
 \end{document}
 '''.lstrip('\n')

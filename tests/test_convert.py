@@ -16,7 +16,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
     DBC_FILE_CHOICES = os.path.join(os.path.split(__file__)[0], 'files/dbc/choices.dbc')
 
     reo_ignore_lines = re.compile(r'^\\newcommand{\\(in|out)file}{.*?}|'
-                                  r'^\\title{.*?}')
+                                  r'^\\title{.*?}|'
+                                  r'^\\date{.*?}')
 
     maxDiff = None
 

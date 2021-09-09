@@ -559,7 +559,6 @@ DLC = {length}
             'is_multiplexer' : sig.is_multiplexer,
             'multiplexer_ids' : sig.multiplexer_ids,
             'multiplexer_signal' : sig.multiplexer_signal,
-            'mux' : self.get_mux(sig)
         }
         for key, val in out.items():
             if val is not None and self.is_hex(sig, key, args) and int(val) == val:
@@ -570,6 +569,7 @@ DLC = {length}
             out['name'] = r'\sig{%s}' % sig.name
         else:
             out['name'] = r'\sig{%s}' % self.break_sig_name(self.texify(sig.name))
+        out['mux'] = self.get_mux(sig)
         return out
 
     @staticmethod
@@ -688,6 +688,8 @@ DLC = {length}
                 out += "mx"
 
         if sig.is_multiplexer:
+            if out:
+                out += r', '
             out += "M"
 
         return out

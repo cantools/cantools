@@ -22,6 +22,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
     maxDiff = None
 
+    # ------- aux functions -------
+
     def get_out_file_name(self, fn_dbc):
         fn = fn_dbc
         fn = os.path.splitext(fn)[0] + '.tex'
@@ -78,7 +80,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         return s[:i0] + val + s[i1:]
 
 
-    # ------- test different timestamp formats -------
+    # ------- test cases -------
 
     def test_choices(self):
         dbc = self.DBC_FILE_CHOICES

@@ -17,6 +17,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
     DBC_FILE_CHOICES = os.path.join(os.path.split(__file__)[0], 'files/dbc/choices.dbc')
     DBC_FILE_MULTIPLEX = os.path.join(os.path.split(__file__)[0], 'files/dbc/multiplex_2.dbc')
     DBC_FILE_SIGNED = os.path.join(os.path.split(__file__)[0], 'files/dbc/signed.dbc')
+    DBC_FILE_COMMENTS = os.path.join(os.path.split(__file__)[0], 'files/dbc/motohawk_with_comments.dbc')
 
     reo_lines_that_are_expected_to_differ = re.compile(
             r'^\\newcommand{\\(?P<key0>infile|outfile)}{(?P<val0>.*?)}|'
@@ -704,6 +705,133 @@ DLC = 8
 \end{tabular}
 \par
 \endgroup
+
+\end{document}
+'''.lstrip('\n')
+
+        with mock.patch('sys.argv', argv):
+            cantools._main()
+
+        self.assert_file_content_equal(expected_content, fn_out)
+
+
+    # ------- test comments -------
+
+    def test_comments(self):
+        dbc = self.DBC_FILE_COMMENTS
+        fn_out = self.get_out_file_name(dbc)
+        argv = ['cantools', 'convert', '--env', 'ltablex-keep-x', dbc, fn_out]
+
+        expected_content = r'''
+% !TeX program = pdflatex
+\documentclass[a4paper]{article}
+
+\usepackage{typearea}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{hyperref}
+
+\hypersetup{hidelinks}
+\setcounter{secnumdepth}{0}
+
+\providecommand{\degree}{\ensuremath{^\circ}}
+\newcommand{\thead}[1]{#1}
+
+\makeatletter
+    \newcommand{\thetitle}{\@title}
+    \newcommand{\thedate}{\@date}
+    \newcommand{\theauthor}{\@author}
+\makeatother
+\renewcommand{\maketitle}{%
+    \begin{center}%
+        \Large
+        \thetitle
+    \end{center}%
+}
+
+\iffalse
+	\usepackage[table]{xcolor}
+	\catcode`*=\active
+	\def*{\rowcolor{green!20}}
+\fi
+
+\usepackage{ltablex}
+\keepXColumns
+
+\KOMAoption{DIV}{12}
+
+\title{Motohawk With Comments}
+\date{09.09.2021}
+\newcommand{\infile}{motohawk\_with\_comments.dbc}
+\newcommand{\outfile}{motohawk\_with\_comments.tex}
+
+\fancyhead{}
+\fancyhead[ol,er]{}
+\fancyhead[or,el]{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+\fancyfoot[ol,er]{Created from \infile, \thedate}
+\fancyfoot[or,el]{Page \thepage\ of \pageref{LastPage}}
+\pagestyle{fancy}
+
+
+\newcommand{\sig}[1]{{\def\-{\discretionary{-}{\hbox{\footnotesize$\hookrightarrow$ }}{}}#1}}
+
+\begin{document}
+\maketitle
+
+\section{0x1F0 ExampleMessage}
+Base frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{tabularx}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.2]S[table-format=3.0]lS[table-format=4.2]S[table-format=4.2]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{Temperature} && 0 & 12 & BE && int & 0.01 & 250 && 229.52 & 270.47 & degK \\
+	\sig{Average\-Radius} && 6 & 6 & BE && uint & 0.1 & 0 && 0 & 5 & m \\
+	\sig{Enable} && 7 & 1 & BE && uint & 1 & 0 && {--} & {--} & - \\
+\end{tabularx}
+\par
+\endgroup
+
+
+%\subsection{Comments, allowed values and multiplexing details}
+\begin{description}
+\item[\sig{Temperature}] ~
+
+Temperature with a really long and complicated comment that probably require many many lines in a decently wide terminal
+
+\item[\sig{Average\-Radius}] ~
+
+AverageRadius signal comment
+
+\item[\sig{Enable}] ~
+
+Enable signal comment
+
+	\begin{tabular}{@{}l@{ }l}
+	\multicolumn{2}{@{}l}{Allowed values:} \\
+	\quad\textbullet~0 & Disabled \\
+	\quad\textbullet~1 & Enabled \\
+	\end{tabular}
+
+\end{description}
 
 \end{document}
 '''.lstrip('\n')

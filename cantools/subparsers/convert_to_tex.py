@@ -150,7 +150,7 @@ class Converter:
 	\def*{\rowcolor{green!20}}
 \fi
 """
-    begin_document = r"\begin{document}\maketitle"
+    begin_document = r"\begin{document}" + "\n" + r"\maketitle"
     table_of_contents = r"\tableofcontents"
     end_document = r"\end{document}"
 

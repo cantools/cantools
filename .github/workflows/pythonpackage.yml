@@ -21,7 +21,6 @@ jobs:
         pip install -r requirements.txt
         pip install coveralls
         sudo apt-get install gcc-8
-        sudo apt-get install clang-8
     - name: Test
       run: |
         coverage run --source=cantools setup.py test

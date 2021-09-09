@@ -18,6 +18,7 @@ from textparser import Optional
 from textparser import Any
 
 from ..signal import Signal
+from ..signal import NamedSignalValue
 from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..internal_database import InternalDatabase
@@ -256,15 +257,21 @@ def _get_enum(enums, name):
 
 def _load_enums(tokens):
     section = _get_section_tokens(tokens, '{ENUMS}')
-    enums = {}
+    all_enums = {}
 
     for _, _, name, _, values, _, _ in section:
         if values:
             values = values[0]
 
-        enums[name] = odict((num(v[0]), v[2]) for v in values)
+        enum = odict()
+        for v in values:
+            value = num(v[0])
+            value_name = v[2]
+            enum[value] = NamedSignalValue(value, value_name)
 
-    return enums
+        all_enums[name] = enum
+
+    return all_enums
 
 
 def _load_signal_type_and_length(type_, tokens, enums):

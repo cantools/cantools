@@ -1,3 +1,5 @@
+from cantools.database.can.signal import NamedSignalValue
+
 MULTI_LINE_FMT = '''
 {message}(
 {signals}
@@ -14,8 +16,8 @@ def _format_signals(message, decoded_signals):
         except KeyError:
             continue
 
-        if isinstance(value, str):
-            value = "'{}'".format(value)
+        if isinstance(value, NamedSignalValue) or isinstance(value, str):
+            value = f"'{value}'"
 
         signal_name = signal.name
 

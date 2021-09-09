@@ -23,6 +23,7 @@ class _ErrorSubparser:
         err_parser = \
             subparser_list.add_parser(self.subparser_name,
                                       description = self.error_message)
+        err_parser.add_argument("args", nargs="*")
 
         err_parser.set_defaults(func=self._print_error)
 
@@ -38,7 +39,7 @@ def _load_subparser(subparser_name, subparsers):
 
     try:
         result = importlib.import_module(f'.subparsers.{subparser_name}',
-                                         package=__loader__.name)
+                                         package='cantools')
         result.add_subparser(subparsers)
 
     except ImportError as e:
@@ -66,6 +67,7 @@ def _main():
     _load_subparser('decode', subparsers)
     _load_subparser('monitor', subparsers)
     _load_subparser('dump', subparsers)
+    _load_subparser('list', subparsers)
     _load_subparser('convert', subparsers)
     _load_subparser('generate_c_source', subparsers)
     _load_subparser('plot', subparsers)

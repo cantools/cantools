@@ -607,7 +607,7 @@ class Signal(object):
         """
 
         items = {
-            value: camel_to_snake_case(name).upper()
+            value: camel_to_snake_case(str(name)).upper()
             for value, name in self.choices.items()
         }
         names = list(items.values())
@@ -1162,7 +1162,7 @@ def _format_choices(signal, signal_name):
             fmt = '{signal_name}_{name}_CHOICE ({value}u)'
 
         choices.append(fmt.format(signal_name=signal_name.upper(),
-                                  name=name,
+                                  name=str(name),
                                   value=value))
 
     return choices

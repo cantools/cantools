@@ -3,6 +3,8 @@
 import binascii
 from copy import deepcopy
 
+from .signal import NamedSignalValue
+
 from ..utils import format_or
 from ..utils import start_bit
 from ..utils import encode_data
@@ -338,7 +340,7 @@ class Message(object):
     def _get_mux_number(self, decoded, signal_name):
         mux = decoded[signal_name]
 
-        if isinstance(mux, str):
+        if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
             signal = self.get_signal_by_name(signal_name)
             mux = signal.choice_string_to_number(mux)
 

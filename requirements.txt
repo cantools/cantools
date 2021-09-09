@@ -7,3 +7,4 @@ diskcache
 nala; python_version >= '3.6'
 argparse_addons
 matplotlib
+parameterized

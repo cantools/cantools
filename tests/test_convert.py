@@ -103,6 +103,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
                 cantools._main()
 
         self.assertEqual(self.mock_run_counter, 2)
+        self.assertTrue(os.path.exists(fn_out))
 
 
     def mock_run(self, cmd, **kw):

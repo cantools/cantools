@@ -969,7 +969,7 @@ This message has no signals.
         with mock.patch('sys.argv', argv):
             cantools._main()
 
-        self.assert_file_content_equal(expected_content, fn_out, fixed_date=True)
+        self.assert_file_content_equal(expected_content, fn_out)
 
 
     # ------- test break signal name anywhere -------
@@ -1216,7 +1216,7 @@ DLC = 8
         with mock.patch('sys.argv', argv):
             cantools._main()
 
-        self.assert_file_content_equal(expected_content, fn_out, fixed_date=True)
+        self.assert_file_content_equal(expected_content, fn_out)
 
 
 if __name__ == '__main__':

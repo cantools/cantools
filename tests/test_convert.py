@@ -21,6 +21,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
     DBC_FILE_COMMENTS = os.path.join(os.path.split(__file__)[0], 'files/dbc/motohawk_with_comments.dbc')
     DBC_FILE_MSG_WITHOUT_SIG = os.path.join(os.path.split(__file__)[0], 'files/dbc/add_two_dbc_files_2.dbc')
     DBC_FILE_LONG_SIGNAL_NAMES = os.path.join(os.path.split(__file__)[0], 'files/dbc/long_names_multiple_relations.dbc')
+    DBC_FILE_MSG_SORT = os.path.join(os.path.split(__file__)[0], 'files/dbc/socialledge.dbc')
 
     reo_lines_that_are_expected_to_differ = re.compile(
             r'^\\newcommand{\\(?P<key0>infile|outfile)}{(?P<val0>.*?)}|'
@@ -1218,6 +1219,272 @@ DLC = 8
 
         self.assert_file_content_equal(expected_content, fn_out)
 
+
+    # ------- test sort messages by name -------
+
+    def test_sort_messages_by_name(self):
+        dbc = self.DBC_FILE_MSG_SORT
+        fn_out = self.get_out_file_name(dbc)
+        argv = ['cantools', 'convert', '--msg-sort', 'name', dbc, fn_out]
+
+        expected_content = r'''
+% !TeX program = pdflatex
+\documentclass[a4paper]{article}
+
+\usepackage{typearea}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{hyperref}
+
+\hypersetup{hidelinks}
+\setcounter{secnumdepth}{0}
+
+\providecommand{\degree}{\ensuremath{^\circ}}
+\newcommand{\thead}[1]{#1}
+
+\makeatletter
+    \newcommand{\thetitle}{\@title}
+    \newcommand{\thedate}{\@date}
+    \newcommand{\theauthor}{\@author}
+\makeatother
+\renewcommand{\maketitle}{%
+    \begin{center}%
+        \Large
+        \thetitle
+    \end{center}%
+}
+
+\iffalse
+	\usepackage[table]{xcolor}
+	\catcode`*=\active
+	\def*{\rowcolor{green!20}}
+\fi
+
+\usepackage{xltabular}
+
+\KOMAoption{DIV}{12}
+
+\title{Socialledge}
+\date{09.09.2021}
+\newcommand{\infile}{socialledge.dbc}
+\newcommand{\outfile}{socialledge.tex}
+
+\fancyhead{}
+\fancyhead[ol,er]{}
+\fancyhead[or,el]{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+\fancyfoot[ol,er]{Created from \infile, \thedate}
+\fancyfoot[or,el]{Page \thepage\ of \pageref{LastPage}}
+\pagestyle{fancy}
+
+
+\newcommand{\sig}[1]{{\def\-{\discretionary{-}{\hbox{\footnotesize$\hookrightarrow$ }}{}}#1}}
+
+\begin{document}
+\maketitle
+
+\section{0x064 DRIVER\_HEARTBEAT}
+Base frame \\
+DLC = 1
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=1.0]clcS[table-format=1.0]S[table-format=1.0]lccc}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{DRIVER\_\-HEARTBEAT\_\-cmd} && 0 & 8 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+
+%\subsection{Comments, allowed values and multiplexing details}
+\begin{description}
+\item[\sig{DRIVER\_\-HEARTBEAT\_\-cmd}] ~
+
+	\begin{tabular}{@{}l@{ }l}
+	\multicolumn{2}{@{}l}{Allowed values:} \\
+	\quad\textbullet~\texttt{0x02} & DRIVER\_HEARTBEAT\_cmd\_REBOOT \\
+	\quad\textbullet~\texttt{0x01} & DRIVER\_HEARTBEAT\_cmd\_SYNC \\
+	\quad\textbullet~\texttt{0x00} & DRIVER\_HEARTBEAT\_cmd\_NOOP \\
+	\end{tabular}
+
+\end{description}
+
+
+\section{0x1F4 IO\_DEBUG}
+Base frame \\
+DLC = 4
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=1.0]clcS[table-format=1.1]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{IO\_\-DEBUG\_\-test\_\-unsigned} && 0 & 8 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+	\sig{IO\_\-DEBUG\_\-test\_enum} && 8 & 8 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+	\sig{IO\_\-DEBUG\_\-test\_\-signed} && 16 & 8 & LE && int & 1 & 0 && {--} & {--} & {--} \\
+	\sig{IO\_\-DEBUG\_\-test\_\-float} && 24 & 8 & LE && uint & 0.5 & 0 && {--} & {--} & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+
+%\subsection{Comments, allowed values and multiplexing details}
+\begin{description}
+\item[\sig{IO\_\-DEBUG\_\-test\_enum}] ~
+
+	\begin{tabular}{@{}l@{ }l}
+	\multicolumn{2}{@{}l}{Allowed values:} \\
+	\quad\textbullet~\texttt{0x02} & IO\_DEBUG\_test2\_enum\_two \\
+	\quad\textbullet~\texttt{0x01} & IO\_DEBUG\_test2\_enum\_one \\
+	\end{tabular}
+
+\end{description}
+
+
+\section{0x065 MOTOR\_CMD}
+Base frame \\
+DLC = 1
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=1.0]clcS[table-format=1.0]S[table-format=2.0]lS[table-format=2.0]S[table-format=1.0]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{MOTOR\_\-CMD\_\-steer} && 0 & 4 & LE && int & 1 & -5 && -5 & 5 & {--} \\
+	\sig{MOTOR\_\-CMD\_\-drive} && 4 & 4 & LE && uint & 1 & 0 && {\texttt{0x00}} & {\texttt{0x09}} & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+
+\section{0x190 MOTOR\_STATUS}
+Base frame \\
+DLC = 3
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.3]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{MOTOR\_\-STATUS\_\-wheel\_\-error} && 0 & 1 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+	\sig{MOTOR\_\-STATUS\_\-speed\_kph} && 8 & 16 & LE && uint & 0.001 & 0 && {--} & {--} & kph \\
+\end{xltabular}
+\par
+\endgroup
+
+
+\section{0x0C8 SENSOR\_SONARS}
+Base frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XclS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.1]S[table-format=1.0]lccc}
+	\toprule
+		{\thead{Name}} & {\thead{Mux}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} & {\thead{Mux}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{SENSOR\_\-SONARS\_\-mux} & M && 0 & 4 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-err\_\-count} &  && 4 & 12 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-left} & m0 && 16 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_left} & m1 && 16 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-middle} & m0 && 28 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_middle} & m1 && 28 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-right} & m0 && 40 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_right} & m1 && 40 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-rear} & m0 && 52 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+	\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_rear} & m1 && 52 & 12 & LE && uint & 0.1 & 0 && {--} & {--} & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+
+%\subsection{Comments, allowed values and multiplexing details}
+\begin{description}
+\item[\sig{SENSOR\_\-SONARS\_\-left}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x0.
+
+\item[\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_left}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x1.
+
+\item[\sig{SENSOR\_\-SONARS\_\-middle}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x0.
+
+\item[\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_middle}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x1.
+
+\item[\sig{SENSOR\_\-SONARS\_\-right}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x0.
+
+\item[\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_right}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x1.
+
+\item[\sig{SENSOR\_\-SONARS\_\-rear}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x0.
+
+\item[\sig{SENSOR\_\-SONARS\_\-no\_\-filt\_rear}] This signal is available only if SENSOR\_SONARS\_mux has the value 0x1.
+
+\end{description}
+
+\end{document}
+'''.lstrip('\n')
+
+        with mock.patch('sys.argv', argv):
+            cantools._main()
+
+        self.assert_file_content_equal(expected_content, fn_out)
 
 if __name__ == '__main__':
     unittest.main()

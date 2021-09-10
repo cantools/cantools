@@ -22,6 +22,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
     DBC_FILE_MSG_WITHOUT_SIG = os.path.join(os.path.split(__file__)[0], 'files/dbc/add_two_dbc_files_2.dbc')
     DBC_FILE_LONG_SIGNAL_NAMES = os.path.join(os.path.split(__file__)[0], 'files/dbc/long_names_multiple_relations.dbc')
     DBC_FILE_MSG_SORT = os.path.join(os.path.split(__file__)[0], 'files/dbc/socialledge.dbc')
+    DBC_FILE_SIG_SORT = os.path.join(os.path.split(__file__)[0], 'files/dbc/foobar.dbc')
 
     reo_lines_that_are_expected_to_differ = re.compile(
             r'^\\newcommand{\\(?P<key0>infile|outfile)}{(?P<val0>.*?)}|'
@@ -1223,6 +1224,7 @@ DLC = 8
     # ------- test sort messages by name -------
 
     def test_sort_messages_by_name(self):
+        # but signals by start
         dbc = self.DBC_FILE_MSG_SORT
         fn_out = self.get_out_file_name(dbc)
         argv = ['cantools', 'convert', '--msg-sort', 'name', dbc, fn_out]
@@ -1486,5 +1488,235 @@ DLC = 8
 
         self.assert_file_content_equal(expected_content, fn_out)
 
+
+    # ------- test sort signals by name -------
+
+    def test_sort_signals_by_name(self):
+        # but messages by ids
+        dbc = self.DBC_FILE_SIG_SORT
+        fn_out = self.get_out_file_name(dbc)
+        argv = ['cantools', 'convert', '--sig-sort', 'name', dbc, fn_out]
+
+        expected_content = r'''
+% !TeX program = pdflatex
+\documentclass[a4paper]{article}
+
+\usepackage{typearea}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{hyperref}
+
+\hypersetup{hidelinks}
+\setcounter{secnumdepth}{0}
+
+\providecommand{\degree}{\ensuremath{^\circ}}
+\newcommand{\thead}[1]{#1}
+
+\makeatletter
+    \newcommand{\thetitle}{\@title}
+    \newcommand{\thedate}{\@date}
+    \newcommand{\theauthor}{\@author}
+\makeatother
+\renewcommand{\maketitle}{%
+    \begin{center}%
+        \Large
+        \thetitle
+    \end{center}%
+}
+
+\iffalse
+	\usepackage[table]{xcolor}
+	\catcode`*=\active
+	\def*{\rowcolor{green!20}}
+\fi
+
+\usepackage{xltabular}
+
+\KOMAoption{DIV}{12}
+
+\title{Foobar}
+\date{09.09.2021}
+\newcommand{\infile}{foobar.dbc}
+\newcommand{\outfile}{foobar.tex}
+
+\fancyhead{}
+\fancyhead[ol,er]{}
+\fancyhead[or,el]{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+\fancyfoot[ol,er]{Created from \infile, \thedate}
+\fancyfoot[or,el]{Page \thepage\ of \pageref{LastPage}}
+\pagestyle{fancy}
+
+
+\newcommand{\sig}[1]{{\def\-{\discretionary{-}{\hbox{\footnotesize$\hookrightarrow$ }}{}}#1}}
+
+\begin{document}
+\maketitle
+
+\section{0x30C FOOBAR}
+Base frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=1.0]S[table-format=1.0]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{ACC\_02\_\-CRC} && 0 & 12 & LE && int & 1 & 0 && 0 & 1 & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+
+\section{0x12330 Foo}
+Extended frame \\
+DLC = 8
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.2]S[table-format=3.0]lS[table-format=3.2]S[table-format=3.2]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{Bar} && 24 & 32 & BE && float & 0.1 & 0 && 0 & 5 & m \\
+	\sig{Foo} && 0 & 12 & BE && int & 0.01 & 250 && 229.53 & 270.47 & degK \\
+\end{xltabular}
+\par
+\endgroup
+
+
+%\subsection{Comments, allowed values and multiplexing details}
+\begin{description}
+\item[\sig{Bar}] ~
+
+Bar.
+
+\end{description}
+
+
+\section{0x12331 Fum}
+Extended frame \\
+DLC = 5
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=1.0]S[table-format=2.0]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{Fam} && 12 & 12 & LE && int & 1 & 0 && 0 & 8 & {--} \\
+	\sig{Fum} && 0 & 12 & LE && int & 1 & 0 && 0 & 10 & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+
+%\subsection{Comments, allowed values and multiplexing details}
+\begin{description}
+\item[\sig{Fam}] ~
+
+	\begin{tabular}{@{}l@{ }l}
+	\multicolumn{2}{@{}l}{Allowed values:} \\
+	\quad\textbullet~1 & Enabled \\
+	\quad\textbullet~0 & Disabled \\
+	\end{tabular}
+
+\end{description}
+
+
+\section{0x12332 Bar}
+Extended frame \\
+DLC = 4
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lS[table-format=4.0]S[table-format=4.0]c}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{Binary32} && 0 & 32 & LE && float & 1 & 0 && {--} & {--} & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+
+\section{0x12333 CanFd}
+Extended frame \\
+DLC = 64
+
+\begingroup
+\centering
+\begin{xltabular}{1\linewidth}{XlS[table-format=2.0]S[table-format=2.0]clcS[table-format=1.0]S[table-format=1.0]lccc}
+	\toprule
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endfirsthead
+		{\thead{Name}} && {\thead{Start}} & {\thead{Bits}} & {\thead{E}} && {\thead{Type}} & {\thead{Scale}} & {\thead{Offset}} && {\thead{Min}} & {\thead{Max}} & {\thead{Unit}} \\
+	\midrule
+\endhead
+	\midrule
+		\multicolumn{\expandafter\the\csname LT@cols\endcsname}{r}{(continued on next page)} \\
+\endfoot
+	\bottomrule
+\endlastfoot
+
+	\sig{Fas} && 64 & 64 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+	\sig{Fie} && 0 & 64 & LE && uint & 1 & 0 && {--} & {--} & {--} \\
+\end{xltabular}
+\par
+\endgroup
+
+\end{document}
+'''.lstrip('\n')
+
+        with mock.patch('sys.argv', argv):
+            cantools._main()
+
+        self.assert_file_content_equal(expected_content, fn_out)
 if __name__ == '__main__':
     unittest.main()

@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import re
 import datetime
+import subprocess
 
 import unittest
 from unittest import mock
@@ -30,9 +31,9 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
     # ------- aux functions -------
 
-    def get_out_file_name(self, fn_dbc):
+    def get_out_file_name(self, fn_dbc, ext='.tex'):
         fn = fn_dbc
-        fn = os.path.splitext(fn)[0] + '.tex'
+        fn = os.path.splitext(fn)[0] + ext
         fn = os.path.split(fn)[1]
         fn = os.path.join(tempfile.mkdtemp(), fn)
         return fn
@@ -87,6 +88,34 @@ class CanToolsConvertFullTest(unittest.TestCase):
         i0 = iv0 - im0
         i1 = iv1 - im0
         return s[:i0] + val + s[i1:]
+
+
+    # ------- test run -------
+
+    def test_run_twice(self):
+        dbc = self.DBC_FILE_LONG_SIGNAL_NAMES
+        fn_out = self.get_out_file_name(dbc, '.pdf')
+        argv = ['cantools', 'convert', dbc, fn_out]
+
+        self.mock_run_counter = 0
+        with mock.patch('sys.argv', argv):
+            with mock.patch('subprocess.run', self.mock_run):
+                cantools._main()
+
+        self.assertEqual(self.mock_run_counter, 2)
+
+
+    def mock_run(self, cmd, **kw):
+        self.mock_run_counter += 1
+
+        fn = cmd[-1]
+        fn = os.path.splitext(fn)[0] + '.pdf'
+        with open(fn, 'wt') as f:
+            f.write('')
+
+        p = mock.Mock()
+        p.returncode = 0
+        return p
 
 
     # ------- test choices -------

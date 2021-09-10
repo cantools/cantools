@@ -98,6 +98,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         argv = ['cantools', 'convert', dbc, fn_out]
 
         self.mock_run_counter = 0
+        self.mock_run_returncode = 0
         with mock.patch('sys.argv', argv):
             with mock.patch('subprocess.run', self.mock_run):
                 cantools._main()
@@ -105,6 +106,19 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.assertEqual(self.mock_run_counter, 2)
         self.assertTrue(os.path.exists(fn_out))
 
+    def test_no_rerun_on_error(self):
+        dbc = self.DBC_FILE_LONG_SIGNAL_NAMES
+        fn_out = self.get_out_file_name(dbc, '.pdf')
+        argv = ['cantools', 'convert', dbc, fn_out]
+
+        self.mock_run_counter = 0
+        self.mock_run_returncode = 1
+        with mock.patch('sys.argv', argv):
+            with mock.patch('subprocess.run', self.mock_run):
+                cantools._main()
+
+        self.assertEqual(self.mock_run_counter, 1)
+        self.assertTrue(os.path.exists(fn_out))
 
     def mock_run(self, cmd, **kw):
         self.mock_run_counter += 1
@@ -115,7 +129,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
             f.write('')
 
         p = mock.Mock()
-        p.returncode = 0
+        p.returncode = self.mock_run_returncode
         return p
 
 

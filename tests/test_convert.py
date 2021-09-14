@@ -11,6 +11,7 @@ import unittest
 from unittest import mock
 
 import cantools
+from cantools.subparsers import convert_to_tex as sut
 
 
 class CanToolsConvertFullTest(unittest.TestCase):
@@ -38,7 +39,12 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn = os.path.splitext(fn)[0] + ext
         fn = os.path.split(fn)[1]
         fn = os.path.join(tempfile.mkdtemp(), fn)
+        self.in_dir_texified = self.texify(os.path.split(fn_dbc)[0] + os.sep)
+        self.out_dir_texified = self.texify(os.path.split(fn)[0] + os.sep)
         return fn
+
+    def texify(self, text):
+        return sut.Converter.texify(None, text)
 
     def remove_out_file(self, fn_out):
         path = os.path.split(fn_out)[0]
@@ -58,8 +64,12 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
     def sub_line(self, m):
         key, val, group = self.find_group(m)
-        if key in ('infile', 'outfile'):
-            val = os.path.split(val)[1]
+        if key == 'infile':
+            assert val.startswith(self.in_dir_texified), "val=%r, in_dir_texified=%r" % (val, self.in_dir_texified)
+            val = val[len(self.in_dir_texified):]
+        elif key == 'outfile':
+            assert val.startswith(self.out_dir_texified), "val=%r, out_dir_texified=%r" % (val, self.out_dir_texified)
+            val = val[len(self.out_dir_texified):]
         elif key == 'date':
             if not self._fixed_date:
                 expected_date = datetime.datetime.now().strftime('%d.%m.%Y')

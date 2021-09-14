@@ -251,6 +251,7 @@ DLC = {length}
         if args.title:
             return args.title
         title = args.outfile
+        title = os.path.split(title)[1]
         title = title.rsplit(os.extsep, 1)[0]
         title = title.replace("_", " ")
         title = title[0:1].upper() + title[1:]

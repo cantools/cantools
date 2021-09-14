@@ -27,8 +27,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
     reo_lines_that_are_expected_to_differ = re.compile(
             r'^\\newcommand{\\(?P<key0>infile|outfile)}{(?P<val0>.*?)}|'
-            r'^\\(?P<key1>title){(?P<val1>.*?)}|'
-            r'^\\(?P<key2>date){(?P<val2>.*?)}')
+            r'^\\(?P<key1>date){(?P<val1>.*?)}')
 
     maxDiff = None
 
@@ -72,9 +71,6 @@ class CanToolsConvertFullTest(unittest.TestCase):
                 expected_date = datetime.datetime.now().strftime('%d.%m.%Y')
                 self.assertEqual(expected_date, val)
                 val = '09.09.2021'
-        elif key == 'title':
-            val = os.path.split(val)[1]
-            val = val[0].upper() + val[1:]
         else:
             raise ValueError('invalid key: %s' % key)
 

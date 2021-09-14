@@ -50,9 +50,6 @@ class CanToolsConvertFullTest(unittest.TestCase):
         path = os.path.split(fn_out)[0]
         shutil.rmtree(path)
 
-    def get_golden_master_file_name(self, fn_dbc):
-        return os.path.splitext(fn_dbc)[0] + '.tex'
-
     def assert_file_content_equal(self, content_expected, fn_is, *, fixed_date=False):
         self._fixed_date = fixed_date
         read_is = lambda f: [self.reo_lines_that_are_expected_to_differ.sub(self.sub_line, ln).rstrip('\n') for ln in f]

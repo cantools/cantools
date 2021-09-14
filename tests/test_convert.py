@@ -16,14 +16,14 @@ from cantools.subparsers import convert_to_tex as sut
 
 class CanToolsConvertFullTest(unittest.TestCase):
 
-    DBC_FILE_CHOICES = os.path.join(os.path.split(__file__)[0], 'files/dbc/choices.dbc')
-    DBC_FILE_MULTIPLEX = os.path.join(os.path.split(__file__)[0], 'files/dbc/multiplex_2.dbc')
-    DBC_FILE_SIGNED = os.path.join(os.path.split(__file__)[0], 'files/dbc/signed.dbc')
-    DBC_FILE_COMMENTS = os.path.join(os.path.split(__file__)[0], 'files/dbc/motohawk_with_comments.dbc')
-    DBC_FILE_MSG_WITHOUT_SIG = os.path.join(os.path.split(__file__)[0], 'files/dbc/add_two_dbc_files_2.dbc')
-    DBC_FILE_LONG_SIGNAL_NAMES = os.path.join(os.path.split(__file__)[0], 'files/dbc/long_names_multiple_relations.dbc')
-    DBC_FILE_MSG_SORT = os.path.join(os.path.split(__file__)[0], 'files/dbc/socialledge.dbc')
-    DBC_FILE_SIG_SORT = os.path.join(os.path.split(__file__)[0], 'files/dbc/foobar.dbc')
+    DBC_FILE_CHOICES = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'choices.dbc')
+    DBC_FILE_MULTIPLEX = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'multiplex_2.dbc')
+    DBC_FILE_SIGNED = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'signed.dbc')
+    DBC_FILE_COMMENTS = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'motohawk_with_comments.dbc')
+    DBC_FILE_MSG_WITHOUT_SIG = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'add_two_dbc_files_2.dbc')
+    DBC_FILE_LONG_SIGNAL_NAMES = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'long_names_multiple_relations.dbc')
+    DBC_FILE_MSG_SORT = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'socialledge.dbc')
+    DBC_FILE_SIG_SORT = os.path.join(os.path.split(__file__)[0], 'files', 'dbc', 'foobar.dbc')
 
     reo_lines_that_are_expected_to_differ = re.compile(
             r'^\\newcommand{\\(?P<key0>infile|outfile)}{(?P<val0>.*?)}|'

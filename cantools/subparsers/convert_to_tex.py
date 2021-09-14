@@ -289,6 +289,7 @@ DLC = {length}
         return text
 
     def format_db(self, db, args):
+        # the group is added to protect the content in an S column
         self.none = "{%s}" % args.none
         out = []
         for msg in sorted(db.messages, key=self.msg_sort_key(args)):

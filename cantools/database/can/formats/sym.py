@@ -424,9 +424,7 @@ def _load_message_signal(tokens,
                          multiplexer_ids):
     signal = signals[tokens[2]]
     start = int(tokens[3])
-
-    if signal.byte_order == 'big_endian':
-        start = (8 * (start // 8) + (7 - (start % 8)))
+    start = _convert_start(start, signal.byte_order)
 
     return Signal(name=signal.name,
                   start=start,
@@ -447,6 +445,10 @@ def _load_message_signal(tokens,
                   is_float=signal.is_float,
                   decimal=signal.decimal)
 
+def _convert_start(start, byte_order):
+    if byte_order == 'big_endian':
+        start = (8 * (start // 8) + (7 - (start % 8)))
+    return start
 
 def _load_message_variable(tokens,
                            enums,
@@ -486,8 +488,7 @@ def _load_message_variable(tokens,
         maximum,
         decimal)
 
-    if byte_order == 'big_endian':
-        start = (8 * (start // 8) + (7 - (start % 8)))
+    start = _convert_start(start, byte_order)
 
     return Signal(name=name,
                   start=start,

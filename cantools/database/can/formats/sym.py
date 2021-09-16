@@ -154,8 +154,9 @@ class Parser60(textparser.Parser):
         bit_rate_switch = Sequence('BRS' , '=', word)
 
         enum_value = Sequence('NUMBER', '=', 'STRING')
+        delim = Sequence(',', Optional('COMMENT'))
         enum = Sequence('Enum', '=', word,
-                        '(', Optional(DelimitedList(enum_value)), ')',
+                        '(', Optional(DelimitedList(enum_value, delim=delim)), ')',
                         Optional('COMMENT'))
 
         sig_unit = '/u:'

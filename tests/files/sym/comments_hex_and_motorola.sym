@@ -1,0 +1,39 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="test comments in enums, -h in var, -m in mux and comment in mux"
+
+{ENUMS}
+Enum=MyEnum(1="A",  // A something
+  2="B",  // B has a comment, too
+  3="C",  // and another comment
+  4="D")  // last comment
+
+{SEND}
+
+
+{RECEIVE}
+
+["Msg1"]
+ID=620h
+Len=2
+Mux="sig1" 0,8 1  -m	// a comment
+Var=sig12 unsigned 8,8 -m /max:1	// another comment for sig1=1
+
+["Msg1"]
+Len=2
+Mux="sig2" 0,8 2  -m	// a comment
+Var=sig22 unsigned 8,8 -m /max:1	// another comment for sig1=2
+
+
+{SENDRECEIVE}
+
+["Msg2"]
+ID=555h	// test
+Len=8
+Var=Test0 unsigned 0,8 -m
+Var=Test1 unsigned 8,8 -h -m
+Var=Test2 unsigned 16,8 -h -m
+Var=Test3 unsigned 24,8 -h -m
+Var=Test4 unsigned 32,8 -h -m
+Var=Test5 unsigned 40,8 -h -m
+Var=Test6 unsigned 48,8 -h -m
+Var=Test7 unsigned 56,8 -h -m /e:MyEnum

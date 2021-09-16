@@ -1,0 +1,15 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Test Big Endian"
+
+{SENDRECEIVE}
+
+[Msg1]
+ID=001h
+Len=8
+Var=m1d unsigned 1,1 -m
+Var=m7d unsigned 14,7 -m /max:1
+Var=m12d unsigned 2,12 -m /max:1
+Var=m1h unsigned 0,1 -h -m
+Var=m42d unsigned 21,42 -m /max:1
+Var=i1h unsigned 56,1 -h
+

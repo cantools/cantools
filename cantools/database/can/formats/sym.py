@@ -473,7 +473,7 @@ def _load_message_variable(tokens,
                                              enums)
 
     # Byte order.
-    if tokens[7] == ['-m']:
+    if '-m' in tokens[7]:
         byte_order = 'big_endian'
 
     # Comment.

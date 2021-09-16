@@ -4,7 +4,7 @@ from argparse_addons import Integer
 
 from .. import database
 from .. import logreader
-from .utils import format_message_by_frame_id
+from .__utils__ import format_message_by_frame_id
 
 def _do_decode(args):
     dbase = database.load_file(args.database,

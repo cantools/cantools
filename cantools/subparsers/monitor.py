@@ -8,8 +8,8 @@ import queue
 import can
 from argparse_addons import Integer
 from .. import database
-from .utils import format_message
-from .utils import format_multiplexed_name
+from .__utils__ import format_message
+from .__utils__ import format_multiplexed_name
 
 
 class QuitError(Exception):

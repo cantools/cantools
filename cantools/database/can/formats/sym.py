@@ -206,7 +206,7 @@ class Parser60(textparser.Parser):
                               Sequence('Len', '=', 'NUMBER'),
                               Sequence('Mux', '=', Any(), 'NUMBER', ',',
                                        'NUMBER', 'NUMBER',
-                                       Optional('-t')),
+                                       ZeroOrMore(choice('-t', '-m'))),
                               Sequence('CycleTime', '=', 'NUMBER'),
                               Sequence('Timeout', '=', 'NUMBER'),
                               Sequence('MinInterval', '=', 'NUMBER'),
@@ -536,11 +536,17 @@ def _load_muxed_message_signals(message_tokens,
                                 enums):
     mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
+    if '-m' in mux_tokens[7]:
+        byte_order = 'big_endian'
+    else:
+        byte_order = 'little_endian'
+    start = int(mux_tokens[3])
+    start = _convert_start(start, byte_order)
     result = [
         Signal(name=multiplexer_signal,
-               start=int(mux_tokens[3]),
+               start=start,
                length=int(mux_tokens[5]),
-               byte_order='little_endian',
+               byte_order=byte_order,
                is_multiplexer=True,
                decimal=SignalDecimal(Decimal(1), Decimal(0))
         )

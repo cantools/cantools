@@ -716,5 +716,4 @@ def load_string(string, strict=True):
     return InternalDatabase(messages,
                             [],
                             [],
-                            version,
-                            [])
+                            version)

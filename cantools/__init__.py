@@ -1,6 +1,8 @@
 import sys
 import argparse
 import importlib
+import pathlib
+import os
 
 from . import tester
 from . import j1939
@@ -64,13 +66,20 @@ def _main():
                                        dest='subcommand')
     subparsers.required = True
 
-    _load_subparser('decode', subparsers)
-    _load_subparser('monitor', subparsers)
-    _load_subparser('dump', subparsers)
-    _load_subparser('list', subparsers)
-    _load_subparser('convert', subparsers)
-    _load_subparser('generate_c_source', subparsers)
-    _load_subparser('plot', subparsers)
+
+    # load all subparses which have a source file in the cantools
+    # module's 'subparsers' sub-directory
+    subparsers_dir = pathlib.Path(__file__).parent / 'subparsers'
+    for cur_file_name in os.listdir(subparsers_dir):
+        if cur_file_name.startswith('__'):
+            continue
+
+        if cur_file_name.endswith('.py'):
+            subparser_name = cur_file_name[:-3]
+            _load_subparser(subparser_name, subparsers)
+        elif (subparsers_dir / cur_file_name / "__init__.py").is_file():
+            subparser_name = cur_file_name
+            _load_subparser(subparser_name, subparsers)
 
     args = parser.parse_args()
 

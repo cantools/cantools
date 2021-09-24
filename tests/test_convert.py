@@ -840,6 +840,8 @@ DLC = 8
 Base frame \\
 DLC = 8
 
+Example message used as template in MotoHawk models.
+
 \begingroup
 \centering
 \begin{tabularx}{1\linewidth}{XlS[table-format=1.0]S[table-format=2.0]clcS[table-format=1.2]S[table-format=3.0]lS[table-format=4.2]S[table-format=4.2]c}
@@ -1296,6 +1298,8 @@ DLC = 8
 Base frame \\
 DLC = 1
 
+Sync message used to synchronize the controllers
+
 \begingroup
 \centering
 \begin{xltabular}{1\linewidth}{XlS[table-format=1.0]S[table-format=1.0]clcS[table-format=1.0]S[table-format=1.0]lccc}
@@ -1589,6 +1593,8 @@ DLC = 8
 \section{0x12330 Foo}
 Extended frame \\
 DLC = 8
+
+Foo.
 
 \begingroup
 \centering

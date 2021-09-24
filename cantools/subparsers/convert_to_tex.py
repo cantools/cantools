@@ -317,6 +317,9 @@ DLC = {length}
         format_dict = self.message_format_dict(msg)
         out = []
         out.append(self.begin_msg.format(**format_dict))
+        if msg.comment:
+            out.append(self.texify(msg.comment))
+            out.append("")
         out.append(self.format_signals(msg.signals, args, msg.is_multiplexed()))
         out.append(self.end_msg.format(**format_dict))
         return "\n".join(out)

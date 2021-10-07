@@ -3,6 +3,7 @@
 import binascii
 from decimal import Decimal
 from collections import namedtuple
+from cantools.database.can.signal import NamedSignalValue
 
 try:
     import bitstruct.c
@@ -50,6 +51,8 @@ def _encode_field(field, data, scaling):
 
     if isinstance(value, str):
         return field.choice_string_to_number(value)
+    elif isinstance(value, NamedSignalValue):
+        return field.choice_string_to_number(str(value))
     elif scaling:
         if field.is_float:
             return (value - field.offset) / field.scale

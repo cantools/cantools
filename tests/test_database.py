@@ -506,6 +506,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                         decode_choices=False)
             self.assertEqual(decoded, decoded_message)
 
+            # check that encode(decode(encode(decoded))) == encode(decoded)
+            encoded2 = db.encode_message(example_message_frame_id, decoded)
+            self.assertEqual(encoded2, encoded)
+
+
         # Encode with enumerated values.
         decoded_message = {
             'Temperature': 250.55,
@@ -519,6 +524,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(encoded, encoded_message)
         decoded = db.decode_message(example_message_frame_id, encoded)
         self.assertEqual(decoded, decoded_message)
+
+        # check that encode(decode(data)) == data
+        encoded2 = db.encode_message(example_message_frame_id, decoded)
+        self.assertEqual(encoded2, encoded)
 
         # By name.
         encoded = db.encode_message(example_message_name, decoded_message)

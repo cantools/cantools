@@ -115,10 +115,10 @@ class NamedSignalValue(object):
         return self._comments
 
     def __str__(self):
-        return self._name
+        return f"{self._name}"
 
     def __repr__(self):
-        return f"{self._name}"
+        return f"'{self._name}'"
 
     def __eq__(self, x):
         if isinstance(x, NamedSignalValue):

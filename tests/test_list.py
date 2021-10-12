@@ -112,6 +112,7 @@ Message2:
   Frame ID: 0x6 (6)
   Size: 7 bytes
   Is extended frame: True
+  Cycle time: 200 ms
   Signals:
     signal3:
       Type: Integer
@@ -283,6 +284,7 @@ Message2:
   Frame ID: 0x2 (2)
   Size: 4 bytes
   Is extended frame: False
+  Cycle time: 100 ms
   Signals:
     Signal1:
       Type: Integer

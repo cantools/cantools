@@ -59,7 +59,9 @@ BO_ 0 NormalMsg: 8 Vector__XXX
 
 
 BA_DEF_  "BusType" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
 BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
 
 

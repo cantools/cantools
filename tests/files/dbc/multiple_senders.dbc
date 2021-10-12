@@ -43,8 +43,8 @@ BO_TX_BU_ 1 : FOO,BAR,FIE;
 
 
 
-
-
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
 
 

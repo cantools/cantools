@@ -606,14 +606,27 @@ def _dump_signal_types(database):
 
     return valtype
 
+def _create_GenMsgCycleTime_definition():
+    return AttributeDefinition('GenMsgCycleTime',
+                               default_value=0,
+                               kind='BO_',
+                               type_name='INT',
+                               minimum=0,
+                               maximum=2**16-1)
 
 def _dump_attribute_definitions(database):
     ba_def = []
 
     if database.dbc is None:
-        return ba_def
+        definitions = odict()
+    else:
+        definitions = database.dbc.attribute_definitions
 
-    definitions = database.dbc.attribute_definitions
+    # define "GenMsgCycleTime" attribute for specifying the cycle
+    # times of messages if it has not been explicitly defined
+    if 'GenMsgCycleTime' not in definitions:
+        definitions['GenMsgCycleTime'] = \
+            _create_GenMsgCycleTime_definition()
 
     def get_value(definition, value):
         if definition.minimum is None:
@@ -664,9 +677,15 @@ def _dump_attribute_definition_defaults(database):
     ba_def_def = []
 
     if database.dbc is None:
-        return ba_def_def
+        definitions = odict()
+    else:
+        definitions = database.dbc.attribute_definitions
 
-    definitions = database.dbc.attribute_definitions
+    # define "GenMsgCycleTime" attribute for specifying the cycle
+    # times of messages if it has not been explicitly defined
+    if 'GenMsgCycleTime' not in definitions:
+        definitions['GenMsgCycleTime'] = \
+            _create_GenMsgCycleTime_definition()
 
     for definition in definitions.values():
         if definition.default_value is not None:
@@ -679,7 +698,6 @@ def _dump_attribute_definition_defaults(database):
                                          value=definition.default_value))
 
     return ba_def_def
-
 
 def _dump_attributes(database):
     ba = []
@@ -695,43 +713,49 @@ def _dump_attributes(database):
     if database.dbc is not None:
         if database.dbc.attributes is not None:
             for attribute in database.dbc.attributes.values():
-                ba.append(
-                    'BA_ "{name}" {value};'.format(name=attribute.definition.name,
-                                                   value=get_value(attribute)))
+                ba.append(f'BA_ "{attribute.definition.name}" '
+                          f'{get_value(attribute)};')
 
     for node in database.nodes:
         if node.dbc is not None:
             if node.dbc.attributes is not None:
                 for attribute in node.dbc.attributes.values():
-                    ba.append(
-                        'BA_ "{name}" {kind} {node_name} {value};'.format(
-                            name=attribute.definition.name,
-                            kind=attribute.definition.kind,
-                            node_name=node.name,
-                            value=get_value(attribute)))
+                    ba.append(f'BA_ "{attribute.definition.name}" '
+                              f'{attribute.definition.kind} '
+                              f'{node.name} '
+                              f'{get_value(attribute)};')
 
     for message in database.messages:
-        if message.dbc is not None:
-            if message.dbc.attributes is not None:
-                for attribute in message.dbc.attributes.values():
-                    ba.append(
-                        'BA_ "{name}" {kind} {frame_id} {value};'.format(
-                            name=attribute.definition.name,
-                            kind=attribute.definition.kind,
-                            frame_id=get_dbc_frame_id(message),
-                            value=get_value(attribute)))
+        # retrieve the ordered dictionary of message attributes
+        msg_attributes = odict()
+        if message.dbc is not None and message.dbc.attributes is not None:
+            msg_attributes = message.dbc.attributes
 
+        # synchronize the attribute for the message cycle time with
+        # the cycle time specified by the message object
+        if message.cycle_time is None and 'GenMsgCycleTime' in msg_attributes:
+            del msg_attributes['GenMsgCycleTime']
+        elif message.cycle_time is not None:
+            msg_attributes['GenMsgCycleTime'] = \
+                Attribute(value=message.cycle_time,
+                          definition=_create_GenMsgCycleTime_definition())
+
+        # output all message attributes
+        for attribute in msg_attributes.values():
+            ba.append(f'BA_ "{attribute.definition.name}" '
+                      f'{attribute.definition.kind} '
+                      f'{get_dbc_frame_id(message)} '
+                      f'{get_value(attribute)};')
+
+        # handle the signals contained in the message
         for signal in message.signals[::-1]:
-            if signal.dbc is not None:
-                if signal.dbc.attributes is not None:
-                    for attribute in signal.dbc.attributes.values():
-                        ba.append(
-                            'BA_ "{name}" {kind} {frame_id} {signal_name} {value};'.format(
-                                name=attribute.definition.name,
-                                kind=attribute.definition.kind,
-                                frame_id=get_dbc_frame_id(message),
-                                signal_name=signal.name,
-                                value=get_value(attribute)))
+            if signal.dbc is not None and signal.dbc.attributes is not None:
+                for attribute in signal.dbc.attributes.values():
+                    ba.append(f'BA_ "{attribute.definition.name}" '
+                              f'{attribute.definition.kind} '
+                              f'{get_dbc_frame_id(message)} '
+                              f'{signal.name} '
+                              f'{get_value(attribute)};')
 
     return ba
 
@@ -1247,7 +1271,7 @@ def _load_signals(tokens,
 
     def get_signal_spn(frame_id_dbc, name):
         signal_attributes = get_attributes(frame_id_dbc, name)
-        
+
         try:
             return signal_attributes['SPN'].value
         except (KeyError, TypeError):
@@ -1357,10 +1381,12 @@ def _load_messages(tokens,
         message_attributes = get_attributes(frame_id_dbc)
 
         try:
-            return int(message_attributes['GenMsgCycleTime'].value)
+            result = int(message_attributes['GenMsgCycleTime'].value)
+            return None if result == 0 else result
         except (KeyError, TypeError):
             try:
-                return int(definitions['GenMsgCycleTime'].default_value)
+                result = int(definitions['GenMsgCycleTime'].default_value)
+                return None if result == 0 else result
             except (KeyError, TypeError):
                 return None
 

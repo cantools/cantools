@@ -47,7 +47,9 @@ BO_ 0 Message1: 8 Vector__XXX
 
 
 BA_DEF_  "BusType" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
 BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
 VAL_ 0 Signal1 1 "One" 0 "Zero" ;
 

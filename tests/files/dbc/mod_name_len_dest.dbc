@@ -46,9 +46,11 @@ CM_ BU_ node_now_short "";
 BA_DEF_ BU_  "SystemNodeLongSymbol" STRING ;
 BA_DEF_ BO_  "SystemMessageLongSymbol" STRING ;
 BA_DEF_ SG_  "SystemSignalLongSymbol" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
 BA_DEF_DEF_  "SystemNodeLongSymbol" "";
 BA_DEF_DEF_  "SystemMessageLongSymbol" "";
 BA_DEF_DEF_  "SystemSignalLongSymbol" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
 
 

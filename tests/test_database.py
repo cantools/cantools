@@ -22,7 +22,7 @@ import cantools
 from cantools.database.can.formats import dbc
 from cantools.database import UnsupportedDatabaseFormatError
 from cantools.database.can.signal import NamedSignalValue
-  
+
 class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
@@ -2042,9 +2042,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.cycle_time, 200)
         self.assertEqual(message.send_type, 'Cyclic')
 
-        # Default message cycle time is 0, as given by BA_DEF_DEF_.
+        # Default message cycle time is None which is defined in the
+        # DBC as 0 (as given by BA_DEF_DEF_)
         message = db.get_message_by_frame_id(2)
-        self.assertEqual(message.cycle_time, 0)
+        self.assertEqual(message.cycle_time, None)
         self.assertEqual(message.send_type, 'NoMsgSendType')
 
         self.assert_dbc_dump(db, filename)

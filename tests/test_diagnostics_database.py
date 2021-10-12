@@ -494,7 +494,7 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.
-logging.basicConfig()
+logging.basicConfig(level=logging.WARNING)
 
 if __name__ == '__main__':
     unittest.main()

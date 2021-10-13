@@ -15,6 +15,9 @@ def _print_message(message):
     print(f'  Size: {message.length} bytes')
     print(f'  Is extended frame: {message.is_extended_frame}')
 
+    if message.cycle_time is not None:
+        print(f'  Cycle time: {message.cycle_time} ms')
+
     if message.signals:
         print(f'  Signals:')
 

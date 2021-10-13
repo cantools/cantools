@@ -45,8 +45,8 @@ BO_ 496 ExampleMessage: 8 PCM1
 
 
 CM_ BO_ 496 "Example message used as template in MotoHawk models.";
-
-
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
 VAL_ 496 Enable 0 "Disabled" 1 "Enabled" ;
 

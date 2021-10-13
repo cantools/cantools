@@ -9,7 +9,9 @@ from unittest import mock
 from io import StringIO
 import cantools
 import matplotlib.pyplot
+import logging
 
+logging.basicConfig(level=logging.WARNING)
 
 class PyplotMock:
 

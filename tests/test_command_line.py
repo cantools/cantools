@@ -880,7 +880,7 @@ BATTERY_VT(
       Destination:    0x34
       Format:         PDU 1
   Length:     8 bytes
-  Cycle time: 0 ms
+  Cycle time: - ms
   Senders:    -
   Layout:
 
@@ -1102,7 +1102,7 @@ BATTERY_VT(
       Destination:    0x02
       Format:         PDU 1
   Length:     8 bytes
-  Cycle time: 0 ms
+  Cycle time: - ms
   Senders:    Node1
   Layout:
 
@@ -1144,7 +1144,7 @@ BATTERY_VT(
       Destination:    All
       Format:         PDU 2
   Length:     8 bytes
-  Cycle time: 0 ms
+  Cycle time: - ms
   Senders:    Node2
   Layout:
 

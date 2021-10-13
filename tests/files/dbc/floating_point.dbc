@@ -47,8 +47,8 @@ BO_ 1025 Message2: 8 TestNode
 
 
 CM_ BU_ TestNode "";
-
-
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
 
 SIG_VALTYPE_ 1024 Signal1 : 2;

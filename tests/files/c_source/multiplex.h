@@ -53,7 +53,7 @@ extern "C" {
 #define MULTIPLEX_MESSAGE1_IS_EXTENDED (1)
 
 /* Frame cycle times in milliseconds. */
-#define MULTIPLEX_MESSAGE1_CYCLE_TIME_MS (0u)
+
 
 /* Signal choices. */
 

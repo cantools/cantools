@@ -62,10 +62,7 @@ extern "C" {
 #define MULTIPLEX_2_EXTENDED_TYPES_IS_EXTENDED (1)
 
 /* Frame cycle times in milliseconds. */
-#define MULTIPLEX_2_SHARED_CYCLE_TIME_MS (0u)
-#define MULTIPLEX_2_NORMAL_CYCLE_TIME_MS (0u)
-#define MULTIPLEX_2_EXTENDED_CYCLE_TIME_MS (0u)
-#define MULTIPLEX_2_EXTENDED_TYPES_CYCLE_TIME_MS (0u)
+
 
 /* Signal choices. */
 

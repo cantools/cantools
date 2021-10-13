@@ -22,7 +22,7 @@ import cantools
 from cantools.database.can.formats import dbc
 from cantools.database import UnsupportedDatabaseFormatError
 from cantools.database.can.signal import NamedSignalValue
-  
+
 class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
@@ -511,6 +511,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(encoded2, encoded)
 
 
+        # Make sure that the decoded message dictionary does not
+        # contain any unknown entries
+        decoded_message = datas[0][0]
+        decoded_message["UnspecifiedSignal"] = "pointless"
+        with self.assertRaises(cantools.database.EncodeError):
+            db.encode_message(example_message_frame_id,
+                              decoded_message)
+
+        # make sure that we don't get this error if we use non-strict
+        # encoding
+        db.encode_message(example_message_frame_id,
+                          decoded_message,
+                          strict=False)
         # Encode with enumerated values.
         decoded_message = {
             'Temperature': 250.55,
@@ -2383,9 +2396,23 @@ class CanToolsDatabaseTest(unittest.TestCase):
             decoded = message.decode(encoded)
             self.assertEqual(decoded, decoded_message)
 
+            # make sure that encoding is idempotent for multiplexed messages
+            encoded2 = message.encode(decoded_message)
+            self.assertEqual(encoded2, encoded)
+
+            # strict encoding ought to fail when specifying unknown signals, non-strict encoding ought to succeed
+            decoded['UndefinedMutiplexerSignal'] = 'Boo!'
+
+            encoded2 = message.encode(decoded, strict=False)
+            self.assertEqual(encoded2, encoded)
+
+            with self.assertRaises(cantools.database.EncodeError):
+                encoded2 = message.encode(decoded)
+
     def test_dbc_parse_error_messages(self):
         # No valid entry.
         with self.assertRaises(textparser.ParseError) as cm:
+
             dbc.load_string('abc')
 
         self.assertEqual(

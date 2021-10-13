@@ -383,6 +383,14 @@ class Message(object):
         if scaling:
             self._check_signals_ranges_scaling(signals, data)
 
+    def _check_unknown_signals(self, signals, data):
+            signal_set = set(map(lambda x: x.name, signals))
+            for signal in data:
+                if signal not in signal_set:
+                    raise EncodeError(
+                        f"No signal named '{signal}' specified in CAN bus "
+                        f"description database.")
+
     def _encode(self, node, data, scaling, strict):
         if strict:
             self._check_signals(node['signals'], data, scaling)
@@ -394,24 +402,28 @@ class Message(object):
         padding_mask = node['formats'].padding_mask
         multiplexers = node['multiplexers']
 
+        all_signals = list(node['signals'])
         for signal in multiplexers:
             mux = self._get_mux_number(data, signal)
 
             try:
                 node = multiplexers[signal][mux]
+
+                if strict:
+                    self._check_signals(node['signals'], data, scaling)
             except KeyError:
                 raise EncodeError('expected multiplexer id {}, but got {}'.format(
                     format_or(multiplexers[signal]),
                     mux))
 
-            mux_encoded, mux_padding_mask = self._encode(node,
-                                                         data,
-                                                         scaling,
-                                                         strict)
+            mux_encoded, mux_padding_mask, mux_signals = \
+                self._encode(node, data, scaling, strict)
+            all_signals.extend(mux_signals)
+
             encoded |= mux_encoded
             padding_mask &= mux_padding_mask
 
-        return encoded, padding_mask
+        return encoded, padding_mask, all_signals
 
     def encode(self, data, scaling=True, padding=False, strict=True):
         """Encode given data as a message of this type.
@@ -420,8 +432,9 @@ class Message(object):
 
         If `padding` is ``True`` unused bits are encoded as 1.
 
-        If `strict` is ``True`` all signal values must be within their
-        allowed ranges, or an exception is raised.
+        If `strict` is ``True`` the specified signals must exactly be the
+        ones expected, and their values must be within their allowed ranges,
+        or an `EncodeError` exception is raised.
 
         >>> foo = db.get_message_by_name('Foo')
         >>> foo.encode({'Bar': 1, 'Fum': 5.0})
@@ -429,10 +442,11 @@ class Message(object):
 
         """
 
-        encoded, padding_mask = self._encode(self._codecs,
-                                             data,
-                                             scaling,
-                                             strict)
+        encoded, padding_mask, all_signals = \
+            self._encode(self._codecs, data, scaling, strict=strict)
+
+        if strict:
+            self._check_unknown_signals(all_signals, data)
 
         if padding:
             encoded |= padding_mask

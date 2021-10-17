@@ -4735,6 +4735,115 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assert_dbc_dump(db, filename)
 
 
+    def test_lsb(self):
+        filename = 'tests/files/dbc/signed.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.get_message_by_name('Message378910')
+        msg_sigs = (
+            (
+                'Message378910',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s7',      1,  7),
+                    ('s8big',   9,  8),
+                    ('s9',     17,  9),
+                    ('s8',     26,  8),
+                    ('s3',     34,  3),
+                    ('s3big',  37,  3),
+                    ('s7big',  56,  7),
+                    ('s10big', 63, 10),
+                )
+            ),
+            (
+                'Message64',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s64',     0, 64),
+                )
+            ),
+            (
+                'Message64big',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s64big', 56, 64),
+                )
+            ),
+            (
+                'Message63',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s63',     0, 63),
+                )
+            ),
+            (
+                'Message63big',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s63big', 57, 63),
+                )
+            ),
+            (
+                'Message63_1',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s63',     1, 63),
+                )
+            ),
+            (
+                'Message63big_1',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s63big', 56, 63),
+                )
+            ),
+            (
+                'Message33',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s33',     0, 33),
+                )
+            ),
+            (
+                'Message33big',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s33big', 39, 33),
+                )
+            ),
+            (
+                'Message32',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s32',     0, 32),
+                )
+            ),
+            (
+                'Message32big',
+                (
+                    # data as displayed in CANdb++ Editor
+                    # Name, Startbit, Length
+                    ('s32big', 24, 32),
+                )
+            ),
+        )
+        for msg, signal_lsb_len in msg_sigs:
+            msg = db.get_message_by_name(msg)
+            for sig, expected_lsb, length in signal_lsb_len:
+                sig = msg.get_signal_by_name(sig)
+                self.assertEqual(sig.length, length)
+                self.assertEqual(sig.lsb, expected_lsb, f'{msg.name}.{sig.name} wrong value for lsb')
+
+
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.WARNING)

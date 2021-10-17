@@ -63,6 +63,7 @@ except ImportError:
 
 from .. import database
 from .. import errors
+from . import utils_argparse
 
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
@@ -788,11 +789,6 @@ class Graph:
         self.plotted_signal = None
 
 
-class RawDescriptionArgumentDefaultsHelpFormatter(
-    argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
-    pass
-
-
 def add_subparser(subparsers):
     '''
     Is called from ../__init__.py.
@@ -802,7 +798,7 @@ def add_subparser(subparsers):
     decode_parser = subparsers.add_parser(
         'plot',
         description=__doc__,
-        formatter_class=RawDescriptionArgumentDefaultsHelpFormatter)
+        formatter_class=utils_argparse.RawDescriptionArgumentDefaultsHelpFormatter)
     decode_parser.add_argument(
         '-c', '--no-decode-choices',
         action='store_true',

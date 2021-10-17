@@ -281,6 +281,32 @@ shell scripts:
           Named values:
             0: Disabled
 
+The convert subcommand
+^^^^^^^^^^^^^^^^^^^^^^
+
+Convert a database file from one format to another.
+Aside from machine readable formats you can also convert a database to tex or pdf (requires pdflatex).
+The desired output format is derived from the extension of outfile.
+
+.. code-block:: text
+
+   $ python3 -m cantools convert [options] infile outfile
+   $ python3 -m cantools convert --help
+
+
+You can install pdflatex with the packages required for converting dbc files to pdf with:
+
+.. code-block:: bash
+
+   $ sudo apt install texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science
+
+or
+
+.. code-block:: bash
+
+   $ sudo pacman -S texlive-core texlive-latexextra texlive-science
+
+
 The generate C source subcommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

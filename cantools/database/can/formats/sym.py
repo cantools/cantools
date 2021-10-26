@@ -647,7 +647,8 @@ def _parse_message_frame_ids(message):
         return int(string, 16)
 
     def is_extended_frame(string, type):
-        return len(string) >= 8 or type.lower() in ['extended', 'fdextended']
+        # Length of 9 includes terminating 'h' for hex
+        return len(string) == 9 or type.lower() in ['extended', 'fdextended']
 
     message = message[3]
 

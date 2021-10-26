@@ -2025,6 +2025,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_sym_file('tests/files/sym/type-extended-cycle-dash-p.sym')
         message = db.get_message_by_name('CAN-Tx Query')
         self.assertTrue(message.is_extended_frame)
+        encoded_msg = message.encode({'Switch Outputs': 984, 'Switch Ch 02': 1, 'Switch Ch 01': 1}).hex()
+        # Ensure proper endianness
+        self.assertEqual(encoded_msg[:4], '03d8')
 
     def test_comments_hex_and_motorola_sym(self):
         db = cantools.database.load_file('tests/files/sym/comments_hex_and_motorola.sym')

@@ -58,8 +58,8 @@ CM_ SG_ 1568 sig22 "another comment for sig1=2";
 CM_ SG_ 1568 sig12 "another comment for sig1=1";
 CM_ SG_ 1568 sig1 "a comment";
 CM_ BO_ 1365 "test";
-
-
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
 VAL_ 1365 Test7 1 "A" 2 "B" 3 "C" 4 "D" ;
 

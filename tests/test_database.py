@@ -2020,6 +2020,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              }
                          ])
 
+    def test_type_parameter_overrides_is_extended_sym(self):
+        db = cantools.db.Database()
+        db.add_sym_file('tests/files/sym/type-extended-cycle-dash-p.sym')
+        message = db.get_message_by_name('CAN-Tx Query')
+        self.assertTrue(message.is_extended_frame)
+
     def test_load_bad_format(self):
         with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):
             cantools.db.load(StringIO(''))

@@ -84,7 +84,7 @@ class SystemLoader(object):
             raise ValueError('This class only supports AUTOSAR '
                              'versions 3 and 4')
 
-        self._arxml_reference_cache = {}
+        self._create_arxml_references_dict()
 
     def autosar_version_newer(self, major, minor=None, patch=None):
         """Returns true iff the AUTOSAR version specified in the ARXML it at
@@ -522,9 +522,9 @@ class SystemLoader(object):
                 return None
 
             literal_spec = \
-                self._follow_arxml3_const_reference(signal_elem,
-                                                    ref_elem.text,
-                                                    ref_elem.attrib.get('DEST', ''))
+                self._follow_arxml_reference(signal_elem,
+                                             ref_elem.text,
+                                             ref_elem.attrib.get('DEST', ''))
 
             if literal_spec is None:
                 # dangling reference...
@@ -818,94 +818,42 @@ class SystemLoader(object):
         return is_signed, is_float
 
     def _follow_arxml_reference(self, base_elem, arxml_path, child_tag_name):
-        """Follow a relative or absolute ARXML reference
+        """Follow a ARXML reference
 
         It returns the ElementTree node which corrosponds to the given
         path through the ARXML package structure. If no such node
         exists, a ValueError exception is raised.
         """
-
-        is_absolute_path = arxml_path.startswith('/')
-
-        if is_absolute_path and arxml_path in self._arxml_reference_cache:
-            # absolute paths are globally unique and thus can be cached
-            return self._arxml_reference_cache[arxml_path]
-
-        # TODO (?): for relative paths, we need to find the corresponding package tag for each base element!
-        base_elem = self._root if is_absolute_path else base_elem
-
-        if not base_elem:
-            raise ValueError(
-                'Tried to dereference a relative ARXML path without '
-                'specifying the base location.')
+        return self._arxml_references_dict.get(arxml_path)
 
 
-        short_names = arxml_path.lstrip('/').split('/')
-        location = []
 
-        # in AUTOSAR3, the top level packages are located beneath the
-        # TOP-LEVEL-PACKAGES tag, and sub-packages use
-        # SUB-PACKAGES. AUTOSAR 4 always uses AR-PACKAGES.
-        if self.autosar_version_newer(4):
-            for atom in short_names[:-1]:
-                location += [
-                    'AR-PACKAGES',
-                    "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(atom)
-                ]
 
-            location += [
-                'ELEMENTS',
-                "{}/[ns:SHORT-NAME='{}']".format(child_tag_name,
-                                                 short_names[-1]) ]
-        else:
-            location = [
-                'TOP-LEVEL-PACKAGES',
-                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(short_names[0]) ]
+    def _create_arxml_references_dict(self):
+        def add_sub_references(elem, elem_path):
+            """Recursively add all ARXML references contained within an XML
+            element to the references dictionary"""
 
-            for atom in short_names[1:-1]:
-                location += [
-                    'SUB-PACKAGES',
-                    "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(atom),
-                ]
+            # check if a short name has been specified for the base
+            # element. if yes, add a new entry to the dictionary.
+            short_name = elem.find(f"ns:SHORT-NAME", self._xml_namespaces)
 
-            location += [
-                'ELEMENTS',
-                "{}/[ns:SHORT-NAME='{}']".format(child_tag_name, short_names[-1]) ]
+            if short_name is not None:
+                short_name = short_name.text
+                elem_path = f'{elem_path}/{short_name}'
 
-        result = base_elem.find(make_xpath(location), self._xml_namespaces)
+                if elem_path in self._arxml_references_dict:
+                    raise ValueError(f"File contains multiple elements with "
+                                     f"path '{elem_path}'")
 
-        if is_absolute_path:
-            self._arxml_reference_cache[arxml_path] = result
+                self._arxml_references_dict[elem_path] = elem
 
-        return result
+            # iterate over all children and add all references contained therein
+            for child in elem.getchildren():
+                add_sub_references(child, elem_path)
 
-    def _follow_arxml3_const_reference(self, base_elem, arxml_const_path, child_tag_name):
-        """This method is does the same as _follow_arxml_ref() but for constant specifications.
-
-        This method is necessary because in AUTOSAR3, constants are
-        referenced differently than anything else. (AUTOSAR4 fixes
-        this issue.)
-        """
-
-        arxml_const_path_tuple = arxml_const_path.split('/')
-
-        c_spec = \
-            self._follow_arxml_reference(base_elem,
-                                         '/'.join(arxml_const_path_tuple[:-1]),
-                                         'CONSTANT-SPECIFICATION')
-        if c_spec is None:
-            raise ValueError(f'No constant specification found for constant {arxml_const_path}')
-
-        val_node = c_spec.find('./ns:VALUE', self._xml_namespaces)
-        if val_node is None:
-            raise ValueError(f'Constant specification of constant '
-                             f'{arxml_const_path} does not exhibit a '
-                             f'VALUE sub-tag')
-
-        literal = val_node.find(f"./ns:{child_tag_name}/"
-                                f"[ns:SHORT-NAME='{arxml_const_path_tuple[-1]}']",
-                                self._xml_namespaces)
-        return literal
+        self._arxml_references_dict = {}
+        add_sub_references(self._root, '')
 
     def _get_arxml_children(self, base_elems, children_location):
         """Locate a set of ElementTree child nodes at a given location.

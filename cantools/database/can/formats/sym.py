@@ -50,7 +50,8 @@ class Parser60(textparser.Parser):
         'Timeout',
         'MinInterval',
         'Color',
-        'Var'
+        'Var',
+        'Type'
     ])
 
     def tokenize(self, string):
@@ -80,7 +81,8 @@ class Parser60(textparser.Parser):
             'B':           '-b',
             'S':           '-s',
             'T':           '-t',
-            'V':           '-v'
+            'V':           '-v',
+            'DP':          '-p'
         }
 
         re_string = r'"(\\"|[^"])*?"'
@@ -88,6 +90,7 @@ class Parser60(textparser.Parser):
         token_specs = [
             ('SKIP',               r'[ \r\n\t]+'),
             ('COMMENT',            r'//.*?\n'),
+            ('HEXNUMBER',          r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
             ('NUMBER',             r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?'),
             ('STRING',             re_string),
             ('U',                  r'/u:({}|\S+)'.format(re_string)),
@@ -105,6 +108,7 @@ class Parser60(textparser.Parser):
             ('S',                  r'\-s'),
             ('T',                  r'\-t'),
             ('V',                  r'\-v'),
+            ('DP',                 r'\-p'),
             ('LPAREN',             r'\('),
             ('RPAREN',             r'\)'),
             ('LBRACE',             r'\['),
@@ -199,19 +203,22 @@ class Parser60(textparser.Parser):
 
         symbol = Sequence('[', Any(), ']',
                           ZeroOrMoreDict(choice(
-                              Sequence('ID', '=', 'NUMBER', word,
-                                       Optional(Sequence('NUMBER', word)),
+                              Sequence('ID', '=', 'HEXNUMBER',
+                                       Optional('HEXNUMBER'),
                                        Optional('COMMENT')),
                               Sequence('Len', '=', 'NUMBER'),
                               Sequence('Mux', '=', Any(), 'NUMBER', ',',
-                                       'NUMBER', 'NUMBER',
-                                       Optional('-t')),
-                              Sequence('CycleTime', '=', 'NUMBER'),
+                                       'NUMBER',
+                                        choice('NUMBER', 'HEXNUMBER'),
+                                        Optional('-t'), Optional('-m')
+                              ),
+                              Sequence('CycleTime', '=', 'NUMBER', Optional('-p')),
                               Sequence('Timeout', '=', 'NUMBER'),
                               Sequence('MinInterval', '=', 'NUMBER'),
-                              Sequence('Color', '=', 'NUMBER', 'WORD'),
+                              Sequence('Color', '=', 'HEXNUMBER'),
                               variable,
-                              Sequence('Sig', '=', Any(), 'NUMBER'))))
+                              Sequence('Sig', '=', Any(), 'NUMBER'),
+                              Sequence('Type', '=', Any()))))
 
         enums = Sequence('{ENUMS}', ZeroOrMore(choice(enum, 'COMMENT')))
         signals = Sequence('{SIGNALS}', ZeroOrMore(choice(signal, 'COMMENT')))
@@ -532,6 +539,15 @@ def _load_muxed_message_signals(message_tokens,
                                 message_section_tokens,
                                 signals,
                                 enums):
+    def get_mutliplexer_ids(mux_tokens):
+        base = 10
+        mux_id = mux_tokens[6]
+        if mux_id.endswith('h'):
+            base = 16
+            mux_id = mux_id[:-1]
+
+        return [int(mux_id, base=base)]
+
     mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
     result = [
@@ -544,7 +560,7 @@ def _load_muxed_message_signals(message_tokens,
         )
     ]
 
-    multiplexer_ids = [int(mux_tokens[6])]
+    multiplexer_ids = get_mutliplexer_ids(mux_tokens)
     result += _load_message_signals_inner(message_tokens,
                                           signals,
                                           enums,
@@ -554,7 +570,7 @@ def _load_muxed_message_signals(message_tokens,
     for tokens in message_section_tokens:
         if tokens[1] == message_tokens[1] and tokens != message_tokens:
             mux_tokens = tokens[3]['Mux'][0]
-            multiplexer_ids = [int(mux_tokens[6])]
+            multiplexer_ids = get_mutliplexer_ids(mux_tokens)
             result += _load_message_signals_inner(tokens,
                                                   signals,
                                                   enums,
@@ -630,20 +646,27 @@ def _parse_message_frame_ids(message):
     def to_int(string):
         return int(string, 16)
 
-    def is_extended_frame(string):
-        return len(string) == 8
+    def is_extended_frame(string, type):
+        # Length of 9 includes terminating 'h' for hex
+        return len(string) == 9 or type.lower() in ['extended', 'fdextended']
 
-    message = message[3]['ID'][0]
-    minimum = to_int(message[2])
+    message = message[3]
 
-    if message[4]:
-        maximum = -to_int(message[4][0][0])
+    message_id = message['ID'][0]
+    minimum = to_int(message_id[2][:-1])
+
+    if message_id[3]:
+        maximum = to_int(message_id[3][0][1:-1])
     else:
         maximum = minimum
 
     frame_ids = range(minimum, maximum + 1)
 
-    return frame_ids, is_extended_frame(message[2])
+    message_type = 'Standard'
+    if 'Type' in message:
+        message_type = message['Type'][0][2]
+
+    return frame_ids, is_extended_frame(message_id[2], message_type)
 
 
 def _load_message_section(section_name, tokens, signals, enums, strict):

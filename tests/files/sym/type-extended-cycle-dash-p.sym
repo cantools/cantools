@@ -1,0 +1,20 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{ENUMS}
+Enum=IDLE_ON_OFF(0="IDLE", 1="ON", 2="OFF")
+
+{SIGNALS}
+Sig="Switch Ch 01" unsigned 2 /e:IDLE_ON_OFF
+Sig="Switch Ch 02" unsigned 2 /e:IDLE_ON_OFF
+
+{SEND}
+
+["CAN-Tx Query"]
+ID=10FFh	// Switch load outputs
+Type=Extended
+Len=8
+CycleTime=100 -p
+Mux="Switch Outputs" 0,16 03D8h  -m
+Sig="Switch Ch 01" 20
+Sig="Switch Ch 02" 16

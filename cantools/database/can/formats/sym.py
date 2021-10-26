@@ -158,8 +158,9 @@ class Parser60(textparser.Parser):
         bit_rate_switch = Sequence('BRS' , '=', word)
 
         enum_value = Sequence('NUMBER', '=', 'STRING')
+        delim = Sequence(',', Optional('COMMENT'))
         enum = Sequence('Enum', '=', word,
-                        '(', Optional(DelimitedList(enum_value)), ')',
+                        '(', Optional(DelimitedList(enum_value, delim=delim)), ')',
                         Optional('COMMENT'))
 
         sig_unit = '/u:'
@@ -189,7 +190,7 @@ class Parser60(textparser.Parser):
 
         variable = Sequence('Var', '=', Any(), word,
                             'NUMBER', ',', 'NUMBER',
-                            ZeroOrMore(choice('-v', '-m', '-s')),
+                            ZeroOrMore(choice('-v', '-m', '-s', '-h')),
                             ZeroOrMore(choice(sig_unit,
                                               sig_factor,
                                               sig_offset,
@@ -208,10 +209,9 @@ class Parser60(textparser.Parser):
                                        Optional('COMMENT')),
                               Sequence('Len', '=', 'NUMBER'),
                               Sequence('Mux', '=', Any(), 'NUMBER', ',',
-                                       'NUMBER',
-                                        choice('NUMBER', 'HEXNUMBER'),
-                                        Optional('-t'), Optional('-m')
-                              ),
+                                       'NUMBER', choice('NUMBER', 'HEXNUMBER'),
+                                       ZeroOrMore(choice('-t', '-m')),
+                                       Optional('COMMENT')),
                               Sequence('CycleTime', '=', 'NUMBER', Optional('-p')),
                               Sequence('Timeout', '=', 'NUMBER'),
                               Sequence('MinInterval', '=', 'NUMBER'),
@@ -430,9 +430,7 @@ def _load_message_signal(tokens,
                          multiplexer_ids):
     signal = signals[tokens[2]]
     start = int(tokens[3])
-
-    if signal.byte_order == 'big_endian':
-        start = (8 * (start // 8) + (7 - (start % 8)))
+    start = _convert_start(start, signal.byte_order)
 
     return Signal(name=signal.name,
                   start=start,
@@ -453,6 +451,10 @@ def _load_message_signal(tokens,
                   is_float=signal.is_float,
                   decimal=signal.decimal)
 
+def _convert_start(start, byte_order):
+    if byte_order == 'big_endian':
+        start = (8 * (start // 8) + (7 - (start % 8)))
+    return start
 
 def _load_message_variable(tokens,
                            enums,
@@ -476,7 +478,7 @@ def _load_message_variable(tokens,
                                              enums)
 
     # Byte order.
-    if tokens[7] == ['-m']:
+    if '-m' in tokens[7]:
         byte_order = 'big_endian'
 
     # Comment.
@@ -492,8 +494,7 @@ def _load_message_variable(tokens,
         maximum,
         decimal)
 
-    if byte_order == 'big_endian':
-        start = (8 * (start // 8) + (7 - (start % 8)))
+    start = _convert_start(start, byte_order)
 
     return Signal(name=name,
                   start=start,
@@ -550,13 +551,24 @@ def _load_muxed_message_signals(message_tokens,
 
     mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
+    if '-m' in mux_tokens[7]:
+        byte_order = 'big_endian'
+    else:
+        byte_order = 'little_endian'
+    start = int(mux_tokens[3])
+    start = _convert_start(start, byte_order)
+    if mux_tokens[8]:
+        comment = _load_comment(mux_tokens[8][0])
+    else:
+        comment = None
     result = [
         Signal(name=multiplexer_signal,
-               start=int(mux_tokens[3]),
+               start=start,
                length=int(mux_tokens[5]),
-               byte_order='little_endian',
+               byte_order=byte_order,
                is_multiplexer=True,
-               decimal=SignalDecimal(Decimal(1), Decimal(0))
+               decimal=SignalDecimal(Decimal(1), Decimal(0)),
+               comment=comment,
         )
     ]
 
@@ -725,5 +737,4 @@ def load_string(string, strict=True):
     return InternalDatabase(messages,
                             [],
                             [],
-                            version,
-                            [])
+                            version)

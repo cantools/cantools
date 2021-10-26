@@ -1,0 +1,67 @@
+VERSION "6.0"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: 
+
+
+BO_ 1568 Msg1: 2 Vector__XXX
+ SG_ sig22 m2 : 15|8@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig12 m1 : 15|8@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig1 M : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1365 Msg2: 8 Vector__XXX
+ SG_ Test7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Test6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Test5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Test4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Test3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Test2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Test1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Test0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+
+
+
+
+CM_ SG_ 1568 sig22 "another comment for sig1=2";
+CM_ SG_ 1568 sig12 "another comment for sig1=1";
+CM_ SG_ 1568 sig1 "a comment";
+CM_ BO_ 1365 "test";
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+
+VAL_ 1365 Test7 1 "A" 2 "B" 3 "C" 4 "D" ;
+
+
+

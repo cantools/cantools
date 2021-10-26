@@ -542,11 +542,12 @@ def _load_muxed_message_signals(message_tokens,
     def get_mutliplexer_ids(mux_tokens):
         base = 10
         mux_id = mux_tokens[6]
-        if mux_tokens[6].endswith('h'):
+        if mux_id.endswith('h'):
             base = 16
             mux_id = mux_id[:-1]
 
         return [int(mux_id, base=base)]
+
     mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
     result = [

@@ -1,4 +1,4 @@
-bitstruct
+bitstruct >= 8.12.1
 codespell
 mock
 python-can

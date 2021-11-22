@@ -45,7 +45,16 @@ class SystemLoader(object):
                      xml_namespace)
 
         if m:
-            # AUTOSAR 4
+            # AUTOSAR 4: For some reason, all AR 4 revisions always
+            # use "http://autosar.org/schema/r4.0" as their XML
+            # namespace. To find out the exact revision used (i.e.,
+            # 4.0, 4.1, 4.2, ...), the "xsi:schemaLocation" attribute
+            # of the root tag needs to be examined. Since this is
+            # pretty fragile (the used naming scheme has changed
+            # during the AR4 journey and with the latest naming scheme
+            # there seems to be no programmatic way to associate the
+            # schemaLocation with the AR revision), we pretend to
+            # always use AR 4.0...
             autosar_version_string = m.group(1)
 
         else:

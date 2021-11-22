@@ -47,7 +47,7 @@ ExampleMessage
 
         # Prepare mocks.
         args = Args('tests/files/dbc/motohawk.dbc')
-        args.print_all = True 
+        args.print_all = True
 
         stdout = StringIO()
         with patch('sys.stdout', stdout):
@@ -212,7 +212,7 @@ Message1:
       Start bit: 0
       Length: 1 bits
       Unit: wp
-      Initial value: False (0x0)
+      Initial value: False
       Is signed: False
       Minimum: 0
       Maximum: 1
@@ -229,7 +229,7 @@ Message1:
       Start bit: 4
       Length: 3 bits
       Unit: m
-      Initial value: 5 (0x5)
+      Initial value: 25.0 m
       Is signed: False
       Minimum: 0
       Maximum: 4

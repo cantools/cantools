@@ -84,7 +84,7 @@ class SystemLoader(object):
             raise ValueError('This class only supports AUTOSAR '
                              'versions 3 and 4')
 
-        self._create_arxml_references_dict()
+        self._create_arxml_reference_dicts()
 
     def autosar_version_newer(self, major, minor=None, patch=None):
         """Returns true iff the AUTOSAR version specified in the ARXML it at
@@ -522,10 +522,10 @@ class SystemLoader(object):
                 return None
 
             literal_spec = \
-                self._follow_arxml_reference(signal_elem,
-                                             ref_elem.text,
-                                             ref_elem.attrib.get('DEST', ''))
-
+                self._follow_arxml_reference(base_elem=signal_elem,
+                                             arxml_path=ref_elem.text,
+                                             dest_tag_name=ref_elem.attrib.get('DEST'),
+                                             refbase_name=ref_elem.attrib.get('BASE'))
             if literal_spec is None:
                 # dangling reference...
                 return None
@@ -817,42 +817,147 @@ class SystemLoader(object):
 
         return is_signed, is_float
 
-    def _follow_arxml_reference(self, base_elem, arxml_path, child_tag_name):
-        """Follow a ARXML reference
+    def _follow_arxml_reference(self, base_elem, arxml_path, dest_tag_name=None, refbase_name=None):
+        """Resolve an ARXML reference
 
-        It returns the ElementTree node which corrosponds to the given
+        It returns the ElementTree node which corresponds to the given
         path through the ARXML package structure. If no such node
-        exists, a ValueError exception is raised.
+        exists, a None object is returned.
         """
-        return self._arxml_references_dict.get(arxml_path)
+
+        # Handle relative references by converting them into absolute
+        # ones
+        if not arxml_path.startswith("/"):
+            base_path = self._node_to_arxml_path[base_elem].split("/")
+
+            # Find the absolute path specified by the applicable
+            # reference base. The spec says the matching reference
+            # base for the "closest" package should be used, so we
+            # traverse the ARXML path of the base element in reverse
+            # to find the first package with a matching reference
+            # base.
+            refbase_path = None
+            for i in range(len(base_path), 0, -1):
+                test_path = '/'.join(base_path[0:i])
+                test_node = self._arxml_path_to_node.get(test_path)
+                if test_node is not None and test_node.tag  != f'{{{self.xml_namespace}}}AR-PACKAGE':
+                    # the referenced XML node does not represent a
+                    # package
+                    continue
+
+                if refbase_name is None:
+                    # the caller did not specify a BASE attribute,
+                    # i.e., we ought to use the closest default
+                    # reference base
+                    refbase_path = self._package_default_refbase_path.get(test_path)
+                    if refbase_path is None:
+                        # bad luck: this package does not specify a
+                        # default reference base
+                        continue
+                    else:
+                        break
+
+                # the caller specifies a BASE attribute
+                refbase_path = self._package_refbase_paths.get(test_path, {}).get(refbase_name)
+                if refbase_path is None:
+                    # bad luck: this package does not specify a
+                    # reference base with the specified name
+                    continue
+                else:
+                    break
+
+            if refbase_path is None:
+                raise ValueError(f"Unknown reference base '{refbase_name}' for relative ARXML reference '{arxml_path}'")
+
+            arxml_path = f'{refbase_path}/{arxml_path}'
+
+        # resolve the absolute reference: This is simple because we
+        # have a path -> XML node dictionary!
+        result = self._arxml_path_to_node.get(arxml_path)
+
+        if result is not None \
+           and dest_tag_name is not None \
+           and result.tag != f'{{{self.xml_namespace}}}{dest_tag_name}':
+            # the reference could be resolved but it lead to a node of
+            # unexpected kind
+            return None
+
+        return result
 
 
+    def _create_arxml_reference_dicts(self):
+        self._node_to_arxml_path = {}
+        self._arxml_path_to_node = {}
+        self._package_default_refbase_path = {}
+        # given a package name, produce a refbase label to ARXML path dictionary
+        self._package_refbase_paths = {}
 
-
-    def _create_arxml_references_dict(self):
-        def add_sub_references(elem, elem_path):
+        def add_sub_references(elem, elem_path, cur_package_path=""):
             """Recursively add all ARXML references contained within an XML
-            element to the references dictionary"""
+            element to the dictionaries to handle ARXML references"""
 
-            # check if a short name has been specified for the base
-            # element. if yes, add a new entry to the dictionary.
-            short_name = elem.find(f"ns:SHORT-NAME", self._xml_namespaces)
+            # check if a short name has been attached to the current
+            # element. If yes update the ARXML path for this element
+            # and its children
+            short_name = elem.find(f'ns:SHORT-NAME', self._xml_namespaces)
 
             if short_name is not None:
                 short_name = short_name.text
                 elem_path = f'{elem_path}/{short_name}'
 
-                if elem_path in self._arxml_references_dict:
+                if elem_path in self._arxml_path_to_node:
                     raise ValueError(f"File contains multiple elements with "
                                      f"path '{elem_path}'")
 
-                self._arxml_references_dict[elem_path] = elem
+                self._arxml_path_to_node[elem_path] = elem
+
+            # register the ARXML path name of the current element
+            self._node_to_arxml_path[elem] = elem_path
+
+            # if the current element is a package, update the ARXML
+            # package path
+            if elem.tag == f'{{{self.xml_namespace}}}AR-PACKAGE':
+                cur_package_path = f'{cur_package_path}/{short_name}'
+
+            # handle reference bases (for relative references)
+            if elem.tag == f'{{{self.xml_namespace}}}REFERENCE-BASE':
+                refbase_name = elem.find('./ns:SHORT-LABEL',
+                                         self._xml_namespaces).text.strip()
+                refbase_path = elem.find('./ns:PACKAGE-REF',
+                                         self._xml_namespaces).text.strip()
+
+                is_default = elem.find('./ns:IS-DEFAULT', self._xml_namespaces)
+                if is_default is not None:
+                    is_default = (is_default.text.strip().lower() == "true")
+                if is_default and self._package_default_refbase_path.get(cur_package_path) is not None:
+                    raise ValueError(f'Multiple default reference bases bases '
+                                     f'specified for package "{cur_package_path}".')
+                elif is_default:
+                    self._package_default_refbase_path[cur_package_path] = refbase_path
+
+
+                is_global = elem.find('./ns:IS-GLOBAL', self._xml_namespaces)
+                if is_global is not None:
+                    is_global = (is_global.text.strip().lower() == "true")
+                if is_global:
+                    raise ValueError(f'Non-canonical relative references are '
+                                     f'not yet supported.')
+
+                # ensure that a dictionary for the refbases of the package exists
+                if cur_package_path not in self._package_refbase_paths:
+                    self._package_refbase_paths[cur_package_path] = {}
+                elif refbase_name in self._package_refbase_paths[cur_package_path]:
+                    raise ValueError(f'Package "{cur_package_path}" specifies '
+                                     f'multiple reference bases named '
+                                     f'"{refbase_name}".')
+                self._package_refbase_paths[cur_package_path][refbase_name] = \
+                    refbase_path
 
             # iterate over all children and add all references contained therein
-            for child in elem.getchildren():
-                add_sub_references(child, elem_path)
+            for child in elem:
+                add_sub_references(child, elem_path, cur_package_path)
 
-        self._arxml_references_dict = {}
+        self._arxml_path_to_node = {}
         add_sub_references(self._root, '')
 
     def _get_arxml_children(self, base_elems, children_location):
@@ -862,9 +967,9 @@ class SystemLoader(object):
         that match a given ARXML location. An ARXML location is a list
         of strings that specify the nesting order of the XML tag
         names; potential references for entries are preceeded by an
-        '&': If a sub-element that exhibits the specified name, it is
-        used directly while if there is a sub-node called
-        '{child_tag_name}-REF' it is assumed to contain an ARXML
+        '&': If a sub-element exhibits the specified name, it is used
+        directly and if there is a sub-node called
+        '{child_tag_name}-REF', it is assumed to contain an ARXML
         reference. This reference is then resolved and the remaining
         location specification is relative to the result of that
         resolution. If a location atom is preceeded by '*', then
@@ -888,6 +993,7 @@ class SystemLoader(object):
                                          'FRAME-TRIGGERINGS',
                                          '*&CAN-FRAME-TRIGGERING'
                                      ])
+
         """
 
         if base_elems is None:
@@ -934,10 +1040,11 @@ class SystemLoader(object):
                     if child_elem.tag == ctt:
                         local_result.append(child_elem)
                     elif child_elem.tag == cttr:
-                        dest_tag_type = child_elem.attrib.get('DEST')
-                        tmp = self._follow_arxml_reference(base_elem,
-                                                           child_elem.text,
-                                                           dest_tag_type)
+                        tmp = self._follow_arxml_reference(
+                            base_elem=base_elem,
+                            arxml_path=child_elem.text,
+                            dest_tag_name=child_elem.attrib.get('DEST'),
+                            refbase_name=child_elem.attrib.get('BASE'))
 
                         if tmp is None:
                             raise ValueError(f'Encountered dangling reference '

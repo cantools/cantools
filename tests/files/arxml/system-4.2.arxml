@@ -45,7 +45,7 @@
         </CAN-CLUSTER>
       </ELEMENTS>
     </AR-PACKAGE>
-    <AR-PACKAGE UUID="ad137c9540ff1f063e71b152f2b2eed4">
+   <AR-PACKAGE UUID="ad137c9540ff1f063e71b152f2b2eed4">
       <SHORT-NAME>CanFrame</SHORT-NAME>
       <ELEMENTS>
         <CAN-FRAME UUID="d7f932589036ffcbeac9310d12ae7c6f">
@@ -96,6 +96,22 @@
     </AR-PACKAGE>
     <AR-PACKAGE UUID="ad92e778fa18ac4adcc838f9235de7f0">
       <SHORT-NAME>ISignal</SHORT-NAME>
+      <REFERENCE-BASES>
+        <REFERENCE-BASE>
+          <SHORT-LABEL>ConstantBase</SHORT-LABEL>
+          <IS-DEFAULT>true</IS-DEFAULT>
+          <IS-GLOBAL>false</IS-GLOBAL>
+          <BASE-IS-THIS-PACKAGE>false</BASE-IS-THIS-PACKAGE>
+          <PACKAGE-REF DEST="AR-PACKAGE">/Constants</PACKAGE-REF>
+        </REFERENCE-BASE>
+        <REFERENCE-BASE>
+          <SHORT-LABEL>SystemSignalBase</SHORT-LABEL>
+          <IS-DEFAULT>false</IS-DEFAULT>
+          <IS-GLOBAL>false</IS-GLOBAL>
+          <BASE-IS-THIS-PACKAGE>false</BASE-IS-THIS-PACKAGE>
+          <PACKAGE-REF DEST="AR-PACKAGE">/SystemSignal</PACKAGE-REF>
+        </REFERENCE-BASE>
+      </REFERENCE-BASES>
       <ELEMENTS>
         <I-SIGNAL UUID="52b93c1cec70bd40a590ece0b3893c0d">
           <SHORT-NAME>signal1</SHORT-NAME>
@@ -117,7 +133,7 @@
               </SW-DATA-DEF-PROPS-CONDITIONAL>
             </SW-DATA-DEF-PROPS-VARIANTS>
           </NETWORK-REPRESENTATION-PROPS>
-          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/SystemSignalInner/Signal2</SYSTEM-SIGNAL-REF>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL" BASE="SystemSignalBase">SystemSignalInner/Signal2</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
         <I-SIGNAL UUID="1b81d9d6c79916117b4848178814a31a">
           <SHORT-NAME>signal2_1c</SHORT-NAME>
@@ -174,7 +190,7 @@
           <SHORT-NAME>signal6</SHORT-NAME>
           <INIT-VALUE>
             <CONSTANT-REFERENCE>
-              <CONSTANT-REF DEST="CONSTANT-SPECIFICATION">/Constants/BooleanFalse</CONSTANT-REF>
+              <CONSTANT-REF DEST="CONSTANT-SPECIFICATION">BooleanFalse</CONSTANT-REF>
             </CONSTANT-REFERENCE>
           </INIT-VALUE>
           <LENGTH>1</LENGTH>
@@ -349,12 +365,12 @@
                 <UPPER-LIMIT>3</UPPER-LIMIT>
               </COMPU-SCALE>
               <COMPU-SCALE>
-                <LOWER-LIMIT>1</LOWER-LIMIT>
-                <UPPER-LIMIT>1</UPPER-LIMIT>
                 <DESC>
                   <L-2 L="EN">One Comment</L-2>
                   <L-2 L="DE">Ein Kommentar</L-2>
                 </DESC>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <UPPER-LIMIT>1</UPPER-LIMIT>
                 <COMPU-CONST><VT>one</VT></COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>
@@ -372,12 +388,12 @@
           <COMPU-INTERNAL-TO-PHYS>
             <COMPU-SCALES>
               <COMPU-SCALE>
-                <LOWER-LIMIT>0</LOWER-LIMIT>
-                <UPPER-LIMIT>0</UPPER-LIMIT>
                 <DESC>
                   <L-2 L="EN">Nothing</L-2>
                   <L-2 L="DE">Nichts</L-2>
                 </DESC>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <UPPER-LIMIT>0</UPPER-LIMIT>
                 <COMPU-CONST><VT>zero</VT></COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>

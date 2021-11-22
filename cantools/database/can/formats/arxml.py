@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__)
 
 def parse_int_string(in_string):
     in_string = in_string.strip()
+
     if not in_string:
         return 0
     elif in_string[0] == '0' and in_string[1:2].isdigit():
@@ -33,39 +34,55 @@ class SystemLoader(object):
         m = re.match('^\\{(.*)\\}AUTOSAR$', self._root.tag)
 
         if not m:
-            raise ValueError(f"No XML namespace specified or illegal root tag name '{self._root.tag}'")
+            raise ValueError(f"No XML namespace specified or illegal root tag "
+                             f"name '{self._root.tag}'")
 
         xml_namespace = m.group(1)
         self.xml_namespace = xml_namespace
         self._xml_namespaces = { 'ns': xml_namespace }
 
-        m = re.match('^http://autosar\.org/schema/r(4\.[0-9.]*)$', xml_namespace)
+        m = re.match('^http://autosar\.org/schema/r(4\.[0-9.]*)$',
+                     xml_namespace)
+
         if m:
             # AUTOSAR 4
             autosar_version_string = m.group(1)
+
         else:
             m = re.match('^http://autosar\.org/(3\.[0-9.]*)$', xml_namespace)
+
             if m:
                 # AUTOSAR 3
                 autosar_version_string = m.group(1)
+
             else:
-                m = re.match('^http://autosar\.org/([0-9.]*)\.DAI\.[0-9]$', xml_namespace)
+                m = re.match('^http://autosar\.org/([0-9.]*)\.DAI\.[0-9]$',
+                             xml_namespace)
+
                 if m:
                     # Daimler (for some model ranges)
                     autosar_version_string = m.group(1)
+
                 else:
-                    raise ValueError(f"Unrecognized AUTOSAR XML namespace '{xml_namespace}'")
+                    raise ValueError(f"Unrecognized AUTOSAR XML namespace "
+                                     f"'{xml_namespace}'")
 
         m = re.match('^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
-        if not m:
-            raise ValueError(f"Could not parse AUTOSAR version '{autosar_version_string}'")
 
-        self.autosar_version_major = int(m.group(1))
-        self.autosar_version_minor = 0 if m.group(2) is None else int(m.group(2)[1:])
-        self.autosar_version_patch = 0 if m.group(3) is None else int(m.group(3)[1:])
+        if not m:
+            raise ValueError(f"Could not parse AUTOSAR version "
+                             f"'{autosar_version_string}'")
+
+        self.autosar_version_major = \
+            int(m.group(1))
+        self.autosar_version_minor = \
+            0 if m.group(2) is None else int(m.group(2)[1:])
+        self.autosar_version_patch = \
+            0 if m.group(3) is None else int(m.group(3)[1:])
 
         if self.autosar_version_major != 4 and self.autosar_version_major != 3:
-            raise ValueError('This class only supports AUTOSAR versions 3 and 4')
+            raise ValueError('This class only supports AUTOSAR '
+                             'versions 3 and 4')
 
         self._arxml_reference_cache = {}
 
@@ -115,6 +132,7 @@ class SystemLoader(object):
         # recursively extract all CAN clusters of all AUTOSAR packages
         # in the XML tree
         def handle_package_list(package_list):
+
             # load all packages of an XML package list tag
             for package in package_list.iterfind('./ns:AR-PACKAGE',
                                                  self._xml_namespaces):
@@ -125,10 +143,12 @@ class SystemLoader(object):
                 if self.autosar_version_newer(4):
                     sub_package_list = package.find('./ns:AR-PACKAGES',
                                                 self._xml_namespaces)
+
                 else:
                     # AUTOSAR 3
                     sub_package_list = package.find('./ns:SUB-PACKAGES',
                                                     self._xml_namespaces)
+
                 if sub_package_list is not None:
                     handle_package_list(sub_package_list)
 
@@ -147,8 +167,12 @@ class SystemLoader(object):
                                 version)
 
     def _load_package_contents(self, package_elem, messages):
-        # This code extracts the information about CAN clusters of an
-        # individual AR package. TODO: deal with the individual buses
+        """This code extracts the information about CAN clusters of an
+        individual AR package
+
+        TODO: deal with the individual CAN buses
+        """
+
         if self.autosar_version_newer(4):
             frame_triggerings_spec = \
                 [
@@ -161,7 +185,9 @@ class SystemLoader(object):
                     'FRAME-TRIGGERINGS',
                     '*&CAN-FRAME-TRIGGERING'
                 ]
-        else: # AUTOSAR 3
+
+        # AUTOSAR 3
+        else:
             frame_triggerings_spec = \
                 [
                     'ELEMENTS',
@@ -198,7 +224,8 @@ class SystemLoader(object):
         name = self._load_message_name(can_frame)
         frame_id = self._load_message_frame_id(can_frame_triggering)
         length = self._load_message_length(can_frame)
-        is_extended_frame = self._load_message_is_extended_frame(can_frame_triggering)
+        is_extended_frame = \
+            self._load_message_is_extended_frame(can_frame_triggering)
         comments = self._load_comments(can_frame)
 
         # ToDo: senders
@@ -229,7 +256,9 @@ class SystemLoader(object):
                     'REPEATING-TIME',
                     'VALUE'
                 ]
-            time_period = self._get_unique_arxml_child(pdu, time_period_location)
+
+            time_period = \
+                self._get_unique_arxml_child(pdu, time_period_location)
 
             if time_period is not None:
                 cycle_time = int(float(time_period.text) * 1000)
@@ -274,12 +303,14 @@ class SystemLoader(object):
                                             'SHORT-NAME').text
 
     def _load_message_frame_id(self, can_frame_triggering):
-        return parse_int_string(self._get_unique_arxml_child(can_frame_triggering,
-                                                             'IDENTIFIER').text)
+        return parse_int_string(
+            self._get_unique_arxml_child(can_frame_triggering,
+                                         'IDENTIFIER').text)
 
     def _load_message_length(self, can_frame):
-        return parse_int_string(self._get_unique_arxml_child(can_frame,
-                                                             'FRAME-LENGTH').text)
+        return parse_int_string(
+            self._get_unique_arxml_child(can_frame,
+                                         'FRAME-LENGTH').text)
 
     def _load_message_is_extended_frame(self, can_frame_triggering):
         can_addressing_mode = \
@@ -298,13 +329,13 @@ class SystemLoader(object):
 
         if len(result) == 0:
             return None
+
         return result
 
     def _load_signal(self, i_signal_to_i_pdu_mapping):
         """Load given signal and return a signal object.
 
         """
-
         i_signal = self._get_i_signal(i_signal_to_i_pdu_mapping)
 
         if i_signal is None:
@@ -317,7 +348,9 @@ class SystemLoader(object):
         # group, in which case we have ignore it if the XSD is to be believed.
         # ARXML is great!
         system_signal = self._get_unique_arxml_child(i_signal, '&SYSTEM-SIGNAL')
-        if system_signal is not None and system_signal.tag != f'{{{self.xml_namespace}}}SYSTEM-SIGNAL':
+
+        if system_signal is not None \
+           and system_signal.tag != f'{{{self.xml_namespace}}}SYSTEM-SIGNAL':
             return None
 
         # Default values.
@@ -332,11 +365,17 @@ class SystemLoader(object):
         receivers = []
         decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
+        if self.autosar_version_newer(4):
+            i_signal_spec = '&I-SIGNAL'
+        else:
+            i_signal_spec = '&SIGNAL'
+
         i_signal = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
-                                                 '&I-SIGNAL' if self.autosar_version_newer(4) else '&SIGNAL')
+                                                i_signal_spec)
         # Name, start position, length and byte order.
         name = self._load_signal_name(i_signal)
-        start_position = self._load_signal_start_position(i_signal_to_i_pdu_mapping)
+        start_position = \
+            self._load_signal_start_position(i_signal_to_i_pdu_mapping)
         length = self._load_signal_length(i_signal, system_signal)
         byte_order = self._load_signal_byte_order(i_signal_to_i_pdu_mapping)
 
@@ -400,8 +439,9 @@ class SystemLoader(object):
         if not self.autosar_version_newer(4) and system_signal is not None:
             # AUTOSAR3 supports specifying the signal length via the
             # system signal. (AR4 does not.)
-            system_signal_length = self._get_unique_arxml_child(system_signal,
-                                                                'LENGTH')
+            system_signal_length = \
+                self._get_unique_arxml_child(system_signal, 'LENGTH')
+
             if system_signal_length is not None:
                 # get the length from the system signal.
                 return parse_int_string(system_signal_length.text)
@@ -416,6 +456,7 @@ class SystemLoader(object):
         string which must be converted into the signal's data type by
         the calling code.
         """
+
         # AUTOSAR3 specifies the signal's initial value via
         # the system signal via the i-signal...
         if self.autosar_version_newer(4):
@@ -440,23 +481,26 @@ class SystemLoader(object):
             value_elem = \
                 self._get_unique_arxml_child(signal_elem,
                                              [
-                                                 'INIT-VALUE',
-                                                 'NUMERICAL-VALUE-SPECIFICATION',
-                                                 'VALUE'
+                                                'INIT-VALUE',
+                                                'NUMERICAL-VALUE-SPECIFICATION',
+                                                'VALUE'
                                              ])
+
             if value_elem is not None:
                 # initial value is specified directly.
                 return value_elem.text
 
-            value_elem = self._get_unique_arxml_child(signal_elem,
-                                                      [
-                                                          'INIT-VALUE',
-                                                          'CONSTANT-REFERENCE',
-                                                          '&CONSTANT',
-                                                          'VALUE-SPEC',
-                                                          'NUMERICAL-VALUE-SPECIFICATION',
-                                                          'VALUE'
-                                                      ])
+            value_elem = \
+                self._get_unique_arxml_child(signal_elem,
+                                             [
+                                                'INIT-VALUE',
+                                                'CONSTANT-REFERENCE',
+                                                '&CONSTANT',
+                                                'VALUE-SPEC',
+                                                'NUMERICAL-VALUE-SPECIFICATION',
+                                                'VALUE'
+                                             ])
+
             if value_elem is not None:
                 # initial value is specified via a reference to a constant.
                 return value_elem.text
@@ -470,7 +514,9 @@ class SystemLoader(object):
             # of INIT-VALUE-REF elements. Unfortunately, these are not
             # standard references so we have to go down a separate
             # code path...
-            ref_elem = signal_elem.find(f'./ns:INIT-VALUE-REF', self._xml_namespaces)
+            ref_elem = signal_elem.find(f'./ns:INIT-VALUE-REF',
+                                        self._xml_namespaces)
+
             if ref_elem is None:
                 # no initial value found here
                 return None
@@ -479,6 +525,7 @@ class SystemLoader(object):
                 self._follow_arxml3_const_reference(signal_elem,
                                                     ref_elem.text,
                                                     ref_elem.attrib.get('DEST', ''))
+
             if literal_spec is None:
                 # dangling reference...
                 return None
@@ -507,6 +554,7 @@ class SystemLoader(object):
                                                '&UNIT',
                                                'DISPLAY-NAME'
                                            ])
+
         if res is None and compu_method is not None:
             # try to go via the compu_method
             res = self._get_unique_arxml_child(compu_method,
@@ -530,21 +578,32 @@ class SystemLoader(object):
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
-                                                        '&COMPU-INTERNAL-TO-PHYS',
-                                                        'COMPU-SCALES',
-                                                        '*&COMPU-SCALE'
+                                                      '&COMPU-INTERNAL-TO-PHYS',
+                                                      'COMPU-SCALES',
+                                                      '*&COMPU-SCALE'
                                                     ]):
-            lower_limit = self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
-            upper_limit = self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
-            vt = self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
-            minimum_scale = None if lower_limit is None else text_to_num_fn(lower_limit.text)
-            maximum_scale = None if upper_limit is None else text_to_num_fn(upper_limit.text)
+            lower_limit = \
+                self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
+            upper_limit = \
+                self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
+            vt = \
+               self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
+            minimum_scale = \
+               None if lower_limit is None else text_to_num_fn(lower_limit.text)
+            maximum_scale = \
+               None if upper_limit is None else text_to_num_fn(upper_limit.text)
             comments = self._load_comments(compu_scale)
 
-            if minimum is None: minimum = minimum_scale
-            elif minimum_scale is not None: minimum = min(minimum, minimum_scale)
-            if maximum is None: maximum = maximum_scale
-            elif maximum_scale is not None: maximum = max(maximum, maximum_scale)
+            if minimum is None:
+                minimum = minimum_scale
+            elif minimum_scale is not None:
+                minimum = min(minimum, minimum_scale)
+
+            if maximum is None:
+                maximum = maximum_scale
+            elif maximum_scale is not None:
+                maximum = max(maximum, maximum_scale)
+
             if vt is not None:
                 value = int(lower_limit.text)
                 name = vt.text
@@ -595,10 +654,13 @@ class SystemLoader(object):
         upper_limit = self._get_unique_arxml_child(compu_scale, '&UPPER-LIMIT')
 
         text_to_num_fn = float if is_float else parse_int_string
-        minimum = None if lower_limit is None else text_to_num_fn(lower_limit.text)
-        maximum = None if upper_limit is None else text_to_num_fn(upper_limit.text)
+        minimum = \
+            None if lower_limit is None else text_to_num_fn(lower_limit.text)
+        maximum = \
+            None if upper_limit is None else text_to_num_fn(upper_limit.text)
 
-        factor, offset = self._load_linear_factor_and_offset(compu_scale, decimal)
+        factor, offset = \
+            self._load_linear_factor_and_offset(compu_scale, decimal)
 
         decimal.minimum = None if minimum is None else Decimal(minimum)
         decimal.maximum = None if maximum is None else Decimal(maximum)
@@ -615,35 +677,48 @@ class SystemLoader(object):
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
-                                                        '&COMPU-INTERNAL-TO-PHYS',
-                                                        'COMPU-SCALES',
-                                                        '*&COMPU-SCALE'
+                                                      '&COMPU-INTERNAL-TO-PHYS',
+                                                      'COMPU-SCALES',
+                                                      '*&COMPU-SCALE'
                                                     ]):
 
-            lower_limit = self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
-            upper_limit = self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
-            vt = self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
+            lower_limit = \
+                self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
+            upper_limit = \
+                self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
+            vt = \
+               self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
 
-            minimum_scale = None if lower_limit is None else text_to_num_fn(lower_limit.text)
-            maximum_scale = None if upper_limit is None else text_to_num_fn(upper_limit.text)
+            minimum_scale = \
+               None if lower_limit is None else text_to_num_fn(lower_limit.text)
+            maximum_scale = \
+               None if upper_limit is None else text_to_num_fn(upper_limit.text)
             comments = self._load_comments(compu_scale)
 
-            if minimum is None: minimum = minimum_scale
-            elif minimum_scale is not None: minimum = min(minimum, minimum_scale)
-            if maximum is None: maximum = maximum_scale
-            elif maximum_scale is not None: maximum = max(maximum, maximum_scale)
+            if minimum is None:
+                minimum = minimum_scale
+            elif minimum_scale is not None:
+                minimum = min(minimum, minimum_scale)
+
+            if maximum is None:
+                maximum = maximum_scale
+            elif maximum_scale is not None:
+                maximum = max(maximum, maximum_scale)
 
             # TODO: make sure that no conflicting scaling factors and offsets
             # are specified. For now, let's just assume that the ARXML file is
             # well formed.
-            factor_scale, offset_scale = self._load_linear_factor_and_offset(compu_scale, decimal)
+            factor_scale, offset_scale = \
+                self._load_linear_factor_and_offset(compu_scale, decimal)
             if factor_scale is not None:
                 factor = factor_scale
+
             if offset_scale is not None:
                 offset = offset_scale
 
             if vt is not None:
-                assert(minimum_scale is not None and minimum_scale == maximum_scale)
+                assert(minimum_scale is not None \
+                       and minimum_scale == maximum_scale)
                 value = int(minimum_scale)
                 name = vt.text
                 choices[value] = NamedSignalValue(value, name, comments)
@@ -720,9 +795,10 @@ class SystemLoader(object):
                 self._get_unique_arxml_child(base_type, '&BASE-TYPE-ENCODING')
 
             if base_type_encoding is None:
+                btt = base_type.find('./ns:SHORT-NAME', self._xml_namespaces)
+                btt = bt.text
                 raise ValueError(
-                    'BASE-TYPE-ENCODING in base type {} does not exist.'.format(
-                        base_type.find('./ns:SHORT-NAME', self._xml_namespaces).text))
+                    f'BASE-TYPE-ENCODING in base type "{btt}" does not exist.')
 
             base_type_encoding = base_type_encoding.text
 
@@ -757,10 +833,12 @@ class SystemLoader(object):
 
         # TODO (?): for relative paths, we need to find the corresponding package tag for each base element!
         base_elem = self._root if is_absolute_path else base_elem
+
         if not base_elem:
             raise ValueError(
                 'Tried to dereference a relative ARXML path without '
                 'specifying the base location.')
+
 
         short_names = arxml_path.lstrip('/').split('/')
         location = []
@@ -880,6 +958,7 @@ class SystemLoader(object):
             base_elems = [base_elems]
 
         for child_tag_name in children_location:
+
             if len(base_elems) == 0:
                 return [] # the base elements left are the empty set...
 
@@ -890,21 +969,27 @@ class SystemLoader(object):
 
             if allow_references:
                 child_tag_name = child_tag_name[1:]
+
             if is_nodeset:
                 child_tag_name = child_tag_name[1:]
 
             # traverse the specified path one level deeper
             result = []
+
             for base_elem in base_elems:
                 local_result = []
 
                 for child_elem in base_elem:
-                    if child_elem.tag == f'{{{self.xml_namespace}}}{child_tag_name}':
+                    ctt = f'{{{self.xml_namespace}}}{child_tag_name}'
+                    cttr = f'{{{self.xml_namespace}}}{child_tag_name}-REF'
+
+                    if child_elem.tag == ctt:
                         local_result.append(child_elem)
-                    elif child_elem.tag == f'{{{self.xml_namespace}}}{child_tag_name}-REF':
+                    elif child_elem.tag == cttr:
+                        dest_tag_type = child_elem.attrib.get('DEST')
                         tmp = self._follow_arxml_reference(base_elem,
                                                            child_elem.text,
-                                                           child_elem.attrib.get('DEST'))
+                                                           dest_tag_type)
 
                         if tmp is None:
                             raise ValueError(f'Encountered dangling reference '
@@ -933,14 +1018,15 @@ class SystemLoader(object):
         object can be used directly if the corresponding node is
         assumed to be present.
         """
-
         tmp = self._get_arxml_children(base_elem, child_location)
+
         if len(tmp) == 0:
             return None
         elif len(tmp) == 1:
             return tmp[0]
         else:
-            raise ValueError(f'{child_location} does not resolve into a unique node')
+            raise ValueError(f'{child_location} does not resolve into a '
+                             f'unique node')
 
     def _get_can_frame(self, can_frame_triggering):
         return self._get_unique_arxml_child(can_frame_triggering, '&FRAME')
@@ -965,10 +1051,10 @@ class SystemLoader(object):
         if self.autosar_version_newer(4):
             return self._get_unique_arxml_child(system_signal,
                                                 [
-                                                    '&PHYSICAL-PROPS',
-                                                    'SW-DATA-DEF-PROPS-VARIANTS',
-                                                    '&SW-DATA-DEF-PROPS-CONDITIONAL',
-                                                    '&COMPU-METHOD'
+                                               '&PHYSICAL-PROPS',
+                                               'SW-DATA-DEF-PROPS-VARIANTS',
+                                               '&SW-DATA-DEF-PROPS-CONDITIONAL',
+                                               '&COMPU-METHOD'
                                                 ])
         else:
             return self._get_unique_arxml_child(system_signal,
@@ -981,10 +1067,10 @@ class SystemLoader(object):
     def _get_sw_base_type(self, i_signal):
         return self._get_unique_arxml_child(i_signal,
                                             [
-                                                '&NETWORK-REPRESENTATION-PROPS',
-                                                'SW-DATA-DEF-PROPS-VARIANTS',
-                                                '&SW-DATA-DEF-PROPS-CONDITIONAL',
-                                                '&BASE-TYPE'
+                                               '&NETWORK-REPRESENTATION-PROPS',
+                                               'SW-DATA-DEF-PROPS-VARIANTS',
+                                               '&SW-DATA-DEF-PROPS-CONDITIONAL',
+                                               '&BASE-TYPE'
                                             ])
 
 # The ARXML XML namespace for the EcuExtractLoader
@@ -1126,7 +1212,6 @@ class EcuExtractLoader(object):
         for value in values:
             definition_ref = value.find(DEFINITION_REF_XPATH,
                                         NAMESPACES).text
-
             if not definition_ref.endswith('ComIPduSignalRef'):
                 continue
 
@@ -1183,7 +1268,6 @@ class EcuExtractLoader(object):
 
     def load_signal(self, xpath):
         ecuc_container_value = self.find_value(xpath)
-
         if ecuc_container_value is None:
             return None
 

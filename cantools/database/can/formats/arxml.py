@@ -45,7 +45,16 @@ class SystemLoader(object):
                      xml_namespace)
 
         if m:
-            # AUTOSAR 4
+            # AUTOSAR 4: For some reason, all AR 4 revisions always
+            # use "http://autosar.org/schema/r4.0" as their XML
+            # namespace. To find out the exact revision used (i.e.,
+            # 4.0, 4.1, 4.2, ...), the "xsi:schemaLocation" attribute
+            # of the root tag needs to be examined. Since this is
+            # pretty fragile (the used naming scheme has changed
+            # during the AR4 journey and with the latest naming scheme
+            # there seems to be no programmatic way to associate the
+            # schemaLocation with the AR revision), we pretend to
+            # always use AR 4.0...
             autosar_version_string = m.group(1)
 
         else:
@@ -530,10 +539,11 @@ class SystemLoader(object):
                 return None
 
             literal_spec = \
-                self._follow_arxml_reference(base_elem=signal_elem,
-                                             arxml_path=ref_elem.text,
-                                             dest_tag_name=ref_elem.attrib.get('DEST'),
-                                             refbase_name=ref_elem.attrib.get('BASE'))
+                self._follow_arxml_reference(
+                    base_elem=signal_elem,
+                    arxml_path=ref_elem.text,
+                    dest_tag_name=ref_elem.attrib.get('DEST'),
+                    refbase_name=ref_elem.attrib.get('BASE'))
             if literal_spec is None:
                 # dangling reference...
                 return None
@@ -825,7 +835,11 @@ class SystemLoader(object):
 
         return is_signed, is_float
 
-    def _follow_arxml_reference(self, base_elem, arxml_path, dest_tag_name=None, refbase_name=None):
+    def _follow_arxml_reference(self,
+                                base_elem,
+                                arxml_path,
+                                dest_tag_name=None,
+                                refbase_name=None):
         """Resolve an ARXML reference
 
         It returns the ElementTree node which corresponds to the given
@@ -848,7 +862,8 @@ class SystemLoader(object):
             for i in range(len(base_path), 0, -1):
                 test_path = '/'.join(base_path[0:i])
                 test_node = self._arxml_path_to_node.get(test_path)
-                if test_node is not None and test_node.tag  != f'{{{self.xml_namespace}}}AR-PACKAGE':
+                if test_node is not None \
+                   and test_node.tag  != f'{{{self.xml_namespace}}}AR-PACKAGE':
                     # the referenced XML node does not represent a
                     # package
                     continue
@@ -857,7 +872,8 @@ class SystemLoader(object):
                     # the caller did not specify a BASE attribute,
                     # i.e., we ought to use the closest default
                     # reference base
-                    refbase_path = self._package_default_refbase_path.get(test_path)
+                    refbase_path = \
+                        self._package_default_refbase_path.get(test_path)
                     if refbase_path is None:
                         # bad luck: this package does not specify a
                         # default reference base
@@ -866,7 +882,9 @@ class SystemLoader(object):
                         break
 
                 # the caller specifies a BASE attribute
-                refbase_path = self._package_refbase_paths.get(test_path, {}).get(refbase_name)
+                refbase_path = \
+                    self._package_refbase_paths.get(test_path, {}) \
+                                               .get(refbase_name)
                 if refbase_path is None:
                     # bad luck: this package does not specify a
                     # reference base with the specified name
@@ -875,7 +893,8 @@ class SystemLoader(object):
                     break
 
             if refbase_path is None:
-                raise ValueError(f"Unknown reference base '{refbase_name}' for relative ARXML reference '{arxml_path}'")
+                raise ValueError(f"Unknown reference base '{refbase_name}' "
+                                 f"for relative ARXML reference '{arxml_path}'")
 
             arxml_path = f'{refbase_path}/{arxml_path}'
 
@@ -935,18 +954,26 @@ class SystemLoader(object):
                                          self._xml_namespaces).text.strip()
 
                 is_default = elem.find('./ns:IS-DEFAULT', self._xml_namespaces)
+
                 if is_default is not None:
                     is_default = (is_default.text.strip().lower() == "true")
-                if is_default and self._package_default_refbase_path.get(cur_package_path) is not None:
-                    raise ValueError(f'Multiple default reference bases bases '
-                                     f'specified for package "{cur_package_path}".')
-                elif is_default:
-                    self._package_default_refbase_path[cur_package_path] = refbase_path
 
+                current_default_refbase_path = \
+                    self._package_default_refbase_path.get(cur_package_path)
+
+                if is_default and current_default_refbase_path is not None:
+                    raise ValueError(f'Multiple default reference bases bases '
+                                     f'specified for package '
+                                     f'"{cur_package_path}".')
+                elif is_default:
+                    self._package_default_refbase_path[cur_package_path] = \
+                        refbase_path
 
                 is_global = elem.find('./ns:IS-GLOBAL', self._xml_namespaces)
+
                 if is_global is not None:
                     is_global = (is_global.text.strip().lower() == "true")
+
                 if is_global:
                     raise ValueError(f'Non-canonical relative references are '
                                      f'not yet supported.')
@@ -954,7 +981,8 @@ class SystemLoader(object):
                 # ensure that a dictionary for the refbases of the package exists
                 if cur_package_path not in self._package_refbase_paths:
                     self._package_refbase_paths[cur_package_path] = {}
-                elif refbase_name in self._package_refbase_paths[cur_package_path]:
+                elif refbase_name in \
+                     self._package_refbase_paths[cur_package_path]:
                     raise ValueError(f'Package "{cur_package_path}" specifies '
                                      f'multiple reference bases named '
                                      f'"{refbase_name}".')

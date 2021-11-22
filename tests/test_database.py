@@ -4000,7 +4000,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'ARXML: "Unrecognized XML namespace \'http://autosar.org/schema/argh4.2.1\'"')
+            'ARXML: "Unrecognized XML namespace \'http://autosar.org/schema/argh4.0\'"')
 
         root = ElementTree.parse('tests/files/arxml/system-illegal-namespace-4.2.arxml').getroot()
         with self.assertRaises(ValueError) as cm:
@@ -4008,7 +4008,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Unrecognized AUTOSAR XML namespace \'http://autosar.org/schema/argh4.2.1\'')
+            'Unrecognized AUTOSAR XML namespace \'http://autosar.org/schema/argh4.0\'')
 
     def test_illegal_root(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
@@ -4016,7 +4016,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'ARXML: "No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.2.1}AUTOSARGH\'"')
+            'ARXML: "No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.0}AUTOSARGH\'"')
 
         root = ElementTree.parse('tests/files/arxml/system-illegal-root-4.2.arxml').getroot()
         with self.assertRaises(ValueError) as cm:
@@ -4024,7 +4024,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.2.1}AUTOSARGH\'')
+            'No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.0}AUTOSARGH\'')
 
     def test_illegal_version(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
@@ -4042,13 +4042,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(loader.autosar_version_newer(4), True)
         self.assertEqual(loader.autosar_version_newer(5), False)
 
-        self.assertEqual(loader.autosar_version_newer(4, 1), True)
-        self.assertEqual(loader.autosar_version_newer(4, 2), True)
+        # for AUTOSAR 4, we always pretend to be version 4.0
+        self.assertEqual(loader.autosar_version_newer(4, 0), True)
+        self.assertEqual(loader.autosar_version_newer(4, 1), False)
+        self.assertEqual(loader.autosar_version_newer(4, 2), False)
         self.assertEqual(loader.autosar_version_newer(4, 3), False)
-
-        self.assertEqual(loader.autosar_version_newer(4, 2, 0), True)
-        self.assertEqual(loader.autosar_version_newer(4, 2, 1), True)
-        self.assertEqual(loader.autosar_version_newer(4, 2, 2), False)
 
     def test_DAI_namespace(self):
         db = cantools.db.load_file('tests/files/arxml/system-DAI-3.1.2.arxml')

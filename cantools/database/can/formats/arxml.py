@@ -392,15 +392,23 @@ class SystemLoader(object):
         initial = self._load_arxml_init_value_string(i_signal, system_signal)
 
         if initial is not None:
-            if is_float:
-                initial = float(initial)
+            initial_int = None
+            try:
+                initial_int = parse_int_string(initial)
+            except:
+                pass
+
+            if choices is not None and initial_int in choices:
+                initial = choices[initial_int]
+            elif is_float:
+                initial = float(initial)*factor + offset
             elif initial.strip().lower() == 'true':
                 initial = True
             elif initial.strip().lower() == 'false':
                 initial = False
             # TODO: strings?
             else:
-                initial = parse_int_string(initial)
+                initial = initial_int*factor + offset
 
         # ToDo: receivers
 

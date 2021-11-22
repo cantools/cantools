@@ -4218,7 +4218,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.name, 'signal1')
         self.assertEqual(signal_2.start, 4)
         self.assertEqual(signal_2.length, 3)
-        self.assertEqual(signal_2.initial, 5)
+        self.assertEqual(signal_2.initial, 25.0)
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'big_endian')
         self.assertEqual(signal_2.is_signed, False)

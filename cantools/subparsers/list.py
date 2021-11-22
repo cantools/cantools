@@ -39,9 +39,11 @@ def _print_message(message):
             print(f'      Unit: {signal.unit}')
         if signal.initial is not None:
             iv = signal.initial
-            if isinstance(iv, int) and not signal.is_signed:
-                iv = f'{signal.initial} (0x{signal.initial:x})'
-            print(f'      Initial value: {iv}')
+            if signal.unit is None or not isinstance(iv, float):
+                unit = ''
+            else:
+                unit = f' {signal.unit}'
+            print(f'      Initial value: {iv}{unit}')
         if signal.is_signed is not None:
             print(f'      Is signed: {signal.is_signed}')
         if signal.minimum is not None:
@@ -85,8 +87,8 @@ def _do_list(args):
                 continue
             if not message.is_extended_frame and exclude_normal:
                 continue
-            messages.append(message.name)    
-    
+            messages.append(message.name)
+
         messages.sort()
 
     if not messages:
@@ -99,8 +101,8 @@ def _do_list(args):
             if not message.is_extended_frame and exclude_normal:
                 continue
 
-            message_names.append(message.name)    
-    
+            message_names.append(message.name)
+
         message_names.sort()
         for message_name in message_names:
             print(message_name)

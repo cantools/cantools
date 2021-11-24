@@ -25,14 +25,30 @@ def _print_message(message):
         signal_type = 'Integer'
         if signal.is_float:
             signal_type = 'Float'
-        elif signal.is_multiplexer:
-            signal_type = 'Multiplexer'
+        elif signal.is_multiplexer and \
+             signal.name in \
+                 [ x.multiplexer_signal for x in message.signals]:
+                signal_type = 'Multiplex Selector'
 
         print(f'    {signal.name}:')
         if signal.comments is not None:
             for lang in signal.comments:
                 print(f'      Comment[{lang}]: {signal.comments[lang]}')
         print(f'      Type: {signal_type}')
+        if signal.multiplexer_signal is not None:
+            print(f'      Selector signal: {signal.multiplexer_signal}')
+            selector_sig = None
+            selector_sig = message.get_signal_by_name(signal.multiplexer_signal)
+            selector_values = []
+
+            for x in signal.multiplexer_ids:
+                if selector_sig.choices and x in selector_sig.choices:
+                    selector_values.append(f'{selector_sig.choices[x]}')
+                else:
+                    selector_values.append(f'{x}')
+
+            print(f'      Selector values: {", ".join(selector_values)}')
+
         print(f'      Start bit: {signal.start}')
         print(f'      Length: {signal.length} bits')
         if signal.unit:

@@ -13,6 +13,12 @@
                 <CAN-PHYSICAL-CHANNEL UUID="7c3e0498d9012ebe0ccd83818229e62b">
                   <SHORT-NAME>Pch0</SHORT-NAME>
                   <FRAME-TRIGGERINGS>
+                    <CAN-FRAME-TRIGGERING UUID="4a5f0ff0995845008ad63274d6d90b82">
+                      <SHORT-NAME>multiplexed_message</SHORT-NAME>
+                      <FRAME-REF DEST="CAN-FRAME">/CanFrame/MultiplexedMessage</FRAME-REF>
+                      <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <IDENTIFIER>4</IDENTIFIER>
+                    </CAN-FRAME-TRIGGERING>
                     <CAN-FRAME-TRIGGERING UUID="0dbdf42579d12a756d1c553d93d2ca3f">
                       <SHORT-NAME>message1</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message1</FRAME-REF>
@@ -48,6 +54,17 @@
    <AR-PACKAGE UUID="ad137c9540ff1f063e71b152f2b2eed4">
       <SHORT-NAME>CanFrame</SHORT-NAME>
       <ELEMENTS>
+        <CAN-FRAME UUID="006474b65e634a1894c5d2df991ab43a">
+          <SHORT-NAME>MultiplexedMessage</SHORT-NAME>
+          <FRAME-LENGTH>2</FRAME-LENGTH>
+          <PDU-TO-FRAME-MAPPINGS>
+            <PDU-TO-FRAME-MAPPING UUID="1e160eb8bcb7a75f054eccbf6f47fe9f">
+              <SHORT-NAME>multiplexed_message</SHORT-NAME>
+              <PDU-REF DEST="MULTIPLEXED-I-PDU">/MultiplexedIPdu/multiplexed_message</PDU-REF>
+              <START-POSITION>0</START-POSITION>
+            </PDU-TO-FRAME-MAPPING>
+          </PDU-TO-FRAME-MAPPINGS>
+        </CAN-FRAME>
         <CAN-FRAME UUID="d7f932589036ffcbeac9310d12ae7c6f">
           <SHORT-NAME>Message1</SHORT-NAME>
           <DESC>
@@ -113,6 +130,108 @@
         </REFERENCE-BASE>
       </REFERENCE-BASES>
       <ELEMENTS>
+	<I-SIGNAL UUID="8608760bc2e64becbe22cbf1fc3d088f">
+          <SHORT-NAME>MultiplexedStatic</SHORT-NAME>
+          <INIT-VALUE>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <VALUE>0x7</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </INIT-VALUE>
+          <LENGTH>3</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/MultiplexedMessageStatic</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+	<I-SIGNAL UUID="3e138055f78d4f2eb52fe26e7a985fb7">
+          <SHORT-NAME>MultiplexedStatic2</SHORT-NAME>
+          <INIT-VALUE>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <VALUE>0x7</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </INIT-VALUE>
+          <LENGTH>8</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/MultiplexedMessageStatic2</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+	<I-SIGNAL UUID="405b27cd56f34c7db454dcded5d00274">
+          <SHORT-NAME>multiplexed_message_selector</SHORT-NAME>
+          <INIT-VALUE>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <VALUE>0</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </INIT-VALUE>
+          <LENGTH>2</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/MultiplexedMessageSelector</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+	<I-SIGNAL UUID="32e5b1187c8b4eb697198879f6a9f350">
+          <SHORT-NAME>Hello</SHORT-NAME>
+          <INIT-VALUE>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <VALUE>0</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </INIT-VALUE>
+          <LENGTH>3</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Hello</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+	<I-SIGNAL UUID="384c5072a52b4a2981b9918ae2c3ed31">
+          <SHORT-NAME>World1</SHORT-NAME>
+          <INIT-VALUE>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <VALUE>3</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </INIT-VALUE>
+          <LENGTH>2</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/World1</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+	<I-SIGNAL UUID="8b5167f49b724a52839ecb34f3cd3794">
+          <SHORT-NAME>World2</SHORT-NAME>
+          <INIT-VALUE>
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <VALUE>0</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </INIT-VALUE>
+          <LENGTH>1</LENGTH>
+          <NETWORK-REPRESENTATION-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <BASE-TYPE-REF DEST="SW-BASE-TYPE">/SwBaseType/S16</BASE-TYPE-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </NETWORK-REPRESENTATION-PROPS>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/World2</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
         <I-SIGNAL UUID="52b93c1cec70bd40a590ece0b3893c0d">
           <SHORT-NAME>signal1</SHORT-NAME>
           <INIT-VALUE>
@@ -213,8 +332,100 @@
       </ELEMENTS>
     </AR-PACKAGE>
     <AR-PACKAGE UUID="bf5ded8d0c2d7bd37cfb17f2525d7208">
+      <SHORT-NAME>MultiplexedIPdu</SHORT-NAME>
+      <ELEMENTS>
+        <MULTIPLEXED-I-PDU UUID="fd7053c9a1b64c9aa2ca9aed65c910c3">
+          <SHORT-NAME>multiplexed_message</SHORT-NAME>
+          <LENGTH>10</LENGTH>
+	  <DYNAMIC-PARTS>
+	    <DYNAMIC-PART>
+	      <SEGMENT-POSITIONS>
+		<SEGMENT-POSITION>
+		  <SEGMENT-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</SEGMENT-BYTE-ORDER>
+		  <SEGMENT-LENGTH>8</SEGMENT-LENGTH>
+		  <SEGMENT-POSITION>0</SEGMENT-POSITION>
+		</SEGMENT-POSITION>
+	      </SEGMENT-POSITIONS>
+	      <DYNAMIC-PART-ALTERNATIVES>
+		<DYNAMIC-PART-ALTERNATIVE>
+		  <I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_0</I-PDU-REF>
+		  <INITIAL-DYNAMIC-PART>true</INITIAL-DYNAMIC-PART>
+		  <SELECTOR-FIELD-CODE>0</SELECTOR-FIELD-CODE>
+		</DYNAMIC-PART-ALTERNATIVE>
+		<DYNAMIC-PART-ALTERNATIVE>
+		  <I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_1</I-PDU-REF>
+		  <INITIAL-DYNAMIC-PART>false</INITIAL-DYNAMIC-PART>
+		  <SELECTOR-FIELD-CODE>1</SELECTOR-FIELD-CODE>
+		</DYNAMIC-PART-ALTERNATIVE>
+	      </DYNAMIC-PART-ALTERNATIVES>
+	    </DYNAMIC-PART>
+	  </DYNAMIC-PARTS>
+	  <SELECTOR-FIELD-LENGTH>2</SELECTOR-FIELD-LENGTH>
+	  <SELECTOR-FIELD-START-POSITION>6</SELECTOR-FIELD-START-POSITION>
+	  <STATIC-PARTS>
+	    <STATIC-PART>
+	      <I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_static</I-PDU-REF>
+	    </STATIC-PART>
+	  </STATIC-PARTS>
+	</MULTIPLEXED-I-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <AR-PACKAGE UUID="bf5ded8d0c2d7bd37cfb17f2525d7208">
       <SHORT-NAME>ISignalIPdu</SHORT-NAME>
       <ELEMENTS>
+	<I-SIGNAL-I-PDU UUID="dfdcb36b36d9430d9c2685a82fc6c1f5">
+          <SHORT-NAME>multiplexed_message_static</SHORT-NAME>
+          <LENGTH>8</LENGTH>
+          <I-SIGNAL-TO-PDU-MAPPINGS>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="f1b87dc75ac84ad3bd787beae3b4e150">
+              <SHORT-NAME>multiplexed_message_static_signal</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/MultiplexedStatic</I-SIGNAL-REF>
+              <START-POSITION>0</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="4ca1b99dd98c4ccb9d8cdceef75f24cb">
+              <SHORT-NAME>multiplexed_message_static2_signal</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/MultiplexedStatic2</I-SIGNAL-REF>
+              <START-POSITION>8</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+          </I-SIGNAL-TO-PDU-MAPPINGS>
+        </I-SIGNAL-I-PDU>
+        <I-SIGNAL-I-PDU UUID="db37fa8f99f54ce993fe25d781b27298">
+          <SHORT-NAME>multiplexed_message_0</SHORT-NAME>
+          <LENGTH>8</LENGTH>
+          <I-SIGNAL-TO-PDU-MAPPINGS>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="e621f807e86e4bdcb88bd84147d39e91">
+              <SHORT-NAME>multiplexed_message_selector</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/multiplexed_message_selector</I-SIGNAL-REF>
+              <START-POSITION>6</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="013427274bfb4b04aea9f7a2b0df2f19">
+              <SHORT-NAME>multiplexed_message_0_hello</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/Hello</I-SIGNAL-REF>
+              <START-POSITION>3</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+          </I-SIGNAL-TO-PDU-MAPPINGS>
+        </I-SIGNAL-I-PDU>
+        <I-SIGNAL-I-PDU UUID="6dd681e3e0864be7ad9993b466693d8b">
+          <SHORT-NAME>multiplexed_message_1</SHORT-NAME>
+          <LENGTH>8</LENGTH>
+          <I-SIGNAL-TO-PDU-MAPPINGS>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="92e7cb8eae27459a9117ce2af77a71dc">
+              <SHORT-NAME>multiplexed_message_1_world1</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/World1</I-SIGNAL-REF>
+              <START-POSITION>4</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="95a954471faf43a68da52ad3efd4e66f">
+              <SHORT-NAME>multiplexed_message_1_world2</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/World2</I-SIGNAL-REF>
+              <START-POSITION>3</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+	    <I-SIGNAL-TO-I-PDU-MAPPING UUID="2d67e353277d429cb991d7264a69f73a">
+              <SHORT-NAME>multiplexed_message_selector</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/multiplexed_message_selector</I-SIGNAL-REF>
+              <START-POSITION>6</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+          </I-SIGNAL-TO-PDU-MAPPINGS>
+        </I-SIGNAL-I-PDU>
         <I-SIGNAL-I-PDU UUID="3dcbb5ec811c3944980fc28bd7f5a483">
           <SHORT-NAME>message1</SHORT-NAME>
           <LENGTH>6</LENGTH>
@@ -338,6 +549,28 @@
     <AR-PACKAGE UUID="bbcd842e7758802dad86635f98742e1c">
       <SHORT-NAME>CompuMethod</SHORT-NAME>
       <ELEMENTS>
+        <COMPU-METHOD UUID="75afc144ad524d9e8cb9c19fc2ab8ac9">
+          <SHORT-NAME>Identical</SHORT-NAME>
+          <CATEGORY>IDENTICAL</CATEGORY>
+        </COMPU-METHOD>
+        <COMPU-METHOD UUID="3bc9da2d3817477abe055bf9b9c26704">
+          <SHORT-NAME>MultiplexedMessageSelector</SHORT-NAME>
+          <CATEGORY>TEXTTABLE</CATEGORY>
+	  <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0</LOWER-LIMIT>
+                <UPPER-LIMIT>0</UPPER-LIMIT>
+                <COMPU-CONST><VT>SELECT_HELLO</VT></COMPU-CONST>
+              </COMPU-SCALE>
+              <COMPU-SCALE>
+                <LOWER-LIMIT>1</LOWER-LIMIT>
+                <UPPER-LIMIT>1</UPPER-LIMIT>
+                <COMPU-CONST><VT>SELECT_WORLD</VT></COMPU-CONST>
+              </COMPU-SCALE>
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
         <COMPU-METHOD UUID="e00081bacca8f50be8ca0bd672f69a7e">
           <SHORT-NAME>Signal1</SHORT-NAME>
           <CATEGORY>LINEAR</CATEGORY>
@@ -412,6 +645,66 @@
     <AR-PACKAGE UUID="e112f3e8fe0f74df3a6e34687da13681">
       <SHORT-NAME>SystemSignal</SHORT-NAME>
       <ELEMENTS>
+	<SYSTEM-SIGNAL UUID="0b2345c719534bbeaec6af1e4a5122bf">
+          <SHORT-NAME>MultiplexedMessageStatic</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Identical</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+	<SYSTEM-SIGNAL UUID="23ee1a014c8c4d73bb1fcd0e04a14005">
+          <SHORT-NAME>MultiplexedMessageStatic2</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Identical</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+	<SYSTEM-SIGNAL UUID="21331d4952d9459eb4180e0a6e8c0b15">
+          <SHORT-NAME>MultiplexedMessageSelector</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/MultiplexedMessageSelector</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+	<SYSTEM-SIGNAL UUID="a62d7c7d53594c0393b2aa4df043d591">
+          <SHORT-NAME>Hello</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Identical</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+	<SYSTEM-SIGNAL UUID="01f876690e3443d2b1a602b94f5ad145">
+          <SHORT-NAME>World1</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Identical</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+	<SYSTEM-SIGNAL UUID="787f1b93d14b413697c460ca00622bfc">
+          <SHORT-NAME>World2</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Identical</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
         <SYSTEM-SIGNAL UUID="536b81878eef939e2a2784502096da1e">
           <SHORT-NAME>Signal1</SHORT-NAME>
           <DESC>

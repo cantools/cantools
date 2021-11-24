@@ -169,6 +169,7 @@ Message2:
 Message1
 Message3
 Message4
+MultiplexedMessage
 """
 
             actual_output = stdout.getvalue()
@@ -288,36 +289,46 @@ Message2:
   Signals:
     Signal1:
       Type: Integer
+      Selector signal: Mux1
+      Selector values: 0
       Start bit: 0
       Length: 8 bits
       Is signed: False
     Signal3:
       Type: Integer
+      Selector signal: Mux1
+      Selector values: 1
       Start bit: 0
       Length: 8 bits
       Is signed: False
     Signal2:
       Type: Integer
+      Selector signal: Mux1
+      Selector values: 0
       Start bit: 8
       Length: 8 bits
       Is signed: False
     Signal4:
       Type: Integer
+      Selector signal: Mux1
+      Selector values: 1
       Start bit: 8
       Length: 8 bits
       Is signed: False
     Mux1:
-      Type: Multiplexer
+      Type: Multiplex Selector
       Start bit: 16
       Length: 2 bits
       Is signed: False
     Mux2:
-      Type: Multiplexer
+      Type: Multiplex Selector
       Start bit: 18
       Length: 1 bits
       Is signed: False
     Signal5:
       Type: Integer
+      Selector signal: Mux2
+      Selector values: 0
       Start bit: 19
       Length: 1 bits
       Is signed: False

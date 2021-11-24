@@ -11,7 +11,6 @@ from ..signal import Decimal as SignalDecimal
 from ..message import Message
 from ..internal_database import InternalDatabase
 
-
 LOGGER = logging.getLogger(__name__)
 
 def parse_int_string(in_string):
@@ -239,61 +238,14 @@ class SystemLoader(object):
 
         # ToDo: senders
 
-        # Find all signals in this message.
-        signals = []
-
         # For "sane" bus systems like CAN or LIN, there ought to be
         # only a single PDU per frame. AUTOSAR also supports "insane"
         # bus systems like flexray, though...
         pdu = self._get_pdu(can_frame)
+        assert pdu is not None
 
-        if pdu is not None:
-            if self.autosar_version_newer(4):
-                time_period_location = [
-                    'I-PDU-TIMING-SPECIFICATIONS',
-                    'I-PDU-TIMING',
-                    'TRANSMISSION-MODE-DECLARATION',
-                    'TRANSMISSION-MODE-TRUE-TIMING',
-                    'CYCLIC-TIMING',
-                    'TIME-PERIOD',
-                    'VALUE'
-                ]
-            else:
-                time_period_location = [
-                    'I-PDU-TIMING-SPECIFICATION',
-                    'CYCLIC-TIMING',
-                    'REPEATING-TIME',
-                    'VALUE'
-                ]
-
-            time_period = \
-                self._get_unique_arxml_child(pdu, time_period_location)
-
-            if time_period is not None:
-                cycle_time = int(float(time_period.text) * 1000)
-
-            if self.autosar_version_newer(4):
-                i_signal_to_i_pdu_mappings_location = \
-                    [
-                        'I-SIGNAL-TO-PDU-MAPPINGS',
-                        '*&I-SIGNAL-TO-I-PDU-MAPPING'
-                    ]
-            else:
-                i_signal_to_i_pdu_mappings_location = \
-                    [
-                        'SIGNAL-TO-PDU-MAPPINGS',
-                        '*&I-SIGNAL-TO-I-PDU-MAPPING'
-                    ]
-
-            i_signal_to_i_pdu_mappings = \
-                self._get_arxml_children(pdu,
-                                         i_signal_to_i_pdu_mappings_location)
-
-            for i_signal_to_i_pdu_mapping in i_signal_to_i_pdu_mappings:
-                signal = self._load_signal(i_signal_to_i_pdu_mapping)
-
-                if signal is not None:
-                    signals.append(signal)
+        _, _, signals, cycle_time = \
+            self._load_pdu(pdu, name, 1)
 
         return Message(frame_id=frame_id,
                        is_extended_frame=is_extended_frame,
@@ -306,6 +258,218 @@ class SystemLoader(object):
                        comment=comments,
                        bus_name=None,
                        strict=self._strict)
+
+
+    def _load_pdu(self, pdu, frame_name, next_selector_idx):
+        # Find all signals in this PDU.
+        signals = []
+
+        bit_length = self._get_unique_arxml_child(pdu, 'LENGTH')
+        if bit_length is not None:
+            bit_length = parse_int_string(bit_length.text)
+
+        if self.autosar_version_newer(4):
+            time_period_location = [
+                'I-PDU-TIMING-SPECIFICATIONS',
+                'I-PDU-TIMING',
+                'TRANSMISSION-MODE-DECLARATION',
+                'TRANSMISSION-MODE-TRUE-TIMING',
+                'CYCLIC-TIMING',
+                'TIME-PERIOD',
+                'VALUE',
+            ]
+        else:
+            time_period_location = [
+                'I-PDU-TIMING-SPECIFICATION',
+                'CYCLIC-TIMING',
+                'REPEATING-TIME',
+                'VALUE',
+            ]
+
+        time_period = \
+            self._get_unique_arxml_child(pdu, time_period_location)
+
+        cycle_time = None
+        if time_period is not None:
+            cycle_time = int(float(time_period.text) * 1000)
+
+        # ordinary non-multiplexed message
+        signals = self._load_pdu_signals(pdu)
+
+        if pdu.tag == f'{{{self.xml_namespace}}}MULTIPLEXED-I-PDU':
+            # multiplexed signals
+            signals.extend(self._load_pdu_multiplexed_parts(pdu,
+                                                            frame_name,
+                                                            next_selector_idx))
+
+        return \
+            next_selector_idx, \
+            bit_length, \
+            signals, \
+            cycle_time
+
+    def _load_pdu_multiplexed_parts(self, pdu, frame_name, next_selector_idx):
+        selector_pos = \
+            self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-START-POSITION')
+        selector_pos = parse_int_string(selector_pos.text)
+
+        selector_len = \
+            self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-LENGTH')
+        selector_len = parse_int_string(selector_len.text)
+
+        selector_byte_order = \
+            self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-BYTE-ORDER')
+        if selector_byte_order is not None:
+            if selector_byte_order.text == 'MOST-SIGNIFICANT-BYTE-FIRST':
+                selector_byte_order = 'big_endian'
+            else:
+                assert selector_byte_order.text == 'MOST-SIGNIFICANT-BYTE-LAST'
+                selector_byte_order = 'little_endian'
+        else:
+            selector_byte_order = 'little_endian'
+
+        selector_signal = Signal(
+            name=f'{frame_name}_selector{next_selector_idx}',
+            start=selector_pos,
+            length=selector_len,
+            byte_order=selector_byte_order,
+            choices={},
+            is_multiplexer=True,
+        )
+        next_selector_idx += 1
+
+        signals = [ selector_signal ]
+
+        if self.autosar_version_newer(4):
+            dynpart_spec = [
+                                                   'DYNAMIC-PARTS',
+                                                   '*DYNAMIC-PART',
+                                                   'DYNAMIC-PART-ALTERNATIVES',
+                                                   '*DYNAMIC-PART-ALTERNATIVE',
+                                               ]
+        else:
+            dynpart_spec = [
+                                                   'DYNAMIC-PART',
+                                                   'DYNAMIC-PART-ALTERNATIVES',
+                                                   '*DYNAMIC-PART-ALTERNATIVE',
+                                               ]
+
+        for dynalt in self._get_arxml_children(pdu, dynpart_spec):
+            dynalt_selector_value = \
+                self._get_unique_arxml_child(dynalt, 'SELECTOR-FIELD-CODE')
+            dynalt_selector_value = parse_int_string(dynalt_selector_value.text)
+            dynalt_pdu = self._get_unique_arxml_child(dynalt, '&I-PDU')
+
+            next_selector_idx, \
+                dynalt_bit_length, \
+                dynalt_signals, \
+                dynalt_cycle_time \
+                = self._load_pdu(dynalt_pdu, frame_name, next_selector_idx)
+
+            is_initial = \
+                self._get_unique_arxml_child(dynalt, 'INITIAL-DYNAMIC-PART')
+            is_initial = \
+                True \
+                if is_initial is not None and is_initial.text == 'true' \
+                else False
+            if is_initial:
+                assert selector_signal.initial is None
+                selector_signal.initial = dynalt_selector_value
+
+            # remove the selector signal from the dynamic part (because it
+            # logically is in the static part, despite the fact that AUTOSAR
+            # includes it in every dynamic part)
+            dynalt_selector_signals = \
+                [ x for x in dynalt_signals if x.start == selector_pos ]
+            assert len(dynalt_selector_signals) == 1
+            assert dynalt_selector_signals[0].start == selector_pos
+            assert dynalt_selector_signals[0].length == selector_len
+            if dynalt_selector_signals[0].choices is not None:
+                selector_signal.choices.update(dynalt_selector_signals[0].choices)
+            dynalt_signals.remove(dynalt_selector_signals[0])
+
+            # copy the non-selector signals into the list of signals
+            # for the PDU. TODO: It would be nicer if the hierarchic
+            # structure of the message could be preserved, but this
+            # would require a major change in the database format.
+            for sig in dynalt_signals:
+                # if a given signal is not already under the wings of
+                # a sub-multiplexer signal, we claim it for ourselfs
+                if sig.multiplexer_signal is None:
+                    sig.multiplexer_signal = selector_signal.name
+                    sig.multiplexer_ids = [ dynalt_selector_value ]
+
+            signals.extend(dynalt_signals)
+
+            # TODO: the cycle time of the multiplexers can be
+            # specified indepently. how should this be handled?
+
+        # the static part of the multiplexed PDU
+        if self.autosar_version_newer(4):
+            static_pdus_spec = [
+                'STATIC-PARTS',
+                '*STATIC-PART',
+                '&I-PDU',
+            ]
+        else:
+            static_pdus_spec = [
+                'STATIC-PART',
+                '&I-PDU',
+            ]
+
+        for static_pdu in self._get_arxml_children(pdu, static_pdus_spec):
+            next_selector_idx, \
+                bit_length, \
+                static_signals, \
+                _ \
+                = self._load_pdu(static_pdu, frame_name, next_selector_idx)
+
+            signals.extend(static_signals)
+
+        return signals
+
+    def _load_pdu_signals(self, pdu):
+        signals = []
+
+        if self.autosar_version_newer(4):
+            # in AR4, "normal" PDUs use I-SIGNAL-TO-PDU-MAPPINGS whilst network
+            # management PDUs use I-SIGNAL-TO-I-PDU-MAPPINGS
+            i_signal_to_i_pdu_mappings = \
+                self._get_arxml_children(pdu,
+                                         [
+                                             'I-SIGNAL-TO-PDU-MAPPINGS',
+                                             '*&I-SIGNAL-TO-I-PDU-MAPPING'
+                                         ])
+            i_signal_to_i_pdu_mappings.extend(
+                self._get_arxml_children(pdu,
+                                         [
+                                             'I-SIGNAL-TO-I-PDU-MAPPINGS',
+                                             '*&I-SIGNAL-TO-I-PDU-MAPPING'
+                                         ]))
+        else:
+            # in AR3, "normal" PDUs use SIGNAL-TO-PDU-MAPPINGS whilst network
+            # management PDUs use I-SIGNAL-TO-I-PDU-MAPPINGS
+            i_signal_to_i_pdu_mappings = \
+                self._get_arxml_children(pdu,
+                                         [
+                                             'SIGNAL-TO-PDU-MAPPINGS',
+                                             '*&I-SIGNAL-TO-I-PDU-MAPPING'
+                                         ])
+
+            i_signal_to_i_pdu_mappings.extend(
+                self._get_arxml_children(pdu,
+                                         [
+                                             'I-SIGNAL-TO-I-PDU-MAPPINGS',
+                                             '*&I-SIGNAL-TO-I-PDU-MAPPING'
+                                         ]))
+
+        for i_signal_to_i_pdu_mapping in i_signal_to_i_pdu_mappings:
+            signal = self._load_signal(i_signal_to_i_pdu_mapping)
+
+            if signal is not None:
+                signals.append(signal)
+
+        return signals
 
     def _load_message_name(self, can_frame_triggering):
         return self._get_unique_arxml_child(can_frame_triggering,
@@ -1533,13 +1697,11 @@ class EcuExtractLoader(object):
 
             yield name, value
 
-
 def is_ecu_extract(root):
     ecuc_value_collection = root.find(ECUC_VALUE_COLLECTION_XPATH,
                                       NAMESPACES)
 
     return ecuc_value_collection is not None
-
 
 def load_string(string, strict=True):
     """Parse given ARXML format string.

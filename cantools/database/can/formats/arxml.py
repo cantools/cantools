@@ -606,24 +606,27 @@ class SystemLoader(object):
                 self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = \
                self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
-            minimum_scale = \
-               None if lower_limit is None else text_to_num_fn(lower_limit.text)
-            maximum_scale = \
-               None if upper_limit is None else text_to_num_fn(upper_limit.text)
             comments = self._load_comments(compu_scale)
 
+            # range of the internal values of the scale.
+            minimum_int_scale = \
+               None if lower_limit is None else text_to_num_fn(lower_limit.text)
+            maximum_int_scale = \
+               None if upper_limit is None else text_to_num_fn(upper_limit.text)
+
+            # for texttables the internal and the physical values are identical
             if minimum is None:
-                minimum = minimum_scale
-            elif minimum_scale is not None:
-                minimum = min(minimum, minimum_scale)
+                minimum = minimum_int_scale
+            elif minimum_int_scale is not None:
+                minimum = min(minimum, minimum_int_scale)
 
             if maximum is None:
-                maximum = maximum_scale
-            elif maximum_scale is not None:
-                maximum = max(maximum, maximum_scale)
+                maximum = maximum_int_scale
+            elif maximum_int_scale is not None:
+                maximum = max(maximum, maximum_int_scale)
 
             if vt is not None:
-                value = int(lower_limit.text)
+                value = parse_int_string(lower_limit.text)
                 name = vt.text
                 choices[value] = NamedSignalValue(value, name, comments)
 
@@ -671,17 +674,24 @@ class SystemLoader(object):
         lower_limit = self._get_unique_arxml_child(compu_scale, '&LOWER-LIMIT')
         upper_limit = self._get_unique_arxml_child(compu_scale, '&UPPER-LIMIT')
 
-        text_to_num_fn = float if is_float else parse_int_string
-        minimum = \
-            None if lower_limit is None else text_to_num_fn(lower_limit.text)
-        maximum = \
-            None if upper_limit is None else text_to_num_fn(upper_limit.text)
+        # range of the internal values
+        minimum_int = \
+            None if lower_limit is None else parse_int_string(lower_limit.text)
+        maximum_int = \
+            None if upper_limit is None else parse_int_string(upper_limit.text)
 
         factor, offset = \
             self._load_linear_factor_and_offset(compu_scale, decimal)
 
+        factor = 1.0 if factor is None else factor
+        offset = 0.0 if offset is None else offset
+
+        # range of the physical values
+        minimum = None if minimum_int is None else minimum_int*factor + offset
+        maximum = None if maximum_int is None else maximum_int*factor + offset
         decimal.minimum = None if minimum is None else Decimal(minimum)
         decimal.maximum = None if maximum is None else Decimal(maximum)
+
         return minimum, maximum, factor, offset
 
     def _load_scale_linear_and_texttable(self, compu_method, decimal, is_float):
@@ -690,8 +700,6 @@ class SystemLoader(object):
         factor = 1
         offset = 0
         choices = {}
-
-        text_to_num_fn = float if is_float else parse_int_string
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -706,22 +714,15 @@ class SystemLoader(object):
                 self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = \
                self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
-
-            minimum_scale = \
-               None if lower_limit is None else text_to_num_fn(lower_limit.text)
-            maximum_scale = \
-               None if upper_limit is None else text_to_num_fn(upper_limit.text)
             comments = self._load_comments(compu_scale)
 
-            if minimum is None:
-                minimum = minimum_scale
-            elif minimum_scale is not None:
-                minimum = min(minimum, minimum_scale)
-
-            if maximum is None:
-                maximum = maximum_scale
-            elif maximum_scale is not None:
-                maximum = max(maximum, maximum_scale)
+            # range of the internal values of the scale.
+            minimum_int_scale = \
+                None if lower_limit is None \
+                else parse_int_string(lower_limit.text)
+            maximum_int_scale = \
+               None if upper_limit is None \
+               else parse_int_string(upper_limit.text)
 
             # TODO: make sure that no conflicting scaling factors and offsets
             # are specified. For now, let's just assume that the ARXML file is
@@ -730,14 +731,31 @@ class SystemLoader(object):
                 self._load_linear_factor_and_offset(compu_scale, decimal)
             if factor_scale is not None:
                 factor = factor_scale
+            else:
+                factor_scale = 1.0
 
             if offset_scale is not None:
                 offset = offset_scale
+            else:
+                offset_scale = 0.0
+
+            # range of the physical values of the scale.
+            if minimum is None:
+                minimum = minimum_int_scale*factor_scale + offset_scale
+            elif minimum_int_scale is not None:
+                minimum = min(minimum,
+                              minimum_int_scale*factor_scale + offset_scale)
+
+            if maximum is None:
+                maximum = maximum_int_scale*factor_scale + offset_scale
+            elif maximum_int_scale is not None:
+                maximum = max(maximum,
+                              maximum_int_scale*factor_scale + offset_scale)
 
             if vt is not None:
-                assert(minimum_scale is not None \
-                       and minimum_scale == maximum_scale)
-                value = int(minimum_scale)
+                assert(minimum_int_scale is not None \
+                       and minimum_int_scale == maximum_int_scale)
+                value = minimum_int_scale
                 name = vt.text
                 choices[value] = NamedSignalValue(value, name, comments)
 

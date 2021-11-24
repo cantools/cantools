@@ -214,8 +214,8 @@ Message1:
       Unit: wp
       Initial value: False
       Is signed: False
-      Minimum: 0
-      Maximum: 1
+      Minimum: 0.0
+      Maximum: 0.1
       Offset: 0.0
       Scaling factor: 0.1
       Named values:
@@ -231,8 +231,8 @@ Message1:
       Unit: m
       Initial value: 25.0 m
       Is signed: False
-      Minimum: 0
-      Maximum: 4
+      Minimum: 0.0
+      Maximum: 20.0
       Offset: 0.0
       Scaling factor: 5.0
     signal5:

@@ -10,9 +10,11 @@ class InternalDatabase(object):
                  nodes,
                  buses,
                  version,
-                 dbc_specifics=None):
+                 dbc_specifics=None,
+                 autosar_specifics=None):
         self.messages = messages
         self.nodes = nodes
         self.buses = buses
         self.version = version
         self.dbc = dbc_specifics
+        self.autosar = autosar_specifics

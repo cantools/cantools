@@ -4055,10 +4055,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.db.load_file('tests/files/arxml/system-3.2.3.arxml')
 
         self.assertEqual(len(db.nodes), 0)
-
         self.assertEqual(len(db.messages), 2)
+        self.assertTrue(db.autosar is not None)
+        self.assertTrue(db.dbc is None)
 
         mux_message = db.messages[0]
+        self.assertTrue(mux_message.autosar is not None)
+        self.assertTrue(mux_message.dbc is None)
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
         self.assertEqual(mux_message.name, 'Multiplexed')
@@ -4191,6 +4194,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.multiplexer_ids, [1])
 
         message_1 = db.messages[1]
+        self.assertTrue(message_1.autosar is not None)
+        self.assertTrue(message_1.dbc is None)
         self.assertEqual(message_1.frame_id, 123)
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Status')
@@ -4298,11 +4303,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
 
         self.assertEqual(len(db.nodes), 0)
-
         self.assertEqual(len(db.messages), 5)
+        self.assertTrue(db.autosar is not None)
+        self.assertTrue(db.dbc is None)
 
         # multiplexed message
         mux_message = db.messages[0]
+        self.assertTrue(mux_message.autosar is not None)
+        self.assertTrue(mux_message.dbc is None)
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
         self.assertEqual(mux_message.name, 'MultiplexedMessage')
@@ -4415,6 +4423,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.multiplexer_ids, [ 1 ])
 
         message_1 = db.messages[1]
+        self.assertTrue(message_1.autosar is not None)
+        self.assertTrue(message_1.dbc is None)
         self.assertEqual(message_1.frame_id, 5)
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Message1')
@@ -4513,6 +4523,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.multiplexer_ids, None)
 
         message_2 = db.messages[2]
+        self.assertTrue(message_2.autosar is not None)
+        self.assertTrue(message_2.dbc is None)
         self.assertEqual(message_2.frame_id, 6)
         self.assertEqual(message_2.is_extended_frame, True)
         self.assertEqual(message_2.name, 'Message2')
@@ -4593,6 +4605,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.multiplexer_ids, None)
 
         message_3 = db.messages[3]
+        self.assertTrue(message_3.autosar is not None)
+        self.assertTrue(message_3.dbc is None)
         self.assertEqual(message_3.frame_id, 100)
         self.assertEqual(message_3.is_extended_frame, False)
         self.assertEqual(message_3.name, 'Message3')
@@ -4606,6 +4620,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # message 4 tests different base encodings
         message_4 = db.messages[4]
+        self.assertTrue(message_4.autosar is not None)
+        self.assertTrue(message_4.dbc is None)
         self.assertEqual(message_4.frame_id, 101)
         self.assertEqual(message_4.is_extended_frame, False)
         self.assertEqual(message_4.name, 'Message4')

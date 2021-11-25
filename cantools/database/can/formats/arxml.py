@@ -13,9 +13,29 @@ from ..internal_database import InternalDatabase
 
 LOGGER = logging.getLogger(__name__)
 
+class AutosarDatabaseSpecifics(object):
+    """This class collects the AUTOSAR specific information of a system
+
+    Message-specific AUTOSAR information is represented by the
+    AutosarMessageSpecifics.
+
+    """
+    def __init__(self):
+        pass
+
+class AutosarMessageSpecifics(object):
+    """This class collects all AUTOSAR specific information of a CAN message
+
+    This means useful information about CAN messages which is provided
+    by ARXML files, but is specific to AUTOSAR.
+    """
+
+    def __init__(self):
+        pass
+
+
 def parse_int_string(in_string):
     in_string = in_string.strip()
-
     if not in_string:
         return 0
     elif in_string[0] == '0' and in_string[1:2].isdigit():
@@ -136,6 +156,7 @@ class SystemLoader(object):
         buses = []
         messages = []
         version = None
+        autosar_specifics = AutosarDatabaseSpecifics()
 
         # recursively extract all CAN clusters of all AUTOSAR packages
         # in the XML tree
@@ -172,7 +193,8 @@ class SystemLoader(object):
         return InternalDatabase(messages,
                                 [],
                                 buses,
-                                version)
+                                version,
+                                autosar_specifics=autosar_specifics)
 
     def _load_package_contents(self, package_elem, messages):
         """This code extracts the information about CAN clusters of an
@@ -225,6 +247,7 @@ class SystemLoader(object):
         # Default values.
         cycle_time = None
         senders = []
+        autosar_specifics = AutosarMessageSpecifics()
 
         can_frame = self._get_can_frame(can_frame_triggering)
 
@@ -257,6 +280,7 @@ class SystemLoader(object):
                        signals=signals,
                        comment=comments,
                        bus_name=None,
+                       autosar_specifics=autosar_specifics,
                        strict=self._strict)
 
 

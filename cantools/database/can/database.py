@@ -31,6 +31,7 @@ class Database(object):
                  buses=None,
                  version=None,
                  dbc_specifics=None,
+                 autosar_specifics=None,
                  frame_id_mask=None,
                  strict=True):
         self._messages = messages if messages else []
@@ -40,6 +41,7 @@ class Database(object):
         self._frame_id_to_message = {}
         self._version = version
         self._dbc = dbc_specifics
+        self._autosar = autosar_specifics
 
         if frame_id_mask is None:
             frame_id_mask = 0xffffffff
@@ -100,6 +102,18 @@ class Database(object):
     def dbc(self, value):
         self._dbc = value
 
+    @property
+    def autosar(self):
+        """An object containing AUTOSAR specific properties like e.g. attributes.
+
+        """
+
+        return self._autosar
+
+    @autosar.setter
+    def autosar(self, value):
+        self._autosar = value
+
     def add_arxml(self, fp):
         """Read and parse ARXML data from given file-like object and add the
         parsed data to the database.
@@ -132,6 +146,7 @@ class Database(object):
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
+        self._autosar = database.autosar
         self.refresh()
 
     def add_dbc(self, fp):

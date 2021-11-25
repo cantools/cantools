@@ -92,8 +92,9 @@ def _do_list(args):
     print_all = args.print_all
     exclude_extended = args.exclude_extended
     exclude_normal = args.exclude_normal
+    no_strict=args.no_strict
 
-    can_db = cantools.database.load_file(input_file_name)
+    can_db = cantools.database.load_file(input_file_name, strict=not no_strict)
 
     if print_all:
         # if no messages have been specified, we print the list of
@@ -169,6 +170,10 @@ def add_subparser(subparsers):
         const=True,
         required=False,
         help='Print detailed infos for all messages found in the input file.')
+    list_parser.add_argument(
+        '--no-strict',
+        action='store_true',
+        help='Skip database consistency checks.')
     list_parser.add_argument('file', metavar='FILE', nargs=1)
     list_parser.add_argument(
         'messages',

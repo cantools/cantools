@@ -24,6 +24,7 @@ class Args(object):
         self.exclude_normal = False
         self.exclude_extended = False
         self.print_all = False
+        self.no_strict = False
         self.file = (database, )
         self.messages = []
 

@@ -4060,8 +4060,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertTrue(db.dbc is None)
 
         mux_message = db.messages[0]
-        self.assertTrue(mux_message.autosar is not None)
-        self.assertTrue(mux_message.dbc is None)
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
         self.assertEqual(mux_message.name, 'Multiplexed')
@@ -4072,6 +4070,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(mux_message.signals), 6)
         self.assertEqual(mux_message.comments, None)
         self.assertEqual(mux_message.bus_name, None)
+        self.assertTrue(mux_message.dbc is None)
+        self.assertTrue(mux_message.autosar is not None)
+        self.assertEqual(mux_message.autosar.pdu_paths, [
+            '/Network/CanCluster/CAN/PDUs/Multiplexed',
+            '/Network/CanCluster/CAN/PDUs/Multiplexed_0',
+            '/Network/CanCluster/CAN/PDUs/Multiplexed_1',
+            '/Network/CanCluster/CAN/PDUs/Multiplexed_Static',
+        ])
 
         mux_signal_selector = mux_message.signals[0]
         self.assertEqual(mux_signal_selector.name, 'Multiplexed_selector1')
@@ -4194,8 +4200,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.multiplexer_ids, [1])
 
         message_1 = db.messages[1]
-        self.assertTrue(message_1.autosar is not None)
-        self.assertTrue(message_1.dbc is None)
         self.assertEqual(message_1.frame_id, 123)
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Status')
@@ -4206,6 +4210,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_1.signals), 4)
         self.assertEqual(message_1.comments["EN"], 'The lonely frame description')
         self.assertEqual(message_1.bus_name, None)
+        self.assertTrue(message_1.dbc is None)
+        self.assertTrue(message_1.autosar is not None)
+        self.assertEqual(message_1.autosar.pdu_paths, [ '/Network/CanCluster/CAN/PDUs/Status' ])
 
         signal_1 = message_1.signals[0]
         self.assertEqual(signal_1.name, 'Alive')
@@ -4309,8 +4316,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # multiplexed message
         mux_message = db.messages[0]
-        self.assertTrue(mux_message.autosar is not None)
-        self.assertTrue(mux_message.dbc is None)
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
         self.assertEqual(mux_message.name, 'MultiplexedMessage')
@@ -4322,6 +4327,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_message.bus_name, None)
         self.assertEqual(mux_message.comments, None)
         self.assertEqual(mux_message.comment, None)
+        self.assertTrue(mux_message.dbc is None)
+        self.assertTrue(mux_message.autosar is not None)
+        self.assertEqual(mux_message.autosar.pdu_paths, [
+            '/MultiplexedIPdu/multiplexed_message',
+            '/ISignalIPdu/multiplexed_message_0',
+            '/ISignalIPdu/multiplexed_message_1',
+            '/ISignalIPdu/multiplexed_message_static',
+        ])
 
         mux_signal_static = mux_message.signals[0]
         self.assertEqual(mux_signal_static.name, 'MultiplexedStatic')
@@ -4423,8 +4436,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.multiplexer_ids, [ 1 ])
 
         message_1 = db.messages[1]
-        self.assertTrue(message_1.autosar is not None)
-        self.assertTrue(message_1.dbc is None)
         self.assertEqual(message_1.frame_id, 5)
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Message1')
@@ -4443,6 +4454,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'DE': 'Kommentar eins',
                              'EN': 'Comment one'
                          })
+        self.assertTrue(message_1.dbc is None)
+        self.assertTrue(message_1.autosar is not None)
+        self.assertEqual(message_1.autosar.pdu_paths, [ '/ISignalIPdu/message1' ])
 
         signal_1 = message_1.signals[0]
         self.assertEqual(signal_1.name, 'signal6')
@@ -4523,8 +4537,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.multiplexer_ids, None)
 
         message_2 = db.messages[2]
-        self.assertTrue(message_2.autosar is not None)
-        self.assertTrue(message_2.dbc is None)
         self.assertEqual(message_2.frame_id, 6)
         self.assertEqual(message_2.is_extended_frame, True)
         self.assertEqual(message_2.name, 'Message2')
@@ -4535,6 +4547,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_2.signals), 3)
         self.assertEqual(message_2.comment, None)
         self.assertEqual(message_2.bus_name, None)
+        self.assertTrue(message_2.dbc is None)
+        self.assertTrue(message_2.autosar is not None)
+        self.assertEqual(message_2.autosar.pdu_paths, [ '/ISignalIPdu/message2' ])
 
         signal_1 = message_2.signals[0]
         self.assertEqual(signal_1.name, 'signal3')
@@ -4605,8 +4620,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.multiplexer_ids, None)
 
         message_3 = db.messages[3]
-        self.assertTrue(message_3.autosar is not None)
-        self.assertTrue(message_3.dbc is None)
         self.assertEqual(message_3.frame_id, 100)
         self.assertEqual(message_3.is_extended_frame, False)
         self.assertEqual(message_3.name, 'Message3')
@@ -4617,11 +4630,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_3.signals), 0)
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, None)
+        self.assertTrue(message_3.dbc is None)
+        self.assertTrue(message_3.autosar is not None)
+        self.assertEqual(message_3.autosar.pdu_paths, [ '/ISignalIPdu/message3' ])
 
         # message 4 tests different base encodings
         message_4 = db.messages[4]
-        self.assertTrue(message_4.autosar is not None)
-        self.assertTrue(message_4.dbc is None)
         self.assertEqual(message_4.frame_id, 101)
         self.assertEqual(message_4.is_extended_frame, False)
         self.assertEqual(message_4.name, 'Message4')
@@ -4632,6 +4646,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_4.signals), 3)
         self.assertEqual(message_4.comment, None)
         self.assertEqual(message_4.bus_name, None)
+        self.assertTrue(message_4.dbc is None)
+        self.assertTrue(message_4.autosar is not None)
+        self.assertEqual(message_4.autosar.pdu_paths, [ '/ISignalIPdu/message4' ])
 
         signal_2 = message_4.signals[0]
         self.assertEqual(signal_2.name, 'signal2')

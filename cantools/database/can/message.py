@@ -34,6 +34,7 @@ class Message(object):
                  send_type=None,
                  cycle_time=None,
                  dbc_specifics=None,
+                 autosar_specifics=None,
                  is_extended_frame=False,
                  bus_name=None,
                  signal_groups=None,
@@ -74,6 +75,7 @@ class Message(object):
         self._send_type = send_type
         self._cycle_time = cycle_time
         self._dbc = dbc_specifics
+        self._autosar = autosar_specifics
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs = None
@@ -295,6 +297,20 @@ class Message(object):
     @dbc.setter
     def dbc(self, value):
         self._dbc = value
+
+    @property
+    def autosar(self):
+        """An object containing AUTOsar specific properties
+
+        e.g. auxiliary data required to implement CRCs, secure on-board
+        communication (secOC) or container messages.
+        """
+
+        return self._autosar
+
+    @autosar.setter
+    def autosar(self, value):
+        self._autosar = value
 
     @property
     def bus_name(self):

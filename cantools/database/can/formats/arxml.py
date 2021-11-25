@@ -13,9 +13,40 @@ from ..internal_database import InternalDatabase
 
 LOGGER = logging.getLogger(__name__)
 
+class AutosarDatabaseSpecifics(object):
+    """This class collects the AUTOSAR specific information of a system
+
+    Message-specific AUTOSAR information is represented by the
+    AutosarMessageSpecifics.
+
+    """
+    def __init__(self):
+        pass
+
+class AutosarMessageSpecifics(object):
+    """This class collects all AUTOSAR specific information of a CAN message
+
+    This means useful information about CAN messages which is provided
+    by ARXML files, but is specific to AUTOSAR.
+    """
+
+    def __init__(self):
+        self._pdu_paths = []
+
+    @property
+    def pdu_paths(self):
+        """The ARXML paths of all PDUs featured by this message.
+
+        For the vast majority of messages, this list only has a single
+        entry. Messages with multiplexers and container frames are
+        different, though.
+        """
+        return self._pdu_paths
+
+
+
 def parse_int_string(in_string):
     in_string = in_string.strip()
-
     if not in_string:
         return 0
     elif in_string[0] == '0' and in_string[1:2].isdigit():
@@ -136,6 +167,7 @@ class SystemLoader(object):
         buses = []
         messages = []
         version = None
+        autosar_specifics = AutosarDatabaseSpecifics()
 
         # recursively extract all CAN clusters of all AUTOSAR packages
         # in the XML tree
@@ -172,7 +204,8 @@ class SystemLoader(object):
         return InternalDatabase(messages,
                                 [],
                                 buses,
-                                version)
+                                version,
+                                autosar_specifics=autosar_specifics)
 
     def _load_package_contents(self, package_elem, messages):
         """This code extracts the information about CAN clusters of an
@@ -225,6 +258,7 @@ class SystemLoader(object):
         # Default values.
         cycle_time = None
         senders = []
+        autosar_specifics = AutosarMessageSpecifics()
 
         can_frame = self._get_can_frame(can_frame_triggering)
 
@@ -238,14 +272,17 @@ class SystemLoader(object):
 
         # ToDo: senders
 
-        # For "sane" bus systems like CAN or LIN, there ought to be
-        # only a single PDU per frame. AUTOSAR also supports "insane"
-        # bus systems like flexray, though...
+        # Usually, a CAN message contains only a single PDU, but for
+        # things like multiplexed and container messages, this is not
+        # the case...
         pdu = self._get_pdu(can_frame)
         assert pdu is not None
+        pdu_path = self._get_pdu_path(can_frame)
+        autosar_specifics._pdu_paths.append(pdu_path)
 
-        _, _, signals, cycle_time = \
+        _, _, signals, cycle_time, child_pdu_paths = \
             self._load_pdu(pdu, name, 1)
+        autosar_specifics._pdu_paths.extend(child_pdu_paths)
 
         return Message(frame_id=frame_id,
                        is_extended_frame=is_extended_frame,
@@ -257,12 +294,14 @@ class SystemLoader(object):
                        signals=signals,
                        comment=comments,
                        bus_name=None,
+                       autosar_specifics=autosar_specifics,
                        strict=self._strict)
 
 
     def _load_pdu(self, pdu, frame_name, next_selector_idx):
-        # Find all signals in this PDU.
+        # load all data associated with this PDU.
         signals = []
+        child_pdu_paths = []
 
         bit_length = self._get_unique_arxml_child(pdu, 'LENGTH')
         if bit_length is not None:
@@ -298,17 +337,20 @@ class SystemLoader(object):
 
         if pdu.tag == f'{{{self.xml_namespace}}}MULTIPLEXED-I-PDU':
             # multiplexed signals
-            signals.extend(self._load_pdu_multiplexed_parts(pdu,
-                                                            frame_name,
-                                                            next_selector_idx))
+            pdu_signals, child_pdu_paths = \
+                self._load_multiplexed_pdu(pdu, frame_name, next_selector_idx)
+            signals.extend(pdu_signals)
 
         return \
             next_selector_idx, \
             bit_length, \
             signals, \
-            cycle_time
+            cycle_time, \
+            child_pdu_paths
 
-    def _load_pdu_multiplexed_parts(self, pdu, frame_name, next_selector_idx):
+    def _load_multiplexed_pdu(self, pdu, frame_name, next_selector_idx):
+        child_pdu_paths = []
+
         selector_pos = \
             self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-START-POSITION')
         selector_pos = parse_int_string(selector_pos.text)
@@ -359,12 +401,20 @@ class SystemLoader(object):
                 self._get_unique_arxml_child(dynalt, 'SELECTOR-FIELD-CODE')
             dynalt_selector_value = parse_int_string(dynalt_selector_value.text)
             dynalt_pdu = self._get_unique_arxml_child(dynalt, '&I-PDU')
+            dynalt_pdu_ref = self._get_unique_arxml_child(dynalt, 'I-PDU-REF')
+            dynalt_pdu_ref = \
+                self._get_absolute_arxml_path(dynalt,
+                                              dynalt_pdu_ref.text,
+                                              dynalt_pdu_ref.attrib.get('BASE'))
+            child_pdu_paths.append(dynalt_pdu_ref)
 
             next_selector_idx, \
                 dynalt_bit_length, \
                 dynalt_signals, \
-                dynalt_cycle_time \
+                dynalt_cycle_time, \
+                dynalt_child_pdu_paths \
                 = self._load_pdu(dynalt_pdu, frame_name, next_selector_idx)
+            child_pdu_paths.extend(dynalt_child_pdu_paths)
 
             is_initial = \
                 self._get_unique_arxml_child(dynalt, 'INITIAL-DYNAMIC-PART')
@@ -402,31 +452,46 @@ class SystemLoader(object):
             signals.extend(dynalt_signals)
 
             # TODO: the cycle time of the multiplexers can be
-            # specified indepently. how should this be handled?
+            # specified indepently of that of the message. how should
+            # this be handled?
 
         # the static part of the multiplexed PDU
         if self.autosar_version_newer(4):
-            static_pdus_spec = [
+            static_pdu_refs_spec = [
                 'STATIC-PARTS',
                 '*STATIC-PART',
-                '&I-PDU',
+                'I-PDU-REF',
             ]
         else:
-            static_pdus_spec = [
+            static_pdu_refs_spec = [
                 'STATIC-PART',
-                '&I-PDU',
+                'I-PDU-REF',
             ]
 
-        for static_pdu in self._get_arxml_children(pdu, static_pdus_spec):
+        for static_pdu_ref in self._get_arxml_children(pdu,
+                                                       static_pdu_refs_spec):
+            static_pdu_path = \
+                self._get_absolute_arxml_path(pdu,
+                                              static_pdu_ref.text,
+                                              static_pdu_ref.attrib.get('BASE'))
+            child_pdu_paths.append(static_pdu_path)
+
+            static_pdu = self._follow_arxml_reference(
+                base_elem=pdu,
+                arxml_path=static_pdu_path,
+                dest_tag_name=static_pdu_ref.attrib.get('DEST'))
+
             next_selector_idx, \
                 bit_length, \
                 static_signals, \
-                _ \
+                _, \
+                static_child_pdu_paths \
                 = self._load_pdu(static_pdu, frame_name, next_selector_idx)
 
+            child_pdu_paths.extend(static_child_pdu_paths)
             signals.extend(static_signals)
 
-        return signals
+        return signals, child_pdu_paths
 
     def _load_pdu_signals(self, pdu):
         signals = []
@@ -1017,6 +1082,68 @@ class SystemLoader(object):
 
         return is_signed, is_float
 
+    def _get_absolute_arxml_path(self,
+                                 base_elem,
+                                 arxml_path,
+                                 refbase_name=None):
+        """Return the absolute ARXML path of a reference
+
+        Relative ARXML paths are converted into absolute ones.
+        """
+
+        if arxml_path.startswith('/'):
+            # path is already absolute
+            return arxml_path
+
+        base_path = self._node_to_arxml_path[base_elem]
+        base_path_atoms = base_path.split("/")
+
+        # Find the absolute path specified by the applicable
+        # reference base. The spec says the matching reference
+        # base for the "closest" package should be used, so we
+        # traverse the ARXML path of the base element in reverse
+        # to find the first package with a matching reference
+        # base.
+        refbase_path = None
+        for i in range(len(base_path_atoms), 0, -1):
+            test_path = '/'.join(base_path_atoms[0:i])
+            test_node = self._arxml_path_to_node.get(test_path)
+            if test_node is not None \
+               and test_node.tag  != f'{{{self.xml_namespace}}}AR-PACKAGE':
+                # the referenced XML node does not represent a
+                # package
+                continue
+
+            if refbase_name is None:
+                # the caller did not specify a BASE attribute,
+                # i.e., we ought to use the closest default
+                # reference base
+                refbase_path = \
+                    self._package_default_refbase_path.get(test_path)
+                if refbase_path is None:
+                    # bad luck: this package does not specify a
+                    # default reference base
+                    continue
+                else:
+                    break
+
+            # the caller specifies a BASE attribute
+            refbase_path = \
+                self._package_refbase_paths.get(test_path, {}) \
+                                           .get(refbase_name)
+            if refbase_path is None:
+                # bad luck: this package does not specify a
+                # reference base with the specified name
+                continue
+            else:
+                break
+
+        if refbase_path is None:
+            raise ValueError(f"Unknown reference base '{refbase_name}' "
+                             f"for relative ARXML reference '{arxml_path}'")
+
+        return f'{refbase_path}/{arxml_path}'
+
     def _follow_arxml_reference(self,
                                 base_elem,
                                 arxml_path,
@@ -1029,56 +1156,10 @@ class SystemLoader(object):
         exists, a None object is returned.
         """
 
-        # Handle relative references by converting them into absolute
-        # ones
-        if not arxml_path.startswith("/"):
-            base_path = self._node_to_arxml_path[base_elem].split("/")
+        arxml_path = self._get_absolute_arxml_path(base_elem,
+                                                   arxml_path,
+                                                   refbase_name)
 
-            # Find the absolute path specified by the applicable
-            # reference base. The spec says the matching reference
-            # base for the "closest" package should be used, so we
-            # traverse the ARXML path of the base element in reverse
-            # to find the first package with a matching reference
-            # base.
-            refbase_path = None
-            for i in range(len(base_path), 0, -1):
-                test_path = '/'.join(base_path[0:i])
-                test_node = self._arxml_path_to_node.get(test_path)
-                if test_node is not None \
-                   and test_node.tag  != f'{{{self.xml_namespace}}}AR-PACKAGE':
-                    # the referenced XML node does not represent a
-                    # package
-                    continue
-
-                if refbase_name is None:
-                    # the caller did not specify a BASE attribute,
-                    # i.e., we ought to use the closest default
-                    # reference base
-                    refbase_path = \
-                        self._package_default_refbase_path.get(test_path)
-                    if refbase_path is None:
-                        # bad luck: this package does not specify a
-                        # default reference base
-                        continue
-                    else:
-                        break
-
-                # the caller specifies a BASE attribute
-                refbase_path = \
-                    self._package_refbase_paths.get(test_path, {}) \
-                                               .get(refbase_name)
-                if refbase_path is None:
-                    # bad luck: this package does not specify a
-                    # reference base with the specified name
-                    continue
-                else:
-                    break
-
-            if refbase_path is None:
-                raise ValueError(f"Unknown reference base '{refbase_name}' "
-                                 f"for relative ARXML reference '{arxml_path}'")
-
-            arxml_path = f'{refbase_path}/{arxml_path}'
 
         # resolve the absolute reference: This is simple because we
         # have a path -> XML node dictionary!
@@ -1319,6 +1400,20 @@ class SystemLoader(object):
                                                 '&PDU-TO-FRAME-MAPPING',
                                                 '&PDU'
                                             ])
+
+    def _get_pdu_path(self, can_frame):
+        pdu_ref = self._get_unique_arxml_child(can_frame,
+                                               [
+                                                   'PDU-TO-FRAME-MAPPINGS',
+                                                   '&PDU-TO-FRAME-MAPPING',
+                                                   'PDU-REF'
+                                               ])
+        if pdu_ref is not None:
+            pdu_ref = self._get_absolute_arxml_path(pdu_ref,
+                                                    pdu_ref.text,
+                                                    pdu_ref.attrib.get('BASE'))
+
+        return pdu_ref
 
     def _get_compu_method(self, system_signal):
         if self.autosar_version_newer(4):

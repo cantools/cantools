@@ -2,6 +2,7 @@
 
 import re
 import logging
+import numbers
 from decimal import Decimal
 
 from xml.etree import ElementTree
@@ -432,10 +433,17 @@ class SystemLoader(object):
             dynalt_selector_signals = \
                 [ x for x in dynalt_signals if x.start == selector_pos ]
             assert len(dynalt_selector_signals) == 1
-            assert dynalt_selector_signals[0].start == selector_pos
-            assert dynalt_selector_signals[0].length == selector_len
+            dselsig = dynalt_selector_signals[0]
+            assert dselsig.start == selector_pos
+            assert dselsig.length == selector_len
+
             if dynalt_selector_signals[0].choices is not None:
                 selector_signal.choices.update(dynalt_selector_signals[0].choices)
+
+            if dynalt_selector_signals[0].invalid is not None:
+                # TODO: this may lead to undefined behaviour if multiple PDU define the choices of their selector signals differently (who does this?)
+                selector_signal.invalid = dynalt_selector_signals[0].invalid
+
             dynalt_signals.remove(dynalt_selector_signals[0])
 
             # copy the non-selector signals into the list of signals
@@ -454,6 +462,15 @@ class SystemLoader(object):
             # TODO: the cycle time of the multiplexers can be
             # specified indepently of that of the message. how should
             # this be handled?
+
+        if selector_signal.initial in selector_signal.choices:
+            selector_signal.initial = \
+                selector_signal.choices[selector_signal.initial]
+
+        if not isinstance(selector_signal.invalid, NamedSignalValue) and \
+           selector_signal.invalid in selector_signal.choices:
+            selector_signal.invalid = \
+                selector_signal.choices[selector_signal.invalid]
 
         # the static part of the multiplexed PDU
         if self.autosar_version_newer(4):
@@ -593,6 +610,7 @@ class SystemLoader(object):
 
         # Default values.
         initial = None
+        invalid = None
         minimum = None
         maximum = None
         factor = 1
@@ -639,7 +657,7 @@ class SystemLoader(object):
             if choices is not None and initial_int in choices:
                 initial = choices[initial_int]
             elif is_float:
-                initial = float(initial)*factor + offset
+                initial = float(initial_int)*factor + offset
             elif initial.strip().lower() == 'true':
                 initial = True
             elif initial.strip().lower() == 'false':
@@ -647,6 +665,15 @@ class SystemLoader(object):
             # TODO: strings?
             else:
                 initial = initial_int*factor + offset
+
+        invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
+
+        if invalid is not None:
+            if choices is not None and invalid in choices:
+                invalid = choices[invalid]
+            elif not isinstance(invalid, bool) and \
+                 isinstance(invalid, numbers.Number):
+                invalid = invalid*factor + offset
 
         # ToDo: receivers
 
@@ -659,6 +686,7 @@ class SystemLoader(object):
                       scale=factor,
                       offset=offset,
                       initial=initial,
+                      invalid=invalid,
                       minimum=minimum,
                       maximum=maximum,
                       unit=unit,
@@ -715,6 +743,62 @@ class SystemLoader(object):
                 return None
 
             return self._load_arxml_init_value_string_helper(system_signal)
+
+    def _load_arxml_invalid_int_value(self, i_signal, system_signal):
+        """Load a signal's internal value which indicates that it is not valid
+
+        i.e., this returns the value which is transferred over the bus
+        before scaling and resolving the named choices. We currently
+        only support boolean and integer literals, any other value
+        specification will be ignored.
+        """
+
+        if self.autosar_version_newer(4):
+            invalid_val = \
+                self._get_unique_arxml_child(i_signal,
+                                             [
+                                                 'NETWORK-REPRESENTATION-PROPS',
+                                                 'SW-DATA-DEF-PROPS-VARIANTS',
+                                                 'SW-DATA-DEF-PROPS-CONDITIONAL',
+                                                 'INVALID-VALUE',
+                                                 'NUMERICAL-VALUE-SPECIFICATION',
+                                                 'VALUE',
+                                             ])
+
+            if invalid_val is None:
+                return None
+
+            return parse_int_string(invalid_val.text)
+
+        else:
+            invalid_val = \
+                self._get_unique_arxml_child(system_signal,
+                                             [
+                                                 '&DATA-TYPE',
+                                                 'SW-DATA-DEF-PROPS',
+                                                 'INVALID-VALUE'
+                                             ])
+
+            if invalid_val is None:
+                return None
+
+            literal = self._get_unique_arxml_child(invalid_val,
+                                                   [
+                                                       'INTEGER-LITERAL',
+                                                       'VALUE',
+                                                   ])
+            if literal is not None:
+                return parse_int_string(literal.text)
+
+            literal = self._get_unique_arxml_child(invalid_val,
+                                                   [
+                                                       'BOOLEAN-LITERAL',
+                                                       'VALUE',
+                                                   ])
+            if literal is not None:
+                return literal.text.lower().strip() == 'true'
+
+            return None
 
     def _load_arxml_init_value_string_helper(self, signal_elem):
         """"Helper function for loading thge initial value of a signal
@@ -912,8 +996,8 @@ class SystemLoader(object):
         factor, offset = \
             self._load_linear_factor_and_offset(compu_scale, decimal)
 
-        factor = 1.0 if factor is None else factor
-        offset = 0.0 if offset is None else offset
+        factor = 1 if factor is None else factor
+        offset = 0 if offset is None else offset
 
         # range of the physical values
         minimum = None if minimum_int is None else minimum_int*factor + offset
@@ -961,12 +1045,12 @@ class SystemLoader(object):
             if factor_scale is not None:
                 factor = factor_scale
             else:
-                factor_scale = 1.0
+                factor_scale = 1
 
             if offset_scale is not None:
                 offset = offset_scale
             else:
-                offset_scale = 0.0
+                offset_scale = 0
 
             # range of the physical values of the scale.
             if minimum is None:

@@ -216,7 +216,7 @@ Message1:
       Unit: wp
       Initial value: False
       Is signed: False
-      Minimum: 0.0
+      Minimum: 0
       Maximum: 0.1
       Offset: 0.0
       Scaling factor: 0.1

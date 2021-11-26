@@ -174,6 +174,7 @@ class Signal(object):
                  byte_order='little_endian',
                  is_signed=False,
                  initial=None,
+                 invalid=None,
                  scale=1,
                  offset=0,
                  minimum=None,
@@ -195,6 +196,7 @@ class Signal(object):
         self._byte_order = byte_order
         self._is_signed = is_signed
         self._initial = initial
+        self._invalid = invalid
         self._scale = scale
         self._offset = offset
         self._minimum = minimum
@@ -308,6 +310,18 @@ class Signal(object):
     @initial.setter
     def initial(self, value):
         self._initial = value
+
+    @property
+    def invalid(self):
+        """The value representing that the signal is invalid, or ``None`` if unavailable.
+
+        """
+
+        return self._invalid
+
+    @invalid.setter
+    def invalid(self, value):
+        self._invalid = value
 
     @property
     def scale(self):

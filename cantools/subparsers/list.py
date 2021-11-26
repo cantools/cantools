@@ -60,6 +60,13 @@ def _print_message(message):
             else:
                 unit = f' {signal.unit}'
             print(f'      Initial value: {iv}{unit}')
+        if signal.invalid is not None:
+            iv = signal.invalid
+            if signal.unit is None or not isinstance(iv, float):
+                unit = ''
+            else:
+                unit = f' {signal.unit}'
+            print(f'      Invalid value: {iv}{unit}')
         if signal.is_signed is not None:
             print(f'      Is signed: {signal.is_signed}')
         if signal.minimum is not None:

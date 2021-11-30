@@ -10,6 +10,7 @@ from xml.etree import ElementTree
 from ..signal import Signal, NamedSignalValue
 from ..signal import Decimal as SignalDecimal
 from ..message import Message
+from ..bus import Bus
 from ..internal_database import InternalDatabase
 
 LOGGER = logging.getLogger(__name__)
@@ -21,8 +22,19 @@ class AutosarDatabaseSpecifics(object):
     AutosarMessageSpecifics.
 
     """
-    def __init__(self):
-        pass
+    def __init__(self,
+                 arxml_version):
+        self._arxml_version = arxml_version
+
+    @property
+    def arxml_version(self):
+        """The used version of ARXML file format
+
+        Note that due to technical reasons we always return version
+        "4.0.0" for AUTOSAR 4.X.
+        """
+        return self._arxml_version
+
 
 class AutosarMessageSpecifics(object):
     """This class collects all AUTOSAR specific information of a CAN message
@@ -165,93 +177,219 @@ class SystemLoader(object):
         return True
 
     def load(self):
-        buses = []
         messages = []
-        version = None
-        autosar_specifics = AutosarDatabaseSpecifics()
-
-        # recursively extract all CAN clusters of all AUTOSAR packages
-        # in the XML tree
-        def handle_package_list(package_list):
-
-            # load all packages of an XML package list tag
-            for package in package_list.iterfind('./ns:AR-PACKAGE',
-                                                 self._xml_namespaces):
-                # deal with the package contents
-                self._load_package_contents(package, messages)
-
-                # load all sub-packages
-                if self.autosar_version_newer(4):
-                    sub_package_list = package.find('./ns:AR-PACKAGES',
-                                                self._xml_namespaces)
-
-                else:
-                    # AUTOSAR 3
-                    sub_package_list = package.find('./ns:SUB-PACKAGES',
-                                                    self._xml_namespaces)
-
-                if sub_package_list is not None:
-                    handle_package_list(sub_package_list)
 
         if self.autosar_version_newer(4):
-            handle_package_list(self._root.find("./ns:AR-PACKAGES",
-                                                self._xml_namespaces))
+            root_packages = self._root.find("./ns:AR-PACKAGES",
+                                            self._xml_namespaces)
         else:
             # AUTOSAR3 puts the top level packages beneath the
             # TOP-LEVEL-PACKAGES XML tag.
-            handle_package_list(self._root.find("./ns:TOP-LEVEL-PACKAGES",
-                                                self._xml_namespaces))
+            root_packages = self._root.find("./ns:TOP-LEVEL-PACKAGES",
+                                            self._xml_namespaces)
 
-        return InternalDatabase(messages,
-                                [],
-                                buses,
-                                version,
+        buses = self._load_buses(root_packages)
+        messages = self._load_messages(root_packages)
+
+        arxml_version = \
+            f'{self.autosar_version_major}.' \
+            f'{self.autosar_version_minor}.' \
+            f'{self.autosar_version_patch}'
+
+        autosar_specifics = \
+            AutosarDatabaseSpecifics(arxml_version=arxml_version)
+
+        return InternalDatabase(buses=buses,
+                                nodes=[],
+                                messages=messages,
+                                version=None,
                                 autosar_specifics=autosar_specifics)
 
-    def _load_package_contents(self, package_elem, messages):
+    def _load_buses(self, package_list):
+        """Recursively extract all buses of all CAN clusters of a list of
+        AUTOSAR packages.
+
+        @return A list of all buses contained in the given list of
+                packages and their sub-packages
+        """
+
+        buses = []
+
+        for package in package_list:
+            can_clusters = \
+                self._get_arxml_children(package,
+                                         [
+                                             'ELEMENTS',
+                                             '*&CAN-CLUSTER',
+                                         ])
+
+            # handle locally-specified clusters
+            for can_cluster in can_clusters:
+                if self.autosar_version_newer(4):
+                    name = \
+                        self._get_unique_arxml_child(can_cluster,
+                                                     'SHORT-NAME').text
+                    comments = self._load_comments(can_cluster)
+                    variants = \
+                        self._get_arxml_children(can_cluster,
+                                                 [
+                                                     '*CAN-CLUSTER-VARIANTS',
+                                                     'CAN-CLUSTER-CONDITIONAL',
+                                                 ])
+
+                    if variants is None or len(variants) == 0:
+                        # WTH?
+                        continue
+                    elif len(variants) > 1:
+                        LOGGER.warning(f'Multiple variants specified for CAN '
+                                       f'cluster "{name}". Using first one.')
+
+                    variant = variants[0]
+
+                    # version of the CAN standard
+                    proto_version = \
+                        self._get_unique_arxml_child(variant, 'PROTOCOL-VERSION')
+                    if proto_version is not None:
+                        proto_version = proto_version.text
+
+                    # base signaling rate
+                    baudrate = self._get_unique_arxml_child(variant, 'BAUDRATE')
+                    if baudrate is not None:
+                        baudrate = parse_int_string(baudrate.text)
+
+                    # baudrate for the payload of CAN-FD frames. (None if
+                    # this bus does not use CAN-FD.)
+                    fd_baudrate = \
+                        self._get_unique_arxml_child(variant, 'CAN-FD-BAUDRATE')
+                    if fd_baudrate is not None:
+                        fd_baudrate = parse_int_string(fd_baudrate.text)
+
+                    buses.append(Bus(name=name,
+                                     comment=comments,
+                                     baudrate=baudrate,
+                                     fd_baudrate=fd_baudrate))
+                else: # AUTOSAR 3
+                    name = \
+                        self._get_unique_arxml_child(can_cluster,
+                                                     'SHORT-NAME').text
+                    comments = self._load_comments(can_cluster)
+
+                    # version of the CAN standard
+                    proto_version = \
+                        self._get_unique_arxml_child(can_cluster, 'PROTOCOL-VERSION')
+                    if proto_version is not None:
+                        proto_version = proto_version.text
+
+                    # base signaling rate
+                    baudrate = self._get_unique_arxml_child(can_cluster, 'SPEED')
+                    if baudrate is not None:
+                        baudrate = parse_int_string(baudrate.text)
+
+                    # AUTOSAR 3 does not support CAN-FD
+                    fd_baudrate = None
+
+                    buses.append(Bus(name=name,
+                                     comment=comments,
+                                     baudrate=baudrate,
+                                     fd_baudrate=fd_baudrate))
+
+            # handle all sub-packages
+            if self.autosar_version_newer(4):
+                sub_package_list = package.find('./ns:AR-PACKAGES',
+                                                self._xml_namespaces)
+
+            else:
+                sub_package_list = package.find('./ns:SUB-PACKAGES',
+                                                self._xml_namespaces)
+
+            if sub_package_list is not None:
+                buses.extend(self._load_buses(sub_package_list))
+
+        return buses
+
+    def _load_messages(self, package_list):
+        """Recursively extract all messages of all CAN clusters of a list of
+        AUTOSAR packages.
+
+        @return A list of all messages contained in the given list of
+                packages and their sub-packages
+        """
+
+        messages = []
+
+        # load all messages of all packages in an list of XML package elements
+        for package in package_list.iterfind('./ns:AR-PACKAGE',
+                                             self._xml_namespaces):
+            # deal with the messages of the current package
+            messages.extend(self._load_package_messages(package))
+
+            # load all sub-packages
+            if self.autosar_version_newer(4):
+                sub_package_list = package.find('./ns:AR-PACKAGES',
+                                            self._xml_namespaces)
+
+            else:
+                sub_package_list = package.find('./ns:SUB-PACKAGES',
+                                                self._xml_namespaces)
+
+            if sub_package_list is not None:
+                messages.extend(self._load_messages(sub_package_list))
+
+        return messages
+
+    def _load_package_messages(self, package_elem):
         """This code extracts the information about CAN clusters of an
         individual AR package
 
         TODO: deal with the individual CAN buses
         """
 
-        if self.autosar_version_newer(4):
-            frame_triggerings_spec = \
-                [
-                    'ELEMENTS',
-                    '*&CAN-CLUSTER',
-                    'CAN-CLUSTER-VARIANTS',
-                    '*&CAN-CLUSTER-CONDITIONAL',
-                    'PHYSICAL-CHANNELS',
-                    '*&CAN-PHYSICAL-CHANNEL',
-                    'FRAME-TRIGGERINGS',
-                    '*&CAN-FRAME-TRIGGERING'
-                ]
+        messages = []
 
-        # AUTOSAR 3
-        else:
-            frame_triggerings_spec = \
-                [
-                    'ELEMENTS',
-                    '*&CAN-CLUSTER',
-                    'PHYSICAL-CHANNELS',
-                    '*&PHYSICAL-CHANNEL',
+        can_clusters = self._get_arxml_children(package_elem,
+                                                [
+                                                    'ELEMENTS',
+                                                    '*&CAN-CLUSTER',
+                                                ])
+        for can_cluster in can_clusters:
+            bus_name = self._get_unique_arxml_child(can_cluster,
+                                                    'SHORT-NAME').text
+            if self.autosar_version_newer(4):
+                frame_triggerings_spec = \
+                    [
+                        'CAN-CLUSTER-VARIANTS',
+                        '*&CAN-CLUSTER-CONDITIONAL',
+                        'PHYSICAL-CHANNELS',
+                        '*&CAN-PHYSICAL-CHANNEL',
+                        'FRAME-TRIGGERINGS',
+                        '*&CAN-FRAME-TRIGGERING'
+                    ]
 
-                    # ATTENTION! The trailig 'S' here is in purpose:
-                    # It appears in the AUTOSAR 3.2 XSD, but it still
-                    # seems to be a typo in the spec...
-                    'FRAME-TRIGGERINGSS',
+            # AUTOSAR 3
+            else:
+                frame_triggerings_spec = \
+                    [
+                        'PHYSICAL-CHANNELS',
+                        '*&PHYSICAL-CHANNEL',
 
-                    '*&CAN-FRAME-TRIGGERING'
-                ]
+                        # ATTENTION! The trailig 'S' here is in purpose:
+                        # It appears in the AUTOSAR 3.2 XSD, but it still
+                        # seems to be a typo in the spec...
+                        'FRAME-TRIGGERINGSS',
 
-        can_frame_triggerings = \
-            self._get_arxml_children(package_elem, frame_triggerings_spec)
+                        '*&CAN-FRAME-TRIGGERING'
+                    ]
 
-        for can_frame_triggering in can_frame_triggerings:
-            messages.append(self._load_message(can_frame_triggering))
+            can_frame_triggerings = \
+                self._get_arxml_children(can_cluster, frame_triggerings_spec)
 
-    def _load_message(self, can_frame_triggering):
+            for can_frame_triggering in can_frame_triggerings:
+                messages.append(self._load_message(bus_name,
+                                                   can_frame_triggering))
+
+        return messages
+
+    def _load_message(self, bus_name, can_frame_triggering):
         """Load given message and return a message object.
 
         """
@@ -285,7 +423,8 @@ class SystemLoader(object):
             self._load_pdu(pdu, name, 1)
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
 
-        return Message(frame_id=frame_id,
+        return Message(bus_name=bus_name,
+                       frame_id=frame_id,
                        is_extended_frame=is_extended_frame,
                        name=name,
                        length=length,
@@ -294,10 +433,8 @@ class SystemLoader(object):
                        cycle_time=cycle_time,
                        signals=signals,
                        comment=comments,
-                       bus_name=None,
                        autosar_specifics=autosar_specifics,
                        strict=self._strict)
-
 
     def _load_pdu(self, pdu, frame_name, next_selector_idx):
         # load all data associated with this PDU.

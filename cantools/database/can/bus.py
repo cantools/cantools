@@ -8,10 +8,24 @@ class Bus(object):
     def __init__(self,
                  name,
                  comment=None,
-                 baudrate=None):
+                 baudrate=None,
+                 fd_baudrate=None):
         self._name = name
-        self._comment = comment
+
+        # If the 'comment' argument is a string, we assume that is an
+        # English comment. This is slightly hacky, because the
+        # function's behavior depends on the type of the passed
+        # argument, but it is quite convenient...
+        if isinstance(comment, str):
+            # use the first comment in the dictionary as "The" comment
+            self._comments = { None: comment }
+        else:
+            # assume that we have either no comment at all or a
+            # multi-lingual dictionary
+            self._comments = comment
+
         self._baudrate = baudrate
+        self._fd_baudrate = fd_baudrate
 
     @property
     def name(self):
@@ -23,11 +37,28 @@ class Bus(object):
 
     @property
     def comment(self):
-        """The bus comment, or ``None`` if unavailable.
+        """The bus' comment, or ``None`` if unavailable.
+
+        Note that we implicitly try to return the English comment if
+        multiple languages were specified.
 
         """
+        if self._comments is None:
+            return None
+        elif self._comments.get(None) is not None:
+            return self._comments.get(None)
+        elif self._comments.get("FOR-ALL") is not None:
+            return self._comments.get("FOR-ALL")
 
-        return self._comment
+        return self._comments.get('EN')
+
+    @property
+    def comments(self):
+        """The dictionary with the descriptions of the bus in multiple
+        languages. ``None`` if unavailable.
+
+        """
+        return self._comments
 
     @property
     def baudrate(self):
@@ -37,7 +68,16 @@ class Bus(object):
 
         return self._baudrate
 
+    @property
+    def fd_baudrate(self):
+        """The baudrate used for the payload of CAN-FD frames, or ``None`` if
+        unavailable.
+
+        """
+
+        return self._fd_baudrate
+
     def __repr__(self):
         return "bus('{}', {})".format(
             self._name,
-            "'" + self._comment + "'" if self._comment is not None else None)
+            "'" + self.comment + "'" if self.comment is not None else None)

@@ -21,8 +21,19 @@ class AutosarDatabaseSpecifics(object):
     AutosarMessageSpecifics.
 
     """
-    def __init__(self):
-        pass
+    def __init__(self,
+                 arxml_version):
+        self._arxml_version = arxml_version
+
+    @property
+    def arxml_version(self):
+        """The used version of ARXML file format
+
+        Note that due to technical reasons we always return version
+        "4.0.0" for AUTOSAR 4.X.
+        """
+        return self._arxml_version
+
 
 class AutosarMessageSpecifics(object):
     """This class collects all AUTOSAR specific information of a CAN message
@@ -166,7 +177,6 @@ class SystemLoader(object):
 
     def load(self):
         messages = []
-        autosar_specifics = AutosarDatabaseSpecifics()
 
         if self.autosar_version_newer(4):
             root_packages = self._root.find("./ns:AR-PACKAGES",
@@ -178,6 +188,14 @@ class SystemLoader(object):
                                             self._xml_namespaces)
 
         messages = self._load_messages(root_packages)
+
+        arxml_version = \
+            f'{self.autosar_version_major}.' \
+            f'{self.autosar_version_minor}.' \
+            f'{self.autosar_version_patch}'
+
+        autosar_specifics = \
+            AutosarDatabaseSpecifics(arxml_version=arxml_version)
 
         return InternalDatabase(messages,
                                 nodes=[],

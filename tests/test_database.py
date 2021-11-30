@@ -4058,6 +4058,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 2)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
+        self.assertEqual(db.autosar.arxml_version, "3.2.3")
 
         mux_message = db.messages[0]
         self.assertEqual(mux_message.frame_id, 4)
@@ -4313,6 +4314,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 5)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
+        self.assertEqual(db.autosar.arxml_version, "4.0.0")
 
         # multiplexed message
         mux_message = db.messages[0]

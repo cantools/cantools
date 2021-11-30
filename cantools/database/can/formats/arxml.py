@@ -165,56 +165,64 @@ class SystemLoader(object):
         return True
 
     def load(self):
-        buses = []
         messages = []
-        version = None
         autosar_specifics = AutosarDatabaseSpecifics()
 
-        # recursively extract all CAN clusters of all AUTOSAR packages
-        # in the XML tree
-        def handle_package_list(package_list):
-
-            # load all packages of an XML package list tag
-            for package in package_list.iterfind('./ns:AR-PACKAGE',
-                                                 self._xml_namespaces):
-                # deal with the package contents
-                self._load_package_contents(package, messages)
-
-                # load all sub-packages
-                if self.autosar_version_newer(4):
-                    sub_package_list = package.find('./ns:AR-PACKAGES',
-                                                self._xml_namespaces)
-
-                else:
-                    # AUTOSAR 3
-                    sub_package_list = package.find('./ns:SUB-PACKAGES',
-                                                    self._xml_namespaces)
-
-                if sub_package_list is not None:
-                    handle_package_list(sub_package_list)
-
         if self.autosar_version_newer(4):
-            handle_package_list(self._root.find("./ns:AR-PACKAGES",
-                                                self._xml_namespaces))
+            root_packages = self._root.find("./ns:AR-PACKAGES",
+                                            self._xml_namespaces)
         else:
             # AUTOSAR3 puts the top level packages beneath the
             # TOP-LEVEL-PACKAGES XML tag.
-            handle_package_list(self._root.find("./ns:TOP-LEVEL-PACKAGES",
-                                                self._xml_namespaces))
+            root_packages = self._root.find("./ns:TOP-LEVEL-PACKAGES",
+                                            self._xml_namespaces)
+
+        messages = self._load_messages(root_packages)
 
         return InternalDatabase(messages,
-                                [],
-                                buses,
-                                version,
+                                nodes=[],
+                                buses=[],
+                                version=None,
                                 autosar_specifics=autosar_specifics)
 
-    def _load_package_contents(self, package_elem, messages):
+    def _load_messages(self, package_list):
+        """Recursively extract all messages of all CAN clusters of a list of
+        AUTOSAR packages.
+
+        @return A list of all messages contained in the given list of
+                packages and their sub-packages
+        """
+
+        messages = []
+
+        # load all messages of all packages in an list of XML package elements
+        for package in package_list.iterfind('./ns:AR-PACKAGE',
+                                             self._xml_namespaces):
+            # deal with the messages of the current package
+            messages.extend(self._load_package_messages(package))
+
+            # load all sub-packages
+            if self.autosar_version_newer(4):
+                sub_package_list = package.find('./ns:AR-PACKAGES',
+                                            self._xml_namespaces)
+
+            else:
+                sub_package_list = package.find('./ns:SUB-PACKAGES',
+                                                self._xml_namespaces)
+
+            if sub_package_list is not None:
+                messages.extend(self._load_messages(sub_package_list))
+
+        return messages
+
+    def _load_package_messages(self, package_elem):
         """This code extracts the information about CAN clusters of an
         individual AR package
 
         TODO: deal with the individual CAN buses
         """
 
+        messages = []
         if self.autosar_version_newer(4):
             frame_triggerings_spec = \
                 [
@@ -250,6 +258,8 @@ class SystemLoader(object):
 
         for can_frame_triggering in can_frame_triggerings:
             messages.append(self._load_message(can_frame_triggering))
+
+        return messages
 
     def _load_message(self, can_frame_triggering):
         """Load given message and return a message object.

@@ -4054,6 +4054,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_system_3_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-3.2.3.arxml')
 
+        self.assertEqual(len(db.buses), 1)
+        bus = db.buses[0]
+        self.assertEqual(bus.name, 'Network')
+        self.assertEqual(bus.comment, None)
+        self.assertEqual(bus.comments, None)
+        self.assertEqual(bus.baudrate, 250000)
+        self.assertEqual(bus.fd_baudrate, None)
+
         self.assertEqual(len(db.nodes), 0)
         self.assertEqual(len(db.messages), 2)
         self.assertTrue(db.autosar is not None)
@@ -4070,7 +4078,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_message.cycle_time, None)
         self.assertEqual(len(mux_message.signals), 6)
         self.assertEqual(mux_message.comments, None)
-        self.assertEqual(mux_message.bus_name, None)
+        self.assertEqual(mux_message.bus_name, 'Network')
         self.assertTrue(mux_message.dbc is None)
         self.assertTrue(mux_message.autosar is not None)
         self.assertEqual(mux_message.autosar.pdu_paths, [
@@ -4210,7 +4218,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.cycle_time, 500)
         self.assertEqual(len(message_1.signals), 4)
         self.assertEqual(message_1.comments["EN"], 'The lonely frame description')
-        self.assertEqual(message_1.bus_name, None)
+        self.assertEqual(message_1.bus_name, 'Network')
         self.assertTrue(message_1.dbc is None)
         self.assertTrue(message_1.autosar is not None)
         self.assertEqual(message_1.autosar.pdu_paths, [ '/Network/CanCluster/CAN/PDUs/Status' ])
@@ -4310,6 +4318,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_system_4_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
 
+        self.assertEqual(len(db.buses), 1)
+        bus = db.buses[0]
+        self.assertEqual(bus.name, 'Cluster0')
+        self.assertEqual(bus.comment, 'The great CAN cluster')
+        self.assertEqual(bus.comments, { 'FOR-ALL': 'The great CAN cluster' })
+        self.assertEqual(bus.baudrate, 500000)
+        self.assertEqual(bus.fd_baudrate, 2000000)
+
         self.assertEqual(len(db.nodes), 0)
         self.assertEqual(len(db.messages), 5)
         self.assertTrue(db.autosar is not None)
@@ -4326,7 +4342,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_message.send_type, None)
         self.assertEqual(mux_message.cycle_time, None)
         self.assertEqual(len(mux_message.signals), 6)
-        self.assertEqual(mux_message.bus_name, None)
+        self.assertEqual(mux_message.bus_name, 'Cluster0')
         self.assertEqual(mux_message.comments, None)
         self.assertEqual(mux_message.comment, None)
         self.assertTrue(mux_message.dbc is None)
@@ -4448,7 +4464,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_1.signals), 3)
         self.assertEqual(message_1.comments["DE"], 'Kommentar1')
         self.assertEqual(message_1.comments["EN"], 'Comment1')
-        self.assertEqual(message_1.bus_name, None)
+        self.assertEqual(message_1.bus_name, 'Cluster0')
         self.assertEqual(message_1.comment, 'Comment1')
         message_1.comments = {'DE': 'Kommentar eins', 'EN': 'Comment one'}
         self.assertEqual(message_1.comments,
@@ -4548,7 +4564,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_2.cycle_time, 200)
         self.assertEqual(len(message_2.signals), 3)
         self.assertEqual(message_2.comment, None)
-        self.assertEqual(message_2.bus_name, None)
+        self.assertEqual(message_2.bus_name, 'Cluster0')
         self.assertTrue(message_2.dbc is None)
         self.assertTrue(message_2.autosar is not None)
         self.assertEqual(message_2.autosar.pdu_paths, [ '/ISignalIPdu/message2' ])
@@ -4631,7 +4647,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.cycle_time, None)
         self.assertEqual(len(message_3.signals), 0)
         self.assertEqual(message_3.comment, None)
-        self.assertEqual(message_3.bus_name, None)
+        self.assertEqual(message_3.bus_name, 'Cluster0')
         self.assertTrue(message_3.dbc is None)
         self.assertTrue(message_3.autosar is not None)
         self.assertEqual(message_3.autosar.pdu_paths, [ '/ISignalIPdu/message3' ])
@@ -4647,7 +4663,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_4.cycle_time, None)
         self.assertEqual(len(message_4.signals), 3)
         self.assertEqual(message_4.comment, None)
-        self.assertEqual(message_4.bus_name, None)
+        self.assertEqual(message_4.bus_name, 'Cluster0')
         self.assertTrue(message_4.dbc is None)
         self.assertTrue(message_4.autosar is not None)
         self.assertEqual(message_4.autosar.pdu_paths, [ '/ISignalIPdu/message4' ])
@@ -4720,6 +4736,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_no_compu_method_category_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/compu_method_no_category.arxml')
 
+        self.assertEqual(len(db.buses), 1)
+        bus = db.buses[0]
+        self.assertEqual(bus.name, 'MY_CLUSTER')
+        self.assertEqual(bus.comment, None)
+        self.assertEqual(bus.comments, None)
+        self.assertEqual(bus.baudrate, 500000)
+        self.assertEqual(bus.fd_baudrate, None)
+
         self.assertEqual(len(db.nodes), 0)
 
         self.assertEqual(len(db.messages), 1)
@@ -4734,16 +4758,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, 200)
         self.assertEqual(message_1.comments, None)
-        self.assertEqual(message_1.bus_name, None)
+        self.assertEqual(message_1.bus_name, 'MY_CLUSTER')
         self.assertEqual(len(message_1.signals), 1)
 
         # signal
         signal_1 = message_1.signals[0]
-        self.assertEqual(signal_1.name, "MY_SIGNAL_XIX_MY_MESSAGE_XIX_MY_CLUSTER")
+        self.assertEqual(signal_1.name, 'MY_SIGNAL_XIX_MY_MESSAGE_XIX_MY_CLUSTER')
         self.assertEqual(signal_1.start, 15)
         self.assertEqual(signal_1.length, 1)
         self.assertEqual(signal_1.receivers, [])
-        self.assertEqual(signal_1.byte_order, "little_endian")
+        self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.initial, 0)
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)

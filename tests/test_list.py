@@ -26,7 +26,8 @@ class Args(object):
         self.print_all = False
         self.no_strict = False
         self.file = (database, )
-        self.messages = []
+        self.print_buses = False
+        self.items = []
 
 class CanToolsListTest(unittest.TestCase):
     def test_dbc(self):
@@ -97,10 +98,29 @@ ExampleMessage:
             actual_output = stdout.getvalue()
             self.assertEqual(actual_output, expected_output)
 
+    def test_arxml3(self):
+        args = Args('tests/files/arxml/system-3.2.3.arxml')
+        args.print_buses = True
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+Network:
+  Baudrate: 250000
+  CAN-FD enabled: False
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
     def test_arxml4(self):
         # Prepare mocks.
         args = Args('tests/files/arxml/system-4.2.arxml')
-        args.messages = ["Message2"]
+        args.items = ["Message2"]
 
         stdout = StringIO()
         with patch('sys.stdout', stdout):
@@ -110,6 +130,7 @@ ExampleMessage:
             # check make sure it behaves as expected
             expected_output = """\
 Message2:
+  Bus: Cluster0
   Frame ID: 0x6 (6)
   Size: 7 bytes
   Is extended frame: True
@@ -177,7 +198,7 @@ MultiplexedMessage
             self.assertEqual(actual_output, expected_output)
 
         args = Args('tests/files/arxml/system-4.2.arxml')
-        args.messages = [ "IAmAGhost" ]
+        args.items = [ "IAmAGhost" ]
 
         stdout = StringIO()
         with patch('sys.stdout', stdout):
@@ -193,7 +214,7 @@ No message named "IAmAGhost" has been found in input file.
             self.assertEqual(actual_output, expected_output)
 
         args = Args('tests/files/arxml/system-4.2.arxml')
-        args.messages = [ "Message1" ]
+        args.items = [ "Message1" ]
 
         stdout = StringIO()
         with patch('sys.stdout', stdout):
@@ -205,6 +226,7 @@ No message named "IAmAGhost" has been found in input file.
 Message1:
   Comment[EN]: Comment1
   Comment[DE]: Kommentar1
+  Bus: Cluster0
   Frame ID: 0x5 (5)
   Size: 6 bytes
   Is extended frame: False
@@ -246,6 +268,27 @@ Message1:
 
             actual_output = stdout.getvalue()
             self.assertEqual(actual_output, expected_output)
+
+        args = Args('tests/files/arxml/system-4.2.arxml')
+        args.print_buses = True
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+Cluster0:
+  Comment[FOR-ALL]: The great CAN cluster
+  Baudrate: 500000
+  CAN-FD enabled: True
+  FD Baudrate: 2000000
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
 
     def test_kcd(self):
         # Prepare mocks.

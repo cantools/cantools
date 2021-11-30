@@ -93,15 +93,48 @@ def _print_message(message):
                     for lang, description in choice.comments.items():
                         print(f'          Comment[{lang}]: {description}')
 
+def _print_bus(bus):
+    print(f'{bus.name}:')
+
+    if bus.comment:
+        for lang in bus.comments:
+            print(f'  Comment[{lang}]: {bus.comments[lang]}')
+
+    if bus.baudrate is not None:
+        print(f'  Baudrate: {bus.baudrate}')
+
+    if bus.fd_baudrate is not None:
+        print(f'  CAN-FD enabled: True')
+        print(f'  FD Baudrate: {bus.fd_baudrate}')
+    else:
+        print(f'  CAN-FD enabled: False')
+
 def _do_list(args):
     input_file_name = args.file[0]
-    messages = args.messages
+    no_strict=args.no_strict
+    print_buses=args.print_buses
+
+    can_db = cantools.database.load_file(input_file_name, strict=not no_strict)
+
+    if print_buses:
+        _do_list_buses(can_db, args)
+    else:
+        _do_list_messages(can_db, args)
+
+def _do_list_buses(can_db, args):
+    bus_names = args.items
+
+    for bus in can_db.buses:
+        if bus_names and bus.name not in bus_names:
+            continue
+
+        _print_bus(bus)
+
+def _do_list_messages(can_db, args):
+    message_names = args.items
     print_all = args.print_all
     exclude_extended = args.exclude_extended
     exclude_normal = args.exclude_normal
-    no_strict=args.no_strict
-
-    can_db = cantools.database.load_file(input_file_name, strict=not no_strict)
 
     if print_all:
         # if no messages have been specified, we print the list of
@@ -111,11 +144,11 @@ def _do_list(args):
                 continue
             if not message.is_extended_frame and exclude_normal:
                 continue
-            messages.append(message.name)
+            message_names.append(message.name)
 
-        messages.sort()
+        message_names.sort()
 
-    if not messages:
+    if not message_names:
         # if no messages have been specified, we print the list of
         # messages in the database
         message_names = []
@@ -135,7 +168,7 @@ def _do_list(args):
     else:
         # if a list of messages has been specified, the details of these
         # are printed.
-        for message_name in messages:
+        for message_name in message_names:
             try:
                 message = can_db.get_message_by_name(message_name)
             except:
@@ -178,14 +211,22 @@ def add_subparser(subparsers):
         required=False,
         help='Print detailed infos for all messages found in the input file.')
     list_parser.add_argument(
+        '-b', '--buses',
+        default=False,
+        action='store_const',
+        dest="print_buses",
+        const=True,
+        required=False,
+        help='Print information about the buses described by the input file.')
+    list_parser.add_argument(
         '--no-strict',
         action='store_true',
         help='Skip database consistency checks.')
     list_parser.add_argument('file', metavar='FILE', nargs=1)
     list_parser.add_argument(
-        'messages',
-        metavar='[MESSAGES]',
+        'items',
+        metavar='[BUSES|MESSAGES]',
         nargs='*',
-        help='The names of the messages which shall be inspected')
+        help='The names of the buses or messages which shall be inspected')
 
     list_parser.set_defaults(func=_do_list)

@@ -236,20 +236,23 @@ class Message(object):
     def comment(self):
         """The message comment, or ``None`` if unavailable.
 
-        Note that we implicitly try to return the comment's language
-        to be English comment if multiple languages were specified.
+        Note that we implicitly try to return the English comment if
+        multiple languages were specified.
 
         """
         if self._comments is None:
             return None
         elif self._comments.get(None) is not None:
             return self._comments.get(None)
+        elif self._comments.get("FOR-ALL") is not None:
+            return self._comments.get("FOR-ALL")
 
-        return self._comments.get('EN', None)
+        return self._comments.get('EN')
 
     @property
     def comments(self):
-        """The dictionary with the descriptions of the message in multiple languages. ``None`` if unavailable.
+        """The dictionary with the descriptions of the message in multiple
+        languages. ``None`` if unavailable.
 
         """
         return self._comments

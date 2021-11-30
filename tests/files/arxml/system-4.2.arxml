@@ -6,6 +6,9 @@
       <ELEMENTS>
         <CAN-CLUSTER UUID="3cd9c2f3aada9a66711bbe3efb74a27c">
           <SHORT-NAME>Cluster0</SHORT-NAME>
+	  <DESC>
+	    <L-2 L="FOR-ALL">The great CAN cluster</L-2>
+	  </DESC>
           <CAN-CLUSTER-VARIANTS>
             <CAN-CLUSTER-CONDITIONAL>
               <BAUDRATE>500000</BAUDRATE>
@@ -46,6 +49,8 @@
                   </FRAME-TRIGGERINGS>
                 </CAN-PHYSICAL-CHANNEL>
               </PHYSICAL-CHANNELS>
+	      <PROTOCOL-VERSION>can2.0b</PROTOCOL-VERSION>
+	      <CAN-FD-BAUDRATE>2000000</CAN-FD-BAUDRATE>
             </CAN-CLUSTER-CONDITIONAL>
           </CAN-CLUSTER-VARIANTS>
         </CAN-CLUSTER>

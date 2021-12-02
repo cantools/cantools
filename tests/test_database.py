@@ -4062,11 +4062,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.baudrate, 250000)
         self.assertEqual(bus.fd_baudrate, None)
 
-        self.assertEqual(len(db.nodes), 0)
+        self.assertEqual(len(db.nodes), 2)
         self.assertEqual(len(db.messages), 2)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "3.2.3")
+
+        node1 = db.nodes[0]
+        self.assertEqual(node1.name, 'Driver')
+        self.assertEqual(node1.comments, {'DE': 'Der rätselhafte Fahrer', 'EN': 'The enigmatic driver'})
+
+        node2 = db.nodes[1]
+        self.assertEqual(node2.name, 'Passenger')
+        self.assertEqual(node2.comments, {'FOR-ALL': 'A boring passenger', 'DE': 'Ein langweiliger Passagier'})
 
         mux_message = db.messages[0]
         self.assertEqual(mux_message.frame_id, 4)
@@ -4326,11 +4334,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.baudrate, 500000)
         self.assertEqual(bus.fd_baudrate, 2000000)
 
-        self.assertEqual(len(db.nodes), 0)
+        self.assertEqual(len(db.nodes), 2)
         self.assertEqual(len(db.messages), 5)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
+
+        node1 = db.nodes[0]
+        self.assertEqual(node1.name, 'DJ')
+        self.assertEqual(node1.comments, None)
+
+        node2 = db.nodes[1]
+        self.assertEqual(node2.name, 'Dancer')
+        self.assertEqual(node2.comments, {'FOR-ALL': 'Rythm is a Dancer!'})
+        self.assertEqual(node2.comment, 'Rythm is a Dancer!')
 
         # multiplexed message
         mux_message = db.messages[0]
@@ -4706,6 +4723,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(childen1_short_names,
                          [
                              'Cluster',
+                             'ECUs',
                              'CanFrame',
                              'ISignal',
                              'Constants',

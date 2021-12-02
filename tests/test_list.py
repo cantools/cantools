@@ -27,6 +27,7 @@ class Args(object):
         self.no_strict = False
         self.file = (database, )
         self.print_buses = False
+        self.print_nodes = False
         self.items = []
 
 class CanToolsListTest(unittest.TestCase):
@@ -117,7 +118,46 @@ Network:
             actual_output = stdout.getvalue()
             self.assertEqual(actual_output, expected_output)
 
+        args = Args('tests/files/arxml/system-3.2.3.arxml')
+        args.print_nodes = True
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+Driver:
+  Comment[DE]: Der rätselhafte Fahrer
+  Comment[EN]: The enigmatic driver
+Passenger:
+  Comment[FOR-ALL]: A boring passenger
+  Comment[DE]: Ein langweiliger Passagier
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
     def test_arxml4(self):
+        args = Args('tests/files/arxml/system-4.2.arxml')
+        args.print_nodes = True
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+DJ:
+Dancer:
+  Comment[FOR-ALL]: Rythm is a Dancer!
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
         # Prepare mocks.
         args = Args('tests/files/arxml/system-4.2.arxml')
         args.items = ["Message2"]

@@ -230,6 +230,25 @@
         </CONSTANT-SPECIFICATION>
       </ELEMENTS>
     </AR-PACKAGE>
+    <AR-PACKAGE UUID="9855a1cef66a4ce9bf4a77a28001860b">
+      <SHORT-NAME>ECUs</SHORT-NAME>
+      <ELEMENTS>
+	<ECU-INSTANCE UUID="48ec4fa049f04d5dacd8dd4ee539d302">
+	  <SHORT-NAME>Driver</SHORT-NAME>
+	  <DESC>
+	    <L-2 L="DE">Der rätselhafte Fahrer</L-2>
+	    <L-2 L="EN">The enigmatic driver</L-2>
+	  </DESC>
+	</ECU-INSTANCE>
+	<ECU-INSTANCE UUID="ef19e858820e4c5e8c1ce3ef6fe0a11b">
+	  <SHORT-NAME>Passenger</SHORT-NAME>
+	  <DESC>
+	    <L-2 L="FOR-ALL">A boring passenger</L-2>
+	    <L-2 L="DE">Ein langweiliger Passagier</L-2>
+	  </DESC>
+	</ECU-INSTANCE>
+      </ELEMENTS>
+    </AR-PACKAGE>
     <AR-PACKAGE UUID="89a48947c1ebc60fbfd68acf9b5bb63a">
       <SHORT-NAME>Network</SHORT-NAME>
       <SUB-PACKAGES>

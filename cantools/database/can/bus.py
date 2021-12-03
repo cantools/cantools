@@ -9,7 +9,8 @@ class Bus(object):
                  name,
                  comment=None,
                  baudrate=None,
-                 fd_baudrate=None):
+                 fd_baudrate=None,
+                 autosar_specifics=None):
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
@@ -26,6 +27,8 @@ class Bus(object):
 
         self._baudrate = baudrate
         self._fd_baudrate = fd_baudrate
+
+        self._autosar = autosar_specifics
 
     @property
     def name(self):
@@ -76,6 +79,18 @@ class Bus(object):
         """
 
         return self._fd_baudrate
+
+    @property
+    def autosar(self):
+        """An object containing AUTOSAR specific properties of the bus.
+
+        """
+
+        return self._autosar
+
+    @autosar.setter
+    def autosar(self, value):
+        self._autosar = value
 
     def __repr__(self):
         return "bus('{}', {})".format(

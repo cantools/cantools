@@ -303,7 +303,7 @@ class Message(object):
 
     @property
     def autosar(self):
-        """An object containing AUTOsar specific properties
+        """An object containing AUTOSAR specific properties
 
         e.g. auxiliary data required to implement CRCs, secure on-board
         communication (secOC) or container messages.

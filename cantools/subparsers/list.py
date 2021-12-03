@@ -4,7 +4,7 @@ import cantools
 def _print_message(message):
     print(f'{message.name}:')
 
-    if message.comment:
+    if message.comments:
         for lang in message.comments:
             print(f'  Comment[{lang}]: {message.comments[lang]}')
 
@@ -89,14 +89,21 @@ def _print_message(message):
             print(f'      Named values:')
             for value, choice in signal.choices.items():
                 print(f'        {value}: {choice}')
-                if choice.comments is not None:
+                if choice.comments:
                     for lang, description in choice.comments.items():
                         print(f'          Comment[{lang}]: {description}')
+
+def _print_node(node):
+    print(f'{node.name}:')
+
+    if node.comments:
+        for lang in node.comments:
+            print(f'  Comment[{lang}]: {node.comments[lang]}')
 
 def _print_bus(bus):
     print(f'{bus.name}:')
 
-    if bus.comment:
+    if bus.comments:
         for lang in bus.comments:
             print(f'  Comment[{lang}]: {bus.comments[lang]}')
 
@@ -113,11 +120,14 @@ def _do_list(args):
     input_file_name = args.file[0]
     no_strict=args.no_strict
     print_buses=args.print_buses
+    print_nodes=args.print_nodes
 
     can_db = cantools.database.load_file(input_file_name, strict=not no_strict)
 
     if print_buses:
         _do_list_buses(can_db, args)
+    elif print_nodes:
+        _do_list_nodes(can_db, args)
     else:
         _do_list_messages(can_db, args)
 
@@ -129,6 +139,15 @@ def _do_list_buses(can_db, args):
             continue
 
         _print_bus(bus)
+
+def _do_list_nodes(can_db, args):
+    node_names = args.items
+
+    for node in can_db.nodes:
+        if node_names and node.name not in node_names:
+            continue
+
+        _print_node(node)
 
 def _do_list_messages(can_db, args):
     message_names = args.items
@@ -218,6 +237,14 @@ def add_subparser(subparsers):
         const=True,
         required=False,
         help='Print information about the buses described by the input file.')
+    list_parser.add_argument(
+        '-c', '--nodes',
+        default=False,
+        action='store_const',
+        dest="print_nodes",
+        const=True,
+        required=False,
+        help='Print information about the CAN nodes described by the input file.')
     list_parser.add_argument(
         '--no-strict',
         action='store_true',

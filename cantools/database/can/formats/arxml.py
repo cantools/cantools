@@ -10,6 +10,7 @@ from xml.etree import ElementTree
 from ..signal import Signal, NamedSignalValue
 from ..signal import Decimal as SignalDecimal
 from ..message import Message
+from ..node import Node
 from ..bus import Bus
 from ..internal_database import InternalDatabase
 
@@ -17,9 +18,6 @@ LOGGER = logging.getLogger(__name__)
 
 class AutosarDatabaseSpecifics(object):
     """This class collects the AUTOSAR specific information of a system
-
-    Message-specific AUTOSAR information is represented by the
-    AutosarMessageSpecifics.
 
     """
     def __init__(self,
@@ -35,6 +33,21 @@ class AutosarDatabaseSpecifics(object):
         """
         return self._arxml_version
 
+class AutosarBusSpecifics(object):
+    """This class collects the AUTOSAR specific information of a CAN bus
+
+    """
+    def __init__(self):
+        pass
+
+class AutosarNodeSpecifics(object):
+    """This class collects the AUTOSAR specific information of node that
+    is attached to a CAN bus
+
+    AUTOSAR calls such nodes "ECU instances"...
+    """
+    def __init__(self):
+        pass
 
 class AutosarMessageSpecifics(object):
     """This class collects all AUTOSAR specific information of a CAN message
@@ -189,6 +202,7 @@ class SystemLoader(object):
                                             self._xml_namespaces)
 
         buses = self._load_buses(root_packages)
+        nodes = self._load_nodes(root_packages)
         messages = self._load_messages(root_packages)
 
         arxml_version = \
@@ -200,7 +214,7 @@ class SystemLoader(object):
             AutosarDatabaseSpecifics(arxml_version=arxml_version)
 
         return InternalDatabase(buses=buses,
-                                nodes=[],
+                                nodes=nodes,
                                 messages=messages,
                                 version=None,
                                 autosar_specifics=autosar_specifics)
@@ -209,7 +223,7 @@ class SystemLoader(object):
         """Recursively extract all buses of all CAN clusters of a list of
         AUTOSAR packages.
 
-        @return A list of all buses contained in the given list of
+        @return The list of all buses contained in the given list of
                 packages and their sub-packages
         """
 
@@ -225,6 +239,8 @@ class SystemLoader(object):
 
             # handle locally-specified clusters
             for can_cluster in can_clusters:
+                autosar_specifics = AutosarBusSpecifics()
+
                 if self.autosar_version_newer(4):
                     name = \
                         self._get_unique_arxml_child(can_cluster,
@@ -266,6 +282,7 @@ class SystemLoader(object):
 
                     buses.append(Bus(name=name,
                                      comment=comments,
+                                     autosar_specifics=autosar_specifics,
                                      baudrate=baudrate,
                                      fd_baudrate=fd_baudrate))
                 else: # AUTOSAR 3
@@ -290,6 +307,7 @@ class SystemLoader(object):
 
                     buses.append(Bus(name=name,
                                      comment=comments,
+                                     autosar_specifics=autosar_specifics,
                                      baudrate=baudrate,
                                      fd_baudrate=fd_baudrate))
 
@@ -307,11 +325,51 @@ class SystemLoader(object):
 
         return buses
 
+    def _load_nodes(self, package_list):
+        """Recursively extract all nodes (ECU-instances in AUTOSAR-speak) of
+        all CAN clusters of a list of AUTOSAR packages.
+
+        @return The list of all nodes contained in the given list of
+                packages and their sub-packages
+        """
+
+        nodes = []
+
+        for package in package_list:
+            for ecu in self._get_arxml_children(package,
+                                                [
+                                                    'ELEMENTS',
+                                                    '*ECU-INSTANCE',
+                                                ]):
+                name = self._get_unique_arxml_child(ecu, "SHORT-NAME").text
+                comments = self._load_comments(ecu)
+                autosar_specifics = AutosarNodeSpecifics()
+
+                nodes.append(Node(name=name,
+                                  comment=comments,
+                                  autosar_specifics=autosar_specifics))
+
+
+            # handle all sub-packages
+            if self.autosar_version_newer(4):
+                sub_package_list = package.find('./ns:AR-PACKAGES',
+                                                self._xml_namespaces)
+
+            else:
+                sub_package_list = package.find('./ns:SUB-PACKAGES',
+                                                self._xml_namespaces)
+
+            if sub_package_list is not None:
+                nodes.extend(self._load_nodes(sub_package_list))
+
+
+        return nodes
+
     def _load_messages(self, package_list):
         """Recursively extract all messages of all CAN clusters of a list of
         AUTOSAR packages.
 
-        @return A list of all messages contained in the given list of
+        @return The list of all messages contained in the given list of
                 packages and their sub-packages
         """
 

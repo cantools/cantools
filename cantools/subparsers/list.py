@@ -118,11 +118,14 @@ def _print_bus(bus):
 
 def _do_list(args):
     input_file_name = args.file[0]
+    no_prune=args.no_prune
     no_strict=args.no_strict
     print_buses=args.print_buses
     print_nodes=args.print_nodes
 
-    can_db = cantools.database.load_file(input_file_name, strict=not no_strict)
+    can_db = cantools.database.load_file(input_file_name,
+                                         prune_choices=not no_prune,
+                                         strict=not no_strict)
 
     if print_buses:
         _do_list_buses(can_db, args)
@@ -245,6 +248,10 @@ def add_subparser(subparsers):
         const=True,
         required=False,
         help='Print information about the CAN nodes described by the input file.')
+    list_parser.add_argument(
+        '--no-prune',
+        action='store_true',
+        help='Refrain from shortening the names of named signal values.')
     list_parser.add_argument(
         '--no-strict',
         action='store_true',

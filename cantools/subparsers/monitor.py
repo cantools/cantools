@@ -24,6 +24,7 @@ class Monitor(can.Listener):
         self._dbase = database.load_file(args.database,
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,
+                                         prune_choices=not args.no_prune,
                                          strict=not args.no_strict)
         self._single_line = args.single_line
         self._filtered_sorted_message_names = []
@@ -460,10 +461,6 @@ def add_subparser(subparsers):
         '-e', '--encoding',
         help='File encoding.')
     monitor_parser.add_argument(
-        '--no-strict',
-        action='store_true',
-        help='Skip database consistency checks.')
-    monitor_parser.add_argument(
         '-m', '--frame-id-mask',
         type=Integer(0),
         help=('Only compare selected frame id bits to find the message in the '
@@ -484,6 +481,14 @@ def add_subparser(subparsers):
         '-f', '--fd',
         action='store_true',
         help='Python CAN CAN-FD bus.')
+    monitor_parser.add_argument(
+        '--no-prune',
+        action='store_true',
+        help='Refrain from shortening the names of named signal values.')
+    monitor_parser.add_argument(
+        '--no-strict',
+        action='store_true',
+        help='Skip database consistency checks.')
     monitor_parser.add_argument(
         'database',
         help='Database file.')

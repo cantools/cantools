@@ -87,7 +87,7 @@ class SystemLoader(object):
         self._root = root
         self._strict = strict
 
-        m = re.match('^\\{(.*)\\}AUTOSAR$', self._root.tag)
+        m = re.match(r'^\{(.*)\}AUTOSAR$', self._root.tag)
 
         if not m:
             raise ValueError(f"No XML namespace specified or illegal root tag "
@@ -97,7 +97,7 @@ class SystemLoader(object):
         self.xml_namespace = xml_namespace
         self._xml_namespaces = { 'ns': xml_namespace }
 
-        m = re.match('^http://autosar\.org/schema/r(4\.[0-9.]*)$',
+        m = re.match(r'^http://autosar\.org/schema/r(4\.[0-9.]*)$',
                      xml_namespace)
 
         if m:
@@ -114,14 +114,14 @@ class SystemLoader(object):
             autosar_version_string = m.group(1)
 
         else:
-            m = re.match('^http://autosar\.org/(3\.[0-9.]*)$', xml_namespace)
+            m = re.match(r'^http://autosar\.org/(3\.[0-9.]*)$', xml_namespace)
 
             if m:
                 # AUTOSAR 3
                 autosar_version_string = m.group(1)
 
             else:
-                m = re.match('^http://autosar\.org/([0-9.]*)\.DAI\.[0-9]$',
+                m = re.match(r'^http://autosar\.org/([0-9.]*)\.DAI\.[0-9]$',
                              xml_namespace)
 
                 if m:
@@ -132,7 +132,7 @@ class SystemLoader(object):
                     raise ValueError(f"Unrecognized AUTOSAR XML namespace "
                                      f"'{xml_namespace}'")
 
-        m = re.match('^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
+        m = re.match(r'^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
 
         if not m:
             raise ValueError(f"Could not parse AUTOSAR version "
@@ -2084,16 +2084,16 @@ def load_string(string, strict=True):
 
     root = ElementTree.fromstring(string)
 
-    m = re.match("{(.*)}AUTOSAR", root.tag)
+    m = re.match(r'{(.*)}AUTOSAR', root.tag)
     if not m:
         raise ValueError(f"No XML namespace specified or illegal root tag name '{root.tag}'")
     xml_namespace = m.group(1)
 
     # Should be replaced with a validation using the XSD file.
     recognized_namespace = False
-    if re.match("http://autosar.org/schema/r(4.*)", xml_namespace) \
-       or re.match("http://autosar.org/(3.*)", xml_namespace) \
-       or re.match("http://autosar.org/(.*)\.DAI\.[0-9]", xml_namespace):
+    if re.match(r'http://autosar.org/schema/r(4.*)', xml_namespace) \
+       or re.match(r'http://autosar.org/(3.*)', xml_namespace) \
+       or re.match(r'http://autosar.org/(.*)\.DAI\.[0-9]', xml_namespace):
         recognized_namespace = True
 
     if not recognized_namespace:

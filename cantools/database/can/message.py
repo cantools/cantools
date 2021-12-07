@@ -5,6 +5,7 @@ import logging
 from copy import deepcopy
 from typing import (
     List,
+    Sequence,
     Tuple,
     Optional,
     Union,
@@ -39,10 +40,12 @@ LOGGER = logging.getLogger(__name__)
 # for AUTOSAR container messages.
 SignalDictType = Dict[str, Union[float, str]]
 ContainerHeaderSpecType = Union['Message', str, int]
-ContainerDecodeResultType = List[Union[Tuple['Message', SignalDictType],
-                                       Tuple[int, bytes]]]
-ContainerEncodeInputType = List[Tuple[ContainerHeaderSpecType,
-                                      Union[bytes, SignalDictType]]]
+ContainerDecodeResultType = Sequence[Union[Tuple['Message', SignalDictType],
+                                           Tuple[int, bytes]]]
+ContainerDecodeResultListType = List[Union[Tuple['Message', SignalDictType],
+                                           Tuple[int, bytes]]]
+ContainerEncodeInputType = Sequence[Tuple[ContainerHeaderSpecType,
+                                          Union[bytes, SignalDictType]]]
 DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalDictType, ContainerEncodeInputType]
 
@@ -494,6 +497,208 @@ class Message(object):
 
         return self._signal_tree
 
+    def gather_signals(self,
+                       input_data: SignalDictType,
+                       node: Optional[Codec] = None) \
+      -> SignalDictType:
+
+        '''Given a superset of all signals required to encode the message,
+        return a dictionary containing exactly the ones required.
+
+        If a required signal is missing from the input dictionary, a
+        ``EncodeError`` exception is raised.
+        '''
+
+        if node is None:
+            node = self._codecs
+        assert node is not None
+
+        result = {}
+
+        for signal in node['signals']:
+            val = input_data.get(signal.name)
+            if val is None:
+                raise EncodeError(f"The signal '{signal.name}' is "
+                                  f"required for encoding.")
+            result[signal.name] = val
+
+        for mux_signal_name, mux_nodes in node['multiplexers'].items():
+            mux_num = self._get_mux_number(input_data, mux_signal_name)
+            mux_node = mux_nodes.get(mux_num)
+            if mux_num is None or mux_node is None:
+                multiplexers = node['multiplexers']
+                try:
+                    expected_str = \
+                        f'Expected one of {{' \
+                        f'{format_or(multiplexers[signal.name])}' \
+                        f'}}, but '
+                except KeyError:
+                    expected_str = ''
+
+                raise EncodeError(f'A valid value for the multiplexer selector '
+                                  f'signal "{mux_signal_name}" is required: '
+                                  f'{expected_str}'
+                                  f'got {input_data[mux_signal_name]}')
+
+            result.update(self.gather_signals(input_data, mux_node))
+
+        return result
+
+    def gather_container(self,
+                         contained_messages: List[ContainerHeaderSpecType],
+                         signal_values: SignalDictType) \
+      -> ContainerDecodeResultType:
+
+        '''Given a superset of all messages required to encode all messages
+        featured by a container message, return a list of (Message,
+        SignalDict) tuples that can be passed to ``encode()``.
+
+        If a required signal is missing from the input dictionary, a
+        ``EncodeError`` exception is raised.
+        '''
+
+        result: ContainerDecodeResultListType = []
+        for header in contained_messages:
+            contained_message = None
+            if isinstance(header, str):
+                contained_message = \
+                    self.get_contained_message_by_name(header)
+            elif isinstance(header, Message):
+                # contained message is specified directly. We go once
+                # around the circle to ensure that a contained message
+                # with the given header ID is there.
+                header_id = header.header_id
+                assert header_id is not None
+                contained_message = \
+                    self.get_contained_message_by_header_id(header_id)
+            elif isinstance(header, int):
+                # contained message is specified directly. We go once
+                # around the circle to ensure that a contained message
+                # with the given header ID is there.
+                contained_message = \
+                    self.get_contained_message_by_header_id(header)
+
+            if contained_message is None:
+                raise EncodeError(f'Cannot determine contained message '
+                                  f'associated with "{header}"')
+
+            contained_signals = contained_message.gather_signals(signal_values)
+
+            result.append( (contained_message, contained_signals) )
+
+        return result
+
+    def assert_signals_encodable(self,
+                                 input_data: SignalDictType,
+                                 scaling: bool,
+                                 assert_values_valid: bool = True,
+                                 assert_all_known: bool = True) \
+      -> None:
+
+        '''Given a dictionary of signal name to signal value mappings, ensure
+        that all the signals required for encoding are present
+
+        As a minimum, all signals required to encode the message need
+        to be specified. If they are not, a ``KeyError`` or an
+        ``EncodeError`` exception is raised.
+
+        Depending on the parameters specified, the data of the
+        dictionary must adhere to additonal requirements:
+
+        :param scaling: If ``False`` no scaling of signals is performed.
+
+        :param assert_values_valid: If ``True``, the values of all
+        specified signals must be valid/encodable. If at least one is
+        not, an ``EncodeError`` exception is raised. (Note that the
+        values of multiplexer selector signals must always be valid!)
+
+        :param assert_all_known: If ``True``, all specified signals must
+        be used by the encoding operation or an ``EncodeError``
+        exception is raised. This is useful to prevent typos.
+
+        '''
+
+        # this method only deals with ordinary messages
+        if self.is_container:
+            raise EncodeError(f'Message "{self.name}" is a container')
+
+        # This type checking is not really comprehensive and is
+        # superfluous if the type hints are respected by the calling
+        # code. That said, it guards against accidentally passing
+        # non-dictionary objects such as lists of (Message,
+        # SignalDict) tuples expected by container messages...
+        if not isinstance(input_data, dict):
+            raise EncodeError(f'Input data for encoding message "{self.name}" '
+                              f'must be a SignalDict')
+
+        used_signals = self.gather_signals(input_data)
+        if assert_all_known and set(used_signals) != set(input_data):
+            raise EncodeError(f'The following signals were specified but are '
+                              f'not required to encode the message:'
+                              f'{set(input_data) - set(used_signals)}')
+        if assert_values_valid:
+            self._assert_signal_values_valid(used_signals, scaling)
+
+    def assert_container_encodable(self,
+                                   input_data: ContainerEncodeInputType,
+                                   scaling: bool,
+                                   assert_values_valid: bool = True,
+                                   assert_all_known: bool = True) \
+      -> None:
+
+        """
+        This method is identical to ``assert_signals_encodable()``
+        except that it is concerned with container messages.
+        """
+
+        # this method only deals with container messages
+        if not self.is_container:
+            raise EncodeError(f'Message "{self.name}" is not a container')
+
+        # This type checking is not really comprehensive and is
+        # superfluous if the type hints are respected by the calling
+        # code. That said it guards against accidentially passing a
+        # SignalDict for normal messages...
+        if not isinstance(input_data, list):
+            raise EncodeError(f'Input data for encoding message "{self.name}" '
+                              f'must be a list of (Message, SignalDict) tuples')
+
+        for header, payload in input_data:
+            if isinstance(header, int) and isinstance(payload, bytes):
+                # contained message specified as raw data
+                continue
+
+            contained_message = None
+            if isinstance(header, int):
+                contained_message = \
+                    self.get_contained_message_by_header_id(header)
+            elif isinstance(header, str):
+                contained_message = \
+                    self.get_contained_message_by_name(header)
+            elif isinstance(header, Message):
+                hid = header.header_id
+                if hid is None:
+                    raise EncodeError(f'Message {header.name} cannot be part '
+                                      f'of a container because it does not '
+                                      f'exhibit a header ID')
+                contained_message = self.get_contained_message_by_header_id(hid)
+
+            if contained_message is None:
+                raise EncodeError(f'Could not associate "{header}" with any '
+                                  f'contained message')
+
+            if isinstance(payload, bytes):
+                if len(payload) != contained_message.length:
+                    raise EncodeError(f'Payload for contained message '
+                                      f'"{contained_message.name}" is '
+                                      f'{len(payload)} instead of '
+                                      f'{contained_message.length} bytes long')
+            else:
+                contained_message.assert_signals_encodable(payload,
+                                                           scaling,
+                                                           assert_values_valid,
+                                                           assert_all_known)
+
     def _get_mux_number(self, decoded, signal_name):
         mux = decoded[signal_name]
 
@@ -503,55 +708,55 @@ class Message(object):
 
         return mux
 
-    def _check_signals_ranges_scaling(self, signals, data):
-        for signal in signals:
-            value = data[signal.name]
+    def _assert_signal_values_valid(self,
+                                    data : SignalDictType,
+                                    scaling : bool) -> None:
 
-            # Choices are checked later.
-            if isinstance(value, str) or isinstance(value, NamedSignalValue):
+        for signal_name, signal_value in data.items():
+            signal = self.get_signal_by_name(signal_name)
+
+            if not signal:
+                continue
+
+            if isinstance(signal_value, (str, NamedSignalValue)):
+                # Check choices
+                signal_value_num = signal.choice_string_to_number(str(signal_value))
+
+                if signal_value_num is None:
+                    raise EncodeError(f'Invalid value specified for signal '
+                                      f'"{signal.name}": "{signal_value}"')
+
                 continue
 
             if signal.minimum is not None:
-                if value < signal.minimum:
+                min_effective = signal.minimum
+
+                # undo the scaling of the signal's minimum value if we
+                # are not supposed to scale the input value
+                if not scaling:
+                    min_effective = (signal.minimum - signal.offset)/signal.scale
+
+                if signal_value < min_effective - signal.scale*1e-6:
                     raise EncodeError(
-                        "Expected signal '{}' value greater than or equal to "
-                        "{} in message '{}', but got {}.".format(signal.name,
-                                                                 signal.minimum,
-                                                                 self._name,
-                                                                 value))
+                        f'Expected signal "{signal.name}" value greater than '
+                        f'or equal to {min_effective} in message "{self.name}", '
+                        f'but got {signal_value}.')
 
             if signal.maximum is not None:
-                if value > signal.maximum:
+                max_effective = signal.maximum
+
+                if not scaling:
+                    # undo the scaling of the signal's maximum value if we
+                    # are not supposed to scale the input value
+                    max_effective = (signal.maximum - signal.offset)/signal.scale
+
+                if signal_value > max_effective + signal.scale*1e-6:
                     raise EncodeError(
-                        "Expected signal '{}' value less than or equal to "
-                        "{} in message '{}', but got {}.".format(signal.name,
-                                                                 signal.maximum,
-                                                                 self.name,
-                                                                 value))
+                        f'Expected signal "{signal.name}" value less than or '
+                        f'equal to {max_effective} in message "{self.name}", '
+                        f'but got {signal_value}.')
 
-    def _check_signals(self, signals, data, scaling):
-        for signal in signals:
-            if signal.name not in data:
-                raise EncodeError(
-                    "Expected signal value for '{}' in data, but got {}.".format(
-                        signal.name,
-                        data))
-
-        if scaling:
-            self._check_signals_ranges_scaling(signals, data)
-
-    def _check_unknown_signals(self, signals, data):
-            signal_set = set(map(lambda x: x.name, signals))
-            for signal in data:
-                if signal not in signal_set:
-                    raise EncodeError(
-                        f"No signal named '{signal}' specified in CAN bus "
-                        f"description database.")
-
-    def _encode(self, node, data, scaling, strict):
-        if strict:
-            self._check_signals(node['signals'], data, scaling)
-
+    def _encode(self, node, data, scaling):
         encoded = encode_data(data,
                               node['signals'],
                               node['formats'],
@@ -565,16 +770,14 @@ class Message(object):
 
             try:
                 node = multiplexers[signal][mux]
-
-                if strict:
-                    self._check_signals(node['signals'], data, scaling)
             except KeyError:
-                raise EncodeError('expected multiplexer id {}, but got {}'.format(
-                    format_or(multiplexers[signal]),
-                    mux))
+                raise EncodeError(f'Expected multiplexer id \in '
+                                  f'{{{format_or(multiplexers[signal])}}}, '
+                                  f'for multiplexer "{signal.name}" '
+                                  f'but got {mux}')
 
             mux_encoded, mux_padding_mask, mux_signals = \
-                self._encode(node, data, scaling, strict)
+                self._encode(node, data, scaling)
             all_signals.extend(mux_signals)
 
             encoded |= mux_encoded
@@ -585,8 +788,7 @@ class Message(object):
     def _encode_container(self,
                           data: ContainerEncodeInputType,
                           scaling: bool,
-                          padding: bool,
-                          strict: bool) -> bytes:
+                          padding: bool) -> bytes:
 
         result = bytes()
 
@@ -643,7 +845,7 @@ class Message(object):
                 contained_payload = contained_message.encode(value,
                                                              scaling,
                                                              padding,
-                                                             strict)
+                                                             strict=False)
 
             else:
                 assert contained_message is not None
@@ -665,6 +867,7 @@ class Message(object):
                padding: bool = False,
                strict: bool = True,
                ) -> bytes:
+
         """Encode given data as a message of this type.
 
         If the message is an "ordinary" frame, this method expects a
@@ -694,20 +897,29 @@ class Message(object):
         """
 
         if self.is_container:
-            if isinstance(data, dict):
-                raise EncodeError(f'Container frames can only encode lists of '
-                                  f'(message, data) tuples')
+            if strict:
+                if isinstance(data, dict):
+                    raise EncodeError(f'Container frames can only encode lists of '
+                                      f'(message, data) tuples')
 
-            return self._encode_container(data,
+                self.assert_container_encodable(data, scaling=scaling)
+
+            return self._encode_container(data, # type: ignore
                                           scaling,
-                                          padding,
-                                          strict)
-
-        encoded, padding_mask, all_signals = \
-            self._encode(self._codecs, data, scaling, strict=strict)
+                                          padding)
 
         if strict:
-            self._check_unknown_signals(all_signals, data)
+            # setting 'strict' to True is just a shortcut for calling
+            # 'assert_signals_encodable()' using the strictest
+            # settings.
+            if not isinstance(data, dict):
+                raise EncodeError(f'The payload for encoding non-container '
+                                  f'messages must be a signal name to '
+                                  f'signal value dictionary')
+            self.assert_signals_encodable(data, scaling=scaling)
+
+        encoded, padding_mask, all_signals = \
+            self._encode(self._codecs, data, scaling)
 
         if padding:
             # there is probably a cleaner and more performant way to
@@ -765,7 +977,7 @@ class Message(object):
                               f'as exhibiting at most {self.length} but '
                               f'received a {len(data)} bytes long frame')
 
-        result: ContainerDecodeResultType = []
+        result: ContainerDecodeResultListType = []
         pos = 0
         while pos < len(data):
             if pos + 4 > len(data):

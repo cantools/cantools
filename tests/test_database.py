@@ -601,6 +601,27 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = db.decode_message(example_message_name, encoded)
         self.assertEqual(decoded, decoded_message)
 
+        # make sure that unknown signals are not accepted in
+        # strict mode
+        filename = 'tests/files/dbc/multiplex_choices.dbc'
+        db = cantools.database.load_file(filename)
+
+        decoded_message = {
+            # the following signals are required by MULTIPLEXOR_8
+            'Multiplexor': 'MULTIPLEXOR_8',
+            'BIT_J': 0,
+            'BIT_C': 0,
+            'BIT_G': 0,
+            'BIT_L': 0,
+
+            # BIT_A is only featued by MULTIPLEXOR_24
+            'BIT_A': 0,
+        }
+
+        with self.assertRaises(cantools.database.EncodeError):
+            db.encode_message("Message2",
+                              decoded_message)
+
     def test_big_endian_no_decode_choices(self):
         """Decode a big endian signal with `decode_choices` set to False.
 
@@ -751,7 +772,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            "Expected signal value for 'Signal1' in data, but got {'Foo': 1}.")
+            "The signal 'Signal1' is required for encoding.")
 
         # Missing value, but checks disabled.
         with self.assertRaises(KeyError):
@@ -830,6 +851,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sensor_sonars.signals[2].multiplexer_ids, [0])
         self.assertEqual(sensor_sonars.signals[0].name, 'SENSOR_SONARS_mux')
         self.assertEqual(sensor_sonars.signals[0].is_multiplexer, True)
+
+        sensor_sonars.assert_signals_encodable({
+            'SENSOR_SONARS_mux': 0,
+            'SENSOR_SONARS_err_count': 1,
+            'SENSOR_SONARS_left': 2,
+            'SENSOR_SONARS_middle': 3,
+            'SENSOR_SONARS_right': 4,
+            'SENSOR_SONARS_rear': 5,
+            #'foo':'bar',
+        }, scaling=True)
+
+        with self.assertRaises(cantools.database.EncodeError):
+            sensor_sonars.assert_signals_encodable(123, scaling=True)
 
         self.assertEqual(sensor_sonars.signal_tree,
                          [
@@ -934,11 +968,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # make sure that we do not accept signal name -> value
         # dictionaries when encoding container frames
-        with self.assertRaises(cantools.database.EncodeError):
+        with self.assertRaises(ValueError):
             db.encode_message(db_msg.frame_id,
                               {'signal': 'value'},
                               strict=False)
-        with self.assertRaises(cantools.database.EncodeError):
+        with self.assertRaises(ValueError):
             db_msg.encode({'signal': 'value'},
                           strict=False)
 
@@ -1002,6 +1036,120 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(encoded2,
                          b'\n\x0b\x0c\x06\x04\x00V\x0eI@'
                          b'\n\x0b\x0c\x06\xa0\xa1\xa2\xa3\xa4\xa5')
+
+    def test_gather_signals(self):
+        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+
+        db_msg = db.get_message_by_name('MultiplexedMessage')
+
+        global_signal_dict = {
+            'MultiplexedStatic': 4,
+            'MultiplexedMessage_selector1': 'SELECT_HELLO',
+            'OneToContainThemAll_selector1': 'SELECT_WORLD',
+            'Hello': 5,
+            'World2': 1,
+            'World1': 0,
+            'MultiplexedStatic2': 123,
+            'signal6' : 'zero',
+            'signal1': 15,
+            'signal5': 3.141529,
+        }
+
+        msg_signal_dict = db_msg.gather_signals(global_signal_dict)
+
+        self.assertEqual(list(msg_signal_dict),
+                         ['MultiplexedStatic',
+                          'MultiplexedMessage_selector1',
+                          'MultiplexedStatic2',
+                          'Hello'])
+
+        # a missing signal should raise an exception
+        del global_signal_dict['Hello']
+        with self.assertRaises(cantools.database.EncodeError):
+            msg_signal_dict = db_msg.gather_signals(global_signal_dict)
+
+        global_signal_dict['MultiplexedMessage_selector1'] = 'SELECT_non_existant'
+        with self.assertRaises(cantools.database.EncodeError):
+            msg_signal_dict = db_msg.gather_signals(global_signal_dict)
+
+        global_signal_dict['MultiplexedMessage_selector1'] = 'SELECT_WORLD'
+        msg_signal_dict = db_msg.gather_signals(global_signal_dict)
+        self.assertEqual(list(msg_signal_dict),
+                         ['MultiplexedStatic',
+                          'MultiplexedMessage_selector1',
+                          'MultiplexedStatic2',
+                          'World2',
+                          'World1'])
+
+        # test the gather method for container messages
+        cmsg = db.get_message_by_name('OneToContainThemAll')
+
+        cmplexer = cmsg.get_contained_message_by_name('multiplexed_message')
+        ccontent = cmsg.gather_container([0xa0b0c, 'message1', cmplexer],
+                                         global_signal_dict)
+
+        cnames = [ x[0].name for x in ccontent ]
+        self.assertEqual(cnames,
+                         ['message1', 'message1', 'multiplexed_message'])
+        csignals = [ list(x[1]) for x in ccontent ]
+        self.assertEqual(csignals,
+                         [['signal6', 'signal1', 'signal5'],
+                          ['signal6', 'signal1', 'signal5'],
+                          ['MultiplexedStatic',
+                           'OneToContainThemAll_selector1',
+                           'MultiplexedStatic2',
+                           'World2',
+                           'World1']
+                          ])
+
+        # unknown contained message
+        with self.assertRaises(cantools.database.EncodeError):
+            cmsg.gather_container([0x00733d], global_signal_dict)
+
+        # make sure that what we've collected is encodable as a
+        # container
+        ccontent[0] = (0xa0b0c, ccontent[0][1])
+        ccontent[1] = ('message1', ccontent[1][1])
+        ccontent.append((0x010203, b'\x00\x11\x22'))
+        cmsg.assert_container_encodable(ccontent, scaling=True)
+
+        # dictionary as input type is not encodable for containers
+        with self.assertRaises(cantools.database.EncodeError):
+            cmsg.assert_container_encodable(msg_signal_dict, scaling=True)
+
+        # normal messages don't support assert_container_encodable()
+        with self.assertRaises(cantools.database.EncodeError):
+            db_msg.assert_container_encodable(ccontent, scaling=True)
+
+        # container messages don't support assert_signals_encodable()
+        with self.assertRaises(cantools.database.EncodeError):
+            cmsg.assert_signals_encodable(msg_signal_dict, scaling=True)
+
+        # make sure that the content specification for containers
+        # cannot be used for normal messages
+        with self.assertRaises(cantools.database.EncodeError):
+            cmsg.assert_signals_encodable(ccontent, scaling=True)
+
+        # make sure that container messages messages cannot be
+        # nested
+        ccontent.append((cmsg, b'\x00\x11\x22'))
+        with self.assertRaises(cantools.database.EncodeError):
+            cmsg.assert_container_encodable(ccontent, scaling=True)
+        del ccontent[-1]
+
+        # make sure that messages without a header id cannot be contained
+        db_msg.header_id = None
+        ccontent = [ (db_msg, b'') ]
+        with self.assertRaises(cantools.database.EncodeError):
+            cmsg.assert_container_encodable(ccontent, scaling=True)
+
+        # make sure that if payload is specified as raw data must
+        # exhibit the correct length
+        ccontent = [ ('message1', b'\x00\x11\x22\x33\x44\x55') ]
+        cmsg.assert_container_encodable(ccontent, scaling=True)
+        ccontent = [ ('message1', b'\x00\x11\x22\x33\x44') ]
+        with self.assertRaises(cantools.database.EncodeError):
+            cmsg.assert_container_encodable(ccontent, scaling=True)
 
     def test_get_message_by_frame_id_and_name(self):
         with open('tests/files/dbc/motohawk.dbc', 'r') as fin:
@@ -3092,7 +3240,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
             message_1.encode({'Multiplexor': 7})
 
         self.assertEqual(str(cm.exception),
-                         'expected multiplexer id 8, 16 or 24, but got 7')
+                         'A valid value for the multiplexer selector signal '
+                         '"Multiplexor" is required: Expected one of '
+                         '{8, 16 or 24}, but got 7')
 
         # Decode.
         with self.assertRaises(cantools.db.DecodeError) as cm:
@@ -3108,7 +3258,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
             message_3.encode({'Multiplexor': 7})
 
         self.assertEqual(str(cm.exception),
-                         'expected multiplexer id 8, but got 7')
+                         'A valid value for the multiplexer selector '
+                         'signal "Multiplexor" is required: Expected '
+                         'one of {8}, but got 7')
 
         # Decode with single multiplexer id 8.
         with self.assertRaises(cantools.db.DecodeError) as cm:

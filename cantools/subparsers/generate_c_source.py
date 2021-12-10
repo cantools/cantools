@@ -10,6 +10,7 @@ from ..database.can.c_source import camel_to_snake_case
 def _do_generate_c_source(args):
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
+                               prune_choices=not args.no_prune,
                                strict=not args.no_strict)
 
     if args.database_name is None:
@@ -87,6 +88,10 @@ def add_subparser(subparsers):
     generate_c_source_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')
+    generate_c_source_parser.add_argument(
+        '--no-prune',
+        action='store_true',
+        help='Refrain from shortening the names of named signal values.')
     generate_c_source_parser.add_argument(
         '--no-strict',
         action='store_true',

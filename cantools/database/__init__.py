@@ -5,6 +5,7 @@ from .errors import Error
 from ..compat import fopen
 from . import can
 from . import diagnostics
+from . import utils
 import textparser
 import diskcache
 
@@ -96,6 +97,7 @@ def load_file(filename,
               database_format=None,
               encoding=None,
               frame_id_mask=None,
+              prune_choices=True,
               strict=True,
               cache_dir=None):
     """Open, read and parse given database file and return a
@@ -177,6 +179,7 @@ def load_file(filename,
             return load(fin,
                         database_format,
                         frame_id_mask,
+                        prune_choices,
                         strict)
     else:
         return _load_file_cache(filename,
@@ -228,6 +231,7 @@ def dump_file(database,
 def load(fp,
          database_format=None,
          frame_id_mask=None,
+         prune_choices=True,
          strict=True):
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
@@ -252,12 +256,14 @@ def load(fp,
     return load_string(fp.read(),
                        database_format,
                        frame_id_mask,
+                       prune_choices,
                        strict)
 
 
 def load_string(string,
                 database_format=None,
                 frame_id_mask=None,
+                prune_choices=True,
                 strict=True):
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
@@ -306,6 +312,9 @@ def load_string(string,
             db.add_kcd_string(string)
         elif fmt == 'sym':
             db.add_sym_string(string)
+
+        if prune_choices:
+            utils.prune_database_choices(db)
 
         return db
 

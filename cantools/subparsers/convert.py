@@ -6,6 +6,7 @@ from .. import database
 def _do_convert(args):
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
+                               prune_choices=args.prune,
                                strict=not args.no_strict)
 
     database.dump_file(dbase,
@@ -22,6 +23,14 @@ def add_subparser(subparsers):
     convert_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')
+    # the result of the convert operation should represent the
+    # original file as closely as possible so -- in contrast to the
+    # other subparsers -- we do not prune the names of signal values
+    # by default
+    convert_parser.add_argument(
+        '--prune',
+        action='store_true',
+        help='Shorten the named signal values.')
     convert_parser.add_argument(
         '--no-strict',
         action='store_true',

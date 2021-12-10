@@ -331,6 +331,7 @@ def _do_decode(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
+                               prune_choices=not args.no_prune,
                                strict=not args.no_strict)
     re_format = None
     timestamp_parser = TimestampParser(args)
@@ -799,36 +800,32 @@ def add_subparser(subparsers):
     It adds the options for this subprogram to the argparse parser.
     It sets the entry point for this subprogram by setting a default values for func.
     '''
-    decode_parser = subparsers.add_parser(
+    plot_parser = subparsers.add_parser(
         'plot',
         description=__doc__,
         formatter_class=RawDescriptionArgumentDefaultsHelpFormatter)
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-c', '--no-decode-choices',
         action='store_true',
         help='Do not convert scaled values to choice strings.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-e', '--encoding',
         help='File encoding of dbc file.')
-    decode_parser.add_argument(
-        '--no-strict',
-        action='store_true',
-        help='Skip database consistency checks.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-m', '--frame-id-mask',
         type=Integer(0),
         help=('Only compare selected frame id bits to find the message in the '
               'database. By default the candump and database frame ids must '
               'be equal for a match.'))
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-I', '--case-sensitive',
         action='store_true',
         help='Match the signal names case sensitive.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-l', '--line-numbers',
         action='store_true',
         help='Use line numbers instead of time stamps on the horizontal axis (useful with `candump -td`).')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-t', '--break-time',
         default=100,
         type=float,
@@ -837,75 +834,83 @@ def add_subparser(subparsers):
               '(if timestamps are used) or input lines (if line numbers are used). '
               '-1 means infinite. '))
 
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--show-invalid-syntax',
         action='store_true',
         help='Show a marker for lines which could not be parsed. This implies -l.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--show-unknown-frames',
         action='store_true',
         help='Show a marker for messages which are not contained in the database file.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--show-invalid-data',
         action='store_true',
         help='Show a marker for messages with data which could not be parsed.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-s', '--show-errors',
         action='store_true',
         help='Show all error messages in the plot. This is an abbreviation for all --show-* options. This implies -l.')
 
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--ignore-invalid-syntax',
         action='store_true',
         help='Don\'t print an error message for lines which could not be parsed.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--ignore-unknown-frames',
         action='store_true',
         help='Don\'t print an error message for messages which are not contained in the database file.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--ignore-invalid-data',
         action='store_true',
         help='Don\'t print an error message for messages with data which could not be parsed.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-q', '--quiet',
         action='store_true',
         help='Don\'t print any error messages. This is an abbreviation for all --ignore-* options.')
 
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-o', '--output-file',
         help='A file to write the plot to instead of displaying it in a window.')
 
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-ss', '--start',
         help='A start time or line number. Everything before is ignored. '
              'This filters the lines/messages to be processed. It does *not* set the minimum value of the x-axis.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-to', '--stop',
         help='An end time or line number. Everything after is ignored. '
              'This filters the lines/messages to be processed. It does *not* set the maximum value of the x-axis.')
 
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--style',
         help='The matplotlib style to be used.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '--list-styles',
         action='store_true',
         help='Print all available matplotlib styles without drawing a plot.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         '-ac', '--auto-color-ylabels',
         action='store_true',
         help='This is equivalent to applying --color C0 to the first y-axis, --color C1 to the second and so on.')
+    plot_parser.add_argument(
+        '--no-prune',
+        action='store_true',
+        help='Refrain from shortening the names of named signal values.')
+    plot_parser.add_argument(
+        '--no-strict',
+        action='store_true',
+        help='Skip database consistency checks.')
 
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         'database',
         help='Database file.')
-    decode_parser.add_argument(
+    plot_parser.add_argument(
         'signals',
         nargs='*',
         help='The signals to be plotted.')
-    decode_parser.set_defaults(func=_do_decode)
+    plot_parser.set_defaults(func=_do_decode)
 
-    subplot_arggroup = decode_parser.add_argument_group('subplot arguments',
+    subplot_arggroup = plot_parser.add_argument_group('subplot arguments',
         '''\
 The following options can be used to configure the subplots/axes.
 If they shall apply to a specific subplot/axis they must be placed among the signals for that subplot/axis and a -- must mark the end of the global optional arguments.

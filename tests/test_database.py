@@ -2398,7 +2398,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assert_dbc_dump(db, 'tests/files/dbc/multiplex_dumped.dbc')
 
     def test_multiplex_choices(self):
-        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc')
+        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc',
+                                   prune_choices=False)
 
         # With Multiplexor and BIT_L as strings.
         decoded_message = {
@@ -2897,7 +2898,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc')
+        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc',
+                                   prune_choices=True)
 
         decoded_message = {
             'Multiplexor': 'MULTIPLEXOR_8',
@@ -2922,7 +2924,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         """
 
-        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc')
+        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc',
+                                   prune_choices=False)
 
         message_1 = db.messages[0]
 

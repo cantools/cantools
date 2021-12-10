@@ -1,6 +1,8 @@
 # Utility functions.
 
 import binascii
+import os.path
+import re
 from decimal import Decimal
 from collections import namedtuple
 from cantools.database.can.signal import NamedSignalValue
@@ -242,3 +244,97 @@ def cdd_offset_to_dbc_start_bit(cdd_offset, bit_length, byte_order):
         return (8 * (cdd_offset // 8)) + min(7, (cdd_offset % 8) + bit_length - 1)
     else:
         return cdd_offset
+
+def prune_signal_choices(signal):
+    '''Shorten the names of the signal choices of a single signal
+
+    For signals with multiple named values this means removing the
+    longest common prefix that ends with an underscore and for which
+    the removal still result the named signal values to be valid
+    python identifiers. For signals with a single named choice, this
+    means removing all leading segments between underscores which
+    occur before a segment that contains a digit.
+
+    Examples:
+
+    ..code:: text
+
+       MyMessage_MySignal_Uint32_Choice1, MyMessage_MySignal_Uint32_Choice2
+       -> Choice1, Choice2
+       MyMessage_MySignal_Uint32_NotAvailable
+       -> NotAvailable
+
+    '''
+
+    if signal.choices is None:
+        # no named choices
+        return
+
+    if len(signal.choices) == 1:
+        # signal exhibits only a single named value: Use the longest
+        # postfix starting with an underscore that does not contain
+        # digits as the new name. If no such suffix exists, leave the
+        # choice alone...
+        key = next(iter(signal.choices.keys()))
+        choice = next(iter(signal.choices.values()))
+        m = re.match(r'^[0-9A-Za-z_]*?_([A-Za-z_]+)$', choice.name)
+        val = str(choice)
+        if m:
+            val = m.group(1)
+
+        if isinstance(choice, str):
+            signal.choices[key] = val
+        else:
+            # assert isinstance(choice, NamedSignalValue)
+            signal.choices[key]._name = val
+        return
+
+    # if there are multiple choices, remove the longest common prefix
+    # that ends with an underscore from all of them provided that the
+    # names of the choices stay valid identifiers
+    choice_values = [ str(x) for x in signal.choices.values() ]
+    full_prefix = os.path.commonprefix(choice_values)
+    i = full_prefix.rfind('_')
+
+    if i >= 0:
+        full_prefix = full_prefix[0:i]
+
+    if not full_prefix:
+        # the longest possible prefix is empty, i.e., there is nothing
+        # to strip from the names of the signal choices
+        return
+
+    full_prefix_segments = full_prefix.split('_')
+
+    # find the longest prefix of the choices which keeps all
+    # names valid python identifiers
+    prefix = ''
+    n = 0
+    valid_name_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_]*$')
+    for i in range(len(full_prefix_segments), -1, -1):
+        if i == 0:
+            # there is no such non-empty prefix
+            return
+
+        prefix = '_'.join(full_prefix_segments[:i]) + '_'
+        n = len(prefix)
+
+        if all([valid_name_re.match(x[n:]) for x in choice_values]):
+            break
+
+    # remove the prefix from the choice names
+    for key, choice in signal.choices.items():
+        if isinstance(choice, str):
+            signal.choices[key] = choice[n:]
+        else:
+            # assert isinstance(choice, NamedSignalValue)
+            signal.choices[key]._name = choice._name[n:]
+
+def prune_database_choices(database):
+    '''
+    Prune names of all named signal values of all signals of a database
+    '''
+    for message in database.messages:
+        for signal in message.signals:
+            prune_signal_choices(signal)
+

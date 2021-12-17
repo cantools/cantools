@@ -370,7 +370,7 @@ class Message(object):
             value = data[signal.name]
 
             # Choices are checked later.
-            if isinstance(value, str):
+            if isinstance(value, str) or isinstance(value, NamedSignalValue):
                 continue
 
             if signal.minimum is not None:

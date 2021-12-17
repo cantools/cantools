@@ -5006,6 +5006,25 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, None)
 
+    def test_encode_mixed_signal(self):
+        # cf issue #373
+        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+
+        decoded_message = {
+            "signal1" : 0.0,
+            "signal5" : 1e5,
+            "signal6" : "zero",
+        }
+
+        encoded_message = db.encode_message("Message1", decoded_message)
+
+        self.assertEqual(encoded_message, b'\x00\x00\x00P\xc3G')
+
+        decoded_message2 = db.decode_message("Message1", encoded_message)
+        encoded_message2 = db.encode_message("Message1", decoded_message2)
+
+        self.assertEqual(encoded_message2, encoded_message)
+
     def test_encode_decode_dlc_zero(self):
         db = cantools.database.load_file('tests/files/dbc/message-dlc-zero.dbc')
 

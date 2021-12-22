@@ -60,6 +60,7 @@ class AutosarMessageSpecifics(object):
 
     def __init__(self):
         self._pdu_paths = []
+        self._is_nm = False
 
     @property
     def pdu_paths(self):
@@ -71,6 +72,11 @@ class AutosarMessageSpecifics(object):
         """
         return self._pdu_paths
 
+    @property
+    def is_nm(self):
+        """True iff the message is used for network management
+        """
+        return self._is_nm
 
 
 def parse_number_string(in_string, allow_float=False):
@@ -496,6 +502,8 @@ class SystemLoader(object):
         _, _, signals, cycle_time, child_pdu_paths = \
             self._load_pdu(pdu, name, 1)
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
+        autosar_specifics._is_nm = \
+            (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
 
         # the bit pattern used to fill in unused bits to avoid
         # undefined behaviour/memory leaks

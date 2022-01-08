@@ -1,4 +1,10 @@
 # A CAN signal.
+import decimal
+from typing import Optional, Dict, MutableMapping, TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from cantools.database.can.formats.dbc import DbcSpecifics
+
 
 class Decimal(object):
     """Holds the same values as
@@ -18,7 +24,7 @@ class Decimal(object):
         self._maximum = maximum
 
     @property
-    def scale(self):
+    def scale(self) -> decimal.Decimal:
         """The scale factor of the signal value as ``decimal.Decimal``.
 
         """
@@ -26,11 +32,11 @@ class Decimal(object):
         return self._scale
 
     @scale.setter
-    def scale(self, value):
+    def scale(self, value: decimal.Decimal) -> None:
         self._scale = value
 
     @property
-    def offset(self):
+    def offset(self) -> decimal.Decimal:
         """The offset of the signal value as ``decimal.Decimal``.
 
         """
@@ -38,11 +44,11 @@ class Decimal(object):
         return self._offset
 
     @offset.setter
-    def offset(self, value):
+    def offset(self, value: decimal.Decimal) -> None:
         self._offset = value
 
     @property
-    def minimum(self):
+    def minimum(self) -> Optional[decimal.Decimal]:
         """The minimum value of the signal as ``decimal.Decimal``, or ``None``
         if unavailable.
 
@@ -51,11 +57,11 @@ class Decimal(object):
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value):
+    def minimum(self, value: decimal.Decimal) -> None:
         self._minimum = value
 
     @property
-    def maximum(self):
+    def maximum(self) -> Optional[decimal.Decimal]:
         """The maximum value of the signal as ``decimal.Decimal``, or ``None``
         if unavailable.
 
@@ -64,8 +70,9 @@ class Decimal(object):
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value):
+    def maximum(self, value: decimal.Decimal) -> None:
         self._maximum = value
+
 
 class NamedSignalValue(object):
     """Represents a named value of a signal.
@@ -81,7 +88,7 @@ class NamedSignalValue(object):
         self._comments = comments
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The text intended for human consumption which the specified integer
         is mapped to.
         """
@@ -89,18 +96,18 @@ class NamedSignalValue(object):
         return self._name
 
     @property
-    def value(self):
+    def value(self) -> int:
         """The integer value that gets mapped
         """
 
         return self._value
 
     @property
-    def comments(self):
+    def comments(self) -> Dict[str, str]:
         """The descriptions of the named value
 
         This is a dictionary containing the descriptions in multiple
-        languagues. The dictionary is indexed by the language.
+        languages. The dictionary is indexed by the language.
 
         Example:
 
@@ -114,13 +121,13 @@ class NamedSignalValue(object):
 
         return self._comments
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self._name}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"'{self._name}'"
 
-    def __eq__(self, x):
+    def __eq__(self, x) -> bool:
         if isinstance(x, NamedSignalValue):
             return \
                 x.value == self.value \
@@ -130,6 +137,7 @@ class NamedSignalValue(object):
             return x == self.name
 
         return False
+
 
 class Signal(object):
     """A CAN signal with position, size, unit and other information. A
@@ -226,7 +234,7 @@ class Signal(object):
         self._spn = spn
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The signal name as a string.
 
         """
@@ -234,11 +242,11 @@ class Signal(object):
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def start(self):
+    def start(self) -> int:
         """The start bit position of the signal within its message.
 
         """
@@ -246,11 +254,11 @@ class Signal(object):
         return self._start
 
     @start.setter
-    def start(self, value):
+    def start(self, value: int) -> None:
         self._start = value
 
     @property
-    def length(self):
+    def length(self) -> int:
         """The length of the signal in bits.
 
         """
@@ -258,11 +266,11 @@ class Signal(object):
         return self._length
 
     @length.setter
-    def length(self, value):
+    def length(self, value: int) -> None:
         self._length = value
 
     @property
-    def byte_order(self):
+    def byte_order(self) -> str:
         """Signal byte order as ``'little_endian'`` or ``'big_endian'``.
 
         """
@@ -270,11 +278,11 @@ class Signal(object):
         return self._byte_order
 
     @byte_order.setter
-    def byte_order(self, value):
+    def byte_order(self, value: str) -> None:
         self._byte_order = value
 
     @property
-    def is_signed(self):
+    def is_signed(self) -> bool:
         """``True`` if the signal is signed, ``False`` otherwise. Ignore this
            attribute if :data:`~cantools.db.Signal.is_float` is
            ``True``.
@@ -284,11 +292,11 @@ class Signal(object):
         return self._is_signed
 
     @is_signed.setter
-    def is_signed(self, value):
+    def is_signed(self, value: bool) -> None:
         self._is_signed = value
 
     @property
-    def is_float(self):
+    def is_float(self) -> bool:
         """``True`` if the signal is a float, ``False`` otherwise.
 
         """
@@ -296,11 +304,11 @@ class Signal(object):
         return self._is_float
 
     @is_float.setter
-    def is_float(self, value):
+    def is_float(self, value: bool) -> None:
         self._is_float = value
 
     @property
-    def initial(self):
+    def initial(self) -> Optional[int]:
         """The initial value of the signal, or ``None`` if unavailable.
 
         """
@@ -308,11 +316,11 @@ class Signal(object):
         return self._initial
 
     @initial.setter
-    def initial(self, value):
+    def initial(self, value: int) -> None:
         self._initial = value
 
     @property
-    def invalid(self):
+    def invalid(self) -> Optional[int]:
         """The value representing that the signal is invalid, or ``None`` if unavailable.
 
         """
@@ -320,11 +328,11 @@ class Signal(object):
         return self._invalid
 
     @invalid.setter
-    def invalid(self, value):
+    def invalid(self, value: int) -> None:
         self._invalid = value
 
     @property
-    def scale(self):
+    def scale(self) -> float:
         """The scale factor of the signal value.
 
         """
@@ -332,11 +340,11 @@ class Signal(object):
         return self._scale
 
     @scale.setter
-    def scale(self, value):
+    def scale(self, value: float) -> None:
         self._scale = value
 
     @property
-    def offset(self):
+    def offset(self) -> float:
         """The offset of the signal value.
 
         """
@@ -344,11 +352,11 @@ class Signal(object):
         return self._offset
 
     @offset.setter
-    def offset(self, value):
+    def offset(self, value: float) -> None:
         self._offset = value
 
     @property
-    def minimum(self):
+    def minimum(self) -> Optional[float]:
         """The minimum value of the signal, or ``None`` if unavailable.
 
         """
@@ -356,11 +364,11 @@ class Signal(object):
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value):
+    def minimum(self, value: Optional[float]) -> None:
         self._minimum = value
 
     @property
-    def maximum(self):
+    def maximum(self) -> Optional[float]:
         """The maximum value of the signal, or ``None`` if unavailable.
 
         """
@@ -368,11 +376,11 @@ class Signal(object):
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value):
+    def maximum(self, value: Optional[float]) -> None:
         self._maximum = value
 
     @property
-    def decimal(self):
+    def decimal(self) -> Decimal:
         """The high precision values of
         :attr:`~cantools.database.can.Signal.scale`,
         :attr:`~cantools.database.can.Signal.offset`,
@@ -387,7 +395,7 @@ class Signal(object):
         return self._decimal
 
     @property
-    def unit(self):
+    def unit(self) -> Optional[str]:
         """The unit of the signal as a string, or ``None`` if unavailable.
 
         """
@@ -395,11 +403,11 @@ class Signal(object):
         return self._unit
 
     @unit.setter
-    def unit(self, value):
+    def unit(self, value: Optional[str]) -> None:
         self._unit = value
 
     @property
-    def choices(self):
+    def choices(self) -> Optional[MutableMapping[int, str]]:
         """A dictionary mapping signal values to enumerated choices, or
         ``None`` if unavailable.
 
@@ -408,7 +416,7 @@ class Signal(object):
         return self._choices
 
     @property
-    def dbc(self):
+    def dbc(self) -> Optional["DbcSpecifics"]:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -416,11 +424,11 @@ class Signal(object):
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value):
+    def dbc(self, value: Optional["DbcSpecifics"]) -> None:
         self._dbc = value
 
     @property
-    def comment(self):
+    def comment(self) -> Optional[str]:
         """The signal comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -445,7 +453,7 @@ class Signal(object):
         return self._comments
 
     @comment.setter
-    def comment(self, value):
+    def comment(self, value: Optional[str]) -> None:
         self._comments = { None: value }
 
     @comments.setter
@@ -453,7 +461,7 @@ class Signal(object):
         self._comments = value
 
     @property
-    def receivers(self):
+    def receivers(self) -> List[str]:
         """A list of all receiver nodes of this signal.
 
         """
@@ -461,7 +469,7 @@ class Signal(object):
         return self._receivers
 
     @property
-    def is_multiplexer(self):
+    def is_multiplexer(self) -> bool:
         """``True`` if this is the multiplexer signal in a message, ``False``
         otherwise.
 
@@ -470,11 +478,11 @@ class Signal(object):
         return self._is_multiplexer
 
     @is_multiplexer.setter
-    def is_multiplexer(self, value):
+    def is_multiplexer(self, value: bool) -> None:
         self._is_multiplexer = value
 
     @property
-    def multiplexer_ids(self):
+    def multiplexer_ids(self) -> Optional[List[int]]:
         """The multiplexer ids list if the signal is part of a multiplexed
         message, ``None`` otherwise.
 
@@ -483,11 +491,11 @@ class Signal(object):
         return self._multiplexer_ids
 
     @multiplexer_ids.setter
-    def multiplexer_ids(self, value):
+    def multiplexer_ids(self, value: Optional[List[int]]) -> None:
         self._multiplexer_ids = value
 
     @property
-    def multiplexer_signal(self):
+    def multiplexer_signal(self) -> Optional[str]:
         """The multiplexer signal if the signal is part of a multiplexed
         message, ``None`` otherwise.
 
@@ -496,11 +504,11 @@ class Signal(object):
         return self._multiplexer_signal
 
     @multiplexer_signal.setter
-    def multiplexer_signal(self, value):
+    def multiplexer_signal(self, value: Optional[str]) -> None:
         self._multiplexer_signal = value
 
     @property
-    def spn(self):
+    def spn(self) -> Optional[int]:
         """The J1939 Suspect Parameter Number (SPN) value if the signal
         has this attribute, ``None`` otherwise.
         
@@ -509,15 +517,15 @@ class Signal(object):
         return self._spn
 
     @spn.setter
-    def spn(self, value):
+    def spn(self, value: Optional[int]) -> None:
         self._spn = value
 
-    def choice_string_to_number(self, string):
+    def choice_string_to_number(self, string: str) -> Optional[int]:
         for choice_number, choice_value in self.choices.items():
             if str(choice_value) == str(string):
                 return choice_number
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self._choices is None:
             choices = None
         else:

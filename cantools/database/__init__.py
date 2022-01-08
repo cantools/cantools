@@ -1,5 +1,7 @@
 import os
+from typing import Union
 from xml.etree import ElementTree
+
 from .errors import ParseError
 from .errors import Error
 from ..compat import fopen
@@ -99,7 +101,8 @@ def load_file(filename,
               frame_id_mask=None,
               prune_choices=True,
               strict=True,
-              cache_dir=None):
+              cache_dir=None,
+              ) -> Union[can.Database, diagnostics.Database]:
     """Open, read and parse given database file and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with

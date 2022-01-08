@@ -2,9 +2,10 @@
 
 import binascii
 from copy import deepcopy
+from typing import List, Optional, Union, Dict, TYPE_CHECKING
 
-from .signal import NamedSignalValue
-
+from .signal import NamedSignalValue, Signal
+from .signal_group import SignalGroup
 from ..utils import format_or
 from ..utils import start_bit
 from ..utils import encode_data
@@ -13,6 +14,10 @@ from ..utils import create_encode_decode_formats
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
+
+if TYPE_CHECKING:
+    from .formats.arxml import AutosarMessageSpecifics
+    from .formats.dbc import DbcSpecifics
 
 
 class Message(object):
@@ -165,7 +170,7 @@ class Message(object):
         return nodes
 
     @property
-    def frame_id(self):
+    def frame_id(self) -> int:
         """The message frame id.
 
         """
@@ -173,11 +178,11 @@ class Message(object):
         return self._frame_id
 
     @frame_id.setter
-    def frame_id(self, value):
+    def frame_id(self, value: int) -> None:
         self._frame_id = value
 
     @property
-    def is_extended_frame(self):
+    def is_extended_frame(self) -> bool:
         """``True`` if the message is an extended frame, ``False`` otherwise.
 
         """
@@ -185,11 +190,11 @@ class Message(object):
         return self._is_extended_frame
 
     @is_extended_frame.setter
-    def is_extended_frame(self, value):
+    def is_extended_frame(self, value: bool) -> None:
         self._is_extended_frame = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The message name as a string.
 
         """
@@ -197,11 +202,11 @@ class Message(object):
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def length(self):
+    def length(self) -> int:
         """The message data length in bytes.
 
         """
@@ -209,11 +214,11 @@ class Message(object):
         return self._length
 
     @length.setter
-    def length(self, value):
+    def length(self, value: int) -> None:
         self._length = value
 
     @property
-    def signals(self):
+    def signals(self) -> List[Signal]:
         """A list of all signals in the message.
 
         """
@@ -221,7 +226,7 @@ class Message(object):
         return self._signals
 
     @property
-    def signal_groups(self):
+    def signal_groups(self) -> List[SignalGroup]:
         """A list of all signal groups in the message.
 
         """
@@ -229,11 +234,11 @@ class Message(object):
         return self._signal_groups
 
     @signal_groups.setter
-    def signal_groups(self, value):
+    def signal_groups(self, value: List[SignalGroup]) -> None:
         self._signal_groups = value
 
     @property
-    def comment(self):
+    def comment(self) -> Optional[str]:
         """The message comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -258,7 +263,7 @@ class Message(object):
         return self._comments
 
     @comment.setter
-    def comment(self, value):
+    def comment(self, value: Optional[str]) -> None:
         self._comments = { None: value }
 
     @comments.setter
@@ -274,7 +279,7 @@ class Message(object):
         return self._senders
 
     @property
-    def send_type(self):
+    def send_type(self) -> Optional[str]:
         """The message send type, or ``None`` if unavailable.
 
         """
@@ -282,7 +287,7 @@ class Message(object):
         return self._send_type
 
     @property
-    def cycle_time(self):
+    def cycle_time(self) -> Optional[int]:
         """The message cycle time, or ``None`` if unavailable.
 
         """
@@ -290,7 +295,7 @@ class Message(object):
         return self._cycle_time
 
     @property
-    def dbc(self):
+    def dbc(self) -> Optional["DbcSpecifics"]:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -298,11 +303,11 @@ class Message(object):
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value):
+    def dbc(self, value: Optional["DbcSpecifics"]) -> None:
         self._dbc = value
 
     @property
-    def autosar(self):
+    def autosar(self) -> Optional["AutosarMessageSpecifics"]:
         """An object containing AUTOSAR specific properties
 
         e.g. auxiliary data required to implement CRCs, secure on-board
@@ -312,11 +317,11 @@ class Message(object):
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value):
+    def autosar(self, value: Optional["AutosarMessageSpecifics"]) -> None:
         self._autosar = value
 
     @property
-    def bus_name(self):
+    def bus_name(self) -> Optional[str]:
         """The message bus name, or ``None`` if unavailable.
 
         """
@@ -324,11 +329,11 @@ class Message(object):
         return self._bus_name
 
     @bus_name.setter
-    def bus_name(self, value):
+    def bus_name(self, value: Optional[str]) -> None:
         self._bus_name = value
 
     @property
-    def protocol(self):
+    def protocol(self) -> Optional[str]:
         """The message protocol, or ``None`` if unavailable. Only one protocol
         is currently supported; ``'j1939'``.
 
@@ -337,7 +342,7 @@ class Message(object):
         return self._protocol
 
     @protocol.setter
-    def protocol(self, value):
+    def protocol(self, value: Optional[str]) -> None:
         self._protocol = value
 
     @property
@@ -444,7 +449,12 @@ class Message(object):
 
         return encoded, padding_mask, all_signals
 
-    def encode(self, data, scaling=True, padding=False, strict=True):
+    def encode(self,
+               data: Dict[str, float],
+               scaling: bool = True,
+               padding: bool = False,
+               strict: bool = True,
+               ) -> bytes:
         """Encode given data as a message of this type.
 
         If `scaling` is ``False`` no scaling of signals is performed.
@@ -501,7 +511,11 @@ class Message(object):
 
         return decoded
 
-    def decode(self, data, decode_choices=True, scaling=True):
+    def decode(self,
+               data: bytes,
+               decode_choices: bool = True,
+               scaling: bool = True,
+               ) -> Dict[str, Union[float, str]]:
         """Decode given data as a message of this type.
 
         If `decode_choices` is ``False`` scaled values are not
@@ -519,14 +533,14 @@ class Message(object):
 
         return self._decode(self._codecs, data, decode_choices, scaling)
 
-    def get_signal_by_name(self, name):
+    def get_signal_by_name(self, name: str) -> Signal:
         for signal in self._signals:
             if signal.name == name:
                 return signal
 
         raise KeyError(name)
 
-    def is_multiplexed(self):
+    def is_multiplexed(self) -> bool:
         """Returns ``True`` if the message is multiplexed, otherwise
         ``False``.
 
@@ -614,7 +628,7 @@ class Message(object):
                         signal.length,
                         self.name))
 
-    def refresh(self, strict=None):
+    def refresh(self, strict=None) -> None:
         """Refresh the internal message state.
 
         If `strict` is ``True`` an exception is raised if any signals
@@ -635,7 +649,7 @@ class Message(object):
             message_bits = 8 * self.length * [None]
             self._check_signal_tree(message_bits, self.signal_tree)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "message('{}', 0x{:x}, {}, {}, {})".format(
             self._name,
             self._frame_id,

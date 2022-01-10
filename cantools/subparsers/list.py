@@ -1,6 +1,8 @@
 import argparse
 import cantools
 
+from .dump.formatting import signal_tree_string
+
 def _print_message(message):
     print(f'{message.name}:')
 
@@ -19,7 +21,15 @@ def _print_message(message):
         print(f'  Cycle time: {message.cycle_time} ms')
 
     if message.signals:
-        print(f'  Signals:')
+        print(f'  Signal tree:')
+        st = signal_tree_string(message, 1000*1000)
+        print()
+        for s in st.split('\n'):
+            print(f'    {s}')
+        print()
+
+    if message.signals:
+        print(f'  Signal details:')
 
     for signal in message.signals:
         signal_type = 'Integer'

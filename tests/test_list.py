@@ -65,7 +65,14 @@ ExampleMessage:
   Frame ID: 0x1f0 (496)
   Size: 8 bytes
   Is extended frame: False
-  Signals:
+  Signal tree:
+
+    -- {root}
+       +-- Enable
+       +-- AverageRadius
+       +-- Temperature
+
+  Signal details:
     Enable:
       Type: Integer
       Start bit: 7
@@ -176,7 +183,14 @@ Message2:
   Size: 7 bytes
   Is extended frame: True
   Cycle time: 200 ms
-  Signals:
+  Signal tree:
+
+    -- {root}
+       +-- signal3
+       +-- signal2
+       +-- signal4
+
+  Signal details:
     signal3:
       Type: Integer
       Start bit: 6
@@ -271,7 +285,14 @@ Message1:
   Frame ID: 0x5 (5)
   Size: 6 bytes
   Is extended frame: False
-  Signals:
+  Signal tree:
+
+    -- {root}
+       +-- signal6
+       +-- signal1
+       +-- signal5
+
+  Signal details:
     signal6:
       Type: Integer
       Start bit: 0
@@ -350,7 +371,13 @@ Message1:
   Frame ID: 0x1 (1)
   Size: 5 bytes
   Is extended frame: False
-  Signals:
+  Signal tree:
+
+    -- {root}
+       +-- Signal1
+       +-- Signal2
+
+  Signal details:
     Signal1:
       Type: Integer
       Start bit: 0
@@ -371,7 +398,22 @@ Message2:
   Size: 4 bytes
   Is extended frame: False
   Cycle time: 100 ms
-  Signals:
+  Signal tree:
+
+    -- {root}
+       +-- Mux1
+       |   +-- 0
+       |   |   +-- Signal1
+       |   |   +-- Signal2
+       |   +-- 1
+       |       +-- Signal3
+       |       +-- Signal4
+       +-- Mux2
+       |   +-- 0
+       |       +-- Signal5
+       +-- Signal6
+
+  Signal details:
     Signal1:
       Type: Integer
       Selector signal: Mux1
@@ -435,7 +477,13 @@ Message4:
   Frame ID: 0x4 (4)
   Size: 5 bytes
   Is extended frame: False
-  Signals:
+  Signal tree:
+
+    -- {root}
+       +-- Signal1
+       +-- Signal2
+
+  Signal details:
     Signal1:
       Type: Integer
       Start bit: 7
@@ -468,7 +516,12 @@ Message3:
   Frame ID: 0x3 (3)
   Size: 8 bytes
   Is extended frame: True
-  Signals:
+  Signal tree:
+
+    -- {root}
+       +-- Signal1
+
+  Signal details:
     Signal1:
       Type: Float
       Start bit: 0

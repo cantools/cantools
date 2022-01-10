@@ -22,7 +22,7 @@ def _print_message(message):
 
     if message.signals:
         print(f'  Signal tree:')
-        st = signal_tree_string(message, 1000*1000)
+        st = signal_tree_string(message, console_width=1000*1000)
         print()
         for s in st.split('\n'):
             print(f'    {s}')

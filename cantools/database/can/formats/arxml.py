@@ -71,7 +71,20 @@ class AutosarMessageSpecifics(object):
 
 
 
-def parse_int_string(in_string):
+def parse_number_string(in_string, allow_float=False):
+    # the input string contains a dot -> floating point value
+    if '.' in in_string:
+        tmp = float(in_string)
+
+        if not allow_float and tmp != int(tmp):
+            raise ValueError('Floating point value specified where integer '
+                             'is required')
+
+        # if an integer is required but a .0 floating point value is
+        # specified, we accept the input anyway. (this seems to be an
+        # ambiguity in the AUTOSAR specification.)
+        return tmp if allow_float else int(tmp)
+
     in_string = in_string.strip()
     if not in_string:
         return 0
@@ -271,14 +284,14 @@ class SystemLoader(object):
                     # base signaling rate
                     baudrate = self._get_unique_arxml_child(variant, 'BAUDRATE')
                     if baudrate is not None:
-                        baudrate = parse_int_string(baudrate.text)
+                        baudrate = parse_number_string(baudrate.text)
 
                     # baudrate for the payload of CAN-FD frames. (None if
                     # this bus does not use CAN-FD.)
                     fd_baudrate = \
                         self._get_unique_arxml_child(variant, 'CAN-FD-BAUDRATE')
                     if fd_baudrate is not None:
-                        fd_baudrate = parse_int_string(fd_baudrate.text)
+                        fd_baudrate = parse_number_string(fd_baudrate.text)
 
                     buses.append(Bus(name=name,
                                      comment=comments,
@@ -300,7 +313,7 @@ class SystemLoader(object):
                     # base signaling rate
                     baudrate = self._get_unique_arxml_child(can_cluster, 'SPEED')
                     if baudrate is not None:
-                        baudrate = parse_int_string(baudrate.text)
+                        baudrate = parse_number_string(baudrate.text)
 
                     # AUTOSAR 3 does not support CAN-FD
                     fd_baudrate = None
@@ -501,7 +514,7 @@ class SystemLoader(object):
 
         bit_length = self._get_unique_arxml_child(pdu, 'LENGTH')
         if bit_length is not None:
-            bit_length = parse_int_string(bit_length.text)
+            bit_length = parse_number_string(bit_length.text)
 
         if self.autosar_version_newer(4):
             time_period_location = [
@@ -549,11 +562,11 @@ class SystemLoader(object):
 
         selector_pos = \
             self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-START-POSITION')
-        selector_pos = parse_int_string(selector_pos.text)
+        selector_pos = parse_number_string(selector_pos.text)
 
         selector_len = \
             self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-LENGTH')
-        selector_len = parse_int_string(selector_len.text)
+        selector_len = parse_number_string(selector_len.text)
 
         selector_byte_order = \
             self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-BYTE-ORDER')
@@ -595,7 +608,7 @@ class SystemLoader(object):
         for dynalt in self._get_arxml_children(pdu, dynpart_spec):
             dynalt_selector_value = \
                 self._get_unique_arxml_child(dynalt, 'SELECTOR-FIELD-CODE')
-            dynalt_selector_value = parse_int_string(dynalt_selector_value.text)
+            dynalt_selector_value = parse_number_string(dynalt_selector_value.text)
             dynalt_pdu = self._get_unique_arxml_child(dynalt, '&I-PDU')
             dynalt_pdu_ref = self._get_unique_arxml_child(dynalt, 'I-PDU-REF')
             dynalt_pdu_ref = \
@@ -753,12 +766,12 @@ class SystemLoader(object):
                                             'SHORT-NAME').text
 
     def _load_message_frame_id(self, can_frame_triggering):
-        return parse_int_string(
+        return parse_number_string(
             self._get_unique_arxml_child(can_frame_triggering,
                                          'IDENTIFIER').text)
 
     def _load_message_length(self, can_frame):
-        return parse_int_string(
+        return parse_number_string(
             self._get_unique_arxml_child(can_frame,
                                          'FRAME-LENGTH').text)
 
@@ -845,7 +858,7 @@ class SystemLoader(object):
         if initial is not None:
             initial_int = None
             try:
-                initial_int = parse_int_string(initial)
+                initial_int = parse_number_string(initial)
             except:
                 pass
 
@@ -897,13 +910,13 @@ class SystemLoader(object):
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping):
         pos = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                            'START-POSITION').text
-        return parse_int_string(pos)
+        return parse_number_string(pos)
 
     def _load_signal_length(self, i_signal, system_signal):
         i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
 
         if i_signal_length is not None:
-            return parse_int_string(i_signal_length.text)
+            return parse_number_string(i_signal_length.text)
 
         if not self.autosar_version_newer(4) and system_signal is not None:
             # AUTOSAR3 supports specifying the signal length via the
@@ -913,7 +926,7 @@ class SystemLoader(object):
 
             if system_signal_length is not None:
                 # get the length from the system signal.
-                return parse_int_string(system_signal_length.text)
+                return parse_number_string(system_signal_length.text)
 
         return None # error?!
 
@@ -963,7 +976,7 @@ class SystemLoader(object):
             if invalid_val is None:
                 return None
 
-            return parse_int_string(invalid_val.text)
+            return parse_number_string(invalid_val.text)
 
         else:
             invalid_val = \
@@ -983,7 +996,7 @@ class SystemLoader(object):
                                                        'VALUE',
                                                    ])
             if literal is not None:
-                return parse_int_string(literal.text)
+                return parse_number_string(literal.text)
 
             literal = self._get_unique_arxml_child(invalid_val,
                                                    [
@@ -1100,8 +1113,6 @@ class SystemLoader(object):
         maximum = None
         choices = {}
 
-        text_to_num_fn = float if is_float else parse_int_string
-
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
                                                       '&COMPU-INTERNAL-TO-PHYS',
@@ -1118,9 +1129,13 @@ class SystemLoader(object):
 
             # range of the internal values of the scale.
             minimum_int_scale = \
-               None if lower_limit is None else text_to_num_fn(lower_limit.text)
+               None \
+               if lower_limit is None \
+               else parse_number_string(lower_limit.text, is_float)
             maximum_int_scale = \
-               None if upper_limit is None else text_to_num_fn(upper_limit.text)
+               None \
+               if upper_limit is None \
+               else parse_number_string(upper_limit.text, is_float)
 
             # for texttables the internal and the physical values are identical
             if minimum is None:
@@ -1134,7 +1149,7 @@ class SystemLoader(object):
                 maximum = max(maximum, maximum_int_scale)
 
             if vt is not None:
-                value = parse_int_string(lower_limit.text)
+                value = parse_number_string(lower_limit.text, is_float)
                 name = vt.text
                 choices[value] = NamedSignalValue(value, name, comments)
 
@@ -1184,9 +1199,13 @@ class SystemLoader(object):
 
         # range of the internal values
         minimum_int = \
-            None if lower_limit is None else parse_int_string(lower_limit.text)
+            None \
+            if lower_limit is None \
+            else parse_number_string(lower_limit.text, is_float)
         maximum_int = \
-            None if upper_limit is None else parse_int_string(upper_limit.text)
+            None \
+            if upper_limit is None \
+            else parse_number_string(upper_limit.text, is_float)
 
         factor, offset = \
             self._load_linear_factor_and_offset(compu_scale, decimal)
@@ -1227,10 +1246,10 @@ class SystemLoader(object):
             # range of the internal values of the scale.
             minimum_int_scale = \
                 None if lower_limit is None \
-                else parse_int_string(lower_limit.text)
+                else parse_number_string(lower_limit.text, is_float)
             maximum_int_scale = \
                None if upper_limit is None \
-               else parse_int_string(upper_limit.text)
+               else parse_number_string(upper_limit.text, is_float)
 
             # TODO: make sure that no conflicting scaling factors and offsets
             # are specified. For now, let's just assume that the ARXML file is

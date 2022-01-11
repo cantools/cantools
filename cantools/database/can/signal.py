@@ -1,8 +1,11 @@
 # A CAN signal.
 import decimal
-from typing import Optional, Dict, MutableMapping, TYPE_CHECKING, List
+from typing import Optional, Dict, TYPE_CHECKING, List, Any, Union
+
+from cantools.typechecking import Comments
 
 if TYPE_CHECKING:
+    from collections import OrderedDict
     from cantools.database.can.formats.dbc import DbcSpecifics
 
 
@@ -17,14 +20,18 @@ class Decimal(object):
 
     """
 
-    def __init__(self, scale=None, offset=None, minimum=None, maximum=None):
+    def __init__(self,
+                 scale: Optional[decimal.Decimal] = None,
+                 offset: Optional[decimal.Decimal] = None,
+                 minimum: Optional[decimal.Decimal] = None,
+                 maximum: Optional[decimal.Decimal] = None) -> None:
         self._scale = scale
         self._offset = offset
         self._minimum = minimum
         self._maximum = maximum
 
     @property
-    def scale(self) -> decimal.Decimal:
+    def scale(self) -> Optional[decimal.Decimal]:
         """The scale factor of the signal value as ``decimal.Decimal``.
 
         """
@@ -32,11 +39,11 @@ class Decimal(object):
         return self._scale
 
     @scale.setter
-    def scale(self, value: decimal.Decimal) -> None:
+    def scale(self, value: Optional[decimal.Decimal]) -> None:
         self._scale = value
 
     @property
-    def offset(self) -> decimal.Decimal:
+    def offset(self) -> Optional[decimal.Decimal]:
         """The offset of the signal value as ``decimal.Decimal``.
 
         """
@@ -44,7 +51,7 @@ class Decimal(object):
         return self._offset
 
     @offset.setter
-    def offset(self, value: decimal.Decimal) -> None:
+    def offset(self, value: Optional[decimal.Decimal]) -> None:
         self._offset = value
 
     @property
@@ -57,7 +64,7 @@ class Decimal(object):
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value: decimal.Decimal) -> None:
+    def minimum(self, value: Optional[decimal.Decimal]) -> None:
         self._minimum = value
 
     @property
@@ -70,7 +77,7 @@ class Decimal(object):
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value: decimal.Decimal) -> None:
+    def maximum(self, value: Optional[decimal.Decimal]) -> None:
         self._maximum = value
 
 
@@ -82,10 +89,14 @@ class NamedSignalValue(object):
     descriptions for the named value.
     """
 
-    def __init__(self, value, name, comments = {}):
+    def __init__(self,
+                 value: int,
+                 name: str,
+                 comments: Optional[Dict[str, str]] = None,
+                 ) -> None:
         self._name = name
         self._value = value
-        self._comments = comments
+        self._comments = comments or {}
 
     @property
     def name(self) -> str:
@@ -127,7 +138,7 @@ class NamedSignalValue(object):
     def __repr__(self) -> str:
         return f"'{self._name}'"
 
-    def __eq__(self, x) -> bool:
+    def __eq__(self, x: Any) -> bool:
         if isinstance(x, NamedSignalValue):
             return \
                 x.value == self.value \
@@ -176,28 +187,29 @@ class Signal(object):
     """
 
     def __init__(self,
-                 name,
-                 start,
-                 length,
-                 byte_order='little_endian',
-                 is_signed=False,
-                 initial=None,
-                 invalid=None,
-                 scale=1,
-                 offset=0,
-                 minimum=None,
-                 maximum=None,
-                 unit=None,
-                 choices=None,
-                 dbc_specifics=None,
-                 comment=None,
-                 receivers=None,
-                 is_multiplexer=False,
-                 multiplexer_ids=None,
-                 multiplexer_signal=None,
-                 is_float=False,
-                 decimal=None,
-                 spn=None):
+                 name: str,
+                 start: int,
+                 length: int,
+                 byte_order: str = 'little_endian',
+                 is_signed: bool = False,
+                 initial: Optional[int] = None,
+                 invalid: Optional[int] = None,
+                 scale: float = 1,
+                 offset: float = 0,
+                 minimum: Optional[float] = None,
+                 maximum: Optional[float] = None,
+                 unit: Optional[str] = None,
+                 choices: Optional["OrderedDict[int, str]"] = None,
+                 dbc_specifics: Optional["DbcSpecifics"] = None,
+                 comment: Optional[Union[str, Comments]] = None,
+                 receivers: Optional[List[str]] = None,
+                 is_multiplexer: bool = False,
+                 multiplexer_ids: Optional[List[int]] = None,
+                 multiplexer_signal: Optional[str] = None,
+                 is_float: bool = False,
+                 decimal: Optional[Decimal] = None,
+                 spn: Optional[int] = None
+                 ) -> None:
         self._name = name
         self._start = start
         self._length = length
@@ -218,15 +230,16 @@ class Signal(object):
         # english comment. this is slightly hacky because the
         # function's behavior depends on the type of the passed
         # argument, but it is quite convenient...
+        self._comments: Optional[Comments]
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = { None: comment }
+            self._comments = {None: comment}
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
             self._comments = comment
 
-        self._receivers = [] if receivers is None else receivers
+        self._receivers = receivers or []
         self._is_multiplexer = is_multiplexer
         self._multiplexer_ids = multiplexer_ids
         self._multiplexer_signal = multiplexer_signal
@@ -407,7 +420,7 @@ class Signal(object):
         self._unit = value
 
     @property
-    def choices(self) -> Optional[MutableMapping[int, str]]:
+    def choices(self) -> Optional["OrderedDict[int, str]"]:
         """A dictionary mapping signal values to enumerated choices, or
         ``None`` if unavailable.
 
@@ -444,6 +457,13 @@ class Signal(object):
 
         return self._comments.get('EN')
 
+    @comment.setter
+    def comment(self, value: Optional[str]) -> None:
+        if value is None:
+            self._comments = None
+        else:
+            self._comments = {None: value}
+
     @property
     def comments(self):
         """The dictionary with the descriptions of the signal in multiple
@@ -451,10 +471,6 @@ class Signal(object):
 
         """
         return self._comments
-
-    @comment.setter
-    def comment(self, value: Optional[str]) -> None:
-        self._comments = { None: value }
 
     @comments.setter
     def comments(self, value):
@@ -521,9 +537,14 @@ class Signal(object):
         self._spn = value
 
     def choice_string_to_number(self, string: str) -> Optional[int]:
+        if self.choices is None:
+            return None
+
         for choice_number, choice_value in self.choices.items():
             if str(choice_value) == str(string):
                 return choice_number
+
+        return None
 
     def __repr__(self) -> str:
         if self._choices is None:

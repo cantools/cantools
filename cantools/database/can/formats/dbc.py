@@ -1,7 +1,7 @@
 # Load and dump a CAN database in DBC format.
 
 import re
-from collections import OrderedDict as odict
+from collections import OrderedDict
 from collections import defaultdict
 from decimal import Decimal
 from copy import deepcopy
@@ -353,16 +353,16 @@ class DbcSpecifics(object):
                  environment_variables=None,
                  value_tables=None):
         if attributes is None:
-            attributes = odict()
+            attributes = OrderedDict()
 
         if attribute_definitions is None:
-            attribute_definitions = odict()
+            attribute_definitions = OrderedDict()
 
         if environment_variables is None:
-            environment_variables = odict()
+            environment_variables = OrderedDict()
 
         if value_tables is None:
-            value_tables = odict()
+            value_tables = OrderedDict()
 
         self._attributes = attributes
         self._attribute_definitions = attribute_definitions
@@ -618,7 +618,7 @@ def _dump_attribute_definitions(database):
     ba_def = []
 
     if database.dbc is None:
-        definitions = odict()
+        definitions = OrderedDict()
     else:
         definitions = database.dbc.attribute_definitions
 
@@ -677,7 +677,7 @@ def _dump_attribute_definition_defaults(database):
     ba_def_def = []
 
     if database.dbc is None:
-        definitions = odict()
+        definitions = OrderedDict()
     else:
         definitions = database.dbc.attribute_definitions
 
@@ -727,7 +727,7 @@ def _dump_attributes(database):
 
     for message in database.messages:
         # retrieve the ordered dictionary of message attributes
-        msg_attributes = odict()
+        msg_attributes = OrderedDict()
         if message.dbc is not None and message.dbc.attributes is not None:
             msg_attributes = message.dbc.attributes
 
@@ -916,7 +916,7 @@ def _load_attribute_definitions(tokens):
 
 
 def _load_attribute_definition_defaults(tokens):
-    defaults = odict()
+    defaults = OrderedDict()
 
     for default_attr in tokens.get('BA_DEF_DEF_', []):
         defaults[default_attr[1]] = default_attr[2]
@@ -925,8 +925,8 @@ def _load_attribute_definition_defaults(tokens):
 
 
 def _load_attributes(tokens, definitions):
-    attributes = odict()
-    attributes['node'] = odict()
+    attributes = OrderedDict()
+    attributes['node'] = OrderedDict()
 
     def to_object(attribute):
         value = attribute[3]
@@ -954,13 +954,13 @@ def _load_attributes(tokens, definitions):
 
                 if frame_id_dbc not in attributes:
                     attributes[frame_id_dbc] = {}
-                    attributes[frame_id_dbc]['message'] = odict()
+                    attributes[frame_id_dbc]['message'] = OrderedDict()
 
                 if 'signal' not in attributes[frame_id_dbc]:
-                    attributes[frame_id_dbc]['signal'] = odict()
+                    attributes[frame_id_dbc]['signal'] = OrderedDict()
 
                 if signal not in attributes[frame_id_dbc]['signal']:
-                    attributes[frame_id_dbc]['signal'][signal] = odict()
+                    attributes[frame_id_dbc]['signal'][signal] = OrderedDict()
 
                 attributes[frame_id_dbc]['signal'][signal][name] = to_object(attribute)
             elif kind == 'BO_':
@@ -968,29 +968,29 @@ def _load_attributes(tokens, definitions):
 
                 if frame_id_dbc not in attributes:
                     attributes[frame_id_dbc] = {}
-                    attributes[frame_id_dbc]['message'] = odict()
+                    attributes[frame_id_dbc]['message'] = OrderedDict()
 
                 attributes[frame_id_dbc]['message'][name] = to_object(attribute)
             elif kind == 'BU_':
                 node = item[1]
 
                 if node not in attributes['node']:
-                    attributes['node'][node] = odict()
+                    attributes['node'][node] = OrderedDict()
 
                 attributes['node'][node][name] = to_object(attribute)
             elif kind == 'EV_':
                 envvar = item[1]
 
                 if 'envvar' not in attributes:
-                    attributes['envvar'] = odict()
+                    attributes['envvar'] = OrderedDict()
 
                 if envvar not in attributes['envvar']:
-                    attributes['envvar'][envvar] = odict()
+                    attributes['envvar'][envvar] = OrderedDict()
 
                 attributes['envvar'][envvar][name] = to_object(attribute)
         else:
             if 'database' not in attributes:
-                attributes['database'] = odict()
+                attributes['database'] = OrderedDict()
 
             attributes['database'][name] = to_object(attribute)
 
@@ -1002,7 +1002,7 @@ def _load_value_tables(tokens):
 
     """
 
-    value_tables = odict()
+    value_tables = OrderedDict()
 
     for value_table in tokens.get('VAL_TABLE_', []):
         name = value_table[1]
@@ -1014,7 +1014,7 @@ def _load_value_tables(tokens):
 
 
 def _load_environment_variables(tokens, comments, attributes):
-    environment_variables = odict()
+    environment_variables = OrderedDict()
 
     for env_var in tokens.get('EV_', []):
         name = _get_environment_variable_name(attributes, env_var[1])
@@ -1039,7 +1039,7 @@ def _load_choices(tokens):
         if len(choice[1]) == 0:
             continue
 
-        od = odict((int(v[0]), NamedSignalValue(v[0], v[1])) for v in choice[3])
+        od = OrderedDict((int(v[0]), NamedSignalValue(v[0], v[1])) for v in choice[3])
 
         if len(od) == 0:
             continue
@@ -1643,7 +1643,7 @@ def make_names_unique(database):
     return database
 
 
-def dump_string(database):
+def dump_string(database: InternalDatabase) -> str:
     """Format database in DBC file format.
 
     """
@@ -1682,7 +1682,7 @@ def dump_string(database):
 
 
 def get_definitions_dict(definitions, defaults):
-    result = odict()
+    result = OrderedDict()
 
     def convert_value(definition, value):
         if definition.type_name in ['INT', 'HEX']:

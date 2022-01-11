@@ -18,7 +18,7 @@ from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
 from ...compat import fopen
-
+from ...typechecking import StringPathLike
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,19 +38,20 @@ class Database(object):
     """
 
     def __init__(self,
-                 messages=None,
-                 nodes=None,
-                 buses=None,
-                 version=None,
-                 dbc_specifics=None,
-                 autosar_specifics=None,
-                 frame_id_mask=None,
-                 strict=True):
-        self._messages = messages if messages else []
-        self._nodes = nodes if nodes else []
-        self._buses = buses if buses else []
-        self._name_to_message = {}
-        self._frame_id_to_message = {}
+                 messages: Optional[List[Message]] = None,
+                 nodes: Optional[List[Node]] = None,
+                 buses: Optional[List[Bus]] = None,
+                 version: Optional[str] = None,
+                 dbc_specifics: Optional[DbcSpecifics] = None,
+                 autosar_specifics: Optional[AutosarDatabaseSpecifics] = None,
+                 frame_id_mask: Optional[int] = None,
+                 strict: bool = True,
+                 ) -> None:
+        self._messages = messages or []
+        self._nodes = nodes or []
+        self._buses = buses or []
+        self._name_to_message: Dict[str, Message] = {}
+        self._frame_id_to_message: Dict[int, Message] = {}
         self._version = version
         self._dbc = dbc_specifics
         self._autosar = autosar_specifics
@@ -134,7 +135,9 @@ class Database(object):
 
         self.add_arxml_string(fp.read())
 
-    def add_arxml_file(self, filename, encoding='utf-8') -> None:
+    def add_arxml_file(self,
+                       filename: StringPathLike,
+                       encoding: str = 'utf-8') -> None:
         """Open, read and parse ARXML data from given file and add the parsed
         data to the database.
 
@@ -173,7 +176,9 @@ class Database(object):
 
         self.add_dbc_string(fp.read())
 
-    def add_dbc_file(self, filename, encoding='cp1252') -> None:
+    def add_dbc_file(self,
+                     filename: StringPathLike,
+                     encoding: str = 'cp1252') -> None:
         """Open, read and parse DBC data from given file and add the parsed
         data to the database.
 
@@ -214,7 +219,9 @@ class Database(object):
 
         self.add_kcd_string(fp.read())
 
-    def add_kcd_file(self, filename, encoding='utf-8') -> None:
+    def add_kcd_file(self,
+                     filename: StringPathLike,
+                     encoding: str = 'utf-8') -> None:
         """Open, read and parse KCD data from given file and add the parsed
         data to the database.
 
@@ -248,7 +255,9 @@ class Database(object):
 
         self.add_sym_string(fp.read())
 
-    def add_sym_file(self, filename, encoding='utf-8') -> None:
+    def add_sym_file(self,
+                     filename: StringPathLike,
+                     encoding: str = 'utf-8') -> None:
         """Open, read and parse SYM data from given file and add the parsed
         data to the database.
 
@@ -334,7 +343,7 @@ class Database(object):
 
         return self._frame_id_to_message[frame_id & self._frame_id_mask]
 
-    def get_node_by_name(self, name: str) -> None:
+    def get_node_by_name(self, name: str) -> Node:
         """Find the node object for given name `name`.
 
         """
@@ -381,10 +390,12 @@ class Database(object):
 
         """
 
-        try:
+        if isinstance(frame_id_or_name, int):
             message = self._frame_id_to_message[frame_id_or_name]
-        except KeyError:
+        elif isinstance(frame_id_or_name, str):
             message = self._name_to_message[frame_id_or_name]
+        else:
+            raise ValueError(f"Invalid frame_id_or_name '{frame_id_or_name}'")
 
         return message.encode(data, scaling, padding, strict)
 
@@ -410,10 +421,12 @@ class Database(object):
 
         """
 
-        try:
+        if isinstance(frame_id_or_name, int):
             message = self._frame_id_to_message[frame_id_or_name]
-        except KeyError:
+        elif isinstance(frame_id_or_name, str):
             message = self._name_to_message[frame_id_or_name]
+        else:
+            raise ValueError(f"Invalid frame_id_or_name '{frame_id_or_name}'")
 
         return message.decode(data, decode_choices, scaling)
 

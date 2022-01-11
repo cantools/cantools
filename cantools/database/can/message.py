@@ -2,7 +2,7 @@
 
 import binascii
 from copy import deepcopy
-from typing import List, Optional, Union, Dict, TYPE_CHECKING
+from typing import List, Optional, Union, Dict, TYPE_CHECKING, Set
 
 from .signal import NamedSignalValue, Signal
 from .signal_group import SignalGroup
@@ -14,6 +14,7 @@ from ..utils import create_encode_decode_formats
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
+from ...typechecking import Comments, Codec
 
 if TYPE_CHECKING:
     from .formats.arxml import AutosarMessageSpecifics
@@ -30,21 +31,22 @@ class Message(object):
     """
 
     def __init__(self,
-                 frame_id,
-                 name,
-                 length,
-                 signals,
-                 comment=None,
-                 senders=None,
-                 send_type=None,
-                 cycle_time=None,
-                 dbc_specifics=None,
-                 autosar_specifics=None,
-                 is_extended_frame=False,
-                 bus_name=None,
-                 signal_groups=None,
-                 strict=True,
-                 protocol=None):
+                 frame_id: int,
+                 name: str,
+                 length: int,
+                 signals: List[Signal],
+                 comment: Optional[Union[str, Comments]] = None,
+                 senders: Optional[List[str]] = None,
+                 send_type: Optional[str] = None,
+                 cycle_time: Optional[int] = None,
+                 dbc_specifics: Optional["DbcSpecifics"] = None,
+                 autosar_specifics: Optional["AutosarMessageSpecifics"] = None,
+                 is_extended_frame: bool = False,
+                 bus_name: Optional[str] = None,
+                 signal_groups: Optional[List[SignalGroup]] = None,
+                 strict: bool = True,
+                 protocol: Optional[str] = None,
+                 ) -> None:
         frame_id_bit_length = frame_id.bit_length()
 
         if is_extended_frame:
@@ -68,9 +70,10 @@ class Message(object):
         # english comment. this is slightly hacky because the
         # function's behavior depends on the type of the passed
         # argument, but it is quite convenient...
+        self._comments: Optional[Comments]
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = { None: comment }
+            self._comments = {None: comment}
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -83,20 +86,23 @@ class Message(object):
         self._autosar = autosar_specifics
         self._bus_name = bus_name
         self._signal_groups = signal_groups
-        self._codecs = None
+        self._codecs: Optional[Codec] = None
         self._signal_tree = None
         self._strict = strict
         self._protocol = protocol
         self.refresh()
 
-    def _create_codec(self, parent_signal=None, multiplexer_id=None):
+    def _create_codec(self,
+                      parent_signal: Optional[str] = None,
+                      multiplexer_id: Optional[int] = None,
+                      ) -> Codec:
         """Create a codec of all signals with given parent signal. This is a
         recursive function.
 
         """
 
         signals = []
-        multiplexers = {}
+        multiplexers: Dict[str, Dict[int, Codec]] = {}
 
         # Find all signals matching given parent signal name and given
         # multiplexer id. Root signals' parent and multiplexer id are
@@ -105,18 +111,21 @@ class Message(object):
             if signal.multiplexer_signal != parent_signal:
                 continue
 
-            if ((multiplexer_id is not None)
-                and (multiplexer_id not in signal.multiplexer_ids)):
+            if (
+                    multiplexer_id is not None
+                    and (signal.multiplexer_ids is None or multiplexer_id not in signal.multiplexer_ids)
+            ):
                 continue
 
             if signal.is_multiplexer:
-                children_ids = set()
+                children_ids: Set[int] = set()
 
                 for s in self._signals:
                     if s.multiplexer_signal != signal.name:
                         continue
 
-                    children_ids.update(s.multiplexer_ids)
+                    if s.multiplexer_ids is not None:
+                        children_ids.update(s.multiplexer_ids)
 
                 # Some CAN messages will have muxes containing only
                 # the multiplexer and no additional signals. At Tesla
@@ -226,7 +235,7 @@ class Message(object):
         return self._signals
 
     @property
-    def signal_groups(self) -> List[SignalGroup]:
+    def signal_groups(self) -> Optional[List[SignalGroup]]:
         """A list of all signal groups in the message.
 
         """
@@ -254,6 +263,13 @@ class Message(object):
 
         return self._comments.get('EN')
 
+    @comment.setter
+    def comment(self, value: Optional[str]) -> None:
+        if value is None:
+            self._comments = None
+        else:
+            self._comments = {None: value}
+
     @property
     def comments(self):
         """The dictionary with the descriptions of the message in multiple
@@ -261,10 +277,6 @@ class Message(object):
 
         """
         return self._comments
-
-    @comment.setter
-    def comment(self, value: Optional[str]) -> None:
-        self._comments = { None: value }
 
     @comments.setter
     def comments(self, value):
@@ -485,7 +497,11 @@ class Message(object):
 
         return binascii.unhexlify(encoded)[:self._length]
 
-    def _decode(self, node, data, decode_choices, scaling):
+    def _decode(self,
+                node: Codec,
+                data: bytes,
+                decode_choices: bool,
+                scaling: bool) -> Dict[str, Union[float, str]]:
         decoded = decode_data(data,
                               node['signals'],
                               node['formats'],
@@ -529,6 +545,9 @@ class Message(object):
 
         """
 
+        if self._codecs is None:
+            raise ValueError("Codec is not initialized.")
+
         data = data[:self._length]
 
         return self._decode(self._codecs, data, decode_choices, scaling)
@@ -552,6 +571,8 @@ class Message(object):
         True
 
         """
+        if self._codecs is None:
+            raise ValueError("Codec is not initialized.")
 
         return bool(self._codecs['multiplexers'])
 
@@ -628,7 +649,7 @@ class Message(object):
                         signal.length,
                         self.name))
 
-    def refresh(self, strict=None) -> None:
+    def refresh(self, strict: Optional[bool] = None) -> None:
         """Refresh the internal message state.
 
         If `strict` is ``True`` an exception is raised if any signals

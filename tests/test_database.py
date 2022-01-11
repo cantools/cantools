@@ -4806,6 +4806,82 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
 
+    def test_system_arxml_float_values(self):
+        db = cantools.db.load_file('tests/files/arxml/system-float-values.arxml')
+
+        self.assertEqual(len(db.buses), 1)
+        bus = db.buses[0]
+        self.assertEqual(bus.name, 'CCB')
+        self.assertEqual(bus.comment, None)
+        self.assertEqual(bus.comments, None)
+        self.assertEqual(bus.baudrate, 500000)
+        self.assertEqual(bus.fd_baudrate, 2000000)
+
+        self.assertEqual([x.name for x in db.nodes], [ 'IDCM_A' ])
+
+        self.assertEqual(len(db.messages), 1)
+
+        # message
+        message_1 = db.messages[0]
+        self.assertEqual(message_1.frame_id, 0xda)
+        self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.name, 'Test_Frame')
+        self.assertEqual(message_1.length, 2)
+        self.assertEqual(message_1.senders, [])
+        self.assertEqual(message_1.send_type, None)
+        self.assertEqual(message_1.cycle_time, 100)
+        self.assertEqual(message_1.comments, None)
+        self.assertEqual(message_1.bus_name, 'CCB')
+        self.assertEqual(len(message_1.signals), 2)
+
+        # first signal
+        signal_1 = message_1.signals[0]
+        self.assertEqual(signal_1.name, 'IMessage_2')
+        self.assertEqual(signal_1.start, 7)
+        self.assertEqual(signal_1.length, 7)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, 'big_endian')
+        self.assertEqual(signal_1.initial, 0.0)
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, 0.0)
+        self.assertEqual(signal_1.maximum, 127.0)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, 0)
+        self.assertEqual(signal_1.decimal.maximum, 127)
+        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comments, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+
+        # second signal
+        signal_2 = message_1.signals[1]
+        self.assertEqual(signal_2.name, 'IMessage_1')
+        self.assertEqual(signal_2.start, 15)
+        self.assertEqual(signal_2.length, 5)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'big_endian')
+        self.assertEqual(signal_2.initial, 0.0)
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, False)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 0)
+        self.assertEqual(signal_2.minimum, 0.0)
+        self.assertEqual(signal_2.maximum, 31.0)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, 0)
+        self.assertEqual(signal_2.decimal.minimum, 0)
+        self.assertEqual(signal_2.decimal.maximum, 31)
+        self.assertEqual(signal_2.unit, None)
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comments, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+
     def test_system_missing_factor_arxml(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(

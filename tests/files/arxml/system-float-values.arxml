@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--PREEvision 8.5.13 final--><!--JDK: 1.8.0_172--><!--Autosar Release 4.2.1 Revision 0001--><!--Date: 2021.12.31 at 15:34:20--><AUTOSAR xmlns="http://autosar.org/schema/r4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://autosar.org/schema/r4.0 AUTOSAR_4-2-1.xsd">
+  <ADMIN-DATA>
+    <LANGUAGE>EN</LANGUAGE>
+    <USED-LANGUAGES>
+      <L-10 L="EN" xml:space="default"/>
+    </USED-LANGUAGES>
+  </ADMIN-DATA>
+  <AR-PACKAGES>
+    <AR-PACKAGE UUID="0a9b246c9e373afb9330a953844b3b6e">
+      <SHORT-NAME>Communication</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE UUID="644b31cca3f63b8aa8f86bf533b94a9a">
+          <SHORT-NAME>Frames</SHORT-NAME>
+          <ELEMENTS>
+            <CAN-FRAME UUID="O9cc19501763c0616ba7160b1XO9cc19501763c0616ba71609310O9cc19501763c0616ba716093">
+              <SHORT-NAME>Test_Frame</SHORT-NAME>
+              <FRAME-LENGTH>2</FRAME-LENGTH>
+              <PDU-TO-FRAME-MAPPINGS>
+                <PDU-TO-FRAME-MAPPING UUID="O9cc19501763c0616ba7160b1xO9cc19501763c0616ba71616910O9cc19501763c0616ba716093">
+                  <SHORT-NAME>Test_Frame</SHORT-NAME>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
+                  <PDU-REF DEST="I-SIGNAL-I-PDU">/Communication/PDUs/Test_Frame</PDU-REF>
+                  <START-POSITION>7</START-POSITION>
+                </PDU-TO-FRAME-MAPPING>
+              </PDU-TO-FRAME-MAPPINGS>
+            </CAN-FRAME>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE UUID="d97be474d70931dca0bc034ced0b9322">
+          <SHORT-NAME>NetworkManagement</SHORT-NAME>
+          <ELEMENTS>
+            <NM-CONFIG UUID="Oa15942c165ea8b2b5f3e025eXOa15942c165ea8b2b5f3e022711Oa15942c165ea8b2b5f3e0227">
+              <SHORT-NAME>NMConfig_GEMMY23</SHORT-NAME>
+              <NM-CLUSTERS>
+                <CAN-NM-CLUSTER UUID="Oa15942c165ea8b2b5f3e025exNa15951317104c1d9511c6de11Oa15942c165ea8b2b5f3e0227">
+                  <SHORT-NAME>CCB</SHORT-NAME>
+                  <COMMUNICATION-CLUSTER-REF DEST="CAN-CLUSTER">/Topology/Clusters/CCB</COMMUNICATION-CLUSTER-REF>
+                  <NM-CHANNEL-SLEEP-MASTER>true</NM-CHANNEL-SLEEP-MASTER>
+                  <NM-NODES>
+                    <CAN-NM-NODE UUID="Oa15942c165ea8b2b5f3e025exNa159513172a0fd1a7554a1311Oa15942c165ea8b2b5f3e0227">
+                      <SHORT-NAME>IDCM_A_CCB</SHORT-NAME>
+                      <CONTROLLER-REF DEST="CAN-COMMUNICATION-CONTROLLER">/Topology/HardwareComponents/IDCM_A/IDCM_A_CCB_Controller</CONTROLLER-REF>
+                      <NM-IF-ECU-REF DEST="NM-ECU">/Communication/NetworkManagement/NMConfig_GEMMY23/IDCM_A</NM-IF-ECU-REF>
+                      <NM-NODE-ID>111</NM-NODE-ID>
+                      <NM-PASSIVE-MODE-ENABLED>false</NM-PASSIVE-MODE-ENABLED>
+                      <NM-MSG-CYCLE-OFFSET>0.03</NM-MSG-CYCLE-OFFSET>
+                      <NM-RANGE-CONFIG>
+                        <LOWER-CAN-ID>1536</LOWER-CAN-ID>
+                        <UPPER-CAN-ID>1663</UPPER-CAN-ID>
+                      </NM-RANGE-CONFIG>
+                    </CAN-NM-NODE>
+                  </NM-NODES>
+                  <NM-SYNCHRONIZING-NETWORK>false</NM-SYNCHRONIZING-NETWORK>
+                  <NM-BUSLOAD-REDUCTION-ACTIVE>false</NM-BUSLOAD-REDUCTION-ACTIVE>
+                  <NM-CAR-WAKE-UP-FILTER-ENABLED>false</NM-CAR-WAKE-UP-FILTER-ENABLED>
+                  <NM-CAR-WAKE-UP-RX-ENABLED>false</NM-CAR-WAKE-UP-RX-ENABLED>
+                  <NM-CBV-POSITION>1</NM-CBV-POSITION>
+                  <NM-CHANNEL-ACTIVE>false</NM-CHANNEL-ACTIVE>
+                  <NM-IMMEDIATE-NM-CYCLE-TIME>0.01</NM-IMMEDIATE-NM-CYCLE-TIME>
+                  <NM-IMMEDIATE-NM-TRANSMISSIONS>15</NM-IMMEDIATE-NM-TRANSMISSIONS>
+                  <NM-MESSAGE-TIMEOUT-TIME>0.5</NM-MESSAGE-TIMEOUT-TIME>
+                  <NM-MSG-CYCLE-TIME>0.64</NM-MSG-CYCLE-TIME>
+                  <NM-NETWORK-TIMEOUT>4</NM-NETWORK-TIMEOUT>
+                  <NM-NID-POSITION>0</NM-NID-POSITION>
+                  <NM-REMOTE-SLEEP-INDICATION-TIME>0</NM-REMOTE-SLEEP-INDICATION-TIME>
+                  <NM-REPEAT-MESSAGE-TIME>1.5</NM-REPEAT-MESSAGE-TIME>
+                  <NM-USER-DATA-LENGTH>6</NM-USER-DATA-LENGTH>
+                  <NM-WAIT-BUS-SLEEP-TIME>4</NM-WAIT-BUS-SLEEP-TIME>
+                </CAN-NM-CLUSTER>
+              </NM-CLUSTERS>
+              <NM-CLUSTER-COUPLINGS>
+                <CAN-NM-CLUSTER-COUPLING>
+                  <COUPLED-CLUSTER-REFS>
+                    <COUPLED-CLUSTER-REF DEST="CAN-NM-CLUSTER">/Communication/NetworkManagement/NMConfig_GEMMY23/CCB</COUPLED-CLUSTER-REF>
+                  </COUPLED-CLUSTER-REFS>
+                  <NM-BUSLOAD-REDUCTION-ENABLED>false</NM-BUSLOAD-REDUCTION-ENABLED>
+                  <NM-IMMEDIATE-RESTART-ENABLED>false</NM-IMMEDIATE-RESTART-ENABLED>
+                </CAN-NM-CLUSTER-COUPLING>
+              </NM-CLUSTER-COUPLINGS>
+              <NM-IF-ECUS>
+                <NM-ECU UUID="Oa15942c165ea8b2b5f3e025exNa15951317104c1d9511c68911Oa15942c165ea8b2b5f3e0227">
+                  <SHORT-NAME>IDCM_A</SHORT-NAME>
+                  <BUS-SPECIFIC-NM-ECU>
+                    <CAN-NM-ECU/>
+                  </BUS-SPECIFIC-NM-ECU>
+                  <ECU-INSTANCE-REF DEST="ECU-INSTANCE">/Topology/HardwareComponents/IDCM_A</ECU-INSTANCE-REF>
+                  <NM-BUS-SYNCHRONIZATION-ENABLED>false</NM-BUS-SYNCHRONIZATION-ENABLED>
+                  <NM-COM-CONTROL-ENABLED>false</NM-COM-CONTROL-ENABLED>
+                  <NM-COORDINATOR>
+                    <NM-ACTIVE-COORDINATOR>false</NM-ACTIVE-COORDINATOR>
+                    <NM-SHUTDOWN-DELAY-TIMER>0</NM-SHUTDOWN-DELAY-TIMER>
+                  </NM-COORDINATOR>
+                  <NM-NODE-DETECTION-ENABLED>false</NM-NODE-DETECTION-ENABLED>
+                  <NM-NODE-ID-ENABLED>true</NM-NODE-ID-ENABLED>
+                  <NM-PASSIVE-MODE-ENABLED>false</NM-PASSIVE-MODE-ENABLED>
+                  <NM-PDU-RX-INDICATION-ENABLED>true</NM-PDU-RX-INDICATION-ENABLED>
+                  <NM-REMOTE-SLEEP-IND-ENABLED>false</NM-REMOTE-SLEEP-IND-ENABLED>
+                  <NM-REPEAT-MSG-IND-ENABLED>false</NM-REPEAT-MSG-IND-ENABLED>
+                  <NM-STATE-CHANGE-IND-ENABLED>false</NM-STATE-CHANGE-IND-ENABLED>
+                  <NM-USER-DATA-ENABLED>true</NM-USER-DATA-ENABLED>
+                </NM-ECU>
+              </NM-IF-ECUS>
+            </NM-CONFIG>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE UUID="8ea7d5f648373dcb81a5df496ef28b08">
+          <SHORT-NAME>PDUs</SHORT-NAME>
+          <ELEMENTS>
+            <I-SIGNAL-I-PDU-GROUP UUID="Pa1693b317c166bc3791300a3dXPa1693b317c166bc3791300a1f00">
+              <SHORT-NAME>IDCM_A_CCB_Tx</SHORT-NAME>
+              <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+              <I-SIGNAL-I-PDUS>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/Communication/PDUs/Test_Frame</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+              </I-SIGNAL-I-PDUS>
+            </I-SIGNAL-I-PDU-GROUP>
+            <I-SIGNAL-I-PDU UUID="O9cc19501763c0616ba716140XO9cc19501763c0616ba71612210O9cc19501763c0616ba716122">
+              <SHORT-NAME>Test_Frame</SHORT-NAME>
+              <LENGTH>2</LENGTH>
+              <I-PDU-TIMING-SPECIFICATIONS>
+                <I-PDU-TIMING>
+                  <MINIMUM-DELAY>0</MINIMUM-DELAY>
+                  <TRANSMISSION-MODE-DECLARATION>
+                    <TRANSMISSION-MODE-CONDITIONS>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/Communication/PDUs/Test_Frame/Message_1</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                      <TRANSMISSION-MODE-CONDITION>
+                        <DATA-FILTER>
+                          <DATA-FILTER-TYPE>ALWAYS</DATA-FILTER-TYPE>
+                        </DATA-FILTER>
+                        <I-SIGNAL-IN-I-PDU-REF DEST="I-SIGNAL-TO-I-PDU-MAPPING">/Communication/PDUs/Test_Frame/Message_2</I-SIGNAL-IN-I-PDU-REF>
+                      </TRANSMISSION-MODE-CONDITION>
+                    </TRANSMISSION-MODE-CONDITIONS>
+                    <TRANSMISSION-MODE-TRUE-TIMING>
+                      <CYCLIC-TIMING>
+                        <TIME-OFFSET>
+                          <VALUE>0</VALUE>
+                        </TIME-OFFSET>
+                        <TIME-PERIOD>
+                          <VALUE>0.1</VALUE>
+                        </TIME-PERIOD>
+                      </CYCLIC-TIMING>
+                    </TRANSMISSION-MODE-TRUE-TIMING>
+                  </TRANSMISSION-MODE-DECLARATION>
+                </I-PDU-TIMING>
+              </I-PDU-TIMING-SPECIFICATIONS>
+              <I-SIGNAL-TO-PDU-MAPPINGS>
+                <I-SIGNAL-TO-I-PDU-MAPPING UUID="O9cc19501763c0616ba716140xO9cc19501763c0616ba71628610O9cc19501763c0616ba716122">
+                  <SHORT-NAME>Message_2</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/Communication/Signals/IMessage_2</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
+                  <START-POSITION>7</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+                <I-SIGNAL-TO-I-PDU-MAPPING UUID="O9cc19501763c0616ba716140xO9cc19501763c0616ba7166ca10O9cc19501763c0616ba716122">
+                  <SHORT-NAME>Message_1</SHORT-NAME>
+                  <I-SIGNAL-REF DEST="I-SIGNAL">/Communication/Signals/IMessage_1</I-SIGNAL-REF>
+                  <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
+                  <START-POSITION>15</START-POSITION>
+                  <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
+                </I-SIGNAL-TO-I-PDU-MAPPING>
+              </I-SIGNAL-TO-PDU-MAPPINGS>
+              <UNUSED-BIT-PATTERN>0</UNUSED-BIT-PATTERN>
+            </I-SIGNAL-I-PDU>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE UUID="8d148d7186933bf681808a1b3ce3d0b3">
+          <SHORT-NAME>Signals</SHORT-NAME>
+          <ELEMENTS>
+            <I-SIGNAL UUID="O9cc19501763c0616ba716743XO9cc19501763c0616ba71672510O9cc19501763c0616ba716725">
+              <SHORT-NAME>IMessage_1</SHORT-NAME>
+              <LONG-NAME>
+                <L-4 L="EN">Message 1</L-4>
+              </LONG-NAME>
+              <DATA-TYPE-POLICY>LEGACY</DATA-TYPE-POLICY>
+              <INIT-VALUE>
+                <NUMERICAL-VALUE-SPECIFICATION>
+                  <SHORT-LABEL>rawInitialValue_Message_1</SHORT-LABEL>
+                  <VALUE>0</VALUE>
+                </NUMERICAL-VALUE-SPECIFICATION>
+              </INIT-VALUE>
+              <LENGTH>5</LENGTH>
+              <NETWORK-REPRESENTATION-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <BASE-TYPE-REF DEST="SW-BASE-TYPE">/DataTypes/BaseTypes/uint8</BASE-TYPE-REF>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/Message_1</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </NETWORK-REPRESENTATION-PROPS>
+              <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/Communication/SystemSignals/Message_1</SYSTEM-SIGNAL-REF>
+            </I-SIGNAL>
+            <I-SIGNAL UUID="O9cc19501763c0616ba7162f2XO9cc19501763c0616ba7162d410O9cc19501763c0616ba7162d4">
+              <SHORT-NAME>IMessage_2</SHORT-NAME>
+              <LONG-NAME>
+                <L-4 L="EN">Message 2</L-4>
+              </LONG-NAME>
+              <DATA-TYPE-POLICY>LEGACY</DATA-TYPE-POLICY>
+              <INIT-VALUE>
+                <NUMERICAL-VALUE-SPECIFICATION>
+                  <SHORT-LABEL>rawInitialValue_Message_2</SHORT-LABEL>
+                  <VALUE>0</VALUE>
+                </NUMERICAL-VALUE-SPECIFICATION>
+              </INIT-VALUE>
+              <LENGTH>7</LENGTH>
+              <NETWORK-REPRESENTATION-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <BASE-TYPE-REF DEST="SW-BASE-TYPE">/DataTypes/BaseTypes/uint8</BASE-TYPE-REF>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/Message_2</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </NETWORK-REPRESENTATION-PROPS>
+              <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/Communication/SystemSignals/Message_2</SYSTEM-SIGNAL-REF>
+            </I-SIGNAL>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE UUID="c804a5701d0931fc916944b1da5613ca">
+          <SHORT-NAME>SystemSignals</SHORT-NAME>
+          <ELEMENTS>
+            <SYSTEM-SIGNAL UUID="dd7695501c173cd4a89c8e057fc23c36">
+              <SHORT-NAME>Message_1</SHORT-NAME>
+              <PHYSICAL-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/Message_1</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </PHYSICAL-PROPS>
+            </SYSTEM-SIGNAL>
+            <SYSTEM-SIGNAL UUID="41b0c01c78f13cd58e61a27d85e137a4">
+              <SHORT-NAME>Message_2</SHORT-NAME>
+              <PHYSICAL-PROPS>
+                <SW-DATA-DEF-PROPS-VARIANTS>
+                  <SW-DATA-DEF-PROPS-CONDITIONAL>
+                    <COMPU-METHOD-REF DEST="COMPU-METHOD">/DataTypes/CompuMethods/Message_2</COMPU-METHOD-REF>
+                  </SW-DATA-DEF-PROPS-CONDITIONAL>
+                </SW-DATA-DEF-PROPS-VARIANTS>
+              </PHYSICAL-PROPS>
+            </SYSTEM-SIGNAL>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+    <AR-PACKAGE UUID="1d99a5eef0c2366cb2a52f149c654713">
+      <SHORT-NAME>DataConstraints</SHORT-NAME>
+      <ELEMENTS>
+        <DATA-CONSTR UUID="O9cc19501763c0616ba71684bxO9cc19501763c0616ba71686810O9cc19501763c0616ba71682d">
+          <SHORT-NAME>IC_CIBAutoBrkReq_RedntAntiRplyCnt_IDCM_A_CIB_Autonomous_Braking_Req_IDCM_A_Redundant_0DA_M</SHORT-NAME>
+          <DATA-CONSTR-RULES>
+            <DATA-CONSTR-RULE>
+              <INTERNAL-CONSTRS>
+                <LOWER-LIMIT INTERVAL-TYPE="CLOSED"/>
+                <UPPER-LIMIT INTERVAL-TYPE="CLOSED"/>
+              </INTERNAL-CONSTRS>
+            </DATA-CONSTR-RULE>
+          </DATA-CONSTR-RULES>
+        </DATA-CONSTR>
+        <DATA-CONSTR UUID="O9cc19501763c0616ba7163f9xO9cc19501763c0616ba71641610O9cc19501763c0616ba7163db">
+          <SHORT-NAME>IC_CIBAutoBrkReq_RedntMAC_IDCM_A_CIB_Autonomous_Braking_Req_IDCM_A_Redundant_0DA_M</SHORT-NAME>
+          <DATA-CONSTR-RULES>
+            <DATA-CONSTR-RULE>
+              <INTERNAL-CONSTRS>
+                <LOWER-LIMIT INTERVAL-TYPE="CLOSED"/>
+                <UPPER-LIMIT INTERVAL-TYPE="CLOSED"/>
+              </INTERNAL-CONSTRS>
+            </DATA-CONSTR-RULE>
+          </DATA-CONSTR-RULES>
+        </DATA-CONSTR>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <AR-PACKAGE UUID="f771792e92c533f297a1b6eb53ac2ad9">
+      <SHORT-NAME>DataTypes</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE UUID="52bf5f499fbc3c2687e8f61a9e45cd41">
+          <SHORT-NAME>BaseTypes</SHORT-NAME>
+          <ELEMENTS>
+            <SW-BASE-TYPE UUID="N9cc190a17b2a1f6ada1a326XN9cc190a17b2a1f6ada1a30810N9cc190a17b2a1f6ada1a308">
+              <SHORT-NAME>uint8</SHORT-NAME>
+              <CATEGORY>FIXED_LENGTH</CATEGORY>
+              <BASE-TYPE-SIZE>8</BASE-TYPE-SIZE>
+              <BASE-TYPE-ENCODING>NONE</BASE-TYPE-ENCODING>
+              <BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</BYTE-ORDER>
+              <NATIVE-DECLARATION>uint8</NATIVE-DECLARATION>
+            </SW-BASE-TYPE>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE UUID="d0c477af727330c9bba069b6d9b3d249">
+          <SHORT-NAME>CompuMethods</SHORT-NAME>
+          <ELEMENTS>
+            <COMPU-METHOD UUID="O9cc19501763c0616ba70658dXO9cc19501763c0616ba70656f10O9cc19501763c0616ba70656f">
+              <SHORT-NAME>Message_1</SHORT-NAME>
+              <CATEGORY>LINEAR</CATEGORY>
+              <UNIT-REF DEST="UNIT">/DataTypes/Units/NoUnit</UNIT-REF>
+              <COMPU-INTERNAL-TO-PHYS>
+                <COMPU-SCALES>
+                  <COMPU-SCALE>
+                    <SHORT-LABEL>Message_1</SHORT-LABEL>
+                    <LOWER-LIMIT INTERVAL-TYPE="CLOSED">0.0</LOWER-LIMIT>
+                    <UPPER-LIMIT INTERVAL-TYPE="CLOSED">31.0</UPPER-LIMIT>
+                    <COMPU-RATIONAL-COEFFS>
+                      <COMPU-NUMERATOR>
+                        <V>0.0</V>
+                        <V>1.0</V>
+                      </COMPU-NUMERATOR>
+                      <COMPU-DENOMINATOR>
+                        <V>1</V>
+                      </COMPU-DENOMINATOR>
+                    </COMPU-RATIONAL-COEFFS>
+                  </COMPU-SCALE>
+                </COMPU-SCALES>
+              </COMPU-INTERNAL-TO-PHYS>
+            </COMPU-METHOD>
+            <COMPU-METHOD UUID="O9cc19501763c0616ba70641fXO9cc19501763c0616ba70640110O9cc19501763c0616ba706401">
+              <SHORT-NAME>Message_2</SHORT-NAME>
+              <CATEGORY>LINEAR</CATEGORY>
+              <UNIT-REF DEST="UNIT">/DataTypes/Units/NoUnit</UNIT-REF>
+              <COMPU-INTERNAL-TO-PHYS>
+                <COMPU-SCALES>
+                  <COMPU-SCALE>
+                    <SHORT-LABEL>Message_2</SHORT-LABEL>
+                    <LOWER-LIMIT INTERVAL-TYPE="CLOSED">0.0</LOWER-LIMIT>
+                    <UPPER-LIMIT INTERVAL-TYPE="CLOSED">127</UPPER-LIMIT>
+                    <COMPU-RATIONAL-COEFFS>
+                      <COMPU-NUMERATOR>
+                        <V>0.0</V>
+                        <V>1.0</V>
+                      </COMPU-NUMERATOR>
+                      <COMPU-DENOMINATOR>
+                        <V>1</V>
+                      </COMPU-DENOMINATOR>
+                    </COMPU-RATIONAL-COEFFS>
+                  </COMPU-SCALE>
+                </COMPU-SCALES>
+              </COMPU-INTERNAL-TO-PHYS>
+            </COMPU-METHOD>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE UUID="2be4ea8aa8d636088a9c510bd6df6ce7">
+          <SHORT-NAME>Units</SHORT-NAME>
+          <ELEMENTS>
+            <UNIT UUID="P9cc189617b57b06dc710decfeXP9cc189617b57b06dc710dece010P9cc189617b57b06dc710dece0">
+              <SHORT-NAME>NoUnit</SHORT-NAME>
+              <DISPLAY-NAME>NoUnit</DISPLAY-NAME>
+              <FACTOR-SI-TO-UNIT>0</FACTOR-SI-TO-UNIT>
+              <OFFSET-SI-TO-UNIT>0</OFFSET-SI-TO-UNIT>
+            </UNIT>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+    <AR-PACKAGE UUID="9a0722db13d534ebbe5fe34b8e780bdb">
+      <SHORT-NAME>System</SHORT-NAME>
+      <ELEMENTS>
+        <SYSTEM UUID="b334851546923406a6e1094c2c82ce12">
+          <SHORT-NAME>System</SHORT-NAME>
+          <CATEGORY>ECU_SYSTEM_DESCRIPTION</CATEGORY>
+          <FIBEX-ELEMENTS>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="CAN-CLUSTER">/Topology/Clusters/CCB</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="CAN-FRAME">/Communication/Frames/Test_Frame</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="ECU-INSTANCE">/Topology/HardwareComponents/IDCM_A</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="I-SIGNAL">/Communication/Signals/IMessage_1</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="I-SIGNAL">/Communication/Signals/IMessage_2</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="I-SIGNAL-I-PDU">/Communication/PDUs/Test_Frame</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="I-SIGNAL-I-PDU-GROUP">/Communication/PDUs/IDCM_A_CCB_Tx</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="NM-CONFIG">/Communication/NetworkManagement/NMConfig_GEMMY23</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+          </FIBEX-ELEMENTS>
+        </SYSTEM>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <AR-PACKAGE UUID="e02953f3dc2732e4a64a0d10e1f81c98">
+      <SHORT-NAME>Topology</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE UUID="d3b99285c5933f55ac710621851679ed">
+          <SHORT-NAME>Clusters</SHORT-NAME>
+          <ELEMENTS>
+            <CAN-CLUSTER UUID="Na15951e16c22616a4c75ad3XNa15951e16c22616a4c75ab410Na15951e16c22616a4c75ab4">
+              <SHORT-NAME>CCB</SHORT-NAME>
+              <CAN-CLUSTER-VARIANTS>
+                <CAN-CLUSTER-CONDITIONAL>
+                  <BAUDRATE>500000</BAUDRATE>
+                  <PHYSICAL-CHANNELS>
+                    <CAN-PHYSICAL-CHANNEL UUID="Na15951e16c22616a4c74982XNa15951e16c22616a4c7496310Na15951e16c22616a4c74963">
+                      <SHORT-NAME>CCB</SHORT-NAME>
+                      <COMM-CONNECTORS>
+                        <COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                          <COMMUNICATION-CONNECTOR-REF DEST="CAN-COMMUNICATION-CONNECTOR">/Topology/HardwareComponents/IDCM_A/IDCM_A_CCB</COMMUNICATION-CONNECTOR-REF>
+                        </COMMUNICATION-CONNECTOR-REF-CONDITIONAL>
+                      </COMM-CONNECTORS>
+                      <FRAME-TRIGGERINGS>
+                        <CAN-FRAME-TRIGGERING UUID="Oa15950c1709b042df31b3621xOa15950c176cb11919616904b10Oa15950c1709b042df31b3603">
+                          <SHORT-NAME>Test_Frame</SHORT-NAME>
+                          <FRAME-PORT-REFS>
+                            <FRAME-PORT-REF DEST="FRAME-PORT">/Topology/HardwareComponents/IDCM_A/IDCM_A_CCB/Test_Frame_IDCM_A</FRAME-PORT-REF>
+                          </FRAME-PORT-REFS>
+                          <FRAME-REF DEST="CAN-FRAME">/Communication/Frames/Test_Frame</FRAME-REF>
+                          <PDU-TRIGGERINGS>
+                            <PDU-TRIGGERING-REF-CONDITIONAL>
+                              <PDU-TRIGGERING-REF DEST="PDU-TRIGGERING">/Topology/Clusters/CCB/CCB/Test_Frame1</PDU-TRIGGERING-REF>
+                            </PDU-TRIGGERING-REF-CONDITIONAL>
+                          </PDU-TRIGGERINGS>
+                          <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                          <CAN-FRAME-RX-BEHAVIOR>CAN-FD</CAN-FRAME-RX-BEHAVIOR>
+                          <CAN-FRAME-TX-BEHAVIOR>CAN-FD</CAN-FRAME-TX-BEHAVIOR>
+                          <IDENTIFIER>218</IDENTIFIER>
+                        </CAN-FRAME-TRIGGERING>
+                      </FRAME-TRIGGERINGS>
+                      <I-SIGNAL-TRIGGERINGS>
+                        <I-SIGNAL-TRIGGERING UUID="O9cc18a517bcd33961824d46bxOa15aa0b17bdcf32fab2f1d3500">
+                          <SHORT-NAME>Message_1</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">generated</L-2>
+                          </DESC>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topology/HardwareComponents/IDCM_A/IDCM_A_CCB/Message_1</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/Communication/Signals/IMessage_1</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+                        <I-SIGNAL-TRIGGERING UUID="O9cc18a517bcd33961824d46bxOa15aa0b17bdcf32fab2f1c6d00">
+                          <SHORT-NAME>Message_2</SHORT-NAME>
+                          <DESC>
+                            <L-2 L="EN">generated</L-2>
+                          </DESC>
+                          <I-SIGNAL-PORT-REFS>
+                            <I-SIGNAL-PORT-REF DEST="I-SIGNAL-PORT">/Topology/HardwareComponents/IDCM_A/IDCM_A_CCB/Message_2</I-SIGNAL-PORT-REF>
+                          </I-SIGNAL-PORT-REFS>
+                          <I-SIGNAL-REF DEST="I-SIGNAL">/Communication/Signals/IMessage_2</I-SIGNAL-REF>
+                        </I-SIGNAL-TRIGGERING>
+                      </I-SIGNAL-TRIGGERINGS>
+                      <PDU-TRIGGERINGS>
+                        <PDU-TRIGGERING UUID="Oa15950c1709b042df31b3621xOa15950c176cb119196168f5a10Oa15950c1709b042df31b3603">
+                          <SHORT-NAME>Test_Frame1</SHORT-NAME>
+                          <I-PDU-PORT-REFS>
+                            <I-PDU-PORT-REF DEST="I-PDU-PORT">/Topology/HardwareComponents/IDCM_A/IDCM_A_CCB/Test_Frame_IDCM_A_CCB</I-PDU-PORT-REF>
+                          </I-PDU-PORT-REFS>
+                          <I-PDU-REF DEST="I-SIGNAL-I-PDU">/Communication/PDUs/Test_Frame</I-PDU-REF>
+                          <I-SIGNAL-TRIGGERINGS>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topology/Clusters/CCB/CCB/Message_1</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                            <I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                              <I-SIGNAL-TRIGGERING-REF DEST="I-SIGNAL-TRIGGERING">/Topology/Clusters/CCB/CCB/Message_2</I-SIGNAL-TRIGGERING-REF>
+                            </I-SIGNAL-TRIGGERING-REF-CONDITIONAL>
+                          </I-SIGNAL-TRIGGERINGS>
+                        </PDU-TRIGGERING>
+                      </PDU-TRIGGERINGS>
+                    </CAN-PHYSICAL-CHANNEL>
+                  </PHYSICAL-CHANNELS>
+                  <CAN-FD-BAUDRATE>2000000</CAN-FD-BAUDRATE>
+                </CAN-CLUSTER-CONDITIONAL>
+              </CAN-CLUSTER-VARIANTS>
+            </CAN-CLUSTER>
+          </ELEMENTS>
+        </AR-PACKAGE>
+        <AR-PACKAGE UUID="0127c66a2ab03563b55cad94c58faad0">
+          <SHORT-NAME>HardwareComponents</SHORT-NAME>
+          <ELEMENTS>
+            <ECU-INSTANCE UUID="Na15951e16c22616a4c710dfXNa15951e16c22616a4c710c010Na15951e16c22616a4c710c0">
+              <SHORT-NAME>IDCM_A</SHORT-NAME>
+              <ASSOCIATED-COM-I-PDU-GROUP-REFS>
+                <ASSOCIATED-COM-I-PDU-GROUP-REF DEST="I-SIGNAL-I-PDU-GROUP">/Communication/PDUs/IDCM_A_CCB_Tx</ASSOCIATED-COM-I-PDU-GROUP-REF>
+              </ASSOCIATED-COM-I-PDU-GROUP-REFS>
+              <COMM-CONTROLLERS>
+                <CAN-COMMUNICATION-CONTROLLER UUID="N9cc18711711cb90d07682feXN9cc18711711cb90d07682e010N9cc18711711cb90d07682e0">
+                  <SHORT-NAME>IDCM_A_CCB_Controller</SHORT-NAME>
+                  <CAN-COMMUNICATION-CONTROLLER-VARIANTS>
+                    <CAN-COMMUNICATION-CONTROLLER-CONDITIONAL>
+                      <CAN-CONTROLLER-ATTRIBUTES>
+                        <CAN-CONTROLLER-CONFIGURATION>
+                          <CAN-CONTROLLER-FD-ATTRIBUTES>
+                            <PADDING-VALUE>85</PADDING-VALUE>
+                            <PROP-SEG>23</PROP-SEG>
+                            <SYNC-JUMP-WIDTH>8</SYNC-JUMP-WIDTH>
+                            <TIME-SEG-1>8</TIME-SEG-1>
+                            <TIME-SEG-2>8</TIME-SEG-2>
+                            <TRCV-DELAY-COMPENSATION-OFFSET>4E-7</TRCV-DELAY-COMPENSATION-OFFSET>
+                            <TX-BIT-RATE-SWITCH>true</TX-BIT-RATE-SWITCH>
+                          </CAN-CONTROLLER-FD-ATTRIBUTES>
+                          <PROP-SEG>23</PROP-SEG>
+                          <SYNC-JUMP-WIDTH>8</SYNC-JUMP-WIDTH>
+                          <TIME-SEG-1>8</TIME-SEG-1>
+                          <TIME-SEG-2>8</TIME-SEG-2>
+                        </CAN-CONTROLLER-CONFIGURATION>
+                      </CAN-CONTROLLER-ATTRIBUTES>
+                    </CAN-COMMUNICATION-CONTROLLER-CONDITIONAL>
+                  </CAN-COMMUNICATION-CONTROLLER-VARIANTS>
+                </CAN-COMMUNICATION-CONTROLLER>
+              </COMM-CONTROLLERS>
+              <CONNECTORS>
+                <CAN-COMMUNICATION-CONNECTOR UUID="Oa15950c1709b042df31b3621xOa15950c1709b042df31b378510Oa15950c1709b042df31b3603">
+                  <SHORT-NAME>IDCM_A_CCB</SHORT-NAME>
+                  <COMM-CONTROLLER-REF DEST="CAN-COMMUNICATION-CONTROLLER">/Topology/HardwareComponents/IDCM_A/IDCM_A_CCB_Controller</COMM-CONTROLLER-REF>
+                  <ECU-COMM-PORT-INSTANCES>
+                    <I-SIGNAL-PORT UUID="O9cc18a517bcd33961824d46bxOa1693b317c166bc37916250300">
+                      <SHORT-NAME>Message_1</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                    <I-SIGNAL-PORT UUID="O9cc18a517bcd33961824d46bxOa1693b317c166bc37916249b00">
+                      <SHORT-NAME>Message_2</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+                    </I-SIGNAL-PORT>
+                    <FRAME-PORT UUID="b281c42ce8023bbaae82600d48f42d28">
+                      <SHORT-NAME>Test_Frame_IDCM_A</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+                    </FRAME-PORT>
+                    <I-PDU-PORT UUID="9399fec7d95d340181a970544d453f5a">
+                      <SHORT-NAME>Test_Frame_IDCM_A_CCB</SHORT-NAME>
+                      <COMMUNICATION-DIRECTION>OUT</COMMUNICATION-DIRECTION>
+                    </I-PDU-PORT>
+                  </ECU-COMM-PORT-INSTANCES>
+                </CAN-COMMUNICATION-CONNECTOR>
+              </CONNECTORS>
+              <SLEEP-MODE-SUPPORTED>false</SLEEP-MODE-SUPPORTED>
+              <WAKE-UP-OVER-BUS-SUPPORTED>false</WAKE-UP-OVER-BUS-SUPPORTED>
+            </ECU-INSTANCE>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+  </AR-PACKAGES>
+</AUTOSAR>

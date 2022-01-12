@@ -187,7 +187,7 @@
           <SHORT-NAME>multiplexed_message_selector</SHORT-NAME>
           <INIT-VALUE>
             <NUMERICAL-VALUE-SPECIFICATION>
-              <VALUE>0</VALUE>
+              <VALUE>0.0</VALUE>
             </NUMERICAL-VALUE-SPECIFICATION>
           </INIT-VALUE>
           <LENGTH>2</LENGTH>

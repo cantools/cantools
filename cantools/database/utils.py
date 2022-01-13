@@ -4,21 +4,15 @@ import binascii
 import os.path
 import re
 from decimal import Decimal
-from collections import namedtuple
-from cantools.database.can.signal import NamedSignalValue
+from typing import Dict, Union, List
+
+from cantools.database.can.signal import NamedSignalValue, Signal
+from cantools.typechecking import Formats
 
 try:
     import bitstruct.c
 except ImportError:
     import bitstruct
-
-
-Formats = namedtuple('Formats',
-                     [
-                         'big_endian',
-                         'little_endian',
-                         'padding_mask'
-                     ])
 
 
 def format_or(items):
@@ -102,7 +96,12 @@ def encode_data(data, fields, formats, scaling):
     return packed_union
 
 
-def decode_data(data, fields, formats, decode_choices, scaling):
+def decode_data(data: bytes,
+                fields: List[Signal],
+                formats: Formats,
+                decode_choices: bool,
+                scaling: bool,
+                ) -> Dict[str, Union[float, str]]:
     unpacked = formats.big_endian.unpack(bytes(data))
     unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
 

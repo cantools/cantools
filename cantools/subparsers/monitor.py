@@ -264,14 +264,6 @@ class Monitor(can.Listener):
 
         self._modified = True
 
-    def page_down(self):
-        num_actual_usable_rows = self._nrows - 2 - 1
-
-        # Increment page
-        self._page_first_row += num_actual_usable_rows
-
-        self._modified = True
-
     def page_up(self):
         num_actual_usable_rows = self._nrows - 2 - 1
 

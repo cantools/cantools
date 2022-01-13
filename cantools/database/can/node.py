@@ -1,4 +1,13 @@
 # A CAN bus node (or Board unit)
+import typing
+from typing import Optional
+
+from cantools.typechecking import Comments
+
+if typing.TYPE_CHECKING:
+    from cantools.database.can.formats.arxml import AutosarNodeSpecifics
+    from cantools.database.can.formats.dbc import DbcSpecifics
+
 
 class Node(object):
     """An NODE on the CAN bus.
@@ -6,19 +15,21 @@ class Node(object):
     """
 
     def __init__(self,
-                 name,
-                 comment=None,
-                 dbc_specifics=None,
-                 autosar_specifics=None):
+                 name: str,
+                 comment: Optional[typing.Union[str, Comments]] = None,
+                 dbc_specifics: Optional["DbcSpecifics"] = None,
+                 autosar_specifics: Optional["AutosarNodeSpecifics"] = None,
+                 ) -> None:
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
         # English comment. This is slightly hacky, because the
         # function's behavior depends on the type of the passed
         # argument, but it is quite convenient...
+        self._comments: Optional[Comments]
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = { None: comment }
+            self._comments = {None: comment}
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -40,7 +51,7 @@ class Node(object):
         self._name = value
 
     @property
-    def comment(self):
+    def comment(self) -> Optional[str]:
         """The node's comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -56,17 +67,17 @@ class Node(object):
 
         return self._comments.get('EN')
 
+    @comment.setter
+    def comment(self, value: Optional[str]) -> None:
+        self._comment = value
+
     @property
-    def comments(self):
+    def comments(self) -> Optional[Comments]:
         """The dictionary with the descriptions of the bus in multiple
         languages. ``None`` if unavailable.
 
         """
         return self._comments
-
-    @comment.setter
-    def comment(self, value):
-        self._comment = value
 
     @property
     def dbc(self):

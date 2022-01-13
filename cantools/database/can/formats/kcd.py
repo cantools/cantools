@@ -1,9 +1,9 @@
 # Load and dump a CAN database in KCD format.
 
-import sys
 import logging
 from collections import defaultdict
 from decimal import Decimal
+from typing import Dict
 
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
@@ -428,12 +428,12 @@ def _dump_messages(messages, node_refs, parent):
         _dump_message(message, bus, node_refs)
 
 
-def dump_string(database):
+def dump_string(database: InternalDatabase) -> str:
     """Format given database in KCD file format.
 
     """
 
-    node_refs = {}
+    node_refs: Dict[str, int] = {}
 
     attrib = {
         'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -448,10 +448,7 @@ def dump_string(database):
 
     _indent_xml(network_definition, '  ')
 
-    if sys.version_info[0] > 2:
-        return ElementTree.tostring(network_definition, encoding='unicode')
-    else:
-        return ElementTree.tostring(network_definition)
+    return ElementTree.tostring(network_definition, encoding='unicode')
 
 
 def load_string(string, strict=True):

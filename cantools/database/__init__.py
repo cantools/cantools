@@ -1,5 +1,7 @@
 import os
+from typing import Union, Optional, TextIO, MutableMapping, cast
 from xml.etree import ElementTree
+
 from .errors import ParseError
 from .errors import Error
 from ..compat import fopen
@@ -11,6 +13,7 @@ import diskcache
 
 # Remove once less users are using the old package structure.
 from .can import *
+from ..typechecking import StringPathLike
 
 
 class UnsupportedDatabaseFormatError(Error):
@@ -69,22 +72,23 @@ def _resolve_database_format_and_encoding(database_format,
     return database_format, encoding
 
 
-def _load_file_cache(filename,
-                     database_format,
-                     encoding,
-                     frame_id_mask,
-                     strict,
-                     cache_dir):
+def _load_file_cache(filename: StringPathLike,
+                     database_format: Optional[str],
+                     encoding: Optional[str],
+                     frame_id_mask: Optional[int],
+                     strict: bool,
+                     cache_dir: str,
+                     ) -> Union[can.Database, diagnostics.Database]:
     with open(filename, 'rb') as fin:
         key = fin.read()
 
-    cache = diskcache.Cache(cache_dir)
+    cache: MutableMapping[bytes, Union[can.Database, diagnostics.Database]] = diskcache.Cache(cache_dir)
 
     try:
         return cache[key]
     except KeyError:
         with fopen(filename, 'r', encoding=encoding) as fin:
-            database = load(fin,
+            database = load(cast(TextIO, fin),
                             database_format,
                             frame_id_mask,
                             strict)
@@ -93,13 +97,14 @@ def _load_file_cache(filename,
         return database
 
 
-def load_file(filename,
-              database_format=None,
-              encoding=None,
-              frame_id_mask=None,
-              prune_choices=True,
-              strict=True,
-              cache_dir=None):
+def load_file(filename: StringPathLike,
+              database_format: Optional[str] = None,
+              encoding: Optional[str] = None,
+              frame_id_mask: Optional[int] = None,
+              prune_choices: bool = True,
+              strict: bool = True,
+              cache_dir: Optional[str] = None,
+              ) -> Union[can.Database, diagnostics.Database]:
     """Open, read and parse given database file and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -228,11 +233,11 @@ def dump_file(database,
         fout.write(output)
 
 
-def load(fp,
-         database_format=None,
-         frame_id_mask=None,
-         prune_choices=True,
-         strict=True):
+def load(fp: TextIO,
+         database_format: Optional[str] = None,
+         frame_id_mask: Optional[int] = None,
+         prune_choices: bool = True,
+         strict: bool = True) -> Union[can.Database, diagnostics.Database]:
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -260,11 +265,11 @@ def load(fp,
                        strict)
 
 
-def load_string(string,
-                database_format=None,
-                frame_id_mask=None,
-                prune_choices=True,
-                strict=True):
+def load_string(string: str,
+                database_format: Optional[str] = None,
+                frame_id_mask: Optional[int] = None,
+                prune_choices: bool = True,
+                strict: bool = True) -> Union[can.Database, diagnostics.Database]:
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -300,7 +305,7 @@ def load_string(string,
     e_sym = None
     e_cdd = None
 
-    def load_can_database(fmt):
+    def load_can_database(fmt: str) -> can.Database:
         db = can.Database(frame_id_mask=frame_id_mask,
                           strict=strict)
 

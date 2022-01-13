@@ -1,16 +1,8 @@
 # The tester module.
 
 import time
-
-try:
-    from collections import UserDict
-except ImportError:
-    from UserDict import UserDict
-
-try:
-    import queue
-except ImportError:
-    import Queue as queue
+from collections import UserDict
+import queue
 
 import can
 

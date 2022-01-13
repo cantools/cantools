@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+no_implicit_optional = true
+disallow_incomplete_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+    "argparse_addons",
+    "can",  # v4.0.0 will be typed
+    "diskcache",
+    "textparser",
+    "bitstruct",
+    "bitstruct.c",
+    "matplotlib",
+]
+ignore_missing_imports = true
+

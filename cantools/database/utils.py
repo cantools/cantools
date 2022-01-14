@@ -297,6 +297,11 @@ def prune_signal_choices(signal):
 
     if i >= 0:
         full_prefix = full_prefix[0:i]
+    else:
+        # full_prefix does not contain an underscore
+        # but the following algorithm assumes it does
+        # and would strip too much
+        return
 
     if not full_prefix:
         # the longest possible prefix is empty, i.e., there is nothing

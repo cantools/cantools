@@ -152,6 +152,10 @@ def load_file(filename: StringPathLike,
     | ``None``        | ``'utf-8'``       |
     +-----------------+-------------------+
 
+    `prune_choices` abbreviates the names of choices by removing
+    a common prefix ending on an underscore. If you want to have
+    the original names you need to pass `prune_choices = False`.
+
     `cache_dir` specifies the database cache location in the file
     system. Give as ``None`` to disable the cache. By default the
     cache is disabled. The cache key is the contents of given

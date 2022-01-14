@@ -384,6 +384,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[2].name, 'no_choice')
         self.assertEqual(message.signals[2].choices, None)
 
+    def test_dbc_load_choices(self):
+        filename = 'tests/files/dbc/choices.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.messages[0]
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0].value, 0)
+        self.assertEqual(sig.choices[0].name, 'With space')
+
+    def test_dbc_load_choices_issue_with_name(self):
+        filename = 'tests/files/dbc/choices_issue_with_name.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.messages[0]
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0].value, 0)
+        self.assertEqual(sig.choices[0].name, 'CmdRespErr')
+        self.assertEqual(sig.choices[1].value, 1)
+        self.assertEqual(sig.choices[1].name, 'CmdRespOK')
+
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.
 

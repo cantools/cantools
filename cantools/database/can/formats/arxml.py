@@ -96,9 +96,10 @@ def parse_number_string(in_string, allow_float=False):
     return int(in_string, 0) # autodetect the base
 
 class SystemLoader(object):
-    def __init__(self, root, strict):
+    def __init__(self, root, strict, sort_signals=True):
         self._root = root
         self._strict = strict
+        self._sort_signals = sort_signals
 
         m = re.match(r'^\{(.*)\}AUTOSAR$', self._root.tag)
 
@@ -505,7 +506,8 @@ class SystemLoader(object):
                        signals=signals,
                        comment=comments,
                        autosar_specifics=autosar_specifics,
-                       strict=self._strict)
+                       strict=self._strict,
+                       sort_signals=self._sort_signals)
 
     def _load_pdu(self, pdu, frame_name, next_selector_idx):
         # load all data associated with this PDU.
@@ -1775,9 +1777,10 @@ REFERENCE_VALUES_XPATH = make_xpath([
 
 class EcuExtractLoader(object):
 
-    def __init__(self, root, strict):
+    def __init__(self, root, strict, sort_signals=True):
         self.root = root
         self.strict = strict
+        self.sort_signals = sort_signals
 
     def load(self):
         buses = []
@@ -1897,7 +1900,8 @@ class EcuExtractLoader(object):
                        signals=signals,
                        comment=comments,
                        bus_name=None,
-                       strict=self.strict)
+                       strict=self.strict,
+                       sort_signals=self.sort_signals)
 
     def load_message_tx(self, com_pdu_id_ref):
         return self.load_message_rx_tx(com_pdu_id_ref,
@@ -2096,7 +2100,7 @@ def is_ecu_extract(root):
 
     return ecuc_value_collection is not None
 
-def load_string(string, strict=True):
+def load_string(string, strict=True, sort_signals=True):
     """Parse given ARXML format string.
 
     """
@@ -2125,6 +2129,6 @@ def load_string(string, strict=True):
                     ROOT_TAG,
                     root.tag))
 
-        return EcuExtractLoader(root, strict).load()
+        return EcuExtractLoader(root, strict, sort_signals).load()
     else:
-        return SystemLoader(root, strict).load()
+        return SystemLoader(root, strict, sort_signals).load()

@@ -617,7 +617,8 @@ def _load_message(frame_id,
                   message_section_tokens,
                   signals,
                   enums,
-                  strict):
+                  strict,
+                  sort_signals):
     #print(message_tokens)
     # Default values.
     name = message_tokens[1]
@@ -651,7 +652,8 @@ def _load_message(frame_id,
                                                  enums),
                    comment=comment,
                    bus_name=None,
-                   strict=strict)
+                   strict=strict,
+                   sort_signals=sort_signals)
 
 
 def _parse_message_frame_ids(message):
@@ -681,7 +683,7 @@ def _parse_message_frame_ids(message):
     return frame_ids, is_extended_frame(message_id[2], message_type)
 
 
-def _load_message_section(section_name, tokens, signals, enums, strict):
+def _load_message_section(section_name, tokens, signals, enums, strict, sort_signals):
     def has_frame_id(message):
         return 'ID' in message[3]
 
@@ -701,16 +703,17 @@ def _load_message_section(section_name, tokens, signals, enums, strict):
                                     message_section_tokens,
                                     signals,
                                     enums,
-                                    strict)
+                                    strict,
+                                    sort_signals)
             messages.append(message)
 
     return messages
 
 
-def _load_messages(tokens, signals, enums, strict):
-    messages = _load_message_section('{SEND}', tokens, signals, enums, strict)
-    messages += _load_message_section('{RECEIVE}', tokens, signals, enums, strict)
-    messages += _load_message_section('{SENDRECEIVE}', tokens, signals, enums, strict)
+def _load_messages(tokens, signals, enums, strict, sort_signals):
+    messages = _load_message_section('{SEND}', tokens, signals, enums, strict, sort_signals)
+    messages += _load_message_section('{RECEIVE}', tokens, signals, enums, strict, sort_signals)
+    messages += _load_message_section('{SENDRECEIVE}', tokens, signals, enums, strict, sort_signals)
 
     return messages
 
@@ -719,7 +722,7 @@ def _load_version(tokens):
     return tokens[1][2]
 
 
-def load_string(string, strict=True):
+def load_string(string, strict=True, sort_signals=True):
     """Parse given string.
 
     """
@@ -732,7 +735,7 @@ def load_string(string, strict=True):
     version = _load_version(tokens)
     enums = _load_enums(tokens)
     signals = _load_signals(tokens, enums)
-    messages = _load_messages(tokens, signals, enums, strict)
+    messages = _load_messages(tokens, signals, enums, strict, sort_signals)
 
     return InternalDatabase(messages,
                             [],

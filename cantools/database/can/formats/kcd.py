@@ -168,7 +168,7 @@ def _load_multiplex_element(mux, nodes):
     return signals
 
 
-def _load_message_element(message, bus_name, nodes, strict):
+def _load_message_element(message, bus_name, nodes, strict, sort_signals):
     """Load given message element and return a message object.
 
     """
@@ -240,7 +240,8 @@ def _load_message_element(message, bus_name, nodes, strict):
                    signals=signals,
                    comment=notes,
                    bus_name=bus_name,
-                   strict=strict)
+                   strict=strict,
+                   sort_signals=sort_signals)
 
 
 def _indent_xml(element, indent, level=0):
@@ -451,7 +452,7 @@ def dump_string(database: InternalDatabase) -> str:
     return ElementTree.tostring(network_definition, encoding='unicode')
 
 
-def load_string(string, strict=True):
+def load_string(string, strict=True, sort_signals=True):
     """Parse given KCD format string.
 
     """
@@ -483,7 +484,8 @@ def load_string(string, strict=True):
             messages.append(_load_message_element(message,
                                                   bus_name,
                                                   nodes,
-                                                  strict))
+                                                  strict,
+                                                  sort_signals))
 
     return InternalDatabase(messages,
                             [

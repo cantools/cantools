@@ -46,6 +46,7 @@ class Database(object):
                  autosar_specifics: Optional[AutosarDatabaseSpecifics] = None,
                  frame_id_mask: Optional[int] = None,
                  strict: bool = True,
+                 sort_signals: bool = True,
                  ) -> None:
         self._messages = messages or []
         self._nodes = nodes or []
@@ -61,6 +62,7 @@ class Database(object):
 
         self._frame_id_mask = frame_id_mask
         self._strict = strict
+        self._sort_signals = sort_signals
         self.refresh()
 
     @property
@@ -154,7 +156,7 @@ class Database(object):
 
         """
 
-        database = arxml.load_string(string, self._strict)
+        database = arxml.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -202,7 +204,7 @@ class Database(object):
 
         """
 
-        database = dbc.load_string(string, self._strict)
+        database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -238,7 +240,7 @@ class Database(object):
 
         """
 
-        database = kcd.load_string(string, self._strict)
+        database = kcd.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -274,7 +276,7 @@ class Database(object):
 
         """
 
-        database = sym.load_string(string, self._strict)
+        database = sym.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes

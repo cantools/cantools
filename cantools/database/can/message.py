@@ -46,6 +46,7 @@ class Message(object):
                  signal_groups: Optional[List[SignalGroup]] = None,
                  strict: bool = True,
                  protocol: Optional[str] = None,
+                 sort_signals = True,
                  ) -> None:
         frame_id_bit_length = frame_id.bit_length()
 
@@ -64,7 +65,8 @@ class Message(object):
         self._name = name
         self._length = length
         self._signals = signals
-        self._signals.sort(key=start_bit)
+        if sort_signals:
+            self._signals.sort(key=start_bit)
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the

@@ -78,6 +78,7 @@ def _load_file_cache(filename: StringPathLike,
                      frame_id_mask: Optional[int],
                      strict: bool,
                      cache_dir: str,
+                     sort_signals : bool,
                      ) -> Union[can.Database, diagnostics.Database]:
     with open(filename, 'rb') as fin:
         key = fin.read()
@@ -91,7 +92,8 @@ def _load_file_cache(filename: StringPathLike,
             database = load(cast(TextIO, fin),
                             database_format,
                             frame_id_mask,
-                            strict)
+                            strict,
+                            sort_signals)
         cache[key] = database
 
         return database
@@ -104,6 +106,7 @@ def load_file(filename: StringPathLike,
               prune_choices: bool = True,
               strict: bool = True,
               cache_dir: Optional[str] = None,
+              sort_signals: bool = True,
               ) -> Union[can.Database, diagnostics.Database]:
     """Open, read and parse given database file and return a
     :class:`can.Database<.can.Database>` or
@@ -189,14 +192,16 @@ def load_file(filename: StringPathLike,
                         database_format,
                         frame_id_mask,
                         prune_choices,
-                        strict)
+                        strict,
+                        sort_signals)
     else:
         return _load_file_cache(filename,
                                 database_format,
                                 encoding,
                                 frame_id_mask,
                                 strict,
-                                cache_dir)
+                                cache_dir,
+                                sort_signals)
 
 
 def dump_file(database,
@@ -241,7 +246,8 @@ def load(fp: TextIO,
          database_format: Optional[str] = None,
          frame_id_mask: Optional[int] = None,
          prune_choices: bool = True,
-         strict: bool = True) -> Union[can.Database, diagnostics.Database]:
+         strict: bool = True,
+         sort_signals: bool = True) -> Union[can.Database, diagnostics.Database]:
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -266,14 +272,16 @@ def load(fp: TextIO,
                        database_format,
                        frame_id_mask,
                        prune_choices,
-                       strict)
+                       strict,
+                       sort_signals)
 
 
 def load_string(string: str,
                 database_format: Optional[str] = None,
                 frame_id_mask: Optional[int] = None,
                 prune_choices: bool = True,
-                strict: bool = True) -> Union[can.Database, diagnostics.Database]:
+                strict: bool = True,
+                sort_signals: bool = True) -> Union[can.Database, diagnostics.Database]:
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -311,7 +319,8 @@ def load_string(string: str,
 
     def load_can_database(fmt: str) -> can.Database:
         db = can.Database(frame_id_mask=frame_id_mask,
-                          strict=strict)
+                          strict=strict,
+                          sort_signals=sort_signals)
 
         if fmt == 'arxml':
             db.add_arxml_string(string)

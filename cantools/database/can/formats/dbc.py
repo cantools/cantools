@@ -1328,7 +1328,8 @@ def _load_messages(tokens,
                    signal_multiplexer_values,
                    strict,
                    bus_name,
-                   signal_groups):
+                   signal_groups,
+                   sort_signals):
     """Load messages.
 
     """
@@ -1486,7 +1487,8 @@ def _load_messages(tokens,
                     strict=strict,
                     protocol=get_protocol(frame_id_dbc),
                     bus_name=bus_name,
-                    signal_groups=get_signal_groups(frame_id_dbc)))
+                    signal_groups=get_signal_groups(frame_id_dbc),
+                    sort_signals=sort_signals))
 
     return messages
 
@@ -1721,7 +1723,7 @@ def get_definitions_dict(definitions, defaults):
     return result
 
 
-def load_string(string, strict=True):
+def load_string(string, strict=True, sort_signals=True):
     """Parse given string.
 
     """
@@ -1750,7 +1752,8 @@ def load_string(string, strict=True):
                               signal_multiplexer_values,
                               strict,
                               bus.name if bus else None,
-                              signal_groups)
+                              signal_groups,
+                              sort_signals)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes)

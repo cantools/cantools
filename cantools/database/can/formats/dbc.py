@@ -488,7 +488,7 @@ def _dump_value_tables(database):
     return val_table + ['']
 
 
-def _dump_messages(database):
+def _dump_messages(database, reverse_signals):
     bo = []
 
     def format_mux(signal):
@@ -520,7 +520,11 @@ def _dump_messages(database):
                 length=message.length,
                 senders=format_senders(message)))
 
-        for signal in message.signals[::-1]:
+        if reverse_signals:
+            signals = message.signals[::-1]
+        else:
+            signals = message.signals
+        for signal in signals:
             fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
                    ' [{minimum}|{maximum}] "{unit}" {receivers}')
@@ -556,7 +560,7 @@ def _dump_senders(database):
     return bo_tx_bu
 
 
-def _dump_comments(database):
+def _dump_comments(database, reverse_signals):
     cm = []
 
     for bus in database.buses:
@@ -579,7 +583,11 @@ def _dump_comments(database):
                     frame_id=get_dbc_frame_id(message),
                     comment=message.comment.replace('"', '\\"')))
 
-        for signal in message.signals[::-1]:
+        if reverse_signals:
+            signals = message.signals[::-1]
+        else:
+            signals = message.signals
+        for signal in signals:
             if signal.comment is not None:
                 cm.append(
                     'CM_ SG_ {frame_id} {name} "{comment}";'.format(
@@ -699,7 +707,7 @@ def _dump_attribute_definition_defaults(database):
 
     return ba_def_def
 
-def _dump_attributes(database):
+def _dump_attributes(database, reverse_signals):
     ba = []
 
     def get_value(attribute):
@@ -748,7 +756,11 @@ def _dump_attributes(database):
                       f'{get_value(attribute)};')
 
         # handle the signals contained in the message
-        for signal in message.signals[::-1]:
+        if reverse_signals:
+            signals = message.signals[::-1]
+        else:
+            signals = message.signals
+        for signal in signals:
             if signal.dbc is not None and signal.dbc.attributes is not None:
                 for attribute in signal.dbc.attributes.values():
                     ba.append(f'BA_ "{attribute.definition.name}" '
@@ -760,11 +772,15 @@ def _dump_attributes(database):
     return ba
 
 
-def _dump_choices(database):
+def _dump_choices(database, reverse_signals):
     val = []
 
     for message in database.messages:
-        for signal in message.signals[::-1]:
+        if reverse_signals:
+            signals = message.signals[::-1]
+        else:
+            signals = message.signals
+        for signal in signals:
             if signal.choices is None:
                 continue
 
@@ -1645,7 +1661,7 @@ def make_names_unique(database):
     return database
 
 
-def dump_string(database: InternalDatabase) -> str:
+def dump_string(database: InternalDatabase, reverse_signals: bool = True) -> str:
     """Format database in DBC file format.
 
     """
@@ -1657,14 +1673,14 @@ def dump_string(database: InternalDatabase) -> str:
     database = make_names_unique(database)
     bu = _dump_nodes(database)
     val_table = _dump_value_tables(database)
-    bo = _dump_messages(database)
+    bo = _dump_messages(database, reverse_signals)
     bo_tx_bu = _dump_senders(database)
-    cm = _dump_comments(database)
+    cm = _dump_comments(database, reverse_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
-    ba = _dump_attributes(database)
-    val = _dump_choices(database)
+    ba = _dump_attributes(database, reverse_signals)
+    val = _dump_choices(database, reverse_signals)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
 

@@ -318,7 +318,8 @@ class Database(object):
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._dbc))
+                                                self._dbc),
+                                                reverse_signals=self._sort_signals)
 
     def as_kcd_string(self) -> str:
         """Return the database as a string formatted as a KCD file.

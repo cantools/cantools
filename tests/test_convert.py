@@ -63,6 +63,19 @@ class CanToolsConvertFullTest(unittest.TestCase):
         path = os.path.split(fn_out)[0]
         shutil.rmtree(path)
 
+    # ------- output of dump is equal to input of load if nothing has been changed -------
+
+    def test_dbc_load_and_dump(self):
+        filename = 'tests/files/dbc/socialledge.dbc'
+        fn_out = self.get_out_file_name(filename, ext='.dbc')
+        fn_expected_output = filename
+
+        db = cantools.database.load_file(filename, prune_choices=False)
+        cantools.database.dump_file(db, fn_out)
+
+        self.assertFileEqual(fn_expected_output, fn_out)
+        self.remove_out_file(fn_out)
+
     # ------- test sym -> dbc -------
 
     def test_sym_to_dbc__compare_files(self):

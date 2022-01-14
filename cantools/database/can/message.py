@@ -46,7 +46,7 @@ class Message(object):
                  signal_groups: Optional[List[SignalGroup]] = None,
                  strict: bool = True,
                  protocol: Optional[str] = None,
-                 sort_signals = True,
+                 sort_signals: bool = True,
                  ) -> None:
         frame_id_bit_length = frame_id.bit_length()
 

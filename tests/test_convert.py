@@ -63,7 +63,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         path = os.path.split(fn_out)[0]
         shutil.rmtree(path)
 
-    # ------- output of dump is equal to input of load if the file has been created by cantools and nothing has been changed -------
+    # ------- dump, load, dump produces same output -------
 
     def test_dbc_load_and_dump(self):
         filename = 'tests/files/dbc/socialledge-written-by-cantools.dbc'

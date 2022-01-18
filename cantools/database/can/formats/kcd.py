@@ -18,7 +18,7 @@ from ..bus import Bus
 from ..internal_database import InternalDatabase
 from ...utils import start_bit
 from .utils import num
-from ...utils import sort_signals_by_start_bit
+from ...utils import type_sort_signals, sort_signals_by_start_bit
 
 
 LOGGER = logging.getLogger(__name__)
@@ -453,7 +453,7 @@ def dump_string(database: InternalDatabase) -> str:
     return ElementTree.tostring(network_definition, encoding='unicode')
 
 
-def load_string(string, strict=True, sort_signals=sort_signals_by_start_bit):
+def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given KCD format string.
 
     """
@@ -472,7 +472,7 @@ def load_string(string, strict=True, sort_signals=sort_signals_by_start_bit):
 
     try:
         document = root.find('ns:Document', NAMESPACES)
-        version = document.attrib.get('version', None)
+        version = document.attrib.get('version', None)  # type: ignore  # avoid mypy error: Item "None" of "Optional[Element]" has no attribute "attrib"
     except AttributeError:
         version = None
 

@@ -18,7 +18,7 @@ from ..bus import Bus
 from ..internal_database import InternalDatabase
 from ...utils import start_bit
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit
+from ...utils import type_sort_signals, sort_signals_by_start_bit, DEFAULT
 
 
 LOGGER = logging.getLogger(__name__)
@@ -369,7 +369,7 @@ def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
                         parent)
 
 
-def _dump_message(message, bus, node_refs):
+def _dump_message(message, bus, node_refs, sort_signals):
     frame_id = '0x{:03X}'.format(message.frame_id)
     message_element = SubElement(bus,
                                  'Message',
@@ -397,14 +397,19 @@ def _dump_message(message, bus, node_refs):
                        id=str(node_refs[sender]))
 
     # Signals.
-    for signal in message.signals:
+    if sort_signals:
+        signals = sort_signals(message.signals)
+    else:
+        signals = message.signals
+
+    for signal in signals:
         if signal.is_multiplexer:
             signal_element = SubElement(message_element, 'Multiplex')
             _dump_signal(signal,
                          node_refs,
                          signal_element)
             _dump_mux_groups(signal.name,
-                             message.signals,
+                             signals,
                              node_refs,
                              signal_element)
         elif signal.multiplexer_ids is None:
@@ -423,17 +428,19 @@ def _dump_nodes(nodes, node_refs, parent):
         node_refs[node.name] = node_id
 
 
-def _dump_messages(messages, node_refs, parent):
+def _dump_messages(messages, node_refs, parent, sort_signals):
     bus = SubElement(parent, 'Bus', name='Bus')
 
     for message in messages:
-        _dump_message(message, bus, node_refs)
+        _dump_message(message, bus, node_refs, sort_signals)
 
 
-def dump_string(database: InternalDatabase) -> str:
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=DEFAULT) -> str:
     """Format given database in KCD file format.
 
     """
+    if sort_signals == DEFAULT:
+        sort_signals = None
 
     node_refs: Dict[str, int] = {}
 
@@ -446,7 +453,7 @@ def dump_string(database: InternalDatabase) -> str:
 
     _dump_version(database.version, network_definition)
     _dump_nodes(database.nodes, node_refs, network_definition)
-    _dump_messages(database.messages, node_refs, network_definition)
+    _dump_messages(database.messages, node_refs, network_definition, sort_signals)
 
     _indent_xml(network_definition, '  ')
 

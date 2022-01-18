@@ -17,7 +17,7 @@ from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
-from ..utils import type_sort_signals, sort_signals_by_start_bit
+from ..utils import type_sort_signals, sort_signals_by_start_bit, DEFAULT
 from ...compat import fopen
 from ...typechecking import StringPathLike
 
@@ -310,28 +310,33 @@ class Database(object):
         self._name_to_message[message.name] = message
         self._frame_id_to_message[masked_frame_id] = message
 
-    def as_dbc_string(self) -> str:
+    def as_dbc_string(self, *, sort_signals:type_sort_signals=DEFAULT) -> str:
         """Return the database as a string formatted as a DBC file.
 
         """
+        if not self._sort_signals and sort_signals == DEFAULT:
+            sort_signals = None
 
         return dbc.dump_string(InternalDatabase(self._messages,
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
                                                 self._dbc),
-                                                reverse_signals=bool(self._sort_signals))
+                               sort_signals=sort_signals)
 
-    def as_kcd_string(self) -> str:
+    def as_kcd_string(self, *, sort_signals:type_sort_signals=DEFAULT) -> str:
         """Return the database as a string formatted as a KCD file.
 
         """
+        if not self._sort_signals and sort_signals == DEFAULT:
+            sort_signals = None
 
         return kcd.dump_string(InternalDatabase(self._messages,
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._dbc))
+                                                self._dbc),
+                               sort_signals=sort_signals)
 
     def get_message_by_name(self, name: str) -> Message:
         """Find the message object for given name `name`.

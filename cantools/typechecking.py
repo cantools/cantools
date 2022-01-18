@@ -1,10 +1,12 @@
 import typing
 
 import typing_extensions
+from typing_extensions import Literal
 from bitstruct import CompiledFormatDict
 
 if typing.TYPE_CHECKING:
     import os
+    import sys
     from cantools.database import Signal
 
 

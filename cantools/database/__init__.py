@@ -210,7 +210,8 @@ def load_file(filename: StringPathLike,
 def dump_file(database,
               filename,
               database_format=None,
-              encoding=None):
+              encoding=None,
+              sort_signals=utils.DEFAULT):
     """Dump given database `database` to given file `filename`.
 
     See :func:`~cantools.database.load_file()` for descriptions of
@@ -233,10 +234,10 @@ def dump_file(database,
     newline = None
 
     if database_format == 'dbc':
-        output = database.as_dbc_string()
+        output = database.as_dbc_string(sort_signals=sort_signals)
         newline = ''
     elif database_format == 'kcd':
-        output = database.as_kcd_string()
+        output = database.as_kcd_string(sort_signals=sort_signals)
     else:
         raise Error(
             "Unsupported output database format '{}'.".format(database_format))

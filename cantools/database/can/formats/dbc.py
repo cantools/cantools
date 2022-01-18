@@ -33,7 +33,7 @@ from ..internal_database import InternalDatabase
 from ..environment_variable import EnvironmentVariable
 
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit
+from ...utils import type_sort_signals, sort_signals_by_start_bit, sort_signals_by_start_bit_reversed, DEFAULT
 
 
 DBC_FMT = (
@@ -489,7 +489,7 @@ def _dump_value_tables(database):
     return val_table + ['']
 
 
-def _dump_messages(database, reverse_signals):
+def _dump_messages(database, sort_signals):
     bo = []
 
     def format_mux(signal):
@@ -521,8 +521,8 @@ def _dump_messages(database, reverse_signals):
                 length=message.length,
                 senders=format_senders(message)))
 
-        if reverse_signals:
-            signals = message.signals[::-1]
+        if sort_signals:
+            signals = sort_signals(message.signals)
         else:
             signals = message.signals
         for signal in signals:
@@ -561,7 +561,7 @@ def _dump_senders(database):
     return bo_tx_bu
 
 
-def _dump_comments(database, reverse_signals):
+def _dump_comments(database, sort_signals):
     cm = []
 
     for bus in database.buses:
@@ -584,8 +584,8 @@ def _dump_comments(database, reverse_signals):
                     frame_id=get_dbc_frame_id(message),
                     comment=message.comment.replace('"', '\\"')))
 
-        if reverse_signals:
-            signals = message.signals[::-1]
+        if sort_signals:
+            signals = sort_signals(message.signals)
         else:
             signals = message.signals
         for signal in signals:
@@ -708,7 +708,7 @@ def _dump_attribute_definition_defaults(database):
 
     return ba_def_def
 
-def _dump_attributes(database, reverse_signals):
+def _dump_attributes(database, sort_signals):
     ba = []
 
     def get_value(attribute):
@@ -757,8 +757,8 @@ def _dump_attributes(database, reverse_signals):
                       f'{get_value(attribute)};')
 
         # handle the signals contained in the message
-        if reverse_signals:
-            signals = message.signals[::-1]
+        if sort_signals:
+            signals = sort_signals(message.signals)
         else:
             signals = message.signals
         for signal in signals:
@@ -773,12 +773,12 @@ def _dump_attributes(database, reverse_signals):
     return ba
 
 
-def _dump_choices(database, reverse_signals):
+def _dump_choices(database, sort_signals):
     val = []
 
     for message in database.messages:
-        if reverse_signals:
-            signals = message.signals[::-1]
+        if sort_signals:
+            signals = sort_signals(message.signals)
         else:
             signals = message.signals
         for signal in signals:
@@ -1662,10 +1662,13 @@ def make_names_unique(database):
     return database
 
 
-def dump_string(database: InternalDatabase, reverse_signals: bool = True) -> str:
+def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = DEFAULT) -> str:
     """Format database in DBC file format.
 
     """
+
+    if sort_signals == DEFAULT:
+        sort_signals = sort_signals_by_start_bit_reversed
 
     # Make a deep copy of the database as names and attributes will be
     # modified for items with long names.
@@ -1674,14 +1677,14 @@ def dump_string(database: InternalDatabase, reverse_signals: bool = True) -> str
     database = make_names_unique(database)
     bu = _dump_nodes(database)
     val_table = _dump_value_tables(database)
-    bo = _dump_messages(database, reverse_signals)
+    bo = _dump_messages(database, sort_signals)
     bo_tx_bu = _dump_senders(database)
-    cm = _dump_comments(database, reverse_signals)
+    cm = _dump_comments(database, sort_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
-    ba = _dump_attributes(database, reverse_signals)
-    val = _dump_choices(database, reverse_signals)
+    ba = _dump_attributes(database, sort_signals)
+    val = _dump_choices(database, sort_signals)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
 

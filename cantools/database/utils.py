@@ -4,7 +4,8 @@ import binascii
 import os.path
 import re
 from decimal import Decimal
-from typing import Dict, Union, List, Callable, Optional
+from typing import Dict, Union, List, Callable
+from ..typechecking import Literal
 
 from cantools.database.can.signal import NamedSignalValue, Signal
 from cantools.typechecking import Formats
@@ -343,7 +344,11 @@ def prune_database_choices(database):
             prune_signal_choices(signal)
 
 
-type_sort_signals = Optional[Callable[[List[Signal]], None]]
+DEFAULT = Literal['default']
+type_sort_signals = Union[Callable[[List[Signal]], List[Signal]], DEFAULT, None]
 
-def sort_signals_by_start_bit(signals: List[Signal]) -> None:
-	signals.sort(key=start_bit)
+def sort_signals_by_start_bit(signals: List[Signal]) -> List[Signal]:
+	return list(sorted(signals, key=start_bit))
+
+def sort_signals_by_start_bit_reversed(signals: List[Signal]) -> List[Signal]:
+	return list(reversed(sorted(signals, key=start_bit)))

@@ -31,6 +31,10 @@ class Message(object):
     If `strict` is ``True`` an exception is raised if any signals are
     overlapping or if they don't fit in the message.
 
+    By default signals are sorted by their start bit when their Message object is created.
+    If you don't want them to be sorted pass `sort_signals = None`.
+    If you want the signals to be sorted in another way pass something like
+    `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
     """
 
     def __init__(self,

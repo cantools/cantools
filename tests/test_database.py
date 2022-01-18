@@ -8,6 +8,7 @@ from collections import namedtuple
 import textparser
 import os
 import re
+import shutil
 
 import logging
 from xml.etree import ElementTree
@@ -26,6 +27,8 @@ from cantools.database.can.signal import NamedSignalValue
 class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
+
+    cache_dir = '__cache_dir'
 
     def assertEqualChoicesDictHelper_(self, have, expect):
         if have.keys() != expect.keys():
@@ -49,6 +52,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
             expected = fin.read().decode('cp1252')
 
         self.assertEqual(actual, expected)
+
+
+    def tearDown(self):
+        if os.path.exists(self.cache_dir):
+            shutil.rmtree(self.cache_dir)
+
 
     def test_vehicle(self):
         filename = 'tests/files/dbc/vehicle.dbc'
@@ -5435,6 +5444,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         self.assertEqual(db.buses[0].comment, 'SpecialRelease')
         self.assert_dbc_dump(db, filename)
+
+
+
+    def test_cache_prune_choices(self):
+        filename = 'tests/files/dbc/socialledge.dbc'
+        db = cantools.database.load_file(filename, prune_choices=False, cache_dir=self.cache_dir)
+        msg = db.get_message_by_name('DRIVER_HEARTBEAT')
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0], 'DRIVER_HEARTBEAT_cmd_NOOP')
+        self.assertEqual(sig.choices[1], 'DRIVER_HEARTBEAT_cmd_SYNC')
+        self.assertEqual(sig.choices[2], 'DRIVER_HEARTBEAT_cmd_REBOOT')
 
 
 # This file is not '__main__' when executed via 'python setup.py3

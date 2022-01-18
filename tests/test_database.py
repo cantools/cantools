@@ -5458,6 +5458,59 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sig.choices[2], 'DRIVER_HEARTBEAT_cmd_REBOOT')
 
 
+    def test_sort_signals_by_name(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+        db = cantools.database.load_file(filename, sort_signals=sort_signals)
+        msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
+
+        expected_signal_names = [
+            'Accuracy_GPS_Speed',
+            'GPS_Speed_2D',
+            'GPS_Speed_3D',
+            'Validity_GPS_Speed_2D',
+            'Validity_GPS_Speed_3D',
+        ]
+
+        actual_signal_names = [sig.name for sig in msg.signals]
+
+        self.assertEqual(actual_signal_names, expected_signal_names)
+
+    def test_dont_sort_signals(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename, sort_signals=None)
+        msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
+
+        expected_signal_names = [
+            'GPS_Speed_3D',
+            'GPS_Speed_2D',
+            'Accuracy_GPS_Speed',
+            'Validity_GPS_Speed_3D',
+            'Validity_GPS_Speed_2D',
+        ]
+
+        actual_signal_names = [sig.name for sig in msg.signals]
+
+        self.assertEqual(actual_signal_names, expected_signal_names)
+
+    def test_default_sort_signals(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
+
+        expected_signal_names = [
+            'Validity_GPS_Speed_2D',
+            'Validity_GPS_Speed_3D',
+            'Accuracy_GPS_Speed',
+            'GPS_Speed_2D',
+            'GPS_Speed_3D',
+        ]
+
+        actual_signal_names = [sig.name for sig in msg.signals]
+
+        self.assertEqual(actual_signal_names, expected_signal_names)
+
+
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.
 logging.basicConfig(level=logging.WARNING)

@@ -18,6 +18,7 @@ from ..bus import Bus
 from ..internal_database import InternalDatabase
 from ...utils import start_bit
 from .utils import num
+from ...utils import sort_signals_by_start_bit
 
 
 LOGGER = logging.getLogger(__name__)
@@ -452,7 +453,7 @@ def dump_string(database: InternalDatabase) -> str:
     return ElementTree.tostring(network_definition, encoding='unicode')
 
 
-def load_string(string, strict=True, sort_signals=True):
+def load_string(string, strict=True, sort_signals=sort_signals_by_start_bit):
     """Parse given KCD format string.
 
     """

@@ -70,7 +70,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_out = self.get_out_file_name(filename, ext='.dbc')
         fn_expected_output = filename
 
-        db = cantools.database.load_file(filename, prune_choices=False, sort_signals=False)
+        db = cantools.database.load_file(filename, prune_choices=False, sort_signals=None)
         cantools.database.dump_file(db, fn_out)
 
         self.assertFileEqual(fn_expected_output, fn_out)

@@ -33,6 +33,7 @@ from ..internal_database import InternalDatabase
 from ..environment_variable import EnvironmentVariable
 
 from .utils import num
+from ...utils import sort_signals_by_start_bit
 
 
 DBC_FMT = (
@@ -1739,7 +1740,7 @@ def get_definitions_dict(definitions, defaults):
     return result
 
 
-def load_string(string, strict=True, sort_signals=True):
+def load_string(string, strict=True, sort_signals=sort_signals_by_start_bit):
     """Parse given string.
 
     """

@@ -78,7 +78,7 @@ def _load_file_cache(filename: StringPathLike,
                      frame_id_mask: Optional[int],
                      strict: bool,
                      cache_dir: str,
-                     sort_signals : bool,
+                     sort_signals: utils.type_sort_signals,
                      ) -> Union[can.Database, diagnostics.Database]:
     with open(filename, 'rb') as fin:
         key = fin.read()
@@ -106,7 +106,7 @@ def load_file(filename: StringPathLike,
               prune_choices: bool = True,
               strict: bool = True,
               cache_dir: Optional[str] = None,
-              sort_signals: bool = True,
+              sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit,
               ) -> Union[can.Database, diagnostics.Database]:
     """Open, read and parse given database file and return a
     :class:`can.Database<.can.Database>` or
@@ -247,7 +247,7 @@ def load(fp: TextIO,
          frame_id_mask: Optional[int] = None,
          prune_choices: bool = True,
          strict: bool = True,
-         sort_signals: bool = True) -> Union[can.Database, diagnostics.Database]:
+         sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -281,7 +281,7 @@ def load_string(string: str,
                 frame_id_mask: Optional[int] = None,
                 prune_choices: bool = True,
                 strict: bool = True,
-                sort_signals: bool = True) -> Union[can.Database, diagnostics.Database]:
+                sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with

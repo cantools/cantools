@@ -17,6 +17,7 @@ from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
+from ..utils import type_sort_signals, sort_signals_by_start_bit
 from ...compat import fopen
 from ...typechecking import StringPathLike
 
@@ -46,7 +47,7 @@ class Database(object):
                  autosar_specifics: Optional[AutosarDatabaseSpecifics] = None,
                  frame_id_mask: Optional[int] = None,
                  strict: bool = True,
-                 sort_signals: bool = True,
+                 sort_signals: type_sort_signals = sort_signals_by_start_bit,
                  ) -> None:
         self._messages = messages or []
         self._nodes = nodes or []
@@ -319,7 +320,7 @@ class Database(object):
                                                 self._buses,
                                                 self._version,
                                                 self._dbc),
-                                                reverse_signals=self._sort_signals)
+                                                reverse_signals=bool(self._sort_signals))
 
     def as_kcd_string(self) -> str:
         """Return the database as a string formatted as a KCD file.

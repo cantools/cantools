@@ -24,6 +24,7 @@ from ..message import Message
 from ..internal_database import InternalDatabase
 
 from .utils import num
+from ...utils import sort_signals_by_start_bit
 from ...errors import ParseError
 
 
@@ -722,7 +723,7 @@ def _load_version(tokens):
     return tokens[1][2]
 
 
-def load_string(string, strict=True, sort_signals=True):
+def load_string(string, strict=True, sort_signals=sort_signals_by_start_bit):
     """Parse given string.
 
     """

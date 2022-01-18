@@ -11,6 +11,8 @@ from ..utils import start_bit
 from ..utils import encode_data
 from ..utils import decode_data
 from ..utils import create_encode_decode_formats
+from ..utils import type_sort_signals
+from ..utils import sort_signals_by_start_bit
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
@@ -46,7 +48,7 @@ class Message(object):
                  signal_groups: Optional[List[SignalGroup]] = None,
                  strict: bool = True,
                  protocol: Optional[str] = None,
-                 sort_signals: bool = True,
+                 sort_signals: type_sort_signals = sort_signals_by_start_bit,
                  ) -> None:
         frame_id_bit_length = frame_id.bit_length()
 
@@ -66,7 +68,7 @@ class Message(object):
         self._length = length
         self._signals = signals
         if sort_signals:
-            self._signals.sort(key=start_bit)
+            sort_signals(self._signals)
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the

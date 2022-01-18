@@ -4,7 +4,7 @@ import binascii
 import os.path
 import re
 from decimal import Decimal
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Callable, Optional
 
 from cantools.database.can.signal import NamedSignalValue, Signal
 from cantools.typechecking import Formats
@@ -342,3 +342,8 @@ def prune_database_choices(database):
         for signal in message.signals:
             prune_signal_choices(signal)
 
+
+type_sort_signals = Optional[Callable[[List[Signal]], None]]
+
+def sort_signals_by_start_bit(signals: List[Signal]) -> None:
+	signals.sort(key=start_bit)

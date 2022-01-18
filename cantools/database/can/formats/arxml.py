@@ -13,6 +13,7 @@ from ..message import Message
 from ..node import Node
 from ..bus import Bus
 from ..internal_database import InternalDatabase
+from ...utils import sort_signals_by_start_bit
 
 LOGGER = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ def parse_number_string(in_string, allow_float=False):
     return int(in_string, 0) # autodetect the base
 
 class SystemLoader(object):
-    def __init__(self, root, strict, sort_signals=True):
+    def __init__(self, root, strict, sort_signals=sort_signals_by_start_bit):
         self._root = root
         self._strict = strict
         self._sort_signals = sort_signals
@@ -1777,7 +1778,7 @@ REFERENCE_VALUES_XPATH = make_xpath([
 
 class EcuExtractLoader(object):
 
-    def __init__(self, root, strict, sort_signals=True):
+    def __init__(self, root, strict, sort_signals=sort_signals_by_start_bit):
         self.root = root
         self.strict = strict
         self.sort_signals = sort_signals
@@ -2100,7 +2101,7 @@ def is_ecu_extract(root):
 
     return ecuc_value_collection is not None
 
-def load_string(string, strict=True, sort_signals=True):
+def load_string(string, strict=True, sort_signals=sort_signals_by_start_bit):
     """Parse given ARXML format string.
 
     """

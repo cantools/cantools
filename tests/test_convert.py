@@ -26,10 +26,10 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn = os.path.join(tempfile.mkdtemp(), fn)
         return fn
 
-    def assertFileEqual(self, fn1, fn2):
-        with open(fn1, 'rt') as f:
+    def assertFileEqual(self, fn1, fn2, encoding=None):
+        with open(fn1, 'rt', encoding=encoding) as f:
             content1 = list(f)
-        with open(fn2, 'rt') as f:
+        with open(fn2, 'rt', encoding=encoding) as f:
             content2 = list(f)
         self.assertListEqual(content1, content2)
 
@@ -86,6 +86,27 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
         self.assertFileEqual(fn_expected_output, fn_out)
         self.remove_out_file(fn_out)
+
+    def test_dbc_dump_default_sort_signals2(self):
+        fn_in = 'tests/files/dbc/vehicle.dbc'
+        fn_out1 = self.get_out_file_name("loaded-with-default-sort-signals", ext='.dbc')
+        fn_out2 = self.get_out_file_name("loaded-with-sort-signals-by-name", ext='.dbc')
+
+        db1 = cantools.database.load_file(fn_in)
+        db2 = cantools.database.load_file(fn_in, sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name)))
+
+        msg1 = db1.get_message_by_name('RT_DL1MK3_GPS_Speed')
+        msg2 = db2.get_message_by_name('RT_DL1MK3_GPS_Speed')
+
+        self.assertEqual({repr(s) for s in msg1.signals}, {repr(s) for s in msg2.signals})
+        self.assertNotEqual([repr(s) for s in msg1.signals], [repr(s) for s in msg2.signals])
+
+        cantools.database.dump_file(db1, fn_out1)
+        cantools.database.dump_file(db2, fn_out2)
+
+        self.assertFileEqual(fn_out1, fn_out2, encoding='cp1252')
+        self.remove_out_file(fn_out1)
+        self.remove_out_file(fn_out2)
 
     # ------- test sym -> dbc -------
 

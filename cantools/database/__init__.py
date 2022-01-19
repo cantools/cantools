@@ -230,6 +230,8 @@ def dump_file(database,
     >>> db = cantools.database.load_file('foo.dbc')
     >>> cantools.database.dump_file(db, 'bar.dbc')
 
+    Pass `sort_signals=None, prune_choices=False` to load_file
+    in order to minimize the differences between foo.dbc and bar.dbc.
     """
 
     database_format, encoding = _resolve_database_format_and_encoding(

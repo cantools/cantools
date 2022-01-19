@@ -36,7 +36,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
             content2 = list(f)
         self.assertListEqual(content1, content2)
 
-    def assertDatabaseEqual(self, db1, db2, *, ignore_message_attributes=[], ignore_signal_attributes=[]):
+    def assertDatabaseEqual(self, db1, db2, *, ignore_message_attributes=[], ignore_signal_attributes=[], ignore_order_of_signals=False):
         message_attributes = ("name", "frame_id", "is_extended_frame", "length", "comment")
         signal_attributes = ("name", "start", "length", "byte_order", "is_signed", "is_float",
                              "initial", "scale", "offset", "minimum", "maximum", "unit", "comment",
@@ -52,8 +52,11 @@ class CanToolsConvertFullTest(unittest.TestCase):
                 self.assertEqual(getattr(msg1, a), getattr(msg2, a), "%s does not match for message %s" % (a, i))
 
             self.assertEqual(len(msg1.signals), len(msg2.signals))
-            sort = lambda s: (s.start, s.multiplexer_ids)
-            for sig1, sig2 in zip(sorted(msg1.signals, key=sort), sorted(msg2.signals, key=sort)):
+            if ignore_order_of_signals:
+                sort = lambda signals: sorted(signals, key=lambda s: (s.start, s.multiplexer_ids))
+            else:
+                sort = lambda signals: signals
+            for sig1, sig2 in zip(sort(msg1.signals), sort(msg2.signals)):
                 for a in signal_attributes:
                     if a in ignore_signal_attributes:
                         continue
@@ -128,36 +131,41 @@ class CanToolsConvertFullTest(unittest.TestCase):
     # ------- sort_signals when dumping to kcd files -------
 
     def test_kcd_dump_default_sort_signals(self):
+        # test that signals are not sorted by default when dumping to a kcd file
+        # I cannot compare the dumped file directly because the order of the attributes inside of a tag varies from test to test
         fn_in = self.get_test_file_name('kcd/vehicle.kcd')
-        fn_expected_output = fn_in
-        fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
-
         db = cantools.database.load_file(fn_in, prune_choices=False)
-        cantools.database.dump_file(db, fn_out)
 
-        self.assertFileEqual(fn_expected_output, fn_out)
+        fn_out = self.get_out_file_name(fn_in, ext='.kcd')
+        cantools.database.dump_file(db, fn_out)
+        dumped_db = cantools.database.load_file(fn_out, prune_choices=False, sort_signals=None)
+        self.assertDatabaseEqual(db, dumped_db)
         self.remove_out_file(fn_out)
 
         for msg in db.messages:
             msg.signals.sort(key=lambda sig: sig.name)
 
-        fn_expected_output = self.get_test_file_name('kcd/vehicle-sort-signals-by-name.kcd')
-        fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
+        fn_out = self.get_out_file_name(fn_in, ext='.kcd')
         cantools.database.dump_file(db, fn_out)
-
-        self.assertFileEqual(fn_expected_output, fn_out)
+        dumped_db = cantools.database.load_file(fn_out, prune_choices=False, sort_signals=None)
+        self.assertDatabaseEqual(db, dumped_db)
         self.remove_out_file(fn_out)
 
     def test_kcd_dump_sort_signals_by_name(self):
+        # test that signals are sorted by name if requested when dumping to a kcd file
+        # I cannot compare the dumped file directly because the order of the attributes inside of a tag varies from test to test
         fn_in = self.get_test_file_name('kcd/vehicle.kcd')
-        fn_expected_output = self.get_test_file_name('kcd/vehicle-sort-signals-by-name.kcd')
-        fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
-        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+        db = cantools.database.load_file(fn_in, prune_choices=False, sort_signals=None)
 
-        db = cantools.database.load_file(fn_in, prune_choices=False)
+        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+        fn_out = self.get_out_file_name(fn_in, ext='.kcd')
         cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
 
-        self.assertFileEqual(fn_expected_output, fn_out)
+        for msg in db.messages:
+            msg.signals.sort(key=lambda sig: sig.name)
+
+        db_dumped = cantools.database.load_file(fn_out, prune_choices=False, sort_signals=None)
+        self.assertDatabaseEqual(db, db_dumped)
         self.remove_out_file(fn_out)
 
     # ------- test sym -> dbc -------
@@ -185,7 +193,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         # In dbc files it does not seem to be possible to specify only one of both.
         # Therefore sig12 and sig22 have minimum = None in the sym file but minimum = 0 in the dbc file.
         # Therefore I am ignoring minimum values in this test.
-        self.assertDatabaseEqual(sym, dbc, ignore_signal_attributes=['minimum'])
+        self.assertDatabaseEqual(sym, dbc, ignore_signal_attributes=['minimum'], ignore_order_of_signals=True)
 
 
 if __name__ == '__main__':

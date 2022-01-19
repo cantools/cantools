@@ -19,6 +19,9 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
     # ------- aux functions -------
 
+    def get_test_file_name(self, fn):
+        return os.path.join(os.path.split(__file__)[0], 'files', *fn.split('/'))
+
     def get_out_file_name(self, fn_in, ext):
         fn = fn_in
         fn = os.path.splitext(fn)[0] + ext
@@ -66,7 +69,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
     # ------- dump, load, dump produces same output -------
 
     def test_dbc_load_and_dump(self):
-        filename = 'tests/files/dbc/socialledge-written-by-cantools.dbc'
+        filename = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
         fn_out = self.get_out_file_name(filename, ext='.dbc')
         fn_expected_output = filename
 
@@ -79,8 +82,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
     # ------- sort_signals when dumping to dbc files -------
 
     def test_dbc_dump_sort_signals_by_name(self):
-        fn_in = 'tests/files/dbc/socialledge-written-by-cantools.dbc'
-        fn_expected_output = 'tests/files/dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc'
+        fn_in = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
+        fn_expected_output = self.get_test_file_name('dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc')
         sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
@@ -91,8 +94,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.remove_out_file(fn_out)
 
     def test_dbc_dump_default_sort_signals(self):
-        fn_in = 'tests/files/dbc/socialledge-written-by-cantools.dbc'
-        fn_expected_output = 'tests/files/dbc/socialledge-written-by-cantools-with-default-sort-signals.dbc'
+        fn_in = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
+        fn_expected_output = self.get_test_file_name('dbc/socialledge-written-by-cantools-with-default-sort-signals.dbc')
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
         db = cantools.database.load_file(fn_in, prune_choices=False)
@@ -102,7 +105,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.remove_out_file(fn_out)
 
     def test_dbc_dump_default_sort_signals2(self):
-        fn_in = 'tests/files/dbc/vehicle.dbc'
+        fn_in = self.get_test_file_name('dbc/vehicle.dbc')
         fn_out1 = self.get_out_file_name("loaded-with-default-sort-signals", ext='.dbc')
         fn_out2 = self.get_out_file_name("loaded-with-sort-signals-by-name", ext='.dbc')
 
@@ -125,7 +128,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
     # ------- sort_signals when dumping to kcd files -------
 
     def test_kcd_dump_default_sort_signals(self):
-        fn_in = 'tests/files/kcd/vehicle.kcd'
+        fn_in = self.get_test_file_name('kcd/vehicle.kcd')
         fn_expected_output = fn_in
         fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
 
@@ -138,7 +141,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         for msg in db.messages:
             msg.signals.sort(key=lambda sig: sig.name)
 
-        fn_expected_output = 'tests/files/kcd/vehicle-sort-signals-by-name.kcd'
+        fn_expected_output = self.get_test_file_name('kcd/vehicle-sort-signals-by-name.kcd')
         fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
         cantools.database.dump_file(db, fn_out)
 
@@ -146,8 +149,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.remove_out_file(fn_out)
 
     def test_kcd_dump_sort_signals_by_name(self):
-        fn_in = 'tests/files/kcd/vehicle.kcd'
-        fn_expected_output = 'tests/files/kcd/vehicle-sort-signals-by-name.kcd'
+        fn_in = self.get_test_file_name('kcd/vehicle.kcd')
+        fn_expected_output = self.get_test_file_name('kcd/vehicle-sort-signals-by-name.kcd')
         fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
         sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
 

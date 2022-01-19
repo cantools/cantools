@@ -1,7 +1,7 @@
 import typing
 
 import typing_extensions
-from typing_extensions import Literal
+from typing_extensions import Literal, Final
 from bitstruct import CompiledFormatDict
 
 if typing.TYPE_CHECKING:

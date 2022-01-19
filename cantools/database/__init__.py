@@ -214,11 +214,13 @@ def dump_file(database,
               sort_signals=utils.DEFAULT):
     """Dump given database `database` to given file `filename`.
 
-    By default signals are sorted by their start bit in descending order
-    (unless you have passed `sort_signals = None` to load_file).
-    If you don't want them to be sorted pass `sort_signals = None`.
-    If you want the signals to be sorted in another way pass something like
+    Depending on the output file format signals may be sorted by default.
+    If you don't want signals to be sorted pass `sort_signals=None`.
+    `sort_signals=None` is assumed by default if you have passed `sort_signals=None` to load_file.
+    If you want the signals to be sorted in a special way pass something like
     `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
+    For dbc files the default is to sort the signals by their start bit in descending order.
+    For kcd files the default is to not sort the signals.
 
     See :func:`~cantools.database.load_file()` for descriptions of
     other arguments.

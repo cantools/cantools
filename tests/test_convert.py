@@ -76,6 +76,18 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.assertFileEqual(fn_expected_output, fn_out)
         self.remove_out_file(fn_out)
 
+    def test_dbc_dump_sort_signals_by_name(self):
+        fn_in = 'tests/files/dbc/socialledge-written-by-cantools.dbc'
+        fn_expected_output = 'tests/files/dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc'
+        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+        fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
+
+        db = cantools.database.load_file(fn_in, prune_choices=False)
+        cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
+
+        self.assertFileEqual(fn_expected_output, fn_out)
+        self.remove_out_file(fn_out)
+
     def test_dbc_dump_default_sort_signals(self):
         fn_in = 'tests/files/dbc/socialledge-written-by-cantools.dbc'
         fn_expected_output = 'tests/files/dbc/socialledge-written-by-cantools-with-default-sort-signals.dbc'

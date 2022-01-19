@@ -76,6 +76,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.assertFileEqual(fn_expected_output, fn_out)
         self.remove_out_file(fn_out)
 
+    # ------- sort_signals when dumping to dbc files -------
+
     def test_dbc_dump_sort_signals_by_name(self):
         fn_in = 'tests/files/dbc/socialledge-written-by-cantools.dbc'
         fn_expected_output = 'tests/files/dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc'
@@ -119,6 +121,19 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.assertFileEqual(fn_out1, fn_out2, encoding='cp1252')
         self.remove_out_file(fn_out1)
         self.remove_out_file(fn_out2)
+
+    # ------- sort_signals when dumping to kcd files -------
+
+    def test_kcd_dump_default_sort_signals(self):
+        fn_in = 'tests/files/kcd/vehicle.kcd'
+        fn_expected_output = fn_in
+        fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
+
+        db = cantools.database.load_file(fn_in, prune_choices=False)
+        cantools.database.dump_file(db, fn_out)
+
+        self.assertFileEqual(fn_expected_output, fn_out)
+        self.remove_out_file(fn_out)
 
     # ------- test sym -> dbc -------
 

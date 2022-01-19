@@ -1,0 +1,2091 @@
+<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Definition.xsd">
+  <Document version="" />
+  <Node id="1" name="UnusedNode" />
+  <Bus name="Bus">
+    <Message format="extended" id="0x9588322" length="8" name="RT_SB_INS_Vel_Body_Axes">
+      <Signal name="Validity_INS_Vel_Forwards" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Vel_Sideways" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Vel_Body" offset="8">
+        <Notes>Accuracy of INS body axis velocities (forward velocity and sideways velocity)</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_Forwards_2D" offset="16">
+        <Notes>Forwards Velocity in the vehicle body axes, 2D (no vertical component) .</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_Sideways_2D" offset="40">
+        <Notes>Sideways Velocity in the vehicle body axes, 2D (no vertical component) .  +ve for motion to the vehicle RHS.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A7C24" length="8" name="RT_DL1MK3_Speed">
+      <Signal name="Validity_Speed" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="8" name="Accuracy_Speed" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="Speed" offset="16">
+        <Value max="20000" min="-20000" slope="1e-05" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9566D24" length="8" name="RT_DL1MK3_GPS_Time">
+      <Signal name="Validity_GPS_Time" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Week" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Time" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="GPS_Time" offset="16">
+        <Notes>GPS time is the time in seconds since midnight GMT on Saturday night.</Notes>
+        <Value max="604800" min="0" slope="0.001" unit="s" />
+      </Signal>
+      <Signal length="16" name="GPS_Week" offset="48">
+        <Value max="65535" min="0" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9566F24" length="8" name="RT_DL1MK3_GPS_Pos_LLH_2">
+      <Signal length="32" name="GPS_Pos_LLH_Longitude" offset="0">
+        <Value max="180" min="-180" slope="1e-07" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="32" name="GPS_Pos_LLH_Altitude" offset="32">
+        <Value max="100000" min="-1000" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9566E24" length="8" name="RT_DL1MK3_GPS_Pos_LLH_1">
+      <Signal name="Validity_GPS_Pos_LLH_Latitude" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Pos_LLH_Longitude" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Pos_LLH_Altitude" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_LLH_Latitude" offset="8">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_LLH_Longitude" offset="16">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_LLH_Altitude" offset="24">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="GPS_Pos_LLH_Latitude" offset="32">
+        <Value max="90" min="-90" slope="1e-07" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9567C24" length="8" name="RT_DL1MK3_GPS_Speed">
+      <Signal name="Validity_GPS_Speed_2D" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Speed_3D" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Speed" offset="8">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="GPS_Speed_2D" offset="16">
+        <Notes>This is GPS scalar 2D speed - scalar speed with no local Z axis component included.</Notes>
+        <Value max="1675" min="0" slope="0.0001" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="GPS_Speed_3D" offset="40">
+        <Notes>This is GPS scalar 3D speed - scalar speed with the local Z axis component included.</Notes>
+        <Value max="1675" min="0" slope="0.0001" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7325" length="2" name="RT_IRTemp_Temp_7">
+      <Signal length="16" name="IR_Temperature_7" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9627425" length="8" name="RT_IRTemp_Temp_RR_2">
+      <Signal length="16" name="IR_Temperature_29" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_30" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_31" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_32" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9627225" length="8" name="RT_IRTemp_Temp_RL_2">
+      <Signal length="16" name="IR_Temperature_21" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_22" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_23" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_24" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9627025" length="8" name="RT_IRTemp_Temp_FR_2">
+      <Signal length="16" name="IR_Temperature_13" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_14" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_15" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_16" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9626E25" length="8" name="RT_IRTemp_Temp_FL_2">
+      <Signal length="16" name="IR_Temperature_5" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_6" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_7" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_8" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9627325" length="8" name="RT_IRTemp_Temp_RR_1">
+      <Signal length="16" name="IR_Temperature_25" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_26" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_27" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_28" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9627125" length="8" name="RT_IRTemp_Temp_RL_1">
+      <Signal length="16" name="IR_Temperature_17" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_18" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_19" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_20" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9626F25" length="8" name="RT_IRTemp_Temp_FR_1">
+      <Signal length="16" name="IR_Temperature_9" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_10" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_11" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_12" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9626D25" length="8" name="RT_IRTemp_Temp_FL_1">
+      <Signal length="16" name="IR_Temperature_1" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_2" offset="16">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_3" offset="32">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+      <Signal length="16" name="IR_Temperature_4" offset="48">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8C25" length="2" name="RT_IRTemp_Temp_32">
+      <Signal length="16" name="IR_Temperature_32" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8B25" length="2" name="RT_IRTemp_Temp_31">
+      <Signal length="16" name="IR_Temperature_31" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8A25" length="2" name="RT_IRTemp_Temp_30">
+      <Signal length="16" name="IR_Temperature_30" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8925" length="2" name="RT_IRTemp_Temp_29">
+      <Signal length="16" name="IR_Temperature_29" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8825" length="2" name="RT_IRTemp_Temp_28">
+      <Signal length="16" name="IR_Temperature_28" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8725" length="2" name="RT_IRTemp_Temp_27">
+      <Signal length="16" name="IR_Temperature_27" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8625" length="2" name="RT_IRTemp_Temp_26">
+      <Signal length="16" name="IR_Temperature_26" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8525" length="2" name="RT_IRTemp_Temp_25">
+      <Signal length="16" name="IR_Temperature_25" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8425" length="2" name="RT_IRTemp_Temp_24">
+      <Signal length="16" name="IR_Temperature_24" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8225" length="2" name="RT_IRTemp_Temp_22">
+      <Signal length="16" name="IR_Temperature_22" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8325" length="2" name="RT_IRTemp_Temp_23">
+      <Signal length="16" name="IR_Temperature_23" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8125" length="2" name="RT_IRTemp_Temp_21">
+      <Signal length="16" name="IR_Temperature_21" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8025" length="2" name="RT_IRTemp_Temp_20">
+      <Signal length="16" name="IR_Temperature_20" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7F25" length="2" name="RT_IRTemp_Temp_19">
+      <Signal length="16" name="IR_Temperature_19" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7E25" length="2" name="RT_IRTemp_Temp_18">
+      <Signal length="16" name="IR_Temperature_18" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7C25" length="2" name="RT_IRTemp_Temp_16">
+      <Signal length="16" name="IR_Temperature_16" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7B25" length="2" name="RT_IRTemp_Temp_15">
+      <Signal length="16" name="IR_Temperature_15" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7A25" length="2" name="RT_IRTemp_Temp_14">
+      <Signal length="16" name="IR_Temperature_14" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7925" length="2" name="RT_IRTemp_Temp_13">
+      <Signal length="16" name="IR_Temperature_13" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7825" length="2" name="RT_IRTemp_Temp_12">
+      <Signal length="16" name="IR_Temperature_12" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7725" length="2" name="RT_IRTemp_Temp_11">
+      <Signal length="16" name="IR_Temperature_11" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7625" length="2" name="RT_IRTemp_Temp_10">
+      <Signal length="16" name="IR_Temperature_10" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7425" length="2" name="RT_IRTemp_Temp_8">
+      <Signal length="16" name="IR_Temperature_8" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7525" length="2" name="RT_IRTemp_Temp_9">
+      <Signal length="16" name="IR_Temperature_9" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7D25" length="2" name="RT_IRTemp_Temp_17">
+      <Signal length="16" name="IR_Temperature_17" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7225" length="2" name="RT_IRTemp_Temp_6">
+      <Signal length="16" name="IR_Temperature_6" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7125" length="2" name="RT_IRTemp_Temp_5">
+      <Signal length="16" name="IR_Temperature_5" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7025" length="2" name="RT_IRTemp_Temp_4">
+      <Signal length="16" name="IR_Temperature_4" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B6F25" length="2" name="RT_IRTemp_Temp_3">
+      <Signal length="16" name="IR_Temperature_3" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B6E25" length="2" name="RT_IRTemp_Temp_2">
+      <Signal length="16" name="IR_Temperature_2" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B6D25" length="2" name="RT_IRTemp_Temp_1">
+      <Signal length="16" name="IR_Temperature_1" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9577322" length="8" name="RT_SB_Trig_Final_Condition">
+      <Signal name="Validity_Final_Speed" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="24" name="Final_Speed" offset="8">
+        <Notes>Speed at end of triggered test</Notes>
+        <Value max="1675" min="0" slope="0.0001" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9577222" length="8" name="RT_SB_Trig_Initial_Condition">
+      <Signal name="Validity_Initial_Speed" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_Initial_Heading" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="24" name="Initial_Speed" offset="8">
+        <Notes>Speed at start of triggered test</Notes>
+        <Value max="1675" min="0" slope="0.0001" unit="m/s" />
+      </Signal>
+      <Signal length="16" name="Initial_Heading" offset="32">
+        <Notes>Heading (track) at start of triggered test</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="8" name="MFDD_Start_Threshold" offset="48">
+        <Value max="100" min="0" unit="%" />
+      </Signal>
+      <Signal length="8" name="MFDD_End_Threshold" offset="56">
+        <Value max="100" min="0" unit="%" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9577122" length="8" name="RT_SB_Trig_Direct_Dist">
+      <Signal length="32" name="Direct_Distance" offset="0">
+        <Notes>Direct distance from start of test to current position</Notes>
+        <Value max="4294967" min="0" slope="0.001" unit="m" />
+      </Signal>
+      <Signal length="32" name="Path_Distance_2D" offset="32">
+        <Notes>2D path distance (horizontal components only)</Notes>
+        <Value max="4294967" min="0" slope="0.001" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9577022" length="8" name="RT_SB_Trig_Forward_Dist">
+      <Signal length="32" name="Forward_Distance" offset="0">
+        <Notes>Current forward distance from start of test in direction of initial heading at start of test</Notes>
+        <Value max="2147483.647" min="-2147483.648" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="32" name="Deviation_Distance" offset="32">
+        <Notes>Current deviation distance from a line projected along the initial heading at start of test, +ve for deviation to the right.</Notes>
+        <Value max="2147483.647" min="-2147483.648" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9576F22" length="8" name="RT_SB_Trig_Path_Dist">
+      <Signal length="32" name="Path_Distance_3D" offset="0">
+        <Notes>3D path distance</Notes>
+        <Value max="4294967" min="0" slope="0.001" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9576E22" length="8" name="RT_SB_Trig_Accel">
+      <Signal name="Validity_MFDD" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Average_Accel" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Triggered_Time" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="16" name="MFDD" offset="8">
+        <Notes>Mean fully-developed decelleration of triggered test.  Thresholds used are as set in the logger configuration.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="Average_Accel" offset="24">
+        <Notes>Average acceleration from start of triggered test to current time.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="24" name="Triggered_Time" offset="40">
+        <Notes>Cumulative time from start of triggered test to current time.</Notes>
+        <Value max="167772" min="0" slope="0.01" unit="s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9607824" length="3" name="RT_DL1MK3_Measure_Time_12">
+      <Signal length="24" name="Measured_Time_12" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607724" length="3" name="RT_DL1MK3_Measure_Time_11">
+      <Signal length="24" name="Measured_Time_11" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607624" length="3" name="RT_DL1MK3_Measure_Time_10">
+      <Signal length="24" name="Measured_Time_10" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607524" length="3" name="RT_DL1MK3_Measure_Time_9">
+      <Signal length="24" name="Measured_Time_9" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607424" length="3" name="RT_DL1MK3_Measure_Time_8">
+      <Signal length="24" name="Measured_Time_8" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607324" length="3" name="RT_DL1MK3_Measure_Time_7">
+      <Signal length="24" name="Measured_Time_7" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607224" length="3" name="RT_DL1MK3_Measure_Time_6">
+      <Signal length="24" name="Measured_Time_6" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607124" length="3" name="RT_DL1MK3_Measure_Time_5">
+      <Signal length="24" name="Measured_Time_5" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9607024" length="3" name="RT_DL1MK3_Measure_Time_4">
+      <Signal length="24" name="Measured_Time_4" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9606F24" length="3" name="RT_DL1MK3_Measure_Time_3">
+      <Signal length="24" name="Measured_Time_3" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9606E24" length="3" name="RT_DL1MK3_Measure_Time_2">
+      <Signal length="24" name="Measured_Time_2" offset="0" />
+    </Message>
+    <Message format="extended" id="0x9606D24" length="3" name="RT_DL1MK3_Measure_Time_1">
+      <Signal length="24" name="Measured_Time_1" offset="0" />
+    </Message>
+    <Message format="extended" id="0x95F7824" length="2" name="RT_DL1MK3_RPM">
+      <Signal length="16" name="RPM" offset="0" />
+    </Message>
+    <Message format="extended" id="0x95F7724" length="2" name="RT_DL1MK3_Freq_4">
+      <Signal length="16" name="Frequency_4" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95F7624" length="2" name="RT_DL1MK3_Freq_3">
+      <Signal length="16" name="Frequency_3" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95F7524" length="2" name="RT_DL1MK3_Freq_2">
+      <Signal length="16" name="Frequency_2" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9616F24" length="2" name="RT_DL1MK3_Misc_3">
+      <Signal length="16" name="Misc_3" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9616E24" length="2" name="RT_DL1MK3_Misc_2">
+      <Signal length="16" name="Misc_2" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9616D24" length="2" name="RT_DL1MK3_Misc_1">
+      <Signal length="16" name="Misc_1" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8B24" length="2" name="RT_DL1MK3_Aux_31">
+      <Signal length="16" name="AUX_31" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8A24" length="2" name="RT_DL1MK3_Aux_30">
+      <Signal length="16" name="AUX_30" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8924" length="2" name="RT_DL1MK3_Aux_29">
+      <Signal length="16" name="AUX_29" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8824" length="2" name="RT_DL1MK3_Aux_28">
+      <Signal length="16" name="AUX_28" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8724" length="2" name="RT_DL1MK3_Aux_27">
+      <Signal length="16" name="AUX_27" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8624" length="2" name="RT_DL1MK3_Aux_26">
+      <Signal length="16" name="AUX_26" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8524" length="2" name="RT_DL1MK3_Aux_25">
+      <Signal length="16" name="AUX_25" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8424" length="2" name="RT_DL1MK3_Aux_24">
+      <Signal length="16" name="AUX_24" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8324" length="2" name="RT_DL1MK3_Aux_23">
+      <Signal length="16" name="AUX_23" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8224" length="2" name="RT_DL1MK3_Aux_22">
+      <Signal length="16" name="AUX_22" offset="0">
+        <Value slope="10" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8124" length="2" name="RT_DL1MK3_Aux_21">
+      <Signal length="16" name="AUX_21" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E8024" length="2" name="RT_DL1MK3_Aux_20">
+      <Signal length="16" name="AUX_20" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7F24" length="2" name="RT_DL1MK3_Aux_19">
+      <Signal length="16" name="AUX_19" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7E24" length="2" name="RT_DL1MK3_Aux_18">
+      <Signal length="16" name="AUX_18" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7D24" length="2" name="RT_DL1MK3_Aux_17">
+      <Signal length="16" name="AUX_17" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7C24" length="2" name="RT_DL1MK3_Aux_16">
+      <Signal length="16" name="AUX_16" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7B24" length="2" name="RT_DL1MK3_Aux_15">
+      <Signal length="16" name="AUX_15" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7A24" length="2" name="RT_DL1MK3_Aux_14">
+      <Signal length="16" name="AUX_14" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7924" length="2" name="RT_DL1MK3_Aux_13">
+      <Signal length="16" name="AUX_13" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7824" length="2" name="RT_DL1MK3_Aux_12">
+      <Signal length="16" name="AUX_12" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7724" length="2" name="RT_DL1MK3_Aux_11">
+      <Signal length="16" name="AUX_11" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7524" length="2" name="RT_DL1MK3_Aux_9">
+      <Signal length="16" name="AUX_9" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7624" length="2" name="RT_DL1MK3_Aux_10">
+      <Signal length="16" name="AUX_10" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7424" length="2" name="RT_DL1MK3_Aux_8">
+      <Signal length="16" name="AUX_8" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7324" length="2" name="RT_DL1MK3_Aux_7">
+      <Signal length="16" name="AUX_7" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7224" length="2" name="RT_DL1MK3_Aux_6">
+      <Signal length="16" name="AUX_6" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7124" length="2" name="RT_DL1MK3_Aux_5">
+      <Signal length="16" name="AUX_5" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E7024" length="2" name="RT_DL1MK3_Aux_4">
+      <Signal length="16" name="AUX_4" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E6F24" length="2" name="RT_DL1MK3_Aux_3">
+      <Signal length="16" name="AUX_3" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E6E24" length="2" name="RT_DL1MK3_Aux_2">
+      <Signal length="16" name="AUX_2" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95E6D24" length="2" name="RT_DL1MK3_Aux_1">
+      <Signal length="16" name="AUX_1" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95A7124" length="3" name="RT_DL1MK3_Pressure_5">
+      <Signal length="24" name="Pressure_5" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95A7024" length="3" name="RT_DL1MK3_Pressure_4">
+      <Signal length="24" name="Pressure_4" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95A6F24" length="3" name="RT_DL1MK3_Pressure_3">
+      <Signal length="24" name="Pressure_3" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95A6E24" length="3" name="RT_DL1MK3_Pressure_2">
+      <Signal length="24" name="Pressure_2" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95A6D24" length="3" name="RT_DL1MK3_Pressure_1">
+      <Signal length="24" name="Pressure_1" offset="0">
+        <Value slope="0.1" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95C6F24" length="2" name="RT_DL1MK3_Angle_3">
+      <Signal length="16" name="Angle_3" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95C6E24" length="2" name="RT_DL1MK3_Angle_2">
+      <Signal length="16" name="Angle_2" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95C6D24" length="2" name="RT_DL1MK3_Angle_1">
+      <Signal length="16" name="Angle_1" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8524" length="2" name="RT_DL1MK3_Temp_25">
+      <Signal length="16" name="Temperature_25" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8424" length="2" name="RT_DL1MK3_Temp_24">
+      <Signal length="16" name="Temperature_24" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8324" length="2" name="RT_DL1MK3_Temp_23">
+      <Signal length="16" name="Temperature_23" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8224" length="2" name="RT_DL1MK3_Temp_22">
+      <Signal length="16" name="Temperature_22" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8124" length="2" name="RT_DL1MK3_Temp_21">
+      <Signal length="16" name="Temperature_21" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B8024" length="2" name="RT_DL1MK3_Temp_20">
+      <Signal length="16" name="Temperature_20" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7F24" length="2" name="RT_DL1MK3_Temp_19">
+      <Signal length="16" name="Temperature_19" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7E24" length="2" name="RT_DL1MK3_Temp_18">
+      <Signal length="16" name="Temperature_18" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7D24" length="2" name="RT_DL1MK3_Temp_17">
+      <Signal length="16" name="Temperature_17" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7C24" length="2" name="RT_DL1MK3_Temp_16">
+      <Signal length="16" name="Temperature_16" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7B24" length="2" name="RT_DL1MK3_Temp_15">
+      <Signal length="16" name="Temperature_15" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7A24" length="2" name="RT_DL1MK3_Temp_14">
+      <Signal length="16" name="Temperature_14" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7924" length="2" name="RT_DL1MK3_Temp_13">
+      <Signal length="16" name="Temperature_13" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7824" length="2" name="RT_DL1MK3_Temp_12">
+      <Signal length="16" name="Temperature_12" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7724" length="2" name="RT_DL1MK3_Temp_11">
+      <Signal length="16" name="Temperature_11" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7624" length="2" name="RT_DL1MK3_Temp_10">
+      <Signal length="16" name="Temperature_10" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7524" length="2" name="RT_DL1MK3_Temp_9">
+      <Signal length="16" name="Temperature_9" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7424" length="2" name="RT_DL1MK3_Temp_8">
+      <Signal length="16" name="Temperature_8" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7324" length="2" name="RT_DL1MK3_Temp_7">
+      <Signal length="16" name="Temperature_7" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7224" length="2" name="RT_DL1MK3_Temp_6">
+      <Signal length="16" name="Temperature_6" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7124" length="2" name="RT_DL1MK3_Temp_5">
+      <Signal length="16" name="Temperature_5" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B7024" length="2" name="RT_DL1MK3_Temp_4">
+      <Signal length="16" name="Temperature_4" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B6F24" length="2" name="RT_DL1MK3_Temp_3">
+      <Signal length="16" name="Temperature_3" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B6E24" length="2" name="RT_DL1MK3_Temp_2">
+      <Signal length="16" name="Temperature_2" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x95B6D24" length="2" name="RT_DL1MK3_Temp_1">
+      <Signal length="16" name="Temperature_1" offset="0">
+        <Value slope="0.1" type="signed" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8B24" length="2" name="RT_DL1MK3_Analog_32">
+      <Signal endianess="big" length="16" name="Analog_32" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8A24" length="2" name="RT_DL1MK3_Analog_31">
+      <Signal endianess="big" length="16" name="Analog_31" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8924" length="2" name="RT_DL1MK3_Analog_30">
+      <Signal endianess="big" length="16" name="Analog_30" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8824" length="2" name="RT_DL1MK3_Analog_29">
+      <Signal endianess="big" length="16" name="Analog_29" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8724" length="2" name="RT_DL1MK3_Analog_28">
+      <Signal endianess="big" length="16" name="Analog_28" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8624" length="2" name="RT_DL1MK3_Analog_27">
+      <Signal endianess="big" length="16" name="Analog_27" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8524" length="2" name="RT_DL1MK3_Analog_26">
+      <Signal endianess="big" length="16" name="Analog_26" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8424" length="2" name="RT_DL1MK3_Analog_25">
+      <Signal endianess="big" length="16" name="Analog_25" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7A24" length="2" name="RT_DL1MK3_Analog_15">
+      <Signal endianess="big" length="16" name="Analog_15" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7924" length="2" name="RT_DL1MK3_Analog_14">
+      <Signal endianess="big" length="16" name="Analog_14" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7C24" length="2" name="RT_DL1MK3_Analog_17">
+      <Signal endianess="big" length="16" name="Analog_17" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8324" length="2" name="RT_DL1MK3_Analog_24">
+      <Signal endianess="big" length="16" name="Analog_24" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8224" length="2" name="RT_DL1MK3_Analog_23">
+      <Signal endianess="big" length="16" name="Analog_23" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8124" length="2" name="RT_DL1MK3_Analog_22">
+      <Signal endianess="big" length="16" name="Analog_22" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C8024" length="2" name="RT_DL1MK3_Analog_21">
+      <Signal endianess="big" length="16" name="Analog_21" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7F24" length="2" name="RT_DL1MK3_Analog_20">
+      <Signal endianess="big" length="16" name="Analog_20" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7E24" length="2" name="RT_DL1MK3_Analog_19">
+      <Signal endianess="big" length="16" name="Analog_19" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7B24" length="2" name="RT_DL1MK3_Analog_16">
+      <Signal endianess="big" length="16" name="Analog_16" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7D24" length="2" name="RT_DL1MK3_Analog_18">
+      <Signal endianess="big" length="16" name="Analog_18" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7724" length="2" name="RT_DL1MK3_Analog_12">
+      <Signal endianess="big" length="16" name="Analog_12" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7624" length="2" name="RT_DL1MK3_Analog_11">
+      <Signal endianess="big" length="16" name="Analog_11" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7524" length="2" name="RT_DL1MK3_Analog_10">
+      <Signal endianess="big" length="16" name="Analog_10" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7424" length="2" name="RT_DL1MK3_Analog_9">
+      <Signal endianess="big" length="16" name="Analog_9" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7324" length="2" name="RT_DL1MK3_Analog_8">
+      <Signal endianess="big" length="16" name="Analog_8" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7224" length="2" name="RT_DL1MK3_Analog_7">
+      <Signal endianess="big" length="16" name="Analog_7" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7124" length="2" name="RT_DL1MK3_Analog_6">
+      <Signal endianess="big" length="16" name="Analog_6" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C7024" length="2" name="RT_DL1MK3_Analog_5">
+      <Signal endianess="big" length="16" name="Analog_5" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C6F24" length="2" name="RT_DL1MK3_Analog_4">
+      <Signal endianess="big" length="16" name="Analog_4" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C6E24" length="2" name="RT_DL1MK3_Analog_3">
+      <Signal endianess="big" length="16" name="Analog_3" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C6D24" length="2" name="RT_DL1MK3_Analog_2">
+      <Signal endianess="big" length="16" name="Analog_2" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94C6C24" length="2" name="RT_DL1MK3_Analog_1">
+      <Signal endianess="big" length="16" name="Analog_1" offset="0">
+        <Value slope="0.001" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A6C24" length="8" name="RT_DL1MK3_Accel">
+      <Signal name="Validity_Accel_Longitudinal" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Accel_Lateral" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Accel_Vertical" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="8" name="Accuracy_Accel" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="Accel_Longitudinal" offset="16">
+        <Notes>Longitudinal acceleration.  This is positive when the vehicle accelerates in a forwards direction.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="Accel_Lateral" offset="32">
+        <Notes>Lateral acceleration.  This is positive when the vehicle accelerates towards the right, e.g. when cornering around a right-hand bend.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="Accel_Vertical" offset="48">
+        <Notes>Vertical acceleration.  This is positive when the vehicle accelerates in an upwards direction, e.g. when travelling through a dip.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9599E22" length="8" name="RT_SB_INS_Vpt_4_Vel_NED_2">
+      <Signal length="24" name="Virtual_4_Vel_NED_D" offset="0">
+        <Notes>VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="16" name="Virtual_4_Heading" offset="32">
+        <Notes>This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="Virtual_4_Slip" offset="48">
+        <Notes>Slip is defined as the difference between yaw and heading.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9599D22" length="8" name="RT_SB_INS_Vpt_4_Vel_NED_1">
+      <Signal length="24" name="Virtual_4_Vel_NED_N" offset="0">
+        <Notes>VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="Virtual_4_Vel_NED_E" offset="32">
+        <Notes>VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9599C22" length="8" name="RT_SB_INS_Vpt_4_Offset">
+      <Signal length="16" name="Virtual_4_Offset_X" offset="0">
+        <Notes>X offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_4_Offset_Y" offset="16">
+        <Notes>Y offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_4_Offset_Z" offset="32">
+        <Notes>Z offset (+ve downwards) of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9598E22" length="8" name="RT_SB_INS_Vpt_3_Vel_NED_2">
+      <Signal length="24" name="Virtual_3_Vel_NED_D" offset="0">
+        <Notes>VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="16" name="Virtual_3_Heading" offset="32">
+        <Notes>This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="Virtual_3_Slip" offset="48">
+        <Notes>Slip is defined as the difference between yaw and heading.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9598D22" length="8" name="RT_SB_INS_Vpt_3_Vel_NED_1">
+      <Signal length="24" name="Virtual_3_Vel_NED_N" offset="0">
+        <Notes>VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="Virtual_3_Vel_NED_E" offset="32">
+        <Notes>VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9598C22" length="8" name="RT_SB_INS_Vpt_3_Offset">
+      <Signal length="16" name="Virtual_3_Offset_X" offset="0">
+        <Notes>X offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_3_Offset_Y" offset="16">
+        <Notes>Y offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_3_Offset_Z" offset="32">
+        <Notes>Z offset (+ve downwards) of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9597E22" length="8" name="RT_SB_INS_Vpt_2_Vel_NED_2">
+      <Signal length="24" name="Virtual_2_Vel_NED_D" offset="0">
+        <Notes>VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="16" name="Virtual_2_Heading" offset="32">
+        <Notes>This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="Virtual_2_Slip" offset="48">
+        <Notes>Slip is defined as the difference between yaw and heading.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9597D22" length="8" name="RT_SB_INS_Vpt_2_Vel_NED_1">
+      <Signal length="24" name="Virtual_2_Vel_NED_N" offset="0">
+        <Notes>VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="Virtual_2_Vel_NED_E" offset="32">
+        <Notes>VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9597C22" length="8" name="RT_SB_INS_Vpt_2_Offset">
+      <Signal length="16" name="Virtual_2_Offset_X" offset="0">
+        <Notes>X offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_2_Offset_Y" offset="16">
+        <Notes>Y offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_2_Offset_Z" offset="32">
+        <Notes>Z offset (+ve downwards) of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9596E22" length="8" name="RT_SB_INS_Vpt_1_Vel_NED_2">
+      <Signal length="24" name="Virtual_1_Vel_NED_D" offset="0">
+        <Notes>VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="16" name="Virtual_1_Heading" offset="32">
+        <Notes>This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="Virtual_1_Slip" offset="48">
+        <Notes>Slip is defined as the difference between yaw and heading.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9596D22" length="8" name="RT_SB_INS_Vpt_1_Vel_NED_1">
+      <Signal length="24" name="Virtual_1_Vel_NED_N" offset="0">
+        <Notes>VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="Virtual_1_Vel_NED_E" offset="32">
+        <Notes>VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9596C22" length="8" name="RT_SB_INS_Vpt_1_Offset">
+      <Signal length="16" name="Virtual_1_Offset_X" offset="0">
+        <Notes>X offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_1_Offset_Y" offset="16">
+        <Notes>Y offset of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+      <Signal length="16" name="Virtual_1_Offset_Z" offset="32">
+        <Notes>Z offset (+ve downwards) of the virtual point in the vehicle body frame.</Notes>
+        <Value max="32.767" min="-32.768" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9588222" length="8" name="RT_SB_INS_Slip">
+      <Signal name="Validity_INS_Slip" offset="0">
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Squat" offset="1">
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Slip" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="INS_Slip" offset="16">
+        <Notes>Slip is defined as the difference between yaw and heading</Notes>
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Squat" offset="32">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="INS_Squat" offset="40">
+        <Notes>Squat is defined as the difference between pitch and gradient</Notes>
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9587F22" length="8" name="RT_SB_INS_Vel_ECEF_2">
+      <Signal name="Validity_INS_Vel_ECEF_Y" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Vel_ECEF_Z" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_ECEF_Y" offset="8">
+        <Notes>ECEF Y velocity.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_ECEF_Z" offset="32">
+        <Notes>ECEF Z velocity.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9587E22" length="8" name="RT_SB_INS_Vel_ECEF_1">
+      <Signal name="Validity_INS_Vel_ECEF_X" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Vel_ECEF_X" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Vel_ECEF_Y" offset="16">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Vel_ECEF_Z" offset="24">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_ECEF_X" offset="32">
+        <Notes>ECEF X velocity.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9587D22" length="8" name="RT_SB_INS_Vel_NED_2">
+      <Signal name="Validity_INS_Vel_NED_D" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Vel_D" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_NED_D" offset="16">
+        <Notes>VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9587C22" length="8" name="RT_SB_INS_Vel_NED_1">
+      <Signal name="Validity_INS_Vel_NED_N" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Vel_NED_E" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Vel_NE" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_NED_N" offset="16">
+        <Notes>VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="INS_Vel_NED_E" offset="40">
+        <Notes>VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9587122" length="8" name="RT_SB_INS_Pos_ECEF_2">
+      <Signal length="32" name="INS_Pos_ECEF_Y" offset="0">
+        <Notes>ECEF Y position.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.</Notes>
+        <Value max="10000000" min="-10000000" slope="0.01" type="signed" unit="m" />
+      </Signal>
+      <Signal length="32" name="INS_Pos_ECEF_Z" offset="32">
+        <Notes>ECEF Z position.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.</Notes>
+        <Value max="10000000" min="-10000000" slope="0.01" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9587022" length="8" name="RT_SB_INS_Pos_ECEF_1">
+      <Signal name="Validity_INS_Pos_ECEF_X" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Pos_ECEF_Y" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Pos_ECEF_Z" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Pos_ECEF_X" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Pos_ECEF_Y" offset="16">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Pos_ECEF_Z" offset="24">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="INS_Pos_ECEF_X" offset="32">
+        <Notes>ECEF X position.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).</Notes>
+        <Value max="10000000" min="-10000000" slope="0.01" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9586F22" length="8" name="RT_SB_INS_Pos_LLH_2">
+      <Signal length="32" name="INS_Pos_LLH_Longitude" offset="0">
+        <Value max="180" min="-180" slope="1e-07" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="32" name="INS_Pos_LLH_Altitude" offset="32">
+        <Value max="100000" min="-1000" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9586E22" length="8" name="RT_SB_INS_Pos_LLH_1">
+      <Signal name="Validity_INS_Pos_LLH_Latitude" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Pos_LLH_Longitude" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Pos_LLH_Altitude" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Pos_LLH_Latitude" offset="8">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Pos_LLH_Longitude" offset="16">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Pos_LLH_Altitude" offset="24">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="INS_Pos_LLH_Latitude" offset="32">
+        <Value max="90" min="-90" slope="1e-07" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9588122" length="8" name="RT_SB_INS_Heading_Gradient_2">
+      <Signal name="Validity_INS_Heading" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Gradient" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Heading" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="INS_Heading_2" offset="16">
+        <Notes>This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="360" min="0" slope="0.01" unit="degrees" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Gradient" offset="32">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="INS_Gradient" offset="40">
+        <Notes>This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).</Notes>
+        <Value max="90" min="-90" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9588022" length="8" name="RT_SB_INS_Heading_Gradient">
+      <Signal name="Validity_INS_Heading" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_INS_Gradient" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Heading" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="INS_Heading" offset="16">
+        <Notes>This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="8" name="Accuracy_INS_Gradient" offset="32">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="INS_Gradient" offset="40">
+        <Notes>This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).</Notes>
+        <Value max="90" min="-90" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9586C22" length="8" name="RT_SB_INS_Status">
+      <Signal length="8" name="INS_Status" offset="0">
+        <Value max="255" min="0" />
+        <LabelSet>
+          <Label name="Converged" value="2" />
+          <Label name="Initialised" value="1" />
+          <Label name="Uninitialised" value="0" />
+        </LabelSet>
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9586D22" length="8" name="RT_SB_INS_Attitude">
+      <Signal name="Validity_Yaw" offset="0">
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Valid" value="1" />
+          <Label name="Invalid" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Validity_Pitch" offset="1">
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Valid" value="1" />
+          <Label name="Invalid" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Validity_Roll" offset="2">
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Valid" value="1" />
+          <Label name="Invalid" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal length="8" name="Accuracy_Attitude" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="Attitude_Yaw" offset="16">
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="Attitude_Pitch" offset="32">
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="Attitude_Roll" offset="48">
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9576D22" length="8" name="RT_SB_Output_Status">
+      <Signal name="Validity_Status_Timestamp" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Status_Analogue_1" offset="8">
+        <Notes>Analogue output status for channel 1.  </Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Status_Analogue_2" offset="9">
+        <Notes>Analogue output status for channel 1.  </Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Status_Analogue_3" offset="10">
+        <Notes>Analogue output status for channel 3.</Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Status_Analogue_4" offset="11">
+        <Notes>Analogue output status for channel 4.</Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Status_Pulse_Output" offset="12">
+        <Notes>Pulse output activity status</Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Status_Serial_Output_1" offset="13">
+        <Notes>Status output of serial port 1</Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Status_Serial_Output_2" offset="14">
+        <Notes>Status output of serial port 1</Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal name="Status_Trigger" offset="15">
+        <Notes>Status of the trigger input</Notes>
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Active" value="1" />
+          <Label name="Inactive" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal length="32" name="GPS_Time" offset="32">
+        <Notes>GPS time is the time in seconds since midnight GMT on Saturday night.</Notes>
+        <Value max="604800" min="0" slope="0.001" unit="s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9568222" length="8" name="RT_SB_GPS_Heading_Gradient_2">
+      <Signal name="Validity_GPS_Heading" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Gradient" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Heading" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="GPS_Heading_2" offset="16">
+        <Notes>This is GPS heading in the range 0 - 360°, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="360" min="0" slope="0.01" unit="degrees" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Gradient" offset="32">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="GPS_Gradient" offset="40">
+        <Notes>This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).</Notes>
+        <Value max="90" min="-90" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A8D22" length="8" name="RT_SB_Cumulative_Distance_2">
+      <Notes>This cumulative distance calculation is updated when the trigger is active.</Notes>
+      <Signal name="Validity_Cumulative_Time" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Cumulative_Distance" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="24" name="Cumulative_Time" offset="8">
+        <Value max="167772" min="0" slope="0.01" unit="s" />
+      </Signal>
+      <Signal length="32" name="Cumulative_Distance" offset="32">
+        <Value max="4294967" min="0" slope="0.001" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A8C22" length="8" name="RT_SB_Cumulative_Distance_1">
+      <Notes>This cumulative distance calculation is updated continuously once the first good GPS lock is obtained.</Notes>
+      <Signal name="Validity_Cumulative_Time" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Cumulative_Distance" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="24" name="Cumulative_Time" offset="8">
+        <Value max="167772" min="0" slope="0.01" unit="s" />
+      </Signal>
+      <Signal length="32" name="Cumulative_Distance" offset="32">
+        <Value max="4294967" min="0" slope="0.001" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9576C22" length="8" name="RT_SB_Trigger_Timestamp">
+      <Signal name="Validity_Trigger_Timestamp" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="8" name="Accuracy_Trigger_Timestamp" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="7" name="Trigger_Number" offset="16">
+        <Notes>This is the ID of the trigger that generated the event, as marked on the case of the logger</Notes>
+        <Value intercept="1" max="128" min="0" />
+      </Signal>
+      <Signal name="Trigger_Timestamp_Type" offset="23">
+        <Value max="1" min="0" />
+        <LabelSet>
+          <Label name="Rising edge" value="1" />
+          <Label name="Falling edge" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal length="40" name="GPS_High_Resolution_Time" offset="24">
+        <Notes>GPS time of week to micro-second resolution.</Notes>
+        <Value max="604800" min="0" slope="1e-06" unit="s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A6D21" length="8" name="RT_IMU06_Gyro_Rates">
+      <Signal name="Validity_Gyro_Rate_Yaw" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_Gyro_Rate_Pitch" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_Gyro_Rate_Roll" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_Gyro_Rates" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+      </Signal>
+      <Signal length="16" name="Gyro_Rate_Yaw" offset="16">
+        <Notes>Yaw rate is positive for clockwise rotation when looking down on the vehicle from above.</Notes>
+        <Value max="327" min="-327" slope="0.01" type="signed" unit="degrees/s" />
+      </Signal>
+      <Signal length="16" name="Gyro_Rate_Pitch" offset="32">
+        <Notes>Pitch rate is positive for clockwise rotation when looking at the left hand side of the vehicle from the left of the vehicle.</Notes>
+        <Value max="327" min="-327" slope="0.01" type="signed" unit="degrees/s" />
+      </Signal>
+      <Signal length="16" name="Gyro_Rate_Roll" offset="48">
+        <Notes>Roll rate is positive for clockwise rotation when looking at the rear of the vehicle from behind the vehicle.</Notes>
+        <Value max="327" min="-327" slope="0.01" type="signed" unit="degrees/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A6C21" length="8" name="RT_IMU06_Accel">
+      <Signal name="Validity_Accel_Longitudinal" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Accel_Lateral" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Accel_Vertical" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="8" name="Accuracy_Accel" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="Accel_Longitudinal" offset="16">
+        <Notes>Longitudinal acceleration.  This is positive when the vehicle accelerates in a forwards direction.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="Accel_Lateral" offset="32">
+        <Notes>Lateral acceleration.  This is positive when the vehicle accelerates towards the right, e.g. when cornering around a right-hand bend.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="Accel_Vertical" offset="48">
+        <Notes>Vertical acceleration.  This is positive when the vehicle accelerates in an upwards direction, e.g. when travelling through a dip.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A7C22" length="8" name="RT_SB_Speed">
+      <Signal name="Validity_Speed" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="8" name="Accuracy_Speed" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="Speed" offset="16">
+        <Value max="20000" min="-20000" slope="1e-05" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9568D22" length="8" name="RT_SB_RTK_Slip">
+      <Signal name="Validity_RTK_Slip" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_RTK_Squat" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_RTK_Baseline" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_RTK_Baseline" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="RTK_Slip" offset="16">
+        <Notes>Slip is defined as the difference between yaw and heading.</Notes>
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="RTK_Squat" offset="32">
+        <Notes>Squat is defined as the difference between pitch and gradient.</Notes>
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="RTK_Baseline" offset="48">
+        <Notes>This is the estimated baseline length calculated by the RTK solution.</Notes>
+        <Value max="65535" min="0" unit="mm" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9568C22" length="8" name="RT_SB_RTK_Attitude">
+      <Signal name="Validity_RTK_Yaw" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_RTK_Pitch" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_RTK_Roll" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_RTK_Attitude" offset="8">
+        <Notes>Note that RTK yaw is typically up to about 4 times more accurate than RTK pitch or roll.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="RTK_Attitude_Yaw" offset="16">
+        <Notes>RTK attitude is determined from the MB-RTK solution only.  Yaw is positive for a clockwise rotational displacement from due North, looking down on the vehicle from above.</Notes>
+        <Value max="360" min="-360" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="RTK_Attitude_Pitch" offset="32">
+        <Notes>RTK attitude is determined from the MB-RTK solution only.  Pitch is positive for a clockwise rotational displacement from the local horizontal plane when looking at the vehicle from the left hand side of it.</Notes>
+        <Value max="90" min="-90" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="16" name="RTK_Attitude_Roll" offset="48">
+        <Notes>RTK attitude is determined from the MB-RTK solution only.  Roll is positive for a clockwise rotational displacement relative to the local horizontal plane when looking at the vehicle from the rear of it.</Notes>
+        <Value max="90" min="-90" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9569C22" length="8" name="RT_SB_GPS_Mcycle_Lean">
+      <Signal name="Validity_GPS_Lateral_Accel" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Mcycle_Lean" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Lateral_Accel" offset="8">
+        <Notes>This accuracy value applies to both GPS-derived lateral acceleration and motorcycle lean angle, since both are derived from the rate of change of GPS heading.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="GPS_Lateral_Accel" offset="16">
+        <Notes>GPS-derived lateral acceleration.  This is derived by differentiating GPS heading - it is much more noisy than lateral accel from the accelerometers, but useful for m/cycle applications.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="GPS_Mcycle_Lean_Angle" offset="32">
+        <Notes>Motorcycle lean angle, derived from rate of change of heading from GPS.  This is the lean angle of the centre of mass of the combined bike + rider.</Notes>
+        <Value max="90" min="-90" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9566C22" length="8" name="RT_SB_GPS_Status">
+      <Signal length="8" name="GPS_Status" offset="0">
+        <Value max="255" min="0" />
+        <LabelSet>
+          <Label name="Lock: Carrier speed and position" value="12" />
+          <Label name="Lock: Doppler speed and position" value="11" />
+          <Label name="Lock: Position but no speed" value="10" />
+          <Label name="Unused" value="9" />
+          <Label name="Unused" value="8" />
+          <Label name="Unused" value="7" />
+          <Label name="Unused" value="6" />
+          <Label name="Exceeded max. speed or alt." value="5" />
+          <Label name="Solution failed" value="4" />
+          <Label name="Solution aborted" value="3" />
+          <Label name="Insufficient satellites" value="2" />
+          <Label name="Searching for satellites" value="1" />
+          <Label name="GPS module not detected" value="0" />
+        </LabelSet>
+      </Signal>
+      <Signal length="8" name="Firmware_Version_Major" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Firmware_Version_Intermediate" offset="16">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Firmware_Version_Minor" offset="24">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="GPS_nSv" offset="32">
+        <Notes>Number of satellites used in GPS solution</Notes>
+        <Value max="16" min="0" />
+      </Signal>
+      <Signal length="8" name="GPS_nSv_2" offset="40">
+        <Notes>Number of satellites used in GPS solution by module 2 on RTK units.</Notes>
+        <Value max="16" min="0" />
+      </Signal>
+      <Signal length="8" name="GPS_nSv_RTK" offset="48">
+        <Notes>Number of common satellites available to RTK solution</Notes>
+        <Value max="16" min="0" />
+      </Signal>
+      <Signal length="8" name="RTK_Status" offset="56">
+        <Value max="255" min="0" />
+        <LabelSet>
+          <Label name="Multiple RTK solutions found" value="4" />
+          <Label name="RTK solution OK" value="3" />
+          <Label name="RTK solution failed" value="2" />
+          <Label name="Not enough common satellites" value="1" />
+          <Label name="Not attempting RTK solution" value="0" />
+        </LabelSet>
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9567122" length="8" name="RT_SB_GPS_Pos_ECEF_2">
+      <Signal length="32" name="GPS_Pos_ECEF_Y" offset="0">
+        <Notes>ECEF Y position.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.</Notes>
+        <Value max="10000000" min="-10000000" slope="0.01" type="signed" unit="m" />
+      </Signal>
+      <Signal length="32" name="GPS_Pos_ECEF_Z" offset="32">
+        <Notes>ECEF Z position.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.</Notes>
+        <Value max="10000000" min="-10000000" slope="0.01" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9567022" length="8" name="RT_SB_GPS_Pos_ECEF_1">
+      <Signal name="Validity_GPS_Pos_ECEF_X" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Pos_ECEF_Y" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Pos_ECEF_Z" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_ECEF_X" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_ECEF_Y" offset="16">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_ECEF_Z" offset="24">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="GPS_Pos_ECEF_X" offset="32">
+        <Notes>ECEF X position.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).</Notes>
+        <Value max="10000000" min="-10000000" slope="0.01" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9566F22" length="8" name="RT_SB_GPS_Pos_LLH_2">
+      <Signal length="32" name="GPS_Pos_LLH_Longitude" offset="0">
+        <Value max="180" min="-180" slope="1e-07" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="32" name="GPS_Pos_LLH_Altitude" offset="32">
+        <Value max="100000" min="-1000" slope="0.001" type="signed" unit="m" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9566E22" length="8" name="RT_SB_GPS_Pos_LLH_1">
+      <Signal name="Validity_GPS_Pos_LLH_Latitude" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Pos_LLH_Longitude" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Pos_LLH_Altitude" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_LLH_Latitude" offset="8">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_LLH_Longitude" offset="16">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Pos_LLH_Altitude" offset="24">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="GPS_Pos_LLH_Latitude" offset="32">
+        <Value max="90" min="-90" slope="1e-07" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9568122" length="8" name="RT_SB_GPS_Heading_Gradient">
+      <Signal name="Validity_GPS_Heading" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Gradient" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Heading" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="GPS_Heading" offset="16">
+        <Notes>This is GPS heading, the direction that the vehicle is travelling in the local horizontal plane.</Notes>
+        <Value max="180" min="-180" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Gradient" offset="32">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="GPS_Gradient" offset="40">
+        <Notes>This is GPS gradient, i.e. the vertical direction that the vehicle is travelling, NOT pointing (pitch).</Notes>
+        <Value max="90" min="-90" slope="0.01" type="signed" unit="degrees" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9568022" length="8" name="RT_SB_GPS_Vel_ECEF_2">
+      <Signal name="Validity_GPS_Vel_ECEF_Y" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Vel_ECEF_Z" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="24" name="GPS_Vel_ECEF_Y" offset="8">
+        <Notes>ECEF Y velocity.  The ECEF Y axis originates from the Earth centre, and the positive Y axis intersects the Earth surface at zero degrees latittude and 90 degrees longitude.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="GPS_Vel_ECEF_Z" offset="32">
+        <Notes>ECEF Z velocity.  The ECEF Z axis originates from the Earth centre, and the positive Z axis intersects the Earth surface at the North Pole.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9567F22" length="8" name="RT_SB_GPS_Vel_ECEF_1">
+      <Signal name="Validity_GPS_Vel_ECEF_X" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Vel_ECEF_X" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Vel_ECEF_Y" offset="16">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Vel_ECEF_Z" offset="24">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="GPS_Vel_ECEF_X" offset="32">
+        <Notes>ECEF X velocity.  The ECEF X axis originates from the Earth centre, and the positive X axis intersects the Earth surface at zero degrees latittude and zero degrees longitude (the intersection of the equator and the prime meridian).</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9567E22" length="8" name="RT_SB_GPS_Vel_NED_2">
+      <Signal name="Validity_GPS_Vel_NED_D" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Vel_D" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="GPS_Vel_NED_D" offset="16">
+        <Notes>VELNED D velocity.  This is the velocity vector directly downwards towards the Earth centre at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9567D22" length="8" name="RT_SB_GPS_Vel_NED_1">
+      <Signal name="Validity_GPS_Vel_NED_N" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Vel_NED_E" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Vel_NE" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="GPS_Vel_NED_N" offset="16">
+        <Notes>VELNED N velocity.  This is the velocity vector directly North at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="GPS_Vel_NED_E" offset="40">
+        <Notes>VELNED E velocity.  This is the velocity vector directly East at the current local Earth surface position.</Notes>
+        <Value max="838" min="-838" slope="0.0001" type="signed" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9567C22" length="8" name="RT_SB_GPS_Speed">
+      <Signal name="Validity_GPS_Speed_2D" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Speed_3D" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Speed" offset="8">
+        <Notes>This accuracy value applies to both 2D and 3D GPS speed.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="24" name="GPS_Speed_2D" offset="16">
+        <Notes>This is GPS scalar 2D speed - scalar speed with no local Z axis component included.</Notes>
+        <Value max="1675" min="0" slope="0.0001" unit="m/s" />
+      </Signal>
+      <Signal length="24" name="GPS_Speed_3D" offset="40">
+        <Notes>This is GPS scalar 3D speed - scalar speed with the local Z axis component included.</Notes>
+        <Value max="1675" min="0" slope="0.0001" unit="m/s" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x9566D22" length="8" name="RT_SB_GPS_Time">
+      <Signal name="Validity_GPS_Time" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_GPS_Week" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_GPS_Time" offset="8">
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="32" name="GPS_Time" offset="16">
+        <Notes>GPS time is the time in seconds since midnight GMT on Saturday night.</Notes>
+        <Value max="604800" min="0" slope="0.001" unit="s" />
+      </Signal>
+      <Signal length="16" name="GPS_Week" offset="48">
+        <Value max="65535" min="0" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A6C22" length="8" name="RT_SB_Accel">
+      <Signal name="Validity_Accel_Longitudinal" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Accel_Lateral" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal name="Validity_Accel_Vertical" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+      </Signal>
+      <Signal length="8" name="Accuracy_Accel" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+        <Value max="255" min="0" />
+      </Signal>
+      <Signal length="16" name="Accel_Longitudinal" offset="16">
+        <Notes>Longitudinal acceleration.  This is positive when the vehicle accelerates in a forwards direction.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="Accel_Lateral" offset="32">
+        <Notes>Lateral acceleration.  This is positive when the vehicle accelerates towards the right, e.g. when cornering around a right-hand bend.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+      <Signal length="16" name="Accel_Vertical" offset="48">
+        <Notes>Vertical acceleration.  This is positive when the vehicle accelerates in an upwards direction, e.g. when travelling through a dip.</Notes>
+        <Value max="65" min="-65" slope="0.001" type="signed" unit="g" />
+      </Signal>
+    </Message>
+    <Message format="extended" id="0x94A6D22" length="8" name="RT_SB_Gyro_Rates">
+      <Signal name="Validity_Gyro_Rate_Yaw" offset="0">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_Gyro_Rate_Pitch" offset="1">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal name="Validity_Gyro_Rate_Roll" offset="2">
+        <Notes>Valid when bit is set, invalid when bit is clear.</Notes>
+        <Value max="1" min="0" />
+      </Signal>
+      <Signal length="8" name="Accuracy_Gyro_Rates" offset="8">
+        <Notes>Dimensionless.  Lower values imply but do not guarantee better accuracy than higher values.</Notes>
+      </Signal>
+      <Signal length="16" name="Gyro_Rate_Yaw" offset="16">
+        <Notes>Yaw rate is positive for clockwise rotation when looking down on the vehicle from above.</Notes>
+        <Value max="327" min="-327" slope="0.01" type="signed" unit="degrees/s" />
+      </Signal>
+      <Signal length="16" name="Gyro_Rate_Pitch" offset="32">
+        <Notes>Pitch rate is positive for clockwise rotation when looking at the left hand side of the vehicle from the left of the vehicle.</Notes>
+        <Value max="327" min="-327" slope="0.01" type="signed" unit="degrees/s" />
+      </Signal>
+      <Signal length="16" name="Gyro_Rate_Roll" offset="48">
+        <Notes>Roll rate is positive for clockwise rotation when looking at the rear of the vehicle from behind the vehicle.</Notes>
+        <Value max="327" min="-327" slope="0.01" type="signed" unit="degrees/s" />
+      </Signal>
+    </Message>
+  </Bus>
+</NetworkDefinition>

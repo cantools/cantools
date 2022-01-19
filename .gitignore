@@ -81,3 +81,6 @@ test_command_line_convert.kcd
 /*fuzzer*
 /main
 /main_bit_fields
+
+# Created by tests/test_command_line.py: test_generate_c_source_output_directory
+some_dir/

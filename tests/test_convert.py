@@ -135,6 +135,28 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.assertFileEqual(fn_expected_output, fn_out)
         self.remove_out_file(fn_out)
 
+        for msg in db.messages:
+            msg.signals.sort(key=lambda sig: sig.name)
+
+        fn_expected_output = 'tests/files/kcd/vehicle-sort-signals-by-name.kcd'
+        fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
+        cantools.database.dump_file(db, fn_out)
+
+        self.assertFileEqual(fn_expected_output, fn_out)
+        self.remove_out_file(fn_out)
+
+    def test_kcd_dump_sort_signals_by_name(self):
+        fn_in = 'tests/files/kcd/vehicle.kcd'
+        fn_expected_output = 'tests/files/kcd/vehicle-sort-signals-by-name.kcd'
+        fn_out = self.get_out_file_name(fn_expected_output, ext='.kcd')
+        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+
+        db = cantools.database.load_file(fn_in, prune_choices=False)
+        cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
+
+        self.assertFileEqual(fn_expected_output, fn_out)
+        self.remove_out_file(fn_out)
+
     # ------- test sym -> dbc -------
 
     def test_sym_to_dbc__compare_files(self):

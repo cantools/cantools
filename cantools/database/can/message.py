@@ -35,6 +35,7 @@ class Message(object):
                  name: str,
                  length: int,
                  signals: List[Signal],
+                 unused_bit_pattern: int = 0x00,
                  comment: Optional[Union[str, Comments]] = None,
                  senders: Optional[List[str]] = None,
                  send_type: Optional[str] = None,
@@ -65,6 +66,7 @@ class Message(object):
         self._length = length
         self._signals = signals
         self._signals.sort(key=start_bit)
+        self._unused_bit_pattern = unused_bit_pattern
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the
@@ -233,6 +235,26 @@ class Message(object):
         """
 
         return self._signals
+
+    @property
+    def unused_bit_pattern(self) -> int:
+        """The pattern used for unused bits of a message.
+
+        This prevents undefined behaviour and/or information leaks
+        when encoding messages.
+        """
+
+        return self._unused_bit_pattern
+
+    @unused_bit_pattern.setter
+    def unused_bit_pattern(self, value):
+        if value < 0 or value > 255:
+            LOGGER.warnig(f'Invalid unused bit pattern "{value}". Must be '
+                          f'an integer between 0 and 255')
+            self._unused_bit_pattern = 0
+            return
+
+        self._unused_bit_pattern = value
 
     @property
     def signal_groups(self) -> Optional[List[SignalGroup]]:
@@ -490,7 +512,14 @@ class Message(object):
             self._check_unknown_signals(all_signals, data)
 
         if padding:
-            encoded |= padding_mask
+            # there is probably a cleaner and more performant way to
+            # do this...
+            padding_pattern = 0
+            for i in range(0, self.length):
+                padding_pattern |= self.unused_bit_pattern << (8*i)
+
+            encoded &= ~padding_mask
+            encoded |= padding_mask & padding_pattern
 
         encoded |= (0x80 << (8 * self._length))
         encoded = hex(encoded)[4:].rstrip('L')

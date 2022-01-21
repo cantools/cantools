@@ -1484,6 +1484,7 @@ def _load_messages(tokens,
                     signals=signals,
                     comment=get_comment(frame_id_dbc),
                     strict=strict,
+                    unused_bit_pattern=0xff,
                     protocol=get_protocol(frame_id_dbc),
                     bus_name=bus_name,
                     signal_groups=get_signal_groups(frame_id_dbc)))

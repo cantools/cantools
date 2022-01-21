@@ -234,6 +234,7 @@ def _load_message_element(message, bus_name, nodes, strict):
                    is_extended_frame=is_extended_frame,
                    name=name,
                    length=length,
+                   unused_bit_pattern=0xff,
                    senders=senders,
                    send_type=None,
                    cycle_time=interval,

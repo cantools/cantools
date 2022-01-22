@@ -305,8 +305,17 @@ def load_string(string: str,
     ``'sym'``, ``'cdd'`` or ``None``, where ``None`` means transparent
     format.
 
+    `prune_choices` is a bool indicating whether signal names are supposed to be abbreviated
+    by stripping a common prefix ending on an underscore. This is enabled by default.
+
     See :class:`can.Database<.can.Database>` for a description of
     `strict`.
+
+    `sort_signals` is a function taking a list of signals as argument and returning a list of signals.
+    By default signals are sorted by their start bit when their Message object is created.
+    If you don't want them to be sorted pass `sort_signals = None`.
+    If you want the signals to be sorted in another way pass something like
+    `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
 
     Raises an
     :class:`~cantools.database.UnsupportedDatabaseFormatError`

@@ -76,8 +76,10 @@ def _load_file_cache(filename: StringPathLike,
                      database_format: Optional[str],
                      encoding: Optional[str],
                      frame_id_mask: Optional[int],
+                     prune_choices: bool,
                      strict: bool,
                      cache_dir: str,
+                     sort_signals: utils.type_sort_signals,
                      ) -> Union[can.Database, diagnostics.Database]:
     with open(filename, 'rb') as fin:
         key = fin.read()
@@ -91,7 +93,9 @@ def _load_file_cache(filename: StringPathLike,
             database = load(cast(TextIO, fin),
                             database_format,
                             frame_id_mask,
-                            strict)
+                            prune_choices,
+                            strict,
+                            sort_signals)
         cache[key] = database
 
         return database
@@ -104,6 +108,7 @@ def load_file(filename: StringPathLike,
               prune_choices: bool = True,
               strict: bool = True,
               cache_dir: Optional[str] = None,
+              sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit,
               ) -> Union[can.Database, diagnostics.Database]:
     """Open, read and parse given database file and return a
     :class:`can.Database<.can.Database>` or
@@ -152,6 +157,10 @@ def load_file(filename: StringPathLike,
     | ``None``        | ``'utf-8'``       |
     +-----------------+-------------------+
 
+    `prune_choices` abbreviates the names of choices by removing
+    a common prefix ending on an underscore. If you want to have
+    the original names you need to pass `prune_choices = False`.
+
     `cache_dir` specifies the database cache location in the file
     system. Give as ``None`` to disable the cache. By default the
     cache is disabled. The cache key is the contents of given
@@ -185,21 +194,33 @@ def load_file(filename: StringPathLike,
                         database_format,
                         frame_id_mask,
                         prune_choices,
-                        strict)
+                        strict,
+                        sort_signals)
     else:
         return _load_file_cache(filename,
                                 database_format,
                                 encoding,
                                 frame_id_mask,
+                                prune_choices,
                                 strict,
-                                cache_dir)
+                                cache_dir,
+                                sort_signals)
 
 
 def dump_file(database,
               filename,
               database_format=None,
-              encoding=None):
+              encoding=None,
+              sort_signals=utils.SORT_SIGNALS_DEFAULT):
     """Dump given database `database` to given file `filename`.
+
+    Depending on the output file format signals may be sorted by default.
+    If you don't want signals to be sorted pass `sort_signals=None`.
+    `sort_signals=None` is assumed by default if you have passed `sort_signals=None` to load_file.
+    If you want the signals to be sorted in a special way pass something like
+    `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
+    For dbc files the default is to sort the signals by their start bit in descending order.
+    For kcd files the default is to not sort the signals.
 
     See :func:`~cantools.database.load_file()` for descriptions of
     other arguments.
@@ -211,6 +232,8 @@ def dump_file(database,
     >>> db = cantools.database.load_file('foo.dbc')
     >>> cantools.database.dump_file(db, 'bar.dbc')
 
+    Pass `sort_signals=None, prune_choices=False` to load_file
+    in order to minimize the differences between foo.dbc and bar.dbc.
     """
 
     database_format, encoding = _resolve_database_format_and_encoding(
@@ -221,10 +244,10 @@ def dump_file(database,
     newline = None
 
     if database_format == 'dbc':
-        output = database.as_dbc_string()
+        output = database.as_dbc_string(sort_signals=sort_signals)
         newline = ''
     elif database_format == 'kcd':
-        output = database.as_kcd_string()
+        output = database.as_kcd_string(sort_signals=sort_signals)
     else:
         raise Error(
             "Unsupported output database format '{}'.".format(database_format))
@@ -237,7 +260,8 @@ def load(fp: TextIO,
          database_format: Optional[str] = None,
          frame_id_mask: Optional[int] = None,
          prune_choices: bool = True,
-         strict: bool = True) -> Union[can.Database, diagnostics.Database]:
+         strict: bool = True,
+         sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -262,14 +286,16 @@ def load(fp: TextIO,
                        database_format,
                        frame_id_mask,
                        prune_choices,
-                       strict)
+                       strict,
+                       sort_signals)
 
 
 def load_string(string: str,
                 database_format: Optional[str] = None,
                 frame_id_mask: Optional[int] = None,
                 prune_choices: bool = True,
-                strict: bool = True) -> Union[can.Database, diagnostics.Database]:
+                strict: bool = True,
+                sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -279,8 +305,17 @@ def load_string(string: str,
     ``'sym'``, ``'cdd'`` or ``None``, where ``None`` means transparent
     format.
 
+    `prune_choices` is a bool indicating whether signal names are supposed to be abbreviated
+    by stripping a common prefix ending on an underscore. This is enabled by default.
+
     See :class:`can.Database<.can.Database>` for a description of
     `strict`.
+
+    `sort_signals` is a function taking a list of signals as argument and returning a list of signals.
+    By default signals are sorted by their start bit when their Message object is created.
+    If you don't want them to be sorted pass `sort_signals = None`.
+    If you want the signals to be sorted in another way pass something like
+    `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
 
     Raises an
     :class:`~cantools.database.UnsupportedDatabaseFormatError`
@@ -307,7 +342,8 @@ def load_string(string: str,
 
     def load_can_database(fmt: str) -> can.Database:
         db = can.Database(frame_id_mask=frame_id_mask,
-                          strict=strict)
+                          strict=strict,
+                          sort_signals=sort_signals)
 
         if fmt == 'arxml':
             db.add_arxml_string(string)

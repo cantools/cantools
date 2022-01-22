@@ -18,6 +18,7 @@ from ..bus import Bus
 from ..internal_database import InternalDatabase
 from ...utils import start_bit
 from .utils import num
+from ...utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
 
 
 LOGGER = logging.getLogger(__name__)
@@ -168,7 +169,7 @@ def _load_multiplex_element(mux, nodes):
     return signals
 
 
-def _load_message_element(message, bus_name, nodes, strict):
+def _load_message_element(message, bus_name, nodes, strict, sort_signals):
     """Load given message element and return a message object.
 
     """
@@ -241,7 +242,8 @@ def _load_message_element(message, bus_name, nodes, strict):
                    signals=signals,
                    comment=notes,
                    bus_name=bus_name,
-                   strict=strict)
+                   strict=strict,
+                   sort_signals=sort_signals)
 
 
 def _indent_xml(element, indent, level=0):
@@ -368,7 +370,7 @@ def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
                         parent)
 
 
-def _dump_message(message, bus, node_refs):
+def _dump_message(message, bus, node_refs, sort_signals):
     frame_id = '0x{:03X}'.format(message.frame_id)
     message_element = SubElement(bus,
                                  'Message',
@@ -396,14 +398,19 @@ def _dump_message(message, bus, node_refs):
                        id=str(node_refs[sender]))
 
     # Signals.
-    for signal in message.signals:
+    if sort_signals:
+        signals = sort_signals(message.signals)
+    else:
+        signals = message.signals
+
+    for signal in signals:
         if signal.is_multiplexer:
             signal_element = SubElement(message_element, 'Multiplex')
             _dump_signal(signal,
                          node_refs,
                          signal_element)
             _dump_mux_groups(signal.name,
-                             message.signals,
+                             signals,
                              node_refs,
                              signal_element)
         elif signal.multiplexer_ids is None:
@@ -422,17 +429,19 @@ def _dump_nodes(nodes, node_refs, parent):
         node_refs[node.name] = node_id
 
 
-def _dump_messages(messages, node_refs, parent):
+def _dump_messages(messages, node_refs, parent, sort_signals):
     bus = SubElement(parent, 'Bus', name='Bus')
 
     for message in messages:
-        _dump_message(message, bus, node_refs)
+        _dump_message(message, bus, node_refs, sort_signals)
 
 
-def dump_string(database: InternalDatabase) -> str:
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
     """Format given database in KCD file format.
 
     """
+    if sort_signals == SORT_SIGNALS_DEFAULT:
+        sort_signals = None
 
     node_refs: Dict[str, int] = {}
 
@@ -445,14 +454,14 @@ def dump_string(database: InternalDatabase) -> str:
 
     _dump_version(database.version, network_definition)
     _dump_nodes(database.nodes, node_refs, network_definition)
-    _dump_messages(database.messages, node_refs, network_definition)
+    _dump_messages(database.messages, node_refs, network_definition, sort_signals)
 
     _indent_xml(network_definition, '  ')
 
     return ElementTree.tostring(network_definition, encoding='unicode')
 
 
-def load_string(string, strict=True):
+def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given KCD format string.
 
     """
@@ -471,7 +480,7 @@ def load_string(string, strict=True):
 
     try:
         document = root.find('ns:Document', NAMESPACES)
-        version = document.attrib.get('version', None)
+        version = document.attrib.get('version', None)  # type: ignore  # avoid mypy error: Item "None" of "Optional[Element]" has no attribute "attrib"
     except AttributeError:
         version = None
 
@@ -484,7 +493,8 @@ def load_string(string, strict=True):
             messages.append(_load_message_element(message,
                                                   bus_name,
                                                   nodes,
-                                                  strict))
+                                                  strict,
+                                                  sort_signals))
 
     return InternalDatabase(messages,
                             [

@@ -33,6 +33,7 @@ from ..internal_database import InternalDatabase
 from ..environment_variable import EnvironmentVariable
 
 from .utils import num
+from ...utils import type_sort_signals, sort_signals_by_start_bit, sort_signals_by_start_bit_reversed, SORT_SIGNALS_DEFAULT
 
 
 DBC_FMT = (
@@ -488,7 +489,7 @@ def _dump_value_tables(database):
     return val_table + ['']
 
 
-def _dump_messages(database):
+def _dump_messages(database, sort_signals):
     bo = []
 
     def format_mux(signal):
@@ -520,7 +521,11 @@ def _dump_messages(database):
                 length=message.length,
                 senders=format_senders(message)))
 
-        for signal in message.signals[::-1]:
+        if sort_signals:
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
             fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
                    ' ({scale},{offset})'
                    ' [{minimum}|{maximum}] "{unit}" {receivers}')
@@ -556,7 +561,7 @@ def _dump_senders(database):
     return bo_tx_bu
 
 
-def _dump_comments(database):
+def _dump_comments(database, sort_signals):
     cm = []
 
     for bus in database.buses:
@@ -579,7 +584,11 @@ def _dump_comments(database):
                     frame_id=get_dbc_frame_id(message),
                     comment=message.comment.replace('"', '\\"')))
 
-        for signal in message.signals[::-1]:
+        if sort_signals:
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
             if signal.comment is not None:
                 cm.append(
                     'CM_ SG_ {frame_id} {name} "{comment}";'.format(
@@ -699,7 +708,7 @@ def _dump_attribute_definition_defaults(database):
 
     return ba_def_def
 
-def _dump_attributes(database):
+def _dump_attributes(database, sort_signals):
     ba = []
 
     def get_value(attribute):
@@ -748,7 +757,11 @@ def _dump_attributes(database):
                       f'{get_value(attribute)};')
 
         # handle the signals contained in the message
-        for signal in message.signals[::-1]:
+        if sort_signals:
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
             if signal.dbc is not None and signal.dbc.attributes is not None:
                 for attribute in signal.dbc.attributes.values():
                     ba.append(f'BA_ "{attribute.definition.name}" '
@@ -760,11 +773,15 @@ def _dump_attributes(database):
     return ba
 
 
-def _dump_choices(database):
+def _dump_choices(database, sort_signals):
     val = []
 
     for message in database.messages:
-        for signal in message.signals[::-1]:
+        if sort_signals:
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
             if signal.choices is None:
                 continue
 
@@ -1006,7 +1023,7 @@ def _load_value_tables(tokens):
 
     for value_table in tokens.get('VAL_TABLE_', []):
         name = value_table[1]
-        choices = {int(number): NamedSignalValue(number, text) for number, text in value_table[2]}
+        choices = {int(number): NamedSignalValue(int(number), text) for number, text in value_table[2]}
         #choices = {int(number): text for number, text in value_table[2]}
         value_tables[name] = choices
 
@@ -1039,7 +1056,7 @@ def _load_choices(tokens):
         if len(choice[1]) == 0:
             continue
 
-        od = OrderedDict((int(v[0]), NamedSignalValue(v[0], v[1])) for v in choice[3])
+        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in choice[3])
 
         if len(od) == 0:
             continue
@@ -1328,7 +1345,8 @@ def _load_messages(tokens,
                    signal_multiplexer_values,
                    strict,
                    bus_name,
-                   signal_groups):
+                   signal_groups,
+                   sort_signals):
     """Load messages.
 
     """
@@ -1487,7 +1505,8 @@ def _load_messages(tokens,
                     unused_bit_pattern=0xff,
                     protocol=get_protocol(frame_id_dbc),
                     bus_name=bus_name,
-                    signal_groups=get_signal_groups(frame_id_dbc)))
+                    signal_groups=get_signal_groups(frame_id_dbc),
+                    sort_signals=sort_signals))
 
     return messages
 
@@ -1644,10 +1663,13 @@ def make_names_unique(database):
     return database
 
 
-def dump_string(database: InternalDatabase) -> str:
+def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = SORT_SIGNALS_DEFAULT) -> str:
     """Format database in DBC file format.
 
     """
+
+    if sort_signals == SORT_SIGNALS_DEFAULT:
+        sort_signals = sort_signals_by_start_bit_reversed
 
     # Make a deep copy of the database as names and attributes will be
     # modified for items with long names.
@@ -1656,14 +1678,14 @@ def dump_string(database: InternalDatabase) -> str:
     database = make_names_unique(database)
     bu = _dump_nodes(database)
     val_table = _dump_value_tables(database)
-    bo = _dump_messages(database)
+    bo = _dump_messages(database, sort_signals)
     bo_tx_bu = _dump_senders(database)
-    cm = _dump_comments(database)
+    cm = _dump_comments(database, sort_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
-    ba = _dump_attributes(database)
-    val = _dump_choices(database)
+    ba = _dump_attributes(database, sort_signals)
+    val = _dump_choices(database, sort_signals)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
 
@@ -1722,7 +1744,7 @@ def get_definitions_dict(definitions, defaults):
     return result
 
 
-def load_string(string, strict=True):
+def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given string.
 
     """
@@ -1751,7 +1773,8 @@ def load_string(string, strict=True):
                               signal_multiplexer_values,
                               strict,
                               bus.name if bus else None,
-                              signal_groups)
+                              signal_groups,
+                              sort_signals)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes)

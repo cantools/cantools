@@ -4,7 +4,8 @@ import binascii
 import os.path
 import re
 from decimal import Decimal
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Callable
+from ..typechecking import Literal, Final
 
 from cantools.database.can.signal import NamedSignalValue, Signal
 from cantools.typechecking import Formats
@@ -297,6 +298,11 @@ def prune_signal_choices(signal):
 
     if i >= 0:
         full_prefix = full_prefix[0:i]
+    else:
+        # full_prefix does not contain an underscore
+        # but the following algorithm assumes it does
+        # and would strip too much
+        return
 
     if not full_prefix:
         # the longest possible prefix is empty, i.e., there is nothing
@@ -337,3 +343,12 @@ def prune_database_choices(database):
         for signal in message.signals:
             prune_signal_choices(signal)
 
+
+SORT_SIGNALS_DEFAULT: Final = 'default'
+type_sort_signals = Union[Callable[[List[Signal]], List[Signal]], Literal['default'], None]
+
+def sort_signals_by_start_bit(signals: List[Signal]) -> List[Signal]:
+	return list(sorted(signals, key=start_bit))
+
+def sort_signals_by_start_bit_reversed(signals: List[Signal]) -> List[Signal]:
+	return list(reversed(sorted(signals, key=start_bit)))

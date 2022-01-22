@@ -8,6 +8,7 @@ from collections import namedtuple
 import textparser
 import os
 import re
+import shutil
 
 import logging
 from xml.etree import ElementTree
@@ -26,6 +27,8 @@ from cantools.database.can.signal import NamedSignalValue
 class CanToolsDatabaseTest(unittest.TestCase):
 
     maxDiff = None
+
+    cache_dir = '__cache_dir'
 
     def assertEqualChoicesDictHelper_(self, have, expect):
         if have.keys() != expect.keys():
@@ -49,6 +52,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
             expected = fin.read().decode('cp1252')
 
         self.assertEqual(actual, expected)
+
+
+    def tearDown(self):
+        if os.path.exists(self.cache_dir):
+            shutil.rmtree(self.cache_dir)
+
 
     def test_vehicle(self):
         filename = 'tests/files/dbc/vehicle.dbc'
@@ -383,6 +392,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[1].choices, None)
         self.assertEqual(message.signals[2].name, 'no_choice')
         self.assertEqual(message.signals[2].choices, None)
+
+    def test_dbc_load_choices(self):
+        filename = 'tests/files/dbc/choices.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.messages[0]
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0].value, 0)
+        self.assertEqual(sig.choices[0].name, 'With space')
+
+    def test_dbc_load_choices_issue_with_name(self):
+        filename = 'tests/files/dbc/choices_issue_with_name.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.messages[0]
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0].value, 0)
+        self.assertEqual(sig.choices[0].name, 'CmdRespErr')
+        self.assertEqual(sig.choices[1].value, 1)
+        self.assertEqual(sig.choices[1].name, 'CmdRespOK')
 
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.
@@ -5456,6 +5485,71 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         self.assertEqual(db.buses[0].comment, 'SpecialRelease')
         self.assert_dbc_dump(db, filename)
+
+
+
+    def test_cache_prune_choices(self):
+        filename = 'tests/files/dbc/socialledge.dbc'
+        db = cantools.database.load_file(filename, prune_choices=False, cache_dir=self.cache_dir)
+        msg = db.get_message_by_name('DRIVER_HEARTBEAT')
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0], 'DRIVER_HEARTBEAT_cmd_NOOP')
+        self.assertEqual(sig.choices[1], 'DRIVER_HEARTBEAT_cmd_SYNC')
+        self.assertEqual(sig.choices[2], 'DRIVER_HEARTBEAT_cmd_REBOOT')
+
+
+    def test_sort_signals_by_name(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+        db = cantools.database.load_file(filename, sort_signals=sort_signals)
+        msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
+
+        expected_signal_names = [
+            'Accuracy_GPS_Speed',
+            'GPS_Speed_2D',
+            'GPS_Speed_3D',
+            'Validity_GPS_Speed_2D',
+            'Validity_GPS_Speed_3D',
+        ]
+
+        actual_signal_names = [sig.name for sig in msg.signals]
+
+        self.assertEqual(actual_signal_names, expected_signal_names)
+
+    def test_dont_sort_signals(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename, sort_signals=None)
+        msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
+
+        expected_signal_names = [
+            'GPS_Speed_3D',
+            'GPS_Speed_2D',
+            'Accuracy_GPS_Speed',
+            'Validity_GPS_Speed_3D',
+            'Validity_GPS_Speed_2D',
+        ]
+
+        actual_signal_names = [sig.name for sig in msg.signals]
+
+        self.assertEqual(actual_signal_names, expected_signal_names)
+
+    def test_default_sort_signals(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
+
+        expected_signal_names = [
+            'Validity_GPS_Speed_2D',
+            'Validity_GPS_Speed_3D',
+            'Accuracy_GPS_Speed',
+            'GPS_Speed_2D',
+            'GPS_Speed_3D',
+        ]
+
+        actual_signal_names = [sig.name for sig in msg.signals]
+
+        self.assertEqual(actual_signal_names, expected_signal_names)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

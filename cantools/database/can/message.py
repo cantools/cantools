@@ -11,6 +11,9 @@ from ..utils import start_bit
 from ..utils import encode_data
 from ..utils import decode_data
 from ..utils import create_encode_decode_formats
+from ..utils import type_sort_signals
+from ..utils import sort_signals_by_start_bit
+from ..utils import SORT_SIGNALS_DEFAULT
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
@@ -28,6 +31,10 @@ class Message(object):
     If `strict` is ``True`` an exception is raised if any signals are
     overlapping or if they don't fit in the message.
 
+    By default signals are sorted by their start bit when their Message object is created.
+    If you don't want them to be sorted pass `sort_signals = None`.
+    If you want the signals to be sorted in another way pass something like
+    `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
     """
 
     def __init__(self,
@@ -47,6 +54,7 @@ class Message(object):
                  signal_groups: Optional[List[SignalGroup]] = None,
                  strict: bool = True,
                  protocol: Optional[str] = None,
+                 sort_signals: type_sort_signals = sort_signals_by_start_bit,
                  ) -> None:
         frame_id_bit_length = frame_id.bit_length()
 
@@ -64,9 +72,14 @@ class Message(object):
         self._is_extended_frame = is_extended_frame
         self._name = name
         self._length = length
-        self._signals = signals
-        self._signals.sort(key=start_bit)
         self._unused_bit_pattern = unused_bit_pattern
+        if sort_signals == SORT_SIGNALS_DEFAULT:
+            self._signals = sort_signals_by_start_bit(signals)
+        elif sort_signals:
+            self._signals = sort_signals(signals)
+        else:
+            self._signals = signals
+
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the

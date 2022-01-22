@@ -17,6 +17,7 @@ from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
+from ..utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
 from ...compat import fopen
 from ...typechecking import StringPathLike
 
@@ -35,6 +36,10 @@ class Database(object):
     If `strict` is ``True`` an exception is raised if any signals are
     overlapping or if they don't fit in their message.
 
+    By default signals are sorted by their start bit when their Message object is created.
+    If you don't want them to be sorted pass `sort_signals = None`.
+    If you want the signals to be sorted in another way pass something like
+    `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
     """
 
     def __init__(self,
@@ -46,6 +51,7 @@ class Database(object):
                  autosar_specifics: Optional[AutosarDatabaseSpecifics] = None,
                  frame_id_mask: Optional[int] = None,
                  strict: bool = True,
+                 sort_signals: type_sort_signals = sort_signals_by_start_bit,
                  ) -> None:
         self._messages = messages or []
         self._nodes = nodes or []
@@ -61,6 +67,7 @@ class Database(object):
 
         self._frame_id_mask = frame_id_mask
         self._strict = strict
+        self._sort_signals = sort_signals
         self.refresh()
 
     @property
@@ -154,7 +161,7 @@ class Database(object):
 
         """
 
-        database = arxml.load_string(string, self._strict)
+        database = arxml.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -202,7 +209,7 @@ class Database(object):
 
         """
 
-        database = dbc.load_string(string, self._strict)
+        database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -238,7 +245,7 @@ class Database(object):
 
         """
 
-        database = kcd.load_string(string, self._strict)
+        database = kcd.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -274,7 +281,7 @@ class Database(object):
 
         """
 
-        database = sym.load_string(string, self._strict)
+        database = sym.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -307,27 +314,33 @@ class Database(object):
         self._name_to_message[message.name] = message
         self._frame_id_to_message[masked_frame_id] = message
 
-    def as_dbc_string(self) -> str:
+    def as_dbc_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
         """Return the database as a string formatted as a DBC file.
 
         """
+        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
+            sort_signals = None
 
         return dbc.dump_string(InternalDatabase(self._messages,
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._dbc))
+                                                self._dbc),
+                               sort_signals=sort_signals)
 
-    def as_kcd_string(self) -> str:
+    def as_kcd_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
         """Return the database as a string formatted as a KCD file.
 
         """
+        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
+            sort_signals = None
 
         return kcd.dump_string(InternalDatabase(self._messages,
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._dbc))
+                                                self._dbc),
+                               sort_signals=sort_signals)
 
     def get_message_by_name(self, name: str) -> Message:
         """Find the message object for given name `name`.

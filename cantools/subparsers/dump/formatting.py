@@ -51,12 +51,21 @@ def signal_tree_string(message, console_width=80, with_comments=False):
 
     def format_mux(mux):
         signal_name, multiplexed_signals = list(mux.items())[0]
+        selector_signal = message.get_signal_by_name(signal_name)
         multiplexed_signals = sorted(list(multiplexed_signals.items()))
         lines = []
 
         for index, multiplexed_signal in enumerate(multiplexed_signals):
             multiplexer_id, signal_names = multiplexed_signal
-            lines.append('+-- {}'.format(multiplexer_id))
+            multiplexer_desc = f'{multiplexer_id}'
+
+            if selector_signal.choices and \
+               multiplexer_id in selector_signal.choices:
+                multiplexer_desc = \
+                    f'{selector_signal.choices[multiplexer_id]} ' \
+                    f'({multiplexer_id})'
+
+            lines.append(f'+-- {multiplexer_desc}')
             lines += add_prefix(get_prefix(index, len(multiplexed_signals)),
                                 format_level_lines(signal_names))
 

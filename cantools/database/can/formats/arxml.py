@@ -497,6 +497,14 @@ class SystemLoader(object):
             self._load_pdu(pdu, name, 1)
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
 
+        # the bit pattern used to fill in unused bits to avoid
+        # undefined behaviour/memory leaks
+        unused_bit_pattern = \
+            self._get_unique_arxml_child(pdu, "UNUSED-BIT-PATTERN")
+        unused_bit_pattern = \
+            0xff if unused_bit_pattern is None \
+            else parse_number_string(unused_bit_pattern.text)
+
         return Message(bus_name=bus_name,
                        frame_id=frame_id,
                        is_extended_frame=is_extended_frame,
@@ -506,6 +514,7 @@ class SystemLoader(object):
                        send_type=None,
                        cycle_time=cycle_time,
                        signals=signals,
+                       unused_bit_pattern=unused_bit_pattern,
                        comment=comments,
                        autosar_specifics=autosar_specifics,
                        strict=self._strict,

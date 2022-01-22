@@ -2905,7 +2905,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message = cantools.db.Message(frame_id=1,
                                       name='M0',
                                       length=8,
-                                      signals=signals)
+                                      signals=signals,
+                                      unused_bit_pattern=0xff)
 
         decoded_message = {
             'S1': 0,
@@ -4387,6 +4388,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_message.is_extended_frame, False)
         self.assertEqual(mux_message.name, 'MultiplexedMessage')
         self.assertEqual(mux_message.length, 2)
+        self.assertEqual(mux_message.unused_bit_pattern, 0xff)
         self.assertEqual(mux_message.senders, [])
         self.assertEqual(mux_message.send_type, None)
         self.assertEqual(mux_message.cycle_time, None)
@@ -4507,6 +4509,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 6)
+        self.assertEqual(message_1.unused_bit_pattern, 0xff)
         self.assertEqual(message_1.senders, [])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, None)
@@ -4691,6 +4694,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.is_extended_frame, False)
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 8)
+        self.assertEqual(message_3.unused_bit_pattern, 0xff)
         self.assertEqual(message_3.senders, [])
         self.assertEqual(message_3.send_type, None)
         self.assertEqual(message_3.cycle_time, None)
@@ -4707,6 +4711,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_4.is_extended_frame, False)
         self.assertEqual(message_4.name, 'Message4')
         self.assertEqual(message_4.length, 6)
+        self.assertEqual(message_4.unused_bit_pattern, 0x55)
         self.assertEqual(message_4.senders, [])
         self.assertEqual(message_4.send_type, None)
         self.assertEqual(message_4.cycle_time, None)
@@ -4834,6 +4839,42 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.comments, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
+
+    def test_unused_bit_pattern(self):
+        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+
+        message4 = db.get_message_by_name('Message4')
+        input_dict = {
+            'signal2': 0x3ff,
+            'signal2_1c': 0x3ff,
+            'signal2_sm': 0x3ff,
+        }
+
+        message4.unused_bit_pattern = 0x00
+        encoded_ref = b'\xff\x03\xff\x03\xff\x03'
+        encoded1 = message4.encode(input_dict, padding=False)
+        encoded2 = message4.encode(input_dict, padding=True)
+        self.assertEqual(encoded1, encoded_ref)
+        self.assertEqual(encoded2, encoded_ref)
+
+        input_dict = {
+            'signal2': 0,
+            'signal2_1c': 0,
+            'signal2_sm': 0,
+        }
+
+        message4.unused_bit_pattern = 0xff
+        encoded_ref1 = b'\x00\x00\x00\x00\x00\x00'
+        encoded_ref2 = b'\x00\xf8\x00\xf8\x00\xf8'
+        encoded1 = message4.encode(input_dict, padding=False)
+        encoded2 = message4.encode(input_dict, padding=True)
+        self.assertEqual(encoded1, encoded_ref1)
+        self.assertEqual(encoded2, encoded_ref2)
+
+        message4.unused_bit_pattern = 0x55
+        encoded_ref = b'\x00\x50\x00\x50\x00\x50'
+        encoded = message4.encode(input_dict, padding=True)
+        self.assertEqual(encoded, encoded_ref)
 
     def test_system_arxml_float_values(self):
         db = cantools.db.load_file('tests/files/arxml/system-float-values.arxml')

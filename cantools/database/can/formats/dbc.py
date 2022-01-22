@@ -33,7 +33,7 @@ from ..internal_database import InternalDatabase
 from ..environment_variable import EnvironmentVariable
 
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit, sort_signals_by_start_bit_reversed, DEFAULT
+from ...utils import type_sort_signals, sort_signals_by_start_bit, sort_signals_by_start_bit_reversed, SORT_SIGNALS_DEFAULT
 
 
 DBC_FMT = (
@@ -1662,12 +1662,12 @@ def make_names_unique(database):
     return database
 
 
-def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = DEFAULT) -> str:
+def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = SORT_SIGNALS_DEFAULT) -> str:
     """Format database in DBC file format.
 
     """
 
-    if sort_signals == DEFAULT:
+    if sort_signals == SORT_SIGNALS_DEFAULT:
         sort_signals = sort_signals_by_start_bit_reversed
 
     # Make a deep copy of the database as names and attributes will be

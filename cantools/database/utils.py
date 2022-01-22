@@ -344,7 +344,7 @@ def prune_database_choices(database):
             prune_signal_choices(signal)
 
 
-DEFAULT: Final = 'default'
+SORT_SIGNALS_DEFAULT: Final = 'default'
 type_sort_signals = Union[Callable[[List[Signal]], List[Signal]], Literal['default'], None]
 
 def sort_signals_by_start_bit(signals: List[Signal]) -> List[Signal]:

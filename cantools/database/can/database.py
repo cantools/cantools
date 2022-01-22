@@ -17,7 +17,7 @@ from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
-from ..utils import type_sort_signals, sort_signals_by_start_bit, DEFAULT
+from ..utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
 from ...compat import fopen
 from ...typechecking import StringPathLike
 
@@ -314,11 +314,11 @@ class Database(object):
         self._name_to_message[message.name] = message
         self._frame_id_to_message[masked_frame_id] = message
 
-    def as_dbc_string(self, *, sort_signals:type_sort_signals=DEFAULT) -> str:
+    def as_dbc_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
         """Return the database as a string formatted as a DBC file.
 
         """
-        if not self._sort_signals and sort_signals == DEFAULT:
+        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
             sort_signals = None
 
         return dbc.dump_string(InternalDatabase(self._messages,
@@ -328,11 +328,11 @@ class Database(object):
                                                 self._dbc),
                                sort_signals=sort_signals)
 
-    def as_kcd_string(self, *, sort_signals:type_sort_signals=DEFAULT) -> str:
+    def as_kcd_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
         """Return the database as a string formatted as a KCD file.
 
         """
-        if not self._sort_signals and sort_signals == DEFAULT:
+        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
             sort_signals = None
 
         return kcd.dump_string(InternalDatabase(self._messages,

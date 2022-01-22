@@ -211,7 +211,7 @@ def dump_file(database,
               filename,
               database_format=None,
               encoding=None,
-              sort_signals=utils.DEFAULT):
+              sort_signals=utils.SORT_SIGNALS_DEFAULT):
     """Dump given database `database` to given file `filename`.
 
     Depending on the output file format signals may be sorted by default.

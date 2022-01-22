@@ -13,7 +13,7 @@ from ..utils import decode_data
 from ..utils import create_encode_decode_formats
 from ..utils import type_sort_signals
 from ..utils import sort_signals_by_start_bit
-from ..utils import DEFAULT
+from ..utils import SORT_SIGNALS_DEFAULT
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
@@ -71,7 +71,7 @@ class Message(object):
         self._is_extended_frame = is_extended_frame
         self._name = name
         self._length = length
-        if sort_signals == DEFAULT:
+        if sort_signals == SORT_SIGNALS_DEFAULT:
             self._signals = sort_signals_by_start_bit(signals)
         elif sort_signals:
             self._signals = sort_signals(signals)

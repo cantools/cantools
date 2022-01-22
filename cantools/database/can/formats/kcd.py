@@ -18,7 +18,7 @@ from ..bus import Bus
 from ..internal_database import InternalDatabase
 from ...utils import start_bit
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit, DEFAULT
+from ...utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
 
 
 LOGGER = logging.getLogger(__name__)
@@ -435,11 +435,11 @@ def _dump_messages(messages, node_refs, parent, sort_signals):
         _dump_message(message, bus, node_refs, sort_signals)
 
 
-def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=DEFAULT) -> str:
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
     """Format given database in KCD file format.
 
     """
-    if sort_signals == DEFAULT:
+    if sort_signals == SORT_SIGNALS_DEFAULT:
         sort_signals = None
 
     node_refs: Dict[str, int] = {}

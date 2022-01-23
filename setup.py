@@ -31,6 +31,7 @@ setup(name='cantools',
           'textparser>=0.21.1',
           'diskcache',
           'argparse_addons',
+          'typing_extensions>=3.10.0.0',
       ],
       extras_require=dict(
           plot=['matplotlib'],

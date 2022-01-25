@@ -8,5 +8,4 @@ nala; python_version >= '3.6'
 argparse_addons
 matplotlib
 parameterized
-mypy==0.931
-typing_extensions>=3.10.0.0
+mypy>=0.931

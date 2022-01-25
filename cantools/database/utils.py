@@ -5,7 +5,8 @@ import os.path
 import re
 from decimal import Decimal
 from typing import Dict, Union, List, Callable
-from ..typechecking import Literal, Final
+
+from typing_extensions import Literal, Final
 
 from cantools.database.can.signal import NamedSignalValue, Signal
 from cantools.typechecking import Formats

@@ -5431,6 +5431,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
             db,
             'tests/files/dbc/issue_184_extended_mux_multiple_values_dumped.dbc')
 
+    def test_dbc_BU_BO_REL(self):
+        # Loading the file should not generate an exception
+        db = cantools.database.load_file(
+            'tests/files/dbc/BU_BO_REL_.dbc')
+
     def test_issue_184_independent_multiplexors(self):
         db = cantools.database.load_file(
             'tests/files/dbc/issue_184_extended_mux_independent_multiplexors.dbc')

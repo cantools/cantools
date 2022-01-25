@@ -283,7 +283,7 @@ class Parser(textparser.Parser):
 
         attribute_definition_rel = Sequence(
             'BA_DEF_REL_',
-            Optional('BU_SG_REL_'),
+            Optional(choice('BU_SG_REL_', 'BU_BO_REL_')),
             'STRING',
             'WORD',
             choice(DelimitedList('STRING'), OneOrMore('NUMBER')),
@@ -292,9 +292,13 @@ class Parser(textparser.Parser):
         attribute_definition_default_rel = Sequence(
             'BA_DEF_DEF_REL_', 'STRING', choice('NUMBER', 'STRING'), ';')
 
-        attribute_rel = Sequence(
+        attribute_rel_sg = Sequence(
             'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
             'WORD', choice('NUMBER', 'STRING'), ';')
+
+        attribute_rel_bo = Sequence(
+            'BA_REL_', 'STRING', 'BU_BO_REL_', 'WORD', 'NUMBER',
+            choice('NUMBER', 'STRING'), ';')
 
         choice_ = Sequence(
             'VAL_',
@@ -331,7 +335,8 @@ class Parser(textparser.Parser):
                 value_table,
                 choice_,
                 attribute,
-                attribute_rel,
+                attribute_rel_sg,
+                attribute_rel_bo,
                 attribute_definition_rel,
                 attribute_definition_default,
                 attribute_definition_default_rel,

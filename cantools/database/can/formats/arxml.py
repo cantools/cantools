@@ -104,7 +104,10 @@ def parse_number_string(in_string, allow_float=False):
     return int(in_string, 0) # autodetect the base
 
 class SystemLoader(object):
-    def __init__(self, root:Any, strict:bool, sort_signals:type_sort_signals=sort_signals_by_start_bit):
+    def __init__(self,
+                 root:Any,
+                 strict:bool,
+                 sort_signals:type_sort_signals=sort_signals_by_start_bit):
         self._root = root
         self._strict = strict
         self._sort_signals = sort_signals
@@ -154,7 +157,8 @@ class SystemLoader(object):
                     raise ValueError(f"Unrecognized AUTOSAR XML namespace "
                                      f"'{xml_namespace}'")
 
-        m = re.match(r'^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
+        m = re.match(r'^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$',
+                     autosar_version_string)
 
         if not m:
             raise ValueError(f"Could not parse AUTOSAR version "
@@ -370,9 +374,11 @@ class SystemLoader(object):
 
             # handle sub-packages
             if self.autosar_version_newer(4):
-                sub_package_list = self._get_unique_arxml_child(package, 'AR-PACKAGES')
+                sub_package_list = self._get_unique_arxml_child(package,
+                                                                'AR-PACKAGES')
             else: # AUTOSAR 3
-                sub_package_list = self._get_unique_arxml_child(package, 'SUB-PACKAGES')
+                sub_package_list = self._get_unique_arxml_child(package,
+                                                                'SUB-PACKAGES')
 
             if sub_package_list is not None:
                 self._load_senders_and_receivers(sub_package_list, messages)
@@ -824,7 +830,9 @@ class SystemLoader(object):
                 selector_signal.choices.update(dynalt_selector_signals[0].choices)
 
             if dynalt_selector_signals[0].invalid is not None:
-                # TODO: this may lead to undefined behaviour if multiple PDU define the choices of their selector signals differently (who does this?)
+                # TODO: this may lead to undefined behaviour if
+                # multiple PDU define the choices of their selector
+                # signals differently (who does this?)
                 selector_signal.invalid = dynalt_selector_signals[0].invalid
 
             dynalt_signals.remove(dynalt_selector_signals[0])
@@ -1950,7 +1958,10 @@ REFERENCE_VALUES_XPATH = make_xpath([
 
 class EcuExtractLoader(object):
 
-    def __init__(self, root:Any, strict:bool, sort_signals:type_sort_signals=sort_signals_by_start_bit):
+    def __init__(self,
+                 root:Any,
+                 strict:bool,
+                 sort_signals:type_sort_signals=sort_signals_by_start_bit):
         self.root = root
         self.strict = strict
         self.sort_signals = sort_signals
@@ -2273,7 +2284,10 @@ def is_ecu_extract(root):
 
     return ecuc_value_collection is not None
 
-def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
+def load_string(string:str,
+                strict:bool=True,
+                sort_signals:type_sort_signals=sort_signals_by_start_bit) \
+            -> InternalDatabase:
     """Parse given ARXML format string.
 
     """

@@ -62,6 +62,7 @@ ExampleMessage
             expected_output = """\
 ExampleMessage:
   Comment[None]: Example message used as template in MotoHawk models.
+  Sending ECUs: PCM1
   Frame ID: 0x1f0 (496)
   Size: 8 bytes
   Is extended frame: False
@@ -93,6 +94,7 @@ ExampleMessage:
       Offset: 0
       Scaling factor: 0.1
     Temperature:
+      Receiving ECUs: FOO, PCM1
       Type: Integer
       Start bit: 0
       Length: 12 bits
@@ -179,6 +181,7 @@ Dancer:
             expected_output = """\
 Message2:
   Bus: Cluster0
+  Sending ECUs: Dancer
   Frame ID: 0x6 (6)
   Size: 7 bytes
   Is extended frame: True
@@ -192,17 +195,20 @@ Message2:
 
   Signal details:
     signal3:
+      Receiving ECUs: DJ
       Type: Integer
       Start bit: 6
       Length: 2 bits
       Is signed: False
     signal2:
       Comment[FOR-ALL]: Signal comment!
+      Receiving ECUs: DJ
       Type: Integer
       Start bit: 18
       Length: 11 bits
       Is signed: True
     signal4:
+      Receiving ECUs: DJ
       Type: Integer
       Start bit: 30
       Length: 4 bits
@@ -282,6 +288,7 @@ Message1:
   Comment[EN]: Comment1
   Comment[DE]: Kommentar1
   Bus: Cluster0
+  Sending ECUs: DJ
   Frame ID: 0x5 (5)
   Size: 6 bytes
   Is extended frame: False
@@ -294,6 +301,7 @@ Message1:
 
   Signal details:
     signal6:
+      Receiving ECUs: Dancer
       Type: Integer
       Start bit: 0
       Length: 1 bits
@@ -311,6 +319,7 @@ Message1:
     signal1:
       Comment[EN]: Signal comment!
       Comment[DE]: Signalkommentar!
+      Receiving ECUs: Dancer
       Type: Integer
       Start bit: 4
       Length: 3 bits
@@ -322,6 +331,7 @@ Message1:
       Offset: 0.0
       Scaling factor: 5.0
     signal5:
+      Receiving ECUs: Dancer
       Type: Float
       Start bit: 16
       Length: 32 bits
@@ -368,6 +378,7 @@ Cluster0:
             expected_output = """\
 Message1:
   Bus: Bus
+  Sending ECUs: Node1
   Frame ID: 0x1 (1)
   Size: 5 bytes
   Is extended frame: False
@@ -384,6 +395,7 @@ Message1:
       Length: 1 bits
       Is signed: False
     Signal2:
+      Receiving ECUs: Node2, Node3
       Type: Float
       Start bit: 8
       Length: 32 bits
@@ -394,6 +406,7 @@ Message1:
 Message2:
   Comment[None]: Note message 2.
   Bus: Bus
+  Sending ECUs: Node2, Node3
   Frame ID: 0x2 (2)
   Size: 4 bytes
   Is extended frame: False
@@ -461,6 +474,7 @@ Message2:
       Is signed: False
     Signal6:
       Comment[None]: Note signal 6.
+      Receiving ECUs: Node1
       Type: Integer
       Start bit: 20
       Length: 12 bits

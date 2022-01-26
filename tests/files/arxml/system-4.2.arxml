@@ -35,7 +35,7 @@
 	  <SHORT-NAME>RX</SHORT-NAME>
 	  <ELEMENTS>
 	    <!-- /PDU_GROUPS/RX/Dancer -->
-	    <I-SIGNAL-I-PDU-GROUP UUID="">
+	    <I-SIGNAL-I-PDU-GROUP UUID="5a0b6f980d60423b9af8ccf9b53a6291">
 	      <SHORT-NAME>Dancer</SHORT-NAME>
 	      <COMMUNICATION-DIRECTION>IN</COMMUNICATION-DIRECTION>
 	      <I-SIGNAL-I-PDUS>
@@ -138,6 +138,13 @@
                       <IDENTIFIER>101</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
                   </FRAME-TRIGGERINGS>
+		  <PDU-TRIGGERINGS>
+		    <!-- /Cluster/Cluster0/Pch0/message3_triggering -->
+		    <PDU-TRIGGERING UUID="0eff046cd6c14c0bba6add9de10019f9">
+		      <SHORT-NAME>message3_triggering</SHORT-NAME>
+		      <I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message3</I-PDU-REF>
+		    </PDU-TRIGGERING>
+		  </PDU-TRIGGERINGS>
                 </CAN-PHYSICAL-CHANNEL>
               </PHYSICAL-CHANNELS>
 	      <PROTOCOL-VERSION>can2.0b</PROTOCOL-VERSION>
@@ -200,7 +207,7 @@
 	    <!-- /CanFrame/Message3/message3 -->
             <PDU-TO-FRAME-MAPPING UUID="c2102052cd836391401149341e964b5f">
               <SHORT-NAME>message3</SHORT-NAME>
-              <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message3</PDU-REF>
+              <PDU-REF DEST="SECURED-I-PDU">/SecuredIPdu/message3_secured</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
           </PDU-TO-FRAME-MAPPINGS>
         </CAN-FRAME>
@@ -687,6 +694,19 @@
           </I-SIGNAL-TO-PDU-MAPPINGS>
           <UNUSED-BIT-PATTERN>85</UNUSED-BIT-PATTERN>
         </I-SIGNAL-I-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <!-- /SecuredIPdu -->
+    <AR-PACKAGE UUID="ccb4004437234d1284113b199856aa16">
+      <SHORT-NAME>SecuredIPdu</SHORT-NAME>
+      <ELEMENTS>
+	<!-- /SecuredIPdu/message3_secured -->
+	<SECURED-I-PDU UUID="9fb09bd0b1f84e86a0c62a2de73be796">
+	  <SHORT-NAME>message3_secured</SHORT-NAME>
+          <LENGTH>16</LENGTH>
+	  <!-- we currently do not specify AUTHENTICATION_PROPS, FRESHNESS_PROPS, and SECURE-COMMUNICATION-PROPS. While this is technically allowed, it does not make sense in the context of a secured I-PDU... -->
+	  <PAYLOAD-REF DEST="PDU-TRIGGERING">/Cluster/Cluster0/Pch0/message3_triggering</PAYLOAD-REF>
+	</SECURED-I-PDU>
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /Unit -->

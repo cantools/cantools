@@ -4702,7 +4702,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.bus_name, 'Cluster0')
         self.assertTrue(message_3.dbc is None)
         self.assertTrue(message_3.autosar is not None)
-        self.assertEqual(message_3.autosar.pdu_paths, [ '/ISignalIPdu/message3' ])
+        self.assertEqual(message_3.autosar.pdu_paths,
+                         [
+                             '/SecuredIPdu/message3_secured',
+                             '/ISignalIPdu/message3'
+                         ])
 
         # message 4 tests different base encodings
         message_4 = db.messages[4]
@@ -4766,6 +4770,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'Constants',
                              'MultiplexedIPdu',
                              'ISignalIPdu',
+                             'SecuredIPdu',
                              'Unit',
                              'CompuMethod',
                              'SystemSignal',

@@ -4509,8 +4509,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 6)
-        self.assertEqual(message_1.unused_bit_pattern, 0xff)
-        self.assertEqual(message_1.senders, [])
+        self.assertEqual(message_1.senders, ['DJ'])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, None)
         self.assertEqual(len(message_1.signals), 3)
@@ -4533,7 +4532,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.start, 0)
         self.assertEqual(signal_1.length, 1)
         self.assertEqual(signal_1.initial, False)
-        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.receivers, ['Dancer'])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
@@ -4556,7 +4555,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.start, 4)
         self.assertEqual(signal_2.length, 3)
         self.assertEqual(signal_2.initial, 25.0)
-        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.receivers, ['Dancer'])
         self.assertEqual(signal_2.byte_order, 'big_endian')
         self.assertEqual(signal_2.is_signed, False)
         self.assertEqual(signal_2.is_float, False)
@@ -4588,7 +4587,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.start, 16)
         self.assertEqual(signal_3.initial, None)
         self.assertEqual(signal_3.length, 32)
-        self.assertEqual(signal_3.receivers, [])
+        self.assertEqual(signal_3.receivers, ['Dancer'])
         self.assertEqual(signal_3.byte_order, 'little_endian')
         self.assertEqual(signal_3.is_signed, False)
         self.assertEqual(signal_3.is_float, True)
@@ -4611,7 +4610,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_2.is_extended_frame, True)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 7)
-        self.assertEqual(message_2.senders, [])
+        self.assertEqual(message_2.senders, ['Dancer'])
         self.assertEqual(message_2.send_type, None)
         self.assertEqual(message_2.cycle_time, 200)
         self.assertEqual(len(message_2.signals), 3)
@@ -4625,7 +4624,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.name, 'signal3')
         self.assertEqual(signal_1.start, 6)
         self.assertEqual(signal_1.length, 2)
-        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.receivers, ['DJ'])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
@@ -4647,7 +4646,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.name, 'signal2')
         self.assertEqual(signal_2.start, 18)
         self.assertEqual(signal_2.length, 11)
-        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.receivers, ['DJ'])
         self.assertEqual(signal_2.byte_order, 'little_endian')
         self.assertEqual(signal_2.is_signed, True)
         self.assertEqual(signal_2.is_float, False)
@@ -4669,7 +4668,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.name, 'signal4')
         self.assertEqual(signal_3.start, 30)
         self.assertEqual(signal_3.length, 4)
-        self.assertEqual(signal_3.receivers, [])
+        self.assertEqual(signal_3.receivers, ['DJ'])
         self.assertEqual(signal_3.byte_order, 'little_endian')
         self.assertEqual(signal_3.is_signed, False)
         self.assertEqual(signal_3.is_float, False)
@@ -4759,8 +4758,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(childen1_short_names,
                          [
+                             'ECU',
+                             'PDU_GROUPS',
                              'Cluster',
-                             'ECUs',
                              'CanFrame',
                              'ISignal',
                              'Constants',
@@ -4897,7 +4897,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.name, 'Test_Frame')
         self.assertEqual(message_1.length, 2)
-        self.assertEqual(message_1.senders, [])
+        self.assertEqual(message_1.senders, ['IDCM_A'])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, 100)
         self.assertEqual(message_1.comments, None)

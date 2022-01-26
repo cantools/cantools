@@ -60,6 +60,7 @@ class AutosarMessageSpecifics(object):
 
     def __init__(self):
         self._pdu_paths = []
+        self._is_nm = False
 
     @property
     def pdu_paths(self):
@@ -71,6 +72,11 @@ class AutosarMessageSpecifics(object):
         """
         return self._pdu_paths
 
+    @property
+    def is_nm(self):
+        """True iff the message is used for network management
+        """
+        return self._is_nm
 
 
 def parse_number_string(in_string, allow_float=False):
@@ -98,7 +104,10 @@ def parse_number_string(in_string, allow_float=False):
     return int(in_string, 0) # autodetect the base
 
 class SystemLoader(object):
-    def __init__(self, root:Any, strict:bool, sort_signals:type_sort_signals=sort_signals_by_start_bit):
+    def __init__(self,
+                 root:Any,
+                 strict:bool,
+                 sort_signals:type_sort_signals=sort_signals_by_start_bit):
         self._root = root
         self._strict = strict
         self._sort_signals = sort_signals
@@ -148,7 +157,8 @@ class SystemLoader(object):
                     raise ValueError(f"Unrecognized AUTOSAR XML namespace "
                                      f"'{xml_namespace}'")
 
-        m = re.match(r'^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$', autosar_version_string)
+        m = re.match(r'^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$',
+                     autosar_version_string)
 
         if not m:
             raise ValueError(f"Could not parse AUTOSAR version "
@@ -221,6 +231,10 @@ class SystemLoader(object):
         nodes = self._load_nodes(root_packages)
         messages = self._load_messages(root_packages)
 
+        # the senders and receivers can only be loaded once all
+        # messages are known...
+        self._load_senders_and_receivers(root_packages, messages)
+
         arxml_version = \
             f'{self.autosar_version_major}.' \
             f'{self.autosar_version_minor}.' \
@@ -280,7 +294,8 @@ class SystemLoader(object):
 
                     # version of the CAN standard
                     proto_version = \
-                        self._get_unique_arxml_child(variant, 'PROTOCOL-VERSION')
+                        self._get_unique_arxml_child(variant,
+                                                     'PROTOCOL-VERSION')
                     if proto_version is not None:
                         proto_version = proto_version.text
 
@@ -309,16 +324,18 @@ class SystemLoader(object):
 
                     # version of the CAN standard
                     proto_version = \
-                        self._get_unique_arxml_child(can_cluster, 'PROTOCOL-VERSION')
+                        self._get_unique_arxml_child(can_cluster,
+                                                     'PROTOCOL-VERSION')
                     if proto_version is not None:
                         proto_version = proto_version.text
 
                     # base signaling rate
-                    baudrate = self._get_unique_arxml_child(can_cluster, 'SPEED')
+                    baudrate = self._get_unique_arxml_child(can_cluster,
+                                                            'SPEED')
                     if baudrate is not None:
                         baudrate = parse_number_string(baudrate.text)
 
-                    # AUTOSAR 3 does not support CAN-FD
+                    # AUTOSAR 3 does not seem to support CAN-FD
                     fd_baudrate = None
 
                     buses.append(Bus(name=name,
@@ -331,7 +348,6 @@ class SystemLoader(object):
             if self.autosar_version_newer(4):
                 sub_package_list = package.find('./ns:AR-PACKAGES',
                                                 self._xml_namespaces)
-
             else:
                 sub_package_list = package.find('./ns:SUB-PACKAGES',
                                                 self._xml_namespaces)
@@ -340,6 +356,159 @@ class SystemLoader(object):
                 buses.extend(self._load_buses(sub_package_list))
 
         return buses
+
+    # deal with the senders of messages and and the receivers of signals
+    def _load_senders_and_receivers(self, package_list, messages):
+        if package_list is None:
+            return
+
+        for package in self._get_arxml_children(package_list, '*AR-PACKAGE'):
+            for ecu_instance in self._get_arxml_children(package,
+                                                         [
+                                                             'ELEMENTS',
+                                                             '*ECU-INSTANCE'
+                                                         ]):
+                self._load_senders_receivers_of_ecu(ecu_instance, messages)
+
+            self._load_senders_receivers_of_nm_pdus(package, messages)
+
+            # handle sub-packages
+            if self.autosar_version_newer(4):
+                sub_package_list = self._get_unique_arxml_child(package,
+                                                                'AR-PACKAGES')
+            else: # AUTOSAR 3
+                sub_package_list = self._get_unique_arxml_child(package,
+                                                                'SUB-PACKAGES')
+
+            if sub_package_list is not None:
+                self._load_senders_and_receivers(sub_package_list, messages)
+
+    # given a list of Message objects and an reference to a PDU by its absolute ARXML path,
+    # return the subset of messages of the list which feature the specified PDU.
+    def __get_messages_of_pdu(self, msg_list, pdu_path, ecu_name):
+        pdu_messages = \
+            [ x for x in msg_list if pdu_path in x.autosar.pdu_paths ]
+
+        if len(pdu_messages) < 1:
+            # hm: the data set seems to be inconsistent
+            LOGGER.info(f'PDU "{pdu_path}" mentioned in the senders or '
+                        f'receivers of ECU "{ecu_name}", but it is not '
+                        f'featured by any message')
+
+        return pdu_messages
+
+    def _load_senders_receivers_of_ecu(self, ecu_instance, messages):
+        # get the name of the ECU. Note that in cantools, ECUs
+        # are called 'nodes' for all intents and purposes...
+        ecu_name = \
+            self._get_unique_arxml_child(ecu_instance,
+                                         'SHORT-NAME').text.strip()
+
+
+        ####
+        # load senders and receivers of "normal" messages
+        ####
+        if self.autosar_version_newer(4):
+            pdu_groups_spec = [
+                'ASSOCIATED-COM-I-PDU-GROUP-REFS',
+                '*&ASSOCIATED-COM-I-PDU-GROUP'
+            ]
+        else: # AUTOSAR 3
+            pdu_groups_spec = [
+                'ASSOCIATED-I-PDU-GROUP-REFS',
+                '*&ASSOCIATED-I-PDU-GROUP'
+            ]
+
+        for pdu_group in self._get_arxml_children(ecu_instance,
+                                                  pdu_groups_spec):
+            comm_dir = \
+                self._get_unique_arxml_child(pdu_group,
+                                             'COMMUNICATION-DIRECTION')
+            comm_dir = comm_dir.text
+
+            if self.autosar_version_newer(4):
+                pdu_spec = [
+                    'I-SIGNAL-I-PDUS',
+                    '*I-SIGNAL-I-PDU-REF-CONDITIONAL',
+                    '&I-SIGNAL-I-PDU'
+                ]
+            else: # AUTOSAR 3
+                pdu_spec = [
+                    'I-PDU-REFS',
+                    '*&I-PDU'
+                ]
+
+            for pdu in self._get_arxml_children(pdu_group, pdu_spec):
+                pdu_path = self._node_to_arxml_path.get(pdu)
+                pdu_messages = \
+                    self.__get_messages_of_pdu(messages,
+                                              pdu_path,
+                                              ecu_name)
+
+                if comm_dir == 'IN':
+                    for pdu_message in pdu_messages:
+                        for signal in pdu_message.signals:
+                            if ecu_name not in signal._receivers:
+                                signal._receivers.append(ecu_name)
+                elif comm_dir == 'OUT':
+                    for pdu_message in pdu_messages:
+                        if ecu_name not in pdu_message._senders:
+                            pdu_message._senders.append(ecu_name)
+
+    def _load_senders_receivers_of_nm_pdus(self, package, messages):
+        ####
+        # senders and receivers of network management messages
+        ####
+        for nm_cluster in self._get_arxml_children(package,
+                                                   [
+                                                       'ELEMENTS',
+                                                       '*NM-CONFIG',
+                                                       'NM-CLUSTERS',
+                                                       '*CAN-NM-CLUSTER',
+                                                   ]):
+
+            nm_node_spec = [
+                'NM-NODES',
+                '*CAN-NM-NODE'
+            ]
+            for nm_node in self._get_arxml_children(nm_cluster, nm_node_spec):
+                nm_if_ecu = self._get_unique_arxml_child(nm_node, '&NM-IF-ECU')
+
+                ecu = self._get_unique_arxml_child(nm_if_ecu, '&ECU-INSTANCE')
+                if ecu is None:
+                    continue
+                ecu_name = self._get_unique_arxml_child(ecu, 'SHORT-NAME').text
+
+                # deal with receive PDUs
+                for rx_pdu in self._get_arxml_children(nm_node,
+                                                       [
+                                                           'RX-NM-PDU-REFS',
+                                                           '*&RX-NM-PDU'
+                                                       ]):
+                    pdu_path = self._node_to_arxml_path.get(rx_pdu)
+                    pdu_messages = self.__get_messages_of_pdu(messages,
+                                                              pdu_path,
+                                                              ecu_name)
+
+                    for pdu_message in pdu_messages:
+                        for signal in pdu_message._signals:
+                            if ecu_name not in signal._receivers:
+                                signal._receivers.append(ecu_name)
+
+                # deal with transmit PDUs
+                for tx_pdu in self._get_arxml_children(nm_node,
+                                                       [
+                                                           'TX-NM-PDU-REFS',
+                                                           '*&TX-NM-PDU'
+                                                       ]):
+                    pdu_path = self._node_to_arxml_path.get(tx_pdu)
+                    pdu_messages = self.__get_messages_of_pdu(messages,
+                                                              pdu_path,
+                                                              ecu_name)
+
+                    for pdu_message in pdu_messages:
+                        if ecu_name not in pdu_message._senders:
+                            pdu_message._senders.append(ecu_name)
 
     def _load_nodes(self, package_list):
         """Recursively extract all nodes (ECU-instances in AUTOSAR-speak) of
@@ -414,8 +583,6 @@ class SystemLoader(object):
     def _load_package_messages(self, package_elem):
         """This code extracts the information about CAN clusters of an
         individual AR package
-
-        TODO: deal with the individual CAN buses
         """
 
         messages = []
@@ -465,7 +632,6 @@ class SystemLoader(object):
 
     def _load_message(self, bus_name, can_frame_triggering):
         """Load given message and return a message object.
-
         """
 
         # Default values.
@@ -496,6 +662,8 @@ class SystemLoader(object):
         _, _, signals, cycle_time, child_pdu_paths = \
             self._load_pdu(pdu, name, 1)
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
+        autosar_specifics._is_nm = \
+            (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
 
         # the bit pattern used to fill in unused bits to avoid
         # undefined behaviour/memory leaks
@@ -662,7 +830,9 @@ class SystemLoader(object):
                 selector_signal.choices.update(dynalt_selector_signals[0].choices)
 
             if dynalt_selector_signals[0].invalid is not None:
-                # TODO: this may lead to undefined behaviour if multiple PDU define the choices of their selector signals differently (who does this?)
+                # TODO: this may lead to undefined behaviour if
+                # multiple PDU define the choices of their selector
+                # signals differently (who does this?)
                 selector_signal.invalid = dynalt_selector_signals[0].invalid
 
             dynalt_signals.remove(dynalt_selector_signals[0])
@@ -1788,7 +1958,10 @@ REFERENCE_VALUES_XPATH = make_xpath([
 
 class EcuExtractLoader(object):
 
-    def __init__(self, root:Any, strict:bool, sort_signals:type_sort_signals=sort_signals_by_start_bit):
+    def __init__(self,
+                 root:Any,
+                 strict:bool,
+                 sort_signals:type_sort_signals=sort_signals_by_start_bit):
         self.root = root
         self.strict = strict
         self.sort_signals = sort_signals
@@ -2111,7 +2284,10 @@ def is_ecu_extract(root):
 
     return ecuc_value_collection is not None
 
-def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
+def load_string(string:str,
+                strict:bool=True,
+                sort_signals:type_sort_signals=sort_signals_by_start_bit) \
+            -> InternalDatabase:
     """Parse given ARXML format string.
 
     """

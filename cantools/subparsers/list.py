@@ -13,6 +13,9 @@ def _print_message(message):
     if message.bus_name:
         print(f'  Bus: {message.bus_name}')
 
+    if message.senders:
+        print(f'  Sending ECUs: {", ".join(sorted(message.senders))}')
+
     print(f'  Frame ID: 0x{message.frame_id:x} ({message.frame_id})')
     print(f'  Size: {message.length} bytes')
     print(f'  Is extended frame: {message.is_extended_frame}')
@@ -44,6 +47,8 @@ def _print_message(message):
         if signal.comments is not None:
             for lang in signal.comments:
                 print(f'      Comment[{lang}]: {signal.comments[lang]}')
+        if signal.receivers:
+            print(f'      Receiving ECUs: {", ".join(sorted(signal.receivers))}')
         print(f'      Type: {signal_type}')
         if signal.multiplexer_signal is not None:
             print(f'      Selector signal: {signal.multiplexer_signal}')

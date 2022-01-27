@@ -357,7 +357,7 @@ class SystemLoader(object):
 
         return buses
 
-    # deal with the senders of messages and and the receivers of signals
+    # deal with the senders of messages and the receivers of signals
     def _load_senders_and_receivers(self, package_list, messages):
         if package_list is None:
             return

@@ -331,7 +331,7 @@ def _do_decode(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
-                               prune_choices=not args.no_prune,
+                               prune_choices=args.prune,
                                strict=not args.no_strict)
     re_format = None
     timestamp_parser = TimestampParser(args)
@@ -893,9 +893,9 @@ def add_subparser(subparsers):
         action='store_true',
         help='This is equivalent to applying --color C0 to the first y-axis, --color C1 to the second and so on.')
     plot_parser.add_argument(
-        '--no-prune',
+        '--prune',
         action='store_true',
-        help='Refrain from shortening the names of named signal values.')
+        help='Try to shorten the names of named signal choices.')
     plot_parser.add_argument(
         '--no-strict',
         action='store_true',

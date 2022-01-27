@@ -23,7 +23,7 @@ class Args(object):
         self.database = database
         self.encoding = None
         self.frame_id_mask = None
-        self.no_prune = False
+        self.prune = False
         self.no_strict = False
         self.single_line = single_line
         self.bit_rate = None

@@ -34,7 +34,7 @@ NS_ :
 BS_:
 
 BU_:
-VAL_TABLE_ CmdResp 1 "CmdRespOK" 0 "CmdRespErr" ;
+VAL_TABLE_ CmdResp 1 "SignalWithChoices_CmdRespOK" 0 "SignalWithChoices_CmdRespErr" ;
 
 
 
@@ -45,4 +45,4 @@ BO_ 2148073472 TestMessage: 1 Vector__XXX
 
 BA_DEF_  "BusType" STRING ;
 BA_DEF_DEF_  "BusType" "CAN";
-VAL_ 2148073472 SignalWithChoices 1 "CmdRespOK" 0 "CmdRespErr" ;
+VAL_ 2148073472 SignalWithChoices 1 "SignalWithChoices_CmdRespOK" 0 "SignalWithChoices_CmdRespErr" ;

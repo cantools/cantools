@@ -14,6 +14,8 @@ import logging
 from xml.etree import ElementTree
 import timeit
 
+from cantools.database.utils import prune_signal_choices
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -404,7 +406,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_dbc_load_choices_issue_with_name(self):
         filename = 'tests/files/dbc/choices_issue_with_name.dbc'
-        db = cantools.database.load_file(filename)
+
+        db = cantools.database.load_file(filename, prune_choices=False)
+        msg = db.messages[0]
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0].value, 0)
+        self.assertEqual(sig.choices[0].name, 'SignalWithChoices_CmdRespErr')
+        self.assertEqual(sig.choices[1].value, 1)
+        self.assertEqual(sig.choices[1].name, 'SignalWithChoices_CmdRespOK')
+
+        db = cantools.database.load_file(filename, prune_choices=True)
         msg = db.messages[0]
         sig = msg.signals[0]
 
@@ -412,6 +424,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sig.choices[0].name, 'CmdRespErr')
         self.assertEqual(sig.choices[1].value, 1)
         self.assertEqual(sig.choices[1].name, 'CmdRespOK')
+
+        # make sure that the default for pruning signal choices is False
+        db = cantools.database.load_file(filename)
+        msg = db.messages[0]
+        sig = msg.signals[0]
+
+        self.assertEqual(sig.choices[0].value, 0)
+        self.assertEqual(sig.choices[0].name, 'SignalWithChoices_CmdRespErr')
+        self.assertEqual(sig.choices[1].value, 1)
+        self.assertEqual(sig.choices[1].name, 'SignalWithChoices_CmdRespOK')
+
+
 
     def test_padding_bit_order(self):
         """Encode and decode signals with reversed bit order.

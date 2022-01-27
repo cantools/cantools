@@ -30,7 +30,7 @@ def add_subparser(subparsers):
     convert_parser.add_argument(
         '--prune',
         action='store_true',
-        help='Shorten the named signal values.')
+        help='Try to shorten the names of named signal choices.')
     convert_parser.add_argument(
         '--no-strict',
         action='store_true',

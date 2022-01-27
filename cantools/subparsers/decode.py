@@ -10,7 +10,7 @@ def _do_decode(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
-                               prune_choices=not args.no_prune,
+                               prune_choices=args.prune,
                                strict=not args.no_strict)
     decode_choices = not args.no_decode_choices
     parser = logreader.Parser(sys.stdin)
@@ -44,9 +44,9 @@ def add_subparser(subparsers):
         '-e', '--encoding',
         help='File encoding.')
     decode_parser.add_argument(
-        '--no-prune',
+        '--prune',
         action='store_true',
-        help='Refrain from shortening the names of named signal values.')
+        help='Try to shorten the names of named signal choices.')
     decode_parser.add_argument(
         '--no-strict',
         action='store_true',

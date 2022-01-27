@@ -24,7 +24,7 @@ class Monitor(can.Listener):
         self._dbase = database.load_file(args.database,
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,
-                                         prune_choices=not args.no_prune,
+                                         prune_choices=args.prune,
                                          strict=not args.no_strict)
         self._single_line = args.single_line
         self._filtered_sorted_message_names = []
@@ -474,7 +474,7 @@ def add_subparser(subparsers):
         action='store_true',
         help='Python CAN CAN-FD bus.')
     monitor_parser.add_argument(
-        '--no-prune',
+        '--prune',
         action='store_true',
         help='Refrain from shortening the names of named signal values.')
     monitor_parser.add_argument(

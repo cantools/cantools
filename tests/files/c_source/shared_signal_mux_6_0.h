@@ -79,13 +79,6 @@ struct shared_signal_mux_6_0_muxed_symbol_t {
     uint8_t shared_signal;
 
     /**
-     * Range: ..1 (..1 -)
-     * Scale: 1
-     * Offset: 0
-     */
-    uint8_t shared_signal;
-
-    /**
      * Range: 0..1 (0..1 -)
      * Scale: 1
      * Offset: 0

@@ -812,9 +812,11 @@ def _format_decimal(value, is_float=False):
 
 
 def _get_unique_signals_in_message(message):
-    # Usually signal names will be unique, but for Multiplexed messages, we list each
-    # signal repeatedly with a different multiplexer_ids list. However, for code generation,
-    # we should not generate the same exact function for each Mux
+    # Usually signals will be unique in a message. However, in the cantools database,
+    # signals are duplicated for multiplexed messages, where each duplicated signal
+    # has a different multiplexer_ids field. This method filters
+    # out this duplication of the same signal in order to allow code autogeneration
+    # of fields that are shared across a multiplexed message
     return [list(signals)[0] for signal_name, signals in groupby(message.signals, lambda signal: signal.name)]
 
 def _format_range(signal):
@@ -1140,7 +1142,7 @@ def _format_unpack_code(message, helper_kinds):
 def _generate_struct(message, bit_fields):
     members = []
 
-    for signal in message.signals:
+    for signal in _get_unique_signals_in_message(message):
         members.append(_generate_signal(signal, bit_fields))
 
     if not members:

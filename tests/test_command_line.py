@@ -1461,8 +1461,8 @@ BATTERY_VT(
 
     def test_generate_c_source_sym(self):
         databases = [
-            # ('min-max-only-6.0', 'min_max_only_6_0'),
-            # ('letter-terminated-can-id-6.0', 'letter_terminated_can_id_6_0'),
+            ('min-max-only-6.0', 'min_max_only_6_0'),
+            ('letter-terminated-can-id-6.0', 'letter_terminated_can_id_6_0'),
             ('shared-signal-mux-6.0', 'shared_signal_mux_6_0')
         ]
 

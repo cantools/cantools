@@ -1,0 +1,18 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{SIGNALS}
+Sig=Shared_Signal unsigned 8 /max:1
+
+{SENDRECEIVE}
+
+[MuxedSymbol]
+ID=234h
+Len=8
+Mux=FirstMux 0,1 0
+Sig=Shared_Signal 8
+
+[MuxedSymbol]
+Len=8
+Mux=SecondMux 0,1 1
+Sig=Shared_Signal 8

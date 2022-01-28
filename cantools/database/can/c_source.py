@@ -1,5 +1,6 @@
 import re
 import time
+from itertools import groupby
 from decimal import Decimal
 
 from ...version import __version__
@@ -1171,7 +1172,11 @@ def _format_choices(signal, signal_name):
 def _generate_encode_decode(message):
     encode_decode = []
 
-    for signal in message.signals:
+    # Usually signal names will be unique, but for Multiplexed messages, we list each
+    # signal repeatedly with a different multiplexer_ids list. However, for code generation,
+    # we should not generate the same exact function for each Mux
+    for signal_name, signals in groupby(message.signals, lambda signal: signal.name):
+        signal = list(signals)[0]
         scale = signal.decimal.scale
         offset = signal.decimal.offset
         formatted_scale = _format_decimal(scale, is_float=True)
@@ -1346,7 +1351,11 @@ def _generate_declarations(database_name, messages, floating_point_numbers):
     for message in messages:
         signal_declarations = []
 
-        for signal in message.signals:
+        # Usually signal names will be unique, but for Multiplexed messages, we list each
+        # signal repeatedly with a different multiplexer_ids list. However, for code generation,
+        # we should not generate the same exact function for each Mux
+        for signal_name, signals in groupby(message.signals, lambda signal: signal.name):
+            signal = list(signals)[0]
             signal_declaration = ''
 
             if floating_point_numbers:

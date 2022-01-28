@@ -84,6 +84,20 @@ struct shared_signal_mux_6_0_muxed_symbol_t {
      * Offset: 0
      */
     uint8_t shared_signal;
+
+    /**
+     * Range: 0..1 (0..1 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    int8_t first_signal_unique;
+
+    /**
+     * Range: 0..1 (0..1 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    int8_t second_signal_unique;
 };
 
 /**
@@ -167,6 +181,60 @@ double shared_signal_mux_6_0_muxed_symbol_shared_signal_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool shared_signal_mux_6_0_muxed_symbol_shared_signal_is_in_range(uint8_t value);
+
+/**
+ * Encode given signal by applying scaling and offset.
+ *
+ * @param[in] value Signal to encode.
+ *
+ * @return Encoded signal.
+ */
+int8_t shared_signal_mux_6_0_muxed_symbol_first_signal_unique_encode(double value);
+
+/**
+ * Decode given signal by applying scaling and offset.
+ *
+ * @param[in] value Signal to decode.
+ *
+ * @return Decoded signal.
+ */
+double shared_signal_mux_6_0_muxed_symbol_first_signal_unique_decode(int8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool shared_signal_mux_6_0_muxed_symbol_first_signal_unique_is_in_range(int8_t value);
+
+/**
+ * Encode given signal by applying scaling and offset.
+ *
+ * @param[in] value Signal to encode.
+ *
+ * @return Encoded signal.
+ */
+int8_t shared_signal_mux_6_0_muxed_symbol_second_signal_unique_encode(double value);
+
+/**
+ * Decode given signal by applying scaling and offset.
+ *
+ * @param[in] value Signal to decode.
+ *
+ * @return Decoded signal.
+ */
+double shared_signal_mux_6_0_muxed_symbol_second_signal_unique_decode(int8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool shared_signal_mux_6_0_muxed_symbol_second_signal_unique_is_in_range(int8_t value);
 
 
 #ifdef __cplusplus

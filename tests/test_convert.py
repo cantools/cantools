@@ -48,7 +48,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
             for a in message_attributes:
                 if a in ignore_message_attributes:
                     continue
-                print(f"msg.{a}".ljust(30) + str(getattr(msg1, a)).ljust(10) + " == %s" % getattr(msg2, a))
+                #print(f"msg.{a}".ljust(30) + str(getattr(msg1, a)).ljust(10) + " == %s" % getattr(msg2, a))
                 self.assertEqual(getattr(msg1, a), getattr(msg2, a), "%s does not match for message %s" % (a, i))
 
             self.assertEqual(len(msg1.signals), len(msg2.signals))
@@ -60,7 +60,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
                 for a in signal_attributes:
                     if a in ignore_signal_attributes:
                         continue
-                    print("    "+f"sig.{a}".ljust(30) + str(getattr(sig1, a)).ljust(10) + " == %s" % getattr(sig2, a))
+                    #print("    "+f"sig.{a}".ljust(30) + str(getattr(sig1, a)).ljust(10) + " == %s" % getattr(sig2, a))
                     self.assertEqual(getattr(sig1, a), getattr(sig2, a), "%s does not match for signal %s in message %s" % (a, sig1.name, msg1.name))
 
                 print()

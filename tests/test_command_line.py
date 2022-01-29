@@ -104,7 +104,7 @@ DRIVER_HEARTBEAT(
   vcan0  1F4   [4]  01 02 03 04 ::
 IO_DEBUG(
     IO_DEBUG_test_unsigned: 1,
-    IO_DEBUG_test_enum: 'two',
+    IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two',
     IO_DEBUG_test_signed: 3,
     IO_DEBUG_test_float: 2.0
 )
@@ -121,7 +121,12 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_timestamp_absolute(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        argv = [
+            'cantools',
+            'decode',
+            '--prune',
+            'tests/files/dbc/socialledge.dbc'
+        ]
         input_data = """\
  (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
  (2020-12-19 12:04:48.597222)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF
@@ -163,7 +168,12 @@ IO_DEBUG(
                     self.assertEqual(actual_output, expected_output)
 
     def test_decode_timestamp_zero(self):
-        argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
+        argv = [
+            'cantools',
+            'decode',
+            '--prune',
+            'tests/files/dbc/socialledge.dbc'
+        ]
         input_data = """\
  (000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
  (002.047817)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF
@@ -231,6 +241,7 @@ CanFd(
         argv = [
             'cantools',
             'decode',
+            '--prune',
             'tests/files/dbc/socialledge.dbc'
         ]
         input_data = """\
@@ -281,6 +292,7 @@ IO_DEBUG(
         argv = [
             'cantools',
             'decode',
+            '--prune',
             '--single-line',
             'tests/files/dbc/socialledge.dbc'
         ]
@@ -316,6 +328,7 @@ IO_DEBUG(
         argv = [
             'cantools',
             'decode',
+            '--prune',
             '--single-line',
             'tests/files/dbc/socialledge.dbc'
         ]
@@ -1008,6 +1021,7 @@ BATTERY_VT(
         argv = [
             'cantools',
             'dump',
+            '--prune',
             'tests/files/dbc/dump_signal_choices.dbc'
         ]
 

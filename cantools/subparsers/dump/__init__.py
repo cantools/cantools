@@ -124,7 +124,7 @@ def _dump_diagnostics_database(dbase):
 def _do_dump(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
-                               prune_choices=not args.no_prune,
+                               prune_choices=args.prune,
                                strict=not args.no_strict)
 
     if isinstance(dbase, CanDatabase):
@@ -144,9 +144,9 @@ def add_subparser(subparsers):
         '-e', '--encoding',
         help='File encoding.')
     dump_parser.add_argument(
-        '--no-prune',
+        '--prune',
         action='store_true',
-        help='Refrain from shortening the names of named signal values.')
+        help='Try to shorten the names of named signal choices.')
     dump_parser.add_argument(
         '--no-strict',
         action='store_true',

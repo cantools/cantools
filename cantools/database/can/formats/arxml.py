@@ -61,6 +61,7 @@ class AutosarMessageSpecifics(object):
     def __init__(self):
         self._pdu_paths = []
         self._is_nm = False
+        self._is_secured = False
 
     @property
     def pdu_paths(self):
@@ -78,6 +79,11 @@ class AutosarMessageSpecifics(object):
         """
         return self._is_nm
 
+    @property
+    def is_secured(self):
+        """True iff the message integrity is secured using SecOC
+        """
+        return self._is_secured
 
 def parse_number_string(in_string, allow_float=False):
     # the input string contains a dot -> floating point value
@@ -664,6 +670,8 @@ class SystemLoader(object):
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
         autosar_specifics._is_nm = \
             (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
+        autosar_specifics._is_secured = \
+            (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
         # the bit pattern used to fill in unused bits to avoid
         # undefined behaviour/memory leaks
@@ -689,6 +697,36 @@ class SystemLoader(object):
                        sort_signals=self._sort_signals)
 
     def _load_pdu(self, pdu, frame_name, next_selector_idx):
+        is_secured = pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU'
+
+        if is_secured:
+            # secured PDUs reference a payload PDU and some
+            # authentication and freshness properties. Currently, we
+            # ignore everything except for the payload.
+            payload_pdu = \
+                self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
+            assert payload_pdu is not None, \
+                "Secured PDUs must specify a payload PDU!"
+
+            next_selector_idx, \
+                _, \
+                signals, \
+                cycle_time, \
+                child_pdu_paths = \
+                    self._load_pdu(payload_pdu, frame_name, next_selector_idx)
+
+            byte_length = self._get_unique_arxml_child(pdu, 'LENGTH')
+            byte_length = parse_number_string(byte_length.text)
+
+            payload_pdu_path = self._node_to_arxml_path[payload_pdu]
+            child_pdu_paths.append(payload_pdu_path)
+
+            return next_selector_idx, \
+                byte_length*8, \
+                signals, \
+                cycle_time, \
+                child_pdu_paths
+
         # load all data associated with this PDU.
         signals = []
         child_pdu_paths = []

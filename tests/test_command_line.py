@@ -1282,7 +1282,7 @@ BATTERY_VT(
                 'tests/files/dbc/{}.dbc'.format(database)
             ]
             if database == 'floating_point_use_float':
-              argv.insert(-1, '--use-float')
+                argv.insert(-1, '--use-float')
 
             database_h = basename + '.h'
             database_c = basename + '.c'

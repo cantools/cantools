@@ -798,16 +798,17 @@ def _format_comment(comment):
         return ''
 
 
-def _format_decimal(value, is_float=False):
+def _format_decimal(value, is_float=False, use_float=False):
+    f_append = 'f' if use_float else ''
     if int(value) == value:
         value = int(value)
 
         if is_float:
-            return str(value) + '.0'
+            return f'{value}.0{f_append}'
         else:
             return str(value)
     else:
-        return str(value)
+        return f'{value}{f_append}'
 
 
 def _format_range(signal):
@@ -1175,8 +1176,8 @@ def _generate_encode_decode(message, use_float):
     for signal in message.signals:
         scale = signal.decimal.scale
         offset = signal.decimal.offset
-        formatted_scale = _format_decimal(scale, is_float=True)
-        formatted_offset = _format_decimal(offset, is_float=True)
+        formatted_scale = _format_decimal(scale, is_float=True, use_float=use_float)
+        formatted_offset = _format_decimal(offset, is_float=True, use_float=use_float)
 
         if offset == 0 and scale == 1:
             encoding = 'value'

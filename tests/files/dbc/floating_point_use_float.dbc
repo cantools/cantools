@@ -1,4 +1,4 @@
-VERSION "HIPBNYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY/4/%%%/4/'%**4YYY///"
+VERSION ""
 
 
 NS_ : 
@@ -43,16 +43,15 @@ BO_ 1025 Message2: 8 TestNode
  SG_ Signal2 : 32|32@1- (1,0) [0|0] "" Vector__XXX
  SG_ Signal1 : 0|32@1- (1,0) [0|0] "" Vector__XXX
 
+BO_ 1026 Message3: 8 Vector__XXX
+ SG_ Signal3 : 0|8@1+ (0.001,-0.125) [0|0] "" Vector__XXX
 
 
 
 CM_ BU_ TestNode "";
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
 BA_DEF_DEF_  "GenMsgCycleTime" 0;
-
-
 SIG_VALTYPE_ 1024 Signal1 : 2;
-SIG_VALTYPE_ 1025 Signal1 : 1;
 SIG_VALTYPE_ 1025 Signal2 : 1;
-
+SIG_VALTYPE_ 1025 Signal1 : 1;
 

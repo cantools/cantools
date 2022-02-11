@@ -1473,6 +1473,40 @@ BATTERY_VT(
             self.assertFalse(os.path.exists(fuzzer_c))
             self.assertFalse(os.path.exists(fuzzer_mk))
 
+    def test_generate_c_source_single_floating_point_numbers(self):
+        databases = [
+            'motohawk',
+        ]
+
+        for database in databases:
+            argv = [
+                'cantools',
+                'generate_c_source',
+                '--single-precision-floating-point',
+                'tests/files/dbc/{}.dbc'.format(database)
+            ]
+
+            database_h = database + '.h'
+            database_c = database + '.c'
+            expected_database_h = database + '_no_floating_point_numbers.h'
+            expected_database_c = database + '_no_floating_point_numbers.c'
+
+            if os.path.exists(database_h):
+                os.remove(database_h)
+
+            if os.path.exists(database_c):
+                os.remove(database_c)
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            if sys.version_info[0] > 2:
+                self.assert_files_equal(
+                    database_h,
+                    'tests/files/c_source/' + expected_database_h)
+                self.assert_files_equal(
+                    database_c,
+                    'tests/files/c_source/' + expected_database_c)
 
 if __name__ == '__main__':
     unittest.main()

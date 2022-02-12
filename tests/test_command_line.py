@@ -1260,6 +1260,7 @@ BATTERY_VT(
             'padding_bit_order',
             'vehicle',
             'floating_point',
+            'floating_point_use_float',
             'no_signals',
             'choices',
             'multiplex',
@@ -1280,6 +1281,8 @@ BATTERY_VT(
                 'generate_c_source',
                 'tests/files/dbc/{}.dbc'.format(database)
             ]
+            if database == 'floating_point_use_float':
+                argv.insert(-1, '--use-float')
 
             database_h = basename + '.h'
             database_c = basename + '.c'

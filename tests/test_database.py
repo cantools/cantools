@@ -4392,7 +4392,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.fd_baudrate, 2000000)
 
         self.assertEqual(len(db.nodes), 2)
-        self.assertEqual(len(db.messages), 5)
+        self.assertEqual(len(db.messages), 6)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
@@ -4764,6 +4764,37 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2_sm.is_signed, True)
         self.assertEqual(signal_2_sm.is_float, False)
 
+        container_message = db.messages[5]
+        self.assertEqual(container_message.frame_id, 102)
+        self.assertEqual(container_message.is_extended_frame, False)
+        self.assertEqual(container_message.name, 'OneToContainThemAll')
+        self.assertEqual(container_message.length, 64)
+        self.assertEqual(container_message.unused_bit_pattern, 0xff)
+        self.assertEqual(container_message.senders, ['DJ', 'Dancer'])
+        self.assertEqual(container_message.send_type, None)
+        self.assertEqual(container_message.cycle_time, None)
+        self.assertEqual(len(container_message.signals), 0)
+        self.assertEqual(container_message.comment, None)
+        self.assertEqual(container_message.bus_name, 'Cluster0')
+        self.assertEqual(len(container_message._contained_messages), 5)
+        header_ids = sorted([cm.header_id for cm in container_message._contained_messages])
+        self.assertEqual(header_ids, [ 0x010203, 0x040506, 0x070809, 0x0a0b0c, 0x1d2e3f ])
+        self.assertTrue(container_message.dbc is None)
+        self.assertTrue(container_message.autosar is not None)
+        self.assertEqual(container_message.autosar.pdu_paths,
+            [
+                '/ContainerIPdu/OneToContainThemAll',
+                '/ISignalIPdu/message1',
+                '/ISignalIPdu/message2',
+                '/ISignalIPdu/message3',
+                '/ISignalIPdu/message3',
+                '/SecuredIPdu/message3_secured',
+                '/ISignalIPdu/multiplexed_message_0',
+                '/ISignalIPdu/multiplexed_message_1',
+                '/ISignalIPdu/multiplexed_message_static',
+                '/MultiplexedIPdu/multiplexed_message'
+            ])
+
     def test_system_arxml_traversal(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(
@@ -4793,12 +4824,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'ISignal',
                              'Constants',
                              'MultiplexedIPdu',
+                             'ContainerIPdu',
                              'ISignalIPdu',
                              'SecuredIPdu',
                              'Unit',
                              'CompuMethod',
                              'SystemSignal',
-                             'SwBaseType'
+                             'SwBaseType',
+                             'System'
                          ])
 
         # test unique location specifier if child nodes exist

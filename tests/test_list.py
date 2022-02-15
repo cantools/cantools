@@ -253,6 +253,7 @@ Message1
 Message3
 Message4
 MultiplexedMessage
+OneToContainThemAll
 """
 
             actual_output = stdout.getvalue()

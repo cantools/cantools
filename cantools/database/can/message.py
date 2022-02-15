@@ -2,7 +2,16 @@
 
 import binascii
 from copy import deepcopy
-from typing import List, Optional, Union, Dict, TYPE_CHECKING, Set
+from typing import (
+    List,
+    Tuple,
+    Optional,
+    Union,
+    Dict,
+    TYPE_CHECKING,
+    Set,
+    Literal
+)
 
 from .signal import NamedSignalValue, Signal
 from .signal_group import SignalGroup
@@ -42,6 +51,11 @@ class Message(object):
                  name: str,
                  length: int,
                  signals: List[Signal],
+                 # if the message is a container message, this lists
+                 # the messages which it potentially features
+                 contained_messages: Optional[List['Message']] = None,
+                 # header ID of message if it is part of a container message
+                 header_id: Optional[int] = None,
                  unused_bit_pattern: int = 0x00,
                  comment: Optional[Union[str, Comments]] = None,
                  senders: Optional[List[str]] = None,
@@ -69,6 +83,7 @@ class Message(object):
                 'message {}.'.format(frame_id, name))
 
         self._frame_id = frame_id
+        self._header_id = header_id
         self._is_extended_frame = is_extended_frame
         self._name = name
         self._length = length
@@ -79,6 +94,7 @@ class Message(object):
             self._signals = sort_signals(signals)
         else:
             self._signals = signals
+        self._contained_messages = contained_messages
 
 
         # if the 'comment' argument is a string, we assume that is an
@@ -194,6 +210,33 @@ class Message(object):
         return nodes
 
     @property
+    def header_id(self) -> Optional[int]:
+        """The header ID of the message if it is part of a container message.
+
+        """
+
+        return self._header_id
+
+    @header_id.setter
+    def header_id(self, value: int) -> None:
+        self._header_id = value
+
+    @property
+    def header_byte_order(self) -> Union[Literal['big_endian'],
+                                         Literal['little_endian']]:
+        """The byte order of the header ID of the message if it is part of a
+        container message.
+
+        """
+
+        return self._header_byte_order
+
+    @header_byte_order.setter
+    def header_byte_order(self, value: Union[Literal['big_endian'],
+                                     Literal['little_endian']] ) -> None:
+        self._header_byte_order = value
+
+    @property
     def frame_id(self) -> int:
         """The message frame id.
 
@@ -248,6 +291,22 @@ class Message(object):
         """
 
         return self._signals
+
+    @property
+    def is_container(self) -> bool:
+        """Returns if the message is a container message
+
+        """
+
+        return self._contained_messages is not None
+
+    @property
+    def contained_messages(self) -> Optional[List['Message']]:
+        """The list of messages potentially contained within this message
+
+        """
+
+        return self._contained_messages
 
     @property
     def unused_bit_pattern(self) -> int:

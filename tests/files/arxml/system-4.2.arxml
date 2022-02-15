@@ -107,6 +107,8 @@
                       <SHORT-NAME>multiplexed_message</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/MultiplexedMessage</FRAME-REF>
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <CAN-FRAME-RX-BEHAVIOR>CAN-FD</CAN-FRAME-RX-BEHAVIOR>
+                      <CAN-FRAME-TX-BEHAVIOR>CAN-FD</CAN-FRAME-TX-BEHAVIOR>
                       <IDENTIFIER>4</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
                     <!-- /Cluster/Cluster0/Pch0/message1 -->
@@ -114,6 +116,7 @@
                       <SHORT-NAME>message1</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message1</FRAME-REF>
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <CAN-FRAME-RX-BEHAVIOR>CAN-FD</CAN-FRAME-RX-BEHAVIOR>
                       <IDENTIFIER>5</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
                     <!-- /Cluster/Cluster0/Pch0/message2 -->
@@ -121,6 +124,7 @@
                       <SHORT-NAME>message2</SHORT-NAME>
                       <FRAME-REF DEST="CAN-FRAME">/CanFrame/Message2</FRAME-REF>
                       <CAN-ADDRESSING-MODE>EXTENDED</CAN-ADDRESSING-MODE>
+                      <CAN-FRAME-TX-BEHAVIOR>CAN-FD</CAN-FRAME-TX-BEHAVIOR>
                       <IDENTIFIER>6</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
                     <!-- /Cluster/Cluster0/Pch0/message3 -->

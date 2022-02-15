@@ -23,6 +23,7 @@ def _print_message(message, indent=''):
         else:
             print(f'{indent}  Size: {message.length} bytes')
         print(f'{indent}  Is extended frame: {message.is_extended_frame}')
+        print(f'{indent}  Is CAN-FD frame: {message.is_fd}')
     else:
         print(f'{indent}  Header ID: 0x{message.header_id:x} ({message.header_id})')
         print(f'{indent}  Size: {message.length} bytes')

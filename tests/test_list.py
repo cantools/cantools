@@ -66,6 +66,7 @@ ExampleMessage:
   Frame ID: 0x1f0 (496)
   Size: 8 bytes
   Is extended frame: False
+  Is CAN-FD frame: False
   Signal tree:
 
     -- {root}
@@ -185,6 +186,7 @@ Message2:
   Frame ID: 0x6 (6)
   Size: 7 bytes
   Is extended frame: True
+  Is CAN-FD frame: True
   Cycle time: 200 ms
   Signal tree:
 
@@ -293,6 +295,7 @@ Message1:
   Frame ID: 0x5 (5)
   Size: 6 bytes
   Is extended frame: False
+  Is CAN-FD frame: True
   Signal tree:
 
     -- {root}
@@ -383,6 +386,7 @@ Message1:
   Frame ID: 0x1 (1)
   Size: 5 bytes
   Is extended frame: False
+  Is CAN-FD frame: False
   Signal tree:
 
     -- {root}
@@ -411,6 +415,7 @@ Message2:
   Frame ID: 0x2 (2)
   Size: 4 bytes
   Is extended frame: False
+  Is CAN-FD frame: False
   Cycle time: 100 ms
   Signal tree:
 
@@ -492,6 +497,7 @@ Message4:
   Frame ID: 0x4 (4)
   Size: 5 bytes
   Is extended frame: False
+  Is CAN-FD frame: False
   Signal tree:
 
     -- {root}
@@ -531,6 +537,7 @@ Message3:
   Frame ID: 0x3 (3)
   Size: 8 bytes
   Is extended frame: True
+  Is CAN-FD frame: False
   Signal tree:
 
     -- {root}

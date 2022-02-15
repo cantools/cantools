@@ -1057,6 +1057,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 33)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
+        self.assertEqual(db.messages[0].is_fd, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
         self.assertEqual(db.messages[0].length, 3)
         self.assertEqual(db.messages[0].senders, ['Brake ACME'])
@@ -1518,6 +1519,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[3]
         self.assertEqual(message_1.frame_id, 0)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 8)
         self.assertEqual(message_1.senders, [])
@@ -1575,6 +1577,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_2 = db.messages[1]
         self.assertEqual(message_2.frame_id, 0x22)
         self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.is_fd, False)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 8)
         self.assertEqual(message_2.senders, [])
@@ -2000,6 +2003,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message = db.messages[0]
         self.assertEqual(message.frame_id, 1)
         self.assertEqual(message.is_extended_frame, False)
+        self.assertEqual(message.is_fd, False)
         self.assertEqual(message.name, 'A/=*')
         self.assertEqual(message.length, 8)
         self.assertEqual(message.senders, [])
@@ -2177,6 +2181,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_sym_file('tests/files/sym/type-extended-cycle-dash-p.sym')
         message = db.get_message_by_name('CAN-Tx Query')
         self.assertTrue(message.is_extended_frame)
+        self.assertEqual(message.is_fd, False)
         encoded_msg = message.encode({'Switch Outputs': 984, 'Switch Ch 02': 1, 'Switch Ch 01': 1}).hex()
         # Ensure proper endianness
         self.assertEqual(encoded_msg[:4], '03d8')
@@ -3303,6 +3308,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.messages[0].name = 'SetterName'
         db.messages[0].frame_id = 0x12121212
         db.messages[0].is_extended_frame = True
+        db.messages[0].is_fd = True
         db.messages[0].length = 6
         db.messages[0].comment = 'TheNewComment'
         db.messages[0].bus_name = 'TheNewBusName'
@@ -4235,6 +4241,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         mux_message = db.messages[0]
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
+        self.assertEqual(mux_message.is_fd, False)
         self.assertEqual(mux_message.name, 'Multiplexed')
         self.assertEqual(mux_message.length, 2)
         self.assertEqual(mux_message.senders, [])
@@ -4375,6 +4382,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[1]
         self.assertEqual(message_1.frame_id, 123)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'Status')
         self.assertEqual(message_1.length, 1)
         self.assertEqual(message_1.senders, [])
@@ -4509,6 +4517,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         mux_message = db.messages[0]
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
+        self.assertEqual(mux_message.is_fd, True)
         self.assertEqual(mux_message.name, 'MultiplexedMessage')
         self.assertEqual(mux_message.length, 2)
         self.assertEqual(mux_message.unused_bit_pattern, 0xff)
@@ -4630,6 +4639,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[1]
         self.assertEqual(message_1.frame_id, 5)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, True)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 6)
         self.assertEqual(message_1.senders, ['DJ'])
@@ -4731,6 +4741,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_2 = db.messages[2]
         self.assertEqual(message_2.frame_id, 6)
         self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.is_fd, True)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 7)
         self.assertEqual(message_2.senders, ['Dancer'])
@@ -4814,6 +4825,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_3 = db.messages[3]
         self.assertEqual(message_3.frame_id, 100)
         self.assertEqual(message_3.is_extended_frame, False)
+        self.assertEqual(message_3.is_fd, False)
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 8)
         self.assertEqual(message_3.unused_bit_pattern, 0xff)
@@ -4835,6 +4847,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_4 = db.messages[4]
         self.assertEqual(message_4.frame_id, 101)
         self.assertEqual(message_4.is_extended_frame, False)
+        self.assertEqual(message_4.is_fd, False)
         self.assertEqual(message_4.name, 'Message4')
         self.assertEqual(message_4.length, 6)
         self.assertEqual(message_4.unused_bit_pattern, 0x55)
@@ -4968,6 +4981,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[0]
         self.assertEqual(message_1.frame_id, 0x5f0)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'MY_MESSAGE_XIX_MY_CLUSTER')
         self.assertEqual(message_1.length, 8)
         self.assertEqual(message_1.senders, [])
@@ -5165,6 +5179,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[0]
         self.assertEqual(message_1.frame_id, 5)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 6)
         self.assertEqual(message_1.senders, [])
@@ -5223,6 +5238,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_2 = db.messages[1]
         self.assertEqual(message_2.frame_id, 6)
         self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.is_fd, False)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 7)
         self.assertEqual(message_2.senders, [])
@@ -5304,6 +5320,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_3 = db.messages[2]
         self.assertEqual(message_3.frame_id, 100)
         self.assertEqual(message_3.is_extended_frame, False)
+        self.assertEqual(message_3.is_fd, False)
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 8)
         self.assertEqual(message_3.senders, [])

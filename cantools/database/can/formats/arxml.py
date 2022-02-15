@@ -721,6 +721,22 @@ class SystemLoader(object):
             self._load_message_is_extended_frame(can_frame_triggering)
         comments = self._load_comments(can_frame)
 
+        rx_behavior = \
+            self._get_unique_arxml_child(can_frame_triggering,
+                                         'CAN-FRAME-RX-BEHAVIOR')
+        tx_behavior = \
+            self._get_unique_arxml_child(can_frame_triggering,
+                                         'CAN-FRAME-TX-BEHAVIOR')
+        if rx_behavior is not None and tx_behavior is not None:
+            if rx_behavior.text != tx_behavior.text:
+                LOGGER.warning(f'Frame "{name}" specifies different receive '
+                               f'and send behavior. This is currently '
+                               f'unsupported by cantools.')
+
+        is_fd = \
+            (rx_behavior is not None and rx_behavior.text == 'CAN-FD') or \
+            (tx_behavior is not None and tx_behavior.text == 'CAN-FD')
+
         # ToDo: senders
 
         # Usually, a CAN message contains only a single PDU, but for
@@ -750,6 +766,7 @@ class SystemLoader(object):
         return Message(bus_name=bus_name,
                        frame_id=frame_id,
                        is_extended_frame=is_extended_frame,
+                       is_fd=is_fd,
                        name=name,
                        length=length,
                        senders=senders,

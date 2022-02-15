@@ -69,6 +69,7 @@ class Message(object):
                  dbc_specifics: Optional["DbcSpecifics"] = None,
                  autosar_specifics: Optional["AutosarMessageSpecifics"] = None,
                  is_extended_frame: bool = False,
+                 is_fd: bool = False,
                  bus_name: Optional[str] = None,
                  signal_groups: Optional[List[SignalGroup]] = None,
                  strict: bool = True,
@@ -91,6 +92,7 @@ class Message(object):
         self._header_id = header_id
         self._header_byte_order = header_byte_order
         self._is_extended_frame = is_extended_frame
+        self._is_fd = is_fd
         self._name = name
         self._length = length
         self._unused_bit_pattern = unused_bit_pattern
@@ -267,7 +269,19 @@ class Message(object):
         self._is_extended_frame = value
 
     @property
-    def name(self) -> str:
+    def is_fd(self):
+        """``True`` if the message requires CAN-FD, ``False`` otherwise.
+
+        """
+
+        return self._is_fd
+
+    @is_fd.setter
+    def is_fd(self, value):
+        self._is_fd = value
+
+    @property
+    def name(self):
         """The message name as a string.
 
         """
@@ -998,9 +1012,10 @@ class Message(object):
             self._check_signal_tree(message_bits, self.signal_tree)
 
     def __repr__(self) -> str:
-        return "message('{}', 0x{:x}, {}, {}, {})".format(
-            self._name,
-            self._frame_id,
-            self._is_extended_frame,
-            self._length,
-            self._comments)
+        return \
+            f'message(' \
+            f"'{self._name}', " \
+            f'0x{self._frame_id:x}, ' \
+            f'{self._is_extended_frame}, '\
+            f'{self._length}, ' \
+            f'{self._comments})'

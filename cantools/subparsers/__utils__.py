@@ -16,17 +16,18 @@ def _format_signals(message, decoded_signals):
         except KeyError:
             continue
 
-        if isinstance(value, NamedSignalValue) or isinstance(value, str):
-            value = f"'{value}'"
-
         signal_name = signal.name
 
-        formatted_signals.append(
-            '{}: {}{}'.format(signal_name,
-                               value,
-                              ''
-                              if signal.unit is None
-                              else ' ' + signal.unit))
+        if signal.unit is None or \
+           isinstance(value, NamedSignalValue) or \
+           isinstance(value, str):
+
+            formatted_signal = f'{signal_name}: {value}'
+
+        else:
+            formatted_signal = f'{signal_name}: {value} {signal.unit}'
+
+        formatted_signals.append(formatted_signal)
 
     return formatted_signals
 

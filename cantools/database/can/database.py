@@ -2,6 +2,7 @@ import logging
 from typing import (
     Dict,
     List,
+    Tuple,
     Optional,
     TextIO,
     Union,
@@ -17,6 +18,7 @@ from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
+from ..errors import DecodeError
 from ..utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
 from ...compat import fopen
 from ...typechecking import StringPathLike
@@ -417,7 +419,13 @@ class Database(object):
                        data: bytes,
                        decode_choices: bool = True,
                        scaling: bool = True,
-                       ) -> Dict[str, Union[float, str]]:
+                       decode_containers: bool = False
+                       ) \
+        -> Union[Dict[str, Union[float, str]], \
+                 List[Tuple[Union[int, 'Message'], \
+                            Union[bytes, \
+                                  Dict[str, Union[float, str]]]]]]:
+
         """Decode given signal data `data` as a message of given frame id or
         name `frame_id_or_name`. Returns a dictionary of signal
         name-value entries.
@@ -432,6 +440,13 @@ class Database(object):
         >>> db.decode_message('Foo', b'\\x01\\x45\\x23\\x00\\x11')
         {'Bar': 1, 'Fum': 5.0}
 
+        If `decode_containers` is ``True``, container frames are
+        decoded. The reason why this needs to be explicitly enabled is
+        that decoding container frames returns a list of ``(Message,
+        SignalsDict)`` tuples which will cause code that does not
+        expect this to misbehave. Trying to decode a container message
+        with `decode_containers` set to ``False`` will raise a
+        `DecodeError`.
         """
 
         if isinstance(frame_id_or_name, int):
@@ -440,6 +455,17 @@ class Database(object):
             message = self._name_to_message[frame_id_or_name]
         else:
             raise ValueError(f"Invalid frame_id_or_name '{frame_id_or_name}'")
+
+        if message.is_container:
+            if decode_containers:
+                return message.decode(data,
+                                      decode_choices,
+                                      scaling,
+                                      decode_containers=True)
+            else:
+                raise DecodeError(f'Message "{message.name}" is a container '
+                                  f'message, but decoding such messages has '
+                                  f'not been enabled!')
 
         return message.decode(data, decode_choices, scaling)
 

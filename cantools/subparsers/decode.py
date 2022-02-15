@@ -1,10 +1,13 @@
 import argparse
 import sys
+import logging
 from argparse_addons import Integer
 
 from .. import database
 from .. import logreader
 from .__utils__ import format_message_by_frame_id
+
+logging.basicConfig(level=logging.WARNING)
 
 def _do_decode(args):
     dbase = database.load_file(args.database,
@@ -13,6 +16,7 @@ def _do_decode(args):
                                prune_choices=args.prune,
                                strict=not args.no_strict)
     decode_choices = not args.no_decode_choices
+    decode_containers = not args.no_decode_containers
     parser = logreader.Parser(sys.stdin)
     for line, frame in parser.iterlines(keep_unknowns=True):
         if frame is not None:
@@ -21,7 +25,8 @@ def _do_decode(args):
                                                frame.frame_id,
                                                frame.data,
                                                decode_choices,
-                                               args.single_line)
+                                               args.single_line,
+                                               decode_containers)
 
         print(line)
 
@@ -36,6 +41,10 @@ def add_subparser(subparsers):
         '-c', '--no-decode-choices',
         action='store_true',
         help='Do not convert scaled values to choice strings.')
+    decode_parser.add_argument(
+        '-t', '--no-decode-containers',
+        action='store_true',
+        help='Do not decode container messages.')
     decode_parser.add_argument(
         '-s', '--single-line',
         action='store_true',

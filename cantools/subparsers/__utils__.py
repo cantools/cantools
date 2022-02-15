@@ -1,3 +1,4 @@
+from cantools.database.can.message import Message
 from cantools.database.can.signal import NamedSignalValue
 
 MULTI_LINE_FMT = '''
@@ -46,18 +47,77 @@ def _format_message_multi_line(message, formatted_signals):
     return MULTI_LINE_FMT.format(message=message.name,
                                  signals=',\n'.join(indented_signals))
 
+def _format_container_single_line(message, decoded_data):
+    contained_list = list()
+    for cm, signals in decoded_data:
+        if isinstance(cm, Message):
+            formatted_cm_signals = _format_signals(cm, signals)
+            formatted_cm = _format_message_single_line(cm, formatted_cm_signals)
+            contained_list.append(formatted_cm)
+        else:
+            header_id = cm
+            data = signals
+            contained_list.append(
+                f'(Unknown contained message: Header ID: 0x{header_id:x}, '
+                f'Data: {data.hex()})')
+
+    return f' {message.name}({", ".join(contained_list)})'
+
+
+def _format_container_multi_line(message, decoded_data):
+    contained_list = list()
+    for cm, signals in decoded_data:
+        if isinstance(cm, Message):
+            formatted_cm_signals = _format_signals(cm, signals)
+            formatted_cm = _format_message_multi_line(cm, formatted_cm_signals)
+            formatted_cm = formatted_cm.replace('\n', '\n    ')
+            contained_list.append('    '+formatted_cm.strip())
+        else:
+            header_id = cm
+            data = signals
+            contained_list.append(
+                f'    Unknown contained message (Header ID: 0x{header_id:x}, '
+                f'Data: {data.hex()})')
+
+    return \
+        f'\n{message.name}(\n' + \
+        ',\n'.join(contained_list) + \
+        '\n)'
 
 def format_message_by_frame_id(dbase,
                                frame_id,
                                data,
                                decode_choices,
-                               single_line):
+                               single_line,
+                               decode_containers):
     try:
         message = dbase.get_message_by_frame_id(frame_id)
     except KeyError:
         return ' Unknown frame id {0} (0x{0:x})'.format(frame_id)
 
+    if message.is_container:
+        if decode_containers:
+            return format_container_message(message,
+                                            data,
+                                            decode_choices,
+                                            single_line)
+        else:
+            return f' Frame 0x{frame_id:x} is a container message'
+
     return format_message(message, data, decode_choices, single_line)
+
+def format_container_message(message, data, decode_choices, single_line):
+    try:
+        decoded_message = message.decode(data,
+                                         decode_choices,
+                                         decode_containers=True)
+    except Exception as e:
+        return ' ' + str(e)
+
+    if single_line:
+        return _format_container_single_line(message, decoded_message)
+    else:
+        return _format_container_multi_line(message, decoded_message)
 
 
 def format_message(message, data, decode_choices, single_line):

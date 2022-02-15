@@ -1,6 +1,7 @@
 # A CAN message.
 
 import binascii
+import logging
 from copy import deepcopy
 from typing import (
     List,
@@ -32,6 +33,7 @@ if TYPE_CHECKING:
     from .formats.arxml import AutosarMessageSpecifics
     from .formats.dbc import DbcSpecifics
 
+LOGGER = logging.getLogger(__name__)
 
 class Message(object):
     """A CAN message with frame id, comment, signals and other
@@ -56,6 +58,9 @@ class Message(object):
                  contained_messages: Optional[List['Message']] = None,
                  # header ID of message if it is part of a container message
                  header_id: Optional[int] = None,
+                 header_byte_order:
+                     Union[Literal['big_endian'],
+                           Literal['little_endian']] = 'big_endian',
                  unused_bit_pattern: int = 0x00,
                  comment: Optional[Union[str, Comments]] = None,
                  senders: Optional[List[str]] = None,
@@ -84,6 +89,7 @@ class Message(object):
 
         self._frame_id = frame_id
         self._header_id = header_id
+        self._header_byte_order = header_byte_order
         self._is_extended_frame = is_extended_frame
         self._name = name
         self._length = length
@@ -321,8 +327,8 @@ class Message(object):
     @unused_bit_pattern.setter
     def unused_bit_pattern(self, value):
         if value < 0 or value > 255:
-            LOGGER.warnig(f'Invalid unused bit pattern "{value}". Must be '
-                          f'an integer between 0 and 255')
+            LOGGER.info(f'Invalid unused bit pattern "{value}". Must be '
+                        f'an integer between 0 and 255')
             self._unused_bit_pattern = 0
             return
 
@@ -555,13 +561,110 @@ class Message(object):
 
         return encoded, padding_mask, all_signals
 
+    def _encode_container(self,
+                          data: List[Tuple[Union['Message', str, int],
+                                           Union[bytes,
+                                                 Dict[str, Union[float, str]]]]],
+                          scaling: bool,
+                          padding: bool,
+                          strict: bool) -> bytes:
+
+        result = bytes()
+
+        for header, value in data:
+            contained_message = None
+            if isinstance(header, str):
+                contained_message = \
+                    self.get_contained_message_by_name(header)
+            elif isinstance(header, Message):
+                # contained message is specified directly. We go once
+                # around the circle to ensure that a contained message
+                # with the given header ID is there.
+                contained_message = \
+                    self.get_contained_message_by_header_id(header.header_id) # type: ignore
+            elif isinstance(header, int):
+                # contained message is specified directly. We go once
+                # around the circle to ensure that a contained message
+                # with the given header ID is there.
+                contained_message = \
+                    self.get_contained_message_by_header_id(header)
+            else:
+                raise EncodeError(f'Could not determine message corresponding '
+                                  f'to header {header}')
+
+            if contained_message is None:
+                if isinstance(value, bytes) and isinstance(header, int):
+                    # the contained message waw specified as raw data
+                    header_id = header
+                else:
+                    raise EncodeError(f'No message corresponding to header '
+                                      f'{header} could be determined')
+            else:
+                assert contained_message.header_id is not None
+                header_id = contained_message.header_id
+
+            if isinstance(value, bytes):
+                # raw data
+
+                # ensure that the size of the blob corresponds to the
+                # one specified by the featured message.
+                if contained_message is not None and \
+                   len(value) != contained_message.length:
+
+                    raise EncodeError(f'Specified data for contained message '
+                                      f'{contained_message.name} is '
+                                      f'{len(value)} bytes instead of '
+                                      f'{contained_message.length} bytes')
+
+                contained_payload = value
+
+            elif isinstance(value, dict):
+                # signal_name to signal_value dictionary
+                assert contained_message is not None
+                contained_payload = contained_message.encode(value, # type: ignore
+                                                             scaling,
+                                                             padding,
+                                                             strict)
+
+            else:
+                assert contained_message is not None
+                raise EncodeError(f'Cannot encode payload for contained '
+                                  f'message "{contained_message.name}".')
+
+            hbo = 'big' if self.header_byte_order == 'big_endian' else 'little'
+            result += int.to_bytes(header_id,
+                                   3,
+                                   hbo) # type: ignore
+            result += int.to_bytes(len(contained_payload), 1, 'big')
+            result += contained_payload
+
+        return result
+
     def encode(self,
-               data: Dict[str, float],
+               data: Union[# type for normal messages
+                           Dict[str, float],
+
+                           # type for container messages
+                           List[Tuple[Union['Message', str, int],
+                                      Union[bytes,
+                                            Dict[str, Union[float, str]]]]]],
                scaling: bool = True,
                padding: bool = False,
                strict: bool = True,
                ) -> bytes:
         """Encode given data as a message of this type.
+
+        If the message is an "ordinary" frame, this method expects a
+        key-to-value dictionary as `data` which maps the name of every
+        required signal to a value that can be encoded by that
+        signal. If the current message is a container message, it
+        expects a list of `(contained_message, contained_data)` tuples
+        where `contained_message` is either an integer with the header
+        ID, the name or the message object of the contained
+        message. Similarly, the `contained_data` can either be
+        specified as raw binary data (`bytes`) or as a key-to-value
+        dictionary of every signal needed to encode the featured
+        message.
 
         If `scaling` is ``False`` no scaling of signals is performed.
 
@@ -576,6 +679,16 @@ class Message(object):
         b'\\x01\\x45\\x23\\x00\\x11'
 
         """
+
+        if self.is_container:
+            if isinstance(data, dict):
+                raise EncodeError(f'Container frames can only encode lists of '
+                                  f'(message, data) tuples')
+
+            return self._encode_container(data,
+                                          scaling,
+                                          padding,
+                                          strict)
 
         encoded, padding_mask, all_signals = \
             self._encode(self._codecs, data, scaling, strict=strict)
@@ -628,11 +741,73 @@ class Message(object):
 
         return decoded
 
+    def _decode_contained(self,
+                          data: bytes,
+                          decode_choices: bool,
+                          scaling: bool) \
+                          -> List[Tuple[Union[int, 'Message'], \
+                                        Union[bytes, \
+                                              Dict[str, Union[float, str]]]]]:
+
+        if len(data) > self.length:
+            raise DecodeError(f'Container message "{self.name}" specified '
+                              f'as exhibiting at most {self.length} but '
+                              f'received a {len(data)} bytes long frame')
+
+        result: List[Tuple[Union[int, Message],
+                           Union[bytes,
+                                 Dict[str, Union[float, str]]]]] \
+            = []
+        pos = 0
+        while pos < len(data):
+            if pos + 4 > len(data):
+                # TODO: better throw an exception? only warn in strict mode?
+                LOGGER.info(f'Malformed container message '
+                            f'"{self.name}" encountered while decoding: '
+                            f'No valid header specified for contained '
+                            f'message #{len(result)+1} starting at position '
+                            f'{pos}. Ignoring.')
+                return result
+
+            contained_id = int.from_bytes(data[pos:pos+3], 'big')
+            contained_len = data[pos+3]
+
+            if pos + contained_len > len(data):
+                raise DecodeError(f'Malformed container message '
+                                  f'"{self.name}": Contained message #'
+                                  f'{len(result)+1} would exceed total message '
+                                  f'size.')
+
+
+            contained_data = data[pos+4:pos+4+contained_len]
+            contained_msg = \
+                self.get_contained_message_by_header_id(contained_id)
+            pos += 4+contained_len
+
+            if contained_msg is None:
+                result.append((contained_id, contained_data))
+                continue
+
+            try:
+                contained_signals = contained_msg.decode(contained_data,
+                                                         decode_choices,
+                                                         scaling)
+                result.append((contained_msg, contained_signals)) # type: ignore
+            except ValueError as e:
+                result.append((contained_id, contained_data))
+
+        return result
+
     def decode(self,
                data: bytes,
                decode_choices: bool = True,
                scaling: bool = True,
-               ) -> Dict[str, Union[float, str]]:
+               decode_containers: bool = False
+               ) \
+               -> Union[Dict[str, Union[float, str]], \
+                        List[Tuple[Union[int, 'Message'],
+                                   Union[bytes,
+                                         Dict[str, Union[float, str]]]]]]:
         """Decode given data as a message of this type.
 
         If `decode_choices` is ``False`` scaled values are not
@@ -644,7 +819,26 @@ class Message(object):
         >>> foo.decode(b'\\x01\\x45\\x23\\x00\\x11')
         {'Bar': 1, 'Fum': 5.0}
 
+        If `decode_containers` is ``True``, the inner messages are
+        decoded if the current message is a container frame. The
+        reason why this needs to be explicitly enabled is that the
+        result of `decode()` for container frames is a list of
+        ``(header_id, signals_dict)`` tuples which might cause code
+        that does not expect this to misbehave. Trying to decode a
+        container message with `decode_containers` set to ``False``
+        will raise a `DecodeError`.
         """
+
+        if self.is_container:
+            if decode_containers:
+                return self._decode_contained(data,
+                                              decode_choices,
+                                              scaling)
+            else:
+                raise DecodeError(f'Message "{self.name}" is a container '
+                                  f'message, but decoding such messages has '
+                                  f'not been enabled by setting the '
+                                  f'decode_containers parameter to True')
 
         if self._codecs is None:
             raise ValueError("Codec is not initialized.")
@@ -652,6 +846,38 @@ class Message(object):
         data = data[:self._length]
 
         return self._decode(self._codecs, data, decode_choices, scaling)
+
+    def get_contained_message_by_header_id(self, header_id: int) \
+        -> Optional['Message']:
+
+        if self.contained_messages is None:
+            return None
+
+        tmp = [ x for x in self.contained_messages if x.header_id == header_id ]
+
+        if len(tmp) == 0:
+            return None
+        elif len(tmp) > 1:
+            raise Error(f'Container message "{self.name}" contains multiple '
+                        f'contained messages exhibiting id 0x{header_id:x}')
+
+        return tmp[0]
+
+    def get_contained_message_by_name(self, name: str) \
+        -> Optional['Message']:
+
+        if self.contained_messages is None:
+            return None
+
+        tmp = [ x for x in self.contained_messages if x.name == name ]
+
+        if len(tmp) == 0:
+            return None
+        elif len(tmp) > 1:
+            raise Error(f'Container message "{self.name}" contains multiple '
+                        f'contained messages named "{name}"')
+
+        return tmp[0]
 
     def get_signal_by_name(self, name: str) -> Signal:
         for signal in self._signals:

@@ -904,6 +904,105 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded, decoded_message)
 
+    def test_encode_decode_containers(self):
+        """Encode and decode container messages
+
+        """
+
+        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+
+        db_msg = db.get_message_by_name('OneToContainThemAll')
+
+        orig_msg = [
+            (
+                'message1',
+                {
+                    'signal6': 'zero',
+                    'signal1': 5.2,
+                    'signal5': 3.1415
+                }
+            ),
+        ]
+
+        encoded = db_msg.encode(orig_msg)
+        encoded2 = db.encode_message(db_msg.frame_id, orig_msg)
+        encoded3 = db.encode_message(db_msg.name, orig_msg)
+
+        self.assertEqual(encoded, b'\n\x0b\x0c\x06\x04\x00V\x0eI@')
+        self.assertEqual(encoded, encoded2)
+        self.assertEqual(encoded, encoded3)
+
+        # make sure that we do not accept signal name -> value
+        # dictionaries when encoding container frames
+        with self.assertRaises(cantools.database.EncodeError):
+            db.encode_message(db_msg.frame_id,
+                              {'signal': 'value'},
+                              strict=False)
+        with self.assertRaises(cantools.database.EncodeError):
+            db_msg.encode({'signal': 'value'},
+                          strict=False)
+
+        # cannot decode a container without explicitly specifying that
+        # containers ought to be decoded
+        with self.assertRaises(cantools.database.DecodeError):
+            decoded = db_msg.decode(encoded)
+        with self.assertRaises(cantools.database.DecodeError):
+            decoded = db.decode_message(db_msg.frame_id, encoded)
+
+        decoded = db_msg.decode(encoded, decode_containers=True)
+        decoded2 = db.decode_message(db_msg.frame_id,
+                                     encoded,
+                                     decode_containers=True)
+        decoded3 = db.decode_message(db_msg.name,
+                                     encoded,
+                                     decode_containers=True)
+
+        self.assertEqual(decoded[0][0].name, orig_msg[0][0])
+        self.assertEqual(str(decoded[0][1]['signal6']),
+                         orig_msg[0][1]['signal6'])
+        self.assertEqual(decoded[0][1]['signal1'], 5)
+        self.assertAlmostEqual(decoded[0][1]['signal5'], 3.1415)
+
+        self.assertEqual(decoded, decoded2)
+        self.assertEqual(decoded, decoded3)
+
+        # make sure that we won't let ourselfs disturb by trailing
+        # garbage
+        encoded += b'\x00\x00\x00\x00'
+        decoded2 = db.decode_message(db_msg.frame_id,
+                                     encoded,
+                                     decode_containers=True)
+        self.assertEqual(len(decoded2), 2)
+        self.assertEqual(decoded2[0], decoded[0])
+        self.assertEqual(decoded2[1], (0, b''))
+
+        # specify a contained message as raw data
+        orig_msg.append( (0xddeeff, b'\xa0\xa1\xa2\xa3\xa4') )
+        encoded = db_msg.encode(orig_msg)
+        self.assertEqual(encoded,
+                         b'\n\x0b\x0c\x06\x04\x00V\x0eI@'
+                         b'\xdd\xee\xff\x05\xa0\xa1\xa2\xa3\xa4')
+
+        decoded = db_msg.decode(encoded, decode_containers=True)
+        self.assertEqual(decoded[0], decoded2[0])
+        self.assertEqual(decoded[1], (0xddeeff, b'\xa0\xa1\xa2\xa3\xa4') )
+
+        # specify a contained message using its name but the payload
+        # as raw bytes
+        orig_msg[-1] = ('message1', b'\xa0\xa1\xa2\xa3\xa4')
+        with self.assertRaises(cantools.database.EncodeError):
+            # fail if the raw payload's length is unequal to the size
+            # specified of the contained message
+            encoded2 = db_msg.encode(orig_msg)
+
+        # succeed if the sizes match
+        orig_msg[-1] = ('message1', b'\xa0\xa1\xa2\xa3\xa4\xa5')
+        encoded2 = db_msg.encode(orig_msg)
+
+        self.assertEqual(encoded2,
+                         b'\n\x0b\x0c\x06\x04\x00V\x0eI@'
+                         b'\n\x0b\x0c\x06\xa0\xa1\xa2\xa3\xa4\xa5')
+
     def test_get_message_by_frame_id_and_name(self):
         with open('tests/files/dbc/motohawk.dbc', 'r') as fin:
             db = cantools.db.load(fin)

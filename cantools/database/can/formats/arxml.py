@@ -722,7 +722,7 @@ class SystemLoader(object):
             child_pdu_paths.append(payload_pdu_path)
 
             return next_selector_idx, \
-                byte_length*8, \
+                byte_length, \
                 signals, \
                 cycle_time, \
                 child_pdu_paths
@@ -731,9 +731,9 @@ class SystemLoader(object):
         signals = []
         child_pdu_paths = []
 
-        bit_length = self._get_unique_arxml_child(pdu, 'LENGTH')
-        if bit_length is not None:
-            bit_length = parse_number_string(bit_length.text)
+        byte_length = self._get_unique_arxml_child(pdu, 'LENGTH')
+        if byte_length is not None:
+            byte_length = parse_number_string(byte_length.text)
 
         if self.autosar_version_newer(4):
             time_period_location = [
@@ -771,7 +771,7 @@ class SystemLoader(object):
 
         return \
             next_selector_idx, \
-            bit_length, \
+            byte_length, \
             signals, \
             cycle_time, \
             child_pdu_paths
@@ -837,7 +837,7 @@ class SystemLoader(object):
             child_pdu_paths.append(dynalt_pdu_ref)
 
             next_selector_idx, \
-                dynalt_bit_length, \
+                dynalt_byte_length, \
                 dynalt_signals, \
                 dynalt_cycle_time, \
                 dynalt_child_pdu_paths \
@@ -928,7 +928,7 @@ class SystemLoader(object):
                 dest_tag_name=static_pdu_ref.attrib.get('DEST'))
 
             next_selector_idx, \
-                bit_length, \
+                byte_length, \
                 static_signals, \
                 _, \
                 static_child_pdu_paths \

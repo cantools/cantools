@@ -10,8 +10,7 @@ from typing import (
     Union,
     Dict,
     TYPE_CHECKING,
-    Set,
-    Literal
+    Set
 )
 
 from .signal import NamedSignalValue, Signal
@@ -58,9 +57,7 @@ class Message(object):
                  contained_messages: Optional[List['Message']] = None,
                  # header ID of message if it is part of a container message
                  header_id: Optional[int] = None,
-                 header_byte_order:
-                     Union[Literal['big_endian'],
-                           Literal['little_endian']] = 'big_endian',
+                 header_byte_order: str = 'big_endian',
                  unused_bit_pattern: int = 0x00,
                  comment: Optional[Union[str, Comments]] = None,
                  senders: Optional[List[str]] = None,
@@ -230,8 +227,7 @@ class Message(object):
         self._header_id = value
 
     @property
-    def header_byte_order(self) -> Union[Literal['big_endian'],
-                                         Literal['little_endian']]:
+    def header_byte_order(self) -> str:
         """The byte order of the header ID of the message if it is part of a
         container message.
 
@@ -240,8 +236,7 @@ class Message(object):
         return self._header_byte_order
 
     @header_byte_order.setter
-    def header_byte_order(self, value: Union[Literal['big_endian'],
-                                     Literal['little_endian']] ) -> None:
+    def header_byte_order(self, value: str) -> None:
         self._header_byte_order = value
 
     @property

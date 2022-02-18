@@ -16,7 +16,7 @@ from .formats import sym
 from .formats.arxml import AutosarDatabaseSpecifics
 from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
-from .message import Message
+from .message import Message, EncodeInputType, DecodeResultType
 from .node import Node
 from ..errors import DecodeError
 from ..utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
@@ -382,14 +382,16 @@ class Database(object):
 
     def encode_message(self,
                        frame_id_or_name: Union[int, str],
-                       data: Dict[str, float],
+                       data: EncodeInputType,
                        scaling: bool = True,
                        padding: bool = False,
                        strict: bool = True,
                        ) -> bytes:
         """Encode given signal data `data` as a message of given frame id or
-        name `frame_id_or_name`. `data` is a dictionary of signal
-        name-value entries.
+        name `frame_id_or_name`. For regular Messages, `data` is a
+        dictionary of signal name-value entries, for container
+        messages it is a list of (ContainedMessageOrMessageName,
+        ContainedMessageSignals) tuples.
 
         If `scaling` is ``False`` no scaling of signals is performed.
 
@@ -421,10 +423,7 @@ class Database(object):
                        scaling: bool = True,
                        decode_containers: bool = False
                        ) \
-        -> Union[Dict[str, Union[float, str]], \
-                 List[Tuple[Union[int, 'Message'], \
-                            Union[bytes, \
-                                  Dict[str, Union[float, str]]]]]]:
+        -> DecodeResultType:
 
         """Decode given signal data `data` as a message of given frame id or
         name `frame_id_or_name`. Returns a dictionary of signal

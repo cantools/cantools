@@ -34,6 +34,18 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+# Type aliases. Introduced to reduce type annotation complexity while
+# allowing for more complex encode/decode schemes like the one used
+# for AUTOSAR container messages.
+SignalDictType = Dict[str, Union[float, str]]
+ContainerHeaderSpecType = Union['Message', str, int]
+ContainerDecodeResultType = List[Union[Tuple['Message', SignalDictType],
+                                       Tuple[int, bytes]]]
+ContainerEncodeInputType = List[Tuple[ContainerHeaderSpecType,
+                                      Union[bytes, SignalDictType]]]
+DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
+EncodeInputType = Union[SignalDictType, ContainerEncodeInputType]
+
 class Message(object):
     """A CAN message with frame id, comment, signals and other
     information.
@@ -571,9 +583,7 @@ class Message(object):
         return encoded, padding_mask, all_signals
 
     def _encode_container(self,
-                          data: List[Tuple[Union['Message', str, int],
-                                           Union[bytes,
-                                                 Dict[str, Union[float, str]]]]],
+                          data: ContainerEncodeInputType,
                           scaling: bool,
                           padding: bool,
                           strict: bool) -> bytes:
@@ -630,7 +640,7 @@ class Message(object):
             elif isinstance(value, dict):
                 # signal_name to signal_value dictionary
                 assert contained_message is not None
-                contained_payload = contained_message.encode(value, # type: ignore
+                contained_payload = contained_message.encode(value,
                                                              scaling,
                                                              padding,
                                                              strict)
@@ -650,13 +660,7 @@ class Message(object):
         return result
 
     def encode(self,
-               data: Union[# type for normal messages
-                           Dict[str, float],
-
-                           # type for container messages
-                           List[Tuple[Union['Message', str, int],
-                                      Union[bytes,
-                                            Dict[str, Union[float, str]]]]]],
+               data: EncodeInputType,
                scaling: bool = True,
                padding: bool = False,
                strict: bool = True,
@@ -724,7 +728,7 @@ class Message(object):
                 node: Codec,
                 data: bytes,
                 decode_choices: bool,
-                scaling: bool) -> Dict[str, Union[float, str]]:
+                scaling: bool) -> SignalDictType:
         decoded = decode_data(data,
                               node['signals'],
                               node['formats'],
@@ -754,19 +758,14 @@ class Message(object):
                           data: bytes,
                           decode_choices: bool,
                           scaling: bool) \
-                          -> List[Tuple[Union[int, 'Message'], \
-                                        Union[bytes, \
-                                              Dict[str, Union[float, str]]]]]:
+                          -> ContainerDecodeResultType:
 
         if len(data) > self.length:
             raise DecodeError(f'Container message "{self.name}" specified '
                               f'as exhibiting at most {self.length} but '
                               f'received a {len(data)} bytes long frame')
 
-        result: List[Tuple[Union[int, Message],
-                           Union[bytes,
-                                 Dict[str, Union[float, str]]]]] \
-            = []
+        result: ContainerDecodeResultType = []
         pos = 0
         while pos < len(data):
             if pos + 4 > len(data):
@@ -813,10 +812,7 @@ class Message(object):
                scaling: bool = True,
                decode_containers: bool = False
                ) \
-               -> Union[Dict[str, Union[float, str]], \
-                        List[Tuple[Union[int, 'Message'],
-                                   Union[bytes,
-                                         Dict[str, Union[float, str]]]]]]:
+               -> DecodeResultType:
         """Decode given data as a message of this type.
 
         If `decode_choices` is ``False`` scaled values are not

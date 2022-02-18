@@ -63,7 +63,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
                     #print("    "+f"sig.{a}".ljust(30) + str(getattr(sig1, a)).ljust(10) + " == %s" % getattr(sig2, a))
                     self.assertEqual(getattr(sig1, a), getattr(sig2, a), "%s does not match for signal %s in message %s" % (a, sig1.name, msg1.name))
 
-                print()
+                #print()
 
     def remove_out_file(self, fn_out):
         path = os.path.split(fn_out)[0]

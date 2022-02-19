@@ -13,7 +13,7 @@ except ImportError:
 import cantools
 
 
-class CanBus(object):
+class CanBus(can.BusABC):
 
     def __init__(self):
         self.channel_info = None

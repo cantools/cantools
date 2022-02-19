@@ -3,36 +3,59 @@ import cantools
 
 from .dump.formatting import signal_tree_string
 
-def _print_message(message):
-    print(f'{message.name}:')
+def _print_message(message, indent=''):
+    print(f'{indent}{message.name}:')
 
     if message.comments:
         for lang in message.comments:
-            print(f'  Comment[{lang}]: {message.comments[lang]}')
+            print(f'{indent}  Comment[{lang}]: {message.comments[lang]}')
 
     if message.bus_name:
-        print(f'  Bus: {message.bus_name}')
+        print(f'{indent}  Bus: {message.bus_name}')
 
     if message.senders:
-        print(f'  Sending ECUs: {", ".join(sorted(message.senders))}')
+        print(f'{indent}  Sending ECUs: {", ".join(sorted(message.senders))}')
 
-    print(f'  Frame ID: 0x{message.frame_id:x} ({message.frame_id})')
-    print(f'  Size: {message.length} bytes')
-    print(f'  Is extended frame: {message.is_extended_frame}')
+    if message.header_id is None:
+        print(f'{indent}  Frame ID: 0x{message.frame_id:x} ({message.frame_id})')
+        if message.is_container:
+            print(f'{indent}  Maximum Size: {message.length} bytes')
+        else:
+            print(f'{indent}  Size: {message.length} bytes')
+        print(f'{indent}  Is extended frame: {message.is_extended_frame}')
+        print(f'{indent}  Is CAN-FD frame: {message.is_fd}')
+    else:
+        print(f'{indent}  Header ID: 0x{message.header_id:x} ({message.header_id})')
+        print(f'{indent}  Size: {message.length} bytes')
 
     if message.cycle_time is not None:
-        print(f'  Cycle time: {message.cycle_time} ms')
+        print(f'{indent}  Cycle time: {message.cycle_time} ms')
 
     if message.signals:
-        print(f'  Signal tree:')
+        print(f'{indent}  Signal tree:')
         st = signal_tree_string(message, console_width=1000*1000)
         print()
         for s in st.split('\n'):
-            print(f'    {s}')
+            print(f'{indent}    {s}')
         print()
 
+    if message.contained_messages is not None:
+        print(f'{indent}  Potentially contained messages:')
+        print()
+        for contained_message in message.contained_messages:
+            if contained_message.name is not None:
+                print(f"{indent}    {contained_message.name} (0x"
+                      f"{contained_message.header_id:x})")
+            else:
+                print(f"{indent}    (0x{contained_message.header_id:x})")
+        print()
+
+        print(f'{indent}  Potentially contained message details:')
+        for contained_message in message.contained_messages:
+            _print_message(contained_message, '    ')
+
     if message.signals:
-        print(f'  Signal details:')
+        print(f'{indent}  Signal details:')
 
     for signal in message.signals:
         signal_type = 'Integer'
@@ -43,15 +66,15 @@ def _print_message(message):
                  [ x.multiplexer_signal for x in message.signals]:
                 signal_type = 'Multiplex Selector'
 
-        print(f'    {signal.name}:')
+        print(f'{indent}    {signal.name}:')
         if signal.comments is not None:
             for lang in signal.comments:
-                print(f'      Comment[{lang}]: {signal.comments[lang]}')
+                print(f'{indent}      Comment[{lang}]: {signal.comments[lang]}')
         if signal.receivers:
-            print(f'      Receiving ECUs: {", ".join(sorted(signal.receivers))}')
-        print(f'      Type: {signal_type}')
+            print(f'{indent}      Receiving ECUs: {", ".join(sorted(signal.receivers))}')
+        print(f'{indent}      Type: {signal_type}')
         if signal.multiplexer_signal is not None:
-            print(f'      Selector signal: {signal.multiplexer_signal}')
+            print(f'{indent}      Selector signal: {signal.multiplexer_signal}')
             selector_sig = None
             selector_sig = message.get_signal_by_name(signal.multiplexer_signal)
             selector_values = []
@@ -62,32 +85,32 @@ def _print_message(message):
                 else:
                     selector_values.append(f'{x}')
 
-            print(f'      Selector values: {", ".join(selector_values)}')
+            print(f'{indent}      Selector values: {", ".join(selector_values)}')
 
-        print(f'      Start bit: {signal.start}')
-        print(f'      Length: {signal.length} bits')
+        print(f'{indent}      Start bit: {signal.start}')
+        print(f'{indent}      Length: {signal.length} bits')
         if signal.unit:
-            print(f'      Unit: {signal.unit}')
+            print(f'{indent}      Unit: {signal.unit}')
         if signal.initial is not None:
             iv = signal.initial
             if signal.unit is None or not isinstance(iv, float):
                 unit = ''
             else:
                 unit = f' {signal.unit}'
-            print(f'      Initial value: {iv}{unit}')
+            print(f'{indent}      Initial value: {iv}{unit}')
         if signal.invalid is not None:
             iv = signal.invalid
             if signal.unit is None or not isinstance(iv, float):
                 unit = ''
             else:
                 unit = f' {signal.unit}'
-            print(f'      Invalid value: {iv}{unit}')
+            print(f'{indent}      Invalid value: {iv}{unit}')
         if signal.is_signed is not None:
-            print(f'      Is signed: {signal.is_signed}')
+            print(f'{indent}      Is signed: {signal.is_signed}')
         if signal.minimum is not None:
-            print(f'      Minimum: {signal.minimum}')
+            print(f'{indent}      Minimum: {signal.minimum}')
         if signal.maximum is not None:
-            print(f'      Maximum: {signal.maximum}')
+            print(f'{indent}      Maximum: {signal.maximum}')
 
         has_offset = signal.offset is not None and signal.offset != 0
         has_scale = \
@@ -95,18 +118,18 @@ def _print_message(message):
             and (signal.scale > 1 + 1e-10 or signal.scale < 1 - 1e-10)
         if has_offset or has_scale:
             offset = signal.offset if signal.offset is not None else 0
-            print(f'      Offset: {offset}')
+            print(f'{indent}      Offset: {offset}')
 
             scale = signal.scale if signal.scale is not None else 1
-            print(f'      Scaling factor: {signal.scale}')
+            print(f'{indent}      Scaling factor: {signal.scale}')
 
         if signal.choices:
-            print(f'      Named values:')
+            print(f'{indent}      Named values:')
             for value, choice in signal.choices.items():
-                print(f'        {value}: {choice}')
+                print(f'{indent}        {value}: {choice}')
                 if choice.comments:
                     for lang, description in choice.comments.items():
-                        print(f'          Comment[{lang}]: {description}')
+                        print(f'{indent}          Comment[{lang}]: {description}')
 
 def _print_node(node):
     print(f'{node.name}:')

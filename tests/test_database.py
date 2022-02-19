@@ -904,6 +904,105 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded, decoded_message)
 
+    def test_encode_decode_containers(self):
+        """Encode and decode container messages
+
+        """
+
+        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+
+        db_msg = db.get_message_by_name('OneToContainThemAll')
+
+        orig_msg = [
+            (
+                'message1',
+                {
+                    'signal6': 'zero',
+                    'signal1': 5.2,
+                    'signal5': 3.1415
+                }
+            ),
+        ]
+
+        encoded = db_msg.encode(orig_msg)
+        encoded2 = db.encode_message(db_msg.frame_id, orig_msg)
+        encoded3 = db.encode_message(db_msg.name, orig_msg)
+
+        self.assertEqual(encoded, b'\n\x0b\x0c\x06\x04\x00V\x0eI@')
+        self.assertEqual(encoded, encoded2)
+        self.assertEqual(encoded, encoded3)
+
+        # make sure that we do not accept signal name -> value
+        # dictionaries when encoding container frames
+        with self.assertRaises(cantools.database.EncodeError):
+            db.encode_message(db_msg.frame_id,
+                              {'signal': 'value'},
+                              strict=False)
+        with self.assertRaises(cantools.database.EncodeError):
+            db_msg.encode({'signal': 'value'},
+                          strict=False)
+
+        # cannot decode a container without explicitly specifying that
+        # containers ought to be decoded
+        with self.assertRaises(cantools.database.DecodeError):
+            decoded = db_msg.decode(encoded)
+        with self.assertRaises(cantools.database.DecodeError):
+            decoded = db.decode_message(db_msg.frame_id, encoded)
+
+        decoded = db_msg.decode(encoded, decode_containers=True)
+        decoded2 = db.decode_message(db_msg.frame_id,
+                                     encoded,
+                                     decode_containers=True)
+        decoded3 = db.decode_message(db_msg.name,
+                                     encoded,
+                                     decode_containers=True)
+
+        self.assertEqual(decoded[0][0].name, orig_msg[0][0])
+        self.assertEqual(str(decoded[0][1]['signal6']),
+                         orig_msg[0][1]['signal6'])
+        self.assertEqual(decoded[0][1]['signal1'], 5)
+        self.assertAlmostEqual(decoded[0][1]['signal5'], 3.1415)
+
+        self.assertEqual(decoded, decoded2)
+        self.assertEqual(decoded, decoded3)
+
+        # make sure that we won't let ourselfs disturb by trailing
+        # garbage
+        encoded += b'\x00\x00\x00\x00'
+        decoded2 = db.decode_message(db_msg.frame_id,
+                                     encoded,
+                                     decode_containers=True)
+        self.assertEqual(len(decoded2), 2)
+        self.assertEqual(decoded2[0], decoded[0])
+        self.assertEqual(decoded2[1], (0, b''))
+
+        # specify a contained message as raw data
+        orig_msg.append( (0xddeeff, b'\xa0\xa1\xa2\xa3\xa4') )
+        encoded = db_msg.encode(orig_msg)
+        self.assertEqual(encoded,
+                         b'\n\x0b\x0c\x06\x04\x00V\x0eI@'
+                         b'\xdd\xee\xff\x05\xa0\xa1\xa2\xa3\xa4')
+
+        decoded = db_msg.decode(encoded, decode_containers=True)
+        self.assertEqual(decoded[0], decoded2[0])
+        self.assertEqual(decoded[1], (0xddeeff, b'\xa0\xa1\xa2\xa3\xa4') )
+
+        # specify a contained message using its name but the payload
+        # as raw bytes
+        orig_msg[-1] = ('message1', b'\xa0\xa1\xa2\xa3\xa4')
+        with self.assertRaises(cantools.database.EncodeError):
+            # fail if the raw payload's length is unequal to the size
+            # specified of the contained message
+            encoded2 = db_msg.encode(orig_msg)
+
+        # succeed if the sizes match
+        orig_msg[-1] = ('message1', b'\xa0\xa1\xa2\xa3\xa4\xa5')
+        encoded2 = db_msg.encode(orig_msg)
+
+        self.assertEqual(encoded2,
+                         b'\n\x0b\x0c\x06\x04\x00V\x0eI@'
+                         b'\n\x0b\x0c\x06\xa0\xa1\xa2\xa3\xa4\xa5')
+
     def test_get_message_by_frame_id_and_name(self):
         with open('tests/files/dbc/motohawk.dbc', 'r') as fin:
             db = cantools.db.load(fin)
@@ -958,6 +1057,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 33)
         self.assertEqual(db.messages[0].frame_id, 0xa)
         self.assertEqual(db.messages[0].is_extended_frame, False)
+        self.assertEqual(db.messages[0].is_fd, False)
         self.assertEqual(db.messages[0].name, 'Airbag')
         self.assertEqual(db.messages[0].length, 3)
         self.assertEqual(db.messages[0].senders, ['Brake ACME'])
@@ -1419,6 +1519,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[3]
         self.assertEqual(message_1.frame_id, 0)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 8)
         self.assertEqual(message_1.senders, [])
@@ -1476,6 +1577,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_2 = db.messages[1]
         self.assertEqual(message_2.frame_id, 0x22)
         self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.is_fd, False)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 8)
         self.assertEqual(message_2.senders, [])
@@ -1901,6 +2003,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message = db.messages[0]
         self.assertEqual(message.frame_id, 1)
         self.assertEqual(message.is_extended_frame, False)
+        self.assertEqual(message.is_fd, False)
         self.assertEqual(message.name, 'A/=*')
         self.assertEqual(message.length, 8)
         self.assertEqual(message.senders, [])
@@ -2078,6 +2181,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_sym_file('tests/files/sym/type-extended-cycle-dash-p.sym')
         message = db.get_message_by_name('CAN-Tx Query')
         self.assertTrue(message.is_extended_frame)
+        self.assertEqual(message.is_fd, False)
         encoded_msg = message.encode({'Switch Outputs': 984, 'Switch Ch 02': 1, 'Switch Ch 01': 1}).hex()
         # Ensure proper endianness
         self.assertEqual(encoded_msg[:4], '03d8')
@@ -3204,6 +3308,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.messages[0].name = 'SetterName'
         db.messages[0].frame_id = 0x12121212
         db.messages[0].is_extended_frame = True
+        db.messages[0].is_fd = True
         db.messages[0].length = 6
         db.messages[0].comment = 'TheNewComment'
         db.messages[0].bus_name = 'TheNewBusName'
@@ -4136,6 +4241,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         mux_message = db.messages[0]
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
+        self.assertEqual(mux_message.is_fd, False)
         self.assertEqual(mux_message.name, 'Multiplexed')
         self.assertEqual(mux_message.length, 2)
         self.assertEqual(mux_message.senders, [])
@@ -4276,6 +4382,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[1]
         self.assertEqual(message_1.frame_id, 123)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'Status')
         self.assertEqual(message_1.length, 1)
         self.assertEqual(message_1.senders, [])
@@ -4392,7 +4499,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.fd_baudrate, 2000000)
 
         self.assertEqual(len(db.nodes), 2)
-        self.assertEqual(len(db.messages), 5)
+        self.assertEqual(len(db.messages), 6)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
@@ -4410,6 +4517,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         mux_message = db.messages[0]
         self.assertEqual(mux_message.frame_id, 4)
         self.assertEqual(mux_message.is_extended_frame, False)
+        self.assertEqual(mux_message.is_fd, True)
         self.assertEqual(mux_message.name, 'MultiplexedMessage')
         self.assertEqual(mux_message.length, 2)
         self.assertEqual(mux_message.unused_bit_pattern, 0xff)
@@ -4531,6 +4639,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[1]
         self.assertEqual(message_1.frame_id, 5)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, True)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 6)
         self.assertEqual(message_1.senders, ['DJ'])
@@ -4632,6 +4741,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_2 = db.messages[2]
         self.assertEqual(message_2.frame_id, 6)
         self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.is_fd, True)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 7)
         self.assertEqual(message_2.senders, ['Dancer'])
@@ -4715,6 +4825,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_3 = db.messages[3]
         self.assertEqual(message_3.frame_id, 100)
         self.assertEqual(message_3.is_extended_frame, False)
+        self.assertEqual(message_3.is_fd, False)
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 8)
         self.assertEqual(message_3.unused_bit_pattern, 0xff)
@@ -4736,6 +4847,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_4 = db.messages[4]
         self.assertEqual(message_4.frame_id, 101)
         self.assertEqual(message_4.is_extended_frame, False)
+        self.assertEqual(message_4.is_fd, False)
         self.assertEqual(message_4.name, 'Message4')
         self.assertEqual(message_4.length, 6)
         self.assertEqual(message_4.unused_bit_pattern, 0x55)
@@ -4763,6 +4875,37 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2_sm.name, 'signal2_sm')
         self.assertEqual(signal_2_sm.is_signed, True)
         self.assertEqual(signal_2_sm.is_float, False)
+
+        container_message = db.messages[5]
+        self.assertEqual(container_message.frame_id, 102)
+        self.assertEqual(container_message.is_extended_frame, False)
+        self.assertEqual(container_message.name, 'OneToContainThemAll')
+        self.assertEqual(container_message.length, 64)
+        self.assertEqual(container_message.unused_bit_pattern, 0xff)
+        self.assertEqual(container_message.senders, ['DJ', 'Dancer'])
+        self.assertEqual(container_message.send_type, None)
+        self.assertEqual(container_message.cycle_time, None)
+        self.assertEqual(len(container_message.signals), 0)
+        self.assertEqual(container_message.comment, None)
+        self.assertEqual(container_message.bus_name, 'Cluster0')
+        self.assertEqual(len(container_message._contained_messages), 5)
+        header_ids = sorted([cm.header_id for cm in container_message._contained_messages])
+        self.assertEqual(header_ids, [ 0x010203, 0x040506, 0x070809, 0x0a0b0c, 0x1d2e3f ])
+        self.assertTrue(container_message.dbc is None)
+        self.assertTrue(container_message.autosar is not None)
+        self.assertEqual(container_message.autosar.pdu_paths,
+            [
+                '/ContainerIPdu/OneToContainThemAll',
+                '/ISignalIPdu/message1',
+                '/ISignalIPdu/message2',
+                '/ISignalIPdu/message3',
+                '/ISignalIPdu/message3',
+                '/SecuredIPdu/message3_secured',
+                '/ISignalIPdu/multiplexed_message_0',
+                '/ISignalIPdu/multiplexed_message_1',
+                '/ISignalIPdu/multiplexed_message_static',
+                '/MultiplexedIPdu/multiplexed_message'
+            ])
 
     def test_system_arxml_traversal(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
@@ -4793,12 +4936,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'ISignal',
                              'Constants',
                              'MultiplexedIPdu',
+                             'ContainerIPdu',
                              'ISignalIPdu',
                              'SecuredIPdu',
                              'Unit',
                              'CompuMethod',
                              'SystemSignal',
-                             'SwBaseType'
+                             'SwBaseType',
+                             'System'
                          ])
 
         # test unique location specifier if child nodes exist
@@ -4836,6 +4981,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[0]
         self.assertEqual(message_1.frame_id, 0x5f0)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'MY_MESSAGE_XIX_MY_CLUSTER')
         self.assertEqual(message_1.length, 8)
         self.assertEqual(message_1.senders, [])
@@ -5033,6 +5179,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_1 = db.messages[0]
         self.assertEqual(message_1.frame_id, 5)
         self.assertEqual(message_1.is_extended_frame, False)
+        self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'Message1')
         self.assertEqual(message_1.length, 6)
         self.assertEqual(message_1.senders, [])
@@ -5091,6 +5238,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_2 = db.messages[1]
         self.assertEqual(message_2.frame_id, 6)
         self.assertEqual(message_2.is_extended_frame, True)
+        self.assertEqual(message_2.is_fd, False)
         self.assertEqual(message_2.name, 'Message2')
         self.assertEqual(message_2.length, 7)
         self.assertEqual(message_2.senders, [])
@@ -5172,6 +5320,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message_3 = db.messages[2]
         self.assertEqual(message_3.frame_id, 100)
         self.assertEqual(message_3.is_extended_frame, False)
+        self.assertEqual(message_3.is_fd, False)
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 8)
         self.assertEqual(message_3.senders, [])

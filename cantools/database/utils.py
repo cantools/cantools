@@ -341,8 +341,14 @@ def prune_database_choices(database):
     Prune names of all named signal values of all signals of a database
     '''
     for message in database.messages:
+
         for signal in message.signals:
             prune_signal_choices(signal)
+
+        if message.contained_messages is not None:
+            for cm in message.contained_messages:
+                for cs in cm.signals:
+                    prune_signal_choices(cs)
 
 
 SORT_SIGNALS_DEFAULT: Final = 'default'

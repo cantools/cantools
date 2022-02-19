@@ -104,7 +104,7 @@ DRIVER_HEARTBEAT(
   vcan0  1F4   [4]  01 02 03 04 ::
 IO_DEBUG(
     IO_DEBUG_test_unsigned: 1,
-    IO_DEBUG_test_enum: 'IO_DEBUG_test2_enum_two',
+    IO_DEBUG_test_enum: IO_DEBUG_test2_enum_two,
     IO_DEBUG_test_signed: 3,
     IO_DEBUG_test_float: 2.0
 )
@@ -151,7 +151,7 @@ DRIVER_HEARTBEAT(
  (2020-12-19 12:04:56.805087)  vcan0  1F4   [4]  01 02 03 04 ::
 IO_DEBUG(
     IO_DEBUG_test_unsigned: 1,
-    IO_DEBUG_test_enum: 'two',
+    IO_DEBUG_test_enum: two,
     IO_DEBUG_test_signed: 3,
     IO_DEBUG_test_float: 2.0
 )
@@ -198,7 +198,7 @@ DRIVER_HEARTBEAT(
  (012.831664)  vcan0  1F4   [4]  01 02 03 04 ::
 IO_DEBUG(
     IO_DEBUG_test_unsigned: 1,
-    IO_DEBUG_test_enum: 'two',
+    IO_DEBUG_test_enum: two,
     IO_DEBUG_test_signed: 3,
     IO_DEBUG_test_float: 2.0
 )
@@ -272,7 +272,7 @@ DRIVER_HEARTBEAT(
 (1594172462.356874) vcan0 1F4#01020304 ::
 IO_DEBUG(
     IO_DEBUG_test_unsigned: 1,
-    IO_DEBUG_test_enum: 'two',
+    IO_DEBUG_test_enum: two,
     IO_DEBUG_test_signed: 3,
     IO_DEBUG_test_float: 2.0
 )
@@ -311,7 +311,7 @@ IO_DEBUG(
   vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
   vcan0  ERROR
 
-  vcan0  1F4   [4]  01 02 03 04 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: 'two', IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
+  vcan0  1F4   [4]  01 02 03 04 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: two, IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
   vcan0  1F3   [3]  01 02 03 :: Unknown frame id 499 (0x1f3)
 """
 
@@ -347,7 +347,7 @@ IO_DEBUG(
 (1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
 (1594172462.127684) vcan0 ERROR
 
-(1594172462.356874) vcan0 1F4#01020304 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: 'two', IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
+(1594172462.356874) vcan0 1F4#01020304 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: two, IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
 (1594172462.688432) vcan0 1F3#010203 :: Unknown frame id 499 (0x1f3)
 """
 

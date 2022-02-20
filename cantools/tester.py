@@ -192,7 +192,7 @@ class Message(UserDict, object):
                                     self.scaling,
                                     self.padding)
         self._can_message = can.Message(arbitration_id=arbitration_id,
-                                        extended_id=extended_id,
+                                        is_extended_id=extended_id,
                                         data=data)
 
         if self._periodic_task is not None:

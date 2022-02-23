@@ -714,38 +714,38 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message1',
                 0,
-                "Expected signal 'Signal1' value greater than or equal to 1 in "
-                "message 'Message1', but got 0."
+                'Expected signal "Signal1" value greater than or equal to 1 in '
+                'message "Message1", but got 0.'
             ),
             (
                 'Message1',
                 3,
-                "Expected signal 'Signal1' value less than or equal to 2 in "
-                "message 'Message1', but got 3."
+                'Expected signal "Signal1" value less than or equal to 2 in '
+                'message "Message1", but got 3.'
             ),
             (
                 'Message2',
                 0,
-                "Expected signal 'Signal1' value greater than or equal to 1 in "
-                "message 'Message2', but got 0."
+                'Expected signal "Signal1" value greater than or equal to 1 in '
+                'message "Message2", but got 0.'
             ),
             (
                 'Message3',
                 3,
-                "Expected signal 'Signal1' value less than or equal to 2 in "
-                "message 'Message3', but got 3."
+                'Expected signal "Signal1" value less than or equal to 2 in '
+                'message "Message3", but got 3.'
             ),
             (
                 'Message4',
                 1.9,
-                "Expected signal 'Signal1' value greater than or equal to 2 in "
-                "message 'Message4', but got 1.9."
+                'Expected signal "Signal1" value greater than or equal to 2 in '
+                'message "Message4", but got 1.9.'
             ),
             (
                 'Message4',
                 8.1,
-                "Expected signal 'Signal1' value less than or equal to 8 in "
-                "message 'Message4', but got 8.1."
+                'Expected signal "Signal1" value less than or equal to 8 in '
+                'message "Message4", but got 8.1.'
             )
         ]
 
@@ -772,7 +772,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            "The signal 'Signal1' is required for encoding.")
+            'The signal "Signal1" is required for encoding.')
 
         # Missing value, but checks disabled.
         with self.assertRaises(KeyError):

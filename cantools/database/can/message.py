@@ -78,8 +78,8 @@ class Message(object):
                  senders: Optional[List[str]] = None,
                  send_type: Optional[str] = None,
                  cycle_time: Optional[int] = None,
-                 dbc_specifics: Optional["DbcSpecifics"] = None,
-                 autosar_specifics: Optional["AutosarMessageSpecifics"] = None,
+                 dbc_specifics: Optional['DbcSpecifics'] = None,
+                 autosar_specifics: Optional['AutosarMessageSpecifics'] = None,
                  is_extended_frame: bool = False,
                  is_fd: bool = False,
                  bus_name: Optional[str] = None,
@@ -382,8 +382,8 @@ class Message(object):
             return None
         elif self._comments.get(None) is not None:
             return self._comments.get(None)
-        elif self._comments.get("FOR-ALL") is not None:
-            return self._comments.get("FOR-ALL")
+        elif self._comments.get('FOR-ALL') is not None:
+            return self._comments.get('FOR-ALL')
 
         return self._comments.get('EN')
 
@@ -431,7 +431,7 @@ class Message(object):
         return self._cycle_time
 
     @property
-    def dbc(self) -> Optional["DbcSpecifics"]:
+    def dbc(self) -> Optional['DbcSpecifics']:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -439,11 +439,11 @@ class Message(object):
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value: Optional["DbcSpecifics"]) -> None:
+    def dbc(self, value: Optional['DbcSpecifics']) -> None:
         self._dbc = value
 
     @property
-    def autosar(self) -> Optional["AutosarMessageSpecifics"]:
+    def autosar(self) -> Optional['AutosarMessageSpecifics']:
         """An object containing AUTOSAR specific properties
 
         e.g. auxiliary data required to implement CRCs, secure on-board
@@ -453,7 +453,7 @@ class Message(object):
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: Optional["AutosarMessageSpecifics"]) -> None:
+    def autosar(self, value: Optional['AutosarMessageSpecifics']) -> None:
         self._autosar = value
 
     @property
@@ -518,8 +518,8 @@ class Message(object):
         for signal in node['signals']:
             val = input_data.get(signal.name)
             if val is None:
-                raise EncodeError(f"The signal '{signal.name}' is "
-                                  f"required for encoding.")
+                raise EncodeError(f'The signal "{signal.name}" is '
+                                  f'required for encoding.')
             result[signal.name] = val
 
         for mux_signal_name, mux_nodes in node['multiplexers'].items():
@@ -1058,7 +1058,7 @@ class Message(object):
                                   f'decode_containers parameter to True')
 
         if self._codecs is None:
-            raise ValueError("Codec is not initialized.")
+            raise ValueError('Codec is not initialized.')
 
         data = data[:self._length]
 
@@ -1116,7 +1116,7 @@ class Message(object):
 
         """
         if self._codecs is None:
-            raise ValueError("Codec is not initialized.")
+            raise ValueError('Codec is not initialized.')
 
         return bool(self._codecs['multiplexers'])
 

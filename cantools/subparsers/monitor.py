@@ -365,7 +365,13 @@ class Monitor(can.Listener):
             self._try_update_container(message, timestamp, data)
             return
 
-        if len(data) != message.length:
+        if len(data) < message.length:
+            formatted = [
+                f'{timestamp:12.3f} {message.name} '
+                f'( undecoded, {message.length - len(data)} bytes '
+                f'too short: 0x{data.hex()} )'
+            ]
+            self._update_formatted_message(message.name, formatted)
             self._discarded += 1
             return
 

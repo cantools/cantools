@@ -281,14 +281,9 @@ class CanToolsMonitorTest(unittest.TestCase):
             stdscr.addstr,
             [
                 call(0, 0, 'Received: 1, Discarded: 1, Errors: 0'),
-                call(1,
-                     0,
-                     '   TIMESTAMP  MESSAGE                                           ',
-                     'green'),
-                call(29,
-                     0,
-                     'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ',
-                     'cyan')
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000 BATTERY_VT ( undecoded: 0x240098980b00 )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
             ])
 
     @patch('can.Notifier')

@@ -33,46 +33,42 @@ def _print_j1939_frame_id(message):
     print('      Destination:    {}'.format(destination))
     print('      Format:         {}'.format(pdu_format))
 
+def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
+    cycle_time = message.cycle_time
+    signal_choices_string = formatting.signal_choices_string(message)
 
-def _dump_can_database(dbase, with_comments=False):
+    if cycle_time is None:
+        cycle_time = '-'
 
-    WIDTH = 80
-    try:
-        import curses
-    except ModuleNotFoundError:  # pragma: no cover
-        pass
-    else:
-        try:
-            _stdscr = curses.initscr()
-            _, WIDTH = _stdscr.getmaxyx()  # pragma: no cover
-            curses.endwin()  # pragma: no cover
-        except Exception as e:
-            pass
+    if len(message.senders) == 0:
+        message.senders.append('-')
 
-    print('================================= Messages =================================')
     print()
-    print('  ' + 72 * '-')
+    print(f'  Name:           {name_prefix}{message.name}')
+    if message.frame_id is not None and not name_prefix:
+        # only print the arbitration ID for top-level messages
+        print(f'  Id:             0x{message.frame_id:x}')
+    if message.header_id is not None and name_prefix:
+        # only print the header ID for child messages
+        print(f'  Header id:      0x{message._header_id:06x}')
 
-    for message in dbase.messages:
-        cycle_time = message.cycle_time
-        signal_choices_string = formatting.signal_choices_string(message)
+    if message.protocol == 'j1939':
+        _print_j1939_frame_id(message)
 
-        if cycle_time is None:
-            cycle_time = '-'
+    if message.is_container:
+        print('  Maximum length: {} bytes'.format(message.length))
+    else:
+        print('  Length:         {} bytes'.format(message.length))
 
-        if len(message.senders) == 0:
-            message.senders.append('-')
-
+    print('  Cycle time:     {} ms'.format(cycle_time))
+    print('  Senders:        {}'.format(format_and(message.senders)))
+    if message.is_container:
+        print('  Possibly contained children:')
         print()
-        print('  Name:       {}'.format(message.name))
-        print('  Id:         0x{:x}'.format(message.frame_id))
-
-        if message.protocol == 'j1939':
-            _print_j1939_frame_id(message)
-
-        print('  Length:     {} bytes'.format(message.length))
-        print('  Cycle time: {} ms'.format(cycle_time))
-        print('  Senders:    {}'.format(format_and(message.senders)))
+        for child in message.contained_messages:
+            print(f'      {message.name} :: {child.name}')
+        print()
+    else:
         print('  Layout:')
         print()
         print('\n'.join([
@@ -96,7 +92,39 @@ def _dump_can_database(dbase, with_comments=False):
             ]))
             print()
 
-        print('  ' + 72 * '-')
+    print('  ' + 72 * '-')
+
+    if message.is_container:
+        # dump the layout of the child messages of the container
+        for child in message.contained_messages:
+            _dump_can_message(child,
+                              with_comments=with_comments,
+                              WIDTH=WIDTH,
+                              name_prefix=f'{message.name} :: ')
+
+def _dump_can_database(dbase, with_comments=False):
+    WIDTH = 80
+    try:
+        import curses
+    except ModuleNotFoundError:  # pragma: no cover
+        pass
+    else:
+        try:
+            _stdscr = curses.initscr()
+            _, WIDTH = _stdscr.getmaxyx()  # pragma: no cover
+            curses.endwin()  # pragma: no cover
+        except Exception as e:
+            pass
+
+    print('================================= Messages =================================')
+    print()
+    print('  ' + 72 * '-')
+
+    for message in dbase.messages:
+        _dump_can_message(message,
+                          with_comments=with_comments,
+                          WIDTH=WIDTH)
+
 
 
 def _dump_diagnostics_database(dbase):

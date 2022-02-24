@@ -741,11 +741,11 @@ BATTERY_VT(
 
   ------------------------------------------------------------------------
 
-  Name:       ExampleMessage
-  Id:         0x1f0
-  Length:     8 bytes
-  Cycle time: - ms
-  Senders:    PCM1
+  Name:           ExampleMessage
+  Id:             0x1f0
+  Length:         8 bytes
+  Cycle time:     - ms
+  Senders:        PCM1
   Layout:
 
                           Bit
@@ -812,11 +812,11 @@ BATTERY_VT(
 
   ------------------------------------------------------------------------
 
-  Name:       ExampleMessage
-  Id:         0x1f0
-  Length:     8 bytes
-  Cycle time: - ms
-  Senders:    PCM1
+  Name:           ExampleMessage
+  Id:             0x1f0
+  Length:         8 bytes
+  Cycle time:     - ms
+  Senders:        PCM1
   Layout:
 
                           Bit
@@ -885,16 +885,16 @@ BATTERY_VT(
 
   ------------------------------------------------------------------------
 
-  Name:       Message1
-  Id:         0x123456
+  Name:           Message1
+  Id:             0x123456
       Priority:       0
       PGN:            0x01200
       Source:         0x56
       Destination:    0x34
       Format:         PDU 1
-  Length:     8 bytes
-  Cycle time: - ms
-  Senders:    -
+  Length:         8 bytes
+  Cycle time:     - ms
+  Senders:        -
   Layout:
 
                           Bit
@@ -985,11 +985,11 @@ BATTERY_VT(
 
   ------------------------------------------------------------------------
 
-  Name:       Foo
-  Id:         0x1d8
-  Length:     1 bytes
-  Cycle time: - ms
-  Senders:    -
+  Name:           Foo
+  Id:             0x1d8
+  Length:         1 bytes
+  Cycle time:     - ms
+  Senders:        -
   Layout:
 
                           Bit
@@ -1030,11 +1030,11 @@ BATTERY_VT(
 
   ------------------------------------------------------------------------
 
-  Name:       Message0
-  Id:         0x400
-  Length:     8 bytes
-  Cycle time: - ms
-  Senders:    Node0
+  Name:           Message0
+  Id:             0x400
+  Length:         8 bytes
+  Cycle time:     - ms
+  Senders:        Node0
   Layout:
 
                           Bit
@@ -1108,16 +1108,16 @@ BATTERY_VT(
 
   ------------------------------------------------------------------------
 
-  Name:       Message1
-  Id:         0x15340201
+  Name:           Message1
+  Id:             0x15340201
       Priority:       5
       PGN:            0x13400
       Source:         0x01
       Destination:    0x02
       Format:         PDU 1
-  Length:     8 bytes
-  Cycle time: - ms
-  Senders:    Node1
+  Length:         8 bytes
+  Cycle time:     - ms
+  Senders:        Node1
   Layout:
 
                           Bit
@@ -1150,16 +1150,16 @@ BATTERY_VT(
 
   ------------------------------------------------------------------------
 
-  Name:       Message2
-  Id:         0x15f01002
+  Name:           Message2
+  Id:             0x15f01002
       Priority:       5
       PGN:            0x1f010
       Source:         0x02
       Destination:    All
       Format:         PDU 2
-  Length:     8 bytes
-  Cycle time: - ms
-  Senders:    Node2
+  Length:         8 bytes
+  Cycle time:     - ms
+  Senders:        Node2
   Layout:
 
                           Bit

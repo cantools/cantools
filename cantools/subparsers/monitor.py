@@ -434,7 +434,7 @@ class Monitor(can.Listener):
         contained_names = []
         for cmsg, _ in decoded:
             if isinstance(cmsg, int):
-                tmp = dbmsg.get_contained_message_by_header_id(cmsg) # type: ignore
+                tmp = dbmsg.get_contained_message_by_header_id(cmsg)
                 cmsg_name = f'0x{cmsg:x}' if tmp is None else tmp.name
             else:
                 cmsg_name = cmsg.name
@@ -461,7 +461,7 @@ class Monitor(can.Listener):
         # by '.'
         for cmsg, cdata in decoded:
             if isinstance(cmsg, int):
-                tmp = dbmsg.get_contained_message_by_header_id(cmsg) # type: ignore
+                tmp = dbmsg.get_contained_message_by_header_id(cmsg)
                 cmsg_name = f'0x{cmsg:x}' if tmp is None else tmp.name
                 full_name = f'{dbmsg.name} :: {cmsg_name}'
 

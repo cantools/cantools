@@ -1622,8 +1622,8 @@ class SystemLoader(object):
         factor, offset = \
             self._load_linear_factor_and_offset(compu_scale, decimal)
 
-        factor = 1 if factor is None else factor
-        offset = 0 if offset is None else offset
+        factor = 1.0 if factor is None else factor
+        offset = 0.0 if offset is None else offset
 
         # range of the physical values
         minimum = None if minimum_int is None else minimum_int*factor + offset
@@ -1671,12 +1671,12 @@ class SystemLoader(object):
             if factor_scale is not None:
                 factor = factor_scale
             else:
-                factor_scale = 1
+                factor_scale = 1.0
 
             if offset_scale is not None:
                 offset = offset_scale
             else:
-                offset_scale = 0
+                offset_scale = 0.0
 
             # range of the physical values of the scale.
             if minimum is None:

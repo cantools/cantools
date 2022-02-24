@@ -361,6 +361,10 @@ class Monitor(can.Listener):
             self._discarded += 1
             return
 
+        if message.is_container:
+            self._try_update_container(message, timestamp, data)
+            return
+
         if len(data) != message.length:
             self._discarded += 1
             return
@@ -375,6 +379,10 @@ class Monitor(can.Listener):
             try:
                 name = format_multiplexed_name(message, data, True)
             except database.DecodeError:
+                self._formatted_messages[name] = [
+                    f'{timestamp:12.3f} {message.name} '
+                    f'( undecodable: 0x{data.hex()} )'
+                ]
                 self._discarded += 1
                 return
 
@@ -392,6 +400,97 @@ class Monitor(can.Listener):
 
         if name not in self._filtered_sorted_message_names:
             self.insort_filtered(name)
+
+    def _try_update_container(self, dbmsg, timestamp, data):
+        try:
+            decoded = dbmsg.decode(data, decode_containers=True)
+        except:
+            if self._single_line:
+                self._formatted_messages[dbmsg.name] = [
+                    f'{timestamp:12.3f} {dbmsg.name} '
+                    f'( undecodable: 0x{data.hex()} )'
+                ]
+            else:
+                self._formatted_messages[dbmsg.name] = [
+                    f'{timestamp:12.3f} {dbmsg.name} (',
+                    ' '*14+f'    undecodable: 0x{data.hex()}',
+                    ' '*14+f')'
+                ]
+
+            if dbmsg.name not in self._filtered_sorted_message_names:
+                self.insort_filtered(dbmsg.name)
+
+            self._discarded += 1
+            return
+
+        # handle the "table of contents" of the container message. To
+        # avoid too visual turmoil and the resulting usability issues,
+        # we always put the contained messages on a single line
+        contained_names = []
+        for cmsg, _ in decoded:
+            if isinstance(cmsg, int):
+                cmsg_name = f'0x{cmsg:x}'
+            else:
+                cmsg_name = f'{cmsg.name}'
+
+            contained_names.append(cmsg_name)
+
+        if self._single_line:
+            self._formatted_messages[dbmsg.name] = [
+                f'{timestamp:12.3f} {dbmsg.name} (' \
+                + ', '.join(contained_names) \
+                + ')'
+            ]
+        else:
+            self._formatted_messages[dbmsg.name] = [
+                f'{timestamp:12.3f} {dbmsg.name} (',
+                14*' ' +          f'    {", ".join(contained_names)}',
+                14*' ' +          f')'
+            ]
+
+        if dbmsg.name not in self._filtered_sorted_message_names:
+            self.insort_filtered(dbmsg.name)
+
+        # handle the contained messages just as normal messages but
+        # prefix their names with the name of the container followed
+        # by '.'
+        for cmsg, cdata in decoded:
+            if isinstance(cmsg, int):
+                full_name = f'{dbmsg.name} :: 0x{cmsg:x}'
+
+                if len(cdata) == 0:
+                    cdata_str = f'<empty>'
+                else:
+                    cdata_str = f'0x{cdata.hex()}'
+
+                formatted = []
+                if self._single_line:
+                    formatted = [
+                        f'{timestamp:12.3f}  {full_name}('
+                        f' undecoded: {cdata_str} '
+                        f')'
+                    ]
+                else:
+                    formatted = [
+                        f'{timestamp:12.3f}  {full_name}(',
+                        ' '*14 +            f'    undecoded: {cdata_str}',
+                        ' '*14 +            f')',
+                    ]
+
+            else:
+                full_name = f'{dbmsg.name} :: {cmsg.name}'
+                formatted = format_message(cmsg,
+                                           data,
+                                           True,
+                                           False)
+                lines = formatted.splitlines()
+                formatted = [f'{timestamp:12.3f}  {full_name}(']
+                formatted += [14 * ' ' + line for line in lines[2:]]
+
+            self._formatted_messages[full_name] = formatted
+
+            if full_name not in self._filtered_sorted_message_names:
+                self.insort_filtered(full_name)
 
     def update_messages(self):
         modified = False

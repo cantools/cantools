@@ -31,6 +31,10 @@ def _print_message(message, indent=''):
     if message.cycle_time is not None:
         print(f'{indent}  Cycle time: {message.cycle_time} ms')
 
+    if message.autosar and message.autosar.e2e:
+        print(f'{indent}  End-to-end category: {message.autosar.e2e.category}')
+        print(f'{indent}  Data IDs: {message.autosar.e2e.data_ids}')
+
     if message.signals:
         print(f'{indent}  Signal tree:')
         st = signal_tree_string(message, console_width=1000*1000)

@@ -67,6 +67,7 @@ ExampleMessage:
   Size: 8 bytes
   Is extended frame: False
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -188,6 +189,7 @@ Message2:
   Is extended frame: True
   Is CAN-FD frame: True
   Cycle time: 200 ms
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -298,6 +300,7 @@ Message1:
   Is CAN-FD frame: True
   End-to-end category: Profile2
   Data IDs: [123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138]
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -403,6 +406,7 @@ Message1:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -433,6 +437,7 @@ Message2:
   Is extended frame: False
   Is CAN-FD frame: False
   Cycle time: 100 ms
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -514,6 +519,7 @@ Message4:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -554,6 +560,7 @@ Message3:
   Size: 8 bytes
   Is extended frame: True
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}

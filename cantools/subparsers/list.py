@@ -35,6 +35,17 @@ def _print_message(message, indent=''):
         print(f'{indent}  End-to-end category: {message.autosar.e2e.category}')
         print(f'{indent}  Data IDs: {message.autosar.e2e.data_ids}')
 
+    is_secured = False
+    if message.autosar and \
+       message.autosar.is_secured:
+        is_secured = True
+
+    print(f'{indent}  Is secured: {is_secured}')
+
+    if is_secured:
+        print(f'{indent}  Secured payload size: '
+              f'{message.autosar.secured_payload_length}')
+
     if message.signals:
         print(f'{indent}  Signal tree:')
         st = signal_tree_string(message, console_width=1000*1000)

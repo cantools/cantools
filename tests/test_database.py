@@ -14,6 +14,7 @@ import logging
 from xml.etree import ElementTree
 import timeit
 
+import cantools.autosar
 from cantools.database.utils import prune_signal_choices
 
 try:

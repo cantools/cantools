@@ -494,6 +494,15 @@
           <LENGTH>1</LENGTH>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal6</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
+        <!-- /ISignal/message1Group -->
+        <I-SIGNAL-GROUP UUID="a026aa86b94d49e3a9a9cbff071ac39a">
+          <SHORT-NAME>message1Group</SHORT-NAME>
+          <I-SIGNAL-REFS>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal1</I-SIGNAL-REF>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal5</I-SIGNAL-REF>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal6</I-SIGNAL-REF>
+          </I-SIGNAL-REFS>
+        </I-SIGNAL-GROUP>
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /Constants -->
@@ -676,9 +685,7 @@
             <!-- /ISignalIPdu/message1/SignalGroup -->
             <I-SIGNAL-TO-I-PDU-MAPPING UUID="3340618ec8eee41339e501f512bc5cc3">
               <SHORT-NAME>SignalGroup</SHORT-NAME>
-              <I-SIGNAL-GROUP-REF DEST="I-SIGNAL-GROUP">/ISignal/todo</I-SIGNAL-GROUP-REF>
-              <TRANSFER-PROPERTY>PENDING</TRANSFER-PROPERTY>
-              <UPDATE-INDICATION-BIT-POSITION>4</UPDATE-INDICATION-BIT-POSITION>
+              <I-SIGNAL-GROUP-REF DEST="I-SIGNAL-GROUP">/ISignal/message1Group</I-SIGNAL-GROUP-REF>
             </I-SIGNAL-TO-I-PDU-MAPPING>
           </I-SIGNAL-TO-PDU-MAPPINGS>
         </I-SIGNAL-I-PDU>
@@ -740,7 +747,7 @@
           </CONTAINED-I-PDU-PROPS>
         </I-SIGNAL-I-PDU>
         <!-- /ISignalIPdu/message4 -->
-       <I-SIGNAL-I-PDU UUID="c81f3b83acabf97610a32ccf5121f972">
+        <I-SIGNAL-I-PDU UUID="c81f3b83acabf97610a32ccf5121f972">
           <SHORT-NAME>message4</SHORT-NAME>
           <LENGTH>6</LENGTH>
           <I-SIGNAL-TO-PDU-MAPPINGS>
@@ -1092,12 +1099,12 @@
     <AR-PACKAGE UUID="bd2f5e1d4cce486b82cbce545c17d52e">
       <SHORT-NAME>System</SHORT-NAME>
       <ELEMENTS>
-	<!-- /System/cantools_system -->
-	<SYSTEM UUID="d52709739676476087d17fce08ac288d">
-	  <SHORT-NAME>cantools_system</SHORT-NAME>
-	  <CATEGORY>SYSTEM_EXTRACT</CATEGORY>
-	  <CONTAINER-I-PDU-HEADER-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</CONTAINER-I-PDU-HEADER-BYTE-ORDER>
-	  </SYSTEM>
+        <!-- /System/cantools_system -->
+        <SYSTEM UUID="d52709739676476087d17fce08ac288d">
+          <SHORT-NAME>cantools_system</SHORT-NAME>
+          <CATEGORY>SYSTEM_EXTRACT</CATEGORY>
+          <CONTAINER-I-PDU-HEADER-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</CONTAINER-I-PDU-HEADER-BYTE-ORDER>
+        </SYSTEM>
       </ELEMENTS>
     </AR-PACKAGE>
   </AR-PACKAGES>

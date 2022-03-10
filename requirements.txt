@@ -1,4 +1,5 @@
 bitstruct >= 8.12.1
+crccheck
 codespell
 mock
 python-can

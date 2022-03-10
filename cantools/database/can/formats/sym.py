@@ -614,6 +614,13 @@ def _load_message_signals(message_tokens,
 
 
 def _get_senders(section_name: str) -> List[str]:
+    """Generates a list of senders for a message based on the Send, Receive or Send/Receive
+    flag defined in the SYM file. Since the Message object only has a senders property on it,
+    it is easiest to translate Send flags into a sender named 'ECU', and translate Receive flags
+    into a sender named 'Peripherals'. This is not the cleanest representation of the data,
+    however, SYM files are unique in only having a Send, Receive or Send/Receive Direction. Most
+    other file formats specify a list of custom-named sending devices
+    """
     if section_name == '{SEND}':
         return ['ECU']
     elif section_name == '{RECEIVE}':

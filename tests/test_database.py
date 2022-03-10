@@ -1780,7 +1780,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.comment, None)
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_ids, None)
-        self.assertSequenceEqual(signal_4.senders, ['ECU', 'Peripherals'])
 
         # Symbol3.
         symbol_3 = db.messages[5]

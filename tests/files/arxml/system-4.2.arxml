@@ -209,7 +209,7 @@
             <L-2 L="EN">Comment1</L-2>
             <L-2 L="DE">Kommentar1</L-2>
           </DESC>
-          <FRAME-LENGTH>6</FRAME-LENGTH>
+          <FRAME-LENGTH>9</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <!-- /CanFrame/Message1/message1 -->
             <PDU-TO-FRAME-MAPPING UUID="1e160eb8bcb7a75f054eccbf6f47fe9f">
@@ -494,15 +494,114 @@
           <LENGTH>1</LENGTH>
           <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/Signal6</SYSTEM-SIGNAL-REF>
         </I-SIGNAL>
+        <!-- /ISignal/message1_CRC -->
+        <I-SIGNAL UUID="387836b304964f1cacc174190af710d3">
+          <SHORT-NAME>message1_CRC</SHORT-NAME>
+          <LENGTH>16</LENGTH>
+        </I-SIGNAL>
+        <!-- /ISignal/message1_SeqCounter -->
+        <I-SIGNAL UUID="0d03dc1f8ec2419baa11f0c6f151325e">
+          <SHORT-NAME>message1_SeqCounter</SHORT-NAME>
+          <LENGTH>16</LENGTH>
+        </I-SIGNAL>
+        <!-- /ISignal/message3_CRC -->
+        <I-SIGNAL UUID="b86c6ab0f4b842f4b3a2c42e8ddd0d05">
+          <SHORT-NAME>message3_CRC</SHORT-NAME>
+          <LENGTH>8</LENGTH>
+        </I-SIGNAL>
+        <!-- /ISignal/message3_SeqCounter -->
+        <I-SIGNAL UUID="7032fb5cfa6f4df996bb5e62b3377dce">
+          <SHORT-NAME>message3_SeqCounter</SHORT-NAME>
+          <LENGTH>4</LENGTH>
+        </I-SIGNAL>
         <!-- /ISignal/message1Group -->
-        <I-SIGNAL-GROUP UUID="a026aa86b94d49e3a9a9cbff071ac39a">
+        <I-SIGNAL-GROUP UUID="3eddf8ea0b7e4e678cbe1e810bd4e160">
           <SHORT-NAME>message1Group</SHORT-NAME>
           <I-SIGNAL-REFS>
             <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal1</I-SIGNAL-REF>
             <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal5</I-SIGNAL-REF>
             <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal6</I-SIGNAL-REF>
           </I-SIGNAL-REFS>
+          <TRANSFORMATION-I-SIGNAL-PROPSS>
+            <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS>
+              <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-VARIANTS>
+                <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-CONDITIONAL>
+                  <TRANSFORMER-REF DEST="TRANSFORMATION-TECHNOLOGY">/Transformers/Decepticons/Starscream</TRANSFORMER-REF>
+                  <DATA-IDS>
+                    <DATA-ID>123</DATA-ID>
+                    <DATA-ID>124</DATA-ID>
+                    <DATA-ID>125</DATA-ID>
+                    <DATA-ID>126</DATA-ID>
+                    <DATA-ID>127</DATA-ID>
+                    <DATA-ID>128</DATA-ID>
+                    <DATA-ID>129</DATA-ID>
+                    <DATA-ID>130</DATA-ID>
+                    <DATA-ID>131</DATA-ID>
+                    <DATA-ID>132</DATA-ID>
+                    <DATA-ID>133</DATA-ID>
+                    <DATA-ID>134</DATA-ID>
+                    <DATA-ID>135</DATA-ID>
+                    <DATA-ID>136</DATA-ID>
+                    <DATA-ID>137</DATA-ID>
+                    <DATA-ID>138</DATA-ID>
+                  </DATA-IDS>
+                </END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-CONDITIONAL>
+              </END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-VARIANTS>
+            </END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS>
+          </TRANSFORMATION-I-SIGNAL-PROPSS>
         </I-SIGNAL-GROUP>
+        <!-- /ISignal/message3Group -->
+        <I-SIGNAL-GROUP UUID="f95abd456e3748dc9b21e242ffc3795e">
+          <SHORT-NAME>message3Group</SHORT-NAME>
+          <I-SIGNAL-REFS>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/messag3_SeqCounter</I-SIGNAL-REF>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/messag3_CRC</I-SIGNAL-REF>
+          </I-SIGNAL-REFS>
+          <TRANSFORMATION-I-SIGNAL-PROPSS>
+            <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS>
+              <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-VARIANTS>
+                <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-CONDITIONAL>
+                  <TRANSFORMER-REF DEST="TRANSFORMATION-TECHNOLOGY">/Transformers/Decepticons/Galvatron</TRANSFORMER-REF>
+                  <DATA-IDS>
+                    <DATA-ID>321</DATA-ID>
+                  </DATA-IDS>
+                </END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-CONDITIONAL>
+              </END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS-VARIANTS>
+            </END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS>
+          </TRANSFORMATION-I-SIGNAL-PROPSS>
+        </I-SIGNAL-GROUP>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <!-- /Transformers -->
+    <AR-PACKAGE UUID="2743d102143a491496938f1436af28d0">
+      <SHORT-NAME>Transformers</SHORT-NAME>
+      <ELEMENTS>
+        <!-- /Transformers/Decepticons -->
+        <DATA-TRANSFORMATION-SET UUID="dbd4091e087b466c90edcdfc0b5a3162">
+          <SHORT-NAME>Decepticons</SHORT-NAME>
+          <TRANSFORMATION-TECHNOLOGYS>
+            <!-- /Transformers/Decepticons/Starscream -->
+                <TRANSFORMATION-TECHNOLOGY UUID="d53f0988652c4f49b57cf84d1299da9d">
+              <SHORT-NAME>Starscream</SHORT-NAME>
+              <PROTOCOL>E2E</PROTOCOL>
+              <TRANSFORMATION-DESCRIPTIONS>
+                <END-TO-END-TRANSFORMATION-DESCRIPTION>
+                  <PROFILE-NAME>Profile2</PROFILE-NAME>
+                </END-TO-END-TRANSFORMATION-DESCRIPTION>
+              </TRANSFORMATION-DESCRIPTIONS>
+            </TRANSFORMATION-TECHNOLOGY>
+            <!-- /Transformers/Decepticons/Galvatron -->
+                <TRANSFORMATION-TECHNOLOGY UUID="daf1a29f227943e2bf733d6eabff5da6">
+              <SHORT-NAME>Galvatron</SHORT-NAME>
+              <PROTOCOL>E2E</PROTOCOL>
+              <TRANSFORMATION-DESCRIPTIONS>
+                <END-TO-END-TRANSFORMATION-DESCRIPTION>
+                  <PROFILE-NAME>Profile5</PROFILE-NAME>
+                </END-TO-END-TRANSFORMATION-DESCRIPTION>
+              </TRANSFORMATION-DESCRIPTIONS>
+            </TRANSFORMATION-TECHNOLOGY>
+          </TRANSFORMATION-TECHNOLOGYS>
+        </DATA-TRANSFORMATION-SET>
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /Constants -->
@@ -655,35 +754,49 @@
         <!-- /ISignalIPdu/message1 -->
         <I-SIGNAL-I-PDU UUID="3dcbb5ec811c3944980fc28bd7f5a483">
           <SHORT-NAME>message1</SHORT-NAME>
-          <LENGTH>6</LENGTH>
+          <LENGTH>9</LENGTH>
           <CONTAINED-I-PDU-PROPS>
             <HEADER-ID-SHORT-HEADER>0x0a0B0c</HEADER-ID-SHORT-HEADER>
           </CONTAINED-I-PDU-PROPS>
           <I-SIGNAL-TO-PDU-MAPPINGS>
+            <!-- /ISignalIPdu/message1/Counter -->
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="8157be9345d94cda9c1013b563459b29">
+              <SHORT-NAME>Counter</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message1_SeqCounter</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>0</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <!-- /ISignalIPdu/message1/CRC -->
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="9ed2ba960ba54a7dbec1baee0d767216">
+              <SHORT-NAME>CRC</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message1_CRC</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>16</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
             <!-- /ISignalIPdu/message1/Signal1 -->
             <I-SIGNAL-TO-I-PDU-MAPPING UUID="ce8b5fec4f2b524050a02a84410cce80">
               <SHORT-NAME>Signal1</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal1</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-FIRST</PACKING-BYTE-ORDER>
-              <START-POSITION>4</START-POSITION>
+              <START-POSITION>36</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
             <!-- /ISignalIPdu/message1/Signal5 -->
             <I-SIGNAL-TO-I-PDU-MAPPING UUID="be19c22b8bc86ed477d522cde2937b71">
               <SHORT-NAME>Signal5</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal5</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-              <START-POSITION>16</START-POSITION>
+              <START-POSITION>40</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
             <!-- /ISignalIPdu/message1/Signal6 -->
             <I-SIGNAL-TO-I-PDU-MAPPING UUID="9c9ed58f86bfc363a231c97532be961f">
               <SHORT-NAME>Signal6</SHORT-NAME>
               <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/signal6</I-SIGNAL-REF>
               <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
-              <START-POSITION>0</START-POSITION>
+              <START-POSITION>32</START-POSITION>
             </I-SIGNAL-TO-I-PDU-MAPPING>
-            <!-- Groups are ignored. -->
+            <!-- Amongst others, signal groups specify the E2E properties -->
             <!-- /ISignalIPdu/message1/SignalGroup -->
-            <I-SIGNAL-TO-I-PDU-MAPPING UUID="3340618ec8eee41339e501f512bc5cc3">
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="f5d48cb6ec0e4ad188c9617970751bab">
               <SHORT-NAME>SignalGroup</SHORT-NAME>
               <I-SIGNAL-GROUP-REF DEST="I-SIGNAL-GROUP">/ISignal/message1Group</I-SIGNAL-GROUP-REF>
             </I-SIGNAL-TO-I-PDU-MAPPING>
@@ -741,10 +854,31 @@
         <!-- /ISignalIPdu/message3 -->
         <I-SIGNAL-I-PDU UUID="12619847f5492c041fa73a13194455fc">
           <SHORT-NAME>message3</SHORT-NAME>
-          <LENGTH>8</LENGTH>
+          <LENGTH>4</LENGTH>
           <CONTAINED-I-PDU-PROPS>
             <HEADER-ID-SHORT-HEADER>0x010203</HEADER-ID-SHORT-HEADER>
           </CONTAINED-I-PDU-PROPS>
+          <I-SIGNAL-TO-PDU-MAPPINGS>
+            <!-- /ISignalIPdu/message3_CRC -->
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="fa24c443037c468f96d8137284a2e125">
+              <SHORT-NAME>message3_CRC</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message3_CRC</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>0</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <!-- /ISignalIPdu/message3_SeqCounter -->
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="47bd5345457f412eb99fe90896901f41">
+              <SHORT-NAME>message3_SeqCounter</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message3_SeqCounter</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>8</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+            <!-- /ISignalIPdu/message3/SignalGroup -->
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="ec45c4df3cb446e8b8c59fcb1d1381df">
+              <SHORT-NAME>SignalGroup</SHORT-NAME>
+              <I-SIGNAL-GROUP-REF DEST="I-SIGNAL-GROUP">/ISignal/message3Group</I-SIGNAL-GROUP-REF>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+          </I-SIGNAL-TO-PDU-MAPPINGS>
         </I-SIGNAL-I-PDU>
         <!-- /ISignalIPdu/message4 -->
         <I-SIGNAL-I-PDU UUID="c81f3b83acabf97610a32ccf5121f972">
@@ -784,11 +918,11 @@
         <!-- /SecuredIPdu/message3_secured -->
         <SECURED-I-PDU UUID="9fb09bd0b1f84e86a0c62a2de73be796">
           <SHORT-NAME>message3_secured</SHORT-NAME>
-          <LENGTH>16</LENGTH>
+          <LENGTH>8</LENGTH>
           <CONTAINED-I-PDU-PROPS>
             <HEADER-ID-SHORT-HEADER>0x040506</HEADER-ID-SHORT-HEADER>
           </CONTAINED-I-PDU-PROPS>
-          <!-- we currently do not specify AUTHENTICATION_PROPS, FRESHNESS_PROPS, and SECURE-COMMUNICATION-PROPS. While this is technically allowed, it does not make sense in the context of a secured I-PDU... -->
+          <!-- we currently do not specify AUTHENTICATION_PROPS, FRESHNESS_PROPS, and SECURE-COMMUNICATION-PROPS. While this is technically allowed, it does not make much sense in the context of a secured I-PDU... -->
           <PAYLOAD-REF DEST="PDU-TRIGGERING">/Cluster/Cluster0/Pch0/message3_triggering</PAYLOAD-REF>
         </SECURED-I-PDU>
       </ELEMENTS>

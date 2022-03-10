@@ -153,6 +153,24 @@
           <DATA-TYPE-REF DEST="INTEGER-TYPE">/DataTypes/MultiplexSelector</DATA-TYPE-REF>
           <LENGTH>2</LENGTH>
         </SYSTEM-SIGNAL>
+        <!-- /SystemSignals/Checksum -->
+        <SYSTEM-SIGNAL UUID="7531a1caf3df44ada375af1713eeb6c2">
+          <SHORT-NAME>Checksum</SHORT-NAME>
+          <DESC>
+            <L-2 L="EN">AUTOSAR end-to-end protection CRC according to profile 2</L-2>
+          </DESC>
+          <DATA-TYPE-REF DEST="INTEGER-TYPE">/DataTypes/Integer</DATA-TYPE-REF>
+          <LENGTH>8</LENGTH>
+        </SYSTEM-SIGNAL>
+        <!-- /SystemSignals/SequenceCounter -->
+        <SYSTEM-SIGNAL UUID="456b676d0744498cb9fbf8e6ec03ba7f">
+          <SHORT-NAME>SequenceCounter</SHORT-NAME>
+          <DESC>
+            <L-2 L="EN">AUTOSAR end-to-end protection sequence counter according to profile 2</L-2>
+          </DESC>
+          <DATA-TYPE-REF DEST="INTEGER-TYPE">/DataTypes/Integer</DATA-TYPE-REF>
+          <LENGTH>4</LENGTH>
+        </SYSTEM-SIGNAL>
         <!-- /SystemSignals/IsAlive -->
         <SYSTEM-SIGNAL UUID="d81e9932feaf514c0b04bfd10d259013">
           <SHORT-NAME>IsAlive</SHORT-NAME>
@@ -426,7 +444,7 @@
                     <!-- /Network/CanCluster/CAN/PDUs/Status -->
                     <SIGNAL-I-PDU UUID="02a323c0ebfeeb13c5ac0f42488d767d">
                       <SHORT-NAME>Status</SHORT-NAME>
-                      <LENGTH>1</LENGTH>
+                      <LENGTH>3</LENGTH>
                       <I-PDU-TIMING-SPECIFICATION>
                         <CYCLIC-TIMING>
                           <REPEATING-TIME>
@@ -439,33 +457,47 @@
                         <MINIMUM-DELAY>0.01</MINIMUM-DELAY>
                       </I-PDU-TIMING-SPECIFICATION>
                       <SIGNAL-TO-PDU-MAPPINGS>
+                        <!-- /Network/CanCluster/CAN/PDUs/ChecksumMapping -->
+                        <I-SIGNAL-TO-I-PDU-MAPPING UUID="445b106734604db694900910b6e8ed04">
+                          <SHORT-NAME>ChecksumMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Checksum</SIGNAL-REF>
+                          <START-POSITION>0</START-POSITION>
+                        </I-SIGNAL-TO-I-PDU-MAPPING>
+                        <!-- /Network/CanCluster/CAN/PDUs/SequenceCounterMapping -->
+                        <I-SIGNAL-TO-I-PDU-MAPPING UUID="dc7db079d14c45c99df2ec21977974dd">
+                          <SHORT-NAME>SequenceCounterMapping</SHORT-NAME>
+                          <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+                          <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/SequenceCounter</SIGNAL-REF>
+                          <START-POSITION>12</START-POSITION>
+                        </I-SIGNAL-TO-I-PDU-MAPPING>
                         <!-- /Network/CanCluster/CAN/PDUs/AliveMapping -->
                         <I-SIGNAL-TO-I-PDU-MAPPING UUID="193a3a3d59ef551a4007497ed778baeb">
                           <SHORT-NAME>AliveMapping</SHORT-NAME>
                           <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
                           <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Alive</SIGNAL-REF>
-                          <START-POSITION>0</START-POSITION>
+                          <START-POSITION>16</START-POSITION>
                         </I-SIGNAL-TO-I-PDU-MAPPING>
                         <!-- /Network/CanCluster/CAN/PDUs/SleepMapping -->
                         <I-SIGNAL-TO-I-PDU-MAPPING UUID="193a3a3d59ef551a4007497ed778baeb">
                           <SHORT-NAME>SleepMapping</SHORT-NAME>
                           <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
                           <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Sleeps</SIGNAL-REF>
-                          <START-POSITION>1</START-POSITION>
+                          <START-POSITION>17</START-POSITION>
                         </I-SIGNAL-TO-I-PDU-MAPPING>
                         <!-- /Network/CanCluster/CAN/PDUs/PositionMapping -->
                         <I-SIGNAL-TO-I-PDU-MAPPING UUID="8662b1aff79c78cca00b319a89f42fd7">
                           <SHORT-NAME>PositionMapping</SHORT-NAME>
                           <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
                           <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Position</SIGNAL-REF>
-                          <START-POSITION>3</START-POSITION>
+                          <START-POSITION>19</START-POSITION>
                         </I-SIGNAL-TO-I-PDU-MAPPING>
                         <!-- /Network/CanCluster/CAN/PDUs/MovementMapping -->
                         <I-SIGNAL-TO-I-PDU-MAPPING UUID="1af43965e283bd5921b9832d183832c1">
                           <SHORT-NAME>MovementMapping</SHORT-NAME>
                           <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
                           <SIGNAL-REF DEST="I-SIGNAL">/Network/CanCluster/CAN/ISignals/Status/Movement</SIGNAL-REF>
-                          <START-POSITION>5</START-POSITION>
+                          <START-POSITION>21</START-POSITION>
                         </I-SIGNAL-TO-I-PDU-MAPPING>
                         <!-- /Network/CanCluster/CAN/PDUs/PositionMovementGroupMapping -->
                         <I-SIGNAL-TO-I-PDU-MAPPING UUID="ae3fc5e7d33ace46bb8db8ef9d1b32f3">
@@ -521,6 +553,16 @@
                     <AR-PACKAGE UUID="d092f91b9733319fe3599c2d991c1c80">
                       <SHORT-NAME>Status</SHORT-NAME>
                       <ELEMENTS>
+                        <!-- /Network/CanCluster/CAN/ISignals/Status/Checksum -->
+                        <I-SIGNAL UUID="dc7db079d14c45c99df2ec21977974dd">
+			  <SHORT-NAME>Checksum</SHORT-NAME>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/Checksum</SYSTEM-SIGNAL-REF>
+                        </I-SIGNAL>
+                        <!-- /Network/CanCluster/CAN/ISignals/Status/SequenceCounter -->
+                        <I-SIGNAL UUID="e05d9b2e0e164799856f79b60dd10d7c">
+			  <SHORT-NAME>SequenceCounter</SHORT-NAME>
+                          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignals/SequenceCounter</SYSTEM-SIGNAL-REF>
+                        </I-SIGNAL>
                         <!-- /Network/CanCluster/CAN/ISignals/Status/Alive -->
                         <I-SIGNAL UUID="8889d143c798e7d0bd8cc6b91c0de364">
                           <SHORT-NAME>Alive</SHORT-NAME>
@@ -577,7 +619,7 @@
                       <DESC>
                         <L-2>The lonely frame description</L-2>
                       </DESC>
-                      <FRAME-LENGTH>1</FRAME-LENGTH>
+                      <FRAME-LENGTH>3</FRAME-LENGTH>
                       <PDU-TO-FRAME-MAPPINGS>
                         <!-- /Network/CanCluster/CAN/Frames/Status/StatusMapping -->
                         <PDU-TO-FRAME-MAPPING UUID="d95c16e24ffdc90dd424ded01440bc9c">
@@ -595,6 +637,48 @@
           </SUB-PACKAGES>
         </AR-PACKAGE>
       </SUB-PACKAGES>
+    </AR-PACKAGE>
+    <!-- /Network/E2EProtection -->
+    <AR-PACKAGE UUID="ca27093f100845be98fe6094731ab03b">
+      <SHORT-NAME>E2EProtection</SHORT-NAME>
+      <ELEMENTS>
+        <!-- /Network/E2EProtection/pset -->
+        <END-TO-END-PROTECTION-SET UUID="6313352860c346f698251c94394e1254">
+          <SHORT-NAME>pset</SHORT-NAME>
+          <END-TO-END-PROTECTIONS>
+            <!-- /Network/E2EProtection/pset/protectmeplenty -->
+            <END-TO-END-PROTECTION UUID="17359182ebae411bb303f0b5d8aa106a">
+              <SHORT-NAME>protectmeplenty</SHORT-NAME>
+              <END-TO-END-PROFILE>
+                <CATEGORY>p2</CATEGORY> <!-- AUTOSAR profile 2 -->
+                <DATA-IDS>
+                  <DATA-ID>0</DATA-ID>
+                  <DATA-ID>1</DATA-ID>
+                  <DATA-ID>2</DATA-ID>
+                  <DATA-ID>3</DATA-ID>
+                  <DATA-ID>4</DATA-ID>
+                  <DATA-ID>5</DATA-ID>
+                  <DATA-ID>6</DATA-ID>
+                  <DATA-ID>7</DATA-ID>
+                  <DATA-ID>8</DATA-ID>
+                  <DATA-ID>9</DATA-ID>
+                  <DATA-ID>10</DATA-ID>
+                  <DATA-ID>11</DATA-ID>
+                  <DATA-ID>12</DATA-ID>
+                  <DATA-ID>13</DATA-ID>
+                  <DATA-ID>14</DATA-ID>
+                  <DATA-ID>15</DATA-ID>
+                </DATA-IDS>
+              </END-TO-END-PROFILE>
+              <END-TO-END-PROTECTION-I-SIGNAL-I-PDUS>
+                <END-TO-END-PROTECTION-I-SIGNAL-I-PDU>
+                  <I-SIGNAL-I-PDU-REF DEST="SIGNAL-I-PDU">/Network/CanCluster/CAN/PDUs/Status</I-SIGNAL-I-PDU-REF>
+                </END-TO-END-PROTECTION-I-SIGNAL-I-PDU>
+              </END-TO-END-PROTECTION-I-SIGNAL-I-PDUS>
+            </END-TO-END-PROTECTION>
+          </END-TO-END-PROTECTIONS>
+        </END-TO-END-PROTECTION-SET>
+      </ELEMENTS>
     </AR-PACKAGE>
   </TOP-LEVEL-PACKAGES>
 </AUTOSAR>

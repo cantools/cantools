@@ -293,21 +293,35 @@ Message1:
   Bus: Cluster0
   Sending ECUs: DJ
   Frame ID: 0x5 (5)
-  Size: 6 bytes
+  Size: 9 bytes
   Is extended frame: False
   Is CAN-FD frame: True
   Signal tree:
 
     -- {root}
+       +-- message1_SeqCounter
+       +-- message1_CRC
        +-- signal6
        +-- signal1
        +-- signal5
 
   Signal details:
-    signal6:
+    message1_SeqCounter:
       Receiving ECUs: Dancer
       Type: Integer
       Start bit: 0
+      Length: 16 bits
+      Is signed: False
+    message1_CRC:
+      Receiving ECUs: Dancer
+      Type: Integer
+      Start bit: 16
+      Length: 16 bits
+      Is signed: False
+    signal6:
+      Receiving ECUs: Dancer
+      Type: Integer
+      Start bit: 32
       Length: 1 bits
       Unit: wp
       Initial value: False
@@ -325,7 +339,7 @@ Message1:
       Comment[DE]: Signalkommentar!
       Receiving ECUs: Dancer
       Type: Integer
-      Start bit: 4
+      Start bit: 36
       Length: 3 bits
       Unit: m
       Initial value: 25.0 m
@@ -337,7 +351,7 @@ Message1:
     signal5:
       Receiving ECUs: Dancer
       Type: Float
-      Start bit: 16
+      Start bit: 40
       Length: 32 bits
       Is signed: False
 """

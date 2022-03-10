@@ -1676,6 +1676,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_1.signals), 2)
         self.assertEqual(message_1.comment, 'apa')
         self.assertEqual(message_1.bus_name, None)
+        self.assertSequenceEqual(message_1.senders, ['ECU', 'Peripherals'])
 
         signal_1 = message_1.signals[0]
         self.assertEqual(signal_1.name, 'Signal1')
@@ -1735,6 +1736,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_2.comment, None)
         self.assertEqual(message_2.bus_name, None)
         self.assertEqual(message_2.is_multiplexed(), False)
+        self.assertSequenceEqual(message_2.senders, ['Peripherals'])
 
         signal_3 = message_2.signals[0]
         self.assertEqual(signal_3.name, 'Signal3')
@@ -1780,6 +1782,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.comment, None)
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_ids, None)
+        self.assertSequenceEqual(signal_4.senders, ['ECU', 'Peripherals'])
 
         # Symbol3.
         symbol_3 = db.messages[5]
@@ -1787,6 +1790,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(symbol_3.length, 8)
         self.assertEqual(symbol_3.is_multiplexed(), True)
         self.assertEqual(len(symbol_3.signals), 4)
+        self.assertSequenceEqual(symbol_3.senders, ['ECU', 'Peripherals'])
         multiplexer = symbol_3.signals[0]
         self.assertEqual(multiplexer.name, 'Multiplexer1')
         self.assertEqual(multiplexer.start, 0)

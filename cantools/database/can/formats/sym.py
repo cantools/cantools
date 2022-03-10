@@ -4,6 +4,7 @@ import re
 import logging
 from collections import OrderedDict as odict
 from decimal import Decimal
+from typing import List
 
 import textparser
 from textparser import Sequence
@@ -612,6 +613,16 @@ def _load_message_signals(message_tokens,
                                            enums)
 
 
+def _get_senders(section_name: str) -> List[str]:
+    if section_name == '{SEND}':
+        return ['ECU']
+    elif section_name == '{RECEIVE}':
+        return ['Peripherals']
+    elif section_name == '{SENDRECEIVE}':
+        return ['ECU', 'Peripherals']
+    else:
+        raise ValueError(f'Unexpected message section named {section_name}')
+
 def _load_message(frame_id,
                   is_extended_frame,
                   message_tokens,
@@ -619,7 +630,8 @@ def _load_message(frame_id,
                   signals,
                   enums,
                   strict,
-                  sort_signals):
+                  sort_signals,
+                  section_name):
     #print(message_tokens)
     # Default values.
     name = message_tokens[1]
@@ -645,7 +657,7 @@ def _load_message(frame_id,
                    name=name,
                    length=length,
                    unused_bit_pattern=0xff,
-                   senders=[],
+                   senders=_get_senders(section_name),
                    send_type=None,
                    cycle_time=cycle_time,
                    signals=_load_message_signals(message_tokens,
@@ -706,7 +718,8 @@ def _load_message_section(section_name, tokens, signals, enums, strict, sort_sig
                                     signals,
                                     enums,
                                     strict,
-                                    sort_signals)
+                                    sort_signals,
+                                    section_name)
             messages.append(message)
 
     return messages

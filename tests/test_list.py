@@ -67,6 +67,7 @@ ExampleMessage:
   Size: 8 bytes
   Is extended frame: False
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -188,6 +189,7 @@ Message2:
   Is extended frame: True
   Is CAN-FD frame: True
   Cycle time: 200 ms
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -293,21 +295,38 @@ Message1:
   Bus: Cluster0
   Sending ECUs: DJ
   Frame ID: 0x5 (5)
-  Size: 6 bytes
+  Size: 9 bytes
   Is extended frame: False
   Is CAN-FD frame: True
+  End-to-end category: Profile2
+  Data IDs: [123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138]
+  Is secured: False
   Signal tree:
 
     -- {root}
+       +-- message1_SeqCounter
+       +-- message1_CRC
        +-- signal6
        +-- signal1
        +-- signal5
 
   Signal details:
-    signal6:
+    message1_SeqCounter:
       Receiving ECUs: Dancer
       Type: Integer
       Start bit: 0
+      Length: 16 bits
+      Is signed: False
+    message1_CRC:
+      Receiving ECUs: Dancer
+      Type: Integer
+      Start bit: 16
+      Length: 16 bits
+      Is signed: False
+    signal6:
+      Receiving ECUs: Dancer
+      Type: Integer
+      Start bit: 32
       Length: 1 bits
       Unit: wp
       Initial value: False
@@ -325,7 +344,7 @@ Message1:
       Comment[DE]: Signalkommentar!
       Receiving ECUs: Dancer
       Type: Integer
-      Start bit: 4
+      Start bit: 36
       Length: 3 bits
       Unit: m
       Initial value: 25.0 m
@@ -337,7 +356,7 @@ Message1:
     signal5:
       Receiving ECUs: Dancer
       Type: Float
-      Start bit: 16
+      Start bit: 40
       Length: 32 bits
       Is signed: False
 """
@@ -387,6 +406,7 @@ Message1:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -417,6 +437,7 @@ Message2:
   Is extended frame: False
   Is CAN-FD frame: False
   Cycle time: 100 ms
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -498,6 +519,7 @@ Message4:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}
@@ -538,6 +560,7 @@ Message3:
   Size: 8 bytes
   Is extended frame: True
   Is CAN-FD frame: False
+  Is secured: False
   Signal tree:
 
     -- {root}

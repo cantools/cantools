@@ -14,6 +14,7 @@ import logging
 from xml.etree import ElementTree
 import timeit
 
+import cantools.autosar
 from cantools.database.utils import prune_signal_choices
 
 try:
@@ -951,6 +952,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'message1',
                 {
+                    'message1_SeqCounter': 123,
+                    'message1_CRC': 456,
                     'signal6': 'zero',
                     'signal1': 5.2,
                     'signal5': 3.1415
@@ -962,7 +965,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         encoded2 = db.encode_message(db_msg.frame_id, orig_msg)
         encoded3 = db.encode_message(db_msg.name, orig_msg)
 
-        self.assertEqual(encoded, b'\n\x0b\x0c\x06\x04\x00V\x0eI@')
+        self.assertEqual(encoded, b'\n\x0b\x0c\t{\x00\xc8\x01\x04V\x0eI@')
         self.assertEqual(encoded, encoded2)
         self.assertEqual(encoded, encoded3)
 
@@ -1014,8 +1017,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         orig_msg.append( (0xddeeff, b'\xa0\xa1\xa2\xa3\xa4') )
         encoded = db_msg.encode(orig_msg)
         self.assertEqual(encoded,
-                         b'\n\x0b\x0c\x06\x04\x00V\x0eI@'
-                         b'\xdd\xee\xff\x05\xa0\xa1\xa2\xa3\xa4')
+                         b'\n\x0b\x0c\t{\x00\xc8\x01\x04V\x0e'
+                         b'I@\xdd\xee\xff\x05\xa0\xa1\xa2\xa3\xa4')
+
 
         decoded = db_msg.decode(encoded, decode_containers=True)
         self.assertEqual(decoded[0], decoded2[0])
@@ -1030,12 +1034,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
             encoded2 = db_msg.encode(orig_msg)
 
         # succeed if the sizes match
-        orig_msg[-1] = ('message1', b'\xa0\xa1\xa2\xa3\xa4\xa5')
+        orig_msg[-1] = ('message1', b'\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8')
         encoded2 = db_msg.encode(orig_msg)
 
         self.assertEqual(encoded2,
-                         b'\n\x0b\x0c\x06\x04\x00V\x0eI@'
-                         b'\n\x0b\x0c\x06\xa0\xa1\xa2\xa3\xa4\xa5')
+                         b'\n\x0b\x0c\t{\x00\xc8\x01\x04V\x0eI@\n\x0b\x0c\t'
+                         b'\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8')
 
     def test_gather_signals(self):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
@@ -1053,6 +1057,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'signal6' : 'zero',
             'signal1': 15,
             'signal5': 3.141529,
+
+            'message1_SeqCounter': 123,
+            'message1_CRC': 456,
         }
 
         msg_signal_dict = db_msg.gather_signals(global_signal_dict)
@@ -1079,7 +1086,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
                           'MultiplexedMessage_selector1',
                           'MultiplexedStatic2',
                           'World2',
-                          'World1'])
+                          'World1',
+                          ])
 
         # test the gather method for container messages
         cmsg = db.get_message_by_name('OneToContainThemAll')
@@ -1093,8 +1101,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          ['message1', 'message1', 'multiplexed_message'])
         csignals = [ list(x[1]) for x in ccontent ]
         self.assertEqual(csignals,
-                         [['signal6', 'signal1', 'signal5'],
-                          ['signal6', 'signal1', 'signal5'],
+                         [['message1_SeqCounter', 'message1_CRC', 'signal6',
+                           'signal1', 'signal5'],
+                          ['message1_SeqCounter', 'message1_CRC', 'signal6',
+                           'signal1', 'signal5'],
                           ['MultiplexedStatic',
                            'OneToContainThemAll_selector1',
                            'MultiplexedStatic2',
@@ -1145,7 +1155,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # make sure that if payload is specified as raw data must
         # exhibit the correct length
-        ccontent = [ ('message1', b'\x00\x11\x22\x33\x44\x55') ]
+        ccontent = [ ('message1', b'\x00\x11\x22\x33\x44\x55\x66\x77\x88') ]
         cmsg.assert_container_encodable(ccontent, scaling=True)
         ccontent = [ ('message1', b'\x00\x11\x22\x33\x44') ]
         with self.assertRaises(cantools.database.EncodeError):
@@ -4543,11 +4553,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.is_fd, False)
         self.assertEqual(message_1.name, 'Status')
-        self.assertEqual(message_1.length, 1)
+        self.assertEqual(message_1.length, 3)
         self.assertEqual(message_1.senders, [])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, 500)
-        self.assertEqual(len(message_1.signals), 4)
+        self.assertEqual(len(message_1.signals), 6)
         self.assertEqual(message_1.comments["EN"], 'The lonely frame description')
         self.assertEqual(message_1.bus_name, 'Network')
         self.assertTrue(message_1.dbc is None)
@@ -4555,12 +4565,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.autosar.pdu_paths, [ '/Network/CanCluster/CAN/PDUs/Status' ])
 
         signal_1 = message_1.signals[0]
-        self.assertEqual(signal_1.name, 'Alive')
+        self.assertEqual(signal_1.name, 'Checksum')
         self.assertEqual(signal_1.start, 0)
-        self.assertEqual(signal_1.length, 1)
+        self.assertEqual(signal_1.length, 8)
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
-        self.assertEqual(signal_1.initial, False)
+        self.assertEqual(signal_1.initial, None)
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
         self.assertEqual(signal_1.scale, 1.0)
@@ -4573,17 +4583,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
-        self.assertEqual(signal_1.comments, {'DE': 'Lebt', 'EN': 'Is alive'})
+        self.assertEqual(signal_1.comments, {'EN': 'AUTOSAR end-to-end protection CRC according to profile 2'})
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
 
         signal_2 = message_1.signals[1]
-        self.assertEqual(signal_2.name, 'Sleeps')
-        self.assertEqual(signal_2.start, 1)
-        self.assertEqual(signal_2.length, 1)
+        self.assertEqual(signal_2.name, 'SequenceCounter')
+        self.assertEqual(signal_2.start, 12)
+        self.assertEqual(signal_2.length, 4)
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')
-        self.assertEqual(signal_2.initial, True)
+        self.assertEqual(signal_2.initial, None)
         self.assertEqual(signal_2.is_signed, False)
         self.assertEqual(signal_2.is_float, False)
         self.assertEqual(signal_2.scale, 1.0)
@@ -4596,55 +4606,101 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
-        self.assertEqual(signal_2.comments, None)
+        self.assertEqual(signal_2.comments, {'EN': 'AUTOSAR end-to-end protection sequence counter according to profile 2'})
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
 
         signal_3 = message_1.signals[2]
-        self.assertEqual(signal_3.name, 'Position')
-        self.assertEqual(signal_3.start, 3)
-        self.assertEqual(signal_3.length, 2)
+        self.assertEqual(signal_3.name, 'Alive')
+        self.assertEqual(signal_3.start, 16)
+        self.assertEqual(signal_3.length, 1)
         self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'little_endian')
+        self.assertEqual(signal_3.initial, False)
         self.assertEqual(signal_3.is_signed, False)
         self.assertEqual(signal_3.is_float, False)
         self.assertEqual(signal_3.scale, 1.0)
         self.assertEqual(signal_3.offset, 0.0)
-        self.assertEqual(signal_3.minimum, 0)
-        self.assertEqual(signal_3.maximum, 2)
-        self.assertEqual(signal_3.decimal.scale, 1.0)
+        self.assertEqual(signal_3.minimum, None)
+        self.assertEqual(signal_3.maximum, None)
+        self.assertEqual(signal_3.decimal.scale, Decimal('1'))
         self.assertEqual(signal_3.decimal.offset, 0.0)
-        self.assertEqual(signal_3.decimal.minimum, 0)
-        self.assertEqual(signal_3.decimal.maximum, 2)
+        self.assertEqual(signal_3.decimal.minimum, None)
+        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
-        self.assertEqual(signal_3.choices, { 0: 'STANDARD_POSITION',
-                                             1: 'FORWARD_POSITION',
-                                             2: 'BACKWARD_POSITION'})
-        self.assertEqual(signal_3.comments, None)
+        self.assertEqual(signal_3.choices, None)
+        self.assertEqual(signal_3.comments, {'DE': 'Lebt', 'EN': 'Is alive'})
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)
 
         signal_4 = message_1.signals[3]
-        self.assertEqual(signal_4.name, 'Movement')
-        self.assertEqual(signal_4.start, 5)
-        self.assertEqual(signal_4.length, 3)
+        self.assertEqual(signal_4.name, 'Sleeps')
+        self.assertEqual(signal_4.start, 17)
+        self.assertEqual(signal_4.length, 1)
         self.assertEqual(signal_4.receivers, [])
         self.assertEqual(signal_4.byte_order, 'little_endian')
+        self.assertEqual(signal_4.initial, True)
         self.assertEqual(signal_4.is_signed, False)
         self.assertEqual(signal_4.is_float, False)
-        self.assertEqual(signal_4.scale, 10.0/4)
-        self.assertEqual(signal_4.offset, 40.0/4)
-        self.assertEqual(signal_4.minimum, 10.0)
-        self.assertEqual(signal_4.maximum, 10.0 + 3*10.0/4)
-        self.assertEqual(signal_4.decimal.scale, 10.0/4)
-        self.assertEqual(signal_4.decimal.offset, 40.0/4)
-        self.assertEqual(signal_4.decimal.minimum, 10.0)
-        self.assertEqual(signal_4.decimal.maximum, 10.0 + 3*10.0/4)
+        self.assertEqual(signal_4.scale, 1.0)
+        self.assertEqual(signal_4.offset, 0.0)
+        self.assertEqual(signal_4.minimum, None)
+        self.assertEqual(signal_4.maximum, None)
+        self.assertEqual(signal_4.decimal.scale, Decimal('1'))
+        self.assertEqual(signal_4.decimal.offset, 0.0)
+        self.assertEqual(signal_4.decimal.minimum, None)
+        self.assertEqual(signal_4.decimal.maximum, None)
         self.assertEqual(signal_4.unit, None)
         self.assertEqual(signal_4.choices, None)
-        self.assertEqual(signal_4.comment, 'Lonely system signal comment')
+        self.assertEqual(signal_4.comments, None)
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_ids, None)
+
+        signal_5 = message_1.signals[4]
+        self.assertEqual(signal_5.name, 'Position')
+        self.assertEqual(signal_5.start, 19)
+        self.assertEqual(signal_5.length, 2)
+        self.assertEqual(signal_5.receivers, [])
+        self.assertEqual(signal_5.byte_order, 'little_endian')
+        self.assertEqual(signal_5.is_signed, False)
+        self.assertEqual(signal_5.is_float, False)
+        self.assertEqual(signal_5.scale, 1.0)
+        self.assertEqual(signal_5.offset, 0.0)
+        self.assertEqual(signal_5.minimum, 0)
+        self.assertEqual(signal_5.maximum, 2)
+        self.assertEqual(signal_5.decimal.scale, 1.0)
+        self.assertEqual(signal_5.decimal.offset, 0.0)
+        self.assertEqual(signal_5.decimal.minimum, 0)
+        self.assertEqual(signal_5.decimal.maximum, 2)
+        self.assertEqual(signal_5.unit, None)
+        self.assertEqual(signal_5.choices, { 0: 'STANDARD_POSITION',
+                                             1: 'FORWARD_POSITION',
+                                             2: 'BACKWARD_POSITION'})
+        self.assertEqual(signal_5.comments, None)
+        self.assertEqual(signal_5.is_multiplexer, False)
+        self.assertEqual(signal_5.multiplexer_ids, None)
+
+        signal_6 = message_1.signals[5]
+        self.assertEqual(signal_6.name, 'Movement')
+        self.assertEqual(signal_6.start, 21)
+        self.assertEqual(signal_6.length, 3)
+        self.assertEqual(signal_6.receivers, [])
+        self.assertEqual(signal_6.byte_order, 'little_endian')
+        self.assertEqual(signal_6.is_signed, False)
+        self.assertEqual(signal_6.is_float, False)
+        self.assertEqual(signal_6.scale, 10.0/4)
+        self.assertEqual(signal_6.offset, 40.0/4)
+        self.assertEqual(signal_6.minimum, 10.0)
+        self.assertEqual(signal_6.maximum, 10.0 + 3*10.0/4)
+        self.assertEqual(signal_6.decimal.scale, 10.0/4)
+        self.assertEqual(signal_6.decimal.offset, 40.0/4)
+        self.assertEqual(signal_6.decimal.minimum, 10.0)
+        self.assertEqual(signal_6.decimal.maximum, 10.0 + 3*10.0/4)
+        self.assertEqual(signal_6.unit, None)
+        self.assertEqual(signal_6.choices, None)
+        self.assertEqual(signal_6.comment, 'Lonely system signal comment')
+        self.assertEqual(signal_6.is_multiplexer, False)
+        self.assertEqual(signal_6.multiplexer_ids, None)
 
     def test_system_4_arxml(self):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
@@ -4800,11 +4856,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.is_extended_frame, False)
         self.assertEqual(message_1.is_fd, True)
         self.assertEqual(message_1.name, 'Message1')
-        self.assertEqual(message_1.length, 6)
+        self.assertEqual(message_1.length, 9)
         self.assertEqual(message_1.senders, ['DJ'])
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, None)
-        self.assertEqual(len(message_1.signals), 3)
+        self.assertEqual(len(message_1.signals), 5)
         self.assertEqual(message_1.comments["DE"], 'Kommentar1')
         self.assertEqual(message_1.comments["EN"], 'Comment1')
         self.assertEqual(message_1.bus_name, 'Cluster0')
@@ -4820,82 +4876,128 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_1.autosar.pdu_paths, [ '/ISignalIPdu/message1' ])
 
         signal_1 = message_1.signals[0]
-        self.assertEqual(signal_1.name, 'signal6')
+        self.assertEqual(signal_1.name, 'message1_SeqCounter')
         self.assertEqual(signal_1.start, 0)
-        self.assertEqual(signal_1.length, 1)
-        self.assertEqual(signal_1.initial, False)
+        self.assertEqual(signal_1.length, 16)
+        self.assertEqual(signal_1.initial, None)
         self.assertEqual(signal_1.receivers, ['Dancer'])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
-        self.assertEqual(signal_1.scale, 0.1)
-        self.assertEqual(signal_1.offset, 0.0)
-        self.assertEqual(signal_1.minimum, 0)
-        self.assertEqual(signal_1.maximum, 0.1)
-        self.assertEqual(signal_1.decimal.scale, Decimal('0.1'))
-        self.assertEqual(signal_1.decimal.offset, 0.0)
-        self.assertEqual(signal_1.decimal.minimum, 0)
-        self.assertEqual(signal_1.decimal.maximum, 0.1)
-        self.assertEqual(signal_1.unit, "wp")
-        self.assertEqual(signal_1.choices, {0: 'zero'})
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, Decimal('1'))
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
 
         signal_2 = message_1.signals[1]
-        self.assertEqual(signal_2.name, 'signal1')
-        self.assertEqual(signal_2.start, 4)
-        self.assertEqual(signal_2.length, 3)
-        self.assertEqual(signal_2.initial, 25.0)
+        self.assertEqual(signal_2.name, 'message1_CRC')
+        self.assertEqual(signal_2.start, 16)
+        self.assertEqual(signal_2.length, 16)
+        self.assertEqual(signal_2.initial, None)
         self.assertEqual(signal_2.receivers, ['Dancer'])
-        self.assertEqual(signal_2.byte_order, 'big_endian')
+        self.assertEqual(signal_2.byte_order, 'little_endian')
         self.assertEqual(signal_2.is_signed, False)
         self.assertEqual(signal_2.is_float, False)
-        self.assertEqual(signal_2.scale, 5.0)
-        self.assertEqual(signal_2.offset, 0.0)
-        self.assertEqual(signal_2.minimum, 0.0)
-        self.assertEqual(signal_2.maximum, 20.0)
-        self.assertEqual(signal_2.decimal.scale, 5.0)
-        self.assertEqual(signal_2.decimal.offset, 0.0)
-        self.assertEqual(signal_2.decimal.minimum, 0.0)
-        self.assertEqual(signal_2.decimal.maximum, 20.0)
-        self.assertEqual(signal_2.unit, 'm')
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 0)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, Decimal('1'))
+        self.assertEqual(signal_2.decimal.offset, 0)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
-        self.assertEqual(signal_2.comments["EN"], 'Signal comment!')
-        self.assertEqual(signal_2.comments["DE"], 'Signalkommentar!')
-        self.assertEqual(signal_2.comment, 'Signal comment!')
-        signal_2.comments = {'DE': 'Kein Kommentar!', 'EN': 'No comment!'}
-        self.assertEqual(signal_2.comments,
+        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+
+        signal_3 = message_1.signals[2]
+        self.assertEqual(signal_3.name, 'signal6')
+        self.assertEqual(signal_3.start, 32)
+        self.assertEqual(signal_3.length, 1)
+        self.assertEqual(signal_3.initial, False)
+        self.assertEqual(signal_3.receivers, ['Dancer'])
+        self.assertEqual(signal_3.byte_order, 'little_endian')
+        self.assertEqual(signal_3.is_signed, False)
+        self.assertEqual(signal_3.is_float, False)
+        self.assertEqual(signal_3.scale, 0.1)
+        self.assertEqual(signal_3.offset, 0.0)
+        self.assertEqual(signal_3.minimum, 0)
+        self.assertEqual(signal_3.maximum, 0.1)
+        self.assertEqual(signal_3.decimal.scale, Decimal('0.1'))
+        self.assertEqual(signal_3.decimal.offset, 0.0)
+        self.assertEqual(signal_3.decimal.minimum, 0)
+        self.assertEqual(signal_3.decimal.maximum, 0.1)
+        self.assertEqual(signal_3.unit, "wp")
+        self.assertEqual(signal_3.choices, {0: 'zero'})
+        self.assertEqual(signal_3.comment, None)
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_ids, None)
+
+        signal_4 = message_1.signals[3]
+        self.assertEqual(signal_4.name, 'signal1')
+        self.assertEqual(signal_4.start, 36)
+        self.assertEqual(signal_4.length, 3)
+        self.assertEqual(signal_4.initial, 25.0)
+        self.assertEqual(signal_4.receivers, ['Dancer'])
+        self.assertEqual(signal_4.byte_order, 'big_endian')
+        self.assertEqual(signal_4.is_signed, False)
+        self.assertEqual(signal_4.is_float, False)
+        self.assertEqual(signal_4.scale, 5.0)
+        self.assertEqual(signal_4.offset, 0.0)
+        self.assertEqual(signal_4.minimum, 0.0)
+        self.assertEqual(signal_4.maximum, 20.0)
+        self.assertEqual(signal_4.decimal.scale, 5.0)
+        self.assertEqual(signal_4.decimal.offset, 0.0)
+        self.assertEqual(signal_4.decimal.minimum, 0.0)
+        self.assertEqual(signal_4.decimal.maximum, 20.0)
+        self.assertEqual(signal_4.unit, 'm')
+        self.assertEqual(signal_4.choices, None)
+        self.assertEqual(signal_4.comments["EN"], 'Signal comment!')
+        self.assertEqual(signal_4.comments["DE"], 'Signalkommentar!')
+        self.assertEqual(signal_4.comment, 'Signal comment!')
+        signal_4.comments = {'DE': 'Kein Kommentar!', 'EN': 'No comment!'}
+        self.assertEqual(signal_4.comments,
                          {
                              'DE': 'Kein Kommentar!',
                              'EN': 'No comment!'
                          })
 
-        self.assertEqual(signal_2.is_multiplexer, False)
-        self.assertEqual(signal_2.multiplexer_ids, None)
+        self.assertEqual(signal_4.is_multiplexer, False)
+        self.assertEqual(signal_4.multiplexer_ids, None)
 
-        signal_3 = message_1.signals[2]
-        self.assertEqual(signal_3.name, 'signal5')
-        self.assertEqual(signal_3.start, 16)
-        self.assertEqual(signal_3.initial, None)
-        self.assertEqual(signal_3.length, 32)
-        self.assertEqual(signal_3.receivers, ['Dancer'])
-        self.assertEqual(signal_3.byte_order, 'little_endian')
-        self.assertEqual(signal_3.is_signed, False)
-        self.assertEqual(signal_3.is_float, True)
-        self.assertEqual(signal_3.scale, 1)
-        self.assertEqual(signal_3.offset, 0)
-        self.assertEqual(signal_3.minimum, None)
-        self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
-        self.assertEqual(signal_3.unit, None)
-        self.assertEqual(signal_3.choices, None)
-        self.assertEqual(signal_3.comment, None)
-        self.assertEqual(signal_3.is_multiplexer, False)
-        self.assertEqual(signal_3.multiplexer_ids, None)
+        signal_5 = message_1.signals[4]
+        self.assertEqual(signal_5.name, 'signal5')
+        self.assertEqual(signal_5.start, 40)
+        self.assertEqual(signal_5.initial, None)
+        self.assertEqual(signal_5.length, 32)
+        self.assertEqual(signal_5.receivers, ['Dancer'])
+        self.assertEqual(signal_5.byte_order, 'little_endian')
+        self.assertEqual(signal_5.is_signed, False)
+        self.assertEqual(signal_5.is_float, True)
+        self.assertEqual(signal_5.scale, 1)
+        self.assertEqual(signal_5.offset, 0)
+        self.assertEqual(signal_5.minimum, None)
+        self.assertEqual(signal_5.maximum, None)
+        self.assertEqual(signal_5.decimal.scale, 1)
+        self.assertEqual(signal_5.decimal.offset, 0)
+        self.assertEqual(signal_5.decimal.minimum, None)
+        self.assertEqual(signal_5.decimal.maximum, None)
+        self.assertEqual(signal_5.unit, None)
+        self.assertEqual(signal_5.choices, None)
+        self.assertEqual(signal_5.comment, None)
+        self.assertEqual(signal_5.is_multiplexer, False)
+        self.assertEqual(signal_5.multiplexer_ids, None)
 
         message_2 = db.messages[2]
         self.assertEqual(message_2.frame_id, 6)
@@ -4991,7 +5093,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.senders, [])
         self.assertEqual(message_3.send_type, None)
         self.assertEqual(message_3.cycle_time, None)
-        self.assertEqual(len(message_3.signals), 0)
+        self.assertEqual(len(message_3.signals), 2)
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, 'Cluster0')
         self.assertTrue(message_3.dbc is None)
@@ -5093,6 +5195,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'Cluster',
                              'CanFrame',
                              'ISignal',
+                             'Transformers',
                              'Constants',
                              'MultiplexedIPdu',
                              'ContainerIPdu',
@@ -5494,17 +5597,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
 
         decoded_message = {
-            "signal1" : 0.0,
-            "signal5" : 1e5,
-            "signal6" : "zero",
+            'message1_SeqCounter': 123,
+            'message1_CRC': 456,
+            'signal1' : 0.0,
+            'signal5' : 1e5,
+            'signal6' : 'zero',
         }
 
-        encoded_message = db.encode_message("Message1", decoded_message)
+        encoded_message = db.encode_message('Message1', decoded_message)
 
-        self.assertEqual(encoded_message, b'\x00\x00\x00P\xc3G')
+        self.assertEqual(encoded_message, b'{\x00\xc8\x01\x00\x00P\xc3G')
 
-        decoded_message2 = db.decode_message("Message1", encoded_message)
-        encoded_message2 = db.encode_message("Message1", decoded_message2)
+        decoded_message2 = db.decode_message('Message1', encoded_message)
+        encoded_message2 = db.encode_message('Message1', decoded_message2)
 
         self.assertEqual(encoded_message2, encoded_message)
 

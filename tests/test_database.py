@@ -3299,7 +3299,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(reg_id_msg.is_extended_frame, False)
         self.assertEqual(ext_id_msg.is_extended_frame, True)
-
+ 
+    def test_event_attributes(self):
+        db = cantools.db.load_file('tests/files/dbc/attribute_Event.dbc')
+        
+        self.assertEqual(db.messages[0].send_type, 'Event')
+        self.assertEqual(db.messages[0].frame_id, 1234)
+        self.assertEqual( db.messages[0].name, 'INV2EventMsg1')
+        
     def test_attributes(self):
         filename = 'tests/files/dbc/attributes.dbc'
 

@@ -4,6 +4,7 @@ import re
 import logging
 from collections import OrderedDict as odict
 from decimal import Decimal
+from typing import List
 
 import textparser
 from textparser import Sequence
@@ -612,6 +613,23 @@ def _load_message_signals(message_tokens,
                                            enums)
 
 
+def _get_senders(section_name: str) -> List[str]:
+    """Generates a list of senders for a message based on the Send, Receive or Send/Receive
+    flag defined in the SYM file. Since the Message object only has a senders property on it,
+    it is easiest to translate Send flags into a sender named 'ECU', and translate Receive flags
+    into a sender named 'Peripherals'. This is not the cleanest representation of the data,
+    however, SYM files are unique in only having a Send, Receive or Send/Receive Direction. Most
+    other file formats specify a list of custom-named sending devices
+    """
+    if section_name == '{SEND}':
+        return ['ECU']
+    elif section_name == '{RECEIVE}':
+        return ['Peripherals']
+    elif section_name == '{SENDRECEIVE}':
+        return ['ECU', 'Peripherals']
+    else:
+        raise ValueError(f'Unexpected message section named {section_name}')
+
 def _load_message(frame_id,
                   is_extended_frame,
                   message_tokens,
@@ -619,7 +637,8 @@ def _load_message(frame_id,
                   signals,
                   enums,
                   strict,
-                  sort_signals):
+                  sort_signals,
+                  section_name):
     #print(message_tokens)
     # Default values.
     name = message_tokens[1]
@@ -645,7 +664,7 @@ def _load_message(frame_id,
                    name=name,
                    length=length,
                    unused_bit_pattern=0xff,
-                   senders=[],
+                   senders=_get_senders(section_name),
                    send_type=None,
                    cycle_time=cycle_time,
                    signals=_load_message_signals(message_tokens,
@@ -706,7 +725,8 @@ def _load_message_section(section_name, tokens, signals, enums, strict, sort_sig
                                     signals,
                                     enums,
                                     strict,
-                                    sort_signals)
+                                    sort_signals,
+                                    section_name)
             messages.append(message)
 
     return messages

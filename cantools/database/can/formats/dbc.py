@@ -1389,6 +1389,7 @@ def _load_messages(tokens,
             
             # if definitions is enum (otherwise above value is maintained) -> Prevents ValueError
             if definitions['GenMsgSendType'].choices is not None and \
+
                 int(result) in definitions['GenMsgSendType'].choices:
                 # Resolve ENUM index to ENUM text
                 result = definitions['GenMsgSendType'].choices[int(result)]

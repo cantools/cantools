@@ -212,7 +212,7 @@
           <FRAME-LENGTH>9</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <!-- /CanFrame/Message1/message1 -->
-            <PDU-TO-FRAME-MAPPING UUID="1e160eb8bcb7a75f054eccbf6f47fe9f">
+            <PDU-TO-FRAME-MAPPING UUID="4750d79cafd04f9cbc14385d5de0b4fb">
               <SHORT-NAME>message1</SHORT-NAME>
               <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message1</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
@@ -554,8 +554,8 @@
         <I-SIGNAL-GROUP UUID="f95abd456e3748dc9b21e242ffc3795e">
           <SHORT-NAME>message3Group</SHORT-NAME>
           <I-SIGNAL-REFS>
-            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/messag3_SeqCounter</I-SIGNAL-REF>
-            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/messag3_CRC</I-SIGNAL-REF>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message3_SeqCounter</I-SIGNAL-REF>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message3_CRC</I-SIGNAL-REF>
           </I-SIGNAL-REFS>
           <TRANSFORMATION-I-SIGNAL-PROPSS>
             <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS>
@@ -685,7 +685,7 @@
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /ISignalIPdu -->
-    <AR-PACKAGE UUID="bf5ded8d0c2d7bd37cfb17f2525d7208">
+    <AR-PACKAGE UUID="65ec052affb34dc19df7d7050d58fe68">
       <SHORT-NAME>ISignalIPdu</SHORT-NAME>
       <ELEMENTS>
         <!-- /ISignalIPdu/multiplexed_message_static -->

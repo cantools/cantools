@@ -365,8 +365,8 @@ class SystemLoader(object):
                     variants = \
                         self._get_arxml_children(can_cluster,
                                                  [
-                                                     '*CAN-CLUSTER-VARIANTS',
-                                                     'CAN-CLUSTER-CONDITIONAL',
+                                                     'CAN-CLUSTER-VARIANTS',
+                                                     '*CAN-CLUSTER-CONDITIONAL',
                                                  ])
 
                     if variants is None or len(variants) == 0:

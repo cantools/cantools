@@ -40,6 +40,10 @@ LOGGER = logging.getLogger(__name__)
 # for AUTOSAR container messages.
 SignalDictType = Dict[str, Union[float, str]]
 ContainerHeaderSpecType = Union['Message', str, int]
+ContainerUnpackResultType = Sequence[Union[Tuple['Message', bytes],
+                                           Tuple[int, bytes]]]
+ContainerUnpackListType = List[Union[Tuple['Message', bytes],
+                                     Tuple[int, bytes]]]
 ContainerDecodeResultType = Sequence[Union[Tuple['Message', SignalDictType],
                                            Tuple[int, bytes]]]
 ContainerDecodeResultListType = List[Union[Tuple['Message', SignalDictType],
@@ -966,18 +970,32 @@ class Message(object):
 
         return decoded
 
-    def _decode_contained(self,
-                          data: bytes,
-                          decode_choices: bool,
-                          scaling: bool) \
-                          -> ContainerDecodeResultType:
+    def unpack_container(self,
+                          data: bytes) \
+                          -> ContainerUnpackResultType:
+        """Unwrap the contents of a container message.
+
+        This returns a list of ``(contained_message, contained_data)``
+        tuples, i.e., the data for the contained message are ``bytes``
+        objects, not decoded signal dictionaries. This is required for
+        verifying the correctness of the end-to-end protection or the
+        authenticity of a contained message.
+
+        Note that ``contained_message`` is the header ID integer value
+        if a contained message is unknown. Further, if something goes
+        seriously wrong, a ``DecodeError`` is raised.
+        """
+
+        if not self.is_container:
+            raise DecodeError(f'Cannot unpack non-container message '
+                              f'"{self.name}"')
 
         if len(data) > self.length:
             raise DecodeError(f'Container message "{self.name}" specified '
                               f'as exhibiting at most {self.length} but '
                               f'received a {len(data)} bytes long frame')
 
-        result: ContainerDecodeResultListType = []
+        result: ContainerUnpackListType = []
         pos = 0
         while pos < len(data):
             if pos + 4 > len(data):
@@ -1006,15 +1024,30 @@ class Message(object):
 
             if contained_msg is None:
                 result.append((contained_id, contained_data))
+            else:
+                result.append((contained_msg, contained_data))
+
+        return result
+
+    def _decode_contained(self,
+                          data: bytes,
+                          decode_choices: bool,
+                          scaling: bool) \
+                          -> ContainerDecodeResultType:
+
+        unpacked = self.unpack_container(data)
+
+        result: ContainerDecodeResultListType = []
+
+        for contained_message, contained_data in unpacked:
+            if not isinstance(contained_message, Message):
+                result.append((contained_message, contained_data))
                 continue
 
-            try:
-                contained_signals = contained_msg.decode(contained_data,
-                                                         decode_choices,
-                                                         scaling)
-                result.append((contained_msg, contained_signals)) # type: ignore
-            except ValueError as e:
-                result.append((contained_id, contained_data))
+            decoded = contained_message.decode(contained_data,
+                                               decode_choices,
+                                               scaling)
+            result.append((contained_message, decoded)) # type: ignore
 
         return result
 

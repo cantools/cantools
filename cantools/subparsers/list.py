@@ -32,8 +32,11 @@ def _print_message(message, indent=''):
         print(f'{indent}  Cycle time: {message.cycle_time} ms')
 
     if message.autosar and message.autosar.e2e:
-        print(f'{indent}  End-to-end category: {message.autosar.e2e.category}')
-        print(f'{indent}  Data IDs: {message.autosar.e2e.data_ids}')
+        e2e = message.autosar.e2e
+        print(f'{indent}  End-to-end properties:')
+        print(f'{indent}    Category: {e2e.category}')
+        print(f'{indent}    Data IDs: {e2e.data_ids}')
+        print(f'{indent}    Protected size: {e2e.payload_length} bytes')
 
     is_secured = False
     if message.autosar and \

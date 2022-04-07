@@ -298,8 +298,10 @@ Message1:
   Size: 9 bytes
   Is extended frame: False
   Is CAN-FD frame: True
-  End-to-end category: Profile2
-  Data IDs: [123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138]
+  End-to-end properties:
+    Category: Profile2
+    Data IDs: [123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138]
+    Protected size: 9 bytes
   Is secured: False
   Signal tree:
 

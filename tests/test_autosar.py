@@ -108,16 +108,18 @@ class CanToolsAutosarTest(unittest.TestCase):
         self.assertTrue(msg.autosar.e2e is not None)
         self.assertEqual(msg.autosar.e2e.category, 'Profile2')
         self.assertEqual(msg.autosar.e2e.data_ids, list(range(123, 123+16)))
+        self.assertEqual(msg.autosar.e2e.payload_length, msg.length)
 
         # verify the E2E parameters for a contained secured message
         cmsg = db.get_message_by_name('OneToContainThemAll')
         msg = cmsg.get_contained_message_by_name('message3_secured')
         self.assertTrue(msg.autosar is not None)
         self.assertTrue(msg.autosar.is_secured)
-        self.assertEqual(msg.autosar.secured_payload_length, 4)
         self.assertTrue(msg.autosar.e2e is not None)
         self.assertEqual(msg.autosar.e2e.category, 'Profile5')
         self.assertEqual(msg.autosar.e2e.data_ids, [321])
+        self.assertEqual(msg.autosar.e2e.payload_length, 4)
+
 
 if __name__ == '__main__':
     unittest.main()

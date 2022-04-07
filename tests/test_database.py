@@ -1708,6 +1708,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.comment, None)
         self.assertEqual(signal_1.is_multiplexer, False)
         self.assertEqual(signal_1.multiplexer_ids, None)
+        self.assertEqual(signal_1.spn, 1234)
 
         signal_2 = message_1.signals[1]
         self.assertEqual(signal_2.name, 'Signal2')
@@ -1730,6 +1731,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.comment, 'bbb')
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
+        self.assertEqual(signal_2.spn, None)
 
         # Message2.
         message_2 = db.messages[1]
@@ -1767,6 +1769,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.comment, None)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, None)
+        self.assertEqual(signal_3.spn, None)
 
         # Symbol2.
         signal_4 = db.messages[4].signals[0]
@@ -1790,6 +1793,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.comment, None)
         self.assertEqual(signal_4.is_multiplexer, False)
         self.assertEqual(signal_4.multiplexer_ids, None)
+        self.assertEqual(signal_4.spn, None)
 
         # Symbol3.
         symbol_3 = db.messages[5]

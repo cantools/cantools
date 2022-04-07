@@ -466,8 +466,7 @@ class SystemLoader(object):
                 sub_package_list = self._get_unique_arxml_child(package,
                                                                 'SUB-PACKAGES')
 
-            if sub_package_list is not None:
-                self._load_senders_and_receivers(sub_package_list, messages)
+            self._load_senders_and_receivers(sub_package_list, messages)
 
     # given a list of Message objects and an reference to a PDU by its absolute ARXML path,
     # return the subset of messages of the list which feature the specified PDU.

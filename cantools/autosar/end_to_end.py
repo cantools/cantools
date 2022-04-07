@@ -74,7 +74,7 @@ def apply_profile2_crc(payload : Union[bytes, bytearray],
 
 
 def check_profile2_crc(payload : Union[bytes, bytearray],
-                       msg_or_data_id: Union[int, Message]) -> bool:
+                       msg_or_data_id: Union[int, Message]) -> Optional[bool]:
     """Check if the AUTOSAR E2E checksum for profile 2 of the AUTOSAR
     end-to-end protection specification is correct.
 
@@ -85,7 +85,7 @@ def check_profile2_crc(payload : Union[bytes, bytearray],
     crc = compute_profile2_crc(payload, msg_or_data_id)
 
     if crc is None:
-        return False
+        return None
 
     crc2 = payload[0]
 
@@ -164,7 +164,7 @@ def apply_profile5_crc(payload : Union[bytes, bytearray],
     return result
 
 def check_profile5_crc(payload : Union[bytes, bytearray],
-                       msg_or_data_id: Union[int, Message]) -> bool:
+                       msg_or_data_id: Union[int, Message]) -> Optional[bool]:
     """Check if the AUTOSAR E2E checksum for profile 5 of the AUTOSAR
     end-to-end protection specification is correct.
 
@@ -175,7 +175,7 @@ def check_profile5_crc(payload : Union[bytes, bytearray],
     crc = compute_profile5_crc(payload, msg_or_data_id)
 
     if crc is None:
-        return False
+        return None
 
     crc2 = payload[0] + (payload[1]<<8)
 

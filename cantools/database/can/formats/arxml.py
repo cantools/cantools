@@ -552,6 +552,12 @@ class SystemLoader(object):
         ####
         # senders and receivers of network management messages
         ####
+
+        if not self.autosar_version_newer(4):
+            # only AUTOSAR4 seems to support specifying senders and
+            # receivers of network management PDUs...
+            return
+
         for nm_cluster in self._get_arxml_children(package,
                                                    [
                                                        'ELEMENTS',
@@ -565,11 +571,28 @@ class SystemLoader(object):
                 '*CAN-NM-NODE'
             ]
             for nm_node in self._get_arxml_children(nm_cluster, nm_node_spec):
-                nm_if_ecu = self._get_unique_arxml_child(nm_node, '&NM-IF-ECU')
+                controller_ref = self._get_unique_arxml_child(nm_node,
+                                                              'CONTROLLER-REF')
 
-                ecu = self._get_unique_arxml_child(nm_if_ecu, '&ECU-INSTANCE')
+                if controller_ref is None:
+                    continue
+
+                controller_ref = controller_ref.text
+
+                # strip away the last element of the reference's path
+                # to get the ECU instance corresponding to the network
+                # controller. This approach is a bit hacky because it
+                # may break down if reference bases are used. (which
+                # seems to be very rarely.)
+                ecu_ref = '/'.join(controller_ref.split('/')[:-1])
+                ecu = self._follow_arxml_reference(
+                    base_elem=nm_node,
+                    arxml_path=ecu_ref,
+                    dest_tag_name='ECU-INSTANCE')
+
                 if ecu is None:
                     continue
+
                 ecu_name = self._get_unique_arxml_child(ecu, 'SHORT-NAME').text
 
                 # deal with receive PDUs
@@ -673,7 +696,6 @@ class SystemLoader(object):
                 nodes.append(Node(name=name,
                                   comment=comments,
                                   autosar_specifics=autosar_specifics))
-
 
             # handle all sub-packages
             if self.autosar_version_newer(4):

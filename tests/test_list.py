@@ -165,6 +165,7 @@ Passenger:
 DJ:
 Dancer:
   Comment[FOR-ALL]: Rythm is a Dancer!
+Guard:
 """
 
             actual_output = stdout.getvalue()
@@ -253,6 +254,7 @@ Message2:
 
             # check make sure it behaves as expected
             expected_output = """\
+AlarmStatus
 Message1
 Message3
 Message4

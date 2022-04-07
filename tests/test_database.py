@@ -4718,8 +4718,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.baudrate, 500000)
         self.assertEqual(bus.fd_baudrate, 2000000)
 
-        self.assertEqual(len(db.nodes), 2)
-        self.assertEqual(len(db.messages), 6)
+        self.assertEqual(len(db.nodes), 3)
+        self.assertEqual(len(db.messages), 7)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
@@ -4732,6 +4732,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(node2.name, 'Dancer')
         self.assertEqual(node2.comments, {'FOR-ALL': 'Rythm is a Dancer!'})
         self.assertEqual(node2.comment, 'Rythm is a Dancer!')
+
+        node3 = db.nodes[2]
+        self.assertEqual(node3.name, 'Guard')
 
         # multiplexed message
         mux_message = db.messages[0]
@@ -5217,6 +5220,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 '/MultiplexedIPdu/multiplexed_message'
             ])
 
+        nm_message = db.messages[6]
+        self.assertEqual(nm_message.frame_id, 1001)
+        self.assertEqual(nm_message.is_extended_frame, False)
+        self.assertEqual(nm_message.name, 'AlarmStatus')
+        self.assertEqual(nm_message.length, 1)
+        self.assertEqual(nm_message.senders, ['Guard'])
+        self.assertEqual(nm_message.send_type, None)
+        self.assertEqual(nm_message.cycle_time, None)
+        self.assertEqual(len(nm_message.signals), 1)
+        self.assertEqual(nm_message.comment, None)
+        self.assertEqual(nm_message.bus_name, 'Cluster0')
+        self.assertTrue(nm_message.dbc is None)
+        self.assertTrue(nm_message.autosar is not None)
+
     def test_system_arxml_traversal(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(
@@ -5241,6 +5258,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          [
                              'ECU',
                              'PDU_GROUPS',
+                             'NMConfig',
                              'Cluster',
                              'CanFrame',
                              'ISignal',
@@ -5249,6 +5267,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'MultiplexedIPdu',
                              'ContainerIPdu',
                              'ISignalIPdu',
+                             'NMPdu',
                              'SecuredIPdu',
                              'Unit',
                              'CompuMethod',

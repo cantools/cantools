@@ -4718,8 +4718,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.baudrate, 500000)
         self.assertEqual(bus.fd_baudrate, 2000000)
 
-        self.assertEqual(len(db.nodes), 2)
-        self.assertEqual(len(db.messages), 6)
+        self.assertEqual(len(db.nodes), 3)
+        self.assertEqual(len(db.messages), 7)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
@@ -4732,6 +4732,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(node2.name, 'Dancer')
         self.assertEqual(node2.comments, {'FOR-ALL': 'Rythm is a Dancer!'})
         self.assertEqual(node2.comment, 'Rythm is a Dancer!')
+
+        node3 = db.nodes[2]
+        self.assertEqual(node3.name, 'Guard')
 
         # multiplexed message
         mux_message = db.messages[0]
@@ -5109,6 +5112,50 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              '/ISignalIPdu/message3'
                          ])
 
+        signal_1 = message_3.signals[0]
+        self.assertEqual(signal_1.name, 'message3_CRC')
+        self.assertEqual(signal_1.start, 0)
+        self.assertEqual(signal_1.length, 8)
+        self.assertEqual(signal_1.receivers, [])
+        self.assertEqual(signal_1.byte_order, 'little_endian')
+        self.assertEqual(signal_1.is_signed, False)
+        self.assertEqual(signal_1.is_float, False)
+        self.assertEqual(signal_1.scale, 1)
+        self.assertEqual(signal_1.offset, 0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.decimal.scale, 1)
+        self.assertEqual(signal_1.decimal.offset, 0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.unit, None)
+        self.assertEqual(signal_1.choices, None)
+        self.assertEqual(signal_1.comment, None)
+        self.assertEqual(signal_1.is_multiplexer, False)
+        self.assertEqual(signal_1.multiplexer_ids, None)
+
+        signal_2 = message_3.signals[1]
+        self.assertEqual(signal_2.name, 'message3_SeqCounter')
+        self.assertEqual(signal_2.start, 8)
+        self.assertEqual(signal_2.length, 4)
+        self.assertEqual(signal_2.receivers, [])
+        self.assertEqual(signal_2.byte_order, 'little_endian')
+        self.assertEqual(signal_2.is_signed, False)
+        self.assertEqual(signal_2.is_float, False)
+        self.assertEqual(signal_2.scale, 1)
+        self.assertEqual(signal_2.offset, 0)
+        self.assertEqual(signal_2.minimum, None)
+        self.assertEqual(signal_2.maximum, None)
+        self.assertEqual(signal_2.decimal.scale, 1)
+        self.assertEqual(signal_2.decimal.offset, 0)
+        self.assertEqual(signal_2.decimal.minimum, None)
+        self.assertEqual(signal_2.decimal.maximum, None)
+        self.assertEqual(signal_2.unit, None)
+        self.assertEqual(signal_2.choices, None)
+        self.assertEqual(signal_2.comment, None)
+        self.assertEqual(signal_2.is_multiplexer, False)
+        self.assertEqual(signal_2.multiplexer_ids, None)
+
         # message 4 tests different base encodings
         message_4 = db.messages[4]
         self.assertEqual(message_4.frame_id, 101)
@@ -5173,6 +5220,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 '/MultiplexedIPdu/multiplexed_message'
             ])
 
+        nm_message = db.messages[6]
+        self.assertEqual(nm_message.frame_id, 1001)
+        self.assertEqual(nm_message.is_extended_frame, False)
+        self.assertEqual(nm_message.name, 'AlarmStatus')
+        self.assertEqual(nm_message.length, 1)
+        self.assertEqual(nm_message.senders, ['Guard'])
+        self.assertEqual(nm_message.send_type, None)
+        self.assertEqual(nm_message.cycle_time, None)
+        self.assertEqual(len(nm_message.signals), 1)
+        self.assertEqual(nm_message.comment, None)
+        self.assertEqual(nm_message.bus_name, 'Cluster0')
+        self.assertTrue(nm_message.dbc is None)
+        self.assertTrue(nm_message.autosar is not None)
+
     def test_system_arxml_traversal(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(
@@ -5197,6 +5258,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          [
                              'ECU',
                              'PDU_GROUPS',
+                             'NMConfig',
                              'Cluster',
                              'CanFrame',
                              'ISignal',
@@ -5205,6 +5267,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'MultiplexedIPdu',
                              'ContainerIPdu',
                              'ISignalIPdu',
+                             'NMPdu',
                              'SecuredIPdu',
                              'Unit',
                              'CompuMethod',

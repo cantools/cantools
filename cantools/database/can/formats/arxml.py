@@ -5,6 +5,7 @@ import logging
 import numbers
 from decimal import Decimal
 from typing import Any, List, Optional
+from copy import deepcopy
 
 from xml.etree import ElementTree
 
@@ -115,6 +116,7 @@ class AutosarEnd2EndProperties:
     def __init__(self):
         self._category: Optional[str] = None
         self._data_ids: Optional[List[int]] = None
+        self._payload_length: int = 0
 
     @property
     def category(self) -> Optional[str]:
@@ -140,6 +142,19 @@ class AutosarEnd2EndProperties:
     def data_ids(self, value: Optional[List[int]]) -> None:
         self._data_ids = value
 
+    @property
+    def payload_length(self) -> int:
+        """The size of the end-to-end protected data in bytes
+
+        This number includes the end-to-end protection signals
+        themselves (i.e. the sequence counter and the CRC value)
+
+        """
+        return self._payload_length
+
+    @payload_length.setter
+    def payload_length(self, value: int) -> None:
+        self._payload_length = value
 
 def parse_number_string(in_string, allow_float=False):
     # the input string contains a dot -> floating point value
@@ -350,8 +365,8 @@ class SystemLoader(object):
                     variants = \
                         self._get_arxml_children(can_cluster,
                                                  [
-                                                     '*CAN-CLUSTER-VARIANTS',
-                                                     'CAN-CLUSTER-CONDITIONAL',
+                                                     'CAN-CLUSTER-VARIANTS',
+                                                     '*CAN-CLUSTER-CONDITIONAL',
                                                  ])
 
                     if variants is None or len(variants) == 0:
@@ -451,8 +466,7 @@ class SystemLoader(object):
                 sub_package_list = self._get_unique_arxml_child(package,
                                                                 'SUB-PACKAGES')
 
-            if sub_package_list is not None:
-                self._load_senders_and_receivers(sub_package_list, messages)
+            self._load_senders_and_receivers(sub_package_list, messages)
 
     # given a list of Message objects and an reference to a PDU by its absolute ARXML path,
     # return the subset of messages of the list which feature the specified PDU.
@@ -538,6 +552,12 @@ class SystemLoader(object):
         ####
         # senders and receivers of network management messages
         ####
+
+        if not self.autosar_version_newer(4):
+            # only AUTOSAR4 seems to support specifying senders and
+            # receivers of network management PDUs...
+            return
+
         for nm_cluster in self._get_arxml_children(package,
                                                    [
                                                        'ELEMENTS',
@@ -551,11 +571,28 @@ class SystemLoader(object):
                 '*CAN-NM-NODE'
             ]
             for nm_node in self._get_arxml_children(nm_cluster, nm_node_spec):
-                nm_if_ecu = self._get_unique_arxml_child(nm_node, '&NM-IF-ECU')
+                controller_ref = self._get_unique_arxml_child(nm_node,
+                                                              'CONTROLLER-REF')
 
-                ecu = self._get_unique_arxml_child(nm_if_ecu, '&ECU-INSTANCE')
+                if controller_ref is None:
+                    continue
+
+                controller_ref = controller_ref.text
+
+                # strip away the last element of the reference's path
+                # to get the ECU instance corresponding to the network
+                # controller. This approach is a bit hacky because it
+                # may break down if reference bases are used. (which
+                # seems to be very rarely.)
+                ecu_ref = '/'.join(controller_ref.split('/')[:-1])
+                ecu = self._follow_arxml_reference(
+                    base_elem=nm_node,
+                    arxml_path=ecu_ref,
+                    dest_tag_name='ECU-INSTANCE')
+
                 if ecu is None:
                     continue
+
                 ecu_name = self._get_unique_arxml_child(ecu, 'SHORT-NAME').text
 
                 # deal with receive PDUs
@@ -660,7 +697,6 @@ class SystemLoader(object):
                                   comment=comments,
                                   autosar_specifics=autosar_specifics))
 
-
             # handle all sub-packages
             if self.autosar_version_newer(4):
                 sub_package_list = package.find('./ns:AR-PACKAGES',
@@ -735,7 +771,14 @@ class SystemLoader(object):
                             # only the contained messages are
                             continue
 
-                        message.autosar.e2e = e2e_props
+                        pdu_e2e = deepcopy(e2e_props)
+                        if message.autosar.is_secured:
+                            pdu_e2e.payload_length = \
+                                message.autosar.secoc.payload_length
+                        else:
+                            pdu_e2e.payload_length = message.length
+
+                        message.autosar.e2e = pdu_e2e
 
             # load all sub-packages
             if self.autosar_version_newer(4):
@@ -885,7 +928,7 @@ class SystemLoader(object):
         autosar_specifics._is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
-        self._load_data_id_from_signal_group(pdu, autosar_specifics)
+        self._load_e2e_data_id_from_signal_group(pdu, autosar_specifics)
         if autosar_specifics.is_secured:
             autosar_specifics._secured_payload_length = payload_length
             if autosar_specifics.e2e is None:
@@ -895,7 +938,8 @@ class SystemLoader(object):
                 payload_pdu = \
                     self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
 
-                self._load_data_id_from_signal_group(payload_pdu, autosar_specifics)
+                self._load_e2e_data_id_from_signal_group(payload_pdu,
+                                                         autosar_specifics)
 
         # the bit pattern used to fill in unused bits to avoid
         # undefined behaviour/information leaks
@@ -1008,10 +1052,12 @@ class SystemLoader(object):
 
                 # load the data ID of the PDU via its associated
                 # signal group (if it is specified this way)
-                self._load_data_id_from_signal_group(contained_pdu,
-                                                     contained_autosar_specifics)
+                self._load_e2e_data_id_from_signal_group(
+                    contained_pdu,
+                    contained_autosar_specifics)
                 if contained_autosar_specifics.is_secured:
-                    contained_autosar_specifics._secured_payload_length = payload_length
+                    contained_autosar_specifics._secured_payload_length = \
+                        payload_length
                     if contained_autosar_specifics.e2e is None:
                         # use the data id from the signal group
                         # associated with the payload PDU if the
@@ -1021,8 +1067,9 @@ class SystemLoader(object):
                             self._get_unique_arxml_child(contained_pdu, [
                                 '&PAYLOAD', '&I-PDU' ])
 
-                        self._load_data_id_from_signal_group(payload_pdu,
-                                                             contained_autosar_specifics)
+                        self._load_e2e_data_id_from_signal_group(
+                            payload_pdu,
+                            contained_autosar_specifics)
 
                 contained_message = \
                     Message(header_id=header_id,
@@ -1367,9 +1414,12 @@ class SystemLoader(object):
 
         return result
 
-    def _load_data_id_from_signal_group(self,
-                                        pdu,
-                                        autosar_specifics):
+    def _load_e2e_data_id_from_signal_group(self,
+                                            pdu,
+                                            autosar_specifics):
+
+        pdu_length = self._get_unique_arxml_child(pdu, 'LENGTH')
+        pdu_length = parse_number_string(pdu_length.text)
 
         # the signal group associated with this message
         signal_group = \
@@ -1418,6 +1468,7 @@ class SystemLoader(object):
         e2e_props = AutosarEnd2EndProperties()
         e2e_props.category = category
         e2e_props.data_ids = data_ids
+        e2e_props.payload_length = pdu_length
         autosar_specifics.e2e = e2e_props
 
     def _load_signal(self, i_signal_to_i_pdu_mapping):

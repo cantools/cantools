@@ -99,7 +99,7 @@ class CandumpDefaultLogPattern(BasePattern):
     # (1579857014.345944) can2 486#82967A6B006B07F8
     # (1613656104.501098) can2 14C##16A0FFE00606E022400000000000000A0FFFF00FFFF25000600000000000000FE
     pattern = re.compile(
-        r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)#(#[0-9A-F])?(?P<can_data>[0-9A-F]*).*?$')
+        r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>[a-zA-Z0-9]+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>([0-9A-Fa-f]{2})*?$).*?$')
 
     @staticmethod
     def unpack(match_object):
@@ -112,6 +112,28 @@ class CandumpDefaultLogPattern(BasePattern):
         timestamp_format = TimestampFormat.ABSOLUTE
 
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+    @staticmethod
+    def raw_unpack(line):
+        split = line.split()
+
+        if len(split) != 3:
+            return None
+
+        timestamp, channel, frame = split
+
+        timestamp = datetime.datetime.utcfromtimestamp(float(timestamp[1:-1]))
+        frame_id, data = frame.split("#")
+        frame_id = int(frame_id, 16)
+
+        # none if data not base16 encoded (divisable by 2)
+        if len(data) % 2 != 0:
+            return None
+
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=TimestampFormat.ABSOLUTE)
 
 
 class CandumpAbsoluteLogPattern(BasePattern):
@@ -136,20 +158,46 @@ class CandumpAbsoluteLogPattern(BasePattern):
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
+class PCANTracePattern(BasePattern):
+    # 1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00
+    pattern = re.compile(
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+
+    @staticmethod
+    def unpack(match_object):
+        """
+        >>> PCANTracePattern().match("  1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+        <logreader.DataFrame object at ...>
+        """
+        channel = 'pcan' + match_object.group('channel')
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        millis = float(match_object.group('timestamp'))
+        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.timedelta(milliseconds=millis)
+        timestamp_format = TimestampFormat.RELATIVE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
 class Parser:
     """A CAN log file parser.
 
     Automatically detects the format of the logfile by trying parser patterns
     until the first successful match.
 
-    >>> with open('candump.log') as fd:
+    >>> with open('candump.log') as fd: #doctest: +SKIP
             for frame in cantools.logreader.Parser(fd):
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream=None):
+    def __init__(self, stream=None, raw=False):
         self.stream = stream
         self.pattern = None
+        self.matcher = None
+        self.raw = raw
 
     @staticmethod
     def detect_pattern(line):
@@ -161,9 +209,19 @@ class Parser:
     def parse(self, line):
         if self.pattern is None:
             self.pattern = self.detect_pattern(line)
+
         if self.pattern is None:
             return None
-        return self.pattern.match(line)
+        if self.matcher is None:
+            if self.raw:
+                if getattr(self.pattern, 'raw_unpack', False):
+                    self.matcher = self.pattern.raw_unpack
+                else:
+                    self.raw = False
+                    self.matcher = self.pattern.match
+            else:
+                self.matcher = self.pattern.match
+        return self.matcher(line)
 
     def iterlines(self, keep_unknowns=False):
         """Returns an generator that yields (str, DataFrame) tuples with the

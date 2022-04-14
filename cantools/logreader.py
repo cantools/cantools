@@ -158,15 +158,152 @@ class CandumpAbsoluteLogPattern(BasePattern):
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
-class PCANTracePattern(BasePattern):
-    # 1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00
+class PCANTracePatternV10(BasePattern):
+    """
+    Reference for PCAN trace patterns: https://www.peak-system.com/produktcd/Pdf/English/PEAK_CAN_TRC_File_Format.pdf
+    1) 1841 0001 8 00 00 00 00 00 00 00 00
+    """
+    pattern = re.compile(
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+
+    @staticmethod
+    def unpack(match_object):
+        """
+        >>> PCANTracePatternV10().match(" 1) 1841 0001 8 00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+        <logreader.DataFrame object at ...>
+        """
+        channel = 'pcanx'
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        millis = float(match_object.group('timestamp'))
+        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.timedelta(milliseconds=millis)
+        timestamp_format = TimestampFormat.RELATIVE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
+class PCANTracePatternV11(BasePattern):
+    """
+    Adds "Type" 'Rx' column to 1.0 and 1/10 microsecond resolution
+    1)      6357.2 Rx        0401  8    00 00 00 00 00 00 00 00
+    """
+    pattern = re.compile(
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+
+    @staticmethod
+    def unpack(match_object):
+        """
+        >>> PCANTracePatternV11().match("  1)      6357.2  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+        <logreader.DataFrame object at ...>
+        """
+        channel = 'pcanx'
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        millis = float(match_object.group('timestamp'))
+        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.timedelta(milliseconds=millis)
+        timestamp_format = TimestampFormat.RELATIVE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
+class PCANTracePatternV12(BasePattern):
+    """
+    Adds "Bus" column and 1 microsecond resolution to 1.1
+    1)      6357.213 1  Rx        0401  8    00 00 00 00 00 00 00 00
+    """
+    pattern = re.compile(
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+
+    @staticmethod
+    def unpack(match_object):
+        """
+        >>> PCANTracePatternV12().match("  1)      6357.213 1  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+        <logreader.DataFrame object at ...>
+        """
+        channel = 'pcan' + match_object.group('channel')
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        millis = float(match_object.group('timestamp'))
+        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.timedelta(milliseconds=millis)
+        timestamp_format = TimestampFormat.RELATIVE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
+class PCANTracePatternV13(BasePattern):
+    """
+    Adds "Reserved" '-' column to 1.2
+    1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00
+    """
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
     def unpack(match_object):
         """
-        >>> PCANTracePattern().match("  1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+        >>> PCANTracePatternV13().match("  1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+        <logreader.DataFrame object at ...>
+        """
+        channel = 'pcan' + match_object.group('channel')
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        millis = float(match_object.group('timestamp'))
+        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.timedelta(milliseconds=millis)
+        timestamp_format = TimestampFormat.RELATIVE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
+class PCANTracePatternV20(BasePattern):
+    """
+     1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00
+    """
+    pattern = re.compile(
+        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+.+\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+
+    @staticmethod
+    def unpack(match_object):
+        """
+        >>> PCANTracePatternV20().match(" 1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
+        <logreader.DataFrame object at ...>
+        """
+        channel = 'pcanx'
+        frame_id = int(match_object.group('can_id'), 16)
+        data = match_object.group('can_data')
+        data = data.replace(' ', '')
+        data = binascii.unhexlify(data)
+        millis = float(match_object.group('timestamp'))
+        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.timedelta(milliseconds=millis)
+        timestamp_format = TimestampFormat.RELATIVE
+
+        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+
+
+class PCANTracePatternV21(BasePattern):
+    """
+    "Reserved" '-' and "Bus" to 2.0
+     1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00
+    """
+    pattern = re.compile(
+        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+.+\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+
+    @staticmethod
+    def unpack(match_object):
+        """
+        >>> PCANTracePatternV21().match(" 1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
         """
         channel = 'pcan' + match_object.group('channel')
@@ -201,7 +338,7 @@ class Parser:
 
     @staticmethod
     def detect_pattern(line):
-        for p in [CandumpDefaultPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern]:
+        for p in [CandumpDefaultPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern, PCANTracePatternV10, PCANTracePatternV11, PCANTracePatternV12, PCANTracePatternV13, PCANTracePatternV20, PCANTracePatternV21]:
             mo = p.pattern.match(line)
             if mo:
                 return p

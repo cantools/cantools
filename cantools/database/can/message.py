@@ -943,6 +943,9 @@ class Message(object):
         multiplexers = node['multiplexers']
 
         for signal in multiplexers:
+            if allow_truncated and signal not in decoded:
+                continue
+
             mux = self._get_mux_number(decoded, signal)
 
             try:

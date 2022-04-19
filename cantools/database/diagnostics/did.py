@@ -99,7 +99,11 @@ class Did(object):
 
         return binascii.unhexlify(encoded)[:self._length]
 
-    def decode(self, data, decode_choices=True, scaling=True):
+    def decode(self,
+               data,
+               decode_choices=True,
+               scaling=True,
+               allow_truncated=False):
         """Decode given data as a DID of this type.
 
         If `decode_choices` is ``False`` scaled values are not
@@ -114,10 +118,12 @@ class Did(object):
         """
 
         return decode_data(data[:self._length],
+                           self.length,
                            self._codec['datas'],
                            self._codec['formats'],
                            decode_choices,
-                           scaling)
+                           scaling,
+                           allow_truncated)
 
     def refresh(self):
         """Refresh the internal DID state.

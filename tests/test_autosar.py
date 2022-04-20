@@ -6,6 +6,8 @@ import traceback
 import cantools
 import cantools.autosar
 
+from cantools.autosar.snakeauth import SnakeOilAuthenticator
+
 class CanToolsAutosarTest(unittest.TestCase):
     def test_autosar3_e2e_profile2(self):
         db = cantools.db.load_file('tests/files/arxml/system-3.2.3.arxml')
@@ -58,7 +60,7 @@ class CanToolsAutosarTest(unittest.TestCase):
         # verify the parameters
         self.assertIsNotNone(msg.autosar)
         self.assertTrue(msg.autosar.is_secured)
-        self.assertEqual(msg.autosar.secured_payload_length, 4)
+        self.assertEqual(msg.autosar.secoc.payload_length, 4)
         self.assertIsNotNone(msg.autosar.e2e)
         self.assertEqual(msg.autosar.e2e.category, 'Profile5')
         self.assertEqual(msg.autosar.e2e.data_ids, [321])
@@ -119,7 +121,6 @@ class CanToolsAutosarTest(unittest.TestCase):
         msg = cmsg.get_contained_message_by_name('message1')
         self.assertTrue(msg.autosar is not None)
         self.assertFalse(msg.autosar.is_secured)
-        self.assertEqual(msg.autosar.secured_payload_length, 0)
         self.assertTrue(msg.autosar.e2e is not None)
         self.assertEqual(msg.autosar.e2e.category, 'Profile2')
         self.assertEqual(msg.autosar.e2e.data_ids, list(range(123, 123+16)))
@@ -135,6 +136,45 @@ class CanToolsAutosarTest(unittest.TestCase):
         self.assertEqual(msg.autosar.e2e.data_ids, [321])
         self.assertEqual(msg.autosar.e2e.payload_length, 4)
 
+    def test_autosar4_secoc(self):
+        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+
+        dbmsg = db.get_message_by_name('Message3')
+
+        self.assertTrue(dbmsg.autosar is not None)
+        self.assertTrue(dbmsg.autosar.is_secured)
+        self.assertTrue(dbmsg.autosar.secoc is not None)
+        self.assertEqual(dbmsg.autosar.secoc.freshness_algorithm_name,
+                         'SmellyCheese')
+        self.assertEqual(dbmsg.autosar.secoc.auth_algorithm_name,
+                         'KnockKnock')
+        self.assertEqual(dbmsg.autosar.secoc.payload_length, 4)
+        self.assertEqual(dbmsg.autosar.secoc.data_id, 1337)
+        self.assertEqual(dbmsg.autosar.secoc.freshness_bit_length, 32)
+        self.assertEqual(dbmsg.autosar.secoc.freshness_tx_bit_length, 6)
+        self.assertEqual(dbmsg.autosar.secoc.auth_tx_bit_length, 10)
+
+        encoded_raw = bytes([0x00]*dbmsg.length)
+        snake_auth = SnakeOilAuthenticator(secret="Psst! Top secretion!")
+        encoded = cantools.autosar.apply_authenticator(encoded_raw,
+                                                       dbmsg,
+                                                       snake_auth,
+                                                       0xcccc)
+
+        self.assertEqual(encoded, bytes.fromhex('000000003130'))
+
+        decoded = dbmsg.decode(encoded)
+        self.assertEqual(decoded['Message3_Freshness'], 0xcccc&0x3f)
+        self.assertEqual(decoded['Message3_Authenticator'], 304)
+
+        self.assertTrue(cantools.autosar.verify_authenticator(encoded,
+                                                              dbmsg,
+                                                              snake_auth,
+                                                              0xcccc))
+        self.assertFalse(cantools.autosar.verify_authenticator(encoded,
+                                                               dbmsg,
+                                                               snake_auth,
+                                                               0xdccc))
 
 if __name__ == '__main__':
     unittest.main()

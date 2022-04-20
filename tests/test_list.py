@@ -407,6 +407,72 @@ Message1:
             self.assertEqual(actual_output, expected_output)
 
         args = Args('tests/files/arxml/system-4.2.arxml')
+        args.items = [ "Message3" ]
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+Message3:
+  Bus: Cluster0
+  Frame ID: 0x64 (100)
+  Size: 6 bytes
+  Is extended frame: False
+  Is CAN-FD frame: False
+  Is network management frame: False
+  End-to-end properties:
+    Category: Profile5
+    Data IDs: [321]
+    Protected size: 4 bytes
+  Is secured: True
+  Security properties:
+    Authentication algorithm: KnockKnock
+    Freshness algorithm: SmellyCheese
+    Data ID: 1337
+    Authentication transmit bits: 10
+    Freshness counter size: 32 bits
+    Freshness counter transmit size: 6 bits
+    Secured size: 4 bytes
+  Signal tree:
+
+    -- {root}
+       +-- message3_CRC
+       +-- message3_SeqCounter
+       +-- Message3_Freshness
+       +-- Message3_Authenticator
+
+  Signal details:
+    message3_CRC:
+      Type: Integer
+      Start bit: 0
+      Length: 8 bits
+      Is signed: False
+    message3_SeqCounter:
+      Type: Integer
+      Start bit: 8
+      Length: 4 bits
+      Is signed: False
+    Message3_Freshness:
+      Comment[FOR-ALL]: Truncated freshness value for 'Message3'
+      Type: Integer
+      Start bit: 39
+      Length: 6 bits
+      Is signed: False
+    Message3_Authenticator:
+      Comment[FOR-ALL]: Truncated authenticator value for 'Message3'
+      Type: Integer
+      Start bit: 33
+      Length: 10 bits
+      Is signed: False
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
+        args = Args('tests/files/arxml/system-4.2.arxml')
         args.print_buses = True
 
         stdout = StringIO()

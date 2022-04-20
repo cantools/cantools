@@ -305,7 +305,7 @@
         <!-- /CanFrame/Message3 -->
         <CAN-FRAME UUID="02f3b1a9e14f4f2167bde58cfcdc00a0">
           <SHORT-NAME>Message3</SHORT-NAME>
-          <FRAME-LENGTH>8</FRAME-LENGTH>
+          <FRAME-LENGTH>6</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <!-- /CanFrame/Message3/message3 -->
             <PDU-TO-FRAME-MAPPING UUID="c2102052cd836391401149341e964b5f">
@@ -1043,13 +1043,42 @@
         <!-- /SecuredIPdu/message3_secured -->
         <SECURED-I-PDU UUID="9fb09bd0b1f84e86a0c62a2de73be796">
           <SHORT-NAME>message3_secured</SHORT-NAME>
-          <LENGTH>8</LENGTH>
+          <LENGTH>6</LENGTH>
           <CONTAINED-I-PDU-PROPS>
             <HEADER-ID-SHORT-HEADER>0x040506</HEADER-ID-SHORT-HEADER>
           </CONTAINED-I-PDU-PROPS>
-          <!-- we currently do not specify AUTHENTICATION_PROPS, FRESHNESS_PROPS, and SECURE-COMMUNICATION-PROPS. While this is technically allowed, it does not make much sense in the context of a secured I-PDU... -->
+          <AUTHENTICATION-PROPS-REF DEST="SECURE-COMMUNICATION-AUTHENTICATION-PROPS">/SecOCProps/S/KnockKnock</AUTHENTICATION-PROPS-REF>
+          <FRESHNESS-PROPS-REF DEST="SECURE-COMMUNICATION-FRESHNESS-PROPS">/SecOCProps/S/SmellyCheese</FRESHNESS-PROPS-REF>
           <PAYLOAD-REF DEST="PDU-TRIGGERING">/Cluster/Cluster0/Pch0/message3_triggering</PAYLOAD-REF>
+          <SECURE-COMMUNICATION-PROPS>
+            <DATA-ID>1337</DATA-ID>
+          </SECURE-COMMUNICATION-PROPS>
         </SECURED-I-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <!-- /SecOCProps -->
+    <AR-PACKAGE UUID="7449c6261f6b409d90dea14df10e1482">
+      <SHORT-NAME>SecOCProps</SHORT-NAME>
+      <ELEMENTS>
+        <!-- /SecOCProps/S -->
+        <SECURE-COMMUNICATION-PROPS-SET UUID="5d34ccae5222458787330a7d4f0a29be">
+          <SHORT-NAME>S</SHORT-NAME>
+          <AUTHENTICATION-PROPSS>
+            <!-- /SecOCProps/S/KnockKnock -->
+            <SECURE-COMMUNICATION-AUTHENTICATION-PROPS UUID="b3cdd53432914128a81d59fee81bee9b">
+              <SHORT-NAME>KnockKnock</SHORT-NAME>
+              <AUTH-INFO-TX-LENGTH>10</AUTH-INFO-TX-LENGTH>
+            </SECURE-COMMUNICATION-AUTHENTICATION-PROPS>
+          </AUTHENTICATION-PROPSS>
+          <FRESHNESS-PROPSS>
+            <!-- /SecOCProps/S/SmellyCheese -->
+            <SECURE-COMMUNICATION-FRESHNESS-PROPS UUID="f964643f4aad43e6aa8a420afd6835ac">
+              <SHORT-NAME>SmellyCheese</SHORT-NAME>
+              <FRESHNESS-VALUE-LENGTH>32</FRESHNESS-VALUE-LENGTH>
+              <FRESHNESS-VALUE-TX-LENGTH>6</FRESHNESS-VALUE-TX-LENGTH>
+            </SECURE-COMMUNICATION-FRESHNESS-PROPS>
+          </FRESHNESS-PROPSS>
+        </SECURE-COMMUNICATION-PROPS-SET>
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /Unit -->

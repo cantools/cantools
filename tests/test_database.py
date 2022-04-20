@@ -5096,12 +5096,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.is_extended_frame, False)
         self.assertEqual(message_3.is_fd, False)
         self.assertEqual(message_3.name, 'Message3')
-        self.assertEqual(message_3.length, 8)
+        self.assertEqual(message_3.length, 6)
         self.assertEqual(message_3.unused_bit_pattern, 0xff)
         self.assertEqual(message_3.senders, [])
         self.assertEqual(message_3.send_type, None)
         self.assertEqual(message_3.cycle_time, None)
-        self.assertEqual(len(message_3.signals), 2)
+        self.assertEqual(len(message_3.signals), 4)
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, 'Cluster0')
         self.assertTrue(message_3.dbc is None)
@@ -5155,6 +5155,50 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.comment, None)
         self.assertEqual(signal_2.is_multiplexer, False)
         self.assertEqual(signal_2.multiplexer_ids, None)
+
+        signal_3 = message_3.signals[2]
+        self.assertEqual(signal_3.name, 'Message3_Freshness')
+        self.assertEqual(signal_3.start, 39)
+        self.assertEqual(signal_3.length, 6)
+        self.assertEqual(signal_3.receivers, [])
+        self.assertEqual(signal_3.byte_order, 'big_endian')
+        self.assertEqual(signal_3.is_signed, False)
+        self.assertEqual(signal_3.is_float, False)
+        self.assertEqual(signal_3.scale, 1)
+        self.assertEqual(signal_3.offset, 0)
+        self.assertEqual(signal_3.minimum, None)
+        self.assertEqual(signal_3.maximum, None)
+        self.assertEqual(signal_3.decimal.scale, None)
+        self.assertEqual(signal_3.decimal.offset, None)
+        self.assertEqual(signal_3.decimal.minimum, None)
+        self.assertEqual(signal_3.decimal.maximum, None)
+        self.assertEqual(signal_3.unit, None)
+        self.assertEqual(signal_3.choices, None)
+        self.assertEqual(signal_3.comment, "Truncated freshness value for 'Message3'")
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_ids, None)
+
+        signal_4 = message_3.signals[3]
+        self.assertEqual(signal_4.name, 'Message3_Authenticator')
+        self.assertEqual(signal_4.start, 33)
+        self.assertEqual(signal_4.length, 10)
+        self.assertEqual(signal_4.receivers, [])
+        self.assertEqual(signal_4.byte_order, 'big_endian')
+        self.assertEqual(signal_4.is_signed, False)
+        self.assertEqual(signal_4.is_float, False)
+        self.assertEqual(signal_4.scale, 1)
+        self.assertEqual(signal_4.offset, 0)
+        self.assertEqual(signal_4.minimum, None)
+        self.assertEqual(signal_4.maximum, None)
+        self.assertEqual(signal_4.decimal.scale, None)
+        self.assertEqual(signal_4.decimal.offset, None)
+        self.assertEqual(signal_4.decimal.minimum, None)
+        self.assertEqual(signal_4.decimal.maximum, None)
+        self.assertEqual(signal_4.unit, None)
+        self.assertEqual(signal_4.choices, None)
+        self.assertEqual(signal_4.comment, "Truncated authenticator value for 'Message3'")
+        self.assertEqual(signal_4.is_multiplexer, False)
+        self.assertEqual(signal_4.multiplexer_ids, None)
 
         # message 4 tests different base encodings
         message_4 = db.messages[4]
@@ -5269,6 +5313,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'ISignalIPdu',
                              'NMPdu',
                              'SecuredIPdu',
+                             'SecOCProps',
                              'Unit',
                              'CompuMethod',
                              'SystemSignal',

@@ -42,10 +42,16 @@ def _print_message(message, indent=''):
             print(f'{indent}    Protected size: {e2e.payload_length} bytes')
 
         print(f'{indent}  Is secured: {message.autosar.is_secured}')
-        if message.autosar.is_secured:
+        secoc = message.autosar.secoc
+        if secoc:
             print(f'{indent}  Security properties:')
-            print(f'{indent}    Secured size: '
-                  f'{message.autosar.secured_payload_length}')
+            print(f'{indent}    Authentication algorithm: {secoc.auth_algorithm_name}')
+            print(f'{indent}    Freshness algorithm: {secoc.freshness_algorithm_name}')
+            print(f'{indent}    Data ID: {secoc.data_id}')
+            print(f'{indent}    Authentication transmit bits: {secoc.auth_tx_bit_length}')
+            print(f'{indent}    Freshness counter size: {secoc.freshness_bit_length} bits')
+            print(f'{indent}    Freshness counter transmit size: {secoc.freshness_tx_bit_length} bits')
+            print(f'{indent}    Secured size: {secoc.payload_length} bytes')
 
     if message.signals:
         print(f'{indent}  Signal tree:')

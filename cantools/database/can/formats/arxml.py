@@ -62,8 +62,7 @@ class AutosarMessageSpecifics(object):
     def __init__(self):
         self._pdu_paths = []
         self._is_nm = False
-        self._is_secured = False
-        self._secured_payload_length = 0
+        self._secoc: Optional['AutosarSecOCProperties'] = None
         self._e2e: Optional['AutosarEnd2EndProperties'] = None
         self._signal_group = None
 
@@ -87,17 +86,13 @@ class AutosarMessageSpecifics(object):
     def is_secured(self):
         """True iff the message integrity is secured using SecOC
         """
-        return self._is_secured
+        return self._secoc is not None
 
     @property
-    def secured_payload_length(self):
-        """Returns the number of bytes covered by the payload of the secured
-        message
-
-        (The full message length is the length of the payload plus the
-        size of the security header.)
+    def secoc(self):
+        """The properties required to implement secured on-board communication
         """
-        return self._secured_payload_length
+        return self._secoc
 
     @property
     def e2e(self) -> Optional['AutosarEnd2EndProperties']:
@@ -107,6 +102,100 @@ class AutosarMessageSpecifics(object):
     @e2e.setter
     def e2e(self, value: Optional['AutosarEnd2EndProperties']) -> None:
         self._e2e = value
+
+class AutosarSecOCProperties:
+    """This class collects all attributes that are required to implement the
+    AUTOSAR secure on-board communication (SecOC) specification.
+
+    Be aware that the AUTOSAR SecOC specification does not cover the
+    required cryptographic primitives themselves, just the
+    "scaffolding" around them...
+    """
+    def __init__(self,
+                 auth_algorithm_name: Optional[str],
+                 freshness_algorithm_name: Optional[str],
+                 payload_length: Optional[int],
+                 data_id: Optional[int],
+                 auth_tx_bit_length: Optional[int],
+                 freshness_bit_length: Optional[int],
+                 freshness_tx_bit_length: Optional[int],
+                 ):
+
+        self._auth_algorithm_name = auth_algorithm_name
+        self._freshness_algorithm_name = freshness_algorithm_name
+
+        self._payload_length = payload_length
+        self._data_id = data_id
+
+        self._freshness_bit_length = freshness_bit_length
+        self._freshness_tx_bit_length = freshness_tx_bit_length
+        self._auth_tx_bit_length = auth_tx_bit_length
+
+    @property
+    def freshness_algorithm_name(self) -> Optional[str]:
+        """The name of the algorithm used for verifying the freshness of a
+        message.
+
+        This can be used to prevent replay attacks. Note that the
+        algorithms themselves are manufacturer-specific, i.e., AUTOSAR
+        does not define *any* freshness schemes.
+        """
+        return self._freshness_algorithm_name
+
+    @property
+    def auth_algorithm_name(self) -> Optional[str]:
+        """The name of the algorithm used for authentication
+
+        Note that the algorithms themselves are manufacturer-specific,
+        i.e., AUTOSAR does not define *any* cryptographic schemes.
+        """
+        return self._auth_algorithm_name
+
+    @property
+    def payload_length(self) -> Optional[int]:
+        """Returns the number of bytes covered by the payload of the secured
+        message
+
+        (The full message length is the length of the payload plus the
+        size of the security trailer.)
+        """
+        return self._payload_length
+
+    @property
+    def data_id(self) -> Optional[int]:
+        """The data ID required for authentication.
+
+        Be aware that this is a different data ID than that required
+        for End-To-End protection.
+        """
+        return self._data_id
+
+    @property
+    def freshness_bit_length(self) -> Optional[int]:
+        """The number of bits of the full freshness counter.
+        """
+        return self._freshness_bit_length
+
+    @property
+    def freshness_tx_bit_length(self) -> Optional[int]:
+        """The number of least-significant bits of the freshness counter that
+        is send as part of the secured frame.
+
+        This number is at most as large as the number of bits of
+        freshness counter objects.
+
+        """
+        return self._freshness_tx_bit_length
+
+    @property
+    def auth_tx_bit_length(self) -> Optional[int]:
+        """The number of most significant bits of the authenticator object
+        send as part of the secured frame
+
+        This is at most the length of the authenicator.
+        """
+        return self._auth_tx_bit_length
+
 
 class AutosarEnd2EndProperties:
     """This class collects all attributes that are required to implement
@@ -916,7 +1005,7 @@ class SystemLoader(object):
         autosar_specifics._pdu_paths.append(pdu_path)
 
         _, \
-            payload_length, \
+            _, \
             signals, \
             cycle_time, \
             child_pdu_paths, \
@@ -925,21 +1014,12 @@ class SystemLoader(object):
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
         autosar_specifics._is_nm = \
             (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
-        autosar_specifics._is_secured = \
+        is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
         self._load_e2e_data_id_from_signal_group(pdu, autosar_specifics)
-        if autosar_specifics.is_secured:
-            autosar_specifics._secured_payload_length = payload_length
-            if autosar_specifics.e2e is None:
-                # use the data id from the signal group associated with
-                # the payload PDU if the secured PDU does not define a
-                # group with a data id...
-                payload_pdu = \
-                    self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
-
-                self._load_e2e_data_id_from_signal_group(payload_pdu,
-                                                         autosar_specifics)
+        if is_secured:
+            self._load_secured_properties(name, pdu, signals, autosar_specifics)
 
         # the bit pattern used to fill in unused bits to avoid
         # undefined behaviour/information leaks
@@ -965,6 +1045,99 @@ class SystemLoader(object):
                        autosar_specifics=autosar_specifics,
                        strict=self._strict,
                        sort_signals=self._sort_signals)
+
+    def _load_secured_properties(self,
+                                 message_name,
+                                 pdu,
+                                 signals,
+                                 autosar_specifics):
+        payload_pdu = \
+            self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
+
+        payload_length = self._get_unique_arxml_child(payload_pdu, 'LENGTH')
+        payload_length = parse_number_string(payload_length.text)
+
+        if autosar_specifics.e2e is None:
+            # use the data id from the signal group associated with
+            # the payload PDU if the secured PDU does not define a
+            # group with a data id...
+            self._load_e2e_data_id_from_signal_group(payload_pdu,
+                                                     autosar_specifics)
+
+        # data specifying the SecOC "footer" of a secured frame
+        auth_algo = self._get_unique_arxml_child(pdu, [
+            '&AUTHENTICATION-PROPS',
+            'SHORT-NAME' ])
+        if auth_algo is not None:
+            auth_algo = auth_algo.text
+
+        fresh_algo = self._get_unique_arxml_child(pdu, [
+            '&FRESHNESS-PROPS',
+            'SHORT-NAME' ])
+        if fresh_algo is not None:
+            fresh_algo = fresh_algo.text
+
+        data_id = self._get_unique_arxml_child(pdu, [
+            'SECURE-COMMUNICATION-PROPS',
+            'DATA-ID' ])
+        if data_id is not None:
+            data_id = parse_number_string(data_id.text)
+
+        auth_tx_len = self._get_unique_arxml_child(pdu, [
+            '&AUTHENTICATION-PROPS',
+            'AUTH-INFO-TX-LENGTH' ])
+        if auth_tx_len is not None:
+            auth_tx_len = parse_number_string(auth_tx_len.text)
+
+        fresh_len = self._get_unique_arxml_child(pdu, [
+            '&FRESHNESS-PROPS',
+            'FRESHNESS-VALUE-LENGTH' ])
+        if fresh_len is not None:
+            fresh_len = parse_number_string(fresh_len.text)
+
+        fresh_tx_len = self._get_unique_arxml_child(pdu, [
+            '&FRESHNESS-PROPS',
+            'FRESHNESS-VALUE-TX-LENGTH' ])
+        if fresh_tx_len is not None:
+            fresh_tx_len = parse_number_string(fresh_tx_len.text)
+
+        # add "pseudo signals" for the truncated freshness value and
+        # the truncated authenticator
+        if fresh_tx_len is not None:
+            signals.append(Signal(name=f'{message_name}_Freshness',
+                                  start=payload_length*8 + 7,
+                                  length=fresh_tx_len,
+                                  byte_order='big_endian',
+                                  comment=\
+                                  {'FOR-ALL':
+                                   f'Truncated freshness value for '
+                                   f"'{message_name}'"}))
+        if auth_tx_len is not None:
+            n0 = payload_length*8 + (fresh_tx_len//8)*8 + (7-fresh_tx_len%8)
+            signals.append(Signal(name=f'{message_name}_Authenticator',
+                                  start=n0,
+                                  length=auth_tx_len,
+                                  byte_order='big_endian',
+                                  comment=\
+                                  { 'FOR-ALL':
+                                    f'Truncated authenticator value for '
+                                    f"'{message_name}'"}))
+
+        # note that the length of the authenificator is implicit:
+        # e.g., for an MD5 based message authencation code, it would
+        # be 128 bits long which algorithm is used is highly
+        # manufacturer specific and determined via the authenticator
+        # name.
+        autosar_specifics._secoc = \
+            AutosarSecOCProperties(
+                auth_algorithm_name=auth_algo,
+                freshness_algorithm_name=fresh_algo,
+                payload_length=payload_length,
+                data_id=data_id,
+                freshness_bit_length=fresh_len,
+                freshness_tx_bit_length=fresh_tx_len,
+                auth_tx_bit_length=auth_tx_len)
+
 
     def _load_pdu(self, pdu, frame_name, next_selector_idx):
         is_secured = pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU'
@@ -1046,7 +1219,7 @@ class SystemLoader(object):
                 # create the autosar specifics of the contained_message
                 contained_autosar_specifics = AutosarMessageSpecifics()
                 contained_autosar_specifics._pdu_paths = contained_pdu_paths
-                contained_autosar_specifics._is_secured = \
+                is_secured = \
                     (contained_pdu.tag ==
                      f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
@@ -1055,21 +1228,11 @@ class SystemLoader(object):
                 self._load_e2e_data_id_from_signal_group(
                     contained_pdu,
                     contained_autosar_specifics)
-                if contained_autosar_specifics.is_secured:
-                    contained_autosar_specifics._secured_payload_length = \
-                        payload_length
-                    if contained_autosar_specifics.e2e is None:
-                        # use the data id from the signal group
-                        # associated with the payload PDU if the
-                        # secured PDU does not define a group with a
-                        # data id...
-                        payload_pdu = \
-                            self._get_unique_arxml_child(contained_pdu, [
-                                '&PAYLOAD', '&I-PDU' ])
-
-                        self._load_e2e_data_id_from_signal_group(
-                            payload_pdu,
-                            contained_autosar_specifics)
+                if is_secured:
+                    self._load_secured_properties(name,
+                                                  contained_pdu,
+                                                  signals,
+                                                  contained_autosar_specifics)
 
                 contained_message = \
                     Message(header_id=header_id,

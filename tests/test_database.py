@@ -6046,6 +6046,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.buses[0].comment, 'SpecialRelease')
         self.assert_dbc_dump(db, filename)
 
+    def test_relation_attributes(self):
+        filename = 'tests/files/dbc/attributes_relation.dbc'
+        db = cantools.database.load_file(filename)
+        for frame in self.db.messages:
+            for signal in frame.signals:
+                if (signal.name is "BIT_B"):
+                    timeout_attr = signal.dbc.attributes.get("SigTimeoutTime")
+                    self.assertEqual(timeout_attr.get("value"), 6000)
+                    break
+        self.assert_dbc_dump(db, filename)
+
 
 
     def test_cache_prune_choices(self):

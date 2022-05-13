@@ -24,6 +24,7 @@ setup(name='cantools',
       keywords=['can', 'can bus', 'dbc', 'kcd', 'automotive'],
       url='https://github.com/eerimoq/cantools',
       packages=find_packages(exclude=['tests']),
+      package_data={"cantools": ["py.typed"]},
       python_requires='>=3.6',
       install_requires=[
           'bitstruct>=6.0.0',

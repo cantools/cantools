@@ -6049,7 +6049,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_relation_attributes(self):
         filename = 'tests/files/dbc/attributes_relation.dbc'
         db = cantools.database.load_file(filename)
-        for frame in self.db.messages:
+        for frame in db.messages:
             for signal in frame.signals:
                 if (signal.name is "BIT_B"):
                     timeout_attr = signal.dbc.attributes.get("SigTimeoutTime")

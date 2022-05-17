@@ -744,20 +744,20 @@ def _dump_attribute_definitions_rel(database):
             choices = ','.join(['"{}"'.format(choice)
                                 for choice in definition.choices])
             ba_def_rel.append(
-                'BA_DEF_REL_ BU_SG_REL_ "{name}" {type_name}  {choices};'.format(
+                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name}  {choices};'.format(
                     name=definition.name,
                     type_name=definition.type_name,
                     choices=choices))
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
             ba_def_rel.append(
-                'BA_DEF_REL_ BU_SG_REL_ "{name}" {type_name}{minimum}{maximum};'.format(
+                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name}{minimum}{maximum};'.format(
                     name=definition.name,
                     type_name=definition.type_name,
                     minimum=get_minimum(definition),
                     maximum=get_maximum(definition)))
         elif definition.type_name == 'STRING':
             ba_def_rel.append(
-                'BA_DEF_REL_ BU_SG_REL_ "{name}" {type_name} ;'.format(
+                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name} ;'.format(
                     name=definition.name,
                     type_name=definition.type_name))
 
@@ -802,9 +802,9 @@ def _dump_attribute_definition_defaults_rel(database):
     for definition in definitions.values():
         if definition.default_value is not None:
             if definition.type_name in ["STRING", "ENUM"]:
-                fmt = 'BA_DEF_DEF_REL_  "{name}" "{value}";'
+                fmt = 'BA_DEF_DEF_REL_ "{name}" "{value}";'
             else:
-                fmt = 'BA_DEF_DEF_REL_  "{name}" {value};'
+                fmt = 'BA_DEF_DEF_REL_ "{name}" {value};'
 
             ba_def_def_rel.append(fmt.format(name=definition.name,
                                              value=definition.default_value))

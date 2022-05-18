@@ -67,7 +67,6 @@ ExampleMessage:
   Size: 8 bytes
   Is extended frame: False
   Is CAN-FD frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -165,6 +164,7 @@ Passenger:
 DJ:
 Dancer:
   Comment[FOR-ALL]: Rythm is a Dancer!
+Guard:
 """
 
             actual_output = stdout.getvalue()
@@ -172,7 +172,7 @@ Dancer:
 
         # Prepare mocks.
         args = Args('tests/files/arxml/system-4.2.arxml')
-        args.items = ["Message2"]
+        args.items = ['Message2']
 
         stdout = StringIO()
         with patch('sys.stdout', stdout):
@@ -189,6 +189,7 @@ Message2:
   Is extended frame: True
   Is CAN-FD frame: True
   Cycle time: 200 ms
+  Is network management frame: False
   Is secured: False
   Signal tree:
 
@@ -230,6 +231,43 @@ Message2:
             self.assertEqual(actual_output, expected_output)
 
         args = Args('tests/files/arxml/system-4.2.arxml')
+        args.items = ['AlarmStatus']
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+AlarmStatus:
+  Bus: Cluster0
+  Sending ECUs: Guard
+  Frame ID: 0x3e9 (1001)
+  Size: 1 bytes
+  Is extended frame: False
+  Is CAN-FD frame: False
+  Is network management frame: True
+  Is secured: False
+  Signal tree:
+
+    -- {root}
+       +-- FireAlarm
+
+  Signal details:
+    FireAlarm:
+      Receiving ECUs: DJ, Dancer
+      Type: Integer
+      Start bit: 0
+      Length: 1 bits
+      Initial value: False
+      Is signed: False
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
+        args = Args('tests/files/arxml/system-4.2.arxml')
         args.exclude_normal = True
 
         stdout = StringIO()
@@ -253,6 +291,7 @@ Message2:
 
             # check make sure it behaves as expected
             expected_output = """\
+AlarmStatus
 Message1
 Message3
 Message4
@@ -264,7 +303,7 @@ OneToContainThemAll
             self.assertEqual(actual_output, expected_output)
 
         args = Args('tests/files/arxml/system-4.2.arxml')
-        args.items = [ "IAmAGhost" ]
+        args.items = [ 'IAmAGhost' ]
 
         stdout = StringIO()
         with patch('sys.stdout', stdout):
@@ -280,7 +319,7 @@ No message named "IAmAGhost" has been found in input file.
             self.assertEqual(actual_output, expected_output)
 
         args = Args('tests/files/arxml/system-4.2.arxml')
-        args.items = [ "Message1" ]
+        args.items = [ 'Message1' ]
 
         stdout = StringIO()
         with patch('sys.stdout', stdout):
@@ -298,8 +337,11 @@ Message1:
   Size: 9 bytes
   Is extended frame: False
   Is CAN-FD frame: True
-  End-to-end category: Profile2
-  Data IDs: [123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138]
+  Is network management frame: False
+  End-to-end properties:
+    Category: Profile2
+    Data IDs: [123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138]
+    Protected size: 9 bytes
   Is secured: False
   Signal tree:
 
@@ -365,6 +407,72 @@ Message1:
             self.assertEqual(actual_output, expected_output)
 
         args = Args('tests/files/arxml/system-4.2.arxml')
+        args.items = [ "Message3" ]
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+Message3:
+  Bus: Cluster0
+  Frame ID: 0x64 (100)
+  Size: 6 bytes
+  Is extended frame: False
+  Is CAN-FD frame: False
+  Is network management frame: False
+  End-to-end properties:
+    Category: Profile5
+    Data IDs: [321]
+    Protected size: 4 bytes
+  Is secured: True
+  Security properties:
+    Authentication algorithm: KnockKnock
+    Freshness algorithm: SmellyCheese
+    Data ID: 1337
+    Authentication transmit bits: 10
+    Freshness counter size: 32 bits
+    Freshness counter transmit size: 6 bits
+    Secured size: 4 bytes
+  Signal tree:
+
+    -- {root}
+       +-- message3_CRC
+       +-- message3_SeqCounter
+       +-- Message3_Freshness
+       +-- Message3_Authenticator
+
+  Signal details:
+    message3_CRC:
+      Type: Integer
+      Start bit: 0
+      Length: 8 bits
+      Is signed: False
+    message3_SeqCounter:
+      Type: Integer
+      Start bit: 8
+      Length: 4 bits
+      Is signed: False
+    Message3_Freshness:
+      Comment[FOR-ALL]: Truncated freshness value for 'Message3'
+      Type: Integer
+      Start bit: 39
+      Length: 6 bits
+      Is signed: False
+    Message3_Authenticator:
+      Comment[FOR-ALL]: Truncated authenticator value for 'Message3'
+      Type: Integer
+      Start bit: 33
+      Length: 10 bits
+      Is signed: False
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
+        args = Args('tests/files/arxml/system-4.2.arxml')
         args.print_buses = True
 
         stdout = StringIO()
@@ -397,7 +505,6 @@ Cluster0:
             list_module._do_list(args)
 
             # check make sure it behaves as expected
-            expected_output = ""
             expected_output = """\
 Message1:
   Bus: Bus
@@ -406,7 +513,6 @@ Message1:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -437,7 +543,6 @@ Message2:
   Is extended frame: False
   Is CAN-FD frame: False
   Cycle time: 100 ms
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -519,7 +624,6 @@ Message4:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -560,7 +664,6 @@ Message3:
   Size: 8 bytes
   Is extended frame: True
   Is CAN-FD frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}

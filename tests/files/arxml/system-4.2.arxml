@@ -12,6 +12,12 @@
             <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/RX/DJ</ASSOCIATED-COM-I-PDU-GROUP-REF>
             <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/TX/DJ</ASSOCIATED-COM-I-PDU-GROUP-REF>
           </ASSOCIATED-COM-I-PDU-GROUP-REFS>
+          <COMM-CONTROLLERS>
+            <!-- /ECU/DJ/Observe -->
+            <CAN-COMMUNICATION-CONTROLLER UUID="49bdc4924d23453384dce24491484e68">
+              <SHORT-NAME>Observe</SHORT-NAME>
+            </CAN-COMMUNICATION-CONTROLLER>
+          </COMM-CONTROLLERS>
         </ECU-INSTANCE>
         <!-- /ECU/Dancer -->
         <ECU-INSTANCE UUID="b22f03b772a649e9bac58cab613d49ab">
@@ -23,6 +29,22 @@
             <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/RX/Dancer</ASSOCIATED-COM-I-PDU-GROUP-REF>
             <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/TX/Dancer</ASSOCIATED-COM-I-PDU-GROUP-REF>
           </ASSOCIATED-COM-I-PDU-GROUP-REFS>
+          <COMM-CONTROLLERS>
+            <!-- /ECU/Dancer/Observe -->
+            <CAN-COMMUNICATION-CONTROLLER UUID="04dc9391c9a14d2b8f9c57c5d90d048e">
+              <SHORT-NAME>Observe</SHORT-NAME>
+            </CAN-COMMUNICATION-CONTROLLER>
+          </COMM-CONTROLLERS>
+        </ECU-INSTANCE>
+        <!-- /ECU/Guard -->
+        <ECU-INSTANCE UUID="2f4a4a772e1e4e0883af030f6c7d0413">
+          <SHORT-NAME>Guard</SHORT-NAME>
+          <COMM-CONTROLLERS>
+            <!-- /ECU/Guard/Patrol -->
+            <CAN-COMMUNICATION-CONTROLLER UUID="c52bf929ae414840add256f2f6787ac0">
+              <SHORT-NAME>Patrol</SHORT-NAME>
+            </CAN-COMMUNICATION-CONTROLLER>
+          </COMM-CONTROLLERS>
         </ECU-INSTANCE>
       </ELEMENTS>
     </AR-PACKAGE>
@@ -83,6 +105,49 @@
           </ELEMENTS>
         </AR-PACKAGE>
       </AR-PACKAGES>
+    </AR-PACKAGE>
+    <!-- /NMConfig -->
+    <AR-PACKAGE UUID="0833f45c2fde44f1887618c6ea711556">
+      <SHORT-NAME>NMConfig</SHORT-NAME>
+      <ELEMENTS>
+        <!-- /NMConfig/A -->
+        <NM-CONFIG UUID="427ce34778d54632b3f62a7c2fda889f">
+          <SHORT-NAME>A</SHORT-NAME>
+          <NM-CLUSTERS>
+            <!-- /NMConfig/A/NightClub -->
+            <CAN-NM-CLUSTER UUID="f4628c43263349c2a4bf03ca12595550">
+              <SHORT-NAME>NightClub</SHORT-NAME>
+              <COMMUNICATION-CLUSTER-REF DEST="CAN-CLUSTER">/Cluster/Cluster0</COMMUNICATION-CLUSTER-REF>
+              <NM-NODES>
+                <!-- /NMConfig/A/NightClub/DJ -->
+                <CAN-NM-NODE UUID="4aef91b5dd414515a4f0aaaddd034970">
+                  <SHORT-NAME>DJ</SHORT-NAME>
+                  <CONTROLLER-REF DEST="CAN-COMMUNICATION-CONTROLLER">/ECU/DJ/Observe</CONTROLLER-REF>
+                  <RX-NM-PDU-REFS>
+                    <RX-NM-PDU-REF DEST="NM-PDU">/NMPdu/alarm_status</RX-NM-PDU-REF>
+                  </RX-NM-PDU-REFS>
+                </CAN-NM-NODE>
+                <!-- /NMConfig/A/NightClub/Dancer -->
+                <CAN-NM-NODE UUID="6736bc7779dc4ad9940c0fd3760799f3">
+                  <SHORT-NAME>Dancer</SHORT-NAME>
+                  <CONTROLLER-REF DEST="CAN-COMMUNICATION-CONTROLLER">/ECU/Dancer/Observe</CONTROLLER-REF>
+                  <RX-NM-PDU-REFS>
+                    <RX-NM-PDU-REF DEST="NM-PDU">/NMPdu/alarm_status</RX-NM-PDU-REF>
+                  </RX-NM-PDU-REFS>
+                </CAN-NM-NODE>
+                <!-- /NMConfig/A/NightClub/Guard -->
+                <CAN-NM-NODE UUID="4f442ffeb22846f388d4a134bf9b27dc">
+                  <SHORT-NAME>Guard</SHORT-NAME>
+                  <CONTROLLER-REF DEST="CAN-COMMUNICATION-CONTROLLER">/ECU/Guard/Patrol</CONTROLLER-REF>
+                  <TX-NM-PDU-REFS>
+                    <TX-NM-PDU-REF DEST="NM-PDU">/NMPdu/alarm_status</TX-NM-PDU-REF>
+                  </TX-NM-PDU-REFS>
+                </CAN-NM-NODE>
+              </NM-NODES>
+            </CAN-NM-CLUSTER>
+          </NM-CLUSTERS>
+        </NM-CONFIG>
+      </ELEMENTS>
     </AR-PACKAGE>
     <!-- /Cluster -->
     <AR-PACKAGE UUID="4f17ec0cd204bc161e791f669540c652">
@@ -148,6 +213,13 @@
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
                       <IDENTIFIER>102</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
+                    <!-- /Cluster/Cluster0/Pch0/AlarmStatus -->
+                    <CAN-FRAME-TRIGGERING UUID="0070954da3df4f92ae324c7de6df1569">
+                      <SHORT-NAME>AlarmStatus</SHORT-NAME>
+                      <FRAME-REF DEST="CAN-FRAME">/CanFrame/AlarmStatus</FRAME-REF>
+                      <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <IDENTIFIER>1001</IDENTIFIER>
+                    </CAN-FRAME-TRIGGERING>
                   </FRAME-TRIGGERINGS>
                   <PDU-TRIGGERINGS>
                     <!-- /Cluster/Cluster0/Pch0/message1_triggering -->
@@ -212,7 +284,7 @@
           <FRAME-LENGTH>9</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <!-- /CanFrame/Message1/message1 -->
-            <PDU-TO-FRAME-MAPPING UUID="1e160eb8bcb7a75f054eccbf6f47fe9f">
+            <PDU-TO-FRAME-MAPPING UUID="4750d79cafd04f9cbc14385d5de0b4fb">
               <SHORT-NAME>message1</SHORT-NAME>
               <PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message1</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
@@ -233,7 +305,7 @@
         <!-- /CanFrame/Message3 -->
         <CAN-FRAME UUID="02f3b1a9e14f4f2167bde58cfcdc00a0">
           <SHORT-NAME>Message3</SHORT-NAME>
-          <FRAME-LENGTH>8</FRAME-LENGTH>
+          <FRAME-LENGTH>6</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <!-- /CanFrame/Message3/message3 -->
             <PDU-TO-FRAME-MAPPING UUID="c2102052cd836391401149341e964b5f">
@@ -263,6 +335,18 @@
             <PDU-TO-FRAME-MAPPING UUID="93a80b2f159a47c080bab5809516fd9b">
               <SHORT-NAME>OneToContainThemAll_mapping</SHORT-NAME>
               <PDU-REF DEST="CONTAINER-I-PDU">/ContainerIPdu/OneToContainThemAll</PDU-REF>
+            </PDU-TO-FRAME-MAPPING>
+          </PDU-TO-FRAME-MAPPINGS>
+        </CAN-FRAME>
+        <!-- /CanFrame/AlarmStatus -->
+        <CAN-FRAME UUID="05939caec6f2472e829d4419992bb92f">
+          <SHORT-NAME>AlarmStatus</SHORT-NAME>
+          <FRAME-LENGTH>1</FRAME-LENGTH>
+          <PDU-TO-FRAME-MAPPINGS>
+            <!-- /CanFrame/AlarmStatus/nm -->
+            <PDU-TO-FRAME-MAPPING UUID="f700209c20454f95be5f688f11484d7b">
+              <SHORT-NAME>nm</SHORT-NAME>
+              <PDU-REF DEST="NM-PDU">/NMPdu/alarm_status</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
           </PDU-TO-FRAME-MAPPINGS>
         </CAN-FRAME>
@@ -514,6 +598,17 @@
           <SHORT-NAME>message3_SeqCounter</SHORT-NAME>
           <LENGTH>4</LENGTH>
         </I-SIGNAL>
+        <!-- /ISignal/FireAlarm -->
+        <I-SIGNAL UUID="ab3a0e5a7d164890a723161c3d1c3c4d">
+          <SHORT-NAME>FireAlarm</SHORT-NAME>
+          <INIT-VALUE>
+            <CONSTANT-REFERENCE>
+              <CONSTANT-REF DEST="CONSTANT-SPECIFICATION">BooleanFalse</CONSTANT-REF>
+            </CONSTANT-REFERENCE>
+          </INIT-VALUE>
+          <LENGTH>1</LENGTH>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/SystemSignal/FireAlarm</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
         <!-- /ISignal/message1Group -->
         <I-SIGNAL-GROUP UUID="3eddf8ea0b7e4e678cbe1e810bd4e160">
           <SHORT-NAME>message1Group</SHORT-NAME>
@@ -554,8 +649,8 @@
         <I-SIGNAL-GROUP UUID="f95abd456e3748dc9b21e242ffc3795e">
           <SHORT-NAME>message3Group</SHORT-NAME>
           <I-SIGNAL-REFS>
-            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/messag3_SeqCounter</I-SIGNAL-REF>
-            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/messag3_CRC</I-SIGNAL-REF>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message3_SeqCounter</I-SIGNAL-REF>
+            <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/message3_CRC</I-SIGNAL-REF>
           </I-SIGNAL-REFS>
           <TRANSFORMATION-I-SIGNAL-PROPSS>
             <END-TO-END-TRANSFORMATION-I-SIGNAL-PROPS>
@@ -608,6 +703,17 @@
     <AR-PACKAGE UUID="89cb5634c5ae4850b6dd0ba310fbc247">
       <SHORT-NAME>Constants</SHORT-NAME>
       <ELEMENTS>
+        <!-- /Constants/BooleanTrue -->
+        <CONSTANT-SPECIFICATION UUID="ab3a0e5a7d164890a723161c3d1c3c4d">
+          <SHORT-NAME>BooleanTrue</SHORT-NAME>
+          <VALUE-SPEC>
+            <!-- /Constants/BooleanTrue/literal -->
+            <NUMERICAL-VALUE-SPECIFICATION>
+              <SHORT-LABEL>literal</SHORT-LABEL>
+              <VALUE>true</VALUE>
+            </NUMERICAL-VALUE-SPECIFICATION>
+          </VALUE-SPEC>
+        </CONSTANT-SPECIFICATION>
         <!-- /Constants/BooleanFalse -->
         <CONSTANT-SPECIFICATION UUID="0778143a6fc7ae0b1bcc9670853fe048">
           <SHORT-NAME>BooleanFalse</SHORT-NAME>
@@ -685,7 +791,7 @@
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /ISignalIPdu -->
-    <AR-PACKAGE UUID="bf5ded8d0c2d7bd37cfb17f2525d7208">
+    <AR-PACKAGE UUID="65ec052affb34dc19df7d7050d58fe68">
       <SHORT-NAME>ISignalIPdu</SHORT-NAME>
       <ELEMENTS>
         <!-- /ISignalIPdu/multiplexed_message_static -->
@@ -911,6 +1017,25 @@
         </I-SIGNAL-I-PDU>
       </ELEMENTS>
     </AR-PACKAGE>
+    <!-- /NMPdu -->
+    <AR-PACKAGE UUID="fc63f405f8c143bcbcffb74c5b03fc34">
+      <SHORT-NAME>NMPdu</SHORT-NAME>
+      <ELEMENTS>
+        <!-- /NMPdu/alarm_status -->
+        <NM-PDU UUID="143c00ecd41541c4ba050dc43175dee4">
+          <SHORT-NAME>alarm_status</SHORT-NAME>
+          <LENGTH>1</LENGTH>
+          <I-SIGNAL-TO-I-PDU-MAPPINGS>
+            <!-- /NMPdu/alarm_status/fire_alarm -->
+            <I-SIGNAL-TO-I-PDU-MAPPING UUID="a76dee55dd2b4421b3e81a58dcf214d9">
+              <SHORT-NAME>fire_alarm</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/FireAlarm</I-SIGNAL-REF>
+              <START-POSITION>0</START-POSITION>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+          </I-SIGNAL-TO-I-PDU-MAPPINGS>
+        </NM-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
     <!-- /SecuredIPdu -->
     <AR-PACKAGE UUID="ccb4004437234d1284113b199856aa16">
       <SHORT-NAME>SecuredIPdu</SHORT-NAME>
@@ -918,13 +1043,42 @@
         <!-- /SecuredIPdu/message3_secured -->
         <SECURED-I-PDU UUID="9fb09bd0b1f84e86a0c62a2de73be796">
           <SHORT-NAME>message3_secured</SHORT-NAME>
-          <LENGTH>8</LENGTH>
+          <LENGTH>6</LENGTH>
           <CONTAINED-I-PDU-PROPS>
             <HEADER-ID-SHORT-HEADER>0x040506</HEADER-ID-SHORT-HEADER>
           </CONTAINED-I-PDU-PROPS>
-          <!-- we currently do not specify AUTHENTICATION_PROPS, FRESHNESS_PROPS, and SECURE-COMMUNICATION-PROPS. While this is technically allowed, it does not make much sense in the context of a secured I-PDU... -->
+          <AUTHENTICATION-PROPS-REF DEST="SECURE-COMMUNICATION-AUTHENTICATION-PROPS">/SecOCProps/S/KnockKnock</AUTHENTICATION-PROPS-REF>
+          <FRESHNESS-PROPS-REF DEST="SECURE-COMMUNICATION-FRESHNESS-PROPS">/SecOCProps/S/SmellyCheese</FRESHNESS-PROPS-REF>
           <PAYLOAD-REF DEST="PDU-TRIGGERING">/Cluster/Cluster0/Pch0/message3_triggering</PAYLOAD-REF>
+          <SECURE-COMMUNICATION-PROPS>
+            <DATA-ID>1337</DATA-ID>
+          </SECURE-COMMUNICATION-PROPS>
         </SECURED-I-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <!-- /SecOCProps -->
+    <AR-PACKAGE UUID="7449c6261f6b409d90dea14df10e1482">
+      <SHORT-NAME>SecOCProps</SHORT-NAME>
+      <ELEMENTS>
+        <!-- /SecOCProps/S -->
+        <SECURE-COMMUNICATION-PROPS-SET UUID="5d34ccae5222458787330a7d4f0a29be">
+          <SHORT-NAME>S</SHORT-NAME>
+          <AUTHENTICATION-PROPSS>
+            <!-- /SecOCProps/S/KnockKnock -->
+            <SECURE-COMMUNICATION-AUTHENTICATION-PROPS UUID="b3cdd53432914128a81d59fee81bee9b">
+              <SHORT-NAME>KnockKnock</SHORT-NAME>
+              <AUTH-INFO-TX-LENGTH>10</AUTH-INFO-TX-LENGTH>
+            </SECURE-COMMUNICATION-AUTHENTICATION-PROPS>
+          </AUTHENTICATION-PROPSS>
+          <FRESHNESS-PROPSS>
+            <!-- /SecOCProps/S/SmellyCheese -->
+            <SECURE-COMMUNICATION-FRESHNESS-PROPS UUID="f964643f4aad43e6aa8a420afd6835ac">
+              <SHORT-NAME>SmellyCheese</SHORT-NAME>
+              <FRESHNESS-VALUE-LENGTH>32</FRESHNESS-VALUE-LENGTH>
+              <FRESHNESS-VALUE-TX-LENGTH>6</FRESHNESS-VALUE-TX-LENGTH>
+            </SECURE-COMMUNICATION-FRESHNESS-PROPS>
+          </FRESHNESS-PROPSS>
+        </SECURE-COMMUNICATION-PROPS-SET>
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /Unit -->
@@ -1159,6 +1313,17 @@
             <SW-DATA-DEF-PROPS-VARIANTS>
               <SW-DATA-DEF-PROPS-CONDITIONAL>
                 <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Signal6</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+        <!-- /SystemSignal/FireAlarm -->
+        <SYSTEM-SIGNAL UUID="dbd1ef2e9d0b4189ad60db41ad9e5a5d">
+          <SHORT-NAME>FireAlarm</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/CompuMethod/Identical</COMPU-METHOD-REF>
               </SW-DATA-DEF-PROPS-CONDITIONAL>
             </SW-DATA-DEF-PROPS-VARIANTS>
           </PHYSICAL-PROPS>

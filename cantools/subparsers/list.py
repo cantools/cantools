@@ -31,20 +31,27 @@ def _print_message(message, indent=''):
     if message.cycle_time is not None:
         print(f'{indent}  Cycle time: {message.cycle_time} ms')
 
-    if message.autosar and message.autosar.e2e:
-        print(f'{indent}  End-to-end category: {message.autosar.e2e.category}')
-        print(f'{indent}  Data IDs: {message.autosar.e2e.data_ids}')
+    if message.autosar:
+        print(f'{indent}  Is network management frame: {message.autosar.is_nm}')
 
-    is_secured = False
-    if message.autosar and \
-       message.autosar.is_secured:
-        is_secured = True
+        if message.autosar.e2e:
+            e2e = message.autosar.e2e
+            print(f'{indent}  End-to-end properties:')
+            print(f'{indent}    Category: {e2e.category}')
+            print(f'{indent}    Data IDs: {e2e.data_ids}')
+            print(f'{indent}    Protected size: {e2e.payload_length} bytes')
 
-    print(f'{indent}  Is secured: {is_secured}')
-
-    if is_secured:
-        print(f'{indent}  Secured payload size: '
-              f'{message.autosar.secured_payload_length}')
+        print(f'{indent}  Is secured: {message.autosar.is_secured}')
+        secoc = message.autosar.secoc
+        if secoc:
+            print(f'{indent}  Security properties:')
+            print(f'{indent}    Authentication algorithm: {secoc.auth_algorithm_name}')
+            print(f'{indent}    Freshness algorithm: {secoc.freshness_algorithm_name}')
+            print(f'{indent}    Data ID: {secoc.data_id}')
+            print(f'{indent}    Authentication transmit bits: {secoc.auth_tx_bit_length}')
+            print(f'{indent}    Freshness counter size: {secoc.freshness_bit_length} bits')
+            print(f'{indent}    Freshness counter transmit size: {secoc.freshness_tx_bit_length} bits')
+            print(f'{indent}    Secured size: {secoc.payload_length} bytes')
 
     if message.signals:
         print(f'{indent}  Signal tree:')

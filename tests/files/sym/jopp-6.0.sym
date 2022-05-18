@@ -7,7 +7,7 @@ Enum=Foo(0="foo",
   1="bar") // barbar
 
 {SIGNALS}
-Sig=Signal1 unsigned 11 /u:A /max:255 /d:1
+Sig=Signal1 unsigned 11 /u:A /max:255 /d:1 /spn:1234
 Sig=Signal2 float /u:V /o:48 /min:16 /max:130 /ln:"hhh"	// bbb
 Sig=Signal3 signed 11 -m /min:0 /max:1 /e:Foo
 Sig=Signal4 double /u:*UU /f:6 /o:5 /min:-1.7E308 /max:1.7E308

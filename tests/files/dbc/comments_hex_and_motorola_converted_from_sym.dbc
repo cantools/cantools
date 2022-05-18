@@ -36,12 +36,12 @@ BS_:
 BU_: 
 
 
-BO_ 1568 Msg1: 2 Vector__XXX
+BO_ 1568 Msg1: 2 Peripherals
  SG_ sig22 m2 : 15|8@0+ (1,0) [0|1] "" Vector__XXX
  SG_ sig12 m1 : 15|8@0+ (1,0) [0|1] "" Vector__XXX
  SG_ sig1 M : 7|8@0+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 1365 Msg2: 8 Vector__XXX
+BO_ 1365 Msg2: 8 ECU
  SG_ Test7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ Test6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ Test5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
@@ -51,7 +51,7 @@ BO_ 1365 Msg2: 8 Vector__XXX
  SG_ Test1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ Test0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
 
-
+BO_TX_BU_ 1365 : ECU,Peripherals;
 
 
 CM_ SG_ 1568 sig22 "another comment for sig1=2";

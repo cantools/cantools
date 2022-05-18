@@ -4,6 +4,7 @@ import re
 import logging
 from collections import OrderedDict as odict
 from decimal import Decimal
+from typing import List
 
 import textparser
 from textparser import Sequence
@@ -73,6 +74,7 @@ class Parser60(textparser.Parser):
             'O':           '/o:',
             'MIN':         '/min:',
             'MAX':         '/max:',
+            'SPN':         '/spn:',
             'D':           '/d:',
             'LN':          '/ln:',
             'E':           '/e:',
@@ -99,6 +101,7 @@ class Parser60(textparser.Parser):
             ('O',                  r'/o:'),
             ('MIN',                r'/min:'),
             ('MAX',                r'/max:'),
+            ('SPN',                r'/spn:'),
             ('D',                  r'/d:'),
             ('LN',                 r'/ln:'),
             ('E',                  r'/e:'),
@@ -169,6 +172,7 @@ class Parser60(textparser.Parser):
         sig_offset = Sequence('/o:', 'NUMBER')
         sig_min = Sequence('/min:', 'NUMBER')
         sig_max = Sequence('/max:', 'NUMBER')
+        sig_spn = Sequence('/spn:', 'NUMBER')
         sig_default = Sequence('/d:', choice('NUMBER', 'WORD'))
         sig_long_name = Sequence('/ln:', 'STRING')
         sig_enum = Sequence('/e:', word)
@@ -186,7 +190,8 @@ class Parser60(textparser.Parser):
                                             sig_default,
                                             sig_long_name,
                                             sig_enum,
-                                            sig_places)),
+                                            sig_places,
+                                            sig_spn)),
                           Optional('COMMENT'))
 
         variable = Sequence('Var', '=', Any(), word,
@@ -324,7 +329,7 @@ def _load_signal_type_and_length(type_, tokens, enums):
     return is_signed, is_float, length, enum, minimum, maximum, decimal
 
 
-def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal):
+def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal, spn):
     # Default values.
     factor = 1
     offset = 0
@@ -350,6 +355,8 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal):
                 decimal.maximum = Decimal(value)
             elif key == '/e:':
                 enum = _get_enum(enums, value)
+            elif key == '/spn:':
+                spn = int(value)
             else:
                 LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
         elif item.startswith('/u:"'):
@@ -359,7 +366,7 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal):
         else:
             raise ParseError('Iternal error {}.'.format(item))
 
-    return unit, factor, offset, enum, minimum, maximum, decimal
+    return unit, factor, offset, enum, minimum, maximum, decimal, spn
 
 
 def _load_signal(tokens, enums):
@@ -367,6 +374,7 @@ def _load_signal(tokens, enums):
     name = tokens[2]
     byte_order = 'little_endian'
     comment = None
+    spn = None
 
     # Type and length.
     (is_signed,
@@ -388,13 +396,14 @@ def _load_signal(tokens, enums):
         comment = _load_comment(tokens[8][0])
 
     # The rest.
-    unit, factor, offset, enum, minimum, maximum, decimal = _load_signal_attributes(
+    unit, factor, offset, enum, minimum, maximum, decimal, spn = _load_signal_attributes(
         tokens[7],
         enum,
         enums,
         minimum,
         maximum,
-        decimal)
+        decimal,
+        spn)
 
     return Signal(name=name,
                   start=offset,
@@ -411,7 +420,8 @@ def _load_signal(tokens, enums):
                   comment=comment,
                   is_multiplexer=False,
                   is_float=is_float,
-                  decimal=decimal)
+                  decimal=decimal,
+                  spn=spn)
 
 
 def _load_signals(tokens, enums):
@@ -450,7 +460,8 @@ def _load_message_signal(tokens,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
                   is_float=signal.is_float,
-                  decimal=signal.decimal)
+                  decimal=signal.decimal,
+                  spn=signal.spn)
 
 def _convert_start(start, byte_order):
     if byte_order == 'big_endian':
@@ -466,6 +477,7 @@ def _load_message_variable(tokens,
     byte_order = 'little_endian'
     start = int(tokens[4])
     comment = None
+    spn = None
 
     # Type and length.
     (is_signed,
@@ -487,13 +499,14 @@ def _load_message_variable(tokens,
         comment = _load_comment(tokens[9][0])
 
     # The rest.
-    unit, factor, offset, enum, minimum, maximum, decimal = _load_signal_attributes(
+    unit, factor, offset, enum, minimum, maximum, decimal, spn = _load_signal_attributes(
         tokens[8],
         enum,
         enums,
         minimum,
         maximum,
-        decimal)
+        decimal,
+        spn)
 
     start = _convert_start(start, byte_order)
 
@@ -514,7 +527,8 @@ def _load_message_variable(tokens,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
                   is_float=is_float,
-                  decimal=decimal)
+                  decimal=decimal,
+                  spn=spn)
 
 
 def _load_message_signals_inner(message_tokens,
@@ -612,6 +626,23 @@ def _load_message_signals(message_tokens,
                                            enums)
 
 
+def _get_senders(section_name: str) -> List[str]:
+    """Generates a list of senders for a message based on the Send, Receive or Send/Receive
+    flag defined in the SYM file. Since the Message object only has a senders property on it,
+    it is easiest to translate Send flags into a sender named 'ECU', and translate Receive flags
+    into a sender named 'Peripherals'. This is not the cleanest representation of the data,
+    however, SYM files are unique in only having a Send, Receive or Send/Receive Direction. Most
+    other file formats specify a list of custom-named sending devices
+    """
+    if section_name == '{SEND}':
+        return ['ECU']
+    elif section_name == '{RECEIVE}':
+        return ['Peripherals']
+    elif section_name == '{SENDRECEIVE}':
+        return ['ECU', 'Peripherals']
+    else:
+        raise ValueError(f'Unexpected message section named {section_name}')
+
 def _load_message(frame_id,
                   is_extended_frame,
                   message_tokens,
@@ -619,7 +650,8 @@ def _load_message(frame_id,
                   signals,
                   enums,
                   strict,
-                  sort_signals):
+                  sort_signals,
+                  section_name):
     #print(message_tokens)
     # Default values.
     name = message_tokens[1]
@@ -645,7 +677,7 @@ def _load_message(frame_id,
                    name=name,
                    length=length,
                    unused_bit_pattern=0xff,
-                   senders=[],
+                   senders=_get_senders(section_name),
                    send_type=None,
                    cycle_time=cycle_time,
                    signals=_load_message_signals(message_tokens,
@@ -706,7 +738,8 @@ def _load_message_section(section_name, tokens, signals, enums, strict, sort_sig
                                     signals,
                                     enums,
                                     strict,
-                                    sort_signals)
+                                    sort_signals,
+                                    section_name)
             messages.append(message)
 
     return messages

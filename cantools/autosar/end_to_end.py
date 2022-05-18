@@ -20,8 +20,9 @@ def compute_profile2_crc(payload : Union[bytes, bytearray],
         # Profile 2 E2E protection requires at least 2 bytes
         return None
 
+    protected_len = None
     data_id = None
-    secured_len = len(payload)
+
     if isinstance(msg_or_data_id, Message):
         msg = msg_or_data_id
         if msg.autosar is None or \
@@ -35,16 +36,15 @@ def compute_profile2_crc(payload : Union[bytes, bytearray],
         assert msg.autosar.e2e is not None
         assert msg.autosar.e2e.data_ids is not None
 
+        protected_len = msg.autosar.e2e.payload_length
         seq_counter = (payload[1]&0xf0) >> 4
         data_id = msg.autosar.e2e.data_ids[seq_counter]
-
-        if msg.autosar.is_secured:
-            secured_len = msg.autosar.secured_payload_length
     else:
+        protected_len = len(payload)
         data_id = msg_or_data_id
 
     # create the data to be checksumed
-    crc_data = bytearray(payload[1:secured_len])
+    crc_data = bytearray(payload[1:protected_len])
 
     # append data id
     crc_data += bytearray([ data_id ])
@@ -74,7 +74,7 @@ def apply_profile2_crc(payload : Union[bytes, bytearray],
 
 
 def check_profile2_crc(payload : Union[bytes, bytearray],
-                       msg_or_data_id: Union[int, Message]) -> bool:
+                       msg_or_data_id: Union[int, Message]) -> Optional[bool]:
     """Check if the AUTOSAR E2E checksum for profile 2 of the AUTOSAR
     end-to-end protection specification is correct.
 
@@ -85,7 +85,7 @@ def check_profile2_crc(payload : Union[bytes, bytearray],
     crc = compute_profile2_crc(payload, msg_or_data_id)
 
     if crc is None:
-        return False
+        return None
 
     crc2 = payload[0]
 
@@ -104,8 +104,9 @@ def compute_profile5_crc(payload : Union[bytes, bytearray],
         # Profile 5 E2E protection requires at least 4 bytes
         return None
 
+    protected_len = None
     data_id = None
-    secured_len = len(payload)
+
     if isinstance(msg_or_data_id, Message):
         msg = msg_or_data_id
         if msg_or_data_id.autosar is None or \
@@ -119,16 +120,15 @@ def compute_profile5_crc(payload : Union[bytes, bytearray],
         assert msg.autosar.e2e is not None
         assert msg.autosar.e2e.data_ids is not None
 
+        protected_len = msg.autosar.e2e.payload_length
         data_id = msg.autosar.e2e.data_ids[0]
-
-        if msg.autosar.is_secured:
-            secured_len = msg.autosar.secured_payload_length
     else:
+        protected_len = len(payload)
         data_id = msg_or_data_id
 
     # we assume that the "offset" parameter given in the specification
     # is always 0...
-    result = crccheck.crc.Crc16Autosar().calc(payload[2:secured_len],
+    result = crccheck.crc.Crc16Autosar().calc(payload[2:protected_len],
                                               initvalue=0xffff)
 
     # deal with the data id
@@ -164,7 +164,7 @@ def apply_profile5_crc(payload : Union[bytes, bytearray],
     return result
 
 def check_profile5_crc(payload : Union[bytes, bytearray],
-                       msg_or_data_id: Union[int, Message]) -> bool:
+                       msg_or_data_id: Union[int, Message]) -> Optional[bool]:
     """Check if the AUTOSAR E2E checksum for profile 5 of the AUTOSAR
     end-to-end protection specification is correct.
 
@@ -175,7 +175,7 @@ def check_profile5_crc(payload : Union[bytes, bytearray],
     crc = compute_profile5_crc(payload, msg_or_data_id)
 
     if crc is None:
-        return False
+        return None
 
     crc2 = payload[0] + (payload[1]<<8)
 

@@ -47,6 +47,7 @@ BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
 BA_DEF_DEF_  "GenMsgCycleTime" 0;
 BA_DEF_REL_ BU_BO_REL_  "MsgProject" ENUM  "A","B","C";
 BA_DEF_DEF_REL_ "MsgProject" "A";
+BA_REL_ "MsgProject" BU_BO_REL_ COM 1 2;
 
 VAL_ 1 state 255 "Invalid" ;
 

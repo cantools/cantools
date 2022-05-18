@@ -83,11 +83,11 @@ DBC_FMT = (
     '\r\n'
     '{cm}\r\n'
     '{ba_def}\r\n'
-    '{ba_def_rel}\r\n'
+    '{ba_def_rel}'
     '{ba_def_def}\r\n'
-    '{ba_def_def_rel}\r\n'
+    '{ba_def_def_rel}'
     '{ba}\r\n'
-    '{ba_rel}\r\n'
+    '{ba_rel}'
     '{val}\r\n'
     '{signal_types}\r\n'
     '{sig_group}\r\n'
@@ -1894,11 +1894,11 @@ def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = SO
                           cm='\r\n'.join(cm),
                           signal_types='\r\n'.join(signal_types),
                           ba_def='\r\n'.join(ba_def),
-                          ba_def_rel='\r\n'.join(ba_def_rel),
+                          ba_def_rel="".join([elem+"\r\n" for elem in ba_def_rel]),
                           ba_def_def='\r\n'.join(ba_def_def),
-                          ba_def_def_rel='\r\n'.join(ba_def_def_rel),
+                          ba_def_def_rel="".join([elem+"\r\n" for elem in ba_def_def_rel]),
                           ba='\r\n'.join(ba),
-                          ba_rel='\r\n'.join(ba_rel),
+                          ba_rel="".join([elem+"\r\n" for elem in ba_rel]),
                           val='\r\n'.join(val),
                           sig_group='\r\n'.join(sig_group),
                           sig_mux_values='\r\n'.join(sig_mux_values))

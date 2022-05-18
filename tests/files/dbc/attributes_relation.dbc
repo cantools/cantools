@@ -36,18 +36,30 @@ BS_:
 BU_: ECU2 ECU1
 
 
-BO_ 82 Message1: 8 ECU1
- SG_ signal_2 : 8|8@1- (1,0) [0|0] ""  ECU2
+BO_ 83 Message_2: 8 ECU2
+ SG_ signal_2 : 0|8@1- (1,0) [0|0] ""  ECU1
+
+BO_ 82 Message_1: 8 ECU1
  SG_ signal_1 : 0|8@1- (1,0) [0|0] ""  ECU2
 
 
 
+
+CM_ BU_ ECU1 "First ECU";
+BA_DEF_ SG_  "GenSigInactiveValue" INT 0 65535;
+BA_DEF_ BO_  "MsgProject" ENUM  "A","B","C";
 BA_DEF_  "BusType" STRING ;
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
 BA_DEF_REL_ BU_SG_REL_  "SigTimeoutTime" INT 0 65535;
-BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "GenSigInactiveValue" 0;
+BA_DEF_DEF_  "MsgProject" "A";
+BA_DEF_DEF_  "BusType" "";
 BA_DEF_DEF_  "GenMsgCycleTime" 0;
 BA_DEF_DEF_REL_ "SigTimeoutTime" 0;
-BA_REL_ "SigTimeoutTime" BU_SG_REL_ ECU2 SG_ 82 signal_2 2000;
+BA_ "BusType" "CAN";
+BA_ "GenMsgCycleTime" BO_ 83 50;
 BA_REL_ "SigTimeoutTime" BU_SG_REL_ ECU2 SG_ 82 signal_1 6000;
+
+
+
 

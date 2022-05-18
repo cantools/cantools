@@ -83,8 +83,11 @@ DBC_FMT = (
     '\r\n'
     '{cm}\r\n'
     '{ba_def}\r\n'
+    '{ba_def_rel}'
     '{ba_def_def}\r\n'
+    '{ba_def_def_rel}'
     '{ba}\r\n'
+    '{ba_rel}'
     '{val}\r\n'
     '{signal_types}\r\n'
     '{sig_group}\r\n'
@@ -357,7 +360,9 @@ class DbcSpecifics(object):
                  attributes=None,
                  attribute_definitions=None,
                  environment_variables=None,
-                 value_tables=None):
+                 value_tables=None,
+                 attributes_rel=None,
+                 attribute_definitions_rel=None):
         if attributes is None:
             attributes = OrderedDict()
 
@@ -370,10 +375,18 @@ class DbcSpecifics(object):
         if value_tables is None:
             value_tables = OrderedDict()
 
+        if attributes_rel is None:
+            attributes_rel = OrderedDict()
+
+        if attribute_definitions_rel is None:
+            attribute_definitions_rel = OrderedDict()
+
         self._attributes = attributes
         self._attribute_definitions = attribute_definitions
         self._environment_variables = environment_variables
         self._value_tables = value_tables
+        self._attributes_rel = attributes_rel
+        self._attribute_definitions_rel = attribute_definitions_rel
 
     @property
     def attributes(self):
@@ -413,6 +426,22 @@ class DbcSpecifics(object):
         """
 
         return self._environment_variables
+
+    @property
+    def attributes_rel(self):
+        """The DBC specific attribute rel as dictionary..
+
+        """
+
+        return self._attributes_rel
+
+    @property
+    def attribute_definitions_rel(self):
+        """The DBC specific attribute definitions rel as dictionary.
+
+        """
+
+        return self._attribute_definitions_rel
 
 
 class LongNamesConverter(object):
@@ -687,6 +716,53 @@ def _dump_attribute_definitions(database):
     return ba_def
 
 
+def _dump_attribute_definitions_rel(database):
+    ba_def_rel = []
+
+    if database.dbc is None:
+        definitions = OrderedDict()
+    else:
+        definitions = database.dbc.attribute_definitions_rel
+
+    def get_value(definition, value):
+        if definition.minimum is None:
+            value = ''
+        else:
+            value = ' {}'.format(value)
+
+        return value
+
+    def get_minimum(definition):
+        return get_value(definition, definition.minimum)
+
+    def get_maximum(definition):
+        return get_value(definition, definition.maximum)
+
+    for definition in definitions.values():
+        if definition.type_name == 'ENUM':
+            choices = ','.join(['"{}"'.format(choice)
+                                for choice in definition.choices])
+            ba_def_rel.append(
+                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name}  {choices};'.format(
+                    name=definition.name,
+                    type_name=definition.type_name,
+                    choices=choices))
+        elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
+            ba_def_rel.append(
+                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name}{minimum}{maximum};'.format(
+                    name=definition.name,
+                    type_name=definition.type_name,
+                    minimum=get_minimum(definition),
+                    maximum=get_maximum(definition)))
+        elif definition.type_name == 'STRING':
+            ba_def_rel.append(
+                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name} ;'.format(
+                    name=definition.name,
+                    type_name=definition.type_name))
+
+    return ba_def_rel
+
+
 def _dump_attribute_definition_defaults(database):
     ba_def_def = []
 
@@ -712,6 +788,28 @@ def _dump_attribute_definition_defaults(database):
                                          value=definition.default_value))
 
     return ba_def_def
+
+
+def _dump_attribute_definition_defaults_rel(database):
+    ba_def_def_rel = []
+
+    if database.dbc is None:
+        definitions = OrderedDict()
+    else:
+        definitions = database.dbc.attribute_definitions_rel
+
+    for definition in definitions.values():
+        if definition.default_value is not None:
+            if definition.type_name in ["STRING", "ENUM"]:
+                fmt = 'BA_DEF_DEF_REL_ "{name}" "{value}";'
+            else:
+                fmt = 'BA_DEF_DEF_REL_ "{name}" {value};'
+
+            ba_def_def_rel.append(fmt.format(name=definition.name,
+                                             value=definition.default_value))
+
+    return ba_def_def_rel
+
 
 def _dump_attributes(database, sort_signals):
     ba = []
@@ -776,6 +874,34 @@ def _dump_attributes(database, sort_signals):
                               f'{get_value(attribute)};')
 
     return ba
+
+
+def _dump_attributes_rel(database, sort_signals):
+    ba_rel = []
+
+    def get_value(attribute):
+        result = attribute.value
+
+        if attribute.definition.type_name == "STRING":
+            result = '"' + attribute.value + '"'
+
+        return result
+
+    if database.dbc is not None and database.dbc.attributes_rel is not None:
+        attributes_rel = database.dbc.attributes_rel
+        for frame_id, element in attributes_rel.items():
+            for signal_name, signal_lst in element['signal'].items():
+                for node_name, node_dict in signal_lst['node'].items():
+                    for attribute_name, attribute in node_dict.items():
+                        ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
+                                      f'BU_SG_REL_ '
+                                      f'{node_name} '
+                                      f'SG_ '
+                                      f'{frame_id} '
+                                      f'{signal_name} '
+                                      f'{get_value(attribute)};')
+
+    return ba_rel
 
 
 def _dump_choices(database, sort_signals):
@@ -946,6 +1072,19 @@ def _load_attribute_definition_defaults(tokens):
     return defaults
 
 
+def _load_attribute_definitions_relation(tokens):
+    return tokens.get('BA_DEF_REL_', [])
+
+
+def _load_attribute_definition_relation_defaults(tokens):
+    defaults = OrderedDict()
+
+    for default_attr in tokens.get('BA_DEF_DEF_REL_', []):
+        defaults[default_attr[1]] = default_attr[2]
+
+    return defaults
+
+
 def _load_attributes(tokens, definitions):
     attributes = OrderedDict()
     attributes['node'] = OrderedDict()
@@ -1017,6 +1156,48 @@ def _load_attributes(tokens, definitions):
             attributes['database'][name] = to_object(attribute)
 
     return attributes
+
+
+def _load_attributes_rel(tokens, definitions):
+    attributes_rel = OrderedDict()
+
+    def to_object(attribute):
+        value = attribute[7]
+
+        definition = definitions[attribute[1]]
+
+        if definition.type_name in ['INT', 'HEX', 'ENUM']:
+            value = to_int(value)
+        elif definition.type_name == 'FLOAT':
+            value = Decimal(value)
+
+        return Attribute(value=value,
+                         definition=definition)
+
+    for attribute in tokens.get('BA_REL_', []):
+        name = attribute[1]
+        node = attribute[3]
+        frame_id_dbc = int(attribute[5])
+        signal = attribute[6]
+
+        if frame_id_dbc not in attributes_rel:
+            attributes_rel[frame_id_dbc] = {}
+
+        if 'signal' not in attributes_rel[frame_id_dbc]:
+            attributes_rel[frame_id_dbc]['signal'] = OrderedDict()
+
+        if signal not in attributes_rel[frame_id_dbc]['signal']:
+            attributes_rel[frame_id_dbc]['signal'][signal] = OrderedDict()
+
+        if 'node' not in attributes_rel[frame_id_dbc]['signal'][signal]:
+            attributes_rel[frame_id_dbc]['signal'][signal]['node'] = OrderedDict()
+
+        if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
+            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
+
+        attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_object(attribute)
+
+    return attributes_rel
 
 
 def _load_value_tables(tokens):
@@ -1691,8 +1872,11 @@ def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = SO
     cm = _dump_comments(database, sort_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
+    ba_def_rel = _dump_attribute_definitions_rel(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
+    ba_def_def_rel = _dump_attribute_definition_defaults_rel(database)
     ba = _dump_attributes(database, sort_signals)
+    ba_rel = _dump_attributes_rel(database, sort_signals)
     val = _dump_choices(database, sort_signals)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
@@ -1705,8 +1889,11 @@ def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = SO
                           cm='\r\n'.join(cm),
                           signal_types='\r\n'.join(signal_types),
                           ba_def='\r\n'.join(ba_def),
+                          ba_def_rel="".join([elem+"\r\n" for elem in ba_def_rel]),
                           ba_def_def='\r\n'.join(ba_def_def),
+                          ba_def_def_rel="".join([elem+"\r\n" for elem in ba_def_def_rel]),
                           ba='\r\n'.join(ba),
+                          ba_rel="".join([elem+"\r\n" for elem in ba_rel]),
                           val='\r\n'.join(val),
                           sig_group='\r\n'.join(sig_group),
                           sig_mux_values='\r\n'.join(sig_mux_values))
@@ -1752,7 +1939,48 @@ def get_definitions_dict(definitions, defaults):
     return result
 
 
-def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
+def get_definitions_rel_dict(definitions, defaults):
+    result = OrderedDict()
+
+    def convert_value(definition, value):
+        if definition.type_name in ['INT', 'HEX']:
+            value = to_int(value)
+        elif definition.type_name == 'FLOAT':
+            value = Decimal(value)
+
+        return value
+
+    for item in definitions:
+        if len(item[1]) > 0:
+            kind = item[1][0]
+        else:
+            kind = None
+
+        definition = AttributeDefinition(name=item[2],
+                                         kind=kind,
+                                         type_name=item[3])
+        values = item[4]
+
+        if len(values) > 0:
+            if definition.type_name == "ENUM":
+                definition.choices = values
+            elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
+                definition.minimum = convert_value(definition, values[0])
+                definition.maximum = convert_value(definition, values[1])
+
+        try:
+            value = defaults[definition.name]
+            definition.default_value = convert_value(definition, value)
+        except KeyError:
+            definition.default_value = None
+
+        result[definition.name] = definition
+
+    return result
+
+
+def load_string(string: str, strict: bool = True,
+                sort_signals: type_sort_signals = sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given string.
 
     """
@@ -1762,8 +1990,12 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)
     defaults = _load_attribute_definition_defaults(tokens)
+    definitions_relation = _load_attribute_definitions_relation(tokens)
+    defaults_relation = _load_attribute_definition_relation_defaults(tokens)
     attribute_definitions = get_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
+    attribute_rel_definitions = get_definitions_rel_dict(definitions_relation, defaults_relation)
+    attributes_rel = _load_attributes_rel(tokens, attribute_rel_definitions)
     bus = _load_bus(attributes, comments)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
@@ -1789,7 +2021,9 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
                                  attribute_definitions,
                                  environment_variables,
-                                 value_tables)
+                                 value_tables,
+                                 attributes_rel,
+                                 attribute_rel_definitions)
 
     return InternalDatabase(messages,
                             nodes,

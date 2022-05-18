@@ -5,8 +5,6 @@ import logging
 from copy import deepcopy
 from typing import (
     List,
-    Sequence,
-    Tuple,
     Optional,
     Union,
     Dict,
@@ -27,7 +25,19 @@ from ..utils import SORT_SIGNALS_DEFAULT
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
-from ...typechecking import Comments, Codec
+from ...typechecking import (
+    Comments,
+    Codec,
+    SignalDictType,
+    ContainerHeaderSpecType,
+    ContainerDecodeResultType,
+    ContainerDecodeResultListType,
+    ContainerEncodeInputType,
+    EncodeInputType,
+    ContainerUnpackResultType,
+    ContainerUnpackListType,
+    DecodeResultType,
+)
 
 if TYPE_CHECKING:
     from .formats.arxml import AutosarMessageSpecifics
@@ -35,23 +45,6 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-# Type aliases. Introduced to reduce type annotation complexity while
-# allowing for more complex encode/decode schemes like the one used
-# for AUTOSAR container messages.
-SignalDictType = Dict[str, Union[float, str]]
-ContainerHeaderSpecType = Union['Message', str, int]
-ContainerUnpackResultType = Sequence[Union[Tuple['Message', bytes],
-                                           Tuple[int, bytes]]]
-ContainerUnpackListType = List[Union[Tuple['Message', bytes],
-                                     Tuple[int, bytes]]]
-ContainerDecodeResultType = Sequence[Union[Tuple['Message', SignalDictType],
-                                           Tuple[int, bytes]]]
-ContainerDecodeResultListType = List[Union[Tuple['Message', SignalDictType],
-                                           Tuple[int, bytes]]]
-ContainerEncodeInputType = Sequence[Tuple[ContainerHeaderSpecType,
-                                          Union[bytes, SignalDictType]]]
-DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
-EncodeInputType = Union[SignalDictType, ContainerEncodeInputType]
 
 class Message(object):
     """A CAN message with frame id, comment, signals and other
@@ -114,12 +107,11 @@ class Message(object):
         self._unused_bit_pattern = unused_bit_pattern
         if sort_signals == SORT_SIGNALS_DEFAULT:
             self._signals = sort_signals_by_start_bit(signals)
-        elif sort_signals:
+        elif callable(sort_signals):
             self._signals = sort_signals(signals)
         else:
             self._signals = signals
         self._contained_messages = contained_messages
-
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the

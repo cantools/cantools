@@ -4,12 +4,12 @@ import binascii
 import os.path
 import re
 from decimal import Decimal
-from typing import Dict, Union, List, Callable
+from typing import Union, List, Callable
 
 from typing_extensions import Literal, Final
 
 from cantools.database.can.signal import NamedSignalValue, Signal
-from cantools.typechecking import Formats
+from cantools.typechecking import Formats, SignalDictType
 
 try:
     import bitstruct.c
@@ -103,7 +103,7 @@ def decode_data(data: bytes,
                 formats: Formats,
                 decode_choices: bool,
                 scaling: bool,
-                ) -> Dict[str, Union[float, str]]:
+                ) -> SignalDictType:
     unpacked = formats.big_endian.unpack(bytes(data))
     unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
 
@@ -354,8 +354,10 @@ def prune_database_choices(database):
 SORT_SIGNALS_DEFAULT: Final = 'default'
 type_sort_signals = Union[Callable[[List[Signal]], List[Signal]], Literal['default'], None]
 
+
 def sort_signals_by_start_bit(signals: List[Signal]) -> List[Signal]:
-	return list(sorted(signals, key=start_bit))
+    return list(sorted(signals, key=start_bit))
+
 
 def sort_signals_by_start_bit_reversed(signals: List[Signal]) -> List[Signal]:
-	return list(reversed(sorted(signals, key=start_bit)))
+    return list(reversed(sorted(signals, key=start_bit)))

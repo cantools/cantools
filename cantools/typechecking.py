@@ -34,7 +34,7 @@ Codec = TypedDict(
     {
         "signals": List["Signal"],
         "formats": Formats,
-        "multiplexers": Dict[str, Dict[int, Any]],
+        "multiplexers": Dict[str, Dict[int, Any]],  # "Any" should be "Codec" (cyclic definition is not possible though)
     },
 )
 
@@ -42,7 +42,8 @@ Codec = TypedDict(
 # Type aliases. Introduced to reduce type annotation complexity while
 # allowing for more complex encode/decode schemes like the one used
 # for AUTOSAR container messages.
-SignalDictType = Dict[str, Union[float, str, "NamedSignalValue"]]
+SignalValueType = Union[float, str, "NamedSignalValue"]
+SignalDictType = Dict[str, SignalValueType]
 ContainerHeaderSpecType = Union["Message", str, int]
 ContainerUnpackResultType = Sequence[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
 ContainerUnpackListType = List[Union[Tuple["Message", bytes], Tuple[int, bytes]]]

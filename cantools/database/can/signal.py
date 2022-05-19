@@ -199,7 +199,7 @@ class Signal(object):
                  minimum: Optional[float] = None,
                  maximum: Optional[float] = None,
                  unit: Optional[str] = None,
-                 choices: Optional["OrderedDict[int, str]"] = None,
+                 choices: Optional["OrderedDict[int, Union[str, NamedSignalValue]]"] = None,
                  dbc_specifics: Optional["DbcSpecifics"] = None,
                  comment: Optional[Union[str, Comments]] = None,
                  receivers: Optional[List[str]] = None,
@@ -420,7 +420,7 @@ class Signal(object):
         self._unit = value
 
     @property
-    def choices(self) -> Optional["OrderedDict[int, str]"]:
+    def choices(self) -> Optional["OrderedDict[int, Union[str, NamedSignalValue]]"]:
         """A dictionary mapping signal values to enumerated choices, or
         ``None`` if unavailable.
 
@@ -536,15 +536,15 @@ class Signal(object):
     def spn(self, value: Optional[int]) -> None:
         self._spn = value
 
-    def choice_string_to_number(self, string: str) -> Optional[int]:
+    def choice_string_to_number(self, string: str) -> int:
         if self.choices is None:
-            return None
+            raise ValueError(f"Signal {self.name} has no choices.")
 
         for choice_number, choice_value in self.choices.items():
             if str(choice_value) == str(string):
                 return choice_number
 
-        return None
+        raise KeyError(f"Choice {string} not found in Signal {self.name}.")
 
     def __repr__(self) -> str:
         if self._choices is None:

@@ -50,11 +50,11 @@ jobs:
         pip install -e .
     - name: Static type checking with mypy
       run: |
-        mypy --python-version 3.6 cantools
-        mypy --python-version 3.7 cantools
-        mypy --python-version 3.8 cantools
-        mypy --python-version 3.9 cantools
-        mypy --python-version 3.10 cantools
+        mypy --python-version 3.6 .
+        mypy --python-version 3.7 .
+        mypy --python-version 3.8 .
+        mypy --python-version 3.9 .
+        mypy --python-version 3.10 .
 
   release:
     needs: [test]

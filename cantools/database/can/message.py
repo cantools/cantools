@@ -5,13 +5,13 @@ import logging
 from copy import deepcopy
 from typing import (
     List,
-    Sequence,
-    Tuple,
     Optional,
     Union,
     Dict,
     TYPE_CHECKING,
-    Set
+    Set,
+    Tuple,
+    cast
 )
 
 from .signal import NamedSignalValue, Signal
@@ -27,7 +27,19 @@ from ..utils import SORT_SIGNALS_DEFAULT
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
-from ...typechecking import Comments, Codec
+from ...typechecking import (
+    Comments,
+    Codec,
+    SignalDictType,
+    ContainerHeaderSpecType,
+    ContainerDecodeResultType,
+    ContainerDecodeResultListType,
+    ContainerEncodeInputType,
+    EncodeInputType,
+    ContainerUnpackResultType,
+    ContainerUnpackListType,
+    DecodeResultType,
+)
 
 if TYPE_CHECKING:
     from .formats.arxml import AutosarMessageSpecifics
@@ -35,23 +47,6 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-# Type aliases. Introduced to reduce type annotation complexity while
-# allowing for more complex encode/decode schemes like the one used
-# for AUTOSAR container messages.
-SignalDictType = Dict[str, Union[float, str]]
-ContainerHeaderSpecType = Union['Message', str, int]
-ContainerUnpackResultType = Sequence[Union[Tuple['Message', bytes],
-                                           Tuple[int, bytes]]]
-ContainerUnpackListType = List[Union[Tuple['Message', bytes],
-                                     Tuple[int, bytes]]]
-ContainerDecodeResultType = Sequence[Union[Tuple['Message', SignalDictType],
-                                           Tuple[int, bytes]]]
-ContainerDecodeResultListType = List[Union[Tuple['Message', SignalDictType],
-                                           Tuple[int, bytes]]]
-ContainerEncodeInputType = Sequence[Tuple[ContainerHeaderSpecType,
-                                          Union[bytes, SignalDictType]]]
-DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
-EncodeInputType = Union[SignalDictType, ContainerEncodeInputType]
 
 class Message(object):
     """A CAN message with frame id, comment, signals and other
@@ -114,12 +109,11 @@ class Message(object):
         self._unused_bit_pattern = unused_bit_pattern
         if sort_signals == SORT_SIGNALS_DEFAULT:
             self._signals = sort_signals_by_start_bit(signals)
-        elif sort_signals:
+        elif callable(sort_signals):
             self._signals = sort_signals(signals)
         else:
             self._signals = signals
         self._contained_messages = contained_messages
-
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the
@@ -142,7 +136,7 @@ class Message(object):
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs: Optional[Codec] = None
-        self._signal_tree = None
+        self._signal_tree: Optional[List[Union[str, List[str]]]] = None
         self._strict = strict
         self._protocol = protocol
         self.refresh()
@@ -295,7 +289,7 @@ class Message(object):
         self._is_fd = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The message name as a string.
 
         """
@@ -411,7 +405,7 @@ class Message(object):
         self._comments = value
 
     @property
-    def senders(self):
+    def senders(self) -> List[str]:
         """A list of all sender nodes of this message.
 
         """
@@ -534,7 +528,7 @@ class Message(object):
                 try:
                     expected_str = \
                         f'Expected one of {{' \
-                        f'{format_or(multiplexers[signal.name])}' \
+                        f'{format_or(list(multiplexers[mux_signal_name].keys()))}' \
                         f'}}, but '
                 except KeyError:
                     expected_str = ''
@@ -703,18 +697,20 @@ class Message(object):
                                                            assert_values_valid,
                                                            assert_all_known)
 
-    def _get_mux_number(self, decoded, signal_name):
+    def _get_mux_number(self, decoded: SignalDictType, signal_name: str) -> int:
         mux = decoded[signal_name]
 
         if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
             signal = self.get_signal_by_name(signal_name)
-            mux = signal.choice_string_to_number(mux)
-
-        return mux
+            try:
+                mux = signal.choice_string_to_number(str(mux))
+            except KeyError:
+                raise EncodeError() from None
+        return int(mux)
 
     def _assert_signal_values_valid(self,
-                                    data : SignalDictType,
-                                    scaling : bool) -> None:
+                                    data: SignalDictType,
+                                    scaling: bool) -> None:
 
         for signal_name, signal_value in data.items():
             signal = self.get_signal_by_name(signal_name)
@@ -760,7 +756,7 @@ class Message(object):
                         f'equal to {max_effective} in message "{self.name}", '
                         f'but got {signal_value}.')
 
-    def _encode(self, node, data, scaling):
+    def _encode(self, node: Codec, data: SignalDictType, scaling: bool) -> Tuple[int, int, List[Signal]]:
         encoded = encode_data(data,
                               node['signals'],
                               node['formats'],
@@ -776,8 +772,8 @@ class Message(object):
                 node = multiplexers[signal][mux]
             except KeyError:
                 raise EncodeError(f'Expected multiplexer id \in '
-                                  f'{{{format_or(multiplexers[signal])}}}, '
-                                  f'for multiplexer "{signal.name}" '
+                                  f'{{{format_or(list(multiplexers[signal].keys()))}}}, '
+                                  f'for multiplexer "{signal}" '
                                   f'but got {mux}')
 
             mux_encoded, mux_padding_mask, mux_signals = \
@@ -797,7 +793,6 @@ class Message(object):
         result = bytes()
 
         for header, value in data:
-            contained_message = None
             if isinstance(header, str):
                 contained_message = \
                     self.get_contained_message_by_name(header)
@@ -908,7 +903,7 @@ class Message(object):
 
                 self.assert_container_encodable(data, scaling=scaling)
 
-            return self._encode_container(data, # type: ignore
+            return self._encode_container(cast(ContainerEncodeInputType, data),
                                           scaling,
                                           padding)
 
@@ -922,8 +917,12 @@ class Message(object):
                                   f'signal value dictionary')
             self.assert_signals_encodable(data, scaling=scaling)
 
-        encoded, padding_mask, all_signals = \
-            self._encode(self._codecs, data, scaling)
+        if self._codecs is None:
+            raise ValueError('Codec is not initialized.')
+
+        encoded, padding_mask, all_signals = self._encode(self._codecs,
+                                                          cast(SignalDictType, data),
+                                                          scaling)
 
         if padding:
             # there is probably a cleaner and more performant way to
@@ -936,9 +935,9 @@ class Message(object):
             encoded |= padding_mask & padding_pattern
 
         encoded |= (0x80 << (8 * self._length))
-        encoded = hex(encoded)[4:].rstrip('L')
+        hex_string = hex(encoded)[4:].rstrip('L')
 
-        return binascii.unhexlify(encoded)[:self._length]
+        return binascii.unhexlify(hex_string)[:self._length]
 
     def _decode(self,
                 node: Codec,
@@ -960,7 +959,7 @@ class Message(object):
                 node = multiplexers[signal][mux]
             except KeyError:
                 raise DecodeError('expected multiplexer id {}, but got {}'.format(
-                    format_or(multiplexers[signal]),
+                    format_or(list(multiplexers[signal].keys())),
                     mux))
 
             decoded.update(self._decode(node,

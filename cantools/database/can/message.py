@@ -1,6 +1,5 @@
 # A CAN message.
 
-import binascii
 import logging
 from copy import deepcopy
 from typing import (
@@ -606,14 +605,13 @@ class Message(object):
         :param scaling: If ``False`` no scaling of signals is performed.
 
         :param assert_values_valid: If ``True``, the values of all
-        specified signals must be valid/encodable. If at least one is
-        not, an ``EncodeError`` exception is raised. (Note that the
-        values of multiplexer selector signals must always be valid!)
+            specified signals must be valid/encodable. If at least one is
+            not, an ``EncodeError`` exception is raised. (Note that the
+            values of multiplexer selector signals must always be valid!)
 
         :param assert_all_known: If ``True``, all specified signals must
-        be used by the encoding operation or an ``EncodeError``
-        exception is raised. This is useful to prevent typos.
-
+            be used by the encoding operation or an ``EncodeError``
+            exception is raised. This is useful to prevent typos.
         '''
 
         # this method only deals with ordinary messages
@@ -925,19 +923,10 @@ class Message(object):
                                                           scaling)
 
         if padding:
-            # there is probably a cleaner and more performant way to
-            # do this...
-            padding_pattern = 0
-            for i in range(0, self.length):
-                padding_pattern |= self.unused_bit_pattern << (8*i)
+            padding_pattern = int.from_bytes([self._unused_bit_pattern] * 64, "big")
+            encoded |= (padding_mask & padding_pattern)
 
-            encoded &= ~padding_mask
-            encoded |= padding_mask & padding_pattern
-
-        encoded |= (0x80 << (8 * self._length))
-        hex_string = hex(encoded)[4:].rstrip('L')
-
-        return binascii.unhexlify(hex_string)[:self._length]
+        return encoded.to_bytes(self._length, "big")
 
     def _decode(self,
                 node: Codec,

@@ -17,12 +17,18 @@ class Data(object):
                  maximum=None,
                  unit=None,
                  choices=None):
-        self._name = name
+        #: The data name as a string.
+        self.name: str = name
+
+        #: The scale factor of the data value.
+        self.scale: float = scale
+
+        #: The offset of the data value.
+        self.offset: float = offset
+
         self._start = start
         self._length = length
         self._byte_order = byte_order
-        self._scale = scale
-        self._offset = offset
         self._minimum = minimum
         self._maximum = maximum
         self._unit = unit
@@ -30,18 +36,6 @@ class Data(object):
         # ToDo: Remove once types are handled properly.
         self.is_float = False
         self.is_signed = False
-
-    @property
-    def name(self):
-        """The data name as a string.
-
-        """
-
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        self._name = value
 
     @property
     def start(self):
@@ -78,30 +72,6 @@ class Data(object):
     @byte_order.setter
     def byte_order(self, value):
         self._byte_order = value
-
-    @property
-    def scale(self):
-        """The scale factor of the data value.
-
-        """
-
-        return self._scale
-
-    @scale.setter
-    def scale(self, value):
-        self._scale = value
-
-    @property
-    def offset(self):
-        """The offset of the data value.
-
-        """
-
-        return self._offset
-
-    @offset.setter
-    def offset(self, value):
-        self._offset = value
 
     @property
     def minimum(self):
@@ -163,12 +133,12 @@ class Data(object):
                  for value, text in self._choices.items()]))
 
         return "data('{}', {}, {}, '{}', {}, {}, {}, {}, '{}', {})".format(
-            self._name,
+            self.name,
             self._start,
             self._length,
             self._byte_order,
-            self._scale,
-            self._offset,
+            self.scale,
+            self.offset,
             self._minimum,
             self._maximum,
             self._unit,

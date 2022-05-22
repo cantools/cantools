@@ -210,15 +210,24 @@ class Signal(object):
                  decimal: Optional[Decimal] = None,
                  spn: Optional[int] = None
                  ) -> None:
-        self._name = name
+        #: The signal name as a string.
+        self.name: str = name
+
+        #: The scale factor of the signal value.
+        self.scale: float = scale
+
+        #: The offset of the signal value.
+        self.offset: float = offset
+
+        #: ``True`` if the signal is a float, ``False`` otherwise.
+        self.is_float: bool = is_float
+
         self._start = start
         self._length = length
         self._byte_order = byte_order
         self._is_signed = is_signed
         self._initial = initial
         self._invalid = invalid
-        self._scale = scale
-        self._offset = offset
         self._minimum = minimum
         self._maximum = maximum
         self._decimal = Decimal() if decimal is None else decimal
@@ -243,20 +252,7 @@ class Signal(object):
         self._is_multiplexer = is_multiplexer
         self._multiplexer_ids = multiplexer_ids
         self._multiplexer_signal = multiplexer_signal
-        self._is_float = is_float
         self._spn = spn
-
-    @property
-    def name(self) -> str:
-        """The signal name as a string.
-
-        """
-
-        return self._name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
 
     @property
     def start(self) -> int:
@@ -309,18 +305,6 @@ class Signal(object):
         self._is_signed = value
 
     @property
-    def is_float(self) -> bool:
-        """``True`` if the signal is a float, ``False`` otherwise.
-
-        """
-
-        return self._is_float
-
-    @is_float.setter
-    def is_float(self, value: bool) -> None:
-        self._is_float = value
-
-    @property
     def initial(self) -> Optional[int]:
         """The initial value of the signal, or ``None`` if unavailable.
 
@@ -343,30 +327,6 @@ class Signal(object):
     @invalid.setter
     def invalid(self, value: int) -> None:
         self._invalid = value
-
-    @property
-    def scale(self) -> float:
-        """The scale factor of the signal value.
-
-        """
-
-        return self._scale
-
-    @scale.setter
-    def scale(self, value: float) -> None:
-        self._scale = value
-
-    @property
-    def offset(self) -> float:
-        """The offset of the signal value.
-
-        """
-
-        return self._offset
-
-    @offset.setter
-    def offset(self, value: float) -> None:
-        self._offset = value
 
     @property
     def minimum(self) -> Optional[float]:
@@ -555,14 +515,14 @@ class Signal(object):
                  for value, text in self._choices.items()]))
 
         return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, {}, '{}', {}, {}, {}, {}, {})".format(
-            self._name,
+            self.name,
             self._start,
             self._length,
             self._byte_order,
             self._is_signed,
             self._initial,
-            self._scale,
-            self._offset,
+            self.scale,
+            self.offset,
             self._minimum,
             self._maximum,
             self._unit,

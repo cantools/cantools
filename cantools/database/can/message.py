@@ -921,7 +921,7 @@ class Message(object):
                                                           scaling)
 
         if padding:
-            padding_pattern = int.from_bytes([self._unused_bit_pattern] * 64, "big")
+            padding_pattern = int.from_bytes([self._unused_bit_pattern] * self._length, "big")
             encoded |= (padding_mask & padding_pattern)
 
         return encoded.to_bytes(self._length, "big")

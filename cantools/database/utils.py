@@ -41,7 +41,7 @@ def format_and(items: List[Union[int, str]]) -> str:
                                   string_items[-1])
 
 
-def start_bit(data: "Signal") -> int:
+def start_bit(data: Union["Data", "Signal"]) -> int:
     if data.byte_order == 'big_endian':
         return 8 * (data.start // 8) + (7 - (data.start % 8))
     else:
@@ -130,10 +130,10 @@ def decode_data(data: bytes,
     }
 
 
-def create_encode_decode_formats(datas: List["Signal"], number_of_bytes: int) -> Formats:
+def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
     format_length = (8 * number_of_bytes)
 
-    def get_format_string_type(data: "Signal") -> str:
+    def get_format_string_type(data: Union["Data", "Signal"]) -> str:
         if data.is_float:
             return 'f'
         elif data.is_signed:
@@ -147,7 +147,7 @@ def create_encode_decode_formats(datas: List["Signal"], number_of_bytes: int) ->
 
         return fmt, padding_mask, None
 
-    def data_item(data: "Signal") -> Tuple[str, str, str]:
+    def data_item(data: Union["Data", "Signal"]) -> Tuple[str, str, str]:
         fmt = '{}{}'.format(get_format_string_type(data),
                             data.length)
         padding_mask = '0' * data.length

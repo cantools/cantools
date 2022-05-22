@@ -222,14 +222,18 @@ class Signal(object):
         #: ``True`` if the signal is a float, ``False`` otherwise.
         self.is_float: bool = is_float
 
+        #: The minimum value of the signal, or ``None`` if unavailable.
+        self.minimum: Optional[float] = minimum
+
+        #: The maximum value of the signal, or ``None`` if unavailable.
+        self.maximum: Optional[float] = maximum
+
         self._start = start
         self._length = length
         self._byte_order = byte_order
         self._is_signed = is_signed
         self._initial = initial
         self._invalid = invalid
-        self._minimum = minimum
-        self._maximum = maximum
         self._decimal = Decimal() if decimal is None else decimal
         self._unit = unit
         self._choices = choices
@@ -327,30 +331,6 @@ class Signal(object):
     @invalid.setter
     def invalid(self, value: int) -> None:
         self._invalid = value
-
-    @property
-    def minimum(self) -> Optional[float]:
-        """The minimum value of the signal, or ``None`` if unavailable.
-
-        """
-
-        return self._minimum
-
-    @minimum.setter
-    def minimum(self, value: Optional[float]) -> None:
-        self._minimum = value
-
-    @property
-    def maximum(self) -> Optional[float]:
-        """The maximum value of the signal, or ``None`` if unavailable.
-
-        """
-
-        return self._maximum
-
-    @maximum.setter
-    def maximum(self, value: Optional[float]) -> None:
-        self._maximum = value
 
     @property
     def decimal(self) -> Decimal:
@@ -523,8 +503,8 @@ class Signal(object):
             self._initial,
             self.scale,
             self.offset,
-            self._minimum,
-            self._maximum,
+            self.minimum,
+            self.maximum,
             self._unit,
             self._is_multiplexer,
             self._multiplexer_ids,

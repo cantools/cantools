@@ -112,6 +112,7 @@ class Message(object):
             self._signals = sort_signals(signals)
         else:
             self._signals = signals
+        self._signal_dict: Dict[str, Signal] = {}
         self._contained_messages = contained_messages
 
         # if the 'comment' argument is a string, we assume that is an
@@ -713,9 +714,6 @@ class Message(object):
         for signal_name, signal_value in data.items():
             signal = self.get_signal_by_name(signal_name)
 
-            if not signal:
-                continue
-
             if isinstance(signal_value, (str, NamedSignalValue)):
                 # Check choices
                 signal_value_num = signal.choice_string_to_number(str(signal_value))
@@ -1118,11 +1116,7 @@ class Message(object):
         return tmp[0]
 
     def get_signal_by_name(self, name: str) -> Signal:
-        for signal in self._signals:
-            if signal.name == name:
-                return signal
-
-        raise KeyError(name)
+        return self._signal_dict[name]
 
     def is_multiplexed(self) -> bool:
         """Returns ``True`` if the message is multiplexed, otherwise
@@ -1227,6 +1221,7 @@ class Message(object):
         self._check_signal_lengths()
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
+        self._signal_dict = {signal.name: signal for signal in self._signals}
 
         if strict is None:
             strict = self._strict

@@ -4,11 +4,16 @@ import contextlib
 import os.path
 import re
 from decimal import Decimal
-from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence
+from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
 
 from typing_extensions import Literal, Final, TypeGuard
 
-from cantools.typechecking import Formats, SignalDictType, SignalValueType, TYPE_CHECKING
+from cantools.typechecking import (
+    Formats,
+    SignalDictType,
+    SignalValueType,
+    ByteOrder,
+)
 
 if TYPE_CHECKING:
     from cantools.database import Database
@@ -248,7 +253,7 @@ def sawtooth_to_network_bitnum(sawtooth_bitnum: int) -> int:
     return (8 * (sawtooth_bitnum // 8)) + (7 - (sawtooth_bitnum % 8))
 
 
-def cdd_offset_to_dbc_start_bit(cdd_offset: int, bit_length: int, byte_order: str) -> int:
+def cdd_offset_to_dbc_start_bit(cdd_offset: int, bit_length: int, byte_order: ByteOrder) -> int:
     '''Convert CDD/c-style field bit offset to DBC field start bit convention.
 
     BigEndian (BE) fields are located by their MSBit's sawtooth index.

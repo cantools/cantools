@@ -1,4 +1,8 @@
 # DID data.
+from typing import Optional
+
+from cantools.typechecking import ByteOrder, Choices
+
 
 class Data(object):
     """A data data with position, size, unit and other information. A data
@@ -7,16 +11,17 @@ class Data(object):
     """
 
     def __init__(self,
-                 name,
-                 start,
-                 length,
-                 byte_order='little_endian',
-                 scale=1,
-                 offset=0,
-                 minimum=None,
-                 maximum=None,
-                 unit=None,
-                 choices=None):
+                 name: str,
+                 start: int,
+                 length: int,
+                 byte_order: ByteOrder = 'little_endian',
+                 scale: float = 1,
+                 offset: float = 0,
+                 minimum: Optional[float] = None,
+                 maximum: Optional[float] = None,
+                 unit: Optional[str] = None,
+                 choices: Optional[Choices] = None,
+                 ) -> None:
         #: The data name as a string.
         self.name: str = name
 
@@ -26,120 +31,58 @@ class Data(object):
         #: The offset of the data value.
         self.offset: float = offset
 
-        self._start = start
-        self._length = length
-        self._byte_order = byte_order
-        self._minimum = minimum
-        self._maximum = maximum
-        self._unit = unit
-        self._choices = choices
+        #: The start bit position of the data within its DID.
+        self.start: int = start
+
+        #: The length of the data in bits.
+        self.length = length
+
+        #: Data byte order as ``'little_endian'`` or ``'big_endian'``.
+        self.byte_order: ByteOrder = byte_order
+
+        #: The minimum value of the data, or ``None`` if unavailable.
+        self.minimum: Optional[float] = minimum
+
+        #: The maximum value of the data, or ``None`` if unavailable.
+        self.maximum: Optional[float] = maximum
+
+        #: The unit of the data as a string, or ``None`` if unavailable.
+        self.unit = unit
+
+        #: A dictionary mapping data values to enumerated choices, or ``None``
+        #: if unavailable.
+        self.choices: Optional[Choices] = choices
+
         # ToDo: Remove once types are handled properly.
-        self.is_float = False
-        self.is_signed = False
+        self.is_float: bool = False
+        self.is_signed: bool = False
 
-    @property
-    def start(self):
-        """The start bit position of the data within its DID.
+    def choice_string_to_number(self, string: str) -> int:
+        if self.choices is None:
+            raise ValueError(f"Data {self.name} has no choices.")
 
-        """
-
-        return self._start
-
-    @start.setter
-    def start(self, value):
-        self._start = value
-
-    @property
-    def length(self):
-        """The length of the data in bits.
-
-        """
-
-        return self._length
-
-    @length.setter
-    def length(self, value):
-        self._length = value
-
-    @property
-    def byte_order(self):
-        """Data byte order as ``'little_endian'`` or ``'big_endian'``.
-
-        """
-
-        return self._byte_order
-
-    @byte_order.setter
-    def byte_order(self, value):
-        self._byte_order = value
-
-    @property
-    def minimum(self):
-        """The minimum value of the data, or ``None`` if unavailable.
-
-        """
-
-        return self._minimum
-
-    @minimum.setter
-    def minimum(self, value):
-        self._minimum = value
-
-    @property
-    def maximum(self):
-        """The maximum value of the data, or ``None`` if unavailable.
-
-        """
-
-        return self._maximum
-
-    @maximum.setter
-    def maximum(self, value):
-        self._maximum = value
-
-    @property
-    def unit(self):
-        """The unit of the data as a string, or ``None`` if unavailable.
-
-        """
-
-        return self._unit
-
-    @unit.setter
-    def unit(self, value):
-        self._unit = value
-
-    @property
-    def choices(self):
-        """A dictionary mapping data values to enumerated choices, or ``None``
-        if unavailable.
-
-        """
-
-        return self._choices
-
-    def choice_string_to_number(self, string):
         for choice_number, choice_string in self.choices.items():
             if choice_string == string:
                 return choice_number
 
-    def __repr__(self):
+        raise KeyError(f"Choice {string} not found in Data {self.name}.")
 
-        if self._choices is None:
+    def __repr__(self) -> str:
+        if self.choices is None:
             choices = None
         else:
             choices = '{{{}}}'.format(', '.join(
                 ["{}: '{}'".format(value, text)
-                 for value, text in self._choices.items()]))
+                 for value, text in self.choices.items()]))
 
         return "data('{}', {}, {}, '{}', {}, {}, {}, {}, '{}', {})".format(
             self.name,
-            self._start,
-            self._length,
-            self._byte_order,
+            self.start,
+            self.length,
+            self.byte_order,
             self.scale,
             self.offset,
-            self._minimum,
-            self._maximum,
-            self._unit,
+            self.minimum,
+            self.maximum,
+            self.unit,
             choices)

@@ -1,17 +1,15 @@
 # Utility functions.
 
-import contextlib
 import os.path
 import re
 from decimal import Decimal
 from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
 
-from typing_extensions import Literal, Final, TypeGuard
+from typing_extensions import Literal, Final
 
 from cantools.typechecking import (
     Formats,
     SignalDictType,
-    SignalValueType,
     ByteOrder,
 )
 
@@ -79,28 +77,6 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
     return unpacked
 
 
-def _decode_field(field: Union["Signal", "Data"],
-                  value: Union[int, float],
-                  decode_choices: bool, scaling: bool,
-                  ) -> SignalValueType:
-    def _is_int(x: Union[int, float]) -> TypeGuard[int]:
-        return isinstance(x, int) or (isinstance(x, float) and x.is_integer())
-
-    if _is_int(value) and decode_choices and field.choices is not None:
-        with contextlib.suppress(KeyError, TypeError):
-            return field.choices[value]
-
-    if scaling:
-        if field.is_float \
-           or not _is_int(field.scale) \
-           or not _is_int(field.offset):
-            return field.scale * value + field.offset
-        else:
-            return int(field.scale * value + field.offset)
-    else:
-        return value
-
-
 def encode_data(data: SignalDictType,
                 fields: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
@@ -123,16 +99,28 @@ def decode_data(data: bytes,
                 decode_choices: bool,
                 scaling: bool,
                 ) -> SignalDictType:
-    unpacked = formats.big_endian.unpack(bytes(data))
-    unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
-
-    return {
-        field.name: _decode_field(field,
-                                  unpacked[field.name],
-                                  decode_choices,
-                                  scaling)
-        for field in fields
+    unpacked = {
+        **formats.big_endian.unpack(bytes(data)),
+        **formats.little_endian.unpack(bytes(data[::-1])),
     }
+
+    decoded = {}
+    for field in fields:
+        value = unpacked[field.name]
+        if decode_choices:
+            try:
+                decoded[field.name] = field.choices[value]  # type: ignore[index]
+                continue
+            except (KeyError, TypeError):
+                pass
+
+        if scaling:
+            decoded[field.name] = field.scale * value + field.offset
+            continue
+        else:
+            decoded[field.name] = value
+
+    return decoded
 
 
 def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:

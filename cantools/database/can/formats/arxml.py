@@ -630,12 +630,12 @@ class SystemLoader(object):
                 if comm_dir == 'IN':
                     for pdu_message in pdu_messages:
                         for signal in pdu_message.signals:
-                            if ecu_name not in signal._receivers:
-                                signal._receivers.append(ecu_name)
+                            if ecu_name not in signal.receivers:
+                                signal.receivers.append(ecu_name)
                 elif comm_dir == 'OUT':
                     for pdu_message in pdu_messages:
-                        if ecu_name not in pdu_message._senders:
-                            pdu_message._senders.append(ecu_name)
+                        if ecu_name not in pdu_message.senders:
+                            pdu_message.senders.append(ecu_name)
 
     def _load_senders_receivers_of_nm_pdus(self, package, messages):
         ####
@@ -695,9 +695,9 @@ class SystemLoader(object):
                                                               pdu_path)
 
                     for pdu_message in pdu_messages:
-                        for signal in pdu_message._signals:
-                            if ecu_name not in signal._receivers:
-                                signal._receivers.append(ecu_name)
+                        for signal in pdu_message.signals:
+                            if ecu_name not in signal.receivers:
+                                signal.receivers.append(ecu_name)
 
                 # deal with transmit PDUs
                 for tx_pdu in self._get_arxml_children(nm_node,
@@ -710,8 +710,8 @@ class SystemLoader(object):
                                                               pdu_path)
 
                     for pdu_message in pdu_messages:
-                        if ecu_name not in pdu_message._senders:
-                            pdu_message._senders.append(ecu_name)
+                        if ecu_name not in pdu_message.senders:
+                            pdu_message.senders.append(ecu_name)
 
     def _load_system(self, package_list, messages):
         """Internalize the information specified by the system.
@@ -2198,7 +2198,7 @@ class SystemLoader(object):
 
             if base_type_encoding is None:
                 btt = base_type.find('./ns:SHORT-NAME', self._xml_namespaces)
-                btt = bt.text
+                btt = btt.text
                 raise ValueError(
                     f'BASE-TYPE-ENCODING in base type "{btt}" does not exist.')
 

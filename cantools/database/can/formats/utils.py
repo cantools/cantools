@@ -1,4 +1,7 @@
-def num(number_as_string):
+from typing import Union
+
+
+def num(number_as_string: str) -> Union[int, float]:
     """Convert given string to an integer or a float.
 
     """
@@ -7,5 +10,5 @@ def num(number_as_string):
         return int(number_as_string)
     except ValueError:
         return float(number_as_string)
-    else:
-        raise ValueError('Expected integer or floating point number.')
+    except Exception:
+        raise ValueError('Expected integer or floating point number.') from None

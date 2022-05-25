@@ -824,10 +824,14 @@ def _dump_signal(signal: Signal) -> str:
         signal_str += f' // {signal.comment}'
     return signal_str
 
-def _dump_signals(database: InternalDatabase) -> str:
+def _dump_signals(database: InternalDatabase, sort_signals) -> str:
     signals = []
     for message in database.messages:
-        for signal in message.signals:
+        if sort_signals:
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
             signals.append(_dump_signal(signal))
 
     if signals:
@@ -901,13 +905,13 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
 
     """
     if sort_signals == SORT_SIGNALS_DEFAULT:
-        sort_signals = None
+        sort_signals = sort_signals_by_start_bit
         
     sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
     sym_str += 'Title="SYM Database"\n\n'
 
     sym_str += _dump_choices(database) + '\n\n'
-    sym_str += _dump_signals(database) + '\n\n'
+    sym_str += _dump_signals(database, sort_signals) + '\n\n'
     sym_str += _dump_messages(database)
 
     return sym_str

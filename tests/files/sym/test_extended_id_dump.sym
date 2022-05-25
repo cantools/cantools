@@ -1,0 +1,13 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{SENDRECEIVE}
+
+[SomeFrame]
+ID=100h
+Len=8
+
+[SomeExtFrame]
+ID=1C2A2A2Ah
+Type=Extended
+Len=8

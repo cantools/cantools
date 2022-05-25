@@ -1,5 +1,6 @@
 # Load and dump a CAN database in SYM format.
 
+import collections
 import re
 import logging
 from collections import OrderedDict as odict
@@ -25,11 +26,18 @@ from ..message import Message
 from ..internal_database import InternalDatabase
 
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit
+from ...utils import SORT_SIGNALS_DEFAULT, type_sort_signals, sort_signals_by_start_bit
 from ...errors import ParseError
 
 
 LOGGER = logging.getLogger(__name__)
+
+# PCAN Symbol Editor will fail to open a SYM File with signals of a longer length
+MAX_SIGNAL_NAME_LENGTH = 32
+# If a message is in the SEND section of a SYM file, it is sent by the ECU
+SEND_MESSAGE_SENDER = 'ECU'
+# If a message is in the RECEIVE section of a SYM file, it is sent by the Peripheral devices
+RECEIVE_MESSAGE_SENDER = 'Peripherals'
 
 
 class Parser60(textparser.Parser):
@@ -91,7 +99,7 @@ class Parser60(textparser.Parser):
         re_string = r'"(\\"|[^"])*?"'
 
         token_specs = [
-            ('SKIP',               r'[ \r\n\t]+'),
+            ('SKIP',               r'[ \n\t]+'),
             ('COMMENT',            r'//.*?\n'),
             ('HEXNUMBER',          r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
             ('NUMBER',             r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?'),
@@ -258,7 +266,7 @@ def _get_section_tokens(tokens, name):
 
 
 def _load_comment(tokens):
-    return tokens[3:].rstrip('\r\n')
+    return tokens[3:].rstrip('\n')
 
 
 def _get_enum(enums, name):
@@ -635,11 +643,11 @@ def _get_senders(section_name: str) -> List[str]:
     other file formats specify a list of custom-named sending devices
     """
     if section_name == '{SEND}':
-        return ['ECU']
+        return [SEND_MESSAGE_SENDER]
     elif section_name == '{RECEIVE}':
-        return ['Peripherals']
+        return [RECEIVE_MESSAGE_SENDER]
     elif section_name == '{SENDRECEIVE}':
-        return ['ECU', 'Peripherals']
+        return [SEND_MESSAGE_SENDER, RECEIVE_MESSAGE_SENDER]
     else:
         raise ValueError(f'Unexpected message section named {section_name}')
 
@@ -756,6 +764,153 @@ def _load_messages(tokens, signals, enums, strict, sort_signals):
 def _load_version(tokens):
     return tokens[1][2]
 
+
+def _get_signal_name(signal: Signal) -> str:
+    return signal.name[:MAX_SIGNAL_NAME_LENGTH]
+
+def _get_enum_name(signal: Signal) -> str:
+    """Returns the name of an enum for a signal. Returns the shortened
+    signal name, plus the letter 'E', since the cantools database doesn't
+    store enum names, unlike the SYM file
+    """
+    return f'{_get_signal_name(signal).replace(" ", "_").replace("/", "_")[:MAX_SIGNAL_NAME_LENGTH - 1]}E'
+
+def _dump_choice(signal: Signal) -> str:
+    # Example:
+    # Enum=DPF_Actv_Options(0="notActive", 1="active", 2="rgnrtnNddAtmtcllyInttdActvRgnrt", 3="notAvailable")
+    if not signal.choices:
+        return None
+
+    enum_str = f'Enum={_get_enum_name(signal)}('
+    is_first_choice = True
+    for choice_number, choice_value in signal.choices.items():
+        enum_str += f'{", " if not is_first_choice else ""}{choice_number}="{choice_value}"'
+        is_first_choice = False
+    enum_str += ')'
+    return enum_str
+
+def _dump_choices(database: InternalDatabase) -> str:
+    choices = []
+    for message in database.messages:
+        for signal in message.signals:
+            new_choice = _dump_choice(signal)
+            if new_choice:
+                choices.append(new_choice)
+    
+    if choices:
+        return '{ENUMS}\n' + '\n'.join(choices)
+    else:
+        return ''
+
+def _dump_signal(signal: Signal) -> str:
+    # Example:
+    # Sig=ec_a_alt48 unsigned 16 /u:A /f:0.05 /o:-1600 /max:1676.75 /d:0 // Alternator Current
+    signal_str = f'Sig="{_get_signal_name(signal)}" unsigned {signal.length}'
+    if signal.unit:
+        signal_str += f' /u:{signal.unit}'
+    if signal.scale and signal.scale != 1:
+        signal_str += f' /f:{signal.scale}'
+    if signal.offset and signal.offset != 0:
+        signal_str += f' /o:{signal.offset}'
+    if signal.maximum and signal.maximum != 0:
+        signal_str += f' /max:{signal.maximum}'
+    if signal.minimum and signal.minimum != 0:
+        signal_str += f' /min:{signal.minimum}'
+    if signal.spn and signal.spn != 0:
+        signal_str += f' /spn:{signal.spn}'
+    if signal.choices:
+        signal_str += f' /e:{_get_enum_name(signal)}'
+    if signal.comment:
+        signal_str += f' // {signal.comment}'
+    return signal_str
+
+def _dump_signals(database: InternalDatabase) -> str:
+    signals = []
+    for message in database.messages:
+        for signal in message.signals:
+            signals.append(_dump_signal(signal))
+
+    if signals:
+        return '{SIGNALS}\n' + '\n'.join(signals)
+    else:
+        return ''
+
+def _dump_message(message: Message, signals: List[Signal], multiplexer_id: int = None, multiplexer_signal: Signal = None):
+    # Example:
+    # [TestMessage]
+    # ID=14A30000h
+    # Type=Extended
+    # Len=8
+    # Sig=test_signal 0
+    extended = ''
+    if message.is_extended_frame:
+        extended = 'Type=Extended\n'
+    message_str = f'["{message.name}"]\nID={message.frame_id:X}h\n{extended}Len={message.length}\n'
+    if message.cycle_time:
+        message_str += f'CycleTime={message.cycle_time}\n'
+    if multiplexer_id:
+        m_flag = ''
+        if multiplexer_signal.byte_order == 'big_endian':
+            m_flag = '-m'
+        hex_multiplexer_id = format(multiplexer_id, 'x').upper()
+        message_str += f'Mux="{hex_multiplexer_id}" {multiplexer_signal.start},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}\n'
+    for signal in signals:
+        message_str += f'Sig="{_get_signal_name(signal)}" {signal.start}\n'
+    return message_str
+
+def _dump_messages(database: InternalDatabase):
+    send_messages = []
+    receive_messages = []
+    send_receive_messages = []
+    for message in database.messages:
+        message_dumps = []
+        if message.is_multiplexed():
+            non_multiplexed_signals = []
+            # Store all non-multiplexed signals first
+            for signal_tree_signal in message.signal_tree:
+                if not isinstance(signal_tree_signal, collections.abc.Mapping):
+                    non_multiplexed_signals.append(signal_tree_signal)
+            
+            for signal_tree_signal in message.signal_tree:
+                if isinstance(signal_tree_signal, collections.abc.Mapping):
+                    signal_name, multiplexed_signals = list(signal_tree_signal.items())[0]
+                    for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
+                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + non_multiplexed_signals,
+                                                      multiplexer_id, message.get_signal_by_name(signal_name)))
+        else:
+            message_dumps.append(_dump_message(message, message.signals))
+        
+        if message.senders == [SEND_MESSAGE_SENDER]:
+            send_messages.extend(message_dumps)
+        elif message.senders == [RECEIVE_MESSAGE_SENDER]:
+            receive_messages.extend(message_dumps)
+        else:
+            send_receive_messages.extend(message_dumps)
+    
+    messages_dump = ''
+    if send_messages:
+        messages_dump += '{SEND}\n' + '\n'.join(send_messages)
+    if receive_messages:
+        messages_dump += '{RECEIVE}\n' + '\n'.join(receive_messages)
+    if send_receive_messages:
+        messages_dump += '{SENDRECEIVE}\n' + '\n'.join(send_receive_messages)
+    return messages_dump
+
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+    """Format given database in SYM file format.
+
+    """
+    if sort_signals == SORT_SIGNALS_DEFAULT:
+        sort_signals = None
+        
+    sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
+    sym_str += 'Title="SYM Database"\n\n'
+
+    sym_str += _dump_choices(database) + '\n\n'
+    sym_str += _dump_signals(database) + '\n\n'
+    sym_str += _dump_messages(database)
+
+    return sym_str
 
 def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given string.

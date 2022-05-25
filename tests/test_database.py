@@ -3298,6 +3298,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(dumped_msg.signals[2].name, "UnmultiplexedSig")
         self.assertEqual(dumped_msg.signals[2].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[2].is_multiplexer, False)
+        
+    def test_multiplex_sym_dump(self):
+        db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
+        dumped_db = cantools.db.load_string(db.as_sym_string())
+        dumped_msg = dumped_db.get_message_by_frame_id(0x100)
+
+        # Note: cantools database cannot support multiple multiplexer signal names, so SYM file names the multiplexer
+        # signal after the multiplexer id (Hence, 2A, not MultiplexerSig)
+        self.assertEqual(dumped_msg.signals[0].name, "2A")
+        self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
+        self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
+        self.assertEqual(dumped_msg.signals[1].name, "MultiplexedSig")
+        self.assertEqual(dumped_msg.signals[1].is_multiplexer, False)
+        self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
 
     def test_string_attribute_definition_dump(self):
         db = cantools.db.load_file('tests/files/dbc/test_multiplex_dump.dbc')
@@ -3309,6 +3323,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_extended_id_dump(self):
         db = cantools.db.load_file('tests/files/dbc/test_extended_id_dump.dbc')
         dumped_db = cantools.db.load_string(db.as_dbc_string())
+        reg_id_msg = dumped_db.get_message_by_frame_id(0x100)
+        ext_id_msg = dumped_db.get_message_by_frame_id(0x1c2a2a2a)
+
+        self.assertEqual(reg_id_msg.is_extended_frame, False)
+        self.assertEqual(ext_id_msg.is_extended_frame, True)
+        
+    def test_extended_id_sym_dump(self):
+        db = cantools.db.load_file('tests/files/sym/test_extended_id_dump.sym')
+        dumped_db = cantools.db.load_string(db.as_sym_string())
         reg_id_msg = dumped_db.get_message_by_frame_id(0x100)
         ext_id_msg = dumped_db.get_message_by_frame_id(0x1c2a2a2a)
 

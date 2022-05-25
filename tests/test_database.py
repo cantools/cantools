@@ -1666,9 +1666,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), 'Only SYM version 6.0 is supported.')
 
-    def test_jopp_6_0_sym(self):
+    def internal_test_jopp_6_0_sym(self, test_sym_string):
         db = cantools.db.Database()
         db.add_sym_file('tests/files/sym/jopp-6.0.sym')
+        if test_sym_string:
+            db = cantools.db.load_string(db.as_sym_string())
 
         self.assertEqual(len(db.messages), 6)
         self.assertEqual(len(db.messages[0].signals), 0)
@@ -1803,7 +1805,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(symbol_3.signals), 4)
         self.assertSequenceEqual(symbol_3.senders, ['ECU', 'Peripherals'])
         multiplexer = symbol_3.signals[0]
-        self.assertEqual(multiplexer.name, 'Multiplexer1')
+        if test_sym_string:
+            self.assertEqual(multiplexer.name, '0')
+        else:
+            self.assertEqual(multiplexer.name, 'Multiplexer1')
         self.assertEqual(multiplexer.start, 0)
         self.assertEqual(multiplexer.length, 3)
         self.assertEqual(multiplexer.is_multiplexer, True)
@@ -1841,6 +1846,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(encoded, b'\x00\x08\x00\x00\x00\x00\x00\x00')
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded['Signal3'], 'bar')
+
+    def test_jopp_6_0_sym(self):
+        self.internal_test_jopp_6_0_sym(False)
+        
+    def test_jopp_6_0_sym_re_read(self):
+        self.internal_test_jopp_6_0_sym(True)
 
     def test_empty_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/empty-6.0.sym')

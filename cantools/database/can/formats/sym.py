@@ -804,7 +804,7 @@ def _dump_choices(database: InternalDatabase) -> str:
 
 def _dump_signal(signal: Signal) -> str:
     # Example:
-    # Sig=ec_a_alt48 unsigned 16 /u:A /f:0.05 /o:-1600 /max:1676.75 /d:0 // Alternator Current
+    # Sig=alt_current unsigned 16 /u:A /f:0.05 /o:-1600 /max:1676.75 /d:0 // Alternator Current
     signal_str = f'Sig="{_get_signal_name(signal)}" unsigned {signal.length}'
     if signal.unit:
         signal_str += f' /u:{signal.unit}'
@@ -825,17 +825,17 @@ def _dump_signal(signal: Signal) -> str:
     return signal_str
 
 def _dump_signals(database: InternalDatabase, sort_signals) -> str:
-    signals = []
+    signal_dumps = []
     for message in database.messages:
         if sort_signals:
             signals = sort_signals(message.signals)
         else:
             signals = message.signals
         for signal in signals:
-            signals.append(_dump_signal(signal))
+            signal_dumps.append(_dump_signal(signal))
 
     if signals:
-        return '{SIGNALS}\n' + '\n'.join(signals)
+        return '{SIGNALS}\n' + '\n'.join(signal_dumps)
     else:
         return ''
 

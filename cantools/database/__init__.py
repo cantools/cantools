@@ -248,6 +248,8 @@ def dump_file(database,
         newline = ''
     elif database_format == 'kcd':
         output = database.as_kcd_string(sort_signals=sort_signals)
+    elif database_format == 'sym':
+        output = database.as_sym_string(sort_signals=sort_signals)
     else:
         raise Error(
             "Unsupported output database format '{}'.".format(database_format))

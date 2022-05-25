@@ -99,7 +99,7 @@ class Parser60(textparser.Parser):
         re_string = r'"(\\"|[^"])*?"'
 
         token_specs = [
-            ('SKIP',               r'[ \n\t]+'),
+            ('SKIP',               r'[ \r\n\t]+'),
             ('COMMENT',            r'//.*?\n'),
             ('HEXNUMBER',          r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
             ('NUMBER',             r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?'),
@@ -266,7 +266,7 @@ def _get_section_tokens(tokens, name):
 
 
 def _load_comment(tokens):
-    return tokens[3:].rstrip('\n')
+    return tokens[3:].rstrip('\r\n')
 
 
 def _get_enum(enums, name):

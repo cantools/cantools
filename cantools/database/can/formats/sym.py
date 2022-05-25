@@ -6,7 +6,7 @@ import re
 import logging
 from collections import OrderedDict as odict
 from decimal import Decimal
-from typing import List
+from typing import Callable, List, Optional as TypingOptional
 
 import textparser
 from textparser import Sequence
@@ -780,7 +780,7 @@ def _dump_choice(signal: Signal) -> str:
     # Example:
     # Enum=DPF_Actv_Options(0="notActive", 1="active", 2="rgnrtnNddAtmtcllyInttdActvRgnrt", 3="notAvailable")
     if not signal.choices:
-        return None
+        return ''
 
     enum_str = f'Enum={_get_enum_name(signal)}('
     is_first_choice = True
@@ -847,7 +847,7 @@ def _dump_signal(signal: Signal) -> str:
 
     return signal_str
 
-def _dump_signals(database: InternalDatabase, sort_signals) -> str:
+def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Callable[[List[Signal]], List[Signal]]]) -> str:
     signal_dumps = []
     # SYM requires unique signals
     generated_signals = set()
@@ -866,7 +866,8 @@ def _dump_signals(database: InternalDatabase, sort_signals) -> str:
     else:
         return ''
 
-def _dump_message(message: Message, signals: List[Signal], min_frame_id: int, max_frame_id: int = None, multiplexer_id: int = None, multiplexer_signal: Signal = None):
+def _dump_message(message: Message, signals: List[Signal], min_frame_id: int, max_frame_id: TypingOptional[int] = None,
+                  multiplexer_id: TypingOptional[int] = None, multiplexer_signal: TypingOptional[Signal] = None) -> str:
     # Example:
     # [TestMessage]
     # ID=14A30000h
@@ -891,7 +892,7 @@ def _dump_message(message: Message, signals: List[Signal], min_frame_id: int, ma
     message_str = f'["{message.name}"]\n{frame_id}{frame_id_range}{comment}{frame_id_newline}{extended}Len={message.length}\n'
     if message.cycle_time:
         message_str += f'CycleTime={message.cycle_time}\n'
-    if multiplexer_id is not None:
+    if multiplexer_id is not None and multiplexer_signal is not None:
         m_flag = ''
         if multiplexer_signal.byte_order == 'big_endian':
             m_flag = '-m'
@@ -901,7 +902,7 @@ def _dump_message(message: Message, signals: List[Signal], min_frame_id: int, ma
         message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
     return message_str
 
-def _dump_messages(database: InternalDatabase):
+def _dump_messages(database: InternalDatabase) -> str:
     send_messages = []
     receive_messages = []
     send_receive_messages = []

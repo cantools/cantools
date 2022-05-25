@@ -6,7 +6,7 @@ import re
 import logging
 from collections import OrderedDict as odict
 from decimal import Decimal
-from typing import Callable, List, Optional as TypingOptional
+from typing import Callable, Iterator, List, Optional as TypingOptional
 
 import textparser
 from textparser import Sequence
@@ -866,7 +866,7 @@ def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Calla
     else:
         return ''
 
-def _dump_message(message: Message, signals: List[Signal], min_frame_id: int, max_frame_id: TypingOptional[int] = None,
+def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingOptional[int], max_frame_id: TypingOptional[int] = None,
                   multiplexer_id: TypingOptional[int] = None, multiplexer_signal: TypingOptional[Signal] = None) -> str:
     # Example:
     # [TestMessage]
@@ -906,7 +906,9 @@ def _dump_messages(database: InternalDatabase) -> str:
     send_messages = []
     receive_messages = []
     send_receive_messages = []
-    for message_name, messages_with_name in groupby(sorted(database.messages, key=lambda m: m.name), key=lambda m: m.name):
+    message_name: str
+    messages_with_name: Iterator[Message]
+    for message_name, messages_with_name in groupby(sorted(database.messages, key=lambda m: m.name), key=lambda m: m.name): # type: ignore
         message_dumps = []
         # Cantools represents SYM CAN ID range with multiple messages - need to dedup multiple cantools messages
         # into a single message with a CAN ID range

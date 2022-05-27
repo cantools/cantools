@@ -547,19 +547,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
                     'AverageRadius': 0,
                     'Enable': 0
                 },
-                b'\x01\x00\x40\x00\x00\x00\x00\x00'
+                b'\x01\x00\x20\x00\x00\x00\x00\x00'
             )
         ]
 
         for decoded_message, encoded_message in datas:
             encoded = db.encode_message(example_message_frame_id,
                                         decoded_message)
+            self.assertEqual(encoded, encoded_message)
             decoded = db.decode_message(example_message_frame_id,
                                         encoded,
                                         decode_choices=False)
-            self.assertEqual(encoded, encoded_message)
-            for key, value in decoded_message.items():
-                self.assertAlmostEqual(value, decoded[key], places=1)
+            self.assertEqual(decoded, decoded_message)
 
             # check that encode(decode(encode(decoded))) == encode(decoded)
             encoded2 = db.encode_message(example_message_frame_id, decoded)

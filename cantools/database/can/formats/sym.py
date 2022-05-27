@@ -829,7 +829,7 @@ def _dump_signal(signal: Signal) -> str:
     if signal.byte_order == 'big_endian':
         signal_str += ' -m'
     if signal.unit:
-        signal_str += f' /u:{signal.unit}'
+        signal_str += f' /u:"{signal.unit}"'
     if signal.scale and signal.scale != 1:
         signal_str += f' /f:{signal.scale}'
     if signal.offset and signal.offset != 0:
@@ -879,16 +879,22 @@ def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingO
         extended = 'Type=Extended\n'
     frame_id = ''
     frame_id_newline = ''
+    comment = ''
     # Frame id should be excluded for multiplexed messages after the first listed message instance
     if min_frame_id is not None:
-        frame_id = f'ID={min_frame_id:X}h'
+        if message.is_extended_frame:
+            frame_id = f'ID={min_frame_id:08X}h'
+        else:
+            frame_id = f'ID={min_frame_id:03X}h'
         frame_id_newline = '\n'
+        if message.comment is not None:
+            comment = f' // {message.comment}'
     frame_id_range = ''
     if max_frame_id is not None:
-        frame_id_range = f'-{max_frame_id:X}h'
-    comment = ''
-    if message.comment is not None:
-        comment = f' // {message.comment}'
+        if message.is_extended_frame:
+            frame_id_range = f'-{max_frame_id:08X}h'
+        else:
+            frame_id_range = f'-{max_frame_id:03X}h'
     message_str = f'["{message.name}"]\n{frame_id}{frame_id_range}{comment}{frame_id_newline}{extended}Len={message.length}\n'
     if message.cycle_time:
         message_str += f'CycleTime={message.cycle_time}\n'

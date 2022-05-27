@@ -892,9 +892,9 @@ def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingO
     frame_id_range = ''
     if max_frame_id is not None:
         if message.is_extended_frame:
-            frame_id_range = f'-{max_frame_id:8X}h'
+            frame_id_range = f'-{max_frame_id:08X}h'
         else:
-            frame_id_range = f'-{max_frame_id:3X}h'
+            frame_id_range = f'-{max_frame_id:03X}h'
     message_str = f'["{message.name}"]\n{frame_id}{frame_id_range}{comment}{frame_id_newline}{extended}Len={message.length}\n'
     if message.cycle_time:
         message_str += f'CycleTime={message.cycle_time}\n'

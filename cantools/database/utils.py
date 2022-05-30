@@ -59,20 +59,17 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
         value = data[field.name]
 
         if isinstance(value, (float, int)):
+            _transform = float if field.is_float else round
             if scaling:
-                if field.is_float:
-                    unpacked[field.name] = (value - field.offset) / field.scale
-                    continue
-
                 if field.offset == 0 and field.scale == 1:
                     # treat special case to avoid introduction of unnecessary rounding error
-                    unpacked[field.name] = round(value)
+                    unpacked[field.name] = _transform(value)
                     continue
 
-                unpacked[field.name] = round((value - field.offset) / field.scale)
+                unpacked[field.name] = _transform((value - field.offset) / field.scale)
                 continue
 
-            unpacked[field.name] = value if field.is_float else round(value)
+            unpacked[field.name] = _transform(value)
             continue
 
         unpacked[field.name] = field.choice_string_to_number(str(value))

@@ -63,13 +63,13 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
             if scaling:
                 if field.offset == 0 and field.scale == 1:
                     # treat special case to avoid introduction of unnecessary rounding error
-                    unpacked[field.name] = _transform(value)
+                    unpacked[field.name] = _transform(value)  # type: ignore[operator]
                     continue
 
-                unpacked[field.name] = _transform((value - field.offset) / field.scale)
+                unpacked[field.name] = _transform((value - field.offset) / field.scale)  # type: ignore[operator]
                 continue
 
-            unpacked[field.name] = _transform(value)
+            unpacked[field.name] = _transform(value)  # type: ignore[operator]
             continue
 
         unpacked[field.name] = field.choice_string_to_number(str(value))

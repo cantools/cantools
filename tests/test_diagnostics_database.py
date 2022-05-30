@@ -491,6 +491,10 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(str(pe.exception), "Unknown byte order code: 4321")
 
+    def test_datarefs(self):
+        db = cantools.db.load_file('tests/files/cdd/example-diddatarefs.cdd', encoding = 'iso-8859-1')
+        self.assertEqual(len(db.dids[-1].datas), 2)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

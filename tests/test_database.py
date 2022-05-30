@@ -1666,9 +1666,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(str(cm.exception), 'Only SYM version 6.0 is supported.')
 
-    def test_jopp_6_0_sym(self):
+    def internal_test_jopp_6_0_sym(self, test_sym_string):
         db = cantools.db.Database()
         db.add_sym_file('tests/files/sym/jopp-6.0.sym')
+        if test_sym_string:
+            db = cantools.db.load_string(db.as_sym_string())
 
         self.assertEqual(len(db.messages), 6)
         self.assertEqual(len(db.messages[0].signals), 0)
@@ -1803,7 +1805,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(symbol_3.signals), 4)
         self.assertSequenceEqual(symbol_3.senders, ['ECU', 'Peripherals'])
         multiplexer = symbol_3.signals[0]
-        self.assertEqual(multiplexer.name, 'Multiplexer1')
+        if test_sym_string:
+            self.assertEqual(multiplexer.name, '0')
+        else:
+            self.assertEqual(multiplexer.name, 'Multiplexer1')
         self.assertEqual(multiplexer.start, 0)
         self.assertEqual(multiplexer.length, 3)
         self.assertEqual(multiplexer.is_multiplexer, True)
@@ -1841,6 +1846,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(encoded, b'\x00\x08\x00\x00\x00\x00\x00\x00')
         decoded = db.decode_message(frame_id, encoded)
         self.assertEqual(decoded['Signal3'], 'bar')
+
+    def test_jopp_6_0_sym(self):
+        self.internal_test_jopp_6_0_sym(False)
+        
+    def test_jopp_6_0_sym_re_read(self):
+        self.internal_test_jopp_6_0_sym(True)
 
     def test_empty_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/empty-6.0.sym')
@@ -3298,6 +3309,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(dumped_msg.signals[2].name, "UnmultiplexedSig")
         self.assertEqual(dumped_msg.signals[2].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[2].is_multiplexer, False)
+        
+    def test_multiplex_sym_dump(self):
+        db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
+        dumped_db = cantools.db.load_string(db.as_sym_string())
+        dumped_msg = dumped_db.get_message_by_frame_id(0x100)
+
+        # Note: cantools database cannot support multiple multiplexer signal names, so SYM file names the multiplexer
+        # signal after the multiplexer id (Hence, 2A, not MultiplexerSig)
+        self.assertEqual(dumped_msg.signals[0].name, "2A")
+        self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
+        self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
+        self.assertEqual(dumped_msg.signals[1].name, "MultiplexedSig")
+        self.assertEqual(dumped_msg.signals[1].is_multiplexer, False)
+        self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
 
     def test_string_attribute_definition_dump(self):
         db = cantools.db.load_file('tests/files/dbc/test_multiplex_dump.dbc')
@@ -3309,6 +3334,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_extended_id_dump(self):
         db = cantools.db.load_file('tests/files/dbc/test_extended_id_dump.dbc')
         dumped_db = cantools.db.load_string(db.as_dbc_string())
+        reg_id_msg = dumped_db.get_message_by_frame_id(0x100)
+        ext_id_msg = dumped_db.get_message_by_frame_id(0x1c2a2a2a)
+
+        self.assertEqual(reg_id_msg.is_extended_frame, False)
+        self.assertEqual(ext_id_msg.is_extended_frame, True)
+        
+    def test_extended_id_sym_dump(self):
+        db = cantools.db.load_file('tests/files/sym/test_extended_id_dump.sym')
+        dumped_db = cantools.db.load_string(db.as_sym_string())
         reg_id_msg = dumped_db.get_message_by_frame_id(0x100)
         ext_id_msg = dumped_db.get_message_by_frame_id(0x1c2a2a2a)
 

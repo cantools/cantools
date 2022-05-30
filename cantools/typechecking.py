@@ -10,7 +10,7 @@ from typing import (
     Tuple,
 )
 
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, Literal, OrderedDict
 from bitstruct import CompiledFormatDict
 
 
@@ -38,6 +38,8 @@ Codec = TypedDict(
     },
 )
 
+ByteOrder = Literal["little_endian", "big_endian"]
+Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]
 
 # Type aliases. Introduced to reduce type annotation complexity while
 # allowing for more complex encode/decode schemes like the one used

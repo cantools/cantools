@@ -1,6 +1,5 @@
 # A CAN message.
 
-import binascii
 import logging
 from copy import deepcopy
 from typing import (
@@ -113,6 +112,7 @@ class Message(object):
             self._signals = sort_signals(signals)
         else:
             self._signals = signals
+        self._signal_dict: Dict[str, Signal] = {}
         self._contained_messages = contained_messages
 
         # if the 'comment' argument is a string, we assume that is an
@@ -606,14 +606,13 @@ class Message(object):
         :param scaling: If ``False`` no scaling of signals is performed.
 
         :param assert_values_valid: If ``True``, the values of all
-        specified signals must be valid/encodable. If at least one is
-        not, an ``EncodeError`` exception is raised. (Note that the
-        values of multiplexer selector signals must always be valid!)
+            specified signals must be valid/encodable. If at least one is
+            not, an ``EncodeError`` exception is raised. (Note that the
+            values of multiplexer selector signals must always be valid!)
 
         :param assert_all_known: If ``True``, all specified signals must
-        be used by the encoding operation or an ``EncodeError``
-        exception is raised. This is useful to prevent typos.
-
+            be used by the encoding operation or an ``EncodeError``
+            exception is raised. This is useful to prevent typos.
         '''
 
         # this method only deals with ordinary messages
@@ -714,9 +713,6 @@ class Message(object):
 
         for signal_name, signal_value in data.items():
             signal = self.get_signal_by_name(signal_name)
-
-            if not signal:
-                continue
 
             if isinstance(signal_value, (str, NamedSignalValue)):
                 # Check choices
@@ -925,19 +921,10 @@ class Message(object):
                                                           scaling)
 
         if padding:
-            # there is probably a cleaner and more performant way to
-            # do this...
-            padding_pattern = 0
-            for i in range(0, self.length):
-                padding_pattern |= self.unused_bit_pattern << (8*i)
+            padding_pattern = int.from_bytes([self._unused_bit_pattern] * self._length, "big")
+            encoded |= (padding_mask & padding_pattern)
 
-            encoded &= ~padding_mask
-            encoded |= padding_mask & padding_pattern
-
-        encoded |= (0x80 << (8 * self._length))
-        hex_string = hex(encoded)[4:].rstrip('L')
-
-        return binascii.unhexlify(hex_string)[:self._length]
+        return encoded.to_bytes(self._length, "big")
 
     def _decode(self,
                 node: Codec,
@@ -1129,11 +1116,7 @@ class Message(object):
         return tmp[0]
 
     def get_signal_by_name(self, name: str) -> Signal:
-        for signal in self._signals:
-            if signal.name == name:
-                return signal
-
-        raise KeyError(name)
+        return self._signal_dict[name]
 
     def is_multiplexed(self) -> bool:
         """Returns ``True`` if the message is multiplexed, otherwise
@@ -1238,6 +1221,7 @@ class Message(object):
         self._check_signal_lengths()
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
+        self._signal_dict = {signal.name: signal for signal in self._signals}
 
         if strict is None:
             strict = self._strict

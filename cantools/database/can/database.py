@@ -343,6 +343,20 @@ class Database(object):
                                                 self._version,
                                                 self._dbc),
                                sort_signals=sort_signals)
+        
+    def as_sym_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+        """Return the database as a string formatted as a SYM file.
+
+        """
+        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
+            sort_signals = None
+
+        return sym.dump_string(InternalDatabase(self._messages,
+                                                self._nodes,
+                                                self._buses,
+                                                self._version,
+                                                self._dbc),
+                               sort_signals=sort_signals)
 
     def get_message_by_name(self, name: str) -> Message:
         """Find the message object for given name `name`.

@@ -15,6 +15,36 @@ class SecOCError(Error):
     """
     pass
 
+def compute_authenticator(raw_payload: Union[bytes, bytearray],
+                          dbmsg: Message,
+                          authenticator_fn: Callable[[Message,
+                                                      bytearray,
+                                                      int],
+                                                     bytearray],
+                          freshness_value: int) \
+                          -> bytearray:
+    """Given a byte-like object that contains the encoded signals to be
+    send, compute the full authenticator SecOC value.
+    """
+
+    if dbmsg.autosar is None or dbmsg.autosar.secoc is None:
+        raise SecOCError(f'Message "{dbmsg.name}" is not secured')
+
+    secoc_props = dbmsg.autosar.secoc
+    n_fresh = secoc_props.freshness_bit_length
+    payload_len = secoc_props.payload_length
+
+    # build the data that needs to be passed to authentificator function
+    auth_data = bitstruct.pack(f'u16' # data ID
+                               f'r{payload_len*8}' # payload to be secured
+                               f'u{n_fresh}', # freshness value
+                               secoc_props.data_id,
+                               raw_payload[:payload_len],
+                               freshness_value)
+
+    # compute authenticator value
+    return authenticator_fn(dbmsg, auth_data, freshness_value)
+
 def apply_authenticator(raw_payload: Union[bytes, bytearray],
                         dbmsg: Message,
                         authenticator_fn: Callable[[Message,
@@ -31,36 +61,25 @@ def apply_authenticator(raw_payload: Union[bytes, bytearray],
     message.
     """
 
-    if dbmsg.autosar is None or dbmsg.autosar.secoc is None:
-        raise SecOCError(f'Message "{dbmsg.name}" is not secured')
-
-    secoc_props = dbmsg.autosar.secoc
     result = bytearray(raw_payload)
 
-    payload_len = secoc_props.payload_length
+    # compute authenticator value
+    auth_value = compute_authenticator(raw_payload,
+                                       dbmsg,
+                                       authenticator_fn,
+                                       freshness_value)
 
-    # get the last N bits of the freshness value. we assume that the
-    # full freshness value is at most 64 bits.
-    n_fresh = secoc_props.freshness_bit_length
+    # get the last N bits of the freshness value.
+    secoc_props = dbmsg.autosar.secoc
     n_fresh_tx = secoc_props.freshness_tx_bit_length
-    mask = 0xffffffffffffffff >> (64 - n_fresh_tx)
-    freshness_header_value = freshness_value&mask
-
-    # compute the authentificator value
-    auth_data = bitstruct.pack(f'u16' # data ID
-                               f'r{payload_len*8}' # payload to be secured
-                               f'u{n_fresh}', # freshness value
-                               secoc_props.data_id,
-                               raw_payload[:payload_len],
-                               freshness_value)
-
-    # compute authenticator and pack it into the result array
-    auth_value = authenticator_fn(dbmsg, auth_data, freshness_value)
+    mask = (1 << n_fresh_tx) - 1
+    truncated_freshness_value = freshness_value&mask
+    payload_len = secoc_props.payload_length
 
     bitstruct.pack_into(f'u{n_fresh_tx}r{secoc_props.auth_tx_bit_length}',
                         result,
                         payload_len*8,
-                        freshness_header_value,
+                        truncated_freshness_value,
                         auth_value)
 
     return result

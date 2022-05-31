@@ -102,24 +102,21 @@ def decode_data(data: bytes,
                 allow_truncated: bool,
                 ) -> SignalDictType:
 
-    unpacked = formats.big_endian.unpack(bytes(data), allow_truncated=allow_truncated)
+    actual_length = len(data)
+    if allow_truncated and actual_length < expected_length:
+        data = data.ljust(expected_length, b"\xFF")
 
-    if allow_truncated and len(data) < expected_length:
-        # to deal with truncated little-endian signals, we have to pad
-        # the raw data and remove the spurious signals after unpacking
-        # (i.e., before the signal values themselfs get decoded)
-        le_data = data[::-1].rjust(expected_length, b"\xFF")
-        le_unpacked = formats.little_endian.unpack(le_data)
+    unpacked = {
+        **formats.big_endian.unpack(bytes(data)),
+        **formats.little_endian.unpack(bytes(data[::-1])),
+    }
 
-        # remove spurious little endian signals
-        valid_bit_count = len(data) * 8
+    if allow_truncated and actual_length < expected_length:
+        # remove signal that are outside available data bytes
+        valid_bit_count = actual_length * 8
         for signal in fields:
             if signal.start + signal.length > valid_bit_count:
-                del le_unpacked[signal.name]
-
-        unpacked.update(le_unpacked)
-    else:
-        unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
+                del unpacked[signal.name]
 
     decoded = {}
     for field in fields:

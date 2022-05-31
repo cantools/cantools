@@ -104,21 +104,17 @@ def decode_data(data: bytes,
 
     unpacked = formats.big_endian.unpack(bytes(data), allow_truncated=allow_truncated)
 
-    if len(data) < expected_length and allow_truncated:
+    if allow_truncated and len(data) < expected_length:
         # to deal with truncated little-endian signals, we have to pad
         # the raw data and remove the spurious signals after unpacking
         # (i.e., before the signal values themselfs get decoded)
-        le_data = bytes(bytearray([0x00]*(expected_length - len(data)))
-                        + data[::-1])
-
+        le_data = data[::-1].rjust(expected_length, b"\xFF")
         le_unpacked = formats.little_endian.unpack(le_data)
 
         # remove spurious little endian signals
+        valid_bit_count = len(data) * 8
         for signal in fields:
-            if signal.byte_order != "little_endian":
-                continue
-
-            if signal.start + signal.length > len(data)*8:
+            if signal.start + signal.length > valid_bit_count:
                 del le_unpacked[signal.name]
 
         unpacked.update(le_unpacked)
@@ -127,27 +123,30 @@ def decode_data(data: bytes,
 
     decoded = {}
     for field in fields:
-        if field.name not in unpacked:
-            continue
+        try:
+            value = unpacked[field.name]
 
-        value = unpacked[field.name]
+            if decode_choices:
+                try:
+                    decoded[field.name] = field.choices[value]  # type: ignore[index]
+                    continue
+                except (KeyError, TypeError):
+                    pass
 
-        if decode_choices:
-            try:
-                decoded[field.name] = field.choices[value]  # type: ignore[index]
+            if scaling:
+                decoded[field.name] = field.scale * value + field.offset
                 continue
-            except (KeyError, TypeError):
-                pass
+            else:
+                decoded[field.name] = value
 
-        if scaling:
-            decoded[field.name] = field.scale * value + field.offset
-            continue
-        else:
-            decoded[field.name] = value
+        except KeyError:
+            if not allow_truncated:
+                raise
 
     return decoded
 
-def create_encode_decode_formats(datas, number_of_bytes):
+
+def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
     format_length = (8 * number_of_bytes)
 
     def get_format_string_type(data: Union["Data", "Signal"]) -> str:

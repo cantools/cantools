@@ -64,12 +64,14 @@ def _format_container_single_line(message, decoded_data):
     return f' {message.name}({", ".join(contained_list)})'
 
 
-def _format_container_multi_line(message, decoded_data):
+def _format_container_multi_line(message, unpacked_data, decoded_data):
     contained_list = list()
-    for cm, signals in decoded_data:
+    for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
             formatted_cm_signals = _format_signals(cm, signals)
-            formatted_cm = _format_message_multi_line(cm, formatted_cm_signals)
+            formatted_cm = f'{cm.header_id:06x}##'
+            formatted_cm += f'{unpacked_data[i][1].hex()} ::'
+            formatted_cm += _format_message_multi_line(cm, formatted_cm_signals)
             formatted_cm = formatted_cm.replace('\n', '\n    ')
             contained_list.append('    '+formatted_cm.strip())
         else:
@@ -106,23 +108,38 @@ def format_message_by_frame_id(dbase,
 
     return format_message(message, data, decode_choices, single_line)
 
-def format_container_message(message, data, decode_choices, single_line):
+def format_container_message(message,
+                             data,
+                             decode_choices,
+                             single_line,
+                             allow_truncated = False):
     try:
+        unpacked_message = message.unpack_container(data,
+                                                    allow_truncated=allow_truncated)
         decoded_message = message.decode(data,
                                          decode_choices,
-                                         decode_containers=True)
+                                         decode_containers=True,
+                                         allow_truncated=allow_truncated)
     except Exception as e:
         return ' ' + str(e)
 
     if single_line:
         return _format_container_single_line(message, decoded_message)
     else:
-        return _format_container_multi_line(message, decoded_message)
+        return _format_container_multi_line(message,
+                                            unpacked_message,
+                                            decoded_message)
 
 
-def format_message(message, data, decode_choices, single_line):
+def format_message(message,
+                   data,
+                   decode_choices,
+                   single_line,
+                   allow_truncated : bool = False):
     try:
-        decoded_signals = message.decode(data, decode_choices)
+        decoded_signals = message.decode(data,
+                                         decode_choices,
+                                         allow_truncated=allow_truncated)
     except Exception as e:
         return ' ' + str(e)
 
@@ -133,8 +150,13 @@ def format_message(message, data, decode_choices, single_line):
     else:
         return _format_message_multi_line(message, formatted_signals)
 
-def format_multiplexed_name(message, data, decode_choices):
-    decoded_signals = message.decode(data, decode_choices)
+def format_multiplexed_name(message,
+                            data,
+                            decode_choices,
+                            allow_truncated : bool = False):
+    decoded_signals = message.decode(data,
+                                     decode_choices,
+                                     allow_truncated=allow_truncated)
 
     # The idea here is that we rely on the sorted order of the Signals, and
     # then simply go through each possible Multiplexer and build a composite

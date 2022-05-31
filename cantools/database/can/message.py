@@ -965,7 +965,7 @@ class Message(object):
 
     def unpack_container(self,
                          data: bytes,
-                         allow_truncated: bool) \
+                         allow_truncated: bool = False) \
                          -> ContainerUnpackResultType:
         """Unwrap the contents of a container message.
 
@@ -1030,7 +1030,7 @@ class Message(object):
                           data: bytes,
                           decode_choices: bool,
                           scaling: bool,
-                          allow_truncated: bool = False) \
+                          allow_truncated: bool) \
                           -> ContainerDecodeResultType:
 
         unpacked = self.unpack_container(data, allow_truncated)

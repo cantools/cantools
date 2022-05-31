@@ -1,5 +1,6 @@
 # Load and dump a diagnostics database in CDD format.
 import logging
+from typing import Dict
 
 from xml.etree import ElementTree
 
@@ -197,15 +198,16 @@ def _load_did_element(did, data_types, did_data_lib):
                datas=datas)
 
 
-def _load_did_data_refs(ecu_doc: ElementTree.Element):
+def _load_did_data_refs(ecu_doc: ElementTree.Element) -> Dict[str, ElementTree.Element]:
     """Load DID data references from given ECU doc element.
 
     """
+    dids = ecu_doc.find('DIDS')
 
-    try:
-        return {k.attrib['id']: k for k in ecu_doc.find('DIDS').findall('DID')}
-    except AttributeError:
+    if dids is None:
         return {}
+    else:
+        return {did.attrib['id']: did for did in dids.findall('DID')}
 
 
 def load_string(string):

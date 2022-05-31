@@ -564,7 +564,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
             encoded2 = db.encode_message(example_message_frame_id, decoded)
             self.assertEqual(encoded2, encoded)
 
-
         # Make sure that the decoded message dictionary does not
         # contain any unknown entries
         decoded_message = datas[0][0]

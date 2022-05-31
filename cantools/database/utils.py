@@ -2,7 +2,6 @@
 
 import os.path
 import re
-from decimal import Decimal
 from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
 
 from typing_extensions import Literal, Final
@@ -60,16 +59,17 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
         value = data[field.name]
 
         if isinstance(value, (float, int)):
+            _transform = float if field.is_float else round
             if scaling:
-                if field.is_float:
-                    unpacked[field.name] = (value - field.offset) / field.scale
-                    continue
-                else:
-                    decimal = (Decimal(value) - Decimal(field.offset)) / Decimal(field.scale)
-                    unpacked[field.name] = int(decimal.to_integral_value())
+                if field.offset == 0 and field.scale == 1:
+                    # treat special case to avoid introduction of unnecessary rounding error
+                    unpacked[field.name] = _transform(value)  # type: ignore[operator]
                     continue
 
-            unpacked[field.name] = value
+                unpacked[field.name] = _transform((value - field.offset) / field.scale)  # type: ignore[operator]
+                continue
+
+            unpacked[field.name] = _transform(value)  # type: ignore[operator]
             continue
 
         unpacked[field.name] = field.choice_string_to_number(str(value))

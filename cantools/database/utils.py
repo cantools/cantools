@@ -94,19 +94,44 @@ def encode_data(data: SignalDictType,
 
 
 def decode_data(data: bytes,
+                expected_length: int,
                 fields: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
                 decode_choices: bool,
                 scaling: bool,
+                allow_truncated: bool,
                 ) -> SignalDictType:
-    unpacked = {
-        **formats.big_endian.unpack(bytes(data)),
-        **formats.little_endian.unpack(bytes(data[::-1])),
-    }
+
+    unpacked = formats.big_endian.unpack(bytes(data), allow_truncated=allow_truncated)
+
+    if len(data) < expected_length and allow_truncated:
+        # to deal with truncated little-endian signals, we have to pad
+        # the raw data and remove the spurious signals after unpacking
+        # (i.e., before the signal values themselfs get decoded)
+        le_data = bytes(bytearray([0x00]*(expected_length - len(data)))
+                        + data[::-1])
+
+        le_unpacked = formats.little_endian.unpack(le_data)
+
+        # remove spurious little endian signals
+        for signal in fields:
+            if signal.byte_order != "little_endian":
+                continue
+
+            if signal.start + signal.length > len(data)*8:
+                del le_unpacked[signal.name]
+
+        unpacked.update(le_unpacked)
+    else:
+        unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
 
     decoded = {}
     for field in fields:
+        if field.name not in unpacked:
+            continue
+
         value = unpacked[field.name]
+
         if decode_choices:
             try:
                 decoded[field.name] = field.choices[value]  # type: ignore[index]
@@ -122,8 +147,7 @@ def decode_data(data: bytes,
 
     return decoded
 
-
-def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
+def create_encode_decode_formats(datas, number_of_bytes):
     format_length = (8 * number_of_bytes)
 
     def get_format_string_type(data: Union["Data", "Signal"]) -> str:

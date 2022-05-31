@@ -435,7 +435,8 @@ class Database(object):
                        data: bytes,
                        decode_choices: bool = True,
                        scaling: bool = True,
-                       decode_containers: bool = False
+                       decode_containers: bool = False,
+                       allow_truncated:  bool = False
                        ) \
         -> DecodeResultType:
 
@@ -474,13 +475,17 @@ class Database(object):
                 return message.decode(data,
                                       decode_choices,
                                       scaling,
-                                      decode_containers=True)
+                                      decode_containers=True,
+                                      allow_truncated=allow_truncated)
             else:
                 raise DecodeError(f'Message "{message.name}" is a container '
                                   f'message, but decoding such messages has '
                                   f'not been enabled!')
 
-        return message.decode(data, decode_choices, scaling)
+        return message.decode(data,
+                              decode_choices,
+                              scaling,
+                              allow_truncated=allow_truncated)
 
     def refresh(self) -> None:
         """Refresh the internal database state.

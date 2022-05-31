@@ -930,12 +930,15 @@ class Message(object):
                 node: Codec,
                 data: bytes,
                 decode_choices: bool,
-                scaling: bool) -> SignalDictType:
+                scaling: bool,
+                allow_truncated: bool) -> SignalDictType:
         decoded = decode_data(data,
+                              self.length,
                               node['signals'],
                               node['formats'],
                               decode_choices,
-                              scaling)
+                              scaling,
+                              allow_truncated)
 
         multiplexers = node['multiplexers']
 
@@ -952,13 +955,15 @@ class Message(object):
             decoded.update(self._decode(node,
                                         data,
                                         decode_choices,
-                                        scaling))
+                                        scaling,
+                                        allow_truncated))
 
         return decoded
 
     def unpack_container(self,
-                          data: bytes) \
-                          -> ContainerUnpackResultType:
+                         data: bytes,
+                         allow_truncated: bool) \
+                         -> ContainerUnpackResultType:
         """Unwrap the contents of a container message.
 
         This returns a list of ``(contained_message, contained_data)``
@@ -996,11 +1001,14 @@ class Message(object):
             contained_id = int.from_bytes(data[pos:pos+3], 'big')
             contained_len = data[pos+3]
 
-            if pos + contained_len > len(data):
-                raise DecodeError(f'Malformed container message '
-                                  f'"{self.name}": Contained message #'
-                                  f'{len(result)+1} would exceed total message '
-                                  f'size.')
+            if pos + 4 + contained_len > len(data):
+                if not allow_truncated:
+                    raise DecodeError(f'Malformed container message '
+                                      f'"{self.name}": Contained message '
+                                      f'{len(result)+1} would exceed total '
+                                      f'message size.')
+                else:
+                    contained_len = len(data) - pos - 4
 
 
             contained_data = data[pos+4:pos+4+contained_len]
@@ -1018,10 +1026,11 @@ class Message(object):
     def _decode_contained(self,
                           data: bytes,
                           decode_choices: bool,
-                          scaling: bool) \
+                          scaling: bool,
+                          allow_truncated: bool = False) \
                           -> ContainerDecodeResultType:
 
-        unpacked = self.unpack_container(data)
+        unpacked = self.unpack_container(data, allow_truncated)
 
         result: ContainerDecodeResultListType = []
 
@@ -1032,7 +1041,8 @@ class Message(object):
 
             decoded = contained_message.decode(contained_data,
                                                decode_choices,
-                                               scaling)
+                                               scaling,
+                                               allow_truncated)
             result.append((contained_message, decoded)) # type: ignore
 
         return result
@@ -1041,7 +1051,8 @@ class Message(object):
                data: bytes,
                decode_choices: bool = True,
                scaling: bool = True,
-               decode_containers: bool = False
+               decode_containers: bool = False,
+               allow_truncated: bool = False
                ) \
                -> DecodeResultType:
         """Decode given data as a message of this type.
@@ -1063,13 +1074,23 @@ class Message(object):
         that does not expect this to misbehave. Trying to decode a
         container message with `decode_containers` set to ``False``
         will raise a `DecodeError`.
+
+        If `allow_truncated` is ``True``, incomplete messages (i.e.,
+        ones where the received data is shorter than specified) will
+        be partially decoded, i.e., all signals which are fully
+        present in the received data will be decoded, and the
+        remaining ones will be omitted. If 'allow_truncated` is set to
+        ``False``, `DecodeError` will be raised when trying to decode
+        incomplete messages.
+
         """
 
         if self.is_container:
             if decode_containers:
                 return self._decode_contained(data,
                                               decode_choices,
-                                              scaling)
+                                              scaling,
+                                              allow_truncated)
             else:
                 raise DecodeError(f'Message "{self.name}" is a container '
                                   f'message, but decoding such messages has '
@@ -1081,7 +1102,11 @@ class Message(object):
 
         data = data[:self._length]
 
-        return self._decode(self._codecs, data, decode_choices, scaling)
+        return self._decode(self._codecs,
+                            data,
+                            decode_choices,
+                            scaling,
+                            allow_truncated)
 
     def get_contained_message_by_header_id(self, header_id: int) \
         -> Optional['Message']:

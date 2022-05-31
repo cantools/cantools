@@ -623,6 +623,57 @@ class CanToolsDatabaseTest(unittest.TestCase):
             db.encode_message("Message2",
                               decoded_message)
 
+    def test_motohawk_decode_truncated(self):
+        """Decoding truncated frames.
+
+        """
+
+        db = cantools.db.Database()
+        db.add_dbc_file('tests/files/dbc/motohawk.dbc')
+
+        msgname = 'ExampleMessage'
+        with self.assertRaises(Exception):
+            db.decode_message(msgname, b'\x00\xff')
+
+        decoded = db.decode_message(msgname, b'\x00\x11', allow_truncated=True)
+        self.assertEqual(decoded, {'AverageRadius': 0.0, 'Enable': 'Disabled'})
+
+        msg = db.get_message_by_name(msgname)
+        with self.assertRaises(Exception):
+            msg.decode(b'\x00\xff')
+
+        decoded = msg.decode(b'\x00\xff', allow_truncated=True)
+        self.assertEqual(decoded, {'AverageRadius': 0.0, 'Enable': 'Disabled'})
+
+    def test_decode_truncated_multiplexed(self):
+        db = cantools.database.load_file('tests/files/dbc/multiplex.dbc')
+        msg = db.get_message_by_name('Message1')
+
+        encoded = bytes.fromhex('60008c35c3000000')
+        decoded_full = msg.decode(encoded)
+
+        # the last byte of the message does not encode any signals,
+        # but the specified frame length must still be observed!
+        with self.assertRaises(Exception):
+            msg.decode(encoded[:-1])
+
+        # partial message without omitted signals
+        self.assertEqual(msg.decode(encoded[:-1], allow_truncated=True),
+                         decoded_full)
+
+        # partial message with omitted signals
+        self.assertEqual(msg.decode(encoded[:-4], allow_truncated=True),
+                         {
+                             'Multiplexor': 24,
+                             'BIT_J': 1,
+                             'BIT_C': 1,
+                             'BIT_G': 1,
+                             'BIT_L': 1,
+                             'BIT_A': 1,
+                             'BIT_K': 1,
+                             'BIT_E': 1
+                         })
+
     def test_big_endian_no_decode_choices(self):
         """Decode a big endian signal with `decode_choices` set to False.
 
@@ -5759,12 +5810,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         encoded_message2 = db.encode_message('Message1', decoded_message2)
 
         self.assertEqual(encoded_message2, encoded_message)
-
-    def test_encode_decode_dlc_zero(self):
-        db = cantools.database.load_file('tests/files/dbc/message-dlc-zero.dbc')
-
-        self.assertEqual(db.encode_message('Message1', {}), b'')
-        self.assertEqual(db.decode_message('Message1', b''), {})
 
     def test_issue_138(self):
         """Test issue 138.

@@ -1,5 +1,6 @@
 # Load and dump a diagnostics database in CDD format.
 import logging
+from typing import Dict
 
 from xml.etree import ElementTree
 
@@ -161,7 +162,7 @@ def _load_data_element(data, offset, data_types):
                 choices=data_type.choices)
 
 
-def _load_did_element(did, data_types):
+def _load_did_element(did, data_types, did_data_lib):
     """Load given DID element and return a did object.
 
     """
@@ -170,6 +171,13 @@ def _load_did_element(did, data_types):
     datas = []
     data_objs = did.findall('SIMPLECOMPCONT/DATAOBJ')
     data_objs += did.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
+    did_data_refs = did.findall('SIMPLECOMPCONT/DIDDATAREF')
+
+    for data_ref in did_data_refs:
+        try:
+            data_objs += did_data_lib[data_ref.attrib['didRef']].findall('STRUCTURE/DATAOBJ')
+        except KeyError:
+            pass
 
     for data_obj in data_objs:
         data = _load_data_element(data_obj,
@@ -190,6 +198,18 @@ def _load_did_element(did, data_types):
                datas=datas)
 
 
+def _load_did_data_refs(ecu_doc: ElementTree.Element) -> Dict[str, ElementTree.Element]:
+    """Load DID data references from given ECU doc element.
+
+    """
+    dids = ecu_doc.find('DIDS')
+
+    if dids is None:
+        return {}
+    else:
+        return {did.attrib['id']: did for did in dids.findall('DID')}
+
+
 def load_string(string):
     """Parse given CDD format string.
 
@@ -198,13 +218,15 @@ def load_string(string):
     root = ElementTree.fromstring(string)
     ecu_doc = root.find('ECUDOC')
     data_types = _load_data_types(ecu_doc)
+    did_data_lib = _load_did_data_refs(ecu_doc)
     var = ecu_doc.findall('ECU')[0].find('VAR')
     dids = []
 
     for diag_class in var.findall('DIAGCLASS'):
         for diag_inst in diag_class.findall('DIAGINST'):
             did = _load_did_element(diag_inst,
-                                    data_types)
+                                    data_types,
+                                    did_data_lib)
             dids.append(did)
 
     return InternalDatabase(dids)

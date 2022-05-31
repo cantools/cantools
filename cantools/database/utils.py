@@ -112,17 +112,17 @@ def decode_data(data: bytes,
     }
 
     if allow_truncated and actual_length < expected_length:
-        # remove signal that are outside available data bytes
+        # remove fields that are outside available data bytes
         valid_bit_count = actual_length * 8
-        for signal in fields:
-            if signal.byte_order == "little_endian":
-                sequential_startbit = signal.start
+        for field in fields:
+            if field.byte_order == "little_endian":
+                sequential_startbit = field.start
             else:
                 # calculate startbit with inverted indices
-                sequential_startbit = 7 - signal.start % 8 + (signal.start // 8) * 8
+                sequential_startbit = 7 - field.start % 8 + (field.start // 8) * 8
 
-            if sequential_startbit + signal.length > valid_bit_count:
-                del unpacked[signal.name]
+            if sequential_startbit + field.length > valid_bit_count:
+                del unpacked[field.name]
 
     decoded = {}
     for field in fields:

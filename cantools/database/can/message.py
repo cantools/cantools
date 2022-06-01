@@ -943,6 +943,9 @@ class Message(object):
         multiplexers = node['multiplexers']
 
         for signal in multiplexers:
+            if allow_truncated and signal not in decoded:
+                continue
+
             mux = self._get_mux_number(decoded, signal)
 
             try:
@@ -962,7 +965,7 @@ class Message(object):
 
     def unpack_container(self,
                          data: bytes,
-                         allow_truncated: bool) \
+                         allow_truncated: bool = False) \
                          -> ContainerUnpackResultType:
         """Unwrap the contents of a container message.
 
@@ -1023,30 +1026,6 @@ class Message(object):
 
         return result
 
-    def _decode_contained(self,
-                          data: bytes,
-                          decode_choices: bool,
-                          scaling: bool,
-                          allow_truncated: bool = False) \
-                          -> ContainerDecodeResultType:
-
-        unpacked = self.unpack_container(data, allow_truncated)
-
-        result: ContainerDecodeResultListType = []
-
-        for contained_message, contained_data in unpacked:
-            if not isinstance(contained_message, Message):
-                result.append((contained_message, contained_data))
-                continue
-
-            decoded = contained_message.decode(contained_data,
-                                               decode_choices,
-                                               scaling,
-                                               allow_truncated)
-            result.append((contained_message, decoded)) # type: ignore
-
-        return result
-
     def decode(self,
                data: bytes,
                decode_choices: bool = True,
@@ -1085,19 +1064,33 @@ class Message(object):
 
         """
 
-        if self.is_container:
-            if decode_containers:
-                return self._decode_contained(data,
-                                              decode_choices,
-                                              scaling,
-                                              allow_truncated)
-            else:
-                raise DecodeError(f'Message "{self.name}" is a container '
-                                  f'message, but decoding such messages has '
-                                  f'not been enabled by setting the '
-                                  f'decode_containers parameter to True')
+        if decode_containers and self.is_container:
+            return self.decode_container(data,
+                                         decode_choices,
+                                         scaling,
+                                         allow_truncated)
 
-        if self._codecs is None:
+        return self.decode_simple(data,
+                                  decode_choices,
+                                  scaling,
+                                  allow_truncated)
+
+    def decode_simple(self,
+                      data: bytes,
+                      decode_choices: bool = True,
+                      scaling: bool = True,
+                      allow_truncated: bool = False) \
+                      -> SignalDictType:
+        """Decode given data as a container message.
+
+        This method is identical to ``decode()`` except that the
+        message **must not** be a container. If the message is a
+        container, an exception is raised.
+        """
+
+        if self.is_container:
+            raise DecodeError(f'Message "{self.name}" is a container')
+        elif self._codecs is None:
             raise ValueError('Codec is not initialized.')
 
         data = data[:self._length]
@@ -1107,6 +1100,39 @@ class Message(object):
                             decode_choices,
                             scaling,
                             allow_truncated)
+
+    def decode_container(self,
+                         data: bytes,
+                         decode_choices: bool = True,
+                         scaling: bool = True,
+                         allow_truncated: bool = False) \
+                         -> ContainerDecodeResultType:
+        """Decode given data as a container message.
+
+        This method is identical to ``decode()`` except that the
+        message **must** be a container. If the message is not a
+        container, an exception is raised.
+        """
+
+        if not self.is_container:
+            raise DecodeError(f'Message "{self.name}" is not a container')
+
+        unpacked = self.unpack_container(data, allow_truncated)
+
+        result: ContainerDecodeResultListType = []
+
+        for contained_message, contained_data in unpacked:
+            if not isinstance(contained_message, Message):
+                result.append((contained_message, contained_data))
+                continue
+
+            decoded = contained_message.decode(contained_data,
+                                               decode_choices,
+                                               scaling,
+                                               allow_truncated)
+            result.append((contained_message, decoded)) # type: ignore
+
+        return result
 
     def get_contained_message_by_header_id(self, header_id: int) \
         -> Optional['Message']:

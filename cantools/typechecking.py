@@ -8,11 +8,11 @@ from typing import (
     Any,
     Sequence,
     Tuple,
+    Callable,
 )
 
 from typing_extensions import TypedDict, Literal, OrderedDict
 from bitstruct import CompiledFormatDict
-
 
 if TYPE_CHECKING:
     import os
@@ -60,3 +60,5 @@ ContainerEncodeInputType = Sequence[
 ]
 DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalDictType, ContainerEncodeInputType]
+
+SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]

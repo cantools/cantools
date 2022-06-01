@@ -673,6 +673,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'BIT_E': 1
                          })
 
+        # partial message with omitted multiplexor signal
+        self.assertEqual(msg.decode(b'', allow_truncated=True), {})
+
     def test_big_endian_no_decode_choices(self):
         """Decode a big endian signal with `decode_choices` set to False.
 

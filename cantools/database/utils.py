@@ -118,8 +118,10 @@ def decode_data(data: bytes,
             if field.byte_order == "little_endian":
                 sequential_startbit = field.start
             else:
-                # calculate startbit with inverted indices
-                sequential_startbit = 7 - field.start % 8 + (field.start // 8) * 8
+                # Calculate startbit with inverted indices.
+                # Function body of ``sawtooth_to_network_bitnum()``
+                # is inlined for improved performance.
+                sequential_startbit = (8 * (field.start // 8)) + (7 - (field.start % 8))
 
             if sequential_startbit + field.length > valid_bit_count:
                 del unpacked[field.name]

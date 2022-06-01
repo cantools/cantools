@@ -135,11 +135,10 @@ def format_container_message(message : Message,
     try:
         unpacked_message = message.unpack_container(data,
                                                     allow_truncated=allow_truncated)
-        decoded_message : ContainerDecodeResultType \
-            = message.decode(data,
-                             decode_choices,
-                             decode_containers=True,
-                             allow_truncated=allow_truncated) # type: ignore
+        decoded_message = message.decode_container(data,
+                                                   decode_choices=True,
+                                                   scaling=True,
+                                                   allow_truncated=allow_truncated)
 
     except Exception as e:
         return ' ' + str(e)
@@ -160,9 +159,9 @@ def format_message(message : Message,
                    single_line : bool,
                    allow_truncated : bool = False) -> str:
     try:
-        decoded_signals = message.decode(data,
-                                         decode_choices,
-                                         allow_truncated=allow_truncated)
+        decoded_signals = message.decode_simple(data,
+                                                decode_choices,
+                                                allow_truncated=allow_truncated)
     except Exception as e:
         return ' ' + str(e)
 

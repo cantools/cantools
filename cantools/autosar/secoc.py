@@ -61,6 +61,13 @@ def apply_authenticator(raw_payload: Union[bytes, bytearray],
     message.
     """
 
+    if dbmsg.autosar is None:
+        raise RuntimeError(f'Message "{dbmsg.name}" does not have '
+                           f'AUTOSAR specific properties.')
+    elif dbmsg.autosar.secoc is None:
+        raise RuntimeError(f'Message "{dbmsg.name}" does not have any'
+                           f'SecOC properties (message is not secured).')
+
     result = bytearray(raw_payload)
 
     # compute authenticator value

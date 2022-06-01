@@ -5,7 +5,14 @@
 from cantools.database.can.message import Message
 from cantools.errors import Error
 
-from typing import Union, List, Optional, Callable
+from typing import (
+    Union,
+    List,
+    Optional,
+ )
+from cantools.typechecking import (
+    SecOCAuthenticatorFn,
+)
 
 import bitstruct
 
@@ -15,12 +22,9 @@ class SecOCError(Error):
     """
     pass
 
-def compute_authenticator(raw_payload: Union[bytes, bytearray],
+def compute_authenticator(raw_payload: bytes,
                           dbmsg: Message,
-                          authenticator_fn: Callable[[Message,
-                                                      bytearray,
-                                                      int],
-                                                     bytearray],
+                          authenticator_fn: SecOCAuthenticatorFn,
                           freshness_value: int) \
                           -> bytearray:
     """Given a byte-like object that contains the encoded signals to be
@@ -45,12 +49,9 @@ def compute_authenticator(raw_payload: Union[bytes, bytearray],
     # compute authenticator value
     return authenticator_fn(dbmsg, auth_data, freshness_value)
 
-def apply_authenticator(raw_payload: Union[bytes, bytearray],
+def apply_authenticator(raw_payload: bytes,
                         dbmsg: Message,
-                        authenticator_fn: Callable[[Message,
-                                                    bytearray,
-                                                    int],
-                                                   bytearray],
+                        authenticator_fn: SecOCAuthenticatorFn,
                         freshness_value: int) \
                         -> bytearray:
     """Given a byte-like object that contains the encoded signals to be
@@ -91,12 +92,9 @@ def apply_authenticator(raw_payload: Union[bytes, bytearray],
 
     return result
 
-def verify_authenticator(raw_payload: Union[bytes, bytearray],
+def verify_authenticator(raw_payload: bytes,
                          dbmsg: Message,
-                         authenticator_fn: Callable[[Message,
-                                                     bytearray,
-                                                     int],
-                                                    bytearray],
+                         authenticator_fn: SecOCAuthenticatorFn,
                          freshness_value: int) \
                     -> bool:
     """Verify that a message that is secured via SecOC is valid."""

@@ -1064,7 +1064,7 @@ class Message(object):
 
         """
 
-        if self.is_container and decode_containers:
+        if decode_containers and self.is_container:
             return self.decode_container(data,
                                          decode_choices,
                                          scaling,

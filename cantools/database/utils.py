@@ -102,52 +102,56 @@ def decode_data(data: bytes,
                 allow_truncated: bool,
                 ) -> SignalDictType:
 
-    unpacked = formats.big_endian.unpack(bytes(data), allow_truncated=allow_truncated)
+    actual_length = len(data)
+    if allow_truncated and actual_length < expected_length:
+        data = data.ljust(expected_length, b"\xFF")
 
-    if len(data) < expected_length and allow_truncated:
-        # to deal with truncated little-endian signals, we have to pad
-        # the raw data and remove the spurious signals after unpacking
-        # (i.e., before the signal values themselfs get decoded)
-        le_data = bytes(bytearray([0x00]*(expected_length - len(data)))
-                        + data[::-1])
+    unpacked = {
+        **formats.big_endian.unpack(bytes(data)),
+        **formats.little_endian.unpack(bytes(data[::-1])),
+    }
 
-        le_unpacked = formats.little_endian.unpack(le_data)
+    if allow_truncated and actual_length < expected_length:
+        # remove fields that are outside available data bytes
+        valid_bit_count = actual_length * 8
+        for field in fields:
+            if field.byte_order == "little_endian":
+                sequential_startbit = field.start
+            else:
+                # Calculate startbit with inverted indices.
+                # Function body of ``sawtooth_to_network_bitnum()``
+                # is inlined for improved performance.
+                sequential_startbit = (8 * (field.start // 8)) + (7 - (field.start % 8))
 
-        # remove spurious little endian signals
-        for signal in fields:
-            if signal.byte_order != "little_endian":
-                continue
-
-            if signal.start + signal.length > len(data)*8:
-                del le_unpacked[signal.name]
-
-        unpacked.update(le_unpacked)
-    else:
-        unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
+            if sequential_startbit + field.length > valid_bit_count:
+                del unpacked[field.name]
 
     decoded = {}
     for field in fields:
-        if field.name not in unpacked:
-            continue
+        try:
+            value = unpacked[field.name]
 
-        value = unpacked[field.name]
+            if decode_choices:
+                try:
+                    decoded[field.name] = field.choices[value]  # type: ignore[index]
+                    continue
+                except (KeyError, TypeError):
+                    pass
 
-        if decode_choices:
-            try:
-                decoded[field.name] = field.choices[value]  # type: ignore[index]
+            if scaling:
+                decoded[field.name] = field.scale * value + field.offset
                 continue
-            except (KeyError, TypeError):
-                pass
+            else:
+                decoded[field.name] = value
 
-        if scaling:
-            decoded[field.name] = field.scale * value + field.offset
-            continue
-        else:
-            decoded[field.name] = value
+        except KeyError:
+            if not allow_truncated:
+                raise
 
     return decoded
 
-def create_encode_decode_formats(datas, number_of_bytes):
+
+def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
     format_length = (8 * number_of_bytes)
 
     def get_format_string_type(data: Union["Data", "Signal"]) -> str:

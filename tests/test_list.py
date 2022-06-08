@@ -163,7 +163,7 @@ Passenger:
             expected_output = """\
 DJ:
 Dancer:
-  Comment[FOR-ALL]: Rythm is a Dancer!
+  Comment[FOR-ALL]: Rhythm is a Dancer!
 Guard:
 """
 

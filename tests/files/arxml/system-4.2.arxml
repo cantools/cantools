@@ -23,7 +23,7 @@
         <ECU-INSTANCE UUID="b22f03b772a649e9bac58cab613d49ab">
           <SHORT-NAME>Dancer</SHORT-NAME>
           <DESC>
-            <L-2 L="FOR-ALL">Rythm is a Dancer!</L-2>
+            <L-2 L="FOR-ALL">Rhythm is a Dancer!</L-2>
           </DESC>
           <ASSOCIATED-COM-I-PDU-GROUP-REFS>
             <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/RX/Dancer</ASSOCIATED-COM-I-PDU-GROUP-REF>

@@ -6127,7 +6127,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.buses[0].comment, 'SpecialRelease')
         self.assert_dbc_dump(db, filename)
 
-
+    def test_relation_attributes(self):
+        filename = 'tests/files/dbc/attributes_relation.dbc'
+        db = cantools.database.load_file(filename)
+        for key, frame in db.dbc.attributes_rel.items():
+            signal = frame.get("signal")
+            if "signal_1" in signal.keys():
+                rel_attributes = signal["signal_1"]["node"]["ECU2"]
+                timeout_attr = rel_attributes["SigTimeoutTime"]
+                self.assertEqual(timeout_attr.value, 6000)
+                break
+        self.assert_dbc_dump(db, filename)
 
     def test_cache_prune_choices(self):
         filename = 'tests/files/dbc/socialledge.dbc'

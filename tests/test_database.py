@@ -614,7 +614,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'BIT_G': 0,
             'BIT_L': 0,
 
-            # BIT_A is only featued by MULTIPLEXOR_24
+            # BIT_A is only featured by MULTIPLEXOR_24
             'BIT_A': 0,
         }
 
@@ -1056,7 +1056,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(decoded, decoded2)
         self.assertEqual(decoded, decoded3)
 
-        # make sure that we won't let ourselfs disturb by trailing
+        # make sure that we won't let ourselves disturb by trailing
         # garbage
         encoded += b'\x00\x00\x00\x00'
         decoded2 = db.decode_message(db_msg.frame_id,
@@ -4817,8 +4817,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         node2 = db.nodes[1]
         self.assertEqual(node2.name, 'Dancer')
-        self.assertEqual(node2.comments, {'FOR-ALL': 'Rythm is a Dancer!'})
-        self.assertEqual(node2.comment, 'Rythm is a Dancer!')
+        self.assertEqual(node2.comments, {'FOR-ALL': 'Rhythm is a Dancer!'})
+        self.assertEqual(node2.comment, 'Rhythm is a Dancer!')
 
         node3 = db.nodes[2]
         self.assertEqual(node3.name, 'Guard')

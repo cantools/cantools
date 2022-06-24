@@ -1103,7 +1103,7 @@ class SystemLoader(object):
 
         # add "pseudo signals" for the truncated freshness value and
         # the truncated authenticator
-        if fresh_tx_len is not None:
+        if fresh_tx_len is not None and fresh_tx_len > 0:
             signals.append(Signal(name=f'{message_name}_Freshness',
                                   start=payload_length*8 + 7,
                                   length=fresh_tx_len,
@@ -1112,7 +1112,7 @@ class SystemLoader(object):
                                   {'FOR-ALL':
                                    f'Truncated freshness value for '
                                    f"'{message_name}'"}))
-        if auth_tx_len is not None:
+        if auth_tx_len is not None and auth_tx_len > 0:
             n0 = payload_length*8 + (fresh_tx_len//8)*8 + (7-fresh_tx_len%8)
             signals.append(Signal(name=f'{message_name}_Authenticator',
                                   start=n0,

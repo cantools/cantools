@@ -32,6 +32,9 @@
 
 #include "my_database_name.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -129,6 +132,80 @@ int my_database_name_example_message_unpack(
     return (0);
 }
 
+static int my_database_name_example_message_check_ranges(struct my_database_name_example_message_t *msg)
+{
+    int idx = 1;
+
+    if (!my_database_name_example_message_enable_is_in_range(msg->enable))
+        return idx;
+
+    idx++;
+
+    if (!my_database_name_example_message_average_radius_is_in_range(msg->average_radius))
+        return idx;
+
+    idx++;
+
+    if (!my_database_name_example_message_temperature_is_in_range(msg->temperature))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int my_database_name_example_message_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double enable,
+    double average_radius,
+    double temperature)
+{
+    struct my_database_name_example_message_t msg;
+
+    msg.enable = my_database_name_example_message_enable_encode(enable);
+    msg.average_radius = my_database_name_example_message_average_radius_encode(average_radius);
+    msg.temperature = my_database_name_example_message_temperature_encode(temperature);
+
+    int ret = my_database_name_example_message_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = my_database_name_example_message_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int my_database_name_example_message_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *enable,
+    double *average_radius,
+    double *temperature)
+{
+    struct my_database_name_example_message_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (my_database_name_example_message_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = my_database_name_example_message_check_ranges(&msg);
+
+    if (enable)
+        *enable = my_database_name_example_message_enable_decode(msg.enable);
+
+    if (average_radius)
+        *average_radius = my_database_name_example_message_average_radius_decode(msg.average_radius);
+
+    if (temperature)
+        *temperature = my_database_name_example_message_temperature_decode(msg.temperature);
+
+    return ret;
+}
+
 uint8_t my_database_name_example_message_enable_encode(double value)
 {
     return (uint8_t)(value);
@@ -137,6 +214,14 @@ uint8_t my_database_name_example_message_enable_encode(double value)
 double my_database_name_example_message_enable_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double my_database_name_example_message_enable_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool my_database_name_example_message_enable_is_in_range(uint8_t value)
@@ -154,6 +239,14 @@ double my_database_name_example_message_average_radius_decode(uint8_t value)
     return ((double)value * 0.1);
 }
 
+double my_database_name_example_message_average_radius_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 0.0);
+    ret = CTOOLS_MIN(ret, 5.0);
+    return ret;
+}
+
 bool my_database_name_example_message_average_radius_is_in_range(uint8_t value)
 {
     return (value <= 50u);
@@ -169,7 +262,18 @@ double my_database_name_example_message_temperature_decode(int16_t value)
     return (((double)value * 0.01) + 250.0);
 }
 
+double my_database_name_example_message_temperature_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 229.52);
+    ret = CTOOLS_MIN(ret, 270.47);
+    return ret;
+}
+
 bool my_database_name_example_message_temperature_is_in_range(int16_t value)
 {
     return ((value >= -2048) && (value <= 2047));
 }
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

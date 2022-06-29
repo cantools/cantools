@@ -126,6 +126,13 @@ int8_t choices_foo_foo_encode(double value);
 double choices_foo_foo_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double choices_foo_foo_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -133,6 +140,35 @@ double choices_foo_foo_decode(int8_t value);
  * @return true if in range, false otherwise.
  */
 bool choices_foo_foo_is_in_range(int8_t value);
+
+/**
+ * Create message Foo if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int choices_foo_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double foo);
+
+/**
+ * unpack message Foo and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int choices_foo_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *foo);
 
 
 #ifdef __cplusplus

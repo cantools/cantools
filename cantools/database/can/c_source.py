@@ -111,8 +111,14 @@ SOURCE_FMT = '''\
 
 #include "{header}"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 {helpers}\
 {definitions}\
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN
 '''
 
 FUZZER_SOURCE_FMT = '''\
@@ -365,6 +371,37 @@ int {database_name}_{message_name}_unpack(
     size_t size);
 '''
 
+MESSAGE_WRAP_PACK_DECLARATION_FMT = '''\
+/**
+ * Create message {database_message_name} if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int {database_name}_{message_name}_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz{message_params_decl});
+'''
+
+MESSAGE_WRAP_UNPACK_DECLARATION_FMT = '''\
+/**
+ * unpack message {database_message_name} and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int {database_name}_{message_name}_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz{message_params_ptrs});
+'''
+
 SIGNAL_DECLARATION_ENCODE_DECODE_FMT = '''\
 /**
  * Encode given signal by applying scaling and offset.
@@ -395,6 +432,16 @@ SIGNAL_DECLARATION_IS_IN_RANGE_FMT = '''\
  * @return true if in range, false otherwise.
  */
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
+'''
+
+SIGNAL_DECLARATION_CLAMP_FMT = '''\
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double {database_name}_{message_name}_{signal_name}_clamp(double val);
+
 '''
 
 PACK_HELPER_LEFT_SHIFT_FMT = '''\
@@ -469,6 +516,55 @@ int {database_name}_{message_name}_unpack(
 }}
 '''
 
+# range check is too eager for multiplexed signals (always checks everything)
+DEFINITION_WRAP_PACK_FMT = '''\
+static int {database_name}_{message_name}_check_ranges(struct {database_name}_{message_name}_t *msg)
+{{
+    int idx = 1;
+{range_checks}
+    return 0;
+}}
+
+int {database_name}_{message_name}_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz{message_params_decl})
+{{
+    struct {database_name}_{message_name}_t msg;
+
+{params_encode}
+    int ret = {database_name}_{message_name}_check_ranges(&msg);
+    if (ret) {{
+        return ret;
+    }}
+
+    ret = {database_name}_{message_name}_pack(outbuf, &msg, outbuf_sz);
+    if ({message_length} != ret) {{
+        return -1;
+    }}
+
+    return 0;
+}}
+'''
+
+# the memset() is there because _check_ranges() is too eager
+# for multiplexed signals (checks everything, even parts that
+# might not have been initialised).
+DEFINITION_WRAP_UNPACK_FMT = '''\
+int {database_name}_{message_name}_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz{message_params_ptrs})
+{{
+    struct {database_name}_{message_name}_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if ({database_name}_{message_name}_unpack(&msg, inbuf, inbuf_sz)) {{
+        return -1;
+    }}
+
+    int ret = {database_name}_{message_name}_check_ranges(&msg);
+{signals_return}
+    return ret;
+}}
+'''
+
 SIGNAL_DEFINITION_ENCODE_DECODE_FMT = '''\
 {type_name} {database_name}_{message_name}_{signal_name}_encode({floating_point_type} value)
 {{
@@ -478,6 +574,17 @@ SIGNAL_DEFINITION_ENCODE_DECODE_FMT = '''\
 {floating_point_type} {database_name}_{message_name}_{signal_name}_decode({type_name} value)
 {{
     return ({decode});
+}}
+
+'''
+
+SIGNAL_DEFINITION_CLAMP_FMT = '''\
+double {database_name}_{message_name}_{signal_name}_clamp(double val)
+{{
+    double ret = val;
+{clamp_min}
+{clamp_max}
+    return ret;
 }}
 
 '''
@@ -1362,6 +1469,11 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                     type_name=signal.type_name,
                     floating_point_type=_get_floating_point_type(use_float))
 
+                signal_declaration += SIGNAL_DECLARATION_CLAMP_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name)
+
             signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
                 message_name=message.snake_name,
@@ -1374,8 +1486,32 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                                              database_message_name=message.name,
                                              message_name=message.snake_name)
 
-        if signal_declarations:
+        if len(signal_declarations) > 0:
             declaration += '\n' + '\n'.join(signal_declarations)
+            sep = ",\n    "
+
+            message_params_ptrs = sep + sep.join(\
+                ["double *{}".format(sig.snake_name)\
+                for sig in message.signals])
+
+            message_params_decl = sep + sep.join(\
+                ["double {}".format(sig.snake_name)\
+                for sig in message.signals])
+        else:
+            message_params_ptrs = ""
+            message_params_decl = ""
+
+        declaration += '\n' + MESSAGE_WRAP_PACK_DECLARATION_FMT.format(
+            database_name=database_name,
+            message_name=message.snake_name,
+            database_message_name=message.name,
+            message_params_decl=message_params_decl)
+
+        declaration += '\n' + MESSAGE_WRAP_UNPACK_DECLARATION_FMT.format(
+            database_name=database_name,
+            message_name=message.snake_name,
+            database_message_name=message.name,
+            message_params_ptrs=message_params_ptrs)
 
         declarations.append(declaration)
 
@@ -1409,6 +1545,36 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                     encode=encode,
                     decode=decode,
                     floating_point_type=_get_floating_point_type(use_float))
+
+                # 'signal.is_float' means something else!
+                if signal.minimum is not None:
+                    if ('e' in str(signal.minimum)) or ('.' in str(signal.minimum)):
+                        suff = ""
+                    else:
+                        suff = ".0"
+
+                    clamp_min = "    ret = CTOOLS_MAX(ret, {}{});" \
+                        .format(signal.minimum, suff)
+                else:
+                    clamp_min = ""
+
+                if signal.maximum is not None:
+                    if ('e' in str(signal.maximum)) or ('.' in str(signal.maximum)):
+                        suff = ""
+                    else:
+                        suff = ".0"
+
+                    clamp_max = "    ret = CTOOLS_MIN(ret, {}{});" \
+                        .format(signal.maximum, suff)
+                else:
+                    clamp_max = ""
+
+                signal_definition += SIGNAL_DEFINITION_CLAMP_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name,
+                    clamp_max=clamp_max,
+                    clamp_min=clamp_min)
 
             signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
                 database_name=database_name,
@@ -1445,6 +1611,49 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                                                pack_body=pack_body,
                                                unpack_variables=unpack_variables,
                                                unpack_body=unpack_body)
+
+            message_params_decl = ""
+            message_params_ptrs = ""
+            params_encode = ""
+            range_checks = ""
+            signals_return = ""
+
+            sep = ',\n    '
+            for sig in message.signals:
+                message_params_decl += sep + "double {}".format(sig.snake_name)
+                message_params_ptrs += sep + "double *{}".format(sig.snake_name)
+
+                params_encode += "    msg.{sig} = {db}_{msg}_{sig}_encode({sig});\n".format(
+                    db=database_name, msg=message.snake_name, sig=sig.snake_name)
+
+                range_checks += "\n    if (!{db}_{msg}_{sig}_is_in_range(msg->{sig}))\n".format(
+                    db=database_name, msg=message.snake_name, sig=sig.snake_name)
+
+                range_checks += "        return idx;\n\n"
+                range_checks += "    idx++;\n"
+
+                signals_return += "\n    if ({sig})\n".format(sig=sig.snake_name)
+                signals_return += "        *{sig} = {db}_{msg}_{sig}_decode(msg.{sig});\n" \
+                    .format(db=database_name, msg=message.snake_name, sig=sig.snake_name)
+
+            if len(message.signals) <= 0:
+                range_checks = "    (void)msg;\n"
+                range_checks += "    (void)idx;\n"
+
+            definition += '\n' + DEFINITION_WRAP_PACK_FMT.format(
+                database_name = database_name,
+                message_name = message.snake_name,
+                message_params_decl = message_params_decl,
+                range_checks = range_checks,
+                params_encode = params_encode,
+                message_length = message.length)
+
+            definition += '\n' + DEFINITION_WRAP_UNPACK_FMT.format(
+                database_name = database_name,
+                message_name = message.snake_name,
+                message_params_ptrs = message_params_ptrs,
+                signals_return = signals_return)
+
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                      message_name=message.snake_name)

@@ -57,3 +57,10 @@ Sig=Signal2 6
 Len=8
 Mux=Multiplexer3 0,3 2
 Sig=Signal3 9
+
+{SENDRECEIVE}
+
+[Message3]
+ID=00Ah
+Len=8
+Sig=Signal3 0

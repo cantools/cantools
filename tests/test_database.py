@@ -1725,7 +1725,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         if test_sym_string:
             db = cantools.db.load_string(db.as_sym_string())
 
-        self.assertEqual(len(db.messages), 6)
+        self.assertEqual(len(db.messages), 7)
         self.assertEqual(len(db.messages[0].signals), 0)
 
         # Message1.
@@ -1884,6 +1884,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.length, 11)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, [2])
+        
+        # Message3.
+        message_3 = db.messages[6]
+        self.assertEqual(message_3.frame_id, 0xA)
+        self.assertEqual(message_3.length, 8)
+        signal_3 = message_3.signals[0]
+        self.assertEqual(signal_3.name, 'Signal3')
+        self.assertEqual(signal_3.start, 7)
+        self.assertEqual(signal_3.length, 11)
+        self.assertEqual(signal_3.is_multiplexer, False)
+        self.assertEqual(signal_3.multiplexer_ids, None)
 
         # Encode and decode.
         frame_id = 0x009

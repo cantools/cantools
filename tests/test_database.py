@@ -1827,7 +1827,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.spn, None)
 
         # Symbol2.
-        signal_4 = db.messages[4].signals[0]
+        signal_4 = db.messages[5].signals[0]
         self.assertEqual(signal_4.name, 'Signal4')
         self.assertEqual(signal_4.start, 0)
         self.assertEqual(signal_4.length, 64)
@@ -1851,7 +1851,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.spn, None)
 
         # Symbol3.
-        symbol_3 = db.messages[5]
+        symbol_3 = db.messages[6]
         self.assertEqual(symbol_3.frame_id, 0x33)
         self.assertEqual(symbol_3.length, 8)
         self.assertEqual(symbol_3.is_multiplexed(), True)
@@ -1886,7 +1886,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.multiplexer_ids, [2])
         
         # Message3.
-        message_3 = db.messages[6]
+        message_3 = db.messages[4]
         self.assertEqual(message_3.frame_id, 0xA)
         self.assertEqual(message_3.length, 8)
         signal_3 = message_3.signals[0]

@@ -51,6 +51,8 @@ extern "C" {
 
 /* Extended or standard frame types. */
 #define LETTER_TERMINATED_CAN_ID_6_0_SYMBOL1_IS_EXTENDED (0)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 
@@ -97,6 +99,33 @@ int letter_terminated_can_id_6_0_symbol1_unpack(
     struct letter_terminated_can_id_6_0_symbol1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Create message Symbol1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int letter_terminated_can_id_6_0_symbol1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz);
+
+/**
+ * unpack message Symbol1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int letter_terminated_can_id_6_0_symbol1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz);
 
 
 #ifdef __cplusplus

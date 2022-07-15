@@ -60,6 +60,8 @@ extern "C" {
 #define MULTIPLEX_2_NORMAL_IS_EXTENDED (1)
 #define MULTIPLEX_2_EXTENDED_IS_EXTENDED (1)
 #define MULTIPLEX_2_EXTENDED_TYPES_IS_EXTENDED (1)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 
@@ -275,6 +277,13 @@ int8_t multiplex_2_shared_s0_encode(double value);
 double multiplex_2_shared_s0_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_shared_s0_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -300,6 +309,13 @@ int8_t multiplex_2_shared_s1_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_2_shared_s1_decode(int8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_shared_s1_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -329,6 +345,13 @@ int8_t multiplex_2_shared_s2_encode(double value);
 double multiplex_2_shared_s2_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_shared_s2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -336,6 +359,39 @@ double multiplex_2_shared_s2_decode(int8_t value);
  * @return true if in range, false otherwise.
  */
 bool multiplex_2_shared_s2_is_in_range(int8_t value);
+
+/**
+ * Create message Shared if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_shared_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s1,
+    double s2);
+
+/**
+ * unpack message Shared and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_shared_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s1,
+    double *s2);
 
 /**
  * Pack message Normal.
@@ -384,6 +440,13 @@ int8_t multiplex_2_normal_s0_encode(double value);
 double multiplex_2_normal_s0_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_normal_s0_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -409,6 +472,13 @@ int8_t multiplex_2_normal_s1_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_2_normal_s1_decode(int8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_normal_s1_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -438,6 +508,13 @@ int8_t multiplex_2_normal_s2_encode(double value);
 double multiplex_2_normal_s2_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_normal_s2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -445,6 +522,39 @@ double multiplex_2_normal_s2_decode(int8_t value);
  * @return true if in range, false otherwise.
  */
 bool multiplex_2_normal_s2_is_in_range(int8_t value);
+
+/**
+ * Create message Normal if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_normal_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s1,
+    double s2);
+
+/**
+ * unpack message Normal and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_normal_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s1,
+    double *s2);
 
 /**
  * Pack message Extended.
@@ -493,6 +603,13 @@ int8_t multiplex_2_extended_s0_encode(double value);
 double multiplex_2_extended_s0_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s0_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -518,6 +635,13 @@ int32_t multiplex_2_extended_s5_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_2_extended_s5_decode(int32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s5_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -547,6 +671,13 @@ int8_t multiplex_2_extended_s1_encode(double value);
 double multiplex_2_extended_s1_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -572,6 +703,13 @@ int32_t multiplex_2_extended_s4_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_2_extended_s4_decode(int32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s4_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -601,6 +739,13 @@ int8_t multiplex_2_extended_s2_encode(double value);
 double multiplex_2_extended_s2_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -626,6 +771,13 @@ int16_t multiplex_2_extended_s3_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_2_extended_s3_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s3_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -655,6 +807,13 @@ int8_t multiplex_2_extended_s6_encode(double value);
 double multiplex_2_extended_s6_decode(int8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s6_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -680,6 +839,13 @@ int8_t multiplex_2_extended_s8_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_2_extended_s8_decode(int8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s8_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -709,6 +875,13 @@ int32_t multiplex_2_extended_s7_encode(double value);
 double multiplex_2_extended_s7_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_s7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -716,6 +889,51 @@ double multiplex_2_extended_s7_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool multiplex_2_extended_s7_is_in_range(int32_t value);
+
+/**
+ * Create message Extended if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_extended_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s5,
+    double s1,
+    double s4,
+    double s2,
+    double s3,
+    double s6,
+    double s8,
+    double s7);
+
+/**
+ * unpack message Extended and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_extended_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s5,
+    double *s1,
+    double *s4,
+    double *s2,
+    double *s3,
+    double *s6,
+    double *s8,
+    double *s7);
 
 /**
  * Pack message ExtendedTypes.
@@ -764,6 +982,13 @@ uint8_t multiplex_2_extended_types_s11_encode(double value);
 double multiplex_2_extended_types_s11_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_types_s11_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -789,6 +1014,13 @@ int8_t multiplex_2_extended_types_s0_encode(double value);
  * @return Decoded signal.
  */
 double multiplex_2_extended_types_s0_decode(int8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_types_s0_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -818,6 +1050,13 @@ float multiplex_2_extended_types_s10_encode(double value);
 double multiplex_2_extended_types_s10_decode(float value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_types_s10_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -845,6 +1084,13 @@ float multiplex_2_extended_types_s9_encode(double value);
 double multiplex_2_extended_types_s9_decode(float value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double multiplex_2_extended_types_s9_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -852,6 +1098,41 @@ double multiplex_2_extended_types_s9_decode(float value);
  * @return true if in range, false otherwise.
  */
 bool multiplex_2_extended_types_s9_is_in_range(float value);
+
+/**
+ * Create message ExtendedTypes if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int multiplex_2_extended_types_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s11,
+    double s0,
+    double s10,
+    double s9);
+
+/**
+ * unpack message ExtendedTypes and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int multiplex_2_extended_types_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s11,
+    double *s0,
+    double *s10,
+    double *s9);
 
 
 #ifdef __cplusplus

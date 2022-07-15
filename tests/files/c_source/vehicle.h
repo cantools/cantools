@@ -699,6 +699,8 @@ extern "C" {
 #define VEHICLE_RT_SB_GPS_TIME_IS_EXTENDED (1)
 #define VEHICLE_RT_SB_ACCEL_IS_EXTENDED (1)
 #define VEHICLE_RT_SB_GYRO_RATES_IS_EXTENDED (1)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 
@@ -6040,6 +6042,13 @@ uint8_t vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_encode(double 
 double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6065,6 +6074,13 @@ uint8_t vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_encode(double 
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6094,6 +6110,13 @@ uint8_t vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_encode(double valu
 double vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6119,6 +6142,13 @@ int32_t vehicle_rt_sb_ins_vel_body_axes_ins_vel_forwards_2_d_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_body_axes_ins_vel_forwards_2_d_decode(int32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_body_axes_ins_vel_forwards_2_d_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6148,6 +6178,13 @@ int32_t vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_encode(double value
 double vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6155,6 +6192,43 @@ double vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_decode(int32_t value
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vel_body_axes_ins_vel_sideways_2_d_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vel_Body_Axes if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vel_body_axes_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_vel_forwards,
+    double validity_ins_vel_sideways,
+    double accuracy_ins_vel_body,
+    double ins_vel_forwards_2_d,
+    double ins_vel_sideways_2_d);
+
+/**
+ * unpack message RT_SB_INS_Vel_Body_Axes and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vel_body_axes_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_vel_forwards,
+    double *validity_ins_vel_sideways,
+    double *accuracy_ins_vel_body,
+    double *ins_vel_forwards_2_d,
+    double *ins_vel_sideways_2_d);
 
 /**
  * Pack message RT_DL1MK3_Speed.
@@ -6203,6 +6277,13 @@ uint8_t vehicle_rt_dl1_mk3_speed_validity_speed_encode(double value);
 double vehicle_rt_dl1_mk3_speed_validity_speed_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_speed_validity_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6228,6 +6309,13 @@ uint8_t vehicle_rt_dl1_mk3_speed_accuracy_speed_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_speed_accuracy_speed_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_speed_accuracy_speed_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6257,6 +6345,13 @@ int32_t vehicle_rt_dl1_mk3_speed_speed_encode(double value);
 double vehicle_rt_dl1_mk3_speed_speed_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_speed_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6264,6 +6359,39 @@ double vehicle_rt_dl1_mk3_speed_speed_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_speed_speed_is_in_range(int32_t value);
+
+/**
+ * Create message RT_DL1MK3_Speed if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_speed_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_speed,
+    double accuracy_speed,
+    double speed);
+
+/**
+ * unpack message RT_DL1MK3_Speed and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_speed_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_speed,
+    double *accuracy_speed,
+    double *speed);
 
 /**
  * Pack message RT_DL1MK3_GPS_Time.
@@ -6312,6 +6440,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_time_validity_gps_time_encode(double value);
 double vehicle_rt_dl1_mk3_gps_time_validity_gps_time_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_time_validity_gps_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6337,6 +6472,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_time_validity_gps_week_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_gps_time_validity_gps_week_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_time_validity_gps_week_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6366,6 +6508,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_encode(double value);
 double vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6391,6 +6540,13 @@ uint32_t vehicle_rt_dl1_mk3_gps_time_gps_time_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_gps_time_gps_time_decode(uint32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_time_gps_time_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6420,6 +6576,13 @@ uint16_t vehicle_rt_dl1_mk3_gps_time_gps_week_encode(double value);
 double vehicle_rt_dl1_mk3_gps_time_gps_week_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_time_gps_week_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6427,6 +6590,43 @@ double vehicle_rt_dl1_mk3_gps_time_gps_week_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_gps_time_gps_week_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_GPS_Time if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_gps_time_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_time,
+    double validity_gps_week,
+    double accuracy_gps_time,
+    double gps_time,
+    double gps_week);
+
+/**
+ * unpack message RT_DL1MK3_GPS_Time and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_gps_time_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_time,
+    double *validity_gps_week,
+    double *accuracy_gps_time,
+    double *gps_time,
+    double *gps_week);
 
 /**
  * Pack message RT_DL1MK3_GPS_Pos_LLH_2.
@@ -6475,6 +6675,13 @@ int32_t vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_encode(double val
 double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6502,6 +6709,13 @@ int32_t vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_encode(double valu
 double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6509,6 +6723,37 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_decode(int32_t valu
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_altitude_is_in_range(int32_t value);
+
+/**
+ * Create message RT_DL1MK3_GPS_Pos_LLH_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_gps_pos_llh_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double gps_pos_llh_longitude,
+    double gps_pos_llh_altitude);
+
+/**
+ * unpack message RT_DL1MK3_GPS_Pos_LLH_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_gps_pos_llh_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *gps_pos_llh_longitude,
+    double *gps_pos_llh_altitude);
 
 /**
  * Pack message RT_DL1MK3_GPS_Pos_LLH_1.
@@ -6557,6 +6802,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_encode(do
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6582,6 +6834,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_encode(d
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6611,6 +6870,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_encode(do
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6636,6 +6902,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_encode(do
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6665,6 +6938,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_encode(d
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6690,6 +6970,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_encode(do
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6719,6 +7006,13 @@ int32_t vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_encode(double valu
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6726,6 +7020,47 @@ double vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t valu
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t value);
+
+/**
+ * Create message RT_DL1MK3_GPS_Pos_LLH_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_gps_pos_llh_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_pos_llh_latitude,
+    double validity_gps_pos_llh_longitude,
+    double validity_gps_pos_llh_altitude,
+    double accuracy_gps_pos_llh_latitude,
+    double accuracy_gps_pos_llh_longitude,
+    double accuracy_gps_pos_llh_altitude,
+    double gps_pos_llh_latitude);
+
+/**
+ * unpack message RT_DL1MK3_GPS_Pos_LLH_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_gps_pos_llh_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_pos_llh_latitude,
+    double *validity_gps_pos_llh_longitude,
+    double *validity_gps_pos_llh_altitude,
+    double *accuracy_gps_pos_llh_latitude,
+    double *accuracy_gps_pos_llh_longitude,
+    double *accuracy_gps_pos_llh_altitude,
+    double *gps_pos_llh_latitude);
 
 /**
  * Pack message RT_DL1MK3_GPS_Speed.
@@ -6774,6 +7109,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_encode(double value)
 double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6799,6 +7141,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_encode(double value)
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6828,6 +7177,13 @@ uint8_t vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_encode(double value);
 double vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6853,6 +7209,13 @@ uint32_t vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_decode(uint32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -6882,6 +7245,13 @@ uint32_t vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_encode(double value);
 double vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6889,6 +7259,43 @@ double vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_GPS_Speed if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_gps_speed_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_speed_2_d,
+    double validity_gps_speed_3_d,
+    double accuracy_gps_speed,
+    double gps_speed_2_d,
+    double gps_speed_3_d);
+
+/**
+ * unpack message RT_DL1MK3_GPS_Speed and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_gps_speed_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_speed_2_d,
+    double *validity_gps_speed_3_d,
+    double *accuracy_gps_speed,
+    double *gps_speed_2_d,
+    double *gps_speed_3_d);
 
 /**
  * Pack message RT_IRTemp_Temp_7.
@@ -6937,6 +7344,13 @@ int16_t vehicle_rt_ir_temp_temp_7_ir_temperature_7_encode(double value);
 double vehicle_rt_ir_temp_temp_7_ir_temperature_7_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_7_ir_temperature_7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -6944,6 +7358,35 @@ double vehicle_rt_ir_temp_temp_7_ir_temperature_7_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_7_ir_temperature_7_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_7 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_7_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_7);
+
+/**
+ * unpack message RT_IRTemp_Temp_7 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_7_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_7);
 
 /**
  * Pack message RT_IRTemp_Temp_RR_2.
@@ -6992,6 +7435,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_encode(double value);
 double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7017,6 +7467,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_30_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7046,6 +7503,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_encode(double value);
 double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_31_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7073,6 +7537,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_encode(double value);
 double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7080,6 +7551,41 @@ double vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_rr_2_ir_temperature_32_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_RR_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_rr_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_29,
+    double ir_temperature_30,
+    double ir_temperature_31,
+    double ir_temperature_32);
+
+/**
+ * unpack message RT_IRTemp_Temp_RR_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_rr_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_29,
+    double *ir_temperature_30,
+    double *ir_temperature_31,
+    double *ir_temperature_32);
 
 /**
  * Pack message RT_IRTemp_Temp_RL_2.
@@ -7128,6 +7634,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_encode(double value);
 double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7153,6 +7666,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_22_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7182,6 +7702,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_encode(double value);
 double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_23_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7209,6 +7736,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_encode(double value);
 double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7216,6 +7750,41 @@ double vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_rl_2_ir_temperature_24_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_RL_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_rl_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_21,
+    double ir_temperature_22,
+    double ir_temperature_23,
+    double ir_temperature_24);
+
+/**
+ * unpack message RT_IRTemp_Temp_RL_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_rl_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_21,
+    double *ir_temperature_22,
+    double *ir_temperature_23,
+    double *ir_temperature_24);
 
 /**
  * Pack message RT_IRTemp_Temp_FR_2.
@@ -7264,6 +7833,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_encode(double value);
 double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7289,6 +7865,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_14_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7318,6 +7901,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_encode(double value);
 double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_15_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7345,6 +7935,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_encode(double value);
 double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7352,6 +7949,41 @@ double vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_fr_2_ir_temperature_16_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_FR_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_fr_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_13,
+    double ir_temperature_14,
+    double ir_temperature_15,
+    double ir_temperature_16);
+
+/**
+ * unpack message RT_IRTemp_Temp_FR_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_fr_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_13,
+    double *ir_temperature_14,
+    double *ir_temperature_15,
+    double *ir_temperature_16);
 
 /**
  * Pack message RT_IRTemp_Temp_FL_2.
@@ -7400,6 +8032,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_encode(double value);
 double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7425,6 +8064,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_6_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7454,6 +8100,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_encode(double value);
 double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7481,6 +8134,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_encode(double value);
 double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7488,6 +8148,41 @@ double vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_fl_2_ir_temperature_8_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_FL_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_fl_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_5,
+    double ir_temperature_6,
+    double ir_temperature_7,
+    double ir_temperature_8);
+
+/**
+ * unpack message RT_IRTemp_Temp_FL_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_fl_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_5,
+    double *ir_temperature_6,
+    double *ir_temperature_7,
+    double *ir_temperature_8);
 
 /**
  * Pack message RT_IRTemp_Temp_RR_1.
@@ -7536,6 +8231,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_encode(double value);
 double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7561,6 +8263,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_26_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7590,6 +8299,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_encode(double value);
 double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_27_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7617,6 +8333,13 @@ int16_t vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_encode(double value);
 double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7624,6 +8347,41 @@ double vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_rr_1_ir_temperature_28_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_RR_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_rr_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_25,
+    double ir_temperature_26,
+    double ir_temperature_27,
+    double ir_temperature_28);
+
+/**
+ * unpack message RT_IRTemp_Temp_RR_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_rr_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_25,
+    double *ir_temperature_26,
+    double *ir_temperature_27,
+    double *ir_temperature_28);
 
 /**
  * Pack message RT_IRTemp_Temp_RL_1.
@@ -7672,6 +8430,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_encode(double value);
 double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7697,6 +8462,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_18_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7726,6 +8498,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_encode(double value);
 double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_19_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7753,6 +8532,13 @@ int16_t vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_encode(double value);
 double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7760,6 +8546,41 @@ double vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_rl_1_ir_temperature_20_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_RL_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_rl_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_17,
+    double ir_temperature_18,
+    double ir_temperature_19,
+    double ir_temperature_20);
+
+/**
+ * unpack message RT_IRTemp_Temp_RL_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_rl_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_17,
+    double *ir_temperature_18,
+    double *ir_temperature_19,
+    double *ir_temperature_20);
 
 /**
  * Pack message RT_IRTemp_Temp_FR_1.
@@ -7808,6 +8629,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_encode(double value);
 double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7833,6 +8661,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_10_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7862,6 +8697,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_encode(double value);
 double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_11_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7889,6 +8731,13 @@ int16_t vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_encode(double value);
 double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7896,6 +8745,41 @@ double vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_fr_1_ir_temperature_12_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_FR_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_fr_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_9,
+    double ir_temperature_10,
+    double ir_temperature_11,
+    double ir_temperature_12);
+
+/**
+ * unpack message RT_IRTemp_Temp_FR_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_fr_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_9,
+    double *ir_temperature_10,
+    double *ir_temperature_11,
+    double *ir_temperature_12);
 
 /**
  * Pack message RT_IRTemp_Temp_FL_1.
@@ -7944,6 +8828,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_encode(double value);
 double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -7969,6 +8860,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -7998,6 +8896,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_encode(double value);
 double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8025,6 +8930,13 @@ int16_t vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_encode(double value);
 double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8032,6 +8944,41 @@ double vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_fl_1_ir_temperature_4_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_FL_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_fl_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_1,
+    double ir_temperature_2,
+    double ir_temperature_3,
+    double ir_temperature_4);
+
+/**
+ * unpack message RT_IRTemp_Temp_FL_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_fl_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_1,
+    double *ir_temperature_2,
+    double *ir_temperature_3,
+    double *ir_temperature_4);
 
 /**
  * Pack message RT_IRTemp_Temp_32.
@@ -8080,6 +9027,13 @@ int16_t vehicle_rt_ir_temp_temp_32_ir_temperature_32_encode(double value);
 double vehicle_rt_ir_temp_temp_32_ir_temperature_32_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_32_ir_temperature_32_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8087,6 +9041,35 @@ double vehicle_rt_ir_temp_temp_32_ir_temperature_32_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_32_ir_temperature_32_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_32 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_32_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_32);
+
+/**
+ * unpack message RT_IRTemp_Temp_32 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_32_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_32);
 
 /**
  * Pack message RT_IRTemp_Temp_31.
@@ -8135,6 +9118,13 @@ int16_t vehicle_rt_ir_temp_temp_31_ir_temperature_31_encode(double value);
 double vehicle_rt_ir_temp_temp_31_ir_temperature_31_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_31_ir_temperature_31_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8142,6 +9132,35 @@ double vehicle_rt_ir_temp_temp_31_ir_temperature_31_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_31_ir_temperature_31_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_31 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_31_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_31);
+
+/**
+ * unpack message RT_IRTemp_Temp_31 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_31_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_31);
 
 /**
  * Pack message RT_IRTemp_Temp_30.
@@ -8190,6 +9209,13 @@ int16_t vehicle_rt_ir_temp_temp_30_ir_temperature_30_encode(double value);
 double vehicle_rt_ir_temp_temp_30_ir_temperature_30_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_30_ir_temperature_30_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8197,6 +9223,35 @@ double vehicle_rt_ir_temp_temp_30_ir_temperature_30_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_30_ir_temperature_30_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_30 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_30_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_30);
+
+/**
+ * unpack message RT_IRTemp_Temp_30 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_30_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_30);
 
 /**
  * Pack message RT_IRTemp_Temp_29.
@@ -8245,6 +9300,13 @@ int16_t vehicle_rt_ir_temp_temp_29_ir_temperature_29_encode(double value);
 double vehicle_rt_ir_temp_temp_29_ir_temperature_29_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_29_ir_temperature_29_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8252,6 +9314,35 @@ double vehicle_rt_ir_temp_temp_29_ir_temperature_29_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_29_ir_temperature_29_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_29 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_29_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_29);
+
+/**
+ * unpack message RT_IRTemp_Temp_29 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_29_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_29);
 
 /**
  * Pack message RT_IRTemp_Temp_28.
@@ -8300,6 +9391,13 @@ int16_t vehicle_rt_ir_temp_temp_28_ir_temperature_28_encode(double value);
 double vehicle_rt_ir_temp_temp_28_ir_temperature_28_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_28_ir_temperature_28_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8307,6 +9405,35 @@ double vehicle_rt_ir_temp_temp_28_ir_temperature_28_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_28_ir_temperature_28_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_28 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_28_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_28);
+
+/**
+ * unpack message RT_IRTemp_Temp_28 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_28_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_28);
 
 /**
  * Pack message RT_IRTemp_Temp_27.
@@ -8355,6 +9482,13 @@ int16_t vehicle_rt_ir_temp_temp_27_ir_temperature_27_encode(double value);
 double vehicle_rt_ir_temp_temp_27_ir_temperature_27_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_27_ir_temperature_27_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8362,6 +9496,35 @@ double vehicle_rt_ir_temp_temp_27_ir_temperature_27_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_27_ir_temperature_27_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_27 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_27_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_27);
+
+/**
+ * unpack message RT_IRTemp_Temp_27 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_27_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_27);
 
 /**
  * Pack message RT_IRTemp_Temp_26.
@@ -8410,6 +9573,13 @@ int16_t vehicle_rt_ir_temp_temp_26_ir_temperature_26_encode(double value);
 double vehicle_rt_ir_temp_temp_26_ir_temperature_26_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_26_ir_temperature_26_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8417,6 +9587,35 @@ double vehicle_rt_ir_temp_temp_26_ir_temperature_26_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_26_ir_temperature_26_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_26 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_26_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_26);
+
+/**
+ * unpack message RT_IRTemp_Temp_26 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_26_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_26);
 
 /**
  * Pack message RT_IRTemp_Temp_25.
@@ -8465,6 +9664,13 @@ int16_t vehicle_rt_ir_temp_temp_25_ir_temperature_25_encode(double value);
 double vehicle_rt_ir_temp_temp_25_ir_temperature_25_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_25_ir_temperature_25_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8472,6 +9678,35 @@ double vehicle_rt_ir_temp_temp_25_ir_temperature_25_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_25_ir_temperature_25_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_25 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_25_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_25);
+
+/**
+ * unpack message RT_IRTemp_Temp_25 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_25_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_25);
 
 /**
  * Pack message RT_IRTemp_Temp_24.
@@ -8520,6 +9755,13 @@ int16_t vehicle_rt_ir_temp_temp_24_ir_temperature_24_encode(double value);
 double vehicle_rt_ir_temp_temp_24_ir_temperature_24_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_24_ir_temperature_24_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8527,6 +9769,35 @@ double vehicle_rt_ir_temp_temp_24_ir_temperature_24_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_24_ir_temperature_24_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_24 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_24_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_24);
+
+/**
+ * unpack message RT_IRTemp_Temp_24 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_24_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_24);
 
 /**
  * Pack message RT_IRTemp_Temp_22.
@@ -8575,6 +9846,13 @@ int16_t vehicle_rt_ir_temp_temp_22_ir_temperature_22_encode(double value);
 double vehicle_rt_ir_temp_temp_22_ir_temperature_22_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_22_ir_temperature_22_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8582,6 +9860,35 @@ double vehicle_rt_ir_temp_temp_22_ir_temperature_22_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_22_ir_temperature_22_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_22 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_22_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_22);
+
+/**
+ * unpack message RT_IRTemp_Temp_22 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_22_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_22);
 
 /**
  * Pack message RT_IRTemp_Temp_23.
@@ -8630,6 +9937,13 @@ int16_t vehicle_rt_ir_temp_temp_23_ir_temperature_23_encode(double value);
 double vehicle_rt_ir_temp_temp_23_ir_temperature_23_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_23_ir_temperature_23_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8637,6 +9951,35 @@ double vehicle_rt_ir_temp_temp_23_ir_temperature_23_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_23_ir_temperature_23_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_23 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_23_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_23);
+
+/**
+ * unpack message RT_IRTemp_Temp_23 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_23_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_23);
 
 /**
  * Pack message RT_IRTemp_Temp_21.
@@ -8685,6 +10028,13 @@ int16_t vehicle_rt_ir_temp_temp_21_ir_temperature_21_encode(double value);
 double vehicle_rt_ir_temp_temp_21_ir_temperature_21_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_21_ir_temperature_21_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8692,6 +10042,35 @@ double vehicle_rt_ir_temp_temp_21_ir_temperature_21_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_21_ir_temperature_21_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_21 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_21_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_21);
+
+/**
+ * unpack message RT_IRTemp_Temp_21 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_21_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_21);
 
 /**
  * Pack message RT_IRTemp_Temp_20.
@@ -8740,6 +10119,13 @@ int16_t vehicle_rt_ir_temp_temp_20_ir_temperature_20_encode(double value);
 double vehicle_rt_ir_temp_temp_20_ir_temperature_20_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_20_ir_temperature_20_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8747,6 +10133,35 @@ double vehicle_rt_ir_temp_temp_20_ir_temperature_20_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_20_ir_temperature_20_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_20 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_20_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_20);
+
+/**
+ * unpack message RT_IRTemp_Temp_20 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_20_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_20);
 
 /**
  * Pack message RT_IRTemp_Temp_19.
@@ -8795,6 +10210,13 @@ int16_t vehicle_rt_ir_temp_temp_19_ir_temperature_19_encode(double value);
 double vehicle_rt_ir_temp_temp_19_ir_temperature_19_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_19_ir_temperature_19_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8802,6 +10224,35 @@ double vehicle_rt_ir_temp_temp_19_ir_temperature_19_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_19_ir_temperature_19_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_19 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_19_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_19);
+
+/**
+ * unpack message RT_IRTemp_Temp_19 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_19_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_19);
 
 /**
  * Pack message RT_IRTemp_Temp_18.
@@ -8850,6 +10301,13 @@ int16_t vehicle_rt_ir_temp_temp_18_ir_temperature_18_encode(double value);
 double vehicle_rt_ir_temp_temp_18_ir_temperature_18_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_18_ir_temperature_18_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8857,6 +10315,35 @@ double vehicle_rt_ir_temp_temp_18_ir_temperature_18_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_18_ir_temperature_18_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_18 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_18_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_18);
+
+/**
+ * unpack message RT_IRTemp_Temp_18 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_18_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_18);
 
 /**
  * Pack message RT_IRTemp_Temp_16.
@@ -8905,6 +10392,13 @@ int16_t vehicle_rt_ir_temp_temp_16_ir_temperature_16_encode(double value);
 double vehicle_rt_ir_temp_temp_16_ir_temperature_16_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_16_ir_temperature_16_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8912,6 +10406,35 @@ double vehicle_rt_ir_temp_temp_16_ir_temperature_16_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_16_ir_temperature_16_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_16 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_16_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_16);
+
+/**
+ * unpack message RT_IRTemp_Temp_16 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_16_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_16);
 
 /**
  * Pack message RT_IRTemp_Temp_15.
@@ -8960,6 +10483,13 @@ int16_t vehicle_rt_ir_temp_temp_15_ir_temperature_15_encode(double value);
 double vehicle_rt_ir_temp_temp_15_ir_temperature_15_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_15_ir_temperature_15_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -8967,6 +10497,35 @@ double vehicle_rt_ir_temp_temp_15_ir_temperature_15_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_15_ir_temperature_15_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_15 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_15_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_15);
+
+/**
+ * unpack message RT_IRTemp_Temp_15 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_15_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_15);
 
 /**
  * Pack message RT_IRTemp_Temp_14.
@@ -9015,6 +10574,13 @@ int16_t vehicle_rt_ir_temp_temp_14_ir_temperature_14_encode(double value);
 double vehicle_rt_ir_temp_temp_14_ir_temperature_14_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_14_ir_temperature_14_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9022,6 +10588,35 @@ double vehicle_rt_ir_temp_temp_14_ir_temperature_14_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_14_ir_temperature_14_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_14 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_14_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_14);
+
+/**
+ * unpack message RT_IRTemp_Temp_14 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_14_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_14);
 
 /**
  * Pack message RT_IRTemp_Temp_13.
@@ -9070,6 +10665,13 @@ int16_t vehicle_rt_ir_temp_temp_13_ir_temperature_13_encode(double value);
 double vehicle_rt_ir_temp_temp_13_ir_temperature_13_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_13_ir_temperature_13_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9077,6 +10679,35 @@ double vehicle_rt_ir_temp_temp_13_ir_temperature_13_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_13_ir_temperature_13_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_13 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_13_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_13);
+
+/**
+ * unpack message RT_IRTemp_Temp_13 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_13_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_13);
 
 /**
  * Pack message RT_IRTemp_Temp_12.
@@ -9125,6 +10756,13 @@ int16_t vehicle_rt_ir_temp_temp_12_ir_temperature_12_encode(double value);
 double vehicle_rt_ir_temp_temp_12_ir_temperature_12_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_12_ir_temperature_12_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9132,6 +10770,35 @@ double vehicle_rt_ir_temp_temp_12_ir_temperature_12_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_12_ir_temperature_12_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_12 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_12_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_12);
+
+/**
+ * unpack message RT_IRTemp_Temp_12 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_12_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_12);
 
 /**
  * Pack message RT_IRTemp_Temp_11.
@@ -9180,6 +10847,13 @@ int16_t vehicle_rt_ir_temp_temp_11_ir_temperature_11_encode(double value);
 double vehicle_rt_ir_temp_temp_11_ir_temperature_11_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_11_ir_temperature_11_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9187,6 +10861,35 @@ double vehicle_rt_ir_temp_temp_11_ir_temperature_11_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_11_ir_temperature_11_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_11 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_11_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_11);
+
+/**
+ * unpack message RT_IRTemp_Temp_11 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_11_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_11);
 
 /**
  * Pack message RT_IRTemp_Temp_10.
@@ -9235,6 +10938,13 @@ int16_t vehicle_rt_ir_temp_temp_10_ir_temperature_10_encode(double value);
 double vehicle_rt_ir_temp_temp_10_ir_temperature_10_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_10_ir_temperature_10_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9242,6 +10952,35 @@ double vehicle_rt_ir_temp_temp_10_ir_temperature_10_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_10_ir_temperature_10_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_10 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_10_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_10);
+
+/**
+ * unpack message RT_IRTemp_Temp_10 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_10_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_10);
 
 /**
  * Pack message RT_IRTemp_Temp_8.
@@ -9290,6 +11029,13 @@ int16_t vehicle_rt_ir_temp_temp_8_ir_temperature_8_encode(double value);
 double vehicle_rt_ir_temp_temp_8_ir_temperature_8_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_8_ir_temperature_8_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9297,6 +11043,35 @@ double vehicle_rt_ir_temp_temp_8_ir_temperature_8_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_8_ir_temperature_8_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_8 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_8_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_8);
+
+/**
+ * unpack message RT_IRTemp_Temp_8 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_8_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_8);
 
 /**
  * Pack message RT_IRTemp_Temp_9.
@@ -9345,6 +11120,13 @@ int16_t vehicle_rt_ir_temp_temp_9_ir_temperature_9_encode(double value);
 double vehicle_rt_ir_temp_temp_9_ir_temperature_9_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_9_ir_temperature_9_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9352,6 +11134,35 @@ double vehicle_rt_ir_temp_temp_9_ir_temperature_9_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_9_ir_temperature_9_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_9 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_9_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_9);
+
+/**
+ * unpack message RT_IRTemp_Temp_9 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_9_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_9);
 
 /**
  * Pack message RT_IRTemp_Temp_17.
@@ -9400,6 +11211,13 @@ int16_t vehicle_rt_ir_temp_temp_17_ir_temperature_17_encode(double value);
 double vehicle_rt_ir_temp_temp_17_ir_temperature_17_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_17_ir_temperature_17_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9407,6 +11225,35 @@ double vehicle_rt_ir_temp_temp_17_ir_temperature_17_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_17_ir_temperature_17_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_17 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_17_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_17);
+
+/**
+ * unpack message RT_IRTemp_Temp_17 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_17_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_17);
 
 /**
  * Pack message RT_IRTemp_Temp_6.
@@ -9455,6 +11302,13 @@ int16_t vehicle_rt_ir_temp_temp_6_ir_temperature_6_encode(double value);
 double vehicle_rt_ir_temp_temp_6_ir_temperature_6_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_6_ir_temperature_6_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9462,6 +11316,35 @@ double vehicle_rt_ir_temp_temp_6_ir_temperature_6_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_6_ir_temperature_6_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_6 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_6_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_6);
+
+/**
+ * unpack message RT_IRTemp_Temp_6 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_6_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_6);
 
 /**
  * Pack message RT_IRTemp_Temp_5.
@@ -9510,6 +11393,13 @@ int16_t vehicle_rt_ir_temp_temp_5_ir_temperature_5_encode(double value);
 double vehicle_rt_ir_temp_temp_5_ir_temperature_5_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_5_ir_temperature_5_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9517,6 +11407,35 @@ double vehicle_rt_ir_temp_temp_5_ir_temperature_5_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_5_ir_temperature_5_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_5 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_5_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_5);
+
+/**
+ * unpack message RT_IRTemp_Temp_5 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_5_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_5);
 
 /**
  * Pack message RT_IRTemp_Temp_4.
@@ -9565,6 +11484,13 @@ int16_t vehicle_rt_ir_temp_temp_4_ir_temperature_4_encode(double value);
 double vehicle_rt_ir_temp_temp_4_ir_temperature_4_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_4_ir_temperature_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9572,6 +11498,35 @@ double vehicle_rt_ir_temp_temp_4_ir_temperature_4_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_4_ir_temperature_4_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_4);
+
+/**
+ * unpack message RT_IRTemp_Temp_4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_4);
 
 /**
  * Pack message RT_IRTemp_Temp_3.
@@ -9620,6 +11575,13 @@ int16_t vehicle_rt_ir_temp_temp_3_ir_temperature_3_encode(double value);
 double vehicle_rt_ir_temp_temp_3_ir_temperature_3_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_3_ir_temperature_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9627,6 +11589,35 @@ double vehicle_rt_ir_temp_temp_3_ir_temperature_3_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_3_ir_temperature_3_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_3);
+
+/**
+ * unpack message RT_IRTemp_Temp_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_3);
 
 /**
  * Pack message RT_IRTemp_Temp_2.
@@ -9675,6 +11666,13 @@ int16_t vehicle_rt_ir_temp_temp_2_ir_temperature_2_encode(double value);
 double vehicle_rt_ir_temp_temp_2_ir_temperature_2_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_2_ir_temperature_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9682,6 +11680,35 @@ double vehicle_rt_ir_temp_temp_2_ir_temperature_2_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_2_ir_temperature_2_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_2);
+
+/**
+ * unpack message RT_IRTemp_Temp_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_2);
 
 /**
  * Pack message RT_IRTemp_Temp_1.
@@ -9730,6 +11757,13 @@ int16_t vehicle_rt_ir_temp_temp_1_ir_temperature_1_encode(double value);
 double vehicle_rt_ir_temp_temp_1_ir_temperature_1_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_ir_temp_temp_1_ir_temperature_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9737,6 +11771,35 @@ double vehicle_rt_ir_temp_temp_1_ir_temperature_1_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_ir_temp_temp_1_ir_temperature_1_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IRTemp_Temp_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_ir_temp_temp_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ir_temperature_1);
+
+/**
+ * unpack message RT_IRTemp_Temp_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_ir_temp_temp_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ir_temperature_1);
 
 /**
  * Pack message RT_SB_Trig_Final_Condition.
@@ -9785,6 +11848,13 @@ uint8_t vehicle_rt_sb_trig_final_condition_validity_final_speed_encode(double va
 double vehicle_rt_sb_trig_final_condition_validity_final_speed_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_final_condition_validity_final_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9812,6 +11882,13 @@ uint32_t vehicle_rt_sb_trig_final_condition_final_speed_encode(double value);
 double vehicle_rt_sb_trig_final_condition_final_speed_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_final_condition_final_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9819,6 +11896,37 @@ double vehicle_rt_sb_trig_final_condition_final_speed_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_trig_final_condition_final_speed_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_Trig_Final_Condition if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_trig_final_condition_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_final_speed,
+    double final_speed);
+
+/**
+ * unpack message RT_SB_Trig_Final_Condition and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_trig_final_condition_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_final_speed,
+    double *final_speed);
 
 /**
  * Pack message RT_SB_Trig_Initial_Condition.
@@ -9867,6 +11975,13 @@ uint8_t vehicle_rt_sb_trig_initial_condition_validity_initial_speed_encode(doubl
 double vehicle_rt_sb_trig_initial_condition_validity_initial_speed_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_initial_condition_validity_initial_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9892,6 +12007,13 @@ uint8_t vehicle_rt_sb_trig_initial_condition_validity_initial_heading_encode(dou
  * @return Decoded signal.
  */
 double vehicle_rt_sb_trig_initial_condition_validity_initial_heading_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_initial_condition_validity_initial_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -9921,6 +12043,13 @@ uint32_t vehicle_rt_sb_trig_initial_condition_initial_speed_encode(double value)
 double vehicle_rt_sb_trig_initial_condition_initial_speed_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_initial_condition_initial_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -9946,6 +12075,13 @@ int16_t vehicle_rt_sb_trig_initial_condition_initial_heading_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_trig_initial_condition_initial_heading_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_initial_condition_initial_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -9975,6 +12111,13 @@ uint8_t vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_encode(double 
 double vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10002,6 +12145,13 @@ uint8_t vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_encode(double va
 double vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10009,6 +12159,45 @@ double vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_decode(uint8_t va
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_is_in_range(uint8_t value);
+
+/**
+ * Create message RT_SB_Trig_Initial_Condition if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_trig_initial_condition_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_initial_speed,
+    double validity_initial_heading,
+    double initial_speed,
+    double initial_heading,
+    double mfdd_start_threshold,
+    double mfdd_end_threshold);
+
+/**
+ * unpack message RT_SB_Trig_Initial_Condition and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_trig_initial_condition_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_initial_speed,
+    double *validity_initial_heading,
+    double *initial_speed,
+    double *initial_heading,
+    double *mfdd_start_threshold,
+    double *mfdd_end_threshold);
 
 /**
  * Pack message RT_SB_Trig_Direct_Dist.
@@ -10057,6 +12246,13 @@ uint32_t vehicle_rt_sb_trig_direct_dist_direct_distance_encode(double value);
 double vehicle_rt_sb_trig_direct_dist_direct_distance_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_direct_dist_direct_distance_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10084,6 +12280,13 @@ uint32_t vehicle_rt_sb_trig_direct_dist_path_distance_2_d_encode(double value);
 double vehicle_rt_sb_trig_direct_dist_path_distance_2_d_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_direct_dist_path_distance_2_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10091,6 +12294,37 @@ double vehicle_rt_sb_trig_direct_dist_path_distance_2_d_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_trig_direct_dist_path_distance_2_d_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_Trig_Direct_Dist if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_trig_direct_dist_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double direct_distance,
+    double path_distance_2_d);
+
+/**
+ * unpack message RT_SB_Trig_Direct_Dist and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_trig_direct_dist_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *direct_distance,
+    double *path_distance_2_d);
 
 /**
  * Pack message RT_SB_Trig_Forward_Dist.
@@ -10139,6 +12373,13 @@ int32_t vehicle_rt_sb_trig_forward_dist_forward_distance_encode(double value);
 double vehicle_rt_sb_trig_forward_dist_forward_distance_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_forward_dist_forward_distance_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10166,6 +12407,13 @@ int32_t vehicle_rt_sb_trig_forward_dist_deviation_distance_encode(double value);
 double vehicle_rt_sb_trig_forward_dist_deviation_distance_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_forward_dist_deviation_distance_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10173,6 +12421,37 @@ double vehicle_rt_sb_trig_forward_dist_deviation_distance_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_trig_forward_dist_deviation_distance_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_Trig_Forward_Dist if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_trig_forward_dist_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double forward_distance,
+    double deviation_distance);
+
+/**
+ * unpack message RT_SB_Trig_Forward_Dist and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_trig_forward_dist_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *forward_distance,
+    double *deviation_distance);
 
 /**
  * Pack message RT_SB_Trig_Path_Dist.
@@ -10221,6 +12500,13 @@ uint32_t vehicle_rt_sb_trig_path_dist_path_distance_3_d_encode(double value);
 double vehicle_rt_sb_trig_path_dist_path_distance_3_d_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_path_dist_path_distance_3_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10228,6 +12514,35 @@ double vehicle_rt_sb_trig_path_dist_path_distance_3_d_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_trig_path_dist_path_distance_3_d_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_Trig_Path_Dist if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_trig_path_dist_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double path_distance_3_d);
+
+/**
+ * unpack message RT_SB_Trig_Path_Dist and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_trig_path_dist_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *path_distance_3_d);
 
 /**
  * Pack message RT_SB_Trig_Accel.
@@ -10276,6 +12591,13 @@ uint8_t vehicle_rt_sb_trig_accel_validity_mfdd_encode(double value);
 double vehicle_rt_sb_trig_accel_validity_mfdd_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_accel_validity_mfdd_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10301,6 +12623,13 @@ uint8_t vehicle_rt_sb_trig_accel_validity_average_accel_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_trig_accel_validity_average_accel_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_accel_validity_average_accel_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -10330,6 +12659,13 @@ uint8_t vehicle_rt_sb_trig_accel_validity_triggered_time_encode(double value);
 double vehicle_rt_sb_trig_accel_validity_triggered_time_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_accel_validity_triggered_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10355,6 +12691,13 @@ int16_t vehicle_rt_sb_trig_accel_mfdd_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_trig_accel_mfdd_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_accel_mfdd_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -10384,6 +12727,13 @@ int16_t vehicle_rt_sb_trig_accel_average_accel_encode(double value);
 double vehicle_rt_sb_trig_accel_average_accel_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_accel_average_accel_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10411,6 +12761,13 @@ uint32_t vehicle_rt_sb_trig_accel_triggered_time_encode(double value);
 double vehicle_rt_sb_trig_accel_triggered_time_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trig_accel_triggered_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10418,6 +12775,45 @@ double vehicle_rt_sb_trig_accel_triggered_time_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_trig_accel_triggered_time_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_Trig_Accel if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_trig_accel_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_mfdd,
+    double validity_average_accel,
+    double validity_triggered_time,
+    double mfdd,
+    double average_accel,
+    double triggered_time);
+
+/**
+ * unpack message RT_SB_Trig_Accel and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_trig_accel_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_mfdd,
+    double *validity_average_accel,
+    double *validity_triggered_time,
+    double *mfdd,
+    double *average_accel,
+    double *triggered_time);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_12.
@@ -10466,6 +12862,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_encode(double value
 double vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10473,6 +12876,35 @@ double vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_decode(uint32_t value
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_12 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_12_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_12);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_12 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_12_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_12);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_11.
@@ -10521,6 +12953,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_encode(double value
 double vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10528,6 +12967,35 @@ double vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_decode(uint32_t value
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_11 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_11_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_11);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_11 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_11_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_11);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_10.
@@ -10576,6 +13044,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_encode(double value
 double vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10583,6 +13058,35 @@ double vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_decode(uint32_t value
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_10 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_10_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_10);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_10 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_10_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_10);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_9.
@@ -10631,6 +13135,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10638,6 +13149,35 @@ double vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_9 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_9_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_9);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_9 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_9_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_9);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_8.
@@ -10686,6 +13226,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10693,6 +13240,35 @@ double vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_8 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_8_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_8);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_8 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_8_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_8);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_7.
@@ -10741,6 +13317,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10748,6 +13331,35 @@ double vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_7 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_7_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_7);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_7 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_7_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_7);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_6.
@@ -10796,6 +13408,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10803,6 +13422,35 @@ double vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_6 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_6_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_6);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_6 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_6_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_6);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_5.
@@ -10851,6 +13499,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10858,6 +13513,35 @@ double vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_5 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_5_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_5);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_5 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_5_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_5);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_4.
@@ -10906,6 +13590,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10913,6 +13604,35 @@ double vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_4);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_4);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_3.
@@ -10961,6 +13681,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -10968,6 +13695,35 @@ double vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_3);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_3);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_2.
@@ -11016,6 +13772,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11023,6 +13786,35 @@ double vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_2);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_2);
 
 /**
  * Pack message RT_DL1MK3_Measure_Time_1.
@@ -11071,6 +13863,13 @@ uint32_t vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_encode(double value);
 double vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11078,6 +13877,35 @@ double vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Measure_Time_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_measure_time_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double measured_time_1);
+
+/**
+ * unpack message RT_DL1MK3_Measure_Time_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_measure_time_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *measured_time_1);
 
 /**
  * Pack message RT_DL1MK3_RPM.
@@ -11126,6 +13954,13 @@ uint16_t vehicle_rt_dl1_mk3_rpm_rpm_encode(double value);
 double vehicle_rt_dl1_mk3_rpm_rpm_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_rpm_rpm_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11133,6 +13968,35 @@ double vehicle_rt_dl1_mk3_rpm_rpm_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_rpm_rpm_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_RPM if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_rpm_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double rpm);
+
+/**
+ * unpack message RT_DL1MK3_RPM and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_rpm_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *rpm);
 
 /**
  * Pack message RT_DL1MK3_Freq_4.
@@ -11181,6 +14045,13 @@ uint16_t vehicle_rt_dl1_mk3_freq_4_frequency_4_encode(double value);
 double vehicle_rt_dl1_mk3_freq_4_frequency_4_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_freq_4_frequency_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11188,6 +14059,35 @@ double vehicle_rt_dl1_mk3_freq_4_frequency_4_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_freq_4_frequency_4_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Freq_4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_freq_4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double frequency_4);
+
+/**
+ * unpack message RT_DL1MK3_Freq_4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_freq_4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *frequency_4);
 
 /**
  * Pack message RT_DL1MK3_Freq_3.
@@ -11236,6 +14136,13 @@ uint16_t vehicle_rt_dl1_mk3_freq_3_frequency_3_encode(double value);
 double vehicle_rt_dl1_mk3_freq_3_frequency_3_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_freq_3_frequency_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11243,6 +14150,35 @@ double vehicle_rt_dl1_mk3_freq_3_frequency_3_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_freq_3_frequency_3_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Freq_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_freq_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double frequency_3);
+
+/**
+ * unpack message RT_DL1MK3_Freq_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_freq_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *frequency_3);
 
 /**
  * Pack message RT_DL1MK3_Freq_2.
@@ -11291,6 +14227,13 @@ uint16_t vehicle_rt_dl1_mk3_freq_2_frequency_2_encode(double value);
 double vehicle_rt_dl1_mk3_freq_2_frequency_2_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_freq_2_frequency_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11298,6 +14241,35 @@ double vehicle_rt_dl1_mk3_freq_2_frequency_2_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_freq_2_frequency_2_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Freq_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_freq_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double frequency_2);
+
+/**
+ * unpack message RT_DL1MK3_Freq_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_freq_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *frequency_2);
 
 /**
  * Pack message RT_DL1MK3_Misc_3.
@@ -11346,6 +14318,13 @@ uint16_t vehicle_rt_dl1_mk3_misc_3_misc_3_encode(double value);
 double vehicle_rt_dl1_mk3_misc_3_misc_3_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_misc_3_misc_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11353,6 +14332,35 @@ double vehicle_rt_dl1_mk3_misc_3_misc_3_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_misc_3_misc_3_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Misc_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_misc_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double misc_3);
+
+/**
+ * unpack message RT_DL1MK3_Misc_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_misc_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *misc_3);
 
 /**
  * Pack message RT_DL1MK3_Misc_2.
@@ -11401,6 +14409,13 @@ uint16_t vehicle_rt_dl1_mk3_misc_2_misc_2_encode(double value);
 double vehicle_rt_dl1_mk3_misc_2_misc_2_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_misc_2_misc_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11408,6 +14423,35 @@ double vehicle_rt_dl1_mk3_misc_2_misc_2_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_misc_2_misc_2_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Misc_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_misc_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double misc_2);
+
+/**
+ * unpack message RT_DL1MK3_Misc_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_misc_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *misc_2);
 
 /**
  * Pack message RT_DL1MK3_Misc_1.
@@ -11456,6 +14500,13 @@ uint16_t vehicle_rt_dl1_mk3_misc_1_misc_1_encode(double value);
 double vehicle_rt_dl1_mk3_misc_1_misc_1_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_misc_1_misc_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11463,6 +14514,35 @@ double vehicle_rt_dl1_mk3_misc_1_misc_1_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_misc_1_misc_1_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Misc_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_misc_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double misc_1);
+
+/**
+ * unpack message RT_DL1MK3_Misc_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_misc_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *misc_1);
 
 /**
  * Pack message RT_DL1MK3_Aux_31.
@@ -11511,6 +14591,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_31_aux_31_encode(double value);
 double vehicle_rt_dl1_mk3_aux_31_aux_31_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_31_aux_31_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11518,6 +14605,35 @@ double vehicle_rt_dl1_mk3_aux_31_aux_31_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_31_aux_31_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_31 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_31_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_31);
+
+/**
+ * unpack message RT_DL1MK3_Aux_31 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_31_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_31);
 
 /**
  * Pack message RT_DL1MK3_Aux_30.
@@ -11566,6 +14682,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_30_aux_30_encode(double value);
 double vehicle_rt_dl1_mk3_aux_30_aux_30_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_30_aux_30_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11573,6 +14696,35 @@ double vehicle_rt_dl1_mk3_aux_30_aux_30_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_30_aux_30_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_30 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_30_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_30);
+
+/**
+ * unpack message RT_DL1MK3_Aux_30 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_30_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_30);
 
 /**
  * Pack message RT_DL1MK3_Aux_29.
@@ -11621,6 +14773,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_29_aux_29_encode(double value);
 double vehicle_rt_dl1_mk3_aux_29_aux_29_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_29_aux_29_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11628,6 +14787,35 @@ double vehicle_rt_dl1_mk3_aux_29_aux_29_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_29_aux_29_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_29 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_29_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_29);
+
+/**
+ * unpack message RT_DL1MK3_Aux_29 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_29_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_29);
 
 /**
  * Pack message RT_DL1MK3_Aux_28.
@@ -11676,6 +14864,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_28_aux_28_encode(double value);
 double vehicle_rt_dl1_mk3_aux_28_aux_28_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_28_aux_28_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11683,6 +14878,35 @@ double vehicle_rt_dl1_mk3_aux_28_aux_28_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_28_aux_28_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_28 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_28_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_28);
+
+/**
+ * unpack message RT_DL1MK3_Aux_28 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_28_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_28);
 
 /**
  * Pack message RT_DL1MK3_Aux_27.
@@ -11731,6 +14955,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_27_aux_27_encode(double value);
 double vehicle_rt_dl1_mk3_aux_27_aux_27_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_27_aux_27_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11738,6 +14969,35 @@ double vehicle_rt_dl1_mk3_aux_27_aux_27_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_27_aux_27_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_27 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_27_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_27);
+
+/**
+ * unpack message RT_DL1MK3_Aux_27 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_27_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_27);
 
 /**
  * Pack message RT_DL1MK3_Aux_26.
@@ -11786,6 +15046,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_26_aux_26_encode(double value);
 double vehicle_rt_dl1_mk3_aux_26_aux_26_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_26_aux_26_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11793,6 +15060,35 @@ double vehicle_rt_dl1_mk3_aux_26_aux_26_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_26_aux_26_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_26 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_26_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_26);
+
+/**
+ * unpack message RT_DL1MK3_Aux_26 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_26_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_26);
 
 /**
  * Pack message RT_DL1MK3_Aux_25.
@@ -11841,6 +15137,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_25_aux_25_encode(double value);
 double vehicle_rt_dl1_mk3_aux_25_aux_25_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_25_aux_25_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11848,6 +15151,35 @@ double vehicle_rt_dl1_mk3_aux_25_aux_25_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_25_aux_25_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_25 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_25_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_25);
+
+/**
+ * unpack message RT_DL1MK3_Aux_25 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_25_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_25);
 
 /**
  * Pack message RT_DL1MK3_Aux_24.
@@ -11896,6 +15228,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_24_aux_24_encode(double value);
 double vehicle_rt_dl1_mk3_aux_24_aux_24_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_24_aux_24_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11903,6 +15242,35 @@ double vehicle_rt_dl1_mk3_aux_24_aux_24_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_24_aux_24_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_24 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_24_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_24);
+
+/**
+ * unpack message RT_DL1MK3_Aux_24 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_24_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_24);
 
 /**
  * Pack message RT_DL1MK3_Aux_23.
@@ -11951,6 +15319,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_23_aux_23_encode(double value);
 double vehicle_rt_dl1_mk3_aux_23_aux_23_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_23_aux_23_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -11958,6 +15333,35 @@ double vehicle_rt_dl1_mk3_aux_23_aux_23_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_23_aux_23_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_23 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_23_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_23);
+
+/**
+ * unpack message RT_DL1MK3_Aux_23 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_23_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_23);
 
 /**
  * Pack message RT_DL1MK3_Aux_22.
@@ -12006,6 +15410,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_22_aux_22_encode(double value);
 double vehicle_rt_dl1_mk3_aux_22_aux_22_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_22_aux_22_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12013,6 +15424,35 @@ double vehicle_rt_dl1_mk3_aux_22_aux_22_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_22_aux_22_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_22 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_22_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_22);
+
+/**
+ * unpack message RT_DL1MK3_Aux_22 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_22_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_22);
 
 /**
  * Pack message RT_DL1MK3_Aux_21.
@@ -12061,6 +15501,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_21_aux_21_encode(double value);
 double vehicle_rt_dl1_mk3_aux_21_aux_21_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_21_aux_21_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12068,6 +15515,35 @@ double vehicle_rt_dl1_mk3_aux_21_aux_21_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_21_aux_21_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_21 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_21_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_21);
+
+/**
+ * unpack message RT_DL1MK3_Aux_21 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_21_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_21);
 
 /**
  * Pack message RT_DL1MK3_Aux_20.
@@ -12116,6 +15592,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_20_aux_20_encode(double value);
 double vehicle_rt_dl1_mk3_aux_20_aux_20_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_20_aux_20_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12123,6 +15606,35 @@ double vehicle_rt_dl1_mk3_aux_20_aux_20_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_20_aux_20_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_20 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_20_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_20);
+
+/**
+ * unpack message RT_DL1MK3_Aux_20 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_20_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_20);
 
 /**
  * Pack message RT_DL1MK3_Aux_19.
@@ -12171,6 +15683,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_19_aux_19_encode(double value);
 double vehicle_rt_dl1_mk3_aux_19_aux_19_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_19_aux_19_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12178,6 +15697,35 @@ double vehicle_rt_dl1_mk3_aux_19_aux_19_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_19_aux_19_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_19 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_19_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_19);
+
+/**
+ * unpack message RT_DL1MK3_Aux_19 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_19_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_19);
 
 /**
  * Pack message RT_DL1MK3_Aux_18.
@@ -12226,6 +15774,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_18_aux_18_encode(double value);
 double vehicle_rt_dl1_mk3_aux_18_aux_18_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_18_aux_18_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12233,6 +15788,35 @@ double vehicle_rt_dl1_mk3_aux_18_aux_18_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_18_aux_18_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_18 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_18_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_18);
+
+/**
+ * unpack message RT_DL1MK3_Aux_18 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_18_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_18);
 
 /**
  * Pack message RT_DL1MK3_Aux_17.
@@ -12281,6 +15865,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_17_aux_17_encode(double value);
 double vehicle_rt_dl1_mk3_aux_17_aux_17_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_17_aux_17_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12288,6 +15879,35 @@ double vehicle_rt_dl1_mk3_aux_17_aux_17_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_17_aux_17_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_17 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_17_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_17);
+
+/**
+ * unpack message RT_DL1MK3_Aux_17 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_17_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_17);
 
 /**
  * Pack message RT_DL1MK3_Aux_16.
@@ -12336,6 +15956,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_16_aux_16_encode(double value);
 double vehicle_rt_dl1_mk3_aux_16_aux_16_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_16_aux_16_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12343,6 +15970,35 @@ double vehicle_rt_dl1_mk3_aux_16_aux_16_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_16_aux_16_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_16 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_16_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_16);
+
+/**
+ * unpack message RT_DL1MK3_Aux_16 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_16_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_16);
 
 /**
  * Pack message RT_DL1MK3_Aux_15.
@@ -12391,6 +16047,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_15_aux_15_encode(double value);
 double vehicle_rt_dl1_mk3_aux_15_aux_15_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_15_aux_15_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12398,6 +16061,35 @@ double vehicle_rt_dl1_mk3_aux_15_aux_15_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_15_aux_15_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_15 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_15_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_15);
+
+/**
+ * unpack message RT_DL1MK3_Aux_15 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_15_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_15);
 
 /**
  * Pack message RT_DL1MK3_Aux_14.
@@ -12446,6 +16138,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_14_aux_14_encode(double value);
 double vehicle_rt_dl1_mk3_aux_14_aux_14_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_14_aux_14_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12453,6 +16152,35 @@ double vehicle_rt_dl1_mk3_aux_14_aux_14_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_14_aux_14_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_14 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_14_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_14);
+
+/**
+ * unpack message RT_DL1MK3_Aux_14 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_14_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_14);
 
 /**
  * Pack message RT_DL1MK3_Aux_13.
@@ -12501,6 +16229,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_13_aux_13_encode(double value);
 double vehicle_rt_dl1_mk3_aux_13_aux_13_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_13_aux_13_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12508,6 +16243,35 @@ double vehicle_rt_dl1_mk3_aux_13_aux_13_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_13_aux_13_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_13 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_13_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_13);
+
+/**
+ * unpack message RT_DL1MK3_Aux_13 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_13_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_13);
 
 /**
  * Pack message RT_DL1MK3_Aux_12.
@@ -12556,6 +16320,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_12_aux_12_encode(double value);
 double vehicle_rt_dl1_mk3_aux_12_aux_12_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_12_aux_12_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12563,6 +16334,35 @@ double vehicle_rt_dl1_mk3_aux_12_aux_12_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_12_aux_12_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_12 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_12_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_12);
+
+/**
+ * unpack message RT_DL1MK3_Aux_12 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_12_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_12);
 
 /**
  * Pack message RT_DL1MK3_Aux_11.
@@ -12611,6 +16411,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_11_aux_11_encode(double value);
 double vehicle_rt_dl1_mk3_aux_11_aux_11_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_11_aux_11_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12618,6 +16425,35 @@ double vehicle_rt_dl1_mk3_aux_11_aux_11_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_11_aux_11_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_11 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_11_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_11);
+
+/**
+ * unpack message RT_DL1MK3_Aux_11 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_11_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_11);
 
 /**
  * Pack message RT_DL1MK3_Aux_9.
@@ -12666,6 +16502,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_9_aux_9_encode(double value);
 double vehicle_rt_dl1_mk3_aux_9_aux_9_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_9_aux_9_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12673,6 +16516,35 @@ double vehicle_rt_dl1_mk3_aux_9_aux_9_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_9_aux_9_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_9 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_9_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_9);
+
+/**
+ * unpack message RT_DL1MK3_Aux_9 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_9_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_9);
 
 /**
  * Pack message RT_DL1MK3_Aux_10.
@@ -12721,6 +16593,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_10_aux_10_encode(double value);
 double vehicle_rt_dl1_mk3_aux_10_aux_10_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_10_aux_10_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12728,6 +16607,35 @@ double vehicle_rt_dl1_mk3_aux_10_aux_10_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_10_aux_10_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_10 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_10_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_10);
+
+/**
+ * unpack message RT_DL1MK3_Aux_10 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_10_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_10);
 
 /**
  * Pack message RT_DL1MK3_Aux_8.
@@ -12776,6 +16684,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_8_aux_8_encode(double value);
 double vehicle_rt_dl1_mk3_aux_8_aux_8_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_8_aux_8_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12783,6 +16698,35 @@ double vehicle_rt_dl1_mk3_aux_8_aux_8_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_8_aux_8_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_8 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_8_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_8);
+
+/**
+ * unpack message RT_DL1MK3_Aux_8 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_8_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_8);
 
 /**
  * Pack message RT_DL1MK3_Aux_7.
@@ -12831,6 +16775,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_7_aux_7_encode(double value);
 double vehicle_rt_dl1_mk3_aux_7_aux_7_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_7_aux_7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12838,6 +16789,35 @@ double vehicle_rt_dl1_mk3_aux_7_aux_7_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_7_aux_7_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_7 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_7_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_7);
+
+/**
+ * unpack message RT_DL1MK3_Aux_7 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_7_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_7);
 
 /**
  * Pack message RT_DL1MK3_Aux_6.
@@ -12886,6 +16866,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_6_aux_6_encode(double value);
 double vehicle_rt_dl1_mk3_aux_6_aux_6_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_6_aux_6_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12893,6 +16880,35 @@ double vehicle_rt_dl1_mk3_aux_6_aux_6_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_6_aux_6_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_6 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_6_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_6);
+
+/**
+ * unpack message RT_DL1MK3_Aux_6 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_6_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_6);
 
 /**
  * Pack message RT_DL1MK3_Aux_5.
@@ -12941,6 +16957,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_5_aux_5_encode(double value);
 double vehicle_rt_dl1_mk3_aux_5_aux_5_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_5_aux_5_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -12948,6 +16971,35 @@ double vehicle_rt_dl1_mk3_aux_5_aux_5_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_5_aux_5_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_5 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_5_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_5);
+
+/**
+ * unpack message RT_DL1MK3_Aux_5 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_5_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_5);
 
 /**
  * Pack message RT_DL1MK3_Aux_4.
@@ -12996,6 +17048,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_4_aux_4_encode(double value);
 double vehicle_rt_dl1_mk3_aux_4_aux_4_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_4_aux_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13003,6 +17062,35 @@ double vehicle_rt_dl1_mk3_aux_4_aux_4_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_4_aux_4_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_4);
+
+/**
+ * unpack message RT_DL1MK3_Aux_4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_4);
 
 /**
  * Pack message RT_DL1MK3_Aux_3.
@@ -13051,6 +17139,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_3_aux_3_encode(double value);
 double vehicle_rt_dl1_mk3_aux_3_aux_3_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_3_aux_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13058,6 +17153,35 @@ double vehicle_rt_dl1_mk3_aux_3_aux_3_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_3_aux_3_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_3);
+
+/**
+ * unpack message RT_DL1MK3_Aux_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_3);
 
 /**
  * Pack message RT_DL1MK3_Aux_2.
@@ -13106,6 +17230,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_2_aux_2_encode(double value);
 double vehicle_rt_dl1_mk3_aux_2_aux_2_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_2_aux_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13113,6 +17244,35 @@ double vehicle_rt_dl1_mk3_aux_2_aux_2_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_2_aux_2_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_2);
+
+/**
+ * unpack message RT_DL1MK3_Aux_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_2);
 
 /**
  * Pack message RT_DL1MK3_Aux_1.
@@ -13161,6 +17321,13 @@ uint16_t vehicle_rt_dl1_mk3_aux_1_aux_1_encode(double value);
 double vehicle_rt_dl1_mk3_aux_1_aux_1_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_aux_1_aux_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13168,6 +17335,35 @@ double vehicle_rt_dl1_mk3_aux_1_aux_1_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_aux_1_aux_1_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Aux_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_aux_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double aux_1);
+
+/**
+ * unpack message RT_DL1MK3_Aux_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_aux_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *aux_1);
 
 /**
  * Pack message RT_DL1MK3_Pressure_5.
@@ -13216,6 +17412,13 @@ uint32_t vehicle_rt_dl1_mk3_pressure_5_pressure_5_encode(double value);
 double vehicle_rt_dl1_mk3_pressure_5_pressure_5_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_pressure_5_pressure_5_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13223,6 +17426,35 @@ double vehicle_rt_dl1_mk3_pressure_5_pressure_5_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_pressure_5_pressure_5_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Pressure_5 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_pressure_5_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double pressure_5);
+
+/**
+ * unpack message RT_DL1MK3_Pressure_5 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_pressure_5_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *pressure_5);
 
 /**
  * Pack message RT_DL1MK3_Pressure_4.
@@ -13271,6 +17503,13 @@ uint32_t vehicle_rt_dl1_mk3_pressure_4_pressure_4_encode(double value);
 double vehicle_rt_dl1_mk3_pressure_4_pressure_4_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_pressure_4_pressure_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13278,6 +17517,35 @@ double vehicle_rt_dl1_mk3_pressure_4_pressure_4_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_pressure_4_pressure_4_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Pressure_4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_pressure_4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double pressure_4);
+
+/**
+ * unpack message RT_DL1MK3_Pressure_4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_pressure_4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *pressure_4);
 
 /**
  * Pack message RT_DL1MK3_Pressure_3.
@@ -13326,6 +17594,13 @@ uint32_t vehicle_rt_dl1_mk3_pressure_3_pressure_3_encode(double value);
 double vehicle_rt_dl1_mk3_pressure_3_pressure_3_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_pressure_3_pressure_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13333,6 +17608,35 @@ double vehicle_rt_dl1_mk3_pressure_3_pressure_3_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_pressure_3_pressure_3_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Pressure_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_pressure_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double pressure_3);
+
+/**
+ * unpack message RT_DL1MK3_Pressure_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_pressure_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *pressure_3);
 
 /**
  * Pack message RT_DL1MK3_Pressure_2.
@@ -13381,6 +17685,13 @@ uint32_t vehicle_rt_dl1_mk3_pressure_2_pressure_2_encode(double value);
 double vehicle_rt_dl1_mk3_pressure_2_pressure_2_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_pressure_2_pressure_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13388,6 +17699,35 @@ double vehicle_rt_dl1_mk3_pressure_2_pressure_2_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_pressure_2_pressure_2_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Pressure_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_pressure_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double pressure_2);
+
+/**
+ * unpack message RT_DL1MK3_Pressure_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_pressure_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *pressure_2);
 
 /**
  * Pack message RT_DL1MK3_Pressure_1.
@@ -13436,6 +17776,13 @@ uint32_t vehicle_rt_dl1_mk3_pressure_1_pressure_1_encode(double value);
 double vehicle_rt_dl1_mk3_pressure_1_pressure_1_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_pressure_1_pressure_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13443,6 +17790,35 @@ double vehicle_rt_dl1_mk3_pressure_1_pressure_1_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_pressure_1_pressure_1_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_DL1MK3_Pressure_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_pressure_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double pressure_1);
+
+/**
+ * unpack message RT_DL1MK3_Pressure_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_pressure_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *pressure_1);
 
 /**
  * Pack message RT_DL1MK3_Angle_3.
@@ -13491,6 +17867,13 @@ int16_t vehicle_rt_dl1_mk3_angle_3_angle_3_encode(double value);
 double vehicle_rt_dl1_mk3_angle_3_angle_3_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_angle_3_angle_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13498,6 +17881,35 @@ double vehicle_rt_dl1_mk3_angle_3_angle_3_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_angle_3_angle_3_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Angle_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_angle_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double angle_3);
+
+/**
+ * unpack message RT_DL1MK3_Angle_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_angle_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *angle_3);
 
 /**
  * Pack message RT_DL1MK3_Angle_2.
@@ -13546,6 +17958,13 @@ int16_t vehicle_rt_dl1_mk3_angle_2_angle_2_encode(double value);
 double vehicle_rt_dl1_mk3_angle_2_angle_2_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_angle_2_angle_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13553,6 +17972,35 @@ double vehicle_rt_dl1_mk3_angle_2_angle_2_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_angle_2_angle_2_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Angle_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_angle_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double angle_2);
+
+/**
+ * unpack message RT_DL1MK3_Angle_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_angle_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *angle_2);
 
 /**
  * Pack message RT_DL1MK3_Angle_1.
@@ -13601,6 +18049,13 @@ int16_t vehicle_rt_dl1_mk3_angle_1_angle_1_encode(double value);
 double vehicle_rt_dl1_mk3_angle_1_angle_1_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_angle_1_angle_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13608,6 +18063,35 @@ double vehicle_rt_dl1_mk3_angle_1_angle_1_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_angle_1_angle_1_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Angle_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_angle_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double angle_1);
+
+/**
+ * unpack message RT_DL1MK3_Angle_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_angle_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *angle_1);
 
 /**
  * Pack message RT_DL1MK3_Temp_25.
@@ -13656,6 +18140,13 @@ int16_t vehicle_rt_dl1_mk3_temp_25_temperature_25_encode(double value);
 double vehicle_rt_dl1_mk3_temp_25_temperature_25_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_25_temperature_25_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13663,6 +18154,35 @@ double vehicle_rt_dl1_mk3_temp_25_temperature_25_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_25_temperature_25_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_25 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_25_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_25);
+
+/**
+ * unpack message RT_DL1MK3_Temp_25 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_25_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_25);
 
 /**
  * Pack message RT_DL1MK3_Temp_24.
@@ -13711,6 +18231,13 @@ int16_t vehicle_rt_dl1_mk3_temp_24_temperature_24_encode(double value);
 double vehicle_rt_dl1_mk3_temp_24_temperature_24_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_24_temperature_24_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13718,6 +18245,35 @@ double vehicle_rt_dl1_mk3_temp_24_temperature_24_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_24_temperature_24_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_24 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_24_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_24);
+
+/**
+ * unpack message RT_DL1MK3_Temp_24 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_24_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_24);
 
 /**
  * Pack message RT_DL1MK3_Temp_23.
@@ -13766,6 +18322,13 @@ int16_t vehicle_rt_dl1_mk3_temp_23_temperature_23_encode(double value);
 double vehicle_rt_dl1_mk3_temp_23_temperature_23_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_23_temperature_23_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13773,6 +18336,35 @@ double vehicle_rt_dl1_mk3_temp_23_temperature_23_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_23_temperature_23_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_23 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_23_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_23);
+
+/**
+ * unpack message RT_DL1MK3_Temp_23 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_23_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_23);
 
 /**
  * Pack message RT_DL1MK3_Temp_22.
@@ -13821,6 +18413,13 @@ int16_t vehicle_rt_dl1_mk3_temp_22_temperature_22_encode(double value);
 double vehicle_rt_dl1_mk3_temp_22_temperature_22_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_22_temperature_22_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13828,6 +18427,35 @@ double vehicle_rt_dl1_mk3_temp_22_temperature_22_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_22_temperature_22_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_22 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_22_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_22);
+
+/**
+ * unpack message RT_DL1MK3_Temp_22 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_22_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_22);
 
 /**
  * Pack message RT_DL1MK3_Temp_21.
@@ -13876,6 +18504,13 @@ int16_t vehicle_rt_dl1_mk3_temp_21_temperature_21_encode(double value);
 double vehicle_rt_dl1_mk3_temp_21_temperature_21_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_21_temperature_21_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13883,6 +18518,35 @@ double vehicle_rt_dl1_mk3_temp_21_temperature_21_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_21_temperature_21_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_21 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_21_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_21);
+
+/**
+ * unpack message RT_DL1MK3_Temp_21 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_21_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_21);
 
 /**
  * Pack message RT_DL1MK3_Temp_20.
@@ -13931,6 +18595,13 @@ int16_t vehicle_rt_dl1_mk3_temp_20_temperature_20_encode(double value);
 double vehicle_rt_dl1_mk3_temp_20_temperature_20_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_20_temperature_20_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13938,6 +18609,35 @@ double vehicle_rt_dl1_mk3_temp_20_temperature_20_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_20_temperature_20_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_20 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_20_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_20);
+
+/**
+ * unpack message RT_DL1MK3_Temp_20 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_20_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_20);
 
 /**
  * Pack message RT_DL1MK3_Temp_19.
@@ -13986,6 +18686,13 @@ int16_t vehicle_rt_dl1_mk3_temp_19_temperature_19_encode(double value);
 double vehicle_rt_dl1_mk3_temp_19_temperature_19_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_19_temperature_19_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -13993,6 +18700,35 @@ double vehicle_rt_dl1_mk3_temp_19_temperature_19_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_19_temperature_19_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_19 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_19_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_19);
+
+/**
+ * unpack message RT_DL1MK3_Temp_19 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_19_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_19);
 
 /**
  * Pack message RT_DL1MK3_Temp_18.
@@ -14041,6 +18777,13 @@ int16_t vehicle_rt_dl1_mk3_temp_18_temperature_18_encode(double value);
 double vehicle_rt_dl1_mk3_temp_18_temperature_18_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_18_temperature_18_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14048,6 +18791,35 @@ double vehicle_rt_dl1_mk3_temp_18_temperature_18_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_18_temperature_18_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_18 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_18_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_18);
+
+/**
+ * unpack message RT_DL1MK3_Temp_18 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_18_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_18);
 
 /**
  * Pack message RT_DL1MK3_Temp_17.
@@ -14096,6 +18868,13 @@ int16_t vehicle_rt_dl1_mk3_temp_17_temperature_17_encode(double value);
 double vehicle_rt_dl1_mk3_temp_17_temperature_17_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_17_temperature_17_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14103,6 +18882,35 @@ double vehicle_rt_dl1_mk3_temp_17_temperature_17_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_17_temperature_17_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_17 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_17_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_17);
+
+/**
+ * unpack message RT_DL1MK3_Temp_17 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_17_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_17);
 
 /**
  * Pack message RT_DL1MK3_Temp_16.
@@ -14151,6 +18959,13 @@ int16_t vehicle_rt_dl1_mk3_temp_16_temperature_16_encode(double value);
 double vehicle_rt_dl1_mk3_temp_16_temperature_16_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_16_temperature_16_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14158,6 +18973,35 @@ double vehicle_rt_dl1_mk3_temp_16_temperature_16_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_16_temperature_16_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_16 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_16_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_16);
+
+/**
+ * unpack message RT_DL1MK3_Temp_16 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_16_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_16);
 
 /**
  * Pack message RT_DL1MK3_Temp_15.
@@ -14206,6 +19050,13 @@ int16_t vehicle_rt_dl1_mk3_temp_15_temperature_15_encode(double value);
 double vehicle_rt_dl1_mk3_temp_15_temperature_15_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_15_temperature_15_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14213,6 +19064,35 @@ double vehicle_rt_dl1_mk3_temp_15_temperature_15_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_15_temperature_15_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_15 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_15_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_15);
+
+/**
+ * unpack message RT_DL1MK3_Temp_15 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_15_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_15);
 
 /**
  * Pack message RT_DL1MK3_Temp_14.
@@ -14261,6 +19141,13 @@ int16_t vehicle_rt_dl1_mk3_temp_14_temperature_14_encode(double value);
 double vehicle_rt_dl1_mk3_temp_14_temperature_14_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_14_temperature_14_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14268,6 +19155,35 @@ double vehicle_rt_dl1_mk3_temp_14_temperature_14_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_14_temperature_14_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_14 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_14_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_14);
+
+/**
+ * unpack message RT_DL1MK3_Temp_14 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_14_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_14);
 
 /**
  * Pack message RT_DL1MK3_Temp_13.
@@ -14316,6 +19232,13 @@ int16_t vehicle_rt_dl1_mk3_temp_13_temperature_13_encode(double value);
 double vehicle_rt_dl1_mk3_temp_13_temperature_13_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_13_temperature_13_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14323,6 +19246,35 @@ double vehicle_rt_dl1_mk3_temp_13_temperature_13_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_13_temperature_13_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_13 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_13_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_13);
+
+/**
+ * unpack message RT_DL1MK3_Temp_13 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_13_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_13);
 
 /**
  * Pack message RT_DL1MK3_Temp_12.
@@ -14371,6 +19323,13 @@ int16_t vehicle_rt_dl1_mk3_temp_12_temperature_12_encode(double value);
 double vehicle_rt_dl1_mk3_temp_12_temperature_12_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_12_temperature_12_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14378,6 +19337,35 @@ double vehicle_rt_dl1_mk3_temp_12_temperature_12_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_12_temperature_12_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_12 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_12_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_12);
+
+/**
+ * unpack message RT_DL1MK3_Temp_12 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_12_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_12);
 
 /**
  * Pack message RT_DL1MK3_Temp_11.
@@ -14426,6 +19414,13 @@ int16_t vehicle_rt_dl1_mk3_temp_11_temperature_11_encode(double value);
 double vehicle_rt_dl1_mk3_temp_11_temperature_11_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_11_temperature_11_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14433,6 +19428,35 @@ double vehicle_rt_dl1_mk3_temp_11_temperature_11_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_11_temperature_11_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_11 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_11_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_11);
+
+/**
+ * unpack message RT_DL1MK3_Temp_11 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_11_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_11);
 
 /**
  * Pack message RT_DL1MK3_Temp_10.
@@ -14481,6 +19505,13 @@ int16_t vehicle_rt_dl1_mk3_temp_10_temperature_10_encode(double value);
 double vehicle_rt_dl1_mk3_temp_10_temperature_10_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_10_temperature_10_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14488,6 +19519,35 @@ double vehicle_rt_dl1_mk3_temp_10_temperature_10_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_10_temperature_10_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_10 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_10_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_10);
+
+/**
+ * unpack message RT_DL1MK3_Temp_10 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_10_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_10);
 
 /**
  * Pack message RT_DL1MK3_Temp_9.
@@ -14536,6 +19596,13 @@ int16_t vehicle_rt_dl1_mk3_temp_9_temperature_9_encode(double value);
 double vehicle_rt_dl1_mk3_temp_9_temperature_9_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_9_temperature_9_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14543,6 +19610,35 @@ double vehicle_rt_dl1_mk3_temp_9_temperature_9_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_9_temperature_9_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_9 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_9_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_9);
+
+/**
+ * unpack message RT_DL1MK3_Temp_9 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_9_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_9);
 
 /**
  * Pack message RT_DL1MK3_Temp_8.
@@ -14591,6 +19687,13 @@ int16_t vehicle_rt_dl1_mk3_temp_8_temperature_8_encode(double value);
 double vehicle_rt_dl1_mk3_temp_8_temperature_8_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_8_temperature_8_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14598,6 +19701,35 @@ double vehicle_rt_dl1_mk3_temp_8_temperature_8_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_8_temperature_8_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_8 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_8_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_8);
+
+/**
+ * unpack message RT_DL1MK3_Temp_8 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_8_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_8);
 
 /**
  * Pack message RT_DL1MK3_Temp_7.
@@ -14646,6 +19778,13 @@ int16_t vehicle_rt_dl1_mk3_temp_7_temperature_7_encode(double value);
 double vehicle_rt_dl1_mk3_temp_7_temperature_7_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_7_temperature_7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14653,6 +19792,35 @@ double vehicle_rt_dl1_mk3_temp_7_temperature_7_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_7_temperature_7_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_7 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_7_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_7);
+
+/**
+ * unpack message RT_DL1MK3_Temp_7 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_7_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_7);
 
 /**
  * Pack message RT_DL1MK3_Temp_6.
@@ -14701,6 +19869,13 @@ int16_t vehicle_rt_dl1_mk3_temp_6_temperature_6_encode(double value);
 double vehicle_rt_dl1_mk3_temp_6_temperature_6_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_6_temperature_6_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14708,6 +19883,35 @@ double vehicle_rt_dl1_mk3_temp_6_temperature_6_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_6_temperature_6_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_6 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_6_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_6);
+
+/**
+ * unpack message RT_DL1MK3_Temp_6 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_6_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_6);
 
 /**
  * Pack message RT_DL1MK3_Temp_5.
@@ -14756,6 +19960,13 @@ int16_t vehicle_rt_dl1_mk3_temp_5_temperature_5_encode(double value);
 double vehicle_rt_dl1_mk3_temp_5_temperature_5_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_5_temperature_5_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14763,6 +19974,35 @@ double vehicle_rt_dl1_mk3_temp_5_temperature_5_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_5_temperature_5_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_5 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_5_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_5);
+
+/**
+ * unpack message RT_DL1MK3_Temp_5 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_5_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_5);
 
 /**
  * Pack message RT_DL1MK3_Temp_4.
@@ -14811,6 +20051,13 @@ int16_t vehicle_rt_dl1_mk3_temp_4_temperature_4_encode(double value);
 double vehicle_rt_dl1_mk3_temp_4_temperature_4_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_4_temperature_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14818,6 +20065,35 @@ double vehicle_rt_dl1_mk3_temp_4_temperature_4_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_4_temperature_4_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_4);
+
+/**
+ * unpack message RT_DL1MK3_Temp_4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_4);
 
 /**
  * Pack message RT_DL1MK3_Temp_3.
@@ -14866,6 +20142,13 @@ int16_t vehicle_rt_dl1_mk3_temp_3_temperature_3_encode(double value);
 double vehicle_rt_dl1_mk3_temp_3_temperature_3_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_3_temperature_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14873,6 +20156,35 @@ double vehicle_rt_dl1_mk3_temp_3_temperature_3_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_3_temperature_3_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_3);
+
+/**
+ * unpack message RT_DL1MK3_Temp_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_3);
 
 /**
  * Pack message RT_DL1MK3_Temp_2.
@@ -14921,6 +20233,13 @@ int16_t vehicle_rt_dl1_mk3_temp_2_temperature_2_encode(double value);
 double vehicle_rt_dl1_mk3_temp_2_temperature_2_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_2_temperature_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14928,6 +20247,35 @@ double vehicle_rt_dl1_mk3_temp_2_temperature_2_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_2_temperature_2_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_2);
+
+/**
+ * unpack message RT_DL1MK3_Temp_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_2);
 
 /**
  * Pack message RT_DL1MK3_Temp_1.
@@ -14976,6 +20324,13 @@ int16_t vehicle_rt_dl1_mk3_temp_1_temperature_1_encode(double value);
 double vehicle_rt_dl1_mk3_temp_1_temperature_1_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_temp_1_temperature_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -14983,6 +20338,35 @@ double vehicle_rt_dl1_mk3_temp_1_temperature_1_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_temp_1_temperature_1_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Temp_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_temp_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double temperature_1);
+
+/**
+ * unpack message RT_DL1MK3_Temp_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_temp_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *temperature_1);
 
 /**
  * Pack message RT_DL1MK3_Analog_32.
@@ -15031,6 +20415,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_32_analog_32_encode(double value);
 double vehicle_rt_dl1_mk3_analog_32_analog_32_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_32_analog_32_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15038,6 +20429,35 @@ double vehicle_rt_dl1_mk3_analog_32_analog_32_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_32_analog_32_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_32 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_32_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_32);
+
+/**
+ * unpack message RT_DL1MK3_Analog_32 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_32_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_32);
 
 /**
  * Pack message RT_DL1MK3_Analog_31.
@@ -15086,6 +20506,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_31_analog_31_encode(double value);
 double vehicle_rt_dl1_mk3_analog_31_analog_31_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_31_analog_31_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15093,6 +20520,35 @@ double vehicle_rt_dl1_mk3_analog_31_analog_31_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_31_analog_31_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_31 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_31_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_31);
+
+/**
+ * unpack message RT_DL1MK3_Analog_31 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_31_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_31);
 
 /**
  * Pack message RT_DL1MK3_Analog_30.
@@ -15141,6 +20597,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_30_analog_30_encode(double value);
 double vehicle_rt_dl1_mk3_analog_30_analog_30_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_30_analog_30_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15148,6 +20611,35 @@ double vehicle_rt_dl1_mk3_analog_30_analog_30_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_30_analog_30_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_30 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_30_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_30);
+
+/**
+ * unpack message RT_DL1MK3_Analog_30 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_30_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_30);
 
 /**
  * Pack message RT_DL1MK3_Analog_29.
@@ -15196,6 +20688,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_29_analog_29_encode(double value);
 double vehicle_rt_dl1_mk3_analog_29_analog_29_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_29_analog_29_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15203,6 +20702,35 @@ double vehicle_rt_dl1_mk3_analog_29_analog_29_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_29_analog_29_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_29 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_29_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_29);
+
+/**
+ * unpack message RT_DL1MK3_Analog_29 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_29_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_29);
 
 /**
  * Pack message RT_DL1MK3_Analog_28.
@@ -15251,6 +20779,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_28_analog_28_encode(double value);
 double vehicle_rt_dl1_mk3_analog_28_analog_28_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_28_analog_28_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15258,6 +20793,35 @@ double vehicle_rt_dl1_mk3_analog_28_analog_28_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_28_analog_28_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_28 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_28_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_28);
+
+/**
+ * unpack message RT_DL1MK3_Analog_28 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_28_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_28);
 
 /**
  * Pack message RT_DL1MK3_Analog_27.
@@ -15306,6 +20870,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_27_analog_27_encode(double value);
 double vehicle_rt_dl1_mk3_analog_27_analog_27_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_27_analog_27_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15313,6 +20884,35 @@ double vehicle_rt_dl1_mk3_analog_27_analog_27_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_27_analog_27_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_27 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_27_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_27);
+
+/**
+ * unpack message RT_DL1MK3_Analog_27 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_27_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_27);
 
 /**
  * Pack message RT_DL1MK3_Analog_26.
@@ -15361,6 +20961,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_26_analog_26_encode(double value);
 double vehicle_rt_dl1_mk3_analog_26_analog_26_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_26_analog_26_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15368,6 +20975,35 @@ double vehicle_rt_dl1_mk3_analog_26_analog_26_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_26_analog_26_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_26 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_26_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_26);
+
+/**
+ * unpack message RT_DL1MK3_Analog_26 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_26_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_26);
 
 /**
  * Pack message RT_DL1MK3_Analog_25.
@@ -15416,6 +21052,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_25_analog_25_encode(double value);
 double vehicle_rt_dl1_mk3_analog_25_analog_25_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_25_analog_25_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15423,6 +21066,35 @@ double vehicle_rt_dl1_mk3_analog_25_analog_25_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_25_analog_25_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_25 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_25_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_25);
+
+/**
+ * unpack message RT_DL1MK3_Analog_25 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_25_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_25);
 
 /**
  * Pack message RT_DL1MK3_Analog_15.
@@ -15471,6 +21143,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_15_analog_15_encode(double value);
 double vehicle_rt_dl1_mk3_analog_15_analog_15_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_15_analog_15_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15478,6 +21157,35 @@ double vehicle_rt_dl1_mk3_analog_15_analog_15_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_15_analog_15_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_15 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_15_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_15);
+
+/**
+ * unpack message RT_DL1MK3_Analog_15 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_15_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_15);
 
 /**
  * Pack message RT_DL1MK3_Analog_14.
@@ -15526,6 +21234,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_14_analog_14_encode(double value);
 double vehicle_rt_dl1_mk3_analog_14_analog_14_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_14_analog_14_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15533,6 +21248,35 @@ double vehicle_rt_dl1_mk3_analog_14_analog_14_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_14_analog_14_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_14 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_14_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_14);
+
+/**
+ * unpack message RT_DL1MK3_Analog_14 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_14_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_14);
 
 /**
  * Pack message RT_DL1MK3_Analog_17.
@@ -15581,6 +21325,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_17_analog_17_encode(double value);
 double vehicle_rt_dl1_mk3_analog_17_analog_17_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_17_analog_17_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15588,6 +21339,35 @@ double vehicle_rt_dl1_mk3_analog_17_analog_17_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_17_analog_17_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_17 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_17_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_17);
+
+/**
+ * unpack message RT_DL1MK3_Analog_17 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_17_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_17);
 
 /**
  * Pack message RT_DL1MK3_Analog_24.
@@ -15636,6 +21416,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_24_analog_24_encode(double value);
 double vehicle_rt_dl1_mk3_analog_24_analog_24_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_24_analog_24_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15643,6 +21430,35 @@ double vehicle_rt_dl1_mk3_analog_24_analog_24_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_24_analog_24_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_24 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_24_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_24);
+
+/**
+ * unpack message RT_DL1MK3_Analog_24 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_24_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_24);
 
 /**
  * Pack message RT_DL1MK3_Analog_23.
@@ -15691,6 +21507,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_23_analog_23_encode(double value);
 double vehicle_rt_dl1_mk3_analog_23_analog_23_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_23_analog_23_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15698,6 +21521,35 @@ double vehicle_rt_dl1_mk3_analog_23_analog_23_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_23_analog_23_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_23 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_23_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_23);
+
+/**
+ * unpack message RT_DL1MK3_Analog_23 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_23_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_23);
 
 /**
  * Pack message RT_DL1MK3_Analog_22.
@@ -15746,6 +21598,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_22_analog_22_encode(double value);
 double vehicle_rt_dl1_mk3_analog_22_analog_22_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_22_analog_22_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15753,6 +21612,35 @@ double vehicle_rt_dl1_mk3_analog_22_analog_22_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_22_analog_22_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_22 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_22_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_22);
+
+/**
+ * unpack message RT_DL1MK3_Analog_22 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_22_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_22);
 
 /**
  * Pack message RT_DL1MK3_Analog_21.
@@ -15801,6 +21689,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_21_analog_21_encode(double value);
 double vehicle_rt_dl1_mk3_analog_21_analog_21_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_21_analog_21_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15808,6 +21703,35 @@ double vehicle_rt_dl1_mk3_analog_21_analog_21_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_21_analog_21_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_21 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_21_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_21);
+
+/**
+ * unpack message RT_DL1MK3_Analog_21 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_21_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_21);
 
 /**
  * Pack message RT_DL1MK3_Analog_20.
@@ -15856,6 +21780,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_20_analog_20_encode(double value);
 double vehicle_rt_dl1_mk3_analog_20_analog_20_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_20_analog_20_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15863,6 +21794,35 @@ double vehicle_rt_dl1_mk3_analog_20_analog_20_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_20_analog_20_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_20 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_20_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_20);
+
+/**
+ * unpack message RT_DL1MK3_Analog_20 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_20_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_20);
 
 /**
  * Pack message RT_DL1MK3_Analog_19.
@@ -15911,6 +21871,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_19_analog_19_encode(double value);
 double vehicle_rt_dl1_mk3_analog_19_analog_19_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_19_analog_19_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15918,6 +21885,35 @@ double vehicle_rt_dl1_mk3_analog_19_analog_19_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_19_analog_19_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_19 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_19_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_19);
+
+/**
+ * unpack message RT_DL1MK3_Analog_19 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_19_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_19);
 
 /**
  * Pack message RT_DL1MK3_Analog_16.
@@ -15966,6 +21962,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_16_analog_16_encode(double value);
 double vehicle_rt_dl1_mk3_analog_16_analog_16_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_16_analog_16_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -15973,6 +21976,35 @@ double vehicle_rt_dl1_mk3_analog_16_analog_16_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_16_analog_16_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_16 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_16_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_16);
+
+/**
+ * unpack message RT_DL1MK3_Analog_16 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_16_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_16);
 
 /**
  * Pack message RT_DL1MK3_Analog_18.
@@ -16021,6 +22053,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_18_analog_18_encode(double value);
 double vehicle_rt_dl1_mk3_analog_18_analog_18_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_18_analog_18_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16028,6 +22067,35 @@ double vehicle_rt_dl1_mk3_analog_18_analog_18_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_18_analog_18_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_18 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_18_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_18);
+
+/**
+ * unpack message RT_DL1MK3_Analog_18 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_18_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_18);
 
 /**
  * Pack message RT_DL1MK3_Analog_12.
@@ -16076,6 +22144,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_12_analog_12_encode(double value);
 double vehicle_rt_dl1_mk3_analog_12_analog_12_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_12_analog_12_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16083,6 +22158,35 @@ double vehicle_rt_dl1_mk3_analog_12_analog_12_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_12_analog_12_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_12 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_12_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_12);
+
+/**
+ * unpack message RT_DL1MK3_Analog_12 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_12_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_12);
 
 /**
  * Pack message RT_DL1MK3_Analog_11.
@@ -16131,6 +22235,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_11_analog_11_encode(double value);
 double vehicle_rt_dl1_mk3_analog_11_analog_11_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_11_analog_11_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16138,6 +22249,35 @@ double vehicle_rt_dl1_mk3_analog_11_analog_11_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_11_analog_11_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_11 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_11_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_11);
+
+/**
+ * unpack message RT_DL1MK3_Analog_11 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_11_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_11);
 
 /**
  * Pack message RT_DL1MK3_Analog_10.
@@ -16186,6 +22326,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_10_analog_10_encode(double value);
 double vehicle_rt_dl1_mk3_analog_10_analog_10_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_10_analog_10_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16193,6 +22340,35 @@ double vehicle_rt_dl1_mk3_analog_10_analog_10_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_10_analog_10_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_10 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_10_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_10);
+
+/**
+ * unpack message RT_DL1MK3_Analog_10 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_10_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_10);
 
 /**
  * Pack message RT_DL1MK3_Analog_9.
@@ -16241,6 +22417,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_9_analog_9_encode(double value);
 double vehicle_rt_dl1_mk3_analog_9_analog_9_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_9_analog_9_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16248,6 +22431,35 @@ double vehicle_rt_dl1_mk3_analog_9_analog_9_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_9_analog_9_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_9 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_9_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_9);
+
+/**
+ * unpack message RT_DL1MK3_Analog_9 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_9_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_9);
 
 /**
  * Pack message RT_DL1MK3_Analog_8.
@@ -16296,6 +22508,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_8_analog_8_encode(double value);
 double vehicle_rt_dl1_mk3_analog_8_analog_8_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_8_analog_8_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16303,6 +22522,35 @@ double vehicle_rt_dl1_mk3_analog_8_analog_8_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_8_analog_8_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_8 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_8_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_8);
+
+/**
+ * unpack message RT_DL1MK3_Analog_8 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_8_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_8);
 
 /**
  * Pack message RT_DL1MK3_Analog_7.
@@ -16351,6 +22599,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_7_analog_7_encode(double value);
 double vehicle_rt_dl1_mk3_analog_7_analog_7_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_7_analog_7_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16358,6 +22613,35 @@ double vehicle_rt_dl1_mk3_analog_7_analog_7_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_7_analog_7_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_7 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_7_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_7);
+
+/**
+ * unpack message RT_DL1MK3_Analog_7 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_7_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_7);
 
 /**
  * Pack message RT_DL1MK3_Analog_6.
@@ -16406,6 +22690,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_6_analog_6_encode(double value);
 double vehicle_rt_dl1_mk3_analog_6_analog_6_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_6_analog_6_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16413,6 +22704,35 @@ double vehicle_rt_dl1_mk3_analog_6_analog_6_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_6_analog_6_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_6 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_6_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_6);
+
+/**
+ * unpack message RT_DL1MK3_Analog_6 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_6_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_6);
 
 /**
  * Pack message RT_DL1MK3_Analog_5.
@@ -16461,6 +22781,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_5_analog_5_encode(double value);
 double vehicle_rt_dl1_mk3_analog_5_analog_5_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_5_analog_5_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16468,6 +22795,35 @@ double vehicle_rt_dl1_mk3_analog_5_analog_5_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_5_analog_5_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_5 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_5_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_5);
+
+/**
+ * unpack message RT_DL1MK3_Analog_5 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_5_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_5);
 
 /**
  * Pack message RT_DL1MK3_Analog_4.
@@ -16516,6 +22872,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_4_analog_4_encode(double value);
 double vehicle_rt_dl1_mk3_analog_4_analog_4_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_4_analog_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16523,6 +22886,35 @@ double vehicle_rt_dl1_mk3_analog_4_analog_4_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_4_analog_4_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_4 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_4_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_4);
+
+/**
+ * unpack message RT_DL1MK3_Analog_4 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_4_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_4);
 
 /**
  * Pack message RT_DL1MK3_Analog_3.
@@ -16571,6 +22963,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_3_analog_3_encode(double value);
 double vehicle_rt_dl1_mk3_analog_3_analog_3_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_3_analog_3_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16578,6 +22977,35 @@ double vehicle_rt_dl1_mk3_analog_3_analog_3_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_3_analog_3_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_3 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_3_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_3);
+
+/**
+ * unpack message RT_DL1MK3_Analog_3 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_3_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_3);
 
 /**
  * Pack message RT_DL1MK3_Analog_2.
@@ -16626,6 +23054,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_2_analog_2_encode(double value);
 double vehicle_rt_dl1_mk3_analog_2_analog_2_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_2_analog_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16633,6 +23068,35 @@ double vehicle_rt_dl1_mk3_analog_2_analog_2_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_2_analog_2_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_2);
+
+/**
+ * unpack message RT_DL1MK3_Analog_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_2);
 
 /**
  * Pack message RT_DL1MK3_Analog_1.
@@ -16681,6 +23145,13 @@ uint16_t vehicle_rt_dl1_mk3_analog_1_analog_1_encode(double value);
 double vehicle_rt_dl1_mk3_analog_1_analog_1_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_analog_1_analog_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16688,6 +23159,35 @@ double vehicle_rt_dl1_mk3_analog_1_analog_1_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_analog_1_analog_1_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_DL1MK3_Analog_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_analog_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double analog_1);
+
+/**
+ * unpack message RT_DL1MK3_Analog_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_analog_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *analog_1);
 
 /**
  * Pack message RT_DL1MK3_Accel.
@@ -16736,6 +23236,13 @@ uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_encode(double value
 double vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16761,6 +23268,13 @@ uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_lateral_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_accel_validity_accel_lateral_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_accel_validity_accel_lateral_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -16790,6 +23304,13 @@ uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_vertical_encode(double value);
 double vehicle_rt_dl1_mk3_accel_validity_accel_vertical_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_accel_validity_accel_vertical_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16815,6 +23336,13 @@ uint8_t vehicle_rt_dl1_mk3_accel_accuracy_accel_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_accel_accuracy_accel_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_accel_accuracy_accel_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -16844,6 +23372,13 @@ int16_t vehicle_rt_dl1_mk3_accel_accel_longitudinal_encode(double value);
 double vehicle_rt_dl1_mk3_accel_accel_longitudinal_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_accel_accel_longitudinal_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16869,6 +23404,13 @@ int16_t vehicle_rt_dl1_mk3_accel_accel_lateral_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_dl1_mk3_accel_accel_lateral_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_accel_accel_lateral_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -16898,6 +23440,13 @@ int16_t vehicle_rt_dl1_mk3_accel_accel_vertical_encode(double value);
 double vehicle_rt_dl1_mk3_accel_accel_vertical_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_dl1_mk3_accel_accel_vertical_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16905,6 +23454,47 @@ double vehicle_rt_dl1_mk3_accel_accel_vertical_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_dl1_mk3_accel_accel_vertical_is_in_range(int16_t value);
+
+/**
+ * Create message RT_DL1MK3_Accel if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_dl1_mk3_accel_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_accel_longitudinal,
+    double validity_accel_lateral,
+    double validity_accel_vertical,
+    double accuracy_accel,
+    double accel_longitudinal,
+    double accel_lateral,
+    double accel_vertical);
+
+/**
+ * unpack message RT_DL1MK3_Accel and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_dl1_mk3_accel_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_accel_longitudinal,
+    double *validity_accel_lateral,
+    double *validity_accel_vertical,
+    double *accuracy_accel,
+    double *accel_longitudinal,
+    double *accel_lateral,
+    double *accel_vertical);
 
 /**
  * Pack message RT_SB_INS_Vpt_4_Vel_NED_2.
@@ -16953,6 +23543,13 @@ int32_t vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_vel_ned_d_encode(double valu
 double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_vel_ned_d_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -16978,6 +23575,13 @@ int16_t vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_heading_encode(double value)
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_heading_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -17007,6 +23611,13 @@ int16_t vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_encode(double value);
 double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17014,6 +23625,39 @@ double vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_slip_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_4_Vel_NED_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_4_vel_ned_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_4_vel_ned_d,
+    double virtual_4_heading,
+    double virtual_4_slip);
+
+/**
+ * unpack message RT_SB_INS_Vpt_4_Vel_NED_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_4_vel_ned_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_4_vel_ned_d,
+    double *virtual_4_heading,
+    double *virtual_4_slip);
 
 /**
  * Pack message RT_SB_INS_Vpt_4_Vel_NED_1.
@@ -17062,6 +23706,13 @@ int32_t vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_n_encode(double valu
 double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_n_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_n_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17089,6 +23740,13 @@ int32_t vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17096,6 +23754,37 @@ double vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_decode(int32_t valu
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_e_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_4_Vel_NED_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_4_vel_ned_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_4_vel_ned_n,
+    double virtual_4_vel_ned_e);
+
+/**
+ * unpack message RT_SB_INS_Vpt_4_Vel_NED_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_4_vel_ned_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_4_vel_ned_n,
+    double *virtual_4_vel_ned_e);
 
 /**
  * Pack message RT_SB_INS_Vpt_4_Offset.
@@ -17144,6 +23833,13 @@ int16_t vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_encode(double value);
 double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17169,6 +23865,13 @@ int16_t vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_y_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -17198,6 +23901,13 @@ int16_t vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_encode(double value);
 double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17205,6 +23915,39 @@ double vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_z_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_4_Offset if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_4_offset_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_4_offset_x,
+    double virtual_4_offset_y,
+    double virtual_4_offset_z);
+
+/**
+ * unpack message RT_SB_INS_Vpt_4_Offset and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_4_offset_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_4_offset_x,
+    double *virtual_4_offset_y,
+    double *virtual_4_offset_z);
 
 /**
  * Pack message RT_SB_INS_Vpt_3_Vel_NED_2.
@@ -17253,6 +23996,13 @@ int32_t vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_vel_ned_d_encode(double valu
 double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_vel_ned_d_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17278,6 +24028,13 @@ int16_t vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_heading_encode(double value)
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_heading_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -17307,6 +24064,13 @@ int16_t vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_encode(double value);
 double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17314,6 +24078,39 @@ double vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_slip_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_3_Vel_NED_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_3_vel_ned_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_3_vel_ned_d,
+    double virtual_3_heading,
+    double virtual_3_slip);
+
+/**
+ * unpack message RT_SB_INS_Vpt_3_Vel_NED_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_3_vel_ned_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_3_vel_ned_d,
+    double *virtual_3_heading,
+    double *virtual_3_slip);
 
 /**
  * Pack message RT_SB_INS_Vpt_3_Vel_NED_1.
@@ -17362,6 +24159,13 @@ int32_t vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_n_encode(double valu
 double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_n_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_n_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17389,6 +24193,13 @@ int32_t vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17396,6 +24207,37 @@ double vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_decode(int32_t valu
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_e_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_3_Vel_NED_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_3_vel_ned_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_3_vel_ned_n,
+    double virtual_3_vel_ned_e);
+
+/**
+ * unpack message RT_SB_INS_Vpt_3_Vel_NED_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_3_vel_ned_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_3_vel_ned_n,
+    double *virtual_3_vel_ned_e);
 
 /**
  * Pack message RT_SB_INS_Vpt_3_Offset.
@@ -17444,6 +24286,13 @@ int16_t vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_encode(double value);
 double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17469,6 +24318,13 @@ int16_t vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_y_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -17498,6 +24354,13 @@ int16_t vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_encode(double value);
 double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17505,6 +24368,39 @@ double vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_z_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_3_Offset if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_3_offset_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_3_offset_x,
+    double virtual_3_offset_y,
+    double virtual_3_offset_z);
+
+/**
+ * unpack message RT_SB_INS_Vpt_3_Offset and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_3_offset_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_3_offset_x,
+    double *virtual_3_offset_y,
+    double *virtual_3_offset_z);
 
 /**
  * Pack message RT_SB_INS_Vpt_2_Vel_NED_2.
@@ -17553,6 +24449,13 @@ int32_t vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_vel_ned_d_encode(double valu
 double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_vel_ned_d_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17578,6 +24481,13 @@ int16_t vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_heading_encode(double value)
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_heading_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -17607,6 +24517,13 @@ int16_t vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_encode(double value);
 double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17614,6 +24531,39 @@ double vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_slip_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_2_Vel_NED_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_2_vel_ned_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_2_vel_ned_d,
+    double virtual_2_heading,
+    double virtual_2_slip);
+
+/**
+ * unpack message RT_SB_INS_Vpt_2_Vel_NED_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_2_vel_ned_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_2_vel_ned_d,
+    double *virtual_2_heading,
+    double *virtual_2_slip);
 
 /**
  * Pack message RT_SB_INS_Vpt_2_Vel_NED_1.
@@ -17662,6 +24612,13 @@ int32_t vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_n_encode(double valu
 double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_n_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_n_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17689,6 +24646,13 @@ int32_t vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17696,6 +24660,37 @@ double vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_decode(int32_t valu
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_e_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_2_Vel_NED_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_2_vel_ned_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_2_vel_ned_n,
+    double virtual_2_vel_ned_e);
+
+/**
+ * unpack message RT_SB_INS_Vpt_2_Vel_NED_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_2_vel_ned_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_2_vel_ned_n,
+    double *virtual_2_vel_ned_e);
 
 /**
  * Pack message RT_SB_INS_Vpt_2_Offset.
@@ -17744,6 +24739,13 @@ int16_t vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_encode(double value);
 double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17769,6 +24771,13 @@ int16_t vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_y_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -17798,6 +24807,13 @@ int16_t vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_encode(double value);
 double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17805,6 +24821,39 @@ double vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_z_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_2_Offset if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_2_offset_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_2_offset_x,
+    double virtual_2_offset_y,
+    double virtual_2_offset_z);
+
+/**
+ * unpack message RT_SB_INS_Vpt_2_Offset and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_2_offset_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_2_offset_x,
+    double *virtual_2_offset_y,
+    double *virtual_2_offset_z);
 
 /**
  * Pack message RT_SB_INS_Vpt_1_Vel_NED_2.
@@ -17853,6 +24902,13 @@ int32_t vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_vel_ned_d_encode(double valu
 double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_vel_ned_d_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17878,6 +24934,13 @@ int16_t vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_heading_encode(double value)
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_heading_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -17907,6 +24970,13 @@ int16_t vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_encode(double value);
 double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17914,6 +24984,39 @@ double vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_slip_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_1_Vel_NED_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_1_vel_ned_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_1_vel_ned_d,
+    double virtual_1_heading,
+    double virtual_1_slip);
+
+/**
+ * unpack message RT_SB_INS_Vpt_1_Vel_NED_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_1_vel_ned_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_1_vel_ned_d,
+    double *virtual_1_heading,
+    double *virtual_1_slip);
 
 /**
  * Pack message RT_SB_INS_Vpt_1_Vel_NED_1.
@@ -17962,6 +25065,13 @@ int32_t vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_n_encode(double valu
 double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_n_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_n_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17989,6 +25099,13 @@ int32_t vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_encode(double valu
 double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -17996,6 +25113,37 @@ double vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_decode(int32_t valu
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_e_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_1_Vel_NED_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_1_vel_ned_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_1_vel_ned_n,
+    double virtual_1_vel_ned_e);
+
+/**
+ * unpack message RT_SB_INS_Vpt_1_Vel_NED_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_1_vel_ned_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_1_vel_ned_n,
+    double *virtual_1_vel_ned_e);
 
 /**
  * Pack message RT_SB_INS_Vpt_1_Offset.
@@ -18044,6 +25192,13 @@ int16_t vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_encode(double value);
 double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18069,6 +25224,13 @@ int16_t vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_y_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18098,6 +25260,13 @@ int16_t vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_encode(double value);
 double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18105,6 +25274,39 @@ double vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_z_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Vpt_1_Offset if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vpt_1_offset_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double virtual_1_offset_x,
+    double virtual_1_offset_y,
+    double virtual_1_offset_z);
+
+/**
+ * unpack message RT_SB_INS_Vpt_1_Offset and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vpt_1_offset_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *virtual_1_offset_x,
+    double *virtual_1_offset_y,
+    double *virtual_1_offset_z);
 
 /**
  * Pack message RT_SB_INS_Slip.
@@ -18153,6 +25355,13 @@ uint8_t vehicle_rt_sb_ins_slip_validity_ins_slip_encode(double value);
 double vehicle_rt_sb_ins_slip_validity_ins_slip_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_slip_validity_ins_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18178,6 +25387,13 @@ uint8_t vehicle_rt_sb_ins_slip_validity_ins_squat_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_slip_validity_ins_squat_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_slip_validity_ins_squat_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18207,6 +25423,13 @@ uint8_t vehicle_rt_sb_ins_slip_accuracy_ins_slip_encode(double value);
 double vehicle_rt_sb_ins_slip_accuracy_ins_slip_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_slip_accuracy_ins_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18232,6 +25455,13 @@ int16_t vehicle_rt_sb_ins_slip_ins_slip_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_slip_ins_slip_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_slip_ins_slip_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18261,6 +25491,13 @@ uint8_t vehicle_rt_sb_ins_slip_accuracy_ins_squat_encode(double value);
 double vehicle_rt_sb_ins_slip_accuracy_ins_squat_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_slip_accuracy_ins_squat_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18288,6 +25525,13 @@ int16_t vehicle_rt_sb_ins_slip_ins_squat_encode(double value);
 double vehicle_rt_sb_ins_slip_ins_squat_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_slip_ins_squat_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18295,6 +25539,45 @@ double vehicle_rt_sb_ins_slip_ins_squat_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_slip_ins_squat_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Slip if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_slip_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_slip,
+    double validity_ins_squat,
+    double accuracy_ins_slip,
+    double ins_slip,
+    double accuracy_ins_squat,
+    double ins_squat);
+
+/**
+ * unpack message RT_SB_INS_Slip and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_slip_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_slip,
+    double *validity_ins_squat,
+    double *accuracy_ins_slip,
+    double *ins_slip,
+    double *accuracy_ins_squat,
+    double *ins_squat);
 
 /**
  * Pack message RT_SB_INS_Vel_ECEF_2.
@@ -18343,6 +25626,13 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_encode(double value
 double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18368,6 +25658,13 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18397,6 +25694,13 @@ int32_t vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_y_encode(double value);
 double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_y_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18424,6 +25728,13 @@ int32_t vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_encode(double value);
 double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18431,6 +25742,41 @@ double vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vel_ecef_2_ins_vel_ecef_z_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vel_ECEF_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vel_ecef_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_vel_ecef_y,
+    double validity_ins_vel_ecef_z,
+    double ins_vel_ecef_y,
+    double ins_vel_ecef_z);
+
+/**
+ * unpack message RT_SB_INS_Vel_ECEF_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vel_ecef_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_vel_ecef_y,
+    double *validity_ins_vel_ecef_z,
+    double *ins_vel_ecef_y,
+    double *ins_vel_ecef_z);
 
 /**
  * Pack message RT_SB_INS_Vel_ECEF_1.
@@ -18479,6 +25825,13 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_encode(double value
 double vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18504,6 +25857,13 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18533,6 +25893,13 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_encode(double value
 double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18558,6 +25925,13 @@ uint8_t vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18587,6 +25961,13 @@ int32_t vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_encode(double value);
 double vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18594,6 +25975,43 @@ double vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vel_ecef_1_ins_vel_ecef_x_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vel_ECEF_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vel_ecef_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_vel_ecef_x,
+    double accuracy_ins_vel_ecef_x,
+    double accuracy_ins_vel_ecef_y,
+    double accuracy_ins_vel_ecef_z,
+    double ins_vel_ecef_x);
+
+/**
+ * unpack message RT_SB_INS_Vel_ECEF_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vel_ecef_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_vel_ecef_x,
+    double *accuracy_ins_vel_ecef_x,
+    double *accuracy_ins_vel_ecef_y,
+    double *accuracy_ins_vel_ecef_z,
+    double *ins_vel_ecef_x);
 
 /**
  * Pack message RT_SB_INS_Vel_NED_2.
@@ -18642,6 +26060,13 @@ uint8_t vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_encode(double value);
 double vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18667,6 +26092,13 @@ uint8_t vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18696,6 +26128,13 @@ int32_t vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_encode(double value);
 double vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18703,6 +26142,39 @@ double vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vel_ned_2_ins_vel_ned_d_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vel_NED_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vel_ned_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_vel_ned_d,
+    double accuracy_ins_vel_d,
+    double ins_vel_ned_d);
+
+/**
+ * unpack message RT_SB_INS_Vel_NED_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vel_ned_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_vel_ned_d,
+    double *accuracy_ins_vel_d,
+    double *ins_vel_ned_d);
 
 /**
  * Pack message RT_SB_INS_Vel_NED_1.
@@ -18751,6 +26223,13 @@ uint8_t vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_encode(double value);
 double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18776,6 +26255,13 @@ uint8_t vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18805,6 +26291,13 @@ uint8_t vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_encode(double value);
 double vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18830,6 +26323,13 @@ int32_t vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_n_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_n_decode(int32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_n_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -18859,6 +26359,13 @@ int32_t vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_encode(double value);
 double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18866,6 +26373,43 @@ double vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_vel_ned_1_ins_vel_ned_e_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Vel_NED_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_vel_ned_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_vel_ned_n,
+    double validity_ins_vel_ned_e,
+    double accuracy_ins_vel_ne,
+    double ins_vel_ned_n,
+    double ins_vel_ned_e);
+
+/**
+ * unpack message RT_SB_INS_Vel_NED_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_vel_ned_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_vel_ned_n,
+    double *validity_ins_vel_ned_e,
+    double *accuracy_ins_vel_ne,
+    double *ins_vel_ned_n,
+    double *ins_vel_ned_e);
 
 /**
  * Pack message RT_SB_INS_Pos_ECEF_2.
@@ -18914,6 +26458,13 @@ int32_t vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_y_encode(double value);
 double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_y_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18941,6 +26492,13 @@ int32_t vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_encode(double value);
 double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -18948,6 +26506,37 @@ double vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_z_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Pos_ECEF_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_pos_ecef_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ins_pos_ecef_y,
+    double ins_pos_ecef_z);
+
+/**
+ * unpack message RT_SB_INS_Pos_ECEF_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_pos_ecef_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ins_pos_ecef_y,
+    double *ins_pos_ecef_z);
 
 /**
  * Pack message RT_SB_INS_Pos_ECEF_1.
@@ -18996,6 +26585,13 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_encode(double value
 double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19021,6 +26617,13 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19050,6 +26653,13 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_encode(double value
 double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19075,6 +26685,13 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19104,6 +26721,13 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_encode(double value
 double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19129,6 +26753,13 @@ uint8_t vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19158,6 +26789,13 @@ int32_t vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_encode(double value);
 double vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19165,6 +26803,47 @@ double vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_pos_ecef_1_ins_pos_ecef_x_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Pos_ECEF_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_pos_ecef_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_pos_ecef_x,
+    double validity_ins_pos_ecef_y,
+    double validity_ins_pos_ecef_z,
+    double accuracy_ins_pos_ecef_x,
+    double accuracy_ins_pos_ecef_y,
+    double accuracy_ins_pos_ecef_z,
+    double ins_pos_ecef_x);
+
+/**
+ * unpack message RT_SB_INS_Pos_ECEF_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_pos_ecef_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_pos_ecef_x,
+    double *validity_ins_pos_ecef_y,
+    double *validity_ins_pos_ecef_z,
+    double *accuracy_ins_pos_ecef_x,
+    double *accuracy_ins_pos_ecef_y,
+    double *accuracy_ins_pos_ecef_z,
+    double *ins_pos_ecef_x);
 
 /**
  * Pack message RT_SB_INS_Pos_LLH_2.
@@ -19213,6 +26892,13 @@ int32_t vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_encode(double value);
 double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19240,6 +26926,13 @@ int32_t vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_encode(double value);
 double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19247,6 +26940,37 @@ double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_altitude_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Pos_LLH_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_pos_llh_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ins_pos_llh_longitude,
+    double ins_pos_llh_altitude);
+
+/**
+ * unpack message RT_SB_INS_Pos_LLH_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_pos_llh_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ins_pos_llh_longitude,
+    double *ins_pos_llh_altitude);
 
 /**
  * Pack message RT_SB_INS_Pos_LLH_1.
@@ -19295,6 +27019,13 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_encode(double 
 double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19320,6 +27051,13 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_encode(double
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19349,6 +27087,13 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_encode(double 
 double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19374,6 +27119,13 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_encode(double 
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19403,6 +27155,13 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_encode(double
 double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19428,6 +27187,13 @@ uint8_t vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_encode(double 
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19457,6 +27223,13 @@ int32_t vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_encode(double value);
 double vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19464,6 +27237,47 @@ double vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_INS_Pos_LLH_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_pos_llh_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_pos_llh_latitude,
+    double validity_ins_pos_llh_longitude,
+    double validity_ins_pos_llh_altitude,
+    double accuracy_ins_pos_llh_latitude,
+    double accuracy_ins_pos_llh_longitude,
+    double accuracy_ins_pos_llh_altitude,
+    double ins_pos_llh_latitude);
+
+/**
+ * unpack message RT_SB_INS_Pos_LLH_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_pos_llh_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_pos_llh_latitude,
+    double *validity_ins_pos_llh_longitude,
+    double *validity_ins_pos_llh_altitude,
+    double *accuracy_ins_pos_llh_latitude,
+    double *accuracy_ins_pos_llh_longitude,
+    double *accuracy_ins_pos_llh_altitude,
+    double *ins_pos_llh_latitude);
 
 /**
  * Pack message RT_SB_INS_Heading_Gradient_2.
@@ -19512,6 +27326,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_encode(double 
 double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19537,6 +27358,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_encode(double
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19566,6 +27394,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_encode(double 
 double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19591,6 +27426,13 @@ uint16_t vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_encode(double value)
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19620,6 +27462,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_encode(double
 double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19647,6 +27496,13 @@ int16_t vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_encode(double value);
 double vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19654,6 +27510,45 @@ double vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_heading_gradient_2_ins_gradient_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Heading_Gradient_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_heading_gradient_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_heading,
+    double validity_ins_gradient,
+    double accuracy_ins_heading,
+    double ins_heading_2,
+    double accuracy_ins_gradient,
+    double ins_gradient);
+
+/**
+ * unpack message RT_SB_INS_Heading_Gradient_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_heading_gradient_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_heading,
+    double *validity_ins_gradient,
+    double *accuracy_ins_heading,
+    double *ins_heading_2,
+    double *accuracy_ins_gradient,
+    double *ins_gradient);
 
 /**
  * Pack message RT_SB_INS_Heading_Gradient.
@@ -19702,6 +27597,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_encode(double va
 double vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19727,6 +27629,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_encode(double v
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19756,6 +27665,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_encode(double va
 double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19781,6 +27697,13 @@ int16_t vehicle_rt_sb_ins_heading_gradient_ins_heading_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_heading_gradient_ins_heading_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_ins_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -19810,6 +27733,13 @@ uint8_t vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_encode(double v
 double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19837,6 +27767,13 @@ int16_t vehicle_rt_sb_ins_heading_gradient_ins_gradient_encode(double value);
 double vehicle_rt_sb_ins_heading_gradient_ins_gradient_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_heading_gradient_ins_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19844,6 +27781,45 @@ double vehicle_rt_sb_ins_heading_gradient_ins_gradient_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_heading_gradient_ins_gradient_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Heading_Gradient if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_heading_gradient_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_ins_heading,
+    double validity_ins_gradient,
+    double accuracy_ins_heading,
+    double ins_heading,
+    double accuracy_ins_gradient,
+    double ins_gradient);
+
+/**
+ * unpack message RT_SB_INS_Heading_Gradient and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_heading_gradient_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_ins_heading,
+    double *validity_ins_gradient,
+    double *accuracy_ins_heading,
+    double *ins_heading,
+    double *accuracy_ins_gradient,
+    double *ins_gradient);
 
 /**
  * Pack message RT_SB_INS_Status.
@@ -19892,6 +27868,13 @@ uint8_t vehicle_rt_sb_ins_status_ins_status_encode(double value);
 double vehicle_rt_sb_ins_status_ins_status_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_status_ins_status_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19899,6 +27882,35 @@ double vehicle_rt_sb_ins_status_ins_status_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_status_ins_status_is_in_range(uint8_t value);
+
+/**
+ * Create message RT_SB_INS_Status if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_status_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double ins_status);
+
+/**
+ * unpack message RT_SB_INS_Status and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_status_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *ins_status);
 
 /**
  * Pack message RT_SB_INS_Attitude.
@@ -19947,6 +27959,13 @@ uint8_t vehicle_rt_sb_ins_attitude_validity_yaw_encode(double value);
 double vehicle_rt_sb_ins_attitude_validity_yaw_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_attitude_validity_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -19972,6 +27991,13 @@ uint8_t vehicle_rt_sb_ins_attitude_validity_pitch_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_attitude_validity_pitch_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_attitude_validity_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20001,6 +28027,13 @@ uint8_t vehicle_rt_sb_ins_attitude_validity_roll_encode(double value);
 double vehicle_rt_sb_ins_attitude_validity_roll_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_attitude_validity_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20026,6 +28059,13 @@ uint8_t vehicle_rt_sb_ins_attitude_accuracy_attitude_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_attitude_accuracy_attitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_attitude_accuracy_attitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20055,6 +28095,13 @@ int16_t vehicle_rt_sb_ins_attitude_attitude_yaw_encode(double value);
 double vehicle_rt_sb_ins_attitude_attitude_yaw_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_attitude_attitude_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20080,6 +28127,13 @@ int16_t vehicle_rt_sb_ins_attitude_attitude_pitch_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_ins_attitude_attitude_pitch_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_attitude_attitude_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20109,6 +28163,13 @@ int16_t vehicle_rt_sb_ins_attitude_attitude_roll_encode(double value);
 double vehicle_rt_sb_ins_attitude_attitude_roll_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_ins_attitude_attitude_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20116,6 +28177,47 @@ double vehicle_rt_sb_ins_attitude_attitude_roll_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_ins_attitude_attitude_roll_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_INS_Attitude if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_ins_attitude_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_yaw,
+    double validity_pitch,
+    double validity_roll,
+    double accuracy_attitude,
+    double attitude_yaw,
+    double attitude_pitch,
+    double attitude_roll);
+
+/**
+ * unpack message RT_SB_INS_Attitude and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_ins_attitude_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_yaw,
+    double *validity_pitch,
+    double *validity_roll,
+    double *accuracy_attitude,
+    double *attitude_yaw,
+    double *attitude_pitch,
+    double *attitude_roll);
 
 /**
  * Pack message RT_SB_Output_Status.
@@ -20164,6 +28266,13 @@ uint8_t vehicle_rt_sb_output_status_validity_status_timestamp_encode(double valu
 double vehicle_rt_sb_output_status_validity_status_timestamp_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_validity_status_timestamp_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20189,6 +28298,13 @@ uint8_t vehicle_rt_sb_output_status_status_analogue_1_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_output_status_status_analogue_1_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_analogue_1_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20218,6 +28334,13 @@ uint8_t vehicle_rt_sb_output_status_status_analogue_2_encode(double value);
 double vehicle_rt_sb_output_status_status_analogue_2_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_analogue_2_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20243,6 +28366,13 @@ uint8_t vehicle_rt_sb_output_status_status_analogue_3_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_output_status_status_analogue_3_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_analogue_3_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20272,6 +28402,13 @@ uint8_t vehicle_rt_sb_output_status_status_analogue_4_encode(double value);
 double vehicle_rt_sb_output_status_status_analogue_4_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_analogue_4_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20297,6 +28434,13 @@ uint8_t vehicle_rt_sb_output_status_status_pulse_output_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_output_status_status_pulse_output_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_pulse_output_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20326,6 +28470,13 @@ uint8_t vehicle_rt_sb_output_status_status_serial_output_1_encode(double value);
 double vehicle_rt_sb_output_status_status_serial_output_1_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_serial_output_1_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20351,6 +28502,13 @@ uint8_t vehicle_rt_sb_output_status_status_serial_output_2_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_output_status_status_serial_output_2_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_serial_output_2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20380,6 +28538,13 @@ uint8_t vehicle_rt_sb_output_status_status_trigger_encode(double value);
 double vehicle_rt_sb_output_status_status_trigger_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_status_trigger_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20407,6 +28572,13 @@ uint32_t vehicle_rt_sb_output_status_gps_time_encode(double value);
 double vehicle_rt_sb_output_status_gps_time_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_output_status_gps_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20414,6 +28586,53 @@ double vehicle_rt_sb_output_status_gps_time_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_output_status_gps_time_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_Output_Status if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_output_status_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_status_timestamp,
+    double status_analogue_1,
+    double status_analogue_2,
+    double status_analogue_3,
+    double status_analogue_4,
+    double status_pulse_output,
+    double status_serial_output_1,
+    double status_serial_output_2,
+    double status_trigger,
+    double gps_time);
+
+/**
+ * unpack message RT_SB_Output_Status and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_output_status_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_status_timestamp,
+    double *status_analogue_1,
+    double *status_analogue_2,
+    double *status_analogue_3,
+    double *status_analogue_4,
+    double *status_pulse_output,
+    double *status_serial_output_1,
+    double *status_serial_output_2,
+    double *status_trigger,
+    double *gps_time);
 
 /**
  * Pack message RT_SB_GPS_Heading_Gradient_2.
@@ -20462,6 +28681,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_encode(double 
 double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20487,6 +28713,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_encode(double
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20516,6 +28749,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_encode(double 
 double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20541,6 +28781,13 @@ uint16_t vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_encode(double value)
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_decode(uint16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20570,6 +28817,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_encode(double
 double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20597,6 +28851,13 @@ int16_t vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_encode(double value);
 double vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20604,6 +28865,45 @@ double vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_heading_gradient_2_gps_gradient_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_GPS_Heading_Gradient_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_heading_gradient_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_heading,
+    double validity_gps_gradient,
+    double accuracy_gps_heading,
+    double gps_heading_2,
+    double accuracy_gps_gradient,
+    double gps_gradient);
+
+/**
+ * unpack message RT_SB_GPS_Heading_Gradient_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_heading_gradient_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_heading,
+    double *validity_gps_gradient,
+    double *accuracy_gps_heading,
+    double *gps_heading_2,
+    double *accuracy_gps_gradient,
+    double *gps_gradient);
 
 /**
  * Pack message RT_SB_Cumulative_Distance_2.
@@ -20652,6 +28952,13 @@ uint8_t vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_encode(doub
 double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20677,6 +28984,13 @@ uint8_t vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_encode(
  * @return Decoded signal.
  */
 double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20706,6 +29020,13 @@ uint32_t vehicle_rt_sb_cumulative_distance_2_cumulative_time_encode(double value
 double vehicle_rt_sb_cumulative_distance_2_cumulative_time_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_2_cumulative_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20733,6 +29054,13 @@ uint32_t vehicle_rt_sb_cumulative_distance_2_cumulative_distance_encode(double v
 double vehicle_rt_sb_cumulative_distance_2_cumulative_distance_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_2_cumulative_distance_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20740,6 +29068,41 @@ double vehicle_rt_sb_cumulative_distance_2_cumulative_distance_decode(uint32_t v
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_cumulative_distance_2_cumulative_distance_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_Cumulative_Distance_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_cumulative_distance_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_cumulative_time,
+    double validity_cumulative_distance,
+    double cumulative_time,
+    double cumulative_distance);
+
+/**
+ * unpack message RT_SB_Cumulative_Distance_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_cumulative_distance_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_cumulative_time,
+    double *validity_cumulative_distance,
+    double *cumulative_time,
+    double *cumulative_distance);
 
 /**
  * Pack message RT_SB_Cumulative_Distance_1.
@@ -20788,6 +29151,13 @@ uint8_t vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_encode(doub
 double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20813,6 +29183,13 @@ uint8_t vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_encode(
  * @return Decoded signal.
  */
 double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20842,6 +29219,13 @@ uint32_t vehicle_rt_sb_cumulative_distance_1_cumulative_time_encode(double value
 double vehicle_rt_sb_cumulative_distance_1_cumulative_time_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_1_cumulative_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20869,6 +29253,13 @@ uint32_t vehicle_rt_sb_cumulative_distance_1_cumulative_distance_encode(double v
 double vehicle_rt_sb_cumulative_distance_1_cumulative_distance_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_cumulative_distance_1_cumulative_distance_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20876,6 +29267,41 @@ double vehicle_rt_sb_cumulative_distance_1_cumulative_distance_decode(uint32_t v
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_cumulative_distance_1_cumulative_distance_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_Cumulative_Distance_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_cumulative_distance_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_cumulative_time,
+    double validity_cumulative_distance,
+    double cumulative_time,
+    double cumulative_distance);
+
+/**
+ * unpack message RT_SB_Cumulative_Distance_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_cumulative_distance_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_cumulative_time,
+    double *validity_cumulative_distance,
+    double *cumulative_time,
+    double *cumulative_distance);
 
 /**
  * Pack message RT_SB_Trigger_Timestamp.
@@ -20924,6 +29350,13 @@ uint8_t vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_encode(double
 double vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -20949,6 +29382,13 @@ uint8_t vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_encode(double
  * @return Decoded signal.
  */
 double vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -20978,6 +29418,13 @@ uint8_t vehicle_rt_sb_trigger_timestamp_trigger_number_encode(double value);
 double vehicle_rt_sb_trigger_timestamp_trigger_number_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trigger_timestamp_trigger_number_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21003,6 +29450,13 @@ uint8_t vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_encode(double val
  * @return Decoded signal.
  */
 double vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21032,6 +29486,13 @@ uint64_t vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_encode(double 
 double vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_decode(uint64_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21039,6 +29500,43 @@ double vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_decode(uint64_t 
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_is_in_range(uint64_t value);
+
+/**
+ * Create message RT_SB_Trigger_Timestamp if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_trigger_timestamp_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_trigger_timestamp,
+    double accuracy_trigger_timestamp,
+    double trigger_number,
+    double trigger_timestamp_type,
+    double gps_high_resolution_time);
+
+/**
+ * unpack message RT_SB_Trigger_Timestamp and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_trigger_timestamp_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_trigger_timestamp,
+    double *accuracy_trigger_timestamp,
+    double *trigger_number,
+    double *trigger_timestamp_type,
+    double *gps_high_resolution_time);
 
 /**
  * Pack message RT_IMU06_Gyro_Rates.
@@ -21087,6 +29585,13 @@ uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_encode(double value);
 double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21112,6 +29617,13 @@ uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21141,6 +29653,13 @@ uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_encode(double value)
 double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21166,6 +29685,13 @@ uint8_t vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21195,6 +29721,13 @@ int16_t vehicle_rt_imu06_gyro_rates_gyro_rate_yaw_encode(double value);
 double vehicle_rt_imu06_gyro_rates_gyro_rate_yaw_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_gyro_rates_gyro_rate_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21220,6 +29753,13 @@ int16_t vehicle_rt_imu06_gyro_rates_gyro_rate_pitch_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_imu06_gyro_rates_gyro_rate_pitch_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_gyro_rates_gyro_rate_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21249,6 +29789,13 @@ int16_t vehicle_rt_imu06_gyro_rates_gyro_rate_roll_encode(double value);
 double vehicle_rt_imu06_gyro_rates_gyro_rate_roll_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_gyro_rates_gyro_rate_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21256,6 +29803,47 @@ double vehicle_rt_imu06_gyro_rates_gyro_rate_roll_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_imu06_gyro_rates_gyro_rate_roll_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IMU06_Gyro_Rates if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_imu06_gyro_rates_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gyro_rate_yaw,
+    double validity_gyro_rate_pitch,
+    double validity_gyro_rate_roll,
+    double accuracy_gyro_rates,
+    double gyro_rate_yaw,
+    double gyro_rate_pitch,
+    double gyro_rate_roll);
+
+/**
+ * unpack message RT_IMU06_Gyro_Rates and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_imu06_gyro_rates_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gyro_rate_yaw,
+    double *validity_gyro_rate_pitch,
+    double *validity_gyro_rate_roll,
+    double *accuracy_gyro_rates,
+    double *gyro_rate_yaw,
+    double *gyro_rate_pitch,
+    double *gyro_rate_roll);
 
 /**
  * Pack message RT_IMU06_Accel.
@@ -21304,6 +29892,13 @@ uint8_t vehicle_rt_imu06_accel_validity_accel_longitudinal_encode(double value);
 double vehicle_rt_imu06_accel_validity_accel_longitudinal_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_accel_validity_accel_longitudinal_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21329,6 +29924,13 @@ uint8_t vehicle_rt_imu06_accel_validity_accel_lateral_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_imu06_accel_validity_accel_lateral_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_accel_validity_accel_lateral_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21358,6 +29960,13 @@ uint8_t vehicle_rt_imu06_accel_validity_accel_vertical_encode(double value);
 double vehicle_rt_imu06_accel_validity_accel_vertical_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_accel_validity_accel_vertical_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21383,6 +29992,13 @@ uint8_t vehicle_rt_imu06_accel_accuracy_accel_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_imu06_accel_accuracy_accel_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_accel_accuracy_accel_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21412,6 +30028,13 @@ int16_t vehicle_rt_imu06_accel_accel_longitudinal_encode(double value);
 double vehicle_rt_imu06_accel_accel_longitudinal_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_accel_accel_longitudinal_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21437,6 +30060,13 @@ int16_t vehicle_rt_imu06_accel_accel_lateral_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_imu06_accel_accel_lateral_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_accel_accel_lateral_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21466,6 +30096,13 @@ int16_t vehicle_rt_imu06_accel_accel_vertical_encode(double value);
 double vehicle_rt_imu06_accel_accel_vertical_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_imu06_accel_accel_vertical_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21473,6 +30110,47 @@ double vehicle_rt_imu06_accel_accel_vertical_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_imu06_accel_accel_vertical_is_in_range(int16_t value);
+
+/**
+ * Create message RT_IMU06_Accel if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_imu06_accel_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_accel_longitudinal,
+    double validity_accel_lateral,
+    double validity_accel_vertical,
+    double accuracy_accel,
+    double accel_longitudinal,
+    double accel_lateral,
+    double accel_vertical);
+
+/**
+ * unpack message RT_IMU06_Accel and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_imu06_accel_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_accel_longitudinal,
+    double *validity_accel_lateral,
+    double *validity_accel_vertical,
+    double *accuracy_accel,
+    double *accel_longitudinal,
+    double *accel_lateral,
+    double *accel_vertical);
 
 /**
  * Pack message RT_SB_Speed.
@@ -21521,6 +30199,13 @@ uint8_t vehicle_rt_sb_speed_validity_speed_encode(double value);
 double vehicle_rt_sb_speed_validity_speed_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_speed_validity_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21546,6 +30231,13 @@ uint8_t vehicle_rt_sb_speed_accuracy_speed_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_speed_accuracy_speed_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_speed_accuracy_speed_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21575,6 +30267,13 @@ int32_t vehicle_rt_sb_speed_speed_encode(double value);
 double vehicle_rt_sb_speed_speed_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_speed_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21582,6 +30281,39 @@ double vehicle_rt_sb_speed_speed_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_speed_speed_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_Speed if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_speed_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_speed,
+    double accuracy_speed,
+    double speed);
+
+/**
+ * unpack message RT_SB_Speed and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_speed_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_speed,
+    double *accuracy_speed,
+    double *speed);
 
 /**
  * Pack message RT_SB_RTK_Slip.
@@ -21630,6 +30362,13 @@ uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_slip_encode(double value);
 double vehicle_rt_sb_rtk_slip_validity_rtk_slip_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_slip_validity_rtk_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21655,6 +30394,13 @@ uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_squat_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_rtk_slip_validity_rtk_squat_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_slip_validity_rtk_squat_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21684,6 +30430,13 @@ uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_baseline_encode(double value);
 double vehicle_rt_sb_rtk_slip_validity_rtk_baseline_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_slip_validity_rtk_baseline_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21709,6 +30462,13 @@ uint8_t vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21738,6 +30498,13 @@ int16_t vehicle_rt_sb_rtk_slip_rtk_slip_encode(double value);
 double vehicle_rt_sb_rtk_slip_rtk_slip_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_slip_rtk_slip_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21763,6 +30530,13 @@ int16_t vehicle_rt_sb_rtk_slip_rtk_squat_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_rtk_slip_rtk_squat_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_slip_rtk_squat_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21792,6 +30566,13 @@ uint16_t vehicle_rt_sb_rtk_slip_rtk_baseline_encode(double value);
 double vehicle_rt_sb_rtk_slip_rtk_baseline_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_slip_rtk_baseline_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21799,6 +30580,47 @@ double vehicle_rt_sb_rtk_slip_rtk_baseline_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_rtk_slip_rtk_baseline_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_SB_RTK_Slip if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_rtk_slip_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_rtk_slip,
+    double validity_rtk_squat,
+    double validity_rtk_baseline,
+    double accuracy_rtk_baseline,
+    double rtk_slip,
+    double rtk_squat,
+    double rtk_baseline);
+
+/**
+ * unpack message RT_SB_RTK_Slip and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_rtk_slip_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_rtk_slip,
+    double *validity_rtk_squat,
+    double *validity_rtk_baseline,
+    double *accuracy_rtk_baseline,
+    double *rtk_slip,
+    double *rtk_squat,
+    double *rtk_baseline);
 
 /**
  * Pack message RT_SB_RTK_Attitude.
@@ -21847,6 +30669,13 @@ uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_encode(double value);
 double vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21872,6 +30701,13 @@ uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21901,6 +30737,13 @@ uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_roll_encode(double value);
 double vehicle_rt_sb_rtk_attitude_validity_rtk_roll_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_attitude_validity_rtk_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21926,6 +30769,13 @@ uint8_t vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -21955,6 +30805,13 @@ int16_t vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_encode(double value);
 double vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_attitude_rtk_attitude_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -21980,6 +30837,13 @@ int16_t vehicle_rt_sb_rtk_attitude_rtk_attitude_pitch_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_rtk_attitude_rtk_attitude_pitch_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_attitude_rtk_attitude_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22009,6 +30873,13 @@ int16_t vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_encode(double value);
 double vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22016,6 +30887,47 @@ double vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_rtk_attitude_rtk_attitude_roll_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_RTK_Attitude if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_rtk_attitude_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_rtk_yaw,
+    double validity_rtk_pitch,
+    double validity_rtk_roll,
+    double accuracy_rtk_attitude,
+    double rtk_attitude_yaw,
+    double rtk_attitude_pitch,
+    double rtk_attitude_roll);
+
+/**
+ * unpack message RT_SB_RTK_Attitude and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_rtk_attitude_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_rtk_yaw,
+    double *validity_rtk_pitch,
+    double *validity_rtk_roll,
+    double *accuracy_rtk_attitude,
+    double *rtk_attitude_yaw,
+    double *rtk_attitude_pitch,
+    double *rtk_attitude_roll);
 
 /**
  * Pack message RT_SB_GPS_Mcycle_Lean.
@@ -22064,6 +30976,13 @@ uint8_t vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_encode(double v
 double vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22089,6 +31008,13 @@ uint8_t vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_encode(double val
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22118,6 +31044,13 @@ uint8_t vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_encode(double v
 double vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22143,6 +31076,13 @@ int16_t vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_mcycle_lean_gps_lateral_accel_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22172,6 +31112,13 @@ int16_t vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_encode(double value)
 double vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22179,6 +31126,43 @@ double vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_decode(int16_t value)
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_mcycle_lean_gps_mcycle_lean_angle_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_GPS_Mcycle_Lean if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_mcycle_lean_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_lateral_accel,
+    double validity_gps_mcycle_lean,
+    double accuracy_gps_lateral_accel,
+    double gps_lateral_accel,
+    double gps_mcycle_lean_angle);
+
+/**
+ * unpack message RT_SB_GPS_Mcycle_Lean and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_mcycle_lean_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_lateral_accel,
+    double *validity_gps_mcycle_lean,
+    double *accuracy_gps_lateral_accel,
+    double *gps_lateral_accel,
+    double *gps_mcycle_lean_angle);
 
 /**
  * Pack message RT_SB_GPS_Status.
@@ -22227,6 +31211,13 @@ uint8_t vehicle_rt_sb_gps_status_gps_status_encode(double value);
 double vehicle_rt_sb_gps_status_gps_status_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_gps_status_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22252,6 +31243,13 @@ uint8_t vehicle_rt_sb_gps_status_firmware_version_major_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_status_firmware_version_major_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_firmware_version_major_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22281,6 +31279,13 @@ uint8_t vehicle_rt_sb_gps_status_firmware_version_intermediate_encode(double val
 double vehicle_rt_sb_gps_status_firmware_version_intermediate_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_firmware_version_intermediate_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22306,6 +31311,13 @@ uint8_t vehicle_rt_sb_gps_status_firmware_version_minor_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_status_firmware_version_minor_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_firmware_version_minor_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22335,6 +31347,13 @@ uint8_t vehicle_rt_sb_gps_status_gps_n_sv_encode(double value);
 double vehicle_rt_sb_gps_status_gps_n_sv_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_gps_n_sv_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22360,6 +31379,13 @@ uint8_t vehicle_rt_sb_gps_status_gps_n_sv_2_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_status_gps_n_sv_2_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_gps_n_sv_2_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22389,6 +31415,13 @@ uint8_t vehicle_rt_sb_gps_status_gps_n_sv_rtk_encode(double value);
 double vehicle_rt_sb_gps_status_gps_n_sv_rtk_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_gps_n_sv_rtk_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22416,6 +31449,13 @@ uint8_t vehicle_rt_sb_gps_status_rtk_status_encode(double value);
 double vehicle_rt_sb_gps_status_rtk_status_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_status_rtk_status_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22423,6 +31463,49 @@ double vehicle_rt_sb_gps_status_rtk_status_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_status_rtk_status_is_in_range(uint8_t value);
+
+/**
+ * Create message RT_SB_GPS_Status if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_status_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double gps_status,
+    double firmware_version_major,
+    double firmware_version_intermediate,
+    double firmware_version_minor,
+    double gps_n_sv,
+    double gps_n_sv_2,
+    double gps_n_sv_rtk,
+    double rtk_status);
+
+/**
+ * unpack message RT_SB_GPS_Status and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_status_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *gps_status,
+    double *firmware_version_major,
+    double *firmware_version_intermediate,
+    double *firmware_version_minor,
+    double *gps_n_sv,
+    double *gps_n_sv_2,
+    double *gps_n_sv_rtk,
+    double *rtk_status);
 
 /**
  * Pack message RT_SB_GPS_Pos_ECEF_2.
@@ -22471,6 +31554,13 @@ int32_t vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_y_encode(double value);
 double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_y_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22498,6 +31588,13 @@ int32_t vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_encode(double value);
 double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22505,6 +31602,37 @@ double vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_z_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Pos_ECEF_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_pos_ecef_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double gps_pos_ecef_y,
+    double gps_pos_ecef_z);
+
+/**
+ * unpack message RT_SB_GPS_Pos_ECEF_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_pos_ecef_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *gps_pos_ecef_y,
+    double *gps_pos_ecef_z);
 
 /**
  * Pack message RT_SB_GPS_Pos_ECEF_1.
@@ -22553,6 +31681,13 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_encode(double value
 double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22578,6 +31713,13 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22607,6 +31749,13 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_encode(double value
 double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22632,6 +31781,13 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22661,6 +31817,13 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_encode(double value
 double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22686,6 +31849,13 @@ uint8_t vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22715,6 +31885,13 @@ int32_t vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_encode(double value);
 double vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22722,6 +31899,47 @@ double vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_pos_ecef_1_gps_pos_ecef_x_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Pos_ECEF_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_pos_ecef_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_pos_ecef_x,
+    double validity_gps_pos_ecef_y,
+    double validity_gps_pos_ecef_z,
+    double accuracy_gps_pos_ecef_x,
+    double accuracy_gps_pos_ecef_y,
+    double accuracy_gps_pos_ecef_z,
+    double gps_pos_ecef_x);
+
+/**
+ * unpack message RT_SB_GPS_Pos_ECEF_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_pos_ecef_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_pos_ecef_x,
+    double *validity_gps_pos_ecef_y,
+    double *validity_gps_pos_ecef_z,
+    double *accuracy_gps_pos_ecef_x,
+    double *accuracy_gps_pos_ecef_y,
+    double *accuracy_gps_pos_ecef_z,
+    double *gps_pos_ecef_x);
 
 /**
  * Pack message RT_SB_GPS_Pos_LLH_2.
@@ -22770,6 +31988,13 @@ int32_t vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_encode(double value);
 double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22797,6 +32022,13 @@ int32_t vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_encode(double value);
 double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22804,6 +32036,37 @@ double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_altitude_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Pos_LLH_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_pos_llh_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double gps_pos_llh_longitude,
+    double gps_pos_llh_altitude);
+
+/**
+ * unpack message RT_SB_GPS_Pos_LLH_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_pos_llh_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *gps_pos_llh_longitude,
+    double *gps_pos_llh_altitude);
 
 /**
  * Pack message RT_SB_GPS_Pos_LLH_1.
@@ -22852,6 +32115,13 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_encode(double 
 double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22877,6 +32147,13 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_encode(double
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22906,6 +32183,13 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_encode(double 
 double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22931,6 +32215,13 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_encode(double 
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -22960,6 +32251,13 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_encode(double
 double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -22985,6 +32283,13 @@ uint8_t vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_encode(double 
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23014,6 +32319,13 @@ int32_t vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_encode(double value);
 double vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23021,6 +32333,47 @@ double vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Pos_LLH_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_pos_llh_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_pos_llh_latitude,
+    double validity_gps_pos_llh_longitude,
+    double validity_gps_pos_llh_altitude,
+    double accuracy_gps_pos_llh_latitude,
+    double accuracy_gps_pos_llh_longitude,
+    double accuracy_gps_pos_llh_altitude,
+    double gps_pos_llh_latitude);
+
+/**
+ * unpack message RT_SB_GPS_Pos_LLH_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_pos_llh_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_pos_llh_latitude,
+    double *validity_gps_pos_llh_longitude,
+    double *validity_gps_pos_llh_altitude,
+    double *accuracy_gps_pos_llh_latitude,
+    double *accuracy_gps_pos_llh_longitude,
+    double *accuracy_gps_pos_llh_altitude,
+    double *gps_pos_llh_latitude);
 
 /**
  * Pack message RT_SB_GPS_Heading_Gradient.
@@ -23069,6 +32422,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_encode(double va
 double vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23094,6 +32454,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_encode(double v
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23123,6 +32490,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_encode(double va
 double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23148,6 +32522,13 @@ int16_t vehicle_rt_sb_gps_heading_gradient_gps_heading_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_heading_gradient_gps_heading_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_gps_heading_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23177,6 +32558,13 @@ uint8_t vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_encode(double v
 double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23204,6 +32592,13 @@ int16_t vehicle_rt_sb_gps_heading_gradient_gps_gradient_encode(double value);
 double vehicle_rt_sb_gps_heading_gradient_gps_gradient_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_heading_gradient_gps_gradient_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23211,6 +32606,45 @@ double vehicle_rt_sb_gps_heading_gradient_gps_gradient_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_heading_gradient_gps_gradient_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_GPS_Heading_Gradient if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_heading_gradient_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_heading,
+    double validity_gps_gradient,
+    double accuracy_gps_heading,
+    double gps_heading,
+    double accuracy_gps_gradient,
+    double gps_gradient);
+
+/**
+ * unpack message RT_SB_GPS_Heading_Gradient and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_heading_gradient_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_heading,
+    double *validity_gps_gradient,
+    double *accuracy_gps_heading,
+    double *gps_heading,
+    double *accuracy_gps_gradient,
+    double *gps_gradient);
 
 /**
  * Pack message RT_SB_GPS_Vel_ECEF_2.
@@ -23259,6 +32693,13 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_encode(double value
 double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23284,6 +32725,13 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23313,6 +32761,13 @@ int32_t vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_y_encode(double value);
 double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_y_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23340,6 +32795,13 @@ int32_t vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_encode(double value);
 double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23347,6 +32809,41 @@ double vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_vel_ecef_2_gps_vel_ecef_z_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Vel_ECEF_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_vel_ecef_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_vel_ecef_y,
+    double validity_gps_vel_ecef_z,
+    double gps_vel_ecef_y,
+    double gps_vel_ecef_z);
+
+/**
+ * unpack message RT_SB_GPS_Vel_ECEF_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_vel_ecef_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_vel_ecef_y,
+    double *validity_gps_vel_ecef_z,
+    double *gps_vel_ecef_y,
+    double *gps_vel_ecef_z);
 
 /**
  * Pack message RT_SB_GPS_Vel_ECEF_1.
@@ -23395,6 +32892,13 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_encode(double value
 double vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23420,6 +32924,13 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23449,6 +32960,13 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_encode(double value
 double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23474,6 +32992,13 @@ uint8_t vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_encode(double value
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23503,6 +33028,13 @@ int32_t vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_encode(double value);
 double vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23510,6 +33042,43 @@ double vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_vel_ecef_1_gps_vel_ecef_x_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Vel_ECEF_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_vel_ecef_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_vel_ecef_x,
+    double accuracy_gps_vel_ecef_x,
+    double accuracy_gps_vel_ecef_y,
+    double accuracy_gps_vel_ecef_z,
+    double gps_vel_ecef_x);
+
+/**
+ * unpack message RT_SB_GPS_Vel_ECEF_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_vel_ecef_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_vel_ecef_x,
+    double *accuracy_gps_vel_ecef_x,
+    double *accuracy_gps_vel_ecef_y,
+    double *accuracy_gps_vel_ecef_z,
+    double *gps_vel_ecef_x);
 
 /**
  * Pack message RT_SB_GPS_Vel_NED_2.
@@ -23558,6 +33127,13 @@ uint8_t vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_encode(double value);
 double vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23583,6 +33159,13 @@ uint8_t vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23612,6 +33195,13 @@ int32_t vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_encode(double value);
 double vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23619,6 +33209,39 @@ double vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_vel_ned_2_gps_vel_ned_d_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Vel_NED_2 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_vel_ned_2_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_vel_ned_d,
+    double accuracy_gps_vel_d,
+    double gps_vel_ned_d);
+
+/**
+ * unpack message RT_SB_GPS_Vel_NED_2 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_vel_ned_2_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_vel_ned_d,
+    double *accuracy_gps_vel_d,
+    double *gps_vel_ned_d);
 
 /**
  * Pack message RT_SB_GPS_Vel_NED_1.
@@ -23667,6 +33290,13 @@ uint8_t vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_encode(double value);
 double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23692,6 +33322,13 @@ uint8_t vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23721,6 +33358,13 @@ uint8_t vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_encode(double value);
 double vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23746,6 +33390,13 @@ int32_t vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_n_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_n_decode(int32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_n_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23775,6 +33426,13 @@ int32_t vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_encode(double value);
 double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_decode(int32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23782,6 +33440,43 @@ double vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_decode(int32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_vel_ned_1_gps_vel_ned_e_is_in_range(int32_t value);
+
+/**
+ * Create message RT_SB_GPS_Vel_NED_1 if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_vel_ned_1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_vel_ned_n,
+    double validity_gps_vel_ned_e,
+    double accuracy_gps_vel_ne,
+    double gps_vel_ned_n,
+    double gps_vel_ned_e);
+
+/**
+ * unpack message RT_SB_GPS_Vel_NED_1 and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_vel_ned_1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_vel_ned_n,
+    double *validity_gps_vel_ned_e,
+    double *accuracy_gps_vel_ne,
+    double *gps_vel_ned_n,
+    double *gps_vel_ned_e);
 
 /**
  * Pack message RT_SB_GPS_Speed.
@@ -23830,6 +33525,13 @@ uint8_t vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_encode(double value);
 double vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23855,6 +33557,13 @@ uint8_t vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23884,6 +33593,13 @@ uint8_t vehicle_rt_sb_gps_speed_accuracy_gps_speed_encode(double value);
 double vehicle_rt_sb_gps_speed_accuracy_gps_speed_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_speed_accuracy_gps_speed_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23909,6 +33625,13 @@ uint32_t vehicle_rt_sb_gps_speed_gps_speed_2_d_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_speed_gps_speed_2_d_decode(uint32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_speed_gps_speed_2_d_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -23938,6 +33661,13 @@ uint32_t vehicle_rt_sb_gps_speed_gps_speed_3_d_encode(double value);
 double vehicle_rt_sb_gps_speed_gps_speed_3_d_decode(uint32_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_speed_gps_speed_3_d_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -23945,6 +33675,43 @@ double vehicle_rt_sb_gps_speed_gps_speed_3_d_decode(uint32_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_speed_gps_speed_3_d_is_in_range(uint32_t value);
+
+/**
+ * Create message RT_SB_GPS_Speed if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_speed_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_speed_2_d,
+    double validity_gps_speed_3_d,
+    double accuracy_gps_speed,
+    double gps_speed_2_d,
+    double gps_speed_3_d);
+
+/**
+ * unpack message RT_SB_GPS_Speed and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_speed_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_speed_2_d,
+    double *validity_gps_speed_3_d,
+    double *accuracy_gps_speed,
+    double *gps_speed_2_d,
+    double *gps_speed_3_d);
 
 /**
  * Pack message RT_SB_GPS_Time.
@@ -23993,6 +33760,13 @@ uint8_t vehicle_rt_sb_gps_time_validity_gps_time_encode(double value);
 double vehicle_rt_sb_gps_time_validity_gps_time_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_time_validity_gps_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24018,6 +33792,13 @@ uint8_t vehicle_rt_sb_gps_time_validity_gps_week_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_time_validity_gps_week_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_time_validity_gps_week_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24047,6 +33828,13 @@ uint8_t vehicle_rt_sb_gps_time_accuracy_gps_time_encode(double value);
 double vehicle_rt_sb_gps_time_accuracy_gps_time_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_time_accuracy_gps_time_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24072,6 +33860,13 @@ uint32_t vehicle_rt_sb_gps_time_gps_time_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gps_time_gps_time_decode(uint32_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_time_gps_time_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24101,6 +33896,13 @@ uint16_t vehicle_rt_sb_gps_time_gps_week_encode(double value);
 double vehicle_rt_sb_gps_time_gps_week_decode(uint16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gps_time_gps_week_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24108,6 +33910,43 @@ double vehicle_rt_sb_gps_time_gps_week_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gps_time_gps_week_is_in_range(uint16_t value);
+
+/**
+ * Create message RT_SB_GPS_Time if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gps_time_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gps_time,
+    double validity_gps_week,
+    double accuracy_gps_time,
+    double gps_time,
+    double gps_week);
+
+/**
+ * unpack message RT_SB_GPS_Time and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gps_time_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gps_time,
+    double *validity_gps_week,
+    double *accuracy_gps_time,
+    double *gps_time,
+    double *gps_week);
 
 /**
  * Pack message RT_SB_Accel.
@@ -24156,6 +33995,13 @@ uint8_t vehicle_rt_sb_accel_validity_accel_longitudinal_encode(double value);
 double vehicle_rt_sb_accel_validity_accel_longitudinal_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_accel_validity_accel_longitudinal_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24181,6 +34027,13 @@ uint8_t vehicle_rt_sb_accel_validity_accel_lateral_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_accel_validity_accel_lateral_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_accel_validity_accel_lateral_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24210,6 +34063,13 @@ uint8_t vehicle_rt_sb_accel_validity_accel_vertical_encode(double value);
 double vehicle_rt_sb_accel_validity_accel_vertical_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_accel_validity_accel_vertical_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24235,6 +34095,13 @@ uint8_t vehicle_rt_sb_accel_accuracy_accel_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_accel_accuracy_accel_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_accel_accuracy_accel_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24264,6 +34131,13 @@ int16_t vehicle_rt_sb_accel_accel_longitudinal_encode(double value);
 double vehicle_rt_sb_accel_accel_longitudinal_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_accel_accel_longitudinal_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24289,6 +34163,13 @@ int16_t vehicle_rt_sb_accel_accel_lateral_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_accel_accel_lateral_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_accel_accel_lateral_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24318,6 +34199,13 @@ int16_t vehicle_rt_sb_accel_accel_vertical_encode(double value);
 double vehicle_rt_sb_accel_accel_vertical_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_accel_accel_vertical_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24325,6 +34213,47 @@ double vehicle_rt_sb_accel_accel_vertical_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_accel_accel_vertical_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_Accel if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_accel_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_accel_longitudinal,
+    double validity_accel_lateral,
+    double validity_accel_vertical,
+    double accuracy_accel,
+    double accel_longitudinal,
+    double accel_lateral,
+    double accel_vertical);
+
+/**
+ * unpack message RT_SB_Accel and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_accel_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_accel_longitudinal,
+    double *validity_accel_lateral,
+    double *validity_accel_vertical,
+    double *accuracy_accel,
+    double *accel_longitudinal,
+    double *accel_lateral,
+    double *accel_vertical);
 
 /**
  * Pack message RT_SB_Gyro_Rates.
@@ -24373,6 +34302,13 @@ uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_encode(double value);
 double vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24398,6 +34334,13 @@ uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24427,6 +34370,13 @@ uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_encode(double value);
 double vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24452,6 +34402,13 @@ uint8_t vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24481,6 +34438,13 @@ int16_t vehicle_rt_sb_gyro_rates_gyro_rate_yaw_encode(double value);
 double vehicle_rt_sb_gyro_rates_gyro_rate_yaw_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gyro_rates_gyro_rate_yaw_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24506,6 +34470,13 @@ int16_t vehicle_rt_sb_gyro_rates_gyro_rate_pitch_encode(double value);
  * @return Decoded signal.
  */
 double vehicle_rt_sb_gyro_rates_gyro_rate_pitch_decode(int16_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gyro_rates_gyro_rate_pitch_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -24535,6 +34506,13 @@ int16_t vehicle_rt_sb_gyro_rates_gyro_rate_roll_encode(double value);
 double vehicle_rt_sb_gyro_rates_gyro_rate_roll_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double vehicle_rt_sb_gyro_rates_gyro_rate_roll_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -24542,6 +34520,47 @@ double vehicle_rt_sb_gyro_rates_gyro_rate_roll_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool vehicle_rt_sb_gyro_rates_gyro_rate_roll_is_in_range(int16_t value);
+
+/**
+ * Create message RT_SB_Gyro_Rates if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int vehicle_rt_sb_gyro_rates_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double validity_gyro_rate_yaw,
+    double validity_gyro_rate_pitch,
+    double validity_gyro_rate_roll,
+    double accuracy_gyro_rates,
+    double gyro_rate_yaw,
+    double gyro_rate_pitch,
+    double gyro_rate_roll);
+
+/**
+ * unpack message RT_SB_Gyro_Rates and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int vehicle_rt_sb_gyro_rates_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *validity_gyro_rate_yaw,
+    double *validity_gyro_rate_pitch,
+    double *validity_gyro_rate_roll,
+    double *accuracy_gyro_rates,
+    double *gyro_rate_yaw,
+    double *gyro_rate_pitch,
+    double *gyro_rate_roll);
 
 
 #ifdef __cplusplus

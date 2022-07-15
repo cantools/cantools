@@ -32,6 +32,9 @@
 
 #include "no_signals.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 int no_signals_message1_pack(
     uint8_t *dst_p,
     const struct no_signals_message1_t *src_p,
@@ -63,6 +66,49 @@ int no_signals_message1_unpack(
     return (0);
 }
 
+static int no_signals_message1_check_ranges(struct no_signals_message1_t *msg)
+{
+    int idx = 1;
+    (void)msg;
+    (void)idx;
+
+    return 0;
+}
+
+int no_signals_message1_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz)
+{
+    struct no_signals_message1_t msg;
+
+
+    int ret = no_signals_message1_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = no_signals_message1_pack(outbuf, &msg, outbuf_sz);
+    if (5 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int no_signals_message1_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz)
+{
+    struct no_signals_message1_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (no_signals_message1_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = no_signals_message1_check_ranges(&msg);
+
+    return ret;
+}
+
 int no_signals_message2_pack(
     uint8_t *dst_p,
     const struct no_signals_message2_t *src_p,
@@ -86,3 +132,11 @@ int no_signals_message2_unpack(
 
     return (0);
 }
+
+bool is_extended_frame(uint32_t frame_id)
+{
+    return false;
+}
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

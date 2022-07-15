@@ -51,6 +51,8 @@ extern "C" {
 
 /* Extended or standard frame types. */
 #define MOTOHAWK_BIT_FIELDS_EXAMPLE_MESSAGE_IS_EXTENDED (0)
+/* return whether a certain frame uses an extended id */
+bool is_extended_frame(uint32_t frame_id);
 
 /* Frame cycle times in milliseconds. */
 
@@ -136,6 +138,13 @@ uint8_t motohawk_bit_fields_example_message_enable_encode(double value);
 double motohawk_bit_fields_example_message_enable_decode(uint8_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double motohawk_bit_fields_example_message_enable_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -161,6 +170,13 @@ uint8_t motohawk_bit_fields_example_message_average_radius_encode(double value);
  * @return Decoded signal.
  */
 double motohawk_bit_fields_example_message_average_radius_decode(uint8_t value);
+
+/**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double motohawk_bit_fields_example_message_average_radius_clamp(double val);
 
 /**
  * Check that given signal is in allowed range.
@@ -190,6 +206,13 @@ int16_t motohawk_bit_fields_example_message_temperature_encode(double value);
 double motohawk_bit_fields_example_message_temperature_decode(int16_t value);
 
 /**
+ * clamp signal to allowed range.
+ * @param[in] val: requested value
+ * @returns   clamped value
+ */
+double motohawk_bit_fields_example_message_temperature_clamp(double val);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -197,6 +220,39 @@ double motohawk_bit_fields_example_message_temperature_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool motohawk_bit_fields_example_message_temperature_is_in_range(int16_t value);
+
+/**
+ * Create message ExampleMessage if range check ok.
+ * @param[out] outbuf:    buffer to write message into
+ * @param[in]  outbuf_sz: size of outbuf
+ *
+ * @returns zero (success),
+ *          -1   (problem packing, likely buffer too small)
+ *          n>0  (nth value out of range)
+ */
+int motohawk_bit_fields_example_message_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double enable,
+    double average_radius,
+    double temperature);
+
+/**
+ * unpack message ExampleMessage and check for allowable ranges
+ * @param[in]  inbuf:    buffer to read from
+ * @param[in]  inbuf_sz: length in bytes
+ * @param[out] rest:     pointers to data to fill
+ *
+ * @returns: zero: on success
+ *           -1:   error during unpacking
+ *           n>0:  nth parameter out of range
+ *
+ * even if parameters are out of range, the output values will be set.
+ */
+int motohawk_bit_fields_example_message_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *enable,
+    double *average_radius,
+    double *temperature);
 
 
 #ifdef __cplusplus

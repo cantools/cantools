@@ -32,6 +32,9 @@
 
 #include "multiplex_2.h"
 
+#define CTOOLS_MAX(x,y) (((x) < (y)) ? (y) : (x))
+#define CTOOLS_MIN(x,y) (((x) < (y)) ? (x) : (y))
+
 static inline uint8_t pack_left_shift_u8(
     uint8_t value,
     uint8_t shift,
@@ -233,6 +236,80 @@ int multiplex_2_shared_unpack(
     return (0);
 }
 
+static int multiplex_2_shared_check_ranges(struct multiplex_2_shared_t *msg)
+{
+    int idx = 1;
+
+    if (!multiplex_2_shared_s0_is_in_range(msg->s0))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_shared_s1_is_in_range(msg->s1))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_shared_s2_is_in_range(msg->s2))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int multiplex_2_shared_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s1,
+    double s2)
+{
+    struct multiplex_2_shared_t msg;
+
+    msg.s0 = multiplex_2_shared_s0_encode(s0);
+    msg.s1 = multiplex_2_shared_s1_encode(s1);
+    msg.s2 = multiplex_2_shared_s2_encode(s2);
+
+    int ret = multiplex_2_shared_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = multiplex_2_shared_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int multiplex_2_shared_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s1,
+    double *s2)
+{
+    struct multiplex_2_shared_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (multiplex_2_shared_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = multiplex_2_shared_check_ranges(&msg);
+
+    if (s0)
+        *s0 = multiplex_2_shared_s0_decode(msg.s0);
+
+    if (s1)
+        *s1 = multiplex_2_shared_s1_decode(msg.s1);
+
+    if (s2)
+        *s2 = multiplex_2_shared_s2_decode(msg.s2);
+
+    return ret;
+}
+
 int8_t multiplex_2_shared_s0_encode(double value)
 {
     return (int8_t)(value);
@@ -241,6 +318,14 @@ int8_t multiplex_2_shared_s0_encode(double value)
 double multiplex_2_shared_s0_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_shared_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_shared_s0_is_in_range(int8_t value)
@@ -258,6 +343,14 @@ double multiplex_2_shared_s1_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_shared_s1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_shared_s1_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -271,6 +364,14 @@ int8_t multiplex_2_shared_s2_encode(double value)
 double multiplex_2_shared_s2_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_shared_s2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_shared_s2_is_in_range(int8_t value)
@@ -362,6 +463,80 @@ int multiplex_2_normal_unpack(
     return (0);
 }
 
+static int multiplex_2_normal_check_ranges(struct multiplex_2_normal_t *msg)
+{
+    int idx = 1;
+
+    if (!multiplex_2_normal_s0_is_in_range(msg->s0))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_normal_s1_is_in_range(msg->s1))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_normal_s2_is_in_range(msg->s2))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int multiplex_2_normal_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s1,
+    double s2)
+{
+    struct multiplex_2_normal_t msg;
+
+    msg.s0 = multiplex_2_normal_s0_encode(s0);
+    msg.s1 = multiplex_2_normal_s1_encode(s1);
+    msg.s2 = multiplex_2_normal_s2_encode(s2);
+
+    int ret = multiplex_2_normal_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = multiplex_2_normal_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int multiplex_2_normal_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s1,
+    double *s2)
+{
+    struct multiplex_2_normal_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (multiplex_2_normal_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = multiplex_2_normal_check_ranges(&msg);
+
+    if (s0)
+        *s0 = multiplex_2_normal_s0_decode(msg.s0);
+
+    if (s1)
+        *s1 = multiplex_2_normal_s1_decode(msg.s1);
+
+    if (s2)
+        *s2 = multiplex_2_normal_s2_decode(msg.s2);
+
+    return ret;
+}
+
 int8_t multiplex_2_normal_s0_encode(double value)
 {
     return (int8_t)(value);
@@ -370,6 +545,14 @@ int8_t multiplex_2_normal_s0_encode(double value)
 double multiplex_2_normal_s0_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_normal_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_normal_s0_is_in_range(int8_t value)
@@ -387,6 +570,14 @@ double multiplex_2_normal_s1_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_normal_s1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_normal_s1_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -400,6 +591,14 @@ int8_t multiplex_2_normal_s2_encode(double value)
 double multiplex_2_normal_s2_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_normal_s2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_normal_s2_is_in_range(int8_t value)
@@ -606,6 +805,146 @@ int multiplex_2_extended_unpack(
     return (0);
 }
 
+static int multiplex_2_extended_check_ranges(struct multiplex_2_extended_t *msg)
+{
+    int idx = 1;
+
+    if (!multiplex_2_extended_s0_is_in_range(msg->s0))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s5_is_in_range(msg->s5))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s1_is_in_range(msg->s1))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s4_is_in_range(msg->s4))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s2_is_in_range(msg->s2))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s3_is_in_range(msg->s3))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s6_is_in_range(msg->s6))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s8_is_in_range(msg->s8))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_s7_is_in_range(msg->s7))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int multiplex_2_extended_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s0,
+    double s5,
+    double s1,
+    double s4,
+    double s2,
+    double s3,
+    double s6,
+    double s8,
+    double s7)
+{
+    struct multiplex_2_extended_t msg;
+
+    msg.s0 = multiplex_2_extended_s0_encode(s0);
+    msg.s5 = multiplex_2_extended_s5_encode(s5);
+    msg.s1 = multiplex_2_extended_s1_encode(s1);
+    msg.s4 = multiplex_2_extended_s4_encode(s4);
+    msg.s2 = multiplex_2_extended_s2_encode(s2);
+    msg.s3 = multiplex_2_extended_s3_encode(s3);
+    msg.s6 = multiplex_2_extended_s6_encode(s6);
+    msg.s8 = multiplex_2_extended_s8_encode(s8);
+    msg.s7 = multiplex_2_extended_s7_encode(s7);
+
+    int ret = multiplex_2_extended_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = multiplex_2_extended_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int multiplex_2_extended_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s0,
+    double *s5,
+    double *s1,
+    double *s4,
+    double *s2,
+    double *s3,
+    double *s6,
+    double *s8,
+    double *s7)
+{
+    struct multiplex_2_extended_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (multiplex_2_extended_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = multiplex_2_extended_check_ranges(&msg);
+
+    if (s0)
+        *s0 = multiplex_2_extended_s0_decode(msg.s0);
+
+    if (s5)
+        *s5 = multiplex_2_extended_s5_decode(msg.s5);
+
+    if (s1)
+        *s1 = multiplex_2_extended_s1_decode(msg.s1);
+
+    if (s4)
+        *s4 = multiplex_2_extended_s4_decode(msg.s4);
+
+    if (s2)
+        *s2 = multiplex_2_extended_s2_decode(msg.s2);
+
+    if (s3)
+        *s3 = multiplex_2_extended_s3_decode(msg.s3);
+
+    if (s6)
+        *s6 = multiplex_2_extended_s6_decode(msg.s6);
+
+    if (s8)
+        *s8 = multiplex_2_extended_s8_decode(msg.s8);
+
+    if (s7)
+        *s7 = multiplex_2_extended_s7_decode(msg.s7);
+
+    return ret;
+}
+
 int8_t multiplex_2_extended_s0_encode(double value)
 {
     return (int8_t)(value);
@@ -614,6 +953,14 @@ int8_t multiplex_2_extended_s0_encode(double value)
 double multiplex_2_extended_s0_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s0_is_in_range(int8_t value)
@@ -631,6 +978,14 @@ double multiplex_2_extended_s5_decode(int32_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s5_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s5_is_in_range(int32_t value)
 {
     return ((value >= -134217728) && (value <= 134217727));
@@ -644,6 +999,14 @@ int8_t multiplex_2_extended_s1_encode(double value)
 double multiplex_2_extended_s1_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s1_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s1_is_in_range(int8_t value)
@@ -661,6 +1024,14 @@ double multiplex_2_extended_s4_decode(int32_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s4_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s4_is_in_range(int32_t value)
 {
     return ((value >= -8388608) && (value <= 8388607));
@@ -674,6 +1045,14 @@ int8_t multiplex_2_extended_s2_encode(double value)
 double multiplex_2_extended_s2_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s2_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s2_is_in_range(int8_t value)
@@ -693,6 +1072,14 @@ double multiplex_2_extended_s3_decode(int16_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s3_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s3_is_in_range(int16_t value)
 {
     (void)value;
@@ -708,6 +1095,14 @@ int8_t multiplex_2_extended_s6_encode(double value)
 double multiplex_2_extended_s6_decode(int8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s6_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s6_is_in_range(int8_t value)
@@ -727,6 +1122,14 @@ double multiplex_2_extended_s8_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_s8_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_s8_is_in_range(int8_t value)
 {
     (void)value;
@@ -742,6 +1145,14 @@ int32_t multiplex_2_extended_s7_encode(double value)
 double multiplex_2_extended_s7_decode(int32_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_s7_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
 }
 
 bool multiplex_2_extended_s7_is_in_range(int32_t value)
@@ -858,6 +1269,91 @@ int multiplex_2_extended_types_unpack(
     return (0);
 }
 
+static int multiplex_2_extended_types_check_ranges(struct multiplex_2_extended_types_t *msg)
+{
+    int idx = 1;
+
+    if (!multiplex_2_extended_types_s11_is_in_range(msg->s11))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_types_s0_is_in_range(msg->s0))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_types_s10_is_in_range(msg->s10))
+        return idx;
+
+    idx++;
+
+    if (!multiplex_2_extended_types_s9_is_in_range(msg->s9))
+        return idx;
+
+    idx++;
+
+    return 0;
+}
+
+int multiplex_2_extended_types_wrap_pack(
+    uint8_t *outbuf, size_t outbuf_sz,
+    double s11,
+    double s0,
+    double s10,
+    double s9)
+{
+    struct multiplex_2_extended_types_t msg;
+
+    msg.s11 = multiplex_2_extended_types_s11_encode(s11);
+    msg.s0 = multiplex_2_extended_types_s0_encode(s0);
+    msg.s10 = multiplex_2_extended_types_s10_encode(s10);
+    msg.s9 = multiplex_2_extended_types_s9_encode(s9);
+
+    int ret = multiplex_2_extended_types_check_ranges(&msg);
+    if (ret) {
+        return ret;
+    }
+
+    ret = multiplex_2_extended_types_pack(outbuf, &msg, outbuf_sz);
+    if (8 != ret) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int multiplex_2_extended_types_wrap_unpack(
+    uint8_t *inbuf, size_t inbuf_sz,
+    double *s11,
+    double *s0,
+    double *s10,
+    double *s9)
+{
+    struct multiplex_2_extended_types_t msg;
+    memset(&msg, 0, sizeof(msg));
+
+    if (multiplex_2_extended_types_unpack(&msg, inbuf, inbuf_sz)) {
+        return -1;
+    }
+
+    int ret = multiplex_2_extended_types_check_ranges(&msg);
+
+    if (s11)
+        *s11 = multiplex_2_extended_types_s11_decode(msg.s11);
+
+    if (s0)
+        *s0 = multiplex_2_extended_types_s0_decode(msg.s0);
+
+    if (s10)
+        *s10 = multiplex_2_extended_types_s10_decode(msg.s10);
+
+    if (s9)
+        *s9 = multiplex_2_extended_types_s9_decode(msg.s9);
+
+    return ret;
+}
+
 uint8_t multiplex_2_extended_types_s11_encode(double value)
 {
     return (uint8_t)(value);
@@ -866,6 +1362,14 @@ uint8_t multiplex_2_extended_types_s11_encode(double value)
 double multiplex_2_extended_types_s11_decode(uint8_t value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_types_s11_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, 2.0);
+    ret = CTOOLS_MIN(ret, 6.0);
+    return ret;
 }
 
 bool multiplex_2_extended_types_s11_is_in_range(uint8_t value)
@@ -883,6 +1387,14 @@ double multiplex_2_extended_types_s0_decode(int8_t value)
     return ((double)value);
 }
 
+double multiplex_2_extended_types_s0_clamp(double val)
+{
+    double ret = val;
+
+
+    return ret;
+}
+
 bool multiplex_2_extended_types_s0_is_in_range(int8_t value)
 {
     return ((value >= -8) && (value <= 7));
@@ -896,6 +1408,14 @@ float multiplex_2_extended_types_s10_encode(double value)
 double multiplex_2_extended_types_s10_decode(float value)
 {
     return ((double)value);
+}
+
+double multiplex_2_extended_types_s10_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -3.4e+38);
+    ret = CTOOLS_MIN(ret, 3.4e+38);
+    return ret;
 }
 
 bool multiplex_2_extended_types_s10_is_in_range(float value)
@@ -913,7 +1433,23 @@ double multiplex_2_extended_types_s9_decode(float value)
     return ((double)value);
 }
 
+double multiplex_2_extended_types_s9_clamp(double val)
+{
+    double ret = val;
+    ret = CTOOLS_MAX(ret, -1.34);
+    ret = CTOOLS_MIN(ret, 1235.0);
+    return ret;
+}
+
 bool multiplex_2_extended_types_s9_is_in_range(float value)
 {
     return ((value >= -1.34f) && (value <= 1235.0f));
 }
+
+bool is_extended_frame(uint32_t frame_id)
+{
+    return true;
+}
+
+#undef CTOOLS_MAX
+#undef CTOOLS_MIN

@@ -52,7 +52,7 @@ BO_ 251 LimitsCmd: 6 Driver
  SG_ AccelLimit : 32|16@1+ (1,0) [0|0] "" Actuator
 
 BO_ 252 ControlStatus: 4 Actuator
- SG_ CRC8_STAT1 : 0|8@1+ (1,0) [0|255] "" Driver
+ SG_ CRC8_STAT1 : 0|8@1+ (1,0) [0|255] "" Driver, Actuator
  SG_ Counter_STAT1 : 12|4@1+ (1,0) [0|15] "" Driver
  SG_ TorqueActual : 16|10@1- (0.015625,0) [-8|8] "N*m" Driver
  SG_ TorqueCloseLoopActual : 26|6@1+ (0.125,0) [0|8] "N*m" Driver

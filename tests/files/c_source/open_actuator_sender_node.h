@@ -479,6 +479,19 @@ int open_actuator_control_status_pack(
     const struct open_actuator_control_status_t *src_p,
     size_t size);
 
+/**
+ * Unpack message ControlStatus.
+ *
+ * @param[out] dst_p Object to unpack the message into.
+ * @param[in] src_p Message to unpack.
+ * @param[in] size Size of src_p.
+ *
+ * @return zero(0) or negative error code.
+ */
+int open_actuator_control_status_unpack(
+    struct open_actuator_control_status_t *dst_p,
+    const uint8_t *src_p,
+    size_t size);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -488,6 +501,15 @@ int open_actuator_control_status_pack(
  * @return Encoded signal.
  */
 uint8_t open_actuator_control_status_crc8_stat1_encode(double value);
+
+/**
+ * Decode given signal by applying scaling and offset.
+ *
+ * @param[in] value Signal to decode.
+ *
+ * @return Decoded signal.
+ */
+double open_actuator_control_status_crc8_stat1_decode(uint8_t value);
 
 /**
  * Check that given signal is in allowed range.

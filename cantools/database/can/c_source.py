@@ -1002,7 +1002,8 @@ def _format_unpack_code_mux(message,
                             mux,
                             body_lines_per_index,
                             variable_lines,
-                            helper_kinds):
+                            helper_kinds,
+                            node_name):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_unpack_code_signal(message,
                                signal_name,
@@ -1020,7 +1021,8 @@ def _format_unpack_code_mux(message,
         body_lines = _format_unpack_code_level(message,
                                                multiplexed_signals,
                                                variable_lines,
-                                               helper_kinds)
+                                               helper_kinds,
+                                               node_name)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
         lines.extend(_strip_blank_lines(body_lines))
@@ -1088,7 +1090,8 @@ def _format_unpack_code_signal(message,
 def _format_unpack_code_level(message,
                               signal_names,
                               variable_lines,
-                              helper_kinds):
+                              helper_kinds,
+                              node_name):
     """Format one unpack level in a signal tree.
 
     """
@@ -1102,13 +1105,17 @@ def _format_unpack_code_level(message,
                                                 signal_name,
                                                 body_lines,
                                                 variable_lines,
-                                                helper_kinds)
+                                                helper_kinds,
+                                                node_name)
 
             if muxes_lines:
                 muxes_lines.append('')
 
             muxes_lines += mux_lines
         else:
+            if not _is_receiver(message.get_signal_by_name(signal_name), node_name):
+                continue
+
             _format_unpack_code_signal(message,
                                        signal_name,
                                        body_lines,
@@ -1130,12 +1137,13 @@ def _format_unpack_code_level(message,
     return body_lines
 
 
-def _format_unpack_code(message, helper_kinds):
+def _format_unpack_code(message, helper_kinds, node_name):
     variable_lines = []
     body_lines = _format_unpack_code_level(message,
                                            message.signal_tree,
                                            variable_lines,
-                                           helper_kinds)
+                                           helper_kinds,
+                                           node_name)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -1485,7 +1493,8 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
             pack_variables, pack_body = _format_pack_code(message,
                                                           pack_helper_kinds)
             unpack_variables, unpack_body = _format_unpack_code(message,
-                                                                unpack_helper_kinds)
+                                                                unpack_helper_kinds,
+                                                                node_name)
             pack_unused = ''
             unpack_unused = ''
 

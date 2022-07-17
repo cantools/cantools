@@ -380,6 +380,19 @@ int open_actuator_control_status_pack(
     const struct open_actuator_control_status_t *src_p,
     size_t size);
 
+/**
+ * Unpack message ControlStatus.
+ *
+ * @param[out] dst_p Object to unpack the message into.
+ * @param[in] src_p Message to unpack.
+ * @param[in] size Size of src_p.
+ *
+ * @return zero(0) or negative error code.
+ */
+int open_actuator_control_status_unpack(
+    struct open_actuator_control_status_t *dst_p,
+    const uint8_t *src_p,
+    size_t size);
 
 /**
  * Check that given signal is in allowed range.

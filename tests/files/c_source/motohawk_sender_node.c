@@ -64,14 +64,6 @@ static inline uint16_t unpack_left_shift_u16(
     return (uint16_t)((uint16_t)(value & mask) << shift);
 }
 
-static inline uint8_t unpack_right_shift_u8(
-    uint8_t value,
-    uint8_t shift,
-    uint8_t mask)
-{
-    return (uint8_t)((uint8_t)(value & mask) >> shift);
-}
-
 static inline uint16_t unpack_right_shift_u16(
     uint8_t value,
     uint8_t shift,
@@ -114,8 +106,6 @@ int motohawk_example_message_unpack(
         return (-EINVAL);
     }
 
-    dst_p->enable = unpack_right_shift_u8(src_p[0], 7u, 0x80u);
-    dst_p->average_radius = unpack_right_shift_u8(src_p[0], 1u, 0x7eu);
     temperature = unpack_left_shift_u16(src_p[0], 11u, 0x01u);
     temperature |= unpack_left_shift_u16(src_p[1], 3u, 0xffu);
     temperature |= unpack_right_shift_u16(src_p[2], 5u, 0xe0u);

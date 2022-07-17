@@ -272,10 +272,28 @@ int open_actuator_control_status_pack(
     return (4);
 }
 
+int open_actuator_control_status_unpack(
+    struct open_actuator_control_status_t *dst_p,
+    const uint8_t *src_p,
+    size_t size)
+{
+    if (size < 4u) {
+        return (-EINVAL);
+    }
+
+    dst_p->crc8_stat1 = unpack_right_shift_u8(src_p[0], 0u, 0xffu);
+
+    return (0);
+}
 
 uint8_t open_actuator_control_status_crc8_stat1_encode(double value)
 {
     return (uint8_t)(value);
+}
+
+double open_actuator_control_status_crc8_stat1_decode(uint8_t value)
+{
+    return ((double)value);
 }
 
 bool open_actuator_control_status_crc8_stat1_is_in_range(uint8_t value)

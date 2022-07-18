@@ -15,7 +15,7 @@ from xml.etree import ElementTree
 import timeit
 
 import cantools.autosar
-from cantools.database.utils import prune_signal_choices
+from cantools.database.utils import prune_signal_choices, sort_choices_by_value, sort_signals_by_name
 
 try:
     from StringIO import StringIO
@@ -1913,7 +1913,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_jopp_6_0_sym(self):
         self.internal_test_jopp_6_0_sym(False)
-        
+
     def test_jopp_6_0_sym_re_read(self):
         self.internal_test_jopp_6_0_sym(True)
 
@@ -3373,7 +3373,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(dumped_msg.signals[2].name, "UnmultiplexedSig")
         self.assertEqual(dumped_msg.signals[2].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[2].is_multiplexer, False)
-        
+
     def test_multiplex_sym_dump(self):
         db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
         dumped_db = cantools.db.load_string(db.as_sym_string())
@@ -3403,7 +3403,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(reg_id_msg.is_extended_frame, False)
         self.assertEqual(ext_id_msg.is_extended_frame, True)
-        
+
     def test_extended_id_sym_dump(self):
         db = cantools.db.load_file('tests/files/sym/test_extended_id_dump.sym')
         dumped_db = cantools.db.load_string(db.as_sym_string())
@@ -3412,14 +3412,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(reg_id_msg.is_extended_frame, False)
         self.assertEqual(ext_id_msg.is_extended_frame, True)
- 
+
     def test_event_attributes(self):
         db = cantools.db.load_file('tests/files/dbc/attribute_Event.dbc')
-        
+
         self.assertEqual(db.messages[0].send_type, 'Event')
         self.assertEqual(db.messages[0].frame_id, 1234)
         self.assertEqual( db.messages[0].name, 'INV2EventMsg1')
-        
+
     def test_attributes(self):
         filename = 'tests/files/dbc/attributes.dbc'
 
@@ -6212,6 +6212,122 @@ class CanToolsDatabaseTest(unittest.TestCase):
         actual_signal_names = [sig.name for sig in msg.signals]
 
         self.assertEqual(actual_signal_names, expected_signal_names)
+
+    def test_dbc_sort_attribute_signals(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.get_message_by_name('RT_SB_INS_Attitude')
+
+        def get_value_defs(msg, db_dump: str):
+            # eg: VAL_ 2304273698 Validity_Roll 1 "Valid" 0 "Invalid" ;
+            # extract the Validity_Roll part
+            frame_id = msg.frame_id
+            if msg.is_extended_frame:
+                frame_id |= 0x80000000
+            prefix = f'VAL_ {frame_id}'
+            defs = filter(lambda x: x.startswith(prefix), db_dump.split('\r\n'))
+
+            return [line.split(' ')[2] for line in defs]
+
+        expected_order = [
+            'Validity_Roll',
+            'Validity_Pitch',
+            'Validity_Yaw',
+        ]
+
+        actual_order = get_value_defs(msg, db.as_dbc_string())
+        self.assertEqual(actual_order, expected_order)
+
+        expected_order = [
+            'Validity_Pitch',
+            'Validity_Roll',
+            'Validity_Yaw',
+        ]
+
+        dump = db.as_dbc_string(sort_attribute_signals=sort_signals_by_name)
+        actual_order = get_value_defs(msg, dump)
+        self.assertEqual(actual_order, expected_order)
+
+    def test_dbc_sort_attributes(self):
+        filename = 'tests/files/dbc/attributes.dbc'
+        db = cantools.database.load_file(filename)
+
+        def attributes_from_dump(dump: str):
+            dump = dump.split('\r\n')
+            return [line.split(' ')[1].strip('"') for line in dump if line.startswith('BA_ ')]
+
+        expected_order = [
+            'TheNetworkAttribute',
+            'BusType',
+            'TheNodeAttribute',
+            'TheFloatAttribute',
+            'TheHexAttribute',
+            'GenMsgSendType',
+            'GenMsgCycleTime',
+            'TheSignalStringAttribute',
+            'GenSigSendType',
+            'GenSigSendType',
+        ]
+
+        dump = db.as_dbc_string()
+        actual_order = attributes_from_dump(dump)
+
+        self.assertEqual(actual_order, expected_order)
+
+        expected_order = [
+            'BusType',
+            'GenMsgCycleTime',
+            'GenMsgSendType',
+            'GenSigSendType',
+            'GenSigSendType',
+            'TheFloatAttribute',
+            'TheHexAttribute',
+            'TheNetworkAttribute',
+            'TheNodeAttribute',
+            'TheSignalStringAttribute',
+        ]
+
+        def sort_attributes_by_name(attributes):
+            return sorted(attributes, key = lambda x: x[1].name)
+
+        dump = db.as_dbc_string(sort_attributes=sort_attributes_by_name)
+        actual_order = attributes_from_dump(dump)
+
+        self.assertEqual(actual_order, expected_order)
+
+    def test_dbc_sort_choices(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename)
+        msg = db.get_message_by_name('RT_SB_GPS_Status')
+        sig = msg.get_signal_by_name('RTK_Status')
+
+        expected_value_order = [4, 3, 2, 1, 0]
+        actual_value_order = list(sig.choices.keys())
+
+        self.assertEqual(actual_value_order, expected_value_order)
+
+        db = cantools.database.load_string(db.as_dbc_string(
+            sort_choices=sort_choices_by_value
+        ), 'dbc')
+        msg = db.get_message_by_name('RT_SB_GPS_Status')
+        sig = msg.get_signal_by_name('RTK_Status')
+
+        expected_value_order = [0, 1, 2, 3, 4]
+        actual_value_order = list(sig.choices.keys())
+
+        self.assertEqual(actual_value_order, expected_value_order)
+
+    def test_dbc_shorten_long_names(self):
+        filename = 'tests/files/dbc/long_names.dbc'
+        db = cantools.database.load_file(filename)
+
+        normal_output = db.as_dbc_string()
+
+        self.assertIn('BA_ "SystemSignalLongSymbol"', normal_output)
+
+        long_output = db.as_dbc_string(shorten_long_names=False)
+
+        self.assertNotIn('BA_ "SystemSignalLongSymbol"', long_output)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

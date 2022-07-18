@@ -33,7 +33,14 @@ from ..internal_database import InternalDatabase
 from ..environment_variable import EnvironmentVariable
 
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit, sort_signals_by_start_bit_reversed, SORT_SIGNALS_DEFAULT
+from ...utils import (
+    type_sort_signals,
+    type_sort_attributes,
+    type_sort_choices,
+    sort_signals_by_start_bit,
+    sort_signals_by_start_bit_reversed,
+    SORT_SIGNALS_DEFAULT
+)
 
 
 DBC_FMT = (
@@ -811,8 +818,8 @@ def _dump_attribute_definition_defaults_rel(database):
     return ba_def_def_rel
 
 
-def _dump_attributes(database, sort_signals):
-    ba = []
+def _dump_attributes(database, sort_signals, sort_attributes):
+    attributes = []
 
     def get_value(attribute):
         result = attribute.value
@@ -825,17 +832,13 @@ def _dump_attributes(database, sort_signals):
     if database.dbc is not None:
         if database.dbc.attributes is not None:
             for attribute in database.dbc.attributes.values():
-                ba.append(f'BA_ "{attribute.definition.name}" '
-                          f'{get_value(attribute)};')
+                attributes.append(('dbc', attribute, None, None, None))
 
     for node in database.nodes:
         if node.dbc is not None:
             if node.dbc.attributes is not None:
                 for attribute in node.dbc.attributes.values():
-                    ba.append(f'BA_ "{attribute.definition.name}" '
-                              f'{attribute.definition.kind} '
-                              f'{node.name} '
-                              f'{get_value(attribute)};')
+                    attributes.append(('node', attribute, node, None, None))
 
     for message in database.messages:
         # retrieve the ordered dictionary of message attributes
@@ -854,10 +857,7 @@ def _dump_attributes(database, sort_signals):
 
         # output all message attributes
         for attribute in msg_attributes.values():
-            ba.append(f'BA_ "{attribute.definition.name}" '
-                      f'{attribute.definition.kind} '
-                      f'{get_dbc_frame_id(message)} '
-                      f'{get_value(attribute)};')
+            attributes.append(('message', attribute, None, message, None))
 
         # handle the signals contained in the message
         if sort_signals:
@@ -867,11 +867,32 @@ def _dump_attributes(database, sort_signals):
         for signal in signals:
             if signal.dbc is not None and signal.dbc.attributes is not None:
                 for attribute in signal.dbc.attributes.values():
-                    ba.append(f'BA_ "{attribute.definition.name}" '
-                              f'{attribute.definition.kind} '
-                              f'{get_dbc_frame_id(message)} '
-                              f'{signal.name} '
-                              f'{get_value(attribute)};')
+                    attributes.append(('signal', attribute, None, message, signal))
+
+    if sort_attributes:
+        attributes = sort_attributes(attributes)
+
+    ba = []
+    for typ, attribute, node, message, signal in attributes:
+        if typ == 'dbc':
+            ba.append(f'BA_ "{attribute.definition.name}" '
+                      f'{get_value(attribute)};')
+        elif typ == 'node':
+            ba.append(f'BA_ "{attribute.definition.name}" '
+                      f'{attribute.definition.kind} '
+                      f'{node.name} '
+                      f'{get_value(attribute)};')
+        elif typ == 'message':
+            ba.append(f'BA_ "{attribute.definition.name}" '
+                      f'{attribute.definition.kind} '
+                      f'{get_dbc_frame_id(message)} '
+                      f'{get_value(attribute)};')
+        elif typ == 'signal':
+            ba.append(f'BA_ "{attribute.definition.name}" '
+                      f'{attribute.definition.kind} '
+                      f'{get_dbc_frame_id(message)} '
+                      f'{signal.name} '
+                      f'{get_value(attribute)};')
 
     return ba
 
@@ -904,7 +925,7 @@ def _dump_attributes_rel(database, sort_signals):
     return ba_rel
 
 
-def _dump_choices(database, sort_signals):
+def _dump_choices(database, sort_signals, sort_choices):
     val = []
 
     for message in database.messages:
@@ -916,13 +937,18 @@ def _dump_choices(database, sort_signals):
             if signal.choices is None:
                 continue
 
+            if sort_choices:
+                choices = sort_choices(signal.choices)
+            else:
+                choices = signal.choices
+
             val.append(
                 'VAL_ {frame_id} {name} {choices} ;'.format(
                     frame_id=get_dbc_frame_id(message),
                     name=signal.name,
                     choices=' '.join(['{value} "{text}"'.format(value=value,
                                                                 text=text)
-                                      for value, text in signal.choices.items()])))
+                                      for value, text in choices.items()])))
 
     return val
 
@@ -1567,7 +1593,7 @@ def _load_messages(tokens,
 
         try:
             result = message_attributes['GenMsgSendType'].value
-            
+
             # if definitions is enum (otherwise above value is maintained) -> Prevents ValueError
             if definitions['GenMsgSendType'].choices != None:
                 # Resolve ENUM index to ENUM text
@@ -1771,14 +1797,14 @@ def try_remove_attribute(dbc, name):
         pass
 
 
-def make_node_names_unique(database):
+def make_node_names_unique(database, shorten_long_names):
     converter = LongNamesConverter(database)
 
     for node in database.nodes:
         name = converter.convert(node.name)
         try_remove_attribute(node.dbc, 'SystemNodeLongSymbol')
 
-        if name is None:
+        if name is None or not shorten_long_names:
             continue
 
         for message in database.messages:
@@ -1800,14 +1826,14 @@ def make_node_names_unique(database):
         node.name = name
 
 
-def make_message_names_unique(database):
+def make_message_names_unique(database, shorten_long_names):
     converter = LongNamesConverter(database)
 
     for message in database.messages:
         name = converter.convert(message.name)
         try_remove_attribute(message.dbc, 'SystemMessageLongSymbol')
 
-        if name is None:
+        if name is None or not shorten_long_names:
             continue
 
         if message.dbc is None:
@@ -1819,7 +1845,7 @@ def make_message_names_unique(database):
         message.name = name
 
 
-def make_signal_names_unique(database):
+def make_signal_names_unique(database, shorten_long_names):
     converter = LongNamesConverter(database)
 
     for message in database.messages:
@@ -1827,7 +1853,7 @@ def make_signal_names_unique(database):
             name = converter.convert(signal.name)
             try_remove_attribute(signal.dbc, 'SystemSignalLongSymbol')
 
-            if name is None:
+            if name is None or not shorten_long_names:
                 continue
 
             if signal.dbc is None:
@@ -1839,45 +1865,55 @@ def make_signal_names_unique(database):
             signal.name = name
 
 
-def make_names_unique(database):
+def make_names_unique(database, shorten_long_names):
     """Make message, signal and node names unique and add attributes for
     their long names.
 
     """
 
-    make_node_names_unique(database)
-    make_message_names_unique(database)
-    make_signal_names_unique(database)
+    make_node_names_unique(database, shorten_long_names)
+    make_message_names_unique(database, shorten_long_names)
+    make_signal_names_unique(database, shorten_long_names)
 
     return database
 
 
-def dump_string(database: InternalDatabase, sort_signals: type_sort_signals = SORT_SIGNALS_DEFAULT) -> str:
+def dump_string(database: InternalDatabase,
+                sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                sort_attributes:type_sort_attributes=None,
+                sort_choices:type_sort_choices=None,
+                shorten_long_names:bool=True) -> str:
     """Format database in DBC file format.
+       sort_signals defines how to sort signals in message definitions
+       sort_attribute_signals defines how to sort signals in metadata -
+          comments, value table definitions and attributes
 
     """
 
     if sort_signals == SORT_SIGNALS_DEFAULT:
         sort_signals = sort_signals_by_start_bit_reversed
+    if sort_attribute_signals == SORT_SIGNALS_DEFAULT:
+        sort_attribute_signals = sort_signals_by_start_bit_reversed
 
     # Make a deep copy of the database as names and attributes will be
     # modified for items with long names.
     database = deepcopy(database)
 
-    database = make_names_unique(database)
+    database = make_names_unique(database, shorten_long_names)
     bu = _dump_nodes(database)
     val_table = _dump_value_tables(database)
     bo = _dump_messages(database, sort_signals)
     bo_tx_bu = _dump_senders(database)
-    cm = _dump_comments(database, sort_signals)
+    cm = _dump_comments(database, sort_attribute_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_rel = _dump_attribute_definitions_rel(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
     ba_def_def_rel = _dump_attribute_definition_defaults_rel(database)
-    ba = _dump_attributes(database, sort_signals)
-    ba_rel = _dump_attributes_rel(database, sort_signals)
-    val = _dump_choices(database, sort_signals)
+    ba = _dump_attributes(database, sort_attribute_signals, sort_attributes)
+    ba_rel = _dump_attributes_rel(database, sort_attribute_signals)
+    val = _dump_choices(database, sort_attribute_signals, sort_choices)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
 

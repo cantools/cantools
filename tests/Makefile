@@ -4,6 +4,7 @@ TESTS += test_bit_fields.c
 SRC += files/c_source/motohawk.c
 SRC += files/c_source/padding_bit_order.c
 SRC += files/c_source/vehicle.c
+SRC += files/c_source/open_actuator.c
 SRC += files/c_source/multiplex.c
 SRC += files/c_source/multiplex_2.c
 SRC += files/c_source/floating_point.c

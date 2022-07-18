@@ -3,6 +3,7 @@
 #include "files/c_source/motohawk.h"
 #include "files/c_source/padding_bit_order.h"
 #include "files/c_source/vehicle.h"
+#include "files/c_source/open_actuator.h"
 #include "files/c_source/multiplex.h"
 #include "files/c_source/multiplex_2.h"
 #include "files/c_source/floating_point.h"

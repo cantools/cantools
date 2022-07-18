@@ -1108,6 +1108,9 @@ class SystemLoader(object):
                                   start=payload_length*8 + 7,
                                   length=fresh_tx_len,
                                   byte_order='big_endian',
+                                  offset=0,
+                                  scale=1,
+                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   {'FOR-ALL':
                                    f'Truncated freshness value for '
@@ -1118,6 +1121,9 @@ class SystemLoader(object):
                                   start=n0,
                                   length=auth_tx_len,
                                   byte_order='big_endian',
+                                  offset=0,
+                                  scale=1,
+                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   { 'FOR-ALL':
                                     f'Truncated authenticator value for '
@@ -1362,6 +1368,9 @@ class SystemLoader(object):
             start=selector_pos,
             length=selector_len,
             byte_order=selector_byte_order,
+            offset=0,
+            scale=1,
+            decimal = SignalDecimal(Decimal(1), Decimal(0)),
             choices={},
             is_multiplexer=True,
         )

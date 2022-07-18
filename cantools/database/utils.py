@@ -1,5 +1,6 @@
 # Utility functions.
 
+from collections import OrderedDict
 import os.path
 import re
 from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
@@ -8,12 +9,16 @@ from typing_extensions import Literal, Final
 
 from cantools.typechecking import (
     Formats,
+    Choices,
     SignalDictType,
     ByteOrder,
 )
 
 if TYPE_CHECKING:
     from cantools.database import Database
+    from cantools.database.can.attribute import Attribute
+    from cantools.database.can.message import Message
+    from cantools.database.can.node import Node
     from cantools.database.can.signal import Signal
     from cantools.database.diagnostics import Data
 
@@ -391,6 +396,16 @@ def prune_database_choices(database: "Database") -> None:
 SORT_SIGNALS_DEFAULT: Final = 'default'
 type_sort_signals = Union[Callable[[List["Signal"]], List["Signal"]], Literal['default'], None]
 
+type_sort_attribute = Union[
+    Tuple[Literal['dbc'],     "Attribute", None,   None,      None],
+    Tuple[Literal['node'],    "Attribute", "Node", None,      None],
+    Tuple[Literal['message'], "Attribute", None,   "Message", None],
+    Tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal"],
+]
+
+type_sort_attributes = Union[Callable[[List[type_sort_attribute]], List[type_sort_attribute]], Literal['default'], None]
+
+type_sort_choices = Union[Callable[[Choices], Choices], None]
 
 def sort_signals_by_start_bit(signals: List["Signal"]) -> List["Signal"]:
     return list(sorted(signals, key=start_bit))
@@ -398,3 +413,29 @@ def sort_signals_by_start_bit(signals: List["Signal"]) -> List["Signal"]:
 
 def sort_signals_by_start_bit_reversed(signals: List["Signal"]) -> List["Signal"]:
     return list(reversed(sorted(signals, key=start_bit)))
+
+
+def sort_signals_by_name(signals: List["Signal"]) -> List["Signal"]:
+    return list(sorted(signals, key=lambda s: s.name))
+
+
+def sort_signals_by_start_bit_and_mux(signals: List["Signal"]) -> List["Signal"]:
+    # sort by start bit
+    signals = sorted(signals, key=start_bit)
+    # but unmuxed values come first
+    signals = sorted(signals, key=lambda s: bool(s.multiplexer_ids))
+    # and group by mux... -1 is fine as the "no mux" case because even negative
+    # multiplexors get cast to unsigned in the .dbc
+    signals = sorted(
+        signals, key=lambda s: s.multiplexer_ids[0] if s.multiplexer_ids else -1
+    )
+
+    return signals
+
+
+def sort_choices_by_value(choices: Choices) -> Choices:
+    return OrderedDict(sorted(choices.items(), key=lambda x: x[0]))
+
+
+def sort_choices_by_value_descending(choices: Choices) -> Choices:
+    return OrderedDict(sorted(choices.items(), key=lambda x: x[0], reverse=True))

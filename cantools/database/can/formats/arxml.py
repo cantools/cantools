@@ -1707,8 +1707,9 @@ class SystemLoader(object):
             initial_int = None
             try:
                 initial_int = parse_number_string(initial)
-            except:
-                pass
+            except ValueError:
+                LOGGER.warning(f'The initial value ("{initial}") of signal '
+                               f'{name} does not represent a number')
 
             if choices is not None and initial_int in choices:
                 initial = choices[initial_int]
@@ -1719,7 +1720,7 @@ class SystemLoader(object):
             elif initial.strip().lower() == 'false':
                 initial = False
             # TODO: strings?
-            else:
+            elif initial_int is not None:
                 initial = initial_int*factor + offset
 
         invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)

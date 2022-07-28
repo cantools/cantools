@@ -111,6 +111,7 @@ def _print_message(message, indent=''):
 
         print(f'{indent}      Start bit: {signal.start}')
         print(f'{indent}      Length: {signal.length} bits')
+        print(f'{indent}      Byte order: {signal.byte_order}')
         if signal.unit:
             print(f'{indent}      Unit: {signal.unit}')
         if signal.initial is not None:

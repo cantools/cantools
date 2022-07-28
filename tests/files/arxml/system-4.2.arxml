@@ -1160,10 +1160,6 @@
           <COMPU-INTERNAL-TO-PHYS>
             <COMPU-SCALES>
               <COMPU-SCALE>
-                <LOWER-LIMIT>0</LOWER-LIMIT>
-                <UPPER-LIMIT>3</UPPER-LIMIT>
-              </COMPU-SCALE>
-              <COMPU-SCALE>
                 <DESC>
                   <L-2 L="EN">One Comment</L-2>
                   <L-2 L="DE">Ein Kommentar</L-2>

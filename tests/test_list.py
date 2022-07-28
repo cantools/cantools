@@ -224,8 +224,6 @@ Message2:
       Length: 4 bits
       Byte order: little_endian
       Is signed: False
-      Minimum: 0
-      Maximum: 3
       Named values:
         1: one
           Comment[EN]: One Comment
@@ -267,7 +265,7 @@ AlarmStatus:
       Start bit: 0
       Length: 1 bits
       Byte order: little_endian
-      Initial value: False
+      Initial value: 0.0
       Is signed: False
 """
 
@@ -381,7 +379,7 @@ Message1:
       Length: 1 bits
       Byte order: little_endian
       Unit: wp
-      Initial value: False
+      Initial value: zero
       Is signed: False
       Minimum: 0.0
       Maximum: 0.1

@@ -802,7 +802,7 @@ class SystemLoader(object):
         return nodes
 
     def _load_e2e_properties(self, package_list, messages):
-        """Internalize AUTOSAR end-2-end protection properties required for
+        """Internalize AUTOSAR end-to-end protection properties required for
         implementing end-to-end protection (CRCs) of messages.
 
         """
@@ -1380,17 +1380,17 @@ class SystemLoader(object):
 
         if self.autosar_version_newer(4):
             dynpart_spec = [
-                                                   'DYNAMIC-PARTS',
-                                                   '*DYNAMIC-PART',
-                                                   'DYNAMIC-PART-ALTERNATIVES',
-                                                   '*DYNAMIC-PART-ALTERNATIVE',
-                                               ]
+                'DYNAMIC-PARTS',
+                '*DYNAMIC-PART',
+                'DYNAMIC-PART-ALTERNATIVES',
+                '*DYNAMIC-PART-ALTERNATIVE',
+            ]
         else:
             dynpart_spec = [
-                                                   'DYNAMIC-PART',
-                                                   'DYNAMIC-PART-ALTERNATIVES',
-                                                   '*DYNAMIC-PART-ALTERNATIVE',
-                                               ]
+                'DYNAMIC-PART',
+                'DYNAMIC-PART-ALTERNATIVES',
+                '*DYNAMIC-PART-ALTERNATIVE',
+            ]
 
         for dynalt in self._get_arxml_children(pdu, dynpart_spec):
             dynalt_selector_value = \
@@ -1730,8 +1730,6 @@ class SystemLoader(object):
             elif not isinstance(invalid, bool) and \
                  isinstance(invalid, numbers.Number):
                 invalid = invalid*factor + offset
-
-        # ToDo: receivers
 
         return Signal(name=name,
                       start=start_position,
@@ -2493,7 +2491,8 @@ class SystemLoader(object):
 
                         if tmp is None:
                             raise ValueError(f'Encountered dangling reference '
-                                             f'{child_tag_name}-REF: '
+                                             f'{child_tag_name}-REF of type '
+                                             f'"{child_elem.attrib.get("DEST")}": '
                                              f'{child_elem.text}')
 
                         local_result.append(tmp)

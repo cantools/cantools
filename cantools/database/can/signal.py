@@ -347,20 +347,21 @@ class Signal(object):
                 ["{}: '{}'".format(value, text)
                  for value, text in self.choices.items()]))
 
-        return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, {}, '{}', {}, {}, {}, {}, {})".format(
-            self.name,
-            self.start,
-            self.length,
-            self.byte_order,
-            self.is_signed,
-            self.initial,
-            self.scale,
-            self.offset,
-            self.minimum,
-            self.maximum,
-            self.unit,
-            self.is_multiplexer,
-            self.multiplexer_ids,
-            choices,
-            self.spn,
-            self.comments)
+        return \
+            f"signal(" \
+            f"'{self.name}', " \
+            f"{self.start}, " \
+            f"{self.length}, " \
+            f"'{self.byte_order}', " \
+            f"{self.is_signed}, " \
+            f"{self.initial}, " \
+            f"{self.scale}, " \
+            f"{self.offset}, " \
+            f"{self.minimum}, " \
+            f"{self.maximum}, " \
+            f"'{self.unit}', " \
+            f"{self.is_multiplexer}, " \
+            f"{self.multiplexer_ids}, " \
+            f"{choices}, " \
+            f"{self.spn}, " \
+            f"{self.comments})"

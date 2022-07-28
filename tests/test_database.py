@@ -5381,7 +5381,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             cantools.db.load_file(
                 'tests/files/arxml/system-dangling-reference-4.2.arxml')
         self.assertEqual(str(cm.exception),
-                         "ARXML: \"Encountered dangling reference FRAME-REF: /PackageDoesNotExist/Message1\"")
+                         'ARXML: \"Encountered dangling reference FRAME-REF ' \
+                         'of type "CAN-FRAME": /PackageDoesNotExist/Message1"')
 
         root = ElementTree.parse('tests/files/arxml/system-4.2.arxml').getroot()
         loader = cantools.db.can.formats.arxml.SystemLoader(root, strict=True)

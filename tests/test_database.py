@@ -4769,12 +4769,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_5.is_float, False)
         self.assertEqual(signal_5.scale, 1.0)
         self.assertEqual(signal_5.offset, 0.0)
-        self.assertEqual(signal_5.minimum, 0)
-        self.assertEqual(signal_5.maximum, 2)
+        self.assertEqual(signal_5.minimum, None)
+        self.assertEqual(signal_5.maximum, None)
         self.assertEqual(signal_5.decimal.scale, 1.0)
         self.assertEqual(signal_5.decimal.offset, 0.0)
-        self.assertEqual(signal_5.decimal.minimum, 0)
-        self.assertEqual(signal_5.decimal.maximum, 2)
+        self.assertEqual(signal_5.decimal.minimum, None)
+        self.assertEqual(signal_5.decimal.maximum, None)
         self.assertEqual(signal_5.unit, None)
         self.assertEqual(signal_5.choices, { 0: 'STANDARD_POSITION',
                                              1: 'FORWARD_POSITION',
@@ -5031,7 +5031,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.name, 'signal6')
         self.assertEqual(signal_3.start, 32)
         self.assertEqual(signal_3.length, 1)
-        self.assertEqual(signal_3.initial, False)
+        self.assertEqual(signal_3.initial, 'zero')
         self.assertEqual(signal_3.receivers, ['Dancer'])
         self.assertEqual(signal_3.byte_order, 'little_endian')
         self.assertEqual(signal_3.is_signed, False)
@@ -5175,12 +5175,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.is_float, False)
         self.assertEqual(signal_3.scale, 1)
         self.assertEqual(signal_3.offset, 0)
-        self.assertEqual(signal_3.minimum, 0)
-        self.assertEqual(signal_3.maximum, 3)
+        self.assertEqual(signal_3.minimum, None)
+        self.assertEqual(signal_3.maximum, None)
         self.assertEqual(signal_3.decimal.scale, 1)
         self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, 0)
-        self.assertEqual(signal_3.decimal.maximum, 3)
+        self.assertEqual(signal_3.decimal.minimum, None)
+        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, {1: 'one', 2: 'two'})
         self.assertEqual(signal_3.choices[1].comments,
@@ -5381,7 +5381,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             cantools.db.load_file(
                 'tests/files/arxml/system-dangling-reference-4.2.arxml')
         self.assertEqual(str(cm.exception),
-                         "ARXML: \"Encountered dangling reference FRAME-REF: /PackageDoesNotExist/Message1\"")
+                         'ARXML: \"Encountered dangling reference FRAME-REF ' \
+                         'of type "CAN-FRAME": /PackageDoesNotExist/Message1"')
 
         root = ElementTree.parse('tests/files/arxml/system-4.2.arxml').getroot()
         loader = cantools.db.can.formats.arxml.SystemLoader(root, strict=True)
@@ -5625,12 +5626,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         signal_1 = db.messages[0].signals[0]
         self.assertEqual(signal_1.scale, 1.0)
         self.assertEqual(signal_1.offset, 0.0)
-        self.assertEqual(signal_1.minimum, 0.0)
-        self.assertEqual(signal_1.maximum, 4.0)
+        self.assertEqual(signal_1.minimum, None)
+        self.assertEqual(signal_1.maximum, None)
         self.assertEqual(signal_1.decimal.scale, 1.0)
         self.assertEqual(signal_1.decimal.offset, 0.0)
-        self.assertEqual(signal_1.decimal.minimum, 0.0)
-        self.assertEqual(signal_1.decimal.maximum, 4.0)
+        self.assertEqual(signal_1.decimal.minimum, None)
+        self.assertEqual(signal_1.decimal.maximum, None)
 
     def test_system_bad_root_tag(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:

@@ -246,8 +246,13 @@ class AutosarEnd2EndProperties:
         self._payload_length = value
 
 def parse_number_string(in_string, allow_float=False):
+    # the string literals "true" and "false" are interpreted as 1 and 0
+    if in_string == 'true':
+        return 1
+    elif in_string == 'false':
+        return 0
     # the input string contains a dot -> floating point value
-    if '.' in in_string:
+    elif '.' in in_string:
         tmp = float(in_string)
 
         if not allow_float and tmp != int(tmp):
@@ -802,7 +807,7 @@ class SystemLoader(object):
         return nodes
 
     def _load_e2e_properties(self, package_list, messages):
-        """Internalize AUTOSAR end-2-end protection properties required for
+        """Internalize AUTOSAR end-to-end protection properties required for
         implementing end-to-end protection (CRCs) of messages.
 
         """
@@ -1380,17 +1385,17 @@ class SystemLoader(object):
 
         if self.autosar_version_newer(4):
             dynpart_spec = [
-                                                   'DYNAMIC-PARTS',
-                                                   '*DYNAMIC-PART',
-                                                   'DYNAMIC-PART-ALTERNATIVES',
-                                                   '*DYNAMIC-PART-ALTERNATIVE',
-                                               ]
+                'DYNAMIC-PARTS',
+                '*DYNAMIC-PART',
+                'DYNAMIC-PART-ALTERNATIVES',
+                '*DYNAMIC-PART-ALTERNATIVE',
+            ]
         else:
             dynpart_spec = [
-                                                   'DYNAMIC-PART',
-                                                   'DYNAMIC-PART-ALTERNATIVES',
-                                                   '*DYNAMIC-PART-ALTERNATIVE',
-                                               ]
+                'DYNAMIC-PART',
+                'DYNAMIC-PART-ALTERNATIVES',
+                '*DYNAMIC-PART-ALTERNATIVE',
+            ]
 
         for dynalt in self._get_arxml_children(pdu, dynpart_spec):
             dynalt_selector_value = \
@@ -1669,8 +1674,8 @@ class SystemLoader(object):
         invalid = None
         minimum = None
         maximum = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         unit = None
         choices = None
         comments = None
@@ -1707,19 +1712,16 @@ class SystemLoader(object):
             initial_int = None
             try:
                 initial_int = parse_number_string(initial)
-            except:
-                pass
+            except ValueError:
+                LOGGER.warning(f'The initial value ("{initial}") of signal '
+                               f'{name} does not represent a number')
 
             if choices is not None and initial_int in choices:
                 initial = choices[initial_int]
             elif is_float:
                 initial = float(initial_int)*factor + offset
-            elif initial.strip().lower() == 'true':
-                initial = True
-            elif initial.strip().lower() == 'false':
-                initial = False
             # TODO: strings?
-            else:
+            elif initial_int is not None:
                 initial = initial_int*factor + offset
 
         invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
@@ -1730,8 +1732,6 @@ class SystemLoader(object):
             elif not isinstance(invalid, bool) and \
                  isinstance(invalid, numbers.Number):
                 invalid = invalid*factor + offset
-
-        # ToDo: receivers
 
         return Signal(name=name,
                       start=start_position,
@@ -1956,7 +1956,7 @@ class SystemLoader(object):
             return None
         return res.text
 
-    def _load_texttable(self, compu_method, decimal, is_float):
+    def _load_texttable(self, compu_method):
         minimum = None
         maximum = None
         choices = {}
@@ -1967,50 +1967,33 @@ class SystemLoader(object):
                                                       'COMPU-SCALES',
                                                       '*&COMPU-SCALE'
                                                     ]):
-            lower_limit = \
-                self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
-            upper_limit = \
-                self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = \
-               self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
+                self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
+
+            # the current scale is an enumeration value
+            lower_limit, upper_limit = self._load_scale_limits(compu_scale)
+            assert lower_limit is not None \
+                   and lower_limit == upper_limit, \
+                   f'Invalid value specified for enumeration {vt}: ' \
+                   f'[{lower_limit}, {upper_limit}]'
+            value = lower_limit
+            name = vt.text
             comments = self._load_comments(compu_scale)
+            choices[value] = NamedSignalValue(value, name, comments)
 
-            # range of the internal values of the scale.
-            minimum_int_scale = \
-               None \
-               if lower_limit is None \
-               else parse_number_string(lower_limit.text, is_float)
-            maximum_int_scale = \
-               None \
-               if upper_limit is None \
-               else parse_number_string(upper_limit.text, is_float)
+        return choices
 
-            # for texttables the internal and the physical values are identical
-            if minimum is None:
-                minimum = minimum_int_scale
-            elif minimum_int_scale is not None:
-                minimum = min(minimum, minimum_int_scale)
-
-            if maximum is None:
-                maximum = maximum_int_scale
-            elif maximum_int_scale is not None:
-                maximum = max(maximum, maximum_int_scale)
-
-            if vt is not None:
-                value = parse_number_string(lower_limit.text, is_float)
-                name = vt.text
-                choices[value] = NamedSignalValue(value, name, comments)
-
-        decimal.minimum = minimum
-        decimal.maximum = maximum
-        return minimum, maximum, choices
-
-    def _load_linear_factor_and_offset(self, compu_scale, decimal):
+    def _load_linear_scale(self, compu_scale, decimal):
+        # load the scaling factor an offset
         compu_rational_coeffs = \
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
 
         if compu_rational_coeffs is None:
-            return None, None
+            LOGGER.warning(f'Scaling parameters (factor and '
+                           f'offset) must be specified for linearly '
+                           f'scaled signals.')
+
+            return None, None, 1.0, 0.0
 
         numerators = self._get_arxml_children(compu_rational_coeffs,
                                               ['&COMPU-NUMERATOR', '*&V'])
@@ -2032,48 +2015,76 @@ class SystemLoader(object):
         decimal.scale = Decimal(numerators[1].text) / denominator
         decimal.offset = Decimal(numerators[0].text) / denominator
 
-        return float(decimal.scale), float(decimal.offset)
+        factor = float(decimal.scale)
+        offset = float(decimal.offset)
 
-    def _load_linear(self, compu_method, decimal, is_float):
-        compu_scale = self._get_unique_arxml_child(compu_method,
-                                                   [
-                                                       'COMPU-INTERNAL-TO-PHYS',
-                                                       'COMPU-SCALES',
-                                                       '&COMPU-SCALE'
-                                                   ])
+        # load the domain interval of the scale
+        lower_limit, upper_limit = self._load_scale_limits(compu_scale)
 
-        lower_limit = self._get_unique_arxml_child(compu_scale, '&LOWER-LIMIT')
-        upper_limit = self._get_unique_arxml_child(compu_scale, '&UPPER-LIMIT')
+        # sanity checks
+        if lower_limit is not None and \
+             upper_limit is not None and \
+             lower_limit > upper_limit:
+            LOGGER.warning(f'An valid interval should be provided for '
+                           f'the domain of scaled signals.')
+            lower_limit = None
+            upper_limit = None
 
-        # range of the internal values
-        minimum_int = \
-            None \
-            if lower_limit is None \
-            else parse_number_string(lower_limit.text, is_float)
-        maximum_int = \
-            None \
-            if upper_limit is None \
-            else parse_number_string(upper_limit.text, is_float)
+        if factor <= 0.0:
+            LOGGER.warning(f'Signal scaling is currently only '
+                           f'supported for positive scaling '
+                           f'factors. Expect spurious '
+                           f'results!')
 
-        factor, offset = \
-            self._load_linear_factor_and_offset(compu_scale, decimal)
-
-        factor = 1.0 if factor is None else factor
-        offset = 0.0 if offset is None else offset
-
-        # range of the physical values
-        minimum = None if minimum_int is None else minimum_int*factor + offset
-        maximum = None if maximum_int is None else maximum_int*factor + offset
-        decimal.minimum = None if minimum is None else Decimal(minimum)
-        decimal.maximum = None if maximum is None else Decimal(maximum)
+        # convert interval of the domain to the interval of the range
+        minimum = None if lower_limit is None else lower_limit*factor + offset
+        maximum = None if upper_limit is None else upper_limit*factor + offset
+        decimal.minimum = minimum
+        decimal.maximum = maximum
 
         return minimum, maximum, factor, offset
+
+    def _load_linear(self, compu_method, decimal, is_float):
+        minimum = None
+        maximum = None
+        factor = 1.0
+        offset = 0.0
+
+        for compu_scale in self._get_arxml_children(compu_method,
+                                                    [
+                                                        'COMPU-INTERNAL-TO-PHYS',
+                                                        'COMPU-SCALES',
+                                                        '&COMPU-SCALE'
+                                                    ]):
+            if minimum is not None or maximum is not None:
+                LOGGER.warning(f'Signal scaling featuring multiple segments '
+                               f'is currently unsupported. Expect spurious '
+                               f'results!')
+
+            minimum, maximum, factor, offset = \
+                self._load_linear_scale(compu_scale, decimal)
+
+        return minimum, maximum, factor, offset
+
+    def _load_scale_limits(self, compu_scale):
+        lower_limit = \
+            self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
+        upper_limit = \
+            self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
+
+        if lower_limit is not None:
+            lower_limit = parse_number_string(lower_limit.text)
+
+        if upper_limit is not None:
+            upper_limit = parse_number_string(upper_limit.text)
+
+        return lower_limit, upper_limit
 
     def _load_scale_linear_and_texttable(self, compu_method, decimal, is_float):
         minimum = None
         maximum = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         choices = {}
 
         for compu_scale in self._get_arxml_children(compu_method,
@@ -2083,66 +2094,42 @@ class SystemLoader(object):
                                                       '*&COMPU-SCALE'
                                                     ]):
 
-            lower_limit = \
-                self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
-            upper_limit = \
-                self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = \
                self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
-            comments = self._load_comments(compu_scale)
-
-            # range of the internal values of the scale.
-            minimum_int_scale = \
-                None if lower_limit is None \
-                else parse_number_string(lower_limit.text, is_float)
-            maximum_int_scale = \
-               None if upper_limit is None \
-               else parse_number_string(upper_limit.text, is_float)
-
-            # TODO: make sure that no conflicting scaling factors and offsets
-            # are specified. For now, let's just assume that the ARXML file is
-            # well formed.
-            factor_scale, offset_scale = \
-                self._load_linear_factor_and_offset(compu_scale, decimal)
-            if factor_scale is not None:
-                factor = factor_scale
-            else:
-                factor_scale = 1.0
-
-            if offset_scale is not None:
-                offset = offset_scale
-            else:
-                offset_scale = 0.0
-
-            # range of the physical values of the scale.
-            if minimum is None:
-                minimum = minimum_int_scale*factor_scale + offset_scale
-            elif minimum_int_scale is not None:
-                minimum = min(minimum,
-                              minimum_int_scale*factor_scale + offset_scale)
-
-            if maximum is None:
-                maximum = maximum_int_scale*factor_scale + offset_scale
-            elif maximum_int_scale is not None:
-                maximum = max(maximum,
-                              maximum_int_scale*factor_scale + offset_scale)
 
             if vt is not None:
-                assert(minimum_int_scale is not None \
-                       and minimum_int_scale == maximum_int_scale)
-                value = minimum_int_scale
+                # the current scale is an enumeration value
+                lower_limit, upper_limit = self._load_scale_limits(compu_scale)
+                assert(lower_limit is not None \
+                       and lower_limit == upper_limit)
+                value = lower_limit
                 name = vt.text
+                comments = self._load_comments(compu_scale)
                 choices[value] = NamedSignalValue(value, name, comments)
 
-        decimal.minimum = Decimal(minimum)
-        decimal.maximum = Decimal(maximum)
+            else:
+                if minimum is not None or maximum is not None:
+                    LOGGER.warning(f'Signal scaling featuring multiple segments '
+                                   f'is currently unsupported. Expect spurious '
+                                   f'results!')
+
+                # the current scale represents physical
+                # values. currently, we only support a single segment,
+                # i.e., no piecewise linear functions. (TODO?)
+
+                # TODO: make sure that no conflicting scaling factors
+                # and offsets are specified. For now, let's just
+                # assume that the ARXML file is well formed.
+                minimum, maximum, factor, offset = \
+                    self._load_linear_scale(compu_scale, decimal)
+
         return minimum, maximum, factor, offset, choices
 
     def _load_system_signal(self, system_signal, decimal, is_float):
         minimum = None
         maximum = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         choices = None
 
         compu_method = self._get_compu_method(system_signal)
@@ -2169,8 +2156,7 @@ class SystemLoader(object):
             category = category.text
 
             if category == 'TEXTTABLE':
-                minimum, maximum, choices = \
-                    self._load_texttable(compu_method, decimal,  is_float)
+                choices = self._load_texttable(compu_method)
             elif category == 'LINEAR':
                 minimum, maximum, factor, offset = \
                     self._load_linear(compu_method, decimal,  is_float)
@@ -2189,8 +2175,8 @@ class SystemLoader(object):
         return \
             minimum, \
             maximum, \
-            1 if factor is None else factor, \
-            0 if offset is None else offset, \
+            1.0 if factor is None else factor, \
+            0.0 if offset is None else offset, \
             choices, \
             unit, \
             comments
@@ -2493,7 +2479,8 @@ class SystemLoader(object):
 
                         if tmp is None:
                             raise ValueError(f'Encountered dangling reference '
-                                             f'{child_tag_name}-REF: '
+                                             f'{child_tag_name}-REF of type '
+                                             f'"{child_elem.attrib.get("DEST")}": '
                                              f'{child_elem.text}')
 
                         local_result.append(tmp)
@@ -2797,8 +2784,8 @@ class EcuExtractLoader(object):
         is_float = False
         minimum = None
         maximum = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         unit = None
         choices = None
         comments = None

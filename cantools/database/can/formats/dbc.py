@@ -1623,8 +1623,8 @@ def _load_messages(tokens,
             except (KeyError, TypeError):
                 return None
 
-    def get_protocol(frame_id_dbc):
-        """Get protocol for a given message.
+    def get_frame_format(frame_id_dbc):
+        """Get frame format for a given message.
 
         """
 
@@ -1639,7 +1639,14 @@ def _load_messages(tokens,
             except (KeyError, TypeError):
                 frame_format = None
 
-        if frame_format == 'J1939PG':
+        return frame_format
+
+    def get_protocol(frame_id_dbc):
+        """Get protocol for a given message.
+
+        """
+
+        if get_frame_format(frame_id_dbc) == 'J1939PG':
             return 'j1939'
         else:
             return None
@@ -1719,6 +1726,8 @@ def _load_messages(tokens,
                     strict=strict,
                     unused_bit_pattern=0xff,
                     protocol=get_protocol(frame_id_dbc),
+                    is_fd=(get_frame_format(frame_id_dbc).endswith("FD") \
+                            if get_frame_format(frame_id_dbc) else False),
                     bus_name=bus_name,
                     signal_groups=get_signal_groups(frame_id_dbc),
                     sort_signals=sort_signals))

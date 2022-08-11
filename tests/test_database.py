@@ -276,6 +276,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[0].receivers, ['FUM'])
         self.assertEqual(message.signals[0].is_float, False)
         self.assertEqual(message.signals[0].length, 64)
+        self.assertEqual(message.is_fd, True)
 
     def test_foobar_encode_decode(self):
         db = cantools.db.Database()

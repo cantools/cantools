@@ -260,6 +260,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.bus_name, 'TheBusName')
         self.assertEqual(message.senders, ['FOO'])
         self.assertEqual(message.signals[0].is_float, False)
+        self.assertEqual(message.is_fd, False)
 
         message = db.get_message_by_frame_id(0x12332)
         self.assertEqual(message.name, 'Bar')
@@ -268,6 +269,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[0].receivers, ['FUM'])
         self.assertEqual(message.signals[0].is_float, True)
         self.assertEqual(message.signals[0].length, 32)
+        self.assertEqual(message.is_fd, False)
 
         message = db.get_message_by_frame_id(0x12333)
         self.assertEqual(message.name, 'CanFd')

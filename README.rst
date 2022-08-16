@@ -353,8 +353,8 @@ functions only for messages with its signal receivers belonging to that node.
    $ cantools generate_c_source tests/files/dbc/motohawk.dbc --node PCM1
    Successfully generated motohawk.h and motohawk.c.
 
-See `motohawk_sender.h`_ and
-`motohawk_sender.c`_ for the contents of the
+See `motohawk_sender_node.h`_ and
+`motohawk_sender_node.c`_ for the contents of the
 generated files.
 
 Other C code generators:

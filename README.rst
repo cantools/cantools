@@ -467,4 +467,8 @@ Contributing
 
 .. _motohawk_no_floating_point_numbers.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.c
 
+.. _motohawk_sender_node.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_sender_node.h
+
+.. _motohawk_sender_node.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_sender_node.c
+
 .. _matplotlib: https://matplotlib.org/

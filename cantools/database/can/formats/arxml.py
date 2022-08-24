@@ -2017,34 +2017,34 @@ class SystemLoader(object):
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
 
         if compu_rational_coeffs is None:
-            LOGGER.warning(f'Scaling parameters (factor and '
-                           f'offset) must be specified for linearly '
-                           f'scaled signals.')
+            factor = 1.0
+            offset = 0.0
 
-            return None, None, 1.0, 0.0
+            decimal.scale = Decimal(factor)
+            decimal.offset = Decimal(offset)
+        else:
+            numerators = self._get_arxml_children(compu_rational_coeffs,
+                                                  ['&COMPU-NUMERATOR', '*&V'])
 
-        numerators = self._get_arxml_children(compu_rational_coeffs,
-                                              ['&COMPU-NUMERATOR', '*&V'])
+            if len(numerators) != 2:
+                raise ValueError(
+                    'Expected 2 numerator values for linear scaling, but '
+                    'got {}.'.format(len(numerators)))
 
-        if len(numerators) != 2:
-            raise ValueError(
-                'Expected 2 numerator values for linear scaling, but '
-                'got {}.'.format(len(numerators)))
+            denominators = self._get_arxml_children(compu_rational_coeffs,
+                                                    ['&COMPU-DENOMINATOR', '*&V'])
 
-        denominators = self._get_arxml_children(compu_rational_coeffs,
-                                                ['&COMPU-DENOMINATOR', '*&V'])
+            if len(denominators) != 1:
+                raise ValueError(
+                    'Expected 1 denominator value for linear scaling, but '
+                    'got {}.'.format(len(denominators)))
 
-        if len(denominators) != 1:
-            raise ValueError(
-                'Expected 1 denominator value for linear scaling, but '
-                'got {}.'.format(len(denominators)))
+            denominator = Decimal(denominators[0].text)
+            decimal.scale = Decimal(numerators[1].text) / denominator
+            decimal.offset = Decimal(numerators[0].text) / denominator
 
-        denominator = Decimal(denominators[0].text)
-        decimal.scale = Decimal(numerators[1].text) / denominator
-        decimal.offset = Decimal(numerators[0].text) / denominator
-
-        factor = float(decimal.scale)
-        offset = float(decimal.offset)
+            factor = float(decimal.scale)
+            offset = float(decimal.offset)
 
         # load the domain interval of the scale
         lower_limit, upper_limit = self._load_scale_limits(compu_scale)

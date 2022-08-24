@@ -64,6 +64,7 @@ class AutosarMessageSpecifics(object):
         self._is_nm = False
         self._secoc: Optional['AutosarSecOCProperties'] = None
         self._e2e: Optional['AutosarEnd2EndProperties'] = None
+        self._is_general_purpose = False
         self._signal_group = None
 
     @property
@@ -81,6 +82,16 @@ class AutosarMessageSpecifics(object):
         """True iff the message is used for network management
         """
         return self._is_nm
+
+    @property
+    def is_general_purpose(self):
+        """True iff the message is not used for signal-based communication
+
+        This comprises messages used for diagnostic and calibration
+        purpuses, e.g. messages used for the ISO-TP or XCP protocols.
+
+        """
+        return self._is_general_purpose
 
     @property
     def is_secured(self):
@@ -1031,6 +1042,10 @@ class SystemLoader(object):
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
         autosar_specifics._is_nm = \
             (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
+        autosar_specifics._is_general_purpose = \
+            (pdu.tag == f'{{{self.xml_namespace}}}N-PDU') or \
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-PDU') or \
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU')
         is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 

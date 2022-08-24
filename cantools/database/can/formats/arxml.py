@@ -246,6 +246,18 @@ class AutosarEnd2EndProperties:
         self._payload_length = value
 
 def parse_number_string(in_string, allow_float=False):
+    """Convert a string representing numeric value that is specified
+    within an ARXML file to either an integer or a floating point object
+
+    This is surprisingly complicated:
+
+    - Some ARXML files use "true" and "false" synonymous to 1 and 0
+    - ARXML uses the C notation (leading 0) to specify octal numbers
+      whereas python only accepts the "0o" prefix
+    - Some ARXML editors seem to sometimes include a dot in integer
+      numbers (e.g., they produce "123.0" instead of "123")
+    """
+
     # the string literals "true" and "false" are interpreted as 1 and 0
     if in_string == 'true':
         return 1

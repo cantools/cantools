@@ -2979,11 +2979,10 @@ def load_string(string:str,
         raise ValueError(f"Unrecognized XML namespace '{xml_namespace}'")
 
     if is_ecu_extract(root):
-        if root.tag != ROOT_TAG:
-            raise ValueError(
-                'Expected root element tag {}, but got {}.'.format(
-                    ROOT_TAG,
-                    root.tag))
+        expected_root = f'{{{xml_namespace}}}AUTOSAR'
+        if root.tag != expected_root:
+            raise ValueError(f'Expected root element tag {expected_root}, '
+                             f'but got {root.tag}.')
 
         return EcuExtractLoader(root, strict, sort_signals).load()
     else:

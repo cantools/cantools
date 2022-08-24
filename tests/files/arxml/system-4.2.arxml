@@ -704,7 +704,7 @@
       <SHORT-NAME>Constants</SHORT-NAME>
       <ELEMENTS>
         <!-- /Constants/BooleanTrue -->
-        <CONSTANT-SPECIFICATION UUID="ab3a0e5a7d164890a723161c3d1c3c4d">
+        <CONSTANT-SPECIFICATION UUID="0c9ee109a5e247a9a21ff483b4626a9f">
           <SHORT-NAME>BooleanTrue</SHORT-NAME>
           <VALUE-SPEC>
             <!-- /Constants/BooleanTrue/literal -->
@@ -1140,8 +1140,8 @@
                 </COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>
-                <LOWER-LIMIT>7</LOWER-LIMIT>
-                <UPPER-LIMIT>7</UPPER-LIMIT>
+                <LOWER-LIMIT>3</LOWER-LIMIT>
+                <UPPER-LIMIT>3</UPPER-LIMIT>
                 <COMPU-CONST>
                   <VT>INVALID_SELECTION</VT>
                 </COMPU-CONST>

@@ -5626,12 +5626,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         signal_1 = db.messages[0].signals[0]
         self.assertEqual(signal_1.scale, 1.0)
         self.assertEqual(signal_1.offset, 0.0)
-        self.assertEqual(signal_1.minimum, None)
-        self.assertEqual(signal_1.maximum, None)
+        self.assertEqual(signal_1.minimum, 0.0)
+        self.assertEqual(signal_1.maximum, 4.0)
         self.assertEqual(signal_1.decimal.scale, 1.0)
         self.assertEqual(signal_1.decimal.offset, 0.0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
+        self.assertEqual(signal_1.decimal.minimum, 0.0)
+        self.assertEqual(signal_1.decimal.maximum, 4.0)
 
     def test_system_bad_root_tag(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:

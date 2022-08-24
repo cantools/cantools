@@ -4,7 +4,7 @@ import re
 import logging
 import numbers
 from decimal import Decimal
-from typing import Any, List, Optional
+from typing import Union, Any, List, Optional
 from copy import deepcopy
 
 from xml.etree import ElementTree
@@ -62,8 +62,9 @@ class AutosarMessageSpecifics(object):
     def __init__(self):
         self._pdu_paths = []
         self._is_nm = False
-        self._secoc: Optional['AutosarSecOCProperties'] = None
-        self._e2e: Optional['AutosarEnd2EndProperties'] = None
+        self._is_general_purpose = False
+        self._secoc: Optional[AutosarSecOCProperties] = None
+        self._e2e: Optional[AutosarEnd2EndProperties] = None
         self._signal_group = None
 
     @property
@@ -81,6 +82,16 @@ class AutosarMessageSpecifics(object):
         """True iff the message is used for network management
         """
         return self._is_nm
+
+    @property
+    def is_general_purpose(self):
+        """True iff the message is not used for signal-based communication
+
+        This comprises messages used for diagnostic and calibration
+        purpuses, e.g. messages used for the ISO-TP or XCP protocols.
+
+        """
+        return self._is_general_purpose
 
     @property
     def is_secured(self):
@@ -245,7 +256,20 @@ class AutosarEnd2EndProperties:
     def payload_length(self, value: int) -> None:
         self._payload_length = value
 
-def parse_number_string(in_string, allow_float=False):
+def parse_number_string(in_string : str, allow_float : bool=False) \
+    -> Union[int, float]:
+    """Convert a string representing numeric value that is specified
+    within an ARXML file to either an integer or a floating point object
+
+    This is surprisingly complicated:
+
+    - Some ARXML files use "true" and "false" synonymous to 1 and 0
+    - ARXML uses the C notation (leading 0) to specify octal numbers
+      whereas python only accepts the "0o" prefix
+    - Some ARXML editors seem to sometimes include a dot in integer
+      numbers (e.g., they produce "123.0" instead of "123")
+    """
+
     # the string literals "true" and "false" are interpreted as 1 and 0
     if in_string == 'true':
         return 1
@@ -1019,6 +1043,10 @@ class SystemLoader(object):
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
         autosar_specifics._is_nm = \
             (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
+        autosar_specifics._is_general_purpose = \
+            (pdu.tag == f'{{{self.xml_namespace}}}N-PDU') or \
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-PDU') or \
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU')
         is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
@@ -1950,7 +1978,7 @@ class SystemLoader(object):
                                                    'DISPLAY-NAME'
                                                ])
 
-        ignorelist = ( "NoUnit", )
+        ignorelist = ( 'NoUnit', )
 
         if res is None or res.text in ignorelist:
             return None
@@ -1989,34 +2017,34 @@ class SystemLoader(object):
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
 
         if compu_rational_coeffs is None:
-            LOGGER.warning(f'Scaling parameters (factor and '
-                           f'offset) must be specified for linearly '
-                           f'scaled signals.')
+            factor = 1.0
+            offset = 0.0
 
-            return None, None, 1.0, 0.0
+            decimal.scale = Decimal(factor)
+            decimal.offset = Decimal(offset)
+        else:
+            numerators = self._get_arxml_children(compu_rational_coeffs,
+                                                  ['&COMPU-NUMERATOR', '*&V'])
 
-        numerators = self._get_arxml_children(compu_rational_coeffs,
-                                              ['&COMPU-NUMERATOR', '*&V'])
+            if len(numerators) != 2:
+                raise ValueError(
+                    'Expected 2 numerator values for linear scaling, but '
+                    'got {}.'.format(len(numerators)))
 
-        if len(numerators) != 2:
-            raise ValueError(
-                'Expected 2 numerator values for linear scaling, but '
-                'got {}.'.format(len(numerators)))
+            denominators = self._get_arxml_children(compu_rational_coeffs,
+                                                    ['&COMPU-DENOMINATOR', '*&V'])
 
-        denominators = self._get_arxml_children(compu_rational_coeffs,
-                                                ['&COMPU-DENOMINATOR', '*&V'])
+            if len(denominators) != 1:
+                raise ValueError(
+                    'Expected 1 denominator value for linear scaling, but '
+                    'got {}.'.format(len(denominators)))
 
-        if len(denominators) != 1:
-            raise ValueError(
-                'Expected 1 denominator value for linear scaling, but '
-                'got {}.'.format(len(denominators)))
+            denominator = Decimal(denominators[0].text)
+            decimal.scale = Decimal(numerators[1].text) / denominator
+            decimal.offset = Decimal(numerators[0].text) / denominator
 
-        denominator = Decimal(denominators[0].text)
-        decimal.scale = Decimal(numerators[1].text) / denominator
-        decimal.offset = Decimal(numerators[0].text) / denominator
-
-        factor = float(decimal.scale)
-        offset = float(decimal.offset)
+            factor = float(decimal.scale)
+            offset = float(decimal.offset)
 
         # load the domain interval of the scale
         lower_limit, upper_limit = self._load_scale_limits(compu_scale)
@@ -2930,9 +2958,26 @@ class EcuExtractLoader(object):
 
             yield name, value
 
-def is_ecu_extract(root):
-    ecuc_value_collection = root.find(ECUC_VALUE_COLLECTION_XPATH,
-                                      NAMESPACES)
+def is_ecu_extract(root: Any # For whatever reason, mypy does not
+                             # accept 'ElementTree' here...
+                   ) -> bool:
+    """Given the root object of an ARXML file's ElementTree,
+    determine if the file represents an ECU extract.
+
+    If it is not, it probably represents a system. Be aware that
+    currently loading ECU extracts is only supported for AUTOSAR 4.
+    """
+
+    ecuc_value_collection_xpath = \
+        './ns:AR-PACKAGES' + \
+        '/ns:AR-PACKAGE' + \
+        '/ns:ELEMENTS' + \
+        '/ns:ECUC-VALUE-COLLECTION'
+
+    namespaces = { 'ns': 'http://autosar.org/schema/r4.0' }
+
+    ecuc_value_collection = \
+        root.find(ecuc_value_collection_xpath, namespaces)
 
     return ecuc_value_collection is not None
 
@@ -2962,11 +3007,10 @@ def load_string(string:str,
         raise ValueError(f"Unrecognized XML namespace '{xml_namespace}'")
 
     if is_ecu_extract(root):
-        if root.tag != ROOT_TAG:
-            raise ValueError(
-                'Expected root element tag {}, but got {}.'.format(
-                    ROOT_TAG,
-                    root.tag))
+        expected_root = f'{{{xml_namespace}}}AUTOSAR'
+        if root.tag != expected_root:
+            raise ValueError(f'Expected root element tag {expected_root}, '
+                             f'but got {root.tag}.')
 
         return EcuExtractLoader(root, strict, sort_signals).load()
     else:

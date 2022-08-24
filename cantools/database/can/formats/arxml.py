@@ -2930,9 +2930,26 @@ class EcuExtractLoader(object):
 
             yield name, value
 
-def is_ecu_extract(root):
-    ecuc_value_collection = root.find(ECUC_VALUE_COLLECTION_XPATH,
-                                      NAMESPACES)
+def is_ecu_extract(root: Any # For whatever reason, mypy does not
+                             # accept 'ElementTree' here...
+                   ) -> bool:
+    """Given the root object of an ARXML file's ElementTree,
+    determine if the file represents an ECU extract.
+
+    If it is not, it probably represents a system. Be aware that
+    currently loading ECU extracts is only supported for AUTOSAR 4.
+    """
+
+    ecuc_value_collection_xpath = \
+        './ns:AR-PACKAGES' + \
+        '/ns:AR-PACKAGE' + \
+        '/ns:ELEMENTS' + \
+        '/ns:ECUC-VALUE-COLLECTION'
+
+    namespaces = { 'ns': 'http://autosar.org/schema/r4.0' }
+
+    ecuc_value_collection = \
+        root.find(ecuc_value_collection_xpath, namespaces)
 
     return ecuc_value_collection is not None
 

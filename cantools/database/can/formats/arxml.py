@@ -4,7 +4,7 @@ import re
 import logging
 import numbers
 from decimal import Decimal
-from typing import Any, List, Optional
+from typing import Union, Any, List, Optional
 from copy import deepcopy
 
 from xml.etree import ElementTree
@@ -62,9 +62,9 @@ class AutosarMessageSpecifics(object):
     def __init__(self):
         self._pdu_paths = []
         self._is_nm = False
-        self._secoc: Optional['AutosarSecOCProperties'] = None
-        self._e2e: Optional['AutosarEnd2EndProperties'] = None
         self._is_general_purpose = False
+        self._secoc: Optional[AutosarSecOCProperties] = None
+        self._e2e: Optional[AutosarEnd2EndProperties] = None
         self._signal_group = None
 
     @property
@@ -256,7 +256,8 @@ class AutosarEnd2EndProperties:
     def payload_length(self, value: int) -> None:
         self._payload_length = value
 
-def parse_number_string(in_string, allow_float=False):
+def parse_number_string(in_string : str, allow_float : bool=False) \
+    -> Union[int, float]:
     """Convert a string representing numeric value that is specified
     within an ARXML file to either an integer or a floating point object
 
@@ -1977,7 +1978,7 @@ class SystemLoader(object):
                                                    'DISPLAY-NAME'
                                                ])
 
-        ignorelist = ( "NoUnit", )
+        ignorelist = ( 'NoUnit', )
 
         if res is None or res.text in ignorelist:
             return None

@@ -915,7 +915,7 @@ def _dump_messages(database: InternalDatabase) -> str:
     send_receive_messages = []
     message_name: str
     messages_with_name: Iterator[Message]
-    for message_name, messages_with_name in groupby(sorted(database.messages, key=lambda m: m.name), key=lambda m: m.name): # type: ignore
+    for message_name, messages_with_name in groupby(sorted(database.messages, key=lambda m: m.name), key=lambda m: m.name):
         message_dumps = []
         # Cantools represents SYM CAN ID range with multiple messages - need to dedup multiple cantools messages
         # into a single message with a CAN ID range

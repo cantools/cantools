@@ -250,12 +250,12 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
     little_fmt, little_padding_mask, little_names = create_little()
 
     try:
-        big_compiled = bitstruct.c.compile(big_fmt, big_names)
+        big_compiled = bitstruct.compile(big_fmt, big_names)
     except Exception as e:
         big_compiled = bitstruct.compile(big_fmt, big_names)
 
     try:
-        little_compiled = bitstruct.c.compile(little_fmt, little_names)
+        little_compiled = bitstruct.compile(little_fmt, little_names)
     except Exception as e:
         little_compiled = bitstruct.compile(little_fmt, little_names)
 

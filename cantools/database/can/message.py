@@ -413,6 +413,29 @@ class Message(object):
         return self._senders
 
     @property
+    def receivers(self) -> Set[str]:
+        """A set of all receiver nodes of this message.
+
+        This is equivalent to the set of nodes which receive at least
+        one of the signals contained in the message.
+
+        """
+        result = set()
+
+        for sig in self.signals:
+            if sig.receivers is not None:
+                result.update(sig.receivers)
+
+        if self.is_container:
+            assert self.contained_messages is not None
+            for cmsg in self.contained_messages:
+                for sig in cmsg.signals:
+                    if sig.receivers is not None:
+                        result.update(sig.receivers)
+
+        return result
+
+    @property
     def send_type(self) -> Optional[str]:
         """The message send type, or ``None`` if unavailable.
 

@@ -1131,22 +1131,22 @@ def _load_attributes_rel(tokens, definitions):
             frame_id_dbc = int(attribute[5])
             signal = attribute[6]
 
-        if frame_id_dbc not in attributes_rel:
-            attributes_rel[frame_id_dbc] = {}
+            if frame_id_dbc not in attributes_rel:
+                attributes_rel[frame_id_dbc] = {}
 
-        if 'signal' not in attributes_rel[frame_id_dbc]:
-            attributes_rel[frame_id_dbc]['signal'] = OrderedDict()
+            if 'signal' not in attributes_rel[frame_id_dbc]:
+                attributes_rel[frame_id_dbc]['signal'] = OrderedDict()
 
-        if signal not in attributes_rel[frame_id_dbc]['signal']:
-            attributes_rel[frame_id_dbc]['signal'][signal] = OrderedDict()
+            if signal not in attributes_rel[frame_id_dbc]['signal']:
+                attributes_rel[frame_id_dbc]['signal'][signal] = OrderedDict()
 
-        if 'node' not in attributes_rel[frame_id_dbc]['signal'][signal]:
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'] = OrderedDict()
+            if 'node' not in attributes_rel[frame_id_dbc]['signal'][signal]:
+                attributes_rel[frame_id_dbc]['signal'][signal]['node'] = OrderedDict()
 
-        if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
+            if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
+                attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
 
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_object(attribute, attribute[7])
+                attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_object(attribute, attribute[7])
 
         elif rel_type == "BU_BO_REL_":
             frame_id_dbc = int(attribute[4])

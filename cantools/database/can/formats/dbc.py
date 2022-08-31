@@ -660,20 +660,23 @@ def _dump_attribute_definitions_rel(database):
             choices = ','.join(['"{}"'.format(choice)
                                 for choice in definition.choices])
             ba_def_rel.append(
-                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name}  {choices};'.format(
+                'BA_DEF_REL_ {kind}  "{name}" {type_name}  {choices};'.format(
+                    kind = definition.kind,
                     name=definition.name,
                     type_name=definition.type_name,
                     choices=choices))
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
             ba_def_rel.append(
-                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name}{minimum}{maximum};'.format(
+                'BA_DEF_REL_ {kind}  "{name}" {type_name}{minimum}{maximum};'.format(
+                    kind=definition.kind,
                     name=definition.name,
                     type_name=definition.type_name,
                     minimum=get_minimum(definition),
                     maximum=get_maximum(definition)))
         elif definition.type_name == 'STRING':
             ba_def_rel.append(
-                'BA_DEF_REL_ BU_SG_REL_  "{name}" {type_name} ;'.format(
+                'BA_DEF_REL_ {kind}  "{name}" {type_name} ;'.format(
+                    kind=definition.kind,
                     name=definition.name,
                     type_name=definition.type_name))
 
@@ -821,15 +824,24 @@ def _dump_attributes_rel(database, sort_signals):
     if database.dbc is not None and database.dbc.attributes_rel is not None:
         attributes_rel = database.dbc.attributes_rel
         for frame_id, element in attributes_rel.items():
-            for signal_name, signal_lst in element['signal'].items():
-                for node_name, node_dict in signal_lst['node'].items():
+            if "signal" in element:
+                for signal_name, signal_lst in element['signal'].items():
+                    for node_name, node_dict in signal_lst['node'].items():
+                        for attribute_name, attribute in node_dict.items():
+                            ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
+                                          f'BU_SG_REL_ '
+                                          f'{node_name} '
+                                          f'SG_ '
+                                          f'{frame_id} '
+                                          f'{signal_name} '
+                                          f'{get_value(attribute)};')
+            elif "node" in element:
+                for node_name, node_dict in element['node'].items():
                     for attribute_name, attribute in node_dict.items():
                         ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                      f'BU_SG_REL_ '
+                                      f'BU_BO_REL_ '
                                       f'{node_name} '
-                                      f'SG_ '
                                       f'{frame_id} '
-                                      f'{signal_name} '
                                       f'{get_value(attribute)};')
 
     return ba_rel
@@ -1097,8 +1109,7 @@ def _load_attributes(tokens, definitions):
 def _load_attributes_rel(tokens, definitions):
     attributes_rel = OrderedDict()
 
-    def to_object(attribute):
-        value = attribute[7]
+    def to_object(attribute, value):
 
         definition = definitions[attribute[1]]
 
@@ -1112,26 +1123,47 @@ def _load_attributes_rel(tokens, definitions):
 
     for attribute in tokens.get('BA_REL_', []):
         name = attribute[1]
+        rel_type = attribute[2]
         node = attribute[3]
-        frame_id_dbc = int(attribute[5])
-        signal = attribute[6]
 
-        if frame_id_dbc not in attributes_rel:
-            attributes_rel[frame_id_dbc] = {}
+        if rel_type == "BU_SG_REL_":
 
-        if 'signal' not in attributes_rel[frame_id_dbc]:
-            attributes_rel[frame_id_dbc]['signal'] = OrderedDict()
+            frame_id_dbc = int(attribute[5])
+            signal = attribute[6]
 
-        if signal not in attributes_rel[frame_id_dbc]['signal']:
-            attributes_rel[frame_id_dbc]['signal'][signal] = OrderedDict()
+            if frame_id_dbc not in attributes_rel:
+                attributes_rel[frame_id_dbc] = {}
 
-        if 'node' not in attributes_rel[frame_id_dbc]['signal'][signal]:
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'] = OrderedDict()
+            if 'signal' not in attributes_rel[frame_id_dbc]:
+                attributes_rel[frame_id_dbc]['signal'] = OrderedDict()
 
-        if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
+            if signal not in attributes_rel[frame_id_dbc]['signal']:
+                attributes_rel[frame_id_dbc]['signal'][signal] = OrderedDict()
 
-        attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_object(attribute)
+            if 'node' not in attributes_rel[frame_id_dbc]['signal'][signal]:
+                attributes_rel[frame_id_dbc]['signal'][signal]['node'] = OrderedDict()
+
+            if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
+                attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
+
+                attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_object(attribute, attribute[7])
+
+        elif rel_type == "BU_BO_REL_":
+            frame_id_dbc = int(attribute[4])
+
+            if frame_id_dbc not in attributes_rel:
+                attributes_rel[frame_id_dbc] = {}
+
+            if 'node' not in attributes_rel[frame_id_dbc]:
+                attributes_rel[frame_id_dbc]['node'] = OrderedDict()
+
+            if node not in attributes_rel[frame_id_dbc]['node']:
+                attributes_rel[frame_id_dbc]['node'][node] = OrderedDict()
+
+            attributes_rel[frame_id_dbc]['node'][node][name] = to_object(attribute, attribute[5])
+
+        else:
+            pass
 
     return attributes_rel
 

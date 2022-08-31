@@ -6151,6 +6151,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 break
         self.assert_dbc_dump(db, filename)
 
+    def test_relation_message_attributes(self):
+        filename = 'tests/files/dbc/BU_BO_REL_Message.dbc'
+        db = cantools.database.load_file(filename)
+        for key, frame in db.dbc.attributes_rel.items():
+            node = frame.get("node")
+            rel_attributes = node["ECU1"]
+            msg_attr = rel_attributes["MsgProject"]
+            self.assertEqual(msg_attr.value, 2)
+            break
+        self.assert_dbc_dump(db, filename)
+
     def test_cache_prune_choices(self):
         filename = 'tests/files/dbc/socialledge.dbc'
         db = cantools.database.load_file(filename, prune_choices=False, cache_dir=self.cache_dir)

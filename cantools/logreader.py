@@ -113,28 +113,6 @@ class CandumpDefaultLogPattern(BasePattern):
 
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
-    @staticmethod
-    def raw_unpack(line):
-        split = line.split()
-
-        if len(split) != 3:
-            return None
-
-        timestamp, channel, frame = split
-
-        timestamp = datetime.datetime.utcfromtimestamp(float(timestamp[1:-1]))
-        frame_id, data = frame.split("#")
-        frame_id = int(frame_id, 16)
-
-        # none if data not base16 encoded (divisable by 2)
-        if len(data) % 2 != 0:
-            return None
-
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
-
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=TimestampFormat.ABSOLUTE)
-
 
 class CandumpAbsoluteLogPattern(BasePattern):
     #candump vcan0 -tA
@@ -330,11 +308,9 @@ class Parser:
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream=None, raw=False):
+    def __init__(self, stream=None):
         self.stream = stream
         self.pattern = None
-        self.matcher = None
-        self.raw = raw
 
     @staticmethod
     def detect_pattern(line):
@@ -346,19 +322,9 @@ class Parser:
     def parse(self, line):
         if self.pattern is None:
             self.pattern = self.detect_pattern(line)
-
         if self.pattern is None:
             return None
-        if self.matcher is None:
-            if self.raw:
-                if getattr(self.pattern, 'raw_unpack', False):
-                    self.matcher = self.pattern.raw_unpack
-                else:
-                    self.raw = False
-                    self.matcher = self.pattern.match
-            else:
-                self.matcher = self.pattern.match
-        return self.matcher(line)
+        return self.pattern.match(line)
 
     def iterlines(self, keep_unknowns=False):
         """Returns an generator that yields (str, DataFrame) tuples with the

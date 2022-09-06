@@ -3,12 +3,14 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.mypy]
+show_error_codes = true
 warn_return_any = true
 warn_unused_configs = true
 no_implicit_optional = true
 disallow_incomplete_defs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
+exclude = "^(?!cantools).*$"
 
 [[tool.mypy.overrides]]
 module = [

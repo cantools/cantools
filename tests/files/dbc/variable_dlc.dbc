@@ -1,0 +1,18 @@
+VERSION ""
+BS_:
+BU_: Test
+
+BO_ 2164195584 TestMessage1: 3 Test
+ SG_ Signal1 : 0|8@1+ (1,0) [0|0] ""  Test
+ SG_ Signal2 : 8|8@1+ (1,0) [0|0] ""  Test
+ SG_ Signal3 : 16|8@1+ (1,0) [0|0] ""  Test
+
+BO_ 2164195840 TestMessage2: 10 Test
+ SG_ Signal4 : 0|15@1+ (1,0) [0|0] ""  Test
+ SG_ Signal5 : 15|15@1+ (1,0) [0|0] ""  Test
+ SG_ Signal6 : 30|15@1+ (1,0) [0|0] ""  Test
+ SG_ Signal7 : 45|15@1+ (1,0) [0|0] ""  Test
+ SG_ Signal8 : 60|15@1+ (1,0) [0|0] ""  Test
+
+BA_DEF_ BO_  "VFrameFormat" INT 0 3;
+BA_DEF_DEF_  "VFrameFormat" 3;

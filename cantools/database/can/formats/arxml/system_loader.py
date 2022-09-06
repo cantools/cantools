@@ -1,5 +1,4 @@
-# Load and dump a CAN database in ARXML format.
-
+# Load a CAN database in ARXML format.
 import re
 import logging
 import numbers
@@ -9,176 +8,24 @@ from copy import deepcopy
 
 from xml.etree import ElementTree
 
-from ..signal import Signal, NamedSignalValue
-from ..signal import Decimal as SignalDecimal
-from ..message import Message
-from ..node import Node
-from ..bus import Bus
-from ..internal_database import InternalDatabase
-from ...utils import type_sort_signals, sort_signals_by_start_bit
+from .utils import parse_number_string
+from .database_specifics import AutosarDatabaseSpecifics
+from .bus_specifics import AutosarBusSpecifics
+from .node_specifics import AutosarNodeSpecifics
+from .message_specifics import AutosarMessageSpecifics
+
+from .secoc_properties import AutosarSecOCProperties
+from .end_to_end_properties import AutosarEnd2EndProperties
+
+from ...signal import Signal, NamedSignalValue
+from ...signal import Decimal as SignalDecimal
+from ...message import Message
+from ...node import Node
+from ...bus import Bus
+from ...internal_database import InternalDatabase
+from ....utils import type_sort_signals, sort_signals_by_start_bit
 
 LOGGER = logging.getLogger(__name__)
-
-class AutosarDatabaseSpecifics(object):
-    """This class collects the AUTOSAR specific information of a system
-
-    """
-    def __init__(self,
-                 arxml_version):
-        self._arxml_version = arxml_version
-
-    @property
-    def arxml_version(self):
-        """The used version of ARXML file format
-
-        Note that due to technical reasons we always return version
-        "4.0.0" for AUTOSAR 4.X.
-        """
-        return self._arxml_version
-
-class AutosarBusSpecifics(object):
-    """This class collects the AUTOSAR specific information of a CAN bus
-
-    """
-    def __init__(self):
-        pass
-
-class AutosarNodeSpecifics(object):
-    """This class collects the AUTOSAR specific information of node that
-    is attached to a CAN bus
-
-    AUTOSAR calls such nodes "ECU instances"...
-    """
-    def __init__(self):
-        pass
-
-class AutosarMessageSpecifics(object):
-    """This class collects all AUTOSAR specific information of a CAN message
-
-    This means useful information about CAN messages which is provided
-    by ARXML files, but is specific to AUTOSAR.
-    """
-
-    def __init__(self):
-        self._pdu_paths = []
-        self._is_nm = False
-        self._is_secured = False
-        self._secured_payload_length = 0
-        self._e2e: Optional['AutosarEnd2EndProperties'] = None
-        self._signal_group = None
-
-    @property
-    def pdu_paths(self):
-        """The ARXML paths of all PDUs featured by this message.
-
-        For the vast majority of messages, this list only has a single
-        entry. Messages with multiplexers and container frames are
-        different, though.
-        """
-        return self._pdu_paths
-
-    @property
-    def is_nm(self):
-        """True iff the message is used for network management
-        """
-        return self._is_nm
-
-    @property
-    def is_secured(self):
-        """True iff the message integrity is secured using SecOC
-        """
-        return self._is_secured
-
-    @property
-    def secured_payload_length(self):
-        """Returns the number of bytes covered by the payload of the secured
-        message
-
-        (The full message length is the length of the payload plus the
-        size of the security header.)
-        """
-        return self._secured_payload_length
-
-    @property
-    def e2e(self) -> Optional['AutosarEnd2EndProperties']:
-        """Returns the end-to-end protection properties for the message"""
-        return self._e2e
-
-    @e2e.setter
-    def e2e(self, value: Optional['AutosarEnd2EndProperties']) -> None:
-        self._e2e = value
-
-class AutosarEnd2EndProperties:
-    """This class collects all attributes that are required to implement
-    AUTOSAR-conformant End-to-End protection (CRCs) of messages
-    """
-
-    def __init__(self):
-        self._category: Optional[str] = None
-        self._data_ids: Optional[List[int]] = None
-        self._payload_length: int = 0
-
-    @property
-    def category(self) -> Optional[str]:
-        """The category string of the applicable end-to-end protection
-        mechanism
-
-        Note that the contents of these are not specified by the
-        AUTOSAR standard.
-        """
-        return self._category
-
-    @category.setter
-    def category(self, value: Optional[str]) -> None:
-        self._category = value
-
-    @property
-    def data_ids(self) -> Optional[List[int]]:
-        """The list of data IDs applicable
-        """
-        return self._data_ids
-
-    @data_ids.setter
-    def data_ids(self, value: Optional[List[int]]) -> None:
-        self._data_ids = value
-
-    @property
-    def payload_length(self) -> int:
-        """The size of the end-to-end protected data in bytes
-
-        This number includes the end-to-end protection signals
-        themselves (i.e. the sequence counter and the CRC value)
-
-        """
-        return self._payload_length
-
-    @payload_length.setter
-    def payload_length(self, value: int) -> None:
-        self._payload_length = value
-
-def parse_number_string(in_string, allow_float=False):
-    # the input string contains a dot -> floating point value
-    if '.' in in_string:
-        tmp = float(in_string)
-
-        if not allow_float and tmp != int(tmp):
-            raise ValueError('Floating point value specified where integer '
-                             'is required')
-
-        # if an integer is required but a .0 floating point value is
-        # specified, we accept the input anyway. (this seems to be an
-        # ambiguity in the AUTOSAR specification.)
-        return tmp if allow_float else int(tmp)
-
-    in_string = in_string.strip()
-    if not in_string:
-        return 0
-    elif in_string[0] == '0' and in_string[1:2].isdigit():
-        # interpret strings starting with a 0 as octal because
-        # python's int(*, 0) does not for some reason.
-        return int(in_string, 8)
-
-    return int(in_string, 0) # autodetect the base
 
 class SystemLoader(object):
     def __init__(self,
@@ -541,12 +388,12 @@ class SystemLoader(object):
                 if comm_dir == 'IN':
                     for pdu_message in pdu_messages:
                         for signal in pdu_message.signals:
-                            if ecu_name not in signal._receivers:
-                                signal._receivers.append(ecu_name)
+                            if ecu_name not in signal.receivers:
+                                signal.receivers.append(ecu_name)
                 elif comm_dir == 'OUT':
                     for pdu_message in pdu_messages:
-                        if ecu_name not in pdu_message._senders:
-                            pdu_message._senders.append(ecu_name)
+                        if ecu_name not in pdu_message.senders:
+                            pdu_message.senders.append(ecu_name)
 
     def _load_senders_receivers_of_nm_pdus(self, package, messages):
         ####
@@ -606,9 +453,9 @@ class SystemLoader(object):
                                                               pdu_path)
 
                     for pdu_message in pdu_messages:
-                        for signal in pdu_message._signals:
-                            if ecu_name not in signal._receivers:
-                                signal._receivers.append(ecu_name)
+                        for signal in pdu_message.signals:
+                            if ecu_name not in signal.receivers:
+                                signal.receivers.append(ecu_name)
 
                 # deal with transmit PDUs
                 for tx_pdu in self._get_arxml_children(nm_node,
@@ -621,8 +468,8 @@ class SystemLoader(object):
                                                               pdu_path)
 
                     for pdu_message in pdu_messages:
-                        if ecu_name not in pdu_message._senders:
-                            pdu_message._senders.append(ecu_name)
+                        if ecu_name not in pdu_message.senders:
+                            pdu_message.senders.append(ecu_name)
 
     def _load_system(self, package_list, messages):
         """Internalize the information specified by the system.
@@ -713,7 +560,7 @@ class SystemLoader(object):
         return nodes
 
     def _load_e2e_properties(self, package_list, messages):
-        """Internalize AUTOSAR end-2-end protection properties required for
+        """Internalize AUTOSAR end-to-end protection properties required for
         implementing end-to-end protection (CRCs) of messages.
 
         """
@@ -916,7 +763,7 @@ class SystemLoader(object):
         autosar_specifics._pdu_paths.append(pdu_path)
 
         _, \
-            payload_length, \
+            _, \
             signals, \
             cycle_time, \
             child_pdu_paths, \
@@ -925,21 +772,16 @@ class SystemLoader(object):
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
         autosar_specifics._is_nm = \
             (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
-        autosar_specifics._is_secured = \
+        autosar_specifics._is_general_purpose = \
+            (pdu.tag == f'{{{self.xml_namespace}}}N-PDU') or \
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-PDU') or \
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU')
+        is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
         self._load_e2e_data_id_from_signal_group(pdu, autosar_specifics)
-        if autosar_specifics.is_secured:
-            autosar_specifics._secured_payload_length = payload_length
-            if autosar_specifics.e2e is None:
-                # use the data id from the signal group associated with
-                # the payload PDU if the secured PDU does not define a
-                # group with a data id...
-                payload_pdu = \
-                    self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
-
-                self._load_e2e_data_id_from_signal_group(payload_pdu,
-                                                         autosar_specifics)
+        if is_secured:
+            self._load_secured_properties(name, pdu, signals, autosar_specifics)
 
         # the bit pattern used to fill in unused bits to avoid
         # undefined behaviour/information leaks
@@ -965,6 +807,105 @@ class SystemLoader(object):
                        autosar_specifics=autosar_specifics,
                        strict=self._strict,
                        sort_signals=self._sort_signals)
+
+    def _load_secured_properties(self,
+                                 message_name,
+                                 pdu,
+                                 signals,
+                                 autosar_specifics):
+        payload_pdu = \
+            self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
+
+        payload_length = self._get_unique_arxml_child(payload_pdu, 'LENGTH')
+        payload_length = parse_number_string(payload_length.text)
+
+        if autosar_specifics.e2e is None:
+            # use the data id from the signal group associated with
+            # the payload PDU if the secured PDU does not define a
+            # group with a data id...
+            self._load_e2e_data_id_from_signal_group(payload_pdu,
+                                                     autosar_specifics)
+
+        # data specifying the SecOC "footer" of a secured frame
+        auth_algo = self._get_unique_arxml_child(pdu, [
+            '&AUTHENTICATION-PROPS',
+            'SHORT-NAME' ])
+        if auth_algo is not None:
+            auth_algo = auth_algo.text
+
+        fresh_algo = self._get_unique_arxml_child(pdu, [
+            '&FRESHNESS-PROPS',
+            'SHORT-NAME' ])
+        if fresh_algo is not None:
+            fresh_algo = fresh_algo.text
+
+        data_id = self._get_unique_arxml_child(pdu, [
+            'SECURE-COMMUNICATION-PROPS',
+            'DATA-ID' ])
+        if data_id is not None:
+            data_id = parse_number_string(data_id.text)
+
+        auth_tx_len = self._get_unique_arxml_child(pdu, [
+            '&AUTHENTICATION-PROPS',
+            'AUTH-INFO-TX-LENGTH' ])
+        if auth_tx_len is not None:
+            auth_tx_len = parse_number_string(auth_tx_len.text)
+
+        fresh_len = self._get_unique_arxml_child(pdu, [
+            '&FRESHNESS-PROPS',
+            'FRESHNESS-VALUE-LENGTH' ])
+        if fresh_len is not None:
+            fresh_len = parse_number_string(fresh_len.text)
+
+        fresh_tx_len = self._get_unique_arxml_child(pdu, [
+            '&FRESHNESS-PROPS',
+            'FRESHNESS-VALUE-TX-LENGTH' ])
+        if fresh_tx_len is not None:
+            fresh_tx_len = parse_number_string(fresh_tx_len.text)
+
+        # add "pseudo signals" for the truncated freshness value and
+        # the truncated authenticator
+        if fresh_tx_len is not None and fresh_tx_len > 0:
+            signals.append(Signal(name=f'{message_name}_Freshness',
+                                  start=payload_length*8 + 7,
+                                  length=fresh_tx_len,
+                                  byte_order='big_endian',
+                                  offset=0,
+                                  scale=1,
+                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
+                                  comment=\
+                                  {'FOR-ALL':
+                                   f'Truncated freshness value for '
+                                   f"'{message_name}'"}))
+        if auth_tx_len is not None and auth_tx_len > 0:
+            n0 = payload_length*8 + (fresh_tx_len//8)*8 + (7-fresh_tx_len%8)
+            signals.append(Signal(name=f'{message_name}_Authenticator',
+                                  start=n0,
+                                  length=auth_tx_len,
+                                  byte_order='big_endian',
+                                  offset=0,
+                                  scale=1,
+                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
+                                  comment=\
+                                  { 'FOR-ALL':
+                                    f'Truncated authenticator value for '
+                                    f"'{message_name}'"}))
+
+        # note that the length of the authenificator is implicit:
+        # e.g., for an MD5 based message authencation code, it would
+        # be 128 bits long which algorithm is used is highly
+        # manufacturer specific and determined via the authenticator
+        # name.
+        autosar_specifics._secoc = \
+            AutosarSecOCProperties(
+                auth_algorithm_name=auth_algo,
+                freshness_algorithm_name=fresh_algo,
+                payload_length=payload_length,
+                data_id=data_id,
+                freshness_bit_length=fresh_len,
+                freshness_tx_bit_length=fresh_tx_len,
+                auth_tx_bit_length=auth_tx_len)
+
 
     def _load_pdu(self, pdu, frame_name, next_selector_idx):
         is_secured = pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU'
@@ -1046,7 +987,7 @@ class SystemLoader(object):
                 # create the autosar specifics of the contained_message
                 contained_autosar_specifics = AutosarMessageSpecifics()
                 contained_autosar_specifics._pdu_paths = contained_pdu_paths
-                contained_autosar_specifics._is_secured = \
+                is_secured = \
                     (contained_pdu.tag ==
                      f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
@@ -1055,21 +996,11 @@ class SystemLoader(object):
                 self._load_e2e_data_id_from_signal_group(
                     contained_pdu,
                     contained_autosar_specifics)
-                if contained_autosar_specifics.is_secured:
-                    contained_autosar_specifics._secured_payload_length = \
-                        payload_length
-                    if contained_autosar_specifics.e2e is None:
-                        # use the data id from the signal group
-                        # associated with the payload PDU if the
-                        # secured PDU does not define a group with a
-                        # data id...
-                        payload_pdu = \
-                            self._get_unique_arxml_child(contained_pdu, [
-                                '&PAYLOAD', '&I-PDU' ])
-
-                        self._load_e2e_data_id_from_signal_group(
-                            payload_pdu,
-                            contained_autosar_specifics)
+                if is_secured:
+                    self._load_secured_properties(name,
+                                                  contained_pdu,
+                                                  signals,
+                                                  contained_autosar_specifics)
 
                 contained_message = \
                     Message(header_id=header_id,
@@ -1199,6 +1130,9 @@ class SystemLoader(object):
             start=selector_pos,
             length=selector_len,
             byte_order=selector_byte_order,
+            offset=0,
+            scale=1,
+            decimal = SignalDecimal(Decimal(1), Decimal(0)),
             choices={},
             is_multiplexer=True,
         )
@@ -1208,17 +1142,17 @@ class SystemLoader(object):
 
         if self.autosar_version_newer(4):
             dynpart_spec = [
-                                                   'DYNAMIC-PARTS',
-                                                   '*DYNAMIC-PART',
-                                                   'DYNAMIC-PART-ALTERNATIVES',
-                                                   '*DYNAMIC-PART-ALTERNATIVE',
-                                               ]
+                'DYNAMIC-PARTS',
+                '*DYNAMIC-PART',
+                'DYNAMIC-PART-ALTERNATIVES',
+                '*DYNAMIC-PART-ALTERNATIVE',
+            ]
         else:
             dynpart_spec = [
-                                                   'DYNAMIC-PART',
-                                                   'DYNAMIC-PART-ALTERNATIVES',
-                                                   '*DYNAMIC-PART-ALTERNATIVE',
-                                               ]
+                'DYNAMIC-PART',
+                'DYNAMIC-PART-ALTERNATIVES',
+                '*DYNAMIC-PART-ALTERNATIVE',
+            ]
 
         for dynalt in self._get_arxml_children(pdu, dynpart_spec):
             dynalt_selector_value = \
@@ -1497,8 +1431,8 @@ class SystemLoader(object):
         invalid = None
         minimum = None
         maximum = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         unit = None
         choices = None
         comments = None
@@ -1514,6 +1448,7 @@ class SystemLoader(object):
                                                 i_signal_spec)
         # Name, start position, length and byte order.
         name = self._load_signal_name(i_signal)
+
         start_position = \
             self._load_signal_start_position(i_signal_to_i_pdu_mapping)
         length = self._load_signal_length(i_signal, system_signal)
@@ -1535,19 +1470,16 @@ class SystemLoader(object):
             initial_int = None
             try:
                 initial_int = parse_number_string(initial)
-            except:
-                pass
+            except ValueError:
+                LOGGER.warning(f'The initial value ("{initial}") of signal '
+                               f'{name} does not represent a number')
 
             if choices is not None and initial_int in choices:
                 initial = choices[initial_int]
             elif is_float:
                 initial = float(initial_int)*factor + offset
-            elif initial.strip().lower() == 'true':
-                initial = True
-            elif initial.strip().lower() == 'false':
-                initial = False
             # TODO: strings?
-            else:
+            elif initial_int is not None:
                 initial = initial_int*factor + offset
 
         invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
@@ -1558,8 +1490,6 @@ class SystemLoader(object):
             elif not isinstance(invalid, bool) and \
                  isinstance(invalid, numbers.Number):
                 invalid = invalid*factor + offset
-
-        # ToDo: receivers
 
         return Signal(name=name,
                       start=start_position,
@@ -1778,13 +1708,13 @@ class SystemLoader(object):
                                                    'DISPLAY-NAME'
                                                ])
 
-        ignorelist = ( "NoUnit", )
+        ignorelist = ( 'NoUnit', )
 
         if res is None or res.text in ignorelist:
             return None
         return res.text
 
-    def _load_texttable(self, compu_method, decimal, is_float):
+    def _load_texttable(self, compu_method):
         minimum = None
         maximum = None
         choices = {}
@@ -1795,113 +1725,124 @@ class SystemLoader(object):
                                                       'COMPU-SCALES',
                                                       '*&COMPU-SCALE'
                                                     ]):
-            lower_limit = \
-                self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
-            upper_limit = \
-                self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = \
-               self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
+                self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
+
+            # the current scale is an enumeration value
+            lower_limit, upper_limit = self._load_scale_limits(compu_scale)
+            assert lower_limit is not None \
+                   and lower_limit == upper_limit, \
+                   f'Invalid value specified for enumeration {vt}: ' \
+                   f'[{lower_limit}, {upper_limit}]'
+            value = lower_limit
+            name = vt.text
             comments = self._load_comments(compu_scale)
+            choices[value] = NamedSignalValue(value, name, comments)
 
-            # range of the internal values of the scale.
-            minimum_int_scale = \
-               None \
-               if lower_limit is None \
-               else parse_number_string(lower_limit.text, is_float)
-            maximum_int_scale = \
-               None \
-               if upper_limit is None \
-               else parse_number_string(upper_limit.text, is_float)
+        return choices
 
-            # for texttables the internal and the physical values are identical
-            if minimum is None:
-                minimum = minimum_int_scale
-            elif minimum_int_scale is not None:
-                minimum = min(minimum, minimum_int_scale)
-
-            if maximum is None:
-                maximum = maximum_int_scale
-            elif maximum_int_scale is not None:
-                maximum = max(maximum, maximum_int_scale)
-
-            if vt is not None:
-                value = parse_number_string(lower_limit.text, is_float)
-                name = vt.text
-                choices[value] = NamedSignalValue(value, name, comments)
-
-        decimal.minimum = minimum
-        decimal.maximum = maximum
-        return minimum, maximum, choices
-
-    def _load_linear_factor_and_offset(self, compu_scale, decimal):
+    def _load_linear_scale(self, compu_scale, decimal):
+        # load the scaling factor an offset
         compu_rational_coeffs = \
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
 
         if compu_rational_coeffs is None:
-            return None, None
+            factor = 1.0
+            offset = 0.0
 
-        numerators = self._get_arxml_children(compu_rational_coeffs,
-                                              ['&COMPU-NUMERATOR', '*&V'])
+            decimal.scale = Decimal(factor)
+            decimal.offset = Decimal(offset)
+        else:
+            numerators = self._get_arxml_children(compu_rational_coeffs,
+                                                  ['&COMPU-NUMERATOR', '*&V'])
 
-        if len(numerators) != 2:
-            raise ValueError(
-                'Expected 2 numerator values for linear scaling, but '
-                'got {}.'.format(len(numerators)))
+            if len(numerators) != 2:
+                raise ValueError(
+                    'Expected 2 numerator values for linear scaling, but '
+                    'got {}.'.format(len(numerators)))
 
-        denominators = self._get_arxml_children(compu_rational_coeffs,
-                                                ['&COMPU-DENOMINATOR', '*&V'])
+            denominators = self._get_arxml_children(compu_rational_coeffs,
+                                                    ['&COMPU-DENOMINATOR', '*&V'])
 
-        if len(denominators) != 1:
-            raise ValueError(
-                'Expected 1 denominator value for linear scaling, but '
-                'got {}.'.format(len(denominators)))
+            if len(denominators) != 1:
+                raise ValueError(
+                    'Expected 1 denominator value for linear scaling, but '
+                    'got {}.'.format(len(denominators)))
 
-        denominator = Decimal(denominators[0].text)
-        decimal.scale = Decimal(numerators[1].text) / denominator
-        decimal.offset = Decimal(numerators[0].text) / denominator
+            denominator = Decimal(denominators[0].text)
+            decimal.scale = Decimal(numerators[1].text) / denominator
+            decimal.offset = Decimal(numerators[0].text) / denominator
 
-        return float(decimal.scale), float(decimal.offset)
+            factor = float(decimal.scale)
+            offset = float(decimal.offset)
 
-    def _load_linear(self, compu_method, decimal, is_float):
-        compu_scale = self._get_unique_arxml_child(compu_method,
-                                                   [
-                                                       'COMPU-INTERNAL-TO-PHYS',
-                                                       'COMPU-SCALES',
-                                                       '&COMPU-SCALE'
-                                                   ])
+        # load the domain interval of the scale
+        lower_limit, upper_limit = self._load_scale_limits(compu_scale)
 
-        lower_limit = self._get_unique_arxml_child(compu_scale, '&LOWER-LIMIT')
-        upper_limit = self._get_unique_arxml_child(compu_scale, '&UPPER-LIMIT')
+        # sanity checks
+        if lower_limit is not None and \
+             upper_limit is not None and \
+             lower_limit > upper_limit:
+            LOGGER.warning(f'An valid interval should be provided for '
+                           f'the domain of scaled signals.')
+            lower_limit = None
+            upper_limit = None
 
-        # range of the internal values
-        minimum_int = \
-            None \
-            if lower_limit is None \
-            else parse_number_string(lower_limit.text, is_float)
-        maximum_int = \
-            None \
-            if upper_limit is None \
-            else parse_number_string(upper_limit.text, is_float)
+        if factor <= 0.0:
+            LOGGER.warning(f'Signal scaling is currently only '
+                           f'supported for positive scaling '
+                           f'factors. Expect spurious '
+                           f'results!')
 
-        factor, offset = \
-            self._load_linear_factor_and_offset(compu_scale, decimal)
-
-        factor = 1.0 if factor is None else factor
-        offset = 0.0 if offset is None else offset
-
-        # range of the physical values
-        minimum = None if minimum_int is None else minimum_int*factor + offset
-        maximum = None if maximum_int is None else maximum_int*factor + offset
-        decimal.minimum = None if minimum is None else Decimal(minimum)
-        decimal.maximum = None if maximum is None else Decimal(maximum)
+        # convert interval of the domain to the interval of the range
+        minimum = None if lower_limit is None else lower_limit*factor + offset
+        maximum = None if upper_limit is None else upper_limit*factor + offset
+        decimal.minimum = minimum
+        decimal.maximum = maximum
 
         return minimum, maximum, factor, offset
+
+    def _load_linear(self, compu_method, decimal, is_float):
+        minimum = None
+        maximum = None
+        factor = 1.0
+        offset = 0.0
+
+        for compu_scale in self._get_arxml_children(compu_method,
+                                                    [
+                                                        'COMPU-INTERNAL-TO-PHYS',
+                                                        'COMPU-SCALES',
+                                                        '&COMPU-SCALE'
+                                                    ]):
+            if minimum is not None or maximum is not None:
+                LOGGER.warning(f'Signal scaling featuring multiple segments '
+                               f'is currently unsupported. Expect spurious '
+                               f'results!')
+
+            minimum, maximum, factor, offset = \
+                self._load_linear_scale(compu_scale, decimal)
+
+        return minimum, maximum, factor, offset
+
+    def _load_scale_limits(self, compu_scale):
+        lower_limit = \
+            self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
+        upper_limit = \
+            self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
+
+        if lower_limit is not None:
+            lower_limit = parse_number_string(lower_limit.text)
+
+        if upper_limit is not None:
+            upper_limit = parse_number_string(upper_limit.text)
+
+        return lower_limit, upper_limit
 
     def _load_scale_linear_and_texttable(self, compu_method, decimal, is_float):
         minimum = None
         maximum = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         choices = {}
 
         for compu_scale in self._get_arxml_children(compu_method,
@@ -1911,66 +1852,42 @@ class SystemLoader(object):
                                                       '*&COMPU-SCALE'
                                                     ]):
 
-            lower_limit = \
-                self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
-            upper_limit = \
-                self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
             vt = \
                self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
-            comments = self._load_comments(compu_scale)
-
-            # range of the internal values of the scale.
-            minimum_int_scale = \
-                None if lower_limit is None \
-                else parse_number_string(lower_limit.text, is_float)
-            maximum_int_scale = \
-               None if upper_limit is None \
-               else parse_number_string(upper_limit.text, is_float)
-
-            # TODO: make sure that no conflicting scaling factors and offsets
-            # are specified. For now, let's just assume that the ARXML file is
-            # well formed.
-            factor_scale, offset_scale = \
-                self._load_linear_factor_and_offset(compu_scale, decimal)
-            if factor_scale is not None:
-                factor = factor_scale
-            else:
-                factor_scale = 1.0
-
-            if offset_scale is not None:
-                offset = offset_scale
-            else:
-                offset_scale = 0.0
-
-            # range of the physical values of the scale.
-            if minimum is None:
-                minimum = minimum_int_scale*factor_scale + offset_scale
-            elif minimum_int_scale is not None:
-                minimum = min(minimum,
-                              minimum_int_scale*factor_scale + offset_scale)
-
-            if maximum is None:
-                maximum = maximum_int_scale*factor_scale + offset_scale
-            elif maximum_int_scale is not None:
-                maximum = max(maximum,
-                              maximum_int_scale*factor_scale + offset_scale)
 
             if vt is not None:
-                assert(minimum_int_scale is not None \
-                       and minimum_int_scale == maximum_int_scale)
-                value = minimum_int_scale
+                # the current scale is an enumeration value
+                lower_limit, upper_limit = self._load_scale_limits(compu_scale)
+                assert(lower_limit is not None \
+                       and lower_limit == upper_limit)
+                value = lower_limit
                 name = vt.text
+                comments = self._load_comments(compu_scale)
                 choices[value] = NamedSignalValue(value, name, comments)
 
-        decimal.minimum = Decimal(minimum)
-        decimal.maximum = Decimal(maximum)
+            else:
+                if minimum is not None or maximum is not None:
+                    LOGGER.warning(f'Signal scaling featuring multiple segments '
+                                   f'is currently unsupported. Expect spurious '
+                                   f'results!')
+
+                # the current scale represents physical
+                # values. currently, we only support a single segment,
+                # i.e., no piecewise linear functions. (TODO?)
+
+                # TODO: make sure that no conflicting scaling factors
+                # and offsets are specified. For now, let's just
+                # assume that the ARXML file is well formed.
+                minimum, maximum, factor, offset = \
+                    self._load_linear_scale(compu_scale, decimal)
+
         return minimum, maximum, factor, offset, choices
 
     def _load_system_signal(self, system_signal, decimal, is_float):
         minimum = None
         maximum = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         choices = None
 
         compu_method = self._get_compu_method(system_signal)
@@ -1997,8 +1914,7 @@ class SystemLoader(object):
             category = category.text
 
             if category == 'TEXTTABLE':
-                minimum, maximum, choices = \
-                    self._load_texttable(compu_method, decimal,  is_float)
+                choices = self._load_texttable(compu_method)
             elif category == 'LINEAR':
                 minimum, maximum, factor, offset = \
                     self._load_linear(compu_method, decimal,  is_float)
@@ -2017,8 +1933,8 @@ class SystemLoader(object):
         return \
             minimum, \
             maximum, \
-            1 if factor is None else factor, \
-            0 if offset is None else offset, \
+            1.0 if factor is None else factor, \
+            0.0 if offset is None else offset, \
             choices, \
             unit, \
             comments
@@ -2035,7 +1951,7 @@ class SystemLoader(object):
 
             if base_type_encoding is None:
                 btt = base_type.find('./ns:SHORT-NAME', self._xml_namespaces)
-                btt = bt.text
+                btt = btt.text
                 raise ValueError(
                     f'BASE-TYPE-ENCODING in base type "{btt}" does not exist.')
 
@@ -2321,7 +2237,8 @@ class SystemLoader(object):
 
                         if tmp is None:
                             raise ValueError(f'Encountered dangling reference '
-                                             f'{child_tag_name}-REF: '
+                                             f'{child_tag_name}-REF of type '
+                                             f'"{child_elem.attrib.get("DEST")}": '
                                              f'{child_elem.text}')
 
                         local_result.append(tmp)
@@ -2414,401 +2331,3 @@ class SystemLoader(object):
                                                '&SW-DATA-DEF-PROPS-CONDITIONAL',
                                                '&BASE-TYPE'
                                             ])
-
-# The ARXML XML namespace for the EcuExtractLoader
-NAMESPACE = 'http://autosar.org/schema/r4.0'
-NAMESPACES = {'ns': NAMESPACE}
-
-ROOT_TAG = '{{{}}}AUTOSAR'.format(NAMESPACE)
-
-# ARXML XPATHs used by the EcuExtractLoader
-def make_xpath(location):
-    return './ns:' + '/ns:'.join(location)
-
-ECUC_VALUE_COLLECTION_XPATH = make_xpath([
-    'AR-PACKAGES',
-    'AR-PACKAGE',
-    'ELEMENTS',
-    'ECUC-VALUE-COLLECTION'
-])
-ECUC_MODULE_CONFIGURATION_VALUES_REF_XPATH = make_xpath([
-    'ECUC-VALUES',
-    'ECUC-MODULE-CONFIGURATION-VALUES-REF-CONDITIONAL',
-    'ECUC-MODULE-CONFIGURATION-VALUES-REF'
-])
-ECUC_REFERENCE_VALUE_XPATH = make_xpath([
-    'REFERENCE-VALUES',
-    'ECUC-REFERENCE-VALUE'
-])
-DEFINITION_REF_XPATH = make_xpath(['DEFINITION-REF'])
-VALUE_XPATH = make_xpath(['VALUE'])
-VALUE_REF_XPATH = make_xpath(['VALUE-REF'])
-SHORT_NAME_XPATH = make_xpath(['SHORT-NAME'])
-PARAMETER_VALUES_XPATH = make_xpath(['PARAMETER-VALUES'])
-REFERENCE_VALUES_XPATH = make_xpath([
-    'REFERENCE-VALUES'
-])
-
-class EcuExtractLoader(object):
-
-    def __init__(self,
-                 root:Any,
-                 strict:bool,
-                 sort_signals:type_sort_signals=sort_signals_by_start_bit):
-        self.root = root
-        self.strict = strict
-        self.sort_signals = sort_signals
-
-    def load(self) -> InternalDatabase:
-        buses:List[Bus] = []
-        messages = []
-        version = None
-
-        ecuc_value_collection = self.root.find(ECUC_VALUE_COLLECTION_XPATH,
-                                               NAMESPACES)
-        values_refs = ecuc_value_collection.iterfind(
-            ECUC_MODULE_CONFIGURATION_VALUES_REF_XPATH,
-            NAMESPACES)
-        com_xpaths = [
-            value_ref.text
-            for value_ref in values_refs
-            if value_ref.text.endswith('/Com')
-        ]
-
-        if len(com_xpaths) != 1:
-            raise ValueError(
-                'Expected 1 /Com, but got {}.'.format(len(com_xpaths)))
-
-        com_config = self.find_com_config(com_xpaths[0] + '/ComConfig')
-
-        for ecuc_container_value in com_config:
-            definition_ref = ecuc_container_value.find(DEFINITION_REF_XPATH,
-                                                       NAMESPACES).text
-
-            if not definition_ref.endswith('ComIPdu'):
-                continue
-
-            message = self.load_message(ecuc_container_value)
-
-            if message is not None:
-                messages.append(message)
-
-        return InternalDatabase(messages,
-                                [],
-                                buses,
-                                version)
-
-    def load_message(self, com_i_pdu):
-        # Default values.
-        interval = None
-        senders = []
-        comments = None
-
-        # Name, frame id, length and is_extended_frame.
-        name = com_i_pdu.find(SHORT_NAME_XPATH, NAMESPACES).text
-        direction = None
-
-        for parameter, value in self.iter_parameter_values(com_i_pdu):
-            if parameter == 'ComIPduDirection':
-                direction = value
-                break
-
-        com_pdu_id_ref = None
-
-        for reference, value in self.iter_reference_values(com_i_pdu):
-            if reference == 'ComPduIdRef':
-                com_pdu_id_ref = value
-                break
-
-        if com_pdu_id_ref is None:
-            raise ValueError('No ComPduIdRef reference found.')
-
-        if direction == 'SEND':
-            frame_id, length, is_extended_frame = self.load_message_tx(
-                com_pdu_id_ref)
-        elif direction == 'RECEIVE':
-            frame_id, length, is_extended_frame = self.load_message_rx(
-                com_pdu_id_ref)
-        else:
-            raise NotImplementedError(
-                'Direction {} not supported.'.format(direction))
-
-        if frame_id is None:
-            LOGGER.warning('No frame id found for message %s.', name)
-
-            return None
-
-        if is_extended_frame is None:
-            LOGGER.warning('No frame type found for message %s.', name)
-
-            return None
-
-        if length is None:
-            LOGGER.warning('No length found for message %s.', name)
-
-            return None
-
-        # ToDo: interval, senders, comments
-
-        # Find all signals in this message.
-        signals = []
-        values = com_i_pdu.iterfind(ECUC_REFERENCE_VALUE_XPATH,
-                                    NAMESPACES)
-
-        for value in values:
-            definition_ref = value.find(DEFINITION_REF_XPATH,
-                                        NAMESPACES).text
-            if not definition_ref.endswith('ComIPduSignalRef'):
-                continue
-
-            value_ref = value.find(VALUE_REF_XPATH, NAMESPACES)
-            signal = self.load_signal(value_ref.text)
-
-            if signal is not None:
-                signals.append(signal)
-
-        return Message(frame_id=frame_id,
-                       is_extended_frame=is_extended_frame,
-                       name=name,
-                       length=length,
-                       senders=senders,
-                       send_type=None,
-                       cycle_time=interval,
-                       signals=signals,
-                       comment=comments,
-                       bus_name=None,
-                       strict=self.strict,
-                       sort_signals=self.sort_signals)
-
-    def load_message_tx(self, com_pdu_id_ref):
-        return self.load_message_rx_tx(com_pdu_id_ref,
-                                       'CanIfTxPduCanId',
-                                       'CanIfTxPduDlc',
-                                       'CanIfTxPduCanIdType')
-
-    def load_message_rx(self, com_pdu_id_ref):
-        return self.load_message_rx_tx(com_pdu_id_ref,
-                                       'CanIfRxPduCanId',
-                                       'CanIfRxPduDlc',
-                                       'CanIfRxPduCanIdType')
-
-    def load_message_rx_tx(self,
-                           com_pdu_id_ref,
-                           parameter_can_id,
-                           parameter_dlc,
-                           parameter_can_id_type):
-        can_if_tx_pdu_cfg = self.find_can_if_rx_tx_pdu_cfg(com_pdu_id_ref)
-        frame_id = None
-        length = None
-        is_extended_frame = None
-
-        if can_if_tx_pdu_cfg is not None:
-            for parameter, value in self.iter_parameter_values(can_if_tx_pdu_cfg):
-                if parameter == parameter_can_id:
-                    frame_id = int(value)
-                elif parameter == parameter_dlc:
-                    length = int(value)
-                elif parameter == parameter_can_id_type:
-                    is_extended_frame = (value == 'EXTENDED_CAN')
-
-        return frame_id, length, is_extended_frame
-
-    def load_signal(self, xpath):
-        ecuc_container_value = self.find_value(xpath)
-        if ecuc_container_value is None:
-            return None
-
-        name = ecuc_container_value.find(SHORT_NAME_XPATH, NAMESPACES).text
-
-        # Default values.
-        is_signed = False
-        is_float = False
-        minimum = None
-        maximum = None
-        factor = 1
-        offset = 0
-        unit = None
-        choices = None
-        comments = None
-        receivers = []
-        decimal = SignalDecimal(Decimal(factor), Decimal(offset))
-
-        # Bit position, length, byte order, is_signed and is_float.
-        bit_position = None
-        length = None
-        byte_order = None
-
-        for parameter, value in self.iter_parameter_values(ecuc_container_value):
-            if parameter == 'ComBitPosition':
-                bit_position = int(value)
-            elif parameter == 'ComBitSize':
-                length = int(value)
-            elif parameter == 'ComSignalEndianness':
-                byte_order = value.lower()
-            elif parameter == 'ComSignalType':
-                if value in ['SINT8', 'SINT16', 'SINT32']:
-                    is_signed = True
-                elif value in ['FLOAT32', 'FLOAT64']:
-                    is_float = True
-
-        if bit_position is None:
-            LOGGER.warning('No bit position found for signal %s.',name)
-
-            return None
-
-        if length is None:
-            LOGGER.warning('No bit size found for signal %s.', name)
-
-            return None
-
-        if byte_order is None:
-            LOGGER.warning('No endianness found for signal %s.', name)
-
-            return None
-
-        # ToDo: minimum, maximum, factor, offset, unit, choices,
-        #       comments and receivers.
-
-        return Signal(name=name,
-                      start=bit_position,
-                      length=length,
-                      receivers=receivers,
-                      byte_order=byte_order,
-                      is_signed=is_signed,
-                      scale=factor,
-                      offset=offset,
-                      minimum=minimum,
-                      maximum=maximum,
-                      unit=unit,
-                      choices=choices,
-                      comment=comments,
-                      is_float=is_float,
-                      decimal=decimal)
-
-    def find_com_config(self, xpath):
-        return self.root.find(make_xpath([
-            "AR-PACKAGES",
-            "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[1]),
-            "ELEMENTS",
-            "ECUC-MODULE-CONFIGURATION-VALUES/[ns:SHORT-NAME='Com']",
-            "CONTAINERS",
-            "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='ComConfig']",
-            "SUB-CONTAINERS"
-        ]),
-                              NAMESPACES)
-
-    def find_value(self, xpath):
-        return self.root.find(make_xpath([
-            "AR-PACKAGES",
-            "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[1]),
-            "ELEMENTS",
-            "ECUC-MODULE-CONFIGURATION-VALUES/[ns:SHORT-NAME='Com']",
-            "CONTAINERS",
-            "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='ComConfig']",
-            "SUB-CONTAINERS",
-            "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[-1])
-        ]),
-                              NAMESPACES)
-
-    def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref):
-        messages = self.root.iterfind(
-            make_xpath([
-                "AR-PACKAGES",
-                "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(
-                    com_pdu_id_ref.split('/')[1]),
-                "ELEMENTS",
-                "ECUC-MODULE-CONFIGURATION-VALUES/[ns:SHORT-NAME='CanIf']",
-                'CONTAINERS',
-                "ECUC-CONTAINER-VALUE/[ns:SHORT-NAME='CanIfInitCfg']",
-                'SUB-CONTAINERS',
-                'ECUC-CONTAINER-VALUE'
-            ]),
-            NAMESPACES)
-
-        for message in messages:
-            definition_ref = message.find(DEFINITION_REF_XPATH,
-                                          NAMESPACES).text
-
-            if definition_ref.endswith('CanIfTxPduCfg'):
-                expected_reference = 'CanIfTxPduRef'
-            elif definition_ref.endswith('CanIfRxPduCfg'):
-                expected_reference = 'CanIfRxPduRef'
-            else:
-                continue
-
-            for reference, value in self.iter_reference_values(message):
-                if reference == expected_reference:
-                    if value == com_pdu_id_ref:
-                        return message
-
-    def iter_parameter_values(self, param_conf_container):
-        parameters = param_conf_container.find(PARAMETER_VALUES_XPATH,
-                                               NAMESPACES)
-
-        if parameters is None:
-            raise ValueError('PARAMETER-VALUES does not exist.')
-
-        for parameter in parameters:
-            definition_ref = parameter.find(DEFINITION_REF_XPATH,
-                                            NAMESPACES).text
-            value = parameter.find(VALUE_XPATH, NAMESPACES).text
-            name = definition_ref.split('/')[-1]
-
-            yield name, value
-
-    def iter_reference_values(self, param_conf_container):
-        references = param_conf_container.find(REFERENCE_VALUES_XPATH,
-                                               NAMESPACES)
-
-        if references is None:
-            raise ValueError('REFERENCE-VALUES does not exist.')
-
-        for reference in references:
-            definition_ref = reference.find(DEFINITION_REF_XPATH,
-                                            NAMESPACES).text
-            value = reference.find(VALUE_REF_XPATH, NAMESPACES).text
-            name = definition_ref.split('/')[-1]
-
-            yield name, value
-
-def is_ecu_extract(root):
-    ecuc_value_collection = root.find(ECUC_VALUE_COLLECTION_XPATH,
-                                      NAMESPACES)
-
-    return ecuc_value_collection is not None
-
-def load_string(string:str,
-                strict:bool=True,
-                sort_signals:type_sort_signals=sort_signals_by_start_bit) \
-            -> InternalDatabase:
-    """Parse given ARXML format string.
-
-    """
-
-    root = ElementTree.fromstring(string)
-
-    m = re.match(r'{(.*)}AUTOSAR', root.tag)
-    if not m:
-        raise ValueError(f"No XML namespace specified or illegal root tag name '{root.tag}'")
-    xml_namespace = m.group(1)
-
-    # Should be replaced with a validation using the XSD file.
-    recognized_namespace = False
-    if re.match(r'http://autosar.org/schema/r(4.*)', xml_namespace) \
-       or re.match(r'http://autosar.org/(3.*)', xml_namespace) \
-       or re.match(r'http://autosar.org/(.*)\.DAI\.[0-9]', xml_namespace):
-        recognized_namespace = True
-
-    if not recognized_namespace:
-        raise ValueError(f"Unrecognized XML namespace '{xml_namespace}'")
-
-    if is_ecu_extract(root):
-        if root.tag != ROOT_TAG:
-            raise ValueError(
-                'Expected root element tag {}, but got {}.'.format(
-                    ROOT_TAG,
-                    root.tag))
-
-        return EcuExtractLoader(root, strict, sort_signals).load()
-    else:
-        return SystemLoader(root, strict, sort_signals).load()

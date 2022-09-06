@@ -1,0 +1,86 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Actuator Driver Sensor
+
+
+BO_ 250 ControlCmd: 7 Driver
+ SG_ CRC8_CMD1 : 0|8@1+ (1,0) [0|255] "" Actuator
+ SG_ Counter_CMD1 : 48|4@1+ (1,0) [0|15] "" Actuator
+ SG_ TargetMotorID_CMD1 : 12|2@1+ (1,0) [0|3] "" Actuator
+ SG_ TargetMode : 8|3@1+ (1,0) [0|3] "" Actuator
+ SG_ PositionCmd_64 : 16|16@1- (0.0154286,0) [-450|450] "deg" Actuator
+ SG_ TorqueCommand_8 : 32|10@1- (0.0166667,0) [-8|8] "N*m" Actuator
+ SG_ TorqueCloseLoopMax_32 : 42|6@1+ (0.186666,0) [0|8] "N*m" Actuator
+
+BO_ 251 LimitsCmd: 6 Driver
+ SG_ CRC8_CMD2 : 0|8@1+ (1,0) [0|255] "" Actuator
+ SG_ Counter_CMD2 : 12|4@1+ (1,0) [0|15] "" Actuator
+ SG_ VelocityLimit : 16|16@1+ (1,0) [0|0] "" Actuator
+ SG_ AccelLimit : 32|16@1+ (1,0) [0|0] "" Actuator
+
+BO_ 252 ControlStatus: 4 Actuator
+ SG_ CRC8_STAT1 : 0|8@1+ (1,0) [0|255] "" Driver, Actuator
+ SG_ Counter_STAT1 : 12|4@1+ (1,0) [0|15] "" Driver
+ SG_ TorqueActual : 16|10@1- (0.015625,0) [-8|8] "N*m" Driver
+ SG_ TorqueCloseLoopActual : 26|6@1+ (0.125,0) [0|8] "N*m" Driver
+
+BO_ 253 SystemStatus: 3 Actuator
+ SG_ CRC8_STAT2 : 0|8@1+ (1,0) [0|255] "" Driver
+ SG_ Counter_STAT2 : 12|4@1+ (1,0) [0|15] "" Driver
+ SG_ ChipTemp : 16|8@1+ (1,-60) [-60|195] "C" Driver
+
+BO_ 113 TorqueSensorData: 3 Sensor
+ SG_ CRC8_DATA1 : 0|8@1+ (1,0) [0|255] ""  Driver
+ SG_ Counter_DATA1 : 8|4@1+ (1,0) [0|15] ""  Driver
+ SG_ TorqueSense : 12|12@1- (0.01,0) [-20|20] "N*m"  Driver
+
+
+CM_ SG_ 250 PositionCmd_64 "Output relative position.
+Alternative usage - absolute output position
+Factor = 64_const / 200steps / 256microsteps *360deg / FinalGearRatio / GearboxRatio";
+CM_ SG_ 250 TorqueCommand_8 "Factor: 
+8_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio";
+CM_ SG_ 250 TorqueCloseLoopMax_32 "For TorqueCmd > 0 
+Max positive close loop torque on top of TorqueCmd (outward torque) and below 0 (centering torque). 
+For TorqueCmd < 0;
+Max negative close loop torque on top of TorqueCmd (outward torque) and above 0 (centering torque).
+Factor: 
+32_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio";
+CM_ SG_ 113 TorqueSense "Strain gauge torque measured";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+VAL_ 250 TargetMode 0 "Off" 1 "Assist" 2 "PositionRelative" 3 "Torque" 4 "PositionAbsolute" ;
+

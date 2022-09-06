@@ -33,7 +33,8 @@ def _do_generate_c_source(args):
         fuzzer_filename_c,
         not args.no_floating_point_numbers,
         args.bit_fields,
-        args.use_float)
+        args.use_float,
+        args.node)
 
     os.makedirs(args.output_directory, exist_ok=True)
     
@@ -81,6 +82,7 @@ def add_subparser(subparsers):
     generate_c_source_parser.add_argument(
         '--no-floating-point-numbers',
         action='store_true',
+        default=False,
         help='No floating point numbers in the generated code.')
     generate_c_source_parser.add_argument(
         '--bit-fields',
@@ -108,8 +110,12 @@ def add_subparser(subparsers):
     generate_c_source_parser.add_argument(
         '--use-float',
         action='store_true',
+        default=False,
         help='Use float instead of double for floating point generation.')
     generate_c_source_parser.add_argument(
         'infile',
         help='Input database file.')
+    generate_c_source_parser.add_argument(
+        '--node',
+        help='Generate pack/unpack functions only for messages sent/received by the node.')
     generate_c_source_parser.set_defaults(func=_do_generate_c_source)

@@ -37,6 +37,13 @@ MinInterval=10
 Sig=Signal2 32
 Sig=Signal1 0
 
+{SENDRECEIVE}
+
+[Message3]
+ID=00Ah
+Len=8
+Sig=Signal3 0
+
 [Symbol2]
 ID=099h
 Len=8

@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<AUTOSAR xsi:schemaLocation="http://autosar.org/schema/r4.0 AUTOSAR_00046.xsd" xmlns="http://autosar.org/schema/r4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<AUTOSAR xmlns="http://autosar.org/schema/r4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://autosar.org/schema/r4.0 AUTOSAR_00046.xsd">
   <AR-PACKAGES>
     <!-- /ECU -->
     <AR-PACKAGE UUID="b6ca6b6954244c4daac08a71f13b290f">
@@ -9,8 +9,8 @@
         <ECU-INSTANCE UUID="9a95054947d84c81b38a57300fd97b02">
           <SHORT-NAME>DJ</SHORT-NAME>
           <ASSOCIATED-COM-I-PDU-GROUP-REFS>
-            <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/RX/DJ</ASSOCIATED-COM-I-PDU-GROUP-REF>
-            <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/TX/DJ</ASSOCIATED-COM-I-PDU-GROUP-REF>
+            <ASSOCIATED-COM-I-PDU-GROUP-REF DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/RX/DJ</ASSOCIATED-COM-I-PDU-GROUP-REF>
+            <ASSOCIATED-COM-I-PDU-GROUP-REF DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/TX/DJ</ASSOCIATED-COM-I-PDU-GROUP-REF>
           </ASSOCIATED-COM-I-PDU-GROUP-REFS>
           <COMM-CONTROLLERS>
             <!-- /ECU/DJ/Observe -->
@@ -23,11 +23,11 @@
         <ECU-INSTANCE UUID="b22f03b772a649e9bac58cab613d49ab">
           <SHORT-NAME>Dancer</SHORT-NAME>
           <DESC>
-            <L-2 L="FOR-ALL">Rythm is a Dancer!</L-2>
+            <L-2 L="FOR-ALL">Rhythm is a Dancer!</L-2>
           </DESC>
           <ASSOCIATED-COM-I-PDU-GROUP-REFS>
-            <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/RX/Dancer</ASSOCIATED-COM-I-PDU-GROUP-REF>
-            <ASSOCIATED-COM-I-PDU-GROUP-REF  DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/TX/Dancer</ASSOCIATED-COM-I-PDU-GROUP-REF>
+            <ASSOCIATED-COM-I-PDU-GROUP-REF DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/RX/Dancer</ASSOCIATED-COM-I-PDU-GROUP-REF>
+            <ASSOCIATED-COM-I-PDU-GROUP-REF DEST="I-SIGNAL-I-PDU-GROUP">/PDU_GROUPS/TX/Dancer</ASSOCIATED-COM-I-PDU-GROUP-REF>
           </ASSOCIATED-COM-I-PDU-GROUP-REFS>
           <COMM-CONTROLLERS>
             <!-- /ECU/Dancer/Observe -->
@@ -305,7 +305,7 @@
         <!-- /CanFrame/Message3 -->
         <CAN-FRAME UUID="02f3b1a9e14f4f2167bde58cfcdc00a0">
           <SHORT-NAME>Message3</SHORT-NAME>
-          <FRAME-LENGTH>8</FRAME-LENGTH>
+          <FRAME-LENGTH>6</FRAME-LENGTH>
           <PDU-TO-FRAME-MAPPINGS>
             <!-- /CanFrame/Message3/message3 -->
             <PDU-TO-FRAME-MAPPING UUID="c2102052cd836391401149341e964b5f">
@@ -676,7 +676,7 @@
           <SHORT-NAME>Decepticons</SHORT-NAME>
           <TRANSFORMATION-TECHNOLOGYS>
             <!-- /Transformers/Decepticons/Starscream -->
-                <TRANSFORMATION-TECHNOLOGY UUID="d53f0988652c4f49b57cf84d1299da9d">
+            <TRANSFORMATION-TECHNOLOGY UUID="d53f0988652c4f49b57cf84d1299da9d">
               <SHORT-NAME>Starscream</SHORT-NAME>
               <PROTOCOL>E2E</PROTOCOL>
               <TRANSFORMATION-DESCRIPTIONS>
@@ -686,7 +686,7 @@
               </TRANSFORMATION-DESCRIPTIONS>
             </TRANSFORMATION-TECHNOLOGY>
             <!-- /Transformers/Decepticons/Galvatron -->
-                <TRANSFORMATION-TECHNOLOGY UUID="daf1a29f227943e2bf733d6eabff5da6">
+            <TRANSFORMATION-TECHNOLOGY UUID="daf1a29f227943e2bf733d6eabff5da6">
               <SHORT-NAME>Galvatron</SHORT-NAME>
               <PROTOCOL>E2E</PROTOCOL>
               <TRANSFORMATION-DESCRIPTIONS>
@@ -704,7 +704,7 @@
       <SHORT-NAME>Constants</SHORT-NAME>
       <ELEMENTS>
         <!-- /Constants/BooleanTrue -->
-        <CONSTANT-SPECIFICATION UUID="ab3a0e5a7d164890a723161c3d1c3c4d">
+        <CONSTANT-SPECIFICATION UUID="0c9ee109a5e247a9a21ff483b4626a9f">
           <SHORT-NAME>BooleanTrue</SHORT-NAME>
           <VALUE-SPEC>
             <!-- /Constants/BooleanTrue/literal -->
@@ -920,14 +920,22 @@
               <TRANSMISSION-MODE-DECLARATION>
                 <TRANSMISSION-MODE-FALSE-TIMING>
                   <CYCLIC-TIMING>
-                    <TIME-OFFSET><VALUE>0</VALUE></TIME-OFFSET>
-                    <TIME-PERIOD><VALUE>0.1</VALUE></TIME-PERIOD>
+                    <TIME-OFFSET>
+                      <VALUE>0</VALUE>
+                    </TIME-OFFSET>
+                    <TIME-PERIOD>
+                      <VALUE>0.1</VALUE>
+                    </TIME-PERIOD>
                   </CYCLIC-TIMING>
                 </TRANSMISSION-MODE-FALSE-TIMING>
                 <TRANSMISSION-MODE-TRUE-TIMING>
                   <CYCLIC-TIMING>
-                    <TIME-OFFSET><VALUE>0</VALUE></TIME-OFFSET>
-                    <TIME-PERIOD><VALUE>0.2</VALUE></TIME-PERIOD>
+                    <TIME-OFFSET>
+                      <VALUE>0</VALUE>
+                    </TIME-OFFSET>
+                    <TIME-PERIOD>
+                      <VALUE>0.2</VALUE>
+                    </TIME-PERIOD>
                   </CYCLIC-TIMING>
                 </TRANSMISSION-MODE-TRUE-TIMING>
               </TRANSMISSION-MODE-DECLARATION>
@@ -1043,13 +1051,42 @@
         <!-- /SecuredIPdu/message3_secured -->
         <SECURED-I-PDU UUID="9fb09bd0b1f84e86a0c62a2de73be796">
           <SHORT-NAME>message3_secured</SHORT-NAME>
-          <LENGTH>8</LENGTH>
+          <LENGTH>6</LENGTH>
           <CONTAINED-I-PDU-PROPS>
             <HEADER-ID-SHORT-HEADER>0x040506</HEADER-ID-SHORT-HEADER>
           </CONTAINED-I-PDU-PROPS>
-          <!-- we currently do not specify AUTHENTICATION_PROPS, FRESHNESS_PROPS, and SECURE-COMMUNICATION-PROPS. While this is technically allowed, it does not make much sense in the context of a secured I-PDU... -->
+          <AUTHENTICATION-PROPS-REF DEST="SECURE-COMMUNICATION-AUTHENTICATION-PROPS">/SecOCProps/S/KnockKnock</AUTHENTICATION-PROPS-REF>
+          <FRESHNESS-PROPS-REF DEST="SECURE-COMMUNICATION-FRESHNESS-PROPS">/SecOCProps/S/SmellyCheese</FRESHNESS-PROPS-REF>
           <PAYLOAD-REF DEST="PDU-TRIGGERING">/Cluster/Cluster0/Pch0/message3_triggering</PAYLOAD-REF>
+          <SECURE-COMMUNICATION-PROPS>
+            <DATA-ID>1337</DATA-ID>
+          </SECURE-COMMUNICATION-PROPS>
         </SECURED-I-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
+    <!-- /SecOCProps -->
+    <AR-PACKAGE UUID="7449c6261f6b409d90dea14df10e1482">
+      <SHORT-NAME>SecOCProps</SHORT-NAME>
+      <ELEMENTS>
+        <!-- /SecOCProps/S -->
+        <SECURE-COMMUNICATION-PROPS-SET UUID="5d34ccae5222458787330a7d4f0a29be">
+          <SHORT-NAME>S</SHORT-NAME>
+          <AUTHENTICATION-PROPSS>
+            <!-- /SecOCProps/S/KnockKnock -->
+            <SECURE-COMMUNICATION-AUTHENTICATION-PROPS UUID="b3cdd53432914128a81d59fee81bee9b">
+              <SHORT-NAME>KnockKnock</SHORT-NAME>
+              <AUTH-INFO-TX-LENGTH>10</AUTH-INFO-TX-LENGTH>
+            </SECURE-COMMUNICATION-AUTHENTICATION-PROPS>
+          </AUTHENTICATION-PROPSS>
+          <FRESHNESS-PROPSS>
+            <!-- /SecOCProps/S/SmellyCheese -->
+            <SECURE-COMMUNICATION-FRESHNESS-PROPS UUID="f964643f4aad43e6aa8a420afd6835ac">
+              <SHORT-NAME>SmellyCheese</SHORT-NAME>
+              <FRESHNESS-VALUE-LENGTH>32</FRESHNESS-VALUE-LENGTH>
+              <FRESHNESS-VALUE-TX-LENGTH>6</FRESHNESS-VALUE-TX-LENGTH>
+            </SECURE-COMMUNICATION-FRESHNESS-PROPS>
+          </FRESHNESS-PROPSS>
+        </SECURE-COMMUNICATION-PROPS-SET>
       </ELEMENTS>
     </AR-PACKAGE>
     <!-- /Unit -->
@@ -1091,17 +1128,23 @@
               <COMPU-SCALE>
                 <LOWER-LIMIT>0</LOWER-LIMIT>
                 <UPPER-LIMIT>0</UPPER-LIMIT>
-                <COMPU-CONST><VT>SELECT_HELLO</VT></COMPU-CONST>
+                <COMPU-CONST>
+                  <VT>SELECT_HELLO</VT>
+                </COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>
                 <LOWER-LIMIT>1</LOWER-LIMIT>
                 <UPPER-LIMIT>1</UPPER-LIMIT>
-                <COMPU-CONST><VT>SELECT_WORLD</VT></COMPU-CONST>
+                <COMPU-CONST>
+                  <VT>SELECT_WORLD</VT>
+                </COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>
-                <LOWER-LIMIT>7</LOWER-LIMIT>
-                <UPPER-LIMIT>7</UPPER-LIMIT>
-                <COMPU-CONST><VT>INVALID_SELECTION</VT></COMPU-CONST>
+                <LOWER-LIMIT>3</LOWER-LIMIT>
+                <UPPER-LIMIT>3</UPPER-LIMIT>
+                <COMPU-CONST>
+                  <VT>INVALID_SELECTION</VT>
+                </COMPU-CONST>
               </COMPU-SCALE>
             </COMPU-SCALES>
           </COMPU-INTERNAL-TO-PHYS>
@@ -1116,8 +1159,13 @@
                 <LOWER-LIMIT>0</LOWER-LIMIT>
                 <UPPER-LIMIT>4</UPPER-LIMIT>
                 <COMPU-RATIONAL-COEFFS>
-                  <COMPU-NUMERATOR><V>0</V><V>10</V></COMPU-NUMERATOR>
-                  <COMPU-DENOMINATOR><V>2</V></COMPU-DENOMINATOR>
+                  <COMPU-NUMERATOR>
+                    <V>0</V>
+                    <V>10</V>
+                  </COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR>
+                    <V>2</V>
+                  </COMPU-DENOMINATOR>
                 </COMPU-RATIONAL-COEFFS>
               </COMPU-SCALE>
             </COMPU-SCALES>
@@ -1131,22 +1179,22 @@
           <COMPU-INTERNAL-TO-PHYS>
             <COMPU-SCALES>
               <COMPU-SCALE>
-                <LOWER-LIMIT>0</LOWER-LIMIT>
-                <UPPER-LIMIT>3</UPPER-LIMIT>
-              </COMPU-SCALE>
-              <COMPU-SCALE>
                 <DESC>
                   <L-2 L="EN">One Comment</L-2>
                   <L-2 L="DE">Ein Kommentar</L-2>
                 </DESC>
                 <LOWER-LIMIT>1</LOWER-LIMIT>
                 <UPPER-LIMIT>1</UPPER-LIMIT>
-                <COMPU-CONST><VT>one</VT></COMPU-CONST>
+                <COMPU-CONST>
+                  <VT>one</VT>
+                </COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>
                 <LOWER-LIMIT>2</LOWER-LIMIT>
                 <UPPER-LIMIT>2</UPPER-LIMIT>
-                <COMPU-CONST><VT>two</VT></COMPU-CONST>
+                <COMPU-CONST>
+                  <VT>two</VT>
+                </COMPU-CONST>
               </COMPU-SCALE>
             </COMPU-SCALES>
           </COMPU-INTERNAL-TO-PHYS>
@@ -1165,14 +1213,21 @@
                 </DESC>
                 <LOWER-LIMIT>0</LOWER-LIMIT>
                 <UPPER-LIMIT>0</UPPER-LIMIT>
-                <COMPU-CONST><VT>zero</VT></COMPU-CONST>
+                <COMPU-CONST>
+                  <VT>zero</VT>
+                </COMPU-CONST>
               </COMPU-SCALE>
               <COMPU-SCALE>
                 <LOWER-LIMIT>0</LOWER-LIMIT>
                 <UPPER-LIMIT>1</UPPER-LIMIT>
                 <COMPU-RATIONAL-COEFFS>
-                  <COMPU-NUMERATOR><V>0</V><V>0.1</V></COMPU-NUMERATOR>
-                  <COMPU-DENOMINATOR><V>1</V></COMPU-DENOMINATOR>
+                  <COMPU-NUMERATOR>
+                    <V>0</V>
+                    <V>0.1</V>
+                  </COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR>
+                    <V>1</V>
+                  </COMPU-DENOMINATOR>
                 </COMPU-RATIONAL-COEFFS>
               </COMPU-SCALE>
             </COMPU-SCALES>
@@ -1308,17 +1363,23 @@
             <!-- /SystemSignal/SystemSignalInner/Signal2 -->
             <SYSTEM-SIGNAL UUID="090ec74285ec66986afd658e7735d84a">
               <SHORT-NAME>Signal2</SHORT-NAME>
-              <DESC><L-2 L="FOR-ALL">Signal comment!</L-2></DESC>
+              <DESC>
+                <L-2 L="FOR-ALL">Signal comment!</L-2>
+              </DESC>
             </SYSTEM-SIGNAL>
             <!-- /SystemSignal/SystemSignalInner/Signal2_1C -->
             <SYSTEM-SIGNAL UUID="16625563aabba9041984761308071610">
               <SHORT-NAME>Signal2_1C</SHORT-NAME>
-              <DESC><L-2 L="FOR-ALL">Signal comment! (1-Complement)</L-2></DESC>
+              <DESC>
+                <L-2 L="FOR-ALL">Signal comment! (1-Complement)</L-2>
+              </DESC>
             </SYSTEM-SIGNAL>
             <!-- /SystemSignal/SystemSignalInner/Signal2_SM -->
             <SYSTEM-SIGNAL UUID="842b775bb4f05d19a94baa8cac26cf4e">
               <SHORT-NAME>Signal2_SM</SHORT-NAME>
-              <DESC><L-2 L="FOR-ALL">Signal comment! (Sign+Magnitude)</L-2></DESC>
+              <DESC>
+                <L-2 L="FOR-ALL">Signal comment! (Sign+Magnitude)</L-2>
+              </DESC>
             </SYSTEM-SIGNAL>
           </ELEMENTS>
         </AR-PACKAGE>

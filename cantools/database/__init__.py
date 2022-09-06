@@ -248,6 +248,8 @@ def dump_file(database,
         newline = ''
     elif database_format == 'kcd':
         output = database.as_kcd_string(sort_signals=sort_signals)
+    elif database_format == 'sym':
+        output = database.as_sym_string(sort_signals=sort_signals)
     else:
         raise Error(
             "Unsupported output database format '{}'.".format(database_format))
@@ -259,7 +261,7 @@ def dump_file(database,
 def load(fp: TextIO,
          database_format: Optional[str] = None,
          frame_id_mask: Optional[int] = None,
-         prune_choices: bool = True,
+         prune_choices: bool = False,
          strict: bool = True,
          sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
     """Read and parse given database file-like object and return a
@@ -293,7 +295,7 @@ def load(fp: TextIO,
 def load_string(string: str,
                 database_format: Optional[str] = None,
                 frame_id_mask: Optional[int] = None,
-                prune_choices: bool = True,
+                prune_choices: bool = False,
                 strict: bool = True,
                 sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
     """Parse given database string and return a

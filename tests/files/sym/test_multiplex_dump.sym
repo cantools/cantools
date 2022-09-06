@@ -1,0 +1,13 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{SIGNALS}
+Sig=MultiplexedSig unsigned 8 /max:1
+
+{SENDRECEIVE}
+
+[MuxedFrame]
+ID=100h
+Len=8
+Mux=MultiplexorSig 0,16 002Ah
+Sig=MultiplexedSig 16

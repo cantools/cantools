@@ -2,10 +2,9 @@
 import decimal
 from typing import Optional, Dict, TYPE_CHECKING, List, Any, Union
 
-from cantools.typechecking import Comments
+from cantools.typechecking import Comments, ByteOrder, Choices
 
 if TYPE_CHECKING:
-    from collections import OrderedDict
     from cantools.database.can.formats.dbc import DbcSpecifics
 
 
@@ -190,7 +189,7 @@ class Signal(object):
                  name: str,
                  start: int,
                  length: int,
-                 byte_order: str = 'little_endian',
+                 byte_order: ByteOrder = 'little_endian',
                  is_signed: bool = False,
                  initial: Optional[int] = None,
                  invalid: Optional[int] = None,
@@ -199,7 +198,7 @@ class Signal(object):
                  minimum: Optional[float] = None,
                  maximum: Optional[float] = None,
                  unit: Optional[str] = None,
-                 choices: Optional["OrderedDict[int, str]"] = None,
+                 choices: Optional[Choices] = None,
                  dbc_specifics: Optional["DbcSpecifics"] = None,
                  comment: Optional[Union[str, Comments]] = None,
                  receivers: Optional[List[str]] = None,
@@ -210,235 +209,101 @@ class Signal(object):
                  decimal: Optional[Decimal] = None,
                  spn: Optional[int] = None
                  ) -> None:
-        self._name = name
-        self._start = start
-        self._length = length
-        self._byte_order = byte_order
-        self._is_signed = is_signed
-        self._initial = initial
-        self._invalid = invalid
-        self._scale = scale
-        self._offset = offset
-        self._minimum = minimum
-        self._maximum = maximum
-        self._decimal = Decimal() if decimal is None else decimal
-        self._unit = unit
-        self._choices = choices
-        self._dbc = dbc_specifics
+        # avoid using properties to improve encoding/decoding performance
+
+        #: The signal name as a string.
+        self.name: str = name
+
+        #: The scale factor of the signal value.
+        self.scale: float = scale
+
+        #: The offset of the signal value.
+        self.offset: float = offset
+
+        #: ``True`` if the signal is a float, ``False`` otherwise.
+        self.is_float: bool = is_float
+
+        #: The minimum value of the signal, or ``None`` if unavailable.
+        self.minimum: Optional[float] = minimum
+
+        #: The maximum value of the signal, or ``None`` if unavailable.
+        self.maximum: Optional[float] = maximum
+
+        #: "A dictionary mapping signal values to enumerated choices, or
+        #: ``None`` if unavailable.
+        self.choices: Optional[Choices] = choices
+
+        #: The start bit position of the signal within its message.
+        self.start: int = start
+
+        #: The length of the signal in bits.
+        self.length: int = length
+
+        #: Signal byte order as ``'little_endian'`` or ``'big_endian'``.
+        self.byte_order: ByteOrder = byte_order
+
+        #: ``True`` if the signal is signed, ``False`` otherwise. Ignore this
+        #: attribute if :data:`~cantools.db.Signal.is_float` is
+        #: ``True``.
+        self.is_signed: bool = is_signed
+
+        #: The initial value of the signal, or ``None`` if unavailable.
+        self.initial: Optional[int] = initial
+
+        #: The value representing that the signal is invalid,
+        #: or ``None`` if unavailable.
+        self.invalid: Optional[int] = invalid
+
+        #: The high precision values of
+        #: :attr:`~cantools.database.can.Signal.scale`,
+        #: :attr:`~cantools.database.can.Signal.offset`,
+        #: :attr:`~cantools.database.can.Signal.minimum` and
+        #: :attr:`~cantools.database.can.Signal.maximum`.
+        #:
+        #: See :class:`~cantools.database.can.signal.Decimal` for more
+        #: details.
+        self.decimal: Decimal = Decimal() if decimal is None else decimal
+
+        #: The unit of the signal as a string, or ``None`` if unavailable.
+        self.unit: Optional[str] = unit
+
+        #: An object containing dbc specific properties like e.g. attributes.
+        self.dbc: Optional["DbcSpecifics"] = dbc_specifics
+
+        #: A list of all receiver nodes of this signal.
+        self.receivers: List[str] = receivers or []
+
+        #: ``True`` if this is the multiplexer signal in a message, ``False``
+        #: otherwise.
+        self.is_multiplexer: bool = is_multiplexer
+
+        #: The multiplexer ids list if the signal is part of a multiplexed
+        #: message, ``None`` otherwise.
+        self.multiplexer_ids: Optional[List[int]] = multiplexer_ids
+
+        #: The multiplexer signal if the signal is part of a multiplexed
+        #: message, ``None`` otherwise.
+        self.multiplexer_signal: Optional[str] = multiplexer_signal
+
+        #: The J1939 Suspect Parameter Number (SPN) value if the signal
+        #: has this attribute, ``None`` otherwise.
+        self.spn: Optional[int] = spn
+
+        #: The dictionary with the descriptions of the signal in multiple
+        #: languages. ``None`` if unavailable.
+        self.comments: Optional[Comments]
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the
         # function's behavior depends on the type of the passed
         # argument, but it is quite convenient...
-        self._comments: Optional[Comments]
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = {None: comment}
+            self.comments = {None: comment}
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
-            self._comments = comment
-
-        self._receivers = receivers or []
-        self._is_multiplexer = is_multiplexer
-        self._multiplexer_ids = multiplexer_ids
-        self._multiplexer_signal = multiplexer_signal
-        self._is_float = is_float
-        self._spn = spn
-
-    @property
-    def name(self) -> str:
-        """The signal name as a string.
-
-        """
-
-        return self._name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
-
-    @property
-    def start(self) -> int:
-        """The start bit position of the signal within its message.
-
-        """
-
-        return self._start
-
-    @start.setter
-    def start(self, value: int) -> None:
-        self._start = value
-
-    @property
-    def length(self) -> int:
-        """The length of the signal in bits.
-
-        """
-
-        return self._length
-
-    @length.setter
-    def length(self, value: int) -> None:
-        self._length = value
-
-    @property
-    def byte_order(self) -> str:
-        """Signal byte order as ``'little_endian'`` or ``'big_endian'``.
-
-        """
-
-        return self._byte_order
-
-    @byte_order.setter
-    def byte_order(self, value: str) -> None:
-        self._byte_order = value
-
-    @property
-    def is_signed(self) -> bool:
-        """``True`` if the signal is signed, ``False`` otherwise. Ignore this
-           attribute if :data:`~cantools.db.Signal.is_float` is
-           ``True``.
-
-        """
-
-        return self._is_signed
-
-    @is_signed.setter
-    def is_signed(self, value: bool) -> None:
-        self._is_signed = value
-
-    @property
-    def is_float(self) -> bool:
-        """``True`` if the signal is a float, ``False`` otherwise.
-
-        """
-
-        return self._is_float
-
-    @is_float.setter
-    def is_float(self, value: bool) -> None:
-        self._is_float = value
-
-    @property
-    def initial(self) -> Optional[int]:
-        """The initial value of the signal, or ``None`` if unavailable.
-
-        """
-
-        return self._initial
-
-    @initial.setter
-    def initial(self, value: int) -> None:
-        self._initial = value
-
-    @property
-    def invalid(self) -> Optional[int]:
-        """The value representing that the signal is invalid, or ``None`` if unavailable.
-
-        """
-
-        return self._invalid
-
-    @invalid.setter
-    def invalid(self, value: int) -> None:
-        self._invalid = value
-
-    @property
-    def scale(self) -> float:
-        """The scale factor of the signal value.
-
-        """
-
-        return self._scale
-
-    @scale.setter
-    def scale(self, value: float) -> None:
-        self._scale = value
-
-    @property
-    def offset(self) -> float:
-        """The offset of the signal value.
-
-        """
-
-        return self._offset
-
-    @offset.setter
-    def offset(self, value: float) -> None:
-        self._offset = value
-
-    @property
-    def minimum(self) -> Optional[float]:
-        """The minimum value of the signal, or ``None`` if unavailable.
-
-        """
-
-        return self._minimum
-
-    @minimum.setter
-    def minimum(self, value: Optional[float]) -> None:
-        self._minimum = value
-
-    @property
-    def maximum(self) -> Optional[float]:
-        """The maximum value of the signal, or ``None`` if unavailable.
-
-        """
-
-        return self._maximum
-
-    @maximum.setter
-    def maximum(self, value: Optional[float]) -> None:
-        self._maximum = value
-
-    @property
-    def decimal(self) -> Decimal:
-        """The high precision values of
-        :attr:`~cantools.database.can.Signal.scale`,
-        :attr:`~cantools.database.can.Signal.offset`,
-        :attr:`~cantools.database.can.Signal.minimum` and
-        :attr:`~cantools.database.can.Signal.maximum`.
-
-        See :class:`~cantools.database.can.signal.Decimal` for more
-        details.
-
-        """
-
-        return self._decimal
-
-    @property
-    def unit(self) -> Optional[str]:
-        """The unit of the signal as a string, or ``None`` if unavailable.
-
-        """
-
-        return self._unit
-
-    @unit.setter
-    def unit(self, value: Optional[str]) -> None:
-        self._unit = value
-
-    @property
-    def choices(self) -> Optional["OrderedDict[int, str]"]:
-        """A dictionary mapping signal values to enumerated choices, or
-        ``None`` if unavailable.
-
-        """
-
-        return self._choices
-
-    @property
-    def dbc(self) -> Optional["DbcSpecifics"]:
-        """An object containing dbc specific properties like e.g. attributes.
-
-        """
-
-        return self._dbc
-
-    @dbc.setter
-    def dbc(self, value: Optional["DbcSpecifics"]) -> None:
-        self._dbc = value
+            self.comments = comment
 
     @property
     def comment(self) -> Optional[str]:
@@ -448,126 +313,55 @@ class Signal(object):
         multiple languages were specified.
 
         """
-        if self._comments is None:
+        if self.comments is None:
             return None
-        elif self._comments.get(None) is not None:
-            return self._comments.get(None)
-        elif self._comments.get("FOR-ALL") is not None:
-            return self._comments.get("FOR-ALL")
+        elif self.comments.get(None) is not None:
+            return self.comments.get(None)
+        elif self.comments.get("FOR-ALL") is not None:
+            return self.comments.get("FOR-ALL")
 
-        return self._comments.get('EN')
+        return self.comments.get('EN')
 
     @comment.setter
     def comment(self, value: Optional[str]) -> None:
         if value is None:
-            self._comments = None
+            self.comments = None
         else:
-            self._comments = {None: value}
+            self.comments = {None: value}
 
-    @property
-    def comments(self):
-        """The dictionary with the descriptions of the signal in multiple
-        languages. ``None`` if unavailable.
-
-        """
-        return self._comments
-
-    @comments.setter
-    def comments(self, value):
-        self._comments = value
-
-    @property
-    def receivers(self) -> List[str]:
-        """A list of all receiver nodes of this signal.
-
-        """
-
-        return self._receivers
-
-    @property
-    def is_multiplexer(self) -> bool:
-        """``True`` if this is the multiplexer signal in a message, ``False``
-        otherwise.
-
-        """
-
-        return self._is_multiplexer
-
-    @is_multiplexer.setter
-    def is_multiplexer(self, value: bool) -> None:
-        self._is_multiplexer = value
-
-    @property
-    def multiplexer_ids(self) -> Optional[List[int]]:
-        """The multiplexer ids list if the signal is part of a multiplexed
-        message, ``None`` otherwise.
-
-        """
-
-        return self._multiplexer_ids
-
-    @multiplexer_ids.setter
-    def multiplexer_ids(self, value: Optional[List[int]]) -> None:
-        self._multiplexer_ids = value
-
-    @property
-    def multiplexer_signal(self) -> Optional[str]:
-        """The multiplexer signal if the signal is part of a multiplexed
-        message, ``None`` otherwise.
-
-        """
-
-        return self._multiplexer_signal
-
-    @multiplexer_signal.setter
-    def multiplexer_signal(self, value: Optional[str]) -> None:
-        self._multiplexer_signal = value
-
-    @property
-    def spn(self) -> Optional[int]:
-        """The J1939 Suspect Parameter Number (SPN) value if the signal
-        has this attribute, ``None`` otherwise.
-        
-        """
-
-        return self._spn
-
-    @spn.setter
-    def spn(self, value: Optional[int]) -> None:
-        self._spn = value
-
-    def choice_string_to_number(self, string: str) -> Optional[int]:
+    def choice_string_to_number(self, string: str) -> int:
         if self.choices is None:
-            return None
+            raise ValueError(f"Signal {self.name} has no choices.")
 
         for choice_number, choice_value in self.choices.items():
             if str(choice_value) == str(string):
                 return choice_number
 
-        return None
+        raise KeyError(f"Choice {string} not found in Signal {self.name}.")
 
     def __repr__(self) -> str:
-        if self._choices is None:
+        if self.choices is None:
             choices = None
         else:
             choices = '{{{}}}'.format(', '.join(
                 ["{}: '{}'".format(value, text)
-                 for value, text in self._choices.items()]))
+                 for value, text in self.choices.items()]))
 
-        return "signal('{}', {}, {}, '{}', {}, {}, {}, {}, {}, {}, '{}', {}, {}, {}, {}, {})".format(
-            self._name,
-            self._start,
-            self._length,
-            self._byte_order,
-            self._is_signed,
-            self._initial,
-            self._scale,
-            self._offset,
-            self._minimum,
-            self._maximum,
-            self._unit,
-            self._is_multiplexer,
-            self._multiplexer_ids,
-            choices,
-            self._spn,
-            self._comments)
+        return \
+            f"signal(" \
+            f"'{self.name}', " \
+            f"{self.start}, " \
+            f"{self.length}, " \
+            f"'{self.byte_order}', " \
+            f"{self.is_signed}, " \
+            f"{self.initial}, " \
+            f"{self.scale}, " \
+            f"{self.offset}, " \
+            f"{self.minimum}, " \
+            f"{self.maximum}, " \
+            f"'{self.unit}', " \
+            f"{self.is_multiplexer}, " \
+            f"{self.multiplexer_ids}, " \
+            f"{choices}, " \
+            f"{self.spn}, " \
+            f"{self.comments})"

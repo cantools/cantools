@@ -332,7 +332,7 @@ file names are also changed by this option.
 See `my_database_name.h`_ and `my_database_name.c`_ for the contents
 of the generated files.
 
-In the last example we use ``--no-floating-point-numbers`` to generate
+In the next example we use ``--no-floating-point-numbers`` to generate
 code without floating point types, i.e. ``float`` and ``double``.
 
 .. code-block:: text
@@ -342,6 +342,19 @@ code without floating point types, i.e. ``float`` and ``double``.
 
 See `motohawk_no_floating_point_numbers.h`_ and
 `motohawk_no_floating_point_numbers.c`_ for the contents of the
+generated files.
+
+In the last example ``--node`` is used to generate
+message pack functions only for messages sent by the specified node and unpack
+functions only for messages with its signal receivers belonging to that node. 
+
+.. code-block:: text
+
+   $ cantools generate_c_source tests/files/dbc/motohawk.dbc --node PCM1
+   Successfully generated motohawk.h and motohawk.c.
+
+See `motohawk_sender_node.h`_ and
+`motohawk_sender_node.c`_ for the contents of the
 generated files.
 
 Other C code generators:
@@ -453,5 +466,9 @@ Contributing
 .. _motohawk_no_floating_point_numbers.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.h
 
 .. _motohawk_no_floating_point_numbers.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.c
+
+.. _motohawk_sender_node.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_sender_node.h
+
+.. _motohawk_sender_node.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_sender_node.c
 
 .. _matplotlib: https://matplotlib.org/

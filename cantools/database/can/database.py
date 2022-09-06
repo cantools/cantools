@@ -19,7 +19,13 @@ from .internal_database import InternalDatabase
 from .message import Message, EncodeInputType, DecodeResultType
 from .node import Node
 from ..errors import DecodeError
-from ..utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
+from ..utils import (
+    type_sort_signals,
+    type_sort_attributes,
+    type_sort_choices,
+    sort_signals_by_start_bit,
+    SORT_SIGNALS_DEFAULT
+)
 from ...compat import fopen
 from ...typechecking import StringPathLike
 
@@ -316,8 +322,16 @@ class Database(object):
         self._name_to_message[message.name] = message
         self._frame_id_to_message[masked_frame_id] = message
 
-    def as_dbc_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+    def as_dbc_string(self, *,
+                      sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                      sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                      sort_attributes:type_sort_attributes=None,
+                      sort_choices:type_sort_choices=None,
+                      shorten_long_names:bool=True) -> str:
         """Return the database as a string formatted as a DBC file.
+           sort_signals defines how to sort signals in message definitions
+           sort_attribute_signals defines how to sort signals in metadata -
+              comments, value table definitions and attributes
 
         """
         if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
@@ -328,7 +342,11 @@ class Database(object):
                                                 self._buses,
                                                 self._version,
                                                 self._dbc),
-                               sort_signals=sort_signals)
+                               sort_signals=sort_signals,
+                               sort_attribute_signals=sort_attribute_signals,
+                               sort_attributes=sort_attributes,
+                               sort_choices=sort_choices,
+                               shorten_long_names=shorten_long_names)
 
     def as_kcd_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
         """Return the database as a string formatted as a KCD file.
@@ -338,6 +356,20 @@ class Database(object):
             sort_signals = None
 
         return kcd.dump_string(InternalDatabase(self._messages,
+                                                self._nodes,
+                                                self._buses,
+                                                self._version,
+                                                self._dbc),
+                               sort_signals=sort_signals)
+
+    def as_sym_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+        """Return the database as a string formatted as a SYM file.
+
+        """
+        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
+            sort_signals = None
+
+        return sym.dump_string(InternalDatabase(self._messages,
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
@@ -421,7 +453,8 @@ class Database(object):
                        data: bytes,
                        decode_choices: bool = True,
                        scaling: bool = True,
-                       decode_containers: bool = False
+                       decode_containers: bool = False,
+                       allow_truncated:  bool = False
                        ) \
         -> DecodeResultType:
 
@@ -460,13 +493,17 @@ class Database(object):
                 return message.decode(data,
                                       decode_choices,
                                       scaling,
-                                      decode_containers=True)
+                                      decode_containers=True,
+                                      allow_truncated=allow_truncated)
             else:
                 raise DecodeError(f'Message "{message.name}" is a container '
                                   f'message, but decoding such messages has '
                                   f'not been enabled!')
 
-        return message.decode(data, decode_choices, scaling)
+        return message.decode(data,
+                              decode_choices,
+                              scaling,
+                              allow_truncated=allow_truncated)
 
     def refresh(self) -> None:
         """Refresh the internal database state.

@@ -1,0 +1,480 @@
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2018-2019 Erik Moqvist
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/**
+
+ */
+
+#ifndef OPEN_ACTUATOR_H
+#define OPEN_ACTUATOR_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#ifndef EINVAL
+#    define EINVAL 22
+#endif
+
+/* Frame ids. */
+#define OPEN_ACTUATOR_CONTROL_CMD_FRAME_ID (0xfau)
+#define OPEN_ACTUATOR_LIMITS_CMD_FRAME_ID (0xfbu)
+#define OPEN_ACTUATOR_CONTROL_STATUS_FRAME_ID (0xfcu)
+#define OPEN_ACTUATOR_SYSTEM_STATUS_FRAME_ID (0xfdu)
+
+/* Frame lengths in bytes. */
+#define OPEN_ACTUATOR_CONTROL_CMD_LENGTH (7u)
+#define OPEN_ACTUATOR_LIMITS_CMD_LENGTH (6u)
+#define OPEN_ACTUATOR_CONTROL_STATUS_LENGTH (4u)
+#define OPEN_ACTUATOR_SYSTEM_STATUS_LENGTH (3u)
+
+/* Extended or standard frame types. */
+#define OPEN_ACTUATOR_CONTROL_CMD_IS_EXTENDED (0)
+#define OPEN_ACTUATOR_LIMITS_CMD_IS_EXTENDED (0)
+#define OPEN_ACTUATOR_CONTROL_STATUS_IS_EXTENDED (0)
+#define OPEN_ACTUATOR_SYSTEM_STATUS_IS_EXTENDED (0)
+
+/* Frame cycle times in milliseconds. */
+
+
+/* Signal choices. */
+#define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_OFF_CHOICE (0u)
+#define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_ASSIST_CHOICE (1u)
+#define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_POSITION_RELATIVE_CHOICE (2u)
+#define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_TORQUE_CHOICE (3u)
+#define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_POSITION_ABSOLUTE_CHOICE (4u)
+
+/**
+ * Signals in message ControlCmd.
+ *
+ * All signal values are as on the CAN bus.
+ */
+struct open_actuator_control_cmd_t {
+    /**
+     * Range: 0..255 (0..255 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t crc8_cmd1;
+
+    /**
+     * Range: 0..3 (0..3 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t target_mode;
+
+    /**
+     * Range: 0..3 (0..3 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t target_motor_id_cmd1;
+
+    /**
+     * Output relative position.
+     * Alternative usage - absolute output position
+     * Factor = 64_const / 200steps / 256microsteps *360deg / FinalGearRatio / GearboxRatio
+     *
+     * Range: -29166.61265442101033146234914..29166.61265442101033146234914 (-450..450 deg)
+     * Scale: 0.0154286
+     * Offset: 0
+     */
+    int16_t position_cmd_64;
+
+    /**
+     * Factor:
+     * 8_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio
+     *
+     * Range: -479.9990400019199961600076800..479.9990400019199961600076800 (-8..8 N*m)
+     * Scale: 0.0166667
+     * Offset: 0
+     */
+    int16_t torque_command_8;
+
+    /**
+     * For TorqueCmd > 0
+     * Max positive close loop torque on top of TorqueCmd (outward torque) and below 0 (centering torque).
+     * For TorqueCmd < 0;
+     * Max negative close loop torque on top of TorqueCmd (outward torque) and above 0 (centering torque).
+     * Factor:
+     * 32_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio
+     *
+     * Range: 0..42.85729591891399612141471934 (0..8 N*m)
+     * Scale: 0.186666
+     * Offset: 0
+     */
+    uint8_t torque_close_loop_max_32;
+
+    /**
+     * Range: 0..15 (0..15 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t counter_cmd1;
+};
+
+/**
+ * Signals in message LimitsCmd.
+ *
+ * All signal values are as on the CAN bus.
+ */
+struct open_actuator_limits_cmd_t {
+    /**
+     * Range: 0..255 (0..255 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t crc8_cmd2;
+
+    /**
+     * Range: 0..15 (0..15 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t counter_cmd2;
+
+    /**
+     * Range: -
+     * Scale: 1
+     * Offset: 0
+     */
+    uint16_t velocity_limit;
+
+    /**
+     * Range: -
+     * Scale: 1
+     * Offset: 0
+     */
+    uint16_t accel_limit;
+};
+
+/**
+ * Signals in message ControlStatus.
+ *
+ * All signal values are as on the CAN bus.
+ */
+struct open_actuator_control_status_t {
+    /**
+     * Range: 0..255 (0..255 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t crc8_stat1;
+
+    /**
+     * Range: 0..15 (0..15 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t counter_stat1;
+
+    /**
+     * Range: -512..512 (-8..8 N*m)
+     * Scale: 0.015625
+     * Offset: 0
+     */
+    int16_t torque_actual;
+
+    /**
+     * Range: 0..64 (0..8 N*m)
+     * Scale: 0.125
+     * Offset: 0
+     */
+    uint8_t torque_close_loop_actual;
+};
+
+/**
+ * Signals in message SystemStatus.
+ *
+ * All signal values are as on the CAN bus.
+ */
+struct open_actuator_system_status_t {
+    /**
+     * Range: 0..255 (0..255 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t crc8_stat2;
+
+    /**
+     * Range: 0..15 (0..15 -)
+     * Scale: 1
+     * Offset: 0
+     */
+    uint8_t counter_stat2;
+
+    /**
+     * Range: 0..255 (-60..195 C)
+     * Scale: 1
+     * Offset: -60
+     */
+    uint8_t chip_temp;
+};
+
+/**
+ * Unpack message ControlCmd.
+ *
+ * @param[out] dst_p Object to unpack the message into.
+ * @param[in] src_p Message to unpack.
+ * @param[in] size Size of src_p.
+ *
+ * @return zero(0) or negative error code.
+ */
+int open_actuator_control_cmd_unpack(
+    struct open_actuator_control_cmd_t *dst_p,
+    const uint8_t *src_p,
+    size_t size);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_cmd_crc8_cmd1_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_cmd_target_mode_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_cmd_target_motor_id_cmd1_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_cmd_position_cmd_64_is_in_range(int16_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_cmd_torque_command_8_is_in_range(int16_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_cmd_counter_cmd1_is_in_range(uint8_t value);
+
+/**
+ * Unpack message LimitsCmd.
+ *
+ * @param[out] dst_p Object to unpack the message into.
+ * @param[in] src_p Message to unpack.
+ * @param[in] size Size of src_p.
+ *
+ * @return zero(0) or negative error code.
+ */
+int open_actuator_limits_cmd_unpack(
+    struct open_actuator_limits_cmd_t *dst_p,
+    const uint8_t *src_p,
+    size_t size);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_limits_cmd_crc8_cmd2_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_limits_cmd_counter_cmd2_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_limits_cmd_velocity_limit_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_limits_cmd_accel_limit_is_in_range(uint16_t value);
+
+/**
+ * Pack message ControlStatus.
+ *
+ * @param[out] dst_p Buffer to pack the message into.
+ * @param[in] src_p Data to pack.
+ * @param[in] size Size of dst_p.
+ *
+ * @return Size of packed data, or negative error code.
+ */
+int open_actuator_control_status_pack(
+    uint8_t *dst_p,
+    const struct open_actuator_control_status_t *src_p,
+    size_t size);
+
+/**
+ * Unpack message ControlStatus.
+ *
+ * @param[out] dst_p Object to unpack the message into.
+ * @param[in] src_p Message to unpack.
+ * @param[in] size Size of src_p.
+ *
+ * @return zero(0) or negative error code.
+ */
+int open_actuator_control_status_unpack(
+    struct open_actuator_control_status_t *dst_p,
+    const uint8_t *src_p,
+    size_t size);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_status_crc8_stat1_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_status_counter_stat1_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_status_torque_actual_is_in_range(int16_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_control_status_torque_close_loop_actual_is_in_range(uint8_t value);
+
+/**
+ * Pack message SystemStatus.
+ *
+ * @param[out] dst_p Buffer to pack the message into.
+ * @param[in] src_p Data to pack.
+ * @param[in] size Size of dst_p.
+ *
+ * @return Size of packed data, or negative error code.
+ */
+int open_actuator_system_status_pack(
+    uint8_t *dst_p,
+    const struct open_actuator_system_status_t *src_p,
+    size_t size);
+
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_system_status_crc8_stat2_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_system_status_counter_stat2_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool open_actuator_system_status_chip_temp_is_in_range(uint8_t value);
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

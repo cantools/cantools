@@ -43,7 +43,7 @@ def compute_profile2_crc(payload : Union[bytes, bytearray],
         protected_len = len(payload)
         data_id = msg_or_data_id
 
-    # create the data to be checksumed
+    # create the data to be checksummed
     crc_data = bytearray(payload[1:protected_len])
 
     # append data id

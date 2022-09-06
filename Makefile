@@ -6,6 +6,7 @@ C_SOURCES := \
 	tests/files/c_source/motohawk.c \
 	tests/files/c_source/padding_bit_order.c \
 	tests/files/c_source/vehicle.c \
+	tests/files/c_source/open_actuator.c \
 	tests/files/c_source/multiplex.c \
 	tests/files/c_source/multiplex_2.c \
 	tests/files/c_source/floating_point.c \

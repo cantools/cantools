@@ -79,6 +79,7 @@ ExampleMessage:
       Type: Integer
       Start bit: 7
       Length: 1 bits
+      Byte order: big_endian
       Unit: -
       Is signed: False
       Named values:
@@ -88,6 +89,7 @@ ExampleMessage:
       Type: Integer
       Start bit: 6
       Length: 6 bits
+      Byte order: big_endian
       Unit: m
       Is signed: False
       Minimum: 0
@@ -99,6 +101,7 @@ ExampleMessage:
       Type: Integer
       Start bit: 0
       Length: 12 bits
+      Byte order: big_endian
       Unit: degK
       Is signed: True
       Minimum: 229.52
@@ -163,7 +166,7 @@ Passenger:
             expected_output = """\
 DJ:
 Dancer:
-  Comment[FOR-ALL]: Rythm is a Dancer!
+  Comment[FOR-ALL]: Rhythm is a Dancer!
 Guard:
 """
 
@@ -204,6 +207,7 @@ Message2:
       Type: Integer
       Start bit: 6
       Length: 2 bits
+      Byte order: little_endian
       Is signed: False
     signal2:
       Comment[FOR-ALL]: Signal comment!
@@ -211,15 +215,15 @@ Message2:
       Type: Integer
       Start bit: 18
       Length: 11 bits
+      Byte order: little_endian
       Is signed: True
     signal4:
       Receiving ECUs: DJ
       Type: Integer
       Start bit: 30
       Length: 4 bits
+      Byte order: little_endian
       Is signed: False
-      Minimum: 0
-      Maximum: 3
       Named values:
         1: one
           Comment[EN]: One Comment
@@ -260,7 +264,8 @@ AlarmStatus:
       Type: Integer
       Start bit: 0
       Length: 1 bits
-      Initial value: False
+      Byte order: little_endian
+      Initial value: 0.0
       Is signed: False
 """
 
@@ -358,20 +363,23 @@ Message1:
       Type: Integer
       Start bit: 0
       Length: 16 bits
+      Byte order: little_endian
       Is signed: False
     message1_CRC:
       Receiving ECUs: Dancer
       Type: Integer
       Start bit: 16
       Length: 16 bits
+      Byte order: little_endian
       Is signed: False
     signal6:
       Receiving ECUs: Dancer
       Type: Integer
       Start bit: 32
       Length: 1 bits
+      Byte order: little_endian
       Unit: wp
-      Initial value: False
+      Initial value: zero
       Is signed: False
       Minimum: 0.0
       Maximum: 0.1
@@ -388,6 +396,7 @@ Message1:
       Type: Integer
       Start bit: 36
       Length: 3 bits
+      Byte order: big_endian
       Unit: m
       Initial value: 25.0 m
       Is signed: False
@@ -400,6 +409,77 @@ Message1:
       Type: Float
       Start bit: 40
       Length: 32 bits
+      Byte order: little_endian
+      Is signed: False
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
+        args = Args('tests/files/arxml/system-4.2.arxml')
+        args.items = [ "Message3" ]
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+Message3:
+  Bus: Cluster0
+  Frame ID: 0x64 (100)
+  Size: 6 bytes
+  Is extended frame: False
+  Is CAN-FD frame: False
+  Is network management frame: False
+  End-to-end properties:
+    Category: Profile5
+    Data IDs: [321]
+    Protected size: 4 bytes
+  Is secured: True
+  Security properties:
+    Authentication algorithm: KnockKnock
+    Freshness algorithm: SmellyCheese
+    Data ID: 1337
+    Authentication transmit bits: 10
+    Freshness counter size: 32 bits
+    Freshness counter transmit size: 6 bits
+    Secured size: 4 bytes
+  Signal tree:
+
+    -- {root}
+       +-- message3_CRC
+       +-- message3_SeqCounter
+       +-- Message3_Freshness
+       +-- Message3_Authenticator
+
+  Signal details:
+    message3_CRC:
+      Type: Integer
+      Start bit: 0
+      Length: 8 bits
+      Byte order: little_endian
+      Is signed: False
+    message3_SeqCounter:
+      Type: Integer
+      Start bit: 8
+      Length: 4 bits
+      Byte order: little_endian
+      Is signed: False
+    Message3_Freshness:
+      Comment[FOR-ALL]: Truncated freshness value for 'Message3'
+      Type: Integer
+      Start bit: 39
+      Length: 6 bits
+      Byte order: big_endian
+      Is signed: False
+    Message3_Authenticator:
+      Comment[FOR-ALL]: Truncated authenticator value for 'Message3'
+      Type: Integer
+      Start bit: 33
+      Length: 10 bits
+      Byte order: big_endian
       Is signed: False
 """
 
@@ -458,12 +538,14 @@ Message1:
       Type: Integer
       Start bit: 0
       Length: 1 bits
+      Byte order: little_endian
       Is signed: False
     Signal2:
       Receiving ECUs: Node2, Node3
       Type: Float
       Start bit: 8
       Length: 32 bits
+      Byte order: little_endian
       Is signed: False
       Named values:
         0: label1
@@ -499,6 +581,7 @@ Message2:
       Selector values: 0
       Start bit: 0
       Length: 8 bits
+      Byte order: little_endian
       Is signed: False
     Signal3:
       Type: Integer
@@ -506,6 +589,7 @@ Message2:
       Selector values: 1
       Start bit: 0
       Length: 8 bits
+      Byte order: little_endian
       Is signed: False
     Signal2:
       Type: Integer
@@ -513,6 +597,7 @@ Message2:
       Selector values: 0
       Start bit: 8
       Length: 8 bits
+      Byte order: little_endian
       Is signed: False
     Signal4:
       Type: Integer
@@ -520,16 +605,19 @@ Message2:
       Selector values: 1
       Start bit: 8
       Length: 8 bits
+      Byte order: little_endian
       Is signed: False
     Mux1:
       Type: Multiplex Selector
       Start bit: 16
       Length: 2 bits
+      Byte order: little_endian
       Is signed: False
     Mux2:
       Type: Multiplex Selector
       Start bit: 18
       Length: 1 bits
+      Byte order: little_endian
       Is signed: False
     Signal5:
       Type: Integer
@@ -537,6 +625,7 @@ Message2:
       Selector values: 0
       Start bit: 19
       Length: 1 bits
+      Byte order: little_endian
       Is signed: False
     Signal6:
       Comment[None]: Note signal 6.
@@ -544,6 +633,7 @@ Message2:
       Type: Integer
       Start bit: 20
       Length: 12 bits
+      Byte order: little_endian
       Unit: Cel
       Is signed: True
       Minimum: 0
@@ -569,11 +659,13 @@ Message4:
       Type: Integer
       Start bit: 7
       Length: 1 bits
+      Byte order: big_endian
       Is signed: False
     Signal2:
       Type: Integer
       Start bit: 8
       Length: 12 bits
+      Byte order: big_endian
       Is signed: False
 """
 
@@ -608,6 +700,7 @@ Message3:
       Type: Float
       Start bit: 0
       Length: 64 bits
+      Byte order: little_endian
       Is signed: False
 """
 

@@ -1,17 +1,16 @@
 # A CAN message.
 
-import binascii
 import logging
 from copy import deepcopy
 from typing import (
     List,
-    Sequence,
-    Tuple,
     Optional,
     Union,
     Dict,
     TYPE_CHECKING,
-    Set
+    Set,
+    Tuple,
+    cast
 )
 
 from .signal import NamedSignalValue, Signal
@@ -27,7 +26,19 @@ from ..utils import SORT_SIGNALS_DEFAULT
 from ..errors import Error
 from ..errors import EncodeError
 from ..errors import DecodeError
-from ...typechecking import Comments, Codec
+from ...typechecking import (
+    Comments,
+    Codec,
+    SignalDictType,
+    ContainerHeaderSpecType,
+    ContainerDecodeResultType,
+    ContainerDecodeResultListType,
+    ContainerEncodeInputType,
+    EncodeInputType,
+    ContainerUnpackResultType,
+    ContainerUnpackListType,
+    DecodeResultType,
+)
 
 if TYPE_CHECKING:
     from .formats.arxml import AutosarMessageSpecifics
@@ -35,23 +46,6 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-# Type aliases. Introduced to reduce type annotation complexity while
-# allowing for more complex encode/decode schemes like the one used
-# for AUTOSAR container messages.
-SignalDictType = Dict[str, Union[float, str]]
-ContainerHeaderSpecType = Union['Message', str, int]
-ContainerUnpackResultType = Sequence[Union[Tuple['Message', bytes],
-                                           Tuple[int, bytes]]]
-ContainerUnpackListType = List[Union[Tuple['Message', bytes],
-                                     Tuple[int, bytes]]]
-ContainerDecodeResultType = Sequence[Union[Tuple['Message', SignalDictType],
-                                           Tuple[int, bytes]]]
-ContainerDecodeResultListType = List[Union[Tuple['Message', SignalDictType],
-                                           Tuple[int, bytes]]]
-ContainerEncodeInputType = Sequence[Tuple[ContainerHeaderSpecType,
-                                          Union[bytes, SignalDictType]]]
-DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
-EncodeInputType = Union[SignalDictType, ContainerEncodeInputType]
 
 class Message(object):
     """A CAN message with frame id, comment, signals and other
@@ -114,12 +108,12 @@ class Message(object):
         self._unused_bit_pattern = unused_bit_pattern
         if sort_signals == SORT_SIGNALS_DEFAULT:
             self._signals = sort_signals_by_start_bit(signals)
-        elif sort_signals:
+        elif callable(sort_signals):
             self._signals = sort_signals(signals)
         else:
             self._signals = signals
+        self._signal_dict: Dict[str, Signal] = {}
         self._contained_messages = contained_messages
-
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the
@@ -142,7 +136,7 @@ class Message(object):
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs: Optional[Codec] = None
-        self._signal_tree = None
+        self._signal_tree: Optional[List[Union[str, List[str]]]] = None
         self._strict = strict
         self._protocol = protocol
         self.refresh()
@@ -295,7 +289,7 @@ class Message(object):
         self._is_fd = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The message name as a string.
 
         """
@@ -411,12 +405,35 @@ class Message(object):
         self._comments = value
 
     @property
-    def senders(self):
+    def senders(self) -> List[str]:
         """A list of all sender nodes of this message.
 
         """
 
         return self._senders
+
+    @property
+    def receivers(self) -> Set[str]:
+        """A set of all receiver nodes of this message.
+
+        This is equivalent to the set of nodes which receive at least
+        one of the signals contained in the message.
+
+        """
+        result = set()
+
+        for sig in self.signals:
+            if sig.receivers is not None:
+                result.update(sig.receivers)
+
+        if self.is_container:
+            assert self.contained_messages is not None
+            for cmsg in self.contained_messages:
+                for sig in cmsg.signals:
+                    if sig.receivers is not None:
+                        result.update(sig.receivers)
+
+        return result
 
     @property
     def send_type(self) -> Optional[str]:
@@ -534,7 +551,7 @@ class Message(object):
                 try:
                     expected_str = \
                         f'Expected one of {{' \
-                        f'{format_or(multiplexers[signal.name])}' \
+                        f'{format_or(list(multiplexers[mux_signal_name].keys()))}' \
                         f'}}, but '
                 except KeyError:
                     expected_str = ''
@@ -612,14 +629,13 @@ class Message(object):
         :param scaling: If ``False`` no scaling of signals is performed.
 
         :param assert_values_valid: If ``True``, the values of all
-        specified signals must be valid/encodable. If at least one is
-        not, an ``EncodeError`` exception is raised. (Note that the
-        values of multiplexer selector signals must always be valid!)
+            specified signals must be valid/encodable. If at least one is
+            not, an ``EncodeError`` exception is raised. (Note that the
+            values of multiplexer selector signals must always be valid!)
 
         :param assert_all_known: If ``True``, all specified signals must
-        be used by the encoding operation or an ``EncodeError``
-        exception is raised. This is useful to prevent typos.
-
+            be used by the encoding operation or an ``EncodeError``
+            exception is raised. This is useful to prevent typos.
         '''
 
         # this method only deals with ordinary messages
@@ -703,24 +719,23 @@ class Message(object):
                                                            assert_values_valid,
                                                            assert_all_known)
 
-    def _get_mux_number(self, decoded, signal_name):
+    def _get_mux_number(self, decoded: SignalDictType, signal_name: str) -> int:
         mux = decoded[signal_name]
 
         if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
             signal = self.get_signal_by_name(signal_name)
-            mux = signal.choice_string_to_number(mux)
-
-        return mux
+            try:
+                mux = signal.choice_string_to_number(str(mux))
+            except KeyError:
+                raise EncodeError() from None
+        return int(mux)
 
     def _assert_signal_values_valid(self,
-                                    data : SignalDictType,
-                                    scaling : bool) -> None:
+                                    data: SignalDictType,
+                                    scaling: bool) -> None:
 
         for signal_name, signal_value in data.items():
             signal = self.get_signal_by_name(signal_name)
-
-            if not signal:
-                continue
 
             if isinstance(signal_value, (str, NamedSignalValue)):
                 # Check choices
@@ -760,7 +775,7 @@ class Message(object):
                         f'equal to {max_effective} in message "{self.name}", '
                         f'but got {signal_value}.')
 
-    def _encode(self, node, data, scaling):
+    def _encode(self, node: Codec, data: SignalDictType, scaling: bool) -> Tuple[int, int, List[Signal]]:
         encoded = encode_data(data,
                               node['signals'],
                               node['formats'],
@@ -776,8 +791,8 @@ class Message(object):
                 node = multiplexers[signal][mux]
             except KeyError:
                 raise EncodeError(f'Expected multiplexer id \in '
-                                  f'{{{format_or(multiplexers[signal])}}}, '
-                                  f'for multiplexer "{signal.name}" '
+                                  f'{{{format_or(list(multiplexers[signal].keys()))}}}, '
+                                  f'for multiplexer "{signal}" '
                                   f'but got {mux}')
 
             mux_encoded, mux_padding_mask, mux_signals = \
@@ -797,7 +812,6 @@ class Message(object):
         result = bytes()
 
         for header, value in data:
-            contained_message = None
             if isinstance(header, str):
                 contained_message = \
                     self.get_contained_message_by_name(header)
@@ -908,7 +922,7 @@ class Message(object):
 
                 self.assert_container_encodable(data, scaling=scaling)
 
-            return self._encode_container(data, # type: ignore
+            return self._encode_container(cast(ContainerEncodeInputType, data),
                                           scaling,
                                           padding)
 
@@ -922,57 +936,60 @@ class Message(object):
                                   f'signal value dictionary')
             self.assert_signals_encodable(data, scaling=scaling)
 
-        encoded, padding_mask, all_signals = \
-            self._encode(self._codecs, data, scaling)
+        if self._codecs is None:
+            raise ValueError('Codec is not initialized.')
+
+        encoded, padding_mask, all_signals = self._encode(self._codecs,
+                                                          cast(SignalDictType, data),
+                                                          scaling)
 
         if padding:
-            # there is probably a cleaner and more performant way to
-            # do this...
-            padding_pattern = 0
-            for i in range(0, self.length):
-                padding_pattern |= self.unused_bit_pattern << (8*i)
+            padding_pattern = int.from_bytes([self._unused_bit_pattern] * self._length, "big")
+            encoded |= (padding_mask & padding_pattern)
 
-            encoded &= ~padding_mask
-            encoded |= padding_mask & padding_pattern
-
-        encoded |= (0x80 << (8 * self._length))
-        encoded = hex(encoded)[4:].rstrip('L')
-
-        return binascii.unhexlify(encoded)[:self._length]
+        return encoded.to_bytes(self._length, "big")
 
     def _decode(self,
                 node: Codec,
                 data: bytes,
                 decode_choices: bool,
-                scaling: bool) -> SignalDictType:
+                scaling: bool,
+                allow_truncated: bool) -> SignalDictType:
         decoded = decode_data(data,
+                              self.length,
                               node['signals'],
                               node['formats'],
                               decode_choices,
-                              scaling)
+                              scaling,
+                              allow_truncated)
 
         multiplexers = node['multiplexers']
 
         for signal in multiplexers:
+            if allow_truncated and signal not in decoded:
+                continue
+
             mux = self._get_mux_number(decoded, signal)
 
             try:
                 node = multiplexers[signal][mux]
             except KeyError:
                 raise DecodeError('expected multiplexer id {}, but got {}'.format(
-                    format_or(multiplexers[signal]),
+                    format_or(list(multiplexers[signal].keys())),
                     mux))
 
             decoded.update(self._decode(node,
                                         data,
                                         decode_choices,
-                                        scaling))
+                                        scaling,
+                                        allow_truncated))
 
         return decoded
 
     def unpack_container(self,
-                          data: bytes) \
-                          -> ContainerUnpackResultType:
+                         data: bytes,
+                         allow_truncated: bool = False) \
+                         -> ContainerUnpackResultType:
         """Unwrap the contents of a container message.
 
         This returns a list of ``(contained_message, contained_data)``
@@ -1010,11 +1027,14 @@ class Message(object):
             contained_id = int.from_bytes(data[pos:pos+3], 'big')
             contained_len = data[pos+3]
 
-            if pos + contained_len > len(data):
-                raise DecodeError(f'Malformed container message '
-                                  f'"{self.name}": Contained message #'
-                                  f'{len(result)+1} would exceed total message '
-                                  f'size.')
+            if pos + 4 + contained_len > len(data):
+                if not allow_truncated:
+                    raise DecodeError(f'Malformed container message '
+                                      f'"{self.name}": Contained message '
+                                      f'{len(result)+1} would exceed total '
+                                      f'message size.')
+                else:
+                    contained_len = len(data) - pos - 4
 
 
             contained_data = data[pos+4:pos+4+contained_len]
@@ -1029,33 +1049,12 @@ class Message(object):
 
         return result
 
-    def _decode_contained(self,
-                          data: bytes,
-                          decode_choices: bool,
-                          scaling: bool) \
-                          -> ContainerDecodeResultType:
-
-        unpacked = self.unpack_container(data)
-
-        result: ContainerDecodeResultListType = []
-
-        for contained_message, contained_data in unpacked:
-            if not isinstance(contained_message, Message):
-                result.append((contained_message, contained_data))
-                continue
-
-            decoded = contained_message.decode(contained_data,
-                                               decode_choices,
-                                               scaling)
-            result.append((contained_message, decoded)) # type: ignore
-
-        return result
-
     def decode(self,
                data: bytes,
                decode_choices: bool = True,
                scaling: bool = True,
-               decode_containers: bool = False
+               decode_containers: bool = False,
+               allow_truncated: bool = False
                ) \
                -> DecodeResultType:
         """Decode given data as a message of this type.
@@ -1077,25 +1076,86 @@ class Message(object):
         that does not expect this to misbehave. Trying to decode a
         container message with `decode_containers` set to ``False``
         will raise a `DecodeError`.
+
+        If `allow_truncated` is ``True``, incomplete messages (i.e.,
+        ones where the received data is shorter than specified) will
+        be partially decoded, i.e., all signals which are fully
+        present in the received data will be decoded, and the
+        remaining ones will be omitted. If 'allow_truncated` is set to
+        ``False``, `DecodeError` will be raised when trying to decode
+        incomplete messages.
+
+        """
+
+        if decode_containers and self.is_container:
+            return self.decode_container(data,
+                                         decode_choices,
+                                         scaling,
+                                         allow_truncated)
+
+        return self.decode_simple(data,
+                                  decode_choices,
+                                  scaling,
+                                  allow_truncated)
+
+    def decode_simple(self,
+                      data: bytes,
+                      decode_choices: bool = True,
+                      scaling: bool = True,
+                      allow_truncated: bool = False) \
+                      -> SignalDictType:
+        """Decode given data as a container message.
+
+        This method is identical to ``decode()`` except that the
+        message **must not** be a container. If the message is a
+        container, an exception is raised.
         """
 
         if self.is_container:
-            if decode_containers:
-                return self._decode_contained(data,
-                                              decode_choices,
-                                              scaling)
-            else:
-                raise DecodeError(f'Message "{self.name}" is a container '
-                                  f'message, but decoding such messages has '
-                                  f'not been enabled by setting the '
-                                  f'decode_containers parameter to True')
-
-        if self._codecs is None:
+            raise DecodeError(f'Message "{self.name}" is a container')
+        elif self._codecs is None:
             raise ValueError('Codec is not initialized.')
 
         data = data[:self._length]
 
-        return self._decode(self._codecs, data, decode_choices, scaling)
+        return self._decode(self._codecs,
+                            data,
+                            decode_choices,
+                            scaling,
+                            allow_truncated)
+
+    def decode_container(self,
+                         data: bytes,
+                         decode_choices: bool = True,
+                         scaling: bool = True,
+                         allow_truncated: bool = False) \
+                         -> ContainerDecodeResultType:
+        """Decode given data as a container message.
+
+        This method is identical to ``decode()`` except that the
+        message **must** be a container. If the message is not a
+        container, an exception is raised.
+        """
+
+        if not self.is_container:
+            raise DecodeError(f'Message "{self.name}" is not a container')
+
+        unpacked = self.unpack_container(data, allow_truncated)
+
+        result: ContainerDecodeResultListType = []
+
+        for contained_message, contained_data in unpacked:
+            if not isinstance(contained_message, Message):
+                result.append((contained_message, contained_data))
+                continue
+
+            decoded = contained_message.decode(contained_data,
+                                               decode_choices,
+                                               scaling,
+                                               allow_truncated)
+            result.append((contained_message, decoded)) # type: ignore
+
+        return result
 
     def get_contained_message_by_header_id(self, header_id: int) \
         -> Optional['Message']:
@@ -1130,11 +1190,7 @@ class Message(object):
         return tmp[0]
 
     def get_signal_by_name(self, name: str) -> Signal:
-        for signal in self._signals:
-            if signal.name == name:
-                return signal
-
-        raise KeyError(name)
+        return self._signal_dict[name]
 
     def is_multiplexed(self) -> bool:
         """Returns ``True`` if the message is multiplexed, otherwise
@@ -1239,6 +1295,7 @@ class Message(object):
         self._check_signal_lengths()
         self._codecs = self._create_codec()
         self._signal_tree = self._create_signal_tree(self._codecs)
+        self._signal_dict = {signal.name: signal for signal in self._signals}
 
         if strict is None:
             strict = self._strict

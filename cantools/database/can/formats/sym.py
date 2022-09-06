@@ -1,10 +1,12 @@
 # Load and dump a CAN database in SYM format.
 
+import collections
+from itertools import groupby
 import re
 import logging
 from collections import OrderedDict as odict
 from decimal import Decimal
-from typing import List
+from typing import Callable, Iterator, List, Optional as TypingOptional
 
 import textparser
 from textparser import Sequence
@@ -25,11 +27,18 @@ from ..message import Message
 from ..internal_database import InternalDatabase
 
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit
+from ...utils import SORT_SIGNALS_DEFAULT, type_sort_signals, sort_signals_by_start_bit
 from ...errors import ParseError
 
 
 LOGGER = logging.getLogger(__name__)
+
+# PCAN Symbol Editor will fail to open a SYM File with signals of a longer length
+MAX_SIGNAL_NAME_LENGTH = 32
+# If a message is in the SEND section of a SYM file, it is sent by the ECU
+SEND_MESSAGE_SENDER = 'ECU'
+# If a message is in the RECEIVE section of a SYM file, it is sent by the Peripheral devices
+RECEIVE_MESSAGE_SENDER = 'Peripherals'
 
 
 class Parser60(textparser.Parser):
@@ -250,11 +259,12 @@ class Parser60(textparser.Parser):
 
 
 def _get_section_tokens(tokens, name):
+    rows = []
     for section in tokens[3]:
         if section[0] == name:
-            return [row for row in section[1] if isinstance(row, list)]
+            rows.extend([row for row in section[1] if isinstance(row, list)])
 
-    return []
+    return rows
 
 
 def _load_comment(tokens):
@@ -635,11 +645,11 @@ def _get_senders(section_name: str) -> List[str]:
     other file formats specify a list of custom-named sending devices
     """
     if section_name == '{SEND}':
-        return ['ECU']
+        return [SEND_MESSAGE_SENDER]
     elif section_name == '{RECEIVE}':
-        return ['Peripherals']
+        return [RECEIVE_MESSAGE_SENDER]
     elif section_name == '{SENDRECEIVE}':
-        return ['ECU', 'Peripherals']
+        return [SEND_MESSAGE_SENDER, RECEIVE_MESSAGE_SENDER]
     else:
         raise ValueError(f'Unexpected message section named {section_name}')
 
@@ -756,6 +766,222 @@ def _load_messages(tokens, signals, enums, strict, sort_signals):
 def _load_version(tokens):
     return tokens[1][2]
 
+
+def _get_signal_name(signal: Signal) -> str:
+    return signal.name[:MAX_SIGNAL_NAME_LENGTH]
+
+def _get_enum_name(signal: Signal) -> str:
+    """Returns the name of an enum for a signal. Returns the shortened
+    signal name, plus the letter 'E', since the cantools database doesn't
+    store enum names, unlike the SYM file
+    """
+    return f'{_get_signal_name(signal).replace(" ", "_").replace("/", "_")[:MAX_SIGNAL_NAME_LENGTH - 1]}E'
+
+def _dump_choice(signal: Signal) -> str:
+    # Example:
+    # Enum=DPF_Actv_Options(0="notActive", 1="active", 2="rgnrtnNddAtmtcllyInttdActvRgnrt", 3="notAvailable")
+    if not signal.choices:
+        return ''
+
+    enum_str = f'Enum={_get_enum_name(signal)}('
+    is_first_choice = True
+    for choice_number, choice_value in signal.choices.items():
+        enum_str += f'{", " if not is_first_choice else ""}{choice_number}="{choice_value}"'
+        is_first_choice = False
+    enum_str += ')'
+    return enum_str
+
+def _dump_choices(database: InternalDatabase) -> str:
+    choices = []
+    # SYM requires unique signals
+    generated_signals = set()
+    for message in database.messages:
+        for signal in message.signals:
+            if signal.name not in generated_signals:
+                generated_signals.add(signal.name)
+                new_choice = _dump_choice(signal)
+                if new_choice:
+                    choices.append(new_choice)
+    
+    if choices:
+        return '{ENUMS}\n' + '\n'.join(choices)
+    else:
+        return ''
+
+def _get_signal_type(signal: Signal) -> str:
+    if signal.is_float:
+        if signal.length == 64:
+            return 'double'
+        else:
+            return 'float'
+    else:
+        if signal.is_signed:
+            return 'signed'
+        else:
+            if signal.length == 1 and signal.minimum == 0 and signal.maximum == 1:
+                return 'bit'
+
+            return 'unsigned'
+
+def _dump_signal(signal: Signal) -> str:
+    # Example:
+    # Sig=alt_current unsigned 16 /u:A /f:0.05 /o:-1600 /max:1676.75 /d:0 // Alternator Current
+    signal_str = f'Sig="{_get_signal_name(signal)}" {_get_signal_type(signal)} {signal.length}'
+    if signal.byte_order == 'big_endian':
+        signal_str += ' -m'
+    if signal.unit:
+        signal_str += f' /u:"{signal.unit}"'
+    if signal.scale and signal.scale != 1:
+        signal_str += f' /f:{signal.scale}'
+    if signal.offset and signal.offset != 0:
+        signal_str += f' /o:{signal.offset}'
+    if signal.maximum is not None:
+        signal_str += f' /max:{signal.maximum}'
+    if signal.minimum is not None:
+        signal_str += f' /min:{signal.minimum}'
+    if signal.spn and signal.spn != 0:
+        signal_str += f' /spn:{signal.spn}'
+    if signal.choices:
+        signal_str += f' /e:{_get_enum_name(signal)}'
+    if signal.comment:
+        signal_str += f' // {signal.comment}'
+
+    return signal_str
+
+def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Callable[[List[Signal]], List[Signal]]]) -> str:
+    signal_dumps = []
+    # SYM requires unique signals
+    generated_signals = set()
+    for message in database.messages:
+        if sort_signals:
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
+            if signal.name not in generated_signals:
+                generated_signals.add(signal.name)
+                signal_dumps.append(_dump_signal(signal))
+
+    if signals:
+        return '{SIGNALS}\n' + '\n'.join(signal_dumps)
+    else:
+        return ''
+
+def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingOptional[int], max_frame_id: TypingOptional[int] = None,
+                  multiplexer_id: TypingOptional[int] = None, multiplexer_signal: TypingOptional[Signal] = None) -> str:
+    # Example:
+    # [TestMessage]
+    # ID=14A30000h
+    # Type=Extended
+    # Len=8
+    # Sig=test_signal 0
+    extended = ''
+    if message.is_extended_frame:
+        extended = 'Type=Extended\n'
+    frame_id = ''
+    frame_id_newline = ''
+    comment = ''
+    # Frame id should be excluded for multiplexed messages after the first listed message instance
+    if min_frame_id is not None:
+        if message.is_extended_frame:
+            frame_id = f'ID={min_frame_id:08X}h'
+        else:
+            frame_id = f'ID={min_frame_id:03X}h'
+        frame_id_newline = '\n'
+        if message.comment is not None:
+            comment = f' // {message.comment}'
+    frame_id_range = ''
+    if max_frame_id is not None:
+        if message.is_extended_frame:
+            frame_id_range = f'-{max_frame_id:08X}h'
+        else:
+            frame_id_range = f'-{max_frame_id:03X}h'
+    message_str = f'["{message.name}"]\n{frame_id}{frame_id_range}{comment}{frame_id_newline}{extended}Len={message.length}\n'
+    if message.cycle_time:
+        message_str += f'CycleTime={message.cycle_time}\n'
+    if multiplexer_id is not None and multiplexer_signal is not None:
+        m_flag = ''
+        if multiplexer_signal.byte_order == 'big_endian':
+            m_flag = '-m'
+        hex_multiplexer_id = format(multiplexer_id, 'x').upper()
+        message_str += f'Mux="{hex_multiplexer_id}" {_convert_start(multiplexer_signal.start, multiplexer_signal.byte_order)},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}\n'
+    for signal in signals:
+        message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
+    return message_str
+
+def _dump_messages(database: InternalDatabase) -> str:
+    send_messages = []
+    receive_messages = []
+    send_receive_messages = []
+    message_name: str
+    messages_with_name: Iterator[Message]
+    for message_name, messages_with_name in groupby(sorted(database.messages, key=lambda m: m.name), key=lambda m: m.name):
+        message_dumps = []
+        # Cantools represents SYM CAN ID range with multiple messages - need to dedup multiple cantools messages
+        # into a single message with a CAN ID range
+        messages_with_name_list = list(messages_with_name)
+        num_messages_with_name = len(messages_with_name_list)
+        if num_messages_with_name == 1:
+            message = messages_with_name_list[0]
+            min_frame_id = message.frame_id
+            max_frame_id = None
+        else:
+            message = min(messages_with_name_list, key=lambda m: m.frame_id)
+            min_frame_id = message.frame_id
+            max_frame_id = max(messages_with_name_list, key=lambda m: m.frame_id).frame_id
+            frame_id_range = max_frame_id - min_frame_id + 1
+            if frame_id_range != num_messages_with_name:
+                raise ValueError(f'Expected {frame_id_range} messages with name {message_name} - given {num_messages_with_name}')
+
+        if message.is_multiplexed():
+            non_multiplexed_signals = []
+            # Store all non-multiplexed signals first
+            for signal_tree_signal in message.signal_tree:
+                if not isinstance(signal_tree_signal, collections.abc.Mapping):
+                    non_multiplexed_signals.append(signal_tree_signal)
+            
+            for signal_tree_signal in message.signal_tree:
+                if isinstance(signal_tree_signal, collections.abc.Mapping):
+                    signal_name, multiplexed_signals = list(signal_tree_signal.items())[0]
+                    is_first_message = True
+                    for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
+                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + non_multiplexed_signals,
+                                                           min_frame_id if is_first_message else None, max_frame_id, multiplexer_id, message.get_signal_by_name(signal_name)))
+                        is_first_message = False
+        else:
+            message_dumps.append(_dump_message(message, message.signals, min_frame_id, max_frame_id))
+        
+        if message.senders == [SEND_MESSAGE_SENDER]:
+            send_messages.extend(message_dumps)
+        elif message.senders == [RECEIVE_MESSAGE_SENDER]:
+            receive_messages.extend(message_dumps)
+        else:
+            send_receive_messages.extend(message_dumps)
+    
+    messages_dump = ''
+    if send_messages:
+        messages_dump += '{SEND}\n' + '\n'.join(send_messages) + '\n'
+    if receive_messages:
+        messages_dump += '{RECEIVE}\n' + '\n'.join(receive_messages) + '\n'
+    if send_receive_messages:
+        messages_dump += '{SENDRECEIVE}\n' + '\n'.join(send_receive_messages) + '\n'
+    return messages_dump
+
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+    """Format given database in SYM file format.
+
+    """
+    if sort_signals == SORT_SIGNALS_DEFAULT:
+        sort_signals = sort_signals_by_start_bit
+        
+    sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
+    sym_str += 'Title="SYM Database"\n\n'
+
+    sym_str += _dump_choices(database) + '\n\n'
+    sym_str += _dump_signals(database, sort_signals) + '\n\n'
+    sym_str += _dump_messages(database)
+
+    return sym_str
 
 def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given string.

@@ -1,5 +1,17 @@
+from cantools.database.can.database import Database
 from cantools.database.can.message import Message
 from cantools.database.can.signal import NamedSignalValue
+
+from typing import (
+    Union,
+    Iterable,
+)
+
+from cantools.typechecking import (
+    SignalDictType,
+    ContainerUnpackResultType,
+    ContainerDecodeResultType,
+)
 
 MULTI_LINE_FMT = '''
 {message}(
@@ -33,12 +45,14 @@ def _format_signals(message, decoded_signals):
     return formatted_signals
 
 
-def _format_message_single_line(message, formatted_signals):
+def _format_message_single_line(message : Message,
+                                formatted_signals : Iterable[str]) -> str:
     return ' {}({})'.format(message.name,
                             ', '.join(formatted_signals))
 
 
-def _format_message_multi_line(message, formatted_signals):
+def _format_message_multi_line(message : Message,
+                               formatted_signals : Iterable[str]) -> str:
     indented_signals = [
         '    ' + formatted_signal
         for formatted_signal in formatted_signals
@@ -47,16 +61,19 @@ def _format_message_multi_line(message, formatted_signals):
     return MULTI_LINE_FMT.format(message=message.name,
                                  signals=',\n'.join(indented_signals))
 
-def _format_container_single_line(message, decoded_data):
+def _format_container_single_line(message : Message,
+                                  unpacked_data : ContainerUnpackResultType,
+                                  decoded_data : ContainerDecodeResultType) \
+                                  -> str:
     contained_list = list()
-    for cm, signals in decoded_data:
+    for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
             formatted_cm_signals = _format_signals(cm, signals)
             formatted_cm = _format_message_single_line(cm, formatted_cm_signals)
             contained_list.append(formatted_cm)
         else:
             header_id = cm
-            data = signals
+            data = unpacked_data[i][1]
             contained_list.append(
                 f'(Unknown contained message: Header ID: 0x{header_id:x}, '
                 f'Data: {data.hex()})')
@@ -64,17 +81,21 @@ def _format_container_single_line(message, decoded_data):
     return f' {message.name}({", ".join(contained_list)})'
 
 
-def _format_container_multi_line(message, decoded_data):
+def _format_container_multi_line(message : Message,
+                                 unpacked_data : ContainerUnpackResultType,
+                                 decoded_data : ContainerDecodeResultType) -> str:
     contained_list = list()
-    for cm, signals in decoded_data:
+    for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
             formatted_cm_signals = _format_signals(cm, signals)
-            formatted_cm = _format_message_multi_line(cm, formatted_cm_signals)
+            formatted_cm = f'{cm.header_id:06x}##'
+            formatted_cm += f'{unpacked_data[i][1].hex()} ::'
+            formatted_cm += _format_message_multi_line(cm, formatted_cm_signals)
             formatted_cm = formatted_cm.replace('\n', '\n    ')
             contained_list.append('    '+formatted_cm.strip())
         else:
             header_id = cm
-            data = signals
+            data = unpacked_data[i][1]
             contained_list.append(
                 f'    Unknown contained message (Header ID: 0x{header_id:x}, '
                 f'Data: {data.hex()})')
@@ -84,12 +105,12 @@ def _format_container_multi_line(message, decoded_data):
         ',\n'.join(contained_list) + \
         '\n)'
 
-def format_message_by_frame_id(dbase,
-                               frame_id,
-                               data,
-                               decode_choices,
-                               single_line,
-                               decode_containers):
+def format_message_by_frame_id(dbase : Database,
+                               frame_id : int,
+                               data : Union[bytes, bytearray],
+                               decode_choices : bool,
+                               single_line : bool,
+                               decode_containers : bool) -> str:
     try:
         message = dbase.get_message_by_frame_id(frame_id)
     except KeyError:
@@ -106,23 +127,41 @@ def format_message_by_frame_id(dbase,
 
     return format_message(message, data, decode_choices, single_line)
 
-def format_container_message(message, data, decode_choices, single_line):
+def format_container_message(message : Message,
+                             data : Union[bytes, bytearray],
+                             decode_choices : bool,
+                             single_line : bool,
+                             allow_truncated : bool = False) -> str:
     try:
-        decoded_message = message.decode(data,
-                                         decode_choices,
-                                         decode_containers=True)
+        unpacked_message = message.unpack_container(data,
+                                                    allow_truncated=allow_truncated)
+        decoded_message = message.decode_container(data,
+                                                   decode_choices=True,
+                                                   scaling=True,
+                                                   allow_truncated=allow_truncated)
+
     except Exception as e:
         return ' ' + str(e)
 
     if single_line:
-        return _format_container_single_line(message, decoded_message)
+        return _format_container_single_line(message,
+                                             unpacked_message,
+                                             decoded_message)
     else:
-        return _format_container_multi_line(message, decoded_message)
+        return _format_container_multi_line(message,
+                                            unpacked_message,
+                                            decoded_message)
 
 
-def format_message(message, data, decode_choices, single_line):
+def format_message(message : Message,
+                   data : Union[bytes, bytearray],
+                   decode_choices : bool,
+                   single_line : bool,
+                   allow_truncated : bool = False) -> str:
     try:
-        decoded_signals = message.decode(data, decode_choices)
+        decoded_signals = message.decode_simple(data,
+                                                decode_choices,
+                                                allow_truncated=allow_truncated)
     except Exception as e:
         return ' ' + str(e)
 
@@ -133,8 +172,14 @@ def format_message(message, data, decode_choices, single_line):
     else:
         return _format_message_multi_line(message, formatted_signals)
 
-def format_multiplexed_name(message, data, decode_choices):
-    decoded_signals = message.decode(data, decode_choices)
+def format_multiplexed_name(message : Message,
+                            data : Union[bytes, bytearray],
+                            decode_choices : bool,
+                            allow_truncated : bool = False) -> str:
+    decoded_signals : SignalDictType \
+        = message.decode(data,
+                         decode_choices,
+                         allow_truncated=allow_truncated) # type: ignore
 
     # The idea here is that we rely on the sorted order of the Signals, and
     # then simply go through each possible Multiplexer and build a composite

@@ -1,15 +1,26 @@
 # Utility functions.
 
-import binascii
+from collections import OrderedDict
 import os.path
 import re
-from decimal import Decimal
-from typing import Dict, Union, List, Callable
+from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
 
 from typing_extensions import Literal, Final
 
-from cantools.database.can.signal import NamedSignalValue, Signal
-from cantools.typechecking import Formats
+from cantools.typechecking import (
+    Formats,
+    Choices,
+    SignalDictType,
+    ByteOrder,
+)
+
+if TYPE_CHECKING:
+    from cantools.database import Database
+    from cantools.database.can.attribute import Attribute
+    from cantools.database.can.message import Message
+    from cantools.database.can.node import Node
+    from cantools.database.can.signal import Signal
+    from cantools.database.diagnostics import Data
 
 try:
     import bitstruct.c
@@ -17,109 +28,138 @@ except ImportError:
     import bitstruct
 
 
-def format_or(items):
-    items = [str(item) for item in items]
+def format_or(items: List[Union[int, str]]) -> str:
+    string_items = [str(item) for item in items]
 
-    if len(items) == 1:
-        return items[0]
+    if len(string_items) == 1:
+        return string_items[0]
     else:
-        return '{} or {}'.format(', '.join(items[:-1]),
-                                 items[-1])
+        return '{} or {}'.format(', '.join(string_items[:-1]),
+                                 string_items[-1])
 
 
-def format_and(items):
-    items = [str(item) for item in items]
+def format_and(items: List[Union[int, str]]) -> str:
+    string_items = [str(item) for item in items]
 
-    if len(items) == 1:
-        return items[0]
+    if len(string_items) == 1:
+        return str(string_items[0])
     else:
-        return '{} and {}'.format(', '.join(items[:-1]),
-                                  items[-1])
+        return '{} and {}'.format(', '.join(string_items[:-1]),
+                                  string_items[-1])
 
 
-def start_bit(data):
+def start_bit(data: Union["Data", "Signal"]) -> int:
     if data.byte_order == 'big_endian':
-        return (8 * (data.start // 8) + (7 - (data.start % 8)))
+        return 8 * (data.start // 8) + (7 - (data.start % 8))
     else:
         return data.start
 
 
-def _encode_field(field, data, scaling):
-    value = data[field.name]
+def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
+                   data: SignalDictType,
+                   scaling: bool,
+                   ) -> Dict[str, Union[int, float]]:
+    unpacked = {}
+    for field in fields:
+        value = data[field.name]
 
-    if isinstance(value, str):
-        return field.choice_string_to_number(value)
-    elif isinstance(value, NamedSignalValue):
-        return field.choice_string_to_number(str(value))
-    elif scaling:
-        if field.is_float:
-            return (value - field.offset) / field.scale
-        else:
-            value = (Decimal(value) - Decimal(field.offset)) / Decimal(field.scale)
+        if isinstance(value, (float, int)):
+            _transform = float if field.is_float else round
+            if scaling:
+                if field.offset == 0 and field.scale == 1:
+                    # treat special case to avoid introduction of unnecessary rounding error
+                    unpacked[field.name] = _transform(value)  # type: ignore[operator]
+                    continue
 
-            return int(value.to_integral())
-    else:
-        return value
+                unpacked[field.name] = _transform((value - field.offset) / field.scale)  # type: ignore[operator]
+                continue
 
+            unpacked[field.name] = _transform(value)  # type: ignore[operator]
+            continue
 
-def _decode_field(field, value, decode_choices, scaling):
-    if decode_choices:
-        try:
-            return field.choices[value]
-        except (KeyError, TypeError):
-            pass
+        unpacked[field.name] = field.choice_string_to_number(str(value))
 
-    if scaling:
-        is_int = \
-            lambda x: isinstance(x, int) or (isinstance(x, float) and x.is_integer())
-        if field.is_float \
-           or not is_int(field.scale) \
-           or not is_int(field.offset):
-            return (field.scale * value + field.offset)
-        else:
-            return int(field.scale * value + field.offset)
-    else:
-        return value
+    return unpacked
 
 
-def encode_data(data, fields, formats, scaling):
+def encode_data(data: SignalDictType,
+                fields: Sequence[Union["Signal", "Data"]],
+                formats: Formats,
+                scaling: bool
+                ) -> int:
     if len(fields) == 0:
         return 0
 
-    unpacked = {
-        field.name: _encode_field(field, data, scaling)
-        for field in fields
-    }
+    unpacked = _encode_fields(fields, data, scaling)
     big_packed = formats.big_endian.pack(unpacked)
-    little_packed = formats.little_endian.pack(unpacked)[::-1]
-    packed_union = int(binascii.hexlify(big_packed), 16)
-    packed_union |= int(binascii.hexlify(little_packed), 16)
+    little_packed = formats.little_endian.pack(unpacked)
+    packed_union = int.from_bytes(big_packed, "big") | int.from_bytes(little_packed, "little")
 
     return packed_union
 
 
 def decode_data(data: bytes,
-                fields: List[Signal],
+                expected_length: int,
+                fields: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
                 decode_choices: bool,
                 scaling: bool,
-                ) -> Dict[str, Union[float, str]]:
-    unpacked = formats.big_endian.unpack(bytes(data))
-    unpacked.update(formats.little_endian.unpack(bytes(data[::-1])))
+                allow_truncated: bool,
+                ) -> SignalDictType:
 
-    return {
-        field.name: _decode_field(field,
-                                  unpacked[field.name],
-                                  decode_choices,
-                                  scaling)
-        for field in fields
+    actual_length = len(data)
+    if allow_truncated and actual_length < expected_length:
+        data = data.ljust(expected_length, b"\xFF")
+
+    unpacked = {
+        **formats.big_endian.unpack(bytes(data)),
+        **formats.little_endian.unpack(bytes(data[::-1])),
     }
 
+    if allow_truncated and actual_length < expected_length:
+        # remove fields that are outside available data bytes
+        valid_bit_count = actual_length * 8
+        for field in fields:
+            if field.byte_order == "little_endian":
+                sequential_startbit = field.start
+            else:
+                # Calculate startbit with inverted indices.
+                # Function body of ``sawtooth_to_network_bitnum()``
+                # is inlined for improved performance.
+                sequential_startbit = (8 * (field.start // 8)) + (7 - (field.start % 8))
 
-def create_encode_decode_formats(datas, number_of_bytes):
+            if sequential_startbit + field.length > valid_bit_count:
+                del unpacked[field.name]
+
+    decoded = {}
+    for field in fields:
+        try:
+            value = unpacked[field.name]
+
+            if decode_choices:
+                try:
+                    decoded[field.name] = field.choices[value]  # type: ignore[index]
+                    continue
+                except (KeyError, TypeError):
+                    pass
+
+            if scaling:
+                decoded[field.name] = field.scale * value + field.offset
+                continue
+            else:
+                decoded[field.name] = value
+
+        except KeyError:
+            if not allow_truncated:
+                raise
+
+    return decoded
+
+
+def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
     format_length = (8 * number_of_bytes)
 
-    def get_format_string_type(data):
+    def get_format_string_type(data: Union["Data", "Signal"]) -> str:
         if data.is_float:
             return 'f'
         elif data.is_signed:
@@ -127,33 +167,33 @@ def create_encode_decode_formats(datas, number_of_bytes):
         else:
             return 'u'
 
-    def padding_item(length):
+    def padding_item(length: int) -> Tuple[str, str, None]:
         fmt = 'p{}'.format(length)
         padding_mask = '1' * length
 
         return fmt, padding_mask, None
 
-    def data_item(data):
+    def data_item(data: Union["Data", "Signal"]) -> Tuple[str, str, str]:
         fmt = '{}{}'.format(get_format_string_type(data),
                             data.length)
         padding_mask = '0' * data.length
 
         return fmt, padding_mask, data.name
 
-    def fmt(items):
+    def fmt(items: List[Tuple[str, str, Optional[str]]]) -> str:
         return ''.join([item[0] for item in items])
 
-    def names(items):
+    def names(items:  List[Tuple[str, str, Optional[str]]]) -> List[str]:
         return [item[2] for item in items if item[2] is not None]
 
-    def padding_mask(items):
+    def padding_mask(items: List[Tuple[str, str, Optional[str]]]) -> int:
         try:
             return int(''.join([item[1] for item in items]), 2)
         except ValueError:
             return 0
 
-    def create_big():
-        items = []
+    def create_big() -> Tuple[str, int, List[str]]:
+        items: List[Tuple[str, str, Optional[str]]] = []
         start = 0
 
         # Select BE fields
@@ -178,8 +218,8 @@ def create_encode_decode_formats(datas, number_of_bytes):
 
         return fmt(items), padding_mask(items), names(items)
 
-    def create_little():
-        items = []
+    def create_little() -> Tuple[str, int, List[str]]:
+        items: List[Tuple[str, str, Optional[str]]] = []
         end = format_length
 
         for data in datas[::-1]:
@@ -201,8 +241,8 @@ def create_encode_decode_formats(datas, number_of_bytes):
 
         if format_length > 0:
             length = len(''.join([item[1] for item in items]))
-            value = bitstruct.pack('u{}'.format(length), value)
-            value = int(binascii.hexlify(value[::-1]), 16)
+            _packed = bitstruct.pack('u{}'.format(length), value)
+            value = int.from_bytes(_packed, "little")
 
         return fmt(items), value, names(items)
 
@@ -210,12 +250,12 @@ def create_encode_decode_formats(datas, number_of_bytes):
     little_fmt, little_padding_mask, little_names = create_little()
 
     try:
-        big_compiled = bitstruct.c.compile(big_fmt, big_names)
+        big_compiled = bitstruct.compile(big_fmt, big_names)
     except Exception as e:
         big_compiled = bitstruct.compile(big_fmt, big_names)
 
     try:
-        little_compiled = bitstruct.c.compile(little_fmt, little_names)
+        little_compiled = bitstruct.compile(little_fmt, little_names)
     except Exception as e:
         little_compiled = bitstruct.compile(little_fmt, little_names)
 
@@ -224,7 +264,7 @@ def create_encode_decode_formats(datas, number_of_bytes):
                    big_padding_mask & little_padding_mask)
 
 
-def sawtooth_to_network_bitnum(sawtooth_bitnum):
+def sawtooth_to_network_bitnum(sawtooth_bitnum: int) -> int:
     '''Convert SawTooth bit number to Network bit number
 
     Byte     |   0   |   1   |
@@ -234,7 +274,7 @@ def sawtooth_to_network_bitnum(sawtooth_bitnum):
     return (8 * (sawtooth_bitnum // 8)) + (7 - (sawtooth_bitnum % 8))
 
 
-def cdd_offset_to_dbc_start_bit(cdd_offset, bit_length, byte_order):
+def cdd_offset_to_dbc_start_bit(cdd_offset: int, bit_length: int, byte_order: ByteOrder) -> int:
     '''Convert CDD/c-style field bit offset to DBC field start bit convention.
 
     BigEndian (BE) fields are located by their MSBit's sawtooth index.
@@ -246,7 +286,8 @@ def cdd_offset_to_dbc_start_bit(cdd_offset, bit_length, byte_order):
     else:
         return cdd_offset
 
-def prune_signal_choices(signal):
+
+def prune_signal_choices(signal: "Signal") -> None:
     '''Shorten the names of the signal choices of a single signal
 
     For signals with multiple named values this means removing the
@@ -278,7 +319,7 @@ def prune_signal_choices(signal):
         # choice alone...
         key = next(iter(signal.choices.keys()))
         choice = next(iter(signal.choices.values()))
-        m = re.match(r'^[0-9A-Za-z_]*?_([A-Za-z_]+)$', choice.name)
+        m = re.match(r'^[0-9A-Za-z_]*?_([A-Za-z_]+)$', str(choice))
         val = str(choice)
         if m:
             val = m.group(1)
@@ -287,7 +328,7 @@ def prune_signal_choices(signal):
             signal.choices[key] = val
         else:
             # assert isinstance(choice, NamedSignalValue)
-            signal.choices[key]._name = val
+            choice._name = val
         return
 
     # if there are multiple choices, remove the longest common prefix
@@ -334,9 +375,10 @@ def prune_signal_choices(signal):
             signal.choices[key] = choice[n:]
         else:
             # assert isinstance(choice, NamedSignalValue)
-            signal.choices[key]._name = choice._name[n:]
+            choice._name = choice._name[n:]
 
-def prune_database_choices(database):
+
+def prune_database_choices(database: "Database") -> None:
     '''
     Prune names of all named signal values of all signals of a database
     '''
@@ -352,10 +394,48 @@ def prune_database_choices(database):
 
 
 SORT_SIGNALS_DEFAULT: Final = 'default'
-type_sort_signals = Union[Callable[[List[Signal]], List[Signal]], Literal['default'], None]
+type_sort_signals = Union[Callable[[List["Signal"]], List["Signal"]], Literal['default'], None]
 
-def sort_signals_by_start_bit(signals: List[Signal]) -> List[Signal]:
-	return list(sorted(signals, key=start_bit))
+type_sort_attribute = Union[
+    Tuple[Literal['dbc'],     "Attribute", None,   None,      None],
+    Tuple[Literal['node'],    "Attribute", "Node", None,      None],
+    Tuple[Literal['message'], "Attribute", None,   "Message", None],
+    Tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal"],
+]
 
-def sort_signals_by_start_bit_reversed(signals: List[Signal]) -> List[Signal]:
-	return list(reversed(sorted(signals, key=start_bit)))
+type_sort_attributes = Union[Callable[[List[type_sort_attribute]], List[type_sort_attribute]], Literal['default'], None]
+
+type_sort_choices = Union[Callable[[Choices], Choices], None]
+
+def sort_signals_by_start_bit(signals: List["Signal"]) -> List["Signal"]:
+    return list(sorted(signals, key=start_bit))
+
+
+def sort_signals_by_start_bit_reversed(signals: List["Signal"]) -> List["Signal"]:
+    return list(reversed(sorted(signals, key=start_bit)))
+
+
+def sort_signals_by_name(signals: List["Signal"]) -> List["Signal"]:
+    return list(sorted(signals, key=lambda s: s.name))
+
+
+def sort_signals_by_start_bit_and_mux(signals: List["Signal"]) -> List["Signal"]:
+    # sort by start bit
+    signals = sorted(signals, key=start_bit)
+    # but unmuxed values come first
+    signals = sorted(signals, key=lambda s: bool(s.multiplexer_ids))
+    # and group by mux... -1 is fine as the "no mux" case because even negative
+    # multiplexors get cast to unsigned in the .dbc
+    signals = sorted(
+        signals, key=lambda s: s.multiplexer_ids[0] if s.multiplexer_ids else -1
+    )
+
+    return signals
+
+
+def sort_choices_by_value(choices: Choices) -> Choices:
+    return OrderedDict(sorted(choices.items(), key=lambda x: x[0]))
+
+
+def sort_choices_by_value_descending(choices: Choices) -> Choices:
+    return OrderedDict(sorted(choices.items(), key=lambda x: x[0], reverse=True))

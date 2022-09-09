@@ -249,7 +249,7 @@ class PCANTracePatternV20(BasePattern):
      1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00
     """
     pattern = re.compile(
-        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+.+\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>\w+)\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
     def unpack(match_object):
@@ -276,7 +276,7 @@ class PCANTracePatternV21(BasePattern):
      1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00
     """
     pattern = re.compile(
-        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+.+\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>.+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
     def unpack(match_object):
@@ -314,7 +314,7 @@ class Parser:
 
     @staticmethod
     def detect_pattern(line):
-        for p in [CandumpDefaultPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern, PCANTracePatternV10, PCANTracePatternV11, PCANTracePatternV12, PCANTracePatternV13, PCANTracePatternV20, PCANTracePatternV21]:
+        for p in [CandumpDefaultPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern, PCANTracePatternV21, PCANTracePatternV20, PCANTracePatternV13, PCANTracePatternV12, PCANTracePatternV11, PCANTracePatternV10]:
             mo = p.pattern.match(line)
             if mo:
                 return p

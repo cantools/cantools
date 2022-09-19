@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from . import formatting
 from ... import database
@@ -105,16 +106,9 @@ def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
 def _dump_can_database(dbase, with_comments=False):
     WIDTH = 80
     try:
-        import curses
-    except ModuleNotFoundError:  # pragma: no cover
+        WIDTH, _ = os.get_terminal_size()
+    except:
         pass
-    else:
-        try:
-            _stdscr = curses.initscr()
-            _, WIDTH = _stdscr.getmaxyx()  # pragma: no cover
-            curses.endwin()  # pragma: no cover
-        except Exception as e:
-            pass
 
     print('================================= Messages =================================')
     print()

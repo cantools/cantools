@@ -33,6 +33,7 @@ setup(name='cantools',
           'diskcache',
           'argparse_addons',
           'typing_extensions>=3.10.0.0',
+          'crccheck',
       ],
       extras_require=dict(
           plot=['matplotlib'],

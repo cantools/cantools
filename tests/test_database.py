@@ -35,14 +35,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def assertEqualChoicesDictHelper_(self, have, expect):
         if have.keys() != expect.keys():
-            raise AssertationError(f'keys differ: {have} != {expect}')
+            raise AssertionError(f'keys differ: {have} != {expect}')
 
         for key in have.keys():
             self.assertEqual(str(have[key]), str(expect[key]))
 
     def assertEqualChoicesDict(self, have, expect):
         if have.keys() != expect.keys():
-            raise AssertationError(f'keys differ: {have.keys()} != {expect.keys()}')
+            raise AssertionError(f'keys differ: {have.keys()} != {expect.keys()}')
 
         for key in have.keys():
             self.assertEqualChoicesDictHelper_(have[key], expect[key])

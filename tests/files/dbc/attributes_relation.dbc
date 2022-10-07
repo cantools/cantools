@@ -50,15 +50,18 @@ BA_DEF_ SG_  "GenSigInactiveValue" INT 0 65535;
 BA_DEF_ BO_  "MsgProject" ENUM  "A","B","C";
 BA_DEF_  "BusType" STRING ;
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_REL_ BU_SG_REL_  "SigFirstTimeoutTime" INT 0 65535;
 BA_DEF_REL_ BU_SG_REL_  "SigTimeoutTime" INT 0 65535;
 BA_DEF_DEF_  "GenSigInactiveValue" 0;
 BA_DEF_DEF_  "MsgProject" "A";
 BA_DEF_DEF_  "BusType" "";
 BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_REL_ "SigFirstTimeoutTime" 0;
 BA_DEF_DEF_REL_ "SigTimeoutTime" 0;
 BA_ "BusType" "CAN";
 BA_ "GenMsgCycleTime" BO_ 83 50;
 BA_REL_ "SigTimeoutTime" BU_SG_REL_ ECU2 SG_ 82 signal_1 6000;
+BA_REL_ "SigFirstTimeoutTime" BU_SG_REL_ ECU2 SG_ 82 signal_1 24000;
 
 
 

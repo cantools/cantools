@@ -6146,7 +6146,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
             signal = frame.get("signal")
             if "signal_1" in signal.keys():
                 rel_attributes = signal["signal_1"]["node"]["ECU2"]
+                first_timeout_attr = rel_attributes["SigFirstTimeoutTime"]
                 timeout_attr = rel_attributes["SigTimeoutTime"]
+                self.assertEqual(first_timeout_attr.value, 24000)
                 self.assertEqual(timeout_attr.value, 6000)
                 break
         self.assert_dbc_dump(db, filename)

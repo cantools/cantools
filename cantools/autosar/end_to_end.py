@@ -37,7 +37,7 @@ def compute_profile2_crc(payload : Union[bytes, bytearray],
         assert msg.autosar.e2e.data_ids is not None
 
         protected_len = msg.autosar.e2e.payload_length
-        seq_counter = (payload[1]&0xf0) >> 4
+        seq_counter = payload[1] & 0xf
         data_id = msg.autosar.e2e.data_ids[seq_counter]
     else:
         protected_len = len(payload)

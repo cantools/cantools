@@ -2,6 +2,7 @@ from typing import (
     TYPE_CHECKING,
     NamedTuple,
     Union,
+    Mapping,
     Dict,
     Optional,
     List,
@@ -34,7 +35,7 @@ Codec = TypedDict(
     {
         "signals": List["Signal"],
         "formats": Formats,
-        "multiplexers": Dict[str, Dict[int, Any]],  # "Any" should be "Codec" (cyclic definition is not possible though)
+        "multiplexers": Mapping[str, Mapping[int, Any]],  # "Any" should be "Codec" (cyclic definition is not possible though)
     },
 )
 
@@ -46,19 +47,20 @@ Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]
 # for AUTOSAR container messages.
 SignalValueType = Union[float, str, "NamedSignalValue"]
 SignalDictType = Dict[str, SignalValueType]
+SignalMappingType = Mapping[str, SignalValueType]
 ContainerHeaderSpecType = Union["Message", str, int]
 ContainerUnpackResultType = Sequence[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
 ContainerUnpackListType = List[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
 ContainerDecodeResultType = Sequence[
-    Union[Tuple["Message", SignalDictType], Tuple[int, bytes]]
+    Union[Tuple["Message", SignalMappingType], Tuple[int, bytes]]
 ]
 ContainerDecodeResultListType = List[
-    Union[Tuple["Message", SignalDictType], Tuple[int, bytes]]
+    Union[Tuple["Message", SignalMappingType], Tuple[int, bytes]]
 ]
 ContainerEncodeInputType = Sequence[
-    Tuple[ContainerHeaderSpecType, Union[bytes, SignalDictType]]
+    Tuple[ContainerHeaderSpecType, Union[bytes, SignalMappingType]]
 ]
-DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
-EncodeInputType = Union[SignalDictType, ContainerEncodeInputType]
+DecodeResultType = Union[SignalMappingType, ContainerDecodeResultType]
+EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]

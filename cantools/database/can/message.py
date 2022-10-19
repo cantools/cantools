@@ -29,7 +29,7 @@ from ..errors import DecodeError
 from ...typechecking import (
     Comments,
     Codec,
-    SignalDictType,
+    SignalMappingType,
     ContainerHeaderSpecType,
     ContainerDecodeResultType,
     ContainerDecodeResultListType,
@@ -519,9 +519,9 @@ class Message(object):
         return self._signal_tree
 
     def gather_signals(self,
-                       input_data: SignalDictType,
+                       input_data: SignalMappingType,
                        node: Optional[Codec] = None) \
-      -> SignalDictType:
+      -> SignalMappingType:
 
         '''Given a superset of all signals required to encode the message,
         return a dictionary containing exactly the ones required.
@@ -567,7 +567,7 @@ class Message(object):
 
     def gather_container(self,
                          contained_messages: List[ContainerHeaderSpecType],
-                         signal_values: SignalDictType) \
+                         signal_values: SignalMappingType) \
       -> ContainerDecodeResultType:
 
         '''Given a superset of all messages required to encode all messages
@@ -610,7 +610,7 @@ class Message(object):
         return result
 
     def assert_signals_encodable(self,
-                                 input_data: SignalDictType,
+                                 input_data: SignalMappingType,
                                  scaling: bool,
                                  assert_values_valid: bool = True,
                                  assert_all_known: bool = True) \
@@ -719,7 +719,7 @@ class Message(object):
                                                            assert_values_valid,
                                                            assert_all_known)
 
-    def _get_mux_number(self, decoded: SignalDictType, signal_name: str) -> int:
+    def _get_mux_number(self, decoded: SignalMappingType, signal_name: str) -> int:
         mux = decoded[signal_name]
 
         if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
@@ -731,7 +731,7 @@ class Message(object):
         return int(mux)
 
     def _assert_signal_values_valid(self,
-                                    data: SignalDictType,
+                                    data: SignalMappingType,
                                     scaling: bool) -> None:
 
         for signal_name, signal_value in data.items():
@@ -775,7 +775,7 @@ class Message(object):
                         f'equal to {max_effective} in message "{self.name}", '
                         f'but got {signal_value}.')
 
-    def _encode(self, node: Codec, data: SignalDictType, scaling: bool) -> Tuple[int, int, List[Signal]]:
+    def _encode(self, node: Codec, data: SignalMappingType, scaling: bool) -> Tuple[int, int, List[Signal]]:
         encoded = encode_data(data,
                               node['signals'],
                               node['formats'],
@@ -916,7 +916,7 @@ class Message(object):
 
         if self.is_container:
             if strict:
-                if isinstance(data, dict):
+                if not isinstance(data, (list, tuple)):
                     raise EncodeError(f'Container frames can only encode lists of '
                                       f'(message, data) tuples')
 
@@ -940,7 +940,7 @@ class Message(object):
             raise ValueError('Codec is not initialized.')
 
         encoded, padding_mask, all_signals = self._encode(self._codecs,
-                                                          cast(SignalDictType, data),
+                                                          cast(SignalMappingType, data),
                                                           scaling)
 
         if padding:
@@ -954,7 +954,7 @@ class Message(object):
                 data: bytes,
                 decode_choices: bool,
                 scaling: bool,
-                allow_truncated: bool) -> SignalDictType:
+                allow_truncated: bool) -> SignalMappingType:
         decoded = decode_data(data,
                               self.length,
                               node['signals'],
@@ -1103,7 +1103,7 @@ class Message(object):
                       decode_choices: bool = True,
                       scaling: bool = True,
                       allow_truncated: bool = False) \
-                      -> SignalDictType:
+                      -> SignalMappingType:
         """Decode given data as a container message.
 
         This method is identical to ``decode()`` except that the

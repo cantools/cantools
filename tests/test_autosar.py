@@ -26,7 +26,7 @@ class CanToolsAutosarTest(unittest.TestCase):
                          173)
         self.assertEqual(cantools.autosar.compute_profile2_crc(b'\x00\x51\x22',
                                                                msg),
-                         173)
+                         17)
 
 
         # test the apply function
@@ -34,14 +34,14 @@ class CanToolsAutosarTest(unittest.TestCase):
                                                               msg))
         self.assertEqual(cantools.autosar.apply_profile2_crc(b'\xff\x51\x22',
                                                              msg),
-                         b'\xad\x51\x22')
+                         b'\x11\x51\x22')
 
         # test the check function
         self.assertFalse(cantools.autosar.check_profile2_crc(b'\xff',
                                                              msg))
         self.assertFalse(cantools.autosar.check_profile2_crc(b'\x00\x51\x22',
                                                              msg))
-        self.assertTrue(cantools.autosar.check_profile2_crc(b'\xad\x51\x22',
+        self.assertTrue(cantools.autosar.check_profile2_crc(b'\x11\x51\x22',
                                                             msg))
 
         # make sure that profile 5 protected messages cannot be used

@@ -2,28 +2,29 @@ name: Python package
 
 on: [push, pull_request]
 
+env:
+  PY_COLORS: "1"
+
 jobs:
-  test:
+  codegen:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
       matrix:
-        python-version: [3.6, 3.9]
+        python-version: ["3.6", "3.10"]
+      fail-fast: false
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install coveralls
+        pip install nala
+        pip install -e .
     - name: Test
       run: |
-        coverage run --source=cantools setup.py test
-        make test-sdist
         env PYTHONPATH=. python examples/hello_world.py
         env PYTHONPATH=. python examples/diagnostics/did.py
         make test-c-clean
@@ -34,20 +35,59 @@ jobs:
         CC=clang make test-c-src
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
+      with:
+        parallel: true
+        flag-name: Code Generator Test
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.6", "3.10"]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox
+    - name: Test
+      run: |
+        tox -e gh
+    - name: Coveralls
+      if: matrix.os == 'ubuntu-latest'
+      uses: AndreMiras/coveralls-python-action@develop
+      with:
+        parallel: true
+        flag-name: Test ${{ matrix.os }} ${{ matrix.python-version }}
+
+  coveralls_finish:
+    needs: [test, codegen]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel-finished: true
 
   linter:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python 3.10
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: "3.10"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
+        pip install mypy
+        pip install -e .[plot]
     - name: Static type checking with mypy
       run: |
         mypy --python-version 3.6 .
@@ -56,18 +96,31 @@ jobs:
         mypy --python-version 3.9 .
         mypy --python-version 3.10 .
 
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Build wheel and sdist
+        run: pipx run build
+      - name: Check build artifacts
+        run: pipx run twine check --strict dist/*
+
   release:
-    needs: [test]
-    runs-on: ubuntu-20.04
+    needs: [test, codegen, linter, build]
+    runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags')
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v1
+      uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: "3.10"
     - name: Install pypa/build
       run: |
         python -m pip install build --user

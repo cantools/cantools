@@ -14,7 +14,7 @@ environment:
 install:
   - SET PATH=%PYTHON%;%PATH%
   - python --version
-  - python -m pip install -r requirements.txt
+  - pip install tox
 
 test_script:
-  - python setup.py test
+  - tox

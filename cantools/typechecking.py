@@ -55,12 +55,12 @@ ContainerDecodeResultType = Sequence[
     Union[Tuple["Message", SignalMappingType], Tuple[int, bytes]]
 ]
 ContainerDecodeResultListType = List[
-    Union[Tuple["Message", SignalMappingType], Tuple[int, bytes]]
+    Union[Tuple["Message", SignalDictType], Tuple[int, bytes]]
 ]
 ContainerEncodeInputType = Sequence[
     Tuple[ContainerHeaderSpecType, Union[bytes, SignalMappingType]]
 ]
-DecodeResultType = Union[SignalMappingType, ContainerDecodeResultType]
+DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]

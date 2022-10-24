@@ -29,6 +29,7 @@ from ..errors import DecodeError
 from ...typechecking import (
     Comments,
     Codec,
+    SignalDictType,
     SignalMappingType,
     ContainerHeaderSpecType,
     ContainerDecodeResultType,
@@ -521,7 +522,7 @@ class Message(object):
     def gather_signals(self,
                        input_data: SignalMappingType,
                        node: Optional[Codec] = None) \
-      -> SignalMappingType:
+      -> SignalDictType:
 
         '''Given a superset of all signals required to encode the message,
         return a dictionary containing exactly the ones required.
@@ -954,7 +955,7 @@ class Message(object):
                 data: bytes,
                 decode_choices: bool,
                 scaling: bool,
-                allow_truncated: bool) -> SignalMappingType:
+                allow_truncated: bool) -> SignalDictType:
         decoded = decode_data(data,
                               self.length,
                               node['signals'],
@@ -1103,7 +1104,7 @@ class Message(object):
                       decode_choices: bool = True,
                       scaling: bool = True,
                       allow_truncated: bool = False) \
-                      -> SignalMappingType:
+                      -> SignalDictType:
         """Decode given data as a container message.
 
         This method is identical to ``decode()`` except that the

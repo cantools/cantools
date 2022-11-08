@@ -15,6 +15,7 @@ setup(name='cantools',
       version=find_version(),
       description='CAN BUS tools.',
       long_description=open('README.rst', 'r').read(),
+      long_description_content_type='text/x-rst',
       author='Erik Moqvist',
       author_email='erik.moqvist@gmail.com',
       license='MIT',
@@ -27,8 +28,8 @@ setup(name='cantools',
       package_data={"cantools": ["py.typed"]},
       python_requires='>=3.6',
       install_requires=[
-          'bitstruct>=6.0.0',
-          'python-can>=2.2.0',
+          'bitstruct>=8.15.1',
+          'python-can>=3.3.4',
           'textparser>=0.21.1',
           'diskcache',
           'argparse_addons',
@@ -39,6 +40,6 @@ setup(name='cantools',
           plot=['matplotlib'],
       ),
       test_suite="tests",
-      entry_points = {
+      entry_points={
           'console_scripts': ['cantools=cantools.__init__:_main']
       })

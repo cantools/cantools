@@ -10,6 +10,7 @@ from typing_extensions import Literal, Final
 from cantools.typechecking import (
     Formats,
     Choices,
+    SignalMappingType,
     SignalDictType,
     ByteOrder,
 )
@@ -56,7 +57,7 @@ def start_bit(data: Union["Data", "Signal"]) -> int:
 
 
 def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
-                   data: SignalDictType,
+                   data: SignalMappingType,
                    scaling: bool,
                    ) -> Dict[str, Union[int, float]]:
     unpacked = {}
@@ -82,7 +83,7 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
     return unpacked
 
 
-def encode_data(data: SignalDictType,
+def encode_data(data: SignalMappingType,
                 fields: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
                 scaling: bool

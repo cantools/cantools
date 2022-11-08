@@ -16,7 +16,7 @@ from .formats import sym
 from .formats.arxml import AutosarDatabaseSpecifics
 from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
-from .message import Message, EncodeInputType, DecodeResultType
+from .message import Message
 from .node import Node
 from ..errors import DecodeError
 from ..utils import (
@@ -27,7 +27,7 @@ from ..utils import (
     SORT_SIGNALS_DEFAULT
 )
 from ...compat import fopen
-from ...typechecking import StringPathLike
+from ...typechecking import StringPathLike, EncodeInputType, DecodeResultType
 
 LOGGER = logging.getLogger(__name__)
 

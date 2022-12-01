@@ -1,7 +1,7 @@
 # DID data.
 from typing import Optional
 
-from cantools.typechecking import ByteOrder, Choices
+from ...typechecking import ByteOrder, Choices
 
 
 class Data(object):

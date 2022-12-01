@@ -1,13 +1,13 @@
-from cantools.database.can.database import Database
-from cantools.database.can.message import Message
-from cantools.database.can.signal import NamedSignalValue
+from ..database.can.database import Database
+from ..database.can.message import Message
+from ..database.can.signal import NamedSignalValue
 
 from typing import (
     Union,
     Iterable,
 )
 
-from cantools.typechecking import (
+from ..typechecking import (
     SignalDictType,
     ContainerUnpackResultType,
     ContainerDecodeResultType,

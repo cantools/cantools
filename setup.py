@@ -2,6 +2,7 @@
 
 from setuptools import setup
 from setuptools import find_packages
+import sys
 import re
 
 
@@ -10,6 +11,24 @@ def find_version():
                      open('cantools/version.py', 'r').read(),
                      re.MULTILINE).group(1)
 
+
+def dependencies():
+    deps = [
+        'bitstruct>=8.15.1',
+        'python-can>=3.3.4',
+        'textparser>=0.21.1',
+        'diskcache',
+        'argparse_addons',
+        'typing_extensions>=3.10.0.0',
+        'crccheck',
+    ]
+
+    if sys.platform == 'win32':
+        deps += [
+            'windows-curses'
+        ]
+
+    return deps
 
 setup(name='cantools',
       version=find_version(),
@@ -27,15 +46,7 @@ setup(name='cantools',
       packages=find_packages(exclude=['tests']),
       package_data={"cantools": ["py.typed"]},
       python_requires='>=3.6',
-      install_requires=[
-          'bitstruct>=8.15.1',
-          'python-can>=3.3.4',
-          'textparser>=0.21.1',
-          'diskcache',
-          'argparse_addons',
-          'typing_extensions>=3.10.0.0',
-          'crccheck',
-      ],
+      install_requires=dependencies(),
       extras_require=dict(
           plot=['matplotlib'],
       ),

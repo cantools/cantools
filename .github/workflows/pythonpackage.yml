@@ -7,7 +7,7 @@ env:
 
 jobs:
   codegen:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: ["3.6", "3.10"]
@@ -41,10 +41,22 @@ jobs:
 
   test:
     runs-on: ${{ matrix.os }}
+    if: ! ${{ matrix.skip_job }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, ubuntu-20.04, macos-latest, windows-latest]
+        # we cannot simply define a matrix with python versions 3.6
+        # and 3.10 directly because python 3.6 is not available on
+        # ubuntu-latest anymore. The workaround is to make the job
+        # conditional on the "skip-job" variable specified via matrix
+        # includes and only set it to true for illegal combinations
         python-version: ["3.6", "3.10"]
+        include:
+          - skip-job: false
+
+          - os: ubuntu-latest
+            python-version: 3.6
+            skip-job: true
       fail-fast: false
     steps:
     - uses: actions/checkout@v3

@@ -41,22 +41,34 @@ jobs:
 
   test:
     runs-on: ${{ matrix.os }}
-    if: ! ${{ matrix.skip_job }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04, macos-latest, windows-latest]
-        # we cannot simply define a matrix with python versions 3.6
-        # and 3.10 directly because python 3.6 is not available on
-        # ubuntu-latest anymore. The workaround is to make the job
-        # conditional on the "skip-job" variable specified via matrix
-        # includes and only set it to true for illegal combinations
-        python-version: ["3.6", "3.10"]
         include:
-          - skip-job: false
 
-          - os: ubuntu-latest
-            python-version: 3.6
-            skip-job: true
+          # we cannot simply define a matrix for [ubuntu-latest,
+          # macos-latest, windows-latest] times [python-3.6 ,
+          # python-3.10] directly because python 3.6 is not available on
+          # ubuntu-latest anymore. The workaround is to make a long 1D
+          # matrix and set the matrix variables manually via
+          # includes. This is pretty clunky, but job-conditionals are
+          # not allowed to depend on matrix variables and other
+          # solutions like preparing the matrix using a separate job
+          # seem to be even more cumbersome...
+          - os: "ubuntu-20.04"
+            python-version: "3.6"
+          - os: "ubuntu-latest"
+            python-version: "3.8"
+          - os: "ubuntu-latest"
+            python-version: "3.10"
+          - os: "windows-latest"
+            python-version: "3.6"
+          - os: windows-latest
+            python-version: "3.10"
+          - os: "macos-latest"
+            python-version: "3.6"
+          - os: "macos-latest"
+            python-version: "3.10"
+
       fail-fast: false
     steps:
     - uses: actions/checkout@v3

@@ -917,19 +917,20 @@ def _format_pack_code_signal(message,
                              signal_name,
                              body_lines,
                              variable_lines,
-                             helper_kinds):
+                             helper_kinds,
+                             original_casing):
     signal = message.get_signal_by_name(signal_name)
 
     if signal.is_float or signal.is_signed:
         variable = '    uint{}_t {};'.format(signal.type_length,
-                                             signal.snake_name)
+                                             signal.snake_name if not original_casing else signal.name)
 
         if signal.is_float:
             conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
-                signal.snake_name)
+                signal.snake_name if not original_casing else signal.name)
         else:
             conversion = '    {0} = (uint{1}_t)src_p->{0};'.format(
-                signal.snake_name,
+                signal.snake_name if not original_casing else signal.name,
                 signal.type_length)
 
         variable_lines.append(variable)
@@ -944,7 +945,7 @@ def _format_pack_code_signal(message,
         line = fmt.format(index,
                           shift_direction,
                           signal.type_length,
-                          signal.snake_name,
+                          signal.snake_name if not original_casing else signal.name,
                           shift,
                           mask)
         body_lines.append(line)
@@ -954,7 +955,8 @@ def _format_pack_code_signal(message,
 def _format_pack_code_level(message,
                             signal_names,
                             variable_lines,
-                            helper_kinds):
+                            helper_kinds,
+                            original_casing):
     """Format one pack level in a signal tree.
 
     """
@@ -968,14 +970,16 @@ def _format_pack_code_level(message,
                                               signal_name,
                                               body_lines,
                                               variable_lines,
-                                              helper_kinds)
+                                              helper_kinds,
+                                              original_casing)
             muxes_lines += mux_lines
         else:
             _format_pack_code_signal(message,
                                      signal_name,
                                      body_lines,
                                      variable_lines,
-                                     helper_kinds)
+                                     helper_kinds,
+                                     original_casing)
 
     body_lines = body_lines + muxes_lines
 
@@ -985,12 +989,13 @@ def _format_pack_code_level(message,
     return body_lines
 
 
-def _format_pack_code(message, helper_kinds):
+def _format_pack_code(message, helper_kinds, original_casing):
     variable_lines = []
     body_lines = _format_pack_code_level(message,
                                          message.signal_tree,
                                          variable_lines,
-                                         helper_kinds)
+                                         helper_kinds,
+                                         original_casing)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -1003,15 +1008,17 @@ def _format_unpack_code_mux(message,
                             body_lines_per_index,
                             variable_lines,
                             helper_kinds,
-                            node_name):
+                            node_name,
+                            original_casing):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_unpack_code_signal(message,
                                signal_name,
                                body_lines_per_index,
                                variable_lines,
-                               helper_kinds)
+                               helper_kinds,
+                               original_casing)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
-    signal_name = camel_to_snake_case(signal_name)
+    signal_name = camel_to_snake_case(signal_name) if not original_casing else signal_name
 
     lines = [
         'switch (dst_p->{}) {{'.format(signal_name)
@@ -1022,7 +1029,8 @@ def _format_unpack_code_mux(message,
                                                multiplexed_signals,
                                                variable_lines,
                                                helper_kinds,
-                                               node_name)
+                                               node_name,
+                                               original_casing)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
         lines.extend(_strip_blank_lines(body_lines))
@@ -1041,12 +1049,13 @@ def _format_unpack_code_signal(message,
                                signal_name,
                                body_lines,
                                variable_lines,
-                               helper_kinds):
+                               helper_kinds,
+                               original_casing):
     signal = message.get_signal_by_name(signal_name)
     conversion_type_name = 'uint{}_t'.format(signal.type_length)
 
     if signal.is_float or signal.is_signed:
-        variable = '    {} {};'.format(conversion_type_name, signal.snake_name)
+        variable = '    {} {};'.format(conversion_type_name, signal.snake_name if not original_casing else signal.name)
         variable_lines.append(variable)
 
     segments = signal.segments(invert_shift=True)
@@ -1057,7 +1066,7 @@ def _format_unpack_code_signal(message,
         else:
             fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
-        line = fmt.format(signal.snake_name,
+        line = fmt.format(signal.snake_name if not original_casing else signal.name,
                           '=' if i == 0 else '|=',
                           shift_direction,
                           signal.type_length,
@@ -1069,20 +1078,20 @@ def _format_unpack_code_signal(message,
 
     if signal.is_float:
         conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
-            signal.snake_name)
+            signal.snake_name if not original_casing else signal.name)
         body_lines.append(conversion)
     elif signal.is_signed:
         mask = ((1 << (signal.type_length - signal.length)) - 1)
 
         if mask != 0:
             mask <<= signal.length
-            formatted = SIGN_EXTENSION_FMT.format(name=signal.snake_name,
+            formatted = SIGN_EXTENSION_FMT.format(name=signal.snake_name if not original_casing else signal.name,
                                                   shift=signal.length - 1,
                                                   mask=mask,
                                                   suffix=signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
 
-        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal.snake_name,
+        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(signal.snake_name if not original_casing else signal.name,
                                                               signal.type_length)
         body_lines.append(conversion)
 
@@ -1091,7 +1100,8 @@ def _format_unpack_code_level(message,
                               signal_names,
                               variable_lines,
                               helper_kinds,
-                              node_name):
+                              node_name,
+                              original_casing):
     """Format one unpack level in a signal tree.
 
     """
@@ -1106,7 +1116,8 @@ def _format_unpack_code_level(message,
                                                 body_lines,
                                                 variable_lines,
                                                 helper_kinds,
-                                                node_name)
+                                                node_name,
+                                                original_casing)
 
             if muxes_lines:
                 muxes_lines.append('')
@@ -1120,7 +1131,8 @@ def _format_unpack_code_level(message,
                                        signal_name,
                                        body_lines,
                                        variable_lines,
-                                       helper_kinds)
+                                       helper_kinds,
+                                       original_casing)
 
     if body_lines:
         if body_lines[-1] != '':
@@ -1137,13 +1149,14 @@ def _format_unpack_code_level(message,
     return body_lines
 
 
-def _format_unpack_code(message, helper_kinds, node_name):
+def _format_unpack_code(message, helper_kinds, node_name, original_casing):
     variable_lines = []
     body_lines = _format_unpack_code_level(message,
                                            message.signal_tree,
                                            variable_lines,
                                            helper_kinds,
-                                           node_name)
+                                           node_name,
+                                           original_casing)
 
     if variable_lines:
         variable_lines = sorted(list(set(variable_lines))) + ['', '']
@@ -1491,10 +1504,12 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
 
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,
-                                                          pack_helper_kinds)
+                                                          pack_helper_kinds,
+                                                          original_casing)
             unpack_variables, unpack_body = _format_unpack_code(message,
                                                                 unpack_helper_kinds,
-                                                                node_name)
+                                                                node_name,
+                                                                original_casing)
             pack_unused = ''
             unpack_unused = ''
 

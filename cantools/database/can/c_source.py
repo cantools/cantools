@@ -850,7 +850,7 @@ def _format_range(signal):
         return '-'
 
 
-def _generate_signal(signal, bit_fields):
+def _generate_signal(signal, bit_fields, original_casing):
     comment = _format_comment(signal.comment)
     range_ = _format_range(signal)
     scale = _get(signal.scale, '-')
@@ -866,7 +866,7 @@ def _generate_signal(signal, bit_fields):
                                       scale=scale,
                                       offset=offset,
                                       type_name=signal.type_name,
-                                      name=signal.snake_name,
+                                      name=signal.snake_name if not original_casing else signal.name,
                                       length=length)
 
     return member
@@ -1151,11 +1151,11 @@ def _format_unpack_code(message, helper_kinds, node_name):
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _generate_struct(message, bit_fields):
+def _generate_struct(message, bit_fields, original_casing):
     members = []
 
     for signal in message.signals:
-        members.append(_generate_signal(signal, bit_fields))
+        members.append(_generate_signal(signal, bit_fields, original_casing))
 
     if not members:
         members = [
@@ -1281,21 +1281,21 @@ def _generate_is_in_range(message):
     return checks
 
 
-def _generate_frame_id_defines(database_name, messages, node_name):
+def _generate_frame_id_defines(database_name, messages, node_name, original_casing):
     return '\n'.join([
         '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.snake_name.upper() if not original_casing else message.name.upper(),
             message.frame_id)
         for message in messages if _is_sender_or_receiver(message, node_name)
     ])
 
 
-def _generate_frame_length_defines(database_name, messages, node_name):
+def _generate_frame_length_defines(database_name, messages, node_name, original_casing):
     result = '\n'.join([
         '#define {}_{}_LENGTH ({}u)'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.snake_name.upper() if not original_casing else message.name.upper(),
             message.length)
         for message in messages if _is_sender_or_receiver(message, node_name)
     ])
@@ -1303,11 +1303,11 @@ def _generate_frame_length_defines(database_name, messages, node_name):
     return result
 
 
-def _generate_frame_cycle_time_defines(database_name, messages, node_name):
+def _generate_frame_cycle_time_defines(database_name, messages, node_name, original_casing):
     result = '\n'.join([
         '#define {}_{}_CYCLE_TIME_MS ({}u)'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.snake_name.upper() if not original_casing else message.name.upper(),
             message.cycle_time)
         for message in messages if message.cycle_time is not None and
                                 _is_sender_or_receiver(message, node_name)
@@ -1316,11 +1316,11 @@ def _generate_frame_cycle_time_defines(database_name, messages, node_name):
     return result
 
 
-def _generate_is_extended_frame_defines(database_name, messages, node_name):
+def _generate_is_extended_frame_defines(database_name, messages, node_name, original_casing):
     result = '\n'.join([
         '#define {}_{}_IS_EXTENDED ({})'.format(
             database_name.upper(),
-            message.snake_name.upper(),
+            message.snake_name.upper() if not original_casing else message.name.upper(),
             int(message.is_extended_frame))
         for message in messages if _is_sender_or_receiver(message, node_name)
     ])
@@ -1328,7 +1328,7 @@ def _generate_is_extended_frame_defines(database_name, messages, node_name):
     return result
 
 
-def _generate_choices_defines(database_name, messages, node_name):
+def _generate_choices_defines(database_name, messages, node_name, original_casing):
     choices_defines = []
 
     for message in messages:
@@ -1339,10 +1339,10 @@ def _generate_choices_defines(database_name, messages, node_name):
             if not is_sender and not _is_receiver(signal, node_name):
                 continue
 
-            choices = _format_choices(signal, signal.snake_name)
+            choices = _format_choices(signal, signal.snake_name if not original_casing else signal.name)
             signal_choices_defines = '\n'.join([
                 '#define {}_{}_{}'.format(database_name.upper(),
-                                          message.snake_name.upper(),
+                                          message.snake_name.upper() if not original_casing else message.name.upper(),
                                           choice)
                 for choice in choices
             ])
@@ -1351,16 +1351,16 @@ def _generate_choices_defines(database_name, messages, node_name):
     return '\n\n'.join(choices_defines)
 
 
-def _generate_structs(database_name, messages, bit_fields, node_name):
+def _generate_structs(database_name, messages, bit_fields, node_name, original_casing):
     structs = []
 
     for message in messages:
         if _is_sender_or_receiver(message, node_name):
-            comment, members = _generate_struct(message, bit_fields)
+            comment, members = _generate_struct(message, bit_fields, original_casing)
             structs.append(
                 STRUCT_FMT.format(comment=comment,
                                 database_message_name=message.name,
-                                message_name=message.snake_name,
+                                message_name=message.snake_name if not original_casing else message.name,
                                 database_name=database_name,
                                 members='\n\n'.join(members)))
 
@@ -1380,7 +1380,7 @@ def _is_sender_or_receiver(message, node_name):
 def _get_floating_point_type(use_float):
     return 'float' if use_float else 'double'
 
-def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name):
+def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name, original_casing):
     declarations = []
 
     for message in messages:
@@ -1398,23 +1398,23 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                 if is_sender:
                     signal_declaration += SIGNAL_DECLARATION_ENCODE_FMT.format(
                         database_name=database_name,
-                        message_name=message.snake_name,
-                        signal_name=signal.snake_name,
+                        message_name=message.snake_name if not original_casing else message.name,
+                        signal_name=signal.snake_name if not original_casing else signal.name,
                         type_name=signal.type_name,
                         floating_point_type=_get_floating_point_type(use_float))
                 if node_name is None or _is_receiver(signal, node_name):
                     signal_declaration += SIGNAL_DECLARATION_DECODE_FMT.format(
                         database_name=database_name,
-                        message_name=message.snake_name,
-                        signal_name=signal.snake_name,
+                        message_name=message.snake_name if not original_casing else message.name,
+                        signal_name=signal.snake_name if not original_casing else signal.name,
                         type_name=signal.type_name,
                         floating_point_type=_get_floating_point_type(use_float))
 
             if is_sender or _is_receiver(signal, node_name):
                 signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_FMT.format(
                     database_name=database_name,
-                    message_name=message.snake_name,
-                    signal_name=signal.snake_name,
+                    message_name=message.snake_name if not original_casing else message.name,
+                    signal_name=signal.snake_name if not original_casing else signal.name,
                     type_name=signal.type_name)
                 
                 signal_declarations.append(signal_declaration)
@@ -1422,11 +1422,11 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
         if is_sender:
             declaration += DECLARATION_PACK_FMT.format(database_name=database_name,
                                                        database_message_name=message.name,
-                                                       message_name=message.snake_name)
+                                                       message_name=message.snake_name if not original_casing else message.name)
         if is_receiver:
             declaration += DECLARATION_UNPACK_FMT.format(database_name=database_name,
                                                          database_message_name=message.name,
-                                                         message_name=message.snake_name)
+                                                         message_name=message.snake_name if not original_casing else message.name)
 
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
@@ -1437,7 +1437,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
     return '\n'.join(declarations)
 
 
-def _generate_definitions(database_name, messages, floating_point_numbers, use_float, node_name):
+def _generate_definitions(database_name, messages, floating_point_numbers, use_float, node_name, original_casing):
     definitions = []
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
@@ -1464,16 +1464,16 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                 if is_sender:
                     signal_definition += SIGNAL_DEFINITION_ENCODE_FMT.format(
                         database_name=database_name,
-                        message_name=message.snake_name,
-                        signal_name=signal.snake_name,
+                        message_name=message.snake_name if not original_casing else message.name,
+                        signal_name=signal.snake_name if not original_casing else signal.name,
                         type_name=signal.type_name,
                         encode=encode,
                         floating_point_type=_get_floating_point_type(use_float))
                 if node_name is None or _is_receiver(signal, node_name):
                     signal_definition += SIGNAL_DEFINITION_DECODE_FMT.format(
                         database_name=database_name,
-                        message_name=message.snake_name,
-                        signal_name=signal.snake_name,
+                        message_name=message.snake_name if not original_casing else message.name,
+                        signal_name=signal.snake_name if not original_casing else signal.name,
                         type_name=signal.type_name,
                         decode=decode,
                         floating_point_type=_get_floating_point_type(use_float))
@@ -1481,8 +1481,8 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
             if is_sender or _is_receiver(signal, node_name):
                 signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
                     database_name=database_name,
-                    message_name=message.snake_name,
-                    signal_name=signal.snake_name,
+                    message_name=message.snake_name if not original_casing else message.name,
+                    signal_name=signal.snake_name if not original_casing else signal.name,
                     type_name=signal.type_name,
                     unused=unused,
                     check=check)
@@ -1509,7 +1509,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
             if is_sender:
                 definition += DEFINITION_PACK_FMT.format(database_name=database_name,
                                                          database_message_name=message.name,
-                                                         message_name=message.snake_name,
+                                                         message_name=message.snake_name if not original_casing else message.name,
                                                          message_length=message.length,
                                                          pack_unused=pack_unused,
                                                          pack_variables=pack_variables,
@@ -1517,14 +1517,14 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
             if is_receiver:
                 definition += DEFINITION_UNPACK_FMT.format(database_name=database_name,
                                                            database_message_name=message.name,
-                                                           message_name=message.snake_name,
+                                                           message_name=message.snake_name if not original_casing else message.name,
                                                            message_length=message.length,
                                                            unpack_unused=unpack_unused,
                                                            unpack_variables=unpack_variables,
                                                            unpack_body=unpack_body)
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
-                                                     message_name=message.snake_name)
+                                                     message_name=message.snake_name if not original_casing else message.name)
 
         if signal_definitions:
             definition += '\n' + '\n'.join(signal_definitions)
@@ -1571,13 +1571,14 @@ def _generate_fuzzer_source(database_name,
                             date,
                             header_name,
                             source_name,
-                            fuzzer_source_name):
+                            fuzzer_source_name,
+                            original_casing):
     tests = []
     calls = []
 
     for message in messages:
         name = '{}_{}'.format(database_name,
-                              camel_to_snake_case(message.name))
+                              camel_to_snake_case(message.name) if not original_casing else message.name)
 
         test = TEST_FMT.format(name=name)
         tests.append(test)
@@ -1607,7 +1608,8 @@ def generate(database,
              floating_point_numbers=True,
              bit_fields=False,
              use_float=False,
-             node_name=None):
+             node_name=None,
+             original_casing=False):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1634,6 +1636,9 @@ def generate(database,
     For all other messages, unpackers will be generated. If `node_name` is not
     provided, both packers and unpackers will be generated. 
 
+    `original_casing` specifies whether the casing of the messages and 
+    signals of the dbc will stay the same in the .c and .h files
+
     This function returns a tuple of the C header and source files as
     strings.
 
@@ -1642,30 +1647,35 @@ def generate(database,
     date = time.ctime()
     messages = [Message(message) for message in database.messages]
     include_guard = '{}_H'.format(database_name.upper())
-    frame_id_defines = _generate_frame_id_defines(database_name, messages, node_name)
+    frame_id_defines = _generate_frame_id_defines(database_name, messages, node_name, original_casing)
     frame_length_defines = _generate_frame_length_defines(database_name,
                                                           messages,
-                                                          node_name)
+                                                          node_name,
+                                                          original_casing)
     is_extended_frame_defines = _generate_is_extended_frame_defines(
         database_name,
         messages,
-        node_name)
+        node_name,
+        original_casing)
     frame_cycle_time_defines = _generate_frame_cycle_time_defines(
         database_name,
         messages,
-        node_name)
-    choices_defines = _generate_choices_defines(database_name, messages, node_name)
-    structs = _generate_structs(database_name, messages, bit_fields, node_name)
+        node_name,
+        original_casing)
+    choices_defines = _generate_choices_defines(database_name, messages, node_name, original_casing)
+    structs = _generate_structs(database_name, messages, bit_fields, node_name, original_casing)
     declarations = _generate_declarations(database_name,
                                           messages,
                                           floating_point_numbers,
                                           use_float,
-                                          node_name)
+                                          node_name,
+                                          original_casing)
     definitions, helper_kinds = _generate_definitions(database_name,
                                                       messages,
                                                       floating_point_numbers,
                                                       use_float,
-                                                      node_name)
+                                                      node_name,
+                                                      original_casing)
     helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(version=__version__,
@@ -1691,6 +1701,7 @@ def generate(database,
         date,
         header_name,
         source_name,
-        fuzzer_source_name)
+        fuzzer_source_name,
+        original_casing)
 
     return header, source, fuzzer_source, fuzzer_makefile

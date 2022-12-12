@@ -7,10 +7,10 @@ env:
 
 jobs:
   codegen:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.6", "3.10"]
+        python-version: ["3.8", "3.10"]
       fail-fast: false
     steps:
     - uses: actions/checkout@v3
@@ -43,32 +43,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-
-          # we cannot simply define a matrix for [ubuntu-latest,
-          # macos-latest, windows-latest] times [python-3.6 ,
-          # python-3.10] directly because python 3.6 is not available on
-          # ubuntu-latest anymore. The workaround is to make a long 1D
-          # matrix and set the matrix variables manually via
-          # includes. This is pretty clunky, but job-conditionals are
-          # not allowed to depend on matrix variables and other
-          # solutions like preparing the matrix using a separate job
-          # seem to be even more cumbersome...
-          - os: "ubuntu-20.04"
-            python-version: "3.6"
-          - os: "ubuntu-latest"
-            python-version: "3.8"
-          - os: "ubuntu-latest"
-            python-version: "3.10"
-          - os: "windows-latest"
-            python-version: "3.6"
-          - os: windows-latest
-            python-version: "3.10"
-          - os: "macos-latest"
-            python-version: "3.6"
-          - os: "macos-latest"
-            python-version: "3.10"
-
+        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
+        python-version: ["3.8", "3.10"]
       fail-fast: false
     steps:
     - uses: actions/checkout@v3
@@ -80,6 +56,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install tox
+    - name: Install optional windows dependencies
+      run: |
+        python -m pip install -e ".[windows-all]"
     - name: Test
       run: |
         tox -e gh

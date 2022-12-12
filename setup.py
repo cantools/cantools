@@ -2,7 +2,6 @@
 
 from setuptools import setup
 from setuptools import find_packages
-import sys
 import re
 
 
@@ -11,24 +10,6 @@ def find_version():
                      open('cantools/version.py', 'r').read(),
                      re.MULTILINE).group(1)
 
-
-def dependencies():
-    deps = [
-        'bitstruct>=8.15.1',
-        'python-can>=3.3.4',
-        'textparser>=0.21.1',
-        'diskcache',
-        'argparse_addons',
-        'typing_extensions>=3.10.0.0',
-        'crccheck',
-    ]
-
-    if sys.platform == 'win32':
-        deps += [
-            'windows-curses'
-        ]
-
-    return deps
 
 setup(name='cantools',
       version=find_version(),
@@ -45,11 +26,20 @@ setup(name='cantools',
       url='https://github.com/eerimoq/cantools',
       packages=find_packages(exclude=['tests']),
       package_data={"cantools": ["py.typed"]},
-      python_requires='>=3.6',
-      install_requires=dependencies(),
-      extras_require=dict(
-          plot=['matplotlib'],
-      ),
+      python_requires='>=3.8',
+      install_requires=[
+          'bitstruct>=8.15.1',
+          'python-can>=3.3.4',
+          'textparser>=0.21.1',
+          'diskcache',
+          'argparse_addons',
+          'typing_extensions>=3.10.0.0',
+          'crccheck',
+      ],
+      extras_require={
+          'plot': ['matplotlib'],
+          'windows-all': ["windows-curses;platform_system=='Windows'"],
+      },
       test_suite="tests",
       entry_points={
           'console_scripts': ['cantools=cantools.__init__:_main']

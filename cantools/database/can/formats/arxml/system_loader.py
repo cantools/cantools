@@ -1797,8 +1797,8 @@ class SystemLoader(object):
         # convert interval of the domain to the interval of the range
         minimum = None if lower_limit is None else lower_limit*factor + offset
         maximum = None if upper_limit is None else upper_limit*factor + offset
-        decimal.minimum = minimum
-        decimal.maximum = maximum
+        decimal.minimum = None if minimum is None else Decimal(minimum)
+        decimal.maximum = None if maximum is None else Decimal(maximum)
 
         return minimum, maximum, factor, offset
 

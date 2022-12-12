@@ -1,6 +1,14 @@
 import unittest
-import curses
 import traceback
+
+try:
+    import curses
+    have_curses = True
+except (ImportError, ModuleNotFoundError) as e:
+    # on windows, the batteries for the curses package are not
+    # included by default (there is a "windows-curses" package
+    # available, though)
+    have_curses = False
 
 try:
     from unittest.mock import Mock
@@ -12,7 +20,8 @@ except ImportError:
     from mock import call
 
 import can
-from cantools.subparsers.monitor import Monitor
+if have_curses:
+    from cantools.subparsers.monitor import Monitor
 
 
 class Args(object):
@@ -51,7 +60,8 @@ class StdScr(object):
         self.getkey = Mock(side_effect=user_input)
         self.move = Mock()
 
-
+@unittest.skipIf(not have_curses,
+                 "The curses module is not available on your system")
 class CanToolsMonitorTest(unittest.TestCase):
 
     maxDiff = None

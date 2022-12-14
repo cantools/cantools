@@ -18,8 +18,8 @@ from bitstruct import CompiledFormatDict
 if TYPE_CHECKING:
     import os
     import sys
-    from cantools.database import Signal, Message
-    from cantools.database.can.signal import NamedSignalValue
+    from .database import Signal, Message
+    from .database.can.signal import NamedSignalValue
 
 
 class Formats(NamedTuple):

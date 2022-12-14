@@ -2,11 +2,11 @@
 import typing
 from typing import Optional
 
-from cantools.typechecking import Comments
+from ...typechecking import Comments
 
 if typing.TYPE_CHECKING:
-    from cantools.database.can.formats.arxml import AutosarNodeSpecifics
-    from cantools.database.can.formats.dbc import DbcSpecifics
+    from ...database.can.formats.arxml import AutosarNodeSpecifics
+    from ...database.can.formats.dbc import DbcSpecifics
 
 
 class Node(object):

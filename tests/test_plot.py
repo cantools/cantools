@@ -113,7 +113,7 @@ class CanToolsPlotTest(unittest.TestCase):
 
     DBC_FILE = os.path.join(os.path.split(__file__)[0], 'files/dbc/abs.dbc')
     DBC_FILE_CHOICES = os.path.join(os.path.split(__file__)[0], 'files/dbc/choices.dbc')
-    REO_TIMESTAMP = re.compile('\(([^)]+)\)')
+    REO_TIMESTAMP = re.compile(r'\(([^)]+)\)')
     FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
     FORMAT_START_TIME = "%d.%m.%Y"
 

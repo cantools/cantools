@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from .secoc_properties import AutosarSecOCProperties
 from .end_to_end_properties import AutosarEnd2EndProperties
@@ -10,8 +10,8 @@ class AutosarMessageSpecifics(object):
     by ARXML files, but is specific to AUTOSAR.
     """
 
-    def __init__(self):
-        self._pdu_paths = []
+    def __init__(self) -> None:
+        self._pdu_paths: List[str] = []
         self._is_nm = False
         self._is_general_purpose = False
         self._secoc: Optional[AutosarSecOCProperties] = None

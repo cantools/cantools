@@ -15,7 +15,6 @@ exclude = "^(?!cantools).*$"
 [[tool.mypy.overrides]]
 module = [
     "argparse_addons",
-    "can",  # v4.0.0 will be typed
     "diskcache",
     "textparser",
     "bitstruct",

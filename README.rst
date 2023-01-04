@@ -32,7 +32,7 @@ Documentation: https://cantools.readthedocs.io
 Installation
 ============
 
-.. code-block:: python
+.. code-block:: bash
 
     python3 -m pip install cantools
 
@@ -191,7 +191,7 @@ For more information see
 Note that by default matplotlib is not installed with cantools. But it can be by specifying an extra
 at installation:
 
-.. code-block:: python
+.. code-block:: bash
 
     $ python3 -m pip install cantools[plot]
 

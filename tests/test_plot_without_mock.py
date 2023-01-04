@@ -39,7 +39,7 @@ class CanToolsPlotTest(unittest.TestCase):
 
     def test_plot_style(self):
         self.assertFalse(os.path.exists(self.FN_OUT))
-        argv = ['cantools', 'plot', '--style', 'seaborn', '-o', self.FN_OUT, self.DBC_FILE]
+        argv = ['cantools', 'plot', '--style', 'seaborn-v0_8-muted', '-o', self.FN_OUT, self.DBC_FILE]
         input_data = """\
  (000.000000)  vcan0  00000343   [8]  C5 04 B7 04 9B 04 C5 04
  (001.001787)  vcan0  00000343   [8]  69 04 69 04 77 04 7E 04

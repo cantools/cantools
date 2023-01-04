@@ -25,7 +25,7 @@ import cantools
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-# needs_sphinx = '1.0'
+# needs_sphinx = "1.0"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -45,11 +45,11 @@ templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-# source_suffix = ['.rst', '.md']
+# source_suffix = [".rst", ".md"]
 source_suffix = ".rst"
 
 # The encoding of source files.
-# source_encoding = 'utf-8-sig'
+# source_encoding = "utf-8-sig"
 
 # The master toctree document.
 master_doc = "index"
@@ -77,9 +77,9 @@ language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
-# today = ''
+# today = ""
 # Else, today_fmt is used as the format for a strftime call.
-# today_fmt = '%B %d, %Y'
+# today_fmt = "%B %d, %Y"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -155,7 +155,7 @@ html_static_path = ["_static"]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-# html_last_updated_fmt = '%b %d, %Y'
+# html_last_updated_fmt = "%b %d, %Y"
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -189,7 +189,7 @@ html_static_path = ["_static"]
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
 # base URL from which the finished HTML is served.
-# html_use_opensearch = ''
+# html_use_opensearch = ""
 
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 # html_file_suffix = None
@@ -198,15 +198,15 @@ html_static_path = ["_static"]
 # Sphinx supports the following languages:
 #   'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja'
 #   'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr'
-# html_search_language = 'en'
+# html_search_language = "en"
 
 # A dictionary with options for the search language support, empty by default.
 # Now only 'ja' uses this config value
-# html_search_options = {'type': 'default'}
+# html_search_options = {"type": "default"}
 
 # The name of a javascript file (relative to the configuration directory) that
 # implements a search results scorer. If empty, the default will be used.
-# html_search_scorer = 'scorer.js'
+# html_search_scorer = "scorer.js"
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "cantoolsdoc"
@@ -215,13 +215,13 @@ htmlhelp_basename = "cantoolsdoc"
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+    # "papersize": "letterpaper",
     # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+    # "pointsize": "10pt",
     # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+    # "preamble": "",
     # Latex figure (float) alignment
-    #'figure_align': 'htbp',
+    # "figure_align": "htbp",
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -286,7 +286,7 @@ texinfo_documents = [
 # texinfo_domain_indices = True
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
-# texinfo_show_urls = 'footnote'
+# texinfo_show_urls = "footnote"
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False

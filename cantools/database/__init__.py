@@ -84,21 +84,21 @@ def _load_file_cache(filename: StringPathLike,
     with open(filename, 'rb') as fin:
         key = fin.read()
 
-    cache: MutableMapping[bytes, Union[can.Database, diagnostics.Database]] = diskcache.Cache(cache_dir)
+    cache: MutableMapping[bytes, Union[can.Database, diagnostics.Database]]
+    with diskcache.Cache(cache_dir) as cache:
+        try:
+            return cache[key]
+        except KeyError:
+            with fopen(filename, 'r', encoding=encoding) as fin:
+                database = load(cast(TextIO, fin),
+                                database_format,
+                                frame_id_mask,
+                                prune_choices,
+                                strict,
+                                sort_signals)
+            cache[key] = database
 
-    try:
-        return cache[key]
-    except KeyError:
-        with fopen(filename, 'r', encoding=encoding) as fin:
-            database = load(cast(TextIO, fin),
-                            database_format,
-                            frame_id_mask,
-                            prune_choices,
-                            strict,
-                            sort_signals)
-        cache[key] = database
-
-        return database
+            return database
 
 
 def load_file(filename: StringPathLike,

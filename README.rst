@@ -154,7 +154,7 @@ Optionally a format can be specified after a signal, separated by a colon.
 
     $ cat candump-2021-01-04_180521.log | python3 -m cantools plot tests/files/dbc/abs.dbc '*33.*fl:-<' '*33.*fr:->' - '*33.*rl:-<' '*33.*rr:->'
 
-.. image:: docs/plot-2-subplots.png
+.. image:: https://github.com/cantools/cantools/raw/master/docs/plot-2-subplots.png
 
 Signals with a different range of values can be displayed in the same subplot on different vertical axes by separating them with a comma.
 
@@ -164,7 +164,7 @@ Signals with a different range of values can be displayed in the same subplot on
       --ylabel 'Bremse 33' '*_33.*fl*:-<' '*_33.*fr*:>' '*_33.*rl*:3' '*_33.*rr*:4' , \
       --ylabel 'Bremse 2' '*_2.*fl*:-<' '*_2.*fr*:>' '*_2.*rl*:3' '*_2.*rr*:4'
 
-.. image:: docs/plot-2-axes.png
+.. image:: https://github.com/cantools/cantools/raw/master/docs/plot-2-axes.png
 
 Matplotlib comes with different preinstalled styles that you can use:
 
@@ -172,7 +172,7 @@ Matplotlib comes with different preinstalled styles that you can use:
 
    $ cat candump-2021-01-04_180521.log | cantools plot tests/files/dbc/abs.dbc --style seaborn
 
-.. image:: docs/plot-seaborn.png
+.. image:: https://github.com/cantools/cantools/raw/master/docs/plot-seaborn.png
 
 You can try all available styles with
 

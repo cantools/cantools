@@ -376,7 +376,7 @@ Monitor CAN bus traffic in a text based user interface.
 
    $ python3 -m cantools monitor tests/files/dbc/motohawk.dbc
 
-.. image:: https://github.com/eerimoq/cantools/raw/master/docs/monitor.png
+.. image:: https://github.com/cantools/cantools/raw/master/docs/monitor.png
 
 The menu at the bottom of the monitor shows the available commands.
 

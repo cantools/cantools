@@ -143,7 +143,7 @@ The plot subcommand is similar to the decode subcommand but messages are visuali
 
     $ cat candump-2021-01-04_180521.log | python3 -m cantools plot tests/files/dbc/abs.dbc
 
-.. image:: docs/plot-1.png
+.. image:: https://github.com/cantools/cantools/raw/master/docs/plot-1.png
 
 If you don't want to show all signals you can select the desired signals with command line arguments.
 A ``*`` can stand for any number of any character, a ``?`` for exactly one arbitrary character.

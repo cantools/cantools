@@ -876,15 +876,17 @@ def _format_pack_code_mux(message,
                           mux,
                           body_lines_per_index,
                           variable_lines,
-                          helper_kinds):
+                          helper_kinds,
+                          original_casing):
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_pack_code_signal(message,
                              signal_name,
                              body_lines_per_index,
                              variable_lines,
-                             helper_kinds)
+                             helper_kinds,
+                             original_casing)
     multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
-    signal_name = camel_to_snake_case(signal_name)
+    signal_name = camel_to_snake_case(signal_name) if not original_casing else signal_name
 
     lines = [
         '',
@@ -895,7 +897,8 @@ def _format_pack_code_mux(message,
         body_lines = _format_pack_code_level(message,
                                              multiplexed_signals,
                                              variable_lines,
-                                             helper_kinds)
+                                             helper_kinds,
+                                             original_casing)
         lines.append('')
         lines.append('case {}:'.format(multiplexer_id))
 

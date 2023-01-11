@@ -73,6 +73,10 @@ class CanToolsCommandLineTest(unittest.TestCase):
     def assert_files_equal(self, actual, expected):
         # open(expected, 'w').write(read_utf8_file(actual))
         self.assertEqual(read_file(actual), read_utf8_file(expected))
+    
+    def assert_files_not_equal(self, actual, expected):
+        # open(expected, 'w').write(read_utf8_file(actual))
+        self.assertNotEqual(read_file(actual), read_utf8_file(expected))
 
     def test_decode(self):
         argv = ['cantools', 'decode', 'tests/files/dbc/socialledge.dbc']
@@ -1421,6 +1425,43 @@ BATTERY_VT(
                                         'tests/files/c_source/' + database_h)
                 self.assert_files_equal(database_c,
                                         'tests/files/c_source/' + database_c)
+
+    def test_generate_c_source_original_casing(self):
+        database = 'motohawk'
+
+        argv = [
+            'cantools',
+            'generate_c_source',
+            '--original-casing',
+            '--database-name', 'motohawk_original_casing',
+            'tests/files/dbc/{}.dbc'.format(database)
+        ]
+
+        database_h = "motohawk_original_casing.h"
+        database_c = "motohawk_original_casing.c"
+
+        with patch('sys.argv', argv):
+            cantools._main()
+
+        dbase = cantools.database.load_file('tests/files/dbc/{}.dbc'.format(database),
+                                  encoding=None,
+                                  prune_choices=None,
+                                  strict=not None)
+
+        self.assert_files_not_equal(database_h, 'tests/files/c_source/' + database + '.h')
+        self.assert_files_not_equal(database_c, 'tests/files/c_source/' + database + '.c')
+
+        with open(database_h, "r") as f:
+          db_dump_original_casing_h = f.read()
+        with open(database_c, "r") as f:
+          db_dump_original_casing_c = f.read()
+
+        for message in dbase.messages:
+          self.assertTrue(re.search(message.name, db_dump_original_casing_c))
+          self.assertTrue(re.search(message.name, db_dump_original_casing_h))
+          for signal in message.signals:
+            self.assertTrue(re.search(signal.name, db_dump_original_casing_c))
+            self.assertTrue(re.search(signal.name, db_dump_original_casing_h))
 
     def test_generate_c_source_output_directory(self):
         database = 'motohawk'

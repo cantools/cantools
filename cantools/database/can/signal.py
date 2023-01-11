@@ -2,10 +2,10 @@
 import decimal
 from typing import Optional, Dict, TYPE_CHECKING, List, Any, Union
 
-from cantools.typechecking import Comments, ByteOrder, Choices
+from ...typechecking import Comments, ByteOrder, Choices
 
 if TYPE_CHECKING:
-    from cantools.database.can.formats.dbc import DbcSpecifics
+    from ...database.can.formats.dbc import DbcSpecifics
 
 
 class Decimal(object):

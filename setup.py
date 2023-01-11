@@ -26,7 +26,7 @@ setup(name='cantools',
       url='https://github.com/eerimoq/cantools',
       packages=find_packages(exclude=['tests']),
       package_data={"cantools": ["py.typed"]},
-      python_requires='>=3.6',
+      python_requires='>=3.8',
       install_requires=[
           'bitstruct>=8.15.1',
           'python-can>=3.3.4',
@@ -36,9 +36,10 @@ setup(name='cantools',
           'typing_extensions>=3.10.0.0',
           'crccheck',
       ],
-      extras_require=dict(
-          plot=['matplotlib'],
-      ),
+      extras_require={
+          'plot': ['matplotlib'],
+          'windows-all': ["windows-curses;platform_system=='Windows'"],
+      },
       test_suite="tests",
       entry_points={
           'console_scripts': ['cantools=cantools.__init__:_main']

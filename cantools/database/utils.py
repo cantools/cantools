@@ -7,7 +7,7 @@ from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_
 
 from typing_extensions import Literal, Final
 
-from cantools.typechecking import (
+from ..typechecking import (
     Formats,
     Choices,
     SignalMappingType,
@@ -16,12 +16,12 @@ from cantools.typechecking import (
 )
 
 if TYPE_CHECKING:
-    from cantools.database import Database
-    from cantools.database.can.attribute import Attribute
-    from cantools.database.can.message import Message
-    from cantools.database.can.node import Node
-    from cantools.database.can.signal import Signal
-    from cantools.database.diagnostics import Data
+    from ..database import Database
+    from ..database.can.attribute import Attribute
+    from ..database.can.message import Message
+    from ..database.can.node import Node
+    from ..database.can.signal import Signal
+    from ..database.diagnostics import Data
 
 try:
     import bitstruct.c

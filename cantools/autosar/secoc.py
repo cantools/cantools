@@ -2,15 +2,15 @@
 # (SecOC, i.e., verification of the authenticity of the sender of
 # messages.)
 
-from cantools.database.can.message import Message
-from cantools.errors import Error
+from ..database.can.message import Message
+from ..errors import Error
 
 from typing import (
     Union,
     List,
     Optional,
  )
-from cantools.typechecking import (
+from ..typechecking import (
     SecOCAuthenticatorFn,
 )
 

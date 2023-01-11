@@ -5,7 +5,7 @@ class AutosarEnd2EndProperties:
     AUTOSAR-conformant End-to-End protection (CRCs) of messages
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._category: Optional[str] = None
         self._data_ids: Optional[List[int]] = None
         self._payload_length: int = 0

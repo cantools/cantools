@@ -1,7 +1,7 @@
 # An example cipher suite for secure on-board communication. This is
 # in no way cryptographically secure. DO NOT USE IN THE REAL WORLD!
 
-from cantools.database import Message
+from ..database import Message
 
 from typing import Union
 

@@ -62,6 +62,7 @@ except ImportError:
     plt = None
 
 from .. import database
+from ..database.can.signal import NamedSignalValue
 from .. import errors
 
 
@@ -441,6 +442,8 @@ class Plotter:
         for signal in decoded_signals:
             x = timestamp
             y = decoded_signals[signal]
+            if isinstance(y, NamedSignalValue):
+                y = str(y)
             signal = message.name + '.' + signal
             self.signals.add_value(signal, x, y)
 

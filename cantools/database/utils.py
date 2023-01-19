@@ -79,8 +79,8 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
             unpacked[field.name] = _transform(value)  # type: ignore[operator]
             continue
 
-        if isinstance(value, Decimal):
-            unpacked[field.name] = (value - field.decimal.offset) / field.decimal.scale
+        if isinstance(value, Decimal) and isinstance(field, Signal):
+            unpacked[field.name] = (value - field.decimal.offset) / field.decimal.scale  # type: ignore[operator]
             continue
 
         unpacked[field.name] = field.choice_string_to_number(str(value))

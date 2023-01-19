@@ -4,6 +4,7 @@ from collections import OrderedDict
 import os.path
 import re
 from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
+from decimal import Decimal
 
 from typing_extensions import Literal, Final
 
@@ -76,6 +77,10 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
                 continue
 
             unpacked[field.name] = _transform(value)  # type: ignore[operator]
+            continue
+
+        if isinstance(value, Decimal):
+            unpacked[field.name] = (value - field.decimal.offset) / field.decimal.scale
             continue
 
         unpacked[field.name] = field.choice_string_to_number(str(value))

@@ -19,7 +19,12 @@ class DecodedMessage(object):
         self.signals = signals
 
 
-class Messages(dict):
+class Messages(UserDict):
+    def __setitem__(self, message_name, value):
+        if getattr(self, '_frozen', False):
+            if not message_name in self.data:
+                raise KeyError(message_name)
+        self.data[message_name] = value
 
     def __missing__(self, key):
         raise Error("invalid message name '{}'".format(key))
@@ -83,6 +88,7 @@ class Message(UserDict, object):
         self.enabled = True
         self._can_message = None
         self._periodic_task = None
+        self._signal_names = set(s.name for s in self.database.signals)
         self.update(self._prepare_initial_signal_values())
 
     @property
@@ -93,11 +99,18 @@ class Message(UserDict, object):
         return self.data[signal_name]
 
     def __setitem__(self, signal_name, value):
+        if not signal_name in self._signal_names:
+            raise KeyError(signal_name)
         self.data[signal_name] = value
         self._update_can_message()
 
     def update(self, signals):
-        self.data.update(signals)
+        s = dict(signals)
+        new_signal_names = set(s) - self._signal_names
+        if new_signal_names:
+            raise KeyError(repr(new_signal_names))
+
+        self.data.update(s)
         self._update_can_message()
 
     def send(self, signals=None):
@@ -293,7 +306,8 @@ class Tester(object):
                             self._input_queue,
                             on_message)
         self._notifier = can.Notifier(can_bus, [listener])
-
+        self._messages._frozen = True
+        
     def start(self):
         """Start the tester. Starts sending enabled periodic messages.
 

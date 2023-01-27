@@ -260,7 +260,7 @@ class Tester(object):
         # DUT name validation.
         node_names = [node.name for node in database.nodes]
 
-        if not any([name == dut_name for name in node_names]):
+        if dut_name and not any([name == dut_name for name in node_names]):
             raise Error(
                 "expected DUT name in {}, but got '{}'".format(node_names,
                                                                dut_name))
@@ -302,7 +302,7 @@ class Tester(object):
         """
 
         for message in self._messages.values():
-            if self._dut_name in message.database.senders:
+            if self._dut_name and self._dut_name in message.database.senders:
                 continue
 
             if not message.periodic:

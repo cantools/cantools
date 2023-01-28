@@ -30,6 +30,45 @@ class Messages(UserDict):
         raise Error("invalid message name '{}'".format(key))
 
 
+def _invert_signal_tree(tree :list, cur_mpx=None, ret=None):
+
+    """The tree is laid out with two kinds of dicts.  Single-element dict
+    keyed by string -> multiplexer, which is own dict keyed by
+    integers.
+
+    """
+
+    if ret is None:
+        ret = {}
+
+    if cur_mpx is None:
+        cur_mpx = {}
+
+    for sigs in tree:
+        if type(sigs) == dict: # outer signal keyed by muliplexer name
+            (mpx_name, mpx_vals), = sigs.items()
+            for mpx_val, sig_tree in mpx_vals.items(): # inner signal
+                #                          keyed by multiplexer values
+                next_mpx = cur_mpx.copy()
+                next_mpx[mpx_name] = mpx_val
+                _invert_signal_tree(sig_tree, next_mpx, ret)
+
+        elif type(sigs) == str:
+            ret.setdefault(sigs,[]).append(set(tuple(cur_mpx.items())))
+        else:
+            raise TypeError(repr(sigs))
+
+    return ret
+
+def invert_signal_tree(tree):
+    """Return a mapping of signals to the multiplex settings that will
+    yield the signal.
+
+    {signal: [{mplexers}, {mplexers...}]}
+
+    """
+    return _invert_signal_tree(tree)
+
 class Listener(can.Listener):
 
     def __init__(self, database, messages, input_queue, on_message):
@@ -79,6 +118,7 @@ class Message(UserDict, object):
                  padding):
         super(Message, self).__init__()
         self.database = database
+        self._mplex_map = invert_signal_tree(database.signal_tree)
         self._can_bus = can_bus
         self._input_queue = input_queue
         self.decode_choices = decode_choices
@@ -110,7 +150,19 @@ class Message(UserDict, object):
         if new_signal_names:
             raise KeyError(repr(new_signal_names))
 
-        self.data.update(s)
+        # Filter out signals that are multiplexed out
+        mplex_out_signals = set(self._mplex_map.keys())
+
+        for sig, settings in self._mplex_map.items():
+            for setting in settings:
+                if all(s[mpx_sig] == mpx_setting
+                       for mpx_sig, mpx_setting in setting):
+                    mplex_out_signals.remove(sig)
+
+        s_pruned = {k:v for k,v in s.items()
+                    if not k in mplex_out_signals}
+
+        self.data.update(s_pruned)
         self._update_can_message()
 
     def send(self, signals=None):
@@ -213,12 +265,21 @@ class Message(UserDict, object):
 
     def _prepare_initial_signal_values(self):
         initial_sig_values = dict()
+
+        # Choose a valid set of mux settings
+        mplex_settings = {}
+        for m0 in reversed(self._mplex_map.values()):
+            for m1 in m0:
+                mplex_settings.update(m1)
+
         for signal in self.database.signals:
             minimum = 0 if not signal.minimum else signal.minimum
             maximum = 0 if not signal.maximum else signal.maximum
             if signal.initial:
                 # use initial signal value (if set)
                 initial_sig_values[signal.name] = (signal.initial * signal.decimal.scale) + signal.decimal.offset
+            elif signal.is_multiplexer:
+                initial_sig_values[signal.name] = mplex_settings.get(signal.name, 0)
             elif minimum <= 0 <= maximum:
                 # use 0 if in allowed range
                 initial_sig_values[signal.name] = 0
@@ -307,7 +368,7 @@ class Tester(object):
                             on_message)
         self._notifier = can.Notifier(can_bus, [listener])
         self._messages._frozen = True
-        
+
     def start(self):
         """Start the tester. Starts sending enabled periodic messages.
 

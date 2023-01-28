@@ -150,19 +150,7 @@ class Message(UserDict, object):
         if new_signal_names:
             raise KeyError(repr(new_signal_names))
 
-        # Filter out signals that are multiplexed out
-        mplex_out_signals = set(self._mplex_map.keys())
-
-        for sig, settings in self._mplex_map.items():
-            for setting in settings:
-                if all(s[mpx_sig] == mpx_setting
-                       for mpx_sig, mpx_setting in setting):
-                    mplex_out_signals.remove(sig)
-
-        s_pruned = {k:v for k,v in s.items()
-                    if not k in mplex_out_signals}
-
-        self.data.update(s_pruned)
+        self.data.update(s)
         self._update_can_message()
 
     def send(self, signals=None):
@@ -253,7 +241,8 @@ class Message(UserDict, object):
     def _update_can_message(self):
         arbitration_id = self.database.frame_id
         extended_id = self.database.is_extended_frame
-        data = self.database.encode(self.data,
+        pruned_data = self.database.gather_signals(self.data)
+        data = self.database.encode(pruned_data,
                                     self.scaling,
                                     self.padding)
         self._can_message = can.Message(arbitration_id=arbitration_id,

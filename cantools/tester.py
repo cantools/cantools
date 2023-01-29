@@ -3,8 +3,9 @@
 import time
 from collections import UserDict
 import queue
-
 import can
+
+from typing import Dict, List
 
 from .errors import Error
 
@@ -30,7 +31,11 @@ class Messages(UserDict):
         raise Error("invalid message name '{}'".format(key))
 
 
-def _invert_signal_tree(tree :list, cur_mpx=None, ret=None):
+def _invert_signal_tree(
+        tree :List,
+        cur_mpx: Dict = None,
+        ret: Dict = None
+) -> Dict:
 
     """The tree is laid out with two kinds of dicts.  Single-element dict
     keyed by string -> multiplexer, which is own dict keyed by
@@ -60,7 +65,7 @@ def _invert_signal_tree(tree :list, cur_mpx=None, ret=None):
 
     return ret
 
-def invert_signal_tree(tree):
+def invert_signal_tree(tree: List) -> Dict:
     """Return a mapping of signals to the multiplex settings that will
     yield the signal.
 

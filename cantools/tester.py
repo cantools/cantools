@@ -5,7 +5,7 @@ from collections import UserDict
 import queue
 import can
 
-from typing import Dict, List
+from typing import Optional, Dict, List
 
 from .errors import Error
 
@@ -33,8 +33,8 @@ class Messages(UserDict):
 
 def _invert_signal_tree(
         tree :List,
-        cur_mpx: Dict = None,
-        ret: Dict = None
+        cur_mpx: Optional[Dict] = None,
+        ret: Optional[Dict] = None
 ) -> Dict:
 
     """The tree is laid out with two kinds of dicts.  Single-element dict

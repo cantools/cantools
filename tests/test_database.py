@@ -4817,7 +4817,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.fd_baudrate, 2000000)
 
         self.assertEqual(len(db.nodes), 3)
-        self.assertEqual(len(db.messages), 7)
+        self.assertEqual(len(db.messages), 8)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
@@ -5375,6 +5375,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(nm_message.bus_name, 'Cluster0')
         self.assertTrue(nm_message.dbc is None)
         self.assertTrue(nm_message.autosar is not None)
+
+        msg_without_pdu = db.messages[7]
+        self.assertEqual(msg_without_pdu.frame_id, 1002)
+        self.assertEqual(msg_without_pdu.is_extended_frame, False)
+        self.assertEqual(msg_without_pdu.name, 'MessageWithoutPDU')
+        self.assertEqual(msg_without_pdu.length, 8)
+        self.assertEqual(msg_without_pdu.senders, [])
+        self.assertEqual(msg_without_pdu.send_type, None)
+        self.assertEqual(msg_without_pdu.cycle_time, None)
+        self.assertEqual(len(msg_without_pdu.signals), 0)
+        self.assertEqual(msg_without_pdu.comment, None)
+        self.assertEqual(msg_without_pdu.bus_name, 'Cluster0')
+        self.assertTrue(msg_without_pdu.dbc is None)
+        self.assertTrue(msg_without_pdu.autosar is not None)
 
     def test_system_arxml_traversal(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:

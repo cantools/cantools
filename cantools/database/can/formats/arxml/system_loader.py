@@ -758,7 +758,24 @@ class SystemLoader(object):
         # things like multiplexed and container messages, this is not
         # the case...
         pdu = self._get_pdu(can_frame)
-        assert pdu is not None
+        if pdu is None:
+            return Message(bus_name=bus_name,
+                           frame_id=frame_id,
+                           is_extended_frame=is_extended_frame,
+                           is_fd=is_fd,
+                           name=name,
+                           length=length,
+                           senders=[],
+                           send_type=None,
+                           cycle_time=None,
+                           signals=[],
+                           contained_messages=None,
+                           unused_bit_pattern=0xff,
+                           comment=None,
+                           autosar_specifics=autosar_specifics,
+                           strict=self._strict,
+                           sort_signals=self._sort_signals)
+
         pdu_path = self._get_pdu_path(can_frame)
         autosar_specifics._pdu_paths.append(pdu_path)
 

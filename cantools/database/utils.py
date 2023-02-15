@@ -145,7 +145,7 @@ def decode_data(data: bytes,
                     pass
 
             if scaling:
-                decoded[field.name] = field.scale * value + field.offset
+                decoded[field.name] = (value + field.offset) * field.scale 
                 continue
             else:
                 decoded[field.name] = value

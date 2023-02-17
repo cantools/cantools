@@ -11,7 +11,8 @@ def _do_generate_c_source(args):
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
                                prune_choices=args.prune,
-                               strict=not args.no_strict)
+                               strict=not args.no_strict,
+                               debug=args.debug)
 
     if args.database_name is None:
         basename = os.path.basename(args.infile)

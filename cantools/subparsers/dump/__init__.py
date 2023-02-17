@@ -147,7 +147,8 @@ def _do_dump(args):
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                prune_choices=args.prune,
-                               strict=not args.no_strict)
+                               strict=not args.no_strict,
+                               debug=args.debug)
 
     if isinstance(dbase, CanDatabase):
         _dump_can_database(dbase, args.with_comments)

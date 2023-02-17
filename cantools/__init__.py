@@ -1,6 +1,7 @@
 import sys
 import argparse
 import importlib
+import logging
 import pathlib
 import os
 
@@ -84,6 +85,7 @@ def _main():
     args = parser.parse_args()
 
     if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
         args.func(args)
     else:
         try:

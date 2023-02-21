@@ -181,14 +181,12 @@ def _do_list(args):
     input_file_name = args.file[0]
     prune=args.prune
     no_strict=args.no_strict
-    debug=args.debug
     print_buses=args.print_buses
     print_nodes=args.print_nodes
 
     can_db = cantools.database.load_file(input_file_name,
                                          prune_choices=prune,
-                                         strict=not no_strict,
-                                         debug=debug)
+                                         strict=not no_strict)
 
     if print_buses:
         _do_list_buses(can_db, args)

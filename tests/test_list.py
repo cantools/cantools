@@ -25,7 +25,6 @@ class Args(object):
         self.exclude_extended = False
         self.print_all = False
         self.no_strict = False
-        self.debug = False
         self.prune = True
         self.file = (database, )
         self.print_buses = False

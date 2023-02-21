@@ -7,8 +7,7 @@ def _do_convert(args):
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
                                prune_choices=args.prune,
-                               strict=not args.no_strict,
-                               debug=args.debug)
+                               strict=not args.no_strict)
 
     database.dump_file(dbase,
                        args.outfile,

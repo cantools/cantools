@@ -25,8 +25,7 @@ class Monitor(can.Listener):
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,
                                          prune_choices=args.prune,
-                                         strict=not args.no_strict,
-                                         debug=args.debug)
+                                         strict=not args.no_strict)
         self._single_line = args.single_line
         self._filtered_sorted_message_names = []
         self._filter = ''

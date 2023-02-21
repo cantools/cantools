@@ -333,8 +333,7 @@ def _do_decode(args):
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
                                prune_choices=args.prune,
-                               strict=not args.no_strict,
-                               debug=args.debug)
+                               strict=not args.no_strict)
     re_format = None
     timestamp_parser = TimestampParser(args)
     if args.show_invalid_syntax:

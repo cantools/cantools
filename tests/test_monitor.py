@@ -34,7 +34,6 @@ class Args(object):
         self.frame_id_mask = None
         self.prune = False
         self.no_strict = False
-        self.debug = False
         self.single_line = single_line
         self.bit_rate = None
         self.fd = False

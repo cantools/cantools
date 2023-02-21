@@ -80,7 +80,7 @@ def _load_file_cache(filename: StringPathLike,
                      strict: bool,
                      cache_dir: str,
                      sort_signals: utils.type_sort_signals,
-                     debug: bool = False) -> Union[can.Database, diagnostics.Database]:
+                     ) -> Union[can.Database, diagnostics.Database]:
     with open(filename, 'rb') as fin:
         key = fin.read()
 
@@ -95,8 +95,7 @@ def _load_file_cache(filename: StringPathLike,
                                 frame_id_mask,
                                 prune_choices,
                                 strict,
-                                sort_signals,
-                                debug=debug)
+                                sort_signals)
             cache[key] = database
 
             return database
@@ -108,7 +107,6 @@ def load_file(filename: StringPathLike,
               frame_id_mask: Optional[int] = None,
               prune_choices: bool = False,
               strict: bool = True,
-              debug: bool = False,
               cache_dir: Optional[str] = None,
               sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit,
               ) -> Union[can.Database, diagnostics.Database]:
@@ -197,8 +195,7 @@ def load_file(filename: StringPathLike,
                         frame_id_mask,
                         prune_choices,
                         strict,
-                        sort_signals,
-                        debug=debug)
+                        sort_signals)
     else:
         return _load_file_cache(filename,
                                 database_format,
@@ -266,8 +263,7 @@ def load(fp: TextIO,
          frame_id_mask: Optional[int] = None,
          prune_choices: bool = False,
          strict: bool = True,
-         sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit,
-         debug: bool = False) -> Union[can.Database, diagnostics.Database]:
+         sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -293,8 +289,7 @@ def load(fp: TextIO,
                        frame_id_mask,
                        prune_choices,
                        strict,
-                       sort_signals,
-                       debug=debug)
+                       sort_signals)
 
 
 def load_string(string: str,
@@ -302,8 +297,8 @@ def load_string(string: str,
                 frame_id_mask: Optional[int] = None,
                 prune_choices: bool = False,
                 strict: bool = True,
-                sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit,
-                debug: bool = False) -> Union[can.Database, diagnostics.Database]:
+                sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) \
+        -> Union[can.Database, diagnostics.Database]:
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -372,32 +367,24 @@ def load_string(string: str,
             return load_can_database('arxml')
         except (ElementTree.ParseError, ValueError) as e:
             e_arxml = e
-            if debug:
-                raise
 
     if database_format in ['dbc', None]:
         try:
             return load_can_database('dbc')
         except textparser.ParseError as e:
             e_dbc = e
-            if debug:
-                raise
 
     if database_format in ['kcd', None]:
         try:
             return load_can_database('kcd')
         except (ElementTree.ParseError, ValueError) as e:
             e_kcd = e
-            if debug:
-                raise
 
     if database_format in ['sym', None]:
         try:
             return load_can_database('sym')
         except ParseError as e:
             e_sym = e
-            if debug:
-                raise
 
     if database_format in ['cdd', None]:
         try:
@@ -406,7 +393,17 @@ def load_string(string: str,
             return db
         except (ElementTree.ParseError, ValueError) as e:
             e_cdd = e
-            if debug:
-                raise
 
-    raise UnsupportedDatabaseFormatError(e_arxml, e_dbc, e_kcd, e_sym, e_cdd)
+    if database_format is not None:
+        # raise an error while keeping the traceback of the original
+        # exception usable. note that for this we cannot auto-detect
+        # the format because the probing mechanism raises an exception
+        # for every single supported database format in this case
+        exc = e_arxml or e_dbc or e_kcd or e_sym or e_cdd
+        raise UnsupportedDatabaseFormatError(e_arxml,
+                                             e_dbc,
+                                             e_kcd,
+                                             e_sym,
+                                             e_cdd) from exc
+    else:
+        raise UnsupportedDatabaseFormatError(e_arxml, e_dbc, e_kcd, e_sym, e_cdd)

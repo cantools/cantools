@@ -365,25 +365,25 @@ def load_string(string: str,
     if database_format in ['arxml', None]:
         try:
             return load_can_database('arxml')
-        except (ElementTree.ParseError, ValueError) as e:
+        except Exception as e:
             e_arxml = e
 
     if database_format in ['dbc', None]:
         try:
             return load_can_database('dbc')
-        except textparser.ParseError as e:
+        except Exception as e:
             e_dbc = e
 
     if database_format in ['kcd', None]:
         try:
             return load_can_database('kcd')
-        except (ElementTree.ParseError, ValueError) as e:
+        except Exception as e:
             e_kcd = e
 
     if database_format in ['sym', None]:
         try:
             return load_can_database('sym')
-        except ParseError as e:
+        except Exception as e:
             e_sym = e
 
     if database_format in ['cdd', None]:
@@ -391,7 +391,7 @@ def load_string(string: str,
             db = diagnostics.Database()
             db.add_cdd_string(string)
             return db
-        except (ElementTree.ParseError, ValueError) as e:
+        except Exception as e:
             e_cdd = e
 
     if database_format is not None:

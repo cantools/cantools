@@ -297,7 +297,7 @@ class Parser(textparser.Parser):
             Optional(choice('BU_SG_REL_', 'BU_BO_REL_')),
             'STRING',
             'WORD',
-            choice(DelimitedList('STRING'), OneOrMore('NUMBER')),
+            Optional(choice(DelimitedList('STRING'), OneOrMore('NUMBER'))),
             ';')
 
         attribute_definition_default_rel = Sequence(
@@ -1941,10 +1941,10 @@ def get_definitions_rel_dict(definitions, defaults):
 
         if len(values) > 0:
             if definition.type_name == "ENUM":
-                definition.choices = values
+                definition.choices = values[0]
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = convert_value(definition, values[0])
-                definition.maximum = convert_value(definition, values[1])
+                definition.minimum = convert_value(definition, values[0][0])
+                definition.maximum = convert_value(definition, values[0][1])
 
         try:
             value = defaults[definition.name]

@@ -105,7 +105,7 @@ class Parser60(textparser.Parser):
             ('HEXNUMBER',          r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
             ('NUMBER',             r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?'),
             ('STRING',             re_string),
-            ('U',                  r'/u:({}|\S+)'.format(re_string)),
+            ('U',                  fr'/u:({re_string}|\S+)'),
             ('F',                  r'/f:'),
             ('O',                  r'/o:'),
             ('MIN',                r'/min:'),
@@ -275,7 +275,7 @@ def _get_enum(enums, name):
     try:
         return enums[name]
     except KeyError:
-        raise ParseError("Enum '{}' is not defined.".format(name))
+        raise ParseError(f"Enum '{name}' is not defined.")
 
 
 def _load_enums(tokens):
@@ -374,7 +374,7 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal, spn)
         elif item.startswith('/u:'):
             unit = item[3:]
         else:
-            raise ParseError('Iternal error {}.'.format(item))
+            raise ParseError(f'Iternal error {item}.')
 
     return unit, factor, offset, enum, minimum, maximum, decimal, spn
 

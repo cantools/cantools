@@ -48,11 +48,11 @@ def frame_id_pack(priority,
                                 source_address)
     except bitstruct.Error:
         if priority > 7:
-            raise Error('Expected priority 0..7, but got {}.'.format(priority))
+            raise Error(f'Expected priority 0..7, but got {priority}.')
         elif reserved > 1:
-            raise Error('Expected reserved 0..1, but got {}.'.format(reserved))
+            raise Error(f'Expected reserved 0..1, but got {reserved}.')
         elif data_page > 1:
-            raise Error('Expected data page 0..1, but got {}.'.format(data_page))
+            raise Error(f'Expected data page 0..1, but got {data_page}.')
         elif pdu_format > 255:
             raise Error('Expected PDU format 0..255, but got {}.'.format(
                 pdu_format))
@@ -103,7 +103,7 @@ def pgn_pack(reserved, data_page, pdu_format, pdu_specific=0):
                                 pdu_specific)
     except bitstruct.Error:
         if reserved > 1:
-            raise Error('Expected reserved 0..1, but got {}.'.format(reserved))
+            raise Error(f'Expected reserved 0..1, but got {reserved}.')
         elif data_page > 1:
             raise Error('Expected data page 0..1, but got {}.'.format(
                 data_page))

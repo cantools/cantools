@@ -8,7 +8,7 @@ from .bus import Bus
 from .formats.dbc_specifics import DbcSpecifics
 from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
 
-class InternalDatabase(object):
+class InternalDatabase:
     """Internal CAN database.
 
     """

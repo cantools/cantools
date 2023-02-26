@@ -1,4 +1,4 @@
-class AutosarDatabaseSpecifics(object):
+class AutosarDatabaseSpecifics:
     """This class collects the AUTOSAR specific information of a system
 
     """

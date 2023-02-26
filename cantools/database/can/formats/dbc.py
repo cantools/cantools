@@ -361,7 +361,7 @@ class Parser(textparser.Parser):
                 bs,
                 version))
 
-class LongNamesConverter(object):
+class LongNamesConverter:
 
     def __init__(self, database):
         self._database = database
@@ -380,7 +380,7 @@ class LongNamesConverter(object):
             if short_name in self._short_names:
                 index = self._next_index_per_cut_name[cut_name]
                 self._next_index_per_cut_name[cut_name] += 1
-                short_name = '{}_{:04d}'.format(name[:27], index)
+                short_name = f'{name[:27]}_{index:04d}'
             else:
                 self._next_index_per_cut_name[cut_name] = 0
                 self._short_names.add(short_name)
@@ -432,7 +432,7 @@ def _dump_value_tables(database):
 
     for name, choices in database.dbc.value_tables.items():
         choices = [
-            '{} "{}"'.format(number, text)
+            f'{number} "{text}"'
             for number, text in reversed(sorted(choices.items()))
         ]
         val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices)))
@@ -447,7 +447,7 @@ def _dump_messages(database, sort_signals):
         if signal.is_multiplexer:
             return ' M'
         elif signal.multiplexer_ids is not None:
-            return ' m{}'.format(signal.multiplexer_ids[0])
+            return f' m{signal.multiplexer_ids[0]}'
         else:
             return ''
 
@@ -592,7 +592,7 @@ def _dump_attribute_definitions(database):
         if definition.minimum is None:
             value = ''
         else:
-            value = ' {}'.format(value)
+            value = f' {value}'
 
         return value
 
@@ -607,7 +607,7 @@ def _dump_attribute_definitions(database):
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
-            choices = ','.join(['"{}"'.format(choice)
+            choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
             ba_def.append(
                 'BA_DEF_ {kind} "{name}" {type_name}  {choices};'.format(
@@ -645,7 +645,7 @@ def _dump_attribute_definitions_rel(database):
         if definition.minimum is None:
             value = ''
         else:
-            value = ' {}'.format(value)
+            value = f' {value}'
 
         return value
 
@@ -657,7 +657,7 @@ def _dump_attribute_definitions_rel(database):
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
-            choices = ','.join(['"{}"'.format(choice)
+            choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
             ba_def_rel.append(
                 'BA_DEF_REL_ {kind}  "{name}" {type_name}  {choices};'.format(
@@ -962,7 +962,7 @@ def _dump_signal_mux_values(database):
                 continue
 
             ranges = ', '.join([
-                '{}-{}'.format(minimum, maximum)
+                f'{minimum}-{maximum}'
                 for minimum, maximum in _create_mux_ranges(signal.multiplexer_ids)
             ])
 

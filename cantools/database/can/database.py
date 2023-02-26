@@ -32,7 +32,7 @@ from ...typechecking import StringPathLike, EncodeInputType, DecodeResultType
 LOGGER = logging.getLogger(__name__)
 
 
-class Database(object):
+class Database:
     """This class contains all messages, signals and definitions of a CAN
     network.
 
@@ -522,7 +522,7 @@ class Database(object):
             self._add_message(message)
 
     def __repr__(self) -> str:
-        lines = ["version('{}')".format(self._version), '']
+        lines = [f"version('{self._version}')", '']
 
         if self._nodes:
             for node in self._nodes:

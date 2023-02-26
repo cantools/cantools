@@ -27,7 +27,7 @@ from ....utils import type_sort_signals, sort_signals_by_start_bit
 
 LOGGER = logging.getLogger(__name__)
 
-class SystemLoader(object):
+class SystemLoader:
     def __init__(self,
                  root:Any,
                  strict:bool,

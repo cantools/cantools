@@ -1,4 +1,4 @@
-class EnvironmentVariable(object):
+class EnvironmentVariable:
     """A CAN environment variable.
 
     """

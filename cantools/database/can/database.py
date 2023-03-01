@@ -2,32 +2,29 @@ import logging
 from typing import (
     Dict,
     List,
-    Tuple,
     Optional,
     TextIO,
+    Tuple,
     Union,
 )
 
+from ...compat import fopen
+from ...typechecking import DecodeResultType, EncodeInputType, StringPathLike
+from ..errors import DecodeError
+from ..utils import (
+    SORT_SIGNALS_DEFAULT,
+    sort_signals_by_start_bit,
+    type_sort_attributes,
+    type_sort_choices,
+    type_sort_signals,
+)
 from .bus import Bus
-from .formats import arxml
-from .formats import dbc
-from .formats import kcd
-from .formats import sym
+from .formats import arxml, dbc, kcd, sym
 from .formats.arxml import AutosarDatabaseSpecifics
 from .formats.dbc import DbcSpecifics
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
-from ..errors import DecodeError
-from ..utils import (
-    type_sort_signals,
-    type_sort_attributes,
-    type_sort_choices,
-    sort_signals_by_start_bit,
-    SORT_SIGNALS_DEFAULT
-)
-from ...compat import fopen
-from ...typechecking import StringPathLike, EncodeInputType, DecodeResultType
 
 LOGGER = logging.getLogger(__name__)
 

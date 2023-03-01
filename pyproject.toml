@@ -30,10 +30,12 @@ select = [
 #    "B",  # pyflakes-bugbear
     "UP",  # pyupgrade
 #    "C4",  # flake8-comprehensions
+    "I",  # isort
 ]
+ignore-init-module-imports = true
 
 # Assume Python 3.8.
 target-version = "py38"
 
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]
+[tool.ruff.isort]
+known-first-party = ["cantools"]

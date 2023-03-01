@@ -1,11 +1,11 @@
 # The tester module.
 
+import queue
 import time
 from collections import UserDict
-import queue
-import can
+from typing import Dict, List, Optional
 
-from typing import Optional, Dict, List
+import can
 
 from .errors import Error
 

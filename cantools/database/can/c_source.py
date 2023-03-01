@@ -4,7 +4,6 @@ from decimal import Decimal
 
 from ...version import __version__
 
-
 HEADER_FMT = '''\
 /**
  * The MIT License (MIT)

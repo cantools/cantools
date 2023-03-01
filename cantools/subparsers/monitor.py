@@ -1,15 +1,15 @@
 import argparse
+import bisect
+import curses
+import queue
 import re
 import time
-import curses
-import bisect
-import queue
 
 import can
 from argparse_addons import Integer
+
 from .. import database
-from .__utils__ import format_message
-from .__utils__ import format_multiplexed_name
+from .__utils__ import format_message, format_multiplexed_name
 
 
 class QuitError(Exception):

@@ -1,27 +1,27 @@
 # Utility functions.
 
-from collections import OrderedDict
 import os.path
 import re
+from collections import OrderedDict
 from typing import (
-    Union,
-    List,
-    Callable,
-    Tuple,
-    Optional,
-    Dict,
-    Sequence,
-    Literal,
-    Final,
     TYPE_CHECKING,
+    Callable,
+    Dict,
+    Final,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
 )
 
 from ..typechecking import (
-    Formats,
-    Choices,
-    SignalMappingType,
-    SignalDictType,
     ByteOrder,
+    Choices,
+    Formats,
+    SignalDictType,
+    SignalMappingType,
 )
 
 if TYPE_CHECKING:

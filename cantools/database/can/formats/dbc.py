@@ -1,48 +1,46 @@
 # Load and dump a CAN database in DBC format.
 
 import re
-from collections import OrderedDict
-from collections import defaultdict
-from decimal import Decimal
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
+from decimal import Decimal
 
 import textparser
-from textparser import Sequence
-from textparser import choice
-from textparser import ZeroOrMore
-from textparser import OneOrMore
-from textparser import OneOrMoreDict
-from textparser import DelimitedList
-from textparser import Any
-from textparser import AnyUntil
-from textparser import tokenize_init
-from textparser import Token
-from textparser import TokenizeError
-from textparser import Optional
-
-from ..attribute_definition import AttributeDefinition
-from ..attribute import Attribute
-from ..signal import Signal
-from ..signal import NamedSignalValue
-from ..signal import Decimal as SignalDecimal
-from ..signal_group import SignalGroup
-from ..message import Message
-from ..node import Node
-from ..bus import Bus
-from ..internal_database import InternalDatabase
-from ..environment_variable import EnvironmentVariable
-
-from .utils import num
-from .dbc_specifics import DbcSpecifics
-from ...utils import (
-    type_sort_signals,
-    type_sort_attributes,
-    type_sort_choices,
-    sort_signals_by_start_bit,
-    sort_signals_by_start_bit_reversed,
-    SORT_SIGNALS_DEFAULT
+from textparser import (
+    Any,
+    AnyUntil,
+    DelimitedList,
+    OneOrMore,
+    OneOrMoreDict,
+    Optional,
+    Sequence,
+    Token,
+    TokenizeError,
+    ZeroOrMore,
+    choice,
+    tokenize_init,
 )
 
+from ...utils import (
+    SORT_SIGNALS_DEFAULT,
+    sort_signals_by_start_bit,
+    sort_signals_by_start_bit_reversed,
+    type_sort_attributes,
+    type_sort_choices,
+    type_sort_signals,
+)
+from ..attribute import Attribute
+from ..attribute_definition import AttributeDefinition
+from ..bus import Bus
+from ..environment_variable import EnvironmentVariable
+from ..internal_database import InternalDatabase
+from ..message import Message
+from ..node import Node
+from ..signal import Decimal as SignalDecimal
+from ..signal import NamedSignalValue, Signal
+from ..signal_group import SignalGroup
+from .dbc_specifics import DbcSpecifics
+from .utils import num
 
 DBC_FMT = (
     'VERSION "{version}"\r\n'

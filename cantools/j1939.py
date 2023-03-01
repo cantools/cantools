@@ -1,8 +1,8 @@
 from collections import namedtuple
+
 import bitstruct
 
 from .errors import Error
-
 
 FrameId = namedtuple('FrameId',
                      [

@@ -1,16 +1,15 @@
+from typing import (
+    Iterable,
+    Union,
+)
+
 from ..database.can.database import Database
 from ..database.can.message import Message
 from ..database.can.signal import NamedSignalValue
-
-from typing import (
-    Union,
-    Iterable,
-)
-
 from ..typechecking import (
-    SignalDictType,
-    ContainerUnpackResultType,
     ContainerDecodeResultType,
+    ContainerUnpackResultType,
+    SignalDictType,
 )
 
 MULTI_LINE_FMT = '''

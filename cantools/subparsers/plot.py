@@ -49,22 +49,22 @@ I recommend using this with the option --auto-color-ylabels.
 All signals (independent of the subplot and vertical axis) share the same horizontal axis.
 '''
 
-import sys
-import re
-import binascii
-import struct
-import datetime
 import argparse
+import binascii
+import datetime
+import re
+import struct
+import sys
+
 from argparse_addons import Integer
+
 try:
     from matplotlib import pyplot as plt
 except ImportError:
     plt = None
 
-from .. import database
+from .. import database, errors
 from ..database.can.signal import NamedSignalValue
-from .. import errors
-
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
 

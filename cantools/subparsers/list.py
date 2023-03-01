@@ -1,7 +1,9 @@
 import argparse
+
 import cantools
 
 from .dump.formatting import signal_tree_string
+
 
 def _print_message(message, indent=''):
     print(f'{indent}{message.name}:')

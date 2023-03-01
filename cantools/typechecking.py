@@ -1,26 +1,27 @@
 from typing import (
     TYPE_CHECKING,
-    NamedTuple,
-    Union,
-    Mapping,
-    Dict,
-    Optional,
-    List,
     Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Mapping,
+    NamedTuple,
+    Optional,
+    OrderedDict,
     Sequence,
     Tuple,
-    Callable,
-    Literal,
-    OrderedDict,
+    Union,
 )
 
-from typing_extensions import TypedDict
 from bitstruct import CompiledFormatDict
+from typing_extensions import TypedDict
 
 if TYPE_CHECKING:
     import os
     import sys
-    from .database import Signal, Message
+
+    from .database import Message, Signal
     from .database.can.signal import NamedSignalValue
 
 

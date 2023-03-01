@@ -4,8 +4,7 @@ import numbers
 import re
 from copy import deepcopy
 from decimal import Decimal
-from typing import Any, List, Optional
-from xml.etree import ElementTree
+from typing import Any
 
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus

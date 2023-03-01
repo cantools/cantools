@@ -19,7 +19,6 @@ from typing_extensions import TypedDict
 
 if TYPE_CHECKING:
     import os
-    import sys
 
     from .database import Message, Signal
     from .database.can.signal import NamedSignalValue

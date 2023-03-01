@@ -2,7 +2,6 @@
 import logging
 from decimal import Decimal
 from typing import Any, List
-from xml.etree import ElementTree
 
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus

@@ -1,7 +1,7 @@
 # Utilities for calculating the CRC of the AUTOSAR end-to-end
 # protection specification
 
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import crccheck  # type: ignore
 

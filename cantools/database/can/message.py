@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class Message(object):
+class Message:
     """A CAN message with frame id, comment, signals and other
     information.
 
@@ -810,7 +810,7 @@ class Message(object):
                           scaling: bool,
                           padding: bool) -> bytes:
 
-        result = bytes()
+        result = b""
 
         for header, value in data:
             if isinstance(header, str):

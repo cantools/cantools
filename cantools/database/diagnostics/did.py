@@ -7,7 +7,7 @@ from ..utils import decode_data
 from ..utils import create_encode_decode_formats
 
 
-class Did(object):
+class Did:
     """A DID with identifier and other information.
 
     """

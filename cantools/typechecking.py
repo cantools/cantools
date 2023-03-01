@@ -10,9 +10,11 @@ from typing import (
     Sequence,
     Tuple,
     Callable,
+    Literal,
+    OrderedDict,
 )
 
-from typing_extensions import TypedDict, Literal, OrderedDict
+from typing_extensions import TypedDict
 from bitstruct import CompiledFormatDict
 
 if TYPE_CHECKING:

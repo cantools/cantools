@@ -29,23 +29,23 @@ class UnsupportedDatabaseFormatError(Error):
         message = []
 
         if e_arxml is not None:
-            message.append('ARXML: "{}"'.format(e_arxml))
+            message.append(f'ARXML: "{e_arxml}"')
 
         if e_dbc is not None:
-            message.append('DBC: "{}"'.format(e_dbc))
+            message.append(f'DBC: "{e_dbc}"')
 
         if e_kcd is not None:
-            message.append('KCD: "{}"'.format(e_kcd))
+            message.append(f'KCD: "{e_kcd}"')
 
         if e_sym is not None:
-            message.append('SYM: "{}"'.format(e_sym))
+            message.append(f'SYM: "{e_sym}"')
 
         if e_cdd is not None:
-            message.append('CDD: "{}"'.format(e_cdd))
+            message.append(f'CDD: "{e_cdd}"')
 
         message = ', '.join(message)
 
-        super(UnsupportedDatabaseFormatError, self).__init__(message)
+        super().__init__(message)
 
         self.e_arxml = e_arxml
         self.e_dbc = e_dbc
@@ -252,7 +252,7 @@ def dump_file(database,
         output = database.as_sym_string(sort_signals=sort_signals)
     else:
         raise Error(
-            "Unsupported output database format '{}'.".format(database_format))
+            f"Unsupported output database format '{database_format}'.")
 
     with fopen(filename, 'w', encoding=encoding, newline=newline) as fout:
         fout.write(output)

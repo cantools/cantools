@@ -1,4 +1,4 @@
-class AutosarBusSpecifics(object):
+class AutosarBusSpecifics:
     """This class collects the AUTOSAR specific information of a CAN bus
 
     """

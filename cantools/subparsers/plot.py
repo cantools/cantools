@@ -671,7 +671,7 @@ class Signals:
                 plotted = True
 
             if not plotted:
-                print("WARNING: signal %r with format %r was not plotted." % (sgo.reo.pattern, sgo.fmt))
+                print(f"WARNING: signal {sgo.reo.pattern!r} with format {sgo.fmt!r} was not plotted.")
 
         self.plot_error(splot, x_invalid_syntax, 'invalid syntax', self.COLOR_INVALID_SYNTAX)
         self.plot_error(splot, x_unknown_frames, 'unknown frames', self.COLOR_UNKNOWN_FRAMES)

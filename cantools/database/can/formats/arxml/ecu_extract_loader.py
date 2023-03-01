@@ -49,7 +49,7 @@ REFERENCE_VALUES_XPATH = make_xpath([
     'REFERENCE-VALUES'
 ])
 
-class EcuExtractLoader(object):
+class EcuExtractLoader:
 
     def __init__(self,
                  root:Any,
@@ -77,7 +77,7 @@ class EcuExtractLoader(object):
 
         if len(com_xpaths) != 1:
             raise ValueError(
-                'Expected 1 /Com, but got {}.'.format(len(com_xpaths)))
+                f'Expected 1 /Com, but got {len(com_xpaths)}.')
 
         com_config = self.find_com_config(com_xpaths[0] + '/ComConfig')
 
@@ -131,7 +131,7 @@ class EcuExtractLoader(object):
                 com_pdu_id_ref)
         else:
             raise NotImplementedError(
-                'Direction {} not supported.'.format(direction))
+                f'Direction {direction} not supported.')
 
         if frame_id is None:
             LOGGER.warning('No frame id found for message %s.', name)

@@ -3,9 +3,18 @@
 from collections import OrderedDict
 import os.path
 import re
-from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
-
-from typing_extensions import Literal, Final
+from typing import (
+    Union,
+    List,
+    Callable,
+    Tuple,
+    Optional,
+    Dict,
+    Sequence,
+    Literal,
+    Final,
+    TYPE_CHECKING,
+)
 
 from ..typechecking import (
     Formats,
@@ -169,7 +178,7 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
             return 'u'
 
     def padding_item(length: int) -> Tuple[str, str, None]:
-        fmt = 'p{}'.format(length)
+        fmt = f'p{length}'
         padding_mask = '1' * length
 
         return fmt, padding_mask, None
@@ -242,7 +251,7 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
 
         if format_length > 0:
             length = len(''.join([item[1] for item in items]))
-            _packed = bitstruct.pack('u{}'.format(length), value)
+            _packed = bitstruct.pack(f'u{length}', value)
             value = int.from_bytes(_packed, "little")
 
         return fmt(items), value, names(items)

@@ -13,7 +13,7 @@ from ...utils import cdd_offset_to_dbc_start_bit
 LOGGER = logging.getLogger(__name__)
 
 
-class DataType(object):
+class DataType:
 
     def __init__(self,
                  name,

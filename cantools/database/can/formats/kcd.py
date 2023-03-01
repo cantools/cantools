@@ -27,7 +27,7 @@ LOGGER = logging.getLogger(__name__)
 NAMESPACE = 'http://kayak.2codeornot2code.org/1.0'
 NAMESPACES = {'ns': NAMESPACE}
 
-ROOT_TAG = '{{{}}}NetworkDefinition'.format(NAMESPACE)
+ROOT_TAG = f'{{{NAMESPACE}}}NetworkDefinition'
 
 
 def _start_bit(offset, byte_order):
@@ -74,7 +74,7 @@ def _load_signal_element(signal, nodes):
         elif key == 'length':
             length = int(value)
         elif key == 'endianess':
-            byte_order = '{}_endian'.format(value)
+            byte_order = f'{value}_endian'
         else:
             LOGGER.debug("Ignoring unsupported signal attribute '%s'.", key)
 
@@ -371,7 +371,7 @@ def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
 
 
 def _dump_message(message, bus, node_refs, sort_signals):
-    frame_id = '0x{:03X}'.format(message.frame_id)
+    frame_id = f'0x{message.frame_id:03X}'
     message_element = SubElement(bus,
                                  'Message',
                                  id=frame_id,

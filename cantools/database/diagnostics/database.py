@@ -7,7 +7,7 @@ from ...compat import fopen
 LOGGER = logging.getLogger(__name__)
 
 
-class Database(object):
+class Database:
     """This class contains all DIDs.
 
     The factory functions :func:`load()<cantools.database.load()>`,

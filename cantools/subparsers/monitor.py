@@ -401,7 +401,7 @@ class Monitor(can.Listener):
         else:
             formatted = format_message(message, data, True, False)
             lines = formatted.splitlines()
-            formatted = ['{:12.3f}  {}'.format(timestamp, lines[1])]
+            formatted = [f'{timestamp:12.3f}  {lines[1]}']
             formatted += [14 * ' ' + line for line in lines[2:]]
 
         self._update_formatted_message(name, formatted)

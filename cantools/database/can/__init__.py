@@ -1,7 +1,5 @@
-from .database import Database
-from .message import Message
-from .message import EncodeError
-from .message import DecodeError
-from .signal import Signal
-from .node import Node
 from .bus import Bus
+from .database import Database
+from .message import DecodeError, EncodeError, Message
+from .node import Node
+from .signal import Signal

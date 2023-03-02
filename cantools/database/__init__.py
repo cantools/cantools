@@ -1,19 +1,17 @@
 import os
-from typing import Union, Optional, TextIO, MutableMapping, cast
+from typing import MutableMapping, Optional, TextIO, Union, cast
 from xml.etree import ElementTree
 
-from .errors import ParseError
-from .errors import Error
-from ..compat import fopen
-from . import can
-from . import diagnostics
-from . import utils
-import textparser
 import diskcache
+import textparser
+
+from ..compat import fopen
+from ..typechecking import StringPathLike
+from . import can, diagnostics, utils
 
 # Remove once less users are using the old package structure.
 from .can import *
-from ..typechecking import StringPathLike
+from .errors import Error, ParseError
 
 
 class UnsupportedDatabaseFormatError(Error):

@@ -4,22 +4,22 @@ import logging
 from collections import defaultdict
 from decimal import Decimal
 from typing import Dict
-
 from xml.etree import ElementTree
-from xml.etree.ElementTree import Element
-from xml.etree.ElementTree import SubElement
+from xml.etree.ElementTree import Element, SubElement
 
-from ..signal import Signal
-from ..signal import NamedSignalValue
-from ..signal import Decimal as SignalDecimal
-from ..message import Message
-from ..node import Node
+from ...utils import (
+    SORT_SIGNALS_DEFAULT,
+    sort_signals_by_start_bit,
+    start_bit,
+    type_sort_signals,
+)
 from ..bus import Bus
 from ..internal_database import InternalDatabase
-from ...utils import start_bit
+from ..message import Message
+from ..node import Node
+from ..signal import Decimal as SignalDecimal
+from ..signal import NamedSignalValue, Signal
 from .utils import num
-from ...utils import type_sort_signals, sort_signals_by_start_bit, SORT_SIGNALS_DEFAULT
-
 
 LOGGER = logging.getLogger(__name__)
 

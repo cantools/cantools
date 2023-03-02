@@ -2,44 +2,35 @@
 
 import logging
 from copy import deepcopy
-from typing import (
-    List,
-    Optional,
-    Union,
-    Dict,
-    TYPE_CHECKING,
-    Set,
-    Tuple,
-    cast
-)
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple, Union, cast
 
-from .signal import NamedSignalValue, Signal
-from .signal_group import SignalGroup
-from ..utils import format_or
-from ..utils import start_bit
-from ..utils import encode_data
-from ..utils import decode_data
-from ..utils import create_encode_decode_formats
-from ..utils import type_sort_signals
-from ..utils import sort_signals_by_start_bit
-from ..utils import SORT_SIGNALS_DEFAULT
-from ..errors import Error
-from ..errors import EncodeError
-from ..errors import DecodeError
 from ...typechecking import (
-    Comments,
     Codec,
+    Comments,
+    ContainerDecodeResultListType,
+    ContainerDecodeResultType,
+    ContainerEncodeInputType,
+    ContainerHeaderSpecType,
+    ContainerUnpackListType,
+    ContainerUnpackResultType,
+    DecodeResultType,
+    EncodeInputType,
     SignalDictType,
     SignalMappingType,
-    ContainerHeaderSpecType,
-    ContainerDecodeResultType,
-    ContainerDecodeResultListType,
-    ContainerEncodeInputType,
-    EncodeInputType,
-    ContainerUnpackResultType,
-    ContainerUnpackListType,
-    DecodeResultType,
 )
+from ..errors import DecodeError, EncodeError, Error
+from ..utils import (
+    SORT_SIGNALS_DEFAULT,
+    create_encode_decode_formats,
+    decode_data,
+    encode_data,
+    format_or,
+    sort_signals_by_start_bit,
+    start_bit,
+    type_sort_signals,
+)
+from .signal import NamedSignalValue, Signal
+from .signal_group import SignalGroup
 
 if TYPE_CHECKING:
     from .formats.arxml import AutosarMessageSpecifics

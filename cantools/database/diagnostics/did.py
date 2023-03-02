@@ -2,9 +2,7 @@
 
 import binascii
 
-from ..utils import encode_data
-from ..utils import decode_data
-from ..utils import create_encode_decode_formats
+from ..utils import create_encode_decode_formats, decode_data, encode_data
 
 
 class Did:

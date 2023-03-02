@@ -1,14 +1,12 @@
 import argparse
 import os
 
-from . import formatting
 from ... import database
-from ...database.utils import format_and
 from ...database.can.database import Database as CanDatabase
 from ...database.diagnostics.database import Database as DiagnosticsDatabase
-from ...j1939 import is_pdu_format_1
-from ...j1939 import frame_id_unpack
-from ...j1939 import pgn_pack
+from ...database.utils import format_and
+from ...j1939 import frame_id_unpack, is_pdu_format_1, pgn_pack
+from . import formatting
 
 
 def _print_j1939_frame_id(message):

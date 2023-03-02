@@ -3,8 +3,7 @@ import os
 import os.path
 
 from .. import database
-from ..database.can.c_source import generate
-from ..database.can.c_source import camel_to_snake_case
+from ..database.can.c_source import camel_to_snake_case, generate
 
 
 def _do_generate_c_source(args):

@@ -1,17 +1,15 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
 import logging
-
-from typing import Any, List
-from xml.etree import ElementTree
-
-from ....utils import type_sort_signals, sort_signals_by_start_bit
-from ...bus import Bus
-from ...message import Message
-from ...signal import Signal
-from ...internal_database import InternalDatabase
-
 from decimal import Decimal
+from typing import Any, List
+
+from ....utils import sort_signals_by_start_bit, type_sort_signals
+from ...bus import Bus
+from ...internal_database import InternalDatabase
+from ...message import Message
 from ...signal import Decimal as SignalDecimal
+from ...signal import Signal
+
 
 def make_xpath(location: List[str]) -> str:
     """Convenience function to traverse the XML element tree more easily

@@ -1,8 +1,8 @@
 # A CAN signal.
 import decimal
-from typing import Optional, Dict, TYPE_CHECKING, List, Any, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from ...typechecking import Comments, ByteOrder, Choices
+from ...typechecking import ByteOrder, Choices, Comments
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics

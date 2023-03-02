@@ -1,35 +1,35 @@
 # Load and dump a CAN database in SYM format.
 
 import collections
-from itertools import groupby
-import re
 import logging
+import re
 from collections import OrderedDict as odict
 from decimal import Decimal
-from typing import Callable, Iterator, List, Optional as TypingOptional
+from itertools import groupby
+from typing import Callable, Iterator, List
+from typing import Optional as TypingOptional
 
 import textparser
-from textparser import Sequence
-from textparser import choice
-from textparser import ZeroOrMore
-from textparser import ZeroOrMoreDict
-from textparser import DelimitedList
-from textparser import tokenize_init
-from textparser import Token
-from textparser import TokenizeError
-from textparser import Optional
-from textparser import Any
+from textparser import (
+    Any,
+    DelimitedList,
+    Optional,
+    Sequence,
+    Token,
+    TokenizeError,
+    ZeroOrMore,
+    ZeroOrMoreDict,
+    choice,
+    tokenize_init,
+)
 
-from ..signal import Signal
-from ..signal import NamedSignalValue
-from ..signal import Decimal as SignalDecimal
-from ..message import Message
-from ..internal_database import InternalDatabase
-
-from .utils import num
-from ...utils import SORT_SIGNALS_DEFAULT, type_sort_signals, sort_signals_by_start_bit
 from ...errors import ParseError
-
+from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
+from ..internal_database import InternalDatabase
+from ..message import Message
+from ..signal import Decimal as SignalDecimal
+from ..signal import NamedSignalValue, Signal
+from .utils import num
 
 LOGGER = logging.getLogger(__name__)
 

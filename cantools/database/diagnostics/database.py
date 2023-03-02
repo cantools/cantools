@@ -1,8 +1,7 @@
 import logging
 
-from .formats import cdd
 from ...compat import fopen
-
+from .formats import cdd
 
 LOGGER = logging.getLogger(__name__)
 

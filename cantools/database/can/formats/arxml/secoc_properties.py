@@ -1,5 +1,6 @@
 from typing import Optional
 
+
 class AutosarSecOCProperties:
     """This class collects all attributes that are required to implement the
     AUTOSAR secure on-board communication (SecOC) specification.

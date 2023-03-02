@@ -1,14 +1,14 @@
 # A CAN signal.
 import decimal
-from typing import Optional, Dict, TYPE_CHECKING, List, Any, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from ...typechecking import Comments, ByteOrder, Choices
+from ...typechecking import ByteOrder, Choices, Comments
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
 
 
-class Decimal(object):
+class Decimal:
     """Holds the same values as
     :attr:`~cantools.database.can.Signal.scale`,
     :attr:`~cantools.database.can.Signal.offset`,
@@ -80,7 +80,7 @@ class Decimal(object):
         self._maximum = value
 
 
-class NamedSignalValue(object):
+class NamedSignalValue:
     """Represents a named value of a signal.
 
     Named values map an integer number to a human-readable
@@ -149,7 +149,7 @@ class NamedSignalValue(object):
         return False
 
 
-class Signal(object):
+class Signal:
     """A CAN signal with position, size, unit and other information. A
     signal is part of a message.
 
@@ -344,7 +344,7 @@ class Signal(object):
             choices = None
         else:
             choices = '{{{}}}'.format(', '.join(
-                ["{}: '{}'".format(value, text)
+                [f"{value}: '{text}'"
                  for value, text in self.choices.items()]))
 
         return \

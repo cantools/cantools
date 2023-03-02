@@ -1,4 +1,4 @@
-class Attribute(object):
+class Attribute:
     """An attribute that can be associated with nodes/messages/signals.
 
     """

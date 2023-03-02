@@ -49,22 +49,22 @@ I recommend using this with the option --auto-color-ylabels.
 All signals (independent of the subplot and vertical axis) share the same horizontal axis.
 '''
 
-import sys
-import re
-import binascii
-import struct
-import datetime
 import argparse
+import binascii
+import datetime
+import re
+import struct
+import sys
+
 from argparse_addons import Integer
+
 try:
     from matplotlib import pyplot as plt
 except ImportError:
     plt = None
 
-from .. import database
+from .. import database, errors
 from ..database.can.signal import NamedSignalValue
-from .. import errors
-
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
 
@@ -671,7 +671,7 @@ class Signals:
                 plotted = True
 
             if not plotted:
-                print("WARNING: signal %r with format %r was not plotted." % (sgo.reo.pattern, sgo.fmt))
+                print(f"WARNING: signal {sgo.reo.pattern!r} with format {sgo.fmt!r} was not plotted.")
 
         self.plot_error(splot, x_invalid_syntax, 'invalid syntax', self.COLOR_INVALID_SYNTAX)
         self.plot_error(splot, x_unknown_frames, 'unknown frames', self.COLOR_UNKNOWN_FRAMES)

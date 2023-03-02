@@ -1,16 +1,16 @@
 # The tester module.
 
+import queue
 import time
 from collections import UserDict
-import queue
-import can
+from typing import Dict, List, Optional
 
-from typing import Optional, Dict, List
+import can
 
 from .errors import Error
 
 
-class DecodedMessage(object):
+class DecodedMessage:
     """A decoded message.
 
     """
@@ -28,7 +28,7 @@ class Messages(UserDict):
         self.data[message_name] = value
 
     def __missing__(self, key):
-        raise Error("invalid message name '{}'".format(key))
+        raise Error(f"invalid message name '{key}'")
 
 
 def _invert_signal_tree(
@@ -111,7 +111,7 @@ class Listener(can.Listener):
         self._input_queue.put(decoded)
 
 
-class Message(UserDict, object):
+class Message(UserDict):
 
     def __init__(self,
                  database,
@@ -121,7 +121,7 @@ class Message(UserDict, object):
                  decode_choices,
                  scaling,
                  padding):
-        super(Message, self).__init__()
+        super().__init__()
         self.database = database
         self._mplex_map = invert_signal_tree(database.signal_tree)
         self._can_bus = can_bus
@@ -283,7 +283,7 @@ class Message(UserDict, object):
         return initial_sig_values
 
 
-class Tester(object):
+class Tester:
     """Test given node `dut_name` on given CAN bus `bus_name`.
 
     `database` is a :class:`~cantools.database.can.Database` instance.

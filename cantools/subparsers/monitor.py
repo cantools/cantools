@@ -1,15 +1,15 @@
 import argparse
+import bisect
+import curses
+import queue
 import re
 import time
-import curses
-import bisect
-import queue
 
 import can
 from argparse_addons import Integer
+
 from .. import database
-from .__utils__ import format_message
-from .__utils__ import format_multiplexed_name
+from .__utils__ import format_message, format_multiplexed_name
 
 
 class QuitError(Exception):
@@ -401,7 +401,7 @@ class Monitor(can.Listener):
         else:
             formatted = format_message(message, data, True, False)
             lines = formatted.splitlines()
-            formatted = ['{:12.3f}  {}'.format(timestamp, lines[1])]
+            formatted = [f'{timestamp:12.3f}  {lines[1]}']
             formatted += [14 * ' ' + line for line in lines[2:]]
 
         self._update_formatted_message(name, formatted)

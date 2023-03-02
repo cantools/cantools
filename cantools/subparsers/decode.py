@@ -1,10 +1,10 @@
 import argparse
-import sys
 import logging
+import sys
+
 from argparse_addons import Integer
 
-from .. import database
-from .. import logreader
+from .. import database, logreader
 from .__utils__ import format_message_by_frame_id
 
 logging.basicConfig(level=logging.WARNING)

@@ -1,21 +1,18 @@
 import re
-
 from typing import Any
 from xml.etree import ElementTree
 
-from .system_loader import SystemLoader
-from .ecu_extract_loader import EcuExtractLoader
-
-from .database_specifics import AutosarDatabaseSpecifics
-from .bus_specifics import AutosarBusSpecifics
-from .node_specifics import AutosarNodeSpecifics
-from .message_specifics import AutosarMessageSpecifics
-
-from .secoc_properties import AutosarSecOCProperties
-from .end_to_end_properties import AutosarEnd2EndProperties
-
+from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...internal_database import InternalDatabase
-from ....utils import type_sort_signals, sort_signals_by_start_bit
+from .bus_specifics import AutosarBusSpecifics
+from .database_specifics import AutosarDatabaseSpecifics
+from .ecu_extract_loader import EcuExtractLoader
+from .end_to_end_properties import AutosarEnd2EndProperties
+from .message_specifics import AutosarMessageSpecifics
+from .node_specifics import AutosarNodeSpecifics
+from .secoc_properties import AutosarSecOCProperties
+from .system_loader import SystemLoader
+
 
 def is_ecu_extract(root: Any # For whatever reason, mypy does not
                              # accept 'ElementTree' here...

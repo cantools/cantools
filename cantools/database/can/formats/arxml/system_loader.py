@@ -1,33 +1,29 @@
 # Load a CAN database in ARXML format.
-import re
 import logging
 import numbers
-from decimal import Decimal
-from typing import Any, List, Optional
+import re
 from copy import deepcopy
+from decimal import Decimal
+from typing import Any
 
-from xml.etree import ElementTree
-
-from .utils import parse_number_string
-from .database_specifics import AutosarDatabaseSpecifics
-from .bus_specifics import AutosarBusSpecifics
-from .node_specifics import AutosarNodeSpecifics
-from .message_specifics import AutosarMessageSpecifics
-
-from .secoc_properties import AutosarSecOCProperties
-from .end_to_end_properties import AutosarEnd2EndProperties
-
-from ...signal import Signal, NamedSignalValue
-from ...signal import Decimal as SignalDecimal
-from ...message import Message
-from ...node import Node
+from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
 from ...internal_database import InternalDatabase
-from ....utils import type_sort_signals, sort_signals_by_start_bit
+from ...message import Message
+from ...node import Node
+from ...signal import Decimal as SignalDecimal
+from ...signal import NamedSignalValue, Signal
+from .bus_specifics import AutosarBusSpecifics
+from .database_specifics import AutosarDatabaseSpecifics
+from .end_to_end_properties import AutosarEnd2EndProperties
+from .message_specifics import AutosarMessageSpecifics
+from .node_specifics import AutosarNodeSpecifics
+from .secoc_properties import AutosarSecOCProperties
+from .utils import parse_number_string
 
 LOGGER = logging.getLogger(__name__)
 
-class SystemLoader(object):
+class SystemLoader:
     def __init__(self,
                  root:Any,
                  strict:bool,

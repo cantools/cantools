@@ -1,9 +1,7 @@
 import os
 from typing import MutableMapping, Optional, TextIO, Union, cast
-from xml.etree import ElementTree
 
 import diskcache
-import textparser
 
 from ..compat import fopen
 from ..typechecking import StringPathLike

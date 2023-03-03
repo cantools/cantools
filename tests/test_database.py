@@ -3960,8 +3960,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             with self.assertRaises(cantools.database.Error) as cm:
                 cantools.database.load_file(filename, strict=True)
 
-            self.assertEqual(str(cm.exception),
-                             'The signal Signal1 does not fit in message Message1.')
+            self.assertTrue(str(cm.exception).endswith(
+                '"The signal Signal1 does not fit in message Message1."'))
 
             # Strict false.
             db = cantools.database.load_file(filename, strict=False)
@@ -4051,8 +4051,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'The signals HtrRes and MaxRes are overlapping in message '
-            'AFT1PSI2.')
+            'DBC: "The signals HtrRes and MaxRes are overlapping in message '
+            'AFT1PSI2."')
 
     def test_j1939_dbc(self):
         db = cantools.database.load_file('tests/files/dbc/j1939.dbc')
@@ -5851,7 +5851,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'The signal M length 0 is not greater than 0 in message Status.')
+            'SYM: "The signal M length 0 is not greater than 0 in message Status."')
 
     def test_multiple_senders(self):
         filename = 'tests/files/dbc/multiple_senders.dbc'
@@ -6049,8 +6049,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Standard frame id 0x10630000 is more than 11 bits in message '
-            'DriverDoorStatus.')
+            'DBC: "Standard frame id 0x10630000 is more than 11 bits in message '
+            'DriverDoorStatus."')
 
     def test_dbc_issue_199_more_than_29_bits_extended_frame_id(self):
         filename = 'tests/files/dbc/issue_199_extended.dbc'
@@ -6060,8 +6060,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Extended frame id 0x7fffffff is more than 29 bits in message '
-            'DriverDoorStatus.')
+            'DBC: "Extended frame id 0x7fffffff is more than 29 bits in message '
+            'DriverDoorStatus."')
 
     def test_issue_207_tolerate_plus_in_dbc_sig_def(self):
         db = cantools.database.load_file('tests/files/dbc/issue_207_sig_plus.dbc')

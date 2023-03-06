@@ -305,7 +305,10 @@ def _load_signal_type_and_length(type_, tokens, enums):
     enum = None
     minimum = None
     maximum = None
-    decimal = SignalDecimal()
+    decimal = SignalDecimal(
+        scale=Decimal("1"),
+        offset=Decimal("0"),
+    )
 
     if type_ == 'signed':
         is_signed = True
@@ -374,7 +377,7 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal, spn)
         elif item.startswith('/u:'):
             unit = item[3:]
         else:
-            raise ParseError(f'Iternal error {item}.')
+            raise ParseError(f'Internal error {item}.')
 
     return unit, factor, offset, enum, minimum, maximum, decimal, spn
 

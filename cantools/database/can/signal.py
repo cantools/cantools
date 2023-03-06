@@ -20,8 +20,8 @@ class Decimal:
     """
 
     def __init__(self,
-                 scale: Optional[decimal.Decimal] = None,
-                 offset: Optional[decimal.Decimal] = None,
+                 scale: decimal.Decimal,
+                 offset: decimal.Decimal,
                  minimum: Optional[decimal.Decimal] = None,
                  maximum: Optional[decimal.Decimal] = None) -> None:
         self._scale = scale
@@ -30,7 +30,7 @@ class Decimal:
         self._maximum = maximum
 
     @property
-    def scale(self) -> Optional[decimal.Decimal]:
+    def scale(self) -> decimal.Decimal:
         """The scale factor of the signal value as ``decimal.Decimal``.
 
         """
@@ -38,11 +38,11 @@ class Decimal:
         return self._scale
 
     @scale.setter
-    def scale(self, value: Optional[decimal.Decimal]) -> None:
+    def scale(self, value: decimal.Decimal) -> None:
         self._scale = value
 
     @property
-    def offset(self) -> Optional[decimal.Decimal]:
+    def offset(self) -> decimal.Decimal:
         """The offset of the signal value as ``decimal.Decimal``.
 
         """
@@ -50,7 +50,7 @@ class Decimal:
         return self._offset
 
     @offset.setter
-    def offset(self, value: Optional[decimal.Decimal]) -> None:
+    def offset(self, value: decimal.Decimal) -> None:
         self._offset = value
 
     @property
@@ -262,7 +262,7 @@ class Signal:
         #:
         #: See :class:`~cantools.database.can.signal.Decimal` for more
         #: details.
-        self.decimal: Decimal = Decimal() if decimal is None else decimal
+        self.decimal: Optional[Decimal] = decimal
 
         #: The unit of the signal as a string, or ``None`` if unavailable.
         self.unit: Optional[str] = unit

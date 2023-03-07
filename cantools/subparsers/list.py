@@ -146,7 +146,7 @@ def _print_message(message, indent=''):
             print(f'{indent}      Offset: {offset}')
 
             scale = signal.scale if signal.scale is not None else 1
-            print(f'{indent}      Scaling factor: {signal.scale}')
+            print(f'{indent}      Scaling factor: {scale}')
 
         if signal.choices:
             print(f'{indent}      Named values:')

@@ -261,12 +261,12 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
 
     try:
         big_compiled = bitstruct.c.compile(big_fmt, big_names)
-    except Exception as e:
+    except Exception:
         big_compiled = bitstruct.compile(big_fmt, big_names)
 
     try:
         little_compiled = bitstruct.c.compile(little_fmt, little_names)
-    except Exception as e:
+    except Exception:
         little_compiled = bitstruct.compile(little_fmt, little_names)
 
     return Formats(big_compiled,

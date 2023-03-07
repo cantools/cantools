@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from ... import database
 from ...database.can.database import Database as CanDatabase

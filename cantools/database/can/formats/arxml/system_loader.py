@@ -1728,8 +1728,6 @@ class SystemLoader:
         return res.text
 
     def _load_texttable(self, compu_method):
-        minimum = None
-        maximum = None
         choices = {}
 
         for compu_scale in self._get_arxml_children(compu_method,

@@ -1204,17 +1204,17 @@ def _load_environment_variables(tokens, comments, attributes):
 def _load_choices(tokens):
     choices = defaultdict(dict)
 
-    for choice in tokens.get('VAL_', []):
-        if len(choice[1]) == 0:
+    for _choice in tokens.get('VAL_', []):
+        if len(_choice[1]) == 0:
             continue
 
-        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in choice[3])
+        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in _choice[3])
 
         if len(od) == 0:
             continue
 
-        frame_id = int(choice[1][0])
-        choices[frame_id][choice[2]] = od
+        frame_id = int(_choice[1][0])
+        choices[frame_id][_choice[2]] = od
 
     return choices
 

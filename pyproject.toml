@@ -26,12 +26,14 @@ ignore_missing_imports = true
 [tool.ruff]
 select = [
 #    "E",  # pycodestyle Error
-#    "F",  # pyflakes
-    "F401",  # pyflakes unused-import
+    "F",  # pyflakes
 #    "B",  # pyflakes-bugbear
     "UP",  # pyupgrade
 #    "C4",  # flake8-comprehensions
     "I",  # isort
+]
+ignore = [
+    "F541",  # f-string-missing-placeholders
 ]
 
 # Assume Python 3.8.

@@ -8,7 +8,7 @@ from ..typechecking import StringPathLike
 from . import can, diagnostics, utils
 
 # Remove once less users are using the old package structure.
-from .can import *
+from .can import *  # noqa: F403
 from .errors import Error, ParseError
 
 

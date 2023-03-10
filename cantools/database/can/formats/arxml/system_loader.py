@@ -1,33 +1,29 @@
 # Load a CAN database in ARXML format.
-import re
 import logging
 import numbers
-from decimal import Decimal
-from typing import Any, List, Optional
+import re
 from copy import deepcopy
+from decimal import Decimal
+from typing import Any
 
-from xml.etree import ElementTree
-
-from .utils import parse_number_string
-from .database_specifics import AutosarDatabaseSpecifics
-from .bus_specifics import AutosarBusSpecifics
-from .node_specifics import AutosarNodeSpecifics
-from .message_specifics import AutosarMessageSpecifics
-
-from .secoc_properties import AutosarSecOCProperties
-from .end_to_end_properties import AutosarEnd2EndProperties
-
-from ...signal import Signal, NamedSignalValue
-from ...signal import Decimal as SignalDecimal
-from ...message import Message
-from ...node import Node
+from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
 from ...internal_database import InternalDatabase
-from ....utils import type_sort_signals, sort_signals_by_start_bit
+from ...message import Message
+from ...node import Node
+from ...signal import Decimal as SignalDecimal
+from ...signal import NamedSignalValue, Signal
+from .bus_specifics import AutosarBusSpecifics
+from .database_specifics import AutosarDatabaseSpecifics
+from .end_to_end_properties import AutosarEnd2EndProperties
+from .message_specifics import AutosarMessageSpecifics
+from .node_specifics import AutosarNodeSpecifics
+from .secoc_properties import AutosarSecOCProperties
+from .utils import parse_number_string
 
 LOGGER = logging.getLogger(__name__)
 
-class SystemLoader(object):
+class SystemLoader:
     def __init__(self,
                  root:Any,
                  strict:bool,
@@ -758,7 +754,24 @@ class SystemLoader(object):
         # things like multiplexed and container messages, this is not
         # the case...
         pdu = self._get_pdu(can_frame)
-        assert pdu is not None
+        if pdu is None:
+            return Message(bus_name=bus_name,
+                           frame_id=frame_id,
+                           is_extended_frame=is_extended_frame,
+                           is_fd=is_fd,
+                           name=name,
+                           length=length,
+                           senders=[],
+                           send_type=None,
+                           cycle_time=None,
+                           signals=[],
+                           contained_messages=None,
+                           unused_bit_pattern=0xff,
+                           comment=None,
+                           autosar_specifics=autosar_specifics,
+                           strict=self._strict,
+                           sort_signals=self._sort_signals)
+
         pdu_path = self._get_pdu_path(can_frame)
         autosar_specifics._pdu_paths.append(pdu_path)
 
@@ -1715,8 +1728,6 @@ class SystemLoader(object):
         return res.text
 
     def _load_texttable(self, compu_method):
-        minimum = None
-        maximum = None
         choices = {}
 
         for compu_scale in self._get_arxml_children(compu_method,

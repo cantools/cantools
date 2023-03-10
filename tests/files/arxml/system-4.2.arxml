@@ -220,6 +220,12 @@
                       <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
                       <IDENTIFIER>1001</IDENTIFIER>
                     </CAN-FRAME-TRIGGERING>
+                    <CAN-FRAME-TRIGGERING>
+                      <SHORT-NAME>MessageWithoutPDU</SHORT-NAME>
+                      <FRAME-REF DEST="CAN-FRAME">/CanFrame/MessageWithoutPDU</FRAME-REF>
+                      <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <IDENTIFIER>1002</IDENTIFIER>
+                    </CAN-FRAME-TRIGGERING>
                   </FRAME-TRIGGERINGS>
                   <PDU-TRIGGERINGS>
                     <!-- /Cluster/Cluster0/Pch0/message1_triggering -->
@@ -349,6 +355,11 @@
               <PDU-REF DEST="NM-PDU">/NMPdu/alarm_status</PDU-REF>
             </PDU-TO-FRAME-MAPPING>
           </PDU-TO-FRAME-MAPPINGS>
+        </CAN-FRAME>
+        <!-- /CanFrame/MessageWithoutPDU -->
+        <CAN-FRAME>
+          <SHORT-NAME>MessageWithoutPDU</SHORT-NAME>
+          <FRAME-LENGTH>8</FRAME-LENGTH>
         </CAN-FRAME>
       </ELEMENTS>
     </AR-PACKAGE>

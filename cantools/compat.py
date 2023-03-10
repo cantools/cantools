@@ -1,4 +1,4 @@
-class fopen(object):
+class fopen:
 
     def __init__(self, filename, mode, encoding, newline=None):
         self._filename = filename

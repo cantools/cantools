@@ -300,6 +300,7 @@ AlarmStatus
 Message1
 Message3
 Message4
+MessageWithoutPDU
 MultiplexedMessage
 OneToContainThemAll
 """

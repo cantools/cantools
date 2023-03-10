@@ -74,6 +74,7 @@ BA_DEF_ BO_  "GenMsgStartValue" STRING ;
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 1000;
 BA_DEF_REL_ BU_SG_REL_  "AFloat2" FLOAT 0 65535;
 BA_DEF_REL_ BU_SG_REL_  "GenSigTimeoutTime" INT 0 65535;
+BA_DEF_REL_ BU_SG_REL_  "GenSigRespComment" STRING ;
 BA_DEF_DEF_  "DBName" "";
 BA_DEF_DEF_  "Baudrate" 125000;
 BA_DEF_DEF_  "AFloat" 0;

@@ -3960,8 +3960,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
             with self.assertRaises(cantools.database.Error) as cm:
                 cantools.database.load_file(filename, strict=True)
 
-            self.assertEqual(str(cm.exception),
-                             'The signal Signal1 does not fit in message Message1.')
+            self.assertTrue(str(cm.exception).endswith(
+                '"The signal Signal1 does not fit in message Message1."'))
 
             # Strict false.
             db = cantools.database.load_file(filename, strict=False)
@@ -4051,8 +4051,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'The signals HtrRes and MaxRes are overlapping in message '
-            'AFT1PSI2.')
+            'DBC: "The signals HtrRes and MaxRes are overlapping in message '
+            'AFT1PSI2."')
 
     def test_j1939_dbc(self):
         db = cantools.database.load_file('tests/files/dbc/j1939.dbc')
@@ -4817,7 +4817,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(bus.fd_baudrate, 2000000)
 
         self.assertEqual(len(db.nodes), 3)
-        self.assertEqual(len(db.messages), 7)
+        self.assertEqual(len(db.messages), 8)
         self.assertTrue(db.autosar is not None)
         self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
@@ -5376,6 +5376,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertTrue(nm_message.dbc is None)
         self.assertTrue(nm_message.autosar is not None)
 
+        msg_without_pdu = db.messages[7]
+        self.assertEqual(msg_without_pdu.frame_id, 1002)
+        self.assertEqual(msg_without_pdu.is_extended_frame, False)
+        self.assertEqual(msg_without_pdu.name, 'MessageWithoutPDU')
+        self.assertEqual(msg_without_pdu.length, 8)
+        self.assertEqual(msg_without_pdu.senders, [])
+        self.assertEqual(msg_without_pdu.send_type, None)
+        self.assertEqual(msg_without_pdu.cycle_time, None)
+        self.assertEqual(len(msg_without_pdu.signals), 0)
+        self.assertEqual(msg_without_pdu.comment, None)
+        self.assertEqual(msg_without_pdu.bus_name, 'Cluster0')
+        self.assertTrue(msg_without_pdu.dbc is None)
+        self.assertTrue(msg_without_pdu.autosar is not None)
+
     def test_system_arxml_traversal(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(
@@ -5837,7 +5851,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'The signal M length 0 is not greater than 0 in message Status.')
+            'SYM: "The signal M length 0 is not greater than 0 in message Status."')
 
     def test_multiple_senders(self):
         filename = 'tests/files/dbc/multiple_senders.dbc'
@@ -6035,8 +6049,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Standard frame id 0x10630000 is more than 11 bits in message '
-            'DriverDoorStatus.')
+            'DBC: "Standard frame id 0x10630000 is more than 11 bits in message '
+            'DriverDoorStatus."')
 
     def test_dbc_issue_199_more_than_29_bits_extended_frame_id(self):
         filename = 'tests/files/dbc/issue_199_extended.dbc'
@@ -6046,8 +6060,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            'Extended frame id 0x7fffffff is more than 29 bits in message '
-            'DriverDoorStatus.')
+            'DBC: "Extended frame id 0x7fffffff is more than 29 bits in message '
+            'DriverDoorStatus."')
 
     def test_issue_207_tolerate_plus_in_dbc_sig_def(self):
         db = cantools.database.load_file('tests/files/dbc/issue_207_sig_plus.dbc')

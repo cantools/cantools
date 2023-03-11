@@ -1,5 +1,6 @@
 # Utility functions.
 
+import decimal
 import os.path
 import re
 from collections import OrderedDict
@@ -15,7 +16,6 @@ from typing import (
     Tuple,
     Union,
 )
-import decimal
 
 from ..typechecking import (
     ByteOrder,

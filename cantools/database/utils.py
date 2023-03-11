@@ -92,7 +92,7 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
             if field.decimal is None:
                 raise ValueError(f'Cannot encode Decimal value into Signal {field.name}, '
                                  'no known Decimal format')
-            unpacked[field.name] = (value - field.decimal.offset) / field.decimal.scale  # type: ignore[operator]
+            unpacked[field.name] = (value - field.decimal.offset) / field.decimal.scale
             continue
 
         unpacked[field.name] = field.choice_string_to_number(str(value))

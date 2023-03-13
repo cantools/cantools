@@ -1,8 +1,10 @@
 # A CAN signal.
+import contextlib
 import decimal
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from ...typechecking import ByteOrder, Choices, Comments
+from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
@@ -191,8 +193,8 @@ class Signal:
                  length: int,
                  byte_order: ByteOrder = 'little_endian',
                  is_signed: bool = False,
-                 initial: Optional[int] = None,
-                 invalid: Optional[int] = None,
+                 raw_initial: Optional[int] = None,
+                 raw_invalid: Optional[int] = None,
                  scale: float = 1,
                  offset: float = 0,
                  minimum: Optional[float] = None,
@@ -247,12 +249,26 @@ class Signal:
         #: ``True``.
         self.is_signed: bool = is_signed
 
-        #: The initial value of the signal, or ``None`` if unavailable.
-        self.initial: Optional[int] = initial
+        # deprecated `initial` attribute
+        self._initial: Optional[Union[int, SignalValueType]] = raw_initial
 
-        #: The value representing that the signal is invalid,
+        #: The raw initial value of the signal, or ``None`` if unavailable.
+        self.raw_initial: Optional[int] = raw_initial
+
+        #: The scaled initial value of the signal, or ``None`` if unavailable.
+        self.scaled_initial: Optional[SignalValueType] = (
+            self.raw_to_scaled(raw_initial) if raw_initial is not None else None
+        )
+
+        #: The raw value representing that the signal is invalid,
         #: or ``None`` if unavailable.
-        self.invalid: Optional[int] = invalid
+        self.raw_invalid: Optional[int] = raw_invalid
+
+        #: The scaled value representing that the signal is invalid,
+        #: or ``None`` if unavailable.
+        self.invalid: Optional[SignalValueType] = (
+            self.raw_to_scaled(raw_invalid) if raw_invalid is not None else None
+        )
 
         #: The high precision values of
         #: :attr:`~cantools.database.can.Signal.scale`,
@@ -306,6 +322,41 @@ class Signal:
             self.comments = comment
 
     @property
+    def initial(self) -> Optional[Union[int, SignalValueType]]:
+        warnings.warn(
+            "The `Signal.initial` attribute is deprecated and scheduled for removal in April 2024. "
+            "Use `Signal.raw_initial` or `Signal.scaled_initial` instead.",
+            DeprecationWarning,
+        )
+        return self._initial
+
+    @initial.setter
+    def initial(self, value: Union[int, SignalValueType]) -> None:
+        warnings.warn(
+            "The `Signal.initial` attribute is deprecated and scheduled for removal in April 2024. "
+            "Use `Signal.raw_initial` or `Signal.scaled_initial` instead.",
+            DeprecationWarning,
+        )
+        self._initial = value
+
+    def raw_to_scaled(self, raw: int) -> SignalValueType:
+        with contextlib.suppress(KeyError, TypeError):
+            return self.choices[raw]  # type: ignore[index]
+
+        return raw * self.scale + self.offset
+
+    def scaled_to_raw(self, scaled: SignalValueType) -> int:
+        if isinstance(scaled, (float, int)):
+            _transform = float if self.is_float else round
+            if self.offset == 0 and self.scale == 1:
+                # treat special case to avoid introduction of unnecessary rounding error
+                return _transform(scaled)  # type: ignore[operator,no-any-return]
+
+            return _transform((scaled - self.offset) / self.scale)  # type: ignore[operator,no-any-return]
+
+        return self.choice_string_to_number(str(scaled))
+
+    @property
     def comment(self) -> Optional[str]:
         """The signal comment, or ``None`` if unavailable.
 
@@ -354,7 +405,7 @@ class Signal:
             f"{self.length}, " \
             f"'{self.byte_order}', " \
             f"{self.is_signed}, " \
-            f"{self.initial}, " \
+            f"{self.raw_initial}, " \
             f"{self.scale}, " \
             f"{self.offset}, " \
             f"{self.minimum}, " \

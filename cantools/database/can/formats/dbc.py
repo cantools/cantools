@@ -1458,7 +1458,7 @@ def _load_signals(tokens,
                                if signal[7] == '0'
                                else 'little_endian'),
                    is_signed=(signal[8] == '-'),
-                   initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
+                   raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
                    scale=num(signal[10]),
                    offset=num(signal[12]),
                    minimum=get_minimum(signal[15], signal[17]),

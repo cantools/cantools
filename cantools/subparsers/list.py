@@ -116,8 +116,8 @@ def _print_message(message, indent=''):
         print(f'{indent}      Byte order: {signal.byte_order}')
         if signal.unit:
             print(f'{indent}      Unit: {signal.unit}')
-        if signal.initial is not None:
-            iv = signal.initial
+        if signal.scaled_initial is not None:
+            iv = signal.scaled_initial
             if signal.unit is None or not isinstance(iv, float):
                 unit = ''
             else:

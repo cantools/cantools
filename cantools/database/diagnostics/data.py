@@ -13,26 +13,27 @@ class Data:
 
     """
 
-    def __init__(self,
-                 name: str,
-                 start: int,
-                 length: int,
-                 byte_order: ByteOrder = 'little_endian',
-                 scale: Union[float, List[float]] = 1,
-                 offset: Union[float, List[float]] = 0,
-                 minimum: Optional[Union[float, List[float]]] = None,
-                 maximum: Optional[Union[float, List[float]]] = None,
-                 unit: Optional[str] = None,
-                 choices: Optional[Choices] = None,
-                 ) -> None:
+    def __init__(
+        self,
+        name: str,
+        start: int,
+        length: int,
+        byte_order: ByteOrder = "little_endian",
+        scale: Union[float, List[float]] = 1,
+        offset: Union[float, List[float]] = 0,
+        minimum: Optional[Union[float, List[float]]] = None,
+        maximum: Optional[Union[float, List[float]]] = None,
+        unit: Optional[str] = None,
+        choices: Optional[Choices] = None,
+    ) -> None:
         #: The data name as a string.
         self.name: str = name
 
         #: The scale factor of the data value.
-        self.scale: Union[float, List[float]] = scale
+        self.scale: List[float] = scale if isinstance(scale, list) else [scale]
 
         #: The offset of the data value.
-        self.offset: Union[float, List[float]] = offset
+        self.offset: List[float] = offset if isinstance(offset, list) else [offset]
 
         #: The start bit position of the data within its DID.
         self.start: int = start
@@ -44,10 +45,14 @@ class Data:
         self.byte_order: ByteOrder = byte_order
 
         #: The minimum value of the data, or ``None`` if unavailable.
-        self.minimum: Optional[Union[float, List[float]]] = minimum
+        self.minimum: Optional[List[float]] = (
+            minimum if isinstance(minimum, list) else [minimum]
+        )
 
         #: The maximum value of the data, or ``None`` if unavailable.
-        self.maximum: Optional[Union[float, List[float]]] = maximum
+        self.maximum: Optional[List[float]] = (
+            maximum if isinstance(maximum, list) else [maximum]
+        )
 
         #: The unit of the data as a string, or ``None`` if unavailable.
         self.unit = unit
@@ -70,11 +75,20 @@ class Data:
         for i in range(len(self.minimum)):
             if self.minimum[i] <= raw_val <= self.maximum[i]:
                 return self.offset[i], self.scale[i]
-            elif self.minimum[i] <= convert(raw_val, self.offset[i], self.scale[i]) <= self.maximum[i]:
+            elif (
+                self.minimum[i]
+                <= convert(raw_val, self.offset[i], self.scale[i])
+                <= self.maximum[i]
+            ):
                 return self.offset[i], self.scale[i]
         else:
-            err_text = [f"{self.minimum[i]} <= x <= {self.maximum[i]}" for i in range(len(self.minimum))]
-            logger.warning(f"Value {raw_val} is not in ranges: \n {' OR '.join(err_text)}")
+            err_text = [
+                f"{self.minimum[i]} <= x <= {self.maximum[i]}"
+                for i in range(len(self.minimum))
+            ]
+            logger.warning(
+                f"Value {raw_val} is not in ranges: \n {' OR '.join(err_text)}"
+            )
             return self.offset[0], self.scale[0]
 
     def choice_string_to_number(self, string: str) -> int:
@@ -91,18 +105,21 @@ class Data:
         if self.choices is None:
             choices = None
         else:
-            choices = '{{{}}}'.format(', '.join(
-                [f"{value}: '{text}'"
-                 for value, text in self.choices.items()]))
+            choices = "{{{}}}".format(
+                ", ".join(
+                    [f"{value}: '{text}'" for value, text in self.choices.items()]
+                )
+            )
 
         return "data('{}', {}, {}, '{}', {}, {}, {}, {}, '{}', {})".format(
             self.name,
             self.start,
             self.length,
             self.byte_order,
-            self.scale,
-            self.offset,
-            self.minimum,
-            self.maximum,
+            self.scale[0],
+            self.offset[0],
+            self.minimum[0],
+            self.maximum[0],
             self.unit,
-            choices)
+            choices,
+        )

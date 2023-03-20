@@ -51,10 +51,10 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         self.assertEqual(data.start, 64)
         self.assertEqual(data.length, 16)
         self.assertEqual(data.byte_order, 'little_endian')
-        self.assertEqual(data.scale, 1)
-        self.assertEqual(data.offset, 0)
-        self.assertEqual(data.minimum, 0)
-        self.assertEqual(data.maximum, 255)
+        self.assertEqual(data.scale, [1])
+        self.assertEqual(data.offset, [0])
+        self.assertEqual(data.minimum, [0])
+        self.assertEqual(data.maximum, [255])
         self.assertEqual(data.unit, None)
         self.assertEqual(data.choices, None)
 
@@ -100,8 +100,8 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         self.assertEqual(did.identifier, 243)
         self.assertEqual(did.datas[1].name, 'period')
         self.assertEqual(did.datas[1].unit, 'sec')
-        self.assertEqual(did.datas[1].scale, 20)
-        self.assertEqual(did.datas[1].offset, 0)
+        self.assertEqual(did.datas[1].scale, [20])
+        self.assertEqual(did.datas[1].offset, [0])
 
         decoded_did = {
             'ampl': 1,

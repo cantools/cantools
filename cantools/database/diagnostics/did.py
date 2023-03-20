@@ -6,15 +6,9 @@ from ..utils import create_encode_decode_formats, decode_data, encode_data
 
 
 class Did:
-    """A DID with identifier and other information.
+    """A DID with identifier and other information."""
 
-    """
-
-    def __init__(self,
-                 identifier,
-                 name,
-                 length,
-                 datas):
+    def __init__(self, identifier, name, length, datas):
         self._identifier = identifier
         self._name = name
         self._length = length
@@ -24,9 +18,7 @@ class Did:
 
     @property
     def identifier(self):
-        """The did identifier as an integer.
-
-        """
+        """The did identifier as an integer."""
 
         return self._identifier
 
@@ -36,9 +28,7 @@ class Did:
 
     @property
     def name(self):
-        """The did name as a string.
-
-        """
+        """The did name as a string."""
 
         return self._name
 
@@ -48,9 +38,7 @@ class Did:
 
     @property
     def length(self):
-        """The did name as a string.
-
-        """
+        """The did name as a string."""
 
         return self._length
 
@@ -60,9 +48,7 @@ class Did:
 
     @property
     def datas(self):
-        """The did datas as a string.
-
-        """
+        """The did datas as a string."""
 
         return self._datas
 
@@ -88,20 +74,15 @@ class Did:
 
         """
 
-        encoded = encode_data(data,
-                              self._codec['datas'],
-                              self._codec['formats'],
-                              scaling)
-        encoded |= (0x80 << (8 * self._length))
-        encoded = hex(encoded)[4:].rstrip('L')
+        encoded = encode_data(
+            data, self._codec["datas"], self._codec["formats"], scaling
+        )
+        encoded |= 0x80 << (8 * self._length)
+        encoded = hex(encoded)[4:].rstrip("L")
 
-        return binascii.unhexlify(encoded)[:self._length]
+        return binascii.unhexlify(encoded)[: self._length]
 
-    def decode(self,
-               data,
-               decode_choices=True,
-               scaling=True,
-               allow_truncated=False):
+    def decode(self, data, decode_choices=True, scaling=True, allow_truncated=False):
         """Decode given data as a DID of this type.
 
         If `decode_choices` is ``False`` scaled values are not
@@ -115,26 +96,23 @@ class Did:
 
         """
 
-        return decode_data(data[:self._length],
-                           self.length,
-                           self._codec['datas'],
-                           self._codec['formats'],
-                           decode_choices,
-                           scaling,
-                           allow_truncated)
+        return decode_data(
+            data[: self._length],
+            self.length,
+            self._codec["datas"],
+            self._codec["formats"],
+            decode_choices,
+            scaling,
+            allow_truncated,
+        )
 
     def refresh(self):
-        """Refresh the internal DID state.
-
-        """
+        """Refresh the internal DID state."""
 
         self._codec = {
-            'datas': self._datas,
-            'formats': create_encode_decode_formats(self._datas,
-                                                    self._length)
+            "datas": self._datas,
+            "formats": create_encode_decode_formats(self._datas, self._length),
         }
 
     def __repr__(self):
-        return "did('{}', 0x{:04x})".format(
-            self._name,
-            self._identifier)
+        return "did('{}', 0x{:04x})".format(self._name, self._identifier)

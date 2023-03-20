@@ -1,7 +1,10 @@
 # DID data.
-from typing import Optional
+import logging
+from typing import Optional, Union, List
 
 from ...typechecking import ByteOrder, Choices
+
+logger = logging.getLogger(__name__)
 
 
 class Data:
@@ -15,10 +18,10 @@ class Data:
                  start: int,
                  length: int,
                  byte_order: ByteOrder = 'little_endian',
-                 scale: float = 1,
-                 offset: float = 0,
-                 minimum: Optional[float] = None,
-                 maximum: Optional[float] = None,
+                 scale: Union[float, List[float]] = 1,
+                 offset: Union[float, List[float]] = 0,
+                 minimum: Optional[Union[float, List[float]]] = None,
+                 maximum: Optional[Union[float, List[float]]] = None,
                  unit: Optional[str] = None,
                  choices: Optional[Choices] = None,
                  ) -> None:
@@ -26,10 +29,10 @@ class Data:
         self.name: str = name
 
         #: The scale factor of the data value.
-        self.scale: float = scale
+        self.scale: Union[float, List[float]] = scale
 
         #: The offset of the data value.
-        self.offset: float = offset
+        self.offset: Union[float, List[float]] = offset
 
         #: The start bit position of the data within its DID.
         self.start: int = start
@@ -41,10 +44,10 @@ class Data:
         self.byte_order: ByteOrder = byte_order
 
         #: The minimum value of the data, or ``None`` if unavailable.
-        self.minimum: Optional[float] = minimum
+        self.minimum: Optional[Union[float, List[float]]] = minimum
 
         #: The maximum value of the data, or ``None`` if unavailable.
-        self.maximum: Optional[float] = maximum
+        self.maximum: Optional[Union[float, List[float]]] = maximum
 
         #: The unit of the data as a string, or ``None`` if unavailable.
         self.unit = unit
@@ -56,6 +59,23 @@ class Data:
         # ToDo: Remove once types are handled properly.
         self.is_float: bool = False
         self.is_signed: bool = False
+
+    def get_scaling_offset(self, raw_val):
+        def convert(v, o, f):
+            return (v - o) / f
+
+        if not isinstance(self.minimum, list):
+            return self.offset, self.scale
+
+        for i in range(len(self.minimum)):
+            if self.minimum[i] <= raw_val <= self.maximum[i]:
+                return self.offset[i], self.scale[i]
+            elif self.minimum[i] <= convert(raw_val, self.offset[i], self.scale[i]) <= self.maximum[i]:
+                return self.offset[i], self.scale[i]
+        else:
+            err_text = [f"{self.minimum[i]} <= x <= {self.maximum[i]}" for i in range(len(self.minimum))]
+            logger.warning(f"Value {raw_val} is not in ranges: \n {' OR '.join(err_text)}")
+            return self.offset[0], self.scale[0]
 
     def choice_string_to_number(self, string: str) -> int:
         if self.choices is None:

@@ -76,12 +76,16 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
         if isinstance(value, (float, int)):
             _transform = float if field.is_float else round
             if scaling:
-                if field.offset == 0 and field.scale == 1:
+                try:
+                    offset, scale = field.get_scaling_offset(value)
+                except AttributeError:
+                    offset, scale = field.offset, field.scale
+                if offset == 0 and scale == 1:
                     # treat special case to avoid introduction of unnecessary rounding error
                     unpacked[field.name] = _transform(value)  # type: ignore[operator]
                     continue
 
-                unpacked[field.name] = _transform((value - field.offset) / field.scale)  # type: ignore[operator]
+                unpacked[field.name] = _transform((value - offset) / scale)  # type: ignore[operator]
                 continue
 
             unpacked[field.name] = _transform(value)  # type: ignore[operator]
@@ -154,7 +158,11 @@ def decode_data(data: bytes,
                     pass
 
             if scaling:
-                decoded[field.name] = field.scale * value + field.offset
+                try:
+                    offset, scale = field.get_scaling_offset(value)
+                except AttributeError:
+                    offset, scale = field.offset, field.scale
+                decoded[field.name] = scale * value + offset
                 continue
             else:
                 decoded[field.name] = value

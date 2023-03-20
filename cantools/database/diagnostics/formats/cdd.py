@@ -67,6 +67,7 @@ def _load_data_types(ecu_doc):
     types += ecu_doc.findall('DATATYPES/TEXTTBL')
     types += ecu_doc.findall('DATATYPES/STRUCTDT')
     types += ecu_doc.findall('DATATYPES/EOSITERDT')
+    types += ecu_doc.findall('DATATYPES/COMPTBL')
 
     for data_type in types:
         # Default values.
@@ -115,48 +116,84 @@ def _load_data_types(ecu_doc):
         choices = _load_choices(data_type)
 
         # Slope and offset.
-        comp = data_type.find('COMP')
+        comps = data_type.findall('COMP')
 
-        if comp is not None:
-            factor = float(comp.attrib['f'])
-            offset = float(comp.attrib['o'])
+        if len(comps) > 0:
+            data_types[type_id] = []
+            for comp in comps:
+                factor = float(comp.attrib['f'])
+                offset = float(comp.attrib['o'])
+                if len(comps) > 1:
+                    # Piecewise linear type
+                    minimum = float(comp.attrib['s'])
+                    maximum = float(comp.attrib['e'])
 
-        data_types[type_id] = DataType(type_name,
-                                       type_id,
-                                       bit_length,
-                                       encoding,
-                                       minimum,
-                                       maximum,
-                                       choices,
-                                       byte_order,
-                                       unit,
-                                       factor,
-                                       offset)
+                data_types[type_id].append(DataType(type_name,
+                                                    type_id,
+                                                    bit_length,
+                                                    encoding,
+                                                    minimum,
+                                                    maximum,
+                                                    choices,
+                                                    byte_order,
+                                                    unit,
+                                                    factor,
+                                                    offset))
+            if len(data_types[type_id]) == 1:
+                data_type = data_types[type_id][0]
+                data_types[type_id] = data_type
+        else:
+            data_types[type_id] = DataType(type_name,
+                                           type_id,
+                                           bit_length,
+                                           encoding,
+                                           minimum,
+                                           maximum,
+                                           choices,
+                                           byte_order,
+                                           unit,
+                                           factor,
+                                           offset)
 
     return data_types
 
 
-def _load_data_element(data, offset, data_types):
+def _load_data_element(data, bit_offset, data_types):
     """Load given signal element and return a signal object.
 
     """
 
-    data_type = data_types[data.attrib['dtref']]
+    types = data_types[data.attrib['dtref']]
+
+    if not isinstance(types, list):
+        types = [types]
+
+    scale = []
+    offset = []
+    minimum = []
+    maximum = []
+    for data_type in types:
+        scale.append(data_type.factor)
+        offset.append(data_type.offset)
+        minimum.append(data_type.minimum)
+        maximum.append(data_type.maximum)
+
+    data_type = types[0]  # for remaining parameters just refer to first element
 
     # Map CDD/c-style field offset to the DBC/can.Signal.start bit numbering
     # convention for compatability with can.Signal objects and the shared codec
     # infrastructure.
     #
-    dbc_start_bitnum = cdd_offset_to_dbc_start_bit(offset, data_type.bit_length, data_type.byte_order)
+    dbc_start_bitnum = int(cdd_offset_to_dbc_start_bit(bit_offset, data_type.bit_length, data_type.byte_order))
 
     return Data(name=data.find('QUAL').text,
-                start = dbc_start_bitnum,
+                start=dbc_start_bitnum,
                 length=data_type.bit_length,
-                byte_order = data_type.byte_order,
-                scale=data_type.factor,
-                offset=data_type.offset,
-                minimum=data_type.minimum,
-                maximum=data_type.maximum,
+                byte_order=data_type.byte_order,
+                scale=scale,
+                offset=offset,
+                minimum=minimum,
+                maximum=maximum,
                 unit=data_type.unit,
                 choices=data_type.choices)
 
@@ -185,7 +222,10 @@ def _load_did_element(did, data_types, did_data_lib):
 
         if data:
             datas.append(data)
-            offset += data.length
+            if isinstance(data, list):
+                offset += data[0].length
+            else:
+                offset += data.length
 
     identifier = int(did.find('STATICVALUE').attrib['v'])
     name = did.find('QUAL').text

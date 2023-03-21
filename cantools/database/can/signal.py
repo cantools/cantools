@@ -1,6 +1,6 @@
 # A CAN signal.
 import decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from ...typechecking import ByteOrder, Choices, Comments
 
@@ -19,11 +19,13 @@ class Decimal:
 
     """
 
-    def __init__(self,
-                 scale: decimal.Decimal,
-                 offset: decimal.Decimal,
-                 minimum: Optional[decimal.Decimal] = None,
-                 maximum: Optional[decimal.Decimal] = None) -> None:
+    def __init__(
+        self,
+        scale: decimal.Decimal,
+        offset: decimal.Decimal,
+        minimum: Optional[decimal.Decimal] = None,
+        maximum: Optional[decimal.Decimal] = None,
+    ) -> None:
         self._scale = scale
         self._offset = offset
         self._minimum = minimum
@@ -31,9 +33,7 @@ class Decimal:
 
     @property
     def scale(self) -> decimal.Decimal:
-        """The scale factor of the signal value as ``decimal.Decimal``.
-
-        """
+        """The scale factor of the signal value as ``decimal.Decimal``."""
 
         return self._scale
 
@@ -43,9 +43,7 @@ class Decimal:
 
     @property
     def offset(self) -> decimal.Decimal:
-        """The offset of the signal value as ``decimal.Decimal``.
-
-        """
+        """The offset of the signal value as ``decimal.Decimal``."""
 
         return self._offset
 
@@ -88,11 +86,12 @@ class NamedSignalValue:
     descriptions for the named value.
     """
 
-    def __init__(self,
-                 value: int,
-                 name: str,
-                 comments: Optional[Dict[str, str]] = None,
-                 ) -> None:
+    def __init__(
+        self,
+        value: int,
+        name: str,
+        comments: Optional[Dict[str, str]] = None,
+    ) -> None:
         self._name = name
         self._value = value
         self._comments = comments or {}
@@ -107,8 +106,7 @@ class NamedSignalValue:
 
     @property
     def value(self) -> int:
-        """The integer value that gets mapped
-        """
+        """The integer value that gets mapped"""
 
         return self._value
 
@@ -139,10 +137,11 @@ class NamedSignalValue:
 
     def __eq__(self, x: Any) -> bool:
         if isinstance(x, NamedSignalValue):
-            return \
-                x.value == self.value \
-                and x.name == self.name \
+            return (
+                x.value == self.value
+                and x.name == self.name
                 and x.comments == self.comments
+            )
         elif isinstance(x, str):
             return x == self.name
 
@@ -185,30 +184,31 @@ class Signal:
 
     """
 
-    def __init__(self,
-                 name: str,
-                 start: int,
-                 length: int,
-                 byte_order: ByteOrder = 'little_endian',
-                 is_signed: bool = False,
-                 initial: Optional[int] = None,
-                 invalid: Optional[int] = None,
-                 scale: float = 1,
-                 offset: float = 0,
-                 minimum: Optional[float] = None,
-                 maximum: Optional[float] = None,
-                 unit: Optional[str] = None,
-                 choices: Optional[Choices] = None,
-                 dbc_specifics: Optional["DbcSpecifics"] = None,
-                 comment: Optional[Union[str, Comments]] = None,
-                 receivers: Optional[List[str]] = None,
-                 is_multiplexer: bool = False,
-                 multiplexer_ids: Optional[List[int]] = None,
-                 multiplexer_signal: Optional[str] = None,
-                 is_float: bool = False,
-                 decimal: Optional[Decimal] = None,
-                 spn: Optional[int] = None
-                 ) -> None:
+    def __init__(
+        self,
+        name: str,
+        start: int,
+        length: int,
+        byte_order: ByteOrder = "little_endian",
+        is_signed: bool = False,
+        initial: Optional[int] = None,
+        invalid: Optional[int] = None,
+        scale: float = 1,
+        offset: float = 0,
+        minimum: Optional[float] = None,
+        maximum: Optional[float] = None,
+        unit: Optional[str] = None,
+        choices: Optional[Choices] = None,
+        dbc_specifics: Optional["DbcSpecifics"] = None,
+        comment: Optional[Union[str, Comments]] = None,
+        receivers: Optional[List[str]] = None,
+        is_multiplexer: bool = False,
+        multiplexer_ids: Optional[List[int]] = None,
+        multiplexer_signal: Optional[str] = None,
+        is_float: bool = False,
+        decimal: Optional[Decimal] = None,
+        spn: Optional[int] = None,
+    ) -> None:
         # avoid using properties to improve encoding/decoding performance
 
         #: The signal name as a string.
@@ -320,7 +320,7 @@ class Signal:
         elif self.comments.get("FOR-ALL") is not None:
             return self.comments.get("FOR-ALL")
 
-        return self.comments.get('EN')
+        return self.comments.get("EN")
 
     @comment.setter
     def comment(self, value: Optional[str]) -> None:
@@ -346,25 +346,28 @@ class Signal:
         if self.choices is None:
             choices = None
         else:
-            choices = '{{{}}}'.format(', '.join(
-                [f"{value}: '{text}'"
-                 for value, text in self.choices.items()]))
+            choices = "{{{}}}".format(
+                ", ".join(
+                    [f"{value}: '{text}'" for value, text in self.choices.items()]
+                )
+            )
 
-        return \
-            f"signal(" \
-            f"'{self.name}', " \
-            f"{self.start}, " \
-            f"{self.length}, " \
-            f"'{self.byte_order}', " \
-            f"{self.is_signed}, " \
-            f"{self.initial}, " \
-            f"{self.scale}, " \
-            f"{self.offset}, " \
-            f"{self.minimum}, " \
-            f"{self.maximum}, " \
-            f"'{self.unit}', " \
-            f"{self.is_multiplexer}, " \
-            f"{self.multiplexer_ids}, " \
-            f"{choices}, " \
-            f"{self.spn}, " \
+        return (
+            f"signal("
+            f"'{self.name}', "
+            f"{self.start}, "
+            f"{self.length}, "
+            f"'{self.byte_order}', "
+            f"{self.is_signed}, "
+            f"{self.initial}, "
+            f"{self.scale}, "
+            f"{self.offset}, "
+            f"{self.minimum}, "
+            f"{self.maximum}, "
+            f"'{self.unit}', "
+            f"{self.is_multiplexer}, "
+            f"{self.multiplexer_ids}, "
+            f"{choices}, "
+            f"{self.spn}, "
             f"{self.comments})"
+        )

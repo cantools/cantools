@@ -115,4 +115,4 @@ class Did:
         }
 
     def __repr__(self):
-        return "did('{}', 0x{:04x})".format(self._name, self._identifier)
+        return f"did('{self._name}', 0x{self._identifier:04x})"

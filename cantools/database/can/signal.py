@@ -1,6 +1,6 @@
 # A CAN signal.
 import decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Tuple
 
 from ...typechecking import ByteOrder, Choices, Comments
 
@@ -338,6 +338,9 @@ class Signal:
                 return choice_number
 
         raise KeyError(f"Choice {string} not found in Signal {self.name}.")
+
+    def get_offset_scaling(self, val: float = 0.0) -> Tuple[float, float]:
+        return self.offset, self.scale
 
     def __repr__(self) -> str:
         if self.choices is None:

@@ -75,10 +75,7 @@ def _encode_fields(
         if isinstance(value, (float, int)):
             _transform = float if field.is_float else round
             if scaling:
-                try:
-                    offset, scale = field.get_scaling_offset(value)
-                except AttributeError:
-                    offset, scale = field.offset, field.scale
+                offset, scale = field.get_offset_scaling(value)
                 if offset == 0 and scale == 1:
                     # treat special case to avoid introduction of unnecessary rounding error
                     unpacked[field.name] = _transform(value)  # type: ignore[operator]
@@ -161,10 +158,7 @@ def decode_data(
                     pass
 
             if scaling:
-                try:
-                    offset, scale = field.get_scaling_offset(value)
-                except AttributeError:
-                    offset, scale = field.offset, field.scale
+                offset, scale = field.get_offset_scaling(value)
                 decoded[field.name] = scale * value + offset
                 continue
             else:

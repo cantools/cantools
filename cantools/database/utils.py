@@ -2,6 +2,8 @@
 
 import os.path
 import re
+import decimal
+from ..database.can.signal import Signal
 from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
@@ -29,7 +31,6 @@ if TYPE_CHECKING:
     from ..database.can.attribute import Attribute
     from ..database.can.message import Message
     from ..database.can.node import Node
-    from ..database.can.signal import Signal
     from ..database.diagnostics import Data
 
 try:
@@ -85,6 +86,19 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
                 continue
 
             unpacked[field.name] = _transform(value)  # type: ignore[operator]
+            continue
+        elif isinstance(value, decimal.Decimal) and isinstance(field, Signal):
+            _transform = decimal.Decimal if field.is_float else round
+            if scaling:
+                if field.offset == 0 and field.scale == 1:
+                    # treat special case to avoid introduction of unnecessary rounding error
+                    unpacked[field.name] = _transform(value)  # type: ignore[operator]
+                    continue
+
+            if field.decimal is not None:
+                unpacked[field.name] = _transform((value - field.decimal.offset) / field.decimal.scale | None)  # type: ignore[operator]
+            else:
+                raise ValueError(f"Offset and Scale are not available as the type Decimal for signal: {Signal}")
             continue
 
         unpacked[field.name] = field.choice_string_to_number(str(value))

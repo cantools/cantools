@@ -17,6 +17,7 @@ from typing import (
     Union,
 )
 
+from ..database.can.signal import Signal
 from ..typechecking import (
     ByteOrder,
     Choices,
@@ -30,7 +31,6 @@ if TYPE_CHECKING:
     from ..database.can.attribute import Attribute
     from ..database.can.message import Message
     from ..database.can.node import Node
-    from ..database.can.signal import Signal
     from ..database.diagnostics import Data
 
 try:

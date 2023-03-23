@@ -1,14 +1,15 @@
 # Internal CAN database.
 
-from typing import Optional, List
+from typing import List, Optional
 
+from .bus import Bus
+from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
+from .formats.dbc_specifics import DbcSpecifics
 from .message import Message
 from .node import Node
-from .bus import Bus
-from .formats.dbc_specifics import DbcSpecifics
-from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
 
-class InternalDatabase(object):
+
+class InternalDatabase:
     """Internal CAN database.
 
     """

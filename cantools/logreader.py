@@ -1,7 +1,7 @@
-import re
-import enum
 import binascii
 import datetime
+import enum
+import re
 
 
 class TimestampFormat(enum.Enum):

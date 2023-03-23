@@ -1,9 +1,10 @@
 # An example cipher suite for secure on-board communication. This is
 # in no way cryptographically secure. DO NOT USE IN THE REAL WORLD!
 
+from typing import Union
+
 from ..database import Message
 
-from typing import Union
 
 class SnakeOilAuthenticator:
     """A snake oil authenticator for secure on-board communication

@@ -1,14 +1,14 @@
 # A CAN signal.
 import decimal
-from typing import Optional, Dict, TYPE_CHECKING, List, Any, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from ...typechecking import Comments, ByteOrder, Choices
+from ...typechecking import ByteOrder, Choices, Comments
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
 
 
-class Decimal(object):
+class Decimal:
     """Holds the same values as
     :attr:`~cantools.database.can.Signal.scale`,
     :attr:`~cantools.database.can.Signal.offset`,
@@ -20,8 +20,8 @@ class Decimal(object):
     """
 
     def __init__(self,
-                 scale: Optional[decimal.Decimal] = None,
-                 offset: Optional[decimal.Decimal] = None,
+                 scale: decimal.Decimal,
+                 offset: decimal.Decimal,
                  minimum: Optional[decimal.Decimal] = None,
                  maximum: Optional[decimal.Decimal] = None) -> None:
         self._scale = scale
@@ -30,7 +30,7 @@ class Decimal(object):
         self._maximum = maximum
 
     @property
-    def scale(self) -> Optional[decimal.Decimal]:
+    def scale(self) -> decimal.Decimal:
         """The scale factor of the signal value as ``decimal.Decimal``.
 
         """
@@ -38,11 +38,11 @@ class Decimal(object):
         return self._scale
 
     @scale.setter
-    def scale(self, value: Optional[decimal.Decimal]) -> None:
+    def scale(self, value: decimal.Decimal) -> None:
         self._scale = value
 
     @property
-    def offset(self) -> Optional[decimal.Decimal]:
+    def offset(self) -> decimal.Decimal:
         """The offset of the signal value as ``decimal.Decimal``.
 
         """
@@ -50,7 +50,7 @@ class Decimal(object):
         return self._offset
 
     @offset.setter
-    def offset(self, value: Optional[decimal.Decimal]) -> None:
+    def offset(self, value: decimal.Decimal) -> None:
         self._offset = value
 
     @property
@@ -80,7 +80,7 @@ class Decimal(object):
         self._maximum = value
 
 
-class NamedSignalValue(object):
+class NamedSignalValue:
     """Represents a named value of a signal.
 
     Named values map an integer number to a human-readable
@@ -149,7 +149,7 @@ class NamedSignalValue(object):
         return False
 
 
-class Signal(object):
+class Signal:
     """A CAN signal with position, size, unit and other information. A
     signal is part of a message.
 
@@ -262,7 +262,7 @@ class Signal(object):
         #:
         #: See :class:`~cantools.database.can.signal.Decimal` for more
         #: details.
-        self.decimal: Decimal = Decimal() if decimal is None else decimal
+        self.decimal: Optional[Decimal] = decimal
 
         #: The unit of the signal as a string, or ``None`` if unavailable.
         self.unit: Optional[str] = unit
@@ -344,7 +344,7 @@ class Signal(object):
             choices = None
         else:
             choices = '{{{}}}'.format(', '.join(
-                ["{}: '{}'".format(value, text)
+                [f"{value}: '{text}'"
                  for value, text in self.choices.items()]))
 
         return \

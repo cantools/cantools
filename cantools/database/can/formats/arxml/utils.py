@@ -1,6 +1,6 @@
 # utility functions that are helpful when dealing with ARXML files
-from xml.etree import ElementTree
-from typing import Union, List
+from typing import Union
+
 
 def parse_number_string(in_string : str, allow_float : bool=False) \
     -> Union[int, float]:

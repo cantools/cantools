@@ -1,18 +1,16 @@
-import sys
 import argparse
 import importlib
-import pathlib
+import logging
 import os
+import pathlib
+import sys
 
-from . import tester
-from . import j1939
-from . import logreader
+from . import j1939, logreader, tester
 from .errors import Error
+from .version import __version__
 
 # Remove once less users are using the old package structure.
-from . import database as db
-
-from .version import __version__
+from . import database as db  # isort: skip
 
 __author__ = 'Erik Moqvist'
 
@@ -84,6 +82,7 @@ def _main():
     args = parser.parse_args()
 
     if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
         args.func(args)
     else:
         try:

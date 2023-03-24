@@ -1,10 +1,13 @@
 # DID data.
 import logging
-from typing import List, Optional
+from typing import Dict, List, Literal, Optional, Tuple
 
 from ...typechecking import ByteOrder, Choices
 
 logger = logging.getLogger(__name__)
+
+_SEGMENTDICTDEF = Dict[Literal["raw", "scaled"], Tuple[float, float]]
+_SEGMENTLISTLIMITTYPE = Optional[List[_SEGMENTDICTDEF]]
 
 
 class Data:
@@ -21,8 +24,9 @@ class Data:
         byte_order: ByteOrder = "little_endian",
         scale: Optional[List[float]] = None,
         offset: Optional[List[float]] = None,
-        minimum: Optional[List[float]] = None,
-        maximum: Optional[List[float]] = None,
+        minimum: Optional[float] = None,
+        maximum: Optional[float] = None,
+        pcw_segments: Optional[List[Tuple[float, float]]] = None,
         unit: Optional[str] = None,
         choices: Optional[Choices] = None,
     ) -> None:
@@ -30,10 +34,14 @@ class Data:
         self.name: str = name
 
         #: The scale factor of the data value.
+        #  For piecewise linear data each list element
+        #  represents the scale for the respective segment
         scale = scale or [1.0]
         self.scale: List[float] = scale
 
         #: The offset of the data value.
+        #  For piecewise linear data each list element
+        #  represents the offset for the respective segment
         offset = offset or [0.0]
         self.offset: List[float] = offset
 
@@ -47,10 +55,10 @@ class Data:
         self.byte_order: ByteOrder = byte_order
 
         #: The minimum value of the data, or ``None`` if unavailable.
-        self.minimum: Optional[List[float]] = minimum
+        self.minimum: Optional[float] = minimum
 
         #: The maximum value of the data, or ``None`` if unavailable.
-        self.maximum: Optional[List[float]] = maximum
+        self.maximum: Optional[float] = maximum
 
         #: The unit of the data as a string, or ``None`` if unavailable.
         self.unit = unit
@@ -59,35 +67,69 @@ class Data:
         #: if unavailable.
         self.choices: Optional[Choices] = choices
 
+        #: This stores start and end points of piecewise linear segments
+        #  None for all other types
+        self.pcw_segments: _SEGMENTLISTLIMITTYPE = None
+        if pcw_segments is not None:
+            self._initialize_segment_limits(pcw_segments)
+
         # ToDo: Remove once types are handled properly.
         self.is_float: bool = False
         self.is_signed: bool = False
 
-    def get_offset_scaling(self, raw_val):
+    def _initialize_segment_limits(self, pcw_segments: List[Tuple[float, float]]) -> None:
         def convert(v, o, f):
-            return (v - o) / f
+            return v * f + o
 
-        if not isinstance(self.minimum, list):
-            return self.offset, self.scale
+        self.pcw_segments = []
+        last_phys_max = None
+        for i, segment in enumerate(pcw_segments):
+            start, end = segment
+            params = [self.offset[i], self.scale[i]]
+            parsed_segment: _SEGMENTDICTDEF = {
+                "raw": (start, end),
+                "scaled": (convert(start, *params), convert(end, *params))
+            }
+            self.pcw_segments.append(parsed_segment)
+            if last_phys_max is None:
+                last_phys_max = parsed_segment["scaled"][1]
+                continue
 
-        for i in range(len(self.minimum)):
-            if self.minimum[i] <= raw_val <= self.maximum[i]:
-                return self.offset[i], self.scale[i]
-            elif (
-                self.minimum[i]
-                <= convert(raw_val, self.offset[i], self.scale[i])
-                <= self.maximum[i]
-            ):
+            if last_phys_max >= parsed_segment["scaled"][0]:
+                logger.warning(f"Piecewise linear type: {self.name} has overlapping segments! "
+                               f"Segment {i} starts at phys val {parsed_segment['scaled'][0]} "
+                               f"but one of the prev segments ended at {last_phys_max}. "
+                               "Encoding might be ambiguous.")
+
+            last_phys_max = max(parsed_segment["scaled"][1], last_phys_max)
+
+    def get_offset_scaling(self, raw_val: Optional[float] = None, scaled: Optional[float] = None) -> Tuple[float, float]:
+        if raw_val is None and scaled is None:
+            raise ValueError("Either raw or scaled value needs to be given!")
+
+        if self.pcw_segments is None or len(self.pcw_segments) == 0:
+            return self.offset[0], self.scale[0]
+
+        type_specifer: Literal["raw", "scaled"] = "raw"
+        val = raw_val
+        if raw_val is None:
+            val = scaled
+            type_specifer = "scaled"
+
+        relevant_segments = []  # only for err text
+        for i, segment in enumerate(self.pcw_segments):
+            start, end = segment[type_specifer]
+            relevant_segments.append((start, end))
+            if start <= val <= end:  # type: ignore
                 return self.offset[i], self.scale[i]
         else:
             err_text = [
-                f"{self.minimum[i]} <= x <= {self.maximum[i]}"
-                for i in range(len(self.minimum))
+                f"{start} <= x <= {end}"
+                for start, end in relevant_segments
             ]
-            logger.warning(
-                f"Value {raw_val} is not in ranges: \n {' OR '.join(err_text)}"
+            raise ValueError(
+                f"Value {val} is not in ranges: \n {' OR '.join(err_text)}"
             )
-            return self.offset[0], self.scale[0]
 
     def choice_string_to_number(self, string: str) -> int:
         if self.choices is None:
@@ -116,8 +158,8 @@ class Data:
             self.byte_order,
             self.scale[0],
             self.offset[0],
-            self.minimum[0] if self.minimum is not None else None,
-            self.maximum[0] if self.maximum is not None else None,
+            self.minimum,
+            self.maximum,
             self.unit,
             choices,
         )

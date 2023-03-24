@@ -1,8 +1,9 @@
 # Load and dump a diagnostics database in CDD format.
 import logging
-from typing import Dict
+from typing import Dict, List, Optional, Tuple
 from xml.etree import ElementTree
 
+from ....typechecking import ByteOrder, Choices
 from ...errors import ParseError
 from ...utils import cdd_offset_to_dbc_start_bit
 from ..data import Data
@@ -15,17 +16,18 @@ LOGGER = logging.getLogger(__name__)
 class DataType:
     def __init__(
         self,
-        name,
-        id_,
-        bit_length,
-        encoding,
-        minimum,
-        maximum,
-        choices,
-        byte_order,
-        unit,
-        factor,
-        offset,
+        name: str,
+        id_ : str,
+        bit_length: int,
+        encoding: str,
+        minimum: int,
+        maximum: int,
+        choices: Optional[Choices],
+        byte_order: ByteOrder,
+        unit: str,
+        factor: List[float],
+        offset: List[float],
+        pcw_segments: Optional[List[Tuple[float, float]]]
     ):
         self.name = name
         self.id_ = id_
@@ -38,6 +40,7 @@ class DataType:
         self.unit = unit
         self.factor = factor
         self.offset = offset
+        self.pcw_segments = pcw_segments
 
 
 def _load_choices(data_type):
@@ -70,14 +73,14 @@ def _load_data_types(ecu_doc):
 
     for data_type in types:
         # Default values.
-        byte_order = "big_endian"
         unit = None
-        factor = 1
-        offset = 0
+        factor = []
+        offset = []
         bit_length = None
         encoding = None
         minimum = None
         maximum = None
+        pcw_segments = None
 
         # Name and id.
         type_name = data_type.find("NAME/TUV[1]").text
@@ -98,6 +101,7 @@ def _load_data_types(ecu_doc):
             else:
                 LOGGER.debug("Ignoring unsupported attribute '%s'.", key)
 
+        byte_order: ByteOrder
         if ctype.attrib["bo"] == "21":
             byte_order = "big_endian"
         elif ctype.attrib["bo"] == "12":
@@ -118,47 +122,33 @@ def _load_data_types(ecu_doc):
         comps = data_type.findall("COMP")
 
         if len(comps) > 0:
-            data_types[type_id] = []
+            pcw_segments = []
             for comp in comps:
-                factor = float(comp.attrib["f"])
-                offset = float(comp.attrib["o"])
+                factor.append(float(comp.attrib["f"]))
+                offset.append(float(comp.attrib["o"]))
                 if len(comps) > 1:
                     # Piecewise linear type
-                    minimum = float(comp.attrib["s"])
-                    maximum = float(comp.attrib["e"])
-
-                data_types[type_id].append(
-                    DataType(
-                        type_name,
-                        type_id,
-                        bit_length,
-                        encoding,
-                        minimum,
-                        maximum,
-                        choices,
-                        byte_order,
-                        unit,
-                        factor,
-                        offset,
-                    )
-                )
-            if len(data_types[type_id]) == 1:
-                data_type = data_types[type_id][0]
-                data_types[type_id] = data_type
+                    pcw_segments.append((float(comp.attrib["s"]),
+                                         float(comp.attrib["e"])))
         else:
-            data_types[type_id] = DataType(
-                type_name,
-                type_id,
-                bit_length,
-                encoding,
-                minimum,
-                maximum,
-                choices,
-                byte_order,
-                unit,
-                factor,
-                offset,
-            )
+            # non-linear data types, assume defaults
+            factor = [1]
+            offset = [0]
+
+        data_types[type_id] = DataType(
+            type_name,
+            type_id,
+            bit_length,
+            encoding,
+            minimum,
+            maximum,
+            choices,
+            byte_order,
+            unit,
+            factor,
+            offset,
+            pcw_segments
+        )
 
     return data_types
 
@@ -166,22 +156,7 @@ def _load_data_types(ecu_doc):
 def _load_data_element(data, bit_offset, data_types):
     """Load given signal element and return a signal object."""
 
-    types = data_types[data.attrib["dtref"]]
-
-    if not isinstance(types, list):
-        types = [types]
-
-    scale = []
-    offset = []
-    minimum = []
-    maximum = []
-    for data_type in types:
-        scale.append(data_type.factor)
-        offset.append(data_type.offset)
-        minimum.append(data_type.minimum)
-        maximum.append(data_type.maximum)
-
-    data_type = types[0]  # for remaining parameters just refer to first element
+    data_type = data_types[data.attrib["dtref"]]
 
     # Map CDD/c-style field offset to the DBC/can.Signal.start bit numbering
     # convention for compatability with can.Signal objects and the shared codec
@@ -198,12 +173,13 @@ def _load_data_element(data, bit_offset, data_types):
         start=dbc_start_bitnum,
         length=data_type.bit_length,
         byte_order=data_type.byte_order,
-        scale=scale,
-        offset=offset,
-        minimum=minimum,
-        maximum=maximum,
+        scale=data_type.factor,
+        offset=data_type.offset,
+        minimum=data_type.minimum,
+        maximum=data_type.maximum,
         unit=data_type.unit,
         choices=data_type.choices,
+        pcw_segments=data_type.pcw_segments
     )
 
 

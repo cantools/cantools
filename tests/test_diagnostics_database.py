@@ -53,8 +53,8 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         self.assertEqual(data.byte_order, 'little_endian')
         self.assertEqual(data.scale, [1])
         self.assertEqual(data.offset, [0])
-        self.assertEqual(data.minimum, [0])
-        self.assertEqual(data.maximum, [255])
+        self.assertEqual(data.minimum, 0)
+        self.assertEqual(data.maximum, 255)
         self.assertEqual(data.unit, None)
         self.assertEqual(data.choices, None)
 
@@ -192,8 +192,8 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
         self.assertEqual(data.byte_order, 'big_endian')
         self.assertEqual(data.scale, [1])
         self.assertEqual(data.offset, [0])
-        self.assertEqual(data.minimum, [0])
-        self.assertEqual(data.maximum, [255])
+        self.assertEqual(data.minimum, 0)
+        self.assertEqual(data.maximum, 255)
         self.assertEqual(data.unit, None)
         self.assertEqual(data.choices, None)
 
@@ -493,7 +493,36 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
 
     def test_datarefs(self):
         db = cantools.db.load_file('tests/files/cdd/example-diddatarefs.cdd', encoding = 'iso-8859-1')
-        self.assertEqual(len(db.dids[-1].datas), 2)
+        self.assertEqual(len(db.dids[3].datas), 2)
+
+    def test_piecewise_data(self):
+        db = cantools.db.load_file('tests/files/cdd/example-diddatarefs.cdd', encoding = 'iso-8859-1')
+        test_did: cantools.db.diagnostics.Did = db.dids[4]
+
+        # Type TestPiecewise has following linear segments:
+        # start  - end    | factor | offset
+        # -----------------------------
+        # 0x00   - 0x0F   | 1      | 0
+        # 0x20   - 0xFF   | 1      | 10
+        # 0x0100 - 0xFFFF | 5      | 20
+        # (big endian)
+        payloads = [
+            {"raw": [0x0, 0x1], "scaled": 1.0},
+            {"raw": [0x0, 0x21], "scaled": 43.0},
+            {"raw": [0x01, 0xFF], "scaled": 2575.0},
+        ]
+        for payload in payloads:
+            decoded = test_did.decode(payload["raw"])
+            self.assertAlmostEqual(payload["scaled"], decoded["PiecewiseData"], 10)
+            encoded = test_did.encode({"PiecewiseData": payload["scaled"]})
+            self.assertEqual(payload["raw"], list(encoded))
+
+        # undefined ranges from cdd data type
+        with self.assertRaises(ValueError):
+            test_did.encode({"PiecewiseData": 16.0})
+
+        with self.assertRaises(ValueError):
+            test_did.encode({"PiecewiseData": 300.0})
 
 
 # This file is not '__main__' when executed via 'python setup.py3

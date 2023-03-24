@@ -339,7 +339,7 @@ class Signal:
 
         raise KeyError(f"Choice {string} not found in Signal {self.name}.")
 
-    def get_offset_scaling(self, val: float = 0.0) -> Tuple[float, float]:
+    def get_offset_scaling(self, raw_val: Optional[float] = None, scaled: Optional[float] = None) -> Tuple[float, float]:
         return self.offset, self.scale
 
     def __repr__(self) -> str:

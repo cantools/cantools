@@ -17,7 +17,7 @@ class DataType:
     def __init__(
         self,
         name: str,
-        id_ : str,
+        id_: str,
         bit_length: int,
         encoding: str,
         minimum: int,
@@ -27,7 +27,7 @@ class DataType:
         unit: str,
         factor: List[float],
         offset: List[float],
-        pcw_segments: Optional[List[Tuple[float, float]]]
+        pcw_segments: Optional[List[Tuple[float, float]]],
     ):
         self.name = name
         self.id_ = id_
@@ -128,8 +128,9 @@ def _load_data_types(ecu_doc):
                 offset.append(float(comp.attrib["o"]))
                 if len(comps) > 1:
                     # Piecewise linear type
-                    pcw_segments.append((float(comp.attrib["s"]),
-                                         float(comp.attrib["e"])))
+                    pcw_segments.append(
+                        (float(comp.attrib["s"]), float(comp.attrib["e"]))
+                    )
         else:
             # non-linear data types, assume defaults
             factor = [1]
@@ -147,7 +148,7 @@ def _load_data_types(ecu_doc):
             unit,
             factor,
             offset,
-            pcw_segments
+            pcw_segments,
         )
 
     return data_types
@@ -179,7 +180,7 @@ def _load_data_element(data, bit_offset, data_types):
         maximum=data_type.maximum,
         unit=data_type.unit,
         choices=data_type.choices,
-        pcw_segments=data_type.pcw_segments
+        pcw_segments=data_type.pcw_segments,
     )
 
 

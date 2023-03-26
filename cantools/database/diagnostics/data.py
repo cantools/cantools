@@ -77,7 +77,9 @@ class Data:
         self.is_float: bool = False
         self.is_signed: bool = False
 
-    def _initialize_segment_limits(self, pcw_segments: List[Tuple[float, float]]) -> None:
+    def _initialize_segment_limits(
+        self, pcw_segments: List[Tuple[float, float]]
+    ) -> None:
         def convert(v, o, f):
             return v * f + o
 
@@ -88,7 +90,7 @@ class Data:
             params = [self.offset[i], self.scale[i]]
             parsed_segment: _SEGMENTDICTDEF = {
                 "raw": (start, end),
-                "scaled": (convert(start, *params), convert(end, *params))
+                "scaled": (convert(start, *params), convert(end, *params)),
             }
             self.pcw_segments.append(parsed_segment)
             if last_phys_max is None:
@@ -96,14 +98,18 @@ class Data:
                 continue
 
             if last_phys_max >= parsed_segment["scaled"][0]:
-                logger.warning(f"Piecewise linear type: {self.name} has overlapping segments! "
-                               f"Segment {i} starts at phys val {parsed_segment['scaled'][0]} "
-                               f"but one of the prev segments ended at {last_phys_max}. "
-                               "Encoding might be ambiguous.")
+                logger.warning(
+                    f"Piecewise linear type: {self.name} has overlapping segments! "
+                    f"Segment {i} starts at phys val {parsed_segment['scaled'][0]} "
+                    f"but one of the prev segments ended at {last_phys_max}. "
+                    "Encoding might be ambiguous."
+                )
 
             last_phys_max = max(parsed_segment["scaled"][1], last_phys_max)
 
-    def get_offset_scaling(self, raw_val: Optional[float] = None, scaled: Optional[float] = None) -> Tuple[float, float]:
+    def get_offset_scaling(
+        self, raw_val: Optional[float] = None, scaled: Optional[float] = None
+    ) -> Tuple[float, float]:
         if raw_val is None and scaled is None:
             raise ValueError("Either raw or scaled value needs to be given!")
 
@@ -123,10 +129,7 @@ class Data:
             if start <= val <= end:  # type: ignore
                 return self.offset[i], self.scale[i]
         else:
-            err_text = [
-                f"{start} <= x <= {end}"
-                for start, end in relevant_segments
-            ]
+            err_text = [f"{start} <= x <= {end}" for start, end in relevant_segments]
             raise ValueError(
                 f"Value {val} is not in ranges: \n {' OR '.join(err_text)}"
             )

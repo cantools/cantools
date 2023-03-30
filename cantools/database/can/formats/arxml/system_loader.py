@@ -1194,8 +1194,8 @@ class SystemLoader:
                 if is_initial is not None and is_initial.text == 'true' \
                 else False
             if is_initial:
-                assert selector_signal.scaled_initial is None
-                selector_signal.scaled_initial = dynalt_selector_value
+                assert selector_signal.raw_initial is None
+                selector_signal.raw_initial = dynalt_selector_value
 
             # remove the selector signal from the dynamic part (because it
             # logically is in the static part, despite the fact that AUTOSAR
@@ -1236,13 +1236,19 @@ class SystemLoader:
             # this be handled?
 
         if selector_signal.raw_initial in selector_signal.choices:
-            selector_signal.raw_initial = \
-                selector_signal.choices[selector_signal.raw_initial]
+            scaled_initial = selector_signal.choices[selector_signal.raw_initial]
+            selector_signal.scaled_initial = scaled_initial
+        else:
+            selector_signal.scaled_initial = selector_signal.raw_initial
 
-        if not isinstance(selector_signal.raw_invalid, NamedSignalValue) and \
-           selector_signal.raw_invalid in selector_signal.choices:
-            selector_signal.raw_invalid = \
-                selector_signal.choices[selector_signal.raw_invalid]
+        # TODO: remove this when deprecation period of signal.initial expires
+        selector_signal._initial = selector_signal.scaled_initial
+
+        if selector_signal.raw_invalid in selector_signal.choices:
+            invalid = selector_signal.choices[selector_signal.raw_invalid]
+            selector_signal.invalid = invalid
+        else:
+            selector_signal.invalid = selector_signal.raw_invalid
 
         # the static part of the multiplexed PDU
         if self.autosar_version_newer(4):
@@ -1505,9 +1511,8 @@ class SystemLoader:
             decimal=decimal,
         )
 
-        signal._initial = (
-            signal.raw_to_scaled(raw_initial) if raw_initial is not None else None
-        )
+        # TODO: remove this when deprecation period of signal.initial expires
+        signal._initial = signal.scaled_initial
 
         return signal
 

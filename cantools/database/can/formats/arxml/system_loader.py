@@ -1104,7 +1104,7 @@ class SystemLoader:
 
         if is_multiplexed:
             # multiplexed signals
-            pdu_signals, child_pdu_paths = \
+            pdu_signals, cycle_time, child_pdu_paths = \
                 self._load_multiplexed_pdu(pdu, frame_name, next_selector_idx)
             signals.extend(pdu_signals)
 
@@ -1167,6 +1167,9 @@ class SystemLoader:
                 '*DYNAMIC-PART-ALTERNATIVE',
             ]
 
+        # the cycle time of the message
+        cycle_time = None
+
         for dynalt in self._get_arxml_children(pdu, dynpart_spec):
             dynalt_selector_value = \
                 self._get_unique_arxml_child(dynalt, 'SELECTOR-FIELD-CODE')
@@ -1187,6 +1190,16 @@ class SystemLoader:
                 _ \
                 = self._load_pdu(dynalt_pdu, frame_name, next_selector_idx)
             child_pdu_paths.extend(dynalt_child_pdu_paths)
+
+            # cantools does not a concept for the cycle time of
+            # individual PDUs, but only one for whole messages. We
+            # thus use the minimum cycle time of any dynamic part
+            # alternative as the cycle time of the multiplexed message
+            if dynalt_cycle_time is not None:
+                if cycle_time is not None:
+                    cycle_time = min(cycle_time, dynalt_cycle_time)
+                else:
+                    cycle_time = dynalt_cycle_time
 
             is_initial = \
                 self._get_unique_arxml_child(dynalt, 'INITIAL-DYNAMIC-PART')
@@ -1282,7 +1295,7 @@ class SystemLoader:
             child_pdu_paths.extend(static_child_pdu_paths)
             signals.extend(static_signals)
 
-        return signals, child_pdu_paths
+        return signals, cycle_time, child_pdu_paths
 
     def _load_pdu_signals(self, pdu):
         signals = []
@@ -1354,7 +1367,11 @@ class SystemLoader:
 
         for l_2 in self._get_arxml_children(node, ['DESC', '*L-2']):
             lang = l_2.attrib.get('L', 'EN')
-            result[lang] = l_2.text
+
+            # remove leading and trailing white space from each line
+            # of multi-line comments
+            tmp = [ x.strip() for x in l_2.text.split('\n') ]
+            result[lang] = '\n'.join(tmp)
 
         if len(result) == 0:
             return None

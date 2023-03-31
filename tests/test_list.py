@@ -20,7 +20,7 @@ except ImportError:
 
 class Args(object):
 
-    def __init__(self, database):
+    def __init__(self, input_file_name):
         self.exclude_normal = False
         self.exclude_extended = False
         self.no_format_specifics = False
@@ -28,7 +28,7 @@ class Args(object):
         self.no_strict = False
         self.no_format_specifics = False
         self.prune = True
-        self.file = (database, )
+        self.input_file_name = (input_file_name, )
         self.print_buses = False
         self.print_nodes = False
         self.items = []
@@ -94,10 +94,10 @@ ExampleMessage:
       Byte order: big_endian
       Unit: m
       Is signed: False
-      Minimum: 0
-      Maximum: 5
-      Offset: 0
-      Scaling factor: 0.1
+      Minimum: 0 m
+      Maximum: 5 m
+      Offset: 0 m
+      Scaling factor: 0.1 m
     Temperature:
       Receiving ECUs: FOO, PCM1
       Type: Integer
@@ -106,10 +106,10 @@ ExampleMessage:
       Byte order: big_endian
       Unit: degK
       Is signed: True
-      Minimum: 229.52
-      Maximum: 270.47
-      Offset: 250
-      Scaling factor: 0.01
+      Minimum: 229.52 degK
+      Maximum: 270.47 degK
+      Offset: 250 degK
+      Scaling factor: 0.01 degK
 """
 
             actual_output = stdout.getvalue()
@@ -384,10 +384,10 @@ Message1:
       Unit: wp
       Initial value: zero
       Is signed: False
-      Minimum: 0.0
-      Maximum: 0.1
-      Offset: 0.0
-      Scaling factor: 0.1
+      Minimum: 0.0 wp
+      Maximum: 0.1 wp
+      Offset: 0.0 wp
+      Scaling factor: 0.1 wp
       Named values:
         0: zero
           Comment[EN]: Nothing
@@ -403,10 +403,10 @@ Message1:
       Unit: m
       Initial value: 25.0 m
       Is signed: False
-      Minimum: 0.0
-      Maximum: 20.0
-      Offset: 0.0
-      Scaling factor: 5.0
+      Minimum: 0.0 m
+      Maximum: 20.0 m
+      Offset: 0.0 m
+      Scaling factor: 5.0 m
     signal5:
       Receiving ECUs: Dancer
       Type: Float
@@ -639,10 +639,10 @@ Message2:
       Byte order: little_endian
       Unit: Cel
       Is signed: True
-      Minimum: 0
-      Maximum: 100
-      Offset: -40
-      Scaling factor: 0.05
+      Minimum: 0 Cel
+      Maximum: 100 Cel
+      Offset: -40 Cel
+      Scaling factor: 0.05 Cel
       Named values:
         0: init
 Message4:

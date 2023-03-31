@@ -1523,8 +1523,16 @@ class SystemLoader:
                       decimal=decimal)
 
     def _load_signal_name(self, i_signal):
-        return self._get_unique_arxml_child(i_signal,
-                                            'SHORT-NAME').text
+        system_signal_name_elem = \
+            self._get_unique_arxml_child(i_signal,
+                                         [
+                                             '&SYSTEM-SIGNAL',
+                                             'SHORT-NAME'
+                                         ])
+        if system_signal_name_elem:
+            return system_signal_name_elem.text
+
+        return self._get_unique_arxml_child(i_signal, 'SHORT-NAME').text
 
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping):
         pos = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,

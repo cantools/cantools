@@ -431,6 +431,7 @@ Message1:
             expected_output = """\
 Message3:
   Bus: Cluster0
+  Sending ECUs: Dancer
   Frame ID: 0x64 (100)
   Size: 6 bytes
   Is extended frame: False
@@ -459,12 +460,14 @@ Message3:
 
   Signal details:
     message3_CRC:
+      Receiving ECUs: DJ
       Internal type: Integer
       Start bit: 0
       Length: 8 bits
       Byte order: little_endian
       Is signed: False
     message3_SeqCounter:
+      Receiving ECUs: DJ
       Internal type: Integer
       Start bit: 8
       Length: 4 bits
@@ -472,6 +475,7 @@ Message3:
       Is signed: False
     Message3_Freshness:
       Comment[FOR-ALL]: Truncated freshness value for 'Message3'
+      Receiving ECUs: DJ
       Internal type: Integer
       Start bit: 39
       Length: 6 bits
@@ -479,6 +483,7 @@ Message3:
       Is signed: False
     Message3_Authenticator:
       Comment[FOR-ALL]: Truncated authenticator value for 'Message3'
+      Receiving ECUs: DJ
       Internal type: Integer
       Start bit: 33
       Length: 10 bits

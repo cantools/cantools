@@ -23,8 +23,10 @@ class Args(object):
     def __init__(self, database):
         self.exclude_normal = False
         self.exclude_extended = False
+        self.no_format_specifics = False
         self.print_all = False
         self.no_strict = False
+        self.no_format_specifics = False
         self.prune = True
         self.file = (database, )
         self.print_buses = False

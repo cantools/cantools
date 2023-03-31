@@ -5,7 +5,7 @@ import cantools
 from .dump.formatting import signal_tree_string
 
 
-def _print_message(message, indent=''):
+def _print_message(message, indent='', no_format_specifics=False):
     print(f'{indent}{message.name}:')
 
     if message.comments:
@@ -33,7 +33,7 @@ def _print_message(message, indent=''):
     if message.cycle_time is not None:
         print(f'{indent}  Cycle time: {message.cycle_time} ms')
 
-    if message.autosar:
+    if not no_format_specifics and message.autosar:
         print(f'{indent}  Is network management frame: {message.autosar.is_nm}')
 
         if message.autosar.e2e:
@@ -76,7 +76,9 @@ def _print_message(message, indent=''):
 
         print(f'{indent}  Potentially contained message details:')
         for contained_message in message.contained_messages:
-            _print_message(contained_message, '    ')
+            _print_message(contained_message,
+                           '    ',
+                           no_format_specifics=no_format_specifics)
 
     if message.signals:
         print(f'{indent}  Signal details:')
@@ -220,6 +222,7 @@ def _do_list_messages(can_db, args):
     print_all = args.print_all
     exclude_extended = args.exclude_extended
     exclude_normal = args.exclude_normal
+    no_format_specifics = args.no_format_specifics
 
     if print_all:
         # if no messages have been specified, we print the list of
@@ -260,7 +263,7 @@ def _do_list_messages(can_db, args):
                 print(f'No message named "{message_name}" has been found in input file.')
                 continue
 
-            _print_message(message)
+            _print_message(message, no_format_specifics=no_format_specifics)
 
 
 
@@ -287,6 +290,13 @@ def add_subparser(subparsers):
         const=True,
         required=False,
         help='Do not print extended CAN messages.')
+    list_parser.add_argument(
+        '--no-format-specifics',
+        default=False,
+        action='store_const',
+        const=True,
+        required=False,
+        help='Do not print any format-specific information information.')
     list_parser.add_argument(
         '-a', '--all',
         default=False,

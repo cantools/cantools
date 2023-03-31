@@ -788,7 +788,8 @@ class SystemLoader:
         autosar_specifics._is_general_purpose = \
             (pdu.tag == f'{{{self.xml_namespace}}}N-PDU') or \
             (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-PDU') or \
-            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU')
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU') or \
+            (pdu.tag == f'{{{self.xml_namespace}}}USER-DEFINED-I-PDU')
         is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 

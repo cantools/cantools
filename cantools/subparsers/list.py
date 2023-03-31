@@ -129,7 +129,7 @@ def _print_message(message,
                 print(f'{indent}      Comment[{lang}]: {signal.comments[lang]}')
         if signal.receivers:
             print(f'{indent}      Receiving ECUs: {", ".join(sorted(signal.receivers))}')
-        print(f'{indent}      Type: {signal_type}')
+        print(f'{indent}      Internal type: {signal_type}')
         if signal.multiplexer_signal is not None:
             print(f'{indent}      Selector signal: {signal.multiplexer_signal}')
             selector_sig = None

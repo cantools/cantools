@@ -78,7 +78,7 @@ ExampleMessage:
 
   Signal details:
     Enable:
-      Type: Integer
+      Internal type: Integer
       Start bit: 7
       Length: 1 bits
       Byte order: big_endian
@@ -88,7 +88,7 @@ ExampleMessage:
         0: Disabled
         1: Enabled
     AverageRadius:
-      Type: Integer
+      Internal type: Integer
       Start bit: 6
       Length: 6 bits
       Byte order: big_endian
@@ -100,7 +100,7 @@ ExampleMessage:
       Scaling factor: 0.1 m
     Temperature:
       Receiving ECUs: FOO, PCM1
-      Type: Integer
+      Internal type: Integer
       Start bit: 0
       Length: 12 bits
       Byte order: big_endian
@@ -206,7 +206,7 @@ Message2:
   Signal details:
     signal3:
       Receiving ECUs: DJ
-      Type: Integer
+      Internal type: Integer
       Start bit: 6
       Length: 2 bits
       Byte order: little_endian
@@ -214,14 +214,14 @@ Message2:
     signal2:
       Comment[FOR-ALL]: Signal comment!
       Receiving ECUs: DJ
-      Type: Integer
+      Internal type: Integer
       Start bit: 18
       Length: 11 bits
       Byte order: little_endian
       Is signed: True
     signal4:
       Receiving ECUs: DJ
-      Type: Integer
+      Internal type: Integer
       Start bit: 30
       Length: 4 bits
       Byte order: little_endian
@@ -263,7 +263,7 @@ AlarmStatus:
   Signal details:
     FireAlarm:
       Receiving ECUs: DJ, Dancer
-      Type: Integer
+      Internal type: Integer
       Start bit: 0
       Length: 1 bits
       Byte order: little_endian
@@ -363,21 +363,21 @@ Message1:
   Signal details:
     message1_SeqCounter:
       Receiving ECUs: Dancer
-      Type: Integer
+      Internal type: Integer
       Start bit: 0
       Length: 16 bits
       Byte order: little_endian
       Is signed: False
     message1_CRC:
       Receiving ECUs: Dancer
-      Type: Integer
+      Internal type: Integer
       Start bit: 16
       Length: 16 bits
       Byte order: little_endian
       Is signed: False
     signal6:
       Receiving ECUs: Dancer
-      Type: Integer
+      Internal type: Integer
       Start bit: 32
       Length: 1 bits
       Byte order: little_endian
@@ -396,7 +396,7 @@ Message1:
       Comment[EN]: Signal comment!
       Comment[DE]: Signalkommentar!
       Receiving ECUs: Dancer
-      Type: Integer
+      Internal type: Integer
       Start bit: 36
       Length: 3 bits
       Byte order: big_endian
@@ -409,7 +409,7 @@ Message1:
       Scaling factor: 5.0 m
     signal5:
       Receiving ECUs: Dancer
-      Type: Float
+      Internal type: Float
       Start bit: 40
       Length: 32 bits
       Byte order: little_endian
@@ -459,27 +459,27 @@ Message3:
 
   Signal details:
     message3_CRC:
-      Type: Integer
+      Internal type: Integer
       Start bit: 0
       Length: 8 bits
       Byte order: little_endian
       Is signed: False
     message3_SeqCounter:
-      Type: Integer
+      Internal type: Integer
       Start bit: 8
       Length: 4 bits
       Byte order: little_endian
       Is signed: False
     Message3_Freshness:
       Comment[FOR-ALL]: Truncated freshness value for 'Message3'
-      Type: Integer
+      Internal type: Integer
       Start bit: 39
       Length: 6 bits
       Byte order: big_endian
       Is signed: False
     Message3_Authenticator:
       Comment[FOR-ALL]: Truncated authenticator value for 'Message3'
-      Type: Integer
+      Internal type: Integer
       Start bit: 33
       Length: 10 bits
       Byte order: big_endian
@@ -538,14 +538,14 @@ Message1:
 
   Signal details:
     Signal1:
-      Type: Integer
+      Internal type: Integer
       Start bit: 0
       Length: 1 bits
       Byte order: little_endian
       Is signed: False
     Signal2:
       Receiving ECUs: Node2, Node3
-      Type: Float
+      Internal type: Float
       Start bit: 8
       Length: 32 bits
       Byte order: little_endian
@@ -579,7 +579,7 @@ Message2:
 
   Signal details:
     Signal1:
-      Type: Integer
+      Internal type: Integer
       Selector signal: Mux1
       Selector values: 0
       Start bit: 0
@@ -587,7 +587,7 @@ Message2:
       Byte order: little_endian
       Is signed: False
     Signal3:
-      Type: Integer
+      Internal type: Integer
       Selector signal: Mux1
       Selector values: 1
       Start bit: 0
@@ -595,7 +595,7 @@ Message2:
       Byte order: little_endian
       Is signed: False
     Signal2:
-      Type: Integer
+      Internal type: Integer
       Selector signal: Mux1
       Selector values: 0
       Start bit: 8
@@ -603,7 +603,7 @@ Message2:
       Byte order: little_endian
       Is signed: False
     Signal4:
-      Type: Integer
+      Internal type: Integer
       Selector signal: Mux1
       Selector values: 1
       Start bit: 8
@@ -611,19 +611,19 @@ Message2:
       Byte order: little_endian
       Is signed: False
     Mux1:
-      Type: Multiplex Selector
+      Internal type: Multiplex Selector
       Start bit: 16
       Length: 2 bits
       Byte order: little_endian
       Is signed: False
     Mux2:
-      Type: Multiplex Selector
+      Internal type: Multiplex Selector
       Start bit: 18
       Length: 1 bits
       Byte order: little_endian
       Is signed: False
     Signal5:
-      Type: Integer
+      Internal type: Integer
       Selector signal: Mux2
       Selector values: 0
       Start bit: 19
@@ -633,7 +633,7 @@ Message2:
     Signal6:
       Comment[None]: Note signal 6.
       Receiving ECUs: Node1
-      Type: Integer
+      Internal type: Integer
       Start bit: 20
       Length: 12 bits
       Byte order: little_endian
@@ -659,13 +659,13 @@ Message4:
 
   Signal details:
     Signal1:
-      Type: Integer
+      Internal type: Integer
       Start bit: 7
       Length: 1 bits
       Byte order: big_endian
       Is signed: False
     Signal2:
-      Type: Integer
+      Internal type: Integer
       Start bit: 8
       Length: 12 bits
       Byte order: big_endian
@@ -700,7 +700,7 @@ Message3:
 
   Signal details:
     Signal1:
-      Type: Float
+      Internal type: Float
       Start bit: 0
       Length: 64 bits
       Byte order: little_endian

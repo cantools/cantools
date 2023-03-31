@@ -1,7 +1,6 @@
 # A CAN signal.
 import contextlib
 import decimal
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
@@ -225,10 +224,10 @@ class Signal:
         #: ``True`` if the signal is a float, ``False`` otherwise.
         self.is_float: bool = is_float
 
-        #: The minimum value of the signal, or ``None`` if unavailable.
+        #: The scaled minimum value of the signal, or ``None`` if unavailable.
         self.minimum: Optional[float] = minimum
 
-        #: The maximum value of the signal, or ``None`` if unavailable.
+        #: The scaled maximum value of the signal, or ``None`` if unavailable.
         self.maximum: Optional[float] = maximum
 
         #: "A dictionary mapping signal values to enumerated choices, or
@@ -249,14 +248,11 @@ class Signal:
         #: ``True``.
         self.is_signed: bool = is_signed
 
-        # deprecated `initial` attribute
-        self._initial: Optional[Union[int, SignalValueType]] = raw_initial
-
         #: The raw initial value of the signal, or ``None`` if unavailable.
         self.raw_initial: Optional[int] = raw_initial
 
         #: The scaled initial value of the signal, or ``None`` if unavailable.
-        self.scaled_initial: Optional[SignalValueType] = (
+        self.initial: Optional[SignalValueType] = (
             self.raw_to_scaled(raw_initial) if raw_initial is not None else None
         )
 
@@ -321,28 +317,13 @@ class Signal:
             # multi-lingual dictionary
             self.comments = comment
 
-    @property
-    def initial(self) -> Optional[Union[int, SignalValueType]]:
-        warnings.warn(
-            "The `Signal.initial` attribute is deprecated and scheduled for removal in April 2024. "
-            "Use `Signal.raw_initial` or `Signal.scaled_initial` instead.",
-            DeprecationWarning,
-        )
-        return self._initial
-
-    @initial.setter
-    def initial(self, value: Union[int, SignalValueType]) -> None:
-        warnings.warn(
-            "The `Signal.initial` attribute is deprecated and scheduled for removal in April 2024. "
-            "Use `Signal.raw_initial` or `Signal.scaled_initial` instead.",
-            DeprecationWarning,
-        )
-        self._initial = value
-
     def raw_to_scaled(self, raw: int) -> SignalValueType:
         with contextlib.suppress(KeyError, TypeError):
             return self.choices[raw]  # type: ignore[index]
 
+        if self.offset == 0 and self.scale == 1:
+            # treat special case to avoid introduction of unnecessary rounding error
+            return raw
         return raw * self.scale + self.offset
 
     def scaled_to_raw(self, scaled: SignalValueType) -> int:

@@ -269,9 +269,9 @@ class Message(UserDict):
         for signal in self.database.signals:
             minimum = 0 if not signal.minimum else signal.minimum
             maximum = 0 if not signal.maximum else signal.maximum
-            if signal.scaled_initial:
+            if signal.initial:
                 # use initial signal value (if set)
-                initial_sig_values[signal.name] = signal.scaled_initial
+                initial_sig_values[signal.name] = signal.initial
             elif signal.is_multiplexer:
                 initial_sig_values[signal.name] = mplex_settings.get(signal.name, 0)
             elif minimum <= 0 <= maximum:

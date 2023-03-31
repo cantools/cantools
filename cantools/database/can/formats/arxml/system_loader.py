@@ -1235,20 +1235,11 @@ class SystemLoader:
             # specified indepently of that of the message. how should
             # this be handled?
 
-        if selector_signal.raw_initial in selector_signal.choices:
-            scaled_initial = selector_signal.choices[selector_signal.raw_initial]
-            selector_signal.scaled_initial = scaled_initial
-        else:
-            selector_signal.scaled_initial = selector_signal.raw_initial
+        if selector_signal.raw_initial is not None:
+            selector_signal.initial = selector_signal.raw_to_scaled(selector_signal.raw_initial)
 
-        # TODO: remove this when deprecation period of signal.initial expires
-        selector_signal._initial = selector_signal.scaled_initial
-
-        if selector_signal.raw_invalid in selector_signal.choices:
-            invalid = selector_signal.choices[selector_signal.raw_invalid]
-            selector_signal.invalid = invalid
-        else:
-            selector_signal.invalid = selector_signal.raw_invalid
+        if selector_signal.raw_invalid is not None:
+            selector_signal.invalid = selector_signal.raw_to_scaled(selector_signal.raw_invalid)
 
         # the static part of the multiplexed PDU
         if self.autosar_version_newer(4):
@@ -1510,10 +1501,6 @@ class SystemLoader:
             is_float=is_float,
             decimal=decimal,
         )
-
-        # TODO: remove this when deprecation period of signal.initial expires
-        signal._initial = signal.scaled_initial
-
         return signal
 
     def _load_signal_name(self, i_signal):

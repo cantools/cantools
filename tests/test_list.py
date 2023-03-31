@@ -265,7 +265,7 @@ AlarmStatus:
       Start bit: 0
       Length: 1 bits
       Byte order: little_endian
-      Initial value: 0.0
+      Initial value: 0
       Is signed: False
 """
 

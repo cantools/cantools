@@ -192,8 +192,8 @@ class Signal:
                  length: int,
                  byte_order: ByteOrder = 'little_endian',
                  is_signed: bool = False,
-                 raw_initial: Optional[int] = None,
-                 raw_invalid: Optional[int] = None,
+                 raw_initial: Optional[Union[int, float]] = None,
+                 raw_invalid: Optional[Union[int, float]] = None,
                  scale: float = 1,
                  offset: float = 0,
                  minimum: Optional[float] = None,
@@ -249,7 +249,7 @@ class Signal:
         self.is_signed: bool = is_signed
 
         #: The raw initial value of the signal, or ``None`` if unavailable.
-        self.raw_initial: Optional[int] = raw_initial
+        self.raw_initial: Optional[Union[int, float]] = raw_initial
 
         #: The scaled initial value of the signal, or ``None`` if unavailable.
         self.initial: Optional[SignalValueType] = (
@@ -258,7 +258,7 @@ class Signal:
 
         #: The raw value representing that the signal is invalid,
         #: or ``None`` if unavailable.
-        self.raw_invalid: Optional[int] = raw_invalid
+        self.raw_invalid: Optional[Union[int, float]] = raw_invalid
 
         #: The scaled value representing that the signal is invalid,
         #: or ``None`` if unavailable.
@@ -317,16 +317,34 @@ class Signal:
             # multi-lingual dictionary
             self.comments = comment
 
-    def raw_to_scaled(self, raw: int) -> SignalValueType:
-        with contextlib.suppress(KeyError, TypeError):
-            return self.choices[raw]  # type: ignore[index]
+    def raw_to_scaled(self, raw: Union[int, float], decode_choices: bool = True) -> SignalValueType:
+        """Convert an internal raw value according to the defined scaling or value table.
+
+        :param raw:
+            The raw value
+        :param decode_choices:
+            If `decode_choices` is ``False`` scaled values are not
+            converted to choice strings (if available).
+        :return:
+            The calculated scaled value
+        """
+        if decode_choices:
+            with contextlib.suppress(KeyError, TypeError):
+                return self.choices[raw]  # type: ignore[index]
 
         if self.offset == 0 and self.scale == 1:
             # treat special case to avoid introduction of unnecessary rounding error
             return raw
         return raw * self.scale + self.offset
 
-    def scaled_to_raw(self, scaled: SignalValueType) -> int:
+    def scaled_to_raw(self, scaled: SignalValueType) -> Union[int, float]:
+        """Convert a scaled value to the internal raw value.
+
+        :param scaled:
+            The scaled value.
+        :return:
+            The internal raw value.
+        """
         if isinstance(scaled, (float, int)):
             _transform = float if self.is_float else round
             if self.offset == 0 and self.scale == 1:

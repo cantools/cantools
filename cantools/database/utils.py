@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from ..database.can.message import Message
     from ..database.can.node import Node
     from ..database.can.signal import Signal
-    from ..database.diagnostics import Data
+    from .dataelement import DataElement
 
 try:
     import bitstruct.c
@@ -56,7 +56,7 @@ def format_and(items: List[Union[int, str]]) -> str:
         return "{} and {}".format(", ".join(string_items[:-1]), string_items[-1])
 
 
-def start_bit(data: Union["Data", "Signal"]) -> int:
+def start_bit(data: "DataElement") -> int:
     if data.byte_order == "big_endian":
         return 8 * (data.start // 8) + (7 - (data.start % 8))
     else:
@@ -64,7 +64,7 @@ def start_bit(data: Union["Data", "Signal"]) -> int:
 
 
 def _encode_fields(
-    fields: Sequence[Union["Signal", "Data"]],
+    fields: Sequence["DataElement"],
     data: SignalMappingType,
     scaling: bool,
 ) -> Dict[str, Union[int, float]]:
@@ -75,7 +75,7 @@ def _encode_fields(
         if isinstance(value, (float, int)):
             _transform = float if field.is_float else round
             if scaling:
-                offset, scale = field.get_offset_scaling(scaled=value)
+                offset, scale = field.get_offset_scaling_from_scaled(value)
                 if offset == 0 and scale == 1:
                     # treat special case to avoid introduction of unnecessary rounding error
                     unpacked[field.name] = _transform(value)  # type: ignore[operator]
@@ -94,7 +94,7 @@ def _encode_fields(
 
 def encode_data(
     data: SignalMappingType,
-    fields: Sequence[Union["Signal", "Data"]],
+    fields: Sequence["DataElement"],
     formats: Formats,
     scaling: bool,
 ) -> int:
@@ -114,7 +114,7 @@ def encode_data(
 def decode_data(
     data: bytes,
     expected_length: int,
-    fields: Sequence[Union["Signal", "Data"]],
+    fields: Sequence["DataElement"],
     formats: Formats,
     decode_choices: bool,
     scaling: bool,
@@ -158,7 +158,7 @@ def decode_data(
                     pass
 
             if scaling:
-                offset, scale = field.get_offset_scaling(raw_val=value)
+                offset, scale = field.get_offset_scaling_from_raw(value)
                 decoded[field.name] = scale * value + offset
                 continue
             else:
@@ -172,11 +172,11 @@ def decode_data(
 
 
 def create_encode_decode_formats(
-    datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int
+    datas: Sequence["DataElement"], number_of_bytes: int
 ) -> Formats:
     format_length = 8 * number_of_bytes
 
-    def get_format_string_type(data: Union["Data", "Signal"]) -> str:
+    def get_format_string_type(data: "DataElement") -> str:
         if data.is_float:
             return "f"
         elif data.is_signed:
@@ -190,7 +190,7 @@ def create_encode_decode_formats(
 
         return fmt, padding_mask, None
 
-    def data_item(data: Union["Data", "Signal"]) -> Tuple[str, str, str]:
+    def data_item(data: "DataElement") -> Tuple[str, str, str]:
         fmt = f"{get_format_string_type(data)}{data.length}"
         padding_mask = "0" * data.length
 

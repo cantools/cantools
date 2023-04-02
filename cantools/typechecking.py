@@ -66,3 +66,5 @@ DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]
+
+PiecewiseSegment = List[Tuple[float, float]]

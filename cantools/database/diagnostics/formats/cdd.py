@@ -27,7 +27,7 @@ class DataType:
         unit: str,
         factor: List[float],
         offset: List[float],
-        pcw_segments: Optional[List[Tuple[float, float]]],
+        segment_boundaries: Optional[List[Tuple[float, float]]],
     ):
         self.name = name
         self.id_ = id_
@@ -40,7 +40,7 @@ class DataType:
         self.unit = unit
         self.factor = factor
         self.offset = offset
-        self.pcw_segments = pcw_segments
+        self.segment_boundaries = segment_boundaries
 
 
 def _load_choices(data_type):
@@ -74,8 +74,6 @@ def _load_data_types(ecu_doc):
     for data_type in types:
         # Default values.
         unit = None
-        factor = []
-        offset = []
         bit_length = None
         encoding = None
         minimum = None
@@ -123,6 +121,8 @@ def _load_data_types(ecu_doc):
 
         if len(comps) > 0:
             pcw_segments = []
+            factor = []
+            offset = []
             for comp in comps:
                 factor.append(float(comp.attrib["f"]))
                 offset.append(float(comp.attrib["o"]))
@@ -133,8 +133,8 @@ def _load_data_types(ecu_doc):
                     )
         else:
             # non-linear data types, assume defaults
-            factor = [1]
-            offset = [0]
+            factor = 1
+            offset = 0
 
         data_types[type_id] = DataType(
             type_name,
@@ -180,7 +180,7 @@ def _load_data_element(data, bit_offset, data_types):
         maximum=data_type.maximum,
         unit=data_type.unit,
         choices=data_type.choices,
-        pcw_segments=data_type.pcw_segments,
+        segment_boundaries=data_type.segment_boundaries,
     )
 
 

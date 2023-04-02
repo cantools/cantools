@@ -1,8 +1,9 @@
 # A CAN signal.
 import decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments
+from ..dataelement import DataElement
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
@@ -148,7 +149,7 @@ class NamedSignalValue:
         return False
 
 
-class Signal:
+class Signal(DataElement):
     """A CAN signal with position, size, unit and other information. A
     signal is part of a message.
 
@@ -209,43 +210,21 @@ class Signal:
         decimal: Optional[Decimal] = None,
         spn: Optional[int] = None,
     ) -> None:
+        super().__init__(
+            name,
+            start,
+            length,
+            byte_order,
+            is_signed,
+            scale,
+            offset,
+            minimum,
+            maximum,
+            unit,
+            choices,
+            is_float,
+        )
         # avoid using properties to improve encoding/decoding performance
-
-        #: The signal name as a string.
-        self.name: str = name
-
-        #: The scale factor of the signal value.
-        self.scale: float = scale
-
-        #: The offset of the signal value.
-        self.offset: float = offset
-
-        #: ``True`` if the signal is a float, ``False`` otherwise.
-        self.is_float: bool = is_float
-
-        #: The minimum value of the signal, or ``None`` if unavailable.
-        self.minimum: Optional[float] = minimum
-
-        #: The maximum value of the signal, or ``None`` if unavailable.
-        self.maximum: Optional[float] = maximum
-
-        #: "A dictionary mapping signal values to enumerated choices, or
-        #: ``None`` if unavailable.
-        self.choices: Optional[Choices] = choices
-
-        #: The start bit position of the signal within its message.
-        self.start: int = start
-
-        #: The length of the signal in bits.
-        self.length: int = length
-
-        #: Signal byte order as ``'little_endian'`` or ``'big_endian'``.
-        self.byte_order: ByteOrder = byte_order
-
-        #: ``True`` if the signal is signed, ``False`` otherwise. Ignore this
-        #: attribute if :data:`~cantools.db.Signal.is_float` is
-        #: ``True``.
-        self.is_signed: bool = is_signed
 
         #: The initial value of the signal, or ``None`` if unavailable.
         self.initial: Optional[int] = initial
@@ -263,9 +242,6 @@ class Signal:
         #: See :class:`~cantools.database.can.signal.Decimal` for more
         #: details.
         self.decimal: Optional[Decimal] = decimal
-
-        #: The unit of the signal as a string, or ``None`` if unavailable.
-        self.unit: Optional[str] = unit
 
         #: An object containing dbc specific properties like e.g. attributes.
         self.dbc: Optional["DbcSpecifics"] = dbc_specifics
@@ -328,21 +304,6 @@ class Signal:
             self.comments = None
         else:
             self.comments = {None: value}
-
-    def choice_string_to_number(self, string: str) -> int:
-        if self.choices is None:
-            raise ValueError(f"Signal {self.name} has no choices.")
-
-        for choice_number, choice_value in self.choices.items():
-            if str(choice_value) == str(string):
-                return choice_number
-
-        raise KeyError(f"Choice {string} not found in Signal {self.name}.")
-
-    def get_offset_scaling(
-        self, raw_val: Optional[float] = None, scaled: Optional[float] = None
-    ) -> Tuple[float, float]:
-        return self.offset, self.scale
 
     def __repr__(self) -> str:
         if self.choices is None:

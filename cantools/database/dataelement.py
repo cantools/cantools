@@ -71,11 +71,11 @@ class DataElement:
 
         #: Stores the raw start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_raw: Optional[Tuple[List[float]]] = None
+        self.segment_boundaries_raw: Optional[Tuple[List[float], List[float]]] = None
 
         #: Stores the scaled start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_scaled: Optional[Tuple[List[float]]] = None
+        self.segment_boundaries_scaled: Optional[Tuple[List[float], List[float]]] = None
         if segment_boundaries is not None:
             if not isinstance(scale, list) or not isinstance(offset, list):
                 raise ValueError(

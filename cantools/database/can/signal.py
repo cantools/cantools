@@ -403,7 +403,7 @@ class Signal:
             list_of_choices = ", ".join(
                 [f"{value}: '{text}'" for value, text in self.choices.items()]
             )
-            choices = "{{{}}}".format(list_of_choices)
+            choices = f"{{{list_of_choices}}}"
 
         return (
             f"signal("

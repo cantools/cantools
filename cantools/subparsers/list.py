@@ -24,9 +24,9 @@ def _format_val(val: Union[float, int, str, NamedSignalValue, None],
         return 'None'
     elif not unit or isinstance(val, (str, NamedSignalValue)):
         # physical value does not exhibit a unit or is an enumeration
-        return f'{{:{value_format_specifier}}}'.format(val)
+        return f'{val:{value_format_specifier}}'
 
-    return f'{{:{value_format_specifier}}} {unit}'.format(val)
+    return f'{val:{value_format_specifier}} {unit}'
 
 
 def _print_message(message: Message,

@@ -23,10 +23,9 @@ class Args(object):
     def __init__(self, input_file_name):
         self.exclude_normal = False
         self.exclude_extended = False
-        self.no_format_specifics = False
         self.print_all = False
         self.no_strict = False
-        self.no_format_specifics = False
+        self.skip_format_specifics = False
         self.prune = True
         self.input_file_name = (input_file_name, )
         self.print_buses = False

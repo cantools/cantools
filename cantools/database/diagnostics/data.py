@@ -3,12 +3,12 @@ import logging
 from typing import List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, PiecewiseSegment
-from ..dataelement import DataElement
+from ..signalbase import SignalBase
 
 logger = logging.getLogger(__name__)
 
 
-class Data(DataElement):
+class Data(SignalBase):
     """A data data with position, size, unit and other information. A data
     is part of a DID.
 
@@ -28,23 +28,20 @@ class Data(DataElement):
         unit: Optional[str] = None,
         choices: Optional[Choices] = None,
     ) -> None:
-        is_float = False
-        is_signed = False
-
         super().__init__(
-            name,
-            start,
-            length,
-            byte_order,
-            is_signed,
-            scale,
-            offset,
-            minimum,
-            maximum,
-            unit,
-            choices,
-            is_float,
-            segment_boundaries,
+            name=name,
+            start=start,
+            length=length,
+            byte_order=byte_order,
+            is_signed=False,
+            scale=scale,
+            offset=offset,
+            minimum=minimum,
+            maximum=maximum,
+            unit=unit,
+            choices=choices,
+            is_float=False,
+            segment_boundaries=segment_boundaries,
         )
 
     def __repr__(self) -> str:
@@ -57,23 +54,13 @@ class Data(DataElement):
                 )
             )
 
-        if isinstance(self.scale, list):
-            scale = self.scale[0]
-        else:
-            scale = self.scale
-
-        if isinstance(self.offset, list):
-            offset = self.offset[0]
-        else:
-            offset = self.offset
-
         return "data('{}', {}, {}, '{}', {}, {}, {}, {}, '{}', {})".format(
             self.name,
             self.start,
             self.length,
             self.byte_order,
-            scale,
-            offset,
+            self.scale,
+            self.offset,
             self.minimum,
             self.maximum,
             self.unit,

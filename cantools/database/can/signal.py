@@ -3,7 +3,7 @@ import decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments
-from ..dataelement import DataElement
+from ..signalbase import SignalBase
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
@@ -149,7 +149,7 @@ class NamedSignalValue:
         return False
 
 
-class Signal(DataElement):
+class Signal(SignalBase):
     """A CAN signal with position, size, unit and other information. A
     signal is part of a message.
 
@@ -211,18 +211,18 @@ class Signal(DataElement):
         spn: Optional[int] = None,
     ) -> None:
         super().__init__(
-            name,
-            start,
-            length,
-            byte_order,
-            is_signed,
-            scale,
-            offset,
-            minimum,
-            maximum,
-            unit,
-            choices,
-            is_float,
+            name=name,
+            start=start,
+            length=length,
+            byte_order=byte_order,
+            is_signed=is_signed,
+            scale=scale,
+            offset=offset,
+            minimum=minimum,
+            maximum=maximum,
+            unit=unit,
+            choices=choices,
+            is_float=is_float,
         )
         # avoid using properties to improve encoding/decoding performance
 

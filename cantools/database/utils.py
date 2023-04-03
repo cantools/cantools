@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from ..database.can.message import Message
     from ..database.can.node import Node
     from ..database.can.signal import Signal
-    from .dataelement import DataElement
+    from .signalbase import SignalBase
 
 try:
     import bitstruct.c
@@ -56,7 +56,7 @@ def format_and(items: List[Union[int, str]]) -> str:
         return "{} and {}".format(", ".join(string_items[:-1]), string_items[-1])
 
 
-def start_bit(data: "DataElement") -> int:
+def start_bit(data: "SignalBase") -> int:
     if data.byte_order == "big_endian":
         return 8 * (data.start // 8) + (7 - (data.start % 8))
     else:
@@ -64,7 +64,7 @@ def start_bit(data: "DataElement") -> int:
 
 
 def _encode_fields(
-    fields: Sequence["DataElement"],
+    fields: Sequence["SignalBase"],
     data: SignalMappingType,
     scaling: bool,
 ) -> Dict[str, Union[int, float]]:
@@ -94,7 +94,7 @@ def _encode_fields(
 
 def encode_data(
     data: SignalMappingType,
-    fields: Sequence["DataElement"],
+    fields: Sequence["SignalBase"],
     formats: Formats,
     scaling: bool,
 ) -> int:
@@ -114,7 +114,7 @@ def encode_data(
 def decode_data(
     data: bytes,
     expected_length: int,
-    fields: Sequence["DataElement"],
+    fields: Sequence["SignalBase"],
     formats: Formats,
     decode_choices: bool,
     scaling: bool,
@@ -172,11 +172,11 @@ def decode_data(
 
 
 def create_encode_decode_formats(
-    datas: Sequence["DataElement"], number_of_bytes: int
+    datas: Sequence["SignalBase"], number_of_bytes: int
 ) -> Formats:
     format_length = 8 * number_of_bytes
 
-    def get_format_string_type(data: "DataElement") -> str:
+    def get_format_string_type(data: "SignalBase") -> str:
         if data.is_float:
             return "f"
         elif data.is_signed:
@@ -190,7 +190,7 @@ def create_encode_decode_formats(
 
         return fmt, padding_mask, None
 
-    def data_item(data: "DataElement") -> Tuple[str, str, str]:
+    def data_item(data: "SignalBase") -> Tuple[str, str, str]:
         fmt = f"{get_format_string_type(data)}{data.length}"
         padding_mask = "0" * data.length
 

@@ -1,4 +1,3 @@
-import bisect
 import logging
 from typing import List, Optional, Tuple, Union
 
@@ -7,7 +6,7 @@ from ..typechecking import ByteOrder, Choices, PiecewiseSegment
 logger = logging.getLogger(__name__)
 
 
-class DataElement:
+class SignalBase:
     def __init__(
         self,
         name: str,
@@ -71,11 +70,11 @@ class DataElement:
 
         #: Stores the raw start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_raw: Optional[Tuple[List[float], List[float]]] = None
+        self.segment_boundaries_raw: PiecewiseSegment = []
 
         #: Stores the scaled start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_scaled: Optional[Tuple[List[float], List[float]]] = None
+        self.segment_boundaries_scaled: PiecewiseSegment = []
         if segment_boundaries is not None:
             if not isinstance(scale, list) or not isinstance(offset, list):
                 raise ValueError(
@@ -83,23 +82,22 @@ class DataElement:
                     "if segment boundaries are defined."
                 )
 
-            self._initialize_segment_limits(segment_boundaries)
+            self._initialize_segment_boundaries(segment_boundaries)
 
-    def _initialize_segment_limits(self, segment_boundaries: PiecewiseSegment) -> None:
+    def _initialize_segment_boundaries(self, segment_boundaries: PiecewiseSegment) -> None:
         def convert(v, o, f):
             return v * f + o
 
+        self.segment_boundaries: PiecewiseSegment = []
         last_phys_max = None
-        self.segment_boundaries_raw = ([], [])
-        self.segment_boundaries_scaled = ([], [])
         for i, segment in enumerate(segment_boundaries):
-            self.segment_boundaries_raw[0].append(segment[0])
-            self.segment_boundaries_raw[1].append(segment[1])
+            self.segment_boundaries_raw.append(segment)
             start, end = segment
-            params = [self._offset[i], self._scale[i]]  # type: ignore
-            scaled_segment = (convert(start, *params), convert(end, *params))
-            self.segment_boundaries_scaled[0].append(scaled_segment[0])
-            self.segment_boundaries_scaled[1].append(scaled_segment[1])
+            scaled_segment = (
+                convert(start, self._offset[i], self._scale[i]),  # type: ignore
+                convert(end, self._offset[i], self._scale[i])     # type: ignore
+            )
+            self.segment_boundaries_scaled.append(scaled_segment)
             if last_phys_max is None:
                 last_phys_max = scaled_segment[1]
                 continue
@@ -114,11 +112,6 @@ class DataElement:
 
             last_phys_max = max(scaled_segment[1], last_phys_max)
 
-        if len(self.segment_boundaries_raw[0]) == 0:
-            # no segments found, save lookups later by setting to None
-            self.segment_boundaries_raw = None
-            self.segment_boundaries_scaled = None
-
     def choice_string_to_number(self, string: str) -> int:
         if self.choices is None:
             raise ValueError(f"Signal {self.name} has no choices.")
@@ -129,21 +122,13 @@ class DataElement:
 
         raise KeyError(f"Choice {string} not found in data element {self.name}.")
 
-    def _get_offset_scaling_from_list(
-        self, val: float, segments: Tuple[List[float], List[float]]
-    ) -> Tuple[float, float]:
-        i = (
-            bisect.bisect_right(segments[0], val) - 1
-        )  # lower limits: rightmost value less than or equal val
-        i2 = bisect.bisect_left(
-            segments[1], val
-        )  # higher limits: leftmost value greater than or equal val
-        if i == i2:
-            return self._offset[i], self._scale[i]  # type: ignore
+    def _get_offset_scaling_from_list(self, val: float, segments: PiecewiseSegment) -> Tuple[float, float]:
+        for i, segment in enumerate(segments):
+            start, end = segment
+            if start <= val <= end:
+                return self._offset[i], self._scale[i]  # type: ignore
         else:
-            err_text = [
-                f"{start} <= x <= {end}" for start, end in zip(segments[0], segments[1])
-            ]
+            err_text = [f"{start} <= x <= {end}" for start, end in segments]
             raise ValueError(
                 f"Value {val} is not in ranges: \n {' OR '.join(err_text)}"
             )
@@ -156,7 +141,7 @@ class DataElement:
         If data type only defines one set of offset/scaling then
         the `raw_val` param can be omitted
         """
-        if raw_val is None or self.segment_boundaries_raw is None:
+        if raw_val is None or not self.segment_boundaries_raw:
             try:
                 return self._offset[0], self._scale[0]  # type: ignore
             except TypeError:
@@ -172,7 +157,7 @@ class DataElement:
         If data type only defines one set of offset/scaling then
         the `scaled_val` param can be omitted
         """
-        if scaled_val is None or self.segment_boundaries_scaled is None:
+        if scaled_val is None or not self.segment_boundaries_scaled:
             try:
                 return self._offset[0], self._scale[0]  # type: ignore
             except TypeError:
@@ -191,9 +176,9 @@ class DataElement:
             return self._offset
 
     @offset.setter
-    def offset(self, offset: float) -> None:
+    def offset(self, new_offset: float) -> None:
         """Set offset"""
-        self._offset = offset
+        self._offset = new_offset
 
     @property
     def scale(self):
@@ -204,6 +189,6 @@ class DataElement:
             return self._scale
 
     @scale.setter
-    def scale(self, scale: float) -> None:
+    def scale(self, new_scale: float) -> None:
         """Set scale"""
-        self._scale = scale
+        self._scale = new_scale

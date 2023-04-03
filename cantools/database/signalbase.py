@@ -84,7 +84,9 @@ class SignalBase:
 
             self._initialize_segment_boundaries(segment_boundaries)
 
-    def _initialize_segment_boundaries(self, segment_boundaries: PiecewiseSegment) -> None:
+    def _initialize_segment_boundaries(
+        self, segment_boundaries: PiecewiseSegment
+    ) -> None:
         def convert(v, o, f):
             return v * f + o
 
@@ -95,7 +97,7 @@ class SignalBase:
             start, end = segment
             scaled_segment = (
                 convert(start, self._offset[i], self._scale[i]),  # type: ignore
-                convert(end, self._offset[i], self._scale[i])     # type: ignore
+                convert(end, self._offset[i], self._scale[i]),  # type: ignore
             )
             self.segment_boundaries_scaled.append(scaled_segment)
             if last_phys_max is None:
@@ -122,7 +124,9 @@ class SignalBase:
 
         raise KeyError(f"Choice {string} not found in data element {self.name}.")
 
-    def _get_offset_scaling_from_list(self, val: float, segments: PiecewiseSegment) -> Tuple[float, float]:
+    def _get_offset_scaling_from_list(
+        self, val: float, segments: PiecewiseSegment
+    ) -> Tuple[float, float]:
         for i, segment in enumerate(segments):
             start, end = segment
             if start <= val <= end:

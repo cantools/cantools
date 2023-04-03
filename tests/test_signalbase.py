@@ -88,11 +88,13 @@ class CanToolsSignalBaseTest(unittest.TestCase):
         )
 
         actual_out = stdout.getvalue()
-        expected_out = "Piecewise linear type: Test has overlapping segments! " \
-                       "Segment 1 starts at phys val 7.0 but one of the prev segments ended at 10.0. " \
-                       "Encoding might be ambiguous.\n"
+        expected_out = (
+            "Piecewise linear type: Test has overlapping segments! "
+            "Segment 1 starts at phys val 7.0 but one of the prev segments ended at 10.0. "
+            "Encoding might be ambiguous.\n"
+        )
         self.assertEqual(expected_out, actual_out)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

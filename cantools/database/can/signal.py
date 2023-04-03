@@ -248,10 +248,12 @@ class Signal:
         #: ``True``.
         self.is_signed: bool = is_signed
 
-        #: The raw initial value of the signal, or ``None`` if unavailable.
+        #: The internal representation of the initial value of the signal,
+        #: or ``None`` if unavailable.
         self.raw_initial: Optional[Union[int, float]] = raw_initial
 
-        #: The scaled initial value of the signal, or ``None`` if unavailable.
+        #: The initial value of the signal in units of the physical world,
+        #: or ``None`` if unavailable.
         self.initial: Optional[SignalValueType] = (
             self.raw_to_scaled(raw_initial) if raw_initial is not None else None
         )
@@ -314,7 +316,7 @@ class Signal:
             self.comments = {None: comment}
         else:
             # assume that we have either no comment at all or a
-            # multi-lingual dictionary
+            # multilingual dictionary
             self.comments = comment
 
     def raw_to_scaled(self, raw: Union[int, float], decode_choices: bool = True) -> SignalValueType:
@@ -353,7 +355,10 @@ class Signal:
 
             return _transform((scaled - self.offset) / self.scale)  # type: ignore[operator,no-any-return]
 
-        return self.choice_string_to_number(str(scaled))
+        if isinstance(scaled, (str, NamedSignalValue)):
+            return self.choice_string_to_number(str(scaled))
+
+        raise TypeError(f"Conversion of type {type(scaled)} is not supported.")
 
     @property
     def comment(self) -> Optional[str]:

@@ -1427,7 +1427,7 @@ class SystemLoader:
             return None
 
         # Get the system signal XML node. This may also be a system signal
-        # group, in which case we have ignore it if the XSD is to be believed.
+        # group, in which case we have to ignore it if the XSD is to be believed.
         # ARXML is great!
         system_signal = self._get_unique_arxml_child(i_signal, '&SYSTEM-SIGNAL')
 
@@ -1472,12 +1472,12 @@ class SystemLoader:
 
         # loading initial values is way too complicated, so it is the
         # job of a separate method
-        initial = self._load_arxml_init_value_string(i_signal, system_signal)
-        if initial is not None:
+        initial_string = self._load_arxml_init_value_string(i_signal, system_signal)
+        if initial_string is not None:
             try:
-                raw_initial = parse_number_string(initial)
+                raw_initial = parse_number_string(initial_string)
             except ValueError:
-                LOGGER.warning(f'The initial value ("{initial}") of signal '
+                LOGGER.warning(f'The initial value ("{initial_string}") of signal '
                                f'{name} does not represent a number')
 
         raw_invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)

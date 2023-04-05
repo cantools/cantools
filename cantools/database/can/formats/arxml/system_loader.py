@@ -1,6 +1,5 @@
 # Load a CAN database in ARXML format.
 import logging
-import numbers
 import re
 from copy import deepcopy
 from decimal import Decimal
@@ -1209,8 +1208,8 @@ class SystemLoader:
                 if is_initial is not None and is_initial.text == 'true' \
                 else False
             if is_initial:
-                assert selector_signal.initial is None
-                selector_signal.initial = dynalt_selector_value
+                assert selector_signal.raw_initial is None
+                selector_signal.raw_initial = dynalt_selector_value
 
             # remove the selector signal from the dynamic part (because it
             # logically is in the static part, despite the fact that AUTOSAR
@@ -1250,14 +1249,11 @@ class SystemLoader:
             # specified indepently of that of the message. how should
             # this be handled?
 
-        if selector_signal.initial in selector_signal.choices:
-            selector_signal.initial = \
-                selector_signal.choices[selector_signal.initial]
+        if selector_signal.raw_initial is not None:
+            selector_signal.initial = selector_signal.raw_to_scaled(selector_signal.raw_initial)
 
-        if not isinstance(selector_signal.invalid, NamedSignalValue) and \
-           selector_signal.invalid in selector_signal.choices:
-            selector_signal.invalid = \
-                selector_signal.choices[selector_signal.invalid]
+        if selector_signal.raw_invalid is not None:
+            selector_signal.invalid = selector_signal.raw_to_scaled(selector_signal.raw_invalid)
 
         # the static part of the multiplexed PDU
         if self.autosar_version_newer(4):
@@ -1449,7 +1445,7 @@ class SystemLoader:
             return None
 
         # Get the system signal XML node. This may also be a system signal
-        # group, in which case we have ignore it if the XSD is to be believed.
+        # group, in which case we have to ignore it if the XSD is to be believed.
         # ARXML is great!
         system_signal = self._get_unique_arxml_child(i_signal, '&SYSTEM-SIGNAL')
 
@@ -1458,8 +1454,7 @@ class SystemLoader:
             return None
 
         # Default values.
-        initial = None
-        invalid = None
+        raw_initial = None
         minimum = None
         maximum = None
         factor = 1.0
@@ -1495,50 +1490,36 @@ class SystemLoader:
 
         # loading initial values is way too complicated, so it is the
         # job of a separate method
-        initial = self._load_arxml_init_value_string(i_signal, system_signal)
-
-        if initial is not None:
-            initial_int = None
+        initial_string = self._load_arxml_init_value_string(i_signal, system_signal)
+        if initial_string is not None:
             try:
-                initial_int = parse_number_string(initial)
+                raw_initial = parse_number_string(initial_string)
             except ValueError:
-                LOGGER.warning(f'The initial value ("{initial}") of signal '
+                LOGGER.warning(f'The initial value ("{initial_string}") of signal '
                                f'{name} does not represent a number')
 
-            if choices is not None and initial_int in choices:
-                initial = choices[initial_int]
-            elif is_float:
-                initial = float(initial_int)*factor + offset
-            # TODO: strings?
-            elif initial_int is not None:
-                initial = initial_int*factor + offset
+        raw_invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
 
-        invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
-
-        if invalid is not None:
-            if choices is not None and invalid in choices:
-                invalid = choices[invalid]
-            elif not isinstance(invalid, bool) and \
-                 isinstance(invalid, numbers.Number):
-                invalid = invalid*factor + offset
-
-        return Signal(name=name,
-                      start=start_position,
-                      length=length,
-                      receivers=receivers,
-                      byte_order=byte_order,
-                      is_signed=is_signed,
-                      scale=factor,
-                      offset=offset,
-                      initial=initial,
-                      invalid=invalid,
-                      minimum=minimum,
-                      maximum=maximum,
-                      unit=unit,
-                      choices=choices,
-                      comment=comments,
-                      is_float=is_float,
-                      decimal=decimal)
+        signal = Signal(
+            name=name,
+            start=start_position,
+            length=length,
+            receivers=receivers,
+            byte_order=byte_order,
+            is_signed=is_signed,
+            scale=factor,
+            offset=offset,
+            raw_initial=raw_initial,
+            raw_invalid=raw_invalid,
+            minimum=minimum,
+            maximum=maximum,
+            unit=unit,
+            choices=choices,
+            comment=comments,
+            is_float=is_float,
+            decimal=decimal,
+        )
+        return signal
 
     def _load_signal_name(self, i_signal):
         system_signal_name_elem = \

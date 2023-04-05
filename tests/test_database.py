@@ -838,6 +838,25 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             db.encode_message('Message1', {'Foo': 1}, strict=False)
 
+    def test_encode_decimal(self):
+        db = cantools.db.Database()
+        db.add_dbc_file('tests/files/dbc/motohawk.dbc')
+
+        data = {
+            'Temperature': Decimal(250.55),
+            'AverageRadius': 3.2,
+            'Enable': 1
+        }
+
+        msg = db.get_message_by_name('ExampleMessage')
+
+        with self.assertRaises(TypeError) as cm:
+            msg.encode(data)
+            self.assertEqual(
+                str(cm.exception),
+                "Unable to encode signal 'Temperature' with type 'Decimal'.",
+            )
+
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not
         decoding choices.

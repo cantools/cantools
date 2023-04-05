@@ -16,6 +16,7 @@ from typing import (
     Union,
 )
 
+from ..database.can.signal import NamedSignalValue
 from ..typechecking import (
     ByteOrder,
     Choices,
@@ -87,7 +88,14 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
             unpacked[field.name] = _transform(value)  # type: ignore[operator]
             continue
 
-        unpacked[field.name] = field.choice_string_to_number(str(value))
+        if isinstance(value, (str, NamedSignalValue)):
+            unpacked[field.name] = field.choice_string_to_number(str(value))
+            continue
+
+        raise TypeError(
+            f"Unable to encode signal '{field.name}' "
+            f"with type '{value.__class__.__name__}'."
+        )
 
     return unpacked
 
@@ -122,8 +130,8 @@ def decode_data(data: bytes,
         data = data.ljust(expected_length, b"\xFF")
 
     unpacked = {
-        **formats.big_endian.unpack(bytes(data)),
-        **formats.little_endian.unpack(bytes(data[::-1])),
+        **formats.big_endian.unpack(data),
+        **formats.little_endian.unpack(data[::-1]),
     }
 
     if allow_truncated and actual_length < expected_length:

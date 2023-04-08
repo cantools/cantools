@@ -127,10 +127,12 @@ class SignalBase:
     def _get_offset_scaling_from_list(
         self, val: float, segments: PiecewiseSegment
     ) -> Tuple[float, float]:
+        assert not isinstance(self._offset, float) and not isinstance(self._scale, float)
+
         for i, segment in enumerate(segments):
             start, end = segment
             if start <= val <= end:
-                return self._offset[i], self._scale[i]  # type: ignore
+                return self._offset[i], self._scale[i]
         else:
             err_text = [f"{start} <= x <= {end}" for start, end in segments]
             raise ValueError(
@@ -138,16 +140,18 @@ class SignalBase:
             )
 
     def get_offset_scaling_from_raw(
-        self, raw_val: Optional[float] = None
+        self, raw_val: Optional[Union[int, float]] = None
     ) -> Tuple[float, float]:
         """Get the applicable offset and scaling for the given raw value.
 
         If data type only defines one set of offset/scaling then
         the `raw_val` param can be omitted
         """
+        assert not isinstance(self._offset, float) and not isinstance(self._scale, float)
+
         if raw_val is None or not self.segment_boundaries_raw:
             try:
-                return self._offset[0], self._scale[0]  # type: ignore
+                return self._offset[0], self._scale[0]
             except TypeError:
                 return self.offset, self.scale
 
@@ -180,7 +184,7 @@ class SignalBase:
             return self._offset
 
     @offset.setter
-    def offset(self, new_offset: float) -> None:
+    def offset(self, new_offset: Union[float, List[float]]) -> None:
         """Set offset"""
         self._offset = new_offset
 
@@ -193,6 +197,6 @@ class SignalBase:
             return self._scale
 
     @scale.setter
-    def scale(self, new_scale: float) -> None:
+    def scale(self, new_scale: Union[float, List[float]]) -> None:
         """Set scale"""
         self._scale = new_scale

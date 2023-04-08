@@ -64,6 +64,9 @@
                 <I-SIGNAL-I-PDU-REF-CONDITIONAL>
                   <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message1</I-SIGNAL-I-PDU-REF>
                 </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+		<I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message4</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
               </I-SIGNAL-I-PDUS>
             </I-SIGNAL-I-PDU-GROUP>
             <!-- /PDU_GROUPS/RX/DJ -->
@@ -73,6 +76,18 @@
               <I-SIGNAL-I-PDUS>
                 <I-SIGNAL-I-PDU-REF-CONDITIONAL>
                   <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message2</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message3</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_static</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_0</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_1</I-SIGNAL-I-PDU-REF>
                 </I-SIGNAL-I-PDU-REF-CONDITIONAL>
               </I-SIGNAL-I-PDUS>
             </I-SIGNAL-I-PDU-GROUP>
@@ -90,6 +105,18 @@
                 <I-SIGNAL-I-PDU-REF-CONDITIONAL>
                   <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message2</I-SIGNAL-I-PDU-REF>
                 </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message3</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_static</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_0</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/multiplexed_message_1</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
               </I-SIGNAL-I-PDUS>
             </I-SIGNAL-I-PDU-GROUP>
             <!-- /PDU_GROUPS/TX/DJ -->
@@ -99,6 +126,9 @@
               <I-SIGNAL-I-PDUS>
                 <I-SIGNAL-I-PDU-REF-CONDITIONAL>
                   <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message1</I-SIGNAL-I-PDU-REF>
+                </I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                <I-SIGNAL-I-PDU-REF-CONDITIONAL>
+                  <I-SIGNAL-I-PDU-REF DEST="I-SIGNAL-I-PDU">/ISignalIPdu/message4</I-SIGNAL-I-PDU-REF>
                 </I-SIGNAL-I-PDU-REF-CONDITIONAL>
               </I-SIGNAL-I-PDUS>
             </I-SIGNAL-I-PDU-GROUP>

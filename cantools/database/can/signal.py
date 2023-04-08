@@ -1,8 +1,9 @@
 # A CAN signal.
+import contextlib
 import decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from ...typechecking import ByteOrder, Choices, Comments
+from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..signalbase import SignalBase
 
 if TYPE_CHECKING:
@@ -107,7 +108,7 @@ class NamedSignalValue:
 
     @property
     def value(self) -> int:
-        """The integer value that gets mapped"""
+        """The integer value that gets mapped."""
 
         return self._value
 
@@ -192,8 +193,8 @@ class Signal(SignalBase):
         length: int,
         byte_order: ByteOrder = "little_endian",
         is_signed: bool = False,
-        initial: Optional[int] = None,
-        invalid: Optional[int] = None,
+        raw_initial: Optional[Union[int, float]] = None,
+        raw_invalid: Optional[Union[int, float]] = None,
         scale: float = 1,
         offset: float = 0,
         minimum: Optional[float] = None,
@@ -226,12 +227,25 @@ class Signal(SignalBase):
         )
         # avoid using properties to improve encoding/decoding performance
 
-        #: The initial value of the signal, or ``None`` if unavailable.
-        self.initial: Optional[int] = initial
-
-        #: The value representing that the signal is invalid,
+        #: The internal representation of the initial value of the signal,
         #: or ``None`` if unavailable.
-        self.invalid: Optional[int] = invalid
+        self.raw_initial: Optional[Union[int, float]] = raw_initial
+
+        #: The initial value of the signal in units of the physical world,
+        #: or ``None`` if unavailable.
+        self.initial: Optional[SignalValueType] = (
+            self.raw_to_scaled(raw_initial) if raw_initial is not None else None
+        )
+
+        #: The raw value representing that the signal is invalid,
+        #: or ``None`` if unavailable.
+        self.raw_invalid: Optional[Union[int, float]] = raw_invalid
+
+        #: The scaled value representing that the signal is invalid,
+        #: or ``None`` if unavailable.
+        self.invalid: Optional[SignalValueType] = (
+            self.raw_to_scaled(raw_invalid) if raw_invalid is not None else None
+        )
 
         #: The high precision values of
         #: :attr:`~cantools.database.can.Signal.scale`,
@@ -278,8 +292,51 @@ class Signal(SignalBase):
             self.comments = {None: comment}
         else:
             # assume that we have either no comment at all or a
-            # multi-lingual dictionary
+            # multilingual dictionary
             self.comments = comment
+
+    def raw_to_scaled(
+        self, raw: Union[int, float], decode_choices: bool = True
+    ) -> SignalValueType:
+        """Convert an internal raw value according to the defined scaling or value table.
+
+        :param raw:
+            The raw value
+        :param decode_choices:
+            If `decode_choices` is ``False`` scaled values are not
+            converted to choice strings (if available).
+        :return:
+            The calculated scaled value
+        """
+        if decode_choices:
+            with contextlib.suppress(KeyError, TypeError):
+                return self.choices[raw]  # type: ignore[index]
+
+        if self.offset == 0 and self.scale == 1:
+            # treat special case to avoid introduction of unnecessary rounding error
+            return raw
+        return raw * self.scale + self.offset
+
+    def scaled_to_raw(self, scaled: SignalValueType) -> Union[int, float]:
+        """Convert a scaled value to the internal raw value.
+
+        :param scaled:
+            The scaled value.
+        :return:
+            The internal raw value.
+        """
+        if isinstance(scaled, (float, int)):
+            _transform = float if self.is_float else round
+            if self.offset == 0 and self.scale == 1:
+                # treat special case to avoid introduction of unnecessary rounding error
+                return _transform(scaled)  # type: ignore[operator,no-any-return]
+
+            return _transform((scaled - self.offset) / self.scale)  # type: ignore[operator,no-any-return]
+
+        if isinstance(scaled, (str, NamedSignalValue)):
+            return self.choice_string_to_number(str(scaled))
+
+        raise TypeError(f"Conversion of type {type(scaled)} is not supported.")
 
     @property
     def comment(self) -> Optional[str]:
@@ -309,11 +366,10 @@ class Signal(SignalBase):
         if self.choices is None:
             choices = None
         else:
-            choices = "{{{}}}".format(
-                ", ".join(
-                    [f"{value}: '{text}'" for value, text in self.choices.items()]
-                )
+            list_of_choices = ", ".join(
+                [f"{value}: '{text}'" for value, text in self.choices.items()]
             )
+            choices = f"{{{list_of_choices}}}"
 
         return (
             f"signal("
@@ -322,7 +378,7 @@ class Signal(SignalBase):
             f"{self.length}, "
             f"'{self.byte_order}', "
             f"{self.is_signed}, "
-            f"{self.initial}, "
+            f"{self.raw_initial}, "
             f"{self.scale}, "
             f"{self.offset}, "
             f"{self.minimum}, "

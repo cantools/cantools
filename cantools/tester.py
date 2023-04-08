@@ -271,7 +271,7 @@ class Message(UserDict):
             maximum = 0 if not signal.maximum else signal.maximum
             if signal.initial:
                 # use initial signal value (if set)
-                initial_sig_values[signal.name] = (signal.initial * signal.decimal.scale) + signal.decimal.offset
+                initial_sig_values[signal.name] = signal.initial
             elif signal.is_multiplexer:
                 initial_sig_values[signal.name] = mplex_settings.get(signal.name, 0)
             elif minimum <= 0 <= maximum:

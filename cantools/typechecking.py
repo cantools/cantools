@@ -47,7 +47,7 @@ Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]
 # Type aliases. Introduced to reduce type annotation complexity while
 # allowing for more complex encode/decode schemes like the one used
 # for AUTOSAR container messages.
-SignalValueType = Union[float, str, "NamedSignalValue"]
+SignalValueType = Union[int, float, str, "NamedSignalValue"]
 SignalDictType = Dict[str, SignalValueType]
 SignalMappingType = Mapping[str, SignalValueType]
 ContainerHeaderSpecType = Union["Message", str, int]

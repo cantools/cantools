@@ -512,7 +512,7 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
             {"raw": [0x01, 0xFF], "scaled": 2575.0},
         ]
         for payload in payloads:
-            decoded = test_did.decode(payload["raw"])
+            decoded = test_did.decode(bytes(payload["raw"]))
             self.assertAlmostEqual(payload["scaled"], decoded["PiecewiseData"], 10)
             encoded = test_did.encode({"PiecewiseData": payload["scaled"]})
             self.assertEqual(payload["raw"], list(encoded))

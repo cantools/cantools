@@ -147,11 +147,9 @@ class SignalBase:
         If data type only defines one set of offset/scaling then
         the `raw_val` param can be omitted
         """
-        assert not isinstance(self._offset, float) and not isinstance(self._scale, float)
-
         if raw_val is None or not self.segment_boundaries_raw:
             try:
-                return self._offset[0], self._scale[0]
+                return self._offset[0], self._scale[0]  # type: ignore
             except TypeError:
                 return self.offset, self.scale
 
@@ -176,7 +174,7 @@ class SignalBase:
         )
 
     @property
-    def offset(self):
+    def offset(self) -> float:
         """Return first or only offset element"""
         if isinstance(self._offset, list):
             return self._offset[0]
@@ -189,7 +187,7 @@ class SignalBase:
         self._offset = new_offset
 
     @property
-    def scale(self):
+    def scale(self) -> float:
         """Return first or only scale element"""
         if isinstance(self._scale, list):
             return self._scale[0]

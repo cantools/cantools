@@ -36,9 +36,9 @@ def _do_generate_c_source(args):
         args.node)
 
     os.makedirs(args.output_directory, exist_ok=True)
-    
+
     path_h = os.path.join(args.output_directory, filename_h)
-    
+
     with open(path_h, 'w') as fout:
         fout.write(header)
 

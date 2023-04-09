@@ -1331,7 +1331,7 @@ def _load_signals(tokens,
 
         try:
             return comments[frame_id_dbc]['signal'][signal]
-        except:
+        except KeyError:
             return None
 
     def get_choices(frame_id_dbc, signal):
@@ -1520,7 +1520,7 @@ def _load_messages(tokens,
 
         try:
             return comments[frame_id_dbc]['message']
-        except:
+        except KeyError:
             return None
 
     def get_send_type(frame_id_dbc):
@@ -1535,7 +1535,7 @@ def _load_messages(tokens,
             result = message_attributes['GenMsgSendType'].value
 
             # if definitions is enum (otherwise above value is maintained) -> Prevents ValueError
-            if definitions['GenMsgSendType'].choices != None:
+            if definitions['GenMsgSendType'].choices is not None:
                 # Resolve ENUM index to ENUM text
                 result = definitions['GenMsgSendType'].choices[int(result)]
         except (KeyError, TypeError):
@@ -1595,7 +1595,7 @@ def _load_messages(tokens,
     def get_signal_groups(frame_id_dbc):
         try:
             return signal_groups[frame_id_dbc]
-        except:
+        except KeyError:
             return None
 
     messages = []

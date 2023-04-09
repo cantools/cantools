@@ -294,7 +294,7 @@ def _do_list_messages(can_db: Database,
         for message_name in message_names:
             try:
                 message = can_db.get_message_by_name(message_name)
-            except:
+            except KeyError:
                 print(f'No message named "{message_name}" has been found in input file.')
                 continue
 

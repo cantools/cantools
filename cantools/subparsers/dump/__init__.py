@@ -106,7 +106,7 @@ def _dump_can_database(dbase, with_comments=False):
     WIDTH = 80
     try:
         WIDTH, _ = os.get_terminal_size()
-    except:
+    except OSError:
         pass
 
     print('================================= Messages =================================')

@@ -805,7 +805,7 @@ def _dump_choices(database: InternalDatabase) -> str:
                 new_choice = _dump_choice(signal)
                 if new_choice:
                     choices.append(new_choice)
-    
+
     if choices:
         return '{ENUMS}\n' + '\n'.join(choices)
     else:
@@ -942,7 +942,7 @@ def _dump_messages(database: InternalDatabase) -> str:
             for signal_tree_signal in message.signal_tree:
                 if not isinstance(signal_tree_signal, collections.abc.Mapping):
                     non_multiplexed_signals.append(signal_tree_signal)
-            
+
             for signal_tree_signal in message.signal_tree:
                 if isinstance(signal_tree_signal, collections.abc.Mapping):
                     signal_name, multiplexed_signals = list(signal_tree_signal.items())[0]
@@ -953,14 +953,14 @@ def _dump_messages(database: InternalDatabase) -> str:
                         is_first_message = False
         else:
             message_dumps.append(_dump_message(message, message.signals, min_frame_id, max_frame_id))
-        
+
         if message.senders == [SEND_MESSAGE_SENDER]:
             send_messages.extend(message_dumps)
         elif message.senders == [RECEIVE_MESSAGE_SENDER]:
             receive_messages.extend(message_dumps)
         else:
             send_receive_messages.extend(message_dumps)
-    
+
     messages_dump = ''
     if send_messages:
         messages_dump += '{SEND}\n' + '\n'.join(send_messages) + '\n'
@@ -976,7 +976,7 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
     """
     if sort_signals == SORT_SIGNALS_DEFAULT:
         sort_signals = sort_signals_by_start_bit
-        
+
     sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
     sym_str += 'Title="SYM Database"\n\n'
 

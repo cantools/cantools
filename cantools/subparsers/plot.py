@@ -140,7 +140,8 @@ class TimestampParser:
         elif self.use_timestamp:
             parse = self.parse_user_input_absolute_time
         else:
-            parse = lambda s,x0: int(s)
+            def parse(s, _x0):
+                return int(s)
 
         if self.args.start is not None:
             self.args.start = parse(self.args.start, x0)
@@ -152,7 +153,7 @@ class TimestampParser:
     def parse_user_input_relative_time(self, user_input, first_timestamp):
         try:
             return float(user_input)
-        except:
+        except ValueError:
             pass
 
         patterns_hour = ['%H:%M:', '%H:%M:%S', '%H:%M:%S.%f']
@@ -663,11 +664,12 @@ class Signals:
                     if isinstance(x[0], float):
                         splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
                     axis_format_uninitialized = False
-                l = getattr(splot, sgo.plt_func)(x, y, sgo.fmt, label=signal_name)
+                plt_func = getattr(splot, sgo.plt_func)
+                container = plt_func(x, y, sgo.fmt, label=signal_name)
                 color = self.subplot_args[(sgo.subplot, sgo.axis)].color
                 if color is not None and self.contains_no_color(sgo.fmt):
-                    for p in l:
-                        p.set_color(color)
+                    for line in container:
+                        line.set_color(color)
                 plotted = True
 
             if not plotted:
@@ -759,7 +761,13 @@ class Signal:
 
     # ------- initialization -------
 
-    def __init__(self, reo, subplot, axis, plt_func, fmt):
+    def __init__(
+        self, reo: "re.Pattern[str]",
+        subplot: int,
+        axis: int,
+        plt_func: str,
+        fmt: str,
+    ) -> None:
         self.reo = reo
         self.subplot = subplot
         self.axis = axis

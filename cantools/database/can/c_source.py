@@ -1392,7 +1392,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                 is_receiver = True
 
             signal_declaration = ''
-            
+
             if floating_point_numbers:
                 if is_sender:
                     signal_declaration += SIGNAL_DECLARATION_ENCODE_FMT.format(
@@ -1415,7 +1415,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                     message_name=message.snake_name,
                     signal_name=signal.snake_name,
                     type_name=signal.type_name)
-                
+
                 signal_declarations.append(signal_declaration)
         declaration = ""
         if is_sender:
@@ -1451,7 +1451,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                                                    _generate_is_in_range(message)):
             if _is_receiver(signal, node_name):
                 is_receiver = True
-            
+
             if check == 'true':
                 unused = '    (void)value;\n\n'
             else:
@@ -1625,13 +1625,13 @@ def generate(database,
     numbers in the generated code.
 
     Set `bit_fields` to ``True`` to generate bit fields in structs.
-    
+
     Set `use_float` to ``True`` to prefer the `float` type instead
     of the `double` type for floating point numbers.
 
     `node_name` specifies the node for which message packers will be generated.
     For all other messages, unpackers will be generated. If `node_name` is not
-    provided, both packers and unpackers will be generated. 
+    provided, both packers and unpackers will be generated.
 
     This function returns a tuple of the C header and source files as
     strings.

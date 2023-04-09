@@ -64,7 +64,7 @@ def _load_signal_element(signal, nodes):
     notes = None
     receivers = []
     decimal = SignalDecimal(Decimal(slope), Decimal(intercept))
-    
+
     # Signal XML attributes.
     for key, value in signal.attrib.items():
         if key == 'name':

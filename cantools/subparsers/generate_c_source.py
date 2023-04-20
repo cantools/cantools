@@ -34,7 +34,7 @@ def _do_generate_c_source(args):
         args.bit_fields,
         args.use_float,
         args.node,
-        args.signal_name_defines
+        args.include_signal_names
     )
 
     os.makedirs(args.output_directory, exist_ok=True)
@@ -122,5 +122,6 @@ def add_subparser(subparsers):
     generate_c_source_parser.add_argument(
         '--include_signal_names',
         default=False,
+        action='store_true',
         help='Include #defines for signal names.')
     generate_c_source_parser.set_defaults(func=_do_generate_c_source)

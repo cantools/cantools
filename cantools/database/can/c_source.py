@@ -65,6 +65,9 @@ extern "C" {{
 /* Signal choices. */
 {choices_defines}
 
+/* Signal Names. */
+{signal_name_defines}
+
 {structs}
 {declarations}
 
@@ -1671,9 +1674,9 @@ def generate(database,
         node_name)
     choices_defines = _generate_choices_defines(database_name, messages, node_name)
 
-    signal_name_defines = ''
-    if include_signal_name_defines:
-        signal_name_defines = _generate_signal_name_defines(database_name, messages, node_name)
+    # signal_name_defines = ''
+    # if include_signal_name_defines:
+    signal_name_defines = _generate_signal_name_defines(database_name, messages, node_name)
 
 
     structs = _generate_structs(database_name, messages, bit_fields, node_name)

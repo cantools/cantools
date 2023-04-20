@@ -1350,6 +1350,19 @@ def _generate_choices_defines(database_name, messages, node_name):
     return '\n\n'.join(choices_defines)
 
 
+def _generate_signal_name_defines(database_name, messages, node_name):
+    result = '\n'.join([
+        '#define {}_{}_{} "{}"'.format(
+            database_name.upper(),
+            message.snake_name.upper(),
+            signal.snake_name.upper(),
+            signal.name)
+        for message in messages if _is_sender_or_receiver(message, node_name) for signal in message.signals
+    ])
+
+    return result
+
+
 def _generate_structs(database_name, messages, bit_fields, node_name):
     structs = []
 
@@ -1606,7 +1619,8 @@ def generate(database,
              floating_point_numbers=True,
              bit_fields=False,
              use_float=False,
-             node_name=None):
+             node_name=None,
+             signal_defines=False):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1633,6 +1647,8 @@ def generate(database,
     For all other messages, unpackers will be generated. If `node_name` is not
     provided, both packers and unpackers will be generated.
 
+    Set `signal_defines` to ``True`` to general #defines for all signal names.
+
     This function returns a tuple of the C header and source files as
     strings.
 
@@ -1654,6 +1670,9 @@ def generate(database,
         messages,
         node_name)
     choices_defines = _generate_choices_defines(database_name, messages, node_name)
+
+    signal_name_defines = _generate_signal_name_defines(database_name, messages, node_name)
+
     structs = _generate_structs(database_name, messages, bit_fields, node_name)
     declarations = _generate_declarations(database_name,
                                           messages,
@@ -1675,6 +1694,7 @@ def generate(database,
                                is_extended_frame_defines=is_extended_frame_defines,
                                frame_cycle_time_defines=frame_cycle_time_defines,
                                choices_defines=choices_defines,
+                               signal_name_defines=signal_name_defines,
                                structs=structs,
                                declarations=declarations)
 

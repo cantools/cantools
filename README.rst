@@ -345,14 +345,14 @@ See `motohawk_no_floating_point_numbers.h`_ and
 generated files.
 
 In this example we use ``--include_signal_names`` to generate
-``#define`` for the CAN Frame Signale names.
+``#define`` definitions for the CAN Frame Signal names.
 
 .. code-block:: text
 
    $ python3 -m cantools generate_c_source --include_signal_names tests/files/dbc/motohawk.dbc
    Successfully generated motohawk.h and motohawk.c.
 
-See `motohawk_include_signal_names.h`_ for the Signal name ``#define``.
+See `motohawk_include_signal_names.h`_ for the Signal name ``#define`` definitions.
 
 In the last example ``--node`` is used to generate
 message pack functions only for messages sent by the specified node and unpack

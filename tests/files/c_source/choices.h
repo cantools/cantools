@@ -69,7 +69,7 @@ extern "C" {
 #define CHOICES_FOO_NAME "Foo"
 
 /* Signal Names. */
-#define CHOICES_FOO_FOO "Foo"
+#define CHOICES_FOO_FOO_NAME "Foo"
 
 /**
  * Signals in message Foo.

@@ -1370,7 +1370,7 @@ def _generate_frame_name_macros(database_name, messages, node_name):
 
 def _generate_signal_name_macros(database_name, messages, node_name):
     result = '\n'.join([
-        '#define {}_{}_{} "{}"'.format(
+        '#define {}_{}_{}_NAME "{}"'.format(
             database_name.upper(),
             message.snake_name.upper(),
             signal.snake_name.upper(),

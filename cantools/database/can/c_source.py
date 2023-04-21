@@ -1688,10 +1688,10 @@ def generate(database,
         node_name)
     choices_defines = _generate_choices_defines(database_name, messages, node_name)
 
-    name_macros = ''
-    if generate_signal_name_macros:
-        name_macros = _generate_frame_name_macros(database_name, messages, node_name) + \
-                      _generate_signal_name_macros(database_name, messages, node_name)
+    # name_macros = ''
+    # if generate_signal_name_macros:
+    name_macros = _generate_frame_name_macros(database_name, messages, node_name) + \
+                  _generate_signal_name_macros(database_name, messages, node_name)
 
     structs = _generate_structs(database_name, messages, bit_fields, node_name)
     declarations = _generate_declarations(database_name,

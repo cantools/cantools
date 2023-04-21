@@ -58,6 +58,23 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define MULTIPLEX_MESSAGE1_NAME "Message1"
+
+/* Signal Names. */
+#define MULTIPLEX_MESSAGE1_MULTIPLEXOR "Multiplexor"
+#define MULTIPLEX_MESSAGE1_BIT_J "BIT_J"
+#define MULTIPLEX_MESSAGE1_BIT_C "BIT_C"
+#define MULTIPLEX_MESSAGE1_BIT_G "BIT_G"
+#define MULTIPLEX_MESSAGE1_BIT_L "BIT_L"
+#define MULTIPLEX_MESSAGE1_BIT_A "BIT_A"
+#define MULTIPLEX_MESSAGE1_BIT_K "BIT_K"
+#define MULTIPLEX_MESSAGE1_BIT_E "BIT_E"
+#define MULTIPLEX_MESSAGE1_BIT_D "BIT_D"
+#define MULTIPLEX_MESSAGE1_BIT_B "BIT_B"
+#define MULTIPLEX_MESSAGE1_BIT_H "BIT_H"
+#define MULTIPLEX_MESSAGE1_BIT_F "BIT_F"
+
 /**
  * Signals in message Message1.
  *

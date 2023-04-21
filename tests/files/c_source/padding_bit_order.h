@@ -70,6 +70,28 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define PADDING_BIT_ORDER_MSG0_NAME "MSG0"
+#define PADDING_BIT_ORDER_MSG1_NAME "MSG1"
+#define PADDING_BIT_ORDER_MSG2_NAME "MSG2"
+#define PADDING_BIT_ORDER_MSG3_NAME "MSG3"
+#define PADDING_BIT_ORDER_MSG4_NAME "MSG4"
+
+/* Signal Names. */
+#define PADDING_BIT_ORDER_MSG0_B "B"
+#define PADDING_BIT_ORDER_MSG0_A "A"
+#define PADDING_BIT_ORDER_MSG0_D "D"
+#define PADDING_BIT_ORDER_MSG0_C "C"
+#define PADDING_BIT_ORDER_MSG1_E "E"
+#define PADDING_BIT_ORDER_MSG1_F "F"
+#define PADDING_BIT_ORDER_MSG1_G "G"
+#define PADDING_BIT_ORDER_MSG1_H "H"
+#define PADDING_BIT_ORDER_MSG2_I "I"
+#define PADDING_BIT_ORDER_MSG2_J "J"
+#define PADDING_BIT_ORDER_MSG2_K "K"
+#define PADDING_BIT_ORDER_MSG3_L "L"
+#define PADDING_BIT_ORDER_MSG4_M "M"
+
 /**
  * Signals in message MSG0.
  *

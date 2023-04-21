@@ -61,6 +61,15 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define FLOATING_POINT_MESSAGE1_NAME "Message1"
+#define FLOATING_POINT_MESSAGE2_NAME "Message2"
+
+/* Signal Names. */
+#define FLOATING_POINT_MESSAGE1_SIGNAL1 "Signal1"
+#define FLOATING_POINT_MESSAGE2_SIGNAL1 "Signal1"
+#define FLOATING_POINT_MESSAGE2_SIGNAL2 "Signal2"
+
 /**
  * Signals in message Message1.
  *

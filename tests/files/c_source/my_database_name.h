@@ -59,6 +59,14 @@ extern "C" {
 #define MY_DATABASE_NAME_EXAMPLE_MESSAGE_ENABLE_DISABLED_CHOICE (0u)
 #define MY_DATABASE_NAME_EXAMPLE_MESSAGE_ENABLE_ENABLED_CHOICE (1u)
 
+/* Frame Names. */
+#define MY_DATABASE_NAME_EXAMPLE_MESSAGE_NAME "ExampleMessage"
+
+/* Signal Names. */
+#define MY_DATABASE_NAME_EXAMPLE_MESSAGE_ENABLE "Enable"
+#define MY_DATABASE_NAME_EXAMPLE_MESSAGE_AVERAGE_RADIUS "AverageRadius"
+#define MY_DATABASE_NAME_EXAMPLE_MESSAGE_TEMPERATURE "Temperature"
+
 /**
  * Signals in message ExampleMessage.
  *

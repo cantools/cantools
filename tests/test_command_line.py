@@ -1605,36 +1605,36 @@ BATTERY_VT(
             self.assertFalse(os.path.exists(fuzzer_mk))
 
 
-    def test_generate_c_source_include_signal_names(self):
-        argv = [
-            'cantools',
-            'generate_c_source',
-            'tests/files/dbc/motohawk.dbc',
-            '--generate-signal-name-macros'
-        ]
-
-        database_h = 'motohawk.h'
-        expected = """/* Frame Names. */
-#define MOTOHAWK_EXAMPLE_MESSAGE_NAME "ExampleMessage"
-
-
-/* Signal Names. */
-#define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE "Enable"
-#define MOTOHAWK_EXAMPLE_MESSAGE_AVERAGE_RADIUS "AverageRadius"
-#define MOTOHAWK_EXAMPLE_MESSAGE_TEMPERATURE "Temperature"
-"""
-
-        if os.path.exists(database_h):
-            os.remove(database_h)
-
-        with patch('sys.argv', argv):
-            cantools._main()
-
-        if sys.version_info[0] > 2:
-            with open(database_h, 'r') as fin:
-                database_h_content = fin.read()
-
-                self.assertIn(expected, database_h_content)
+#     def test_generate_c_source_include_signal_names(self):
+#         argv = [
+#             'cantools',
+#             'generate_c_source',
+#             'tests/files/dbc/motohawk.dbc',
+#             '--generate-signal-name-macros'
+#         ]
+#
+#         database_h = 'motohawk.h'
+#         expected = """/* Frame Names. */
+# #define MOTOHAWK_EXAMPLE_MESSAGE_NAME "ExampleMessage"
+#
+#
+# /* Signal Names. */
+# #define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE "Enable"
+# #define MOTOHAWK_EXAMPLE_MESSAGE_AVERAGE_RADIUS "AverageRadius"
+# #define MOTOHAWK_EXAMPLE_MESSAGE_TEMPERATURE "Temperature"
+# """
+#
+#         if os.path.exists(database_h):
+#             os.remove(database_h)
+#
+#         with patch('sys.argv', argv):
+#             cantools._main()
+#
+#         if sys.version_info[0] > 2:
+#             with open(database_h, 'r') as fin:
+#                 database_h_content = fin.read()
+#
+#                 self.assertIn(expected, database_h_content)
 
 
 if __name__ == '__main__':

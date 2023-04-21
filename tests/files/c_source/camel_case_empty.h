@@ -58,6 +58,12 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define CAMEL_CASE_EMPTY_MESSAGE1_NAME "Message1"
+
+/* Signal Names. */
+
+
 /**
  * Signals in message Message1.
  *

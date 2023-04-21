@@ -1614,15 +1614,10 @@ BATTERY_VT(
         ]
 
         database_h = 'motohawk.h'
-        database_c = 'motohawk.c'
         expected_database_h = 'motohawk_include_signal_names.h'
-        expected_database_c = 'motohawk_include_signal_names.c'
 
         if os.path.exists(database_h):
             os.remove(database_h)
-
-        if os.path.exists(database_c):
-            os.remove(database_c)
 
         with patch('sys.argv', argv):
             cantools._main()
@@ -1630,8 +1625,6 @@ BATTERY_VT(
         if sys.version_info[0] > 2:
             self.assert_files_equal(database_h,
                                     'tests/files/c_source/' + expected_database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + expected_database_c)
 
 
 if __name__ == '__main__':

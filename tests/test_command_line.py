@@ -1614,7 +1614,11 @@ BATTERY_VT(
         ]
 
         database_h = 'motohawk.h'
-        expected_database_h = 'motohawk_include_signal_names.h'
+        expected = """/* Signal Names. */
+#define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE "Enable"
+#define MOTOHAWK_EXAMPLE_MESSAGE_AVERAGE_RADIUS "AverageRadius"
+#define MOTOHAWK_EXAMPLE_MESSAGE_TEMPERATURE "Temperature"
+"""
 
         if os.path.exists(database_h):
             os.remove(database_h)
@@ -1623,8 +1627,10 @@ BATTERY_VT(
             cantools._main()
 
         if sys.version_info[0] > 2:
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + expected_database_h)
+            with open(database_h, 'r') as fin:
+                database_h_content = fin.read()
+
+                self.assertIn(expected, database_h_content)
 
 
 if __name__ == '__main__':

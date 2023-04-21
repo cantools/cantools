@@ -65,6 +65,12 @@ extern "C" {{
 /* Signal choices. */
 {choices_defines}
 
+/* Frame Names. */
+{frame_name_macros}
+
+/* Signal Names. */
+{signal_name_macros}
+
 {structs}
 {declarations}
 
@@ -1350,6 +1356,31 @@ def _generate_choices_defines(database_name, messages, node_name):
     return '\n\n'.join(choices_defines)
 
 
+def _generate_frame_name_macros(database_name, messages, node_name):
+    result = '\n'.join([
+        '#define {}_{}_NAME "{}"'.format(
+            database_name.upper(),
+            message.snake_name.upper(),
+            message.name)
+        for message in messages if _is_sender_or_receiver(message, node_name)
+    ])
+
+    return result
+
+
+def _generate_signal_name_macros(database_name, messages, node_name):
+    result = '\n'.join([
+        '#define {}_{}_{}_NAME "{}"'.format(
+            database_name.upper(),
+            message.snake_name.upper(),
+            signal.snake_name.upper(),
+            signal.name)
+        for message in messages if _is_sender_or_receiver(message, node_name) for signal in message.signals
+    ])
+
+    return result
+
+
 def _generate_structs(database_name, messages, bit_fields, node_name):
     structs = []
 
@@ -1654,6 +1685,10 @@ def generate(database,
         messages,
         node_name)
     choices_defines = _generate_choices_defines(database_name, messages, node_name)
+
+    frame_name_macros = _generate_frame_name_macros(database_name, messages, node_name)
+    signal_name_macros = _generate_signal_name_macros(database_name, messages, node_name)
+
     structs = _generate_structs(database_name, messages, bit_fields, node_name)
     declarations = _generate_declarations(database_name,
                                           messages,
@@ -1675,6 +1710,8 @@ def generate(database,
                                is_extended_frame_defines=is_extended_frame_defines,
                                frame_cycle_time_defines=frame_cycle_time_defines,
                                choices_defines=choices_defines,
+                               frame_name_macros=frame_name_macros,
+                               signal_name_macros=signal_name_macros,
                                structs=structs,
                                declarations=declarations)
 

@@ -59,6 +59,14 @@ extern "C" {
 #define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE_DISABLED_CHOICE (0u)
 #define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE_ENABLED_CHOICE (1u)
 
+/* Frame Names. */
+#define MOTOHAWK_EXAMPLE_MESSAGE_NAME "ExampleMessage"
+
+/* Signal Names. */
+#define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE_NAME "Enable"
+#define MOTOHAWK_EXAMPLE_MESSAGE_AVERAGE_RADIUS_NAME "AverageRadius"
+#define MOTOHAWK_EXAMPLE_MESSAGE_TEMPERATURE_NAME "Temperature"
+
 /**
  * Signals in message ExampleMessage.
  *

@@ -58,6 +58,12 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define LETTER_TERMINATED_CAN_ID_6_0_SYMBOL1_NAME "Symbol1"
+
+/* Signal Names. */
+
+
 /**
  * Signals in message Symbol1.
  *

@@ -120,7 +120,7 @@ def add_subparser(subparsers):
         '--node',
         help='Generate pack/unpack functions only for messages sent/received by the node.')
     generate_c_source_parser.add_argument(
-        '--include_signal_names',
+        '--include-signal-names',
         default=False,
         action='store_true',
         help='Include #defines for signal names.')

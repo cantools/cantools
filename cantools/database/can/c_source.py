@@ -1315,7 +1315,7 @@ def _generate_frame_cycle_time_defines(database_name, messages, node_name):
             message.snake_name.upper(),
             message.cycle_time)
         for message in messages if message.cycle_time is not None and
-                                 _is_sender_or_receiver(message, node_name)
+                                _is_sender_or_receiver(message, node_name)
     ])
 
     return result

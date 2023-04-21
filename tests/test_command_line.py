@@ -44,9 +44,7 @@ def with_fake_screen_width(screen_width):
             # A test method doesn't return anything, but return anyway to be
             # completely transparent.
             return test_method_return
-
         return wrapper
-
     return decorator
 
 

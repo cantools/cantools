@@ -1614,7 +1614,11 @@ BATTERY_VT(
         ]
 
         database_h = 'motohawk.h'
-        expected = """/* Signal Names. */
+        expected = """/* Frame Names. */
+#define MOTOHAWK_EXAMPLE_MESSAGE_NAME "ExampleMessage"
+
+
+/* Signal Names. */
 #define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE "Enable"
 #define MOTOHAWK_EXAMPLE_MESSAGE_AVERAGE_RADIUS "AverageRadius"
 #define MOTOHAWK_EXAMPLE_MESSAGE_TEMPERATURE "Temperature"

@@ -344,16 +344,6 @@ See `motohawk_no_floating_point_numbers.h`_ and
 `motohawk_no_floating_point_numbers.c`_ for the contents of the
 generated files.
 
-In this example we use ``--generate-signal-name-macros`` to generate
-``#define`` definitions for the CAN Frame Signal names.
-
-.. code-block:: text
-
-   $ python3 -m cantools generate_c_source --generate-signal-name-macros tests/files/dbc/motohawk.dbc
-   Successfully generated motohawk.h and motohawk.c.
-
-See `motohawk_include_signal_names.h`_ for the Signal name ``#define`` definitions.
-
 In the last example ``--node`` is used to generate
 message pack functions only for messages sent by the specified node and unpack
 functions only for messages with its signal receivers belonging to that node. 

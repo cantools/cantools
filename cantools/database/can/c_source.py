@@ -64,7 +64,7 @@ extern "C" {{
 
 /* Signal choices. */
 {choices_defines}
-{signal_name_defines}
+{signal_name_macros}
 {structs}
 {declarations}
 
@@ -1350,7 +1350,7 @@ def _generate_choices_defines(database_name, messages, node_name):
     return '\n\n'.join(choices_defines)
 
 
-def _generate_signal_name_defines(database_name, messages, node_name):
+def _generate_signal_name_macros(database_name, messages, node_name):
     result = '\n/* Signal Names. */\n' + '\n'.join([
         '#define {}_{}_{} "{}"'.format(
             database_name.upper(),
@@ -1671,9 +1671,9 @@ def generate(database,
         node_name)
     choices_defines = _generate_choices_defines(database_name, messages, node_name)
 
-    signal_name_defines = ''
+    signal_name_macros = ''
     if generate_signal_name_macros:
-        signal_name_defines = _generate_signal_name_defines(database_name, messages, node_name)
+        signal_name_macros = _generate_signal_name_macros(database_name, messages, node_name)
 
 
     structs = _generate_structs(database_name, messages, bit_fields, node_name)
@@ -1697,7 +1697,7 @@ def generate(database,
                                is_extended_frame_defines=is_extended_frame_defines,
                                frame_cycle_time_defines=frame_cycle_time_defines,
                                choices_defines=choices_defines,
-                               signal_name_defines=signal_name_defines,
+                               signal_name_macros=signal_name_macros,
                                structs=structs,
                                declarations=declarations)
 

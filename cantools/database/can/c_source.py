@@ -1642,8 +1642,7 @@ def generate(database,
              floating_point_numbers=True,
              bit_fields=False,
              use_float=False,
-             node_name=None
-             ):
+             node_name=None):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1669,8 +1668,6 @@ def generate(database,
     `node_name` specifies the node for which message packers will be generated.
     For all other messages, unpackers will be generated. If `node_name` is not
     provided, both packers and unpackers will be generated.
-
-    Set `generate_signal_name_macros` to ``True`` to general #defines for all signal names.
 
     This function returns a tuple of the C header and source files as
     strings.

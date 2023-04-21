@@ -757,7 +757,7 @@ class Message:
     def __init__(self, message):
         self._message = message
         self.snake_name = camel_to_snake_case(self.name)
-        self.signals = [Signal(signal) for signal in message.signals]
+        self.signals = [Signal(signal)for signal in message.signals]
 
     def __getattr__(self, name):
         return getattr(self._message, name)
@@ -1315,7 +1315,7 @@ def _generate_frame_cycle_time_defines(database_name, messages, node_name):
             message.snake_name.upper(),
             message.cycle_time)
         for message in messages if message.cycle_time is not None and
-                                   _is_sender_or_receiver(message, node_name)
+                                 _is_sender_or_receiver(message, node_name)
     ])
 
     return result
@@ -1389,31 +1389,26 @@ def _generate_structs(database_name, messages, bit_fields, node_name):
             comment, members = _generate_struct(message, bit_fields)
             structs.append(
                 STRUCT_FMT.format(comment=comment,
-                                  database_message_name=message.name,
-                                  message_name=message.snake_name,
-                                  database_name=database_name,
-                                  members='\n\n'.join(members)))
+                                database_message_name=message.name,
+                                message_name=message.snake_name,
+                                database_name=database_name,
+                                members='\n\n'.join(members)))
 
     return '\n'.join(structs)
-
 
 def _is_sender(message, node_name):
     return node_name is None or node_name in message.senders
 
-
 def _is_receiver(signal, node_name):
     return node_name is None or node_name in signal.receivers
-
 
 def _is_sender_or_receiver(message, node_name):
     if _is_sender(message, node_name):
         return True
     return any(_is_receiver(signal, node_name) for signal in message.signals)
 
-
 def _get_floating_point_type(use_float):
     return 'float' if use_float else 'double'
-
 
 def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name):
     declarations = []

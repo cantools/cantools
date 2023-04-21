@@ -34,7 +34,7 @@ def _do_generate_c_source(args):
         args.bit_fields,
         args.use_float,
         args.node,
-        args.include_signal_names
+        args.generate_signal_name_macros
     )
 
     os.makedirs(args.output_directory, exist_ok=True)
@@ -120,8 +120,8 @@ def add_subparser(subparsers):
         '--node',
         help='Generate pack/unpack functions only for messages sent/received by the node.')
     generate_c_source_parser.add_argument(
-        '--include-signal-names',
+        '--generate-signal-name-macros',
         default=False,
         action='store_true',
-        help='Include #defines for signal names.')
+        help='Generate #defines for signal names.')
     generate_c_source_parser.set_defaults(func=_do_generate_c_source)

@@ -1610,7 +1610,7 @@ BATTERY_VT(
             'cantools',
             'generate_c_source',
             'tests/files/dbc/motohawk.dbc',
-            '--include-signal-names'
+            '--generate-signal-name-macros'
         ]
 
         database_h = 'motohawk.h'

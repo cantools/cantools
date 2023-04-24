@@ -403,6 +403,25 @@ SIGNAL_DECLARATION_IS_IN_RANGE_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
 '''
 
+MESSAGE_DECLARATION_INIT_FMT = '''\
+/**
+ * Init message fields to default values from {database_message_name}.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or negative error code.
+ */
+int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p);
+'''
+
+MESSAGE_DEFINITION_INIT_FMT = '''\
+int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p)
+{{
+    {init_body}
+    return 0;
+}}
+'''
+
 PACK_HELPER_LEFT_SHIFT_FMT = '''\
 static inline uint8_t pack_left_shift_u{length}(
     {var_type} value,
@@ -1428,6 +1447,10 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                                                          database_message_name=message.name,
                                                          message_name=message.snake_name)
 
+        declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
+                                                           database_message_name=message.name,
+                                                           message_name=message.snake_name)
+
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
 
@@ -1531,6 +1554,27 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
 
         if definition:
             definitions.append(definition)
+
+    for message in messages:
+        definition = ""
+        init_signals = ""
+        iter_number = 0
+        init_signal_body_template = "{type_name} tmp{ind} = {signal_default_value};\n\tmemcpy((void*)(&msg_p->{signal_name}), (void*)&tmp{ind}, {signal_default_length});\n\t"
+        for signal in message.signals:
+            init_signal_body = init_signal_body_template.format(type_name=signal.type_name,
+                                                                ind=iter_number,
+                                                                signal_default_value=signal.initial if signal.initial else 0,
+                                                                signal_name=signal.snake_name,
+                                                                signal_default_length=int(signal.type_length / 8)
+                                                                )
+            init_signals += init_signal_body
+            iter_number += 1
+
+        definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
+                                                         database_message_name=message.name,
+                                                         message_name=message.snake_name,
+                                                         init_body=init_signals)
+        definitions.append(definition)
 
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)
 

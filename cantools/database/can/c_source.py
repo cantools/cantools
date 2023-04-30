@@ -416,8 +416,9 @@ int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t 
 MESSAGE_DEFINITION_INIT_FMT = '''\
 int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p)
 {{
-    {init_body}
-    return 0;
+    if (msg_p == NULL) return -1;
+    
+    {init_body}return 0;
 }}
 '''
 
@@ -1562,11 +1563,9 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
     for message in messages:
         definition = ""
         init_signals = ""
-        init_signal_body_template = "if (msg_p == NULL) return -1;\n\t" \
-                                    "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
+        init_signal_body_template = "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
                                     "memcpy((void*)(&msg_p->{signal_name}), " \
-                                    "(void*)&tmp_{signal_name}, {signal_data_length});\n\t"
-        init_signal_empty_body_template = "if (msg_p == NULL) return -1;\n\t"
+                                    "(void*)&tmp_{signal_name}, {signal_data_length});\n\n\t"
         for signal in message.signals:
             init_signals += init_signal_body_template.format(type_name=signal.type_name,
                                                              signal_initial=signal.initial,
@@ -1577,8 +1576,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
         definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
                                                          database_message_name=message.name,
                                                          message_name=message.snake_name,
-                                                         init_body=init_signal_empty_body_template if init_signals == ""
-                                                                                                    else init_signals)
+                                                         init_body=init_signals)
         definitions.append(definition)
 
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)

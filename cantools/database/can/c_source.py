@@ -496,6 +496,7 @@ int {database_name}_{message_name}_unpack(
 {unpack_body}
     return (0);
 }}
+
 '''
 
 SIGNAL_DEFINITION_ENCODE_FMT = '''\
@@ -1470,11 +1471,15 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
     definitions = []
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
+    init_signal_body_template = "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
+                                "memcpy((void*)(&msg_p->{signal_name}), " \
+                                "(void*)&tmp_{signal_name}, {signal_data_length});\n\n\t"
 
     for message in messages:
         signal_definitions = []
         is_sender = _is_sender(message, node_name)
         is_receiver = node_name is None
+        signals_init_body = ''
 
         for signal, (encode, decode), check in zip(message.signals,
                                                    _generate_encode_decode(message, use_float),
@@ -1518,6 +1523,12 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
 
                 signal_definitions.append(signal_definition)
 
+            signals_init_body += init_signal_body_template.format(type_name=signal.type_name,
+                                                                  signal_initial=signal.initial,
+                                                                  signal_name=signal.snake_name,
+                                                                  signal_data_length=int(signal.type_length / 8)
+                                                                  ) if signal.initial is not None else ""
+
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,
                                                           pack_helper_kinds)
@@ -1551,6 +1562,12 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                                                            unpack_unused=unpack_unused,
                                                            unpack_variables=unpack_variables,
                                                            unpack_body=unpack_body)
+
+            definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
+                                                             database_message_name=message.name,
+                                                             message_name=message.snake_name,
+                                                             init_body=signals_init_body)
+
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                      message_name=message.snake_name)
@@ -1560,25 +1577,6 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
 
         if definition:
             definitions.append(definition)
-
-    for message in messages:
-        definition = ""
-        init_signals = ""
-        init_signal_body_template = "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
-                                    "memcpy((void*)(&msg_p->{signal_name}), " \
-                                    "(void*)&tmp_{signal_name}, {signal_data_length});\n\n\t"
-        for signal in message.signals:
-            init_signals += init_signal_body_template.format(type_name=signal.type_name,
-                                                             signal_initial=signal.initial,
-                                                             signal_name=signal.snake_name,
-                                                             signal_data_length=int(signal.type_length / 8)
-                                                             ) if signal.initial is not None else ""
-
-        definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
-                                                         database_message_name=message.name,
-                                                         message_name=message.snake_name,
-                                                         init_body=init_signals)
-        definitions.append(definition)
 
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)
 

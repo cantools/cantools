@@ -408,7 +408,7 @@ MESSAGE_DECLARATION_INIT_FMT = '''\
  *
  * @param[in] msg_p Message to init.
  *
- * @return zero(0) on success or negative error code.
+ * @return zero(0) on success or (-1) in case of nullptr argument.
  */
 int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p);
 '''
@@ -1566,7 +1566,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                                     "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
                                     "memcpy((void*)(&msg_p->{signal_name}), " \
                                     "(void*)&tmp_{signal_name}, {signal_data_length});\n\t"
-        init_signal_empty_body_template = "(void)msg_p\n\t"
+        init_signal_empty_body_template = "if (msg_p == NULL) return -1;\n\t"
         for signal in message.signals:
             init_signals += init_signal_body_template.format(type_name=signal.type_name,
                                                              signal_initial=signal.initial,

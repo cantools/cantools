@@ -1562,16 +1562,17 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
     for message in messages:
         definition = ""
         init_signals = ""
-        init_signal_body_template = "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
+        init_signal_body_template = "if (msg_p == NULL) return -1;\n\t" \
+                                    "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
                                     "memcpy((void*)(&msg_p->{signal_name}), " \
                                     "(void*)&tmp_{signal_name}, {signal_data_length});\n\t"
-        init_signal_empty_body_template = "(void)msg_p"
+        init_signal_empty_body_template = "(void)msg_p\n\t"
         for signal in message.signals:
             init_signals += init_signal_body_template.format(type_name=signal.type_name,
                                                              signal_initial=signal.initial,
                                                              signal_name=signal.snake_name,
                                                              signal_data_length=int(signal.type_length / 8)
-                                                             ) if signal.initial else ""
+                                                             ) if signal.initial is not None else ""
 
         definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
                                                          database_message_name=message.name,

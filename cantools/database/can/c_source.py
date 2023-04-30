@@ -4,7 +4,6 @@ from decimal import Decimal
 
 from ...version import __version__
 
-
 HEADER_FMT = '''\
 /**
  * The MIT License (MIT)
@@ -771,7 +770,7 @@ class Message(object):
     def __init__(self, message):
         self._message = message
         self.snake_name = camel_to_snake_case(self.name)
-        self.signals = [Signal(signal)for signal in message.signals]
+        self.signals = [Signal(signal) for signal in message.signals]
 
     def __getattr__(self, name):
         return getattr(self._message, name)
@@ -1329,7 +1328,7 @@ def _generate_frame_cycle_time_defines(database_name, messages, node_name):
             message.snake_name.upper(),
             message.cycle_time)
         for message in messages if message.cycle_time is not None and
-                                _is_sender_or_receiver(message, node_name)
+                                   _is_sender_or_receiver(message, node_name)
     ])
 
     return result
@@ -1378,26 +1377,31 @@ def _generate_structs(database_name, messages, bit_fields, node_name):
             comment, members = _generate_struct(message, bit_fields)
             structs.append(
                 STRUCT_FMT.format(comment=comment,
-                                database_message_name=message.name,
-                                message_name=message.snake_name,
-                                database_name=database_name,
-                                members='\n\n'.join(members)))
+                                  database_message_name=message.name,
+                                  message_name=message.snake_name,
+                                  database_name=database_name,
+                                  members='\n\n'.join(members)))
 
     return '\n'.join(structs)
+
 
 def _is_sender(message, node_name):
     return node_name is None or node_name in message.senders
 
+
 def _is_receiver(signal, node_name):
     return node_name is None or node_name in signal.receivers
+
 
 def _is_sender_or_receiver(message, node_name):
     if _is_sender(message, node_name):
         return True
     return any(_is_receiver(signal, node_name) for signal in message.signals)
 
+
 def _get_floating_point_type(use_float):
     return 'float' if use_float else 'double'
+
 
 def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name):
     declarations = []
@@ -1412,7 +1416,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                 is_receiver = True
 
             signal_declaration = ''
-            
+
             if floating_point_numbers:
                 if is_sender:
                     signal_declaration += SIGNAL_DECLARATION_ENCODE_FMT.format(
@@ -1435,7 +1439,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                     message_name=message.snake_name,
                     signal_name=signal.snake_name,
                     type_name=signal.type_name)
-                
+
                 signal_declarations.append(signal_declaration)
         declaration = ""
         if is_sender:
@@ -1475,7 +1479,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                                                    _generate_is_in_range(message)):
             if _is_receiver(signal, node_name):
                 is_receiver = True
-            
+
             if check == 'true':
                 unused = '    (void)value;\n\n'
             else:
@@ -1558,22 +1562,22 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
     for message in messages:
         definition = ""
         init_signals = ""
-        iter_number = 0
-        init_signal_body_template = "{type_name} tmp{ind} = {signal_default_value};\n\tmemcpy((void*)(&msg_p->{signal_name}), (void*)&tmp{ind}, {signal_default_length});\n\t"
+        init_signal_body_template = "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
+                                    "memcpy((void*)(&msg_p->{signal_name}), " \
+                                    "(void*)&tmp_{signal_name}, {signal_data_length});\n\t"
+        init_signal_empty_body_template = "(void)msg_p"
         for signal in message.signals:
-            init_signal_body = init_signal_body_template.format(type_name=signal.type_name,
-                                                                ind=iter_number,
-                                                                signal_default_value=signal.initial if signal.initial else 0,
-                                                                signal_name=signal.snake_name,
-                                                                signal_default_length=int(signal.type_length / 8)
-                                                                )
-            init_signals += init_signal_body
-            iter_number += 1
+            init_signals += init_signal_body_template.format(type_name=signal.type_name,
+                                                             signal_initial=signal.initial if signal.initial else 0,
+                                                             signal_name=signal.snake_name,
+                                                             signal_data_length=int(signal.type_length / 8)
+                                                             )
 
         definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
                                                          database_message_name=message.name,
                                                          message_name=message.snake_name,
-                                                         init_body=init_signals)
+                                                         init_body=init_signal_empty_body_template if init_signals == ""
+                                                                                                    else init_signals)
         definitions.append(definition)
 
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)

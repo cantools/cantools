@@ -1568,10 +1568,10 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
         init_signal_empty_body_template = "(void)msg_p"
         for signal in message.signals:
             init_signals += init_signal_body_template.format(type_name=signal.type_name,
-                                                             signal_initial=signal.initial if signal.initial else 0,
+                                                             signal_initial=signal.initial,
                                                              signal_name=signal.snake_name,
                                                              signal_data_length=int(signal.type_length / 8)
-                                                             )
+                                                             ) if signal.initial else ""
 
         definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
                                                          database_message_name=message.name,

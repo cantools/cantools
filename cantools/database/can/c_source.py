@@ -417,6 +417,7 @@ MESSAGE_DEFINITION_INIT_FMT = '''\
 int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p)
 {{
     if (msg_p == NULL) return -1;
+    memset(msg_p, 0, sizeof(msg_p));
     
     {init_body}return 0;
 }}

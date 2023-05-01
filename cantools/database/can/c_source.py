@@ -365,6 +365,7 @@ int {database_name}_{message_name}_unpack(
     struct {database_name}_{message_name}_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
 '''
 
 SIGNAL_DECLARATION_ENCODE_FMT = '''\
@@ -418,7 +419,7 @@ int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t 
 {{
     if (msg_p == NULL) return -1;
     memset(msg_p, 0, sizeof(struct {database_name}_{message_name}_t));
-    
+
     {init_body}return 0;
 }}
 '''

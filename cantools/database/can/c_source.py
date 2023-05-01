@@ -1472,8 +1472,8 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
     init_signal_body_template = "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
-                                "memcpy((void*)(&msg_p->{signal_name}), " \
-                                "(void*)&tmp_{signal_name}, {signal_data_length});\n\n\t"
+                                "memcpy((void*)(&msg_p->{signal_name}),\n\t\t   " \
+                                "(void*)&tmp_{signal_name},\n\t\t   sizeof({type_name}));\n\n\t"
 
     for message in messages:
         signal_definitions = []

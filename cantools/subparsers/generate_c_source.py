@@ -34,7 +34,8 @@ def _do_generate_c_source(args):
         not args.no_floating_point_numbers,
         args.bit_fields,
         args.use_float,
-        args.node)
+        args.node,
+        args.add_initializers)
 
     os.makedirs(args.output_directory, exist_ok=True)
     
@@ -118,4 +119,8 @@ def add_subparser(subparsers):
     generate_c_source_parser.add_argument(
         '--node',
         help='Generate pack/unpack functions only for messages sent/received by the node.')
+    generate_c_source_parser.add_argument(
+        '--add-initializers',
+        action='store_true',
+        help='Generate initialization functions with initial signal values from database for every message.')
     generate_c_source_parser.set_defaults(func=_do_generate_c_source)

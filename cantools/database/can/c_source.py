@@ -1407,7 +1407,7 @@ def _get_floating_point_type(use_float):
     return 'float' if use_float else 'double'
 
 
-def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name):
+def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name, add_initializers):
     declarations = []
 
     for message in messages:
@@ -1455,9 +1455,10 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                                                          database_message_name=message.name,
                                                          message_name=message.snake_name)
 
-        declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
-                                                           database_message_name=message.name,
-                                                           message_name=message.snake_name)
+        if add_initializers:
+            declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
+                                                               database_message_name=message.name,
+                                                               message_name=message.snake_name)
 
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
@@ -1468,7 +1469,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
     return '\n'.join(declarations)
 
 
-def _generate_definitions(database_name, messages, floating_point_numbers, use_float, node_name):
+def _generate_definitions(database_name, messages, floating_point_numbers, use_float, node_name, add_initializers):
     definitions = []
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
@@ -1524,11 +1525,12 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
 
                 signal_definitions.append(signal_definition)
 
-            signals_init_body += init_signal_body_template.format(type_name=signal.type_name,
-                                                                  signal_initial=signal.initial,
-                                                                  signal_name=signal.snake_name,
-                                                                  signal_data_length=int(signal.type_length / 8)
-                                                                  ) if signal.initial is not None else ""
+            if add_initializers:
+                signals_init_body += init_signal_body_template.format(type_name=signal.type_name,
+                                                                      signal_initial=signal.initial,
+                                                                      signal_name=signal.snake_name,
+                                                                      signal_data_length=int(signal.type_length / 8)
+                                                                      ) if signal.initial is not None else ""
 
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,
@@ -1564,10 +1566,11 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                                                            unpack_variables=unpack_variables,
                                                            unpack_body=unpack_body)
 
-            definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
-                                                             database_message_name=message.name,
-                                                             message_name=message.snake_name,
-                                                             init_body=signals_init_body)
+            if add_initializers:
+                definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
+                                                                 database_message_name=message.name,
+                                                                 message_name=message.snake_name,
+                                                                 init_body=signals_init_body)
 
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
@@ -1654,7 +1657,8 @@ def generate(database,
              floating_point_numbers=True,
              bit_fields=False,
              use_float=False,
-             node_name=None):
+             node_name=None,
+             add_initializers=None):
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data
@@ -1707,12 +1711,14 @@ def generate(database,
                                           messages,
                                           floating_point_numbers,
                                           use_float,
-                                          node_name)
+                                          node_name,
+                                          add_initializers)
     definitions, helper_kinds = _generate_definitions(database_name,
                                                       messages,
                                                       floating_point_numbers,
                                                       use_float,
-                                                      node_name)
+                                                      node_name,
+                                                      add_initializers)
     helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(version=__version__,

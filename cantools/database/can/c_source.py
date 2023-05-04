@@ -420,7 +420,7 @@ int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t 
     if (msg_p == NULL) return -1;
     memset(msg_p, 0, sizeof(struct {database_name}_{message_name}_t));
 
-    {init_body}return 0;
+{init_body}    return 0;
 }}
 '''
 
@@ -565,6 +565,14 @@ SIGNAL_MEMBER_FMT = '''\
      * Offset: {offset}
      */
     {type_name} {name}{length};\
+'''
+
+INIT_SIGNAL_BODY_TEMPLATE_FMT = '''\
+    {type_name} tmp_{signal_name} = {signal_initial};
+    memcpy((void*)(&msg_p->{signal_name}),
+           (void*)&tmp_{signal_name},
+           sizeof({type_name}));
+
 '''
 
 
@@ -1473,9 +1481,6 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
     definitions = []
     pack_helper_kinds = set()
     unpack_helper_kinds = set()
-    init_signal_body_template = "{type_name} tmp_{signal_name} = {signal_initial};\n\t" \
-                                "memcpy((void*)(&msg_p->{signal_name}),\n\t\t   " \
-                                "(void*)&tmp_{signal_name},\n\t\t   sizeof({type_name}));\n\n\t"
 
     for message in messages:
         signal_definitions = []
@@ -1528,11 +1533,11 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
             if add_initializers and signal.initial:
                 init_value = float(signal.initial) * signal.scale + signal.offset
                 init_value = int(init_value) if not signal.is_float else float(init_value)
-                signals_init_body += init_signal_body_template.format(type_name=signal.type_name,
-                                                                      signal_initial=init_value,
-                                                                      signal_name=signal.snake_name,
-                                                                      signal_data_length=int(signal.type_length / 8)
-                                                                      )
+                signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(type_name=signal.type_name,
+                                                                          signal_initial=init_value,
+                                                                          signal_name=signal.snake_name,
+                                                                          signal_data_length=int(signal.type_length / 8)
+                                                                          )
 
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,

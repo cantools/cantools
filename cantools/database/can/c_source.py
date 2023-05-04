@@ -1525,12 +1525,14 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
 
                 signal_definitions.append(signal_definition)
 
-            if add_initializers:
+            if add_initializers and signal.initial:
+                init_value = float(signal.initial) * signal.scale + signal.offset
+                init_value = int(init_value) if not signal.is_float else float(init_value)
                 signals_init_body += init_signal_body_template.format(type_name=signal.type_name,
-                                                                      signal_initial=signal.initial,
+                                                                      signal_initial=init_value,
                                                                       signal_name=signal.snake_name,
                                                                       signal_data_length=int(signal.type_length / 8)
-                                                                      ) if signal.initial is not None else ""
+                                                                      )
 
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,

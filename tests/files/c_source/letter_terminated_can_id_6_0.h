@@ -104,6 +104,15 @@ int letter_terminated_can_id_6_0_symbol1_unpack(
     const uint8_t *src_p,
     size_t size);
 
+/**
+ * Init message fields to default values from Symbol1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int letter_terminated_can_id_6_0_symbol1_init(struct letter_terminated_can_id_6_0_symbol1_t *msg_p);
+
 
 #ifdef __cplusplus
 }

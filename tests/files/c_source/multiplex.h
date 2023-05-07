@@ -197,6 +197,15 @@ int multiplex_message1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_message1_init(struct multiplex_message1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.

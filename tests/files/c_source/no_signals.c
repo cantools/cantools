@@ -63,6 +63,15 @@ int no_signals_message1_unpack(
     return (0);
 }
 
+int no_signals_message1_init(struct no_signals_message1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct no_signals_message1_t));
+
+    return 0;
+}
+
 int no_signals_message2_pack(
     uint8_t *dst_p,
     const struct no_signals_message2_t *src_p,

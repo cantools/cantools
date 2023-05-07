@@ -84,6 +84,15 @@ int choices_foo_unpack(
     return (0);
 }
 
+int choices_foo_init(struct choices_foo_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct choices_foo_t));
+
+    return 0;
+}
+
 int8_t choices_foo_foo_encode(double value)
 {
     return (int8_t)(value);

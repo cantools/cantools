@@ -114,6 +114,15 @@ int choices_foo_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Foo.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int choices_foo_init(struct choices_foo_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.

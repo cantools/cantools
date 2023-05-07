@@ -62,3 +62,12 @@ int letter_terminated_can_id_6_0_symbol1_unpack(
 
     return (0);
 }
+
+int letter_terminated_can_id_6_0_symbol1_init(struct letter_terminated_can_id_6_0_symbol1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct letter_terminated_can_id_6_0_symbol1_t));
+
+    return 0;
+}

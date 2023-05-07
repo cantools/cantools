@@ -6705,6 +6705,15 @@ int vehicle_rt_sb_ins_vel_body_axes_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vel_Body_Axes.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vel_body_axes_init(struct vehicle_rt_sb_ins_vel_body_axes_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -6868,6 +6877,15 @@ int vehicle_rt_dl1_mk3_speed_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Speed.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_speed_init(struct vehicle_rt_dl1_mk3_speed_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -6975,6 +6993,15 @@ int vehicle_rt_dl1_mk3_gps_time_unpack(
     struct vehicle_rt_dl1_mk3_gps_time_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_GPS_Time.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_gps_time_init(struct vehicle_rt_dl1_mk3_gps_time_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -7140,6 +7167,15 @@ int vehicle_rt_dl1_mk3_gps_pos_llh_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_GPS_Pos_LLH_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_gps_pos_llh_2_init(struct vehicle_rt_dl1_mk3_gps_pos_llh_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -7220,6 +7256,15 @@ int vehicle_rt_dl1_mk3_gps_pos_llh_1_unpack(
     struct vehicle_rt_dl1_mk3_gps_pos_llh_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_GPS_Pos_LLH_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_gps_pos_llh_1_init(struct vehicle_rt_dl1_mk3_gps_pos_llh_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -7439,6 +7484,15 @@ int vehicle_rt_dl1_mk3_gps_speed_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_GPS_Speed.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_gps_speed_init(struct vehicle_rt_dl1_mk3_gps_speed_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -7602,6 +7656,15 @@ int vehicle_rt_ir_temp_temp_7_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_7.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_7_init(struct vehicle_rt_ir_temp_temp_7_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -7655,6 +7718,15 @@ int vehicle_rt_ir_temp_temp_rr_2_unpack(
     struct vehicle_rt_ir_temp_temp_rr_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_RR_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_rr_2_init(struct vehicle_rt_ir_temp_temp_rr_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -7793,6 +7865,15 @@ int vehicle_rt_ir_temp_temp_rl_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_RL_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_rl_2_init(struct vehicle_rt_ir_temp_temp_rl_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -7927,6 +8008,15 @@ int vehicle_rt_ir_temp_temp_fr_2_unpack(
     struct vehicle_rt_ir_temp_temp_fr_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_FR_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_fr_2_init(struct vehicle_rt_ir_temp_temp_fr_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -8065,6 +8155,15 @@ int vehicle_rt_ir_temp_temp_fl_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_FL_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_fl_2_init(struct vehicle_rt_ir_temp_temp_fl_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -8199,6 +8298,15 @@ int vehicle_rt_ir_temp_temp_rr_1_unpack(
     struct vehicle_rt_ir_temp_temp_rr_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_RR_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_rr_1_init(struct vehicle_rt_ir_temp_temp_rr_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -8337,6 +8445,15 @@ int vehicle_rt_ir_temp_temp_rl_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_RL_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_rl_1_init(struct vehicle_rt_ir_temp_temp_rl_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -8471,6 +8588,15 @@ int vehicle_rt_ir_temp_temp_fr_1_unpack(
     struct vehicle_rt_ir_temp_temp_fr_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_FR_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_fr_1_init(struct vehicle_rt_ir_temp_temp_fr_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -8609,6 +8735,15 @@ int vehicle_rt_ir_temp_temp_fl_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_FL_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_fl_1_init(struct vehicle_rt_ir_temp_temp_fl_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -8745,6 +8880,15 @@ int vehicle_rt_ir_temp_temp_32_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_32.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_32_init(struct vehicle_rt_ir_temp_temp_32_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -8798,6 +8942,15 @@ int vehicle_rt_ir_temp_temp_31_unpack(
     struct vehicle_rt_ir_temp_temp_31_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_31.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_31_init(struct vehicle_rt_ir_temp_temp_31_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -8855,6 +9008,15 @@ int vehicle_rt_ir_temp_temp_30_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_30.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_30_init(struct vehicle_rt_ir_temp_temp_30_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -8908,6 +9070,15 @@ int vehicle_rt_ir_temp_temp_29_unpack(
     struct vehicle_rt_ir_temp_temp_29_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_29.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_29_init(struct vehicle_rt_ir_temp_temp_29_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -8965,6 +9136,15 @@ int vehicle_rt_ir_temp_temp_28_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_28.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_28_init(struct vehicle_rt_ir_temp_temp_28_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9018,6 +9198,15 @@ int vehicle_rt_ir_temp_temp_27_unpack(
     struct vehicle_rt_ir_temp_temp_27_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_27.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_27_init(struct vehicle_rt_ir_temp_temp_27_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9075,6 +9264,15 @@ int vehicle_rt_ir_temp_temp_26_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_26.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_26_init(struct vehicle_rt_ir_temp_temp_26_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9128,6 +9326,15 @@ int vehicle_rt_ir_temp_temp_25_unpack(
     struct vehicle_rt_ir_temp_temp_25_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_25.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_25_init(struct vehicle_rt_ir_temp_temp_25_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9185,6 +9392,15 @@ int vehicle_rt_ir_temp_temp_24_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_24.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_24_init(struct vehicle_rt_ir_temp_temp_24_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9238,6 +9454,15 @@ int vehicle_rt_ir_temp_temp_22_unpack(
     struct vehicle_rt_ir_temp_temp_22_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_22.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_22_init(struct vehicle_rt_ir_temp_temp_22_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9295,6 +9520,15 @@ int vehicle_rt_ir_temp_temp_23_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_23.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_23_init(struct vehicle_rt_ir_temp_temp_23_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9348,6 +9582,15 @@ int vehicle_rt_ir_temp_temp_21_unpack(
     struct vehicle_rt_ir_temp_temp_21_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_21.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_21_init(struct vehicle_rt_ir_temp_temp_21_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9405,6 +9648,15 @@ int vehicle_rt_ir_temp_temp_20_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_20.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_20_init(struct vehicle_rt_ir_temp_temp_20_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9458,6 +9710,15 @@ int vehicle_rt_ir_temp_temp_19_unpack(
     struct vehicle_rt_ir_temp_temp_19_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_19.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_19_init(struct vehicle_rt_ir_temp_temp_19_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9515,6 +9776,15 @@ int vehicle_rt_ir_temp_temp_18_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_18.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_18_init(struct vehicle_rt_ir_temp_temp_18_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9568,6 +9838,15 @@ int vehicle_rt_ir_temp_temp_16_unpack(
     struct vehicle_rt_ir_temp_temp_16_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_16.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_16_init(struct vehicle_rt_ir_temp_temp_16_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9625,6 +9904,15 @@ int vehicle_rt_ir_temp_temp_15_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_15.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_15_init(struct vehicle_rt_ir_temp_temp_15_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9678,6 +9966,15 @@ int vehicle_rt_ir_temp_temp_14_unpack(
     struct vehicle_rt_ir_temp_temp_14_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_14.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_14_init(struct vehicle_rt_ir_temp_temp_14_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9735,6 +10032,15 @@ int vehicle_rt_ir_temp_temp_13_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_13.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_13_init(struct vehicle_rt_ir_temp_temp_13_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9788,6 +10094,15 @@ int vehicle_rt_ir_temp_temp_12_unpack(
     struct vehicle_rt_ir_temp_temp_12_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_12.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_12_init(struct vehicle_rt_ir_temp_temp_12_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9845,6 +10160,15 @@ int vehicle_rt_ir_temp_temp_11_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_11.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_11_init(struct vehicle_rt_ir_temp_temp_11_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -9898,6 +10222,15 @@ int vehicle_rt_ir_temp_temp_10_unpack(
     struct vehicle_rt_ir_temp_temp_10_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_10.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_10_init(struct vehicle_rt_ir_temp_temp_10_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -9955,6 +10288,15 @@ int vehicle_rt_ir_temp_temp_8_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_8.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_8_init(struct vehicle_rt_ir_temp_temp_8_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -10008,6 +10350,15 @@ int vehicle_rt_ir_temp_temp_9_unpack(
     struct vehicle_rt_ir_temp_temp_9_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_9.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_9_init(struct vehicle_rt_ir_temp_temp_9_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -10065,6 +10416,15 @@ int vehicle_rt_ir_temp_temp_17_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_17.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_17_init(struct vehicle_rt_ir_temp_temp_17_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -10118,6 +10478,15 @@ int vehicle_rt_ir_temp_temp_6_unpack(
     struct vehicle_rt_ir_temp_temp_6_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_6.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_6_init(struct vehicle_rt_ir_temp_temp_6_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -10175,6 +10544,15 @@ int vehicle_rt_ir_temp_temp_5_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_5.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_5_init(struct vehicle_rt_ir_temp_temp_5_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -10228,6 +10606,15 @@ int vehicle_rt_ir_temp_temp_4_unpack(
     struct vehicle_rt_ir_temp_temp_4_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_4_init(struct vehicle_rt_ir_temp_temp_4_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -10285,6 +10672,15 @@ int vehicle_rt_ir_temp_temp_3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_3_init(struct vehicle_rt_ir_temp_temp_3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -10338,6 +10734,15 @@ int vehicle_rt_ir_temp_temp_2_unpack(
     struct vehicle_rt_ir_temp_temp_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IRTemp_Temp_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_2_init(struct vehicle_rt_ir_temp_temp_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -10395,6 +10800,15 @@ int vehicle_rt_ir_temp_temp_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IRTemp_Temp_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_ir_temp_temp_1_init(struct vehicle_rt_ir_temp_temp_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -10448,6 +10862,15 @@ int vehicle_rt_sb_trig_final_condition_unpack(
     struct vehicle_rt_sb_trig_final_condition_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Trig_Final_Condition.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_trig_final_condition_init(struct vehicle_rt_sb_trig_final_condition_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -10530,6 +10953,15 @@ int vehicle_rt_sb_trig_initial_condition_unpack(
     struct vehicle_rt_sb_trig_initial_condition_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Trig_Initial_Condition.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_trig_initial_condition_init(struct vehicle_rt_sb_trig_initial_condition_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -10722,6 +11154,15 @@ int vehicle_rt_sb_trig_direct_dist_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_Trig_Direct_Dist.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_trig_direct_dist_init(struct vehicle_rt_sb_trig_direct_dist_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -10802,6 +11243,15 @@ int vehicle_rt_sb_trig_forward_dist_unpack(
     struct vehicle_rt_sb_trig_forward_dist_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Trig_Forward_Dist.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_trig_forward_dist_init(struct vehicle_rt_sb_trig_forward_dist_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -10886,6 +11336,15 @@ int vehicle_rt_sb_trig_path_dist_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_Trig_Path_Dist.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_trig_path_dist_init(struct vehicle_rt_sb_trig_path_dist_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -10939,6 +11398,15 @@ int vehicle_rt_sb_trig_accel_unpack(
     struct vehicle_rt_sb_trig_accel_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Trig_Accel.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_trig_accel_init(struct vehicle_rt_sb_trig_accel_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11131,6 +11599,15 @@ int vehicle_rt_dl1_mk3_measure_time_12_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_12.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_12_init(struct vehicle_rt_dl1_mk3_measure_time_12_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11184,6 +11661,15 @@ int vehicle_rt_dl1_mk3_measure_time_11_unpack(
     struct vehicle_rt_dl1_mk3_measure_time_11_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_11.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_11_init(struct vehicle_rt_dl1_mk3_measure_time_11_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11241,6 +11727,15 @@ int vehicle_rt_dl1_mk3_measure_time_10_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_10.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_10_init(struct vehicle_rt_dl1_mk3_measure_time_10_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11294,6 +11789,15 @@ int vehicle_rt_dl1_mk3_measure_time_9_unpack(
     struct vehicle_rt_dl1_mk3_measure_time_9_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_9.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_9_init(struct vehicle_rt_dl1_mk3_measure_time_9_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11351,6 +11855,15 @@ int vehicle_rt_dl1_mk3_measure_time_8_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_8.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_8_init(struct vehicle_rt_dl1_mk3_measure_time_8_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11404,6 +11917,15 @@ int vehicle_rt_dl1_mk3_measure_time_7_unpack(
     struct vehicle_rt_dl1_mk3_measure_time_7_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_7.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_7_init(struct vehicle_rt_dl1_mk3_measure_time_7_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11461,6 +11983,15 @@ int vehicle_rt_dl1_mk3_measure_time_6_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_6.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_6_init(struct vehicle_rt_dl1_mk3_measure_time_6_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11514,6 +12045,15 @@ int vehicle_rt_dl1_mk3_measure_time_5_unpack(
     struct vehicle_rt_dl1_mk3_measure_time_5_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_5.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_5_init(struct vehicle_rt_dl1_mk3_measure_time_5_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11571,6 +12111,15 @@ int vehicle_rt_dl1_mk3_measure_time_4_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_4_init(struct vehicle_rt_dl1_mk3_measure_time_4_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11624,6 +12173,15 @@ int vehicle_rt_dl1_mk3_measure_time_3_unpack(
     struct vehicle_rt_dl1_mk3_measure_time_3_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_3_init(struct vehicle_rt_dl1_mk3_measure_time_3_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11681,6 +12239,15 @@ int vehicle_rt_dl1_mk3_measure_time_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_2_init(struct vehicle_rt_dl1_mk3_measure_time_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11734,6 +12301,15 @@ int vehicle_rt_dl1_mk3_measure_time_1_unpack(
     struct vehicle_rt_dl1_mk3_measure_time_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Measure_Time_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_measure_time_1_init(struct vehicle_rt_dl1_mk3_measure_time_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11791,6 +12367,15 @@ int vehicle_rt_dl1_mk3_rpm_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_RPM.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_rpm_init(struct vehicle_rt_dl1_mk3_rpm_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11844,6 +12429,15 @@ int vehicle_rt_dl1_mk3_freq_4_unpack(
     struct vehicle_rt_dl1_mk3_freq_4_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Freq_4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_freq_4_init(struct vehicle_rt_dl1_mk3_freq_4_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -11901,6 +12495,15 @@ int vehicle_rt_dl1_mk3_freq_3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Freq_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_freq_3_init(struct vehicle_rt_dl1_mk3_freq_3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -11954,6 +12557,15 @@ int vehicle_rt_dl1_mk3_freq_2_unpack(
     struct vehicle_rt_dl1_mk3_freq_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Freq_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_freq_2_init(struct vehicle_rt_dl1_mk3_freq_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12011,6 +12623,15 @@ int vehicle_rt_dl1_mk3_misc_3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Misc_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_misc_3_init(struct vehicle_rt_dl1_mk3_misc_3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12064,6 +12685,15 @@ int vehicle_rt_dl1_mk3_misc_2_unpack(
     struct vehicle_rt_dl1_mk3_misc_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Misc_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_misc_2_init(struct vehicle_rt_dl1_mk3_misc_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12121,6 +12751,15 @@ int vehicle_rt_dl1_mk3_misc_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Misc_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_misc_1_init(struct vehicle_rt_dl1_mk3_misc_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12174,6 +12813,15 @@ int vehicle_rt_dl1_mk3_aux_31_unpack(
     struct vehicle_rt_dl1_mk3_aux_31_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_31.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_31_init(struct vehicle_rt_dl1_mk3_aux_31_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12231,6 +12879,15 @@ int vehicle_rt_dl1_mk3_aux_30_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_30.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_30_init(struct vehicle_rt_dl1_mk3_aux_30_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12284,6 +12941,15 @@ int vehicle_rt_dl1_mk3_aux_29_unpack(
     struct vehicle_rt_dl1_mk3_aux_29_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_29.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_29_init(struct vehicle_rt_dl1_mk3_aux_29_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12341,6 +13007,15 @@ int vehicle_rt_dl1_mk3_aux_28_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_28.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_28_init(struct vehicle_rt_dl1_mk3_aux_28_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12394,6 +13069,15 @@ int vehicle_rt_dl1_mk3_aux_27_unpack(
     struct vehicle_rt_dl1_mk3_aux_27_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_27.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_27_init(struct vehicle_rt_dl1_mk3_aux_27_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12451,6 +13135,15 @@ int vehicle_rt_dl1_mk3_aux_26_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_26.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_26_init(struct vehicle_rt_dl1_mk3_aux_26_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12504,6 +13197,15 @@ int vehicle_rt_dl1_mk3_aux_25_unpack(
     struct vehicle_rt_dl1_mk3_aux_25_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_25.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_25_init(struct vehicle_rt_dl1_mk3_aux_25_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12561,6 +13263,15 @@ int vehicle_rt_dl1_mk3_aux_24_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_24.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_24_init(struct vehicle_rt_dl1_mk3_aux_24_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12614,6 +13325,15 @@ int vehicle_rt_dl1_mk3_aux_23_unpack(
     struct vehicle_rt_dl1_mk3_aux_23_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_23.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_23_init(struct vehicle_rt_dl1_mk3_aux_23_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12671,6 +13391,15 @@ int vehicle_rt_dl1_mk3_aux_22_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_22.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_22_init(struct vehicle_rt_dl1_mk3_aux_22_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12724,6 +13453,15 @@ int vehicle_rt_dl1_mk3_aux_21_unpack(
     struct vehicle_rt_dl1_mk3_aux_21_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_21.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_21_init(struct vehicle_rt_dl1_mk3_aux_21_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12781,6 +13519,15 @@ int vehicle_rt_dl1_mk3_aux_20_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_20.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_20_init(struct vehicle_rt_dl1_mk3_aux_20_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12834,6 +13581,15 @@ int vehicle_rt_dl1_mk3_aux_19_unpack(
     struct vehicle_rt_dl1_mk3_aux_19_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_19.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_19_init(struct vehicle_rt_dl1_mk3_aux_19_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -12891,6 +13647,15 @@ int vehicle_rt_dl1_mk3_aux_18_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_18.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_18_init(struct vehicle_rt_dl1_mk3_aux_18_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -12944,6 +13709,15 @@ int vehicle_rt_dl1_mk3_aux_17_unpack(
     struct vehicle_rt_dl1_mk3_aux_17_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_17.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_17_init(struct vehicle_rt_dl1_mk3_aux_17_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13001,6 +13775,15 @@ int vehicle_rt_dl1_mk3_aux_16_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_16.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_16_init(struct vehicle_rt_dl1_mk3_aux_16_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13054,6 +13837,15 @@ int vehicle_rt_dl1_mk3_aux_15_unpack(
     struct vehicle_rt_dl1_mk3_aux_15_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_15.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_15_init(struct vehicle_rt_dl1_mk3_aux_15_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13111,6 +13903,15 @@ int vehicle_rt_dl1_mk3_aux_14_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_14.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_14_init(struct vehicle_rt_dl1_mk3_aux_14_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13164,6 +13965,15 @@ int vehicle_rt_dl1_mk3_aux_13_unpack(
     struct vehicle_rt_dl1_mk3_aux_13_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_13.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_13_init(struct vehicle_rt_dl1_mk3_aux_13_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13221,6 +14031,15 @@ int vehicle_rt_dl1_mk3_aux_12_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_12.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_12_init(struct vehicle_rt_dl1_mk3_aux_12_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13274,6 +14093,15 @@ int vehicle_rt_dl1_mk3_aux_11_unpack(
     struct vehicle_rt_dl1_mk3_aux_11_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_11.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_11_init(struct vehicle_rt_dl1_mk3_aux_11_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13331,6 +14159,15 @@ int vehicle_rt_dl1_mk3_aux_9_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_9.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_9_init(struct vehicle_rt_dl1_mk3_aux_9_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13384,6 +14221,15 @@ int vehicle_rt_dl1_mk3_aux_10_unpack(
     struct vehicle_rt_dl1_mk3_aux_10_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_10.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_10_init(struct vehicle_rt_dl1_mk3_aux_10_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13441,6 +14287,15 @@ int vehicle_rt_dl1_mk3_aux_8_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_8.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_8_init(struct vehicle_rt_dl1_mk3_aux_8_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13494,6 +14349,15 @@ int vehicle_rt_dl1_mk3_aux_7_unpack(
     struct vehicle_rt_dl1_mk3_aux_7_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_7.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_7_init(struct vehicle_rt_dl1_mk3_aux_7_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13551,6 +14415,15 @@ int vehicle_rt_dl1_mk3_aux_6_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_6.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_6_init(struct vehicle_rt_dl1_mk3_aux_6_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13604,6 +14477,15 @@ int vehicle_rt_dl1_mk3_aux_5_unpack(
     struct vehicle_rt_dl1_mk3_aux_5_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_5.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_5_init(struct vehicle_rt_dl1_mk3_aux_5_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13661,6 +14543,15 @@ int vehicle_rt_dl1_mk3_aux_4_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_4_init(struct vehicle_rt_dl1_mk3_aux_4_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13714,6 +14605,15 @@ int vehicle_rt_dl1_mk3_aux_3_unpack(
     struct vehicle_rt_dl1_mk3_aux_3_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_3_init(struct vehicle_rt_dl1_mk3_aux_3_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13771,6 +14671,15 @@ int vehicle_rt_dl1_mk3_aux_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Aux_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_2_init(struct vehicle_rt_dl1_mk3_aux_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13824,6 +14733,15 @@ int vehicle_rt_dl1_mk3_aux_1_unpack(
     struct vehicle_rt_dl1_mk3_aux_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Aux_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_aux_1_init(struct vehicle_rt_dl1_mk3_aux_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13881,6 +14799,15 @@ int vehicle_rt_dl1_mk3_pressure_5_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Pressure_5.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_pressure_5_init(struct vehicle_rt_dl1_mk3_pressure_5_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -13934,6 +14861,15 @@ int vehicle_rt_dl1_mk3_pressure_4_unpack(
     struct vehicle_rt_dl1_mk3_pressure_4_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Pressure_4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_pressure_4_init(struct vehicle_rt_dl1_mk3_pressure_4_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -13991,6 +14927,15 @@ int vehicle_rt_dl1_mk3_pressure_3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Pressure_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_pressure_3_init(struct vehicle_rt_dl1_mk3_pressure_3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14044,6 +14989,15 @@ int vehicle_rt_dl1_mk3_pressure_2_unpack(
     struct vehicle_rt_dl1_mk3_pressure_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Pressure_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_pressure_2_init(struct vehicle_rt_dl1_mk3_pressure_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14101,6 +15055,15 @@ int vehicle_rt_dl1_mk3_pressure_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Pressure_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_pressure_1_init(struct vehicle_rt_dl1_mk3_pressure_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14154,6 +15117,15 @@ int vehicle_rt_dl1_mk3_angle_3_unpack(
     struct vehicle_rt_dl1_mk3_angle_3_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Angle_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_angle_3_init(struct vehicle_rt_dl1_mk3_angle_3_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14211,6 +15183,15 @@ int vehicle_rt_dl1_mk3_angle_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Angle_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_angle_2_init(struct vehicle_rt_dl1_mk3_angle_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14264,6 +15245,15 @@ int vehicle_rt_dl1_mk3_angle_1_unpack(
     struct vehicle_rt_dl1_mk3_angle_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Angle_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_angle_1_init(struct vehicle_rt_dl1_mk3_angle_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14321,6 +15311,15 @@ int vehicle_rt_dl1_mk3_temp_25_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_25.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_25_init(struct vehicle_rt_dl1_mk3_temp_25_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14374,6 +15373,15 @@ int vehicle_rt_dl1_mk3_temp_24_unpack(
     struct vehicle_rt_dl1_mk3_temp_24_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_24.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_24_init(struct vehicle_rt_dl1_mk3_temp_24_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14431,6 +15439,15 @@ int vehicle_rt_dl1_mk3_temp_23_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_23.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_23_init(struct vehicle_rt_dl1_mk3_temp_23_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14484,6 +15501,15 @@ int vehicle_rt_dl1_mk3_temp_22_unpack(
     struct vehicle_rt_dl1_mk3_temp_22_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_22.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_22_init(struct vehicle_rt_dl1_mk3_temp_22_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14541,6 +15567,15 @@ int vehicle_rt_dl1_mk3_temp_21_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_21.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_21_init(struct vehicle_rt_dl1_mk3_temp_21_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14594,6 +15629,15 @@ int vehicle_rt_dl1_mk3_temp_20_unpack(
     struct vehicle_rt_dl1_mk3_temp_20_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_20.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_20_init(struct vehicle_rt_dl1_mk3_temp_20_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14651,6 +15695,15 @@ int vehicle_rt_dl1_mk3_temp_19_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_19.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_19_init(struct vehicle_rt_dl1_mk3_temp_19_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14704,6 +15757,15 @@ int vehicle_rt_dl1_mk3_temp_18_unpack(
     struct vehicle_rt_dl1_mk3_temp_18_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_18.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_18_init(struct vehicle_rt_dl1_mk3_temp_18_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14761,6 +15823,15 @@ int vehicle_rt_dl1_mk3_temp_17_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_17.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_17_init(struct vehicle_rt_dl1_mk3_temp_17_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14814,6 +15885,15 @@ int vehicle_rt_dl1_mk3_temp_16_unpack(
     struct vehicle_rt_dl1_mk3_temp_16_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_16.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_16_init(struct vehicle_rt_dl1_mk3_temp_16_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14871,6 +15951,15 @@ int vehicle_rt_dl1_mk3_temp_15_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_15.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_15_init(struct vehicle_rt_dl1_mk3_temp_15_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -14924,6 +16013,15 @@ int vehicle_rt_dl1_mk3_temp_14_unpack(
     struct vehicle_rt_dl1_mk3_temp_14_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_14.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_14_init(struct vehicle_rt_dl1_mk3_temp_14_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -14981,6 +16079,15 @@ int vehicle_rt_dl1_mk3_temp_13_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_13.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_13_init(struct vehicle_rt_dl1_mk3_temp_13_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15034,6 +16141,15 @@ int vehicle_rt_dl1_mk3_temp_12_unpack(
     struct vehicle_rt_dl1_mk3_temp_12_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_12.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_12_init(struct vehicle_rt_dl1_mk3_temp_12_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15091,6 +16207,15 @@ int vehicle_rt_dl1_mk3_temp_11_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_11.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_11_init(struct vehicle_rt_dl1_mk3_temp_11_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15144,6 +16269,15 @@ int vehicle_rt_dl1_mk3_temp_10_unpack(
     struct vehicle_rt_dl1_mk3_temp_10_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_10.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_10_init(struct vehicle_rt_dl1_mk3_temp_10_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15201,6 +16335,15 @@ int vehicle_rt_dl1_mk3_temp_9_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_9.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_9_init(struct vehicle_rt_dl1_mk3_temp_9_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15254,6 +16397,15 @@ int vehicle_rt_dl1_mk3_temp_8_unpack(
     struct vehicle_rt_dl1_mk3_temp_8_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_8.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_8_init(struct vehicle_rt_dl1_mk3_temp_8_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15311,6 +16463,15 @@ int vehicle_rt_dl1_mk3_temp_7_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_7.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_7_init(struct vehicle_rt_dl1_mk3_temp_7_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15364,6 +16525,15 @@ int vehicle_rt_dl1_mk3_temp_6_unpack(
     struct vehicle_rt_dl1_mk3_temp_6_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_6.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_6_init(struct vehicle_rt_dl1_mk3_temp_6_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15421,6 +16591,15 @@ int vehicle_rt_dl1_mk3_temp_5_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_5.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_5_init(struct vehicle_rt_dl1_mk3_temp_5_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15474,6 +16653,15 @@ int vehicle_rt_dl1_mk3_temp_4_unpack(
     struct vehicle_rt_dl1_mk3_temp_4_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_4_init(struct vehicle_rt_dl1_mk3_temp_4_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15531,6 +16719,15 @@ int vehicle_rt_dl1_mk3_temp_3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_3_init(struct vehicle_rt_dl1_mk3_temp_3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15584,6 +16781,15 @@ int vehicle_rt_dl1_mk3_temp_2_unpack(
     struct vehicle_rt_dl1_mk3_temp_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Temp_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_2_init(struct vehicle_rt_dl1_mk3_temp_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15641,6 +16847,15 @@ int vehicle_rt_dl1_mk3_temp_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Temp_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_temp_1_init(struct vehicle_rt_dl1_mk3_temp_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15694,6 +16909,15 @@ int vehicle_rt_dl1_mk3_analog_32_unpack(
     struct vehicle_rt_dl1_mk3_analog_32_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_32.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_32_init(struct vehicle_rt_dl1_mk3_analog_32_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15751,6 +16975,15 @@ int vehicle_rt_dl1_mk3_analog_31_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_31.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_31_init(struct vehicle_rt_dl1_mk3_analog_31_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15804,6 +17037,15 @@ int vehicle_rt_dl1_mk3_analog_30_unpack(
     struct vehicle_rt_dl1_mk3_analog_30_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_30.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_30_init(struct vehicle_rt_dl1_mk3_analog_30_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15861,6 +17103,15 @@ int vehicle_rt_dl1_mk3_analog_29_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_29.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_29_init(struct vehicle_rt_dl1_mk3_analog_29_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -15914,6 +17165,15 @@ int vehicle_rt_dl1_mk3_analog_28_unpack(
     struct vehicle_rt_dl1_mk3_analog_28_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_28.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_28_init(struct vehicle_rt_dl1_mk3_analog_28_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -15971,6 +17231,15 @@ int vehicle_rt_dl1_mk3_analog_27_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_27.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_27_init(struct vehicle_rt_dl1_mk3_analog_27_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16024,6 +17293,15 @@ int vehicle_rt_dl1_mk3_analog_26_unpack(
     struct vehicle_rt_dl1_mk3_analog_26_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_26.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_26_init(struct vehicle_rt_dl1_mk3_analog_26_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16081,6 +17359,15 @@ int vehicle_rt_dl1_mk3_analog_25_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_25.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_25_init(struct vehicle_rt_dl1_mk3_analog_25_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16134,6 +17421,15 @@ int vehicle_rt_dl1_mk3_analog_15_unpack(
     struct vehicle_rt_dl1_mk3_analog_15_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_15.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_15_init(struct vehicle_rt_dl1_mk3_analog_15_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16191,6 +17487,15 @@ int vehicle_rt_dl1_mk3_analog_14_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_14.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_14_init(struct vehicle_rt_dl1_mk3_analog_14_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16244,6 +17549,15 @@ int vehicle_rt_dl1_mk3_analog_17_unpack(
     struct vehicle_rt_dl1_mk3_analog_17_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_17.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_17_init(struct vehicle_rt_dl1_mk3_analog_17_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16301,6 +17615,15 @@ int vehicle_rt_dl1_mk3_analog_24_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_24.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_24_init(struct vehicle_rt_dl1_mk3_analog_24_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16354,6 +17677,15 @@ int vehicle_rt_dl1_mk3_analog_23_unpack(
     struct vehicle_rt_dl1_mk3_analog_23_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_23.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_23_init(struct vehicle_rt_dl1_mk3_analog_23_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16411,6 +17743,15 @@ int vehicle_rt_dl1_mk3_analog_22_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_22.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_22_init(struct vehicle_rt_dl1_mk3_analog_22_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16464,6 +17805,15 @@ int vehicle_rt_dl1_mk3_analog_21_unpack(
     struct vehicle_rt_dl1_mk3_analog_21_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_21.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_21_init(struct vehicle_rt_dl1_mk3_analog_21_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16521,6 +17871,15 @@ int vehicle_rt_dl1_mk3_analog_20_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_20.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_20_init(struct vehicle_rt_dl1_mk3_analog_20_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16574,6 +17933,15 @@ int vehicle_rt_dl1_mk3_analog_19_unpack(
     struct vehicle_rt_dl1_mk3_analog_19_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_19.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_19_init(struct vehicle_rt_dl1_mk3_analog_19_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16631,6 +17999,15 @@ int vehicle_rt_dl1_mk3_analog_16_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_16.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_16_init(struct vehicle_rt_dl1_mk3_analog_16_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16684,6 +18061,15 @@ int vehicle_rt_dl1_mk3_analog_18_unpack(
     struct vehicle_rt_dl1_mk3_analog_18_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_18.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_18_init(struct vehicle_rt_dl1_mk3_analog_18_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16741,6 +18127,15 @@ int vehicle_rt_dl1_mk3_analog_12_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_12.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_12_init(struct vehicle_rt_dl1_mk3_analog_12_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16794,6 +18189,15 @@ int vehicle_rt_dl1_mk3_analog_11_unpack(
     struct vehicle_rt_dl1_mk3_analog_11_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_11.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_11_init(struct vehicle_rt_dl1_mk3_analog_11_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16851,6 +18255,15 @@ int vehicle_rt_dl1_mk3_analog_10_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_10.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_10_init(struct vehicle_rt_dl1_mk3_analog_10_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -16904,6 +18317,15 @@ int vehicle_rt_dl1_mk3_analog_9_unpack(
     struct vehicle_rt_dl1_mk3_analog_9_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_9.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_9_init(struct vehicle_rt_dl1_mk3_analog_9_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -16961,6 +18383,15 @@ int vehicle_rt_dl1_mk3_analog_8_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_8.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_8_init(struct vehicle_rt_dl1_mk3_analog_8_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -17014,6 +18445,15 @@ int vehicle_rt_dl1_mk3_analog_7_unpack(
     struct vehicle_rt_dl1_mk3_analog_7_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_7.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_7_init(struct vehicle_rt_dl1_mk3_analog_7_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -17071,6 +18511,15 @@ int vehicle_rt_dl1_mk3_analog_6_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_6.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_6_init(struct vehicle_rt_dl1_mk3_analog_6_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -17124,6 +18573,15 @@ int vehicle_rt_dl1_mk3_analog_5_unpack(
     struct vehicle_rt_dl1_mk3_analog_5_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_5.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_5_init(struct vehicle_rt_dl1_mk3_analog_5_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -17181,6 +18639,15 @@ int vehicle_rt_dl1_mk3_analog_4_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_4_init(struct vehicle_rt_dl1_mk3_analog_4_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -17234,6 +18701,15 @@ int vehicle_rt_dl1_mk3_analog_3_unpack(
     struct vehicle_rt_dl1_mk3_analog_3_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Analog_3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_3_init(struct vehicle_rt_dl1_mk3_analog_3_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -17291,6 +18767,15 @@ int vehicle_rt_dl1_mk3_analog_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_2_init(struct vehicle_rt_dl1_mk3_analog_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -17346,6 +18831,15 @@ int vehicle_rt_dl1_mk3_analog_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_DL1MK3_Analog_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_analog_1_init(struct vehicle_rt_dl1_mk3_analog_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -17399,6 +18893,15 @@ int vehicle_rt_dl1_mk3_accel_unpack(
     struct vehicle_rt_dl1_mk3_accel_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_DL1MK3_Accel.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_dl1_mk3_accel_init(struct vehicle_rt_dl1_mk3_accel_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -17618,6 +19121,15 @@ int vehicle_rt_sb_ins_vpt_4_vel_ned_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_4_Vel_NED_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_4_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_4_vel_ned_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -17727,6 +19239,15 @@ int vehicle_rt_sb_ins_vpt_4_vel_ned_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_4_Vel_NED_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_4_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_4_vel_ned_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -17807,6 +19328,15 @@ int vehicle_rt_sb_ins_vpt_4_offset_unpack(
     struct vehicle_rt_sb_ins_vpt_4_offset_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Vpt_4_Offset.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_4_offset_init(struct vehicle_rt_sb_ins_vpt_4_offset_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -17918,6 +19448,15 @@ int vehicle_rt_sb_ins_vpt_3_vel_ned_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_3_Vel_NED_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_3_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_3_vel_ned_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -18027,6 +19566,15 @@ int vehicle_rt_sb_ins_vpt_3_vel_ned_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_3_Vel_NED_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_3_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_3_vel_ned_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -18107,6 +19655,15 @@ int vehicle_rt_sb_ins_vpt_3_offset_unpack(
     struct vehicle_rt_sb_ins_vpt_3_offset_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Vpt_3_Offset.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_3_offset_init(struct vehicle_rt_sb_ins_vpt_3_offset_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -18218,6 +19775,15 @@ int vehicle_rt_sb_ins_vpt_2_vel_ned_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_2_Vel_NED_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_2_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_2_vel_ned_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -18327,6 +19893,15 @@ int vehicle_rt_sb_ins_vpt_2_vel_ned_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_2_Vel_NED_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_2_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_2_vel_ned_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -18407,6 +19982,15 @@ int vehicle_rt_sb_ins_vpt_2_offset_unpack(
     struct vehicle_rt_sb_ins_vpt_2_offset_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Vpt_2_Offset.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_2_offset_init(struct vehicle_rt_sb_ins_vpt_2_offset_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -18518,6 +20102,15 @@ int vehicle_rt_sb_ins_vpt_1_vel_ned_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_1_Vel_NED_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_1_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_1_vel_ned_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -18627,6 +20220,15 @@ int vehicle_rt_sb_ins_vpt_1_vel_ned_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vpt_1_Vel_NED_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_1_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_1_vel_ned_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -18707,6 +20309,15 @@ int vehicle_rt_sb_ins_vpt_1_offset_unpack(
     struct vehicle_rt_sb_ins_vpt_1_offset_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Vpt_1_Offset.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vpt_1_offset_init(struct vehicle_rt_sb_ins_vpt_1_offset_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -18816,6 +20427,15 @@ int vehicle_rt_sb_ins_slip_unpack(
     struct vehicle_rt_sb_ins_slip_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Slip.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_slip_init(struct vehicle_rt_sb_ins_slip_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -19008,6 +20628,15 @@ int vehicle_rt_sb_ins_vel_ecef_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vel_ECEF_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vel_ecef_2_init(struct vehicle_rt_sb_ins_vel_ecef_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -19142,6 +20771,15 @@ int vehicle_rt_sb_ins_vel_ecef_1_unpack(
     struct vehicle_rt_sb_ins_vel_ecef_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Vel_ECEF_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vel_ecef_1_init(struct vehicle_rt_sb_ins_vel_ecef_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -19307,6 +20945,15 @@ int vehicle_rt_sb_ins_vel_ned_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Vel_NED_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vel_ned_2_init(struct vehicle_rt_sb_ins_vel_ned_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -19414,6 +21061,15 @@ int vehicle_rt_sb_ins_vel_ned_1_unpack(
     struct vehicle_rt_sb_ins_vel_ned_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Vel_NED_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_vel_ned_1_init(struct vehicle_rt_sb_ins_vel_ned_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -19579,6 +21235,15 @@ int vehicle_rt_sb_ins_pos_ecef_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Pos_ECEF_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_pos_ecef_2_init(struct vehicle_rt_sb_ins_pos_ecef_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -19659,6 +21324,15 @@ int vehicle_rt_sb_ins_pos_ecef_1_unpack(
     struct vehicle_rt_sb_ins_pos_ecef_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Pos_ECEF_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_pos_ecef_1_init(struct vehicle_rt_sb_ins_pos_ecef_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -19878,6 +21552,15 @@ int vehicle_rt_sb_ins_pos_llh_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Pos_LLH_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_pos_llh_2_init(struct vehicle_rt_sb_ins_pos_llh_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -19958,6 +21641,15 @@ int vehicle_rt_sb_ins_pos_llh_1_unpack(
     struct vehicle_rt_sb_ins_pos_llh_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Pos_LLH_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_pos_llh_1_init(struct vehicle_rt_sb_ins_pos_llh_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -20177,6 +21869,15 @@ int vehicle_rt_sb_ins_heading_gradient_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Heading_Gradient_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_heading_gradient_2_init(struct vehicle_rt_sb_ins_heading_gradient_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -20365,6 +22066,15 @@ int vehicle_rt_sb_ins_heading_gradient_unpack(
     struct vehicle_rt_sb_ins_heading_gradient_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Heading_Gradient.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_heading_gradient_init(struct vehicle_rt_sb_ins_heading_gradient_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -20557,6 +22267,15 @@ int vehicle_rt_sb_ins_status_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_INS_Status.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_status_init(struct vehicle_rt_sb_ins_status_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -20610,6 +22329,15 @@ int vehicle_rt_sb_ins_attitude_unpack(
     struct vehicle_rt_sb_ins_attitude_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_INS_Attitude.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_ins_attitude_init(struct vehicle_rt_sb_ins_attitude_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -20827,6 +22555,15 @@ int vehicle_rt_sb_output_status_unpack(
     struct vehicle_rt_sb_output_status_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Output_Status.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_output_status_init(struct vehicle_rt_sb_output_status_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -21127,6 +22864,15 @@ int vehicle_rt_sb_gps_heading_gradient_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Heading_Gradient_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_heading_gradient_2_init(struct vehicle_rt_sb_gps_heading_gradient_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -21317,6 +23063,15 @@ int vehicle_rt_sb_cumulative_distance_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_Cumulative_Distance_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_cumulative_distance_2_init(struct vehicle_rt_sb_cumulative_distance_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -21453,6 +23208,15 @@ int vehicle_rt_sb_cumulative_distance_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_Cumulative_Distance_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_cumulative_distance_1_init(struct vehicle_rt_sb_cumulative_distance_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -21587,6 +23351,15 @@ int vehicle_rt_sb_trigger_timestamp_unpack(
     struct vehicle_rt_sb_trigger_timestamp_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Trigger_Timestamp.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_trigger_timestamp_init(struct vehicle_rt_sb_trigger_timestamp_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -21750,6 +23523,15 @@ int vehicle_rt_imu06_gyro_rates_unpack(
     struct vehicle_rt_imu06_gyro_rates_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_IMU06_Gyro_Rates.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_imu06_gyro_rates_init(struct vehicle_rt_imu06_gyro_rates_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -21969,6 +23751,15 @@ int vehicle_rt_imu06_accel_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_IMU06_Accel.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_imu06_accel_init(struct vehicle_rt_imu06_accel_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -22186,6 +23977,15 @@ int vehicle_rt_sb_speed_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_Speed.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_speed_init(struct vehicle_rt_sb_speed_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -22293,6 +24093,15 @@ int vehicle_rt_sb_rtk_slip_unpack(
     struct vehicle_rt_sb_rtk_slip_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_RTK_Slip.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_rtk_slip_init(struct vehicle_rt_sb_rtk_slip_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -22512,6 +24321,15 @@ int vehicle_rt_sb_rtk_attitude_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_RTK_Attitude.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_rtk_attitude_init(struct vehicle_rt_sb_rtk_attitude_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -22729,6 +24547,15 @@ int vehicle_rt_sb_gps_mcycle_lean_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Mcycle_Lean.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_mcycle_lean_init(struct vehicle_rt_sb_gps_mcycle_lean_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -22890,6 +24717,15 @@ int vehicle_rt_sb_gps_status_unpack(
     struct vehicle_rt_sb_gps_status_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_GPS_Status.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_status_init(struct vehicle_rt_sb_gps_status_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -23136,6 +24972,15 @@ int vehicle_rt_sb_gps_pos_ecef_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Pos_ECEF_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_pos_ecef_2_init(struct vehicle_rt_sb_gps_pos_ecef_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -23216,6 +25061,15 @@ int vehicle_rt_sb_gps_pos_ecef_1_unpack(
     struct vehicle_rt_sb_gps_pos_ecef_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_GPS_Pos_ECEF_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_pos_ecef_1_init(struct vehicle_rt_sb_gps_pos_ecef_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -23435,6 +25289,15 @@ int vehicle_rt_sb_gps_pos_llh_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Pos_LLH_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_pos_llh_2_init(struct vehicle_rt_sb_gps_pos_llh_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -23515,6 +25378,15 @@ int vehicle_rt_sb_gps_pos_llh_1_unpack(
     struct vehicle_rt_sb_gps_pos_llh_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_GPS_Pos_LLH_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_pos_llh_1_init(struct vehicle_rt_sb_gps_pos_llh_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -23734,6 +25606,15 @@ int vehicle_rt_sb_gps_heading_gradient_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Heading_Gradient.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_heading_gradient_init(struct vehicle_rt_sb_gps_heading_gradient_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -23924,6 +25805,15 @@ int vehicle_rt_sb_gps_vel_ecef_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Vel_ECEF_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_vel_ecef_2_init(struct vehicle_rt_sb_gps_vel_ecef_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -24058,6 +25948,15 @@ int vehicle_rt_sb_gps_vel_ecef_1_unpack(
     struct vehicle_rt_sb_gps_vel_ecef_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_GPS_Vel_ECEF_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_vel_ecef_1_init(struct vehicle_rt_sb_gps_vel_ecef_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -24223,6 +26122,15 @@ int vehicle_rt_sb_gps_vel_ned_2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Vel_NED_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_vel_ned_2_init(struct vehicle_rt_sb_gps_vel_ned_2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -24330,6 +26238,15 @@ int vehicle_rt_sb_gps_vel_ned_1_unpack(
     struct vehicle_rt_sb_gps_vel_ned_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_GPS_Vel_NED_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_vel_ned_1_init(struct vehicle_rt_sb_gps_vel_ned_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -24495,6 +26412,15 @@ int vehicle_rt_sb_gps_speed_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Speed.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_speed_init(struct vehicle_rt_sb_gps_speed_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -24658,6 +26584,15 @@ int vehicle_rt_sb_gps_time_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from RT_SB_GPS_Time.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gps_time_init(struct vehicle_rt_sb_gps_time_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -24819,6 +26754,15 @@ int vehicle_rt_sb_accel_unpack(
     struct vehicle_rt_sb_accel_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Accel.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_accel_init(struct vehicle_rt_sb_accel_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -25036,6 +26980,15 @@ int vehicle_rt_sb_gyro_rates_unpack(
     struct vehicle_rt_sb_gyro_rates_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from RT_SB_Gyro_Rates.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int vehicle_rt_sb_gyro_rates_init(struct vehicle_rt_sb_gyro_rates_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

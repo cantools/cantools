@@ -280,6 +280,15 @@ int open_actuator_control_cmd_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from ControlCmd.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_control_cmd_init(struct open_actuator_control_cmd_t *msg_p);
+
+/**
  * Decode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to decode.
@@ -420,6 +429,15 @@ int open_actuator_limits_cmd_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from LimitsCmd.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_limits_cmd_init(struct open_actuator_limits_cmd_t *msg_p);
+
+/**
  * Decode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to decode.
@@ -520,6 +538,15 @@ int open_actuator_control_status_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from ControlStatus.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_control_status_init(struct open_actuator_control_status_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -614,6 +641,14 @@ int open_actuator_system_status_pack(
     const struct open_actuator_system_status_t *src_p,
     size_t size);
 
+/**
+ * Init message fields to default values from SystemStatus.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_system_status_init(struct open_actuator_system_status_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -668,6 +703,15 @@ uint8_t open_actuator_system_status_chip_temp_encode(double value);
  * @return true if in range, false otherwise.
  */
 bool open_actuator_system_status_chip_temp_is_in_range(uint8_t value);
+
+/**
+ * Init message fields to default values from TorqueSensorData.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_torque_sensor_data_init(struct open_actuator_torque_sensor_data_t *msg_p);
 
 
 #ifdef __cplusplus

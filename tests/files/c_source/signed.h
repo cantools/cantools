@@ -353,6 +353,15 @@ int signed_message378910_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message378910.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message378910_init(struct signed_message378910_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -597,6 +606,15 @@ int signed_message63big_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message63big_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message63big_1_init(struct signed_message63big_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -650,6 +668,15 @@ int signed_message63_1_unpack(
     struct signed_message63_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message63_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message63_1_init(struct signed_message63_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -707,6 +734,15 @@ int signed_message63big_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message63big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message63big_init(struct signed_message63big_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -760,6 +796,15 @@ int signed_message63_unpack(
     struct signed_message63_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message63.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message63_init(struct signed_message63_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -817,6 +862,15 @@ int signed_message32big_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message32big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message32big_init(struct signed_message32big_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -870,6 +924,15 @@ int signed_message33big_unpack(
     struct signed_message33big_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message33big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message33big_init(struct signed_message33big_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -927,6 +990,15 @@ int signed_message64big_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message64big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message64big_init(struct signed_message64big_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -980,6 +1052,15 @@ int signed_message64_unpack(
     struct signed_message64_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message64.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message64_init(struct signed_message64_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1037,6 +1118,15 @@ int signed_message33_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message33.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message33_init(struct signed_message33_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1090,6 +1180,15 @@ int signed_message32_unpack(
     struct signed_message32_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message32.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_message32_init(struct signed_message32_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

@@ -278,6 +278,15 @@ int signed_bit_fields_message378910_unpack(
     return (0);
 }
 
+int signed_bit_fields_message378910_init(struct signed_bit_fields_message378910_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message378910_t));
+
+    return 0;
+}
+
 int8_t signed_bit_fields_message378910_s7_encode(double value)
 {
     return (int8_t)(value);
@@ -457,6 +466,15 @@ int signed_bit_fields_message63big_1_unpack(
     return (0);
 }
 
+int signed_bit_fields_message63big_1_init(struct signed_bit_fields_message63big_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message63big_1_t));
+
+    return 0;
+}
+
 int64_t signed_bit_fields_message63big_1_s63big_encode(double value)
 {
     return (int64_t)(value);
@@ -525,6 +543,15 @@ int signed_bit_fields_message63_1_unpack(
     dst_p->s63 = (int64_t)s63;
 
     return (0);
+}
+
+int signed_bit_fields_message63_1_init(struct signed_bit_fields_message63_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message63_1_t));
+
+    return 0;
 }
 
 int64_t signed_bit_fields_message63_1_s63_encode(double value)
@@ -597,6 +624,15 @@ int signed_bit_fields_message63big_unpack(
     return (0);
 }
 
+int signed_bit_fields_message63big_init(struct signed_bit_fields_message63big_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message63big_t));
+
+    return 0;
+}
+
 int64_t signed_bit_fields_message63big_s63big_encode(double value)
 {
     return (int64_t)(value);
@@ -667,6 +703,15 @@ int signed_bit_fields_message63_unpack(
     return (0);
 }
 
+int signed_bit_fields_message63_init(struct signed_bit_fields_message63_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message63_t));
+
+    return 0;
+}
+
 int64_t signed_bit_fields_message63_s63_encode(double value)
 {
     return (int64_t)(value);
@@ -722,6 +767,15 @@ int signed_bit_fields_message32big_unpack(
     dst_p->s32big = (int32_t)s32big;
 
     return (0);
+}
+
+int signed_bit_fields_message32big_init(struct signed_bit_fields_message32big_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message32big_t));
+
+    return 0;
 }
 
 int32_t signed_bit_fields_message32big_s32big_encode(double value)
@@ -790,6 +844,15 @@ int signed_bit_fields_message33big_unpack(
     return (0);
 }
 
+int signed_bit_fields_message33big_init(struct signed_bit_fields_message33big_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message33big_t));
+
+    return 0;
+}
+
 int64_t signed_bit_fields_message33big_s33big_encode(double value)
 {
     return (int64_t)(value);
@@ -853,6 +916,15 @@ int signed_bit_fields_message64big_unpack(
     dst_p->s64big = (int64_t)s64big;
 
     return (0);
+}
+
+int signed_bit_fields_message64big_init(struct signed_bit_fields_message64big_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message64big_t));
+
+    return 0;
 }
 
 int64_t signed_bit_fields_message64big_s64big_encode(double value)
@@ -922,6 +994,15 @@ int signed_bit_fields_message64_unpack(
     return (0);
 }
 
+int signed_bit_fields_message64_init(struct signed_bit_fields_message64_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message64_t));
+
+    return 0;
+}
+
 int64_t signed_bit_fields_message64_s64_encode(double value)
 {
     return (int64_t)(value);
@@ -988,6 +1069,15 @@ int signed_bit_fields_message33_unpack(
     return (0);
 }
 
+int signed_bit_fields_message33_init(struct signed_bit_fields_message33_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message33_t));
+
+    return 0;
+}
+
 int64_t signed_bit_fields_message33_s33_encode(double value)
 {
     return (int64_t)(value);
@@ -1043,6 +1133,15 @@ int signed_bit_fields_message32_unpack(
     dst_p->s32 = (int32_t)s32;
 
     return (0);
+}
+
+int signed_bit_fields_message32_init(struct signed_bit_fields_message32_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct signed_bit_fields_message32_t));
+
+    return 0;
 }
 
 int32_t signed_bit_fields_message32_s32_encode(double value)

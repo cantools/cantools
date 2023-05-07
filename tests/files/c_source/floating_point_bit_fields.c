@@ -146,6 +146,15 @@ int floating_point_bit_fields_message1_unpack(
     return (0);
 }
 
+int floating_point_bit_fields_message1_init(struct floating_point_bit_fields_message1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct floating_point_bit_fields_message1_t));
+
+    return 0;
+}
+
 double floating_point_bit_fields_message1_signal1_encode(double value)
 {
     return (double)(value);
@@ -215,6 +224,15 @@ int floating_point_bit_fields_message2_unpack(
     memcpy(&dst_p->signal2, &signal2, sizeof(dst_p->signal2));
 
     return (0);
+}
+
+int floating_point_bit_fields_message2_init(struct floating_point_bit_fields_message2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct floating_point_bit_fields_message2_t));
+
+    return 0;
 }
 
 float floating_point_bit_fields_message2_signal1_encode(double value)

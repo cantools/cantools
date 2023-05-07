@@ -210,6 +210,15 @@ int vehicle_rt_sb_ins_vel_body_axes_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vel_body_axes_init(struct vehicle_rt_sb_ins_vel_body_axes_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vel_body_axes_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_encode(double value)
 {
     return (uint8_t)(value);
@@ -333,6 +342,15 @@ int vehicle_rt_dl1_mk3_speed_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_speed_init(struct vehicle_rt_dl1_mk3_speed_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_speed_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_dl1_mk3_speed_validity_speed_encode(double value)
 {
     return (uint8_t)(value);
@@ -424,6 +442,15 @@ int vehicle_rt_dl1_mk3_gps_time_unpack(
     dst_p->gps_week |= unpack_left_shift_u16(src_p[7], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_gps_time_init(struct vehicle_rt_dl1_mk3_gps_time_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_gps_time_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_dl1_mk3_gps_time_validity_gps_time_encode(double value)
@@ -559,6 +586,15 @@ int vehicle_rt_dl1_mk3_gps_pos_llh_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_gps_pos_llh_2_init(struct vehicle_rt_dl1_mk3_gps_pos_llh_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_gps_pos_llh_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_encode(double value)
 {
     return (int32_t)(value / 1E-7);
@@ -641,6 +677,15 @@ int vehicle_rt_dl1_mk3_gps_pos_llh_1_unpack(
     dst_p->gps_pos_llh_latitude = (int32_t)gps_pos_llh_latitude;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_gps_pos_llh_1_init(struct vehicle_rt_dl1_mk3_gps_pos_llh_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_gps_pos_llh_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_encode(double value)
@@ -800,6 +845,15 @@ int vehicle_rt_dl1_mk3_gps_speed_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_gps_speed_init(struct vehicle_rt_dl1_mk3_gps_speed_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_gps_speed_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_encode(double value)
 {
     return (uint8_t)(value);
@@ -915,6 +969,15 @@ int vehicle_rt_ir_temp_temp_7_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_7_init(struct vehicle_rt_ir_temp_temp_7_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_7_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_7_ir_temperature_7_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -992,6 +1055,15 @@ int vehicle_rt_ir_temp_temp_rr_2_unpack(
     dst_p->ir_temperature_32 = (int16_t)ir_temperature_32;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_rr_2_init(struct vehicle_rt_ir_temp_temp_rr_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_rr_2_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_rr_2_ir_temperature_29_encode(double value)
@@ -1124,6 +1196,15 @@ int vehicle_rt_ir_temp_temp_rl_2_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_rl_2_init(struct vehicle_rt_ir_temp_temp_rl_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_rl_2_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_rl_2_ir_temperature_21_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -1252,6 +1333,15 @@ int vehicle_rt_ir_temp_temp_fr_2_unpack(
     dst_p->ir_temperature_16 = (int16_t)ir_temperature_16;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_fr_2_init(struct vehicle_rt_ir_temp_temp_fr_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_fr_2_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_fr_2_ir_temperature_13_encode(double value)
@@ -1384,6 +1474,15 @@ int vehicle_rt_ir_temp_temp_fl_2_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_fl_2_init(struct vehicle_rt_ir_temp_temp_fl_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_fl_2_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_fl_2_ir_temperature_5_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -1512,6 +1611,15 @@ int vehicle_rt_ir_temp_temp_rr_1_unpack(
     dst_p->ir_temperature_28 = (int16_t)ir_temperature_28;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_rr_1_init(struct vehicle_rt_ir_temp_temp_rr_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_rr_1_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_rr_1_ir_temperature_25_encode(double value)
@@ -1644,6 +1752,15 @@ int vehicle_rt_ir_temp_temp_rl_1_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_rl_1_init(struct vehicle_rt_ir_temp_temp_rl_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_rl_1_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_rl_1_ir_temperature_17_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -1772,6 +1889,15 @@ int vehicle_rt_ir_temp_temp_fr_1_unpack(
     dst_p->ir_temperature_12 = (int16_t)ir_temperature_12;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_fr_1_init(struct vehicle_rt_ir_temp_temp_fr_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_fr_1_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_fr_1_ir_temperature_9_encode(double value)
@@ -1904,6 +2030,15 @@ int vehicle_rt_ir_temp_temp_fl_1_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_fl_1_init(struct vehicle_rt_ir_temp_temp_fl_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_fl_1_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_fl_1_ir_temperature_1_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2010,6 +2145,15 @@ int vehicle_rt_ir_temp_temp_32_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_32_init(struct vehicle_rt_ir_temp_temp_32_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_32_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_32_ir_temperature_32_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2063,6 +2207,15 @@ int vehicle_rt_ir_temp_temp_31_unpack(
     dst_p->ir_temperature_31 = (int16_t)ir_temperature_31;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_31_init(struct vehicle_rt_ir_temp_temp_31_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_31_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_31_ir_temperature_31_encode(double value)
@@ -2120,6 +2273,15 @@ int vehicle_rt_ir_temp_temp_30_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_30_init(struct vehicle_rt_ir_temp_temp_30_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_30_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_30_ir_temperature_30_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2173,6 +2335,15 @@ int vehicle_rt_ir_temp_temp_29_unpack(
     dst_p->ir_temperature_29 = (int16_t)ir_temperature_29;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_29_init(struct vehicle_rt_ir_temp_temp_29_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_29_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_29_ir_temperature_29_encode(double value)
@@ -2230,6 +2401,15 @@ int vehicle_rt_ir_temp_temp_28_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_28_init(struct vehicle_rt_ir_temp_temp_28_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_28_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_28_ir_temperature_28_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2283,6 +2463,15 @@ int vehicle_rt_ir_temp_temp_27_unpack(
     dst_p->ir_temperature_27 = (int16_t)ir_temperature_27;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_27_init(struct vehicle_rt_ir_temp_temp_27_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_27_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_27_ir_temperature_27_encode(double value)
@@ -2340,6 +2529,15 @@ int vehicle_rt_ir_temp_temp_26_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_26_init(struct vehicle_rt_ir_temp_temp_26_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_26_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_26_ir_temperature_26_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2393,6 +2591,15 @@ int vehicle_rt_ir_temp_temp_25_unpack(
     dst_p->ir_temperature_25 = (int16_t)ir_temperature_25;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_25_init(struct vehicle_rt_ir_temp_temp_25_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_25_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_25_ir_temperature_25_encode(double value)
@@ -2450,6 +2657,15 @@ int vehicle_rt_ir_temp_temp_24_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_24_init(struct vehicle_rt_ir_temp_temp_24_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_24_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_24_ir_temperature_24_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2503,6 +2719,15 @@ int vehicle_rt_ir_temp_temp_22_unpack(
     dst_p->ir_temperature_22 = (int16_t)ir_temperature_22;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_22_init(struct vehicle_rt_ir_temp_temp_22_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_22_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_22_ir_temperature_22_encode(double value)
@@ -2560,6 +2785,15 @@ int vehicle_rt_ir_temp_temp_23_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_23_init(struct vehicle_rt_ir_temp_temp_23_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_23_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_23_ir_temperature_23_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2613,6 +2847,15 @@ int vehicle_rt_ir_temp_temp_21_unpack(
     dst_p->ir_temperature_21 = (int16_t)ir_temperature_21;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_21_init(struct vehicle_rt_ir_temp_temp_21_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_21_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_21_ir_temperature_21_encode(double value)
@@ -2670,6 +2913,15 @@ int vehicle_rt_ir_temp_temp_20_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_20_init(struct vehicle_rt_ir_temp_temp_20_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_20_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_20_ir_temperature_20_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2723,6 +2975,15 @@ int vehicle_rt_ir_temp_temp_19_unpack(
     dst_p->ir_temperature_19 = (int16_t)ir_temperature_19;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_19_init(struct vehicle_rt_ir_temp_temp_19_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_19_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_19_ir_temperature_19_encode(double value)
@@ -2780,6 +3041,15 @@ int vehicle_rt_ir_temp_temp_18_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_18_init(struct vehicle_rt_ir_temp_temp_18_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_18_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_18_ir_temperature_18_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2833,6 +3103,15 @@ int vehicle_rt_ir_temp_temp_16_unpack(
     dst_p->ir_temperature_16 = (int16_t)ir_temperature_16;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_16_init(struct vehicle_rt_ir_temp_temp_16_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_16_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_16_ir_temperature_16_encode(double value)
@@ -2890,6 +3169,15 @@ int vehicle_rt_ir_temp_temp_15_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_15_init(struct vehicle_rt_ir_temp_temp_15_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_15_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_15_ir_temperature_15_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -2943,6 +3231,15 @@ int vehicle_rt_ir_temp_temp_14_unpack(
     dst_p->ir_temperature_14 = (int16_t)ir_temperature_14;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_14_init(struct vehicle_rt_ir_temp_temp_14_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_14_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_14_ir_temperature_14_encode(double value)
@@ -3000,6 +3297,15 @@ int vehicle_rt_ir_temp_temp_13_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_13_init(struct vehicle_rt_ir_temp_temp_13_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_13_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_13_ir_temperature_13_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -3053,6 +3359,15 @@ int vehicle_rt_ir_temp_temp_12_unpack(
     dst_p->ir_temperature_12 = (int16_t)ir_temperature_12;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_12_init(struct vehicle_rt_ir_temp_temp_12_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_12_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_12_ir_temperature_12_encode(double value)
@@ -3110,6 +3425,15 @@ int vehicle_rt_ir_temp_temp_11_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_11_init(struct vehicle_rt_ir_temp_temp_11_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_11_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_11_ir_temperature_11_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -3163,6 +3487,15 @@ int vehicle_rt_ir_temp_temp_10_unpack(
     dst_p->ir_temperature_10 = (int16_t)ir_temperature_10;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_10_init(struct vehicle_rt_ir_temp_temp_10_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_10_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_10_ir_temperature_10_encode(double value)
@@ -3220,6 +3553,15 @@ int vehicle_rt_ir_temp_temp_8_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_8_init(struct vehicle_rt_ir_temp_temp_8_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_8_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_8_ir_temperature_8_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -3273,6 +3615,15 @@ int vehicle_rt_ir_temp_temp_9_unpack(
     dst_p->ir_temperature_9 = (int16_t)ir_temperature_9;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_9_init(struct vehicle_rt_ir_temp_temp_9_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_9_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_9_ir_temperature_9_encode(double value)
@@ -3330,6 +3681,15 @@ int vehicle_rt_ir_temp_temp_17_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_17_init(struct vehicle_rt_ir_temp_temp_17_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_17_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_17_ir_temperature_17_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -3383,6 +3743,15 @@ int vehicle_rt_ir_temp_temp_6_unpack(
     dst_p->ir_temperature_6 = (int16_t)ir_temperature_6;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_6_init(struct vehicle_rt_ir_temp_temp_6_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_6_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_6_ir_temperature_6_encode(double value)
@@ -3440,6 +3809,15 @@ int vehicle_rt_ir_temp_temp_5_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_5_init(struct vehicle_rt_ir_temp_temp_5_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_5_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_5_ir_temperature_5_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -3493,6 +3871,15 @@ int vehicle_rt_ir_temp_temp_4_unpack(
     dst_p->ir_temperature_4 = (int16_t)ir_temperature_4;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_4_init(struct vehicle_rt_ir_temp_temp_4_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_4_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_4_ir_temperature_4_encode(double value)
@@ -3550,6 +3937,15 @@ int vehicle_rt_ir_temp_temp_3_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_3_init(struct vehicle_rt_ir_temp_temp_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_3_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_3_ir_temperature_3_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -3603,6 +3999,15 @@ int vehicle_rt_ir_temp_temp_2_unpack(
     dst_p->ir_temperature_2 = (int16_t)ir_temperature_2;
 
     return (0);
+}
+
+int vehicle_rt_ir_temp_temp_2_init(struct vehicle_rt_ir_temp_temp_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_2_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_ir_temp_temp_2_ir_temperature_2_encode(double value)
@@ -3660,6 +4065,15 @@ int vehicle_rt_ir_temp_temp_1_unpack(
     return (0);
 }
 
+int vehicle_rt_ir_temp_temp_1_init(struct vehicle_rt_ir_temp_temp_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_ir_temp_temp_1_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_ir_temp_temp_1_ir_temperature_1_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -3711,6 +4125,15 @@ int vehicle_rt_sb_trig_final_condition_unpack(
     dst_p->final_speed |= unpack_left_shift_u32(src_p[3], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_trig_final_condition_init(struct vehicle_rt_sb_trig_final_condition_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_trig_final_condition_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_trig_final_condition_validity_final_speed_encode(double value)
@@ -3793,6 +4216,15 @@ int vehicle_rt_sb_trig_initial_condition_unpack(
     dst_p->mfdd_end_threshold = unpack_right_shift_u8(src_p[7], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_trig_initial_condition_init(struct vehicle_rt_sb_trig_initial_condition_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_trig_initial_condition_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_trig_initial_condition_validity_initial_speed_encode(double value)
@@ -3929,6 +4361,15 @@ int vehicle_rt_sb_trig_direct_dist_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_trig_direct_dist_init(struct vehicle_rt_sb_trig_direct_dist_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_trig_direct_dist_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_sb_trig_direct_dist_direct_distance_encode(double value)
 {
     return (uint32_t)(value / 0.001);
@@ -4013,6 +4454,15 @@ int vehicle_rt_sb_trig_forward_dist_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_trig_forward_dist_init(struct vehicle_rt_sb_trig_forward_dist_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_trig_forward_dist_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_trig_forward_dist_forward_distance_encode(double value)
 {
     return (int32_t)(value / 0.001);
@@ -4081,6 +4531,15 @@ int vehicle_rt_sb_trig_path_dist_unpack(
     dst_p->path_distance_3_d |= unpack_left_shift_u32(src_p[3], 24u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_trig_path_dist_init(struct vehicle_rt_sb_trig_path_dist_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_trig_path_dist_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_sb_trig_path_dist_path_distance_3_d_encode(double value)
@@ -4154,6 +4613,15 @@ int vehicle_rt_sb_trig_accel_unpack(
     dst_p->triggered_time |= unpack_left_shift_u32(src_p[7], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_trig_accel_init(struct vehicle_rt_sb_trig_accel_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_trig_accel_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_trig_accel_validity_mfdd_encode(double value)
@@ -4284,6 +4752,15 @@ int vehicle_rt_dl1_mk3_measure_time_12_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_measure_time_12_init(struct vehicle_rt_dl1_mk3_measure_time_12_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_12_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_encode(double value)
 {
     return (uint32_t)(value);
@@ -4331,6 +4808,15 @@ int vehicle_rt_dl1_mk3_measure_time_11_unpack(
     dst_p->measured_time_11 |= unpack_left_shift_u32(src_p[2], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_measure_time_11_init(struct vehicle_rt_dl1_mk3_measure_time_11_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_11_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_encode(double value)
@@ -4382,6 +4868,15 @@ int vehicle_rt_dl1_mk3_measure_time_10_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_measure_time_10_init(struct vehicle_rt_dl1_mk3_measure_time_10_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_10_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_encode(double value)
 {
     return (uint32_t)(value);
@@ -4429,6 +4924,15 @@ int vehicle_rt_dl1_mk3_measure_time_9_unpack(
     dst_p->measured_time_9 |= unpack_left_shift_u32(src_p[2], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_measure_time_9_init(struct vehicle_rt_dl1_mk3_measure_time_9_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_9_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_encode(double value)
@@ -4480,6 +4984,15 @@ int vehicle_rt_dl1_mk3_measure_time_8_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_measure_time_8_init(struct vehicle_rt_dl1_mk3_measure_time_8_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_8_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_encode(double value)
 {
     return (uint32_t)(value);
@@ -4527,6 +5040,15 @@ int vehicle_rt_dl1_mk3_measure_time_7_unpack(
     dst_p->measured_time_7 |= unpack_left_shift_u32(src_p[2], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_measure_time_7_init(struct vehicle_rt_dl1_mk3_measure_time_7_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_7_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_encode(double value)
@@ -4578,6 +5100,15 @@ int vehicle_rt_dl1_mk3_measure_time_6_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_measure_time_6_init(struct vehicle_rt_dl1_mk3_measure_time_6_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_6_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_encode(double value)
 {
     return (uint32_t)(value);
@@ -4625,6 +5156,15 @@ int vehicle_rt_dl1_mk3_measure_time_5_unpack(
     dst_p->measured_time_5 |= unpack_left_shift_u32(src_p[2], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_measure_time_5_init(struct vehicle_rt_dl1_mk3_measure_time_5_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_5_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_encode(double value)
@@ -4676,6 +5216,15 @@ int vehicle_rt_dl1_mk3_measure_time_4_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_measure_time_4_init(struct vehicle_rt_dl1_mk3_measure_time_4_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_4_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_encode(double value)
 {
     return (uint32_t)(value);
@@ -4723,6 +5272,15 @@ int vehicle_rt_dl1_mk3_measure_time_3_unpack(
     dst_p->measured_time_3 |= unpack_left_shift_u32(src_p[2], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_measure_time_3_init(struct vehicle_rt_dl1_mk3_measure_time_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_3_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_encode(double value)
@@ -4774,6 +5332,15 @@ int vehicle_rt_dl1_mk3_measure_time_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_measure_time_2_init(struct vehicle_rt_dl1_mk3_measure_time_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_2_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_encode(double value)
 {
     return (uint32_t)(value);
@@ -4823,6 +5390,15 @@ int vehicle_rt_dl1_mk3_measure_time_1_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_measure_time_1_init(struct vehicle_rt_dl1_mk3_measure_time_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_measure_time_1_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_encode(double value)
 {
     return (uint32_t)(value);
@@ -4868,6 +5444,15 @@ int vehicle_rt_dl1_mk3_rpm_unpack(
     dst_p->rpm |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_rpm_init(struct vehicle_rt_dl1_mk3_rpm_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_rpm_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_rpm_rpm_encode(double value)
@@ -4919,6 +5504,15 @@ int vehicle_rt_dl1_mk3_freq_4_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_freq_4_init(struct vehicle_rt_dl1_mk3_freq_4_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_freq_4_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_freq_4_frequency_4_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -4966,6 +5560,15 @@ int vehicle_rt_dl1_mk3_freq_3_unpack(
     dst_p->frequency_3 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_freq_3_init(struct vehicle_rt_dl1_mk3_freq_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_freq_3_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_freq_3_frequency_3_encode(double value)
@@ -5017,6 +5620,15 @@ int vehicle_rt_dl1_mk3_freq_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_freq_2_init(struct vehicle_rt_dl1_mk3_freq_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_freq_2_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_freq_2_frequency_2_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5064,6 +5676,15 @@ int vehicle_rt_dl1_mk3_misc_3_unpack(
     dst_p->misc_3 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_misc_3_init(struct vehicle_rt_dl1_mk3_misc_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_misc_3_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_misc_3_misc_3_encode(double value)
@@ -5115,6 +5736,15 @@ int vehicle_rt_dl1_mk3_misc_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_misc_2_init(struct vehicle_rt_dl1_mk3_misc_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_misc_2_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_misc_2_misc_2_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -5162,6 +5792,15 @@ int vehicle_rt_dl1_mk3_misc_1_unpack(
     dst_p->misc_1 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_misc_1_init(struct vehicle_rt_dl1_mk3_misc_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_misc_1_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_misc_1_misc_1_encode(double value)
@@ -5213,6 +5852,15 @@ int vehicle_rt_dl1_mk3_aux_31_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_31_init(struct vehicle_rt_dl1_mk3_aux_31_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_31_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_31_aux_31_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5260,6 +5908,15 @@ int vehicle_rt_dl1_mk3_aux_30_unpack(
     dst_p->aux_30 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_30_init(struct vehicle_rt_dl1_mk3_aux_30_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_30_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_30_aux_30_encode(double value)
@@ -5311,6 +5968,15 @@ int vehicle_rt_dl1_mk3_aux_29_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_29_init(struct vehicle_rt_dl1_mk3_aux_29_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_29_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_29_aux_29_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5358,6 +6024,15 @@ int vehicle_rt_dl1_mk3_aux_28_unpack(
     dst_p->aux_28 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_28_init(struct vehicle_rt_dl1_mk3_aux_28_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_28_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_28_aux_28_encode(double value)
@@ -5409,6 +6084,15 @@ int vehicle_rt_dl1_mk3_aux_27_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_27_init(struct vehicle_rt_dl1_mk3_aux_27_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_27_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_27_aux_27_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5456,6 +6140,15 @@ int vehicle_rt_dl1_mk3_aux_26_unpack(
     dst_p->aux_26 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_26_init(struct vehicle_rt_dl1_mk3_aux_26_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_26_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_26_aux_26_encode(double value)
@@ -5507,6 +6200,15 @@ int vehicle_rt_dl1_mk3_aux_25_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_25_init(struct vehicle_rt_dl1_mk3_aux_25_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_25_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_25_aux_25_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5554,6 +6256,15 @@ int vehicle_rt_dl1_mk3_aux_24_unpack(
     dst_p->aux_24 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_24_init(struct vehicle_rt_dl1_mk3_aux_24_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_24_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_24_aux_24_encode(double value)
@@ -5605,6 +6316,15 @@ int vehicle_rt_dl1_mk3_aux_23_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_23_init(struct vehicle_rt_dl1_mk3_aux_23_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_23_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_23_aux_23_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5652,6 +6372,15 @@ int vehicle_rt_dl1_mk3_aux_22_unpack(
     dst_p->aux_22 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_22_init(struct vehicle_rt_dl1_mk3_aux_22_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_22_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_22_aux_22_encode(double value)
@@ -5703,6 +6432,15 @@ int vehicle_rt_dl1_mk3_aux_21_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_21_init(struct vehicle_rt_dl1_mk3_aux_21_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_21_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_21_aux_21_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5750,6 +6488,15 @@ int vehicle_rt_dl1_mk3_aux_20_unpack(
     dst_p->aux_20 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_20_init(struct vehicle_rt_dl1_mk3_aux_20_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_20_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_20_aux_20_encode(double value)
@@ -5801,6 +6548,15 @@ int vehicle_rt_dl1_mk3_aux_19_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_19_init(struct vehicle_rt_dl1_mk3_aux_19_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_19_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_19_aux_19_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5848,6 +6604,15 @@ int vehicle_rt_dl1_mk3_aux_18_unpack(
     dst_p->aux_18 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_18_init(struct vehicle_rt_dl1_mk3_aux_18_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_18_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_18_aux_18_encode(double value)
@@ -5899,6 +6664,15 @@ int vehicle_rt_dl1_mk3_aux_17_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_17_init(struct vehicle_rt_dl1_mk3_aux_17_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_17_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_17_aux_17_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -5946,6 +6720,15 @@ int vehicle_rt_dl1_mk3_aux_16_unpack(
     dst_p->aux_16 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_16_init(struct vehicle_rt_dl1_mk3_aux_16_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_16_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_16_aux_16_encode(double value)
@@ -5997,6 +6780,15 @@ int vehicle_rt_dl1_mk3_aux_15_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_15_init(struct vehicle_rt_dl1_mk3_aux_15_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_15_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_15_aux_15_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6044,6 +6836,15 @@ int vehicle_rt_dl1_mk3_aux_14_unpack(
     dst_p->aux_14 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_14_init(struct vehicle_rt_dl1_mk3_aux_14_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_14_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_14_aux_14_encode(double value)
@@ -6095,6 +6896,15 @@ int vehicle_rt_dl1_mk3_aux_13_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_13_init(struct vehicle_rt_dl1_mk3_aux_13_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_13_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_13_aux_13_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6142,6 +6952,15 @@ int vehicle_rt_dl1_mk3_aux_12_unpack(
     dst_p->aux_12 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_12_init(struct vehicle_rt_dl1_mk3_aux_12_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_12_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_12_aux_12_encode(double value)
@@ -6193,6 +7012,15 @@ int vehicle_rt_dl1_mk3_aux_11_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_11_init(struct vehicle_rt_dl1_mk3_aux_11_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_11_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_11_aux_11_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6240,6 +7068,15 @@ int vehicle_rt_dl1_mk3_aux_9_unpack(
     dst_p->aux_9 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_9_init(struct vehicle_rt_dl1_mk3_aux_9_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_9_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_9_aux_9_encode(double value)
@@ -6291,6 +7128,15 @@ int vehicle_rt_dl1_mk3_aux_10_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_10_init(struct vehicle_rt_dl1_mk3_aux_10_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_10_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_10_aux_10_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6338,6 +7184,15 @@ int vehicle_rt_dl1_mk3_aux_8_unpack(
     dst_p->aux_8 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_8_init(struct vehicle_rt_dl1_mk3_aux_8_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_8_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_8_aux_8_encode(double value)
@@ -6389,6 +7244,15 @@ int vehicle_rt_dl1_mk3_aux_7_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_7_init(struct vehicle_rt_dl1_mk3_aux_7_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_7_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_7_aux_7_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6436,6 +7300,15 @@ int vehicle_rt_dl1_mk3_aux_6_unpack(
     dst_p->aux_6 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_6_init(struct vehicle_rt_dl1_mk3_aux_6_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_6_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_6_aux_6_encode(double value)
@@ -6487,6 +7360,15 @@ int vehicle_rt_dl1_mk3_aux_5_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_5_init(struct vehicle_rt_dl1_mk3_aux_5_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_5_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_5_aux_5_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6534,6 +7416,15 @@ int vehicle_rt_dl1_mk3_aux_4_unpack(
     dst_p->aux_4 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_4_init(struct vehicle_rt_dl1_mk3_aux_4_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_4_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_4_aux_4_encode(double value)
@@ -6585,6 +7476,15 @@ int vehicle_rt_dl1_mk3_aux_3_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_3_init(struct vehicle_rt_dl1_mk3_aux_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_3_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_3_aux_3_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6634,6 +7534,15 @@ int vehicle_rt_dl1_mk3_aux_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_aux_2_init(struct vehicle_rt_dl1_mk3_aux_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_2_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_aux_2_aux_2_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -6681,6 +7590,15 @@ int vehicle_rt_dl1_mk3_aux_1_unpack(
     dst_p->aux_1 |= unpack_left_shift_u16(src_p[1], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_aux_1_init(struct vehicle_rt_dl1_mk3_aux_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_aux_1_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_aux_1_aux_1_encode(double value)
@@ -6734,6 +7652,15 @@ int vehicle_rt_dl1_mk3_pressure_5_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_pressure_5_init(struct vehicle_rt_dl1_mk3_pressure_5_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_pressure_5_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_pressure_5_pressure_5_encode(double value)
 {
     return (uint32_t)(value / 0.1);
@@ -6781,6 +7708,15 @@ int vehicle_rt_dl1_mk3_pressure_4_unpack(
     dst_p->pressure_4 |= unpack_left_shift_u32(src_p[2], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_pressure_4_init(struct vehicle_rt_dl1_mk3_pressure_4_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_pressure_4_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_dl1_mk3_pressure_4_pressure_4_encode(double value)
@@ -6832,6 +7768,15 @@ int vehicle_rt_dl1_mk3_pressure_3_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_pressure_3_init(struct vehicle_rt_dl1_mk3_pressure_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_pressure_3_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_pressure_3_pressure_3_encode(double value)
 {
     return (uint32_t)(value / 0.1);
@@ -6881,6 +7826,15 @@ int vehicle_rt_dl1_mk3_pressure_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_pressure_2_init(struct vehicle_rt_dl1_mk3_pressure_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_pressure_2_t));
+
+    return 0;
+}
+
 uint32_t vehicle_rt_dl1_mk3_pressure_2_pressure_2_encode(double value)
 {
     return (uint32_t)(value / 0.1);
@@ -6928,6 +7882,15 @@ int vehicle_rt_dl1_mk3_pressure_1_unpack(
     dst_p->pressure_1 |= unpack_left_shift_u32(src_p[2], 16u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_pressure_1_init(struct vehicle_rt_dl1_mk3_pressure_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_pressure_1_t));
+
+    return 0;
 }
 
 uint32_t vehicle_rt_dl1_mk3_pressure_1_pressure_1_encode(double value)
@@ -6981,6 +7944,15 @@ int vehicle_rt_dl1_mk3_angle_3_unpack(
     dst_p->angle_3 = (int16_t)angle_3;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_angle_3_init(struct vehicle_rt_dl1_mk3_angle_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_angle_3_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_angle_3_angle_3_encode(double value)
@@ -7038,6 +8010,15 @@ int vehicle_rt_dl1_mk3_angle_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_angle_2_init(struct vehicle_rt_dl1_mk3_angle_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_angle_2_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_angle_2_angle_2_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7091,6 +8072,15 @@ int vehicle_rt_dl1_mk3_angle_1_unpack(
     dst_p->angle_1 = (int16_t)angle_1;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_angle_1_init(struct vehicle_rt_dl1_mk3_angle_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_angle_1_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_angle_1_angle_1_encode(double value)
@@ -7148,6 +8138,15 @@ int vehicle_rt_dl1_mk3_temp_25_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_25_init(struct vehicle_rt_dl1_mk3_temp_25_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_25_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_25_temperature_25_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7201,6 +8200,15 @@ int vehicle_rt_dl1_mk3_temp_24_unpack(
     dst_p->temperature_24 = (int16_t)temperature_24;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_24_init(struct vehicle_rt_dl1_mk3_temp_24_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_24_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_24_temperature_24_encode(double value)
@@ -7258,6 +8266,15 @@ int vehicle_rt_dl1_mk3_temp_23_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_23_init(struct vehicle_rt_dl1_mk3_temp_23_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_23_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_23_temperature_23_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7311,6 +8328,15 @@ int vehicle_rt_dl1_mk3_temp_22_unpack(
     dst_p->temperature_22 = (int16_t)temperature_22;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_22_init(struct vehicle_rt_dl1_mk3_temp_22_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_22_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_22_temperature_22_encode(double value)
@@ -7368,6 +8394,15 @@ int vehicle_rt_dl1_mk3_temp_21_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_21_init(struct vehicle_rt_dl1_mk3_temp_21_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_21_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_21_temperature_21_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7421,6 +8456,15 @@ int vehicle_rt_dl1_mk3_temp_20_unpack(
     dst_p->temperature_20 = (int16_t)temperature_20;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_20_init(struct vehicle_rt_dl1_mk3_temp_20_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_20_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_20_temperature_20_encode(double value)
@@ -7478,6 +8522,15 @@ int vehicle_rt_dl1_mk3_temp_19_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_19_init(struct vehicle_rt_dl1_mk3_temp_19_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_19_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_19_temperature_19_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7531,6 +8584,15 @@ int vehicle_rt_dl1_mk3_temp_18_unpack(
     dst_p->temperature_18 = (int16_t)temperature_18;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_18_init(struct vehicle_rt_dl1_mk3_temp_18_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_18_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_18_temperature_18_encode(double value)
@@ -7588,6 +8650,15 @@ int vehicle_rt_dl1_mk3_temp_17_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_17_init(struct vehicle_rt_dl1_mk3_temp_17_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_17_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_17_temperature_17_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7641,6 +8712,15 @@ int vehicle_rt_dl1_mk3_temp_16_unpack(
     dst_p->temperature_16 = (int16_t)temperature_16;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_16_init(struct vehicle_rt_dl1_mk3_temp_16_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_16_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_16_temperature_16_encode(double value)
@@ -7698,6 +8778,15 @@ int vehicle_rt_dl1_mk3_temp_15_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_15_init(struct vehicle_rt_dl1_mk3_temp_15_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_15_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_15_temperature_15_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7751,6 +8840,15 @@ int vehicle_rt_dl1_mk3_temp_14_unpack(
     dst_p->temperature_14 = (int16_t)temperature_14;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_14_init(struct vehicle_rt_dl1_mk3_temp_14_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_14_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_14_temperature_14_encode(double value)
@@ -7808,6 +8906,15 @@ int vehicle_rt_dl1_mk3_temp_13_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_13_init(struct vehicle_rt_dl1_mk3_temp_13_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_13_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_13_temperature_13_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7861,6 +8968,15 @@ int vehicle_rt_dl1_mk3_temp_12_unpack(
     dst_p->temperature_12 = (int16_t)temperature_12;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_12_init(struct vehicle_rt_dl1_mk3_temp_12_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_12_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_12_temperature_12_encode(double value)
@@ -7918,6 +9034,15 @@ int vehicle_rt_dl1_mk3_temp_11_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_11_init(struct vehicle_rt_dl1_mk3_temp_11_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_11_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_11_temperature_11_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -7971,6 +9096,15 @@ int vehicle_rt_dl1_mk3_temp_10_unpack(
     dst_p->temperature_10 = (int16_t)temperature_10;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_10_init(struct vehicle_rt_dl1_mk3_temp_10_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_10_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_10_temperature_10_encode(double value)
@@ -8028,6 +9162,15 @@ int vehicle_rt_dl1_mk3_temp_9_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_9_init(struct vehicle_rt_dl1_mk3_temp_9_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_9_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_9_temperature_9_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -8081,6 +9224,15 @@ int vehicle_rt_dl1_mk3_temp_8_unpack(
     dst_p->temperature_8 = (int16_t)temperature_8;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_8_init(struct vehicle_rt_dl1_mk3_temp_8_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_8_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_8_temperature_8_encode(double value)
@@ -8138,6 +9290,15 @@ int vehicle_rt_dl1_mk3_temp_7_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_7_init(struct vehicle_rt_dl1_mk3_temp_7_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_7_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_7_temperature_7_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -8191,6 +9352,15 @@ int vehicle_rt_dl1_mk3_temp_6_unpack(
     dst_p->temperature_6 = (int16_t)temperature_6;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_6_init(struct vehicle_rt_dl1_mk3_temp_6_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_6_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_6_temperature_6_encode(double value)
@@ -8248,6 +9418,15 @@ int vehicle_rt_dl1_mk3_temp_5_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_5_init(struct vehicle_rt_dl1_mk3_temp_5_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_5_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_5_temperature_5_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -8301,6 +9480,15 @@ int vehicle_rt_dl1_mk3_temp_4_unpack(
     dst_p->temperature_4 = (int16_t)temperature_4;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_4_init(struct vehicle_rt_dl1_mk3_temp_4_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_4_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_4_temperature_4_encode(double value)
@@ -8358,6 +9546,15 @@ int vehicle_rt_dl1_mk3_temp_3_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_3_init(struct vehicle_rt_dl1_mk3_temp_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_3_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_3_temperature_3_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -8411,6 +9608,15 @@ int vehicle_rt_dl1_mk3_temp_2_unpack(
     dst_p->temperature_2 = (int16_t)temperature_2;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_temp_2_init(struct vehicle_rt_dl1_mk3_temp_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_2_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_dl1_mk3_temp_2_temperature_2_encode(double value)
@@ -8468,6 +9674,15 @@ int vehicle_rt_dl1_mk3_temp_1_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_temp_1_init(struct vehicle_rt_dl1_mk3_temp_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_temp_1_t));
+
+    return 0;
+}
+
 int16_t vehicle_rt_dl1_mk3_temp_1_temperature_1_encode(double value)
 {
     return (int16_t)(value / 0.1);
@@ -8515,6 +9730,15 @@ int vehicle_rt_dl1_mk3_analog_32_unpack(
     dst_p->analog_32 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_32_init(struct vehicle_rt_dl1_mk3_analog_32_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_32_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_32_analog_32_encode(double value)
@@ -8566,6 +9790,15 @@ int vehicle_rt_dl1_mk3_analog_31_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_31_init(struct vehicle_rt_dl1_mk3_analog_31_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_31_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_31_analog_31_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -8613,6 +9846,15 @@ int vehicle_rt_dl1_mk3_analog_30_unpack(
     dst_p->analog_30 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_30_init(struct vehicle_rt_dl1_mk3_analog_30_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_30_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_30_analog_30_encode(double value)
@@ -8664,6 +9906,15 @@ int vehicle_rt_dl1_mk3_analog_29_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_29_init(struct vehicle_rt_dl1_mk3_analog_29_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_29_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_29_analog_29_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -8711,6 +9962,15 @@ int vehicle_rt_dl1_mk3_analog_28_unpack(
     dst_p->analog_28 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_28_init(struct vehicle_rt_dl1_mk3_analog_28_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_28_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_28_analog_28_encode(double value)
@@ -8762,6 +10022,15 @@ int vehicle_rt_dl1_mk3_analog_27_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_27_init(struct vehicle_rt_dl1_mk3_analog_27_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_27_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_27_analog_27_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -8809,6 +10078,15 @@ int vehicle_rt_dl1_mk3_analog_26_unpack(
     dst_p->analog_26 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_26_init(struct vehicle_rt_dl1_mk3_analog_26_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_26_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_26_analog_26_encode(double value)
@@ -8860,6 +10138,15 @@ int vehicle_rt_dl1_mk3_analog_25_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_25_init(struct vehicle_rt_dl1_mk3_analog_25_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_25_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_25_analog_25_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -8907,6 +10194,15 @@ int vehicle_rt_dl1_mk3_analog_15_unpack(
     dst_p->analog_15 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_15_init(struct vehicle_rt_dl1_mk3_analog_15_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_15_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_15_analog_15_encode(double value)
@@ -8958,6 +10254,15 @@ int vehicle_rt_dl1_mk3_analog_14_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_14_init(struct vehicle_rt_dl1_mk3_analog_14_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_14_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_14_analog_14_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9005,6 +10310,15 @@ int vehicle_rt_dl1_mk3_analog_17_unpack(
     dst_p->analog_17 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_17_init(struct vehicle_rt_dl1_mk3_analog_17_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_17_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_17_analog_17_encode(double value)
@@ -9056,6 +10370,15 @@ int vehicle_rt_dl1_mk3_analog_24_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_24_init(struct vehicle_rt_dl1_mk3_analog_24_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_24_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_24_analog_24_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9103,6 +10426,15 @@ int vehicle_rt_dl1_mk3_analog_23_unpack(
     dst_p->analog_23 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_23_init(struct vehicle_rt_dl1_mk3_analog_23_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_23_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_23_analog_23_encode(double value)
@@ -9154,6 +10486,15 @@ int vehicle_rt_dl1_mk3_analog_22_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_22_init(struct vehicle_rt_dl1_mk3_analog_22_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_22_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_22_analog_22_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9201,6 +10542,15 @@ int vehicle_rt_dl1_mk3_analog_21_unpack(
     dst_p->analog_21 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_21_init(struct vehicle_rt_dl1_mk3_analog_21_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_21_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_21_analog_21_encode(double value)
@@ -9252,6 +10602,15 @@ int vehicle_rt_dl1_mk3_analog_20_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_20_init(struct vehicle_rt_dl1_mk3_analog_20_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_20_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_20_analog_20_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9299,6 +10658,15 @@ int vehicle_rt_dl1_mk3_analog_19_unpack(
     dst_p->analog_19 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_19_init(struct vehicle_rt_dl1_mk3_analog_19_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_19_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_19_analog_19_encode(double value)
@@ -9350,6 +10718,15 @@ int vehicle_rt_dl1_mk3_analog_16_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_16_init(struct vehicle_rt_dl1_mk3_analog_16_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_16_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_16_analog_16_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9397,6 +10774,15 @@ int vehicle_rt_dl1_mk3_analog_18_unpack(
     dst_p->analog_18 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_18_init(struct vehicle_rt_dl1_mk3_analog_18_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_18_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_18_analog_18_encode(double value)
@@ -9448,6 +10834,15 @@ int vehicle_rt_dl1_mk3_analog_12_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_12_init(struct vehicle_rt_dl1_mk3_analog_12_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_12_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_12_analog_12_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9495,6 +10890,15 @@ int vehicle_rt_dl1_mk3_analog_11_unpack(
     dst_p->analog_11 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_11_init(struct vehicle_rt_dl1_mk3_analog_11_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_11_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_11_analog_11_encode(double value)
@@ -9546,6 +10950,15 @@ int vehicle_rt_dl1_mk3_analog_10_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_10_init(struct vehicle_rt_dl1_mk3_analog_10_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_10_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_10_analog_10_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9593,6 +11006,15 @@ int vehicle_rt_dl1_mk3_analog_9_unpack(
     dst_p->analog_9 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_9_init(struct vehicle_rt_dl1_mk3_analog_9_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_9_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_9_analog_9_encode(double value)
@@ -9644,6 +11066,15 @@ int vehicle_rt_dl1_mk3_analog_8_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_8_init(struct vehicle_rt_dl1_mk3_analog_8_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_8_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_8_analog_8_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9691,6 +11122,15 @@ int vehicle_rt_dl1_mk3_analog_7_unpack(
     dst_p->analog_7 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_7_init(struct vehicle_rt_dl1_mk3_analog_7_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_7_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_7_analog_7_encode(double value)
@@ -9742,6 +11182,15 @@ int vehicle_rt_dl1_mk3_analog_6_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_6_init(struct vehicle_rt_dl1_mk3_analog_6_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_6_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_6_analog_6_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9789,6 +11238,15 @@ int vehicle_rt_dl1_mk3_analog_5_unpack(
     dst_p->analog_5 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_5_init(struct vehicle_rt_dl1_mk3_analog_5_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_5_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_5_analog_5_encode(double value)
@@ -9840,6 +11298,15 @@ int vehicle_rt_dl1_mk3_analog_4_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_4_init(struct vehicle_rt_dl1_mk3_analog_4_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_4_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_4_analog_4_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9887,6 +11354,15 @@ int vehicle_rt_dl1_mk3_analog_3_unpack(
     dst_p->analog_3 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_3_init(struct vehicle_rt_dl1_mk3_analog_3_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_3_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_3_analog_3_encode(double value)
@@ -9938,6 +11414,15 @@ int vehicle_rt_dl1_mk3_analog_2_unpack(
     return (0);
 }
 
+int vehicle_rt_dl1_mk3_analog_2_init(struct vehicle_rt_dl1_mk3_analog_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_2_t));
+
+    return 0;
+}
+
 uint16_t vehicle_rt_dl1_mk3_analog_2_analog_2_encode(double value)
 {
     return (uint16_t)(value / 0.001);
@@ -9985,6 +11470,15 @@ int vehicle_rt_dl1_mk3_analog_1_unpack(
     dst_p->analog_1 |= unpack_right_shift_u16(src_p[1], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_analog_1_init(struct vehicle_rt_dl1_mk3_analog_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_analog_1_t));
+
+    return 0;
 }
 
 uint16_t vehicle_rt_dl1_mk3_analog_1_analog_1_encode(double value)
@@ -10064,6 +11558,15 @@ int vehicle_rt_dl1_mk3_accel_unpack(
     dst_p->accel_vertical = (int16_t)accel_vertical;
 
     return (0);
+}
+
+int vehicle_rt_dl1_mk3_accel_init(struct vehicle_rt_dl1_mk3_accel_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_dl1_mk3_accel_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_encode(double value)
@@ -10240,6 +11743,15 @@ int vehicle_rt_sb_ins_vpt_4_vel_ned_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_4_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_4_vel_ned_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_4_vel_ned_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_4_vel_ned_2_virtual_4_vel_ned_d_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -10345,6 +11857,15 @@ int vehicle_rt_sb_ins_vpt_4_vel_ned_1_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_4_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_4_vel_ned_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_4_vel_ned_1_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_4_vel_ned_1_virtual_4_vel_ned_n_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -10427,6 +11948,15 @@ int vehicle_rt_sb_ins_vpt_4_offset_unpack(
     dst_p->virtual_4_offset_z = (int16_t)virtual_4_offset_z;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_vpt_4_offset_init(struct vehicle_rt_sb_ins_vpt_4_offset_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_4_offset_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_sb_ins_vpt_4_offset_virtual_4_offset_x_encode(double value)
@@ -10541,6 +12071,15 @@ int vehicle_rt_sb_ins_vpt_3_vel_ned_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_3_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_3_vel_ned_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_3_vel_ned_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_3_vel_ned_2_virtual_3_vel_ned_d_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -10646,6 +12185,15 @@ int vehicle_rt_sb_ins_vpt_3_vel_ned_1_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_3_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_3_vel_ned_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_3_vel_ned_1_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_3_vel_ned_1_virtual_3_vel_ned_n_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -10728,6 +12276,15 @@ int vehicle_rt_sb_ins_vpt_3_offset_unpack(
     dst_p->virtual_3_offset_z = (int16_t)virtual_3_offset_z;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_vpt_3_offset_init(struct vehicle_rt_sb_ins_vpt_3_offset_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_3_offset_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_sb_ins_vpt_3_offset_virtual_3_offset_x_encode(double value)
@@ -10842,6 +12399,15 @@ int vehicle_rt_sb_ins_vpt_2_vel_ned_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_2_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_2_vel_ned_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_2_vel_ned_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_2_vel_ned_2_virtual_2_vel_ned_d_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -10947,6 +12513,15 @@ int vehicle_rt_sb_ins_vpt_2_vel_ned_1_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_2_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_2_vel_ned_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_2_vel_ned_1_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_2_vel_ned_1_virtual_2_vel_ned_n_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -11029,6 +12604,15 @@ int vehicle_rt_sb_ins_vpt_2_offset_unpack(
     dst_p->virtual_2_offset_z = (int16_t)virtual_2_offset_z;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_vpt_2_offset_init(struct vehicle_rt_sb_ins_vpt_2_offset_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_2_offset_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_sb_ins_vpt_2_offset_virtual_2_offset_x_encode(double value)
@@ -11143,6 +12727,15 @@ int vehicle_rt_sb_ins_vpt_1_vel_ned_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_1_vel_ned_2_init(struct vehicle_rt_sb_ins_vpt_1_vel_ned_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_1_vel_ned_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_1_vel_ned_2_virtual_1_vel_ned_d_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -11248,6 +12841,15 @@ int vehicle_rt_sb_ins_vpt_1_vel_ned_1_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vpt_1_vel_ned_1_init(struct vehicle_rt_sb_ins_vpt_1_vel_ned_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_1_vel_ned_1_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_vpt_1_vel_ned_1_virtual_1_vel_ned_n_encode(double value)
 {
     return (int32_t)(value / 0.0001);
@@ -11330,6 +12932,15 @@ int vehicle_rt_sb_ins_vpt_1_offset_unpack(
     dst_p->virtual_1_offset_z = (int16_t)virtual_1_offset_z;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_vpt_1_offset_init(struct vehicle_rt_sb_ins_vpt_1_offset_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vpt_1_offset_t));
+
+    return 0;
 }
 
 int16_t vehicle_rt_sb_ins_vpt_1_offset_virtual_1_offset_x_encode(double value)
@@ -11435,6 +13046,15 @@ int vehicle_rt_sb_ins_slip_unpack(
     dst_p->ins_squat = (int16_t)ins_squat;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_slip_init(struct vehicle_rt_sb_ins_slip_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_slip_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_ins_slip_validity_ins_slip_encode(double value)
@@ -11599,6 +13219,15 @@ int vehicle_rt_sb_ins_vel_ecef_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vel_ecef_2_init(struct vehicle_rt_sb_ins_vel_ecef_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vel_ecef_2_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_encode(double value)
 {
     return (uint8_t)(value);
@@ -11710,6 +13339,15 @@ int vehicle_rt_sb_ins_vel_ecef_1_unpack(
     dst_p->ins_vel_ecef_x = (int32_t)ins_vel_ecef_x;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_vel_ecef_1_init(struct vehicle_rt_sb_ins_vel_ecef_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vel_ecef_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_encode(double value)
@@ -11842,6 +13480,15 @@ int vehicle_rt_sb_ins_vel_ned_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_vel_ned_2_init(struct vehicle_rt_sb_ins_vel_ned_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vel_ned_2_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_encode(double value)
 {
     return (uint8_t)(value);
@@ -11953,6 +13600,15 @@ int vehicle_rt_sb_ins_vel_ned_1_unpack(
     dst_p->ins_vel_ned_e = (int32_t)ins_vel_ned_e;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_vel_ned_1_init(struct vehicle_rt_sb_ins_vel_ned_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_vel_ned_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_encode(double value)
@@ -12086,6 +13742,15 @@ int vehicle_rt_sb_ins_pos_ecef_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_pos_ecef_2_init(struct vehicle_rt_sb_ins_pos_ecef_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_pos_ecef_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_pos_ecef_2_ins_pos_ecef_y_encode(double value)
 {
     return (int32_t)(value / 0.01);
@@ -12168,6 +13833,15 @@ int vehicle_rt_sb_ins_pos_ecef_1_unpack(
     dst_p->ins_pos_ecef_x = (int32_t)ins_pos_ecef_x;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_pos_ecef_1_init(struct vehicle_rt_sb_ins_pos_ecef_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_pos_ecef_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_encode(double value)
@@ -12335,6 +14009,15 @@ int vehicle_rt_sb_ins_pos_llh_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_pos_llh_2_init(struct vehicle_rt_sb_ins_pos_llh_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_pos_llh_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_encode(double value)
 {
     return (int32_t)(value / 1E-7);
@@ -12417,6 +14100,15 @@ int vehicle_rt_sb_ins_pos_llh_1_unpack(
     dst_p->ins_pos_llh_latitude = (int32_t)ins_pos_llh_latitude;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_pos_llh_1_init(struct vehicle_rt_sb_ins_pos_llh_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_pos_llh_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_encode(double value)
@@ -12580,6 +14272,15 @@ int vehicle_rt_sb_ins_heading_gradient_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_heading_gradient_2_init(struct vehicle_rt_sb_ins_heading_gradient_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_heading_gradient_2_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_encode(double value)
 {
     return (uint8_t)(value);
@@ -12728,6 +14429,15 @@ int vehicle_rt_sb_ins_heading_gradient_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_heading_gradient_init(struct vehicle_rt_sb_ins_heading_gradient_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_heading_gradient_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_encode(double value)
 {
     return (uint8_t)(value);
@@ -12852,6 +14562,15 @@ int vehicle_rt_sb_ins_status_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_ins_status_init(struct vehicle_rt_sb_ins_status_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_status_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_ins_status_ins_status_encode(double value)
 {
     return (uint8_t)(value);
@@ -12929,6 +14648,15 @@ int vehicle_rt_sb_ins_attitude_unpack(
     dst_p->attitude_roll = (int16_t)attitude_roll;
 
     return (0);
+}
+
+int vehicle_rt_sb_ins_attitude_init(struct vehicle_rt_sb_ins_attitude_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_ins_attitude_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_ins_attitude_validity_yaw_encode(double value)
@@ -13096,6 +14824,15 @@ int vehicle_rt_sb_output_status_unpack(
     dst_p->gps_time |= unpack_left_shift_u32(src_p[7], 24u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_output_status_init(struct vehicle_rt_sb_output_status_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_output_status_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_output_status_validity_status_timestamp_encode(double value)
@@ -13298,6 +15035,15 @@ int vehicle_rt_sb_gps_heading_gradient_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_heading_gradient_2_init(struct vehicle_rt_sb_gps_heading_gradient_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_heading_gradient_2_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_encode(double value)
 {
     return (uint8_t)(value);
@@ -13438,6 +15184,15 @@ int vehicle_rt_sb_cumulative_distance_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_cumulative_distance_2_init(struct vehicle_rt_sb_cumulative_distance_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_cumulative_distance_2_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_encode(double value)
 {
     return (uint8_t)(value);
@@ -13544,6 +15299,15 @@ int vehicle_rt_sb_cumulative_distance_1_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_cumulative_distance_1_init(struct vehicle_rt_sb_cumulative_distance_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_cumulative_distance_1_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_encode(double value)
 {
     return (uint8_t)(value);
@@ -13648,6 +15412,15 @@ int vehicle_rt_sb_trigger_timestamp_unpack(
     dst_p->gps_high_resolution_time |= unpack_left_shift_u64(src_p[7], 32u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_trigger_timestamp_init(struct vehicle_rt_sb_trigger_timestamp_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_trigger_timestamp_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_encode(double value)
@@ -13787,6 +15560,15 @@ int vehicle_rt_imu06_gyro_rates_unpack(
     dst_p->gyro_rate_roll = (int16_t)gyro_rate_roll;
 
     return (0);
+}
+
+int vehicle_rt_imu06_gyro_rates_init(struct vehicle_rt_imu06_gyro_rates_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_imu06_gyro_rates_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_encode(double value)
@@ -13958,6 +15740,20 @@ int vehicle_rt_imu06_accel_unpack(
     return (0);
 }
 
+int vehicle_rt_imu06_accel_init(struct vehicle_rt_imu06_accel_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_imu06_accel_t));
+    msg_p->validity_accel_lateral = 1;
+    msg_p->accuracy_accel = 127;
+    msg_p->accel_longitudinal = 32767;
+    msg_p->accel_lateral = -30000;
+    msg_p->accel_vertical = 16120;
+
+    return 0;
+}
+
 uint8_t vehicle_rt_imu06_accel_validity_accel_longitudinal_encode(double value)
 {
     return (uint8_t)(value);
@@ -14117,6 +15913,15 @@ int vehicle_rt_sb_speed_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_speed_init(struct vehicle_rt_sb_speed_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_speed_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_speed_validity_speed_encode(double value)
 {
     return (uint8_t)(value);
@@ -14220,6 +16025,15 @@ int vehicle_rt_sb_rtk_slip_unpack(
     dst_p->rtk_baseline |= unpack_left_shift_u16(src_p[7], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_rtk_slip_init(struct vehicle_rt_sb_rtk_slip_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_rtk_slip_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_slip_encode(double value)
@@ -14397,6 +16211,15 @@ int vehicle_rt_sb_rtk_attitude_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_rtk_attitude_init(struct vehicle_rt_sb_rtk_attitude_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_rtk_attitude_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_encode(double value)
 {
     return (uint8_t)(value);
@@ -14558,6 +16381,15 @@ int vehicle_rt_sb_gps_mcycle_lean_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_mcycle_lean_init(struct vehicle_rt_sb_gps_mcycle_lean_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_mcycle_lean_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_encode(double value)
 {
     return (uint8_t)(value);
@@ -14679,6 +16511,15 @@ int vehicle_rt_sb_gps_status_unpack(
     dst_p->rtk_status = unpack_right_shift_u8(src_p[7], 0u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_gps_status_init(struct vehicle_rt_sb_gps_status_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_status_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_gps_status_gps_status_encode(double value)
@@ -14865,6 +16706,15 @@ int vehicle_rt_sb_gps_pos_ecef_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_pos_ecef_2_init(struct vehicle_rt_sb_gps_pos_ecef_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_pos_ecef_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_gps_pos_ecef_2_gps_pos_ecef_y_encode(double value)
 {
     return (int32_t)(value / 0.01);
@@ -14947,6 +16797,15 @@ int vehicle_rt_sb_gps_pos_ecef_1_unpack(
     dst_p->gps_pos_ecef_x = (int32_t)gps_pos_ecef_x;
 
     return (0);
+}
+
+int vehicle_rt_sb_gps_pos_ecef_1_init(struct vehicle_rt_sb_gps_pos_ecef_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_pos_ecef_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_encode(double value)
@@ -15114,6 +16973,15 @@ int vehicle_rt_sb_gps_pos_llh_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_pos_llh_2_init(struct vehicle_rt_sb_gps_pos_llh_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_pos_llh_2_t));
+
+    return 0;
+}
+
 int32_t vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_encode(double value)
 {
     return (int32_t)(value / 1E-7);
@@ -15196,6 +17064,15 @@ int vehicle_rt_sb_gps_pos_llh_1_unpack(
     dst_p->gps_pos_llh_latitude = (int32_t)gps_pos_llh_latitude;
 
     return (0);
+}
+
+int vehicle_rt_sb_gps_pos_llh_1_init(struct vehicle_rt_sb_gps_pos_llh_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_pos_llh_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_encode(double value)
@@ -15363,6 +17240,15 @@ int vehicle_rt_sb_gps_heading_gradient_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_heading_gradient_init(struct vehicle_rt_sb_gps_heading_gradient_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_heading_gradient_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_encode(double value)
 {
     return (uint8_t)(value);
@@ -15521,6 +17407,15 @@ int vehicle_rt_sb_gps_vel_ecef_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_vel_ecef_2_init(struct vehicle_rt_sb_gps_vel_ecef_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_vel_ecef_2_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_encode(double value)
 {
     return (uint8_t)(value);
@@ -15632,6 +17527,15 @@ int vehicle_rt_sb_gps_vel_ecef_1_unpack(
     dst_p->gps_vel_ecef_x = (int32_t)gps_vel_ecef_x;
 
     return (0);
+}
+
+int vehicle_rt_sb_gps_vel_ecef_1_init(struct vehicle_rt_sb_gps_vel_ecef_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_vel_ecef_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_encode(double value)
@@ -15764,6 +17668,15 @@ int vehicle_rt_sb_gps_vel_ned_2_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_vel_ned_2_init(struct vehicle_rt_sb_gps_vel_ned_2_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_vel_ned_2_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_encode(double value)
 {
     return (uint8_t)(value);
@@ -15875,6 +17788,15 @@ int vehicle_rt_sb_gps_vel_ned_1_unpack(
     dst_p->gps_vel_ned_e = (int32_t)gps_vel_ned_e;
 
     return (0);
+}
+
+int vehicle_rt_sb_gps_vel_ned_1_init(struct vehicle_rt_sb_gps_vel_ned_1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_vel_ned_1_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_encode(double value)
@@ -16000,6 +17922,15 @@ int vehicle_rt_sb_gps_speed_unpack(
     return (0);
 }
 
+int vehicle_rt_sb_gps_speed_init(struct vehicle_rt_sb_gps_speed_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_speed_t));
+
+    return 0;
+}
+
 uint8_t vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_encode(double value)
 {
     return (uint8_t)(value);
@@ -16121,6 +18052,15 @@ int vehicle_rt_sb_gps_time_unpack(
     dst_p->gps_week |= unpack_left_shift_u16(src_p[7], 8u, 0xffu);
 
     return (0);
+}
+
+int vehicle_rt_sb_gps_time_init(struct vehicle_rt_sb_gps_time_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gps_time_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_gps_time_validity_gps_time_encode(double value)
@@ -16262,6 +18202,15 @@ int vehicle_rt_sb_accel_unpack(
     dst_p->accel_vertical = (int16_t)accel_vertical;
 
     return (0);
+}
+
+int vehicle_rt_sb_accel_init(struct vehicle_rt_sb_accel_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_accel_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_accel_validity_accel_longitudinal_encode(double value)
@@ -16437,6 +18386,15 @@ int vehicle_rt_sb_gyro_rates_unpack(
     dst_p->gyro_rate_roll = (int16_t)gyro_rate_roll;
 
     return (0);
+}
+
+int vehicle_rt_sb_gyro_rates_init(struct vehicle_rt_sb_gyro_rates_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct vehicle_rt_sb_gyro_rates_t));
+
+    return 0;
 }
 
 uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_encode(double value)

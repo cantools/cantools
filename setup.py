@@ -28,7 +28,7 @@ setup(name='cantools',
       package_data={"cantools": ["py.typed"]},
       python_requires='>=3.8',
       install_requires=[
-          'bitstruct>=8.15.1',
+          'bitstruct>=8.16.1',
           'python-can>=3.3.4',
           'textparser>=0.21.1',
           'diskcache',

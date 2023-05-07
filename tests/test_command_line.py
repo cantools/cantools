@@ -67,7 +67,6 @@ def read_utf8_file(filename):
 
 
 class CanToolsCommandLineTest(unittest.TestCase):
-
     maxDiff = None
 
     def assert_files_equal(self, actual, expected):
@@ -1350,15 +1349,14 @@ BATTERY_VT(
                     database_c,
                     'tests/files/c_source/' + expected_database_c)
 
-
     def test_generate_c_source_sender_node_no_signal_encode_decode(self):
         databases = [
             'motohawk',
             'open_actuator'
         ]
         nodes = [
-          'PCM1',
-          'Actuator'
+            'PCM1',
+            'Actuator'
         ]
 
         for database, node in zip(databases, nodes):
@@ -1389,7 +1387,6 @@ BATTERY_VT(
                                         'tests/files/c_source/' + expected_database_h)
                 self.assert_files_equal(database_c,
                                         'tests/files/c_source/' + expected_database_c)
-
 
     def test_generate_c_source_database_name(self):
         databases = [
@@ -1424,7 +1421,7 @@ BATTERY_VT(
 
     def test_generate_c_source_output_directory(self):
         database = 'motohawk'
-        
+
         output_directory = 'some_dir'
 
         argv = [
@@ -1487,8 +1484,8 @@ BATTERY_VT(
             'open_actuator'
         ]
         nodes = [
-          'PCM1',
-          'Actuator'
+            'PCM1',
+            'Actuator'
         ]
 
         for database, node in zip(databases, nodes):

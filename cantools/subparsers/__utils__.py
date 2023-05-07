@@ -1,16 +1,15 @@
+from typing import (
+    Iterable,
+    Union,
+)
+
 from ..database.can.database import Database
 from ..database.can.message import Message
 from ..database.can.signal import NamedSignalValue
-
-from typing import (
-    Union,
-    Iterable,
-)
-
 from ..typechecking import (
-    SignalDictType,
-    ContainerUnpackResultType,
     ContainerDecodeResultType,
+    ContainerUnpackResultType,
+    SignalDictType,
 )
 
 MULTI_LINE_FMT = '''
@@ -193,8 +192,8 @@ def format_multiplexed_name(message : Message,
         if signal.is_multiplexer:
             if signal.name in decoded_signals:
                 result.append(str(decoded_signals[signal.name]))
-            elif signal.initial is not None:
-                result.append(str(signal.initial))
+            elif signal.raw_initial is not None:
+                result.append(str(signal.raw_initial))
             else:
                 result.append('0')
 

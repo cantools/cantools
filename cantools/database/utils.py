@@ -1,18 +1,28 @@
 # Utility functions.
 
-from collections import OrderedDict
 import os.path
 import re
-from typing import Union, List, Callable, Tuple, Optional, Dict, Sequence, TYPE_CHECKING
+from collections import OrderedDict
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    Final,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
-from typing_extensions import Literal, Final
-
+from ..database.can.signal import NamedSignalValue
 from ..typechecking import (
-    Formats,
-    Choices,
-    SignalMappingType,
-    SignalDictType,
     ByteOrder,
+    Choices,
+    Formats,
+    SignalDictType,
+    SignalMappingType,
 )
 
 if TYPE_CHECKING:
@@ -78,7 +88,14 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
             unpacked[field.name] = _transform(value)  # type: ignore[operator]
             continue
 
-        unpacked[field.name] = field.choice_string_to_number(str(value))
+        if isinstance(value, (str, NamedSignalValue)):
+            unpacked[field.name] = field.choice_string_to_number(str(value))
+            continue
+
+        raise TypeError(
+            f"Unable to encode signal '{field.name}' "
+            f"with type '{value.__class__.__name__}'."
+        )
 
     return unpacked
 
@@ -113,8 +130,8 @@ def decode_data(data: bytes,
         data = data.ljust(expected_length, b"\xFF")
 
     unpacked = {
-        **formats.big_endian.unpack(bytes(data)),
-        **formats.little_endian.unpack(bytes(data[::-1])),
+        **formats.big_endian.unpack(data),
+        **formats.little_endian.unpack(data[::-1]),
     }
 
     if allow_truncated and actual_length < expected_length:
@@ -169,7 +186,7 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
             return 'u'
 
     def padding_item(length: int) -> Tuple[str, str, None]:
-        fmt = 'p{}'.format(length)
+        fmt = f'p{length}'
         padding_mask = '1' * length
 
         return fmt, padding_mask, None
@@ -242,7 +259,7 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
 
         if format_length > 0:
             length = len(''.join([item[1] for item in items]))
-            _packed = bitstruct.pack('u{}'.format(length), value)
+            _packed = bitstruct.pack(f'u{length}', value)
             value = int.from_bytes(_packed, "little")
 
         return fmt(items), value, names(items)
@@ -252,12 +269,12 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
 
     try:
         big_compiled = bitstruct.c.compile(big_fmt, big_names)
-    except Exception as e:
+    except Exception:
         big_compiled = bitstruct.compile(big_fmt, big_names)
 
     try:
         little_compiled = bitstruct.c.compile(little_fmt, little_names)
-    except Exception as e:
+    except Exception:
         little_compiled = bitstruct.compile(little_fmt, little_names)
 
     return Formats(big_compiled,

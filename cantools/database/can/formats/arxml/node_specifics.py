@@ -1,4 +1,4 @@
-class AutosarNodeSpecifics(object):
+class AutosarNodeSpecifics:
     """This class collects the AUTOSAR specific information of node that
     is attached to a CAN bus
 

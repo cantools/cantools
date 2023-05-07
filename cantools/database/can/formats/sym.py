@@ -1,35 +1,35 @@
 # Load and dump a CAN database in SYM format.
 
 import collections
-from itertools import groupby
-import re
 import logging
+import re
 from collections import OrderedDict as odict
 from decimal import Decimal
-from typing import Callable, Iterator, List, Optional as TypingOptional
+from itertools import groupby
+from typing import Callable, Iterator, List
+from typing import Optional as TypingOptional
 
 import textparser
-from textparser import Sequence
-from textparser import choice
-from textparser import ZeroOrMore
-from textparser import ZeroOrMoreDict
-from textparser import DelimitedList
-from textparser import tokenize_init
-from textparser import Token
-from textparser import TokenizeError
-from textparser import Optional
-from textparser import Any
+from textparser import (
+    Any,
+    DelimitedList,
+    Optional,
+    Sequence,
+    Token,
+    TokenizeError,
+    ZeroOrMore,
+    ZeroOrMoreDict,
+    choice,
+    tokenize_init,
+)
 
-from ..signal import Signal
-from ..signal import NamedSignalValue
-from ..signal import Decimal as SignalDecimal
-from ..message import Message
-from ..internal_database import InternalDatabase
-
-from .utils import num
-from ...utils import SORT_SIGNALS_DEFAULT, type_sort_signals, sort_signals_by_start_bit
 from ...errors import ParseError
-
+from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
+from ..internal_database import InternalDatabase
+from ..message import Message
+from ..signal import Decimal as SignalDecimal
+from ..signal import NamedSignalValue, Signal
+from .utils import num
 
 LOGGER = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ class Parser60(textparser.Parser):
             ('HEXNUMBER',          r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
             ('NUMBER',             r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?'),
             ('STRING',             re_string),
-            ('U',                  r'/u:({}|\S+)'.format(re_string)),
+            ('U',                  fr'/u:({re_string}|\S+)'),
             ('F',                  r'/f:'),
             ('O',                  r'/o:'),
             ('MIN',                r'/min:'),
@@ -275,7 +275,7 @@ def _get_enum(enums, name):
     try:
         return enums[name]
     except KeyError:
-        raise ParseError("Enum '{}' is not defined.".format(name))
+        raise ParseError(f"Enum '{name}' is not defined.")
 
 
 def _load_enums(tokens):
@@ -305,7 +305,10 @@ def _load_signal_type_and_length(type_, tokens, enums):
     enum = None
     minimum = None
     maximum = None
-    decimal = SignalDecimal()
+    decimal = SignalDecimal(
+        scale=Decimal("1"),
+        offset=Decimal("0"),
+    )
 
     if type_ == 'signed':
         is_signed = True
@@ -374,7 +377,7 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal, spn)
         elif item.startswith('/u:'):
             unit = item[3:]
         else:
-            raise ParseError('Iternal error {}.'.format(item))
+            raise ParseError(f'Internal error {item}.')
 
     return unit, factor, offset, enum, minimum, maximum, decimal, spn
 
@@ -802,7 +805,7 @@ def _dump_choices(database: InternalDatabase) -> str:
                 new_choice = _dump_choice(signal)
                 if new_choice:
                     choices.append(new_choice)
-    
+
     if choices:
         return '{ENUMS}\n' + '\n'.join(choices)
     else:
@@ -939,7 +942,7 @@ def _dump_messages(database: InternalDatabase) -> str:
             for signal_tree_signal in message.signal_tree:
                 if not isinstance(signal_tree_signal, collections.abc.Mapping):
                     non_multiplexed_signals.append(signal_tree_signal)
-            
+
             for signal_tree_signal in message.signal_tree:
                 if isinstance(signal_tree_signal, collections.abc.Mapping):
                     signal_name, multiplexed_signals = list(signal_tree_signal.items())[0]
@@ -950,14 +953,14 @@ def _dump_messages(database: InternalDatabase) -> str:
                         is_first_message = False
         else:
             message_dumps.append(_dump_message(message, message.signals, min_frame_id, max_frame_id))
-        
+
         if message.senders == [SEND_MESSAGE_SENDER]:
             send_messages.extend(message_dumps)
         elif message.senders == [RECEIVE_MESSAGE_SENDER]:
             receive_messages.extend(message_dumps)
         else:
             send_receive_messages.extend(message_dumps)
-    
+
     messages_dump = ''
     if send_messages:
         messages_dump += '{SEND}\n' + '\n'.join(send_messages) + '\n'
@@ -973,7 +976,7 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
     """
     if sort_signals == SORT_SIGNALS_DEFAULT:
         sort_signals = sort_signals_by_start_bit
-        
+
     sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
     sym_str += 'Title="SYM Database"\n\n'
 

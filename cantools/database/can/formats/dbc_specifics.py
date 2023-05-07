@@ -2,7 +2,8 @@
 
 from collections import OrderedDict
 
-class DbcSpecifics(object):
+
+class DbcSpecifics:
 
     def __init__(self,
                  attributes=None,

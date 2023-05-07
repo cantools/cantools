@@ -65,6 +65,12 @@ extern "C" {
 #define CHOICES_FOO_FOO_RESERVED_5_CHOICE (5)
 #define CHOICES_FOO_FOO_RESERVED_6_CHOICE (6)
 
+/* Frame Names. */
+#define CHOICES_FOO_NAME "Foo"
+
+/* Signal Names. */
+#define CHOICES_FOO_FOO_NAME "Foo"
+
 /**
  * Signals in message Foo.
  *

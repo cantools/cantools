@@ -120,7 +120,7 @@
       </Producer>
       <Signal name="CCEnabled" offset="0"/>
       <Signal name="CCActivated" offset="1"/>
-      <Signal name="SpeedKm" offset="2" length="16"/>
+      <Signal name="CCTargetSpeedKm" offset="2" length="16"/>
     </Message>
 
     <Message id="0x400" length="5" name="Emission">

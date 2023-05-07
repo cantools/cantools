@@ -2,19 +2,14 @@
 # (SecOC, i.e., verification of the authenticity of the sender of
 # messages.)
 
+import bitstruct
+
 from ..database.can.message import Message
 from ..errors import Error
-
-from typing import (
-    Union,
-    List,
-    Optional,
- )
 from ..typechecking import (
     SecOCAuthenticatorFn,
 )
 
-import bitstruct
 
 class SecOCError(Error):
     """Exception that is raised if something SecOC related goes wrong.

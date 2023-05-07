@@ -1,48 +1,46 @@
 # Load and dump a CAN database in DBC format.
 
 import re
-from collections import OrderedDict
-from collections import defaultdict
-from decimal import Decimal
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
+from decimal import Decimal
 
 import textparser
-from textparser import Sequence
-from textparser import choice
-from textparser import ZeroOrMore
-from textparser import OneOrMore
-from textparser import OneOrMoreDict
-from textparser import DelimitedList
-from textparser import Any
-from textparser import AnyUntil
-from textparser import tokenize_init
-from textparser import Token
-from textparser import TokenizeError
-from textparser import Optional
-
-from ..attribute_definition import AttributeDefinition
-from ..attribute import Attribute
-from ..signal import Signal
-from ..signal import NamedSignalValue
-from ..signal import Decimal as SignalDecimal
-from ..signal_group import SignalGroup
-from ..message import Message
-from ..node import Node
-from ..bus import Bus
-from ..internal_database import InternalDatabase
-from ..environment_variable import EnvironmentVariable
-
-from .utils import num
-from .dbc_specifics import DbcSpecifics
-from ...utils import (
-    type_sort_signals,
-    type_sort_attributes,
-    type_sort_choices,
-    sort_signals_by_start_bit,
-    sort_signals_by_start_bit_reversed,
-    SORT_SIGNALS_DEFAULT
+from textparser import (
+    Any,
+    AnyUntil,
+    DelimitedList,
+    OneOrMore,
+    OneOrMoreDict,
+    Optional,
+    Sequence,
+    Token,
+    TokenizeError,
+    ZeroOrMore,
+    choice,
+    tokenize_init,
 )
 
+from ...utils import (
+    SORT_SIGNALS_DEFAULT,
+    sort_signals_by_start_bit,
+    sort_signals_by_start_bit_reversed,
+    type_sort_attributes,
+    type_sort_choices,
+    type_sort_signals,
+)
+from ..attribute import Attribute
+from ..attribute_definition import AttributeDefinition
+from ..bus import Bus
+from ..environment_variable import EnvironmentVariable
+from ..internal_database import InternalDatabase
+from ..message import Message
+from ..node import Node
+from ..signal import Decimal as SignalDecimal
+from ..signal import NamedSignalValue, Signal
+from ..signal_group import SignalGroup
+from .dbc_specifics import DbcSpecifics
+from .utils import num
 
 DBC_FMT = (
     'VERSION "{version}"\r\n'
@@ -297,7 +295,7 @@ class Parser(textparser.Parser):
             Optional(choice('BU_SG_REL_', 'BU_BO_REL_')),
             'STRING',
             'WORD',
-            choice(DelimitedList('STRING'), OneOrMore('NUMBER')),
+            Optional(choice(DelimitedList('STRING'), OneOrMore('NUMBER'))),
             ';')
 
         attribute_definition_default_rel = Sequence(
@@ -361,7 +359,7 @@ class Parser(textparser.Parser):
                 bs,
                 version))
 
-class LongNamesConverter(object):
+class LongNamesConverter:
 
     def __init__(self, database):
         self._database = database
@@ -380,7 +378,7 @@ class LongNamesConverter(object):
             if short_name in self._short_names:
                 index = self._next_index_per_cut_name[cut_name]
                 self._next_index_per_cut_name[cut_name] += 1
-                short_name = '{}_{:04d}'.format(name[:27], index)
+                short_name = f'{name[:27]}_{index:04d}'
             else:
                 self._next_index_per_cut_name[cut_name] = 0
                 self._short_names.add(short_name)
@@ -432,7 +430,7 @@ def _dump_value_tables(database):
 
     for name, choices in database.dbc.value_tables.items():
         choices = [
-            '{} "{}"'.format(number, text)
+            f'{number} "{text}"'
             for number, text in reversed(sorted(choices.items()))
         ]
         val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices)))
@@ -447,7 +445,7 @@ def _dump_messages(database, sort_signals):
         if signal.is_multiplexer:
             return ' M'
         elif signal.multiplexer_ids is not None:
-            return ' m{}'.format(signal.multiplexer_ids[0])
+            return f' m{signal.multiplexer_ids[0]}'
         else:
             return ''
 
@@ -592,7 +590,7 @@ def _dump_attribute_definitions(database):
         if definition.minimum is None:
             value = ''
         else:
-            value = ' {}'.format(value)
+            value = f' {value}'
 
         return value
 
@@ -607,7 +605,7 @@ def _dump_attribute_definitions(database):
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
-            choices = ','.join(['"{}"'.format(choice)
+            choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
             ba_def.append(
                 'BA_DEF_ {kind} "{name}" {type_name}  {choices};'.format(
@@ -645,7 +643,7 @@ def _dump_attribute_definitions_rel(database):
         if definition.minimum is None:
             value = ''
         else:
-            value = ' {}'.format(value)
+            value = f' {value}'
 
         return value
 
@@ -657,7 +655,7 @@ def _dump_attribute_definitions_rel(database):
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
-            choices = ','.join(['"{}"'.format(choice)
+            choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
             ba_def_rel.append(
                 'BA_DEF_REL_ {kind}  "{name}" {type_name}  {choices};'.format(
@@ -962,7 +960,7 @@ def _dump_signal_mux_values(database):
                 continue
 
             ranges = ', '.join([
-                '{}-{}'.format(minimum, maximum)
+                f'{minimum}-{maximum}'
                 for minimum, maximum in _create_mux_ranges(signal.multiplexer_ids)
             ])
 
@@ -1206,17 +1204,17 @@ def _load_environment_variables(tokens, comments, attributes):
 def _load_choices(tokens):
     choices = defaultdict(dict)
 
-    for choice in tokens.get('VAL_', []):
-        if len(choice[1]) == 0:
+    for _choice in tokens.get('VAL_', []):
+        if len(_choice[1]) == 0:
             continue
 
-        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in choice[3])
+        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in _choice[3])
 
         if len(od) == 0:
             continue
 
-        frame_id = int(choice[1][0])
-        choices[frame_id][choice[2]] = od
+        frame_id = int(_choice[1][0])
+        choices[frame_id][_choice[2]] = od
 
     return choices
 
@@ -1333,7 +1331,7 @@ def _load_signals(tokens,
 
         try:
             return comments[frame_id_dbc]['signal'][signal]
-        except:
+        except KeyError:
             return None
 
     def get_choices(frame_id_dbc, signal):
@@ -1460,7 +1458,7 @@ def _load_signals(tokens,
                                if signal[7] == '0'
                                else 'little_endian'),
                    is_signed=(signal[8] == '-'),
-                   initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
+                   raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
                    scale=num(signal[10]),
                    offset=num(signal[12]),
                    minimum=get_minimum(signal[15], signal[17]),
@@ -1522,7 +1520,7 @@ def _load_messages(tokens,
 
         try:
             return comments[frame_id_dbc]['message']
-        except:
+        except KeyError:
             return None
 
     def get_send_type(frame_id_dbc):
@@ -1537,7 +1535,7 @@ def _load_messages(tokens,
             result = message_attributes['GenMsgSendType'].value
 
             # if definitions is enum (otherwise above value is maintained) -> Prevents ValueError
-            if definitions['GenMsgSendType'].choices != None:
+            if definitions['GenMsgSendType'].choices is not None:
                 # Resolve ENUM index to ENUM text
                 result = definitions['GenMsgSendType'].choices[int(result)]
         except (KeyError, TypeError):
@@ -1597,7 +1595,7 @@ def _load_messages(tokens,
     def get_signal_groups(frame_id_dbc):
         try:
             return signal_groups[frame_id_dbc]
-        except:
+        except KeyError:
             return None
 
     messages = []
@@ -1941,10 +1939,10 @@ def get_definitions_rel_dict(definitions, defaults):
 
         if len(values) > 0:
             if definition.type_name == "ENUM":
-                definition.choices = values
+                definition.choices = values[0]
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = convert_value(definition, values[0])
-                definition.maximum = convert_value(definition, values[1])
+                definition.minimum = convert_value(definition, values[0][0])
+                definition.maximum = convert_value(definition, values[0][1])
 
         try:
             value = defaults[definition.name]

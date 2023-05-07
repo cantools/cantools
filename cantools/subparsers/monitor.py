@@ -1,15 +1,15 @@
 import argparse
+import bisect
+import curses
+import queue
 import re
 import time
-import curses
-import bisect
-import queue
 
 import can
 from argparse_addons import Integer
+
 from .. import database
-from .__utils__ import format_message
-from .__utils__ import format_multiplexed_name
+from .__utils__ import format_message, format_multiplexed_name
 
 
 class QuitError(Exception):
@@ -66,11 +66,11 @@ class Monitor(can.Listener):
             return can.Bus(bustype=args.bus_type,
                            channel=args.channel,
                            **kwargs)
-        except:
+        except Exception as exc:
             raise Exception(
                 "Failed to create CAN bus with bustype='{}' and "
-                "channel='{}'.".format(args.bus_type,
-                                       args.channel))
+                "channel='{}'.".format(args.bus_type, args.channel)
+            ) from exc
 
     def run(self, max_num_keys_per_tick=-1):
         while True:
@@ -286,7 +286,7 @@ class Monitor(can.Listener):
     def compile_filter(self):
         try:
             self._compiled_filter = re.compile(self._filter)
-        except:
+        except (TypeError, re.error):
             self._compiled_filter = None
 
     def process_user_input_filter(self, key):
@@ -401,7 +401,7 @@ class Monitor(can.Listener):
         else:
             formatted = format_message(message, data, True, False)
             lines = formatted.splitlines()
-            formatted = ['{:12.3f}  {}'.format(timestamp, lines[1])]
+            formatted = [f'{timestamp:12.3f}  {lines[1]}']
             formatted += [14 * ' ' + line for line in lines[2:]]
 
         self._update_formatted_message(name, formatted)
@@ -409,8 +409,7 @@ class Monitor(can.Listener):
     def _try_update_container(self, dbmsg, timestamp, data):
         try:
             decoded = dbmsg.decode(data, decode_containers=True)
-        except:
-            formatted = None
+        except:  # noqa: E722  # TODO: introduce cantools.DecodeError & cantools.EncodeError
             if self._single_line:
                 formatted = [
                     f'{timestamp:12.3f} {dbmsg.name} '

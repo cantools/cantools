@@ -58,6 +58,15 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define MIN_MAX_ONLY_6_0_SYMBOL1_NAME "Symbol1"
+
+/* Signal Names. */
+#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL1_NAME "Signal1"
+#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL2_NAME "Signal2"
+#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL4_NAME "Signal4"
+#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL3_NAME "Signal3"
+
 /**
  * Signals in message Symbol1.
  *

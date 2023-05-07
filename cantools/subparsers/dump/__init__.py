@@ -1,25 +1,24 @@
 import argparse
 import os
+import sys
 
-from . import formatting
 from ... import database
-from ...database.utils import format_and
 from ...database.can.database import Database as CanDatabase
 from ...database.diagnostics.database import Database as DiagnosticsDatabase
-from ...j1939 import is_pdu_format_1
-from ...j1939 import frame_id_unpack
-from ...j1939 import pgn_pack
+from ...database.utils import format_and
+from ...j1939 import frame_id_unpack, is_pdu_format_1, pgn_pack
+from . import formatting
 
 
 def _print_j1939_frame_id(message):
     unpacked = frame_id_unpack(message.frame_id)
 
-    print('      Priority:       {}'.format(unpacked.priority))
+    print(f'      Priority:       {unpacked.priority}')
 
     if is_pdu_format_1(unpacked.pdu_format):
         pdu_format = 'PDU 1'
         pdu_specific = 0
-        destination = '0x{:02x}'.format(unpacked.pdu_specific)
+        destination = f'0x{unpacked.pdu_specific:02x}'
     else:
         pdu_format = 'PDU 2'
         pdu_specific = unpacked.pdu_specific
@@ -30,9 +29,9 @@ def _print_j1939_frame_id(message):
                  unpacked.data_page,
                  unpacked.pdu_format,
                  pdu_specific)))
-    print('      Source:         0x{:02x}'.format(unpacked.source_address))
-    print('      Destination:    {}'.format(destination))
-    print('      Format:         {}'.format(pdu_format))
+    print(f'      Source:         0x{unpacked.source_address:02x}')
+    print(f'      Destination:    {destination}')
+    print(f'      Format:         {pdu_format}')
 
 def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
     cycle_time = message.cycle_time
@@ -57,12 +56,12 @@ def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
         _print_j1939_frame_id(message)
 
     if message.is_container:
-        print('  Maximum length: {} bytes'.format(message.length))
+        print(f'  Maximum length: {message.length} bytes')
     else:
-        print('  Length:         {} bytes'.format(message.length))
+        print(f'  Length:         {message.length} bytes')
 
-    print('  Cycle time:     {} ms'.format(cycle_time))
-    print('  Senders:        {}'.format(format_and(message.senders)))
+    print(f'  Cycle time:     {cycle_time} ms')
+    print(f'  Senders:        {format_and(message.senders)}')
     if message.is_container:
         print('  Possibly contained children:')
         print()
@@ -107,7 +106,7 @@ def _dump_can_database(dbase, with_comments=False):
     WIDTH = 80
     try:
         WIDTH, _ = os.get_terminal_size()
-    except:
+    except OSError:
         pass
 
     print('================================= Messages =================================')
@@ -128,15 +127,15 @@ def _dump_diagnostics_database(dbase):
 
     for did in dbase.dids:
         print()
-        print('  Name:       {}'.format(did.name))
-        print('  Length:     {} bytes'.format(did.length))
+        print(f'  Name:       {did.name}')
+        print(f'  Length:     {did.length} bytes')
         print('  Layout:')
         print()
 
         for data in did.datas:
-            print('    Name:      {}'.format(data.name))
-            print('    Start bit: {}'.format(data.start))
-            print('    Length:    {}'.format(data.length))
+            print(f'    Name:      {data.name}')
+            print(f'    Start bit: {data.start}')
+            print(f'    Length:    {data.length}')
             print()
 
         print()

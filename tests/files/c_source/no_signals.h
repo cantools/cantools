@@ -61,6 +61,13 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define NO_SIGNALS_MESSAGE1_NAME "Message1"
+#define NO_SIGNALS_MESSAGE2_NAME "Message2"
+
+/* Signal Names. */
+
+
 /**
  * Signals in message Message1.
  *

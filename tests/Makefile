@@ -1,5 +1,6 @@
 TESTS += test_basic.c
 TESTS += test_bit_fields.c
+TESTS += test_initial_values.c
 
 SRC += files/c_source/motohawk.c
 SRC += files/c_source/padding_bit_order.c

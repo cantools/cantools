@@ -420,7 +420,8 @@ int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t 
     if (msg_p == NULL) return -1;
     memset(msg_p, 0, sizeof(struct {database_name}_{message_name}_t));
 
-{init_body}    return 0;
+{init_body}
+    return 0;
 }}
 '''
 
@@ -569,7 +570,6 @@ SIGNAL_MEMBER_FMT = '''\
 
 INIT_SIGNAL_BODY_TEMPLATE_FMT = '''\
     msg_p->{signal_name} = {signal_initial};
-
 '''
 
 

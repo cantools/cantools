@@ -34,8 +34,7 @@ def _do_generate_c_source(args):
         not args.no_floating_point_numbers,
         args.bit_fields,
         args.use_float,
-        args.node,
-        args.add_initializers)
+        args.node)
 
     os.makedirs(args.output_directory, exist_ok=True)
     

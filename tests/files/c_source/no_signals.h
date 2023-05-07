@@ -121,6 +121,15 @@ int no_signals_message1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int no_signals_message1_init(struct no_signals_message1_t *msg_p);
+
+/**
  * Pack message Message2.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -147,6 +156,15 @@ int no_signals_message2_unpack(
     struct no_signals_message2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int no_signals_message2_init(struct no_signals_message2_t *msg_p);
 
 
 #ifdef __cplusplus

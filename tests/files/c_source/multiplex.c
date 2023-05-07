@@ -146,6 +146,15 @@ int multiplex_message1_unpack(
     return (0);
 }
 
+int multiplex_message1_init(struct multiplex_message1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct multiplex_message1_t));
+
+    return 0;
+}
+
 uint8_t multiplex_message1_multiplexor_encode(double value)
 {
     return (uint8_t)(value);

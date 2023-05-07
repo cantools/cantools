@@ -112,6 +112,15 @@ int open_actuator_control_cmd_unpack(
     return (0);
 }
 
+int open_actuator_control_cmd_init(struct open_actuator_control_cmd_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_control_cmd_t));
+
+    return 0;
+}
+
 double open_actuator_control_cmd_crc8_cmd1_decode(uint8_t value)
 {
     return ((double)value);
@@ -203,6 +212,15 @@ int open_actuator_limits_cmd_unpack(
     return (0);
 }
 
+int open_actuator_limits_cmd_init(struct open_actuator_limits_cmd_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_limits_cmd_t));
+
+    return 0;
+}
+
 double open_actuator_limits_cmd_crc8_cmd2_decode(uint8_t value)
 {
     return ((double)value);
@@ -286,6 +304,15 @@ int open_actuator_control_status_unpack(
     return (0);
 }
 
+int open_actuator_control_status_init(struct open_actuator_control_status_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_control_status_t));
+
+    return 0;
+}
+
 uint8_t open_actuator_control_status_crc8_stat1_encode(double value)
 {
     return (uint8_t)(value);
@@ -351,6 +378,14 @@ int open_actuator_system_status_pack(
     return (3);
 }
 
+int open_actuator_system_status_init(struct open_actuator_system_status_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_system_status_t));
+
+    return 0;
+}
 
 uint8_t open_actuator_system_status_crc8_stat2_encode(double value)
 {
@@ -384,4 +419,13 @@ bool open_actuator_system_status_chip_temp_is_in_range(uint8_t value)
     (void)value;
 
     return (true);
+}
+
+int open_actuator_torque_sensor_data_init(struct open_actuator_torque_sensor_data_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_torque_sensor_data_t));
+
+    return 0;
 }

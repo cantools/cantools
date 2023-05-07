@@ -156,6 +156,15 @@ int min_max_only_6_0_symbol1_unpack(
     return (0);
 }
 
+int min_max_only_6_0_symbol1_init(struct min_max_only_6_0_symbol1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct min_max_only_6_0_symbol1_t));
+
+    return 0;
+}
+
 uint8_t min_max_only_6_0_symbol1_signal1_encode(double value)
 {
     return (uint8_t)(value);

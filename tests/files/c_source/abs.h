@@ -1221,6 +1221,15 @@ int abs_bremse_33_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_33.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_33_init(struct abs_bremse_33_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1357,6 +1366,15 @@ int abs_bremse_10_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_10.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_10_init(struct abs_bremse_10_t *msg_p);
+
+/**
  * Pack message BREMSE_11.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1383,6 +1401,15 @@ int abs_bremse_11_unpack(
     struct abs_bremse_11_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_11.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_11_init(struct abs_bremse_11_t *msg_p);
 
 /**
  * Pack message BREMSE_12.
@@ -1413,6 +1440,15 @@ int abs_bremse_12_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_12.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_12_init(struct abs_bremse_12_t *msg_p);
+
+/**
  * Pack message BREMSE_13.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1439,6 +1475,15 @@ int abs_bremse_13_unpack(
     struct abs_bremse_13_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_13.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_13_init(struct abs_bremse_13_t *msg_p);
 
 /**
  * Pack message DRS_RX_ID0.
@@ -1469,6 +1514,15 @@ int abs_drs_rx_id0_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from DRS_RX_ID0.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_drs_rx_id0_init(struct abs_drs_rx_id0_t *msg_p);
+
+/**
  * Pack message MM5_10_TX1.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1495,6 +1549,15 @@ int abs_mm5_10_tx1_unpack(
     struct abs_mm5_10_tx1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from MM5_10_TX1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_mm5_10_tx1_init(struct abs_mm5_10_tx1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1579,6 +1642,15 @@ int abs_mm5_10_tx2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from MM5_10_TX2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_mm5_10_tx2_init(struct abs_mm5_10_tx2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1661,6 +1733,15 @@ int abs_mm5_10_tx3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from MM5_10_TX3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_mm5_10_tx3_init(struct abs_mm5_10_tx3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1714,6 +1795,15 @@ int abs_bremse_2_unpack(
     struct abs_bremse_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_2_init(struct abs_bremse_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1852,6 +1942,15 @@ int abs_abs_switch_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from ABS_Switch.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_abs_switch_init(struct abs_abs_switch_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1907,6 +2006,15 @@ int abs_bremse_30_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_30.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_30_init(struct abs_bremse_30_t *msg_p);
+
+/**
  * Pack message BREMSE_31.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1933,6 +2041,15 @@ int abs_bremse_31_unpack(
     struct abs_bremse_31_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_31.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_31_init(struct abs_bremse_31_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1988,6 +2105,15 @@ int abs_bremse_32_unpack(
     struct abs_bremse_32_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_32.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_32_init(struct abs_bremse_32_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -2180,6 +2306,15 @@ int abs_bremse_51_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_51.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_51_init(struct abs_bremse_51_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -2341,6 +2476,15 @@ int abs_bremse_52_unpack(
     struct abs_bremse_52_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_52.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_52_init(struct abs_bremse_52_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -3424,6 +3568,15 @@ int abs_bremse_50_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_50.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_50_init(struct abs_bremse_50_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -3558,6 +3711,15 @@ int abs_bremse_53_unpack(
     struct abs_bremse_53_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_53.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_53_init(struct abs_bremse_53_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

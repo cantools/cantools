@@ -284,6 +284,15 @@ int multiplex_2_shared_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Shared.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_shared_init(struct multiplex_2_shared_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -393,6 +402,15 @@ int multiplex_2_normal_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Normal.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_normal_init(struct multiplex_2_normal_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -500,6 +518,15 @@ int multiplex_2_extended_unpack(
     struct multiplex_2_extended_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Extended.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_extended_init(struct multiplex_2_extended_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -771,6 +798,15 @@ int multiplex_2_extended_types_unpack(
     struct multiplex_2_extended_types_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from ExtendedTypes.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_extended_types_init(struct multiplex_2_extended_types_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

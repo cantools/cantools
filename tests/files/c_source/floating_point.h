@@ -134,6 +134,15 @@ int floating_point_message1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int floating_point_message1_init(struct floating_point_message1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -187,6 +196,15 @@ int floating_point_message2_unpack(
     struct floating_point_message2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int floating_point_message2_init(struct floating_point_message2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

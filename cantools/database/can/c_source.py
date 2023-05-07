@@ -371,6 +371,7 @@ int {database_name}_{message_name}_unpack(
     struct {database_name}_{message_name}_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
 '''
 
 SIGNAL_DECLARATION_ENCODE_FMT = '''\
@@ -406,6 +407,28 @@ SIGNAL_DECLARATION_IS_IN_RANGE_FMT = '''\
  * @return true if in range, false otherwise.
  */
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
+'''
+
+MESSAGE_DECLARATION_INIT_FMT = '''\
+/**
+ * Init message fields to default values from {database_message_name}.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p);
+'''
+
+MESSAGE_DEFINITION_INIT_FMT = '''\
+int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p)
+{{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct {database_name}_{message_name}_t));
+{init_body}
+    return 0;
+}}
 '''
 
 PACK_HELPER_LEFT_SHIFT_FMT = '''\
@@ -481,6 +504,7 @@ int {database_name}_{message_name}_unpack(
 {unpack_body}
     return (0);
 }}
+
 '''
 
 SIGNAL_DEFINITION_ENCODE_FMT = '''\
@@ -548,6 +572,10 @@ SIGNAL_MEMBER_FMT = '''\
      * Offset: {offset}
      */
     {type_name} {name}{length};\
+'''
+
+INIT_SIGNAL_BODY_TEMPLATE_FMT = '''\
+    msg_p->{signal_name} = {signal_initial};
 '''
 
 
@@ -757,7 +785,7 @@ class Message:
     def __init__(self, message):
         self._message = message
         self.snake_name = camel_to_snake_case(self.name)
-        self.signals = [Signal(signal)for signal in message.signals]
+        self.signals = [Signal(signal) for signal in message.signals]
 
     def __getattr__(self, name):
         return getattr(self._message, name)
@@ -1315,7 +1343,7 @@ def _generate_frame_cycle_time_defines(database_name, messages, node_name):
             message.snake_name.upper(),
             message.cycle_time)
         for message in messages if message.cycle_time is not None and
-                                _is_sender_or_receiver(message, node_name)
+                                   _is_sender_or_receiver(message, node_name)
     ])
 
     return result
@@ -1389,26 +1417,31 @@ def _generate_structs(database_name, messages, bit_fields, node_name):
             comment, members = _generate_struct(message, bit_fields)
             structs.append(
                 STRUCT_FMT.format(comment=comment,
-                                database_message_name=message.name,
-                                message_name=message.snake_name,
-                                database_name=database_name,
-                                members='\n\n'.join(members)))
+                                  database_message_name=message.name,
+                                  message_name=message.snake_name,
+                                  database_name=database_name,
+                                  members='\n\n'.join(members)))
 
     return '\n'.join(structs)
+
 
 def _is_sender(message, node_name):
     return node_name is None or node_name in message.senders
 
+
 def _is_receiver(signal, node_name):
     return node_name is None or node_name in signal.receivers
+
 
 def _is_sender_or_receiver(message, node_name):
     if _is_sender(message, node_name):
         return True
     return any(_is_receiver(signal, node_name) for signal in message.signals)
 
+
 def _get_floating_point_type(use_float):
     return 'float' if use_float else 'double'
+
 
 def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name):
     declarations = []
@@ -1458,6 +1491,10 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                                                          database_message_name=message.name,
                                                          message_name=message.snake_name)
 
+        declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
+                                                           database_message_name=message.name,
+                                                           message_name=message.snake_name)
+
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
 
@@ -1476,6 +1513,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
         signal_definitions = []
         is_sender = _is_sender(message, node_name)
         is_receiver = node_name is None
+        signals_init_body = ''
 
         for signal, (encode, decode), check in zip(message.signals,
                                                    _generate_encode_decode(message, use_float),
@@ -1519,6 +1557,10 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
 
                 signal_definitions.append(signal_definition)
 
+            if signal.initial:
+                signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(signal_initial=signal.raw_initial,
+                                                                          signal_name=signal.snake_name)
+
         if message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,
                                                           pack_helper_kinds)
@@ -1552,6 +1594,12 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                                                            unpack_unused=unpack_unused,
                                                            unpack_variables=unpack_variables,
                                                            unpack_body=unpack_body)
+
+            definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
+                                                             database_message_name=message.name,
+                                                             message_name=message.snake_name,
+                                                             init_body=signals_init_body)
+
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
                                                      message_name=message.snake_name)

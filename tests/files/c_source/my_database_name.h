@@ -126,6 +126,15 @@ int my_database_name_example_message_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from ExampleMessage.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int my_database_name_example_message_init(struct my_database_name_example_message_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.

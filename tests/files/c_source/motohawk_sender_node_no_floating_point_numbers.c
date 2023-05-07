@@ -119,6 +119,15 @@ int motohawk_example_message_unpack(
     return (0);
 }
 
+int motohawk_example_message_init(struct motohawk_example_message_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct motohawk_example_message_t));
+
+    return 0;
+}
+
 bool motohawk_example_message_enable_is_in_range(uint8_t value)
 {
     return (value <= 1u);

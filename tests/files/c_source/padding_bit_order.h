@@ -247,6 +247,15 @@ int padding_bit_order_msg0_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from MSG0.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int padding_bit_order_msg0_init(struct padding_bit_order_msg0_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -381,6 +390,15 @@ int padding_bit_order_msg1_unpack(
     struct padding_bit_order_msg1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from MSG1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int padding_bit_order_msg1_init(struct padding_bit_order_msg1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -519,6 +537,15 @@ int padding_bit_order_msg2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from MSG2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int padding_bit_order_msg2_init(struct padding_bit_order_msg2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -628,6 +655,15 @@ int padding_bit_order_msg3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from MSG3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int padding_bit_order_msg3_init(struct padding_bit_order_msg3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -681,6 +717,15 @@ int padding_bit_order_msg4_unpack(
     struct padding_bit_order_msg4_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from MSG4.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int padding_bit_order_msg4_init(struct padding_bit_order_msg4_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

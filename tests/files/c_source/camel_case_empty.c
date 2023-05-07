@@ -62,3 +62,12 @@ int camel_case_empty_message1_unpack(
 
     return (0);
 }
+
+int camel_case_empty_message1_init(struct camel_case_empty_message1_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct camel_case_empty_message1_t));
+
+    return 0;
+}

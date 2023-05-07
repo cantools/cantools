@@ -424,7 +424,7 @@ MESSAGE_DEFINITION_INIT_FMT = '''\
 int {database_name}_{message_name}_init(struct {database_name}_{message_name}_t *msg_p)
 {{
     if (msg_p == NULL) return -1;
-    
+
     memset(msg_p, 0, sizeof(struct {database_name}_{message_name}_t));
 {init_body}
     return 0;
@@ -1558,7 +1558,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                 signal_definitions.append(signal_definition)
 
             if signal.initial:
-                signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(signal_initial=signal.initial,
+                signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(signal_initial=signal.raw_initial,
                                                                           signal_name=signal.snake_name)
 
         if message.length > 0:

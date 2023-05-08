@@ -4,13 +4,13 @@ import math
 import os
 import re
 import shutil
+import textparser
 import timeit
 import unittest
-from collections import namedtuple
-from decimal import Decimal
-from xml.etree import ElementTree
 
-import textparser
+from collections import OrderedDict, namedtuple
+from typing import Any
+from xml.etree import ElementTree
 
 import cantools.autosar
 from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
@@ -23,6 +23,74 @@ except ImportError:
 import cantools
 from cantools.database import Message, Signal, UnsupportedDatabaseFormatError
 from cantools.database.can.formats import dbc
+
+
+def objects_similar(a: Any,
+                    b: Any,
+                    tolerance: float = 1e-12) -> bool:
+
+    if type(a) != type(b):
+        # the types of the objects do not match
+        return False
+    elif a is None:
+        # a and b are None
+        return True
+    elif isinstance(a, (int, str, set)):
+        # the values of the objects must be equal
+        return a == b
+    elif isinstance(a, float):
+        # floating point objects are be compared inexactly
+        if abs(a) > 1:
+            if abs(1.0 - b/a) > tolerance:
+                return False
+        else:
+            if abs(b - a) > tolerance:
+                return False
+
+        return True
+
+    elif isinstance(a, (list, tuple)):
+        # lists and tuples are similar if all elements are similar
+        for i in range(0, len(a)):
+            if not objects_similar(a[i], b[i], tolerance):
+                return False
+        return True
+
+    elif isinstance(a, (dict, OrderedDict)):
+        # dictionaries are similar if they feature the same keys and
+        # all elements are similar
+        if a.keys() != b.keys():
+            return False
+        for key in a:
+            if not objects_similar(a[key], b[key], tolerance):
+                return False
+        return True
+
+    # assume that `a` and `b` are objects of custom classes
+    a_attrib_names = dir(a)
+    b_attrib_names = dir(b)
+
+    # both objects must have the same attributes and member functions
+    if a_attrib_names != b_attrib_names:
+        return False
+
+    for attrib_name in a_attrib_names:
+        if attrib_name.startswith('_'):
+            # ignore non-public attributes
+            continue
+
+        a_attrib = getattr(a, attrib_name)
+        b_attrib = getattr(b, attrib_name)
+
+        if type(a_attrib) != type(b_attrib):
+            return False
+        elif callable(a_attrib):
+            # ignore callable attributes
+            continue
+        elif not objects_similar(a_attrib, b_attrib, tolerance):
+            return False
+
+    return True
 
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -46,14 +114,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqualChoicesDictHelper_(have[key], expect[key])
 
     def assert_dbc_dump(self, db, filename):
-        actual = db.as_dbc_string()
+        actual_str = db.as_dbc_string()
+        actual_db = cantools.database.load_string(actual_str)
         # open(filename, 'wb').write(actual.encode('cp1252'))
 
         with open(filename, 'rb') as fin:
-            expected = fin.read().decode('cp1252')
+            expected_str = fin.read().decode('cp1252')
+            expected_db = cantools.database.load_string(expected_str)
 
-        self.assertEqual(actual, expected)
-
+        self.assertTrue(objects_similar(actual_db, expected_db, tolerance=1e-8))
 
     def tearDown(self):
         if os.path.exists(self.cache_dir):
@@ -848,25 +917,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             db.encode_message('Message1', {'Foo': 1}, strict=False)
 
-    def test_encode_decimal(self):
-        db = cantools.db.Database()
-        db.add_dbc_file('tests/files/dbc/motohawk.dbc')
-
-        data = {
-            'Temperature': Decimal(250.55),
-            'AverageRadius': 3.2,
-            'Enable': 1
-        }
-
-        msg = db.get_message_by_name('ExampleMessage')
-
-        with self.assertRaises(TypeError) as cm:
-            msg.encode(data)
-            self.assertEqual(
-                str(cm.exception),
-                "Unable to encode signal 'Temperature' with type 'Decimal'.",
-            )
-
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not
         decoding choices.
@@ -1339,10 +1389,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(seat_configuration.offset, 0)
         self.assertEqual(seat_configuration.minimum, None)
         self.assertEqual(seat_configuration.maximum, None)
-        self.assertEqual(seat_configuration.decimal.scale, 1)
-        self.assertEqual(seat_configuration.decimal.offset, 0)
-        self.assertEqual(seat_configuration.decimal.minimum, None)
-        self.assertEqual(seat_configuration.decimal.maximum, None)
         self.assertEqual(seat_configuration.unit, None)
         self.assertEqual(seat_configuration.choices, None)
         self.assertEqual(seat_configuration.comment, None)
@@ -1360,10 +1406,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(tank_temperature.offset, 0)
         self.assertEqual(tank_temperature.minimum, None)
         self.assertEqual(tank_temperature.maximum, None)
-        self.assertEqual(tank_temperature.decimal.scale, 1)
-        self.assertEqual(tank_temperature.decimal.offset, 0)
-        self.assertEqual(tank_temperature.decimal.minimum, None)
-        self.assertEqual(tank_temperature.decimal.maximum, None)
         self.assertEqual(tank_temperature.unit, 'Cel')
         self.assertEqual(tank_temperature.choices, None)
         self.assertEqual(tank_temperature.comment, None)
@@ -1445,10 +1487,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(outside_temp.offset, -40)
         self.assertEqual(outside_temp.minimum, 0)
         self.assertEqual(outside_temp.maximum, 100)
-        self.assertEqual(outside_temp.decimal.scale, Decimal('0.05'))
-        self.assertEqual(outside_temp.decimal.offset, -40)
-        self.assertEqual(outside_temp.decimal.minimum, 0)
-        self.assertEqual(outside_temp.decimal.maximum, 100)
         self.assertEqual(outside_temp.unit, 'Cel')
         self.assertEqual(outside_temp.choices, {0: 'init'})
         self.assertEqual(outside_temp.comment, 'Outside temperature.')
@@ -1466,10 +1504,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(speed_km.offset, 0)
         self.assertEqual(speed_km.minimum, None)
         self.assertEqual(speed_km.maximum, None)
-        self.assertEqual(speed_km.decimal.scale, Decimal('0.2'))
-        self.assertEqual(speed_km.decimal.offset, 0)
-        self.assertEqual(speed_km.decimal.minimum, None)
-        self.assertEqual(speed_km.decimal.maximum, None)
         self.assertEqual(speed_km.unit, 'km/h')
         self.assertEqual(speed_km.choices, {16777215: 'invalid'})
         self.assertEqual(speed_km.comment,
@@ -1503,10 +1537,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(ambient_lux.offset, 0)
         self.assertEqual(ambient_lux.minimum, None)
         self.assertEqual(ambient_lux.maximum, None)
-        self.assertEqual(ambient_lux.decimal.scale, 1)
-        self.assertEqual(ambient_lux.decimal.offset, 0)
-        self.assertEqual(ambient_lux.decimal.minimum, None)
-        self.assertEqual(ambient_lux.decimal.maximum, None)
         self.assertEqual(ambient_lux.unit, 'Lux')
         self.assertEqual(ambient_lux.choices, None)
         self.assertEqual(ambient_lux.comment, None)
@@ -1524,10 +1554,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(windshield_humidity.offset, 0)
         self.assertEqual(windshield_humidity.minimum, None)
         self.assertEqual(windshield_humidity.maximum, None)
-        self.assertEqual(windshield_humidity.decimal.scale, 1)
-        self.assertEqual(windshield_humidity.decimal.offset, 0)
-        self.assertEqual(windshield_humidity.decimal.minimum, None)
-        self.assertEqual(windshield_humidity.decimal.maximum, None)
         self.assertEqual(windshield_humidity.unit, '% RH')
         self.assertEqual(windshield_humidity.choices, None)
         self.assertEqual(windshield_humidity.comment, None)
@@ -1545,10 +1571,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(wheel_angle.offset, -800)
         self.assertEqual(wheel_angle.minimum, None)
         self.assertEqual(wheel_angle.maximum, None)
-        self.assertEqual(wheel_angle.decimal.scale, Decimal('0.1'))
-        self.assertEqual(wheel_angle.decimal.offset, -800)
-        self.assertEqual(wheel_angle.decimal.minimum, None)
-        self.assertEqual(wheel_angle.decimal.maximum, None)
         self.assertEqual(wheel_angle.unit, 'deg')
         self.assertEqual(wheel_angle.choices,
                          {
@@ -1573,10 +1595,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(big_endian_a.offset, 0)
         self.assertEqual(big_endian_a.minimum, None)
         self.assertEqual(big_endian_a.maximum, None)
-        self.assertEqual(big_endian_a.decimal.scale, 1)
-        self.assertEqual(big_endian_a.decimal.offset, 0)
-        self.assertEqual(big_endian_a.decimal.minimum, None)
-        self.assertEqual(big_endian_a.decimal.maximum, None)
         self.assertEqual(big_endian_a.unit, None)
         self.assertEqual(big_endian_a.choices, None)
         self.assertEqual(big_endian_a.comment, None)
@@ -1789,10 +1807,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, 255)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, 255)
         self.assertEqual(signal_1.unit, 'A')
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
@@ -1812,10 +1826,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 48)
         self.assertEqual(signal_2.minimum, 16)
         self.assertEqual(signal_2.maximum, 130)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 48)
-        self.assertEqual(signal_2.decimal.minimum, 16)
-        self.assertEqual(signal_2.decimal.maximum, 130)
         self.assertEqual(signal_2.unit, 'V')
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comment, 'bbb')
@@ -1850,10 +1860,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, 0)
         self.assertEqual(signal_3.maximum, 1)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, 0)
-        self.assertEqual(signal_3.decimal.maximum, 1)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, {0: 'foo', 1: 'bar'})
         self.assertEqual(signal_3.comment, None)
@@ -1874,10 +1880,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.offset, 5)
         self.assertEqual(signal_4.minimum, -1.7e+308)
         self.assertEqual(signal_4.maximum, 1.7e+308)
-        self.assertEqual(signal_4.decimal.scale, 6)
-        self.assertEqual(signal_4.decimal.offset, 5)
-        self.assertEqual(signal_4.decimal.minimum, Decimal('-1.7e+308'))
-        self.assertEqual(signal_4.decimal.maximum, Decimal('1.7e+308'))
         self.assertEqual(signal_4.unit, '*UU')
         self.assertEqual(signal_4.choices, None)
         self.assertEqual(signal_4.comment, None)
@@ -1995,10 +1997,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.offset, 0)
         self.assertEqual(signal_0.minimum, 0)
         self.assertEqual(signal_0.maximum, 1)
-        self.assertEqual(signal_0.decimal.scale, 1)
-        self.assertEqual(signal_0.decimal.offset, 0)
-        self.assertEqual(signal_0.decimal.minimum, 0)
-        self.assertEqual(signal_0.decimal.maximum, 1)
         self.assertEqual(signal_0.unit, None)
         self.assertEqual(signal_0.choices, None)
         self.assertEqual(signal_0.comment, None)
@@ -2017,10 +2015,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
@@ -2039,10 +2033,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, {})
         self.assertEqual(signal_2.comment, None)
@@ -2061,10 +2051,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, None)
         self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, None)
         self.assertEqual(signal_3.comment, None)
@@ -2083,10 +2069,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.offset, 0)
         self.assertEqual(signal_4.minimum, None)
         self.assertEqual(signal_4.maximum, None)
-        self.assertEqual(signal_4.decimal.scale, 1)
-        self.assertEqual(signal_4.decimal.offset, 0)
-        self.assertEqual(signal_4.decimal.minimum, None)
-        self.assertEqual(signal_4.decimal.maximum, None)
         self.assertEqual(signal_4.unit, None)
         self.assertEqual(signal_4.choices, None)
         self.assertEqual(signal_4.comment, None)
@@ -2105,10 +2087,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_5.offset, 0)
         self.assertEqual(signal_5.minimum, None)
         self.assertEqual(signal_5.maximum, None)
-        self.assertEqual(signal_5.decimal.scale, 1)
-        self.assertEqual(signal_5.decimal.offset, 0)
-        self.assertEqual(signal_5.decimal.minimum, None)
-        self.assertEqual(signal_5.decimal.maximum, None)
         self.assertEqual(signal_5.unit, None)
         self.assertEqual(signal_5.choices, None)
         self.assertEqual(signal_5.comment, None)
@@ -2127,10 +2105,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_6.offset, 0)
         self.assertEqual(signal_6.minimum, None)
         self.assertEqual(signal_6.maximum, None)
-        self.assertEqual(signal_6.decimal.scale, 1)
-        self.assertEqual(signal_6.decimal.offset, 0)
-        self.assertEqual(signal_6.decimal.minimum, None)
-        self.assertEqual(signal_6.decimal.maximum, None)
         self.assertEqual(signal_6.unit, None)
         self.assertEqual(signal_6.choices, None)
         self.assertEqual(signal_6.comment, None)
@@ -2149,10 +2123,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_7.offset, 0)
         self.assertEqual(signal_7.minimum, None)
         self.assertEqual(signal_7.maximum, None)
-        self.assertEqual(signal_7.decimal.scale, 1)
-        self.assertEqual(signal_7.decimal.offset, 0)
-        self.assertEqual(signal_7.decimal.minimum, None)
-        self.assertEqual(signal_7.decimal.maximum, None)
         self.assertEqual(signal_7.unit, None)
         self.assertEqual(signal_7.choices, None)
         self.assertEqual(signal_7.comment, None)
@@ -2178,10 +2148,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.offset, 0)
         self.assertEqual(signal_0.minimum, None)
         self.assertEqual(signal_0.maximum, None)
-        self.assertEqual(signal_0.decimal.scale, 1)
-        self.assertEqual(signal_0.decimal.offset, 0)
-        self.assertEqual(signal_0.decimal.minimum, None)
-        self.assertEqual(signal_0.decimal.maximum, None)
         self.assertEqual(signal_0.unit, None)
         self.assertEqual(signal_0.choices, {0: 'Foo'})
         self.assertEqual(signal_0.comment, None)
@@ -2200,10 +2166,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, {0: 'Foo'})
         self.assertEqual(signal_1.comment, None)
@@ -2222,10 +2184,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, {})
         self.assertEqual(signal_2.comment, None)
@@ -2244,10 +2202,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 2)
         self.assertEqual(signal_3.minimum, None)
         self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 2)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, 'A')
         self.assertEqual(signal_3.choices, None)
         self.assertEqual(signal_3.comment, None)
@@ -2296,10 +2250,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_0.offset, 0)
         self.assertEqual(signal_0.minimum, None)
         self.assertEqual(signal_0.maximum, None)
-        self.assertEqual(signal_0.decimal.scale, 1)
-        self.assertEqual(signal_0.decimal.offset, 0)
-        self.assertEqual(signal_0.decimal.minimum, None)
-        self.assertEqual(signal_0.decimal.maximum, None)
         self.assertEqual(signal_0.unit, 'A B')
         self.assertEqual(signal_0.choices, None)
         self.assertEqual(signal_0.comment, 'A B')
@@ -2318,10 +2268,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, '/')
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, '/')
@@ -2340,10 +2286,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, -55)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, -55)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, '=')
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comment, '=')
@@ -2362,10 +2304,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, None)
         self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, '{SEND}')
         self.assertEqual(signal_3.choices, None)
         self.assertEqual(signal_3.comment, ']')
@@ -2384,10 +2322,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.offset, 0)
         self.assertEqual(signal_4.minimum, None)
         self.assertEqual(signal_4.maximum, None)
-        self.assertEqual(signal_4.decimal.scale, 1)
-        self.assertEqual(signal_4.decimal.offset, 0)
-        self.assertEqual(signal_4.decimal.minimum, None)
-        self.assertEqual(signal_4.decimal.maximum, None)
         self.assertEqual(signal_4.unit, '][')
         self.assertEqual(signal_4.choices, None)
         self.assertEqual(signal_4.comment, 'ö')
@@ -2407,10 +2341,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_5.offset, 0)
         self.assertEqual(signal_5.minimum, 0)
         self.assertEqual(signal_5.maximum, 1)
-        self.assertEqual(signal_5.decimal.scale, 1)
-        self.assertEqual(signal_5.decimal.offset, 0)
-        self.assertEqual(signal_5.decimal.minimum, 0)
-        self.assertEqual(signal_5.decimal.maximum, 1)
         self.assertEqual(signal_5.unit, 'm/s')
         self.assertEqual(signal_5.choices, None)
         self.assertEqual(signal_5.comment, 'comment')
@@ -2477,10 +2407,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sig1.offset, 0)
         self.assertEqual(sig1.minimum, None)
         self.assertEqual(sig1.maximum, None)
-        self.assertEqual(sig1.decimal.scale, 1)
-        self.assertEqual(sig1.decimal.offset, 0)
-        self.assertEqual(sig1.decimal.minimum, None)
-        self.assertEqual(sig1.decimal.maximum, None)
         self.assertEqual(sig1.unit, None)
         self.assertEqual(sig1.choices, None)
         self.assertEqual(sig1.comment, 'a comment')
@@ -2499,10 +2425,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sig12.offset, 0)
         self.assertEqual(sig12.minimum, None)
         self.assertEqual(sig12.maximum, 1)
-        self.assertEqual(sig12.decimal.scale, 1)
-        self.assertEqual(sig12.decimal.offset, 0)
-        self.assertEqual(sig12.decimal.minimum, None)
-        self.assertEqual(sig12.decimal.maximum, 1)
         self.assertEqual(sig12.unit, None)
         self.assertEqual(sig12.choices, None)
         self.assertEqual(sig12.comment, 'another comment for sig1=1')
@@ -2521,10 +2443,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sig22.offset, 0)
         self.assertEqual(sig22.minimum, None)
         self.assertEqual(sig22.maximum, 1)
-        self.assertEqual(sig22.decimal.scale, 1)
-        self.assertEqual(sig22.decimal.offset, 0)
-        self.assertEqual(sig22.decimal.minimum, None)
-        self.assertEqual(sig22.decimal.maximum, 1)
         self.assertEqual(sig22.unit, None)
         self.assertEqual(sig22.choices, None)
         self.assertEqual(sig22.comment, 'another comment for sig1=2')
@@ -2551,10 +2469,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(sig.offset, 0)
             self.assertEqual(sig.minimum, None)
             self.assertEqual(sig.maximum, None)
-            self.assertEqual(sig.decimal.scale, 1)
-            self.assertEqual(sig.decimal.offset, 0)
-            self.assertEqual(sig.decimal.minimum, None)
-            self.assertEqual(sig.decimal.maximum, None)
             self.assertEqual(sig.unit, None)
             if i != 7:
                 self.assertEqual(sig.choices, None)
@@ -2588,10 +2502,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(m1h.offset, 0)
         self.assertEqual(m1h.minimum, None)
         self.assertEqual(m1h.maximum, None)
-        self.assertEqual(m1h.decimal.scale, 1)
-        self.assertEqual(m1h.decimal.offset, 0)
-        self.assertEqual(m1h.decimal.minimum, None)
-        self.assertEqual(m1h.decimal.maximum, None)
         self.assertEqual(m1h.unit, None)
         self.assertEqual(m1h.choices, None)
         self.assertEqual(m1h.comment, None)
@@ -2610,10 +2520,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(m1d.offset, 0)
         self.assertEqual(m1d.minimum, None)
         self.assertEqual(m1d.maximum, None)
-        self.assertEqual(m1d.decimal.scale, 1)
-        self.assertEqual(m1d.decimal.offset, 0)
-        self.assertEqual(m1d.decimal.minimum, None)
-        self.assertEqual(m1d.decimal.maximum, None)
         self.assertEqual(m1d.unit, None)
         self.assertEqual(m1d.choices, None)
         self.assertEqual(m1d.comment, None)
@@ -2632,10 +2538,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(m12d.offset, 0)
         self.assertEqual(m12d.minimum, None)
         self.assertEqual(m12d.maximum, 1)
-        self.assertEqual(m12d.decimal.scale, 1)
-        self.assertEqual(m12d.decimal.offset, 0)
-        self.assertEqual(m12d.decimal.minimum, None)
-        self.assertEqual(m12d.decimal.maximum, 1)
         self.assertEqual(m12d.unit, None)
         self.assertEqual(m12d.choices, None)
         self.assertEqual(m12d.comment, None)
@@ -2654,10 +2556,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(m7d.offset, 0)
         self.assertEqual(m7d.minimum, None)
         self.assertEqual(m7d.maximum, 1)
-        self.assertEqual(m7d.decimal.scale, 1)
-        self.assertEqual(m7d.decimal.offset, 0)
-        self.assertEqual(m7d.decimal.minimum, None)
-        self.assertEqual(m7d.decimal.maximum, 1)
         self.assertEqual(m7d.unit, None)
         self.assertEqual(m7d.choices, None)
         self.assertEqual(m7d.comment, None)
@@ -2676,10 +2574,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(m42d.offset, 0)
         self.assertEqual(m42d.minimum, None)
         self.assertEqual(m42d.maximum, 1)
-        self.assertEqual(m42d.decimal.scale, 1)
-        self.assertEqual(m42d.decimal.offset, 0)
-        self.assertEqual(m42d.decimal.minimum, None)
-        self.assertEqual(m42d.decimal.maximum, 1)
         self.assertEqual(m42d.unit, None)
         self.assertEqual(m42d.choices, None)
         self.assertEqual(m42d.comment, None)
@@ -2698,10 +2592,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(i1h.offset, 0)
         self.assertEqual(i1h.minimum, None)
         self.assertEqual(i1h.maximum, None)
-        self.assertEqual(i1h.decimal.scale, 1)
-        self.assertEqual(i1h.decimal.offset, 0)
-        self.assertEqual(i1h.decimal.minimum, None)
-        self.assertEqual(i1h.decimal.maximum, None)
         self.assertEqual(i1h.unit, None)
         self.assertEqual(i1h.choices, None)
         self.assertEqual(i1h.comment, None)
@@ -3528,7 +3418,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         attribute = attributes['TheFloatAttribute']
         self.assertEqual(attribute.name, 'TheFloatAttribute')
-        self.assertEqual(attribute.value, Decimal('58.7'))
+        self.assertEqual(attribute.value, 58.7)
         self.assertEqual(attribute.definition,
                          db.dbc.attribute_definitions['TheFloatAttribute'])
         self.assertEqual(attribute.definition.default_value, 55.0)
@@ -3633,10 +3523,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.messages[0].signals[0].offset = 1
         db.messages[0].signals[0].minimum = 0
         db.messages[0].signals[0].maximum = 100
-        db.messages[0].signals[0].decimal.scale = Decimal(10)
-        db.messages[0].signals[0].decimal.offset = Decimal(1)
-        db.messages[0].signals[0].decimal.minimum = Decimal(0)
-        db.messages[0].signals[0].decimal.maximum = Decimal(100)
         db.messages[0].signals[0].unit = 'TheNewUnit'
         db.messages[0].signals[0].is_multiplexer = True
         db.messages[0].signals[0].multiplexer_signal = db.messages[0].signals[0]
@@ -4580,10 +4466,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_selector.offset, 0.0)
         self.assertEqual(mux_signal_selector.minimum, None)
         self.assertEqual(mux_signal_selector.maximum, None)
-        self.assertEqual(mux_signal_selector.decimal.scale, 1)
-        self.assertEqual(mux_signal_selector.decimal.offset, 0)
-        self.assertEqual(mux_signal_selector.decimal.minimum, None)
-        self.assertEqual(mux_signal_selector.decimal.maximum, None)
         self.assertEqual(mux_signal_selector.unit, None)
         self.assertEqual(mux_signal_selector.choices, None)
         self.assertEqual(mux_signal_selector.comments, None)
@@ -4604,10 +4486,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_static.offset, 0.0)
         self.assertEqual(mux_signal_static.minimum, None)
         self.assertEqual(mux_signal_static.maximum, None)
-        self.assertEqual(mux_signal_static.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_static.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_static.decimal.minimum, None)
-        self.assertEqual(mux_signal_static.decimal.maximum, None)
         self.assertEqual(mux_signal_static.unit, None)
         self.assertEqual(mux_signal_static.choices, None)
         self.assertEqual(mux_signal_static.comments, None)
@@ -4628,10 +4506,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_hello.offset, 0.0)
         self.assertEqual(mux_signal_hello.minimum, None)
         self.assertEqual(mux_signal_hello.maximum, None)
-        self.assertEqual(mux_signal_hello.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_hello.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_hello.decimal.minimum, None)
-        self.assertEqual(mux_signal_hello.decimal.maximum, None)
         self.assertEqual(mux_signal_hello.unit, None)
         self.assertEqual(mux_signal_hello.choices, None)
         self.assertEqual(mux_signal_hello.comments, None)
@@ -4653,10 +4527,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world2.offset, 0.0)
         self.assertEqual(mux_signal_world2.minimum, None)
         self.assertEqual(mux_signal_world2.maximum, None)
-        self.assertEqual(mux_signal_world2.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_world2.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_world2.decimal.minimum, None)
-        self.assertEqual(mux_signal_world2.decimal.maximum, None)
         self.assertEqual(mux_signal_world2.unit, None)
         self.assertEqual(mux_signal_world2.choices, None)
         self.assertEqual(mux_signal_world2.comments, None)
@@ -4678,10 +4548,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.offset, 0.0)
         self.assertEqual(mux_signal_world1.minimum, None)
         self.assertEqual(mux_signal_world1.maximum, None)
-        self.assertEqual(mux_signal_world1.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_world1.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_world1.decimal.minimum, None)
-        self.assertEqual(mux_signal_world1.decimal.maximum, None)
         self.assertEqual(mux_signal_world1.unit, None)
         self.assertEqual(mux_signal_world1.choices, None)
         self.assertEqual(mux_signal_world1.comments, None)
@@ -4719,10 +4585,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0.0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, Decimal('1'))
-        self.assertEqual(signal_1.decimal.offset, 0.0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comments, {'EN': 'AUTOSAR end-to-end protection CRC according to profile 2'})
@@ -4743,10 +4605,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0.0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, Decimal('1'))
-        self.assertEqual(signal_2.decimal.offset, 0.0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comments, {'EN': 'AUTOSAR end-to-end protection sequence counter according to profile 2'})
@@ -4767,10 +4625,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0.0)
         self.assertEqual(signal_3.minimum, None)
         self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, Decimal('1'))
-        self.assertEqual(signal_3.decimal.offset, 0.0)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, None)
         self.assertEqual(signal_3.comments, {'DE': 'Lebt', 'EN': 'Is alive'})
@@ -4791,10 +4645,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.offset, 0.0)
         self.assertEqual(signal_4.minimum, None)
         self.assertEqual(signal_4.maximum, None)
-        self.assertEqual(signal_4.decimal.scale, Decimal('1'))
-        self.assertEqual(signal_4.decimal.offset, 0.0)
-        self.assertEqual(signal_4.decimal.minimum, None)
-        self.assertEqual(signal_4.decimal.maximum, None)
         self.assertEqual(signal_4.unit, None)
         self.assertEqual(signal_4.choices, None)
         self.assertEqual(signal_4.comments, None)
@@ -4813,10 +4663,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_5.offset, 0.0)
         self.assertEqual(signal_5.minimum, None)
         self.assertEqual(signal_5.maximum, None)
-        self.assertEqual(signal_5.decimal.scale, 1.0)
-        self.assertEqual(signal_5.decimal.offset, 0.0)
-        self.assertEqual(signal_5.decimal.minimum, None)
-        self.assertEqual(signal_5.decimal.maximum, None)
         self.assertEqual(signal_5.unit, None)
         self.assertEqual(signal_5.choices, { 0: 'STANDARD_POSITION',
                                              1: 'FORWARD_POSITION',
@@ -4837,10 +4683,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_6.offset, 40.0/4)
         self.assertEqual(signal_6.minimum, 10.0)
         self.assertEqual(signal_6.maximum, 10.0 + 3*10.0/4)
-        self.assertEqual(signal_6.decimal.scale, 10.0/4)
-        self.assertEqual(signal_6.decimal.offset, 40.0/4)
-        self.assertEqual(signal_6.decimal.minimum, 10.0)
-        self.assertEqual(signal_6.decimal.maximum, 10.0 + 3*10.0/4)
         self.assertEqual(signal_6.unit, None)
         self.assertEqual(signal_6.choices, None)
         self.assertEqual(signal_6.comment, 'Lonely system signal comment')
@@ -4914,10 +4756,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_static.offset, 0.0)
         self.assertEqual(mux_signal_static.minimum, None)
         self.assertEqual(mux_signal_static.maximum, None)
-        self.assertEqual(mux_signal_static.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_static.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_static.decimal.minimum, None)
-        self.assertEqual(mux_signal_static.decimal.maximum, None)
         self.assertEqual(mux_signal_static.unit, None)
         self.assertEqual(mux_signal_static.choices, None)
         self.assertEqual(mux_signal_static.comment, None)
@@ -4939,10 +4777,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_hello.offset, 0.0)
         self.assertEqual(mux_signal_hello.minimum, None)
         self.assertEqual(mux_signal_hello.maximum, None)
-        self.assertEqual(mux_signal_hello.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_hello.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_hello.decimal.minimum, None)
-        self.assertEqual(mux_signal_hello.decimal.maximum, None)
         self.assertEqual(mux_signal_hello.unit, None)
         self.assertEqual(mux_signal_hello.choices, None)
         self.assertEqual(mux_signal_hello.comment, None)
@@ -4965,10 +4799,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world2.offset, 0.0)
         self.assertEqual(mux_signal_world2.minimum, None)
         self.assertEqual(mux_signal_world2.maximum, None)
-        self.assertEqual(mux_signal_world2.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_world2.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_world2.decimal.minimum, None)
-        self.assertEqual(mux_signal_world2.decimal.maximum, None)
         self.assertEqual(mux_signal_world2.unit, None)
         self.assertEqual(mux_signal_world2.choices, None)
         self.assertEqual(mux_signal_world2.comment, None)
@@ -4991,10 +4821,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.offset, 0.0)
         self.assertEqual(mux_signal_world1.minimum, None)
         self.assertEqual(mux_signal_world1.maximum, None)
-        self.assertEqual(mux_signal_world1.decimal.scale, Decimal('1'))
-        self.assertEqual(mux_signal_world1.decimal.offset, 0.0)
-        self.assertEqual(mux_signal_world1.decimal.minimum, None)
-        self.assertEqual(mux_signal_world1.decimal.maximum, None)
         self.assertEqual(mux_signal_world1.unit, None)
         self.assertEqual(mux_signal_world1.choices, None)
         self.assertEqual(mux_signal_world1.comment, None)
@@ -5041,10 +4867,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, Decimal('1'))
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
@@ -5065,10 +4887,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, Decimal('1'))
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comment, None)
@@ -5089,10 +4907,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0.0)
         self.assertEqual(signal_3.minimum, 0)
         self.assertEqual(signal_3.maximum, 0.1)
-        self.assertEqual(signal_3.decimal.scale, Decimal('0.1'))
-        self.assertEqual(signal_3.decimal.offset, 0.0)
-        self.assertEqual(signal_3.decimal.minimum, 0)
-        self.assertEqual(signal_3.decimal.maximum, 0.1)
         self.assertEqual(signal_3.unit, "wp")
         self.assertEqual(signal_3.choices, {0: 'zero'})
         self.assertEqual(signal_3.comment, None)
@@ -5113,10 +4927,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.offset, 0.0)
         self.assertEqual(signal_4.minimum, 0.0)
         self.assertEqual(signal_4.maximum, 20.0)
-        self.assertEqual(signal_4.decimal.scale, 5.0)
-        self.assertEqual(signal_4.decimal.offset, 0.0)
-        self.assertEqual(signal_4.decimal.minimum, 0.0)
-        self.assertEqual(signal_4.decimal.maximum, 20.0)
         self.assertEqual(signal_4.unit, 'm')
         self.assertEqual(signal_4.choices, None)
         self.assertEqual(signal_4.comments["EN"], 'Signal comment!')
@@ -5146,10 +4956,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_5.offset, 0)
         self.assertEqual(signal_5.minimum, None)
         self.assertEqual(signal_5.maximum, None)
-        self.assertEqual(signal_5.decimal.scale, 1)
-        self.assertEqual(signal_5.decimal.offset, 0)
-        self.assertEqual(signal_5.decimal.minimum, None)
-        self.assertEqual(signal_5.decimal.maximum, None)
         self.assertEqual(signal_5.unit, None)
         self.assertEqual(signal_5.choices, None)
         self.assertEqual(signal_5.comment, None)
@@ -5184,10 +4990,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
@@ -5206,10 +5008,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comments["FOR-ALL"], 'Signal comment!')
@@ -5228,10 +5026,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, None)
         self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, {1: 'one', 2: 'two'})
         self.assertEqual(signal_3.choices[1].comments,
@@ -5273,10 +5067,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
@@ -5295,10 +5085,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comment, None)
@@ -5317,10 +5103,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, None)
         self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, None)
         self.assertEqual(signal_3.comment, "Truncated freshness value for 'Message3'")
@@ -5339,10 +5121,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.offset, 0)
         self.assertEqual(signal_4.minimum, None)
         self.assertEqual(signal_4.maximum, None)
-        self.assertEqual(signal_4.decimal.scale, 1)
-        self.assertEqual(signal_4.decimal.offset, 0)
-        self.assertEqual(signal_4.decimal.minimum, None)
-        self.assertEqual(signal_4.decimal.maximum, None)
         self.assertEqual(signal_4.unit, None)
         self.assertEqual(signal_4.choices, None)
         self.assertEqual(signal_4.comment, "Truncated authenticator value for 'Message3'")
@@ -5545,10 +5323,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comments, None)
@@ -5634,10 +5408,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, 0.0)
         self.assertEqual(signal_1.maximum, 127.0)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, 0)
-        self.assertEqual(signal_1.decimal.maximum, 127)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comments, None)
@@ -5659,10 +5429,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, 0.0)
         self.assertEqual(signal_2.maximum, 31.0)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, 0)
-        self.assertEqual(signal_2.decimal.maximum, 31)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comments, None)
@@ -5696,10 +5462,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0.0)
         self.assertEqual(signal_1.minimum, 0.0)
         self.assertEqual(signal_1.maximum, 4.0)
-        self.assertEqual(signal_1.decimal.scale, 1.0)
-        self.assertEqual(signal_1.decimal.offset, 0.0)
-        self.assertEqual(signal_1.decimal.minimum, 0.0)
-        self.assertEqual(signal_1.decimal.maximum, 4.0)
 
     def test_system_bad_root_tag(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
@@ -5745,10 +5507,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0.0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
@@ -5767,10 +5525,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
         self.assertEqual(signal_2.comment, None)
@@ -5802,10 +5556,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.offset, 0)
         self.assertEqual(signal_1.minimum, None)
         self.assertEqual(signal_1.maximum, None)
-        self.assertEqual(signal_1.decimal.scale, 1)
-        self.assertEqual(signal_1.decimal.offset, 0)
-        self.assertEqual(signal_1.decimal.minimum, None)
-        self.assertEqual(signal_1.decimal.maximum, None)
         self.assertEqual(signal_1.unit, None)
         self.assertEqual(signal_1.choices, None)
         self.assertEqual(signal_1.comment, None)
@@ -5824,10 +5574,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.offset, 0)
         self.assertEqual(signal_2.minimum, None)
         self.assertEqual(signal_2.maximum, None)
-        self.assertEqual(signal_2.decimal.scale, 1)
-        self.assertEqual(signal_2.decimal.offset, 0)
-        self.assertEqual(signal_2.decimal.minimum, None)
-        self.assertEqual(signal_2.decimal.maximum, None)
         self.assertEqual(signal_2.unit, None)
         self.assertEqual(signal_2.choices, None)
         # Signal comment is not part of an ECU extract it seems.
@@ -5849,10 +5595,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.offset, 0)
         self.assertEqual(signal_3.minimum, None)
         self.assertEqual(signal_3.maximum, None)
-        self.assertEqual(signal_3.decimal.scale, 1)
-        self.assertEqual(signal_3.decimal.offset, 0)
-        self.assertEqual(signal_3.decimal.minimum, None)
-        self.assertEqual(signal_3.decimal.maximum, None)
         self.assertEqual(signal_3.unit, None)
         self.assertEqual(signal_3.choices, None)
         self.assertEqual(signal_3.comment, None)

@@ -937,7 +937,7 @@ double multiplex_2_extended_types_s10_decode(float value)
 
 bool multiplex_2_extended_types_s10_is_in_range(float value)
 {
-    return ((value >= -339999999999999996123846586046231871488.0f) && (value <= 339999999999999996123846586046231871488.0f));
+    return ((value >= -3.4e+38f) && (value <= 3.4e+38f));
 }
 
 float multiplex_2_extended_types_s9_encode(double value)

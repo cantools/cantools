@@ -611,7 +611,7 @@ struct abs_bremse_51_t {
     /**
      * Used longitudional acceleration value in the ABS.
      *
-     * Range: 0..65535 (-4.1768..4.1736697 g)
+     * Range: 0..65535 (-4.1768..4.17367 g)
      * Scale: 0.00012742
      * Offset: -4.1768
      */

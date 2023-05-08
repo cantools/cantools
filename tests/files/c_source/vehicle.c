@@ -385,12 +385,12 @@ bool vehicle_rt_dl1_mk3_speed_accuracy_speed_is_in_range(uint8_t value)
 
 int32_t vehicle_rt_dl1_mk3_speed_speed_encode(double value)
 {
-    return (int32_t)(value / 0.00001);
+    return (int32_t)(value / 1e-05);
 }
 
 double vehicle_rt_dl1_mk3_speed_speed_decode(int32_t value)
 {
-    return ((double)value * 0.00001);
+    return ((double)value * 1e-05);
 }
 
 bool vehicle_rt_dl1_mk3_speed_speed_is_in_range(int32_t value)
@@ -597,12 +597,12 @@ int vehicle_rt_dl1_mk3_gps_pos_llh_2_init(struct vehicle_rt_dl1_mk3_gps_pos_llh_
 
 int32_t vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_encode(double value)
 {
-    return (int32_t)(value / 1E-7);
+    return (int32_t)(value / 1e-07);
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_decode(int32_t value)
 {
-    return ((double)value * 1E-7);
+    return ((double)value * 1e-07);
 }
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_2_gps_pos_llh_longitude_is_in_range(int32_t value)
@@ -786,12 +786,12 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_is_in_range(
 
 int32_t vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_encode(double value)
 {
-    return (int32_t)(value / 1E-7);
+    return (int32_t)(value / 1e-07);
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t value)
 {
-    return ((double)value * 1E-7);
+    return ((double)value * 1e-07);
 }
 
 bool vehicle_rt_dl1_mk3_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t value)
@@ -14020,12 +14020,12 @@ int vehicle_rt_sb_ins_pos_llh_2_init(struct vehicle_rt_sb_ins_pos_llh_2_t *msg_p
 
 int32_t vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_encode(double value)
 {
-    return (int32_t)(value / 1E-7);
+    return (int32_t)(value / 1e-07);
 }
 
 double vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_decode(int32_t value)
 {
-    return ((double)value * 1E-7);
+    return ((double)value * 1e-07);
 }
 
 bool vehicle_rt_sb_ins_pos_llh_2_ins_pos_llh_longitude_is_in_range(int32_t value)
@@ -14209,12 +14209,12 @@ bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_is_in_range(uint8
 
 int32_t vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_encode(double value)
 {
-    return (int32_t)(value / 1E-7);
+    return (int32_t)(value / 1e-07);
 }
 
 double vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_decode(int32_t value)
 {
-    return ((double)value * 1E-7);
+    return ((double)value * 1e-07);
 }
 
 bool vehicle_rt_sb_ins_pos_llh_1_ins_pos_llh_latitude_is_in_range(int32_t value)
@@ -15487,12 +15487,12 @@ bool vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_is_in_range(uint8_t 
 
 uint64_t vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_encode(double value)
 {
-    return (uint64_t)(value / 0.000001);
+    return (uint64_t)(value / 1e-06);
 }
 
 double vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_decode(uint64_t value)
 {
-    return ((double)value * 0.000001);
+    return ((double)value * 1e-06);
 }
 
 bool vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_is_in_range(uint64_t value)
@@ -15956,12 +15956,12 @@ bool vehicle_rt_sb_speed_accuracy_speed_is_in_range(uint8_t value)
 
 int32_t vehicle_rt_sb_speed_speed_encode(double value)
 {
-    return (int32_t)(value / 0.00001);
+    return (int32_t)(value / 1e-05);
 }
 
 double vehicle_rt_sb_speed_speed_decode(int32_t value)
 {
-    return ((double)value * 0.00001);
+    return ((double)value * 1e-05);
 }
 
 bool vehicle_rt_sb_speed_speed_is_in_range(int32_t value)
@@ -16984,12 +16984,12 @@ int vehicle_rt_sb_gps_pos_llh_2_init(struct vehicle_rt_sb_gps_pos_llh_2_t *msg_p
 
 int32_t vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_encode(double value)
 {
-    return (int32_t)(value / 1E-7);
+    return (int32_t)(value / 1e-07);
 }
 
 double vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_decode(int32_t value)
 {
-    return ((double)value * 1E-7);
+    return ((double)value * 1e-07);
 }
 
 bool vehicle_rt_sb_gps_pos_llh_2_gps_pos_llh_longitude_is_in_range(int32_t value)
@@ -17173,12 +17173,12 @@ bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_is_in_range(uint8
 
 int32_t vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_encode(double value)
 {
-    return (int32_t)(value / 1E-7);
+    return (int32_t)(value / 1e-07);
 }
 
 double vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_decode(int32_t value)
 {
-    return ((double)value * 1E-7);
+    return ((double)value * 1e-07);
 }
 
 bool vehicle_rt_sb_gps_pos_llh_1_gps_pos_llh_latitude_is_in_range(int32_t value)

@@ -1,6 +1,5 @@
 import re
 import time
-from decimal import Decimal
 
 from ...version import __version__
 
@@ -681,14 +680,14 @@ class Signal:
     @property
     def minimum_type_value(self):
         if self.type_name == 'int8_t':
-            return -128
+            return -2**7
         elif self.type_name == 'int16_t':
-            return -32768
+            return -2**15
         elif self.type_name == 'int32_t':
-            return -2147483648
+            return -2**31
         elif self.type_name == 'int64_t':
-            return -9223372036854775808
-        elif self.type_name[0] == 'u':
+            return -2**63
+        elif self.type_name.startswith('u'):
             return 0
         else:
             return None
@@ -696,21 +695,21 @@ class Signal:
     @property
     def maximum_type_value(self):
         if self.type_name == 'int8_t':
-            return 127
+            return 2**7 - 1
         elif self.type_name == 'int16_t':
-            return 32767
+            return 2**15 - 1
         elif self.type_name == 'int32_t':
-            return 2147483647
+            return 2**31 - 1
         elif self.type_name == 'int64_t':
-            return 9223372036854775807
+            return 2**63 - 1
         elif self.type_name == 'uint8_t':
-            return 255
+            return 2**8 - 1
         elif self.type_name == 'uint16_t':
-            return 65535
+            return 2**16 - 1
         elif self.type_name == 'uint32_t':
-            return 4294967295
+            return 2**32 - 1
         elif self.type_name == 'uint64_t':
-            return 18446744073709551615
+            return 2**64 - 1
         else:
             return None
 
@@ -843,39 +842,26 @@ def _format_comment(comment):
         return ''
 
 
-def _format_decimal(value, is_float=False, use_float=False):
-    f_append = 'f' if use_float else ''
-    if int(value) == value:
-        value = int(value)
-
-        if is_float:
-            return f'{value}.0{f_append}'
-        else:
-            return str(value)
-    else:
-        return f'{value}{f_append}'
-
-
 def _format_range(signal):
     minimum = signal.minimum
     maximum = signal.maximum
 
+    phys_to_raw = float if signal.is_float else round
+
     if minimum is not None and maximum is not None:
-        return '{}..{} ({}..{} {})'.format(
-            _format_decimal(signal._signal.scaled_to_raw(minimum)),
-            _format_decimal(signal._signal.scaled_to_raw(maximum)),
-            minimum,
-            maximum,
-            signal.unit)
+        return \
+            f'{phys_to_raw(signal._signal.scaled_to_raw(minimum))}..' \
+            f'{phys_to_raw(signal._signal.scaled_to_raw(maximum))} ' \
+            f'({round(minimum, 5)}..{round(maximum, 5)} {signal.unit})'
     elif minimum is not None:
         return '{}.. ({}.. {})'.format(
-            _format_decimal(signal._signal.scaled_to_raw(minimum)),
-            minimum,
+            phys_to_raw(signal._signal.scaled_to_raw(minimum)),
+            round(minimum, 5),
             signal.unit)
     elif maximum is not None:
         return '..{} (..{} {})'.format(
-            _format_decimal(signal._signal.scaled_to_raw(maximum)),
-            maximum,
+            phys_to_raw(signal._signal.scaled_to_raw(maximum)),
+            round(maximum, 5),
             signal.unit)
     else:
         return '-'
@@ -1225,25 +1211,21 @@ def _generate_encode_decode(message, use_float):
 
     floating_point_type = _get_floating_point_type(use_float)
     for signal in message.signals:
-        scale = signal.decimal.scale
-        offset = signal.decimal.offset
-        formatted_scale = _format_decimal(scale, is_float=True, use_float=use_float)
-        formatted_offset = _format_decimal(offset, is_float=True, use_float=use_float)
+        scale = float(signal.scale)
+        offset = float(signal.offset)
 
         if offset == 0 and scale == 1:
             encoding = 'value'
             decoding = f'({floating_point_type})value'
         elif offset != 0 and scale != 1:
-            encoding = '(value - {}) / {}'.format(formatted_offset,
-                                                  formatted_scale)
-            decoding = '(({})value * {}) + {}'.format(floating_point_type, formatted_scale,
-                                                      formatted_offset)
+            encoding = f'(value - {offset}) / {scale}'
+            decoding = f'(({floating_point_type})value * {scale}) + {offset}'
         elif offset != 0:
-            encoding = f'value - {formatted_offset}'
-            decoding = f'({floating_point_type})value + {formatted_offset}'
+            encoding = f'value - {offset}'
+            decoding = f'({floating_point_type})value + {offset}'
         else:
-            encoding = f'value / {formatted_scale}'
-            decoding = f'({floating_point_type})value * {formatted_scale}'
+            encoding = f'value / {scale}'
+            decoding = f'({floating_point_type})value * {scale}'
 
         encode_decode.append((encoding, decoding))
 
@@ -1280,22 +1262,24 @@ def _generate_is_in_range(message):
 
         if minimum is not None:
             if not signal.conversion.is_float:
-                minimum = Decimal(int(minimum))
+                minimum = round(minimum)
+            else:
+                minimum = float(minimum)
 
             minimum_type_value = signal.minimum_type_value
 
             if (minimum_type_value is None) or (minimum > minimum_type_value):
-                minimum = _format_decimal(minimum, signal.conversion.is_float)
                 check.append(f'(value >= {minimum}{suffix})')
 
         if maximum is not None:
             if not signal.conversion.is_float:
-                maximum = Decimal(int(maximum))
+                maximum = round(maximum)
+            else:
+                maximum = float(maximum)
 
             maximum_type_value = signal.maximum_type_value
 
             if (maximum_type_value is None) or (maximum < maximum_type_value):
-                maximum = _format_decimal(maximum, signal.conversion.is_float)
                 check.append(f'(value <= {maximum}{suffix})')
 
         if not check:

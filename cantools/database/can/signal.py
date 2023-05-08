@@ -1,5 +1,4 @@
 # A CAN signal.
-import decimal
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
@@ -8,77 +7,6 @@ from ..namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
-
-
-class Decimal:
-    """Holds the same values as
-    :attr:`~cantools.database.can.Signal.scale`,
-    :attr:`~cantools.database.can.Signal.offset`,
-    :attr:`~cantools.database.can.Signal.minimum` and
-    :attr:`~cantools.database.can.Signal.maximum`, but as
-    ``decimal.Decimal`` instead of ``int`` and ``float`` for higher
-    precision (no rounding errors).
-
-    """
-
-    def __init__(
-        self,
-        scale: decimal.Decimal,
-        offset: decimal.Decimal,
-        minimum: Optional[decimal.Decimal] = None,
-        maximum: Optional[decimal.Decimal] = None,
-    ) -> None:
-        self._scale = scale
-        self._offset = offset
-        self._minimum = minimum
-        self._maximum = maximum
-
-    @property
-    def scale(self) -> decimal.Decimal:
-        """The scale factor of the signal value as ``decimal.Decimal``."""
-
-        return self._scale
-
-    @scale.setter
-    def scale(self, value: decimal.Decimal) -> None:
-        self._scale = value
-
-    @property
-    def offset(self) -> decimal.Decimal:
-        """The offset of the signal value as ``decimal.Decimal``."""
-
-        return self._offset
-
-    @offset.setter
-    def offset(self, value: decimal.Decimal) -> None:
-        self._offset = value
-
-    @property
-    def minimum(self) -> Optional[decimal.Decimal]:
-        """The minimum value of the signal as ``decimal.Decimal``, or ``None``
-        if unavailable.
-
-        """
-
-        return self._minimum
-
-    @minimum.setter
-    def minimum(self, value: Optional[decimal.Decimal]) -> None:
-        self._minimum = value
-
-    @property
-    def maximum(self) -> Optional[decimal.Decimal]:
-        """The maximum value of the signal as ``decimal.Decimal``, or ``None``
-        if unavailable.
-
-        """
-
-        return self._maximum
-
-    @maximum.setter
-    def maximum(self, value: Optional[decimal.Decimal]) -> None:
-        self._maximum = value
-
 
 class Signal:
     """A CAN signal with position, size, unit and other information. A
@@ -135,7 +63,6 @@ class Signal:
         is_multiplexer: bool = False,
         multiplexer_ids: Optional[List[int]] = None,
         multiplexer_signal: Optional[str] = None,
-        decimal: Optional[Decimal] = None,
         spn: Optional[int] = None,
     ) -> None:
         # avoid using properties to improve encoding/decoding performance
@@ -185,16 +112,6 @@ class Signal:
         self.invalid: Optional[SignalValueType] = (
             self.conversion.raw_to_scaled(raw_invalid) if raw_invalid is not None else None
         )
-
-        #: The high precision values of
-        #: :attr:`~cantools.database.can.Signal.scale`,
-        #: :attr:`~cantools.database.can.Signal.offset`,
-        #: :attr:`~cantools.database.can.Signal.minimum` and
-        #: :attr:`~cantools.database.can.Signal.maximum`.
-        #:
-        #: See :class:`~cantools.database.can.signal.Decimal` for more
-        #: details.
-        self.decimal: Optional[Decimal] = decimal
 
         #: The unit of the signal as a string, or ``None`` if unavailable.
         self.unit: Optional[str] = unit

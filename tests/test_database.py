@@ -1909,7 +1909,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.length, 11)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, [2])
-        
+
         # Message3.
         message_3 = db.messages[4]
         self.assertEqual(message_3.frame_id, 0xA)
@@ -6400,6 +6400,38 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertNotIn('BA_ "SystemSignalLongSymbol"', long_output)
 
+    def test_dbc_comment_grouping(self):
+        filename = 'tests/files/dbc/vehicle.dbc'
+        db = cantools.database.load_file(filename)
+
+        node_comment1 = 'CM_ BO_ 2303364386 "This cumulative distance calculation is updated when the trigger is active.";'
+        node_comment2 = 'CM_ BO_ 2303364130 "This cumulative distance calculation is updated continuously once the first good GPS lock is obtained.";'
+        sig_comment_fornode1 = 'CM_ SG_ 2303364386 Validity_Cumulative_Distance "Valid when bit is set, invalid when bit is clear.";'
+        sig_comment_fornode2 = 'CM_ SG_ 2303364386 Validity_Cumulative_Time "Valid when bit is set, invalid when bit is clear.";'
+        sig_comment_first = 'CM_ SG_ 2304279330 INS_Vel_Sideways_2D "Sideways Velocity in the vehicle body axes, 2D (no vertical component) .  +ve for motion to the vehicle RHS.";'
+
+        # node, then signals for that node
+        normal_output_expected = '\r\n'.join([
+            node_comment1,
+            sig_comment_fornode1,
+            sig_comment_fornode2,
+            node_comment2,
+        ])
+
+        # all nodes, then all signals
+        grouped_output_expected = '\r\n'.join([
+            node_comment1,
+            node_comment2,
+            sig_comment_first,
+        ])
+
+        normal_output = db.as_dbc_string()
+
+        self.assertIn(normal_output_expected, normal_output)
+
+        grouped_output = db.as_dbc_string(group_comment_signals=True)
+
+        self.assertIn(grouped_output_expected, grouped_output)
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

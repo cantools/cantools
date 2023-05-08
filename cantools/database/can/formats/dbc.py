@@ -510,7 +510,7 @@ def _dump_senders(database):
     return bo_tx_bu
 
 
-def _dump_comments(database, sort_signals):
+def _dump_comments(database, sort_signals, group_comment_signals):
     cm = []
 
     for bus in database.buses:
@@ -526,6 +526,8 @@ def _dump_comments(database, sort_signals):
                     name=node.name,
                     comment=node.comment.replace('"', '\\"')))
 
+    signal_comments = []
+
     for message in database.messages:
         if message.comment is not None:
             cm.append(
@@ -539,11 +541,17 @@ def _dump_comments(database, sort_signals):
             signals = message.signals
         for signal in signals:
             if signal.comment is not None:
-                cm.append(
-                    'CM_ SG_ {frame_id} {name} "{comment}";'.format(
-                        frame_id=get_dbc_frame_id(message),
-                        name=signal.name,
-                        comment=signal.comment.replace('"', '\\"')))
+                line = 'CM_ SG_ {frame_id} {name} "{comment}";'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    name=signal.name,
+                    comment=signal.comment.replace('"', '\\"'))
+
+                if group_comment_signals:
+                    signal_comments.append(line)
+                else:
+                    cm.append(line)
+
+    cm.extend(signal_comments)
 
     return cm
 
@@ -1823,11 +1831,15 @@ def dump_string(database: InternalDatabase,
                 sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
                 sort_attributes:type_sort_attributes=None,
                 sort_choices:type_sort_choices=None,
-                shorten_long_names:bool=True) -> str:
+                shorten_long_names:bool=True,
+                group_comment_signals:bool=False) -> str:
     """Format database in DBC file format.
        sort_signals defines how to sort signals in message definitions
        sort_attribute_signals defines how to sort signals in metadata -
           comments, value table definitions and attributes
+       If group_comment_signals==True, `CM_ SG_` lines appear after all
+          `CM_ BO_` lines, instead of immediately after their containing
+          message
 
     """
 
@@ -1845,7 +1857,7 @@ def dump_string(database: InternalDatabase,
     val_table = _dump_value_tables(database)
     bo = _dump_messages(database, sort_signals)
     bo_tx_bu = _dump_senders(database)
-    cm = _dump_comments(database, sort_attribute_signals)
+    cm = _dump_comments(database, sort_attribute_signals, group_comment_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_rel = _dump_attribute_definitions_rel(database)

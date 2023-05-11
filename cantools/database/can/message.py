@@ -19,6 +19,7 @@ from ...typechecking import (
     SignalMappingType,
 )
 from ..errors import DecodeError, EncodeError, Error
+from ..namedsignalvalue import NamedSignalValue
 from ..utils import (
     SORT_SIGNALS_DEFAULT,
     create_encode_decode_formats,
@@ -29,7 +30,7 @@ from ..utils import (
     start_bit,
     type_sort_signals,
 )
-from .signal import NamedSignalValue, Signal
+from .signal import Signal
 from .signal_group import SignalGroup
 
 if TYPE_CHECKING:

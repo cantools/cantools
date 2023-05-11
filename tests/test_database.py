@@ -25,7 +25,7 @@ except ImportError:
 import cantools
 from cantools.database.can.formats import dbc
 from cantools.database import UnsupportedDatabaseFormatError
-from cantools.database.can.signal import NamedSignalValue
+from cantools.database.namedsignalvalue import NamedSignalValue
 
 class CanToolsDatabaseTest(unittest.TestCase):
 

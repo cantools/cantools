@@ -5,13 +5,14 @@ from copy import deepcopy
 from decimal import Decimal
 from typing import Any
 
+from ....namedsignalvalue import NamedSignalValue
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...node import Node
 from ...signal import Decimal as SignalDecimal
-from ...signal import NamedSignalValue, Signal
+from ...signal import Signal
 from .bus_specifics import AutosarBusSpecifics
 from .database_specifics import AutosarDatabaseSpecifics
 from .end_to_end_properties import AutosarEnd2EndProperties

@@ -64,7 +64,7 @@ except ImportError:
     plt = None
 
 from .. import database, errors
-from ..database.can.signal import NamedSignalValue
+from ..database.namedsignalvalue import NamedSignalValue
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
 

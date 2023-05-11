@@ -16,7 +16,7 @@ from typing import (
     Union,
 )
 
-from ..database.can.signal import NamedSignalValue
+from ..database.namedsignalvalue import NamedSignalValue
 from ..typechecking import (
     ByteOrder,
     Choices,

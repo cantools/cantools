@@ -4047,9 +4047,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         """
 
-        if sys.version_info < (3, 8):
-            return
-
         filename = 'tests/files/kcd/dump.kcd'
         db = cantools.database.load_file(filename)
 

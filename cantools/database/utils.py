@@ -66,34 +66,34 @@ def start_bit(data: Union["Data", "Signal"]) -> int:
         return data.start
 
 
-def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
+def _encode_signals(signals: Sequence[Union["Signal", "Data"]],
                    data: SignalMappingType,
                    scaling: bool,
                    ) -> Dict[str, Union[int, float]]:
     unpacked = {}
-    for field in fields:
-        value = data[field.name]
+    for signal in signals:
+        value = data[signal.name]
 
         if isinstance(value, (float, int)):
-            _transform = float if field.is_float else round
+            _transform = float if signal.is_float else round
             if scaling:
-                if field.offset == 0 and field.scale == 1:
+                if signal.offset == 0 and signal.scale == 1:
                     # treat special case to avoid introduction of unnecessary rounding error
-                    unpacked[field.name] = _transform(value)  # type: ignore[operator]
+                    unpacked[signal.name] = _transform(value)  # type: ignore[operator]
                     continue
 
-                unpacked[field.name] = _transform((value - field.offset) / field.scale)  # type: ignore[operator]
+                unpacked[signal.name] = _transform((value - signal.offset) / signal.scale)  # type: ignore[operator]
                 continue
 
-            unpacked[field.name] = _transform(value)  # type: ignore[operator]
+            unpacked[signal.name] = _transform(value)  # type: ignore[operator]
             continue
 
         if isinstance(value, (str, NamedSignalValue)):
-            unpacked[field.name] = field.choice_string_to_number(str(value))
+            unpacked[signal.name] = signal.choice_string_to_number(str(value))
             continue
 
         raise TypeError(
-            f"Unable to encode signal '{field.name}' "
+            f"Unable to encode signal '{signal.name}' "
             f"with type '{value.__class__.__name__}'."
         )
 
@@ -101,14 +101,14 @@ def _encode_fields(fields: Sequence[Union["Signal", "Data"]],
 
 
 def encode_data(data: SignalMappingType,
-                fields: Sequence[Union["Signal", "Data"]],
+                signals: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
                 scaling: bool
                 ) -> int:
-    if len(fields) == 0:
+    if len(signals) == 0:
         return 0
 
-    unpacked = _encode_fields(fields, data, scaling)
+    unpacked = _encode_signals(signals, data, scaling)
     big_packed = formats.big_endian.pack(unpacked)
     little_packed = formats.little_endian.pack(unpacked)
     packed_union = int.from_bytes(big_packed, "big") | int.from_bytes(little_packed, "little")
@@ -118,7 +118,7 @@ def encode_data(data: SignalMappingType,
 
 def decode_data(data: bytes,
                 expected_length: int,
-                fields: Sequence[Union["Signal", "Data"]],
+                signals: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
                 decode_choices: bool,
                 scaling: bool,
@@ -135,37 +135,37 @@ def decode_data(data: bytes,
     }
 
     if allow_truncated and actual_length < expected_length:
-        # remove fields that are outside available data bytes
+        # remove signals that are outside available data bytes
         valid_bit_count = actual_length * 8
-        for field in fields:
-            if field.byte_order == "little_endian":
-                sequential_startbit = field.start
+        for signal in signals:
+            if signal.byte_order == "little_endian":
+                sequential_startbit = signal.start
             else:
                 # Calculate startbit with inverted indices.
                 # Function body of ``sawtooth_to_network_bitnum()``
                 # is inlined for improved performance.
-                sequential_startbit = (8 * (field.start // 8)) + (7 - (field.start % 8))
+                sequential_startbit = (8 * (signal.start // 8)) + (7 - (signal.start % 8))
 
-            if sequential_startbit + field.length > valid_bit_count:
-                del unpacked[field.name]
+            if sequential_startbit + signal.length > valid_bit_count:
+                del unpacked[signal.name]
 
     decoded = {}
-    for field in fields:
+    for signal in signals:
         try:
-            value = unpacked[field.name]
+            value = unpacked[signal.name]
 
             if decode_choices:
                 try:
-                    decoded[field.name] = field.choices[value]  # type: ignore[index]
+                    decoded[signal.name] = signal.choices[value]  # type: ignore[index]
                     continue
                 except (KeyError, TypeError):
                     pass
 
             if scaling:
-                decoded[field.name] = field.scale * value + field.offset
+                decoded[signal.name] = signal.scale * value + signal.offset
                 continue
             else:
-                decoded[field.name] = value
+                decoded[signal.name] = value
 
         except KeyError:
             if not allow_truncated:
@@ -214,10 +214,10 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
         items: List[Tuple[str, str, Optional[str]]] = []
         start = 0
 
-        # Select BE fields
+        # Select BE signals
         be_datas = [data for data in datas if data.byte_order == "big_endian"]
 
-        # Ensure BE fields are sorted in network order
+        # Ensure BE signals are sorted in network order
         sorted_datas = sorted(be_datas, key = lambda data: sawtooth_to_network_bitnum(data.start))
 
         for data in sorted_datas:

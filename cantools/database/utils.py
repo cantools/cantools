@@ -67,9 +67,9 @@ def start_bit(data: Union["Data", "Signal"]) -> int:
 
 
 def _encode_signals(signals: Sequence[Union["Signal", "Data"]],
-                   data: SignalMappingType,
-                   scaling: bool,
-                   ) -> Dict[str, Union[int, float]]:
+                    data: SignalMappingType,
+                    scaling: bool,
+                    ) -> Dict[str, Union[int, float]]:
     unpacked = {}
     for signal in signals:
         value = data[signal.name]
@@ -77,12 +77,13 @@ def _encode_signals(signals: Sequence[Union["Signal", "Data"]],
         if isinstance(value, (float, int)):
             _transform = float if signal.is_float else round
             if scaling:
-                if signal.offset == 0 and signal.scale == 1:
+                offset, scale = signal.offset, signal.scale
+                if offset == 0 and scale == 1:
                     # treat special case to avoid introduction of unnecessary rounding error
                     unpacked[signal.name] = _transform(value)  # type: ignore[operator]
                     continue
 
-                unpacked[signal.name] = _transform((value - signal.offset) / signal.scale)  # type: ignore[operator]
+                unpacked[signal.name] = _transform((value - offset) / scale)  # type: ignore[operator]
                 continue
 
             unpacked[signal.name] = _transform(value)  # type: ignore[operator]
@@ -162,7 +163,8 @@ def decode_data(data: bytes,
                     pass
 
             if scaling:
-                decoded[signal.name] = signal.scale * value + signal.offset
+                offset, scale = signal.offset, signal.scale
+                decoded[signal.name] = scale * value + offset
                 continue
             else:
                 decoded[signal.name] = value

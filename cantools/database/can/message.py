@@ -718,7 +718,7 @@ class Message:
         if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
             signal = self.get_signal_by_name(signal_name)
             try:
-                mux = signal.choice_string_to_number(str(mux))
+                mux = signal.choice_to_number(str(mux))
             except KeyError:
                 raise EncodeError() from None
         return int(mux)
@@ -732,7 +732,7 @@ class Message:
 
             if isinstance(signal_value, (str, NamedSignalValue)):
                 # Check choices
-                signal_value_num = signal.choice_string_to_number(str(signal_value))
+                signal_value_num = signal.choice_to_number(str(signal_value))
 
                 if signal_value_num is None:
                     raise EncodeError(f'Invalid value specified for signal '

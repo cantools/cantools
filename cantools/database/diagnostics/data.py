@@ -1,8 +1,8 @@
 # DID data.
 from typing import Optional, Union
 
-from ..can.signal import NamedSignalValue
 from ...typechecking import ByteOrder, Choices, SignalValueType
+from ..can.signal import NamedSignalValue
 
 
 class Data:
@@ -71,9 +71,9 @@ class Data:
         :return:
             The calculated scaled value
         """
-        if decode_choices:
-            with contextlib.suppress(KeyError, TypeError):
-                return self.choices[raw]  # type: ignore[index]
+        if decode_choices and self.choices and raw in self.choices:
+            assert isinstance(raw, int)
+            return self.choices[raw]
 
         if self.offset == 0 and self.scale == 1:
             # treat special case to avoid introduction of unnecessary rounding error
@@ -97,11 +97,11 @@ class Data:
             return _transform((scaled - self.offset) / self.scale)  # type: ignore[operator,no-any-return]
 
         if isinstance(scaled, (str, NamedSignalValue)):
-            return self.choice_string_to_number(str(scaled))
+            return self.choice_to_number(str(scaled))
 
         raise TypeError(f"Conversion of type {type(scaled)} is not supported.")
 
-    def choice_string_to_number(self, string: str) -> int:
+    def choice_to_number(self, string: Union[str, NamedSignalValue]) -> int:
         if self.choices is None:
             raise ValueError(f"Data {self.name} has no choices.")
 

@@ -77,15 +77,10 @@ def _encode_signals(signals: Sequence[Union["Signal", "Data"]],
 
         raw_value: Union[int, float]
         if scaling:
-            if not isinstance(value, (int, float, str, NamedSignalValue)):
-                raise TypeError(
-                    f"Unable to encode signal '{signal.name}' "
-                    f"of type '{type(value).__name__}'."
-                )
             raw_value = signal.scaled_to_raw(value)
         else:
             if isinstance(value, (str, NamedSignalValue)):
-                raw_value = signal.choice_string_to_number(value)
+                raw_value = signal.choice_to_number(value)
             elif not isinstance(value, (float, int)):
                 raise TypeError(
                     f"Unable to encode signal '{signal.name}' "

@@ -1,5 +1,4 @@
 # A CAN signal.
-import contextlib
 import decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -320,7 +319,7 @@ class Signal:
             self.comments = comment
 
     def raw_to_scaled(
-        self, raw: Union[int, float], decode_choices: bool = True
+        self, raw_value: Union[int, float], decode_choices: bool = True
     ) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
 
@@ -332,16 +331,22 @@ class Signal:
         :return:
             The calculated scaled value
         """
-        if decode_choices:
-            with contextlib.suppress(KeyError, TypeError):
-                return self.choices[raw]  # type: ignore[index]
+        # translate the raw value into a string if it is named and
+        # translation requested
+        if decode_choices and self.choices and raw_value in self.choices:
+            assert isinstance(raw_value, int)
+            return self.choices[raw_value]
 
-        if self.offset == 0 and self.scale == 1:
-            # treat special case to avoid introduction of unnecessary rounding error
-            return raw
-        return raw * self.scale + self.offset
+        # scale the value
+        offset, factor =  self.offset, self.scale
 
-    def scaled_to_raw(self, scaled: SignalValueType) -> Union[int, float]:
+        if factor == 1 and (isinstance(offset, int) or offset.is_integer()):
+            # avoid unnecessary rounding error if the scaling factor is 1
+            return raw_value + int(offset)
+
+        return float(raw_value*factor + offset)
+
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
         """Convert a scaled value to the internal raw value.
 
         :param scaled:
@@ -349,18 +354,25 @@ class Signal:
         :return:
             The internal raw value.
         """
-        if isinstance(scaled, (float, int)):
-            _transform = float if self.is_float else round
-            if self.offset == 0 and self.scale == 1:
-                # treat special case to avoid introduction of unnecessary rounding error
-                return _transform(scaled)  # type: ignore[operator,no-any-return]
+        # translate the scaled value into a number if it is an alias
+        if isinstance(scaled_value, (str, NamedSignalValue)):
+            return self.choice_string_to_number(str(scaled_value))
 
-            return _transform((scaled - self.offset) / self.scale)  # type: ignore[operator,no-any-return]
+        # "unscale" the value. Note that this usually produces a float
+        # value even if the raw value is supposed to be an
+        # integer.
+        offset, factor = self.offset, self.scale
 
-        if isinstance(scaled, (str, NamedSignalValue)):
-            return self.choice_string_to_number(str(scaled))
+        if factor == 1 and (isinstance(offset, int) or offset.is_integer()):
+            # avoid unnecessary rounding error if the scaling factor is 1
+            result = scaled_value - int(offset)
+        else:
+            result = (scaled_value - offset)/factor
 
-        raise TypeError(f"Conversion of type {type(scaled)} is not supported.")
+        if self.is_float:
+            return float(result)
+        else:
+            return round(result)
 
     @property
     def comment(self) -> Optional[str]:

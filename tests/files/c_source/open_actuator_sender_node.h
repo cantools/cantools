@@ -129,7 +129,7 @@ struct open_actuator_control_cmd_t {
      * Alternative usage - absolute output position
      * Factor = 64_const / 200steps / 256microsteps *360deg / FinalGearRatio / GearboxRatio
      *
-     * Range: -29166.61265442101033146234914..29166.61265442101033146234914 (-450..450 deg)
+     * Range: -29167..29167 (-450..450 deg)
      * Scale: 0.0154286
      * Offset: 0
      */
@@ -139,7 +139,7 @@ struct open_actuator_control_cmd_t {
      * Factor:
      * 8_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio
      *
-     * Range: -479.9990400019199961600076800..479.9990400019199961600076800 (-8..8 N*m)
+     * Range: -480..480 (-8..8 N*m)
      * Scale: 0.0166667
      * Offset: 0
      */
@@ -153,7 +153,7 @@ struct open_actuator_control_cmd_t {
      * Factor:
      * 32_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio
      *
-     * Range: 0..42.85729591891399612141471934 (0..8 N*m)
+     * Range: 0..43 (0..8 N*m)
      * Scale: 0.186666
      * Offset: 0
      */

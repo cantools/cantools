@@ -857,26 +857,24 @@ def _format_decimal(value, is_float=False, use_float=False):
 
 
 def _format_range(signal):
-    minimum = signal.decimal.minimum
-    maximum = signal.decimal.maximum
-    scale = signal.decimal.scale
-    offset = signal.decimal.offset
+    minimum = signal.minimum
+    maximum = signal.maximum
 
     if minimum is not None and maximum is not None:
         return '{}..{} ({}..{} {})'.format(
-            _format_decimal((minimum - offset) / scale),
-            _format_decimal((maximum - offset) / scale),
+            _format_decimal(signal._signal.scaled_to_raw(minimum)),
+            _format_decimal(signal._signal.scaled_to_raw(maximum)),
             minimum,
             maximum,
             signal.unit)
     elif minimum is not None:
         return '{}.. ({}.. {})'.format(
-            _format_decimal((minimum - offset) / scale),
+            _format_decimal(signal._signal.scaled_to_raw(minimum)),
             minimum,
             signal.unit)
     elif maximum is not None:
         return '..{} (..{} {})'.format(
-            _format_decimal((maximum - offset) / scale),
+            _format_decimal(signal._signal.scaled_to_raw(maximum)),
             maximum,
             signal.unit)
     else:
@@ -1260,16 +1258,14 @@ def _generate_is_in_range(message):
     checks = []
 
     for signal in message.signals:
-        scale = signal.decimal.scale
-        offset = (signal.decimal.offset / scale)
-        minimum = signal.decimal.minimum
-        maximum = signal.decimal.maximum
+        minimum = signal.minimum
+        maximum = signal.maximum
 
         if minimum is not None:
-            minimum = (minimum / scale - offset)
+            minimum = signal.scaled_to_raw(minimum)
 
         if maximum is not None:
-            maximum = (maximum / scale - offset)
+            maximum = signal.scaled_to_raw(maximum)
 
         if minimum is None and signal.minimum_value is not None:
             if signal.minimum_value > signal.minimum_type_value:

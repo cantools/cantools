@@ -780,7 +780,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message1',
                 3,
-                'Expected signal "Signal1" value less than or equal to 2 in '
+                'Expected signal "Signal1" value smaller than or equal to 2 in '
                 'message "Message1", but got 3.'
             ),
             (
@@ -792,7 +792,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message3',
                 3,
-                'Expected signal "Signal1" value less than or equal to 2 in '
+                'Expected signal "Signal1" value smaller than or equal to 2 in '
                 'message "Message3", but got 3.'
             ),
             (
@@ -804,7 +804,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message4',
                 8.1,
-                'Expected signal "Signal1" value less than or equal to 8 in '
+                'Expected signal "Signal1" value smaller than or equal to 8 in '
                 'message "Message4", but got 8.1.'
             )
         ]

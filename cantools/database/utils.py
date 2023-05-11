@@ -23,6 +23,7 @@ from ..typechecking import (
     Formats,
     SignalDictType,
     SignalMappingType,
+    SignalValueType,
 )
 
 if TYPE_CHECKING:
@@ -74,29 +75,27 @@ def _encode_signals(signals: Sequence[Union["Signal", "Data"]],
     for signal in signals:
         value = data[signal.name]
 
-        if isinstance(value, (float, int)):
-            _transform = float if signal.is_float else round
-            if scaling:
-                offset, scale = signal.offset, signal.scale
-                if offset == 0 and scale == 1:
-                    # treat special case to avoid introduction of unnecessary rounding error
-                    unpacked[signal.name] = _transform(value)  # type: ignore[operator]
-                    continue
+        raw_value: Union[int, float]
+        if scaling:
+            if not isinstance(value, (int, float, str, NamedSignalValue)):
+                raise TypeError(
+                    f"Unable to encode signal '{signal.name}' "
+                    f"of type '{type(value).__name__}'."
+                )
+            raw_value = signal.scaled_to_raw(value)
+        else:
+            if isinstance(value, (str, NamedSignalValue)):
+                raw_value = signal.choice_string_to_number(value)
+            elif not isinstance(value, (float, int)):
+                raise TypeError(
+                    f"Unable to encode signal '{signal.name}' "
+                    f"of type '{type(value).__name__}'."
+                )
+            else:
+                raw_value = value
+            raw_value = float(raw_value) if signal.is_float else round(raw_value)
 
-                unpacked[signal.name] = _transform((value - offset) / scale)  # type: ignore[operator]
-                continue
-
-            unpacked[signal.name] = _transform(value)  # type: ignore[operator]
-            continue
-
-        if isinstance(value, (str, NamedSignalValue)):
-            unpacked[signal.name] = signal.choice_string_to_number(str(value))
-            continue
-
-        raise TypeError(
-            f"Unable to encode signal '{signal.name}' "
-            f"with type '{value.__class__.__name__}'."
-        )
+        unpacked[signal.name] = raw_value
 
     return unpacked
 
@@ -137,41 +136,38 @@ def decode_data(data: bytes,
 
     if allow_truncated and actual_length < expected_length:
         # remove signals that are outside available data bytes
-        valid_bit_count = actual_length * 8
+        actual_bit_count = actual_length * 8
         for signal in signals:
             if signal.byte_order == "little_endian":
-                sequential_startbit = signal.start
+                sequential_start_bit = signal.start
             else:
-                # Calculate startbit with inverted indices.
+                # Calculate start bit with inverted indices.
                 # Function body of ``sawtooth_to_network_bitnum()``
                 # is inlined for improved performance.
-                sequential_startbit = (8 * (signal.start // 8)) + (7 - (signal.start % 8))
+                sequential_start_bit = (8 * (signal.start // 8)) + (7 - (signal.start % 8))
 
-            if sequential_startbit + signal.length > valid_bit_count:
+            if sequential_start_bit + signal.length > actual_bit_count:
                 del unpacked[signal.name]
 
-    decoded = {}
+    decoded: Dict[str, SignalValueType] = {}
     for signal in signals:
         try:
             value = unpacked[signal.name]
-
-            if decode_choices:
-                try:
-                    decoded[signal.name] = signal.choices[value]  # type: ignore[index]
-                    continue
-                except (KeyError, TypeError):
-                    pass
-
-            if scaling:
-                offset, scale = signal.offset, signal.scale
-                decoded[signal.name] = scale * value + offset
-                continue
-            else:
-                decoded[signal.name] = value
-
         except KeyError:
             if not allow_truncated:
                 raise
+            continue
+
+        if decode_choices and signal.choices is not None and value in signal.choices:
+            decoded[signal.name] = signal.choices[value]
+            continue
+
+        if scaling:
+            offset, scale = signal.offset, signal.scale
+            decoded[signal.name] = scale*value + offset
+            continue
+        else:
+            decoded[signal.name] = value
 
     return decoded
 

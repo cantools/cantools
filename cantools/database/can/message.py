@@ -746,7 +746,7 @@ class Message:
                 # undo the scaling of the signal's minimum value if we
                 # are not supposed to scale the input value
                 if not scaling:
-                    min_effective = (signal.minimum - signal.offset)/signal.scale
+                    min_effective = signal.scaled_to_raw(signal.minimum)
 
                 if signal_value < min_effective - signal.scale*1e-6:
                     raise EncodeError(
@@ -764,8 +764,8 @@ class Message:
 
                 if signal_value > max_effective + signal.scale*1e-6:
                     raise EncodeError(
-                        f'Expected signal "{signal.name}" value less than or '
-                        f'equal to {max_effective} in message "{self.name}", '
+                        f'Expected signal "{signal.name}" value smaller than '
+                        f'or equal to {max_effective} in message "{self.name}", '
                         f'but got {signal_value}.')
 
     def _encode(self, node: Codec, data: SignalMappingType, scaling: bool) -> Tuple[int, int, List[Signal]]:

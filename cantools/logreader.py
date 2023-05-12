@@ -1,6 +1,7 @@
 import binascii
 import datetime
 import enum
+from typing import ByteString
 import re
 
 
@@ -19,7 +20,7 @@ class DataFrame:
 
     def __init__(self, channel: str,
                  frame_id: int,
-                 data: bytes,
+                 data: ByteString,
                  timestamp: datetime.datetime,
                  timestamp_format: TimestampFormat):
         """Constructor for DataFrame
@@ -32,7 +33,7 @@ class DataFrame:
         : """
         self.channel = channel
         self.frame_id = frame_id
-        self.data = data
+        self.data = bytes(data)
         self.timestamp = timestamp
         self.timestamp_format = timestamp_format
 

@@ -1,6 +1,7 @@
 from typing import (
     TYPE_CHECKING,
     Any,
+    ByteString,
     Callable,
     Dict,
     List,
@@ -51,8 +52,8 @@ SignalValueType = Union[int, float, str, "NamedSignalValue"]
 SignalDictType = Dict[str, SignalValueType]
 SignalMappingType = Mapping[str, SignalValueType]
 ContainerHeaderSpecType = Union["Message", str, int]
-ContainerUnpackResultType = Sequence[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
-ContainerUnpackListType = List[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
+ContainerUnpackResultType = Sequence[Union[Tuple["Message", ByteString], Tuple[int, ByteString]]]
+ContainerUnpackListType = List[Union[Tuple["Message", ByteString], Tuple[int, ByteString]]]
 ContainerDecodeResultType = Sequence[
     Union[Tuple["Message", SignalMappingType], Tuple[int, bytes]]
 ]
@@ -60,9 +61,9 @@ ContainerDecodeResultListType = List[
     Union[Tuple["Message", SignalDictType], Tuple[int, bytes]]
 ]
 ContainerEncodeInputType = Sequence[
-    Tuple[ContainerHeaderSpecType, Union[bytes, SignalMappingType]]
+    Tuple[ContainerHeaderSpecType, Union[ByteString, SignalMappingType]]
 ]
 DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
-SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]
+SecOCAuthenticatorFn = Callable[["Message", ByteString, int], ByteString]

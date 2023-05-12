@@ -2,7 +2,7 @@
 
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, ByteString, Dict, List, Optional, Set, Tuple, Union, cast
 
 from ...typechecking import (
     Codec,
@@ -677,7 +677,7 @@ class Message:
                               f'must be a list of (Message, SignalDict) tuples')
 
         for header, payload in input_data:
-            if isinstance(header, int) and isinstance(payload, bytes):
+            if isinstance(header, int) and isinstance(payload, ByteString):
                 # contained message specified as raw data
                 continue
 
@@ -700,7 +700,7 @@ class Message:
                 raise EncodeError(f'Could not associate "{header}" with any '
                                   f'contained message')
 
-            if isinstance(payload, bytes):
+            if isinstance(payload, ByteString):
                 if len(payload) != contained_message.length:
                     raise EncodeError(f'Payload for contained message '
                                       f'"{contained_message.name}" is '
@@ -825,8 +825,8 @@ class Message:
                                   f'to header {header}')
 
             if contained_message is None:
-                if isinstance(value, bytes) and isinstance(header, int):
-                    # the contained message waw specified as raw data
+                if isinstance(value, ByteString) and isinstance(header, int):
+                    # the contained message was specified as raw data
                     header_id = header
                 else:
                     raise EncodeError(f'No message corresponding to header '
@@ -835,7 +835,7 @@ class Message:
                 assert contained_message.header_id is not None
                 header_id = contained_message.header_id
 
-            if isinstance(value, bytes):
+            if isinstance(value, ByteString):
                 # raw data
 
                 # ensure that the size of the blob corresponds to the
@@ -868,7 +868,7 @@ class Message:
                                    3,
                                    hbo) # type: ignore
             result += int.to_bytes(len(contained_payload), 1, 'big')
-            result += contained_payload
+            result += bytes(contained_payload)
 
         return result
 
@@ -944,7 +944,7 @@ class Message:
 
     def _decode(self,
                 node: Codec,
-                data: bytes,
+                data: ByteString,
                 decode_choices: bool,
                 scaling: bool,
                 allow_truncated: bool) -> SignalDictType:
@@ -980,7 +980,7 @@ class Message:
         return decoded
 
     def unpack_container(self,
-                         data: bytes,
+                         data: ByteString,
                          allow_truncated: bool = False) \
                          -> ContainerUnpackResultType:
         """Unwrap the contents of a container message.
@@ -1036,14 +1036,14 @@ class Message:
             pos += 4+contained_len
 
             if contained_msg is None:
-                result.append((contained_id, contained_data))
+                result.append((contained_id, bytes(contained_data)))
             else:
-                result.append((contained_msg, contained_data))
+                result.append((contained_msg, bytes(contained_data)))
 
         return result
 
     def decode(self,
-               data: bytes,
+               data: ByteString,
                decode_choices: bool = True,
                scaling: bool = True,
                decode_containers: bool = False,
@@ -1092,7 +1092,7 @@ class Message:
                                   allow_truncated)
 
     def decode_simple(self,
-                      data: bytes,
+                      data: ByteString,
                       decode_choices: bool = True,
                       scaling: bool = True,
                       allow_truncated: bool = False) \
@@ -1109,7 +1109,7 @@ class Message:
         elif self._codecs is None:
             raise ValueError('Codec is not initialized.')
 
-        data = data[:self._length]
+        data = bytes(data[:self._length])
 
         return self._decode(self._codecs,
                             data,
@@ -1118,7 +1118,7 @@ class Message:
                             allow_truncated)
 
     def decode_container(self,
-                         data: bytes,
+                         data: ByteString,
                          decode_choices: bool = True,
                          scaling: bool = True,
                          allow_truncated: bool = False) \
@@ -1139,7 +1139,7 @@ class Message:
 
         for contained_message, contained_data in unpacked:
             if not isinstance(contained_message, Message):
-                result.append((contained_message, contained_data))
+                result.append((contained_message, bytes(contained_data)))
                 continue
 
             decoded = contained_message.decode(contained_data,

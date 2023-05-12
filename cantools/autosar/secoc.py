@@ -3,6 +3,7 @@
 # messages.)
 
 import bitstruct
+from typing import ByteString
 
 from ..database.can.message import Message
 from ..errors import Error
@@ -17,11 +18,11 @@ class SecOCError(Error):
     """
     pass
 
-def compute_authenticator(raw_payload: bytes,
+def compute_authenticator(raw_payload: ByteString,
                           dbmsg: Message,
                           authenticator_fn: SecOCAuthenticatorFn,
                           freshness_value: int) \
-                          -> bytearray:
+                          -> ByteString:
     """Given a byte-like object that contains the encoded signals to be
     send, compute the full authenticator SecOC value.
     """
@@ -44,7 +45,7 @@ def compute_authenticator(raw_payload: bytes,
     # compute authenticator value
     return authenticator_fn(dbmsg, auth_data, freshness_value)
 
-def apply_authenticator(raw_payload: bytes,
+def apply_authenticator(raw_payload: ByteString,
                         dbmsg: Message,
                         authenticator_fn: SecOCAuthenticatorFn,
                         freshness_value: int) \
@@ -87,7 +88,7 @@ def apply_authenticator(raw_payload: bytes,
 
     return result
 
-def verify_authenticator(raw_payload: bytes,
+def verify_authenticator(raw_payload: ByteString,
                          dbmsg: Message,
                          authenticator_fn: SecOCAuthenticatorFn,
                          freshness_value: int) \

@@ -5,6 +5,7 @@ import re
 from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
+    ByteString,
     Callable,
     Dict,
     Final,
@@ -111,7 +112,7 @@ def encode_data(data: SignalMappingType,
     return packed_union
 
 
-def decode_data(data: bytes,
+def decode_data(data: ByteString,
                 expected_length: int,
                 signals: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
@@ -122,11 +123,11 @@ def decode_data(data: bytes,
 
     actual_length = len(data)
     if allow_truncated and actual_length < expected_length:
-        data = data.ljust(expected_length, b"\xFF")
+        data = bytes(data).ljust(expected_length, b"\xFF")
 
     unpacked = {
-        **formats.big_endian.unpack(data),
-        **formats.little_endian.unpack(data[::-1]),
+        **formats.big_endian.unpack(bytes(data)),
+        **formats.little_endian.unpack(bytes(data[::-1])),
     }
 
     if allow_truncated and actual_length < expected_length:

@@ -2230,7 +2230,7 @@ double abs_bremse_53_p_fa_decode(int16_t value)
 
 bool abs_bremse_53_p_fa_is_in_range(int16_t value)
 {
-    return ((value >= -2785) && (value <= 27850));
+    return ((value >= -2785) && (value <= 27851));
 }
 
 uint8_t abs_bremse_53_bls_encode(double value)
@@ -2500,5 +2500,5 @@ double abs_bremse_53_p_ra_decode(int16_t value)
 
 bool abs_bremse_53_p_ra_is_in_range(int16_t value)
 {
-    return ((value >= -2785) && (value <= 27850));
+    return ((value >= -2785) && (value <= 27851));
 }

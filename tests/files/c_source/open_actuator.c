@@ -209,7 +209,7 @@ double open_actuator_control_cmd_position_cmd_64_decode(int16_t value)
 
 bool open_actuator_control_cmd_position_cmd_64_is_in_range(int16_t value)
 {
-    return ((value >= -29166) && (value <= 29166));
+    return ((value >= -29167) && (value <= 29167));
 }
 
 int16_t open_actuator_control_cmd_torque_command_8_encode(double value)
@@ -224,7 +224,7 @@ double open_actuator_control_cmd_torque_command_8_decode(int16_t value)
 
 bool open_actuator_control_cmd_torque_command_8_is_in_range(int16_t value)
 {
-    return ((value >= -479) && (value <= 479));
+    return ((value >= -480) && (value <= 480));
 }
 
 uint8_t open_actuator_control_cmd_torque_close_loop_max_32_encode(double value)
@@ -239,7 +239,7 @@ double open_actuator_control_cmd_torque_close_loop_max_32_decode(uint8_t value)
 
 bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_range(uint8_t value)
 {
-    return (value <= 42u);
+    return (value <= 43u);
 }
 
 uint8_t open_actuator_control_cmd_counter_cmd1_encode(double value)

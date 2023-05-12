@@ -1,6 +1,6 @@
 # A CAN signal.
 import decimal
-from typing import cast, TYPE_CHECKING, List, Optional, Union
+from typing import cast, TYPE_CHECKING, Dict, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..namedsignalvalue import NamedSignalValue
@@ -162,6 +162,9 @@ class Signal:
 
         #: "A dictionary mapping signal values to enumerated choices, or
         #: ``None`` if unavailable.
+        self.choices: Optional[Choices]
+        #: The inverse of ``choices``
+        self._inverse_choices: Optional[Dict[str, int]]
         self.set_choices(choices)
 
         #: The start bit position of the signal within its message.
@@ -329,8 +332,7 @@ class Signal:
             self.comments = {None: value}
 
     def set_choices(self, choices: Optional[Choices]) -> None:
-        self.choices: Optional[Choices] = choices
-        self._inverse_choices: Optional[Dict[str, int]] = None
+        self.choices = choices
         if choices is not None:
             # we simply assume that the choices are invertible
             self._inverse_choices = { str(x[1]): x[0] for x in choices.items() }

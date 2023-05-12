@@ -7,6 +7,7 @@ from typing import (
     TYPE_CHECKING,
     ByteString,
     Callable,
+    cast,
     Dict,
     Final,
     List,
@@ -154,14 +155,10 @@ def decode_data(data: ByteString,
                 raise
             continue
 
-        if decode_choices and signal.choices is not None and value in signal.choices:
-            decoded[signal.name] = signal.choices[value]
-            continue
-
         if scaling:
-            offset, scale = signal.offset, signal.scale
-            decoded[signal.name] = scale*value + offset
-            continue
+            decoded[signal.name] = signal.raw_to_scaled(value, decode_choices)
+        elif decode_choices and signal.choices is not None and value in signal.choices:
+            decoded[signal.name] = signal.choices[cast(int, value)]
         else:
             decoded[signal.name] = value
 

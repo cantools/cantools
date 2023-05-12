@@ -15,6 +15,7 @@ from ...utils import (
     type_sort_signals,
 )
 from ..bus import Bus
+from ..conversion import conversion_factory
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node
@@ -132,14 +133,20 @@ def _load_signal_element(signal, nodes):
             receivers.append(_get_node_name_by_id(nodes,
                                                   receiver.attrib['id']))
 
+    conversion = conversion_factory(
+        scale=slope,
+        offset=intercept,
+        choices=labels,
+        is_float=is_float,
+    )
+
     return Signal(name=name,
                   start=_start_bit(offset, byte_order),
                   length=length,
                   receivers=receivers,
                   byte_order=byte_order,
                   is_signed=is_signed,
-                  scale=slope,
-                  offset=intercept,
+                  conversion=conversion,
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,

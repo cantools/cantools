@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..namedsignalvalue import NamedSignalValue
+from .conversion import BaseConversion, IdentityConversion
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
@@ -124,8 +125,7 @@ class Signal:
         is_signed: bool = False,
         raw_initial: Optional[Union[int, float]] = None,
         raw_invalid: Optional[Union[int, float]] = None,
-        scale: float = 1,
-        offset: float = 0,
+        conversion: BaseConversion = IdentityConversion(is_float=False),
         minimum: Optional[float] = None,
         maximum: Optional[float] = None,
         unit: Optional[str] = None,
@@ -145,11 +145,13 @@ class Signal:
         #: The signal name as a string.
         self.name: str = name
 
+        self.conversion = conversion
+
         #: The scale factor of the signal value.
-        self.scale: float = scale
+        self.scale = conversion.scale
 
         #: The offset of the signal value.
-        self.offset: float = offset
+        self.offset = conversion.offset
 
         #: ``True`` if the signal is a float, ``False`` otherwise.
         self.is_float: bool = is_float
@@ -188,7 +190,7 @@ class Signal:
         #: The initial value of the signal in units of the physical world,
         #: or ``None`` if unavailable.
         self.initial: Optional[SignalValueType] = (
-            self.raw_to_scaled(raw_initial) if raw_initial is not None else None
+            self.conversion.raw_to_scaled(raw_initial) if raw_initial is not None else None
         )
 
         #: The raw value representing that the signal is invalid,
@@ -198,7 +200,7 @@ class Signal:
         #: The scaled value representing that the signal is invalid,
         #: or ``None`` if unavailable.
         self.invalid: Optional[SignalValueType] = (
-            self.raw_to_scaled(raw_invalid) if raw_invalid is not None else None
+            self.conversion.raw_to_scaled(raw_invalid) if raw_invalid is not None else None
         )
 
         #: The high precision values of
@@ -257,7 +259,7 @@ class Signal:
     ) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
 
-        :param raw:
+        :param raw_value:
             The raw value
         :param decode_choices:
             If `decode_choices` is ``False`` scaled values are not
@@ -265,47 +267,17 @@ class Signal:
         :return:
             The calculated scaled value
         """
-        # translate the raw value into a string if it is named and
-        # translation requested
-        if decode_choices and self.choices and raw_value in self.choices:
-            return self.choices[cast(int, raw_value)]
-
-        # scale the value
-        offset, factor =  self.offset, self.scale
-
-        if factor == 1 and (isinstance(offset, int) or offset.is_integer()):
-            # avoid unnecessary rounding error if the scaling factor is 1
-            return raw_value + int(offset)
-
-        return float(raw_value*factor + offset)
+        return self.conversion.raw_to_scaled(raw_value, decode_choices)
 
     def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
         """Convert a scaled value to the internal raw value.
 
-        :param scaled:
+        :param scaled_value:
             The scaled value.
         :return:
             The internal raw value.
         """
-        # translate the scaled value into a number if it is an alias
-        if isinstance(scaled_value, (str, NamedSignalValue)):
-            return self.choice_to_number(str(scaled_value))
-
-        # "unscale" the value. Note that this usually produces a float
-        # value even if the raw value is supposed to be an
-        # integer.
-        offset, factor = self.offset, self.scale
-
-        if factor == 1 and (isinstance(offset, int) or offset.is_integer()):
-            # avoid unnecessary rounding error if the scaling factor is 1
-            result = scaled_value - int(offset)
-        else:
-            result = (scaled_value - offset)/factor
-
-        if self.is_float:
-            return float(result)
-        else:
-            return round(result)
+        return self.conversion.scaled_to_raw(scaled_value)
 
     @property
     def comment(self) -> Optional[str]:
@@ -359,8 +331,8 @@ class Signal:
             f"'{self.byte_order}', "
             f"{self.is_signed}, "
             f"{self.raw_initial}, "
-            f"{self.scale}, "
-            f"{self.offset}, "
+            f"{self.conversion.scale}, "
+            f"{self.conversion.offset}, "
             f"{self.minimum}, "
             f"{self.maximum}, "
             f"'{self.unit}', "

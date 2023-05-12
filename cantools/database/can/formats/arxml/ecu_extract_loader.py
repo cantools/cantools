@@ -5,6 +5,7 @@ from typing import Any, List
 
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
+from ...conversion import conversion_factory
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...signal import Decimal as SignalDecimal
@@ -267,14 +268,20 @@ class EcuExtractLoader:
         # ToDo: minimum, maximum, factor, offset, unit, choices,
         #       comments and receivers.
 
+        conversion = conversion_factory(
+            scale=factor,
+            offset=offset,
+            choices=choices,
+            is_float=is_float,
+        )
+
         return Signal(name=name,
                       start=bit_position,
                       length=length,
                       receivers=receivers,
                       byte_order=byte_order,
                       is_signed=is_signed,
-                      scale=factor,
-                      offset=offset,
+                      conversion=conversion,
                       minimum=minimum,
                       maximum=maximum,
                       unit=unit,

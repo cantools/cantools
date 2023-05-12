@@ -26,6 +26,7 @@ from textparser import (
 from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
+from ..conversion import conversion_factory
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..signal import Decimal as SignalDecimal
@@ -419,14 +420,20 @@ def _load_signal(tokens, enums):
         decimal,
         spn)
 
+    conversion = conversion_factory(
+        scale=factor,
+        offset=offset,
+        choices=enum,
+        is_float=is_float,
+    )
+
     return Signal(name=name,
                   start=offset,
                   length=length,
                   receivers=[],
                   byte_order=byte_order,
                   is_signed=is_signed,
-                  scale=factor,
-                  offset=offset,
+                  conversion=conversion,
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
@@ -457,14 +464,20 @@ def _load_message_signal(tokens,
     start = int(tokens[3])
     start = _convert_start(start, signal.byte_order)
 
+    conversion = conversion_factory(
+        scale=signal.scale,
+        offset=signal.offset,
+        choices=signal.choices,
+        is_float=signal.is_float,
+    )
+
     return Signal(name=signal.name,
                   start=start,
                   length=signal.length,
                   receivers=signal.receivers,
                   byte_order=signal.byte_order,
                   is_signed=signal.is_signed,
-                  scale=signal.scale,
-                  offset=signal.offset,
+                  conversion=conversion,
                   minimum=signal.minimum,
                   maximum=signal.maximum,
                   unit=signal.unit,
@@ -524,14 +537,20 @@ def _load_message_variable(tokens,
 
     start = _convert_start(start, byte_order)
 
+    conversion = conversion_factory(
+        scale=factor,
+        offset=offset,
+        choices=enum,
+        is_float=is_float,
+    )
+
     return Signal(name=name,
                   start=start,
                   length=length,
                   receivers=[],
                   byte_order=byte_order,
                   is_signed=is_signed,
-                  scale=factor,
-                  offset=offset,
+                  conversion=conversion,
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
@@ -835,10 +854,10 @@ def _dump_signal(signal: Signal) -> str:
         signal_str += ' -m'
     if signal.unit:
         signal_str += f' /u:"{signal.unit}"'
-    if signal.scale and signal.scale != 1:
-        signal_str += f' /f:{signal.scale}'
-    if signal.offset and signal.offset != 0:
-        signal_str += f' /o:{signal.offset}'
+    if signal.conversion.scale != 1:
+        signal_str += f' /f:{signal.conversion.scale}'
+    if signal.conversion.offset != 0:
+        signal_str += f' /o:{signal.conversion.offset}'
     if signal.maximum is not None:
         signal_str += f' /max:{signal.maximum}'
     if signal.minimum is not None:

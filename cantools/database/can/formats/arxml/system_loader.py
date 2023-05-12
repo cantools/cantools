@@ -8,6 +8,7 @@ from typing import Any
 from ....namedsignalvalue import NamedSignalValue
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
+from ...conversion import IdentityConversion, conversion_factory
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...node import Node
@@ -884,9 +885,8 @@ class SystemLoader:
                                   start=payload_length*8 + 7,
                                   length=fresh_tx_len,
                                   byte_order='big_endian',
-                                  offset=0,
-                                  scale=1,
-                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
+                                  conversion=IdentityConversion(is_float=False),
+                                  decimal=SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   {'FOR-ALL':
                                    f'Truncated freshness value for '
@@ -897,8 +897,7 @@ class SystemLoader:
                                   start=n0,
                                   length=auth_tx_len,
                                   byte_order='big_endian',
-                                  offset=0,
-                                  scale=1,
+                                  conversion=IdentityConversion(is_float=False),
                                   decimal = SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   { 'FOR-ALL':
@@ -1144,9 +1143,8 @@ class SystemLoader:
             start=selector_pos,
             length=selector_len,
             byte_order=selector_byte_order,
-            offset=0,
-            scale=1,
-            decimal = SignalDecimal(Decimal(1), Decimal(0)),
+            conversion=IdentityConversion(is_float=False),
+            decimal=SignalDecimal(Decimal(1), Decimal(0)),
             choices={},
             is_multiplexer=True,
         )
@@ -1251,6 +1249,14 @@ class SystemLoader:
             # TODO: the cycle time of the multiplexers can be
             # specified indepently of that of the message. how should
             # this be handled?
+
+        if selector_signal.choices:
+            selector_signal.conversion = conversion_factory(
+                scale=1,
+                offset=0,
+                choices=selector_signal.choices,
+                is_float=False,
+            )
 
         if selector_signal.raw_initial is not None:
             selector_signal.initial = selector_signal.raw_to_scaled(selector_signal.raw_initial)
@@ -1503,6 +1509,13 @@ class SystemLoader:
 
         raw_invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
 
+        conversion = conversion_factory(
+            scale=factor,
+            offset=offset,
+            choices=choices,
+            is_float=is_float,
+        )
+
         signal = Signal(
             name=name,
             start=start_position,
@@ -1510,8 +1523,7 @@ class SystemLoader:
             receivers=receivers,
             byte_order=byte_order,
             is_signed=is_signed,
-            scale=factor,
-            offset=offset,
+            conversion=conversion,
             raw_initial=raw_initial,
             raw_invalid=raw_invalid,
             minimum=minimum,

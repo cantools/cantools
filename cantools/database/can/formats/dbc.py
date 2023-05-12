@@ -33,6 +33,7 @@ from ...utils import (
 from ..attribute import Attribute
 from ..attribute_definition import AttributeDefinition
 from ..bus import Bus
+from ..conversion import conversion_factory
 from ..environment_variable import EnvironmentVariable
 from ..internal_database import InternalDatabase
 from ..message import Message
@@ -1450,6 +1451,11 @@ def _load_signals(tokens,
     signals = []
 
     for signal in tokens:
+        _scale = num(signal[10])
+        _offset = num(signal[12])
+        _is_float = get_is_float(frame_id_dbc, signal[1][0])
+        _choices = get_choices(frame_id_dbc, signal[1][0])
+
         signals.append(
             Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
                    start=int(signal[3]),
@@ -1460,8 +1466,12 @@ def _load_signals(tokens,
                                else 'little_endian'),
                    is_signed=(signal[8] == '-'),
                    raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
-                   scale=num(signal[10]),
-                   offset=num(signal[12]),
+                   conversion=conversion_factory(
+                       scale=_scale,
+                       offset=_offset,
+                       is_float=_is_float,
+                       choices=_choices,
+                   ),
                    minimum=get_minimum(signal[15], signal[17]),
                    maximum=get_maximum(signal[15], signal[17]),
                    decimal=SignalDecimal(Decimal(signal[10]),
@@ -1472,8 +1482,7 @@ def _load_signals(tokens,
                                                              signal[17])),
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
-                   choices=get_choices(frame_id_dbc,
-                                       signal[1][0]),
+                   choices=_choices,
                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
                                               definitions),
                    comment=get_comment(frame_id_dbc,
@@ -1483,7 +1492,7 @@ def _load_signals(tokens,
                                                        multiplexer_signal),
                    multiplexer_signal=get_multiplexer_signal(signal[1],
                                                              multiplexer_signal),
-                   is_float=get_is_float(frame_id_dbc, signal[1][0])))
+                   is_float=_is_float))
 
     return signals
 

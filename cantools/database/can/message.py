@@ -755,9 +755,9 @@ class Message:
                 # undo the scaling of the signal's minimum value if we
                 # are not supposed to scale the input value
                 if not scaling:
-                    min_effective = signal.scaled_to_raw(signal.minimum)
+                    min_effective = signal.conversion.scaled_to_raw(signal.minimum)
 
-                if signal_value < min_effective - signal.scale*1e-6:
+                if signal_value < min_effective - signal.conversion.scale*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value greater than '
                         f'or equal to {min_effective} in message "{self.name}", '
@@ -769,9 +769,9 @@ class Message:
                 if not scaling:
                     # undo the scaling of the signal's maximum value if we
                     # are not supposed to scale the input value
-                    max_effective = (signal.maximum - signal.offset)/signal.scale
+                    max_effective = signal.conversion.scaled_to_raw(signal.maximum)
 
-                if signal_value > max_effective + signal.scale*1e-6:
+                if signal_value > max_effective + signal.conversion.scale*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value smaller than '
                         f'or equal to {max_effective} in message "{self.name}", '

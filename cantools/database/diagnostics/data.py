@@ -2,6 +2,7 @@
 from typing import Optional, Union
 
 from ...typechecking import ByteOrder, Choices, SignalValueType
+from ..can.conversion import BaseConversion, IdentityConversion
 from ..can.signal import NamedSignalValue
 
 
@@ -16,8 +17,7 @@ class Data:
                  start: int,
                  length: int,
                  byte_order: ByteOrder = 'little_endian',
-                 scale: float = 1,
-                 offset: float = 0,
+                 conversion: BaseConversion = IdentityConversion(is_float=False),
                  minimum: Optional[float] = None,
                  maximum: Optional[float] = None,
                  unit: Optional[str] = None,
@@ -26,11 +26,13 @@ class Data:
         #: The data name as a string.
         self.name: str = name
 
+        self.conversion = conversion
+
         #: The scale factor of the data value.
-        self.scale: float = scale
+        self.scale = conversion.scale
 
         #: The offset of the data value.
-        self.offset: float = offset
+        self.offset = conversion.offset
 
         #: The start bit position of the data within its DID.
         self.start: int = start
@@ -124,8 +126,8 @@ class Data:
             self.start,
             self.length,
             self.byte_order,
-            self.scale,
-            self.offset,
+            self.conversion.scale,
+            self.conversion.offset,
             self.minimum,
             self.maximum,
             self.unit,

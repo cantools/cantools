@@ -3,6 +3,7 @@ import logging
 from typing import Dict
 from xml.etree import ElementTree
 
+from ...can.conversion import conversion_factory
 from ...errors import ParseError
 from ...utils import cdd_offset_to_dbc_start_bit
 from ..data import Data
@@ -144,17 +145,23 @@ def _load_data_element(data, offset, data_types):
     data_type = data_types[data.attrib['dtref']]
 
     # Map CDD/c-style field offset to the DBC/can.Signal.start bit numbering
-    # convention for compatability with can.Signal objects and the shared codec
+    # convention for compatibility with can.Signal objects and the shared codec
     # infrastructure.
     #
     dbc_start_bitnum = cdd_offset_to_dbc_start_bit(offset, data_type.bit_length, data_type.byte_order)
 
+    conversion = conversion_factory(
+        scale=data_type.factor,
+        offset=data_type.offset,
+        choices=data_type.choices,
+        is_float=False
+    )
+
     return Data(name=data.find('QUAL').text,
-                start = dbc_start_bitnum,
+                start=dbc_start_bitnum,
                 length=data_type.bit_length,
-                byte_order = data_type.byte_order,
-                scale=data_type.factor,
-                offset=data_type.offset,
+                byte_order=data_type.byte_order,
+                conversion=conversion,
                 minimum=data_type.minimum,
                 maximum=data_type.maximum,
                 unit=data_type.unit,

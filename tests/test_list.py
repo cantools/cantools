@@ -400,12 +400,12 @@ Message1:
       Length: 3 bits
       Byte order: big_endian
       Unit: m
-      Initial value: 25.0 m
+      Initial value: 25 m
       Is signed: False
       Minimum: 0.0 m
       Maximum: 20.0 m
-      Offset: 0.0 m
-      Scaling factor: 5.0 m
+      Offset: 0 m
+      Scaling factor: 5 m
     signal5:
       Receiving ECUs: Dancer
       Internal type: Float

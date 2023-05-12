@@ -17,7 +17,6 @@ from typing import (
     cast,
 )
 
-from ..database.namedsignalvalue import NamedSignalValue
 from ..typechecking import (
     ByteOrder,
     Choices,
@@ -26,6 +25,7 @@ from ..typechecking import (
     SignalMappingType,
     SignalValueType,
 )
+from .namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
     from ..database import Database
@@ -79,22 +79,21 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
     for signal in signals:
         value = signal_values[signal.name]
 
-        raw_value: Union[int, float]
-        if scaling:
-            raw_value = signal.scaled_to_raw(value)
-        else:
-            if isinstance(value, (str, NamedSignalValue)):
-                raw_value = signal.choice_to_number(value)
-            elif not isinstance(value, (float, int)):
-                raise TypeError(
-                    f"Unable to encode signal '{signal.name}' "
-                    f"of type '{type(value).__name__}'."
-                )
-            else:
-                raw_value = value
-            raw_value = float(raw_value) if signal.is_float else round(raw_value)
+        try:
+            if scaling or isinstance(value, (str, NamedSignalValue)):
+                raw_values[signal.name] = signal.conversion.scaled_to_raw(value)
 
-        raw_values[signal.name] = raw_value
+            elif isinstance(value, (int, float)):
+                raw_values[signal.name] = value if signal.is_float else round(value)
+
+            else:
+                raise TypeError
+
+        except TypeError as exc:
+            raise TypeError(
+                f"Unable to encode signal '{signal.name}' "
+                f"with type '{value.__class__.__name__}'."
+            ) from exc
 
     return raw_values
 
@@ -126,11 +125,11 @@ def decode_data(data: bytes,
 
     actual_length = len(data)
     if allow_truncated and actual_length < expected_length:
-        data = bytes(data).ljust(expected_length, b"\xFF")
+        data = data.ljust(expected_length, b"\xFF")
 
     unpacked = {
-        **formats.big_endian.unpack(bytes(data)),
-        **formats.little_endian.unpack(bytes(data[::-1])),
+        **formats.big_endian.unpack(data),
+        **formats.little_endian.unpack(data[::-1]),
     }
 
     if allow_truncated and actual_length < expected_length:
@@ -158,9 +157,12 @@ def decode_data(data: bytes,
             continue
 
         if scaling:
-            decoded[signal.name] = signal.raw_to_scaled(value, decode_choices)
-        elif decode_choices and signal.choices is not None and value in signal.choices:
-            decoded[signal.name] = signal.choices[cast(int, value)]
+            decoded[signal.name] = signal.conversion.raw_to_scaled(value, decode_choices)
+        elif decode_choices and signal.conversion.choices:
+            try:
+                decoded[signal.name] = signal.conversion.choices[value]
+            except KeyError:
+                decoded[signal.name] = value
         else:
             decoded[signal.name] = value
 

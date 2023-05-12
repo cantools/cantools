@@ -165,15 +165,15 @@ def _print_message(message: Message,
         if signal.maximum is not None:
             print(f'{indent}      Maximum: {_format_val(signal.maximum, unit, vfs)}')
 
-        has_offset = signal.offset is not None and signal.offset != 0
+        has_offset = signal.conversion.offset is not None and signal.conversion.offset != 0
         has_scale = \
-            signal.scale is not None \
-            and (signal.scale > 1 + 1e-10 or signal.scale < 1 - 1e-10)
+            signal.conversion.scale is not None \
+            and (signal.conversion.scale > 1 + 1e-10 or signal.conversion.scale < 1 - 1e-10)
         if has_offset or has_scale:
-            offset = signal.offset if signal.offset is not None else 0
+            offset = signal.conversion.offset if signal.conversion.offset is not None else 0
             print(f'{indent}      Offset: {_format_val(offset, unit, vfs)}')
 
-            scale = signal.scale if signal.scale is not None else 1
+            scale = signal.conversion.scale if signal.conversion.scale is not None else 1
             print(f'{indent}      Scaling factor: {_format_val(scale, unit, vfs)}')
 
         if signal.choices:

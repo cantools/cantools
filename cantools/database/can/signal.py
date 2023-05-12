@@ -1,6 +1,6 @@
 # A CAN signal.
 import decimal
-from typing import cast, TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..namedsignalvalue import NamedSignalValue

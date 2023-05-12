@@ -1,7 +1,7 @@
 # An example cipher suite for secure on-board communication. This is
 # in no way cryptographically secure. DO NOT USE IN THE REAL WORLD!
 
-from typing import ByteString, Union
+from typing import ByteString
 
 from ..database import Message
 

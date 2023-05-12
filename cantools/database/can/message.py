@@ -2,7 +2,17 @@
 
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, ByteString, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    ByteString,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 from ...typechecking import (
     Codec,

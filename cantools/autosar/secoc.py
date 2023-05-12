@@ -2,8 +2,9 @@
 # (SecOC, i.e., verification of the authenticity of the sender of
 # messages.)
 
-import bitstruct
 from typing import ByteString
+
+import bitstruct
 
 from ..database.can.message import Message
 from ..errors import Error

@@ -1,8 +1,8 @@
 import binascii
 import datetime
 import enum
-from typing import ByteString
 import re
+from typing import ByteString
 
 
 class TimestampFormat(enum.Enum):

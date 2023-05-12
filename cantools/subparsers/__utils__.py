@@ -1,7 +1,6 @@
 from typing import (
     ByteString,
     Iterable,
-    Union,
 )
 
 from ..database.can.database import Database

@@ -7,7 +7,6 @@ from typing import (
     TYPE_CHECKING,
     ByteString,
     Callable,
-    cast,
     Dict,
     Final,
     List,
@@ -16,6 +15,7 @@ from typing import (
     Sequence,
     Tuple,
     Union,
+    cast,
 )
 
 from ..database.namedsignalvalue import NamedSignalValue

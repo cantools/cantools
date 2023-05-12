@@ -21,6 +21,7 @@ from textparser import (
     tokenize_init,
 )
 
+from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
@@ -37,7 +38,7 @@ from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node
 from ..signal import Decimal as SignalDecimal
-from ..signal import NamedSignalValue, Signal
+from ..signal import Signal
 from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
 from .utils import num

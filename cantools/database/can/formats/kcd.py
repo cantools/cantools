@@ -7,6 +7,7 @@ from typing import Dict
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
+from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
@@ -18,7 +19,7 @@ from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node
 from ..signal import Decimal as SignalDecimal
-from ..signal import NamedSignalValue, Signal
+from ..signal import Signal
 from .utils import num
 
 LOGGER = logging.getLogger(__name__)

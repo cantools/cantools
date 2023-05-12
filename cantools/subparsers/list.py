@@ -4,8 +4,8 @@ from typing import Any, Union
 import cantools
 
 from ..database import Bus, Database, Message, Node
-from ..database.can.signal import NamedSignalValue
 from ..database.diagnostics.database import Database as DiagnosticsDatabase
+from ..database.namedsignalvalue import NamedSignalValue
 from .dump.formatting import signal_tree_string
 
 

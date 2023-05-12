@@ -5,7 +5,7 @@ from typing import (
 
 from ..database.can.database import Database
 from ..database.can.message import Message
-from ..database.can.signal import NamedSignalValue
+from ..database.namedsignalvalue import NamedSignalValue
 from ..typechecking import (
     ContainerDecodeResultType,
     ContainerUnpackResultType,

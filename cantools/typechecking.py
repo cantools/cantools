@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     import os
 
     from .database import Message, Signal
-    from .database.can.signal import NamedSignalValue
+    from .database.namedsignalvalue import NamedSignalValue
 
 
 class Formats(NamedTuple):

@@ -135,11 +135,8 @@ class NamedSignalConversion(BaseConversion):
         raw_value: Union[int, float],
         decode_choices: bool = True,
     ) -> SignalValueType:
-        if decode_choices:
-            try:
-                return self.choices[raw_value]  # type: ignore[index]
-            except (AttributeError, KeyError):
-                pass
+        if decode_choices and (choice := self.choices.get(raw_value)) is not None:  # type: ignore[arg-type]
+            return choice
         return self._conversion.raw_to_scaled(raw_value, False)
 
     def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:

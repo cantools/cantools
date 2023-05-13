@@ -60,6 +60,9 @@ class BaseConversion(ABC):
         """
         raise NotImplementedError
 
+    def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
+        raise KeyError
+
     @abstractmethod
     def __repr__(self) -> str:
         raise NotImplementedError

@@ -97,11 +97,11 @@ class Data:
         if self.choices is None:
             raise ValueError(f"Data {self.name} has no choices.")
 
-        for choice_number, choice_string in self.choices.items():
-            if choice_string == string:
-                return choice_number
-
-        raise KeyError(f"Choice {string} not found in Data {self.name}.")
+        try:
+            return self.conversion.choice_to_number(string)
+        except KeyError as exc:
+            err_msg = f"Choice {string} not found in Data {self.name}."
+            raise KeyError(err_msg) from exc
 
     @property
     def scale(self) -> Union[int, float]:

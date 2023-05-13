@@ -351,9 +351,14 @@ class Signal:
             self._inverse_choices = { str(x[1]): x[0] for x in choices.items() }
 
     def choice_to_number(self, choice: Union[str, NamedSignalValue]) -> int:
-        if self._inverse_choices is None:
-            raise KeyError(f"Signal {self.name} does not exhibit any choices")
-        return self._inverse_choices[str(choice)]
+        if self.conversion.choices is None:
+            raise KeyError(f"Signal {self.name} has no choices.")
+
+        try:
+            return self.conversion.choice_to_number(choice)
+        except KeyError as exc:
+            err_msg = f"Choice {choice} not found in Signal {self.name}."
+            raise KeyError(err_msg) from exc
 
     def __repr__(self) -> str:
         if self.choices is None:

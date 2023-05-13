@@ -119,8 +119,8 @@ class NamedSignalConversion(BaseConversion):
     def __init__(self, scale: float, offset: float, choices: Choices) -> None:
         self.scale = scale
         self.offset = offset
-        self._inverse_choices: Optional[Dict[str, int]] = None
-        self.choices = choices
+        self._inverse_choices: Dict[str, int] = {}
+        self.choices: Choices = choices
         self._update_choices()
 
         self._conversion = conversion_factory(
@@ -151,20 +151,15 @@ class NamedSignalConversion(BaseConversion):
 
         raise TypeError
 
-    def set_choices(self, choices: Optional[Choices]) -> None:
-        self.choices: Optional[Choices] = choices
+    def set_choices(self, choices: Choices) -> None:
+        self.choices = choices
         self._update_choices()
 
     def _update_choices(self) -> None:
         # we simply assume that the choices are invertible
-        if self.choices:
-            self._inverse_choices = {str(x[1]): x[0] for x in self.choices.items()}
-        else:
-            self._inverse_choices = None
+        self._inverse_choices = {str(x[1]): x[0] for x in self.choices.items()}
 
     def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
-        if self._inverse_choices is None:
-            raise KeyError(f"Signal does not exhibit any choices")
         return self._inverse_choices[str(choice)]
 
 

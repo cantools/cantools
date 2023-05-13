@@ -163,8 +163,7 @@ class Signal:
         self.byte_order: ByteOrder = byte_order
 
         #: ``True`` if the signal is signed, ``False`` otherwise. Ignore this
-        #: attribute if :data:`~cantools.db.Signal.is_float` is
-        #: ``True``.
+        #: attribute if :attr:`is_float` is ``True``.
         self.is_signed: bool = is_signed
 
         #: The internal representation of the initial value of the signal,

@@ -6,9 +6,19 @@ from .namedsignalvalue import NamedSignalValue
 
 
 class BaseConversion(ABC):
+    """The BaseConversion class defines the interface for all signal conversion classes."""
+
+    #: the scaling factor of the conversion
     scale: float
+
+    #: the offset value of the conversion
     offset: float
+
+    #: ``True`` if the raw/internal value is a floating datatype
+    #: ``False`` if it is an integer datatype
     is_float: bool
+
+    #: an optional mapping of raw values to their corresponding text value
     choices: Optional[Choices]
 
     @staticmethod
@@ -18,6 +28,23 @@ class BaseConversion(ABC):
         choices: Optional[Choices] = None,
         is_float: bool = False,
     ) -> "BaseConversion":
+        """Factory method that returns an instance of a conversion subclass based on the given parameters.
+
+        :param scale:
+            The scale factor to use for the conversion.
+        :param offset:
+            The offset to use for the conversion.
+        :param choices:
+            A dictionary of named signal choices, mapping raw values to string labels.
+        :param is_float:
+            A boolean flag indicating whether the raw value is a float or an integer.
+
+        :returns:
+            An instance of a conversion subclass, either an `IdentityConversion`, a `LinearIntegerConversion`,
+            a `LinearConversion`or a `NamedSignalConversion`.
+
+        :raises TypeError: If the given parameters are of the wrong type.
+        """
         if choices is None:
             if scale == 1 and offset == 0:
                 return IdentityConversion(is_float=is_float)

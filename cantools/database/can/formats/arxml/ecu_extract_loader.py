@@ -285,9 +285,7 @@ class EcuExtractLoader:
                       minimum=minimum,
                       maximum=maximum,
                       unit=unit,
-                      choices=choices,
                       comment=comments,
-                      is_float=is_float,
                       decimal=decimal)
 
     def find_com_config(self, xpath):

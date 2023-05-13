@@ -150,9 +150,7 @@ def _load_signal_element(signal, nodes):
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
-                  choices=labels,
                   comment=notes,
-                  is_float=is_float,
                   decimal=decimal)
 
 

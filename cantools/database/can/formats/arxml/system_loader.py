@@ -1,6 +1,7 @@
 # Load a CAN database in ARXML format.
 import logging
 import re
+from collections import OrderedDict
 from copy import deepcopy
 from decimal import Decimal
 from typing import Any
@@ -1145,7 +1146,6 @@ class SystemLoader:
             byte_order=selector_byte_order,
             conversion=IdentityConversion(is_float=False),
             decimal=SignalDecimal(Decimal(1), Decimal(0)),
-            choices={},
             is_multiplexer=True,
         )
         next_selector_idx += 1
@@ -1165,6 +1165,8 @@ class SystemLoader:
                 'DYNAMIC-PART-ALTERNATIVES',
                 '*DYNAMIC-PART-ALTERNATIVE',
             ]
+
+        selector_signal_choices = OrderedDict()
 
         # the cycle time of the message
         cycle_time = None
@@ -1221,9 +1223,7 @@ class SystemLoader:
             assert dselsig.length == selector_len
 
             if dynalt_selector_signals[0].choices is not None:
-                tmp = selector_signal.choices
-                tmp.update(dynalt_selector_signals[0].choices)
-                selector_signal.set_choices(tmp)
+                selector_signal_choices.update(dynalt_selector_signals[0].choices)
 
             if dynalt_selector_signals[0].invalid is not None:
                 # TODO: this may lead to undefined behaviour if
@@ -1250,11 +1250,11 @@ class SystemLoader:
             # specified indepently of that of the message. how should
             # this be handled?
 
-        if selector_signal.choices:
+        if selector_signal_choices:
             selector_signal.conversion = BaseConversion.factory(
                 scale=1,
                 offset=0,
-                choices=selector_signal.choices,
+                choices=selector_signal_choices,
                 is_float=False,
             )
 
@@ -1529,9 +1529,7 @@ class SystemLoader:
             minimum=minimum,
             maximum=maximum,
             unit=unit,
-            choices=choices,
             comment=comments,
-            is_float=is_float,
             decimal=decimal,
         )
         return signal

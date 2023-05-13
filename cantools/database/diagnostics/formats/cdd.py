@@ -164,8 +164,7 @@ def _load_data_element(data, offset, data_types):
                 conversion=conversion,
                 minimum=data_type.minimum,
                 maximum=data_type.maximum,
-                unit=data_type.unit,
-                choices=data_type.choices)
+                unit=data_type.unit)
 
 
 def _load_did_element(did, data_types, did_data_lib):

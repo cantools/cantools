@@ -1,6 +1,6 @@
 # A CAN signal.
 import decimal
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..namedsignalvalue import NamedSignalValue
@@ -129,14 +129,12 @@ class Signal:
         minimum: Optional[float] = None,
         maximum: Optional[float] = None,
         unit: Optional[str] = None,
-        choices: Optional[Choices] = None,
         dbc_specifics: Optional["DbcSpecifics"] = None,
         comment: Optional[Union[str, Comments]] = None,
         receivers: Optional[List[str]] = None,
         is_multiplexer: bool = False,
         multiplexer_ids: Optional[List[int]] = None,
         multiplexer_signal: Optional[str] = None,
-        is_float: bool = False,
         decimal: Optional[Decimal] = None,
         spn: Optional[int] = None,
     ) -> None:
@@ -145,29 +143,15 @@ class Signal:
         #: The signal name as a string.
         self.name: str = name
 
-        self.conversion = conversion
-
-        #: The scale factor of the signal value.
-        self.scale = conversion.scale
-
-        #: The offset of the signal value.
-        self.offset = conversion.offset
-
-        #: ``True`` if the signal is a float, ``False`` otherwise.
-        self.is_float: bool = is_float
+        #: The conversion instance, which is used to convert
+        #: between raw and scaled/physical values.
+        self.conversion: BaseConversion = conversion
 
         #: The scaled minimum value of the signal, or ``None`` if unavailable.
         self.minimum: Optional[float] = minimum
 
         #: The scaled maximum value of the signal, or ``None`` if unavailable.
         self.maximum: Optional[float] = maximum
-
-        #: "A dictionary mapping signal values to enumerated choices, or
-        #: ``None`` if unavailable.
-        self.choices: Optional[Choices]
-        #: The inverse of ``choices``
-        self._inverse_choices: Optional[Dict[str, int]]
-        self.set_choices(choices)
 
         #: The start bit position of the signal within its message.
         self.start: int = start
@@ -280,6 +264,63 @@ class Signal:
         return self.conversion.scaled_to_raw(scaled_value)
 
     @property
+    def scale(self) -> Union[int, float]:
+        """The scale factor of the signal value."""
+        return self.conversion.scale
+
+    @scale.setter
+    def scale(self, value: Union[int, float]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=value,
+            offset=self.conversion.offset,
+            choices=self.conversion.choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def offset(self) -> Union[int, float]:
+        """The offset of the signal value."""
+        return self.conversion.offset
+
+    @offset.setter
+    def offset(self, value: Union[int, float]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=value,
+            choices=self.conversion.choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def choices(self) -> Optional[Choices]:
+        """A dictionary mapping signal values to enumerated choices, or
+        ``None`` if unavailable."""
+        return self.conversion.choices
+
+    @choices.setter
+    def choices(self, choices: Optional[Choices]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=self.conversion.offset,
+            choices=choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def is_float(self) -> bool:
+        """``True`` if the raw signal value is a float, ``False`` otherwise."""
+        return self.conversion.is_float
+
+    @is_float.setter
+    def is_float(self, is_float: bool) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=self.conversion.offset,
+            choices=self.conversion.choices,
+            is_float=is_float,
+        )
+
+    @property
     def comment(self) -> Optional[str]:
         """The signal comment, or ``None`` if unavailable.
 
@@ -304,7 +345,7 @@ class Signal:
             self.comments = {None: value}
 
     def set_choices(self, choices: Optional[Choices]) -> None:
-        self.choices = choices
+        self.conversion.choices = choices
         if choices is not None:
             # we simply assume that the choices are invertible
             self._inverse_choices = { str(x[1]): x[0] for x in choices.items() }

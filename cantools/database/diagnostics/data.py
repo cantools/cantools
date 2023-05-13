@@ -21,18 +21,13 @@ class Data:
                  minimum: Optional[float] = None,
                  maximum: Optional[float] = None,
                  unit: Optional[str] = None,
-                 choices: Optional[Choices] = None,
                  ) -> None:
         #: The data name as a string.
         self.name: str = name
 
+        #: The conversion instance, which is used to convert
+        #: between raw and scaled/physical values.
         self.conversion = conversion
-
-        #: The scale factor of the data value.
-        self.scale = conversion.scale
-
-        #: The offset of the data value.
-        self.offset = conversion.offset
 
         #: The start bit position of the data within its DID.
         self.start: int = start
@@ -52,12 +47,7 @@ class Data:
         #: The unit of the data as a string, or ``None`` if unavailable.
         self.unit = unit
 
-        #: A dictionary mapping data values to enumerated choices, or ``None``
-        #: if unavailable.
-        self.choices: Optional[Choices] = choices
-
         # ToDo: Remove once types are handled properly.
-        self.is_float: bool = False
         self.is_signed: bool = False
 
     def raw_to_scaled(
@@ -112,6 +102,63 @@ class Data:
                 return choice_number
 
         raise KeyError(f"Choice {string} not found in Data {self.name}.")
+
+    @property
+    def scale(self) -> Union[int, float]:
+        """The scale factor of the signal value."""
+        return self.conversion.scale
+
+    @scale.setter
+    def scale(self, value: Union[int, float]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=value,
+            offset=self.conversion.offset,
+            choices=self.conversion.choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def offset(self) -> Union[int, float]:
+        """The offset of the signal value."""
+        return self.conversion.offset
+
+    @offset.setter
+    def offset(self, value: Union[int, float]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=value,
+            choices=self.conversion.choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def choices(self) -> Optional[Choices]:
+        """A dictionary mapping signal values to enumerated choices, or
+        ``None`` if unavailable."""
+        return self.conversion.choices
+
+    @choices.setter
+    def choices(self, choices: Optional[Choices]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=self.conversion.offset,
+            choices=choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def is_float(self) -> bool:
+        """``True`` if the raw signal value is a float, ``False`` otherwise."""
+        return self.conversion.is_float
+
+    @is_float.setter
+    def is_float(self, is_float: bool) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=self.conversion.offset,
+            choices=self.conversion.choices,
+            is_float=is_float,
+        )
 
     def __repr__(self) -> str:
         if self.choices is None:

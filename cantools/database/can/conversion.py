@@ -27,7 +27,9 @@ class BaseConversion(ABC):
 
             return LinearConversion(scale=scale, offset=offset, is_float=is_float)
 
-        return NamedSignalConversion(scale=scale, offset=offset, choices=choices)
+        return NamedSignalConversion(
+            scale=scale, offset=offset, choices=choices, is_float=is_float
+        )
 
     @abstractmethod
     def raw_to_scaled(
@@ -132,11 +134,12 @@ class LinearConversion(BaseConversion):
 
 
 class NamedSignalConversion(BaseConversion):
-    is_float = False
-
-    def __init__(self, scale: float, offset: float, choices: Choices) -> None:
+    def __init__(
+        self, scale: float, offset: float, choices: Choices, is_float: bool
+    ) -> None:
         self.scale = scale
         self.offset = offset
+        self.is_float = is_float
         self._inverse_choices: Dict[str, int] = {}
         self.choices: Choices = choices
         self._update_choices()
@@ -145,7 +148,7 @@ class NamedSignalConversion(BaseConversion):
             scale=self.scale,
             offset=self.offset,
             choices=None,
-            is_float=False,
+            is_float=is_float,
         )
 
     def raw_to_scaled(

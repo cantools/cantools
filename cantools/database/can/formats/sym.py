@@ -437,10 +437,8 @@ def _load_signal(tokens, enums):
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
-                  choices=enum,
                   comment=comment,
                   is_multiplexer=False,
-                  is_float=is_float,
                   decimal=decimal,
                   spn=spn)
 
@@ -481,12 +479,10 @@ def _load_message_signal(tokens,
                   minimum=signal.minimum,
                   maximum=signal.maximum,
                   unit=signal.unit,
-                  choices=signal.choices,
                   comment=signal.comment,
                   is_multiplexer=signal.is_multiplexer,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
-                  is_float=signal.is_float,
                   decimal=signal.decimal,
                   spn=signal.spn)
 
@@ -554,12 +550,10 @@ def _load_message_variable(tokens,
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
-                  choices=enum,
                   comment=comment,
                   is_multiplexer=False,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
-                  is_float=is_float,
                   decimal=decimal,
                   spn=spn)
 

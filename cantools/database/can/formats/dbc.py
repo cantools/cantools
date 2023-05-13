@@ -1451,11 +1451,6 @@ def _load_signals(tokens,
     signals = []
 
     for signal in tokens:
-        _scale = num(signal[10])
-        _offset = num(signal[12])
-        _is_float = get_is_float(frame_id_dbc, signal[1][0])
-        _choices = get_choices(frame_id_dbc, signal[1][0])
-
         signals.append(
             Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
                    start=int(signal[3]),
@@ -1467,10 +1462,10 @@ def _load_signals(tokens,
                    is_signed=(signal[8] == '-'),
                    raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
                    conversion=BaseConversion.factory(
-                       scale=_scale,
-                       offset=_offset,
-                       is_float=_is_float,
-                       choices=_choices,
+                       scale=num(signal[10]),
+                       offset=num(signal[12]),
+                       is_float=get_is_float(frame_id_dbc, signal[1][0]),
+                       choices=get_choices(frame_id_dbc, signal[1][0]),
                    ),
                    minimum=get_minimum(signal[15], signal[17]),
                    maximum=get_maximum(signal[15], signal[17]),
@@ -1482,7 +1477,6 @@ def _load_signals(tokens,
                                                              signal[17])),
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
-                   choices=_choices,
                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
                                               definitions),
                    comment=get_comment(frame_id_dbc,
@@ -1491,8 +1485,7 @@ def _load_signals(tokens,
                    multiplexer_ids=get_multiplexer_ids(signal[1],
                                                        multiplexer_signal),
                    multiplexer_signal=get_multiplexer_signal(signal[1],
-                                                             multiplexer_signal),
-                   is_float=_is_float))
+                                                             multiplexer_signal)))
 
     return signals
 

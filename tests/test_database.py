@@ -4571,7 +4571,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_selector.decimal.minimum, None)
         self.assertEqual(mux_signal_selector.decimal.maximum, None)
         self.assertEqual(mux_signal_selector.unit, None)
-        self.assertEqual(mux_signal_selector.choices, {})
+        self.assertEqual(mux_signal_selector.choices, None)
         self.assertEqual(mux_signal_selector.comments, None)
         self.assertEqual(mux_signal_selector.is_multiplexer, True)
         self.assertEqual(mux_signal_selector.multiplexer_signal , None)

@@ -33,7 +33,7 @@ from ...utils import (
 from ..attribute import Attribute
 from ..attribute_definition import AttributeDefinition
 from ..bus import Bus
-from ..conversion import conversion_factory
+from ..conversion import BaseConversion
 from ..environment_variable import EnvironmentVariable
 from ..internal_database import InternalDatabase
 from ..message import Message
@@ -1466,7 +1466,7 @@ def _load_signals(tokens,
                                else 'little_endian'),
                    is_signed=(signal[8] == '-'),
                    raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
-                   conversion=conversion_factory(
+                   conversion=BaseConversion.factory(
                        scale=_scale,
                        offset=_offset,
                        is_float=_is_float,

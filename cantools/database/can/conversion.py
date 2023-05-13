@@ -11,6 +11,24 @@ class BaseConversion(ABC):
     is_float: bool
     choices: Optional[Choices]
 
+    @staticmethod
+    def factory(
+        scale: float = 1,
+        offset: float = 0,
+        choices: Optional[Choices] = None,
+        is_float: bool = False,
+    ) -> "BaseConversion":
+        if choices is None:
+            if scale == 1 and offset == 0:
+                return IdentityConversion(is_float=is_float)
+
+            if _is_integer(scale) and _is_integer(offset) and not is_float:
+                return LinearIntegerConversion(scale=int(scale), offset=int(offset))
+
+            return LinearConversion(scale=scale, offset=offset, is_float=is_float)
+
+        return NamedSignalConversion(scale=scale, offset=offset, choices=choices)
+
     @abstractmethod
     def raw_to_scaled(
         self,
@@ -123,7 +141,7 @@ class NamedSignalConversion(BaseConversion):
         self.choices: Choices = choices
         self._update_choices()
 
-        self._conversion = conversion_factory(
+        self._conversion = BaseConversion.factory(
             scale=self.scale,
             offset=self.offset,
             choices=None,
@@ -158,24 +176,6 @@ class NamedSignalConversion(BaseConversion):
 
     def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
         return self._inverse_choices[str(choice)]
-
-
-def conversion_factory(
-    scale: float = 1,
-    offset: float = 0,
-    choices: Optional[Choices] = None,
-    is_float: bool = False,
-) -> BaseConversion:
-    if choices is None:
-        if scale == 1 and offset == 0:
-            return IdentityConversion(is_float=is_float)
-
-        if _is_integer(scale) and _is_integer(offset) and not is_float:
-            return LinearIntegerConversion(scale=int(scale), offset=int(offset))
-
-        return LinearConversion(scale=scale, offset=offset, is_float=is_float)
-
-    return NamedSignalConversion(scale=scale, offset=offset, choices=choices)
 
 
 def _is_integer(value: Union[int, float]) -> bool:

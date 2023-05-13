@@ -3,7 +3,7 @@ import logging
 from typing import Dict
 from xml.etree import ElementTree
 
-from ...can.conversion import conversion_factory
+from ...can.conversion import BaseConversion
 from ...errors import ParseError
 from ...utils import cdd_offset_to_dbc_start_bit
 from ..data import Data
@@ -150,7 +150,7 @@ def _load_data_element(data, offset, data_types):
     #
     dbc_start_bitnum = cdd_offset_to_dbc_start_bit(offset, data_type.bit_length, data_type.byte_order)
 
-    conversion = conversion_factory(
+    conversion = BaseConversion.factory(
         scale=data_type.factor,
         offset=data_type.offset,
         choices=data_type.choices,

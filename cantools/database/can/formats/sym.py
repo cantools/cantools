@@ -26,7 +26,7 @@ from textparser import (
 from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
-from ..conversion import conversion_factory
+from ..conversion import BaseConversion
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..signal import Decimal as SignalDecimal
@@ -420,7 +420,7 @@ def _load_signal(tokens, enums):
         decimal,
         spn)
 
-    conversion = conversion_factory(
+    conversion = BaseConversion.factory(
         scale=factor,
         offset=offset,
         choices=enum,
@@ -464,7 +464,7 @@ def _load_message_signal(tokens,
     start = int(tokens[3])
     start = _convert_start(start, signal.byte_order)
 
-    conversion = conversion_factory(
+    conversion = BaseConversion.factory(
         scale=signal.scale,
         offset=signal.offset,
         choices=signal.choices,
@@ -537,7 +537,7 @@ def _load_message_variable(tokens,
 
     start = _convert_start(start, byte_order)
 
-    conversion = conversion_factory(
+    conversion = BaseConversion.factory(
         scale=factor,
         offset=offset,
         choices=enum,

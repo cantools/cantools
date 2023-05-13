@@ -8,7 +8,7 @@ from typing import Any
 from ....namedsignalvalue import NamedSignalValue
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
-from ...conversion import IdentityConversion, conversion_factory
+from ...conversion import BaseConversion, IdentityConversion
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...node import Node
@@ -1251,7 +1251,7 @@ class SystemLoader:
             # this be handled?
 
         if selector_signal.choices:
-            selector_signal.conversion = conversion_factory(
+            selector_signal.conversion = BaseConversion.factory(
                 scale=1,
                 offset=0,
                 choices=selector_signal.choices,
@@ -1509,7 +1509,7 @@ class SystemLoader:
 
         raw_invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
 
-        conversion = conversion_factory(
+        conversion = BaseConversion.factory(
             scale=factor,
             offset=offset,
             choices=choices,

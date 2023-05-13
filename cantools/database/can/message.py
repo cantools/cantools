@@ -184,8 +184,8 @@ class Message:
                 # enumeration. Here we ensure that any named
                 # multiplexer is included, even if it has no child
                 # signals.
-                if signal.choices:
-                    children_ids.update(signal.choices.keys())
+                if signal.conversion.choices:
+                    children_ids.update(signal.conversion.choices.keys())
 
                 for child_id in children_ids:
                     codec = self._create_codec(signal.name, child_id)
@@ -727,7 +727,7 @@ class Message:
         if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
             signal = self.get_signal_by_name(signal_name)
             try:
-                mux = signal.choice_to_number(str(mux))
+                mux = signal.conversion.choice_to_number(str(mux))
             except KeyError:
                 raise EncodeError() from None
         return int(mux)
@@ -741,7 +741,7 @@ class Message:
 
             if isinstance(signal_value, (str, NamedSignalValue)):
                 # Check choices
-                signal_value_num = signal.choice_to_number(str(signal_value))
+                signal_value_num = signal.conversion.choice_to_number(str(signal_value))
 
                 if signal_value_num is None:
                     raise EncodeError(f'Invalid value specified for signal '

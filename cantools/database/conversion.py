@@ -60,6 +60,10 @@ class BaseConversion(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def __repr__(self) -> str:
+        raise NotImplementedError
+
 
 class IdentityConversion(BaseConversion):
     scale = 1
@@ -83,6 +87,9 @@ class IdentityConversion(BaseConversion):
             )
         return scaled_value
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(is_float={self.is_float})"
+
 
 class LinearIntegerConversion(BaseConversion):
     is_float = False
@@ -105,6 +112,9 @@ class LinearIntegerConversion(BaseConversion):
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
             )
         return round((scaled_value - self.offset) / self.scale)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(scale={self.scale}, offset={self.offset})"
 
 
 class LinearConversion(BaseConversion):
@@ -131,6 +141,14 @@ class LinearConversion(BaseConversion):
         if self.is_float:
             return _raw
         return round(_raw)
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"scale={self.scale}, "
+            f"offset={self.offset}, "
+            f"is_float={self.is_float})"
+        )
 
 
 class NamedSignalConversion(BaseConversion):
@@ -179,6 +197,19 @@ class NamedSignalConversion(BaseConversion):
 
     def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
         return self._inverse_choices[str(choice)]
+
+    def __repr__(self) -> str:
+        list_of_choices = ", ".join(
+            [f"{value}: '{text}'" for value, text in self.choices.items()]
+        )
+        choices = f"{{{list_of_choices}}}"
+        return (
+            f"{self.__class__.__name__}("
+            f"scale={self.scale}, "
+            f"offset={self.offset}, "
+            f"choices={choices}, "
+            f"is_float={self.is_float})"
+        )
 
 
 def _is_integer(value: Union[int, float]) -> bool:

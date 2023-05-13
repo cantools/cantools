@@ -3,7 +3,7 @@ import logging
 from typing import Dict
 from xml.etree import ElementTree
 
-from ...can.conversion import BaseConversion
+from ...conversion import BaseConversion
 from ...errors import ParseError
 from ...utils import cdd_offset_to_dbc_start_bit
 from ..data import Data

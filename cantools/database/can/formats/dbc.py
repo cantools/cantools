@@ -21,6 +21,7 @@ from textparser import (
     tokenize_init,
 )
 
+from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
@@ -33,7 +34,6 @@ from ...utils import (
 from ..attribute import Attribute
 from ..attribute_definition import AttributeDefinition
 from ..bus import Bus
-from ..conversion import BaseConversion
 from ..environment_variable import EnvironmentVariable
 from ..internal_database import InternalDatabase
 from ..message import Message

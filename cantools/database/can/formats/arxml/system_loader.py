@@ -6,10 +6,10 @@ from copy import deepcopy
 from decimal import Decimal
 from typing import Any
 
+from ....conversion import BaseConversion, IdentityConversion
 from ....namedsignalvalue import NamedSignalValue
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
-from ...conversion import BaseConversion, IdentityConversion
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...node import Node

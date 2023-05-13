@@ -7,6 +7,7 @@ from typing import Dict
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
+from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
@@ -15,7 +16,6 @@ from ...utils import (
     type_sort_signals,
 )
 from ..bus import Bus
-from ..conversion import BaseConversion
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node

@@ -3,9 +3,9 @@ import logging
 from decimal import Decimal
 from typing import Any, List
 
+from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
-from ...conversion import BaseConversion
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...signal import Decimal as SignalDecimal

@@ -23,10 +23,10 @@ from textparser import (
     tokenize_init,
 )
 
+from ...conversion import BaseConversion
 from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
-from ..conversion import BaseConversion
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..signal import Decimal as SignalDecimal

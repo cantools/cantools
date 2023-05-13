@@ -243,4 +243,10 @@ class NamedSignalConversion(BaseConversion):
 
 
 def _is_integer(value: Union[int, float]) -> bool:
-    return isinstance(value, int) or value.is_integer()
+    if isinstance(value, int) or (hasattr(value, "is_integer") and value.is_integer()):
+        return True
+    elif isinstance(value, float):
+        return False
+
+    err_msg = f"`value` must be of type `int` or `float`, is {type(value)}"
+    raise TypeError(err_msg)

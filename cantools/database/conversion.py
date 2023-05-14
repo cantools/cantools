@@ -92,7 +92,16 @@ class BaseConversion(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+    def numeric_scaled_to_raw(
+        self, scaled_value: Union[int, float]
+    ) -> Union[int, float]:
+        """Convert a numeric scaled value to the internal raw value.
+
+        :param scaled_value:
+            The numeric scaled value.
+        :return:
+            The internal raw value.
+        """
         raise NotImplementedError
 
     def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
@@ -125,7 +134,9 @@ class IdentityConversion(BaseConversion):
             )
         return self.numeric_scaled_to_raw(scaled_value)
 
-    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+    def numeric_scaled_to_raw(
+        self, scaled_value: Union[int, float]
+    ) -> Union[int, float]:
         return scaled_value if self.is_float else round(scaled_value)
 
     def __repr__(self) -> str:
@@ -154,7 +165,9 @@ class LinearIntegerConversion(BaseConversion):
             )
         return self.numeric_scaled_to_raw(scaled_value)
 
-    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+    def numeric_scaled_to_raw(
+        self, scaled_value: Union[int, float]
+    ) -> Union[int, float]:
         _raw = scaled_value - self.offset
         if _raw % self.scale == 0:
             _raw //= self.scale
@@ -188,7 +201,9 @@ class LinearConversion(BaseConversion):
             )
         return self.numeric_scaled_to_raw(scaled_value)
 
-    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+    def numeric_scaled_to_raw(
+        self, scaled_value: Union[int, float]
+    ) -> Union[int, float]:
         _raw = (scaled_value - self.offset) / self.scale
         return _raw if self.is_float else round(_raw)
 
@@ -218,6 +233,8 @@ class NamedSignalConversion(BaseConversion):
             choices=None,
             is_float=is_float,
         )
+        # monkeypatch method to avoid unnecessary function call
+        self.numeric_scaled_to_raw = self._conversion.numeric_scaled_to_raw
 
     def raw_to_scaled(
         self,
@@ -241,7 +258,9 @@ class NamedSignalConversion(BaseConversion):
 
         raise TypeError
 
-    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+    def numeric_scaled_to_raw(
+        self, scaled_value: Union[int, float]
+    ) -> Union[int, float]:
         return self._conversion.scaled_to_raw(scaled_value)
 
     def set_choices(self, choices: Choices) -> None:

@@ -115,7 +115,7 @@ class IdentityConversion(BaseConversion):
             raise TypeError(
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
             )
-        return scaled_value
+        return scaled_value if self.is_float else round(scaled_value)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(is_float={self.is_float})"

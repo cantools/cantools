@@ -82,14 +82,14 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
 
         if isinstance(value, (int, float)):
             if scaling:
-                raw_values[name] = conversion.scaled_to_raw(value)
+                raw_values[name] = conversion.numeric_scaled_to_raw(value)
                 continue
 
             raw_values[name] = value if conversion.is_float else round(value)
             continue
 
         if isinstance(value, (str, NamedSignalValue)):
-            raw_values[name] = conversion.scaled_to_raw(value)
+            raw_values[name] = conversion.choice_to_number(value)
             continue
 
         raise TypeError(

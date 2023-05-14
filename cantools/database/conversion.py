@@ -52,7 +52,11 @@ class BaseConversion(ABC):
             if _is_integer(scale) and _is_integer(offset) and not is_float:
                 return LinearIntegerConversion(scale=int(scale), offset=int(offset))
 
-            return LinearConversion(scale=scale, offset=offset, is_float=is_float)
+            return LinearConversion(
+                scale=scale,
+                offset=offset,
+                is_float=is_float,
+            )
 
         return NamedSignalConversion(
             scale=scale, offset=offset, choices=choices, is_float=is_float
@@ -87,6 +91,10 @@ class BaseConversion(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+        raise NotImplementedError
+
     def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
         raise KeyError
 
@@ -115,6 +123,9 @@ class IdentityConversion(BaseConversion):
             raise TypeError(
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
             )
+        return self.numeric_scaled_to_raw(scaled_value)
+
+    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
         return scaled_value if self.is_float else round(scaled_value)
 
     def __repr__(self) -> str:
@@ -141,7 +152,15 @@ class LinearIntegerConversion(BaseConversion):
             raise TypeError(
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
             )
-        return round((scaled_value - self.offset) / self.scale)
+        return self.numeric_scaled_to_raw(scaled_value)
+
+    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+        _raw = scaled_value - self.offset
+        if _raw % self.scale == 0:
+            _raw //= self.scale
+        else:
+            _raw /= self.scale
+        return round(_raw)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(scale={self.scale}, offset={self.offset})"
@@ -167,10 +186,11 @@ class LinearConversion(BaseConversion):
             raise TypeError(
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
             )
+        return self.numeric_scaled_to_raw(scaled_value)
+
+    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
         _raw = (scaled_value - self.offset) / self.scale
-        if self.is_float:
-            return _raw
-        return round(_raw)
+        return _raw if self.is_float else round(_raw)
 
     def __repr__(self) -> str:
         return (
@@ -220,6 +240,9 @@ class NamedSignalConversion(BaseConversion):
             return self.choice_to_number(scaled_value)
 
         raise TypeError
+
+    def numeric_scaled_to_raw(self, scaled_value: Union[int, float]) -> Union[int, float]:
+        return self._conversion.scaled_to_raw(scaled_value)
 
     def set_choices(self, choices: Choices) -> None:
         self.choices = choices

@@ -14,7 +14,6 @@ from typing import (
     Sequence,
     Tuple,
     Union,
-    cast,
 )
 
 from ..typechecking import (
@@ -77,23 +76,26 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
     """
     raw_values = {}
     for signal in signals:
-        value = signal_values[signal.name]
+        name = signal.name
+        conversion = signal.conversion
+        value = signal_values[name]
 
-        try:
-            if scaling or isinstance(value, (str, NamedSignalValue)):
-                raw_values[signal.name] = signal.conversion.scaled_to_raw(value)
+        if isinstance(value, (int, float)):
+            if scaling:
+                raw_values[name] = conversion.scaled_to_raw(value)
+                continue
 
-            elif isinstance(value, (int, float)):
-                raw_values[signal.name] = value if signal.is_float else round(value)
+            raw_values[name] = value if conversion.is_float else round(value)
+            continue
 
-            else:
-                raise TypeError
+        if isinstance(value, (str, NamedSignalValue)):
+            raw_values[name] = conversion.scaled_to_raw(value)
+            continue
 
-        except TypeError as exc:
-            raise TypeError(
-                f"Unable to encode signal '{signal.name}' "
-                f"with type '{value.__class__.__name__}'."
-            ) from exc
+        raise TypeError(
+            f"Unable to encode signal '{name}' "
+            f"with type '{value.__class__.__name__}'."
+        )
 
     return raw_values
 
@@ -131,6 +133,9 @@ def decode_data(data: bytes,
         **formats.big_endian.unpack(data),
         **formats.little_endian.unpack(data[::-1]),
     }
+
+    if allow_truncated and not (scaling or decode_choices):
+        return unpacked
 
     if allow_truncated and actual_length < expected_length:
         # remove signals that are outside available data bytes

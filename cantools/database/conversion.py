@@ -236,7 +236,7 @@ class NamedSignalConversion(BaseConversion):
             is_float=is_float,
         )
         # monkeypatch method to avoid unnecessary function call
-        self.numeric_scaled_to_raw = self._conversion.numeric_scaled_to_raw
+        self.numeric_scaled_to_raw = self._conversion.numeric_scaled_to_raw  # type: ignore[method-assign]
 
     def raw_to_scaled(
         self,

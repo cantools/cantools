@@ -346,7 +346,7 @@ def prune_signal_choices(signal: "Signal") -> None:
             signal.choices[key] = val
         else:
             # assert isinstance(choice, NamedSignalValue)
-            choice._name = val
+            choice.name = val
         return
 
     # if there are multiple choices, remove the longest common prefix
@@ -393,7 +393,7 @@ def prune_signal_choices(signal: "Signal") -> None:
             signal.choices[key] = choice[n:]
         else:
             # assert isinstance(choice, NamedSignalValue)
-            choice._name = choice._name[n:]
+            choice.name = choice.name[n:]
 
 
 def prune_database_choices(database: "Database") -> None:

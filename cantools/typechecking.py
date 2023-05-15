@@ -65,4 +65,4 @@ ContainerEncodeInputType = Sequence[
 DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
-SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]
+SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]

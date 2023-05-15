@@ -14,7 +14,7 @@ class SnakeOilAuthenticator:
     cryptographically secure! DO NOT USE THEM IN THE REAL WORLD!
     """
     def __init__(self,
-                 secret: Union[str, bytes, bytearray]):
+                 secret: Union[bytes, str]) -> None:
         if isinstance(secret, str):
             self._secret = secret.encode()
         else:

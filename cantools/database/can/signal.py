@@ -1,6 +1,6 @@
 # A CAN signal.
 import decimal
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..namedsignalvalue import NamedSignalValue
@@ -162,7 +162,10 @@ class Signal:
 
         #: "A dictionary mapping signal values to enumerated choices, or
         #: ``None`` if unavailable.
-        self.choices: Optional[Choices] = choices
+        self.choices: Optional[Choices]
+        #: The inverse of ``choices``
+        self._inverse_choices: Optional[Dict[str, int]]
+        self.set_choices(choices)
 
         #: The start bit position of the signal within its message.
         self.start: int = start
@@ -265,8 +268,7 @@ class Signal:
         # translate the raw value into a string if it is named and
         # translation requested
         if decode_choices and self.choices and raw_value in self.choices:
-            assert isinstance(raw_value, int)
-            return self.choices[raw_value]
+            return self.choices[cast(int, raw_value)]
 
         # scale the value
         offset, factor =  self.offset, self.scale
@@ -287,7 +289,7 @@ class Signal:
         """
         # translate the scaled value into a number if it is an alias
         if isinstance(scaled_value, (str, NamedSignalValue)):
-            return self.choice_string_to_number(str(scaled_value))
+            return self.choice_to_number(str(scaled_value))
 
         # "unscale" the value. Note that this usually produces a float
         # value even if the raw value is supposed to be an
@@ -329,15 +331,16 @@ class Signal:
         else:
             self.comments = {None: value}
 
-    def choice_string_to_number(self, string: str) -> int:
-        if self.choices is None:
-            raise ValueError(f"Signal {self.name} has no choices.")
+    def set_choices(self, choices: Optional[Choices]) -> None:
+        self.choices = choices
+        if choices is not None:
+            # we simply assume that the choices are invertible
+            self._inverse_choices = { str(x[1]): x[0] for x in choices.items() }
 
-        for choice_number, choice_value in self.choices.items():
-            if str(choice_value) == str(string):
-                return choice_number
-
-        raise KeyError(f"Choice {string} not found in Signal {self.name}.")
+    def choice_to_number(self, choice: Union[str, NamedSignalValue]) -> int:
+        if self._inverse_choices is None:
+            raise KeyError(f"Signal {self.name} does not exhibit any choices")
+        return self._inverse_choices[str(choice)]
 
     def __repr__(self) -> str:
         if self.choices is None:

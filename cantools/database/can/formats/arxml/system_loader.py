@@ -1223,7 +1223,9 @@ class SystemLoader:
             assert dselsig.length == selector_len
 
             if dynalt_selector_signals[0].choices is not None:
-                selector_signal.choices.update(dynalt_selector_signals[0].choices)
+                tmp = selector_signal.choices
+                tmp.update(dynalt_selector_signals[0].choices)
+                selector_signal.set_choices(tmp)
 
             if dynalt_selector_signals[0].invalid is not None:
                 # TODO: this may lead to undefined behaviour if

@@ -8,7 +8,7 @@ import crccheck  # type: ignore
 from ..database.can.message import Message
 
 
-def compute_profile2_crc(payload : Union[bytes, bytearray],
+def compute_profile2_crc(payload: bytes,
                          msg_or_data_id: Union[int, Message]) -> Optional[int]:
     """Compute the CRC checksum for profile 2 of the AUTOSAR end-to-end
     protection specification.
@@ -53,7 +53,7 @@ def compute_profile2_crc(payload : Union[bytes, bytearray],
     # do the actual work
     return int(crccheck.crc.Crc8Autosar().calc(crc_data))
 
-def apply_profile2_crc(payload : Union[bytes, bytearray],
+def apply_profile2_crc(payload: bytes,
                        msg_or_data_id: Union[int, Message]) \
   -> Optional[bytearray]:
     """Compute the CRC checksum for profile 2 of the AUTOSAR end-to-end
@@ -74,7 +74,7 @@ def apply_profile2_crc(payload : Union[bytes, bytearray],
     return result
 
 
-def check_profile2_crc(payload : Union[bytes, bytearray],
+def check_profile2_crc(payload: bytes,
                        msg_or_data_id: Union[int, Message]) -> Optional[bool]:
     """Check if the AUTOSAR E2E checksum for profile 2 of the AUTOSAR
     end-to-end protection specification is correct.
@@ -92,7 +92,7 @@ def check_profile2_crc(payload : Union[bytes, bytearray],
 
     return crc == crc2
 
-def compute_profile5_crc(payload : Union[bytes, bytearray],
+def compute_profile5_crc(payload: bytes,
                          msg_or_data_id: Union[int, Message]) -> Optional[int]:
     """Compute the CRC checksum for profile 5 of the AUTOSAR end-to-end
     protection specification.
@@ -140,7 +140,7 @@ def compute_profile5_crc(payload : Union[bytes, bytearray],
 
     return int(result)
 
-def apply_profile5_crc(payload : Union[bytes, bytearray],
+def apply_profile5_crc(payload: bytes,
                        msg_or_data_id: Union[int, Message]) \
   -> Optional[bytearray]:
     """Compute the AUTOSAR E2E checksum for profile 5 of the AUTOSAR
@@ -164,7 +164,7 @@ def apply_profile5_crc(payload : Union[bytes, bytearray],
 
     return result
 
-def check_profile5_crc(payload : Union[bytes, bytearray],
+def check_profile5_crc(payload: bytes,
                        msg_or_data_id: Union[int, Message]) -> Optional[bool]:
     """Check if the AUTOSAR E2E checksum for profile 5 of the AUTOSAR
     end-to-end protection specification is correct.

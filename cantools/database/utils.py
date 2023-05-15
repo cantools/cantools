@@ -61,20 +61,23 @@ def format_and(items: List[Union[int, str]]) -> str:
                                   string_items[-1])
 
 
-def start_bit(data: Union["Data", "Signal"]) -> int:
-    if data.byte_order == 'big_endian':
-        return 8 * (data.start // 8) + (7 - (data.start % 8))
+def start_bit(signal: Union["Data", "Signal"]) -> int:
+    if signal.byte_order == 'big_endian':
+        return 8 * (signal.start // 8) + (7 - (signal.start % 8))
     else:
-        return data.start
+        return signal.start
 
 
-def _encode_signals(signals: Sequence[Union["Signal", "Data"]],
-                    data: SignalMappingType,
-                    scaling: bool,
-                    ) -> Dict[str, Union[int, float]]:
-    unpacked = {}
+def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
+                          signal_values: SignalMappingType,
+                          scaling: bool,
+                          ) -> Dict[str, Union[int, float]]:
+    """
+    Convert a dictionary of physical signal values into raw ones.
+    """
+    raw_values = {}
     for signal in signals:
-        value = data[signal.name]
+        value = signal_values[signal.name]
 
         raw_value: Union[int, float]
         if scaling:
@@ -91,12 +94,12 @@ def _encode_signals(signals: Sequence[Union["Signal", "Data"]],
                 raw_value = value
             raw_value = float(raw_value) if signal.is_float else round(raw_value)
 
-        unpacked[signal.name] = raw_value
+        raw_values[signal.name] = raw_value
 
-    return unpacked
+    return raw_values
 
 
-def encode_data(data: SignalMappingType,
+def encode_data(signal_values: SignalMappingType,
                 signals: Sequence[Union["Signal", "Data"]],
                 formats: Formats,
                 scaling: bool
@@ -104,9 +107,9 @@ def encode_data(data: SignalMappingType,
     if len(signals) == 0:
         return 0
 
-    unpacked = _encode_signals(signals, data, scaling)
-    big_packed = formats.big_endian.pack(unpacked)
-    little_packed = formats.little_endian.pack(unpacked)
+    raw_signal_values = _encode_signal_values(signals, signal_values, scaling)
+    big_packed = formats.big_endian.pack(raw_signal_values)
+    little_packed = formats.little_endian.pack(raw_signal_values)
     packed_union = int.from_bytes(big_packed, "big") | int.from_bytes(little_packed, "little")
 
     return packed_union
@@ -164,13 +167,13 @@ def decode_data(data: bytes,
     return decoded
 
 
-def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
+def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
     format_length = (8 * number_of_bytes)
 
-    def get_format_string_type(data: Union["Data", "Signal"]) -> str:
-        if data.is_float:
+    def get_format_string_type(signal: Union["Data", "Signal"]) -> str:
+        if signal.is_float:
             return 'f'
-        elif data.is_signed:
+        elif signal.is_signed:
             return 's'
         else:
             return 'u'
@@ -181,12 +184,12 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
 
         return fmt, padding_mask, None
 
-    def data_item(data: Union["Data", "Signal"]) -> Tuple[str, str, str]:
-        fmt = '{}{}'.format(get_format_string_type(data),
-                            data.length)
-        padding_mask = '0' * data.length
+    def data_item(signal: Union["Data", "Signal"]) -> Tuple[str, str, str]:
+        fmt = '{}{}'.format(get_format_string_type(signal),
+                            signal.length)
+        padding_mask = '0' * signal.length
 
-        return fmt, padding_mask, data.name
+        return fmt, padding_mask, signal.name
 
     def fmt(items: List[Tuple[str, str, Optional[str]]]) -> str:
         return ''.join([item[0] for item in items])
@@ -205,20 +208,20 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
         start = 0
 
         # Select BE signals
-        be_datas = [data for data in datas if data.byte_order == "big_endian"]
+        be_signals = [signal for signal in signals if signal.byte_order == "big_endian"]
 
         # Ensure BE signals are sorted in network order
-        sorted_datas = sorted(be_datas, key = lambda data: sawtooth_to_network_bitnum(data.start))
+        sorted_signals = sorted(be_signals, key = lambda signal: sawtooth_to_network_bitnum(signal.start))
 
-        for data in sorted_datas:
+        for signal in sorted_signals:
 
-            padding_length = (start_bit(data) - start)
+            padding_length = (start_bit(signal) - start)
 
             if padding_length > 0:
                 items.append(padding_item(padding_length))
 
-            items.append(data_item(data))
-            start = (start_bit(data) + data.length)
+            items.append(data_item(signal))
+            start = (start_bit(signal) + signal.length)
 
         if start < format_length:
             length = format_length - start
@@ -230,17 +233,17 @@ def create_encode_decode_formats(datas: Sequence[Union["Data", "Signal"]], numbe
         items: List[Tuple[str, str, Optional[str]]] = []
         end = format_length
 
-        for data in datas[::-1]:
-            if data.byte_order == 'big_endian':
+        for signal in signals[::-1]:
+            if signal.byte_order == 'big_endian':
                 continue
 
-            padding_length = end - (data.start + data.length)
+            padding_length = end - (signal.start + signal.length)
 
             if padding_length > 0:
                 items.append(padding_item(padding_length))
 
-            items.append(data_item(data))
-            end = data.start
+            items.append(data_item(signal))
+            end = signal.start
 
         if end > 0:
             items.append(padding_item(end))

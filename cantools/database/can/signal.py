@@ -3,8 +3,8 @@ import decimal
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
+from ..conversion import BaseConversion, IdentityConversion
 from ..namedsignalvalue import NamedSignalValue
-from .conversion import BaseConversion, IdentityConversion
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
@@ -343,16 +343,7 @@ class Signal:
         else:
             self.comments = {None: value}
 
-    def set_choices(self, choices: Optional[Choices]) -> None:
-        self.conversion.choices = choices
-        if choices is not None:
-            # we simply assume that the choices are invertible
-            self._inverse_choices = { str(x[1]): x[0] for x in choices.items() }
-
     def choice_to_number(self, choice: Union[str, NamedSignalValue]) -> int:
-        if self.conversion.choices is None:
-            raise KeyError(f"Signal {self.name} has no choices.")
-
         try:
             return self.conversion.choice_to_number(choice)
         except KeyError as exc:

@@ -163,11 +163,10 @@ def decode_data(data: bytes,
 
         if scaling:
             decoded[signal.name] = signal.conversion.raw_to_scaled(value, decode_choices)
-        elif decode_choices and signal.conversion.choices:
-            try:
-                decoded[signal.name] = signal.conversion.choices[value]
-            except KeyError:
-                decoded[signal.name] = value
+        elif (decode_choices
+              and signal.conversion.choices
+              and (choice := signal.conversion.choices.get(value, None)) is not None):
+            decoded[signal.name] = choice
         else:
             decoded[signal.name] = value
 
@@ -178,7 +177,7 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
     format_length = (8 * number_of_bytes)
 
     def get_format_string_type(signal: Union["Data", "Signal"]) -> str:
-        if signal.is_float:
+        if signal.conversion.is_float:
             return 'f'
         elif signal.is_signed:
             return 's'

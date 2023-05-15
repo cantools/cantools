@@ -4,7 +4,6 @@ import logging
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
-    ByteString,
     Dict,
     List,
     Optional,
@@ -687,7 +686,7 @@ class Message:
                               f'must be a list of (Message, SignalDict) tuples')
 
         for header, payload in input_data:
-            if isinstance(header, int) and isinstance(payload, ByteString):
+            if isinstance(header, int) and isinstance(payload, bytes):
                 # contained message specified as raw data
                 continue
 
@@ -710,7 +709,7 @@ class Message:
                 raise EncodeError(f'Could not associate "{header}" with any '
                                   f'contained message')
 
-            if isinstance(payload, ByteString):
+            if isinstance(payload, bytes):
                 if len(payload) != contained_message.length:
                     raise EncodeError(f'Payload for contained message '
                                       f'"{contained_message.name}" is '
@@ -835,7 +834,7 @@ class Message:
                                   f'to header {header}')
 
             if contained_message is None:
-                if isinstance(value, ByteString) and isinstance(header, int):
+                if isinstance(value, bytes) and isinstance(header, int):
                     # the contained message was specified as raw data
                     header_id = header
                 else:
@@ -845,7 +844,7 @@ class Message:
                 assert contained_message.header_id is not None
                 header_id = contained_message.header_id
 
-            if isinstance(value, ByteString):
+            if isinstance(value, bytes):
                 # raw data
 
                 # ensure that the size of the blob corresponds to the
@@ -954,7 +953,7 @@ class Message:
 
     def _decode(self,
                 node: Codec,
-                data: ByteString,
+                data: bytes,
                 decode_choices: bool,
                 scaling: bool,
                 allow_truncated: bool) -> SignalDictType:
@@ -990,7 +989,7 @@ class Message:
         return decoded
 
     def unpack_container(self,
-                         data: ByteString,
+                         data: bytes,
                          allow_truncated: bool = False) \
                          -> ContainerUnpackResultType:
         """Unwrap the contents of a container message.
@@ -1053,7 +1052,7 @@ class Message:
         return result
 
     def decode(self,
-               data: ByteString,
+               data: bytes,
                decode_choices: bool = True,
                scaling: bool = True,
                decode_containers: bool = False,
@@ -1102,7 +1101,7 @@ class Message:
                                   allow_truncated)
 
     def decode_simple(self,
-                      data: ByteString,
+                      data: bytes,
                       decode_choices: bool = True,
                       scaling: bool = True,
                       allow_truncated: bool = False) \
@@ -1128,7 +1127,7 @@ class Message:
                             allow_truncated)
 
     def decode_container(self,
-                         data: ByteString,
+                         data: bytes,
                          decode_choices: bool = True,
                          scaling: bool = True,
                          allow_truncated: bool = False) \

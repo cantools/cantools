@@ -2,8 +2,6 @@
 # (SecOC, i.e., verification of the authenticity of the sender of
 # messages.)
 
-from typing import ByteString
-
 import bitstruct
 
 from ..database.can.message import Message
@@ -19,11 +17,11 @@ class SecOCError(Error):
     """
     pass
 
-def compute_authenticator(raw_payload: ByteString,
+def compute_authenticator(raw_payload: bytes,
                           dbmsg: Message,
                           authenticator_fn: SecOCAuthenticatorFn,
                           freshness_value: int) \
-                          -> ByteString:
+                          -> bytes:
     """Given a byte-like object that contains the encoded signals to be
     send, compute the full authenticator SecOC value.
     """
@@ -46,7 +44,7 @@ def compute_authenticator(raw_payload: ByteString,
     # compute authenticator value
     return authenticator_fn(dbmsg, auth_data, freshness_value)
 
-def apply_authenticator(raw_payload: ByteString,
+def apply_authenticator(raw_payload: bytes,
                         dbmsg: Message,
                         authenticator_fn: SecOCAuthenticatorFn,
                         freshness_value: int) \
@@ -89,7 +87,7 @@ def apply_authenticator(raw_payload: ByteString,
 
     return result
 
-def verify_authenticator(raw_payload: ByteString,
+def verify_authenticator(raw_payload: bytes,
                          dbmsg: Message,
                          authenticator_fn: SecOCAuthenticatorFn,
                          freshness_value: int) \

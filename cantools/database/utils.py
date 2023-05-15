@@ -5,7 +5,6 @@ import re
 from collections import OrderedDict
 from typing import (
     TYPE_CHECKING,
-    ByteString,
     Callable,
     Dict,
     Final,
@@ -113,7 +112,7 @@ def encode_data(data: SignalMappingType,
     return packed_union
 
 
-def decode_data(data: ByteString,
+def decode_data(data: bytes,
                 expected_length: int,
                 signals: Sequence[Union["Signal", "Data"]],
                 formats: Formats,

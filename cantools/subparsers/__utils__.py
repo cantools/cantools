@@ -1,7 +1,4 @@
-from typing import (
-    ByteString,
-    Iterable,
-)
+from typing import Iterable
 
 from ..database.can.database import Database
 from ..database.can.message import Message
@@ -106,7 +103,7 @@ def _format_container_multi_line(message : Message,
 
 def format_message_by_frame_id(dbase : Database,
                                frame_id : int,
-                               data : ByteString,
+                               data : bytes,
                                decode_choices : bool,
                                single_line : bool,
                                decode_containers : bool) -> str:
@@ -127,7 +124,7 @@ def format_message_by_frame_id(dbase : Database,
     return format_message(message, data, decode_choices, single_line)
 
 def format_container_message(message : Message,
-                             data : ByteString,
+                             data : bytes,
                              decode_choices : bool,
                              single_line : bool,
                              allow_truncated : bool = False) -> str:
@@ -153,7 +150,7 @@ def format_container_message(message : Message,
 
 
 def format_message(message : Message,
-                   data : ByteString,
+                   data : bytes,
                    decode_choices : bool,
                    single_line : bool,
                    allow_truncated : bool = False) -> str:
@@ -172,7 +169,7 @@ def format_message(message : Message,
         return _format_message_multi_line(message, formatted_signals)
 
 def format_multiplexed_name(message : Message,
-                            data : ByteString,
+                            data : bytes,
                             decode_choices : bool,
                             allow_truncated : bool = False) -> str:
     decoded_signals : SignalDictType \

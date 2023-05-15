@@ -1,7 +1,7 @@
 # An example cipher suite for secure on-board communication. This is
 # in no way cryptographically secure. DO NOT USE IN THE REAL WORLD!
 
-from typing import ByteString
+from typing import Union
 
 from ..database import Message
 
@@ -14,7 +14,7 @@ class SnakeOilAuthenticator:
     cryptographically secure! DO NOT USE THEM IN THE REAL WORLD!
     """
     def __init__(self,
-                 secret: ByteString):
+                 secret: Union[bytes, str]) -> None:
         if isinstance(secret, str):
             self._secret = secret.encode()
         else:

@@ -1,6 +1,5 @@
 import logging
 from typing import (
-    ByteString,
     Dict,
     List,
     Optional,
@@ -447,7 +446,7 @@ class Database:
 
     def decode_message(self,
                        frame_id_or_name: Union[int, str],
-                       data: ByteString,
+                       data: bytes,
                        decode_choices: bool = True,
                        scaling: bool = True,
                        decode_containers: bool = False,

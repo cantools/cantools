@@ -3,6 +3,7 @@ import logging
 from decimal import Decimal
 from typing import Any, List
 
+from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
 from ...internal_database import InternalDatabase
@@ -267,20 +268,24 @@ class EcuExtractLoader:
         # ToDo: minimum, maximum, factor, offset, unit, choices,
         #       comments and receivers.
 
+        conversion = BaseConversion.factory(
+            scale=factor,
+            offset=offset,
+            choices=choices,
+            is_float=is_float,
+        )
+
         return Signal(name=name,
                       start=bit_position,
                       length=length,
                       receivers=receivers,
                       byte_order=byte_order,
                       is_signed=is_signed,
-                      scale=factor,
-                      offset=offset,
+                      conversion=conversion,
                       minimum=minimum,
                       maximum=maximum,
                       unit=unit,
-                      choices=choices,
                       comment=comments,
-                      is_float=is_float,
                       decimal=decimal)
 
     def find_com_config(self, xpath):

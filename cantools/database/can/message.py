@@ -184,8 +184,8 @@ class Message:
                 # enumeration. Here we ensure that any named
                 # multiplexer is included, even if it has no child
                 # signals.
-                if signal.choices:
-                    children_ids.update(signal.choices.keys())
+                if signal.conversion.choices:
+                    children_ids.update(signal.conversion.choices.keys())
 
                 for child_id in children_ids:
                     codec = self._create_codec(signal.name, child_id)
@@ -727,7 +727,7 @@ class Message:
         if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
             signal = self.get_signal_by_name(signal_name)
             try:
-                mux = signal.choice_to_number(str(mux))
+                mux = signal.conversion.choice_to_number(str(mux))
             except KeyError:
                 raise EncodeError() from None
         return int(mux)
@@ -741,7 +741,7 @@ class Message:
 
             if isinstance(signal_value, (str, NamedSignalValue)):
                 # Check choices
-                signal_value_num = signal.choice_to_number(str(signal_value))
+                signal_value_num = signal.conversion.choice_to_number(str(signal_value))
 
                 if signal_value_num is None:
                     raise EncodeError(f'Invalid value specified for signal '
@@ -755,9 +755,9 @@ class Message:
                 # undo the scaling of the signal's minimum value if we
                 # are not supposed to scale the input value
                 if not scaling:
-                    min_effective = signal.scaled_to_raw(signal.minimum)
+                    min_effective = signal.conversion.numeric_scaled_to_raw(signal.minimum)
 
-                if signal_value < min_effective - signal.scale*1e-6:
+                if signal_value < min_effective - signal.conversion.scale*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value greater than '
                         f'or equal to {min_effective} in message "{self.name}", '
@@ -769,9 +769,9 @@ class Message:
                 if not scaling:
                     # undo the scaling of the signal's maximum value if we
                     # are not supposed to scale the input value
-                    max_effective = (signal.maximum - signal.offset)/signal.scale
+                    max_effective = signal.conversion.numeric_scaled_to_raw(signal.maximum)
 
-                if signal_value > max_effective + signal.scale*1e-6:
+                if signal_value > max_effective + signal.conversion.scale*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value smaller than '
                         f'or equal to {max_effective} in message "{self.name}", '

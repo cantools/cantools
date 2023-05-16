@@ -605,7 +605,7 @@ class Signal:
 
     @property
     def type_name(self):
-        if self.is_float:
+        if self.conversion.is_float:
             if self.length == 32:
                 type_name = 'float'
             else:
@@ -716,7 +716,7 @@ class Signal:
 
     @property
     def minimum_value(self):
-        if self.is_float:
+        if self.conversion.is_float:
             return None
         elif self.is_signed:
             return -(2 ** (self.length - 1))
@@ -725,7 +725,7 @@ class Signal:
 
     @property
     def maximum_value(self):
-        if self.is_float:
+        if self.conversion.is_float:
             return None
         elif self.is_signed:
             return ((2 ** (self.length - 1)) - 1)
@@ -884,10 +884,10 @@ def _format_range(signal):
 def _generate_signal(signal, bit_fields):
     comment = _format_comment(signal.comment)
     range_ = _format_range(signal)
-    scale = _get(signal.scale, '-')
-    offset = _get(signal.offset, '-')
+    scale = _get(signal.conversion.scale, '-')
+    offset = _get(signal.conversion.offset, '-')
 
-    if signal.is_float or not bit_fields:
+    if signal.conversion.is_float or not bit_fields:
         length = ''
     else:
         length = f' : {signal.length}'
@@ -951,11 +951,11 @@ def _format_pack_code_signal(message,
                              helper_kinds):
     signal = message.get_signal_by_name(signal_name)
 
-    if signal.is_float or signal.is_signed:
+    if signal.conversion.is_float or signal.is_signed:
         variable = '    uint{}_t {};'.format(signal.type_length,
                                              signal.snake_name)
 
-        if signal.is_float:
+        if signal.conversion.is_float:
             conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
                 signal.snake_name)
         else:
@@ -967,7 +967,7 @@ def _format_pack_code_signal(message,
         body_lines.append(conversion)
 
     for index, shift, shift_direction, mask in signal.segments(invert_shift=False):
-        if signal.is_float or signal.is_signed:
+        if signal.conversion.is_float or signal.is_signed:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}({}, {}u, 0x{:02x}u);'
         else:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
@@ -1076,14 +1076,14 @@ def _format_unpack_code_signal(message,
     signal = message.get_signal_by_name(signal_name)
     conversion_type_name = f'uint{signal.type_length}_t'
 
-    if signal.is_float or signal.is_signed:
+    if signal.conversion.is_float or signal.is_signed:
         variable = f'    {conversion_type_name} {signal.snake_name};'
         variable_lines.append(variable)
 
     segments = signal.segments(invert_shift=True)
 
     for i, (index, shift, shift_direction, mask) in enumerate(segments):
-        if signal.is_float or signal.is_signed:
+        if signal.conversion.is_float or signal.is_signed:
             fmt = '    {} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
         else:
             fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
@@ -1098,7 +1098,7 @@ def _format_unpack_code_signal(message,
         body_lines.append(line)
         helper_kinds.add((shift_direction, signal.type_length))
 
-    if signal.is_float:
+    if signal.conversion.is_float:
         conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
             signal.snake_name)
         body_lines.append(conversion)
@@ -1279,23 +1279,23 @@ def _generate_is_in_range(message):
         check = []
 
         if minimum is not None:
-            if not signal.is_float:
+            if not signal.conversion.is_float:
                 minimum = Decimal(int(minimum))
 
             minimum_type_value = signal.minimum_type_value
 
             if (minimum_type_value is None) or (minimum > minimum_type_value):
-                minimum = _format_decimal(minimum, signal.is_float)
+                minimum = _format_decimal(minimum, signal.conversion.is_float)
                 check.append(f'(value >= {minimum}{suffix})')
 
         if maximum is not None:
-            if not signal.is_float:
+            if not signal.conversion.is_float:
                 maximum = Decimal(int(maximum))
 
             maximum_type_value = signal.maximum_type_value
 
             if (maximum_type_value is None) or (maximum < maximum_type_value):
-                maximum = _format_decimal(maximum, signal.is_float)
+                maximum = _format_decimal(maximum, signal.conversion.is_float)
                 check.append(f'(value <= {maximum}{suffix})')
 
         if not check:
@@ -1363,7 +1363,7 @@ def _generate_choices_defines(database_name, messages, node_name):
     for message in messages:
         is_sender = _is_sender(message, node_name)
         for signal in message.signals:
-            if signal.choices is None:
+            if signal.conversion.choices is None:
                 continue
             if not is_sender and not _is_receiver(signal, node_name):
                 continue

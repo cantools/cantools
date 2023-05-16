@@ -14,10 +14,8 @@ from typing import (
     Sequence,
     Tuple,
     Union,
-    cast,
 )
 
-from ..database.namedsignalvalue import NamedSignalValue
 from ..typechecking import (
     ByteOrder,
     Choices,
@@ -26,6 +24,7 @@ from ..typechecking import (
     SignalMappingType,
     SignalValueType,
 )
+from .namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
     from ..database import Database
@@ -77,24 +76,26 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
     """
     raw_values = {}
     for signal in signals:
-        value = signal_values[signal.name]
+        name = signal.name
+        conversion = signal.conversion
+        value = signal_values[name]
 
-        raw_value: Union[int, float]
-        if scaling:
-            raw_value = signal.scaled_to_raw(value)
-        else:
-            if isinstance(value, (str, NamedSignalValue)):
-                raw_value = signal.choice_to_number(value)
-            elif not isinstance(value, (float, int)):
-                raise TypeError(
-                    f"Unable to encode signal '{signal.name}' "
-                    f"of type '{type(value).__name__}'."
-                )
-            else:
-                raw_value = value
-            raw_value = float(raw_value) if signal.is_float else round(raw_value)
+        if isinstance(value, (int, float)):
+            if scaling:
+                raw_values[name] = conversion.numeric_scaled_to_raw(value)
+                continue
 
-        raw_values[signal.name] = raw_value
+            raw_values[name] = value if conversion.is_float else round(value)
+            continue
+
+        if isinstance(value, (str, NamedSignalValue)):
+            raw_values[name] = conversion.choice_to_number(value)
+            continue
+
+        raise TypeError(
+            f"Unable to encode signal '{name}' "
+            f"with type '{value.__class__.__name__}'."
+        )
 
     return raw_values
 
@@ -126,12 +127,15 @@ def decode_data(data: bytes,
 
     actual_length = len(data)
     if allow_truncated and actual_length < expected_length:
-        data = bytes(data).ljust(expected_length, b"\xFF")
+        data = data.ljust(expected_length, b"\xFF")
 
     unpacked = {
-        **formats.big_endian.unpack(bytes(data)),
-        **formats.little_endian.unpack(bytes(data[::-1])),
+        **formats.big_endian.unpack(data),
+        **formats.little_endian.unpack(data[::-1]),
     }
+
+    if allow_truncated and not (scaling or decode_choices):
+        return unpacked
 
     if allow_truncated and actual_length < expected_length:
         # remove signals that are outside available data bytes
@@ -158,9 +162,11 @@ def decode_data(data: bytes,
             continue
 
         if scaling:
-            decoded[signal.name] = signal.raw_to_scaled(value, decode_choices)
-        elif decode_choices and signal.choices is not None and value in signal.choices:
-            decoded[signal.name] = signal.choices[cast(int, value)]
+            decoded[signal.name] = signal.conversion.raw_to_scaled(value, decode_choices)
+        elif (decode_choices
+              and signal.conversion.choices
+              and (choice := signal.conversion.choices.get(value, None)) is not None):
+            decoded[signal.name] = choice
         else:
             decoded[signal.name] = value
 
@@ -171,7 +177,7 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
     format_length = (8 * number_of_bytes)
 
     def get_format_string_type(signal: Union["Data", "Signal"]) -> str:
-        if signal.is_float:
+        if signal.conversion.is_float:
             return 'f'
         elif signal.is_signed:
             return 's'
@@ -339,7 +345,7 @@ def prune_signal_choices(signal: "Signal") -> None:
             signal.choices[key] = val
         else:
             # assert isinstance(choice, NamedSignalValue)
-            choice._name = val
+            choice.name = val
         return
 
     # if there are multiple choices, remove the longest common prefix
@@ -386,7 +392,7 @@ def prune_signal_choices(signal: "Signal") -> None:
             signal.choices[key] = choice[n:]
         else:
             # assert isinstance(choice, NamedSignalValue)
-            choice._name = choice._name[n:]
+            choice.name = choice.name[n:]
 
 
 def prune_database_choices(database: "Database") -> None:

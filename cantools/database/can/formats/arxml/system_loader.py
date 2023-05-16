@@ -1,10 +1,12 @@
 # Load a CAN database in ARXML format.
 import logging
 import re
+from collections import OrderedDict
 from copy import deepcopy
 from decimal import Decimal
 from typing import Any
 
+from ....conversion import BaseConversion, IdentityConversion
 from ....namedsignalvalue import NamedSignalValue
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
@@ -884,9 +886,8 @@ class SystemLoader:
                                   start=payload_length*8 + 7,
                                   length=fresh_tx_len,
                                   byte_order='big_endian',
-                                  offset=0,
-                                  scale=1,
-                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
+                                  conversion=IdentityConversion(is_float=False),
+                                  decimal=SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   {'FOR-ALL':
                                    f'Truncated freshness value for '
@@ -897,8 +898,7 @@ class SystemLoader:
                                   start=n0,
                                   length=auth_tx_len,
                                   byte_order='big_endian',
-                                  offset=0,
-                                  scale=1,
+                                  conversion=IdentityConversion(is_float=False),
                                   decimal = SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   { 'FOR-ALL':
@@ -1144,10 +1144,8 @@ class SystemLoader:
             start=selector_pos,
             length=selector_len,
             byte_order=selector_byte_order,
-            offset=0,
-            scale=1,
-            decimal = SignalDecimal(Decimal(1), Decimal(0)),
-            choices={},
+            conversion=IdentityConversion(is_float=False),
+            decimal=SignalDecimal(Decimal(1), Decimal(0)),
             is_multiplexer=True,
         )
         next_selector_idx += 1
@@ -1167,6 +1165,8 @@ class SystemLoader:
                 'DYNAMIC-PART-ALTERNATIVES',
                 '*DYNAMIC-PART-ALTERNATIVE',
             ]
+
+        selector_signal_choices = OrderedDict()
 
         # the cycle time of the message
         cycle_time = None
@@ -1223,9 +1223,7 @@ class SystemLoader:
             assert dselsig.length == selector_len
 
             if dynalt_selector_signals[0].choices is not None:
-                tmp = selector_signal.choices
-                tmp.update(dynalt_selector_signals[0].choices)
-                selector_signal.set_choices(tmp)
+                selector_signal_choices.update(dynalt_selector_signals[0].choices)
 
             if dynalt_selector_signals[0].invalid is not None:
                 # TODO: this may lead to undefined behaviour if
@@ -1251,6 +1249,14 @@ class SystemLoader:
             # TODO: the cycle time of the multiplexers can be
             # specified indepently of that of the message. how should
             # this be handled?
+
+        if selector_signal_choices:
+            selector_signal.conversion = BaseConversion.factory(
+                scale=1,
+                offset=0,
+                choices=selector_signal_choices,
+                is_float=False,
+            )
 
         if selector_signal.raw_initial is not None:
             selector_signal.initial = selector_signal.raw_to_scaled(selector_signal.raw_initial)
@@ -1503,6 +1509,13 @@ class SystemLoader:
 
         raw_invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
 
+        conversion = BaseConversion.factory(
+            scale=factor,
+            offset=offset,
+            choices=choices,
+            is_float=is_float,
+        )
+
         signal = Signal(
             name=name,
             start=start_position,
@@ -1510,16 +1523,13 @@ class SystemLoader:
             receivers=receivers,
             byte_order=byte_order,
             is_signed=is_signed,
-            scale=factor,
-            offset=offset,
+            conversion=conversion,
             raw_initial=raw_initial,
             raw_invalid=raw_invalid,
             minimum=minimum,
             maximum=maximum,
             unit=unit,
-            choices=choices,
             comment=comments,
-            is_float=is_float,
             decimal=decimal,
         )
         return signal

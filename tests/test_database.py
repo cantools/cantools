@@ -1909,7 +1909,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.length, 11)
         self.assertEqual(signal_3.is_multiplexer, False)
         self.assertEqual(signal_3.multiplexer_ids, [2])
-        
+
         # Message3.
         message_3 = db.messages[4]
         self.assertEqual(message_3.frame_id, 0xA)
@@ -6192,6 +6192,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         self.assertEqual(db.buses[0].comment, 'SpecialRelease')
         self.assert_dbc_dump(db, filename)
+
+    def test_bus_comment_bare(self):
+        # bus comment without a DBName attribute, and concatenation behaviour of
+        # comments
+        filename = 'tests/files/dbc/bus_comment_bare.dbc'
+        expected = 'tests/files/dbc/bus_comment_bare_out.dbc'
+        db = cantools.database.load_file(filename)
+        self.assertEqual(db.buses[0].comment, 'Comment1Comment2')
+        self.assert_dbc_dump(db, expected)
 
     def test_relation_attributes(self):
         filename = 'tests/files/dbc/attributes_relation.dbc'

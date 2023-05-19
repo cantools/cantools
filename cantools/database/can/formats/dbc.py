@@ -1566,10 +1566,8 @@ def _load_messages(tokens,
             except (KeyError, TypeError):
                 return None
 
-    def get_protocol(frame_id_dbc):
-        """Get protocol for a given message.
-
-        """
+    def get_frame_format(frame_id_dbc):
+        """Get frame format for a given message"""
 
         message_attributes = get_attributes(frame_id_dbc)
 
@@ -1581,6 +1579,15 @@ def _load_messages(tokens,
                 frame_format = definitions['VFrameFormat'].default_value
             except (KeyError, TypeError):
                 frame_format = None
+
+        return frame_format
+
+    def get_protocol(frame_id_dbc):
+        """Get protocol for a given message.
+
+        """
+
+        frame_format = get_frame_format(frame_id_dbc)
 
         if frame_format == 'J1939PG':
             return 'j1939'
@@ -1614,6 +1621,11 @@ def _load_messages(tokens,
         frame_id_dbc = int(message[1])
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
+        frame_format = get_frame_format(frame_id_dbc)
+        if frame_format is not None:
+            is_fd = frame_format.endswith("CAN_FD")
+        else:
+            is_fd = False
 
         # Senders.
         senders = [_get_node_name(attributes, message[5])]
@@ -1664,7 +1676,8 @@ def _load_messages(tokens,
                     protocol=get_protocol(frame_id_dbc),
                     bus_name=bus_name,
                     signal_groups=get_signal_groups(frame_id_dbc),
-                    sort_signals=sort_signals))
+                    sort_signals=sort_signals,
+                    is_fd=is_fd))
 
     return messages
 

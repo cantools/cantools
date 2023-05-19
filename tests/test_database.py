@@ -6397,6 +6397,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertNotIn('BA_ "SystemSignalLongSymbol"', long_output)
 
+    def test_fd_detection(self):
+        filename = "tests/files/dbc/fd_test.dbc"
+        db = cantools.db.load_file(filename)
+
+        msgfdex = db.get_message_by_name('TestMsg_FDEx')
+        self.assertEqual(True, msgfdex.is_fd)
+        self.assertEqual(True, msgfdex.is_extended_frame)
+
+        msgfdstd = db.get_message_by_name('TestMsg_FDStd')
+        self.assertEqual(True, msgfdstd.is_fd)
+        self.assertEqual(False, msgfdstd.is_extended_frame)
+
+        msgstd = db.get_message_by_name('TestMsg_Std')
+        self.assertEqual(False, msgstd.is_fd)
+        self.assertEqual(False, msgstd.is_extended_frame)
+
+        msgex = db.get_message_by_name('TestMsg_Ex')
+        self.assertEqual(False, msgex.is_fd)
+        self.assertEqual(True, msgex.is_extended_frame)
+
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

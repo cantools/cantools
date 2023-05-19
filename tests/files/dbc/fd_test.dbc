@@ -1,0 +1,78 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_:
+
+
+BO_ 2147483651 TestMsg_Ex: 8 Vector__XXX
+ SG_ TestSig_Copy_1 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 2 TestMsg_Std: 8 Vector__XXX
+ SG_ TestSig_Copy_3 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 1 TestMsg_FDStd: 8 Vector__XXX
+ SG_ TestSig_Copy_2 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 2147483648 TestMsg_FDEx: 8 Vector__XXX
+ SG_ TestSig : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+
+
+BA_DEF_ BO_  "CANFD_BRS" ENUM  "0","1";
+BA_DEF_  "DBName" STRING ;
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ BU_  "NodeLayerModules" STRING ;
+BA_DEF_ BU_  "ECU" STRING ;
+BA_DEF_ BU_  "CANoeJitterMax" INT 0 0;
+BA_DEF_ BU_  "CANoeJitterMin" INT 0 0;
+BA_DEF_ BU_  "CANoeDrift" INT 0 0;
+BA_DEF_ BU_  "CANoeStartDelay" INT 0 0;
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD";
+BA_DEF_DEF_  "CANFD_BRS" "1";
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "NodeLayerModules" "";
+BA_DEF_DEF_  "ECU" "";
+BA_DEF_DEF_  "CANoeJitterMax" 0;
+BA_DEF_DEF_  "CANoeJitterMin" 0;
+BA_DEF_DEF_  "CANoeDrift" 0;
+BA_DEF_DEF_  "CANoeStartDelay" 0;
+BA_DEF_DEF_  "VFrameFormat" "StandardCAN";
+BA_ "BusType" "CAN FD";
+BA_ "DBName" "fd_test";
+BA_ "VFrameFormat" BO_ 2147483651 1;
+BA_ "VFrameFormat" BO_ 1 14;
+BA_ "VFrameFormat" BO_ 2147483648 15;
+

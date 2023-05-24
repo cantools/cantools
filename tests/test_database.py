@@ -93,6 +93,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(i, 15)
         self.assert_dbc_dump(db, filename)
 
+    def test_signal_initial_synonym(self):
+        with self.assertLogs(logger=cantools.db.Signal.__module__,
+                             level='WARNING'):
+            s = cantools.db.Signal('foo', 0, 8, initial=47)
+        self.assertEqual(s.raw_initial, 47)
+
+        with self.assertRaises(ValueError):
+            cantools.db.Signal('foo', 0, 8, initial=47, raw_initial=47)
+
     def test_dbc_signal_initial_value(self):
         filename = 'tests/files/dbc/vehicle.dbc'
         db = cantools.database.load_file(filename)

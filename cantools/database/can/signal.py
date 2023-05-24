@@ -1,5 +1,6 @@
 # A CAN signal.
 import decimal
+import logging
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
@@ -9,6 +10,7 @@ from ..namedsignalvalue import NamedSignalValue
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
 
+LOGGER = logging.getLogger(__name__)
 
 class Decimal:
     """Holds the same values as
@@ -137,8 +139,15 @@ class Signal:
         multiplexer_signal: Optional[str] = None,
         decimal: Optional[Decimal] = None,
         spn: Optional[int] = None,
+        initial: Optional[Union[int, float]] = None, # for backward compatibility
     ) -> None:
         # avoid using properties to improve encoding/decoding performance
+
+        if initial is not None:
+            if raw_initial is not None:
+                raise ValueError('cannot pass both initial= and raw_initial=')
+            LOGGER.warning('initial= is deprecated, use raw_initial=')
+            raw_initial = initial
 
         #: The signal name as a string.
         self.name: str = name

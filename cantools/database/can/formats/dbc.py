@@ -981,7 +981,9 @@ def _load_comments(tokens):
 
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
-            comments['database']['bus'] = comment[1]
+            # CANdb++ behaviour: all bus comments are concatenated
+            existing_comment = comments['database'].get('bus', '')
+            comments['database']['bus'] = existing_comment + comment[1]
             continue
 
         item = comment[1]
@@ -1690,7 +1692,7 @@ def _load_bus(attributes, comments):
     try:
         bus_name = attributes['database']['DBName'].value
     except KeyError:
-        return None
+        bus_name = ''
 
     try:
         bus_baudrate = attributes['database']['Baudrate'].value
@@ -1701,6 +1703,9 @@ def _load_bus(attributes, comments):
         bus_comment = comments['database']['bus']
     except KeyError:
         bus_comment = None
+
+    if not any([bus_name, bus_baudrate, bus_comment]):
+        return None
 
     return Bus(bus_name, baudrate=bus_baudrate, comment=bus_comment)
 

@@ -573,6 +573,18 @@ def _create_GenMsgCycleTime_definition():
                                type_name='INT',
                                minimum=0,
                                maximum=2**16-1)
+def _create_GenSigStartValue_definition():
+    return AttributeDefinition('GenSigStartValue',
+                               default_value=0,
+                               kind='SG_',
+                               type_name='FLOAT',
+                               minimum=0,
+                               maximum=100000000000)
+
+def _need_startval_def(database):
+    return any(s.raw_initial is not None
+               for m in database.messages
+               for s in m.signals)
 
 def _dump_attribute_definitions(database):
     ba_def = []
@@ -587,6 +599,9 @@ def _dump_attribute_definitions(database):
     if 'GenMsgCycleTime' not in definitions:
         definitions['GenMsgCycleTime'] = \
             _create_GenMsgCycleTime_definition()
+    if 'GenSigStartValue' not in definitions and _need_startval_def(database):
+        definitions['GenSigStartValue'] = \
+            _create_GenSigStartValue_definition()
 
     def get_value(definition, value):
         if definition.minimum is None:
@@ -696,6 +711,9 @@ def _dump_attribute_definition_defaults(database):
     if 'GenMsgCycleTime' not in definitions:
         definitions['GenMsgCycleTime'] = \
             _create_GenMsgCycleTime_definition()
+    if 'GenSigStartValue' not in definitions and _need_startval_def(database):
+        definitions['GenSigStartValue'] = \
+            _create_GenSigStartValue_definition()
 
     for definition in definitions.values():
         if definition.default_value is not None:
@@ -778,9 +796,23 @@ def _dump_attributes(database, sort_signals, sort_attributes):
         else:
             signals = message.signals
         for signal in signals:
+            # retrieve the ordered dictionary of signal attributes
+            sig_attributes = OrderedDict()
             if signal.dbc is not None and signal.dbc.attributes is not None:
-                for attribute in signal.dbc.attributes.values():
-                    attributes.append(('signal', attribute, None, message, signal))
+                sig_attributes = signal.dbc.attributes
+
+            # synchronize the attribute for the signal start value with
+            # the start value specified by the message object
+            if signal.raw_initial is None and 'GenSigStartValue' in sig_attributes:
+                del sig_attributes['GenSigStartValue']
+            elif signal.raw_initial is not None:
+                sig_attributes['GenSigStartValue'] = \
+                    Attribute(signal.raw_initial,
+                              definition=_create_GenSigStartValue_definition())
+
+            # output all signal attributes
+            for attribute in sig_attributes.values():
+                attributes.append(('signal', attribute, None, message, signal))
 
     if sort_attributes:
         attributes = sort_attributes(attributes)

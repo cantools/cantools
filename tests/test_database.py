@@ -23,6 +23,7 @@ except ImportError:
     from io import StringIO
 
 import cantools
+from cantools.database import Signal, Message
 from cantools.database.can.formats import dbc
 from cantools.database import UnsupportedDatabaseFormatError
 from cantools.database.namedsignalvalue import NamedSignalValue
@@ -136,6 +137,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
         signal = message.get_signal_by_name('Accel_Vertical')
         self.assertEqual(signal.raw_initial, 16120)
         self.assertEqual(signal.initial, 16.120)
+
+    def test_dbc_gensigstartval_from_raw_initial(self):
+        sig = Signal(name='s', start=0, length=8, raw_initial=47)
+        msg = Message(frame_id=0x42, name='m', length=8, signals=[sig])
+        expected_db = cantools.db.Database(messages=[msg])
+
+        actual_db = cantools.db.Database()
+        actual_db.add_dbc_string(expected_db.as_dbc_string())
+
+        self.assertEqual(
+            actual_db.get_message_by_name('m').get_signal_by_name('s').raw_initial,
+            sig.raw_initial)
 
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'

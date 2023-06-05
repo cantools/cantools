@@ -914,7 +914,7 @@ def _format_pack_code_mux(message,
                              body_lines_per_index,
                              variable_lines,
                              helper_kinds)
-    multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
+    multiplexed_signals_per_id = sorted(multiplexed_signals.items())
     signal_name = camel_to_snake_case(signal_name)
 
     lines = [
@@ -1024,7 +1024,7 @@ def _format_pack_code(message, helper_kinds):
                                          helper_kinds)
 
     if variable_lines:
-        variable_lines = sorted(list(set(variable_lines))) + ['', '']
+        variable_lines = sorted(set(variable_lines)) + ['', '']
 
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
@@ -1041,7 +1041,7 @@ def _format_unpack_code_mux(message,
                                body_lines_per_index,
                                variable_lines,
                                helper_kinds)
-    multiplexed_signals_per_id = sorted(list(multiplexed_signals.items()))
+    multiplexed_signals_per_id = sorted(multiplexed_signals.items())
     signal_name = camel_to_snake_case(signal_name)
 
     lines = [
@@ -1177,7 +1177,7 @@ def _format_unpack_code(message, helper_kinds, node_name):
                                            node_name)
 
     if variable_lines:
-        variable_lines = sorted(list(set(variable_lines))) + ['', '']
+        variable_lines = sorted(set(variable_lines)) + ['', '']
 
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 

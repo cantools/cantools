@@ -48,7 +48,7 @@ class Parser60(textparser.Parser):
 
     """
 
-    KEYWORDS = set([
+    KEYWORDS = {
         'FormatVersion',
         'Title',
         'UniqueVariables',
@@ -65,7 +65,7 @@ class Parser60(textparser.Parser):
         'Color',
         'Var',
         'Type'
-    ])
+    }
 
     def tokenize(self, string):
         names = {

@@ -30,12 +30,13 @@ select = [
     "F",  # pyflakes
     "B",  # pyflakes-bugbear
     "UP",  # pyupgrade
-#    "C4",  # flake8-comprehensions
+    "C4",  # flake8-comprehensions
     "I",  # isort
 ]
 ignore = [
     "E501",  # line too long
     "F541",  # f-string-missing-placeholders
+    "C413",  # Unnecessary `reversed` call around `sorted()`
 ]
 
 # Assume Python 3.8.

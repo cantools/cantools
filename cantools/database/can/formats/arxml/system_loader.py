@@ -952,7 +952,7 @@ class SystemLoader:
                                              '&I-PDU'
                                          ])
             child_pdu_paths = []
-            contained_messages = list()
+            contained_messages = []
             for contained_pdu in contained_pdus:
                 name = \
                     self._get_unique_arxml_child(contained_pdu, 'SHORT-NAME')

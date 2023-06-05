@@ -509,7 +509,7 @@ class Signals:
         self.break_time_uninit = True
         self.subplot = self.FIRST_SUBPLOT
         self.subplot_axis = self.FIRST_AXIS
-        self.subplot_args = dict()
+        self.subplot_args = {}
         self.subplot_argparser = argparse.ArgumentParser()
         self.subplot_argparser.add_argument('signals', nargs='*')
         add_subplot_options(self.subplot_argparser)
@@ -716,8 +716,8 @@ class Signals:
     def finish_subplot(self, splot, subplot_args):
         self.finish_axis(splot, subplot_args)
         splot.legend(self.legend_handles, self.legend_labels)
-        self.legend_handles = list()
-        self.legend_labels = list()
+        self.legend_handles = []
+        self.legend_labels = []
 
     def contains_no_color(self, fmt):
         for c in fmt:

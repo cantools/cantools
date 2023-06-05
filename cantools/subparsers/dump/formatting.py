@@ -52,7 +52,7 @@ def signal_tree_string(message, console_width=80, with_comments=False):
     def format_mux(mux):
         signal_name, multiplexed_signals = list(mux.items())[0]
         selector_signal = message.get_signal_by_name(signal_name)
-        multiplexed_signals = sorted(list(multiplexed_signals.items()))
+        multiplexed_signals = sorted(multiplexed_signals.items())
         lines = []
 
         for index, multiplexed_signal in enumerate(multiplexed_signals):
@@ -300,7 +300,7 @@ def layout_string(message, signal_names=True):
             for signal in signals:
                 line = number_width * ' ' + '  ' + signal[1]
                 line = (7 - signal[0]) * '    ' + line
-                chars = [char for char in line]
+                chars = list(line)
 
                 for other_signal in signals:
                     if other_signal[0] > signal[0]:

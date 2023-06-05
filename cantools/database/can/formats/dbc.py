@@ -859,7 +859,7 @@ def _dump_attributes_rel(database, sort_signals):
             if "signal" in element:
                 for signal_name, signal_lst in element['signal'].items():
                     for node_name, node_dict in signal_lst['node'].items():
-                        for attribute_name, attribute in node_dict.items():
+                        for attribute in node_dict.values():
                             ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
                                           f'BU_SG_REL_ '
                                           f'{node_name} '
@@ -869,7 +869,7 @@ def _dump_attributes_rel(database, sort_signals):
                                           f'{get_value(attribute)};')
             elif "node" in element:
                 for node_name, node_dict in element['node'].items():
-                    for attribute_name, attribute in node_dict.items():
+                    for attribute in node_dict.values():
                         ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
                                       f'BU_BO_REL_ '
                                       f'{node_name} '

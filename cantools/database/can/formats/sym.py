@@ -277,7 +277,7 @@ def _get_enum(enums, name):
     try:
         return enums[name]
     except KeyError:
-        raise ParseError(f"Enum '{name}' is not defined.")
+        raise ParseError(f"Enum '{name}' is not defined.") from None
 
 
 def _load_enums(tokens):

@@ -48,22 +48,19 @@ def frame_id_pack(priority,
                                 source_address)
     except bitstruct.Error:
         if priority > 7:
-            raise Error(f'Expected priority 0..7, but got {priority}.')
+            raise Error(f'Expected priority 0..7, but got {priority}.') from None
         elif reserved > 1:
-            raise Error(f'Expected reserved 0..1, but got {reserved}.')
+            raise Error(f'Expected reserved 0..1, but got {reserved}.') from None
         elif data_page > 1:
-            raise Error(f'Expected data page 0..1, but got {data_page}.')
+            raise Error(f'Expected data page 0..1, but got {data_page}.') from None
         elif pdu_format > 255:
-            raise Error('Expected PDU format 0..255, but got {}.'.format(
-                pdu_format))
+            raise Error(f'Expected PDU format 0..255, but got {pdu_format}.') from None
         elif pdu_specific > 255:
-            raise Error('Expected PDU specific 0..255, but got {}.'.format(
-                pdu_specific))
+            raise Error(f'Expected PDU specific 0..255, but got {pdu_specific}.') from None
         elif source_address > 255:
-            raise Error('Expected source address 0..255, but got {}.'.format(
-                source_address))
+            raise Error(f'Expected source address 0..255, but got {source_address}.') from None
         else:
-            raise Error('Internal error.')
+            raise Error('Internal error.') from None
 
     return bitstruct.unpack('u29', packed)[0]
 
@@ -77,9 +74,7 @@ def frame_id_unpack(frame_id):
     try:
         packed = bitstruct.pack('u29', frame_id)
     except bitstruct.Error:
-        raise Error(
-            'Expected a frame id 0..0x1fffffff, but got {}.'.format(
-                hex(frame_id)))
+        raise Error(f'Expected a frame id 0..0x1fffffff, but got {hex(frame_id)}.') from None
 
     return FrameId(*bitstruct.unpack('u3u1u1u8u8u8', packed))
 
@@ -103,18 +98,15 @@ def pgn_pack(reserved, data_page, pdu_format, pdu_specific=0):
                                 pdu_specific)
     except bitstruct.Error:
         if reserved > 1:
-            raise Error(f'Expected reserved 0..1, but got {reserved}.')
+            raise Error(f'Expected reserved 0..1, but got {reserved}.') from None
         elif data_page > 1:
-            raise Error('Expected data page 0..1, but got {}.'.format(
-                data_page))
+            raise Error(f'Expected data page 0..1, but got {data_page}.') from None
         elif pdu_format > 255:
-            raise Error('Expected PDU format 0..255, but got {}.'.format(
-                pdu_format))
+            raise Error(f'Expected PDU format 0..255, but got {pdu_format}.') from None
         elif pdu_specific > 255:
-            raise Error('Expected PDU specific 0..255, but got {}.'.format(
-                pdu_specific))
+            raise Error(f'Expected PDU specific 0..255, but got {pdu_specific}.') from None
         else:
-            raise Error('Internal error.')
+            raise Error('Internal error.') from None
 
     return bitstruct.unpack('u18', packed)[0]
 
@@ -128,9 +120,7 @@ def pgn_unpack(pgn):
     try:
         packed = bitstruct.pack('u18', pgn)
     except bitstruct.Error:
-        raise Error(
-            'Expected a parameter group number 0..0x3ffff, but got {}.'.format(
-                hex(pgn)))
+        raise Error(f'Expected a parameter group number 0..0x3ffff, but got {hex(pgn)}.') from None
 
     return PGN(*bitstruct.unpack('u1u1u8u8', packed))
 

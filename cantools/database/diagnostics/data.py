@@ -17,7 +17,7 @@ class Data:
                  start: int,
                  length: int,
                  byte_order: ByteOrder = 'little_endian',
-                 conversion: BaseConversion = IdentityConversion(is_float=False),
+                 conversion: Optional[BaseConversion] = None,
                  minimum: Optional[float] = None,
                  maximum: Optional[float] = None,
                  unit: Optional[str] = None,
@@ -27,7 +27,7 @@ class Data:
 
         #: The conversion instance, which is used to convert
         #: between raw and scaled/physical values.
-        self.conversion = conversion
+        self.conversion = conversion or IdentityConversion(is_float=False)
 
         #: The start bit position of the data within its DID.
         self.start: int = start

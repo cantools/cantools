@@ -125,7 +125,7 @@ class Signal:
         is_signed: bool = False,
         raw_initial: Optional[Union[int, float]] = None,
         raw_invalid: Optional[Union[int, float]] = None,
-        conversion: BaseConversion = IdentityConversion(is_float=False),
+        conversion: Optional[BaseConversion] = None,
         minimum: Optional[float] = None,
         maximum: Optional[float] = None,
         unit: Optional[str] = None,
@@ -145,7 +145,7 @@ class Signal:
 
         #: The conversion instance, which is used to convert
         #: between raw and scaled/physical values.
-        self.conversion: BaseConversion = conversion
+        self.conversion: BaseConversion = conversion or IdentityConversion(is_float=False)
 
         #: The scaled minimum value of the signal, or ``None`` if unavailable.
         self.minimum: Optional[float] = minimum

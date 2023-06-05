@@ -84,24 +84,24 @@ def _load_signal_element(signal, nodes):
     value = signal.find('ns:Value', NAMESPACES)
 
     if value is not None:
-        for key, value in value.attrib.items():
+        for key, _value in value.attrib.items():
             if key == 'min':
-                minimum = num(value)
-                decimal.minimum = Decimal(value)
+                minimum = num(_value)
+                decimal.minimum = Decimal(_value)
             elif key == 'max':
-                maximum = num(value)
-                decimal.maximum = Decimal(value)
+                maximum = num(_value)
+                decimal.maximum = Decimal(_value)
             elif key == 'slope':
-                slope = num(value)
-                decimal.scale = Decimal(value)
+                slope = num(_value)
+                decimal.scale = Decimal(_value)
             elif key == 'intercept':
-                intercept = num(value)
-                decimal.offset = Decimal(value)
+                intercept = num(_value)
+                decimal.offset = Decimal(_value)
             elif key == 'unit':
-                unit = value
+                unit = _value
             elif key == 'type':
-                is_signed = (value == 'signed')
-                is_float = (value in ['single', 'double'])
+                is_signed = (_value == 'signed')
+                is_float = (_value in ['single', 'double'])
             else:
                 LOGGER.debug("Ignoring unsupported signal value attribute '%s'.",
                              key)
@@ -262,11 +262,11 @@ def _indent_xml(element, indent, level=0):
         if not element.tail or not element.tail.strip():
             element.tail = i
 
-        for element in element:
-            _indent_xml(element, indent, level + 1)
+        for child in element:
+            _indent_xml(child, indent, level + 1)
 
-        if not element.tail or not element.tail.strip():
-            element.tail = i
+        if not child.tail or not child.tail.strip():
+            child.tail = i
     else:
         if level and (not element.tail or not element.tail.strip()):
             element.tail = i

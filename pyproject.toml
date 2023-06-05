@@ -28,7 +28,7 @@ select = [
     "E",  # pycodestyle Error
     "W",  # pycodestyle Warning
     "F",  # pyflakes
-#    "B",  # pyflakes-bugbear
+    "B",  # pyflakes-bugbear
     "UP",  # pyupgrade
 #    "C4",  # flake8-comprehensions
     "I",  # isort

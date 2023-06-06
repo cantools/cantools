@@ -143,7 +143,7 @@ def to_int(value):
 class Parser(textparser.Parser):
 
     def tokenize(self, string):
-        keywords = set([
+        keywords = {
             'BA_',
             'BA_DEF_',
             'BA_DEF_DEF_',
@@ -179,7 +179,7 @@ class Parser(textparser.Parser):
             'VAL_',
             'VAL_TABLE_',
             'VERSION'
-        ])
+        }
 
         names = {
             'LPAREN': '(',
@@ -859,7 +859,7 @@ def _dump_attributes_rel(database, sort_signals):
             if "signal" in element:
                 for signal_name, signal_lst in element['signal'].items():
                     for node_name, node_dict in signal_lst['node'].items():
-                        for attribute_name, attribute in node_dict.items():
+                        for attribute in node_dict.values():
                             ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
                                           f'BU_SG_REL_ '
                                           f'{node_name} '
@@ -869,7 +869,7 @@ def _dump_attributes_rel(database, sort_signals):
                                           f'{get_value(attribute)};')
             elif "node" in element:
                 for node_name, node_dict in element['node'].items():
-                    for attribute_name, attribute in node_dict.items():
+                    for attribute in node_dict.values():
                         ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
                                       f'BU_BO_REL_ '
                                       f'{node_name} '
@@ -915,7 +915,7 @@ def _dump_signal_groups(database):
             continue
 
         for signal_group in message.signal_groups:
-            all_sig_names = list(map(lambda sig: sig.name, message.signals))
+            all_sig_names = [sig.name for sig in message.signals]
             signal_group.signal_names = list(filter(lambda sig_name: sig_name in all_sig_names, signal_group.signal_names))
             sig_group.append(
                 'SIG_GROUP_ {frame_id} {signal_group_name} {repetitions} : {signal_names};'.format(

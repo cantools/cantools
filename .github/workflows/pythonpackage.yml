@@ -44,7 +44,7 @@ jobs:
     strategy:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
-        python-version: ["3.8", "3.11"]
+        python-version: ["3.8", "3.11", "pypy-3.9"]
       fail-fast: false
     steps:
     - uses: actions/checkout@v3

@@ -383,7 +383,7 @@ def prune_signal_choices(signal: "Signal") -> None:
         prefix = '_'.join(full_prefix_segments[:i]) + '_'
         n = len(prefix)
 
-        if all([valid_name_re.match(x[n:]) for x in choice_values]):
+        if all(valid_name_re.match(x[n:]) for x in choice_values):
             break
 
     # remove the prefix from the choice names

@@ -59,7 +59,7 @@ def _invert_signal_tree(
                 _invert_signal_tree(sig_tree, next_mpx, ret)
 
         elif type(sigs) == str:
-            ret.setdefault(sigs,[]).append(set(tuple(cur_mpx.items())))
+            ret.setdefault(sigs,[]).append(set(cur_mpx.items()))
         else:
             raise TypeError(repr(sigs))
 
@@ -133,7 +133,7 @@ class Message(UserDict):
         self.enabled = True
         self._can_message = None
         self._periodic_task = None
-        self._signal_names = set(s.name for s in self.database.signals)
+        self._signal_names = {s.name for s in self.database.signals}
         self.update(self._prepare_initial_signal_values())
 
     @property
@@ -227,7 +227,7 @@ class Message(UserDict):
 
     def _filter_expected_message(self, message, signals):
         if message.name == self.database.name:
-            if all([message.signals[name] == signals[name] for name in signals]):
+            if all(message.signals[name] == signals[name] for name in signals):
                 return message.signals
 
     def send_periodic_start(self):
@@ -258,7 +258,7 @@ class Message(UserDict):
             self._periodic_task.modify_data(self._can_message)
 
     def _prepare_initial_signal_values(self):
-        initial_sig_values = dict()
+        initial_sig_values = {}
 
         # Choose a valid set of mux settings
         mplex_settings = {}
@@ -328,7 +328,7 @@ class Tester:
         # DUT name validation.
         node_names = [node.name for node in database.nodes]
 
-        if dut_name and not any([name == dut_name for name in node_names]):
+        if dut_name and not any(name == dut_name for name in node_names):
             raise Error(
                 "expected DUT name in {}, but got '{}'".format(node_names,
                                                                dut_name))
@@ -341,7 +341,7 @@ class Tester:
                 raise Error(
                     "expected bus name None as there are no buses defined in "
                     "the database, but got '{}'".format(bus_name))
-        elif not any([name == bus_name for name in bus_names]):
+        elif not any(name == bus_name for name in bus_names):
             raise Error(
                 "expected bus name in {}, but got '{}'".format(bus_names,
                                                                bus_name))

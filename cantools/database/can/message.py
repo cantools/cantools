@@ -795,7 +795,7 @@ class Message:
                 raise EncodeError(f'Expected multiplexer id in '
                                   f'{{{format_or(list(multiplexers[signal].keys()))}}}, '
                                   f'for multiplexer "{signal}" '
-                                  f'but got {mux}')
+                                  f'but got {mux}') from None
 
             mux_encoded, mux_padding_mask, mux_signals = \
                 self._encode(node, data, scaling)
@@ -978,7 +978,7 @@ class Message:
             except KeyError:
                 raise DecodeError('expected multiplexer id {}, but got {}'.format(
                     format_or(list(multiplexers[signal].keys())),
-                    mux))
+                    mux)) from None
 
             decoded.update(self._decode(node,
                                         data,

@@ -61,7 +61,7 @@ def _format_container_single_line(message : Message,
                                   unpacked_data : ContainerUnpackResultType,
                                   decoded_data : ContainerDecodeResultType) \
                                   -> str:
-    contained_list = list()
+    contained_list = []
     for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
             formatted_cm_signals = _format_signals(cm, signals)
@@ -80,7 +80,7 @@ def _format_container_single_line(message : Message,
 def _format_container_multi_line(message : Message,
                                  unpacked_data : ContainerUnpackResultType,
                                  decoded_data : ContainerDecodeResultType) -> str:
-    contained_list = list()
+    contained_list = []
     for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
             formatted_cm_signals = _format_signals(cm, signals)

@@ -38,7 +38,10 @@ setup(name='cantools',
       ],
       extras_require={
           'plot': ['matplotlib'],
-          'windows-all': ["windows-curses;platform_system=='Windows'"],
+          'windows-all': [
+              "windows-curses;platform_system=='Windows' "
+              "and platform_python_implementation=='CPython'"
+          ],
       },
       test_suite="tests",
       entry_points={

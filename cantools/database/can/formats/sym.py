@@ -48,7 +48,7 @@ class Parser60(textparser.Parser):
 
     """
 
-    KEYWORDS = set([
+    KEYWORDS = {
         'FormatVersion',
         'Title',
         'UniqueVariables',
@@ -65,7 +65,7 @@ class Parser60(textparser.Parser):
         'Color',
         'Var',
         'Type'
-    ])
+    }
 
     def tokenize(self, string):
         names = {
@@ -277,7 +277,7 @@ def _get_enum(enums, name):
     try:
         return enums[name]
     except KeyError:
-        raise ParseError(f"Enum '{name}' is not defined.")
+        raise ParseError(f"Enum '{name}' is not defined.") from None
 
 
 def _load_enums(tokens):

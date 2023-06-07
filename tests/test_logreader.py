@@ -536,7 +536,7 @@ class TestLogreaderStreams(unittest.TestCase):
 5 1334.416 FD 1 0500 Tx - 12 01 02 03 04 05 06 07 08 09 0A 0B 0C
 6 1334.222 ER 1 - Rx - 5 04 00 02 00 00
 7 1334.224 EV 1 User-defined event for bus 1
-8 1334.225 EV - User-defined event for all busses
+8 1334.225 EV - User-defined event for all buses
 9 1334.231 ST 1 - Rx - 4 00 00 00 08
 10 1334.268 ER 1 - Rx - 5 04 00 02 08 00
 11 1334.643 EC 1 - Rx - 2 02 02

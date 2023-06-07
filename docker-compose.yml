@@ -1,0 +1,11 @@
+version: '3.5'
+services:
+  cantools:
+    container_name: cantools
+    build:
+      dockerfile: cantools.Dockerfile
+    working_dir: /home/app
+    volumes:
+      # Mount the source code into the container, so one can keep developing, even though it runs inside a container.
+      - '.:/home/app'
+    tty: true

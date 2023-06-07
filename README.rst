@@ -412,6 +412,15 @@ Contributing
 
       make test
 
+#. Use Docker for the environment setup.
+
+   .. code-block:: text
+
+      docker-compose build
+      docker-compose run cantools bash # to start the docker container opening a bash shell
+      python3 setup.py install # install all requirements/dependencies
+      make test
+
 #. Create a pull request.
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/eerimoq/cantools?svg=true

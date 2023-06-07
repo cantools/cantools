@@ -399,7 +399,7 @@ Contributing
 
    .. code-block:: text
 
-      python3 -m pip install -r requirements.txt
+      python3 setup.py install
 
 #. Implement the new feature or bug fix.
 
@@ -410,6 +410,15 @@ Contributing
 
    .. code-block:: text
 
+      make test
+
+#. Use Docker for the environment setup.
+
+   .. code-block:: text
+
+      docker-compose build
+      docker-compose run cantools bash # to start the docker container opening a bash shell
+      python3 setup.py install # install all requirements/dependencies
       make test
 
 #. Create a pull request.

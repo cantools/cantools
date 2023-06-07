@@ -849,9 +849,7 @@ BATTERY_VT(
     -- {root}
        +-- Enable [94mEnable signal comment [-][0m
        +-- AverageRadius [94mAverageRadius signal comment [m][0m
-       +-- Temperature [94mTemperature with a really long and complicated comment
-                       that probably require many many lines in a decently wide
-                       terminal [degK][0m
+       +-- Temperature [94mTemperature with a really long and complicated comment that probably require many many lines in a decently wide terminal [degK][0m
 
   Signal choices:
 

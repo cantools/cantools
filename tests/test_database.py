@@ -3411,15 +3411,28 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_multiplex_sym_dump(self):
         db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
+        # change the name of the multiplexer signal to empty to trigger the condition in function _dump_message
+        db.messages[1].signals[0].name = ''
         dumped_db = cantools.db.load_string(db.as_sym_string())
-        dumped_msg = dumped_db.get_message_by_frame_id(0x100)
 
+        # message 1 MuxedFrame
+        dumped_msg = dumped_db.get_message_by_frame_id(0x100)
         self.assertEqual(dumped_msg.signals[0].name, "MultiplexorSig")
         self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
         self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[1].name, "MultiplexedSig")
         self.assertEqual(dumped_msg.signals[1].is_multiplexer, False)
         self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
+
+        # message 2 TestMultiplexer
+        test_multiplexer_msg = dumped_db.get_message_by_frame_id(0x200)
+        self.assertEqual(dumped_msg.signals[0].name, "2A")
+        self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
+        self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
+        self.assertEqual(dumped_msg.signals[1].name, "NormalSig")
+        self.assertEqual(dumped_msg.signals[1].is_multiplexer, False)
+        self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
+
 
     def test_string_attribute_definition_dump(self):
         db = cantools.db.load_file('tests/files/dbc/test_multiplex_dump.dbc')

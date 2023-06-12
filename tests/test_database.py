@@ -3426,12 +3426,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # message 2 TestMultiplexer
         test_multiplexer_msg = dumped_db.get_message_by_frame_id(0x200)
-        self.assertEqual(dumped_msg.signals[0].name, "2A")
-        self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
-        self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
-        self.assertEqual(dumped_msg.signals[1].name, "NormalSig")
-        self.assertEqual(dumped_msg.signals[1].is_multiplexer, False)
-        self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
+        self.assertEqual(test_multiplexer_msg.signals[0].name, "2A")
+        self.assertEqual(test_multiplexer_msg.signals[0].is_multiplexer, True)
+        self.assertEqual(test_multiplexer_msg.signals[0].multiplexer_ids, None)
+        self.assertEqual(test_multiplexer_msg.signals[1].name, "NormalSig")
+        self.assertEqual(test_multiplexer_msg.signals[1].is_multiplexer, False)
+        self.assertEqual(test_multiplexer_msg.signals[1].multiplexer_ids[0], 0x2a)
 
 
     def test_string_attribute_definition_dump(self):

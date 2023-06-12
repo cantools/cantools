@@ -1896,10 +1896,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(symbol_3.signals), 4)
         self.assertSequenceEqual(symbol_3.senders, ['ECU', 'Peripherals'])
         multiplexer = symbol_3.signals[0]
-        if test_sym_string:
-            self.assertEqual(multiplexer.name, '0')
-        else:
-            self.assertEqual(multiplexer.name, 'Multiplexer1')
+        self.assertEqual(multiplexer.name, 'Multiplexer1')
         self.assertEqual(multiplexer.start, 0)
         self.assertEqual(multiplexer.length, 3)
         self.assertEqual(multiplexer.is_multiplexer, True)
@@ -3417,9 +3414,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         dumped_db = cantools.db.load_string(db.as_sym_string())
         dumped_msg = dumped_db.get_message_by_frame_id(0x100)
 
-        # Note: cantools database cannot support multiple multiplexer signal names, so SYM file names the multiplexer
-        # signal after the multiplexer id (Hence, 2A, not MultiplexerSig)
-        self.assertEqual(dumped_msg.signals[0].name, "2A")
+        self.assertEqual(dumped_msg.signals[0].name, "MultiplexedSig")
         self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
         self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[1].name, "MultiplexedSig")

@@ -409,6 +409,17 @@ SIGNAL_DECLARATION_IS_IN_RANGE_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value);
 '''
 
+SIGNAL_DECLARATION_IS_IN_PHYSICAL_RANGE_FMT = '''\
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool {database_name}_{message_name}_{signal_name}_is_in_physical_range({floating_point_type} value);
+'''
+
 MESSAGE_DECLARATION_INIT_FMT = '''\
 /**
  * Init message fields to default values from {database_message_name}.
@@ -527,6 +538,13 @@ SIGNAL_DEFINITION_IS_IN_RANGE_FMT = '''\
 bool {database_name}_{message_name}_{signal_name}_is_in_range({type_name} value)
 {{
 {unused}\
+    return ({check});
+}}
+'''
+
+SIGNAL_DEFINITION_IS_IN_PHYSICAL_RANGE_FMT = '''\
+bool {database_name}_{message_name}_{signal_name}_is_in_physical_range({floating_point_type} value)
+{{
     return ({check});
 }}
 '''
@@ -1309,6 +1327,37 @@ def _generate_is_in_range(message):
 
     return checks
 
+def _generate_is_in_phys_range(message, use_float):
+    """Generate physical range checks for all signals in given message.
+
+    """
+
+    checks = []
+
+    for signal in message.signals:
+        check = []
+
+        if signal.scale != 1:
+            if signal.minimum is not None:
+                check.append(f'(value >= {_format_decimal(signal.minimum, is_float=True, use_float=use_float)})')
+            elif signal.minimum is None:
+                check.append(f'(value >= {_format_decimal(signal.raw_to_scaled(signal.minimum_value, False), is_float=True, use_float=use_float)})')
+
+            if signal.maximum is not None:
+                check.append(f'(value <= {_format_decimal(signal.maximum, is_float=True, use_float=use_float)})')
+            elif signal.maximum is None:
+                check.append(f'(value <= {_format_decimal(signal.raw_to_scaled(signal.maximum_value, False), is_float=True, use_float=use_float)})')
+
+        if not check:
+            check = ['true']
+        elif len(check) == 1:
+            check = [check[0][1:-1]]
+
+        check = ' && '.join(check)
+
+        checks.append(check)
+
+    return checks
 
 def _generate_frame_id_defines(database_name, messages, node_name):
     return '\n'.join([
@@ -1477,6 +1526,16 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
                     type_name=signal.type_name)
 
                 signal_declarations.append(signal_declaration)
+
+            if (floating_point_numbers and (is_sender or _is_receiver(signal, node_name))) and signal.scale != 1:
+                signal_declaration = ''
+                signal_declaration += SIGNAL_DECLARATION_IS_IN_PHYSICAL_RANGE_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name,
+                    floating_point_type=_get_floating_point_type(use_float))
+                signal_declarations.append(signal_declaration)
+
         declaration = ""
         if is_sender:
             declaration += DECLARATION_PACK_FMT.format(database_name=database_name,
@@ -1511,9 +1570,10 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
         is_receiver = node_name is None
         signals_init_body = ''
 
-        for signal, (encode, decode), check in zip(message.signals,
+        for signal, (encode, decode), check, phys_check in zip(message.signals,
                                                    _generate_encode_decode(message, use_float),
-                                                   _generate_is_in_range(message)):
+                                                   _generate_is_in_range(message),
+                                                   _generate_is_in_phys_range(message, use_float)):
             if _is_receiver(signal, node_name):
                 is_receiver = True
 
@@ -1551,6 +1611,16 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                     unused=unused,
                     check=check)
 
+                signal_definitions.append(signal_definition)
+
+            if (floating_point_numbers and (is_sender or _is_receiver(signal, node_name))) and signal.scale != 1:
+                signal_definition = ''
+                signal_definition += SIGNAL_DEFINITION_IS_IN_PHYSICAL_RANGE_FMT.format(
+                    database_name=database_name,
+                    message_name=message.snake_name,
+                    signal_name=signal.snake_name,
+                    floating_point_type=_get_floating_point_type(use_float),
+                    check=phys_check)
                 signal_definitions.append(signal_definition)
 
             if signal.initial:

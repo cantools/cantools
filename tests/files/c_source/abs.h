@@ -1257,6 +1257,15 @@ double abs_bremse_33_whlspeed_fl_decode(uint16_t value);
 bool abs_bremse_33_whlspeed_fl_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_33_whlspeed_fl_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1282,6 +1291,15 @@ double abs_bremse_33_whlspeed_fr_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_33_whlspeed_fr_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_33_whlspeed_fr_is_in_physical_range(double value);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1311,6 +1329,15 @@ double abs_bremse_33_whlspeed_rl_decode(uint16_t value);
 bool abs_bremse_33_whlspeed_rl_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_33_whlspeed_rl_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1336,6 +1363,15 @@ double abs_bremse_33_whlspeed_rr_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_33_whlspeed_rr_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_33_whlspeed_rr_is_in_physical_range(double value);
 
 /**
  * Pack message BREMSE_10.
@@ -1587,6 +1623,15 @@ double abs_mm5_10_tx1_yaw_rate_decode(uint16_t value);
 bool abs_mm5_10_tx1_yaw_rate_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_mm5_10_tx1_yaw_rate_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1612,6 +1657,15 @@ double abs_mm5_10_tx1_ay1_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_mm5_10_tx1_ay1_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_mm5_10_tx1_ay1_is_in_physical_range(double value);
 
 /**
  * Pack message MM5_10_TX2.
@@ -1678,6 +1732,15 @@ double abs_mm5_10_tx2_roll_rate_decode(uint16_t value);
 bool abs_mm5_10_tx2_roll_rate_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_mm5_10_tx2_roll_rate_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1703,6 +1766,15 @@ double abs_mm5_10_tx2_ax1_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_mm5_10_tx2_ax1_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_mm5_10_tx2_ax1_is_in_physical_range(double value);
 
 /**
  * Pack message MM5_10_TX3.
@@ -1769,6 +1841,15 @@ double abs_mm5_10_tx3_az_decode(uint16_t value);
 bool abs_mm5_10_tx3_az_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_mm5_10_tx3_az_is_in_physical_range(double value);
+
+/**
  * Pack message BREMSE_2.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1833,6 +1914,15 @@ double abs_bremse_2_whlspeed_fl_bremse2_decode(uint16_t value);
 bool abs_bremse_2_whlspeed_fl_bremse2_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_2_whlspeed_fl_bremse2_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1858,6 +1948,15 @@ double abs_bremse_2_whlspeed_fr_bremse2_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_2_whlspeed_fr_bremse2_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_2_whlspeed_fr_bremse2_is_in_physical_range(double value);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1887,6 +1986,15 @@ double abs_bremse_2_whlspeed_rl_bremse2_decode(uint16_t value);
 bool abs_bremse_2_whlspeed_rl_bremse2_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_2_whlspeed_rl_bremse2_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1912,6 +2020,15 @@ double abs_bremse_2_whlspeed_rr_bremse2_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_2_whlspeed_rr_bremse2_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_2_whlspeed_rr_bremse2_is_in_physical_range(double value);
 
 /**
  * Pack message ABS_Switch.
@@ -2143,6 +2260,15 @@ double abs_bremse_32_acc_fa_decode(uint8_t value);
 bool abs_bremse_32_acc_fa_is_in_range(uint8_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_32_acc_fa_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -2168,6 +2294,15 @@ double abs_bremse_32_acc_ra_decode(uint8_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_32_acc_ra_is_in_range(uint8_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_32_acc_ra_is_in_physical_range(double value);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -2342,6 +2477,15 @@ double abs_bremse_51_ax1_abs_int_decode(uint16_t value);
 bool abs_bremse_51_ax1_abs_int_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_51_ax1_abs_int_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -2367,6 +2511,15 @@ double abs_bremse_51_ay1_abs_int_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_51_ay1_abs_int_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_51_ay1_abs_int_is_in_physical_range(double value);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -3604,6 +3757,15 @@ double abs_bremse_50_brake_bal_at50_decode(uint16_t value);
 bool abs_bremse_50_brake_bal_at50_is_in_range(uint16_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_50_brake_bal_at50_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -3656,6 +3818,15 @@ double abs_bremse_50_brake_bal_pct_decode(uint16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_50_brake_bal_pct_is_in_range(uint16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_50_brake_bal_pct_is_in_physical_range(double value);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -3774,6 +3945,15 @@ double abs_bremse_53_p_fa_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_53_p_fa_is_in_range(int16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_53_p_fa_is_in_physical_range(double value);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -4260,6 +4440,15 @@ double abs_bremse_53_p_ra_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool abs_bremse_53_p_ra_is_in_range(int16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool abs_bremse_53_p_ra_is_in_physical_range(double value);
 
 
 #ifdef __cplusplus

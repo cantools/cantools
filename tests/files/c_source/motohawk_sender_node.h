@@ -171,6 +171,15 @@ uint8_t motohawk_example_message_average_radius_encode(double value);
 bool motohawk_example_message_average_radius_is_in_range(uint8_t value);
 
 /**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool motohawk_example_message_average_radius_is_in_physical_range(double value);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -196,6 +205,15 @@ double motohawk_example_message_temperature_decode(int16_t value);
  * @return true if in range, false otherwise.
  */
 bool motohawk_example_message_temperature_is_in_range(int16_t value);
+
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool motohawk_example_message_temperature_is_in_physical_range(double value);
 
 
 #ifdef __cplusplus

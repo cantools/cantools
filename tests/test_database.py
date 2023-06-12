@@ -3414,7 +3414,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         dumped_db = cantools.db.load_string(db.as_sym_string())
         dumped_msg = dumped_db.get_message_by_frame_id(0x100)
 
-        self.assertEqual(dumped_msg.signals[0].name, "MultiplexedSig")
+        self.assertEqual(dumped_msg.signals[0].name, "MultiplexorSig")
         self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
         self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
         self.assertEqual(dumped_msg.signals[1].name, "MultiplexedSig")

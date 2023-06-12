@@ -921,7 +921,10 @@ def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingO
         if multiplexer_signal.byte_order == 'big_endian':
             m_flag = '-m'
         hex_multiplexer_id = format(multiplexer_id, 'x').upper()
-        message_str += f'Mux="{hex_multiplexer_id}" {_convert_start(multiplexer_signal.start, multiplexer_signal.byte_order)},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}\n'
+        multiplexer_signal_name = hex_multiplexer_id
+        if multiplexer_signal.name != '':
+            multiplexer_signal_name = multiplexer_signal.name
+        message_str += f'Mux="{multiplexer_signal_name}" {_convert_start(multiplexer_signal.start, multiplexer_signal.byte_order)},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}\n'
     for signal in signals:
         message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
     return message_str

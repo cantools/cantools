@@ -3411,9 +3411,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_multiplex_sym_dump(self):
         db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
+        dumped_db = cantools.db.load_string(db.as_dbc_string())
 
         # message 1 MuxedFrame
-        dumped_msg = db.get_message_by_frame_id(0x100)
+        dumped_msg = dumped_db.get_message_by_frame_id(0x100)
         self.assertEqual(dumped_msg.signals[0].name, "MultiplexorSig")
         self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
         self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
@@ -3422,7 +3423,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
 
         # message 2 TestMultiplexer
-        test_multiplexer_msg = db.get_message_by_frame_id(0x200)
+        test_multiplexer_msg = dumped_db.get_message_by_frame_id(0x200)
         self.assertEqual(test_multiplexer_msg.signals[0].name, "TestMultiplexerSignal")
         self.assertEqual(test_multiplexer_msg.signals[0].is_multiplexer, True)
         self.assertEqual(test_multiplexer_msg.signals[0].multiplexer_ids, None)

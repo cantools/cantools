@@ -3411,12 +3411,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_multiplex_sym_dump(self):
         db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
-        # change the name of the multiplexer signal to empty to trigger the condition in function _dump_message
-        db.messages[1].signals[0].name = ''
-        dumped_db = cantools.db.load_string(db.as_sym_string())
 
         # message 1 MuxedFrame
-        dumped_msg = dumped_db.get_message_by_frame_id(0x100)
+        dumped_msg = db.get_message_by_frame_id(0x100)
         self.assertEqual(dumped_msg.signals[0].name, "MultiplexorSig")
         self.assertEqual(dumped_msg.signals[0].is_multiplexer, True)
         self.assertEqual(dumped_msg.signals[0].multiplexer_ids, None)
@@ -3425,14 +3422,22 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(dumped_msg.signals[1].multiplexer_ids[0], 0x2a)
 
         # message 2 TestMultiplexer
-        test_multiplexer_msg = dumped_db.get_message_by_frame_id(0x200)
-        self.assertEqual(test_multiplexer_msg.signals[0].name, "2A")
+        test_multiplexer_msg = db.get_message_by_frame_id(0x200)
+        self.assertEqual(test_multiplexer_msg.signals[0].name, "TestMultiplexerSignal")
         self.assertEqual(test_multiplexer_msg.signals[0].is_multiplexer, True)
         self.assertEqual(test_multiplexer_msg.signals[0].multiplexer_ids, None)
         self.assertEqual(test_multiplexer_msg.signals[1].name, "NormalSig")
         self.assertEqual(test_multiplexer_msg.signals[1].is_multiplexer, False)
         self.assertEqual(test_multiplexer_msg.signals[1].multiplexer_ids[0], 0x2a)
 
+    def test_multiplex_sym_with_empty_signal_name_dump(self):
+        db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
+        # change the name of the multiplexer signal to empty to trigger the condition in function _dump_message
+        db.messages[1].signals[0].name = ''
+        with self.assertRaises(ValueError) as context:
+            cantools.db.load_string(db.as_sym_string())
+
+        self.assertTrue("The database is corrupt." in str(context.exception))
 
     def test_string_attribute_definition_dump(self):
         db = cantools.db.load_file('tests/files/dbc/test_multiplex_dump.dbc')

@@ -3411,7 +3411,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_multiplex_sym_dump(self):
         db = cantools.db.load_file('tests/files/sym/test_multiplex_dump.sym')
-        dumped_db = cantools.db.load_string(db.as_dbc_string())
+        dumped_db = cantools.db.load_string(db.as_sym_string())
 
         # message 1 MuxedFrame
         dumped_msg = dumped_db.get_message_by_frame_id(0x100)

@@ -32,14 +32,10 @@ class Formats(NamedTuple):
 
 StringPathLike = Union[str, "os.PathLike[str]"]
 Comments = Dict[Optional[str], str]
-Codec = TypedDict(
-    "Codec",
-    {
-        "signals": List["Signal"],
-        "formats": Formats,
-        "multiplexers": Mapping[str, Mapping[int, Any]],  # "Any" should be "Codec" (cyclic definition is not possible though)
-    },
-)
+class Codec(TypedDict):
+    signals: List["Signal"]
+    formats: Formats
+    multiplexers: Mapping[str, Mapping[int, Any]]
 
 ByteOrder = Literal["little_endian", "big_endian"]
 Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]

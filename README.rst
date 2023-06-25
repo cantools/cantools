@@ -399,18 +399,25 @@ Contributing
 
    .. code-block:: text
 
-      python3 -m pip install -r requirements.txt
+      python3 -m pip install -e .[dev]
 
 #. Implement the new feature or bug fix.
 
 #. Implement test case(s) to ensure that future changes do not break
    legacy.
 
+#. Run the linters
+
+   .. code-block:: text
+
+      ruff check cantools
+      mypy cantools
+
 #. Run the tests.
 
    .. code-block:: text
 
-      make test
+      tox -e py
 
 #. Create a pull request.
 

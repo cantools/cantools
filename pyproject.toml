@@ -1,6 +1,66 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "cantools"
+authors = [
+    {name = "Erik Moqvist", email = "erik.moqvist@gmail.com"},
+]
+description = "CAN BUS tools."
+readme = "README.rst"
+requires-python = ">=3.8"
+keywords = [
+    "can",
+    "can bus",
+    "arxml",
+    "dbc",
+    "kcd",
+    "automotive",
+]
+license = { text = "MIT" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "bitstruct>=8.16.1",
+    "python-can>=3.3.4",
+    "textparser>=0.21.1",
+    "diskcache",
+    "argparse_addons",
+    "typing_extensions>=3.10.0.0",
+    "crccheck",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "pipx",
+    "ruff",
+    "tox",
+]
+plot = ["matplotlib"]
+windows-all = [
+    "windows-curses;platform_system=='Windows' and platform_python_implementation=='CPython'"
+]
+
+[project.scripts]
+cantools = "cantools.__init__:_main"
+
+[project.urls]
+homepage = "https://github.com/eerimoq/cantools"
+documentation = "https://cantools.readthedocs.io/"
+repository = "https://github.com/eerimoq/cantools"
+
+[tool.setuptools]
+packages = ["cantools"]
+
+[tool.setuptools.package-data]
+cantools = ["py.typed"]
+
+[tool.setuptools.dynamic]
+version = {attr = "cantools.version.__version__"}
 
 [tool.mypy]
 show_error_codes = true

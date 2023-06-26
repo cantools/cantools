@@ -38,7 +38,6 @@ from ..environment_variable import EnvironmentVariable
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node
-from ..signal import Decimal as SignalDecimal
 from ..signal import Signal
 from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
@@ -139,6 +138,8 @@ ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME = AttributeDefinition(
 def to_int(value):
     return int(Decimal(value))
 
+def to_float(value):
+    return float(Decimal(value))
 
 class Parser(textparser.Parser):
 
@@ -1079,7 +1080,7 @@ def _load_attributes(tokens, definitions):
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
-            value = Decimal(value)
+            value = to_float(value)
 
         return Attribute(value=value,
                          definition=definition)
@@ -1150,7 +1151,7 @@ def _load_attributes_rel(tokens, definitions):
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
-            value = Decimal(value)
+            value = to_float(value)
 
         return Attribute(value=value,
                          definition=definition)
@@ -1436,18 +1437,6 @@ def _load_signals(tokens,
         else:
             return num(maximum)
 
-    def get_minimum_decimal(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return Decimal(minimum)
-
-    def get_maximum_decimal(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return Decimal(maximum)
-
     def get_is_float(frame_id_dbc, signal):
         """Get is_float for given signal.
 
@@ -1503,12 +1492,6 @@ def _load_signals(tokens,
                    ),
                    minimum=get_minimum(signal[15], signal[17]),
                    maximum=get_maximum(signal[15], signal[17]),
-                   decimal=SignalDecimal(Decimal(signal[10]),
-                                         Decimal(signal[12]),
-                                         get_minimum_decimal(signal[15],
-                                                             signal[17]),
-                                         get_maximum_decimal(signal[15],
-                                                             signal[17])),
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
@@ -1935,7 +1918,7 @@ def get_definitions_dict(definitions, defaults):
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
-            value = Decimal(value)
+            value = to_float(value)
 
         return value
 
@@ -1975,7 +1958,7 @@ def get_definitions_rel_dict(definitions, defaults):
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
-            value = Decimal(value)
+            value = to_float(value)
 
         return value
 

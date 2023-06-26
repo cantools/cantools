@@ -1,5 +1,7 @@
 import logging
+from collections import OrderedDict
 from typing import (
+    Any,
     Dict,
     List,
     Optional,
@@ -137,6 +139,98 @@ class Database:
     @autosar.setter
     def autosar(self, value: Optional[AutosarDatabaseSpecifics]) -> None:
         self._autosar = value
+
+
+    def is_similar(self,
+                   other: "Database",
+                   *,
+                   tolerance: float = 1e-12,
+                   include_format_specifics: bool = True) -> bool:
+        """Compare two database objects inexactly
+
+        This means that small discrepanceies stemming from
+        e.g. rounding errors are ignored.
+        """
+        return self._objects_similar(self, other, tolerance, include_format_specifics)
+
+    @staticmethod
+    def _objects_similar(a: Any,
+                         b: Any,
+                         tolerance: float,
+                         include_format_specifics: bool) -> bool:
+
+        if type(a) != type(b):
+            # the types of the objects do not match
+            return False
+        elif a is None:
+            # a and b are None
+            return True
+        elif isinstance(a, (int, str, set)):
+            # the values of the objects must be equal
+            return bool(a == b)
+        elif isinstance(a, float):
+            # floating point objects are be compared inexactly
+            if abs(a) > 1:
+                if abs(1.0 - b/a) > tolerance:
+                    return False
+            else:
+                if abs(b - a) > tolerance:
+                    return False
+
+            return True
+
+        elif isinstance(a, (list, tuple)):
+            # lists and tuples are similar if all elements are similar
+            for i in range(0, len(a)):
+                if not Database._objects_similar(a[i], b[i], tolerance, include_format_specifics):
+                    return False
+            return True
+
+        elif isinstance(a, (dict, OrderedDict)):
+            # dictionaries are similar if they feature the same keys and
+            # all elements are similar
+            if a.keys() != b.keys():
+                return False
+            for key in a:
+                if not Database._objects_similar(a[key], b[key], tolerance, include_format_specifics):
+                    return False
+            return True
+
+        # assume that `a` and `b` are objects of custom classes
+        a_attrib_names = dir(a)
+        b_attrib_names = dir(b)
+
+        if not include_format_specifics:
+            # ignore format specific attributes if requested. So far,
+            # only DBC and ARXML amend the databaase with format
+            # specific information.
+            for x in 'dbc', 'autosar':
+                if x in a_attrib_names:
+                    a_attrib_names.remove(x)
+                if x in b_attrib_names:
+                    b_attrib_names.remove(x)
+
+        # both objects must exhibit the same attributes and member functions
+        if a_attrib_names != b_attrib_names:
+            return False
+
+        for attrib_name in a_attrib_names:
+            if attrib_name.startswith('_'):
+                # ignore non-public attributes
+                continue
+
+            a_attrib = getattr(a, attrib_name)
+            b_attrib = getattr(b, attrib_name)
+
+            if type(a_attrib) != type(b_attrib):
+                return False
+            elif callable(a_attrib):
+                # ignore callable attributes
+                continue
+            elif not Database._objects_similar(a_attrib, b_attrib, tolerance, include_format_specifics):
+                return False
+
+        return True
 
     def add_arxml(self, fp: TextIO) -> None:
         """Read and parse ARXML data from given file-like object and add the

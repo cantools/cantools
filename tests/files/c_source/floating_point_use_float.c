@@ -326,12 +326,12 @@ int floating_point_use_float_message3_init(struct floating_point_use_float_messa
 
 uint8_t floating_point_use_float_message3_signal3_encode(float value)
 {
-    return (uint8_t)((value - -0.125f) / 0.001f);
+    return (uint8_t)((value - -0.125) / 0.001);
 }
 
 float floating_point_use_float_message3_signal3_decode(uint8_t value)
 {
-    return (((float)value * 0.001f) + -0.125f);
+    return (((float)value * 0.001) + -0.125);
 }
 
 bool floating_point_use_float_message3_signal3_is_in_range(uint8_t value)

@@ -3,7 +3,6 @@ import logging
 import re
 from collections import OrderedDict
 from copy import deepcopy
-from decimal import Decimal
 from typing import Any
 
 from ....conversion import BaseConversion, IdentityConversion
@@ -13,7 +12,6 @@ from ...bus import Bus
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...node import Node
-from ...signal import Decimal as SignalDecimal
 from ...signal import Signal
 from .bus_specifics import AutosarBusSpecifics
 from .database_specifics import AutosarDatabaseSpecifics
@@ -887,7 +885,6 @@ class SystemLoader:
                                   length=fresh_tx_len,
                                   byte_order='big_endian',
                                   conversion=IdentityConversion(is_float=False),
-                                  decimal=SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   {'FOR-ALL':
                                    f'Truncated freshness value for '
@@ -899,7 +896,6 @@ class SystemLoader:
                                   length=auth_tx_len,
                                   byte_order='big_endian',
                                   conversion=IdentityConversion(is_float=False),
-                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   { 'FOR-ALL':
                                     f'Truncated authenticator value for '
@@ -1145,7 +1141,6 @@ class SystemLoader:
             length=selector_len,
             byte_order=selector_byte_order,
             conversion=IdentityConversion(is_float=False),
-            decimal=SignalDecimal(Decimal(1), Decimal(0)),
             is_multiplexer=True,
         )
         next_selector_idx += 1
@@ -1472,7 +1467,6 @@ class SystemLoader:
         choices = None
         comments = None
         receivers = []
-        decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
         if self.autosar_version_newer(4):
             i_signal_spec = '&I-SIGNAL'
@@ -1495,7 +1489,7 @@ class SystemLoader:
         if system_signal is not None:
             # Minimum, maximum, factor, offset and choices.
             minimum, maximum, factor, offset, choices, unit, comments = \
-                self._load_system_signal(system_signal, decimal, is_float)
+                self._load_system_signal(system_signal, is_float)
 
         # loading initial values is way too complicated, so it is the
         # job of a separate method
@@ -1530,7 +1524,6 @@ class SystemLoader:
             maximum=maximum,
             unit=unit,
             comment=comments,
-            decimal=decimal,
         )
         return signal
 
@@ -1772,7 +1765,7 @@ class SystemLoader:
 
         return choices
 
-    def _load_linear_scale(self, compu_scale, decimal):
+    def _load_linear_scale(self, compu_scale):
         # load the scaling factor an offset
         compu_rational_coeffs = \
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
@@ -1780,9 +1773,6 @@ class SystemLoader:
         if compu_rational_coeffs is None:
             factor = 1.0
             offset = 0.0
-
-            decimal.scale = Decimal(factor)
-            decimal.offset = Decimal(offset)
         else:
             numerators = self._get_arxml_children(compu_rational_coeffs,
                                                   ['&COMPU-NUMERATOR', '*&V'])
@@ -1800,12 +1790,9 @@ class SystemLoader:
                     'Expected 1 denominator value for linear scaling, but '
                     'got {}.'.format(len(denominators)))
 
-            denominator = Decimal(denominators[0].text)
-            decimal.scale = Decimal(numerators[1].text) / denominator
-            decimal.offset = Decimal(numerators[0].text) / denominator
-
-            factor = float(decimal.scale)
-            offset = float(decimal.offset)
+            denominator = parse_number_string(denominators[0].text, True)
+            factor = parse_number_string(numerators[1].text, True) / denominator
+            offset = parse_number_string(numerators[0].text, True) / denominator
 
         # load the domain interval of the scale
         lower_limit, upper_limit = self._load_scale_limits(compu_scale)
@@ -1828,12 +1815,10 @@ class SystemLoader:
         # convert interval of the domain to the interval of the range
         minimum = None if lower_limit is None else lower_limit*factor + offset
         maximum = None if upper_limit is None else upper_limit*factor + offset
-        decimal.minimum = None if minimum is None else Decimal(minimum)
-        decimal.maximum = None if maximum is None else Decimal(maximum)
 
         return minimum, maximum, factor, offset
 
-    def _load_linear(self, compu_method, decimal, is_float):
+    def _load_linear(self, compu_method, is_float):
         minimum = None
         maximum = None
         factor = 1.0
@@ -1851,7 +1836,7 @@ class SystemLoader:
                                f'results!')
 
             minimum, maximum, factor, offset = \
-                self._load_linear_scale(compu_scale, decimal)
+                self._load_linear_scale(compu_scale)
 
         return minimum, maximum, factor, offset
 
@@ -1869,7 +1854,7 @@ class SystemLoader:
 
         return lower_limit, upper_limit
 
-    def _load_scale_linear_and_texttable(self, compu_method, decimal, is_float):
+    def _load_scale_linear_and_texttable(self, compu_method, is_float):
         minimum = None
         maximum = None
         factor = 1.0
@@ -1910,11 +1895,11 @@ class SystemLoader:
                 # and offsets are specified. For now, let's just
                 # assume that the ARXML file is well formed.
                 minimum, maximum, factor, offset = \
-                    self._load_linear_scale(compu_scale, decimal)
+                    self._load_linear_scale(compu_scale)
 
         return minimum, maximum, factor, offset, choices
 
-    def _load_system_signal(self, system_signal, decimal, is_float):
+    def _load_system_signal(self, system_signal, is_float):
         minimum = None
         maximum = None
         factor = 1.0
@@ -1948,14 +1933,13 @@ class SystemLoader:
                 choices = self._load_texttable(compu_method)
             elif category == 'LINEAR':
                 minimum, maximum, factor, offset = \
-                    self._load_linear(compu_method, decimal,  is_float)
+                    self._load_linear(compu_method,  is_float)
             elif category == 'SCALE_LINEAR_AND_TEXTTABLE':
                 (minimum,
                  maximum,
                  factor,
                  offset,
                  choices) = self._load_scale_linear_and_texttable(compu_method,
-                                                                  decimal,
                                                                   is_float)
             else:
                 LOGGER.debug('Compu method category %s is not yet implemented.',

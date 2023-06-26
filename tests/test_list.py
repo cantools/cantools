@@ -110,7 +110,6 @@ ExampleMessage:
       Offset: 250 degK
       Scaling factor: 0.01 degK
 """
-
             actual_output = stdout.getvalue()
             self.assertEqual(actual_output, expected_output)
 

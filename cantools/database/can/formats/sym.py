@@ -4,7 +4,6 @@ import collections
 import logging
 import re
 from collections import OrderedDict as odict
-from decimal import Decimal
 from itertools import groupby
 from typing import Callable, Iterator, List
 from typing import Optional as TypingOptional
@@ -29,7 +28,6 @@ from ...namedsignalvalue import NamedSignalValue
 from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
 from ..internal_database import InternalDatabase
 from ..message import Message
-from ..signal import Decimal as SignalDecimal
 from ..signal import Signal
 from .utils import num
 
@@ -307,10 +305,6 @@ def _load_signal_type_and_length(type_, tokens, enums):
     enum = None
     minimum = None
     maximum = None
-    decimal = SignalDecimal(
-        scale=Decimal("1"),
-        offset=Decimal("0"),
-    )
 
     if type_ == 'signed':
         is_signed = True
@@ -328,8 +322,6 @@ def _load_signal_type_and_length(type_, tokens, enums):
         length = 1
         minimum = 0
         maximum = 1
-        decimal.minimum = Decimal('0')
-        decimal.maximum = Decimal('1')
     elif type_ == 'char':
         # As unsigned integer for now.
         length = 8
@@ -341,16 +333,14 @@ def _load_signal_type_and_length(type_, tokens, enums):
         length = int(tokens[0])
         enum = _get_enum(enums, type_)
 
-    return is_signed, is_float, length, enum, minimum, maximum, decimal
+    return is_signed, is_float, length, enum, minimum, maximum
 
 
-def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal, spn):
+def _load_signal_attributes(tokens, enum, enums, minimum, maximum, spn):
     # Default values.
     factor = 1
     offset = 0
     unit = None
-    decimal.scale = Decimal(factor)
-    decimal.offset = Decimal(offset)
 
     for item in tokens:
         if isinstance(item, list):
@@ -358,16 +348,12 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal, spn)
 
             if key == '/f:':
                 factor = num(value)
-                decimal.scale = Decimal(value)
             elif key == '/o:':
                 offset = num(value)
-                decimal.offset = Decimal(value)
             elif key == '/min:':
                 minimum = num(value)
-                decimal.minimum = Decimal(value)
             elif key == '/max:':
                 maximum = num(value)
-                decimal.maximum = Decimal(value)
             elif key == '/e:':
                 enum = _get_enum(enums, value)
             elif key == '/spn:':
@@ -381,7 +367,7 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, decimal, spn)
         else:
             raise ParseError(f'Internal error {item}.')
 
-    return unit, factor, offset, enum, minimum, maximum, decimal, spn
+    return unit, factor, offset, enum, minimum, maximum, spn
 
 
 def _load_signal(tokens, enums):
@@ -397,8 +383,7 @@ def _load_signal(tokens, enums):
      length,
      enum,
      minimum,
-     maximum,
-     decimal) = _load_signal_type_and_length(tokens[3],
+     maximum) = _load_signal_type_and_length(tokens[3],
                                              tokens[4],
                                              enums)
 
@@ -411,13 +396,12 @@ def _load_signal(tokens, enums):
         comment = _load_comment(tokens[8][0])
 
     # The rest.
-    unit, factor, offset, enum, minimum, maximum, decimal, spn = _load_signal_attributes(
+    unit, factor, offset, enum, minimum, maximum, spn = _load_signal_attributes(
         tokens[7],
         enum,
         enums,
         minimum,
         maximum,
-        decimal,
         spn)
 
     conversion = BaseConversion.factory(
@@ -439,7 +423,6 @@ def _load_signal(tokens, enums):
                   unit=unit,
                   comment=comment,
                   is_multiplexer=False,
-                  decimal=decimal,
                   spn=spn)
 
 
@@ -483,7 +466,6 @@ def _load_message_signal(tokens,
                   is_multiplexer=signal.is_multiplexer,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
-                  decimal=signal.decimal,
                   spn=signal.spn)
 
 def _convert_start(start, byte_order):
@@ -508,8 +490,7 @@ def _load_message_variable(tokens,
      length,
      enum,
      minimum,
-     maximum,
-     decimal) = _load_signal_type_and_length(tokens[3],
+     maximum) = _load_signal_type_and_length(tokens[3],
                                              [tokens[6]],
                                              enums)
 
@@ -522,13 +503,12 @@ def _load_message_variable(tokens,
         comment = _load_comment(tokens[9][0])
 
     # The rest.
-    unit, factor, offset, enum, minimum, maximum, decimal, spn = _load_signal_attributes(
+    unit, factor, offset, enum, minimum, maximum, spn = _load_signal_attributes(
         tokens[8],
         enum,
         enums,
         minimum,
         maximum,
-        decimal,
         spn)
 
     start = _convert_start(start, byte_order)
@@ -554,7 +534,6 @@ def _load_message_variable(tokens,
                   is_multiplexer=False,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
-                  decimal=decimal,
                   spn=spn)
 
 
@@ -609,7 +588,6 @@ def _load_muxed_message_signals(message_tokens,
                length=int(mux_tokens[5]),
                byte_order=byte_order,
                is_multiplexer=True,
-               decimal=SignalDecimal(Decimal(1), Decimal(0)),
                comment=comment,
         )
     ]

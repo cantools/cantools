@@ -1,6 +1,5 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
 import logging
-from decimal import Decimal
 from typing import Any, List
 
 from ....conversion import BaseConversion
@@ -8,7 +7,6 @@ from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
 from ...internal_database import InternalDatabase
 from ...message import Message
-from ...signal import Decimal as SignalDecimal
 from ...signal import Signal
 
 
@@ -230,7 +228,6 @@ class EcuExtractLoader:
         choices = None
         comments = None
         receivers = []
-        decimal = SignalDecimal(Decimal(factor), Decimal(offset))
 
         # Bit position, length, byte order, is_signed and is_float.
         bit_position = None
@@ -286,7 +283,7 @@ class EcuExtractLoader:
                       maximum=maximum,
                       unit=unit,
                       comment=comments,
-                      decimal=decimal)
+                      )
 
     def find_com_config(self, xpath):
         return self.root.find(make_xpath([

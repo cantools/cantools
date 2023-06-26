@@ -25,73 +25,6 @@ from cantools.database import Message, Signal, UnsupportedDatabaseFormatError
 from cantools.database.can.formats import dbc
 
 
-def objects_similar(a: Any,
-                    b: Any,
-                    tolerance: float = 1e-12) -> bool:
-
-    if type(a) != type(b):
-        # the types of the objects do not match
-        return False
-    elif a is None:
-        # a and b are None
-        return True
-    elif isinstance(a, (int, str, set)):
-        # the values of the objects must be equal
-        return a == b
-    elif isinstance(a, float):
-        # floating point objects are be compared inexactly
-        if abs(a) > 1:
-            if abs(1.0 - b/a) > tolerance:
-                return False
-        else:
-            if abs(b - a) > tolerance:
-                return False
-
-        return True
-
-    elif isinstance(a, (list, tuple)):
-        # lists and tuples are similar if all elements are similar
-        for i in range(0, len(a)):
-            if not objects_similar(a[i], b[i], tolerance):
-                return False
-        return True
-
-    elif isinstance(a, (dict, OrderedDict)):
-        # dictionaries are similar if they feature the same keys and
-        # all elements are similar
-        if a.keys() != b.keys():
-            return False
-        for key in a:
-            if not objects_similar(a[key], b[key], tolerance):
-                return False
-        return True
-
-    # assume that `a` and `b` are objects of custom classes
-    a_attrib_names = dir(a)
-    b_attrib_names = dir(b)
-
-    # both objects must have the same attributes and member functions
-    if a_attrib_names != b_attrib_names:
-        return False
-
-    for attrib_name in a_attrib_names:
-        if attrib_name.startswith('_'):
-            # ignore non-public attributes
-            continue
-
-        a_attrib = getattr(a, attrib_name)
-        b_attrib = getattr(b, attrib_name)
-
-        if type(a_attrib) != type(b_attrib):
-            return False
-        elif callable(a_attrib):
-            # ignore callable attributes
-            continue
-        elif not objects_similar(a_attrib, b_attrib, tolerance):
-            return False
-
-    return True
-
 
 class CanToolsDatabaseTest(unittest.TestCase):
 
@@ -122,7 +55,19 @@ class CanToolsDatabaseTest(unittest.TestCase):
             expected_str = fin.read().decode('cp1252')
             expected_db = cantools.database.load_string(expected_str)
 
-        self.assertTrue(objects_similar(actual_db, expected_db, tolerance=1e-8))
+        self.assertTrue(actual_db.is_similar(expected_db))
+
+    def assert_sym_equal(self, db):
+        sym_str = db.as_sym_string()
+        sym_db = cantools.database.load_string(sym_str)
+
+        self.assertTrue(db.is_similar(db, include_format_specifics=False))
+
+    def assert_kcd_equal(self, db):
+        kcd_str = db.as_kcd_string()
+        kcd_db = cantools.database.load_string(kcd_str)
+
+        self.assertTrue(db.is_similar(db, include_format_specifics=False))
 
     def tearDown(self):
         if os.path.exists(self.cache_dir):
@@ -159,6 +104,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertEqual(i, 15)
         self.assert_dbc_dump(db, filename)
+        self.assert_sym_equal(db)
+        self.assert_kcd_equal(db)
 
     def test_dbc_signal_initial_value(self):
         filename = 'tests/files/dbc/vehicle.dbc'

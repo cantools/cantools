@@ -53,8 +53,8 @@ homepage = "https://github.com/eerimoq/cantools"
 documentation = "https://cantools.readthedocs.io/"
 repository = "https://github.com/eerimoq/cantools"
 
-[tool.setuptools]
-packages = ["cantools"]
+[tool.setuptools.packages.find]
+include = ["cantools*"]
 
 [tool.setuptools.package-data]
 cantools = ["py.typed"]

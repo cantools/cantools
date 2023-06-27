@@ -31,9 +31,6 @@ Functions and classes
 .. autoclass:: cantools.database.can.Signal
     :members:
 
-.. autoclass:: cantools.database.can.signal.Decimal
-    :members:
-
 .. autoclass:: cantools.database.namedsignalvalue.NamedSignalValue
     :members:
 

@@ -410,8 +410,8 @@ Contributing
 
    .. code-block:: text
 
-      ruff check cantools
-      mypy cantools
+      ruff check src
+      mypy src
 
 #. Run the tests.
 

@@ -1426,16 +1426,10 @@ def _load_signals(tokens,
         return [_get_node_name(attributes, receiver) for receiver in receivers]
 
     def get_minimum(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return num(minimum)
+        return num(minimum)
 
     def get_maximum(minimum, maximum):
-        if minimum == maximum == '0':
-            return None
-        else:
-            return num(maximum)
+        return num(maximum)
 
     def get_is_float(frame_id_dbc, signal):
         """Get is_float for given signal.

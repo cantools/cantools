@@ -843,7 +843,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
     return ba
 
 
-def _dump_attributes_rel(database, sort_signals):
+def _dump_attributes_rel(database):
     ba_rel = []
 
     def get_value(attribute):
@@ -854,28 +854,26 @@ def _dump_attributes_rel(database, sort_signals):
 
         return result
 
-    if database.dbc is not None and database.dbc.attributes_rel is not None:
-        attributes_rel = database.dbc.attributes_rel
-        for frame_id, element in attributes_rel.items():
-            if "signal" in element:
-                for signal_name, signal_lst in element['signal'].items():
-                    for node_name, node_dict in signal_lst['node'].items():
-                        for attribute in node_dict.values():
-                            ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                          f'BU_SG_REL_ '
-                                          f'{node_name} '
-                                          f'SG_ '
-                                          f'{frame_id} '
-                                          f'{signal_name} '
-                                          f'{get_value(attribute)};')
-            elif "node" in element:
-                for node_name, node_dict in element['node'].items():
+    for message in database.messages:
+        for signal in message.signals:
+            if signal.dbc is not None and signal.dbc.attributes_rel is not None:
+                for node_name, node_dict in signal.dbc.attributes_rel.items():
                     for attribute in node_dict.values():
                         ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                      f'BU_BO_REL_ '
+                                      f'BU_SG_REL_ '
                                       f'{node_name} '
-                                      f'{frame_id} '
+                                      f'SG_ '
+                                      f'{get_dbc_frame_id(message)} '
+                                      f'{signal.name} '
                                       f'{get_value(attribute)};')
+        if message.dbc is not None and message.dbc.attributes_rel is not None:
+            for node_name, node_dict in message.dbc.attributes_rel.items():
+                for attribute in node_dict.values():
+                    ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
+                                  f'BU_BO_REL_ '
+                                  f'{node_name} '
+                                  f'{get_dbc_frame_id(message)} '
+                                  f'{get_value(attribute)};')
 
     return ba_rel
 
@@ -1339,7 +1337,8 @@ def _load_signals(tokens,
                   signal_types,
                   signal_multiplexer_values,
                   frame_id_dbc,
-                  multiplexer_signal):
+                  multiplexer_signal,
+                  attributes_rel):
     signal_to_multiplexer = {}
 
     try:
@@ -1358,6 +1357,16 @@ def _load_signals(tokens,
 
         try:
             return attributes[frame_id_dbc]['signal'][signal]
+        except KeyError:
+            return None
+
+    def get_attributes_rel(frame_id_dbc, signal):
+        """Get node mapped message attributes for given signal.
+
+        """
+
+        try:
+            return attributes_rel[frame_id_dbc]['signal'][signal]['node']
         except KeyError:
             return None
 
@@ -1495,7 +1504,8 @@ def _load_signals(tokens,
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
-                                              definitions),
+                                              definitions,
+                                              attributes_rel=get_attributes_rel(frame_id_dbc, signal[1][0])),
                    comment=get_comment(frame_id_dbc,
                                        signal[1][0]),
                    is_multiplexer=get_is_multiplexer(signal),
@@ -1518,7 +1528,8 @@ def _load_messages(tokens,
                    strict,
                    bus_name,
                    signal_groups,
-                   sort_signals):
+                   sort_signals,
+                   attributes_rel):
     """Load messages.
 
     """
@@ -1530,6 +1541,15 @@ def _load_messages(tokens,
 
         try:
             return attributes[frame_id_dbc]['message']
+        except KeyError:
+            return None
+
+    def get_attributes_rel(frame_id_dbc):
+        """Get Node mapped attributes for given message.
+        """
+
+        try:
+            return attributes_rel[frame_id_dbc]['node']
         except KeyError:
             return None
 
@@ -1674,7 +1694,8 @@ def _load_messages(tokens,
                                 signal_types,
                                 signal_multiplexer_values,
                                 frame_id_dbc,
-                                multiplexer_signal)
+                                multiplexer_signal,
+                                attributes_rel)
 
         messages.append(
             Message(frame_id=frame_id,
@@ -1685,7 +1706,8 @@ def _load_messages(tokens,
                     send_type=get_send_type(frame_id_dbc),
                     cycle_time=get_cycle_time(frame_id_dbc),
                     dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc),
-                                               definitions),
+                                               definitions,
+                                               attributes_rel = get_attributes_rel(frame_id_dbc)),
                     signals=signals,
                     comment=get_comment(frame_id_dbc),
                     strict=strict,
@@ -1888,7 +1910,7 @@ def dump_string(database: InternalDatabase,
     ba_def_def = _dump_attribute_definition_defaults(database)
     ba_def_def_rel = _dump_attribute_definition_defaults_rel(database)
     ba = _dump_attributes(database, sort_attribute_signals, sort_attributes)
-    ba_rel = _dump_attributes_rel(database, sort_attribute_signals)
+    ba_rel = _dump_attributes_rel(database)
     val = _dump_choices(database, sort_attribute_signals, sort_choices)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
@@ -2026,7 +2048,8 @@ def load_string(string: str, strict: bool = True,
                               strict,
                               bus.name if bus else None,
                               signal_groups,
-                              sort_signals)
+                              sort_signals,
+                              attributes_rel)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes)
@@ -2034,7 +2057,6 @@ def load_string(string: str, strict: bool = True,
                                  attribute_definitions,
                                  environment_variables,
                                  value_tables,
-                                 attributes_rel,
                                  attribute_rel_definitions)
 
     return InternalDatabase(messages,

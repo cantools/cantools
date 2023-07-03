@@ -42,9 +42,6 @@ BU_:
 
 
 CM_ "Comment1Comment2";
-BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
-BA_DEF_DEF_  "GenMsgCycleTime" 0;
-
 
 
 

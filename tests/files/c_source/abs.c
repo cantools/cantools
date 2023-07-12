@@ -196,6 +196,11 @@ bool abs_bremse_33_whlspeed_fl_is_in_range(uint16_t value)
     return (value <= 6400u);
 }
 
+bool abs_bremse_33_whlspeed_fl_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
+}
+
 uint16_t abs_bremse_33_whlspeed_fr_encode(double value)
 {
     return (uint16_t)(value / 0.015625);
@@ -209,6 +214,11 @@ double abs_bremse_33_whlspeed_fr_decode(uint16_t value)
 bool abs_bremse_33_whlspeed_fr_is_in_range(uint16_t value)
 {
     return (value <= 6400u);
+}
+
+bool abs_bremse_33_whlspeed_fr_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
 }
 
 uint16_t abs_bremse_33_whlspeed_rl_encode(double value)
@@ -226,6 +236,11 @@ bool abs_bremse_33_whlspeed_rl_is_in_range(uint16_t value)
     return (value <= 6400u);
 }
 
+bool abs_bremse_33_whlspeed_rl_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
+}
+
 uint16_t abs_bremse_33_whlspeed_rr_encode(double value)
 {
     return (uint16_t)(value / 0.015625);
@@ -239,6 +254,11 @@ double abs_bremse_33_whlspeed_rr_decode(uint16_t value)
 bool abs_bremse_33_whlspeed_rr_is_in_range(uint16_t value)
 {
     return (value <= 6400u);
+}
+
+bool abs_bremse_33_whlspeed_rr_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
 }
 
 int abs_bremse_10_pack(
@@ -501,6 +521,11 @@ bool abs_mm5_10_tx1_yaw_rate_is_in_range(uint16_t value)
     return (value <= 65534u);
 }
 
+bool abs_mm5_10_tx1_yaw_rate_is_in_physical_range(double value)
+{
+    return ((value >= -163.84) && (value <= 163.83));
+}
+
 uint16_t abs_mm5_10_tx1_ay1_encode(double value)
 {
     return (uint16_t)((value - -4.1768) / 0.000127465);
@@ -514,6 +539,11 @@ double abs_mm5_10_tx1_ay1_decode(uint16_t value)
 bool abs_mm5_10_tx1_ay1_is_in_range(uint16_t value)
 {
     return (value <= 65534u);
+}
+
+bool abs_mm5_10_tx1_ay1_is_in_physical_range(double value)
+{
+    return ((value >= -4.1768) && (value <= 4.1765));
 }
 
 int abs_mm5_10_tx2_pack(
@@ -578,6 +608,11 @@ bool abs_mm5_10_tx2_roll_rate_is_in_range(uint16_t value)
     return (true);
 }
 
+bool abs_mm5_10_tx2_roll_rate_is_in_physical_range(double value)
+{
+    return ((value >= -163.84) && (value <= 163.835));
+}
+
 uint16_t abs_mm5_10_tx2_ax1_encode(double value)
 {
     return (uint16_t)((value - -4.1768) / 0.000127465);
@@ -591,6 +626,11 @@ double abs_mm5_10_tx2_ax1_decode(uint16_t value)
 bool abs_mm5_10_tx2_ax1_is_in_range(uint16_t value)
 {
     return (value <= 65534u);
+}
+
+bool abs_mm5_10_tx2_ax1_is_in_physical_range(double value)
+{
+    return ((value >= -4.1768) && (value <= 4.1765));
 }
 
 int abs_mm5_10_tx3_pack(
@@ -647,6 +687,11 @@ double abs_mm5_10_tx3_az_decode(uint16_t value)
 bool abs_mm5_10_tx3_az_is_in_range(uint16_t value)
 {
     return (value <= 65534u);
+}
+
+bool abs_mm5_10_tx3_az_is_in_physical_range(double value)
+{
+    return ((value >= -4.1768) && (value <= 4.1765));
 }
 
 int abs_bremse_2_pack(
@@ -717,6 +762,11 @@ bool abs_bremse_2_whlspeed_fl_bremse2_is_in_range(uint16_t value)
     return (value <= 6400u);
 }
 
+bool abs_bremse_2_whlspeed_fl_bremse2_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
+}
+
 uint16_t abs_bremse_2_whlspeed_fr_bremse2_encode(double value)
 {
     return (uint16_t)(value / 0.015625);
@@ -730,6 +780,11 @@ double abs_bremse_2_whlspeed_fr_bremse2_decode(uint16_t value)
 bool abs_bremse_2_whlspeed_fr_bremse2_is_in_range(uint16_t value)
 {
     return (value <= 6400u);
+}
+
+bool abs_bremse_2_whlspeed_fr_bremse2_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
 }
 
 uint16_t abs_bremse_2_whlspeed_rl_bremse2_encode(double value)
@@ -747,6 +802,11 @@ bool abs_bremse_2_whlspeed_rl_bremse2_is_in_range(uint16_t value)
     return (value <= 6400u);
 }
 
+bool abs_bremse_2_whlspeed_rl_bremse2_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
+}
+
 uint16_t abs_bremse_2_whlspeed_rr_bremse2_encode(double value)
 {
     return (uint16_t)(value / 0.015625);
@@ -760,6 +820,11 @@ double abs_bremse_2_whlspeed_rr_bremse2_decode(uint16_t value)
 bool abs_bremse_2_whlspeed_rr_bremse2_is_in_range(uint16_t value)
 {
     return (value <= 6400u);
+}
+
+bool abs_bremse_2_whlspeed_rr_bremse2_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
 }
 
 int abs_abs_switch_pack(
@@ -978,6 +1043,11 @@ bool abs_bremse_32_acc_fa_is_in_range(uint8_t value)
     return (value <= 200u);
 }
 
+bool abs_bremse_32_acc_fa_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 10.0));
+}
+
 uint8_t abs_bremse_32_acc_ra_encode(double value)
 {
     return (uint8_t)(value / 0.05);
@@ -991,6 +1061,11 @@ double abs_bremse_32_acc_ra_decode(uint8_t value)
 bool abs_bremse_32_acc_ra_is_in_range(uint8_t value)
 {
     return (value <= 200u);
+}
+
+bool abs_bremse_32_acc_ra_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 10.0));
 }
 
 uint8_t abs_bremse_32_wheel_quality_fl_encode(double value)
@@ -1123,6 +1198,11 @@ bool abs_bremse_51_ax1_abs_int_is_in_range(uint16_t value)
     return (true);
 }
 
+bool abs_bremse_51_ax1_abs_int_is_in_physical_range(double value)
+{
+    return ((value >= -4.1768) && (value <= 4.1736697));
+}
+
 uint16_t abs_bremse_51_ay1_abs_int_encode(double value)
 {
     return (uint16_t)((value - -4.1768) / 0.00012742);
@@ -1138,6 +1218,11 @@ bool abs_bremse_51_ay1_abs_int_is_in_range(uint16_t value)
     (void)value;
 
     return (true);
+}
+
+bool abs_bremse_51_ay1_abs_int_is_in_physical_range(double value)
+{
+    return ((value >= -4.1768) && (value <= 4.1765));
 }
 
 uint8_t abs_bremse_51_if_variant_encode(double value)
@@ -2067,6 +2152,11 @@ bool abs_bremse_50_brake_bal_at50_is_in_range(uint16_t value)
     return (value <= 1000u);
 }
 
+bool abs_bremse_50_brake_bal_at50_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
+}
+
 uint8_t abs_bremse_50_brake_bal_at50_advice_encode(double value)
 {
     return (uint8_t)(value);
@@ -2095,6 +2185,11 @@ double abs_bremse_50_brake_bal_pct_decode(uint16_t value)
 bool abs_bremse_50_brake_bal_pct_is_in_range(uint16_t value)
 {
     return (value <= 1000u);
+}
+
+bool abs_bremse_50_brake_bal_pct_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 100.0));
 }
 
 uint8_t abs_bremse_50_brake_bal_pct_advice_encode(double value)
@@ -2231,6 +2326,11 @@ double abs_bremse_53_p_fa_decode(int16_t value)
 bool abs_bremse_53_p_fa_is_in_range(int16_t value)
 {
     return ((value >= -2785) && (value <= 27851));
+}
+
+bool abs_bremse_53_p_fa_is_in_physical_range(double value)
+{
+    return ((value >= -42.5) && (value <= 425.0));
 }
 
 uint8_t abs_bremse_53_bls_encode(double value)
@@ -2501,4 +2601,9 @@ double abs_bremse_53_p_ra_decode(int16_t value)
 bool abs_bremse_53_p_ra_is_in_range(int16_t value)
 {
     return ((value >= -2785) && (value <= 27851));
+}
+
+bool abs_bremse_53_p_ra_is_in_physical_range(double value)
+{
+    return ((value >= -42.5) && (value <= 425.0));
 }

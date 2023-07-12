@@ -340,3 +340,8 @@ bool floating_point_use_float_message3_signal3_is_in_range(uint8_t value)
 
     return (true);
 }
+
+bool floating_point_use_float_message3_signal3_is_in_physical_range(float value)
+{
+    return ((value >= -0.125f) && (value <= 0.13f));
+}

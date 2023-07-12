@@ -163,6 +163,11 @@ bool open_actuator_control_cmd_position_cmd_64_is_in_range(int16_t value)
     return ((value >= -29167) && (value <= 29167));
 }
 
+bool open_actuator_control_cmd_position_cmd_64_is_in_physical_range(double value)
+{
+    return ((value >= -450.0) && (value <= 450.0));
+}
+
 double open_actuator_control_cmd_torque_command_8_decode(int16_t value)
 {
     return ((double)value * 0.0166667);
@@ -173,6 +178,11 @@ bool open_actuator_control_cmd_torque_command_8_is_in_range(int16_t value)
     return ((value >= -480) && (value <= 480));
 }
 
+bool open_actuator_control_cmd_torque_command_8_is_in_physical_range(double value)
+{
+    return ((value >= -8.0) && (value <= 8.0));
+}
+
 double open_actuator_control_cmd_torque_close_loop_max_32_decode(uint8_t value)
 {
     return ((double)value * 0.186666);
@@ -181,6 +191,11 @@ double open_actuator_control_cmd_torque_close_loop_max_32_decode(uint8_t value)
 bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_range(uint8_t value)
 {
     return (value <= 43u);
+}
+
+bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 8.0));
 }
 
 double open_actuator_control_cmd_counter_cmd1_decode(uint8_t value)
@@ -350,6 +365,11 @@ bool open_actuator_control_status_torque_actual_is_in_range(int16_t value)
     return ((value >= -512) && (value <= 512));
 }
 
+bool open_actuator_control_status_torque_actual_is_in_physical_range(double value)
+{
+    return ((value >= -8.0) && (value <= 8.0));
+}
+
 uint8_t open_actuator_control_status_torque_close_loop_actual_encode(double value)
 {
     return (uint8_t)(value / 0.125);
@@ -358,6 +378,11 @@ uint8_t open_actuator_control_status_torque_close_loop_actual_encode(double valu
 bool open_actuator_control_status_torque_close_loop_actual_is_in_range(uint8_t value)
 {
     return (value <= 64u);
+}
+
+bool open_actuator_control_status_torque_close_loop_actual_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 8.0));
 }
 
 int open_actuator_system_status_pack(

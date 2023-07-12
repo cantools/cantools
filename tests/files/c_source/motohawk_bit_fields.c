@@ -168,6 +168,11 @@ bool motohawk_bit_fields_example_message_average_radius_is_in_range(uint8_t valu
     return (value <= 50u);
 }
 
+bool motohawk_bit_fields_example_message_average_radius_is_in_physical_range(double value)
+{
+    return ((value >= 0.0) && (value <= 5.0));
+}
+
 int16_t motohawk_bit_fields_example_message_temperature_encode(double value)
 {
     return (int16_t)((value - 250.0) / 0.01);
@@ -181,4 +186,9 @@ double motohawk_bit_fields_example_message_temperature_decode(int16_t value)
 bool motohawk_bit_fields_example_message_temperature_is_in_range(int16_t value)
 {
     return ((value >= -2048) && (value <= 2047));
+}
+
+bool motohawk_bit_fields_example_message_temperature_is_in_physical_range(double value)
+{
+    return ((value >= 229.52) && (value <= 270.47));
 }

@@ -343,6 +343,15 @@ float floating_point_use_float_message3_signal3_decode(uint8_t value);
  */
 bool floating_point_use_float_message3_signal3_is_in_range(uint8_t value);
 
+/**
+ * Check that given signal is in allowed physical range.
+ *
+ * @param[in] value Signal to check.
+ *
+ * @return true if in range, false otherwise.
+ */
+bool floating_point_use_float_message3_signal3_is_in_physical_range(float value);
+
 
 #ifdef __cplusplus
 }

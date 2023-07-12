@@ -1367,6 +1367,9 @@ class SystemLoader:
         result = {}
 
         for l_2 in self._get_arxml_children(node, ['DESC', '*L-2']):
+            if l_2.text is None:
+                continue
+
             lang = l_2.attrib.get('L', 'EN')
 
             # remove leading and trailing white space from each line

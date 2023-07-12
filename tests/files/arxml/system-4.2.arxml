@@ -1419,7 +1419,6 @@
             <SYSTEM-SIGNAL UUID="842b775bb4f05d19a94baa8cac26cf4e">
               <SHORT-NAME>Signal2_SM</SHORT-NAME>
               <DESC>
-                <L-2 L="FOR-ALL">Signal comment! (Sign+Magnitude)</L-2>
                 <L-2 L="FOR-ALL" />
               </DESC>
             </SYSTEM-SIGNAL>

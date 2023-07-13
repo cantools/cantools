@@ -1570,7 +1570,7 @@ def generate(database,
     Set `bit_fields` to ``True`` to generate bit fields in structs.
 
     Set `disable_snake_case_conversion` to ``True`` to preseve
-    message and signal names from the DBC databse to the extent
+    message and signal names from the database to the extent
     possible while still remaining legal python identifiers.
 
     This function returns a tuple of the C header and source files as

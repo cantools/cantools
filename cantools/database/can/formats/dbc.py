@@ -488,7 +488,7 @@ def _dump_messages(database, sort_signals):
                 length=signal.length,
                 receivers=format_receivers(signal),
                 byte_order=(0 if signal.byte_order == 'big_endian' else 1),
-                sign=('-' if signal.is_signed else '+'),
+                sign=('-' if signal.is_signed or signal.is_float else '+'),
                 scale=signal.scale,
                 offset=signal.offset,
                 minimum=(0 if signal.minimum is None else signal.minimum),
@@ -555,7 +555,7 @@ def _dump_signal_types(database):
     valtype = []
 
     for message in database.messages:
-        for signal in message.signals:
+        for signal in sorted(message.signals, key=lambda x: x.start, reverse=True):
             if not signal.is_float:
                 continue
 

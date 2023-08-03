@@ -395,8 +395,7 @@ class Monitor(can.Listener):
 
         if self._single_line:
             formatted = [
-                '{:12.3f} {}'.format(timestamp,
-                                     format_message(message, data, True, True))
+                f'{timestamp:12.3f} {format_message(message, data, True, True)}'
             ]
         else:
             formatted = format_message(message, data, True, False)

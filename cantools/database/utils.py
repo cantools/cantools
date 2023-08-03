@@ -191,8 +191,7 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
         return fmt, padding_mask, None
 
     def data_item(signal: Union["Data", "Signal"]) -> Tuple[str, str, str]:
-        fmt = '{}{}'.format(get_format_string_type(signal),
-                            signal.length)
+        fmt = f'{get_format_string_type(signal)}{signal.length}'
         padding_mask = '0' * signal.length
 
         return fmt, padding_mask, signal.name

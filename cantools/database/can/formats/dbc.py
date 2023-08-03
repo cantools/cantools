@@ -518,9 +518,7 @@ def _dump_comments(database, sort_signals):
 
     for bus in database.buses:
         if bus.comment is not None:
-            cm.append(
-                'CM_ "{comment}";'.format(
-                    comment=bus.comment) )
+            cm.append(f'CM_ "{bus.comment}";')
 
     for node in database.nodes:
         if node.comment is not None:
@@ -907,9 +905,7 @@ def _dump_choices(database, sort_signals, sort_choices):
                 'VAL_ {frame_id} {name} {choices} ;'.format(
                     frame_id=get_dbc_frame_id(message),
                     name=signal.name,
-                    choices=' '.join(['{value} "{text}"'.format(value=value,
-                                                                text=text)
-                                      for value, text in choices.items()])))
+                    choices=' '.join([f'{value} "{text}"' for value, text in choices.items()])))
 
     return val
 

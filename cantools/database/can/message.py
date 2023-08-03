@@ -1241,10 +1241,7 @@ class Message:
 
         # Check that the signal fits in the message.
         if len(signal_bits) > len(message_bits):
-            raise Error(
-                'The signal {} does not fit in message {}.'.format(
-                    signal.name,
-                    self.name))
+            raise Error(f'The signal {signal.name} does not fit in message {self.name}.')
 
         # Check that the signal does not overlap with other
         # signals.

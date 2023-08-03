@@ -469,9 +469,7 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
 
     # Should be replaced with a validation using the XSD file.
     if root.tag != ROOT_TAG:
-        raise ValueError(
-            'Expected root element tag {}, but got {}.'.format(ROOT_TAG,
-                                                               root.tag))
+        raise ValueError(f'Expected root element tag {ROOT_TAG}, but got {root.tag}.')
 
     nodes = [node.attrib for node in root.iterfind('./ns:Node', NAMESPACES)]
     buses = []

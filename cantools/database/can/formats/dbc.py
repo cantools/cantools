@@ -587,6 +587,12 @@ def _need_startval_def(database):
                for m in database.messages
                for s in m.signals)
 
+def _need_cycletime_def(database):
+    # If the user has added cycle times to a database which didn't start with them,
+    # we need to add the global attribute definition so the output DBC is valid
+    return any(m.cycle_time is not None
+               for m in database.messages)
+
 def _dump_attribute_definitions(database):
     ba_def = []
 
@@ -597,7 +603,7 @@ def _dump_attribute_definitions(database):
 
     # define "GenMsgCycleTime" attribute for specifying the cycle
     # times of messages if it has not been explicitly defined
-    if 'GenMsgCycleTime' not in definitions:
+    if 'GenMsgCycleTime' not in definitions and _need_cycletime_def(database):
         definitions['GenMsgCycleTime'] = \
             _create_GenMsgCycleTime_definition()
     if 'GenSigStartValue' not in definitions and _need_startval_def(database):
@@ -709,7 +715,7 @@ def _dump_attribute_definition_defaults(database):
 
     # define "GenMsgCycleTime" attribute for specifying the cycle
     # times of messages if it has not been explicitly defined
-    if 'GenMsgCycleTime' not in definitions:
+    if 'GenMsgCycleTime' not in definitions and _need_cycletime_def(database):
         definitions['GenMsgCycleTime'] = \
             _create_GenMsgCycleTime_definition()
     if 'GenSigStartValue' not in definitions and _need_startval_def(database):
@@ -780,9 +786,9 @@ def _dump_attributes(database, sort_signals, sort_attributes):
 
         # synchronize the attribute for the message cycle time with
         # the cycle time specified by the message object
-        if message.cycle_time is None and 'GenMsgCycleTime' in msg_attributes:
+        if message._cycle_time is None and 'GenMsgCycleTime' in msg_attributes:
             del msg_attributes['GenMsgCycleTime']
-        elif message.cycle_time is not None:
+        elif message._cycle_time is not None:
             msg_attributes['GenMsgCycleTime'] = \
                 Attribute(value=message.cycle_time,
                           definition=_create_GenMsgCycleTime_definition())
@@ -1577,11 +1583,7 @@ def _load_messages(tokens,
             result = int(message_attributes['GenMsgCycleTime'].value)
             return None if result == 0 else result
         except (KeyError, TypeError):
-            try:
-                result = int(definitions['GenMsgCycleTime'].default_value)
-                return None if result == 0 else result
-            except (KeyError, TypeError):
-                return None
+            return None
 
     def get_frame_format(frame_id_dbc):
         """Get frame format for a given message"""

@@ -60,8 +60,7 @@ def _do_generate_c_source(args):
         with open(fuzzer_filename_mk, 'w') as fout:
             fout.write(fuzzer_makefile)
 
-        print('Successfully generated {} and {}.'.format(fuzzer_path_c,
-                                                         fuzzer_path_mk))
+        print(f'Successfully generated {fuzzer_path_c} and {fuzzer_path_mk}.')
         print()
         print(
             'Run "make -f {}" to build and run the fuzzer. Requires a'.format(

@@ -938,8 +938,7 @@ def _format_pack_code_signal(message,
     signal = message.get_signal_by_name(signal_name)
 
     if signal.conversion.is_float or signal.is_signed:
-        variable = '    uint{}_t {};'.format(signal.type_length,
-                                             signal.snake_name)
+        variable = f'    uint{signal.type_length}_t {signal.snake_name};'
 
         if signal.conversion.is_float:
             conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
@@ -1354,9 +1353,7 @@ def _generate_choices_defines(database_name, messages, node_name):
 
             choices = _format_choices(signal, signal.snake_name)
             signal_choices_defines = '\n'.join([
-                '#define {}_{}_{}'.format(database_name.upper(),
-                                          message.snake_name.upper(),
-                                          choice)
+                f'#define {database_name.upper()}_{message.snake_name.upper()}_{choice}'
                 for choice in choices
             ])
             choices_defines.append(signal_choices_defines)
@@ -1634,8 +1631,7 @@ def _generate_fuzzer_source(database_name,
     calls = []
 
     for message in messages:
-        name = '{}_{}'.format(database_name,
-                              camel_to_snake_case(message.name))
+        name = f'{database_name}_{camel_to_snake_case(message.name)}'
 
         test = TEST_FMT.format(name=name)
         tests.append(test)

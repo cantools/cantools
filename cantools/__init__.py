@@ -49,6 +49,7 @@ def _load_subparser(subparser_name, subparsers):
 
 def _main():
     parser = argparse.ArgumentParser(
+        prog='cantools',
         description='Various CAN utilities.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )

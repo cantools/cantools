@@ -110,7 +110,7 @@ def format_message_by_frame_id(dbase : Database,
     try:
         message = dbase.get_message_by_frame_id(frame_id)
     except KeyError:
-        return ' Unknown frame id {0} (0x{0:x})'.format(frame_id)
+        return f' Unknown frame id {frame_id} (0x{frame_id:x})'
 
     if message.is_container:
         if decode_containers:

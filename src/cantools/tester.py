@@ -58,7 +58,7 @@ def _invert_signal_tree(
                 next_mpx[mpx_name] = mpx_val
                 _invert_signal_tree(sig_tree, next_mpx, ret)
 
-        elif type(sigs) == str:
+        elif isinstance(sigs, str):
             ret.setdefault(sigs,[]).append(set(cur_mpx.items()))
         else:
             raise TypeError(repr(sigs))

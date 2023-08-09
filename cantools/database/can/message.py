@@ -93,12 +93,12 @@ class Message:
         if is_extended_frame:
             if frame_id_bit_length > 29:
                 raise Error(
-                    'Extended frame id 0x{:x} is more than 29 bits in '
-                    'message {}.'.format(frame_id, name))
+                    f'Extended frame id 0x{frame_id:x} is more than 29 bits in '
+                    f'message {name}.')
         elif frame_id_bit_length > 11:
             raise Error(
-                'Standard frame id 0x{:x} is more than 11 bits in '
-                'message {}.'.format(frame_id, name))
+                f'Standard frame id 0x{frame_id:x} is more than 11 bits in '
+                f'message {name}.')
 
         self._frame_id = frame_id
         self._header_id = header_id

@@ -10,8 +10,8 @@ class DbcSpecifics:
                  attribute_definitions=None,
                  environment_variables=None,
                  value_tables=None,
-                 attributes_rel=None,
-                 attribute_definitions_rel=None):
+                 attribute_definitions_rel=None,
+                 attributes_rel=None):
         if attributes is None:
             attributes = OrderedDict()
 
@@ -78,7 +78,7 @@ class DbcSpecifics:
 
     @property
     def attributes_rel(self):
-        """The DBC specific attribute rel as dictionary..
+        """The DBC specific attribute rel as dictionary.
 
         """
 

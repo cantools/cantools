@@ -57,7 +57,7 @@ def _do_generate_c_source(args):
 
         fuzzer_path_mk = os.path.join(args.output_directory, fuzzer_filename_mk)
 
-        with open(fuzzer_filename_mk, 'w') as fout:
+        with open(fuzzer_path_mk, 'w') as fout:
             fout.write(fuzzer_makefile)
 
         print(f'Successfully generated {fuzzer_path_c} and {fuzzer_path_mk}.')

@@ -1,10 +1,11 @@
 import sys
 import os
 import re
-import shutil
+import tempfile
 import unittest
 import types
 import functools
+from pathlib import Path
 
 try:
     from unittest.mock import patch
@@ -17,6 +18,7 @@ except ImportError:
     from io import StringIO
 
 import cantools
+import cantools.database
 
 
 def with_fake_screen_width(screen_width):
@@ -1201,41 +1203,38 @@ BATTERY_VT(
                 self.assertEqual(actual_output, expected_output)
 
     def test_convert(self):
-        # DBC to KCD.
-        argv = [
-            'cantools',
-            'convert',
-            'tests/files/dbc/motohawk.dbc',
-            'test_command_line_convert.kcd'
-        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # DBC to KCD.
+            kcd_out_path = os.path.join(tmpdir, 'test_command_line_convert.kcd')
+            argv = [
+                'cantools',
+                'convert',
+                'tests/files/dbc/motohawk.dbc',
+                kcd_out_path
+            ]
 
-        if os.path.exists('test_command_line_convert.kcd'):
-            os.remove('test_command_line_convert.kcd')
+            with patch('sys.argv', argv):
+                cantools._main()
 
-        with patch('sys.argv', argv):
-            cantools._main()
+            db = cantools.database.Database()
+            db.add_kcd_file(kcd_out_path)
+            self.assertEqual(db.version, '1.0')
 
-        db = cantools.database.Database()
-        db.add_kcd_file('test_command_line_convert.kcd')
-        self.assertEqual(db.version, '1.0')
+            # KCD to DBC.
+            dbc_out_path = os.path.join(tmpdir, 'test_command_line_convert.dbc')
+            argv = [
+                'cantools',
+                'convert',
+                kcd_out_path,
+                dbc_out_path
+            ]
 
-        # KCD to DBC.
-        argv = [
-            'cantools',
-            'convert',
-            'test_command_line_convert.kcd',
-            'test_command_line_convert.dbc'
-        ]
+            with patch('sys.argv', argv):
+                cantools._main()
 
-        if os.path.exists('test_command_line_convert.dbc'):
-            os.remove('test_command_line_convert.dbc')
-
-        with patch('sys.argv', argv):
-            cantools._main()
-
-        db = cantools.database.Database()
-        db.add_dbc_file('test_command_line_convert.dbc')
-        self.assertEqual(db.version, '1.0')
+            db = cantools.database.Database()
+            db.add_dbc_file(dbc_out_path)
+            self.assertEqual(db.version, '1.0')
 
     def test_convert_bad_outfile(self):
         argv = [
@@ -1270,46 +1269,39 @@ BATTERY_VT(
             'abs'
         ]
 
-        for database in databases:
-            if isinstance(database, tuple):
-                database, basename = database
-            else:
-                basename = database
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
 
-            argv = [
-                'cantools',
-                'generate_c_source',
-                'tests/files/dbc/{}.dbc'.format(database)
-            ]
-            if database == 'floating_point_use_float':
-                argv.insert(-1, '--use-float')
+            for database in databases:
+                if isinstance(database, tuple):
+                    database, basename = database
+                else:
+                    basename = database
 
-            database_h = basename + '.h'
-            database_c = basename + '.c'
-            fuzzer_c = basename + '_fuzzer.c'
-            fuzzer_mk = basename + '_fuzzer.mk'
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    'tests/files/dbc/{}.dbc'.format(database),
+                    '-o',
+                    str(tmpdir),
+                ]
+                if database == 'floating_point_use_float':
+                    argv.append('--use-float')
 
-            if os.path.exists(database_h):
-                os.remove(database_h)
+                with patch('sys.argv', argv):
+                    cantools._main()
 
-            if os.path.exists(database_c):
-                os.remove(database_c)
+                database_h = basename + '.h'
+                database_c = basename + '.c'
+                fuzzer_c = basename + '_fuzzer.c'
+                fuzzer_mk = basename + '_fuzzer.mk'
 
-            if os.path.exists(fuzzer_c):
-                os.remove(fuzzer_c)
-
-            if os.path.exists(fuzzer_mk):
-                os.remove(fuzzer_mk)
-
-            with patch('sys.argv', argv):
-                cantools._main()
-
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + database_c)
-            self.assertFalse(os.path.exists(fuzzer_c))
-            self.assertFalse(os.path.exists(fuzzer_mk))
+                self.assert_files_equal(tmpdir / database_h,
+                                        'tests/files/c_source/' + database_h)
+                self.assert_files_equal(tmpdir / database_c,
+                                        'tests/files/c_source/' + database_c)
+                self.assertFalse((tmpdir / fuzzer_c).exists())
+                self.assertFalse((tmpdir / fuzzer_mk).exists())
 
     def test_generate_c_source_no_signal_encode_decode(self):
         databases = [
@@ -1317,34 +1309,33 @@ BATTERY_VT(
             'open_actuator'
         ]
 
-        for database in databases:
-            argv = [
-                'cantools',
-                'generate_c_source',
-                '--no-floating-point-numbers',
-                'tests/files/dbc/{}.dbc'.format(database)
-            ]
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
 
-            database_h = database + '.h'
-            database_c = database + '.c'
-            expected_database_h = database + '_no_floating_point_numbers.h'
-            expected_database_c = database + '_no_floating_point_numbers.c'
+            for database in databases:
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    '--no-floating-point-numbers',
+                    'tests/files/dbc/{}.dbc'.format(database),
+                    '-o',
+                    str(tmpdir),
+                ]
 
-            if os.path.exists(database_h):
-                os.remove(database_h)
+                database_h = database + '.h'
+                database_c = database + '.c'
+                expected_database_h = database + '_no_floating_point_numbers.h'
+                expected_database_c = database + '_no_floating_point_numbers.c'
 
-            if os.path.exists(database_c):
-                os.remove(database_c)
+                with patch('sys.argv', argv):
+                    cantools._main()
 
-            with patch('sys.argv', argv):
-                cantools._main()
-
-            self.assert_files_equal(
-                database_h,
-                'tests/files/c_source/' + expected_database_h)
-            self.assert_files_equal(
-                database_c,
-                'tests/files/c_source/' + expected_database_c)
+                self.assert_files_equal(
+                    tmpdir / database_h,
+                    'tests/files/c_source/' + expected_database_h)
+                self.assert_files_equal(
+                    tmpdir / database_c,
+                    'tests/files/c_source/' + expected_database_c)
 
     def test_generate_c_source_sender_node_no_signal_encode_decode(self):
         databases = [
@@ -1356,80 +1347,73 @@ BATTERY_VT(
             'Actuator'
         ]
 
-        for database, node in zip(databases, nodes):
-            argv = [
-                'cantools',
-                'generate_c_source',
-                '--no-floating-point-numbers',
-                '--node', node,
-                'tests/files/dbc/{}.dbc'.format(database)
-            ]
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
 
-            database_h = database + '.h'
-            database_c = database + '.c'
-            expected_database_h = database + '_sender_node_no_floating_point_numbers.h'
-            expected_database_c = database + '_sender_node_no_floating_point_numbers.c'
+            for database, node in zip(databases, nodes):
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    '--no-floating-point-numbers',
+                    '--node', node,
+                    'tests/files/dbc/{}.dbc'.format(database),
+                    '-o',
+                    str(tmpdir),
+                ]
 
-            if os.path.exists(database_h):
-                os.remove(database_h)
+                database_h = database + '.h'
+                database_c = database + '.c'
+                expected_database_h = database + '_sender_node_no_floating_point_numbers.h'
+                expected_database_c = database + '_sender_node_no_floating_point_numbers.c'
 
-            if os.path.exists(database_c):
-                os.remove(database_c)
+                with patch('sys.argv', argv):
+                    cantools._main()
 
-            with patch('sys.argv', argv):
-                cantools._main()
-
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + expected_database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + expected_database_c)
+                self.assert_files_equal(tmpdir / database_h,
+                                        'tests/files/c_source/' + expected_database_h)
+                self.assert_files_equal(tmpdir / database_c,
+                                        'tests/files/c_source/' + expected_database_c)
 
     def test_generate_c_source_database_name(self):
         databases = [
             'motohawk',
         ]
 
-        for database in databases:
-            argv = [
-                'cantools',
-                'generate_c_source',
-                '--database-name', 'my_database_name',
-                'tests/files/dbc/{}.dbc'.format(database)
-            ]
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
 
-            database_h = 'my_database_name.h'
-            database_c = 'my_database_name.c'
+            for database in databases:
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    '--database-name', 'my_database_name',
+                    'tests/files/dbc/{}.dbc'.format(database),
+                    '-o',
+                    str(tmpdir),
+                ]
 
-            if os.path.exists(database_h):
-                os.remove(database_h)
+                database_h = 'my_database_name.h'
+                database_c = 'my_database_name.c'
 
-            if os.path.exists(database_c):
-                os.remove(database_c)
+                with patch('sys.argv', argv):
+                    cantools._main()
 
-            with patch('sys.argv', argv):
-                cantools._main()
+                self.assert_files_equal(tmpdir / database_h,
+                                        'tests/files/c_source/' + database_h)
+                self.assert_files_equal(tmpdir / database_c,
+                                        'tests/files/c_source/' + database_c)
 
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + database_c)
-
-    def test_generate_c_source_output_directory(self):
+    def test_generate_c_source_working_directory(self):
         database = 'motohawk'
-
-        output_directory = 'some_dir'
 
         argv = [
             'cantools',
             'generate_c_source',
-            '--output-directory', output_directory,
             'tests/files/dbc/{}.dbc'.format(database)
         ]
 
-        database_h = os.path.join(output_directory, f'{database}.h')
-        database_c = os.path.join(output_directory, f'{database}.c')
-
-        shutil.rmtree(output_directory, ignore_errors=True)
+        database_h = database + '.h'
+        database_c = database + '.c'
 
         with patch('sys.argv', argv):
             cantools._main()
@@ -1439,6 +1423,12 @@ BATTERY_VT(
         self.assert_files_equal(database_c,
                                 'tests/files/c_source/' + os.path.basename(database_c))
 
+        if os.path.exists(database_h):
+            os.remove(database_h)
+
+        if os.path.exists(database_c):
+            os.remove(database_c)
+
     def test_generate_c_source_bit_fields(self):
         databases = [
             'motohawk',
@@ -1446,31 +1436,30 @@ BATTERY_VT(
             'signed'
         ]
 
-        for database in databases:
-            argv = [
-                'cantools',
-                'generate_c_source',
-                '--bit-fields',
-                '--database-name', '{}_bit_fields'.format(database),
-                'tests/files/dbc/{}.dbc'.format(database)
-            ]
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
 
-            database_h = database + '_bit_fields.h'
-            database_c = database + '_bit_fields.c'
+            for database in databases:
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    '--bit-fields',
+                    '--database-name', '{}_bit_fields'.format(database),
+                    'tests/files/dbc/{}.dbc'.format(database),
+                    '-o',
+                    str(tmpdir),
+                ]
 
-            if os.path.exists(database_h):
-                os.remove(database_h)
+                database_h = database + '_bit_fields.h'
+                database_c = database + '_bit_fields.c'
 
-            if os.path.exists(database_c):
-                os.remove(database_c)
+                with patch('sys.argv', argv):
+                    cantools._main()
 
-            with patch('sys.argv', argv):
-                cantools._main()
-
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + database_c)
+                self.assert_files_equal(tmpdir / database_h,
+                                        'tests/files/c_source/' + database_h)
+                self.assert_files_equal(tmpdir / database_c,
+                                        'tests/files/c_source/' + database_c)
 
     def test_generate_c_source_sender_node(self):
         databases = [
@@ -1482,69 +1471,61 @@ BATTERY_VT(
             'Actuator'
         ]
 
-        for database, node in zip(databases, nodes):
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
+
+            for database, node in zip(databases, nodes):
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    '--node', node,
+                    'tests/files/dbc/{}.dbc'.format(database),
+                    '-o',
+                    str(tmpdir),
+                ]
+
+                database_h = database + '.h'
+                database_c = database + '.c'
+                expected_database_h = database + '_sender_node.h'
+                expected_database_c = database + '_sender_node.c'
+
+                with patch('sys.argv', argv):
+                    cantools._main()
+
+                self.assert_files_equal(tmpdir / database_h,
+                                        'tests/files/c_source/' + expected_database_h)
+                self.assert_files_equal(tmpdir / database_c,
+                                        'tests/files/c_source/' + expected_database_c)
+
+    def test_generate_c_source_generate_fuzzer(self):
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
+
             argv = [
                 'cantools',
                 'generate_c_source',
-                '--node', node,
-                'tests/files/dbc/{}.dbc'.format(database)
+                '--generate-fuzzer',
+                'tests/files/dbc/multiplex_2.dbc',
+                '-o',
+                str(tmpdir),
             ]
 
-            database_h = database + '.h'
-            database_c = database + '.c'
-            expected_database_h = database + '_sender_node.h'
-            expected_database_c = database + '_sender_node.c'
-
-            if os.path.exists(database_h):
-                os.remove(database_h)
-
-            if os.path.exists(database_c):
-                os.remove(database_c)
+            database_h = 'multiplex_2.h'
+            database_c = 'multiplex_2.c'
+            fuzzer_c = 'multiplex_2_fuzzer.c'
+            fuzzer_mk = 'multiplex_2_fuzzer.mk'
 
             with patch('sys.argv', argv):
                 cantools._main()
 
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + expected_database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + expected_database_c)
-
-    def test_generate_c_source_generate_fuzzer(self):
-        argv = [
-            'cantools',
-            'generate_c_source',
-            '--generate-fuzzer',
-            'tests/files/dbc/multiplex_2.dbc'
-        ]
-
-        database_h = 'multiplex_2.h'
-        database_c = 'multiplex_2.c'
-        fuzzer_c = 'multiplex_2_fuzzer.c'
-        fuzzer_mk = 'multiplex_2_fuzzer.mk'
-
-        if os.path.exists(database_h):
-            os.remove(database_h)
-
-        if os.path.exists(database_c):
-            os.remove(database_c)
-
-        if os.path.exists(fuzzer_c):
-            os.remove(fuzzer_c)
-
-        if os.path.exists(fuzzer_mk):
-            os.remove(fuzzer_mk)
-
-        with patch('sys.argv', argv):
-            cantools._main()
-
-        self.assert_files_equal(database_h,
-                                'tests/files/c_source/' + database_h)
-        self.assert_files_equal(database_c,
-                                'tests/files/c_source/' + database_c)
-        self.assert_files_equal(fuzzer_c,
-                                'tests/files/c_source/' + fuzzer_c)
-        self.assert_files_equal(fuzzer_mk,
-                                'tests/files/c_source/' + fuzzer_mk)
+            self.assert_files_equal(tmpdir / database_h,
+                                    'tests/files/c_source/' + database_h)
+            self.assert_files_equal(tmpdir / database_c,
+                                    'tests/files/c_source/' + database_c)
+            self.assert_files_equal(tmpdir / fuzzer_c,
+                                    'tests/files/c_source/' + fuzzer_c)
+            self.assert_files_equal(tmpdir / fuzzer_mk,
+                                    'tests/files/c_source/' + fuzzer_mk)
 
     def test_generate_c_source_sym(self):
         databases = [
@@ -1552,44 +1533,37 @@ BATTERY_VT(
             ('letter-terminated-can-id-6.0', 'letter_terminated_can_id_6_0')
         ]
 
-        for database in databases:
-            if isinstance(database, tuple):
-                database, basename = database
-            else:
-                basename = database
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
 
-            argv = [
-                'cantools',
-                'generate_c_source',
-                'tests/files/sym/{}.sym'.format(database)
-            ]
+            for database in databases:
+                if isinstance(database, tuple):
+                    database, basename = database
+                else:
+                    basename = database
 
-            database_h = basename + '.h'
-            database_c = basename + '.c'
-            fuzzer_c = basename + '_fuzzer.c'
-            fuzzer_mk = basename + '_fuzzer.mk'
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    'tests/files/sym/{}.sym'.format(database),
+                    '-o',
+                    str(tmpdir),
+                ]
 
-            if os.path.exists(database_h):
-                os.remove(database_h)
+                database_h = basename + '.h'
+                database_c = basename + '.c'
+                fuzzer_c = basename + '_fuzzer.c'
+                fuzzer_mk = basename + '_fuzzer.mk'
 
-            if os.path.exists(database_c):
-                os.remove(database_c)
+                with patch('sys.argv', argv):
+                    cantools._main()
 
-            if os.path.exists(fuzzer_c):
-                os.remove(fuzzer_c)
-
-            if os.path.exists(fuzzer_mk):
-                os.remove(fuzzer_mk)
-
-            with patch('sys.argv', argv):
-                cantools._main()
-
-            self.assert_files_equal(database_h,
-                                    'tests/files/c_source/' + database_h)
-            self.assert_files_equal(database_c,
-                                    'tests/files/c_source/' + database_c)
-            self.assertFalse(os.path.exists(fuzzer_c))
-            self.assertFalse(os.path.exists(fuzzer_mk))
+                self.assert_files_equal(tmpdir / database_h,
+                                        'tests/files/c_source/' + database_h)
+                self.assert_files_equal(tmpdir / database_c,
+                                        'tests/files/c_source/' + database_c)
+                self.assertFalse((tmpdir / fuzzer_c).exists())
+                self.assertFalse((tmpdir / fuzzer_mk).exists())
 
 
 if __name__ == '__main__':

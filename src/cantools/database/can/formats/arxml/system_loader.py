@@ -1782,16 +1782,16 @@ class SystemLoader:
 
             if len(numerators) != 2:
                 raise ValueError(
-                    'Expected 2 numerator values for linear scaling, but '
-                    'got {}.'.format(len(numerators)))
+                    f'Expected 2 numerator values for linear scaling, but '
+                    f'got {len(numerators)}.')
 
             denominators = self._get_arxml_children(compu_rational_coeffs,
                                                     ['&COMPU-DENOMINATOR', '*&V'])
 
             if len(denominators) != 1:
                 raise ValueError(
-                    'Expected 1 denominator value for linear scaling, but '
-                    'got {}.'.format(len(denominators)))
+                    f'Expected 1 denominator value for linear scaling, but '
+                    f'got {len(denominators)}.')
 
             denominator = parse_number_string(denominators[0].text, True)
             factor = parse_number_string(numerators[1].text, True) / denominator

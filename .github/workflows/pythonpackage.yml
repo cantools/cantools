@@ -99,7 +99,7 @@ jobs:
         mypy --python-version 3.11 .
     - name: Run linters
       run: |
-        ruff check ./cantools
+        ruff check ./src
 
   docs:
     runs-on: ubuntu-latest

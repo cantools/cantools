@@ -54,7 +54,7 @@ documentation = "https://cantools.readthedocs.io/"
 repository = "https://github.com/eerimoq/cantools"
 
 [tool.setuptools.packages.find]
-include = ["cantools*"]
+where = ["src"]
 
 [tool.setuptools.package-data]
 cantools = ["py.typed"]
@@ -70,7 +70,7 @@ no_implicit_optional = true
 disallow_incomplete_defs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
-exclude = "^(?!cantools).*$"
+exclude = "^(?!src).*$"
 
 [[tool.mypy.overrides]]
 module = [

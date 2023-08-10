@@ -428,7 +428,7 @@ class Plotter:
             if self.show_unknown_frames:
                 self.x_unknown_frames.append(timestamp)
             if not self.ignore_unknown_frames:
-                print('Unknown frame id {0} (0x{0:x})'.format(frame_id))
+                print(f'Unknown frame id {frame_id} (0x{frame_id:x})')
             return
 
         try:

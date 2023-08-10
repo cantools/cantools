@@ -68,8 +68,8 @@ class Monitor(can.Listener):
                            **kwargs)
         except Exception as exc:
             raise Exception(
-                "Failed to create CAN bus with bustype='{}' and "
-                "channel='{}'.".format(args.bus_type, args.channel)
+                f"Failed to create CAN bus with bustype='{args.bus_type}' and "
+                f"channel='{args.channel}'."
             ) from exc
 
     def run(self, max_num_keys_per_tick=-1):

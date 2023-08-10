@@ -330,8 +330,8 @@ def load_string(string: str,
 
     if database_format not in ['arxml', 'dbc', 'kcd', 'sym', 'cdd', None]:
         raise ValueError(
-            "expected database format 'arxml', 'dbc', 'kcd', 'sym', 'cdd' or "
-            "None, but got '{}'".format(database_format))
+            f"expected database format 'arxml', 'dbc', 'kcd', 'sym', 'cdd' or "
+            f"None, but got '{database_format}'")
 
     e_arxml = None
     e_dbc = None

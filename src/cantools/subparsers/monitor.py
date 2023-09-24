@@ -91,7 +91,7 @@ class Monitor(can.Listener):
 
     def redraw(self):
         # Clear the screen.
-        self._stdscr.clear()
+        self._stdscr.erase()
 
         # Draw everything.
         self.draw_stats(0)

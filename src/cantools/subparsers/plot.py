@@ -61,7 +61,7 @@ from argparse_addons import Integer
 try:
     from matplotlib import pyplot as plt
 except ImportError:
-    plt = None
+    plt = None  # type: ignore[assignment,unused-ignore]
 
 from .. import database, errors
 from ..database.namedsignalvalue import NamedSignalValue

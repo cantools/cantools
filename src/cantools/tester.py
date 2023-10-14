@@ -3,7 +3,7 @@
 import queue
 import time
 from collections import UserDict
-from typing import Dict, List, Optional
+from typing import Dict, List, Mapping, Optional
 
 import can
 
@@ -50,7 +50,7 @@ def _invert_signal_tree(
         cur_mpx = {}
 
     for sigs in tree:
-        if type(sigs) == dict: # outer signal keyed by muliplexer name
+        if isinstance(sigs, Mapping): # outer signal keyed by muliplexer name
             (mpx_name, mpx_vals), = sigs.items()
             for mpx_val, sig_tree in mpx_vals.items(): # inner signal
                 #                          keyed by multiplexer values

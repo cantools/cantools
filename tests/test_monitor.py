@@ -53,6 +53,7 @@ class StdScr(object):
         self.addstr = Mock()
         self.refresh = Mock()
         self.keypad = Mock()
+        self.erase = Mock()
 
         if user_input is None:
             user_input = ['q']

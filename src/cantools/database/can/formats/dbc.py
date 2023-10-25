@@ -4,6 +4,7 @@ import re
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from decimal import Decimal
+from typing import List
 
 import textparser
 from textparser import (
@@ -134,6 +135,31 @@ ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME = AttributeDefinition(
     kind='SG_',
     type_name='STRING')
 
+ATTRIBUTE_DEFINITION_VFRAMEFORMAT = AttributeDefinition(
+    name='VFrameFormat',
+    default_value='StandardCAN',
+    kind='BO_',
+    type_name='ENUM',
+    choices=['StandardCAN', 'ExtendedCAN',
+             'reserved', 'J1939PG',
+             'reserved', 'reserved',
+             'reserved', 'reserved',
+             'reserved', 'reserved',
+             'reserved', 'reserved',
+             'reserved', 'reserved',
+             'StandardCAN_FD', 'ExtendedCAN_FD'])
+
+ATTRIBUTE_DEFINITION_CANFD_BRS = AttributeDefinition(
+    name='CANFD_BRS',
+    default_value='1',
+    kind='BO_',
+    type_name='ENUM',
+    choices=['0', '1'])
+
+ATTRIBUTE_DEFINITION_BUS_TYPE = AttributeDefinition(
+    name='BusType',
+    default_value='CAN',
+    type_name='STRING')
 
 def to_int(value):
     return int(Decimal(value))
@@ -591,7 +617,15 @@ def _need_cycletime_def(database):
     return any(m.cycle_time is not None
                for m in database.messages)
 
-def _dump_attribute_definitions(database):
+def _bus_is_canfd(database: InternalDatabase) -> bool:
+    if database.dbc is None or database.dbc.attributes is None:
+        return False
+    bus_type = database.dbc.attributes.get('BusType', None)
+    if bus_type is None:
+        return False
+    return bus_type.value == 'CAN FD'  # type: ignore[no-any-return]
+
+def _dump_attribute_definitions(database: InternalDatabase) -> List[str]:
     ba_def = []
 
     if database.dbc is None:
@@ -602,11 +636,16 @@ def _dump_attribute_definitions(database):
     # define "GenMsgCycleTime" attribute for specifying the cycle
     # times of messages if it has not been explicitly defined
     if 'GenMsgCycleTime' not in definitions and _need_cycletime_def(database):
-        definitions['GenMsgCycleTime'] = \
-            _create_GenMsgCycleTime_definition()
+        definitions['GenMsgCycleTime'] = _create_GenMsgCycleTime_definition()
     if 'GenSigStartValue' not in definitions and _need_startval_def(database):
-        definitions['GenSigStartValue'] = \
-            _create_GenSigStartValue_definition()
+        definitions['GenSigStartValue'] = _create_GenSigStartValue_definition()
+
+    # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if bus is CAN FD
+    if _bus_is_canfd(database):
+        if 'VFrameFormat' not in definitions:
+            definitions['VFrameFormat'] = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
+        if 'CANFD_BRS' not in definitions:
+            definitions['CANFD_BRS'] = ATTRIBUTE_DEFINITION_CANFD_BRS
 
     def get_value(definition, value):
         if definition.minimum is None:
@@ -761,7 +800,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
         result = attribute.value
 
         if attribute.definition.type_name == "STRING":
-            result = '"' + attribute.value + '"'
+            result = f'"{attribute.value}"'
 
         return result
 
@@ -780,7 +819,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
         # retrieve the ordered dictionary of message attributes
         msg_attributes = OrderedDict()
         if message.dbc is not None and message.dbc.attributes is not None:
-            msg_attributes = message.dbc.attributes
+            msg_attributes.update(message.dbc.attributes)
 
         # synchronize the attribute for the message cycle time with
         # the cycle time specified by the message object
@@ -790,6 +829,30 @@ def _dump_attributes(database, sort_signals, sort_attributes):
             msg_attributes['GenMsgCycleTime'] = \
                 Attribute(value=message.cycle_time,
                           definition=_create_GenMsgCycleTime_definition())
+
+        # if bus is CAN FD, set VFrameFormat
+        v_frame_format_def: AttributeDefinition
+        if v_frame_format_def := database.dbc.attribute_definitions.get("VFrameFormat"):
+            if message.protocol == 'j1939':
+                v_frame_format_str = 'J1939PG'
+            elif message.is_fd and message.is_extended_frame:
+                v_frame_format_str = 'ExtendedCAN_FD'
+            elif message.is_fd:
+                v_frame_format_str = 'StandardCAN_FD'
+            elif message.is_extended_frame:
+                v_frame_format_str = 'ExtendedCAN'
+            else:
+                v_frame_format_str = 'StandardCAN'
+
+            # only set the VFrameFormat if it valid according to the attribute definition
+            if (
+                v_frame_format_str in v_frame_format_def.choices
+                and v_frame_format_str != v_frame_format_def.default_value
+            ):
+                msg_attributes['VFrameFormat'] = Attribute(
+                    value=v_frame_format_def.choices.index(v_frame_format_str),
+                    definition=v_frame_format_def,
+                )
 
         # output all message attributes
         for attribute in msg_attributes.values():
@@ -1873,6 +1936,9 @@ def dump_string(database: InternalDatabase,
     # Make a deep copy of the database as names and attributes will be
     # modified for items with long names.
     database = deepcopy(database)
+
+    if database.dbc is None:
+        database.dbc = DbcSpecifics()
 
     database = make_names_unique(database, shorten_long_names)
     bu = _dump_nodes(database)

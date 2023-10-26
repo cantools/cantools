@@ -8,6 +8,8 @@ import unittest
 from unittest import mock
 
 import cantools
+from cantools.database.can.attribute import Attribute
+from cantools.database.can.attribute_definition import AttributeDefinition
 
 
 class CanToolsConvertFullTest(unittest.TestCase):
@@ -127,6 +129,31 @@ class CanToolsConvertFullTest(unittest.TestCase):
         self.assertFileEqual(fn_out1, fn_out2, encoding='cp1252')
         self.remove_out_file(fn_out1)
         self.remove_out_file(fn_out2)
+
+    def test_dbc_load_can_dump_canfd(self):
+        fn_in = self.get_test_file_name('dbc/motohawk.dbc')
+        fn_expected_output = self.get_test_file_name('dbc/motohawk_fd.dbc')
+        fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
+
+        db = cantools.db.load_file(fn_in)
+
+        # make bus CAN FD
+        bus_type_def = AttributeDefinition("BusType",
+                                           type_name="STRING",
+                                           default_value="")
+        db.dbc.attribute_definitions["BusType"] = bus_type_def
+        db.dbc.attributes["BusType"] = Attribute(value="CAN FD",
+                                                 definition=bus_type_def)
+
+        # make message extended and FD
+        msg = db.get_message_by_name("ExampleMessage")
+        msg.is_extended_frame = True
+        msg.is_fd = True
+        msg.refresh()
+
+        cantools.database.dump_file(db, fn_out)
+
+        self.assertFileEqual(fn_expected_output, fn_out, encoding='cp1252')
 
     # ------- sort_signals when dumping to kcd files -------
 

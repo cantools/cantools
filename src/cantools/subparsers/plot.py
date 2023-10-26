@@ -437,7 +437,7 @@ class Plotter:
             if self.show_invalid_data:
                 self.x_invalid_data.append(timestamp)
             if not self.ignore_invalid_data:
-                print('Failed to parse data of frame id {0} (0x{0:x}): {1}'.format(frame_id, e))
+                print(f'Failed to parse data of frame id {frame_id} (0x{frame_id:x}): {e}')
             return
 
         for signal in decoded_signals:

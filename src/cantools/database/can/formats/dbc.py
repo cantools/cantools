@@ -641,7 +641,7 @@ def _dump_attribute_definitions(database: InternalDatabase) -> List[str]:
     if 'GenMsgCycleTime' not in definitions and _need_cycletime_def(database):
         definitions['GenMsgCycleTime'] = ATTRIBUTE_DEFINITION_GENMSGCYCLETIME
     if 'GenSigStartValue' not in definitions and _need_startval_def(database):
-        definitions['GenSigStartValue'] = ATTRIBUTE_DEFININTION_GENSIGSTARTVALUE
+        definitions['GenSigStartValue'] = ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE
 
     # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if bus is CAN FD
     if _bus_is_canfd(database):
@@ -876,7 +876,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
             elif signal.raw_initial is not None:
                 sig_attributes['GenSigStartValue'] = Attribute(
                     value=signal.raw_initial,
-                    definition=ATTRIBUTE_DEFININTION_GENSIGSTARTVALUE)
+                    definition=ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE)
 
             # output all signal attributes
             for attribute in sig_attributes.values():

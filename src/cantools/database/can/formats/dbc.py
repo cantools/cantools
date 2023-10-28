@@ -822,7 +822,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
         if gen_msg_cycle_time_def := database.dbc.attribute_definitions.get("GenMsgCycleTime"):
             if msg_cycle_time != gen_msg_cycle_time_def.default_value:
                 msg_attributes['GenMsgCycleTime'] = Attribute(
-                    value=message.cycle_time,
+                    value=msg_cycle_time,
                     definition=gen_msg_cycle_time_def,
                 )
             elif 'GenMsgCycleTime' in msg_attributes:

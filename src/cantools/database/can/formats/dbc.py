@@ -169,7 +169,7 @@ ATTRIBUTE_DEFINITION_GENMSGCYCLETIME = AttributeDefinition(
     minimum=0,
     maximum=2**16-1)
 
-ATTRIBUTE_DEFININTION_GENSIGSTARTVALUE = AttributeDefinition(
+ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
     name='GenSigStartValue',
     default_value=0,
     kind='SG_',

@@ -20,9 +20,9 @@ message = db.get_message_by_name('TheMessage')
 # Manipulate a message attribute. Try/except will catch accesses to
 # non existent attributes.
 try:
-    print("Input cycle time: ", message.dbc.attributes['GenMsgCycleTime'].value)
-    message.dbc.attributes['GenMsgCycleTime'].value = 2000
-    print("Output cycle time:", message.dbc.attributes['GenMsgCycleTime'].value)
+    print("Input cycle time: ", message.cycle_time)
+    message.cycle_time = 2000
+    print("Output cycle time:", message.cycle_time)
 except KeyError as e:
     raise e
 

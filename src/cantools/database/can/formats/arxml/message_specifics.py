@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
-from .end_to_end_properties import AutosarEnd2EndProperties
-from .secoc_properties import AutosarSecOCProperties
+if TYPE_CHECKING:
+    from .end_to_end_properties import AutosarEnd2EndProperties
+    from .secoc_properties import AutosarSecOCProperties
 
 
 class AutosarMessageSpecifics:

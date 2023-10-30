@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from ..typechecking import Choices, SignalValueType
-from .namedsignalvalue import NamedSignalValue
+
+if TYPE_CHECKING:
+    from .namedsignalvalue import NamedSignalValue
 
 
 class BaseConversion(ABC):

@@ -1,13 +1,15 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
 import logging
-from typing import Any, List
+from typing import TYPE_CHECKING, Any, List
 
 from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
-from ...bus import Bus
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...signal import Signal
+
+if TYPE_CHECKING:
+    from ...bus import Bus
 
 
 def make_xpath(location: List[str]) -> str:

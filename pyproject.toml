@@ -92,6 +92,7 @@ select = [
     "UP",  # pyupgrade
     "C4",  # flake8-comprehensions
     "I",  # isort
+    "TCH",  # flake8-type-checking
 ]
 ignore = [
     "E501",  # line too long

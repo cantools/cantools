@@ -451,15 +451,11 @@ class Message:
 
         """
 
-        if self._cycle_time is not None or not self.dbc:
-            return self._cycle_time
+        return self._cycle_time
 
-        # fall back to default cycle time for DBC files
-        try:
-            result = int(self.dbc.attribute_definitions['GenMsgCycleTime'].default_value)
-            return None if result == 0 else result
-        except (KeyError, TypeError):
-            return None
+    @cycle_time.setter
+    def cycle_time(self, value: Optional[int]) -> None:
+        self._cycle_time = value
 
     @property
     def dbc(self) -> Optional['DbcSpecifics']:

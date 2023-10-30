@@ -161,6 +161,23 @@ ATTRIBUTE_DEFINITION_BUS_TYPE = AttributeDefinition(
     default_value='CAN',
     type_name='STRING')
 
+ATTRIBUTE_DEFINITION_GENMSGCYCLETIME = AttributeDefinition(
+    name='GenMsgCycleTime',
+    default_value=0,
+    kind='BO_',
+    type_name='INT',
+    minimum=0,
+    maximum=2**16-1)
+
+ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
+    name='GenSigStartValue',
+    default_value=0,
+    kind='SG_',
+    type_name='FLOAT',
+    minimum=0,
+    maximum=100000000000)
+
+
 def to_int(value):
     return int(Decimal(value))
 
@@ -591,20 +608,6 @@ def _dump_signal_types(database):
 
     return valtype
 
-def _create_GenMsgCycleTime_definition():
-    return AttributeDefinition('GenMsgCycleTime',
-                               default_value=0,
-                               kind='BO_',
-                               type_name='INT',
-                               minimum=0,
-                               maximum=2**16-1)
-def _create_GenSigStartValue_definition():
-    return AttributeDefinition('GenSigStartValue',
-                               default_value=0,
-                               kind='SG_',
-                               type_name='FLOAT',
-                               minimum=0,
-                               maximum=100000000000)
 
 def _need_startval_def(database):
     return any(s.raw_initial is not None
@@ -636,9 +639,9 @@ def _dump_attribute_definitions(database: InternalDatabase) -> List[str]:
     # define "GenMsgCycleTime" attribute for specifying the cycle
     # times of messages if it has not been explicitly defined
     if 'GenMsgCycleTime' not in definitions and _need_cycletime_def(database):
-        definitions['GenMsgCycleTime'] = _create_GenMsgCycleTime_definition()
+        definitions['GenMsgCycleTime'] = ATTRIBUTE_DEFINITION_GENMSGCYCLETIME
     if 'GenSigStartValue' not in definitions and _need_startval_def(database):
-        definitions['GenSigStartValue'] = _create_GenSigStartValue_definition()
+        definitions['GenSigStartValue'] = ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE
 
     # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if bus is CAN FD
     if _bus_is_canfd(database):
@@ -750,15 +753,6 @@ def _dump_attribute_definition_defaults(database):
     else:
         definitions = database.dbc.attribute_definitions
 
-    # define "GenMsgCycleTime" attribute for specifying the cycle
-    # times of messages if it has not been explicitly defined
-    if 'GenMsgCycleTime' not in definitions and _need_cycletime_def(database):
-        definitions['GenMsgCycleTime'] = \
-            _create_GenMsgCycleTime_definition()
-    if 'GenSigStartValue' not in definitions and _need_startval_def(database):
-        definitions['GenSigStartValue'] = \
-            _create_GenSigStartValue_definition()
-
     for definition in definitions.values():
         if definition.default_value is not None:
             if definition.type_name in ["STRING", "ENUM"]:
@@ -823,12 +817,18 @@ def _dump_attributes(database, sort_signals, sort_attributes):
 
         # synchronize the attribute for the message cycle time with
         # the cycle time specified by the message object
-        if message._cycle_time is None and 'GenMsgCycleTime' in msg_attributes:
+        gen_msg_cycle_time_def: AttributeDefinition
+        msg_cycle_time = message.cycle_time or 0
+        if gen_msg_cycle_time_def := database.dbc.attribute_definitions.get("GenMsgCycleTime"):
+            if msg_cycle_time != gen_msg_cycle_time_def.default_value:
+                msg_attributes['GenMsgCycleTime'] = Attribute(
+                    value=msg_cycle_time,
+                    definition=gen_msg_cycle_time_def,
+                )
+            elif 'GenMsgCycleTime' in msg_attributes:
+                del msg_attributes['GenMsgCycleTime']
+        elif 'GenMsgCycleTime' in msg_attributes:
             del msg_attributes['GenMsgCycleTime']
-        elif message._cycle_time is not None:
-            msg_attributes['GenMsgCycleTime'] = \
-                Attribute(value=message.cycle_time,
-                          definition=_create_GenMsgCycleTime_definition())
 
         # if bus is CAN FD, set VFrameFormat
         v_frame_format_def: AttributeDefinition
@@ -874,9 +874,9 @@ def _dump_attributes(database, sort_signals, sort_attributes):
             if signal.raw_initial is None and 'GenSigStartValue' in sig_attributes:
                 del sig_attributes['GenSigStartValue']
             elif signal.raw_initial is not None:
-                sig_attributes['GenSigStartValue'] = \
-                    Attribute(signal.raw_initial,
-                              definition=_create_GenSigStartValue_definition())
+                sig_attributes['GenSigStartValue'] = Attribute(
+                    value=signal.raw_initial,
+                    definition=ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE)
 
             # output all signal attributes
             for attribute in sig_attributes.values():
@@ -1635,14 +1635,19 @@ def _load_messages(tokens,
         """Get cycle time for a given message.
 
         """
-
         message_attributes = get_attributes(frame_id_dbc)
 
-        try:
-            result = int(message_attributes['GenMsgCycleTime'].value)
-            return None if result == 0 else result
-        except (KeyError, TypeError):
+        gen_msg_cycle_time_def = definitions.get('GenMsgCycleTime')
+        if gen_msg_cycle_time_def is None:
             return None
+
+        if message_attributes:
+            gen_msg_cycle_time_attr = message_attributes.get('GenMsgCycleTime')
+            if gen_msg_cycle_time_attr:
+                return gen_msg_cycle_time_attr.value or None
+
+        return gen_msg_cycle_time_def.default_value or None
+
 
     def get_frame_format(frame_id_dbc):
         """Get frame format for a given message"""

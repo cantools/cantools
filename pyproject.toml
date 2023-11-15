@@ -52,9 +52,9 @@ windows-all = [
 cantools = "cantools.__init__:_main"
 
 [project.urls]
-homepage = "https://github.com/eerimoq/cantools"
+homepage = "https://github.com/cantools/cantools"
 documentation = "https://cantools.readthedocs.io/"
-repository = "https://github.com/eerimoq/cantools"
+repository = "https://github.com/cantools/cantools"
 
 [tool.setuptools.packages.find]
 where = ["src"]

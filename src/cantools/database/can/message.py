@@ -851,15 +851,16 @@ class Message:
             if isinstance(value, bytes):
                 # raw data
 
-                # ensure that the size of the blob corresponds to the
-                # one specified by the featured message.
+                # produce a message if size of the blob does not
+                # correspond to the size specified by the message
+                # which it represents.
                 if contained_message is not None and \
-                   len(value) != contained_message.length:
+                    len(value) != contained_message.length:
 
-                    raise EncodeError(f'Specified data for contained message '
-                                      f'{contained_message.name} is '
-                                      f'{len(value)} bytes instead of '
-                                      f'{contained_message.length} bytes')
+                    LOGGER.info(f'Specified data for contained message '
+                                f'{contained_message.name} is '
+                                f'{len(value)} bytes instead of '
+                                f'{contained_message.length} bytes')
 
                 contained_payload = value
 

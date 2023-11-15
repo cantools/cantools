@@ -4,13 +4,12 @@ import math
 import os
 import re
 import shutil
-import textparser
 import timeit
 import unittest
-
-from collections import OrderedDict, namedtuple
-from typing import Any
+from collections import namedtuple
 from xml.etree import ElementTree
+
+import textparser
 
 import cantools.autosar
 from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
@@ -23,7 +22,6 @@ except ImportError:
 import cantools
 from cantools.database import Message, Signal, UnsupportedDatabaseFormatError
 from cantools.database.can.formats import dbc
-
 
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -59,13 +57,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def assert_sym_equal(self, db):
         sym_str = db.as_sym_string()
-        sym_db = cantools.database.load_string(sym_str)
+        cantools.database.load_string(sym_str)
 
         self.assertTrue(db.is_similar(db, include_format_specifics=False))
 
     def assert_kcd_equal(self, db):
         kcd_str = db.as_kcd_string()
-        kcd_db = cantools.database.load_string(kcd_str)
+        cantools.database.load_string(kcd_str)
 
         self.assertTrue(db.is_similar(db, include_format_specifics=False))
 
@@ -5699,8 +5697,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # write access to version attribute
         my_version = "my_version"
         db.version = my_version
-        self.assertTrue(db.as_dbc_string().startswith('VERSION "{}"'.
-                                                      format(my_version)))
+        self.assertTrue(db.as_dbc_string().startswith(f'VERSION "{my_version}"'))
 
     def test_dbc_modify_names(self):
         """Test that modified object names are dumped correctly to dbc.

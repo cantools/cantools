@@ -383,7 +383,11 @@ class Monitor(can.Listener):
             # case, we just discard the message, like we do when the CAN
             # message ID or length doesn't match what's specified in the DBC.
             try:
-                name = format_multiplexed_name(message, data, True)
+                name = format_multiplexed_name(message,
+                                               data,
+                                               decode_choices=True,
+                                               allow_truncated=True,
+                                               allow_excess=True)
             except database.DecodeError:
                 formatted = [
                     f'{timestamp:12.3f} {message.name} '
@@ -395,10 +399,20 @@ class Monitor(can.Listener):
 
         if self._single_line:
             formatted = [
-                f'{timestamp:12.3f} {format_message(message, data, True, True)}'
+                f'''{timestamp:12.3f} {format_message(message,
+                                                      data,
+                                                      decode_choices=True,
+                                                      single_line=self._single_line,
+                                                      allow_truncated=True,
+                                                      allow_excess=True)}'''
             ]
         else:
-            formatted = format_message(message, data, True, False)
+            formatted = format_message(message,
+                                       data,
+                                       decode_choices=True,
+                                       single_line=self._single_line,
+                                       allow_truncated=True,
+                                       allow_excess=True)
             lines = formatted.splitlines()
             formatted = [f'{timestamp:12.3f}  {lines[1]}']
             formatted += [14 * ' ' + line for line in lines[2:]]
@@ -486,8 +500,10 @@ class Monitor(can.Listener):
                 full_name = f'{dbmsg.name} :: {cmsg.name}'
                 formatted = format_message(cmsg,
                                            data,
-                                           True,
-                                           False)
+                                           decode_choices=True,
+                                           single_line=self._single_line,
+                                           allow_truncated=True,
+                                           allow_excess=True)
                 lines = formatted.splitlines()
                 formatted = [f'{timestamp:12.3f}  {full_name}(']
                 formatted += [14 * ' ' + line for line in lines[2:]]

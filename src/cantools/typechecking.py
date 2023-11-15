@@ -50,10 +50,10 @@ ContainerHeaderSpecType = Union["Message", str, int]
 ContainerUnpackResultType = Sequence[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
 ContainerUnpackListType = List[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
 ContainerDecodeResultType = Sequence[
-    Union[Tuple["Message", SignalMappingType], Tuple[int, bytes]]
+    Union[Tuple["Message", SignalMappingType], Tuple["Message", bytes], Tuple[int, bytes]]
 ]
 ContainerDecodeResultListType = List[
-    Union[Tuple["Message", SignalDictType], Tuple[int, bytes]]
+    Union[Tuple["Message", SignalDictType], Tuple["Message", bytes], Tuple[int, bytes]]
 ]
 ContainerEncodeInputType = Sequence[
     Tuple[ContainerHeaderSpecType, Union[bytes, SignalMappingType]]

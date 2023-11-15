@@ -1,9 +1,13 @@
-# -*- coding: utf-8 -*-
 
-from parameterized import parameterized
 import unittest
 
-from cantools.database.utils import sawtooth_to_network_bitnum, cdd_offset_to_dbc_start_bit
+from parameterized import parameterized
+
+from cantools.database.utils import (
+    cdd_offset_to_dbc_start_bit,
+    sawtooth_to_network_bitnum,
+)
+
 
 class CanToolsDatabaseUtilsTest(unittest.TestCase):
 

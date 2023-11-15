@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import unittest
-from unittest import mock
 from io import StringIO
-import cantools
+from unittest import mock
+
 import matplotlib.pyplot as plt
+
+import cantools
 
 
 class CanToolsPlotTest(unittest.TestCase):

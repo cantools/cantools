@@ -1,14 +1,12 @@
 import time
-import os
 import unittest
+
 import can
 
 try:
-    from queue import Queue
-    from queue import Empty
+    from queue import Empty, Queue
 except ImportError:
-    from Queue import Queue
-    from Queue import Empty
+    from Queue import Empty, Queue
 
 import cantools
 

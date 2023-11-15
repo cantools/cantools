@@ -1,16 +1,10 @@
 import unittest
-import traceback
 
 try:
-    from unittest.mock import Mock
-    from unittest.mock import patch
-    from unittest.mock import call
+    from unittest.mock import Mock, call, patch
 except ImportError:
-    from mock import Mock
-    from mock import patch
-    from mock import call
+    from unittest.mock import patch
 
-import can
 import cantools.subparsers.list as list_module
 
 try:
@@ -18,7 +12,7 @@ try:
 except ImportError:
     from io import StringIO
 
-class Args(object):
+class Args:
 
     def __init__(self, input_file_name):
         self.exclude_normal = False

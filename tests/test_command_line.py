@@ -1,16 +1,16 @@
-import sys
+import functools
 import os
 import re
+import sys
 import tempfile
-import unittest
 import types
-import functools
+import unittest
 from pathlib import Path
 
 try:
     from unittest.mock import patch
 except ImportError:
-    from mock import patch
+    from unittest.mock import patch
 
 try:
     from StringIO import StringIO
@@ -55,7 +55,7 @@ def remove_date_time(string):
 
 
 def read_file(filename):
-    with open(filename, 'r') as fin:
+    with open(filename) as fin:
         return remove_date_time(fin.read())
 
 
@@ -64,7 +64,7 @@ def read_utf8_file(filename):
 
     """
 
-    with open(filename, 'r', encoding='utf-8') as fin:
+    with open(filename, encoding='utf-8') as fin:
         return remove_date_time(fin.read())
 
 
@@ -96,10 +96,7 @@ SENSOR_SONARS(
     SENSOR_SONARS_right: 0.0,
     SENSOR_SONARS_rear: 0.0
 )
-  vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF ::
-DRIVER_HEARTBEAT(
-    DRIVER_HEARTBEAT_cmd: 240
-)
+  vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF :: Wrong data size: 10 instead of 1 bytes
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04 ::
@@ -145,10 +142,7 @@ SENSOR_SONARS(
     SENSOR_SONARS_right: 0.0,
     SENSOR_SONARS_rear: 0.0
 )
- (2020-12-19 12:04:48.597222)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF ::
-DRIVER_HEARTBEAT(
-    DRIVER_HEARTBEAT_cmd: 240
-)
+ (2020-12-19 12:04:48.597222)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF :: Wrong data size: 8 instead of 1 bytes
  (2020-12-19 12:04:56.805087)  vcan0  1F4   [4]  01 02 03 04 ::
 IO_DEBUG(
     IO_DEBUG_test_unsigned: 1,
@@ -192,10 +186,7 @@ SENSOR_SONARS(
     SENSOR_SONARS_right: 0.0,
     SENSOR_SONARS_rear: 0.0
 )
- (002.047817)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF ::
-DRIVER_HEARTBEAT(
-    DRIVER_HEARTBEAT_cmd: 240
-)
+ (002.047817)  vcan0  064   [8]  F0 01 FF FF FF FF FF FF :: Wrong data size: 8 instead of 1 bytes
  (012.831664)  vcan0  1F4   [4]  01 02 03 04 ::
 IO_DEBUG(
     IO_DEBUG_test_unsigned: 1,
@@ -264,10 +255,7 @@ SENSOR_SONARS(
     SENSOR_SONARS_right: 0.0,
     SENSOR_SONARS_rear: 0.0
 )
-(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF ::
-DRIVER_HEARTBEAT(
-    DRIVER_HEARTBEAT_cmd: 240
-)
+(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF :: Wrong data size: 10 instead of 1 bytes
 (1594172462.127684) vcan0 ERROR
 
 (1594172462.356874) vcan0 1F4#01020304 ::
@@ -309,7 +297,7 @@ IO_DEBUG(
 
         expected_output = """\
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00 :: SENSOR_SONARS(SENSOR_SONARS_mux: 0, SENSOR_SONARS_err_count: 15, SENSOR_SONARS_left: 0.0, SENSOR_SONARS_middle: 0.0, SENSOR_SONARS_right: 0.0, SENSOR_SONARS_rear: 0.0)
-  vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
+  vcan0  064   [10]  F0 01 FF FF FF FF FF FF FF FF :: Wrong data size: 10 instead of 1 bytes
   vcan0  ERROR
 
   vcan0  1F4   [4]  01 02 03 04 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: two, IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
@@ -345,7 +333,7 @@ IO_DEBUG(
 
         expected_output = """\
 (1594172461.968006) vcan0 0C8#F000000000000000 :: SENSOR_SONARS(SENSOR_SONARS_mux: 0, SENSOR_SONARS_err_count: 15, SENSOR_SONARS_left: 0.0, SENSOR_SONARS_middle: 0.0, SENSOR_SONARS_right: 0.0, SENSOR_SONARS_rear: 0.0)
-(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF :: DRIVER_HEARTBEAT(DRIVER_HEARTBEAT_cmd: 240)
+(1594172462.126542) vcan0 064#F001FFFFFFFFFFFFFFFF :: Wrong data size: 10 instead of 1 bytes
 (1594172462.127684) vcan0 ERROR
 
 (1594172462.356874) vcan0 1F4#01020304 :: IO_DEBUG(IO_DEBUG_test_unsigned: 1, IO_DEBUG_test_enum: two, IO_DEBUG_test_signed: 3, IO_DEBUG_test_float: 2.0)
@@ -1281,7 +1269,7 @@ BATTERY_VT(
                 argv = [
                     'cantools',
                     'generate_c_source',
-                    'tests/files/dbc/{}.dbc'.format(database),
+                    f'tests/files/dbc/{database}.dbc',
                     '-o',
                     str(tmpdir),
                 ]
@@ -1317,7 +1305,7 @@ BATTERY_VT(
                     'cantools',
                     'generate_c_source',
                     '--no-floating-point-numbers',
-                    'tests/files/dbc/{}.dbc'.format(database),
+                    f'tests/files/dbc/{database}.dbc',
                     '-o',
                     str(tmpdir),
                 ]
@@ -1356,7 +1344,7 @@ BATTERY_VT(
                     'generate_c_source',
                     '--no-floating-point-numbers',
                     '--node', node,
-                    'tests/files/dbc/{}.dbc'.format(database),
+                    f'tests/files/dbc/{database}.dbc',
                     '-o',
                     str(tmpdir),
                 ]
@@ -1387,7 +1375,7 @@ BATTERY_VT(
                     'cantools',
                     'generate_c_source',
                     '--database-name', 'my_database_name',
-                    'tests/files/dbc/{}.dbc'.format(database),
+                    f'tests/files/dbc/{database}.dbc',
                     '-o',
                     str(tmpdir),
                 ]
@@ -1409,7 +1397,7 @@ BATTERY_VT(
         argv = [
             'cantools',
             'generate_c_source',
-            'tests/files/dbc/{}.dbc'.format(database)
+            f'tests/files/dbc/{database}.dbc'
         ]
 
         database_h = database + '.h'
@@ -1444,8 +1432,8 @@ BATTERY_VT(
                     'cantools',
                     'generate_c_source',
                     '--bit-fields',
-                    '--database-name', '{}_bit_fields'.format(database),
-                    'tests/files/dbc/{}.dbc'.format(database),
+                    '--database-name', f'{database}_bit_fields',
+                    f'tests/files/dbc/{database}.dbc',
                     '-o',
                     str(tmpdir),
                 ]
@@ -1479,7 +1467,7 @@ BATTERY_VT(
                     'cantools',
                     'generate_c_source',
                     '--node', node,
-                    'tests/files/dbc/{}.dbc'.format(database),
+                    f'tests/files/dbc/{database}.dbc',
                     '-o',
                     str(tmpdir),
                 ]
@@ -1545,7 +1533,7 @@ BATTERY_VT(
                 argv = [
                     'cantools',
                     'generate_c_source',
-                    'tests/files/sym/{}.sym'.format(database),
+                    f'tests/files/sym/{database}.sym',
                     '-o',
                     str(tmpdir),
                 ]

@@ -4,6 +4,7 @@
 #
 
 import os
+
 import cantools
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -11,7 +12,7 @@ INPUT_DBC_PATH = os.path.join(SCRIPT_DIR, 'dbc_input.dbc')
 OUTPUT_DBC_PATH = os.path.join(SCRIPT_DIR, 'dbc_output.dbc')
 
 # Read the DBC.
-print("Loading DBC database from '{}'.".format(INPUT_DBC_PATH))
+print(f"Loading DBC database from '{INPUT_DBC_PATH}'.")
 db = cantools.db.load_file(INPUT_DBC_PATH)
 
 # Get a message to manipulate.
@@ -31,7 +32,7 @@ print("Input frame id: ", hex(message.frame_id))
 message.frame_id = 0x234
 print("Output frame id:", hex(message.frame_id))
 
-print("Writing modified DBC database to '{}'.".format(OUTPUT_DBC_PATH))
+print(f"Writing modified DBC database to '{OUTPUT_DBC_PATH}'.")
 
 with open(OUTPUT_DBC_PATH, 'w', newline="\r\n") as fout:
     fout.write(db.as_dbc_string())

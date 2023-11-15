@@ -89,7 +89,7 @@ class CandumpTimestampedPattern(BasePattern):
             timestamp = datetime.timedelta(seconds=seconds)
             timestamp_format = TimestampFormat.RELATIVE
         else:
-            timestamp = datetime.datetime.utcfromtimestamp(seconds)
+            timestamp = datetime.datetime.fromtimestamp(seconds, datetime.timezone.utc)
             timestamp_format = TimestampFormat.ABSOLUTE
 
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
@@ -108,7 +108,7 @@ class CandumpDefaultLogPattern(BasePattern):
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
-        timestamp = datetime.datetime.utcfromtimestamp(float(match_object.group('timestamp')))
+        timestamp = datetime.datetime.fromtimestamp(float(match_object.group('timestamp')), datetime.timezone.utc)
         timestamp_format = TimestampFormat.ABSOLUTE
 
         return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)

@@ -9,7 +9,6 @@ from typing import (
     Union,
 )
 
-from ...compat import fopen
 from ...typechecking import DecodeResultType, EncodeInputType, StringPathLike
 from ..errors import DecodeError
 from ..utils import (
@@ -250,7 +249,7 @@ class Database:
 
         """
 
-        with fopen(filename, 'r', encoding=encoding) as fin:
+        with open(filename, encoding=encoding, errors='replace') as fin:
             self.add_arxml(fin)
 
     def add_arxml_string(self, string: str) -> None:
@@ -294,7 +293,7 @@ class Database:
 
         """
 
-        with fopen(filename, 'r', encoding=encoding) as fin:
+        with open(filename, encoding=encoding, errors='replace') as fin:
             self.add_dbc(fin)
 
     def add_dbc_string(self, string: str) -> None:
@@ -334,7 +333,7 @@ class Database:
 
         """
 
-        with fopen(filename, 'r', encoding=encoding) as fin:
+        with open(filename, encoding=encoding, errors='replace') as fin:
             self.add_kcd(fin)
 
     def add_kcd_string(self, string: str) -> None:
@@ -370,7 +369,7 @@ class Database:
 
         """
 
-        with fopen(filename, 'r', encoding=encoding) as fin:
+        with open(filename, encoding=encoding, errors='replace') as fin:
             self.add_sym(fin)
 
     def add_sym_string(self, string: str) -> None:

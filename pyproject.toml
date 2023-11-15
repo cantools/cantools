@@ -60,7 +60,7 @@ where = ["src"]
 cantools = ["py.typed"]
 
 [tool.setuptools.dynamic]
-version = {attr = "cantools.version.__version__"}
+version = {attr = "cantools.__version__"}
 
 [tool.mypy]
 show_error_codes = true

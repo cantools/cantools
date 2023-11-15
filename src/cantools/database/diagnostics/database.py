@@ -1,6 +1,5 @@
 import logging
 
-from ...compat import fopen
 from .formats import cdd
 
 LOGGER = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ class Database:
 
         """
 
-        with fopen(filename, 'r', encoding=encoding) as fin:
+        with open(filename, encoding=encoding, errors='replace') as fin:
             self.add_cdd(fin)
 
     def add_cdd_string(self, string):

@@ -1,7 +1,7 @@
 import re
 import time
 
-from ...version import __version__
+from cantools import __version__
 
 HEADER_FMT = '''\
 /**

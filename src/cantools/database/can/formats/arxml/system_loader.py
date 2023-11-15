@@ -1537,7 +1537,7 @@ class SystemLoader:
                                              '&SYSTEM-SIGNAL',
                                              'SHORT-NAME'
                                          ])
-        if system_signal_name_elem:
+        if system_signal_name_elem is not None and len(system_signal_name_elem):
             return system_signal_name_elem.text
 
         return self._get_unique_arxml_child(i_signal, 'SHORT-NAME').text

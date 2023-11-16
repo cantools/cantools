@@ -1,30 +1,24 @@
-import unittest
 import traceback
+import unittest
 
 try:
     import curses
     have_curses = True
-except (ImportError, ModuleNotFoundError) as e:
+except (ImportError, ModuleNotFoundError):
     # on windows, the batteries for the curses package are not
     # included by default (there is a "windows-curses" package
     # available, though)
     have_curses = False
 
-try:
-    from unittest.mock import Mock
-    from unittest.mock import patch
-    from unittest.mock import call
-except ImportError:
-    from mock import Mock
-    from mock import patch
-    from mock import call
+from unittest.mock import Mock, call, patch
 
 import can
+
 if have_curses:
     from cantools.subparsers.monitor import Monitor
 
 
-class Args(object):
+class Args:
 
     def __init__(self,
                  database,
@@ -41,7 +35,7 @@ class Args(object):
         self.channel = 'vcan0'
 
 
-class StdScr(object):
+class StdScr:
 
     def __init__(self, user_input=None, resolution=None):
         if resolution is None:
@@ -76,8 +70,8 @@ class CanToolsMonitorTest(unittest.TestCase):
             if verbose:
                 nl = ",\n "
                 print(f"Assertion failed:")
-                print(f"Expected: {nl.join(map(lambda x: str(x), expected))}")
-                print(f"Got: {nl.join(map(lambda x: str(x), mock.call_args_list))}")
+                print(f"Expected: {nl.join((str(x) for x in expected))}")
+                print(f"Got: {nl.join((str(x) for x in mock.call_args_list))}")
                 print("Traceback:")
                 traceback.print_stack()
             raise e
@@ -735,7 +729,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 0, 'Filter regex: ', 'cyan'),
                 call(29, 14, ' ', 'cyan inverted'),
                 call(29, 15, '                                                 ', 'cyan'),
-                
+
                 # 'E' pressed.
                 call(0, 0, 'Received: 2, Discarded: 1, Errors: 0, Filter: E'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),

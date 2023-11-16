@@ -1,6 +1,5 @@
-import os
-import unittest
 import logging
+import unittest
 
 import cantools
 

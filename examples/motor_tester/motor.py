@@ -5,7 +5,9 @@
 #
 
 import struct
+
 import can
+
 
 def create_message(speed, load):
     return can.Message(arbitration_id=0x010,
@@ -25,7 +27,7 @@ def main():
 
         if message.arbitration_id == 0x011:
             speed = struct.unpack('<H', message.data)[0]
-            print('Received motor speed of {} rpm.'.format(speed))
+            print(f'Received motor speed of {speed} rpm.')
             task.modify_data(create_message(speed, 12))
 
             if message.data == b'\xff\xff':

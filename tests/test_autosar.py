@@ -1,12 +1,11 @@
 # unit tests for the autosar specifics of message and database objects
 # (message.autosar and db.autosar)
 import unittest
-import traceback
 
 import cantools
 import cantools.autosar
-
 from cantools.autosar.snakeauth import SnakeOilAuthenticator
+
 
 class CanToolsAutosarTest(unittest.TestCase):
     def test_autosar3_e2e_profile2(self):

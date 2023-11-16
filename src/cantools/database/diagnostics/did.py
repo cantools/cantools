@@ -101,7 +101,8 @@ class Did:
                data,
                decode_choices=True,
                scaling=True,
-               allow_truncated=False):
+               allow_truncated=False,
+               allow_excess=True):
         """Decode given data as a DID of this type.
 
         If `decode_choices` is ``False`` scaled values are not
@@ -121,7 +122,8 @@ class Did:
                            self._codec['formats'],
                            decode_choices,
                            scaling,
-                           allow_truncated)
+                           allow_truncated,
+                           allow_excess)
 
     def refresh(self):
         """Refresh the internal DID state.

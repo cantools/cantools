@@ -17,6 +17,8 @@ def _do_decode(args):
                                strict=not args.no_strict)
     decode_choices = not args.no_decode_choices
     decode_containers = not args.no_decode_containers
+    allow_truncated = args.no_strict
+    allow_excess = args.no_strict
     parser = logreader.Parser(sys.stdin)
     for line, frame in parser.iterlines(keep_unknowns=True):
         if frame is not None:
@@ -26,7 +28,9 @@ def _do_decode(args):
                                                frame.data,
                                                decode_choices,
                                                args.single_line,
-                                               decode_containers)
+                                               decode_containers,
+                                               allow_truncated=allow_truncated,
+                                               allow_excess=allow_excess)
 
         print(line)
 

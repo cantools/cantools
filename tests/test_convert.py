@@ -3,7 +3,6 @@
 import os
 import shutil
 import tempfile
-
 import unittest
 from unittest import mock
 
@@ -32,13 +31,17 @@ class CanToolsConvertFullTest(unittest.TestCase):
         return fn
 
     def assertFileEqual(self, fn1, fn2, encoding=None):
-        with open(fn1, 'rt', encoding=encoding) as f:
+        with open(fn1, encoding=encoding) as f:
             content1 = list(f)
-        with open(fn2, 'rt', encoding=encoding) as f:
+        with open(fn2, encoding=encoding) as f:
             content2 = list(f)
         self.assertListEqual(content1, content2)
 
-    def assertDatabaseEqual(self, db1, db2, *, ignore_message_attributes=[], ignore_signal_attributes=[], ignore_order_of_signals=False):
+    def assertDatabaseEqual(self, db1, db2, *, ignore_message_attributes=None, ignore_signal_attributes=None, ignore_order_of_signals=False):
+        if ignore_signal_attributes is None:
+            ignore_signal_attributes = []
+        if ignore_message_attributes is None:
+            ignore_message_attributes = []
         message_attributes = ("name", "frame_id", "is_extended_frame", "length", "comment")
         signal_attributes = ("name", "start", "length", "byte_order", "is_signed", "is_float",
                              "initial", "scale", "offset", "minimum", "maximum", "unit", "comment",
@@ -51,19 +54,21 @@ class CanToolsConvertFullTest(unittest.TestCase):
                 if a in ignore_message_attributes:
                     continue
                 #print(f"msg.{a}".ljust(30) + str(getattr(msg1, a)).ljust(10) + " == %s" % getattr(msg2, a))
-                self.assertEqual(getattr(msg1, a), getattr(msg2, a), "%s does not match for message %s" % (a, i))
+                self.assertEqual(getattr(msg1, a), getattr(msg2, a), "{} does not match for message {}".format(a, i))
 
             self.assertEqual(len(msg1.signals), len(msg2.signals))
             if ignore_order_of_signals:
-                sort = lambda signals: sorted(signals, key=lambda s: (s.start, s.multiplexer_ids))
+                def sort(signals):
+                    return sorted(signals, key=lambda s: (s.start, s.multiplexer_ids))
             else:
-                sort = lambda signals: signals
+                def sort(signals):
+                    return signals
             for sig1, sig2 in zip(sort(msg1.signals), sort(msg2.signals)):
                 for a in signal_attributes:
                     if a in ignore_signal_attributes:
                         continue
                     #print("    "+f"sig.{a}".ljust(30) + str(getattr(sig1, a)).ljust(10) + " == %s" % getattr(sig2, a))
-                    self.assertEqual(getattr(sig1, a), getattr(sig2, a), "%s does not match for signal %s in message %s" % (a, sig1.name, msg1.name))
+                    self.assertEqual(getattr(sig1, a), getattr(sig2, a), "{} does not match for signal {} in message {}".format(a, sig1.name, msg1.name))
 
                 #print()
 
@@ -89,7 +94,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
     def test_dbc_dump_sort_signals_by_name(self):
         fn_in = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
         fn_expected_output = self.get_test_file_name('dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc')
-        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+        def sort_signals(signals):
+            return list(sorted(signals, key=lambda sig: sig.name))
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
         db = cantools.database.load_file(fn_in, prune_choices=False)
@@ -184,7 +190,8 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_in = self.get_test_file_name('kcd/vehicle.kcd')
         db = cantools.database.load_file(fn_in, prune_choices=False, sort_signals=None)
 
-        sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))
+        def sort_signals(signals):
+            return list(sorted(signals, key=lambda sig: sig.name))
         fn_out = self.get_out_file_name(fn_in, ext='.kcd')
         cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
 

@@ -123,21 +123,31 @@ def decode_data(data: bytes,
                 decode_choices: bool,
                 scaling: bool,
                 allow_truncated: bool,
+                allow_excess: bool,
                 ) -> SignalDictType:
 
     actual_length = len(data)
-    if allow_truncated and actual_length < expected_length:
-        data = data.ljust(expected_length, b"\xFF")
+    if actual_length != expected_length:
+        if allow_truncated:
+            # pad the data with 0xff to prevent the codec from
+            # raising an exception. Note that all signals
+            # that contain garbage will be removed below.
+            data = data.ljust(expected_length, b"\xFF")
+
+        if allow_excess:
+            # trim the payload data to match the expected size
+            data = data[:expected_length]
+
+        if len(data) != expected_length:
+            raise ValueError(f"Wrong data size: {actual_length} instead of "
+                             f"{expected_length} bytes")
 
     unpacked = {
         **formats.big_endian.unpack(data),
         **formats.little_endian.unpack(data[::-1]),
     }
 
-    if allow_truncated and not (scaling or decode_choices):
-        return unpacked
-
-    if allow_truncated and actual_length < expected_length:
+    if actual_length < expected_length and allow_truncated:
         # remove signals that are outside available data bytes
         actual_bit_count = actual_length * 8
         for signal in signals:
@@ -152,13 +162,11 @@ def decode_data(data: bytes,
             if sequential_start_bit + signal.length > actual_bit_count:
                 del unpacked[signal.name]
 
+    # scale the signal values and decode choices
     decoded: Dict[str, SignalValueType] = {}
     for signal in signals:
-        try:
-            value = unpacked[signal.name]
-        except KeyError:
-            if not allow_truncated:
-                raise
+        if (value := unpacked.get(signal.name)) is None:
+            # signal value was removed above...
             continue
 
         if scaling:

@@ -64,8 +64,12 @@ def _format_container_single_line(message : Message,
     contained_list = []
     for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
-            formatted_cm_signals = _format_signals(cm, signals)
-            formatted_cm = _format_message_single_line(cm, formatted_cm_signals)
+            if isinstance(signals, bytes):
+                formatted_cm = f'{cm.name}: Undecodable data: {signals.hex(" ")}'
+                contained_list.append(formatted_cm)
+            else:
+                formatted_cm_signals = _format_signals(cm, signals)
+                formatted_cm = _format_message_single_line(cm, formatted_cm_signals)
             contained_list.append(formatted_cm)
         else:
             header_id = cm
@@ -83,18 +87,23 @@ def _format_container_multi_line(message : Message,
     contained_list = []
     for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
-            formatted_cm_signals = _format_signals(cm, signals)
-            formatted_cm = f'{cm.header_id:06x}##'
-            formatted_cm += f'{bytes(unpacked_data[i][1]).hex()} ::'
-            formatted_cm += _format_message_multi_line(cm, formatted_cm_signals)
-            formatted_cm = formatted_cm.replace('\n', '\n    ')
-            contained_list.append('    '+formatted_cm.strip())
+            if isinstance(signals, bytes):
+                formatted_cm = f'    {cm.header_id:06x}##{signals.hex()} ::\n'
+                formatted_cm += f'    {cm.name}: Undecodable data'
+                contained_list.append(formatted_cm)
+            else:
+                formatted_cm_signals = _format_signals(cm, signals)
+                formatted_cm = f'{cm.header_id:06x}##'
+                formatted_cm += f'{bytes(unpacked_data[i][1]).hex()} ::'
+                formatted_cm += _format_message_multi_line(cm, formatted_cm_signals)
+                formatted_cm = formatted_cm.replace('\n', '\n    ')
+                contained_list.append('    '+formatted_cm.strip())
         else:
             header_id = cm
             data = unpacked_data[i][1]
             contained_list.append(
-                f'    Unknown contained message (Header ID: 0x{header_id:x}, '
-                f'Data: {bytes(data).hex()})')
+                f'    {header_id:06x}##{data.hex()} ::\n'
+                f'    Unknown contained message')
 
     return \
         f'\n{message.name}(\n' + \
@@ -106,7 +115,10 @@ def format_message_by_frame_id(dbase : Database,
                                data : bytes,
                                decode_choices : bool,
                                single_line : bool,
-                               decode_containers : bool) -> str:
+                               decode_containers : bool,
+                               *,
+                               allow_truncated: bool,
+                               allow_excess: bool) -> str:
     try:
         message = dbase.get_message_by_frame_id(frame_id)
     except KeyError:
@@ -117,24 +129,34 @@ def format_message_by_frame_id(dbase : Database,
             return format_container_message(message,
                                             data,
                                             decode_choices,
-                                            single_line)
+                                            single_line,
+                                            allow_truncated=allow_truncated,
+                                            allow_excess=allow_excess)
         else:
             return f' Frame 0x{frame_id:x} is a container message'
 
-    return format_message(message, data, decode_choices, single_line)
+    return format_message(message,
+                          data,
+                          decode_choices,
+                          single_line,
+                          allow_truncated=allow_truncated,
+                          allow_excess=allow_excess)
 
 def format_container_message(message : Message,
                              data : bytes,
                              decode_choices : bool,
                              single_line : bool,
-                             allow_truncated : bool = False) -> str:
+                             *,
+                             allow_truncated : bool,
+                             allow_excess: bool) -> str:
     try:
         unpacked_message = message.unpack_container(data,
                                                     allow_truncated=allow_truncated)
         decoded_message = message.decode_container(data,
                                                    decode_choices=True,
                                                    scaling=True,
-                                                   allow_truncated=allow_truncated)
+                                                   allow_truncated=allow_truncated,
+                                                   allow_excess=allow_excess)
 
     except Exception as e:
         return ' ' + str(e)
@@ -153,11 +175,13 @@ def format_message(message : Message,
                    data : bytes,
                    decode_choices : bool,
                    single_line : bool,
-                   allow_truncated : bool = False) -> str:
+                   allow_truncated : bool,
+                   allow_excess : bool) -> str:
     try:
         decoded_signals = message.decode_simple(data,
                                                 decode_choices,
-                                                allow_truncated=allow_truncated)
+                                                allow_truncated=allow_truncated,
+                                                allow_excess=allow_excess)
     except Exception as e:
         return ' ' + str(e)
 
@@ -171,11 +195,13 @@ def format_message(message : Message,
 def format_multiplexed_name(message : Message,
                             data : bytes,
                             decode_choices : bool,
-                            allow_truncated : bool = False) -> str:
+                            allow_truncated : bool,
+                            allow_excess: bool) -> str:
     decoded_signals : SignalDictType \
         = message.decode(data,
                          decode_choices,
-                         allow_truncated=allow_truncated) # type: ignore
+                         allow_truncated=allow_truncated,
+                         allow_excess=allow_excess) # type: ignore
 
     # The idea here is that we rely on the sorted order of the Signals, and
     # then simply go through each possible Multiplexer and build a composite

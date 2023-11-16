@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import datetime
+import logging
+import os
 import re
 import unittest
-from unittest import mock
 from io import StringIO
+from unittest import mock
+
 import cantools
-import matplotlib.pyplot
-import logging
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -59,7 +58,7 @@ class SubplotMock(mock.Mock):
         self.__ignore_color = kw.pop('ignore_color', ignore)
 
         key_pattern = 'ignore_%s'
-        self.__kw = dict()
+        self.__kw = {}
         for a in self._ATTRIBUTES_WHICH_CAN_BE_IGNORED:
             key = key_pattern % a
             if kw.pop(key, ignore):
@@ -69,7 +68,7 @@ class SubplotMock(mock.Mock):
                 self.__kw[key] = False
 
         if kw:
-            raise TypeError("%s() got unexpected keyword argument(s): %s" % (type(self).__name__, ', '.join('%r'%key for key in kw.keys())))
+            raise TypeError("{}() got unexpected keyword argument(s): {}".format(type(self).__name__, ', '.join('%r'%key for key in kw.keys())))
 
         if parent:
             parent.attach_mock(self, 'subplot()')
@@ -822,7 +821,6 @@ BREMSE_33(
 """
 
         db = cantools.db.load_file(self.DBC_FILE_CHOICES)
-        choices = db.get_message_by_name("Foo").get_signal_by_name("Foo").choices
 
         xs  = self.parse_time(input_data, self.parse_absolute_time)
         ys = [1, 2, -5, 5, 0, 2, 5, 0, 2, 6]
@@ -2083,7 +2081,6 @@ Failed to parse line: 'invalid syntax'
         ]]
 
         stdout = StringIO()
-        expected_output = ""
 
         with mock.patch('sys.stdin', StringIO(input_data)):
             with mock.patch('sys.stdout', stdout):
@@ -2128,7 +2125,6 @@ Failed to parse line: 'invalid syntax'
         ]
 
         stdout = StringIO()
-        expected_output = ""
 
         with mock.patch('sys.stdin', StringIO(input_data)):
             with mock.patch('sys.stdout', stdout):
@@ -2172,7 +2168,6 @@ Failed to parse line: 'invalid syntax'
         ]
 
         stdout = StringIO()
-        expected_output = ""
 
         with mock.patch('sys.stdin', StringIO(input_data)):
             with mock.patch('sys.stdout', stdout):

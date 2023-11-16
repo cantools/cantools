@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 
-import unittest
 import logging
+import unittest
 
 import cantools
 from cantools.subparsers.dump import formatting

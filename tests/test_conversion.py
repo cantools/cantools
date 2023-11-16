@@ -1,5 +1,6 @@
 import unittest
 from collections import OrderedDict
+from typing import TYPE_CHECKING
 
 from cantools.database.conversion import (
     BaseConversion,
@@ -9,7 +10,9 @@ from cantools.database.conversion import (
     NamedSignalConversion,
 )
 from cantools.database.namedsignalvalue import NamedSignalValue
-from cantools.typechecking import Choices
+
+if TYPE_CHECKING:
+    from cantools.typechecking import Choices
 
 
 class TestConversions(unittest.TestCase):
@@ -48,7 +51,7 @@ class TestConversions(unittest.TestCase):
         assert conversion.choices == choices
 
         # Test the error handling
-        with self.assertRaises(TypeError) as cm:
+        with self.assertRaises(TypeError):
             BaseConversion.factory(scale="2", offset="3")
 
     def test_identity_conversion(self):

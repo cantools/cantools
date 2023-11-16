@@ -851,15 +851,16 @@ class Message:
             if isinstance(value, bytes):
                 # raw data
 
-                # ensure that the size of the blob corresponds to the
-                # one specified by the featured message.
+                # produce a message if size of the blob does not
+                # correspond to the size specified by the message
+                # which it represents.
                 if contained_message is not None and \
-                   len(value) != contained_message.length:
+                    len(value) != contained_message.length:
 
-                    raise EncodeError(f'Specified data for contained message '
-                                      f'{contained_message.name} is '
-                                      f'{len(value)} bytes instead of '
-                                      f'{contained_message.length} bytes')
+                    LOGGER.info(f'Specified data for contained message '
+                                f'{contained_message.name} is '
+                                f'{len(value)} bytes instead of '
+                                f'{contained_message.length} bytes')
 
                 contained_payload = value
 
@@ -960,14 +961,16 @@ class Message:
                 data: bytes,
                 decode_choices: bool,
                 scaling: bool,
-                allow_truncated: bool) -> SignalDictType:
+                allow_truncated: bool,
+                allow_excess: bool) -> SignalDictType:
         decoded = decode_data(data,
                               self.length,
                               node['signals'],
                               node['formats'],
                               decode_choices,
                               scaling,
-                              allow_truncated)
+                              allow_truncated,
+                              allow_excess)
 
         multiplexers = node['multiplexers']
 
@@ -988,7 +991,8 @@ class Message:
                                         data,
                                         decode_choices,
                                         scaling,
-                                        allow_truncated))
+                                        allow_truncated,
+                                        allow_excess))
 
         return decoded
 
@@ -1060,7 +1064,8 @@ class Message:
                decode_choices: bool = True,
                scaling: bool = True,
                decode_containers: bool = False,
-               allow_truncated: bool = False
+               allow_truncated: bool = False,
+               allow_excess: bool = True,
                ) \
                -> DecodeResultType:
         """Decode given data as a message of this type.
@@ -1091,24 +1096,30 @@ class Message:
         ``False``, `DecodeError` will be raised when trying to decode
         incomplete messages.
 
+        If `allow_excess` is ``True``, data that is are longer than
+        the expected message length is decoded, else a `ValueError` is
+        raised if such data is encountered.
         """
 
         if decode_containers and self.is_container:
             return self.decode_container(data,
                                          decode_choices,
                                          scaling,
-                                         allow_truncated)
+                                         allow_truncated,
+                                         allow_excess)
 
         return self.decode_simple(data,
                                   decode_choices,
                                   scaling,
-                                  allow_truncated)
+                                  allow_truncated,
+                                  allow_excess)
 
     def decode_simple(self,
                       data: bytes,
                       decode_choices: bool = True,
                       scaling: bool = True,
-                      allow_truncated: bool = False) \
+                      allow_truncated: bool = False,
+                      allow_excess: bool = True) \
                       -> SignalDictType:
         """Decode given data as a container message.
 
@@ -1122,19 +1133,19 @@ class Message:
         elif self._codecs is None:
             raise ValueError('Codec is not initialized.')
 
-        data = bytes(data[:self._length])
-
         return self._decode(self._codecs,
                             data,
                             decode_choices,
                             scaling,
-                            allow_truncated)
+                            allow_truncated,
+                            allow_excess)
 
     def decode_container(self,
                          data: bytes,
                          decode_choices: bool = True,
                          scaling: bool = True,
-                         allow_truncated: bool = False) \
+                         allow_truncated: bool = False,
+                         allow_excess: bool = True) \
                          -> ContainerDecodeResultType:
         """Decode given data as a container message.
 
@@ -1155,10 +1166,17 @@ class Message:
                 result.append((contained_message, bytes(contained_data)))
                 continue
 
-            decoded = contained_message.decode(contained_data,
-                                               decode_choices,
-                                               scaling,
-                                               allow_truncated)
+            try:
+                decoded = contained_message.decode(contained_data,
+                                                   decode_choices,
+                                                   scaling,
+                                                   decode_containers=False,
+                                                   allow_truncated=allow_truncated,
+                                                   allow_excess=allow_excess)
+            except (ValueError, DecodeError):
+                result.append((contained_message, bytes(contained_data)))
+                continue
+
             result.append((contained_message, decoded)) # type: ignore
 
         return result

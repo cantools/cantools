@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import unittest
 import datetime
+import unittest
 
 import cantools.subparsers.plot as plot
+
 
 class CanToolsPlotUnittests(unittest.TestCase):
 

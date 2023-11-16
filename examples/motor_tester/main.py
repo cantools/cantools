@@ -4,9 +4,10 @@
 #
 
 import os
-import cantools
+
 import can
 
+import cantools
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 WASHING_MACHINE_KCD_PATH = os.path.join(SCRIPT_DIR, 'system.kcd')

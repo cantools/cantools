@@ -150,9 +150,6 @@ def decode_data(data: bytes,
         **formats.little_endian.unpack(bytes(data[::-1])),
     }
 
-    if allow_truncated and not (scaling or decode_choices):
-        return unpacked
-
     if allow_truncated and actual_length < expected_length:
         # remove signals that are outside available data bytes
         actual_bit_count = actual_length * 8

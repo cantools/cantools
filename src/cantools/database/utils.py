@@ -148,8 +148,8 @@ def decode_data(data: bytes,
                 data = data[:expected_length]
 
     unpacked = {
-        **formats.big_endian.unpack(bytes(data)),
-        **formats.little_endian.unpack(bytes(data[::-1])),
+        **formats.big_endian.unpack(data),
+        **formats.little_endian.unpack(data[::-1]),
     }
 
     if actual_length < expected_length and allow_truncated:

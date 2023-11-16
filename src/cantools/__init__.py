@@ -12,7 +12,7 @@ from .errors import Error
 from . import database as db  # isort: skip
 
 __author__ = 'Erik Moqvist'
-__version__ = '39.3.0'
+from .version import version as __version__
 
 class _ErrorSubparser:
     def __init__(self, subparser_name, error_message):

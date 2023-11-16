@@ -127,25 +127,20 @@ def decode_data(data: bytes,
                 ) -> SignalDictType:
 
     actual_length = len(data)
-
     if actual_length != expected_length:
-        if actual_length < expected_length:
-            if not allow_truncated:
-                 raise ValueError(f"Wrong data size: {actual_length} instead of "
-                                  f"{expected_length} bytes")
-            else:
-                # pad the data with 0xff to prevent the codec from
-                # raising an exception. Note that all signals
-                # that contain garbage will be removed below.
-                data = data.ljust(expected_length, b"\xFF")
+        if allow_truncated:
+            # pad the data with 0xff to prevent the codec from
+            # raising an exception. Note that all signals
+            # that contain garbage will be removed below.
+            data = data.ljust(expected_length, b"\xFF")
 
-        if actual_length > expected_length:
-            if not allow_excess:
-                raise ValueError(f"Wrong data size: {actual_length} instead of "
-                                 f"{expected_length} bytes")
-            else:
-                # trim the payload data to match the expected size
-                data = data[:expected_length]
+        if allow_excess:
+            # trim the payload data to match the expected size
+            data = data[:expected_length]
+
+        if len(data) != expected_length:
+            raise ValueError(f"Wrong data size: {actual_length} instead of "
+                             f"{expected_length} bytes")
 
     unpacked = {
         **formats.big_endian.unpack(data),

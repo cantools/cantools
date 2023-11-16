@@ -1173,7 +1173,7 @@ class Message:
                                                    decode_containers=False,
                                                    allow_truncated=allow_truncated,
                                                    allow_excess=allow_excess)
-            except ValueError:
+            except (ValueError, DecodeError):
                 result.append((contained_message, bytes(contained_data)))
                 continue
 

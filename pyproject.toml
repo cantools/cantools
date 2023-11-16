@@ -34,7 +34,7 @@ dependencies = [
 dynamic = ["version"]
 
 [tool.setuptools_scm]
-version_file = "src/cantools/version.py"
+# can be empty if no extra settings are needed, presence enables setuptools_scm
 
 [project.optional-dependencies]
 dev = [

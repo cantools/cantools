@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=68", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -33,6 +33,9 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[tool.setuptools_scm]
+version_file = "src/cantools/version.py"
+
 [project.optional-dependencies]
 dev = [
     "mypy",
@@ -58,9 +61,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 cantools = ["py.typed"]
-
-[tool.setuptools.dynamic]
-version = {attr = "cantools.__version__"}
 
 [tool.mypy]
 show_error_codes = true

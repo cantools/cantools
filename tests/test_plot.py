@@ -821,7 +821,6 @@ BREMSE_33(
 """
 
         db = cantools.db.load_file(self.DBC_FILE_CHOICES)
-        db.get_message_by_name("Foo").get_signal_by_name("Foo").choices
 
         xs  = self.parse_time(input_data, self.parse_absolute_time)
         ys = [1, 2, -5, 5, 0, 2, 5, 0, 2, 6]

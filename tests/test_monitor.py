@@ -10,10 +10,7 @@ except (ImportError, ModuleNotFoundError):
     # available, though)
     have_curses = False
 
-try:
-    from unittest.mock import Mock, call, patch
-except ImportError:
-    from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 
 import can
 

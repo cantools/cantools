@@ -7,10 +7,7 @@ import types
 import unittest
 from pathlib import Path
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from unittest.mock import patch
+from unittest.mock import patch
 
 try:
     from StringIO import StringIO

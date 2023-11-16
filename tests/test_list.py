@@ -1,9 +1,6 @@
 import unittest
 
-try:
-    from unittest.mock import Mock, call, patch
-except ImportError:
-    from unittest.mock import patch
+from unittest.mock import Mock, call, patch
 
 import cantools.subparsers.list as list_module
 

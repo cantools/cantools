@@ -128,29 +128,31 @@ def decode_data(data: bytes,
 
     actual_length = len(data)
 
-    if actual_length < expected_length:
-        if not allow_truncated:
-            raise ValueError(f"Wrong data size: {actual_length} instead of "
-                             f"{expected_length} bytes")
-        else:
-            # pad the data with 0xff to prevent the codec from raising an
-            # exception
-            data = data.ljust(expected_length, b"\xFF")
+    if actual_length != expected_length:
+        if actual_length < expected_length:
+            if not allow_truncated:
+                 raise ValueError(f"Wrong data size: {actual_length} instead of "
+                                  f"{expected_length} bytes")
+            else:
+                # pad the data with 0xff to prevent the codec from
+                # raising an exception. Note that all signals
+                # that contain garbage will be removed below.
+                data = data.ljust(expected_length, b"\xFF")
 
-    if actual_length > expected_length:
-        if not allow_excess:
-            raise ValueError(f"Wrong data size: {actual_length} instead of "
-                             f"{expected_length} bytes")
-        else:
-            # trim the payload data to match the expected size
-            data = data[:expected_length]
+        if actual_length > expected_length:
+            if not allow_excess:
+                raise ValueError(f"Wrong data size: {actual_length} instead of "
+                                 f"{expected_length} bytes")
+            else:
+                # trim the payload data to match the expected size
+                data = data[:expected_length]
 
     unpacked = {
         **formats.big_endian.unpack(bytes(data)),
         **formats.little_endian.unpack(bytes(data[::-1])),
     }
 
-    if allow_truncated and actual_length < expected_length:
+    if actual_length < expected_length and allow_truncated:
         # remove signals that are outside available data bytes
         actual_bit_count = actual_length * 8
         for signal in signals:
@@ -165,13 +167,11 @@ def decode_data(data: bytes,
             if sequential_start_bit + signal.length > actual_bit_count:
                 del unpacked[signal.name]
 
+    # scale the signal values and decode choices
     decoded: Dict[str, SignalValueType] = {}
     for signal in signals:
-        try:
-            value = unpacked[signal.name]
-        except KeyError:
-            if not allow_truncated:
-                raise
+        if (value := unpacked.get(signal.name)) is None:
+            # signal value was removed above...
             continue
 
         if scaling:

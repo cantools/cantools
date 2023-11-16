@@ -3,10 +3,7 @@ import unittest
 
 import can
 
-try:
-    from queue import Empty, Queue
-except ImportError:
-    from Queue import Empty, Queue
+from queue import Empty, Queue
 
 import cantools
 

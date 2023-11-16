@@ -162,7 +162,6 @@ class CanToolsAutosarTest(unittest.TestCase):
 
         self.assertEqual(encoded, bytes.fromhex('000000003130'))
 
-        print(f"{encoded}")
         decoded = dbmsg.decode(encoded)
         self.assertEqual(decoded['Message3_Freshness'], 0xcccc&0x3f)
         self.assertEqual(decoded['Message3_Authenticator'], 304)

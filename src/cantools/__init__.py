@@ -4,15 +4,22 @@ import logging
 import os
 import pathlib
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
 from . import j1939, logreader, tester
 from .errors import Error
-from .version import __version__
 
 # Remove once less users are using the old package structure.
 from . import database as db  # isort: skip
 
 __author__ = 'Erik Moqvist'
+
+try:
+    __version__ = version("cantools")
+except PackageNotFoundError:
+    # package is not installed
+    pass
+
 
 class _ErrorSubparser:
     def __init__(self, subparser_name, error_message):

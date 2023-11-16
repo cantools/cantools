@@ -3,7 +3,6 @@ from typing import MutableMapping, Optional, TextIO, Union, cast
 
 import diskcache
 
-from ..compat import fopen
 from ..typechecking import StringPathLike
 from . import can, diagnostics, utils
 
@@ -85,7 +84,7 @@ def _load_file_cache(filename: StringPathLike,
         try:
             return cache[key]
         except KeyError:
-            with fopen(filename, 'r', encoding=encoding) as fin:
+            with open(filename, encoding=encoding, errors='replace') as fin:
                 database = load(cast(TextIO, fin),
                                 database_format,
                                 frame_id_mask,
@@ -185,7 +184,7 @@ def load_file(filename: StringPathLike,
         filename)
 
     if cache_dir is None:
-        with fopen(filename, 'r', encoding=encoding) as fin:
+        with open(filename, encoding=encoding, errors='replace') as fin:
             return load(fin,
                         database_format,
                         frame_id_mask,
@@ -250,7 +249,7 @@ def dump_file(database,
         raise Error(
             f"Unsupported output database format '{database_format}'.")
 
-    with fopen(filename, 'w', encoding=encoding, newline=newline) as fout:
+    with open(filename, 'w', encoding=encoding, newline=newline, errors='replace') as fout:
         fout.write(output)
 
 

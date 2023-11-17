@@ -477,7 +477,7 @@ def _dump_value_tables(database):
     for name, choices in database.dbc.value_tables.items():
         choices = [
             f'{number} "{text}"'
-            for number, text in reversed(sorted(choices.items()))
+            for number, text in sorted(choices.items(), reverse=True)
         ]
         val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices)))
 

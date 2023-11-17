@@ -11,11 +11,11 @@ from typing import (
     OrderedDict,
     Sequence,
     Tuple,
+    TypedDict,
     Union,
 )
 
 from bitstruct import CompiledFormatDict
-from typing_extensions import TypedDict
 
 if TYPE_CHECKING:
     import os

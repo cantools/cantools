@@ -1,6 +1,4 @@
-|appveyor|_
-|coverage|_
-|nala|_
+|github-actions| |coverage| |nala|
 
 About
 =====
@@ -25,7 +23,7 @@ CAN BUS tools in Python 3.
 
 - Graphical plots of signals.
 
-Project homepage: https://github.com/eerimoq/cantools
+Project homepage: https://github.com/cantools/cantools
 
 Documentation: https://cantools.readthedocs.io
 
@@ -421,18 +419,20 @@ Contributing
 
 #. Create a pull request.
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/eerimoq/cantools?svg=true
-.. _appveyor: https://ci.appveyor.com/project/eerimoq/cantools/branch/master
+.. |github-actions| image:: https://github.com/cantools/cantools/actions/workflows/pythonpackage.yml/badge.svg?branch=master
+   :target: https://github.com/cantools/cantools/actions/workflows/pythonpackage.yml
+   :alt: Github Actions workflow status
 
-.. |coverage| image:: https://coveralls.io/repos/github/eerimoq/cantools/badge.svg?branch=master
-.. _coverage: https://coveralls.io/github/eerimoq/cantools
+.. |coverage| image:: https://coveralls.io/repos/github/cantools/cantools/badge.svg?branch=master
+   :target: https://coveralls.io/github/cantoolscantools?branch=master
+   :alt: Test coverage reports on Coveralls.io
 
 .. |nala| image:: https://img.shields.io/badge/nala-test-blue.svg
-.. _nala: https://github.com/eerimoq/nala
+   :target: https://github.com/cantools/nala
 
-.. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/dbc/motohawk.dbc
+.. _small DBC-file: https://github.com/cantools/cantools/blob/master/tests/files/dbc/motohawk.dbc
 
-.. _motohawk.dbc: https://github.com/eerimoq/cantools/blob/master/tests/files/dbc/motohawk.dbc
+.. _motohawk.dbc: https://github.com/cantools/cantools/blob/master/tests/files/dbc/motohawk.dbc
 
 .. _python-can: https://python-can.readthedocs.io/en/master/
 
@@ -448,34 +448,34 @@ Contributing
 
 .. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.database.can.Database.decode_message
 
-.. _examples: https://github.com/eerimoq/cantools/blob/master/examples
+.. _examples: https://github.com/cantools/cantools/blob/master/examples
 
-.. _structs: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L58
+.. _structs: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.h#L58
 
-.. _pack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L88
+.. _pack: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.h#L88
 
-.. _unpack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L102
+.. _unpack: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.h#L102
 
-.. _encode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L116
+.. _encode: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.h#L116
 
-.. _decode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L125
+.. _decode: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.h#L125
 
-.. _defines: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L42
+.. _defines: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.h#L42
 
-.. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h
+.. _motohawk.h: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.h
 
-.. _motohawk.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.c
+.. _motohawk.c: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk.c
 
-.. _my_database_name.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.h
+.. _my_database_name.h: https://github.com/cantools/cantools/blob/master/tests/files/c_source/my_database_name.h
 
-.. _my_database_name.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.c
+.. _my_database_name.c: https://github.com/cantools/cantools/blob/master/tests/files/c_source/my_database_name.c
 
-.. _motohawk_no_floating_point_numbers.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.h
+.. _motohawk_no_floating_point_numbers.h: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.h
 
-.. _motohawk_no_floating_point_numbers.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.c
+.. _motohawk_no_floating_point_numbers.c: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.c
 
-.. _motohawk_sender_node.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_sender_node.h
+.. _motohawk_sender_node.h: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk_sender_node.h
 
-.. _motohawk_sender_node.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_sender_node.c
+.. _motohawk_sender_node.c: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk_sender_node.c
 
 .. _matplotlib: https://matplotlib.org/

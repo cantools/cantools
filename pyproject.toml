@@ -28,7 +28,6 @@ dependencies = [
     "textparser>=0.21.1",
     "diskcache",
     "argparse_addons",
-    "typing_extensions>=3.10.0.0",
     "crccheck",
 ]
 dynamic = ["version"]
@@ -97,7 +96,6 @@ select = [
 ignore = [
     "E501",  # line too long
     "F541",  # f-string-missing-placeholders
-    "C413",  # Unnecessary `reversed` call around `sorted()`
 ]
 
 # Assume Python 3.8.

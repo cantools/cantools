@@ -432,15 +432,15 @@ type_sort_attributes = Union[Callable[[List[type_sort_attribute]], List[type_sor
 type_sort_choices = Union[Callable[[Choices], Choices], None]
 
 def sort_signals_by_start_bit(signals: List["Signal"]) -> List["Signal"]:
-    return list(sorted(signals, key=start_bit))
+    return sorted(signals, key=start_bit)
 
 
 def sort_signals_by_start_bit_reversed(signals: List["Signal"]) -> List["Signal"]:
-    return list(reversed(sorted(signals, key=start_bit)))
+    return sorted(signals, key=start_bit)[::-1]
 
 
 def sort_signals_by_name(signals: List["Signal"]) -> List["Signal"]:
-    return list(sorted(signals, key=lambda s: s.name))
+    return sorted(signals, key=lambda s: s.name)
 
 
 def sort_signals_by_start_bit_and_mux(signals: List["Signal"]) -> List["Signal"]:

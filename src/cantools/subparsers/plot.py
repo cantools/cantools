@@ -92,9 +92,6 @@ RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F
 RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s+[0-9.+-]+(\s+.*)?,?|\)')
 # Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
 RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?P<data>[\dA-F]*)(\s+[RT])?$')
-# Matches the PEAK CAN TRC file format, i.e. "     1)         3.0  Rx         01F0  8  00 00 00 00 00 00 1B C1 ".
-RE_TRC = re.compile(r'^\s*\d+\)\s+(?P<time>\d+(\.?\d?))\s+Rx\s+(?P<frameid>[\dA-F]+)\s+\d?\s+(?P<data>[0-9A-F ]*)$', flags=re.ASCII)
-RE_TRC_COMMENT = re.compile(r'^;')
 
 
 def _mo_unpack(mo):
@@ -365,11 +362,15 @@ def _do_decode(args):
 
         # Auto-detect on first valid line.
         if re_format is None:
-            for regex in (RE_CANDUMP, RE_CANDUMP_LOG, RE_TRC):
-                mo = regex.match(line)
+            mo = RE_CANDUMP.match(line)
+
+            if mo:
+                re_format = RE_CANDUMP
+            else:
+                mo = RE_CANDUMP_LOG.match(line)
+
                 if mo:
-                    re_format = regex
-                    break
+                    re_format = RE_CANDUMP_LOG
         else:
             mo = re_format.match(line)
 
@@ -382,7 +383,7 @@ def _do_decode(args):
             elif args.stop is not None and timestamp > args.stop:
                 break
             plotter.add_msg(timestamp, frame_id, data)
-        elif RE_DECODE.match(line) or RE_TRC_COMMENT.match(line):
+        elif RE_DECODE.match(line):
             continue
         else:
             plotter.failed_to_parse_line(line_number, line)

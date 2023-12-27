@@ -1,9 +1,8 @@
 import time
 import unittest
+from queue import Empty, Queue
 
 import can
-
-from queue import Empty, Queue
 
 import cantools
 

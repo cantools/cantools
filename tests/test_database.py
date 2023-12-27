@@ -9,8 +9,8 @@ import unittest
 from collections import namedtuple
 from xml.etree import ElementTree
 
-from parameterized import parameterized
 import textparser
+from parameterized import parameterized
 
 import cantools.autosar
 from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
@@ -662,14 +662,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_dbc_file('tests/files/dbc/motohawk.dbc')
 
         msgname = 'ExampleMessage'
-        with self.assertRaises(Exception):
+        with self.assertRaises(cantools.database.DecodeError):
             db.decode_message(msgname, b'\x00\xff')
 
         decoded = db.decode_message(msgname, b'\x00\x11', allow_truncated=True)
         self.assertEqual(decoded, {'AverageRadius': 0.0, 'Enable': 'Disabled'})
 
         msg = db.get_message_by_name(msgname)
-        with self.assertRaises(Exception):
+        with self.assertRaises(cantools.database.DecodeError):
             msg.decode(b'\x00\xff')
 
         decoded = msg.decode(b'\x00\xff', allow_truncated=True)
@@ -684,7 +684,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # the last byte of the message does not encode any signals,
         # but the specified frame length must still be observed!
-        with self.assertRaises(Exception):
+        with self.assertRaises(cantools.database.DecodeError):
             msg.decode(encoded[:-1])
 
         # partial message without omitted signals
@@ -5979,7 +5979,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_sort_signals_by_name(self):
         filename = 'tests/files/dbc/vehicle.dbc'
         def sort_signals(signals):
-            return list(sorted(signals, key=lambda sig: sig.name))
+            return sorted(signals, key=lambda sig: sig.name)
         db = cantools.database.load_file(filename, sort_signals=sort_signals)
         msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
 

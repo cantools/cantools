@@ -817,7 +817,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
 
         # synchronize the attribute for the message cycle time with
         # the cycle time specified by the message object
-        gen_msg_cycle_time_def: AttributeDefinition
+        gen_msg_cycle_time_def: AttributeDefinition  # type: ignore[annotation-unchecked]
         msg_cycle_time = message.cycle_time or 0
         if gen_msg_cycle_time_def := database.dbc.attribute_definitions.get("GenMsgCycleTime"):
             if msg_cycle_time != gen_msg_cycle_time_def.default_value:
@@ -831,7 +831,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
             del msg_attributes['GenMsgCycleTime']
 
         # if bus is CAN FD, set VFrameFormat
-        v_frame_format_def: AttributeDefinition
+        v_frame_format_def: AttributeDefinition  # type: ignore[annotation-unchecked]
         if v_frame_format_def := database.dbc.attribute_definitions.get("VFrameFormat"):
             if message.protocol == 'j1939':
                 v_frame_format_str = 'J1939PG'

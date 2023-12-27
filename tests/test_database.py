@@ -9,6 +9,7 @@ import unittest
 from collections import namedtuple
 from xml.etree import ElementTree
 
+from parameterized import parameterized
 import textparser
 
 import cantools.autosar
@@ -861,6 +862,43 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # Missing value, but checks disabled.
         with self.assertRaises(KeyError):
             db.encode_message('Message1', {'Foo': 1}, strict=False)
+
+    @parameterized.expand(
+        [
+            ("Error", True,  b'\x0f\xff'),
+            ("Error", False,  b'\x0f\xff'),
+            ("Init", True, b'\x0f\xfe'),
+            ("Init", False, b'\x0f\xfe'),
+            (4070.00, True, b'\x0b\xb8'),
+            (4069.99, True, None),
+            (3000, False, b'\x0b\xb8'),
+            (3001, False, None),
+            (4100, True, b'\x00\x00'),
+            (4100.01, True, None),
+            (4095, True, b'\x01\xf4'),
+            (4095, False, b'\x0f\xff'),
+            (4094, True, b'\x02\x58'),
+            (4094, False, b'\x0f\xfe'),
+            (0, False, b'\x00\x00'),
+            (-1, False, None),
+            (4096, False, None),
+        ]
+    )
+    def test_encode_signal_strict_negative_scaling(self, value, scaling, expected_result):
+        """Test encoding of a signal with negative scaling (=-0.01),
+        a value range from 4070-4100 and a value table."""
+        db = cantools.db.Database()
+        db.add_dbc_file('tests/files/dbc/issue_636_negative_scaling.dbc')
+        msg = db.get_message_by_name("ExampleMessage")
+
+        data = {"Temperature": value}
+
+        try:
+            _result = msg.encode(data=data, scaling=scaling, strict=True)
+            self.assertEqual(expected_result, _result)
+        except cantools.database.EncodeError:
+            if expected_result is not None:
+                raise
 
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not

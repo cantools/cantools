@@ -750,36 +750,32 @@ class Message:
                 if signal_value_num is None:
                     raise EncodeError(f'Invalid value specified for signal '
                                       f'"{signal.name}": "{signal_value}"')
-
                 continue
 
+            if scaling:
+                scaled_value = signal_value
+            else:
+                if signal.conversion.choices and signal_value in signal.conversion.choices:
+                    # skip range check if raw value exists in value table
+                    continue
+
+                # scale signal to perform range check against minimum and maximum
+                scaled_value = signal.conversion.raw_to_scaled(
+                    raw_value=signal_value, decode_choices=False)  # type: ignore[assignment]
+
             if signal.minimum is not None:
-                min_effective = signal.minimum
-
-                # undo the scaling of the signal's minimum value if we
-                # are not supposed to scale the input value
-                if not scaling:
-                    min_effective = signal.conversion.numeric_scaled_to_raw(signal.minimum)
-
-                if signal_value < min_effective - signal.conversion.scale*1e-6:
+                if scaled_value < signal.minimum - abs(signal.conversion.scale)*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value greater than '
-                        f'or equal to {min_effective} in message "{self.name}", '
-                        f'but got {signal_value}.')
+                        f'or equal to {signal.minimum} in message "{self.name}", '
+                        f'but got {scaled_value}.')
 
             if signal.maximum is not None:
-                max_effective = signal.maximum
-
-                if not scaling:
-                    # undo the scaling of the signal's maximum value if we
-                    # are not supposed to scale the input value
-                    max_effective = signal.conversion.numeric_scaled_to_raw(signal.maximum)
-
-                if signal_value > max_effective + signal.conversion.scale*1e-6:
+                if scaled_value > signal.maximum + abs(signal.conversion.scale)*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value smaller than '
-                        f'or equal to {max_effective} in message "{self.name}", '
-                        f'but got {signal_value}.')
+                        f'or equal to {signal.maximum} in message "{self.name}", '
+                        f'but got {scaled_value}.')
 
     def _encode(self, node: Codec, data: SignalMappingType, scaling: bool) -> Tuple[int, int, List[Signal]]:
         encoded = encode_data(data,

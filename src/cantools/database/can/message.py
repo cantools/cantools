@@ -752,16 +752,21 @@ class Message:
                                       f'"{signal.name}": "{signal_value}"')
                 continue
 
+            # retrieve the signal's scaled value to perform range check against minimum and maximum,
+            # retrieve the signal's raw value to check if exists in value table
             if scaling:
                 scaled_value = signal_value
+                raw_value = signal.conversion.numeric_scaled_to_raw(scaled_value)
             else:
-                if signal.conversion.choices and signal_value in signal.conversion.choices:
-                    # skip range check if raw value exists in value table
-                    continue
+                scaled_value = cast(
+                    Union[int, float],
+                    signal.conversion.raw_to_scaled(raw_value=signal_value, decode_choices=False)
+                )
+                raw_value = signal_value
 
-                # scale signal to perform range check against minimum and maximum
-                scaled_value = signal.conversion.raw_to_scaled(
-                    raw_value=signal_value, decode_choices=False)  # type: ignore[assignment]
+            if signal.conversion.choices and raw_value in signal.conversion.choices:
+                # skip range check if raw value exists in value table
+                continue
 
             if signal.minimum is not None:
                 if scaled_value < signal.minimum - abs(signal.conversion.scale)*1e-6:

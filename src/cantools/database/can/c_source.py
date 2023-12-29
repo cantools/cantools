@@ -1,5 +1,6 @@
 import re
 import time
+from typing import List, Tuple
 
 from cantools import __version__
 
@@ -1205,26 +1206,28 @@ def _format_choices(signal, signal_name):
     return choices
 
 
-def _generate_encode_decode(message, use_float):
+def _generate_encode_decode(message: "Message", use_float: bool) -> List[Tuple[str, str]]:
     encode_decode = []
 
     floating_point_type = _get_floating_point_type(use_float)
     for signal in message.signals:
-        scale = float(signal.scale)
-        offset = float(signal.offset)
+        scale = signal.scale
+        offset = signal.offset
+        scale_literal = f"{scale}{'f' if isinstance(scale, float) and use_float else ''}"
+        offset_literal = f"{offset}{'f' if isinstance(offset, float) and use_float else ''}"
 
         if offset == 0 and scale == 1:
             encoding = 'value'
             decoding = f'({floating_point_type})value'
         elif offset != 0 and scale != 1:
-            encoding = f'(value - {offset}) / {scale}'
-            decoding = f'(({floating_point_type})value * {scale}) + {offset}'
+            encoding = f'(value - {offset_literal}) / {scale_literal}'
+            decoding = f'(({floating_point_type})value * {scale_literal}) + {offset_literal}'
         elif offset != 0:
-            encoding = f'value - {offset}'
-            decoding = f'({floating_point_type})value + {offset}'
+            encoding = f'value - {offset_literal}'
+            decoding = f'({floating_point_type})value + {offset_literal}'
         else:
-            encoding = f'value / {scale}'
-            decoding = f'({floating_point_type})value * {scale}'
+            encoding = f'value / {scale_literal}'
+            decoding = f'({floating_point_type})value * {scale_literal}'
 
         encode_decode.append((encoding, decoding))
 

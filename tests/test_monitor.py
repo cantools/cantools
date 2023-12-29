@@ -70,8 +70,8 @@ class CanToolsMonitorTest(unittest.TestCase):
             if verbose:
                 nl = ",\n "
                 print(f"Assertion failed:")
-                print(f"Expected: {nl.join((str(x) for x in expected))}")
-                print(f"Got: {nl.join((str(x) for x in mock.call_args_list))}")
+                print(f"Expected: {nl.join(str(x) for x in expected)}")
+                print(f"Got: {nl.join(str(x) for x in mock.call_args_list)}")
                 print("Traceback:")
                 traceback.print_stack()
             raise e

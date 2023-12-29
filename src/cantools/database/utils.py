@@ -24,6 +24,7 @@ from ..typechecking import (
     SignalMappingType,
     SignalValueType,
 )
+from .errors import DecodeError, EncodeError
 from .namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
@@ -92,7 +93,7 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
             raw_values[name] = conversion.choice_to_number(value)
             continue
 
-        raise TypeError(
+        raise EncodeError(
             f"Unable to encode signal '{name}' "
             f"with type '{value.__class__.__name__}'."
         )
@@ -139,8 +140,8 @@ def decode_data(data: bytes,
             data = data[:expected_length]
 
         if len(data) != expected_length:
-            raise ValueError(f"Wrong data size: {actual_length} instead of "
-                             f"{expected_length} bytes")
+            raise DecodeError(f"Wrong data size: {actual_length} instead of "
+                              f"{expected_length} bytes")
 
     unpacked = {
         **formats.big_endian.unpack(data),

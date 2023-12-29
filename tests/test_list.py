@@ -1,6 +1,5 @@
 import unittest
-
-from unittest.mock import Mock, call, patch
+from unittest.mock import patch
 
 import cantools.subparsers.list as list_module
 

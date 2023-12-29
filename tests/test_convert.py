@@ -54,7 +54,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
                 if a in ignore_message_attributes:
                     continue
                 #print(f"msg.{a}".ljust(30) + str(getattr(msg1, a)).ljust(10) + " == %s" % getattr(msg2, a))
-                self.assertEqual(getattr(msg1, a), getattr(msg2, a), "{} does not match for message {}".format(a, i))
+                self.assertEqual(getattr(msg1, a), getattr(msg2, a), f"{a} does not match for message {i}")
 
             self.assertEqual(len(msg1.signals), len(msg2.signals))
             if ignore_order_of_signals:
@@ -68,7 +68,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
                     if a in ignore_signal_attributes:
                         continue
                     #print("    "+f"sig.{a}".ljust(30) + str(getattr(sig1, a)).ljust(10) + " == %s" % getattr(sig2, a))
-                    self.assertEqual(getattr(sig1, a), getattr(sig2, a), "{} does not match for signal {} in message {}".format(a, sig1.name, msg1.name))
+                    self.assertEqual(getattr(sig1, a), getattr(sig2, a), f"{a} does not match for signal {sig1.name} in message {msg1.name}")
 
                 #print()
 
@@ -95,7 +95,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_in = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
         fn_expected_output = self.get_test_file_name('dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc')
         def sort_signals(signals):
-            return list(sorted(signals, key=lambda sig: sig.name))
+            return sorted(signals, key=lambda sig: sig.name)
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
         db = cantools.database.load_file(fn_in, prune_choices=False)
@@ -121,7 +121,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_out2 = self.get_out_file_name("loaded-with-sort-signals-by-name", ext='.dbc')
 
         db1 = cantools.database.load_file(fn_in)
-        db2 = cantools.database.load_file(fn_in, sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name)))
+        db2 = cantools.database.load_file(fn_in, sort_signals = lambda signals: sorted(signals, key=lambda sig: sig.name))
 
         msg1 = db1.get_message_by_name('RT_DL1MK3_GPS_Speed')
         msg2 = db2.get_message_by_name('RT_DL1MK3_GPS_Speed')
@@ -191,7 +191,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         db = cantools.database.load_file(fn_in, prune_choices=False, sort_signals=None)
 
         def sort_signals(signals):
-            return list(sorted(signals, key=lambda sig: sig.name))
+            return sorted(signals, key=lambda sig: sig.name)
         fn_out = self.get_out_file_name(fn_in, ext='.kcd')
         cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
 

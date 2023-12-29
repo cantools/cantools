@@ -25,7 +25,7 @@ class PyplotMock:
 
         if 'ignore' not in kwargs:
             kwargs['ignore'] = False
-        self.subplot.side_effect = lambda *l, **kw: SubplotMock(parent=self._mock, **kwargs)
+        self.subplot.side_effect = lambda *_l, **kw: SubplotMock(parent=self._mock, **kwargs)
 
     @property
     def mock_calls(self):
@@ -855,9 +855,7 @@ BREMSE_33(
  (2020-12-29 08:48:34.369165)  vcan0  00000000   [8]  06 00 00 00 00 00 00 00
 """
 
-        db = cantools.db.load_file(self.DBC_FILE_CHOICES)
-
-        xs  = self.parse_time(input_data, self.parse_absolute_time)
+        xs = self.parse_time(input_data, self.parse_absolute_time)
         ys = [1, 2, -5, 5, 0, 2, 5, 0, 2, 6]
 
         subplots = [SubplotMock()]

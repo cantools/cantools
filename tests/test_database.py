@@ -10,6 +10,7 @@ from collections import namedtuple
 from xml.etree import ElementTree
 
 import textparser
+from parameterized import parameterized
 
 import cantools.autosar
 from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
@@ -661,14 +662,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db.add_dbc_file('tests/files/dbc/motohawk.dbc')
 
         msgname = 'ExampleMessage'
-        with self.assertRaises(Exception):
+        with self.assertRaises(cantools.database.DecodeError):
             db.decode_message(msgname, b'\x00\xff')
 
         decoded = db.decode_message(msgname, b'\x00\x11', allow_truncated=True)
         self.assertEqual(decoded, {'AverageRadius': 0.0, 'Enable': 'Disabled'})
 
         msg = db.get_message_by_name(msgname)
-        with self.assertRaises(Exception):
+        with self.assertRaises(cantools.database.DecodeError):
             msg.decode(b'\x00\xff')
 
         decoded = msg.decode(b'\x00\xff', allow_truncated=True)
@@ -683,7 +684,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # the last byte of the message does not encode any signals,
         # but the specified frame length must still be observed!
-        with self.assertRaises(Exception):
+        with self.assertRaises(cantools.database.DecodeError):
             msg.decode(encoded[:-1])
 
         # partial message without omitted signals
@@ -861,6 +862,45 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # Missing value, but checks disabled.
         with self.assertRaises(KeyError):
             db.encode_message('Message1', {'Foo': 1}, strict=False)
+
+    @parameterized.expand(
+        [
+            ("Error", True,  b'\x0f\xff'),
+            ("Error", False,  b'\x0f\xff'),
+            ("Init", True, b'\x0f\xfe'),
+            ("Init", False, b'\x0f\xfe'),
+            (4070.00, True, b'\x0b\xb8'),
+            (4069.99, True, None),  # scaled value < minimum
+            (4059.06, True, b'\x0f\xfe'),  # scaled value corresponds to enum value "Init"
+            (4059.05, True, b'\x0f\xff'),  # scaled value corresponds to enum value "Error"
+            (3000, False, b'\x0b\xb8'),
+            (3001, False, None),  # raw value < minimum
+            (4100, True, b'\x00\x00'),
+            (4100.01, True, None),  # scaled value > maximum
+            (4095, True, b'\x01\xf4'),
+            (4095, False, b'\x0f\xff'),
+            (4094, True, b'\x02\x58'),
+            (4094, False, b'\x0f\xfe'),
+            (0, False, b'\x00\x00'),
+            (-1, False, None),  # raw value outside unsigned 12bit range
+            (4096, False, None),  # raw value outside unsigned 12bit range
+        ]
+    )
+    def test_encode_signal_strict_negative_scaling(self, value, scaling, expected_result):
+        """Test encoding of a signal with negative scaling (=-0.01),
+        a value range from 4070-4100 and a value table."""
+        db = cantools.db.Database()
+        db.add_dbc_file('tests/files/dbc/issue_636_negative_scaling.dbc')
+        msg = db.get_message_by_name("ExampleMessage")
+
+        data = {"Temperature": value}
+
+        try:
+            _result = msg.encode(data=data, scaling=scaling, strict=True)
+            self.assertEqual(expected_result, _result)
+        except cantools.database.EncodeError:
+            if expected_result is not None:
+                raise
 
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not
@@ -5941,7 +5981,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_sort_signals_by_name(self):
         filename = 'tests/files/dbc/vehicle.dbc'
         def sort_signals(signals):
-            return list(sorted(signals, key=lambda sig: sig.name))
+            return sorted(signals, key=lambda sig: sig.name)
         db = cantools.database.load_file(filename, sort_signals=sort_signals)
         msg = db.get_message_by_name('RT_DL1MK3_GPS_Speed')
 

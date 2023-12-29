@@ -870,18 +870,20 @@ class CanToolsDatabaseTest(unittest.TestCase):
             ("Init", True, b'\x0f\xfe'),
             ("Init", False, b'\x0f\xfe'),
             (4070.00, True, b'\x0b\xb8'),
-            (4069.99, True, None),
+            (4069.99, True, None),  # scaled value < minimum
+            (4059.06, True, b'\x0f\xfe'),  # scaled value corresponds to enum value "Init"
+            (4059.05, True, b'\x0f\xff'),  # scaled value corresponds to enum value "Error"
             (3000, False, b'\x0b\xb8'),
-            (3001, False, None),
+            (3001, False, None),  # raw value < minimum
             (4100, True, b'\x00\x00'),
-            (4100.01, True, None),
+            (4100.01, True, None),  # scaled value > maximum
             (4095, True, b'\x01\xf4'),
             (4095, False, b'\x0f\xff'),
             (4094, True, b'\x02\x58'),
             (4094, False, b'\x0f\xfe'),
             (0, False, b'\x00\x00'),
-            (-1, False, None),
-            (4096, False, None),
+            (-1, False, None),  # raw value outside unsigned 12bit range
+            (4096, False, None),  # raw value outside unsigned 12bit range
         ]
     )
     def test_encode_signal_strict_negative_scaling(self, value, scaling, expected_result):

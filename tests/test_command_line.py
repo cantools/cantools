@@ -5,6 +5,7 @@ import sys
 import tempfile
 import types
 import unittest
+import warnings
 from pathlib import Path
 from unittest.mock import patch
 
@@ -1292,8 +1293,13 @@ BATTERY_VT(
                 if database == 'floating_point_use_float':
                     argv.append('--use-float')
 
-                with patch('sys.argv', argv):
+                with patch('sys.argv', argv), warnings.catch_warnings(record=True) as w:
                     cantools._main()
+
+                    if database == 'floating_point_use_float':
+                        assert str(w[-1].message) == (
+                            "User selected `--use-float`, but database contains "
+                            "signal with data type `double`: \"Message1::Signal1\"")
 
                 database_h = basename + '.h'
                 database_c = basename + '.c'

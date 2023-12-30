@@ -1,8 +1,12 @@
 import re
 import time
-from typing import List, Tuple
+import warnings
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
 from cantools import __version__
+
+if TYPE_CHECKING:
+    from cantools.database import Database
 
 HEADER_FMT = '''\
 /**
@@ -1206,94 +1210,83 @@ def _format_choices(signal, signal_name):
     return choices
 
 
-def _generate_encode_decode(message: "Message", use_float: bool) -> List[Tuple[str, str]]:
-    encode_decode = []
-
+def _generate_encode_decode(signal: "Signal", use_float: bool) -> Tuple[str, str]:
     floating_point_type = _get_floating_point_type(use_float)
-    for signal in message.signals:
-        scale = signal.scale
-        offset = signal.offset
-        scale_literal = f"{scale}{'f' if isinstance(scale, float) and use_float else ''}"
-        offset_literal = f"{offset}{'f' if isinstance(offset, float) and use_float else ''}"
 
-        if offset == 0 and scale == 1:
-            encoding = 'value'
-            decoding = f'({floating_point_type})value'
-        elif offset != 0 and scale != 1:
-            encoding = f'(value - {offset_literal}) / {scale_literal}'
-            decoding = f'(({floating_point_type})value * {scale_literal}) + {offset_literal}'
-        elif offset != 0:
-            encoding = f'value - {offset_literal}'
-            decoding = f'({floating_point_type})value + {offset_literal}'
-        else:
-            encoding = f'value / {scale_literal}'
-            decoding = f'({floating_point_type})value * {scale_literal}'
+    scale = signal.scale
+    offset = signal.offset
 
-        encode_decode.append((encoding, decoding))
+    scale_literal = f"{scale}{'.0' if isinstance(scale, int) else ''}{'f' if use_float else ''}"
+    offset_literal = f"{offset}{'.0' if isinstance(offset, int) else ''}{'f' if use_float else ''}"
 
-    return encode_decode
+    if offset == 0 and scale == 1:
+        encoding = 'value'
+        decoding = f'({floating_point_type})value'
+    elif offset != 0 and scale != 1:
+        encoding = f'(value - {offset_literal}) / {scale_literal}'
+        decoding = f'(({floating_point_type})value * {scale_literal}) + {offset_literal}'
+    elif offset != 0:
+        encoding = f'value - {offset_literal}'
+        decoding = f'({floating_point_type})value + {offset_literal}'
+    else:
+        encoding = f'value / {scale_literal}'
+        decoding = f'({floating_point_type})value * {scale_literal}'
+
+    return encoding, decoding
 
 
-def _generate_is_in_range(message):
+def _generate_is_in_range(signal: "Signal") -> str:
     """Generate range checks for all signals in given message.
 
     """
+    minimum = signal.minimum
+    maximum = signal.maximum
 
-    checks = []
+    if minimum is not None:
+        minimum = signal.scaled_to_raw(minimum)
 
-    for signal in message.signals:
-        minimum = signal.minimum
-        maximum = signal.maximum
+    if maximum is not None:
+        maximum = signal.scaled_to_raw(maximum)
 
-        if minimum is not None:
-            minimum = signal.scaled_to_raw(minimum)
+    if minimum is None and signal.minimum_value is not None:
+        if signal.minimum_value > signal.minimum_type_value:
+            minimum = signal.minimum_value
 
-        if maximum is not None:
-            maximum = signal.scaled_to_raw(maximum)
+    if maximum is None and signal.maximum_value is not None:
+        if signal.maximum_value < signal.maximum_type_value:
+            maximum = signal.maximum_value
 
-        if minimum is None and signal.minimum_value is not None:
-            if signal.minimum_value > signal.minimum_type_value:
-                minimum = signal.minimum_value
+    suffix = signal.type_suffix
+    check = []
 
-        if maximum is None and signal.maximum_value is not None:
-            if signal.maximum_value < signal.maximum_type_value:
-                maximum = signal.maximum_value
+    if minimum is not None:
+        if not signal.conversion.is_float:
+            minimum = round(minimum)
+        else:
+            minimum = float(minimum)
 
-        suffix = signal.type_suffix
-        check = []
+        minimum_type_value = signal.minimum_type_value
 
-        if minimum is not None:
-            if not signal.conversion.is_float:
-                minimum = round(minimum)
-            else:
-                minimum = float(minimum)
+        if (minimum_type_value is None) or (minimum > minimum_type_value):
+            check.append(f'(value >= {minimum}{suffix})')
 
-            minimum_type_value = signal.minimum_type_value
+    if maximum is not None:
+        if not signal.conversion.is_float:
+            maximum = round(maximum)
+        else:
+            maximum = float(maximum)
 
-            if (minimum_type_value is None) or (minimum > minimum_type_value):
-                check.append(f'(value >= {minimum}{suffix})')
+        maximum_type_value = signal.maximum_type_value
 
-        if maximum is not None:
-            if not signal.conversion.is_float:
-                maximum = round(maximum)
-            else:
-                maximum = float(maximum)
+        if (maximum_type_value is None) or (maximum < maximum_type_value):
+            check.append(f'(value <= {maximum}{suffix})')
 
-            maximum_type_value = signal.maximum_type_value
+    if not check:
+        check = ['true']
+    elif len(check) == 1:
+        check = [check[0][1:-1]]
 
-            if (maximum_type_value is None) or (maximum < maximum_type_value):
-                check.append(f'(value <= {maximum}{suffix})')
-
-        if not check:
-            check = ['true']
-        elif len(check) == 1:
-            check = [check[0][1:-1]]
-
-        check = ' && '.join(check)
-
-        checks.append(check)
-
-    return checks
+    return ' && '.join(check)
 
 
 def _generate_frame_id_defines(database_name, messages, node_name):
@@ -1484,10 +1477,15 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
     return '\n'.join(declarations)
 
 
-def _generate_definitions(database_name, messages, floating_point_numbers, use_float, node_name):
+def _generate_definitions(database_name: str,
+                          messages: List["Message"],
+                          floating_point_numbers: bool,
+                          use_float: bool,
+                          node_name: Optional[str],
+                          ) -> Tuple[str, Tuple[Set[Tuple[str, int]], Set[Tuple[str, int]]]]:
     definitions = []
-    pack_helper_kinds = set()
-    unpack_helper_kinds = set()
+    pack_helper_kinds: Set[Tuple[str, int]] = set()
+    unpack_helper_kinds: Set[Tuple[str, int]] = set()
 
     for message in messages:
         signal_definitions = []
@@ -1495,9 +1493,18 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
         is_receiver = node_name is None
         signals_init_body = ''
 
-        for signal, (encode, decode), check in zip(message.signals,
-                                                   _generate_encode_decode(message, use_float),
-                                                   _generate_is_in_range(message)):
+        for signal in message.signals:
+            if use_float and signal.type_name == "double":
+                warnings.warn(f"User selected `--use-float`, but database contains "
+                              f"signal with data type `double`: \"{message.name}::{signal.name}\"",
+                              stacklevel=2)
+                _use_float = False
+            else:
+                _use_float = use_float
+
+            encode, decode = _generate_encode_decode(signal, _use_float)
+            check = _generate_is_in_range(signal)
+
             if _is_receiver(signal, node_name):
                 is_receiver = True
 
@@ -1516,7 +1523,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                         signal_name=signal.snake_name,
                         type_name=signal.type_name,
                         encode=encode,
-                        floating_point_type=_get_floating_point_type(use_float))
+                        floating_point_type=_get_floating_point_type(_use_float))
                 if node_name is None or _is_receiver(signal, node_name):
                     signal_definition += SIGNAL_DEFINITION_DECODE_FMT.format(
                         database_name=database_name,
@@ -1524,7 +1531,7 @@ def _generate_definitions(database_name, messages, floating_point_numbers, use_f
                         signal_name=signal.snake_name,
                         type_name=signal.type_name,
                         decode=decode,
-                        floating_point_type=_get_floating_point_type(use_float))
+                        floating_point_type=_get_floating_point_type(_use_float))
 
             if is_sender or _is_receiver(signal, node_name):
                 signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
@@ -1656,15 +1663,16 @@ def _generate_fuzzer_source(database_name,
     return source, makefile
 
 
-def generate(database,
-             database_name,
-             header_name,
-             source_name,
-             fuzzer_source_name,
-             floating_point_numbers=True,
-             bit_fields=False,
-             use_float=False,
-             node_name=None):
+def generate(database: "Database",
+             database_name: str,
+             header_name: str,
+             source_name: str,
+             fuzzer_source_name: str,
+             floating_point_numbers: bool = True,
+             bit_fields: bool = False,
+             use_float: bool = False,
+             node_name: Optional[str] = None,
+             ) -> Tuple[str, str, str, str]:
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data

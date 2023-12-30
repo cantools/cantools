@@ -1,12 +1,23 @@
 import re
 import time
 import warnings
-from typing import TYPE_CHECKING, List, Optional, Set, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from cantools import __version__
 
 if TYPE_CHECKING:
-    from cantools.database import Database
+    from cantools.database.can import Database, Message, Signal
 
 HEADER_FMT = '''\
 /**
@@ -583,47 +594,44 @@ INIT_SIGNAL_BODY_TEMPLATE_FMT = '''\
 '''
 
 
-class Signal:
+class CodeGenSignal:
 
-    def __init__(self, signal):
-        self._signal = signal
-        self.snake_name = camel_to_snake_case(self.name)
-
-    def __getattr__(self, name):
-        return getattr(self._signal, name)
+    def __init__(self, signal: "Signal") -> None:
+        self.signal: "Signal" = signal
+        self.snake_name = camel_to_snake_case(signal.name)
 
     @property
-    def unit(self):
-        return _get(self._signal.unit, '-')
+    def unit(self) -> str:
+        return _get(self.signal.unit, '-')
 
     @property
-    def type_length(self):
-        if self.length <= 8:
+    def type_length(self) -> int:
+        if self.signal.length <= 8:
             return 8
-        elif self.length <= 16:
+        elif self.signal.length <= 16:
             return 16
-        elif self.length <= 32:
+        elif self.signal.length <= 32:
             return 32
         else:
             return 64
 
     @property
-    def type_name(self):
-        if self.conversion.is_float:
-            if self.length == 32:
+    def type_name(self) -> str:
+        if self.signal.conversion.is_float:
+            if self.signal.length == 32:
                 type_name = 'float'
             else:
                 type_name = 'double'
         else:
             type_name = f'int{self.type_length}_t'
 
-            if not self.is_signed:
+            if not self.signal.is_signed:
                 type_name = 'u' + type_name
 
         return type_name
 
     @property
-    def type_suffix(self):
+    def type_suffix(self) -> str:
         try:
             return {
                 'uint8_t': 'u',
@@ -637,7 +645,7 @@ class Signal:
             return ''
 
     @property
-    def conversion_type_suffix(self):
+    def conversion_type_suffix(self) -> str:
         try:
             return {
                 8: 'u',
@@ -649,15 +657,17 @@ class Signal:
             return ''
 
     @property
-    def unique_choices(self):
+    def unique_choices(self) -> Dict[int, str]:
         """Make duplicated choice names unique by first appending its value
         and then underscores until unique.
 
         """
+        if self.signal.choices is None:
+            return {}
 
         items = {
             value: camel_to_snake_case(str(name)).upper()
-            for value, name in self.choices.items()
+            for value, name in self.signal.choices.items()
         }
         names = list(items.values())
         duplicated_names = [
@@ -683,7 +693,7 @@ class Signal:
         return unique_choices
 
     @property
-    def minimum_type_value(self):
+    def minimum_type_value(self) -> Optional[int]:
         if self.type_name == 'int8_t':
             return -2**7
         elif self.type_name == 'int16_t':
@@ -698,7 +708,7 @@ class Signal:
             return None
 
     @property
-    def maximum_type_value(self):
+    def maximum_type_value(self) -> Optional[int]:
         if self.type_name == 'int8_t':
             return 2**7 - 1
         elif self.type_name == 'int16_t':
@@ -719,29 +729,29 @@ class Signal:
             return None
 
     @property
-    def minimum_value(self):
-        if self.conversion.is_float:
+    def minimum_value(self) -> Optional[int]:
+        if self.signal.conversion.is_float:
             return None
-        elif self.is_signed:
-            return -(2 ** (self.length - 1))
+        elif self.signal.is_signed:
+            return cast(int, -(2 ** (self.signal.length - 1)))
         else:
             return 0
 
     @property
-    def maximum_value(self):
-        if self.conversion.is_float:
+    def maximum_value(self) -> Optional[int]:
+        if self.signal.conversion.is_float:
             return None
-        elif self.is_signed:
-            return ((2 ** (self.length - 1)) - 1)
+        elif self.signal.is_signed:
+            return cast(int, (2 ** (self.signal.length - 1)) - 1)
         else:
-            return ((2 ** self.length) - 1)
+            return cast(int, (2 ** self.signal.length) - 1)
 
-    def segments(self, invert_shift):
-        index, pos = divmod(self.start, 8)
-        left = self.length
+    def segments(self, invert_shift: bool) -> Iterator[Tuple[int, int, str, int]]:
+        index, pos = divmod(self.signal.start, 8)
+        left = self.signal.length
 
         while left > 0:
-            if self.byte_order == 'big_endian':
+            if self.signal.byte_order == 'big_endian':
                 if left >= (pos + 1):
                     length = (pos + 1)
                     pos = 7
@@ -753,7 +763,7 @@ class Signal:
                     mask = ((1 << length) - 1)
                     mask <<= (pos - length + 1)
             else:
-                shift = (left - self.length) + pos
+                shift = (left - self.signal.length) + pos
 
                 if left >= (8 - pos):
                     length = (8 - pos)
@@ -784,23 +794,21 @@ class Signal:
             index += 1
 
 
-class Message:
+class CodeGenMessage:
 
-    def __init__(self, message):
-        self._message = message
-        self.snake_name = camel_to_snake_case(self.name)
-        self.signals = [Signal(signal) for signal in message.signals]
+    def __init__(self, message: "Message") -> None:
+        self.message = message
+        self.snake_name = camel_to_snake_case(message.name)
+        self.signals = [CodeGenSignal(signal) for signal in message.signals]
 
-    def __getattr__(self, name):
-        return getattr(self._message, name)
-
-    def get_signal_by_name(self, name):
+    def get_signal_by_name(self, name: str) -> "CodeGenSignal":
         for signal in self.signals:
-            if signal.name == name:
+            if signal.signal.name == name:
                 return signal
+        raise KeyError(f"Signal {name} not found.")
 
 
-def _canonical(value):
+def _canonical(value: str) -> str:
     """Replace anything but 'a-z', 'A-Z' and '0-9' with '_'.
 
     """
@@ -808,7 +816,7 @@ def _canonical(value):
     return re.sub(r'[^a-zA-Z0-9]', '_', value)
 
 
-def camel_to_snake_case(value):
+def camel_to_snake_case(value: str) -> str:
     value = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', value)
     value = re.sub(r'(_+)', '_', value)
     value = re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', value).lower()
@@ -817,7 +825,7 @@ def camel_to_snake_case(value):
     return value
 
 
-def _strip_blank_lines(lines):
+def _strip_blank_lines(lines: List[str]) -> List[str]:
     try:
         while lines[0] == '':
             lines = lines[1:]
@@ -830,14 +838,17 @@ def _strip_blank_lines(lines):
     return lines
 
 
-def _get(value, default):
-    if value is None:
-        value = default
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
 
+
+def _get(value: Optional[_T1], default: _T2) -> Union[_T1, _T2]:
+    if value is None:
+        return default
     return value
 
 
-def _format_comment(comment):
+def _format_comment(comment: Optional[str]) -> str:
     if comment:
         return '\n'.join([
             '     * ' + line.rstrip()
@@ -847,41 +858,39 @@ def _format_comment(comment):
         return ''
 
 
-def _format_range(signal):
-    minimum = signal.minimum
-    maximum = signal.maximum
+def _format_range(signal: "CodeGenSignal") -> str:
+    minimum = signal.signal.minimum
+    maximum = signal.signal.maximum
 
-    phys_to_raw = float if signal.is_float else round
+    def phys_to_raw(x: Union[int, float]) -> float:
+        raw_val = signal.signal.scaled_to_raw(x)
+        if signal.signal.is_float:
+            return float(raw_val)
+        return round(raw_val)
 
     if minimum is not None and maximum is not None:
         return \
-            f'{phys_to_raw(signal._signal.scaled_to_raw(minimum))}..' \
-            f'{phys_to_raw(signal._signal.scaled_to_raw(maximum))} ' \
+            f'{phys_to_raw(minimum)}..' \
+            f'{phys_to_raw(maximum)} ' \
             f'({round(minimum, 5)}..{round(maximum, 5)} {signal.unit})'
     elif minimum is not None:
-        return '{}.. ({}.. {})'.format(
-            phys_to_raw(signal._signal.scaled_to_raw(minimum)),
-            round(minimum, 5),
-            signal.unit)
+        return f'{phys_to_raw(minimum)}.. ({round(minimum, 5)}.. {signal.unit})'
     elif maximum is not None:
-        return '..{} (..{} {})'.format(
-            phys_to_raw(signal._signal.scaled_to_raw(maximum)),
-            round(maximum, 5),
-            signal.unit)
+        return f'..{phys_to_raw(maximum)} (..{round(maximum, 5)} {signal.unit})'
     else:
         return '-'
 
 
-def _generate_signal(signal, bit_fields):
-    comment = _format_comment(signal.comment)
+def _generate_signal(signal: "CodeGenSignal", bit_fields: bool) -> str:
+    comment = _format_comment(signal.signal.comment)
     range_ = _format_range(signal)
-    scale = _get(signal.conversion.scale, '-')
-    offset = _get(signal.conversion.offset, '-')
+    scale = _get(signal.signal.conversion.scale, '-')
+    offset = _get(signal.signal.conversion.offset, '-')
 
-    if signal.conversion.is_float or not bit_fields:
+    if signal.signal.conversion.is_float or not bit_fields:
         length = ''
     else:
-        length = f' : {signal.length}'
+        length = f' : {signal.signal.length}'
 
     member = SIGNAL_MEMBER_FMT.format(comment=comment,
                                       range=range_,
@@ -894,11 +903,11 @@ def _generate_signal(signal, bit_fields):
     return member
 
 
-def _format_pack_code_mux(message,
-                          mux,
-                          body_lines_per_index,
-                          variable_lines,
-                          helper_kinds):
+def _format_pack_code_mux(message: "CodeGenMessage",
+                          mux: Dict[str, Dict[int, List[str]]],
+                          body_lines_per_index: List[str],
+                          variable_lines: List[str],
+                          helper_kinds: Set[Tuple[str, int]]) -> List[str]:
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_pack_code_signal(message,
                              signal_name,
@@ -913,9 +922,9 @@ def _format_pack_code_mux(message,
         f'switch (src_p->{signal_name}) {{'
     ]
 
-    for multiplexer_id, multiplexed_signals in multiplexed_signals_per_id:
+    for multiplexer_id, signals_of_multiplexer_id in multiplexed_signals_per_id:
         body_lines = _format_pack_code_level(message,
-                                             multiplexed_signals,
+                                             signals_of_multiplexer_id,
                                              variable_lines,
                                              helper_kinds)
         lines.append('')
@@ -935,17 +944,17 @@ def _format_pack_code_mux(message,
     return [('    ' + line).rstrip() for line in lines]
 
 
-def _format_pack_code_signal(message,
-                             signal_name,
-                             body_lines,
-                             variable_lines,
-                             helper_kinds):
+def _format_pack_code_signal(message: "CodeGenMessage",
+                             signal_name: str,
+                             body_lines: List[str],
+                             variable_lines: List[str],
+                             helper_kinds: Set[Tuple[str, int]]) -> None:
     signal = message.get_signal_by_name(signal_name)
 
-    if signal.conversion.is_float or signal.is_signed:
+    if signal.signal.conversion.is_float or signal.signal.is_signed:
         variable = f'    uint{signal.type_length}_t {signal.snake_name};'
 
-        if signal.conversion.is_float:
+        if signal.signal.conversion.is_float:
             conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
                 signal.snake_name)
         else:
@@ -957,7 +966,7 @@ def _format_pack_code_signal(message,
         body_lines.append(conversion)
 
     for index, shift, shift_direction, mask in signal.segments(invert_shift=False):
-        if signal.conversion.is_float or signal.is_signed:
+        if signal.signal.conversion.is_float or signal.signal.is_signed:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}({}, {}u, 0x{:02x}u);'
         else:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
@@ -972,16 +981,16 @@ def _format_pack_code_signal(message,
         helper_kinds.add((shift_direction, signal.type_length))
 
 
-def _format_pack_code_level(message,
-                            signal_names,
-                            variable_lines,
-                            helper_kinds):
+def _format_pack_code_level(message: "CodeGenMessage",
+                            signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
+                            variable_lines: List[str],
+                            helper_kinds: Set[Tuple[str, int]]) -> List[str]:
     """Format one pack level in a signal tree.
 
     """
 
-    body_lines = []
-    muxes_lines = []
+    body_lines: List[str] = []
+    muxes_lines: List[str] = []
 
     for signal_name in signal_names:
         if isinstance(signal_name, dict):
@@ -1006,10 +1015,12 @@ def _format_pack_code_level(message,
     return body_lines
 
 
-def _format_pack_code(message, helper_kinds):
-    variable_lines = []
+def _format_pack_code(message: "CodeGenMessage",
+                      helper_kinds: Set[Tuple[str, int]]
+                      ) -> Tuple[str, str]:
+    variable_lines: List[str] = []
     body_lines = _format_pack_code_level(message,
-                                         message.signal_tree,
+                                         message.message.signal_tree,
                                          variable_lines,
                                          helper_kinds)
 
@@ -1019,12 +1030,12 @@ def _format_pack_code(message, helper_kinds):
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _format_unpack_code_mux(message,
-                            mux,
-                            body_lines_per_index,
-                            variable_lines,
-                            helper_kinds,
-                            node_name):
+def _format_unpack_code_mux(message: "CodeGenMessage",
+                            mux: Dict[str, Dict[int, List[str]]],
+                            body_lines_per_index: List[str],
+                            variable_lines: List[str],
+                            helper_kinds: Set[Tuple[str, int]],
+                            node_name: Optional[str]) -> List[str]:
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_unpack_code_signal(message,
                                signal_name,
@@ -1038,9 +1049,9 @@ def _format_unpack_code_mux(message,
         f'switch (dst_p->{signal_name}) {{'
     ]
 
-    for multiplexer_id, multiplexed_signals in multiplexed_signals_per_id:
+    for multiplexer_id, signals_of_multiplexer_id in multiplexed_signals_per_id:
         body_lines = _format_unpack_code_level(message,
-                                               multiplexed_signals,
+                                               signals_of_multiplexer_id,
                                                variable_lines,
                                                helper_kinds,
                                                node_name)
@@ -1058,22 +1069,22 @@ def _format_unpack_code_mux(message,
     return [('    ' + line).rstrip() for line in lines]
 
 
-def _format_unpack_code_signal(message,
-                               signal_name,
-                               body_lines,
-                               variable_lines,
-                               helper_kinds):
+def _format_unpack_code_signal(message: "CodeGenMessage",
+                               signal_name: str,
+                               body_lines: List[str],
+                               variable_lines: List[str],
+                               helper_kinds: Set[Tuple[str, int]]) -> None:
     signal = message.get_signal_by_name(signal_name)
     conversion_type_name = f'uint{signal.type_length}_t'
 
-    if signal.conversion.is_float or signal.is_signed:
+    if signal.signal.conversion.is_float or signal.signal.is_signed:
         variable = f'    {conversion_type_name} {signal.snake_name};'
         variable_lines.append(variable)
 
     segments = signal.segments(invert_shift=True)
 
     for i, (index, shift, shift_direction, mask) in enumerate(segments):
-        if signal.conversion.is_float or signal.is_signed:
+        if signal.signal.conversion.is_float or signal.signal.is_signed:
             fmt = '    {} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
         else:
             fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
@@ -1088,17 +1099,17 @@ def _format_unpack_code_signal(message,
         body_lines.append(line)
         helper_kinds.add((shift_direction, signal.type_length))
 
-    if signal.conversion.is_float:
+    if signal.signal.conversion.is_float:
         conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
             signal.snake_name)
         body_lines.append(conversion)
-    elif signal.is_signed:
-        mask = ((1 << (signal.type_length - signal.length)) - 1)
+    elif signal.signal.is_signed:
+        mask = ((1 << (signal.type_length - signal.signal.length)) - 1)
 
         if mask != 0:
-            mask <<= signal.length
+            mask <<= signal.signal.length
             formatted = SIGN_EXTENSION_FMT.format(name=signal.snake_name,
-                                                  shift=signal.length - 1,
+                                                  shift=signal.signal.length - 1,
                                                   mask=mask,
                                                   suffix=signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
@@ -1108,17 +1119,17 @@ def _format_unpack_code_signal(message,
         body_lines.append(conversion)
 
 
-def _format_unpack_code_level(message,
-                              signal_names,
-                              variable_lines,
-                              helper_kinds,
-                              node_name):
+def _format_unpack_code_level(message: "CodeGenMessage",
+                              signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
+                              variable_lines: List[str],
+                              helper_kinds: Set[Tuple[str, int]],
+                              node_name: Optional[str]) -> List[str]:
     """Format one unpack level in a signal tree.
 
     """
 
-    body_lines = []
-    muxes_lines = []
+    body_lines: List[str] = []
+    muxes_lines: List[str] = []
 
     for signal_name in signal_names:
         if isinstance(signal_name, dict):
@@ -1158,10 +1169,12 @@ def _format_unpack_code_level(message,
     return body_lines
 
 
-def _format_unpack_code(message, helper_kinds, node_name):
-    variable_lines = []
+def _format_unpack_code(message: "CodeGenMessage",
+                        helper_kinds: Set[Tuple[str, int]],
+                        node_name: Optional[str]) -> Tuple[str, str]:
+    variable_lines: List[str] = []
     body_lines = _format_unpack_code_level(message,
-                                           message.signal_tree,
+                                           message.message.signal_tree,
                                            variable_lines,
                                            helper_kinds,
                                            node_name)
@@ -1172,7 +1185,7 @@ def _format_unpack_code(message, helper_kinds, node_name):
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _generate_struct(message, bit_fields):
+def _generate_struct(message: "CodeGenMessage", bit_fields: bool) -> Tuple[str, List[str]]:
     members = []
 
     for signal in message.signals:
@@ -1186,19 +1199,19 @@ def _generate_struct(message, bit_fields):
             '    uint8_t dummy;'
         ]
 
-    if message.comment is None:
+    if message.message.comment is None:
         comment = ''
     else:
-        comment = f' * {message.comment}\n *\n'
+        comment = f' * {message.message.comment}\n *\n'
 
     return comment, members
 
 
-def _format_choices(signal, signal_name):
+def _format_choices(signal: "CodeGenSignal", signal_name: str) -> List[str]:
     choices = []
 
     for value, name in sorted(signal.unique_choices.items()):
-        if signal.is_signed:
+        if signal.signal.is_signed:
             fmt = '{signal_name}_{name}_CHOICE ({value})'
         else:
             fmt = '{signal_name}_{name}_CHOICE ({value}u)'
@@ -1210,11 +1223,11 @@ def _format_choices(signal, signal_name):
     return choices
 
 
-def _generate_encode_decode(signal: "Signal", use_float: bool) -> Tuple[str, str]:
+def _generate_encode_decode(signal: "CodeGenSignal", use_float: bool) -> Tuple[str, str]:
     floating_point_type = _get_floating_point_type(use_float)
 
-    scale = signal.scale
-    offset = signal.offset
+    scale = signal.signal.scale
+    offset = signal.signal.offset
 
     scale_literal = f"{scale}{'.0' if isinstance(scale, int) else ''}{'f' if use_float else ''}"
     offset_literal = f"{offset}{'.0' if isinstance(offset, int) else ''}{'f' if use_float else ''}"
@@ -1235,32 +1248,36 @@ def _generate_encode_decode(signal: "Signal", use_float: bool) -> Tuple[str, str
     return encoding, decoding
 
 
-def _generate_is_in_range(signal: "Signal") -> str:
+def _generate_is_in_range(signal: "CodeGenSignal") -> str:
     """Generate range checks for all signals in given message.
 
     """
-    minimum = signal.minimum
-    maximum = signal.maximum
+    minimum = signal.signal.minimum
+    maximum = signal.signal.maximum
 
     if minimum is not None:
-        minimum = signal.scaled_to_raw(minimum)
+        minimum = signal.signal.scaled_to_raw(minimum)
 
     if maximum is not None:
-        maximum = signal.scaled_to_raw(maximum)
+        maximum = signal.signal.scaled_to_raw(maximum)
 
     if minimum is None and signal.minimum_value is not None:
-        if signal.minimum_value > signal.minimum_type_value:
+        if signal.minimum_type_value is None:
+            minimum = signal.minimum_value
+        elif signal.minimum_value > signal.minimum_type_value:
             minimum = signal.minimum_value
 
     if maximum is None and signal.maximum_value is not None:
-        if signal.maximum_value < signal.maximum_type_value:
+        if signal.maximum_type_value is None:
+            maximum = signal.maximum_value
+        elif signal.maximum_value < signal.maximum_type_value:
             maximum = signal.maximum_value
 
     suffix = signal.type_suffix
     check = []
 
     if minimum is not None:
-        if not signal.conversion.is_float:
+        if not signal.signal.conversion.is_float:
             minimum = round(minimum)
         else:
             minimum = float(minimum)
@@ -1271,7 +1288,7 @@ def _generate_is_in_range(signal: "Signal") -> str:
             check.append(f'(value >= {minimum}{suffix})')
 
     if maximum is not None:
-        if not signal.conversion.is_float:
+        if not signal.signal.conversion.is_float:
             maximum = round(maximum)
         else:
             maximum = float(maximum)
@@ -1289,60 +1306,70 @@ def _generate_is_in_range(signal: "Signal") -> str:
     return ' && '.join(check)
 
 
-def _generate_frame_id_defines(database_name, messages, node_name):
+def _generate_frame_id_defines(database_name: str,
+                               messages: List["CodeGenMessage"],
+                               node_name: Optional[str]) -> str:
     return '\n'.join([
         '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
             database_name.upper(),
             message.snake_name.upper(),
-            message.frame_id)
+            message.message.frame_id)
         for message in messages if _is_sender_or_receiver(message, node_name)
     ])
 
 
-def _generate_frame_length_defines(database_name, messages, node_name):
+def _generate_frame_length_defines(database_name: str,
+                                   messages: List["CodeGenMessage"],
+                                   node_name: Optional[str]) -> str:
     result = '\n'.join([
         '#define {}_{}_LENGTH ({}u)'.format(
             database_name.upper(),
             message.snake_name.upper(),
-            message.length)
+            message.message.length)
         for message in messages if _is_sender_or_receiver(message, node_name)
     ])
 
     return result
 
 
-def _generate_frame_cycle_time_defines(database_name, messages, node_name):
+def _generate_frame_cycle_time_defines(database_name: str,
+                                       messages: List["CodeGenMessage"],
+                                       node_name: Optional[str]) -> str:
     result = '\n'.join([
         '#define {}_{}_CYCLE_TIME_MS ({}u)'.format(
             database_name.upper(),
             message.snake_name.upper(),
-            message.cycle_time)
-        for message in messages if message.cycle_time is not None and
+            message.message.cycle_time)
+        for message in messages if message.message.cycle_time is not None and
                                    _is_sender_or_receiver(message, node_name)
     ])
 
     return result
 
 
-def _generate_is_extended_frame_defines(database_name, messages, node_name):
+def _generate_is_extended_frame_defines(database_name: str,
+                                        messages: List["CodeGenMessage"],
+                                        node_name: Optional[str]) -> str:
     result = '\n'.join([
         '#define {}_{}_IS_EXTENDED ({})'.format(
             database_name.upper(),
             message.snake_name.upper(),
-            int(message.is_extended_frame))
+            int(message.message.is_extended_frame))
         for message in messages if _is_sender_or_receiver(message, node_name)
     ])
 
     return result
 
 
-def _generate_choices_defines(database_name, messages, node_name):
+def _generate_choices_defines(database_name: str,
+                              messages: List["CodeGenMessage"],
+                              node_name: Optional[str]) -> str:
     choices_defines = []
 
     for message in messages:
         is_sender = _is_sender(message, node_name)
         for signal in message.signals:
-            if signal.conversion.choices is None:
+            if signal.signal.conversion.choices is None:
                 continue
             if not is_sender and not _is_receiver(signal, node_name):
                 continue
@@ -1357,32 +1384,39 @@ def _generate_choices_defines(database_name, messages, node_name):
     return '\n\n'.join(choices_defines)
 
 
-def _generate_frame_name_macros(database_name, messages, node_name):
+def _generate_frame_name_macros(database_name: str,
+                                messages: List["CodeGenMessage"],
+                                node_name: Optional[str]) -> str:
     result = '\n'.join([
         '#define {}_{}_NAME "{}"'.format(
             database_name.upper(),
             message.snake_name.upper(),
-            message.name)
+            message.message.name)
         for message in messages if _is_sender_or_receiver(message, node_name)
     ])
 
     return result
 
 
-def _generate_signal_name_macros(database_name, messages, node_name):
+def _generate_signal_name_macros(database_name: str,
+                                 messages: List["CodeGenMessage"],
+                                 node_name: Optional[str]) -> str:
     result = '\n'.join([
         '#define {}_{}_{}_NAME "{}"'.format(
             database_name.upper(),
             message.snake_name.upper(),
             signal.snake_name.upper(),
-            signal.name)
+            signal.signal.name)
         for message in messages if _is_sender_or_receiver(message, node_name) for signal in message.signals
     ])
 
     return result
 
 
-def _generate_structs(database_name, messages, bit_fields, node_name):
+def _generate_structs(database_name: str,
+                      messages: List["CodeGenMessage"],
+                      bit_fields: bool,
+                      node_name: Optional[str]) -> str:
     structs = []
 
     for message in messages:
@@ -1390,7 +1424,7 @@ def _generate_structs(database_name, messages, bit_fields, node_name):
             comment, members = _generate_struct(message, bit_fields)
             structs.append(
                 STRUCT_FMT.format(comment=comment,
-                                  database_message_name=message.name,
+                                  database_message_name=message.message.name,
                                   message_name=message.snake_name,
                                   database_name=database_name,
                                   members='\n\n'.join(members)))
@@ -1398,25 +1432,29 @@ def _generate_structs(database_name, messages, bit_fields, node_name):
     return '\n'.join(structs)
 
 
-def _is_sender(message, node_name):
-    return node_name is None or node_name in message.senders
+def _is_sender(message: "CodeGenMessage", node_name: Optional[str]) -> bool:
+    return node_name is None or node_name in message.message.senders
 
 
-def _is_receiver(signal, node_name):
-    return node_name is None or node_name in signal.receivers
+def _is_receiver(signal: "CodeGenSignal", node_name: Optional[str]) -> bool:
+    return node_name is None or node_name in signal.signal.receivers
 
 
-def _is_sender_or_receiver(message, node_name):
+def _is_sender_or_receiver(message: "CodeGenMessage", node_name: Optional[str]) -> bool:
     if _is_sender(message, node_name):
         return True
     return any(_is_receiver(signal, node_name) for signal in message.signals)
 
 
-def _get_floating_point_type(use_float):
+def _get_floating_point_type(use_float: bool) -> str:
     return 'float' if use_float else 'double'
 
 
-def _generate_declarations(database_name, messages, floating_point_numbers, use_float, node_name):
+def _generate_declarations(database_name: str,
+                           messages: List["CodeGenMessage"],
+                           floating_point_numbers: bool,
+                           use_float: bool,
+                           node_name: Optional[str]) -> str:
     declarations = []
 
     for message in messages:
@@ -1457,15 +1495,15 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
         declaration = ""
         if is_sender:
             declaration += DECLARATION_PACK_FMT.format(database_name=database_name,
-                                                       database_message_name=message.name,
+                                                       database_message_name=message.message.name,
                                                        message_name=message.snake_name)
         if is_receiver:
             declaration += DECLARATION_UNPACK_FMT.format(database_name=database_name,
-                                                         database_message_name=message.name,
+                                                         database_message_name=message.message.name,
                                                          message_name=message.snake_name)
 
         declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
-                                                           database_message_name=message.name,
+                                                           database_message_name=message.message.name,
                                                            message_name=message.snake_name)
 
         if signal_declarations:
@@ -1478,7 +1516,7 @@ def _generate_declarations(database_name, messages, floating_point_numbers, use_
 
 
 def _generate_definitions(database_name: str,
-                          messages: List["Message"],
+                          messages: List["CodeGenMessage"],
                           floating_point_numbers: bool,
                           use_float: bool,
                           node_name: Optional[str],
@@ -1496,7 +1534,8 @@ def _generate_definitions(database_name: str,
         for signal in message.signals:
             if use_float and signal.type_name == "double":
                 warnings.warn(f"User selected `--use-float`, but database contains "
-                              f"signal with data type `double`: \"{message.name}::{signal.name}\"",
+                              f"signal with data type `double`: "
+                              f"\"{message.message.name}::{signal.signal.name}\"",
                               stacklevel=2)
                 _use_float = False
             else:
@@ -1544,11 +1583,11 @@ def _generate_definitions(database_name: str,
 
                 signal_definitions.append(signal_definition)
 
-            if signal.initial:
-                signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(signal_initial=signal.raw_initial,
+            if signal.signal.initial:
+                signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(signal_initial=signal.signal.raw_initial,
                                                                           signal_name=signal.snake_name)
 
-        if message.length > 0:
+        if message.message.length > 0:
             pack_variables, pack_body = _format_pack_code(message,
                                                           pack_helper_kinds)
             unpack_variables, unpack_body = _format_unpack_code(message,
@@ -1567,23 +1606,23 @@ def _generate_definitions(database_name: str,
             definition = ""
             if is_sender:
                 definition += DEFINITION_PACK_FMT.format(database_name=database_name,
-                                                         database_message_name=message.name,
+                                                         database_message_name=message.message.name,
                                                          message_name=message.snake_name,
-                                                         message_length=message.length,
+                                                         message_length=message.message.length,
                                                          pack_unused=pack_unused,
                                                          pack_variables=pack_variables,
                                                          pack_body=pack_body)
             if is_receiver:
                 definition += DEFINITION_UNPACK_FMT.format(database_name=database_name,
-                                                           database_message_name=message.name,
+                                                           database_message_name=message.message.name,
                                                            message_name=message.snake_name,
-                                                           message_length=message.length,
+                                                           message_length=message.message.length,
                                                            unpack_unused=unpack_unused,
                                                            unpack_variables=unpack_variables,
                                                            unpack_body=unpack_body)
 
             definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
-                                                             database_message_name=message.name,
+                                                             database_message_name=message.message.name,
                                                              message_name=message.snake_name,
                                                              init_body=signals_init_body)
 
@@ -1600,7 +1639,9 @@ def _generate_definitions(database_name: str,
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)
 
 
-def _generate_helpers_kind(kinds, left_format, right_format):
+def _generate_helpers_kind(kinds: Set[Tuple[str, int]],
+                           left_format: str,
+                           right_format: str) -> List[str]:
     formats = {
         'left': left_format,
         'right': right_format
@@ -1616,7 +1657,7 @@ def _generate_helpers_kind(kinds, left_format, right_format):
     return helpers
 
 
-def _generate_helpers(kinds):
+def _generate_helpers(kinds: Tuple[Set[Tuple[str, int]], Set[Tuple[str, int]]]) -> str:
     pack_helpers = _generate_helpers_kind(kinds[0],
                                           PACK_HELPER_LEFT_SHIFT_FMT,
                                           PACK_HELPER_RIGHT_SHIFT_FMT)
@@ -1631,17 +1672,17 @@ def _generate_helpers(kinds):
     return '\n'.join(helpers)
 
 
-def _generate_fuzzer_source(database_name,
-                            messages,
-                            date,
-                            header_name,
-                            source_name,
-                            fuzzer_source_name):
+def _generate_fuzzer_source(database_name: str,
+                            messages: List["CodeGenMessage"],
+                            date: str,
+                            header_name: str,
+                            source_name: str,
+                            fuzzer_source_name: str) -> Tuple[str, str]:
     tests = []
     calls = []
 
     for message in messages:
-        name = f'{database_name}_{camel_to_snake_case(message.name)}'
+        name = f'{database_name}_{camel_to_snake_case(message.message.name)}'
 
         test = TEST_FMT.format(name=name)
         tests.append(test)
@@ -1705,7 +1746,7 @@ def generate(database: "Database",
     """
 
     date = time.ctime()
-    messages = [Message(message) for message in database.messages]
+    messages = [CodeGenMessage(message) for message in database.messages]
     include_guard = f'{database_name.upper()}_H'
     frame_id_defines = _generate_frame_id_defines(database_name, messages, node_name)
     frame_length_defines = _generate_frame_length_defines(database_name,

@@ -699,7 +699,7 @@ class CodeGenSignal:
         return unique_choices
 
     @property
-    def minimum_type_value(self) -> Optional[int]:
+    def minimum_ctype_value(self) -> Optional[int]:
         if self.type_name == 'int8_t':
             return -2**7
         elif self.type_name == 'int16_t':
@@ -714,7 +714,7 @@ class CodeGenSignal:
             return None
 
     @property
-    def maximum_type_value(self) -> Optional[int]:
+    def maximum_ctype_value(self) -> Optional[int]:
         if self.type_name == 'int8_t':
             return 2**7 - 1
         elif self.type_name == 'int16_t':
@@ -735,7 +735,7 @@ class CodeGenSignal:
             return None
 
     @property
-    def minimum_value(self) -> Optional[int]:
+    def minimum_can_raw_value(self) -> Optional[int]:
         if self.signal.conversion.is_float:
             return None
         elif self.signal.is_signed:
@@ -744,7 +744,7 @@ class CodeGenSignal:
             return 0
 
     @property
-    def maximum_value(self) -> Optional[int]:
+    def maximum_can_raw_value(self) -> Optional[int]:
         if self.signal.conversion.is_float:
             return None
         elif self.signal.is_signed:
@@ -1263,17 +1263,17 @@ def _generate_is_in_range(cg_signal: "CodeGenSignal") -> str:
     if maximum is not None:
         maximum = cg_signal.signal.scaled_to_raw(maximum)
 
-    if minimum is None and cg_signal.minimum_value is not None:
-        if cg_signal.minimum_type_value is None:
-            minimum = cg_signal.minimum_value
-        elif cg_signal.minimum_value > cg_signal.minimum_type_value:
-            minimum = cg_signal.minimum_value
+    if minimum is None and cg_signal.minimum_can_raw_value is not None:
+        if cg_signal.minimum_ctype_value is None:
+            minimum = cg_signal.minimum_can_raw_value
+        elif cg_signal.minimum_can_raw_value > cg_signal.minimum_ctype_value:
+            minimum = cg_signal.minimum_can_raw_value
 
-    if maximum is None and cg_signal.maximum_value is not None:
-        if cg_signal.maximum_type_value is None:
-            maximum = cg_signal.maximum_value
-        elif cg_signal.maximum_value < cg_signal.maximum_type_value:
-            maximum = cg_signal.maximum_value
+    if maximum is None and cg_signal.maximum_can_raw_value is not None:
+        if cg_signal.maximum_ctype_value is None:
+            maximum = cg_signal.maximum_can_raw_value
+        elif cg_signal.maximum_can_raw_value < cg_signal.maximum_ctype_value:
+            maximum = cg_signal.maximum_can_raw_value
 
     suffix = cg_signal.type_suffix
     check = []
@@ -1284,9 +1284,9 @@ def _generate_is_in_range(cg_signal: "CodeGenSignal") -> str:
         else:
             minimum = float(minimum)
 
-        minimum_type_value = cg_signal.minimum_type_value
+        minimum_ctype_value = cg_signal.minimum_ctype_value
 
-        if (minimum_type_value is None) or (minimum > minimum_type_value):
+        if (minimum_ctype_value is None) or (minimum > minimum_ctype_value):
             check.append(f'(value >= {minimum}{suffix})')
 
     if maximum is not None:
@@ -1295,9 +1295,9 @@ def _generate_is_in_range(cg_signal: "CodeGenSignal") -> str:
         else:
             maximum = float(maximum)
 
-        maximum_type_value = cg_signal.maximum_type_value
+        maximum_ctype_value = cg_signal.maximum_ctype_value
 
-        if (maximum_type_value is None) or (maximum < maximum_type_value):
+        if (maximum_ctype_value is None) or (maximum < maximum_ctype_value):
             check.append(f'(value <= {maximum}{suffix})')
 
     if not check:

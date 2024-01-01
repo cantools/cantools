@@ -13,11 +13,16 @@ from typing import (
     Union,
     cast,
 )
-
 from cantools import __version__
 
 if TYPE_CHECKING:
     from cantools.database.can import Database, Message, Signal
+
+
+_T1 = TypeVar("_T1")
+_T2 = TypeVar("_T2")
+THelperKind = Tuple[str, int]
+
 
 HEADER_FMT = '''\
 /**
@@ -838,10 +843,6 @@ def _strip_blank_lines(lines: List[str]) -> List[str]:
     return lines
 
 
-_T1 = TypeVar("_T1")
-_T2 = TypeVar("_T2")
-
-
 def _get(value: Optional[_T1], default: _T2) -> Union[_T1, _T2]:
     if value is None:
         return default
@@ -862,7 +863,7 @@ def _format_range(signal: "CodeGenSignal") -> str:
     minimum = signal.signal.minimum
     maximum = signal.signal.maximum
 
-    def phys_to_raw(x: Union[int, float]) -> float:
+    def phys_to_raw(x: Union[int, float]) -> Union[int, float]:
         raw_val = signal.signal.scaled_to_raw(x)
         if signal.signal.is_float:
             return float(raw_val)
@@ -907,7 +908,7 @@ def _format_pack_code_mux(message: "CodeGenMessage",
                           mux: Dict[str, Dict[int, List[str]]],
                           body_lines_per_index: List[str],
                           variable_lines: List[str],
-                          helper_kinds: Set[Tuple[str, int]]) -> List[str]:
+                          helper_kinds: Set[THelperKind]) -> List[str]:
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_pack_code_signal(message,
                              signal_name,
@@ -948,7 +949,7 @@ def _format_pack_code_signal(message: "CodeGenMessage",
                              signal_name: str,
                              body_lines: List[str],
                              variable_lines: List[str],
-                             helper_kinds: Set[Tuple[str, int]]) -> None:
+                             helper_kinds: Set[THelperKind]) -> None:
     signal = message.get_signal_by_name(signal_name)
 
     if signal.signal.conversion.is_float or signal.signal.is_signed:
@@ -984,7 +985,7 @@ def _format_pack_code_signal(message: "CodeGenMessage",
 def _format_pack_code_level(message: "CodeGenMessage",
                             signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
                             variable_lines: List[str],
-                            helper_kinds: Set[Tuple[str, int]]) -> List[str]:
+                            helper_kinds: Set[THelperKind]) -> List[str]:
     """Format one pack level in a signal tree.
 
     """
@@ -1016,7 +1017,7 @@ def _format_pack_code_level(message: "CodeGenMessage",
 
 
 def _format_pack_code(message: "CodeGenMessage",
-                      helper_kinds: Set[Tuple[str, int]]
+                      helper_kinds: Set[THelperKind]
                       ) -> Tuple[str, str]:
     variable_lines: List[str] = []
     body_lines = _format_pack_code_level(message,
@@ -1034,7 +1035,7 @@ def _format_unpack_code_mux(message: "CodeGenMessage",
                             mux: Dict[str, Dict[int, List[str]]],
                             body_lines_per_index: List[str],
                             variable_lines: List[str],
-                            helper_kinds: Set[Tuple[str, int]],
+                            helper_kinds: Set[THelperKind],
                             node_name: Optional[str]) -> List[str]:
     signal_name, multiplexed_signals = list(mux.items())[0]
     _format_unpack_code_signal(message,
@@ -1073,7 +1074,7 @@ def _format_unpack_code_signal(message: "CodeGenMessage",
                                signal_name: str,
                                body_lines: List[str],
                                variable_lines: List[str],
-                               helper_kinds: Set[Tuple[str, int]]) -> None:
+                               helper_kinds: Set[THelperKind]) -> None:
     signal = message.get_signal_by_name(signal_name)
     conversion_type_name = f'uint{signal.type_length}_t'
 
@@ -1122,7 +1123,7 @@ def _format_unpack_code_signal(message: "CodeGenMessage",
 def _format_unpack_code_level(message: "CodeGenMessage",
                               signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
                               variable_lines: List[str],
-                              helper_kinds: Set[Tuple[str, int]],
+                              helper_kinds: Set[THelperKind],
                               node_name: Optional[str]) -> List[str]:
     """Format one unpack level in a signal tree.
 
@@ -1170,7 +1171,7 @@ def _format_unpack_code_level(message: "CodeGenMessage",
 
 
 def _format_unpack_code(message: "CodeGenMessage",
-                        helper_kinds: Set[Tuple[str, int]],
+                        helper_kinds: Set[THelperKind],
                         node_name: Optional[str]) -> Tuple[str, str]:
     variable_lines: List[str] = []
     body_lines = _format_unpack_code_level(message,
@@ -1520,10 +1521,10 @@ def _generate_definitions(database_name: str,
                           floating_point_numbers: bool,
                           use_float: bool,
                           node_name: Optional[str],
-                          ) -> Tuple[str, Tuple[Set[Tuple[str, int]], Set[Tuple[str, int]]]]:
+                          ) -> Tuple[str, Tuple[Set[THelperKind], Set[THelperKind]]]:
     definitions = []
-    pack_helper_kinds: Set[Tuple[str, int]] = set()
-    unpack_helper_kinds: Set[Tuple[str, int]] = set()
+    pack_helper_kinds: Set[THelperKind] = set()
+    unpack_helper_kinds: Set[THelperKind] = set()
 
     for message in messages:
         signal_definitions = []
@@ -1639,7 +1640,7 @@ def _generate_definitions(database_name: str,
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)
 
 
-def _generate_helpers_kind(kinds: Set[Tuple[str, int]],
+def _generate_helpers_kind(kinds: Set[THelperKind],
                            left_format: str,
                            right_format: str) -> List[str]:
     formats = {
@@ -1657,7 +1658,7 @@ def _generate_helpers_kind(kinds: Set[Tuple[str, int]],
     return helpers
 
 
-def _generate_helpers(kinds: Tuple[Set[Tuple[str, int]], Set[Tuple[str, int]]]) -> str:
+def _generate_helpers(kinds: Tuple[Set[THelperKind], Set[THelperKind]]) -> str:
     pack_helpers = _generate_helpers_kind(kinds[0],
                                           PACK_HELPER_LEFT_SHIFT_FMT,
                                           PACK_HELPER_RIGHT_SHIFT_FMT)

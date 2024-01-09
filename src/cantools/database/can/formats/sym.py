@@ -775,7 +775,6 @@ def _get_enum_name(signal: Signal) -> str:
 def _dump_choice(signal: Signal) -> str:
     # Example:
     # Enum=DPF_Actv_Options(0="notActive", 1="active", 2="rgnrtnNddAtmtcllyInttdActvRgnrt", 3="notAvailable")
-    new_line = '\n'
 
     if not signal.choices:
         return ''

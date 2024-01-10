@@ -775,6 +775,7 @@ def _get_enum_name(signal: Signal) -> str:
 def _dump_choice(signal: Signal) -> str:
     # Example:
     # Enum=DPF_Actv_Options(0="notActive", 1="active", 2="rgnrtnNddAtmtcllyInttdActvRgnrt", 3="notAvailable")
+    nl = '\n'
 
     if not signal.choices:
         return ''
@@ -782,7 +783,10 @@ def _dump_choice(signal: Signal) -> str:
     enum_str = f'Enum={_get_enum_name(signal)}('
     is_first_choice = True
     for choice_number, choice_value in signal.choices.items():
-        enum_str += f'{",{new_line}" if not is_first_choice else ""}{choice_number}="{choice_value}"'
+        if choice_number % 10 == 0 and not choice_number == 0:
+            enum_str += f'{","+nl if not is_first_choice else ""}{choice_number}="{choice_value}"'
+        else:
+            enum_str += f'{", " if not is_first_choice else ""}{choice_number}="{choice_value}"'
         is_first_choice = False
     enum_str += ')'
     return enum_str

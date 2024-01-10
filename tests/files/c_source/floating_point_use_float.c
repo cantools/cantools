@@ -171,14 +171,14 @@ int floating_point_use_float_message1_init(struct floating_point_use_float_messa
     return 0;
 }
 
-double floating_point_use_float_message1_signal1_encode(float value)
+double floating_point_use_float_message1_signal1_encode(double value)
 {
     return (double)(value);
 }
 
-float floating_point_use_float_message1_signal1_decode(double value)
+double floating_point_use_float_message1_signal1_decode(double value)
 {
-    return ((float)value);
+    return ((double)value);
 }
 
 bool floating_point_use_float_message1_signal1_is_in_range(double value)
@@ -326,12 +326,12 @@ int floating_point_use_float_message3_init(struct floating_point_use_float_messa
 
 uint8_t floating_point_use_float_message3_signal3_encode(float value)
 {
-    return (uint8_t)((value - -0.125) / 0.001);
+    return (uint8_t)((value - -0.125f) / 0.001f);
 }
 
 float floating_point_use_float_message3_signal3_decode(uint8_t value)
 {
-    return (((float)value * 0.001) + -0.125);
+    return (((float)value * 0.001f) + -0.125f);
 }
 
 bool floating_point_use_float_message3_signal3_is_in_range(uint8_t value)

@@ -1936,6 +1936,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_jopp_6_0_sym_re_read(self):
         self.internal_test_jopp_6_0_sym(True)
 
+    def test_multiline_enum_sym_parsing(self):
+        db = cantools.database.load_file('tests/files/sym/test_multiline_enum.sym')
+        cantools.database.dump_file(db, 'tests/files/sym/test_multiline_enum_dump.sym')
+        db_reloaded = cantools.database.load_file('tests/files/sym/test_multiline_enum_dump.sym')
+
+        self.assertTrue(db.is_similar(db_reloaded, include_format_specifics=False))
+
     def test_empty_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/empty-6.0.sym')
 

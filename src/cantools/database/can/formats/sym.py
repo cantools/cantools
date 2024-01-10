@@ -781,13 +781,13 @@ def _dump_choice(signal: Signal) -> str:
         return ''
 
     enum_str = f'Enum={_get_enum_name(signal)}('
-    is_first_choice = True
-    for choice_number, choice_value in signal.choices.items():
-        if choice_number % 10 == 0 and not choice_number == 0:
-            enum_str += f'{","+nl if not is_first_choice else ""}{choice_number}="{choice_value}"'
-        else:
-            enum_str += f'{", " if not is_first_choice else ""}{choice_number}="{choice_value}"'
-        is_first_choice = False
+    for choice_count, (choice_number, choice_value) in enumerate(signal.choices.items()):
+        if choice_count % 10 == 0 and not choice_count == 0:
+            enum_str += ","
+            enum_str += nl
+        elif choice_count > 0:
+            enum_str += ", "
+        enum_str += f'{choice_number}="{choice_value}"'
     enum_str += ')'
     return enum_str
 

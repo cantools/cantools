@@ -782,7 +782,7 @@ def _dump_choice(signal: Signal) -> str:
 
     enum_str = f'Enum={_get_enum_name(signal)}('
     for choice_count, (choice_number, choice_value) in enumerate(signal.choices.items()):
-        if choice_count % 10 == 0 and not choice_count == 0:
+        if choice_count % 10 == 0 and choice_count != 0:
             enum_str += ","
             enum_str += nl
         elif choice_count > 0:

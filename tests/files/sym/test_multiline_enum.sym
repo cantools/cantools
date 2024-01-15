@@ -1,0 +1,70 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Jopp"
+
+{ENUMS}
+// pickled enum
+Enum=pickled(0="pickle",
+  1="onion", // barbar
+  2="carrot", // CARROT
+  3="banana", 4="plum", 5="beet", 6="tomato", 7="corn", 8="blueberry", 9="jalapenos", 10="peach", 11="cabbage",
+  12="egg")
+
+{SIGNALS}
+Sig=Signal1 unsigned 11 /u:A /max:255 /d:1 /spn:1234
+Sig=Signal2 float /u:V /o:48 /min:16 /max:130 /ln:"hhh" // bbb
+Sig=Signal3 signed 11 -m /min:0 /max:1
+Sig=Signal4 double /u:*UU /f:6 /o:5 /min:-1.7E308 /max:1.7E308
+Sig=Signal5 char
+Sig=Signal6 unsigned 8 /max:1 /e:pickled
+
+{SEND}
+
+[Symbol1]
+ID=009h
+Len=8
+
+{RECEIVE}
+
+[Message2]
+ID=00000022h-00000023h
+Type=Extended
+Len=8
+Sig=Signal3 2
+
+{SENDRECEIVE}
+
+[Message1]
+ID=000h // apa
+Len=8
+CycleTime=30
+Timeout=20
+MinInterval=10
+Sig=Signal2 32
+Sig=Signal1 0
+Sig=Signal6 24
+
+[Message3]
+ID=00Ah
+Len=8
+Sig=Signal3 0
+
+[Symbol2]
+ID=099h
+Len=8
+Sig=Signal4 0
+
+[Symbol3]
+ID=033h
+Len=8
+Mux=Multiplexer1 0,3 0
+Sig=Signal1 3
+
+[Symbol3]
+Len=8
+Mux=Multiplexer2 0,3 1
+Sig=Signal2 6
+
+[Symbol3]
+Len=8
+Mux=Multiplexer3 0,3 2
+Sig=Signal3 9

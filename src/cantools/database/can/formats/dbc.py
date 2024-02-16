@@ -1530,11 +1530,14 @@ def _load_signals(tokens,
 
     def get_signal_spn(frame_id_dbc, name):
         signal_attributes = get_attributes(frame_id_dbc, name)
+        if signal_attributes is not None and 'SPN' in signal_attributes:
+            if (value := signal_attributes['SPN'].value) is not None:
+                return value
 
-        try:
-            return signal_attributes['SPN'].value
-        except (KeyError, TypeError):
-            return None
+        if definitions is not None and 'SPN' in definitions:
+            return definitions['SPN'].default_value
+
+        return None
 
     signals = []
 

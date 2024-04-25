@@ -422,11 +422,10 @@ class LongNamesConverter:
             short_name = name[:32]
 
             if short_name in self._short_names:
-                index = self._next_index_per_cut_name[cut_name]
-                self._next_index_per_cut_name[cut_name] += 1
+                index = self._next_index_per_cut_name.get(cut_name, 0)
+                self._next_index_per_cut_name[cut_name] = index + 1
                 short_name = f'{name[:27]}_{index:04d}'
             else:
-                self._next_index_per_cut_name[cut_name] = 0
                 self._short_names.add(short_name)
 
         return short_name

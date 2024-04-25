@@ -1408,7 +1408,12 @@ def _load_signals(tokens,
         """
 
         try:
-            return choices[frame_id_dbc][signal]
+            # Remove the selected signal from the choices dict, this
+            # lets us validate that all VAL_ choices specified by the
+            # DBC are used by Messages.
+            c = choices[frame_id_dbc][signal]
+            del(choices[frame_id_dbc][signal])
+            return c
         except KeyError:
             return None
 
@@ -2068,6 +2073,16 @@ def load_string(string: str, strict: bool = True,
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes)
+    # There shouldn't be any choices/VAL_ entries left, each one should
+    # have been claimed by a Message above.
+    unused_choices = [ ]
+    for frame_id in choices.keys():
+        for c in choices[frame_id]:
+            unused_choices.append(f"VAL_ {frame_id} {c}")
+    if len(unused_choices) > 0:
+        errors = "\n    ".join(unused_choices)
+        raise ValueError(f'unused VAL_ entries in DBC:\n    {errors}')
+
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
                                  attribute_definitions,
                                  environment_variables,

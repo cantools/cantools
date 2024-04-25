@@ -1273,6 +1273,7 @@ def _load_choices(tokens):
 
     for _choice in tokens.get('VAL_', []):
         if len(_choice[1]) == 0:
+            # No optional frame id specified, ignore this VAL_/choice.
             continue
 
         od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in _choice[3])

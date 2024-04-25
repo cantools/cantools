@@ -689,6 +689,7 @@ def _load_choices(tokens: DbcTokens) -> ChoicesDict:
         choice_tokens = dbc_assert_type(_choice_tokens, list)
         frame_id_list = dbc_assert_type(choice_tokens[1], list)
         if len(frame_id_list) == 0:
+            # No optional frame id specified, ignore this VAL_/choice.
             continue
 
         pairs = dbc_assert_type(choice_tokens[3], list)

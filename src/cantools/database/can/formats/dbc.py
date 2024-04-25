@@ -1479,7 +1479,12 @@ def _load_signals(tokens,
         """
 
         try:
-            return signal_types[frame_id_dbc][signal] in FLOAT_SIGNAL_TYPES
+            # Remove the selected signal type from the signal_types
+            # dict, this lets us validate that all SIG_VALTYPE_ entries
+            # specified by the DBC are used by Messages.
+            signal_type = signal_types[frame_id_dbc][signal]
+            del(signal_types[frame_id_dbc][signal])
+            return signal_type in FLOAT_SIGNAL_TYPES
         except KeyError:
             return False
 
@@ -2082,6 +2087,16 @@ def load_string(string: str, strict: bool = True,
     if len(unused_choices) > 0:
         errors = "\n    ".join(unused_choices)
         raise ValueError(f'unused VAL_ entries in DBC:\n    {errors}')
+
+    # There shouldn't be any SIG_VALTYPE_ signal_type entries left,
+    # each one should have been claimed by a Message above.
+    unused_signal_types = [ ]
+    for frame_id in signal_types.keys():
+        for signal_type in signal_types[frame_id]:
+            unused_signal_types.append(f"SIG_VALTYPE_ {frame_id} {signal_type}")
+    if len(unused_signal_types) > 0:
+        errors = "\n    ".join(unused_signal_types)
+        raise ValueError(f'unused SIG_VALTYPE_ entries in DBC:\n    {errors}')
 
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
                                  attribute_definitions,

@@ -63,8 +63,7 @@ def _do_generate_c_source(args):
         print(f'Successfully generated {fuzzer_path_c} and {fuzzer_path_mk}.')
         print()
         print(
-            'Run "make -f {}" to build and run the fuzzer. Requires a'.format(
-                fuzzer_filename_mk))
+            f'Run "make -f {fuzzer_filename_mk}" to build and run the fuzzer. Requires a')
         print('recent version of clang.')
 
 

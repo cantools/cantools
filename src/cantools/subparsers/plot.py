@@ -170,7 +170,7 @@ class TimestampParser:
             if t is not None:
                 return t
 
-        raise ValueError("Failed to parse relative time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
+        raise ValueError(f"Failed to parse relative time {user_input!r}.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.').")
 
     def strptimedelta_in_seconds(self, user_input, pattern):
         '''
@@ -234,7 +234,7 @@ class TimestampParser:
                     out = out.replace(**kw)
                     return out
 
-        raise ValueError("Failed to parse absolute time %r.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.')." % user_input)
+        raise ValueError(f"Failed to parse absolute time {user_input!r}.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.').")
 
     def first_parse_timestamp(self, timestamp, linenumber):
         if timestamp is None:
@@ -318,7 +318,7 @@ def _do_decode(args):
     if args.list_styles:
         print("available matplotlib styles:")
         for style in plt.style.available:
-            print("- %s" % style)
+            print(f"- {style}")
         return
 
     if args.show_errors:
@@ -452,7 +452,7 @@ class Plotter:
         if self.show_invalid_syntax:
             self.x_invalid_syntax.append(timestamp)
         if not self.ignore_invalid_syntax:
-            print("Failed to parse line: %r" % line)
+            print(f"Failed to parse line: {line!r}")
 
     # ------- at end -------
 
@@ -460,7 +460,7 @@ class Plotter:
         self.signals.plot(xlabel, self.x_invalid_syntax, self.x_unknown_frames, self.x_invalid_data)
         if self.output_filename:
             plt.savefig(self.output_filename)
-            print("Result written to %s" % self.output_filename)
+            print(f"Result written to {self.output_filename}")
         else:
             plt.show()
 
@@ -531,7 +531,7 @@ class Signals:
             subplot_signals = signals[i0:i1]
             subplot_args = self.subplot_argparser.parse_args(subplot_signals)
             if auto_color_ylabels and subplot_args.color is None:
-                subplot_args.color = "C%s" % self.subplot_axis
+                subplot_args.color = f"C{self.subplot_axis}"
             self.subplot_args[(self.subplot, self.subplot_axis)] = subplot_args
             self._ylabel = ""
             for sg in subplot_args.signals:
@@ -727,7 +727,7 @@ class Signals:
 
     def plot_error(self, splot, xs, label, color):
         if xs:
-            label += " (%s)" % len(xs)
+            label += f" ({len(xs)})"
             xs = iter(xs)
             splot.axvline(next(xs), color=color, linewidth=self.ERROR_LINEWIDTH, label=label)
             for x in xs:

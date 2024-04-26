@@ -87,8 +87,7 @@ def pgn_pack(reserved, data_page, pdu_format, pdu_specific=0):
 
     if pdu_format < 240 and pdu_specific != 0:
         raise Error(
-            'Expected PDU specific 0 when PDU format is 0..239, but got {}.'.format(
-                pdu_specific))
+            f'Expected PDU specific 0 when PDU format is 0..239, but got {pdu_specific}.')
 
     try:
         packed = bitstruct.pack('u1u1u8u8',

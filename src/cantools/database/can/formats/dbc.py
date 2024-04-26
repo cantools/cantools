@@ -510,11 +510,7 @@ def _dump_messages(database, sort_signals):
     for message in database.messages:
         msg = []
         msg.append(
-            'BO_ {frame_id} {name}: {length} {senders}'.format(
-                frame_id=get_dbc_frame_id(message),
-                name=message.name,
-                length=message.length,
-                senders=format_senders(message)))
+            f'BO_ {get_dbc_frame_id(message)} {message.name}: {message.length} {format_senders(message)}')
 
         if sort_signals:
             signals = sort_signals(message.signals)
@@ -601,10 +597,7 @@ def _dump_signal_types(database):
                 continue
 
             valtype.append(
-                'SIG_VALTYPE_ {} {} : {};'.format(
-                    get_dbc_frame_id(message),
-                    signal.name,
-                    FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]))
+                f'SIG_VALTYPE_ {get_dbc_frame_id(message)} {signal.name} : {FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]};')
 
     return valtype
 
@@ -672,25 +665,13 @@ def _dump_attribute_definitions(database: InternalDatabase) -> List[str]:
             choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
             ba_def.append(
-                'BA_DEF_ {kind} "{name}" {type_name}  {choices};'.format(
-                    kind=get_kind(definition),
-                    name=definition.name,
-                    type_name=definition.type_name,
-                    choices=choices))
+                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}  {choices};')
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
             ba_def.append(
-                'BA_DEF_ {kind} "{name}" {type_name}{minimum}{maximum};'.format(
-                    kind=get_kind(definition),
-                    name=definition.name,
-                    type_name=definition.type_name,
-                    minimum=get_minimum(definition),
-                    maximum=get_maximum(definition)))
+                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}{get_minimum(definition)}{get_maximum(definition)};')
         elif definition.type_name == 'STRING':
             ba_def.append(
-                'BA_DEF_ {kind} "{name}" {type_name} ;'.format(
-                    kind=get_kind(definition),
-                    name=definition.name,
-                    type_name=definition.type_name))
+                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name} ;')
 
     return ba_def
 
@@ -722,25 +703,13 @@ def _dump_attribute_definitions_rel(database):
             choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
             ba_def_rel.append(
-                'BA_DEF_REL_ {kind}  "{name}" {type_name}  {choices};'.format(
-                    kind = definition.kind,
-                    name=definition.name,
-                    type_name=definition.type_name,
-                    choices=choices))
+                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}  {choices};')
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
             ba_def_rel.append(
-                'BA_DEF_REL_ {kind}  "{name}" {type_name}{minimum}{maximum};'.format(
-                    kind=definition.kind,
-                    name=definition.name,
-                    type_name=definition.type_name,
-                    minimum=get_minimum(definition),
-                    maximum=get_maximum(definition)))
+                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}{get_minimum(definition)}{get_maximum(definition)};')
         elif definition.type_name == 'STRING':
             ba_def_rel.append(
-                'BA_DEF_REL_ {kind}  "{name}" {type_name} ;'.format(
-                    kind=definition.kind,
-                    name=definition.name,
-                    type_name=definition.type_name))
+                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name} ;')
 
     return ba_def_rel
 
@@ -1065,11 +1034,7 @@ def _dump_signal_mux_values(database):
             ])
 
             sig_mux_values.append(
-                'SG_MUL_VAL_ {frame_id} {name} {multiplexer} {ranges};'.format(
-                    frame_id=get_dbc_frame_id(message),
-                    name=signal.name,
-                    multiplexer=signal.multiplexer_signal,
-                    ranges=ranges))
+                f'SG_MUL_VAL_ {get_dbc_frame_id(message)} {signal.name} {signal.multiplexer_signal} {ranges};')
 
     return sig_mux_values
 

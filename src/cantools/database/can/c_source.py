@@ -957,12 +957,9 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
         variable = f'    uint{cg_signal.type_length}_t {cg_signal.snake_name};'
 
         if cg_signal.signal.conversion.is_float:
-            conversion = '    memcpy(&{0}, &src_p->{0}, sizeof({0}));'.format(
-                cg_signal.snake_name)
+            conversion = f'    memcpy(&{cg_signal.snake_name}, &src_p->{cg_signal.snake_name}, sizeof({cg_signal.snake_name}));'
         else:
-            conversion = '    {0} = (uint{1}_t)src_p->{0};'.format(
-                cg_signal.snake_name,
-                cg_signal.type_length)
+            conversion = f'    {cg_signal.snake_name} = (uint{cg_signal.type_length}_t)src_p->{cg_signal.snake_name};'
 
         variable_lines.append(variable)
         body_lines.append(conversion)
@@ -1102,8 +1099,7 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
         helper_kinds.add((shift_direction, cg_signal.type_length))
 
     if cg_signal.signal.conversion.is_float:
-        conversion = '    memcpy(&dst_p->{0}, &{0}, sizeof(dst_p->{0}));'.format(
-            cg_signal.snake_name)
+        conversion = f'    memcpy(&dst_p->{cg_signal.snake_name}, &{cg_signal.snake_name}, sizeof(dst_p->{cg_signal.snake_name}));'
         body_lines.append(conversion)
     elif cg_signal.signal.is_signed:
         mask = ((1 << (cg_signal.type_length - cg_signal.signal.length)) - 1)
@@ -1116,8 +1112,7 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
                                                   suffix=cg_signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
 
-        conversion = '    dst_p->{0} = (int{1}_t){0};'.format(cg_signal.snake_name,
-                                                              cg_signal.type_length)
+        conversion = f'    dst_p->{cg_signal.snake_name} = (int{cg_signal.type_length}_t){cg_signal.snake_name};'
         body_lines.append(conversion)
 
 
@@ -1312,10 +1307,7 @@ def _generate_frame_id_defines(database_name: str,
                                cg_messages: List["CodeGenMessage"],
                                node_name: Optional[str]) -> str:
     return '\n'.join([
-        '#define {}_{}_FRAME_ID (0x{:02x}u)'.format(
-            database_name.upper(),
-            cg_message.snake_name.upper(),
-            cg_message.message.frame_id)
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_FRAME_ID (0x{cg_message.message.frame_id:02x}u)'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
@@ -1324,10 +1316,7 @@ def _generate_frame_length_defines(database_name: str,
                                    cg_messages: List["CodeGenMessage"],
                                    node_name: Optional[str]) -> str:
     result = '\n'.join([
-        '#define {}_{}_LENGTH ({}u)'.format(
-            database_name.upper(),
-            cg_message.snake_name.upper(),
-            cg_message.message.length)
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_LENGTH ({cg_message.message.length}u)'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
@@ -1338,10 +1327,7 @@ def _generate_frame_cycle_time_defines(database_name: str,
                                        cg_messages: List["CodeGenMessage"],
                                        node_name: Optional[str]) -> str:
     result = '\n'.join([
-        '#define {}_{}_CYCLE_TIME_MS ({}u)'.format(
-            database_name.upper(),
-            cg_message.snake_name.upper(),
-            cg_message.message.cycle_time)
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_CYCLE_TIME_MS ({cg_message.message.cycle_time}u)'
         for cg_message in cg_messages if cg_message.message.cycle_time is not None and
                                       _is_sender_or_receiver(cg_message, node_name)
     ])
@@ -1353,10 +1339,7 @@ def _generate_is_extended_frame_defines(database_name: str,
                                         cg_messages: List["CodeGenMessage"],
                                         node_name: Optional[str]) -> str:
     result = '\n'.join([
-        '#define {}_{}_IS_EXTENDED ({})'.format(
-            database_name.upper(),
-            cg_message.snake_name.upper(),
-            int(cg_message.message.is_extended_frame))
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_IS_EXTENDED ({int(cg_message.message.is_extended_frame)})'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
@@ -1390,10 +1373,7 @@ def _generate_frame_name_macros(database_name: str,
                                 cg_messages: List["CodeGenMessage"],
                                 node_name: Optional[str]) -> str:
     result = '\n'.join([
-        '#define {}_{}_NAME "{}"'.format(
-            database_name.upper(),
-            cg_message.snake_name.upper(),
-            cg_message.message.name)
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_NAME "{cg_message.message.name}"'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
@@ -1404,11 +1384,7 @@ def _generate_signal_name_macros(database_name: str,
                                  cg_messages: List["CodeGenMessage"],
                                  node_name: Optional[str]) -> str:
     result = '\n'.join([
-        '#define {}_{}_{}_NAME "{}"'.format(
-            database_name.upper(),
-            cg_message.snake_name.upper(),
-            cg_signal.snake_name.upper(),
-            cg_signal.signal.name)
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_{cg_signal.snake_name.upper()}_NAME "{cg_signal.signal.name}"'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name) for cg_signal in cg_message.cg_signals
     ])
 

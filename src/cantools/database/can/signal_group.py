@@ -54,6 +54,4 @@ class SignalGroup:
         self._signal_names = value
 
     def __repr__(self):
-        return "signal_group('{}', {}, {})".format(self._name,
-                                                   self._repetitions,
-                                                   self._signal_names)
+        return f"signal_group('{self._name}', {self._repetitions}, {self._signal_names})"

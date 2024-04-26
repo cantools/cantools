@@ -104,7 +104,7 @@ def _load_data_types(ecu_doc):
         elif ctype.attrib['bo'] == '12':
             byte_order = 'little_endian'
         else:
-            raise ParseError("Unknown byte order code: %s" % ctype.attrib['bo'])
+            raise ParseError(f"Unknown byte order code: {ctype.attrib['bo']}")
 
         # Load from P-type element.
         ptype_unit = data_type.find('PVALUETYPE/UNIT')

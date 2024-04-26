@@ -984,9 +984,7 @@ class Message:
             try:
                 node = multiplexers[signal][mux]
             except KeyError:
-                raise DecodeError('expected multiplexer id {}, but got {}'.format(
-                    format_or(list(multiplexers[signal].keys())),
-                    mux)) from None
+                raise DecodeError(f'expected multiplexer id {format_or(list(multiplexers[signal].keys()))}, but got {mux}') from None
 
             decoded.update(self._decode(node,
                                         data,
@@ -1264,10 +1262,7 @@ class Message:
             if signal_bit is not None:
                 if message_bits[offset] is not None:
                     raise Error(
-                        'The signals {} and {} are overlapping in message {}.'.format(
-                            signal.name,
-                            message_bits[offset],
-                            self.name))
+                        f'The signals {signal.name} and {message_bits[offset]} are overlapping in message {self.name}.')
 
                 message_bits[offset] = signal.name
 
@@ -1298,11 +1293,8 @@ class Message:
         for signal in self._signals:
             if signal.length <= 0:
                 raise Error(
-                    'The signal {} length {} is not greater than 0 in '
-                    'message {}.'.format(
-                        signal.name,
-                        signal.length,
-                        self.name))
+                    f'The signal {signal.name} length {signal.length} is not greater than 0 in '
+                    f'message {self.name}.')
 
     def refresh(self, strict: Optional[bool] = None) -> None:
         """Refresh the internal message state.

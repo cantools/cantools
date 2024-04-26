@@ -147,14 +147,4 @@ class Data:
                 [f"{value}: '{text}'"
                  for value, text in self.choices.items()]))
 
-        return "data('{}', {}, {}, '{}', {}, {}, {}, {}, '{}', {})".format(
-            self.name,
-            self.start,
-            self.length,
-            self.byte_order,
-            self.conversion.scale,
-            self.conversion.offset,
-            self.minimum,
-            self.maximum,
-            self.unit,
-            choices)
+        return f"data('{self.name}', {self.start}, {self.length}, '{self.byte_order}', {self.conversion.scale}, {self.conversion.offset}, {self.minimum}, {self.maximum}, '{self.unit}', {choices})"

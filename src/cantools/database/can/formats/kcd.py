@@ -419,7 +419,8 @@ def _dump_message(message, bus, node_refs, sort_signals):
 
 
 def _dump_version(version, parent):
-    SubElement(parent, 'Document', version=version)
+    if version is not None:
+        SubElement(parent, 'Document', version=version)
 
 
 def _dump_nodes(nodes, node_refs, parent):

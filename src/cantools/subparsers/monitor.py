@@ -558,6 +558,9 @@ class Monitor(can.Listener):
 
     def on_message_received(self, msg):
         self._queue.put(msg)
+    
+    def stop(self):
+        pass
 
 
 def _do_monitor(args):

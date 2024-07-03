@@ -481,7 +481,7 @@ def _dump_value_tables(database):
         ]
         val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices)))
 
-    return val_table + ['']
+    return [*val_table, '']
 
 
 def _dump_messages(database, sort_signals):

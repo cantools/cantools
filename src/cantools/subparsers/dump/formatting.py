@@ -50,7 +50,7 @@ def signal_tree_string(message, console_width=80, with_comments=False):
         return signal_name_line
 
     def format_mux(mux):
-        signal_name, multiplexed_signals = list(mux.items())[0]
+        signal_name, multiplexed_signals = next(iter(mux.items()))
         selector_signal = message.get_signal_by_name(signal_name)
         multiplexed_signals = sorted(multiplexed_signals.items())
         lines = []
@@ -89,7 +89,7 @@ def signal_tree_string(message, console_width=80, with_comments=False):
         return lines
 
     lines = format_level_lines(message.signal_tree)
-    lines = ['-- {root}'] + add_prefix('   ', lines)
+    lines = ['-- {root}', *add_prefix('   ', lines)]
 
     return '\n'.join(lines)
 
@@ -258,8 +258,9 @@ def layout_string(message, signal_names=True):
             padding + '               Bit',
             padding + '',
             padding + '  7   6   5   4   3   2   1   0',
-            padding + '+---+---+---+---+---+---+---+---+'
-        ] + lines
+            padding + '+---+---+---+---+---+---+---+---+',
+            *lines,
+        ]
 
     def add_horizontal_lines(byte_lines, number_width):
         padding = number_width * ' '

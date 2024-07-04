@@ -1267,7 +1267,7 @@ class Message:
                 message_bits[offset] = signal.name
 
     def _check_mux(self, message_bits, mux):
-        signal_name, children = list(mux.items())[0]
+        signal_name, children = next(iter(mux.items()))
         self._check_signal(message_bits,
                            self.get_signal_by_name(signal_name))
         children_message_bits = deepcopy(message_bits)

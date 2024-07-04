@@ -699,9 +699,9 @@ def _parse_message_frame_ids(message):
     def to_int(string):
         return int(string, 16)
 
-    def is_extended_frame(string, type):
+    def is_extended_frame(string, type_str):
         # Length of 9 includes terminating 'h' for hex
-        return len(string) == 9 or type.lower() in ['extended', 'fdextended']
+        return len(string) == 9 or type_str.lower() in ['extended', 'fdextended']
 
     message = message[3]
 
@@ -903,7 +903,7 @@ def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingO
         hex_multiplexer_id = format(multiplexer_id, 'x').upper()
         multiplexer_signal_name = multiplexer_signal.name
         if not multiplexer_signal_name:
-            raise ValueError(f"The name of the multiplexer signal with ID {str(hex_multiplexer_id)} is empty. The database is corrupt.")
+            raise ValueError(f"The name of the multiplexer signal with ID {hex_multiplexer_id} is empty. The database is corrupt.")
         message_str += f'Mux="{multiplexer_signal_name}" {_convert_start(multiplexer_signal.start, multiplexer_signal.byte_order)},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}\n'
     for signal in signals:
         message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
@@ -942,7 +942,7 @@ def _dump_messages(database: InternalDatabase) -> str:
 
             for signal_tree_signal in message.signal_tree:
                 if isinstance(signal_tree_signal, collections.abc.Mapping):
-                    signal_name, multiplexed_signals = list(signal_tree_signal.items())[0]
+                    signal_name, multiplexed_signals = next(iter(signal_tree_signal.items()))
                     is_first_message = True
                     for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
                         message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + non_multiplexed_signals,

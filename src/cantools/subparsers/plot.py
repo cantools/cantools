@@ -162,7 +162,7 @@ class TimestampParser:
 
         day_time_sep = ', '
         for pattern_day in tuple(patterns_day):
-            for pattern_time in ['%H:%M']+patterns_hour:
+            for pattern_time in ['%H:%M', *patterns_hour]:
                 patterns_day.append(pattern_day+day_time_sep+pattern_time)
 
         for pattern in patterns_minute + patterns_hour + patterns_day:
@@ -211,7 +211,7 @@ class TimestampParser:
         date_time_sep = ' '
         for patterns in (patterns_year, patterns_month, patterns_day):
             for pattern_date in tuple(patterns):
-                for pattern_time in ['%H:%M']+patterns_hour:
+                for pattern_time in ['%H:%M', *patterns_hour]:
                     patterns.append(pattern_date+date_time_sep+pattern_time)
 
         patterns_year.append('%Y-%m')
@@ -504,7 +504,7 @@ class Signals:
         self.global_subplot_args = global_subplot_args
         self.signals = []
         self.values = {}
-        self.re_flags = 0 if case_sensitive else re.I
+        self.re_flags = 0 if case_sensitive else re.IGNORECASE
         self.break_time = break_time
         self.break_time_uninit = True
         self.subplot = self.FIRST_SUBPLOT
@@ -592,7 +592,7 @@ class Signals:
         self.signals.append(sgo)
 
     def compile_reo(self):
-        self.reo = re.compile('|'.join(sg.reo.pattern for sg in self.signals), re.I)
+        self.reo = re.compile('|'.join(sg.reo.pattern for sg in self.signals), re.IGNORECASE)
 
     # ------- while reading data -------
 

@@ -117,7 +117,7 @@ class Signal:
         self.unit: Optional[str] = unit
 
         #: An object containing dbc specific properties like e.g. attributes.
-        self.dbc: Optional["DbcSpecifics"] = dbc_specifics
+        self.dbc: Optional[DbcSpecifics] = dbc_specifics
 
         #: A list of all receiver nodes of this signal.
         self.receivers: List[str] = receivers or []

@@ -603,7 +603,7 @@ INIT_SIGNAL_BODY_TEMPLATE_FMT = '''\
 class CodeGenSignal:
 
     def __init__(self, signal: "Signal") -> None:
-        self.signal: "Signal" = signal
+        self.signal: Signal = signal
         self.snake_name = camel_to_snake_case(signal.name)
 
     @property
@@ -910,7 +910,7 @@ def _format_pack_code_mux(cg_message: "CodeGenMessage",
                           body_lines_per_index: List[str],
                           variable_lines: List[str],
                           helper_kinds: Set[THelperKind]) -> List[str]:
-    signal_name, multiplexed_signals = list(mux.items())[0]
+    signal_name, multiplexed_signals = next(iter(mux.items()))
     _format_pack_code_signal(cg_message,
                              signal_name,
                              body_lines_per_index,
@@ -1009,7 +1009,7 @@ def _format_pack_code_level(cg_message: "CodeGenMessage",
     body_lines = body_lines + muxes_lines
 
     if body_lines:
-        body_lines = [''] + body_lines + ['']
+        body_lines = ["", *body_lines, ""]
 
     return body_lines
 
@@ -1024,7 +1024,7 @@ def _format_pack_code(cg_message: "CodeGenMessage",
                                          helper_kinds)
 
     if variable_lines:
-        variable_lines = sorted(set(variable_lines)) + ['', '']
+        variable_lines = [*sorted(set(variable_lines)), "", ""]
 
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
@@ -1035,7 +1035,7 @@ def _format_unpack_code_mux(cg_message: "CodeGenMessage",
                             variable_lines: List[str],
                             helper_kinds: Set[THelperKind],
                             node_name: Optional[str]) -> List[str]:
-    signal_name, multiplexed_signals = list(mux.items())[0]
+    signal_name, multiplexed_signals = next(iter(mux.items()))
     _format_unpack_code_signal(cg_message,
                                signal_name,
                                body_lines_per_index,
@@ -1161,7 +1161,7 @@ def _format_unpack_code_level(cg_message: "CodeGenMessage",
     body_lines = body_lines + muxes_lines
 
     if body_lines:
-        body_lines = [''] + body_lines
+        body_lines = ["", *body_lines]
 
     return body_lines
 
@@ -1177,7 +1177,7 @@ def _format_unpack_code(cg_message: "CodeGenMessage",
                                            node_name)
 
     if variable_lines:
-        variable_lines = sorted(set(variable_lines)) + ['', '']
+        variable_lines = [*sorted(set(variable_lines)), "", ""]
 
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 

@@ -335,6 +335,7 @@ def _do_decode(args):
                                frame_id_mask=args.frame_id_mask,
                                prune_choices=args.prune,
                                strict=not args.no_strict)
+
     re_format = None
     timestamp_parser = TimestampParser(args)
     if args.show_invalid_syntax:
@@ -390,7 +391,7 @@ def _do_decode(args):
 
         line_number += 1
 
-    plotter.plot(timestamp_parser.get_label())
+    plotter.plot(timestamp_parser.get_label(), args.plot_title)
 
 
 class Plotter:
@@ -456,7 +457,8 @@ class Plotter:
 
     # ------- at end -------
 
-    def plot(self, xlabel):
+    def plot(self, xlabel, title):
+        plt.title(title)
         self.signals.plot(xlabel, self.x_invalid_syntax, self.x_unknown_frames, self.x_invalid_data)
         if self.output_filename:
             plt.savefig(self.output_filename)
@@ -664,13 +666,16 @@ class Signals:
                     if isinstance(x[0], float):
                         splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
                     axis_format_uninitialized = False
-                plt_func = getattr(splot, sgo.plt_func)
-                container = plt_func(x, y, sgo.fmt, label=signal_name)
-                color = self.subplot_args[(sgo.subplot, sgo.axis)].color
-                if color is not None and self.contains_no_color(sgo.fmt):
-                    for line in container:
-                        line.set_color(color)
-                plotted = True
+                try:
+                    plt_func = getattr(splot, sgo.plt_func)
+                    container = plt_func(x, y, sgo.fmt, label=signal_name)
+                    color = self.subplot_args[(sgo.subplot, sgo.axis)].color
+                    if color is not None and self.contains_no_color(sgo.fmt):
+                        for line in container:
+                            line.set_color(color)
+                    plotted = True
+                except TypeError:
+                    pass
 
             if not plotted:
                 print(f"WARNING: signal {sgo.reo.pattern!r} with format {sgo.fmt!r} was not plotted.")
@@ -911,6 +916,9 @@ def add_subparser(subparsers):
         '--no-strict',
         action='store_true',
         help='Skip database consistency checks.')
+    plot_parser.add_argument(
+        '--plot-title',
+        help='The title to use for the overall matplotlib title.')
 
     plot_parser.add_argument(
         'database',

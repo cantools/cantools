@@ -41,7 +41,7 @@ class CanToolsPlotUnittests(unittest.TestCase):
             ('second', '2021-02-03 04:05:06', '2021-02-03 04:05:42'),
             ('microsecond', '2021-02-03 04:05:06.000007', '2021-02-03 04:05:06.0042'),
         ]:
-            pattern = plot.plt.rcParams["date.autoformatter.%s" % scope]
+            pattern = plot.plt.rcParams[f"date.autoformatter.{scope}"]
             first_timestamp = self.parse_time(first_timestamp)
             expected = self.parse_time(expected)
             user_input = expected.strftime(pattern)
@@ -68,7 +68,7 @@ class CanToolsPlotUnittests(unittest.TestCase):
             ('3 days, 4:56:01.12', 3*24*60**2 + 4*60**2 + 56*60 + 1.12),
         ]:
             actual = sut.parse_user_input_relative_time(user_input, first_timestamp=0)
-            self.assertEqual(actual, expected, "unexpected result for %r" % user_input)
+            self.assertEqual(actual, expected, f"unexpected result for {user_input!r}")
 
 
     # ------- auxiliary functions -------
@@ -79,7 +79,7 @@ class CanToolsPlotUnittests(unittest.TestCase):
                 return datetime.datetime.strptime(s, pattern)
             except ValueError:
                 pass
-        raise ValueError('Failed to parse time %r' % s)
+        raise ValueError('Failed to parse time {s}')
 
 
 if __name__ == '__main__':

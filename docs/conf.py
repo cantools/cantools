@@ -55,7 +55,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "cantools"
-copyright = "2015-2023, Erik Moqvist"
+project_copyright = "2015-2023, Erik Moqvist"
 author = "Erik Moqvist"
 
 # The version info for the project you're documenting, acts as replacement for

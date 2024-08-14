@@ -67,7 +67,7 @@ class CanToolsPlotTest(unittest.TestCase):
         stdout = StringIO()
 
         expected = "available matplotlib styles:"
-        expected += "".join("\n- %s" % s for s in plt.style.available)
+        expected += "".join(f"\n- {s}" for s in plt.style.available)
         expected += "\n"
 
         with mock.patch('sys.stdout', stdout):

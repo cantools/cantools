@@ -2451,7 +2451,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         for i in range(8):
             sig = msg2.signals[i]
-            self.assertEqual(sig.name, 'Test%s' % i)
+            self.assertEqual(sig.name, f'Test{i}')
             self.assertEqual(sig.start, i*8 + 7)
             self.assertEqual(sig.length, 8)
             self.assertEqual(sig.receivers, [])

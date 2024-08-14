@@ -158,7 +158,7 @@ class Database:
                          tolerance: float,
                          include_format_specifics: bool) -> bool:
 
-        if type(a) != type(b):
+        if type(a) is not type(b):
             # the types of the objects do not match
             return False
         elif a is None:
@@ -221,7 +221,7 @@ class Database:
             a_attrib = getattr(a, attrib_name)
             b_attrib = getattr(b, attrib_name)
 
-            if type(a_attrib) != type(b_attrib):
+            if type(a_attrib) is not type(b_attrib):
                 return False
             elif callable(a_attrib):
                 # ignore callable attributes

@@ -33,7 +33,8 @@ def _do_generate_c_source(args):
         not args.no_floating_point_numbers,
         args.bit_fields,
         args.use_float,
-        args.node)
+        args.node,
+        args.original_casing)
 
     os.makedirs(args.output_directory, exist_ok=True)
 
@@ -115,4 +116,9 @@ def add_subparser(subparsers):
     generate_c_source_parser.add_argument(
         '--node',
         help='Generate pack/unpack functions only for messages sent/received by the node.')
+    generate_c_source_parser.add_argument(
+        '--original-casing',
+        action='store_true',
+        default=False,
+        help='Use original casing found in dbc for messages and signals.')
     generate_c_source_parser.set_defaults(func=_do_generate_c_source)

@@ -397,7 +397,7 @@ Contributing
 
    .. code-block:: text
 
-      python3 -m pip install -e .[dev]
+      python3 -m pip install -e '.[dev]'
 
 #. Implement the new feature or bug fix.
 

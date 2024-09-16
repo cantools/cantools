@@ -1723,8 +1723,8 @@ def generate(database: "Database",
              floating_point_numbers: bool = True,
              bit_fields: bool = False,
              use_float: bool = False,
-             original_casing: bool = False,
              node_name: Optional[str] = None,
+             original_casing: bool = False,
              ) -> Tuple[str, str, str, str]:
     """Generate C source code from given CAN database `database`.
 

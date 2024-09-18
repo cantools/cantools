@@ -135,12 +135,15 @@ def format_message_by_frame_id(dbase : Database,
         else:
             return f' Frame 0x{frame_id:x} is a container message'
 
-    return format_message(message,
-                          data,
-                          decode_choices,
-                          single_line,
-                          allow_truncated=allow_truncated,
-                          allow_excess=allow_excess)
+    try:
+        return format_message(message,
+                            data,
+                            decode_choices,
+                            single_line,
+                            allow_truncated=allow_truncated,
+                            allow_excess=allow_excess)
+    except Exception as e:
+        return f' {e}'
 
 def format_container_message(message : Message,
                              data : bytes,
@@ -177,13 +180,10 @@ def format_message(message : Message,
                    single_line : bool,
                    allow_truncated : bool,
                    allow_excess : bool) -> str:
-    try:
-        decoded_signals = message.decode_simple(data,
-                                                decode_choices,
-                                                allow_truncated=allow_truncated,
-                                                allow_excess=allow_excess)
-    except Exception as e:
-        return ' ' + str(e)
+    decoded_signals = message.decode_simple(data,
+                                            decode_choices,
+                                            allow_truncated=allow_truncated,
+                                            allow_excess=allow_excess)
 
     formatted_signals = _format_signals(message, decoded_signals)
 

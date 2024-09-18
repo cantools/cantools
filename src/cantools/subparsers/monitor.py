@@ -365,59 +365,44 @@ class Monitor(can.Listener):
             self._try_update_container(message, timestamp, data)
             return
 
+        name = message.name
         if len(data) < message.length:
-            formatted = [
-                f'{timestamp:12.3f} {message.name} '
-                f'( undecoded, {message.length - len(data)} bytes '
-                f'too short: 0x{data.hex()} )'
-            ]
-            self._update_formatted_message(message.name, formatted)
-            self._discarded += 1
+            self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
             return
 
-        name = message.name
-
-        if message.is_multiplexed():
-            # Handle the case where a multiplexer index is used that isn't
-            # specified in the DBC file (ie. outside of the range). In this
-            # case, we just discard the message, like we do when the CAN
-            # message ID or length doesn't match what's specified in the DBC.
-            try:
+        try:
+            if message.is_multiplexed():
                 name = format_multiplexed_name(message,
-                                               data,
-                                               decode_choices=True,
-                                               allow_truncated=True,
-                                               allow_excess=True)
-            except database.DecodeError:
+                                                data,
+                                                decode_choices=True,
+                                                allow_truncated=True,
+                                                allow_excess=True)
+
+            if self._single_line:
                 formatted = [
-                    f'{timestamp:12.3f} {message.name} '
-                    f'( undecoded: 0x{data.hex()} )'
+                    f'''{timestamp:12.3f} {format_message(message,
+                                                        data,
+                                                        decode_choices=True,
+                                                        single_line=self._single_line,
+                                                        allow_truncated=True,
+                                                        allow_excess=True)}'''
                 ]
-                self._update_formatted_message(message.name, formatted)
-                self._discarded += 1
-                return
+            else:
+                formatted = format_message(message,
+                                        data,
+                                        decode_choices=True,
+                                        single_line=self._single_line,
+                                        allow_truncated=True,
+                                        allow_excess=True)
+                lines = formatted.splitlines()
+                formatted = [f'{timestamp:12.3f}  {lines[1]}']
+                formatted += [14 * ' ' + line for line in lines[2:]]
 
-        if self._single_line:
-            formatted = [
-                f'''{timestamp:12.3f} {format_message(message,
-                                                      data,
-                                                      decode_choices=True,
-                                                      single_line=self._single_line,
-                                                      allow_truncated=True,
-                                                      allow_excess=True)}'''
-            ]
-        else:
-            formatted = format_message(message,
-                                       data,
-                                       decode_choices=True,
-                                       single_line=self._single_line,
-                                       allow_truncated=True,
-                                       allow_excess=True)
-            lines = formatted.splitlines()
-            formatted = [f'{timestamp:12.3f}  {lines[1]}']
-            formatted += [14 * ' ' + line for line in lines[2:]]
-
-        self._update_formatted_message(name, formatted)
+            self._update_formatted_message(name, formatted)
+        except Exception as e:
+            # Discard the message in case of any decoding error, like we do when the
+            # CAN message ID or length doesn't match what's specified in the DBC.
+            self._update_message_error(timestamp, name, data, str(e))
 
     def _try_update_container(self, dbmsg, timestamp, data):
         try:
@@ -522,6 +507,13 @@ class Monitor(can.Listener):
 
         if msg_name not in self._filtered_sorted_message_names:
             self.insort_filtered(msg_name)
+
+    def _update_message_error(self, timestamp, msg_name, data, error):
+        formatted = [
+            f'{timestamp:12.3f} {msg_name} ( undecoded, {error}: 0x{data.hex()} )'
+        ]
+        self._update_formatted_message(msg_name, formatted)
+        self._discarded += 1
 
     def update_messages(self):
         modified = False

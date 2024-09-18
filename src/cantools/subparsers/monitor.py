@@ -361,16 +361,17 @@ class Monitor(can.Listener):
             self._discarded += 1
             return
 
-        if message.is_container:
-            self._try_update_container(message, timestamp, data)
-            return
-
         name = message.name
-        if len(data) < message.length:
-            self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
-            return
-
         try:
+            if message.is_container:
+                self._try_update_container(message, timestamp, data)
+                return
+
+
+            if len(data) < message.length:
+                self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
+                return
+
             if message.is_multiplexed():
                 name = format_multiplexed_name(message,
                                                 data,
@@ -405,25 +406,7 @@ class Monitor(can.Listener):
             self._update_message_error(timestamp, name, data, str(e))
 
     def _try_update_container(self, dbmsg, timestamp, data):
-        try:
-            decoded = dbmsg.decode(data, decode_containers=True)
-        except:  # noqa: E722  # TODO: introduce cantools.DecodeError & cantools.EncodeError
-            if self._single_line:
-                formatted = [
-                    f'{timestamp:12.3f} {dbmsg.name} '
-                    f'( undecodable: 0x{data.hex()} )'
-                ]
-            else:
-                formatted = [
-                    f'{timestamp:12.3f} {dbmsg.name} (',
-                    ' '*14+f'    undecodable: 0x{data.hex()}',
-                    ' '*14+f')'
-                ]
-
-            self._update_formatted_message(dbmsg.name, formatted)
-
-            self._discarded += 1
-            return
+        decoded = dbmsg.decode(data, decode_containers=True)
 
         # handle the "table of contents" of the container message. To
         # avoid too much visual turmoil and the resulting usability issues,

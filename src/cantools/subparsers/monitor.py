@@ -8,6 +8,8 @@ import time
 import can
 from argparse_addons import Integer
 
+from cantools.database.errors import DecodeError
+
 from .. import database
 from .__utils__ import format_message, format_multiplexed_name
 
@@ -400,7 +402,7 @@ class Monitor(can.Listener):
                 formatted += [14 * ' ' + line for line in lines[2:]]
 
             self._update_formatted_message(name, formatted)
-        except Exception as e:
+        except DecodeError as e:
             # Discard the message in case of any decoding error, like we do when the
             # CAN message ID or length doesn't match what's specified in the DBC.
             self._update_message_error(timestamp, name, data, str(e))

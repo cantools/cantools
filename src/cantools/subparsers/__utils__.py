@@ -1,5 +1,7 @@
 from typing import Iterable
 
+from cantools.database.errors import DecodeError
+
 from ..database.can.database import Database
 from ..database.can.message import Message
 from ..database.namedsignalvalue import NamedSignalValue
@@ -142,7 +144,7 @@ def format_message_by_frame_id(dbase : Database,
                             single_line,
                             allow_truncated=allow_truncated,
                             allow_excess=allow_excess)
-    except Exception as e:
+    except DecodeError as e:
         return f' {e}'
 
 def format_container_message(message : Message,
@@ -161,8 +163,8 @@ def format_container_message(message : Message,
                                                    allow_truncated=allow_truncated,
                                                    allow_excess=allow_excess)
 
-    except Exception as e:
-        return ' ' + str(e)
+    except DecodeError as e:
+        return f' {e}'
 
     if single_line:
         return _format_container_single_line(message,

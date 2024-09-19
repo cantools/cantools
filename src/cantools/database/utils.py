@@ -143,10 +143,14 @@ def decode_data(data: bytes,
             raise DecodeError(f"Wrong data size: {actual_length} instead of "
                               f"{expected_length} bytes")
 
-    unpacked = {
-        **formats.big_endian.unpack(data),
-        **formats.little_endian.unpack(data[::-1]),
-    }
+    try:
+        unpacked = {
+            **formats.big_endian.unpack(data),
+            **formats.little_endian.unpack(data[::-1]),
+        }
+    except (bitstruct.Error, ValueError) as e:
+        # bitstruct returns different errors in PyPy and cpython
+        raise DecodeError("unpacking failed") from e
 
     if actual_length < expected_length and allow_truncated:
         # remove signals that are outside available data bytes

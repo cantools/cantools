@@ -984,7 +984,7 @@ class Message:
             try:
                 node = multiplexers[signal][mux]
             except KeyError:
-                raise DecodeError(f'expected multiplexer id {format_or(list(multiplexers[signal].keys()))}, but got {mux}') from None
+                raise DecodeError(f'expected multiplexer id {format_or(sorted(multiplexers[signal].keys()))}, but got {mux}') from None
 
             decoded.update(self._decode(node,
                                         data,

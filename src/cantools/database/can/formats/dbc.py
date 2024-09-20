@@ -1,10 +1,10 @@
 # Load and dump a CAN database in DBC format.
 
 import re
+import typing
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from decimal import Decimal
-from typing import List
 
 import textparser
 from textparser import (
@@ -405,15 +405,14 @@ class Parser(textparser.Parser):
                 bs,
                 version))
 
+
 class LongNamesConverter:
+    def __init__(self) -> None:
+        self._next_index_per_cut_name: typing.DefaultDict[str, int] = defaultdict(int)
+        self._short_names: typing.Set[str] = set()
 
-    def __init__(self, database):
-        self._database = database
-        self._next_index_per_cut_name = defaultdict(int)
-        self._short_names = set()
-
-    def convert(self, name):
-        short_name = None
+    def convert(self, name: str) -> typing.Optional[str]:
+        short_name: typing.Optional[str] = None
 
         if len(name) == 32:
             self._short_names.add(name)
@@ -422,9 +421,9 @@ class LongNamesConverter:
             short_name = name[:32]
 
             if short_name in self._short_names:
-                index = self._next_index_per_cut_name.get(cut_name, 0)
+                index = self._next_index_per_cut_name[cut_name]
                 self._next_index_per_cut_name[cut_name] = index + 1
-                short_name = f'{name[:27]}_{index:04d}'
+                short_name = f'{cut_name}_{index:04d}'
             else:
                 self._short_names.add(short_name)
 
@@ -620,7 +619,7 @@ def _bus_is_canfd(database: InternalDatabase) -> bool:
         return False
     return bus_type.value == 'CAN FD'  # type: ignore[no-any-return]
 
-def _dump_attribute_definitions(database: InternalDatabase) -> List[str]:
+def _dump_attribute_definitions(database: InternalDatabase) -> typing.List[str]:
     ba_def = []
 
     if database.dbc is None:
@@ -1807,7 +1806,7 @@ def try_remove_attribute(dbc, name):
 
 
 def make_node_names_unique(database, shorten_long_names):
-    converter = LongNamesConverter(database)
+    converter = LongNamesConverter()
 
     for node in database.nodes:
         name = converter.convert(node.name)
@@ -1836,7 +1835,7 @@ def make_node_names_unique(database, shorten_long_names):
 
 
 def make_message_names_unique(database, shorten_long_names):
-    converter = LongNamesConverter(database)
+    converter = LongNamesConverter()
 
     for message in database.messages:
         name = converter.convert(message.name)
@@ -1855,7 +1854,7 @@ def make_message_names_unique(database, shorten_long_names):
 
 
 def make_signal_names_unique(database, shorten_long_names):
-    converter = LongNamesConverter(database)
+    converter = LongNamesConverter()
 
     for message in database.messages:
         for signal in message.signals:

@@ -13,6 +13,7 @@ import textparser
 from parameterized import parameterized
 
 import cantools.autosar
+from cantools.database.can.formats.dbc import LongNamesConverter
 from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
 
 try:
@@ -4342,6 +4343,13 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertTrue('E1234567890123456789012345678901' in envvar_names)
         self.assertFalse('E12345678901234567890123456_0000' in envvar_names)
         self.assertTrue('E12345678901234567890123456789012' in envvar_names)
+
+    def test_long_names_converter(self):
+        lnc = LongNamesConverter()
+        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLA"), "SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLL")
+        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLB"), "SSSSSSSSSSSSSSSSSSSSSSSSSSS_0000")
+        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLA"), "SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLL")
+        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLB"), "SSSSSSSSSSSSSSSSSSSSSSSSSSS_0001")
 
     def test_illegal_namespace(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:

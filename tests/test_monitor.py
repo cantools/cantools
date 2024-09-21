@@ -526,7 +526,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                     _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
-            'f', 'Y', '[', '\b', '\n', 'f', '\b', 'E', '\n', 'q'
+            'f', 'Y', '[', '\b', '\n', 'f', '\b', 'E', 'X', '\n', 'q'
         ])
         args = Args('tests/files/dbc/motohawk.dbc')
         color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
@@ -627,8 +627,20 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(29, 15, ' ', 'cyan inverted'),
                 call(29, 16, '                                                ', 'cyan'),
 
+                # Match 'x' with uppercase 'X'
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: EX'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  ExampleMessage('),
+                call(3, 0, "                  Enable: Enabled,"),
+                call(4, 0, '                  AverageRadius: 3.2 m,'),
+                call(5, 0, '                  Temperature: 250.55 degK'),
+                call(6, 0, '              )'),
+                call(29, 0, 'Filter regex: EX', 'cyan'),
+                call(29, 16, ' ', 'cyan inverted'),
+                call(29, 17, '                                               ', 'cyan'),
+
                 # Hit enter to hide filter.
-                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: E'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: EX'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000  ExampleMessage('),
                 call(3, 0, "                  Enable: Enabled,"),

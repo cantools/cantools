@@ -158,7 +158,8 @@ def load_file(filename: StringPathLike,
 
     `cache_dir` specifies the database cache location in the file
     system. Give as ``None`` to disable the cache. By default the
-    cache is disabled. The cache key is the contents of given
+    cache is disabled, but can be enabled with environment variable
+    `CANTOOLS_CACHE_DIR`. The cache key is the contents of given
     file. Using a cache will significantly reduce the load time when
     reloading the same file. The cache directory is automatically
     created if it does not exist. Remove the cache directory
@@ -182,6 +183,9 @@ def load_file(filename: StringPathLike,
         database_format,
         encoding,
         filename)
+
+    if not cache_dir:
+        cache_dir = os.getenv("CANTOOLS_CACHE_DIR", None)
 
     if cache_dir is None:
         with open(filename, encoding=encoding, errors='replace') as fin:

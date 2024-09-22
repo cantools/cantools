@@ -130,11 +130,11 @@ def load_file(filename: StringPathLike,
     `cache_dir` specifies the database cache location in the file
     system. Give as ``None`` to disable the cache. By default the
     cache is disabled, but can be enabled with environment variable
-    `CANTOOLS_CACHE_DIR`. The cache key is the contents of given
-    file. Using a cache will significantly reduce the load time when
-    reloading the same file. The cache directory is automatically
-    created if it does not exist. Remove the cache directory
-    `cache_dir` to clear the cache.
+    `CANTOOLS_CACHE_DIR`. The cache key is db path with modification
+    time and all arguments that may influence the result. Using a
+    cache will significantly reduce the load time when reloading the
+    same file. The cache directory is automatically created if it does
+    not exist. Remove the cache directory `cache_dir` to clear the cache.
 
     See :func:`~cantools.database.load_string()` for descriptions of
     other arguments.
@@ -165,16 +165,16 @@ def load_file(filename: StringPathLike,
             # the key cannot be created if function is local or depends on context
             # pickle serializer will fail anyway
             if not callable(sort_signals) or sort_signals.__module__ == 'cantools.database.utils':
-                with open(filename, 'rb') as fin:
-                    cache_key = (
-                        database_format,
-                        encoding,
-                        frame_id_mask,
-                        prune_choices,
-                        strict,
-                        sort_signals,
-                        fin.read(),
-                    )
+                cache_key = (
+                    database_format,
+                    encoding,
+                    frame_id_mask,
+                    prune_choices,
+                    strict,
+                    sort_signals,
+                    filename,
+                    os.path.getmtime(filename),
+                )
 
         db: Union[can.Database, diagnostics.Database]
         if cache_key:

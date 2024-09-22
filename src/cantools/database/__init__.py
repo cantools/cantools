@@ -1,5 +1,6 @@
 import os
-from typing import MutableMapping, Optional, TextIO, Union, cast
+from contextlib import nullcontext
+from typing import Callable, MutableMapping, Optional, TextIO, Union, cast
 
 import diskcache
 
@@ -65,36 +66,6 @@ def _resolve_database_format_and_encoding(database_format,
             encoding = 'utf-8'
 
     return database_format, encoding
-
-
-def _load_file_cache(filename: StringPathLike,
-                     database_format: Optional[str],
-                     encoding: Optional[str],
-                     frame_id_mask: Optional[int],
-                     prune_choices: bool,
-                     strict: bool,
-                     cache_dir: str,
-                     sort_signals: utils.type_sort_signals,
-                     ) -> Union[can.Database, diagnostics.Database]:
-    with open(filename, 'rb') as fin:
-        key = fin.read()
-
-    cache: MutableMapping[bytes, Union[can.Database, diagnostics.Database]]
-    with diskcache.Cache(cache_dir) as cache:
-        try:
-            return cache[key]
-        except KeyError:
-            with open(filename, encoding=encoding, errors='replace') as fin:
-                database = load(cast(TextIO, fin),
-                                database_format,
-                                frame_id_mask,
-                                prune_choices,
-                                strict,
-                                sort_signals)
-            cache[key] = database
-
-            return database
-
 
 def load_file(filename: StringPathLike,
               database_format: Optional[str] = None,
@@ -187,24 +158,42 @@ def load_file(filename: StringPathLike,
     if not cache_dir:
         cache_dir = os.getenv("CANTOOLS_CACHE_DIR", None)
 
-    if cache_dir is None:
-        with open(filename, encoding=encoding, errors='replace') as fin:
-            return load(fin,
+    with diskcache.Cache(cache_dir) if cache_dir else nullcontext() as cache:
+        cache_key = None
+        if cache_dir:
+            # do not cache if user-defined sort_signals function is provided
+            # the key cannot be created if function is local or depends on context
+            # pickle serializer will fail anyway
+            if not callable(sort_signals) or sort_signals.__module__ == 'cantools.database.utils':
+                with open(filename, 'rb') as fin:
+                    cache_key = (
                         database_format,
+                        encoding,
                         frame_id_mask,
                         prune_choices,
                         strict,
-                        sort_signals)
-    else:
-        return _load_file_cache(filename,
-                                database_format,
-                                encoding,
-                                frame_id_mask,
-                                prune_choices,
-                                strict,
-                                cache_dir,
-                                sort_signals)
+                        sort_signals,
+                        fin.read(),
+                    )
 
+        db: Union[can.Database, diagnostics.Database]
+        if cache_key:
+            db = cache.get(cache_key)
+            if db:
+                return db
+
+        with open(filename, encoding=encoding, errors='replace') as fin:
+            db = load(fin,
+                    database_format,
+                    frame_id_mask,
+                    prune_choices,
+                    strict,
+                    sort_signals)
+
+        if cache_key:
+            cache[cache_key] = db
+
+        return db
 
 def dump_file(database,
               filename,

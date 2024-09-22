@@ -61,7 +61,7 @@ jobs:
         python -m pip install -e ".[windows-all]"
     - name: Test
       run: |
-        tox -e gh
+        tox -e gh,gh_cache
     - name: Coveralls
       if: matrix.os == 'ubuntu-latest'
       uses: AndreMiras/coveralls-python-action@develop

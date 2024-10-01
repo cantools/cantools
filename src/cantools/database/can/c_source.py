@@ -901,7 +901,7 @@ def _generate_signal(cg_signal: "CodeGenSignal", bit_fields: bool, original_casi
                                       scale=scale,
                                       offset=offset,
                                       type_name=cg_signal.type_name,
-                                      name=cg_signal.snake_name if not original_casing else cg_signal.signal.name,
+                                      name=cg_signal.name if original_casing else cg_signal.snake_name,
                                       length=length)
 
     return member

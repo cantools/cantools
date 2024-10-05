@@ -15,15 +15,17 @@ def parse_number_string(in_string : str, allow_float : bool=False) \
     - Some ARXML editors seem to sometimes include a dot in integer
       numbers (e.g., they produce "123.0" instead of "123")
     """
-
     # the string literals "true" and "false" are interpreted as 1 and 0
     if in_string == 'true':
         return 1
     elif in_string == 'false':
         return 0
     # the input string contains a dot -> floating point value
-    elif '.' in in_string:
-        tmp = float(in_string)
+    else:
+        if in_string.lower().startswith('0x'):
+            tmp = float.fromhex(in_string)
+        else:
+            tmp = float(in_string)
 
         if not allow_float and tmp != int(tmp):
             raise ValueError('Floating point value specified where integer '

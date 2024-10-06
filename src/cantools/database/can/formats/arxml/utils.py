@@ -2,7 +2,7 @@
 from typing import Union
 
 
-def parse_number_string(in_string : str, allow_float : bool=False) \
+def parse_number_string(in_string: str, allow_float: bool=False) \
     -> Union[int, float]:
     """Convert a string representing numeric value that is specified
     within an ARXML file to either an integer or a floating point object
@@ -15,33 +15,51 @@ def parse_number_string(in_string : str, allow_float : bool=False) \
     - Some ARXML editors seem to sometimes include a dot in integer
       numbers (e.g., they produce "123.0" instead of "123")
     """
-    # the string literals "true" and "false" are interpreted as 1 and 0
-    if in_string == 'true':
-        return 1
-    elif in_string == 'false':
-        return 0
-    # the input string contains a dot -> floating point value
+    ret: Union[None, int, float] = None
+    in_string = in_string.strip().lower()
+
+    if len(in_string) > 0:
+        # the string literals "true" and "false" are interpreted as 1 and 0
+        if in_string == 'true':
+            ret = 1
+
+        if in_string == 'false':
+            ret = 0
+
+        # parse hex strings
+        if in_string.startswith('0x'):
+            ret = float.fromhex(in_string)
+
+        # allow octal notation without an "o" after the leading 0
+        if len(in_string) > 1 and in_string[0] == '0' and in_string[1].isdigit():
+            # interpret strings starting with a 0 as octal because
+            # python's int(*, 0) does not for some reason.
+            ret = int(in_string, 8)
+
+        if ret is None:
+            # try float parsing; throws an error, if non-numeric
+            # but handles for example scientific notation
+            try:
+                ret = float(in_string)
+            except ValueError:
+                pass
+
+        if ret is None:
+            # try int parsing; handles python integer literals
+            # see https://docs.python.org/3/reference/lexical_analysis.html#integers
+            ret = int(in_string, 0)
+
+        # check for not allowed non-integer values
+        if not allow_float:
+            if ret != int(ret):
+                raise ValueError('Floating point value specified where integer '
+                                 'is required')
+            # if an integer is required but a .0 floating point value is
+            # specified, we accept the input anyway. (this seems to be an
+            # ambiguity in the AUTOSAR specification.)
+            ret = int(ret)
     else:
-        if in_string.lower().startswith('0x'):
-            tmp = float.fromhex(in_string)
-        else:
-            tmp = float(in_string)
+        ret = 0
 
-        if not allow_float and tmp != int(tmp):
-            raise ValueError('Floating point value specified where integer '
-                             'is required')
+    return ret
 
-        # if an integer is required but a .0 floating point value is
-        # specified, we accept the input anyway. (this seems to be an
-        # ambiguity in the AUTOSAR specification.)
-        return tmp if allow_float else int(tmp)
-
-    in_string = in_string.strip()
-    if not in_string:
-        return 0
-    elif in_string[0] == '0' and in_string[1:2].isdigit():
-        # interpret strings starting with a 0 as octal because
-        # python's int(*, 0) does not for some reason.
-        return int(in_string, 8)
-
-    return int(in_string, 0) # autodetect the base

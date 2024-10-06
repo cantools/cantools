@@ -4,6 +4,7 @@ import curses
 import queue
 import re
 import time
+from enum import Enum
 
 import can
 from argparse_addons import Integer
@@ -17,6 +18,10 @@ from .__utils__ import format_message, format_multiplexed_name
 class QuitError(Exception):
     pass
 
+class MessageFormattingResult(Enum):
+    Ok = 0
+    UnknownMessage = 1
+    DecodeError = 2
 
 class Monitor(can.Listener):
 
@@ -41,6 +46,7 @@ class Monitor(can.Listener):
         self._nrows, self._ncols = stdscr.getmaxyx()
         self._received = 0
         self._discarded = 0
+        self._errors = 0
         self._basetime = None
         self._page_first_row = 0
 
@@ -132,7 +138,7 @@ class Monitor(can.Listener):
 
     def draw_stats(self, row):
         status_text = \
-            f'Received: {self._received}, Discarded: {self._discarded}, Errors: 0'
+            f'Received: {self._received}, Discarded: {self._discarded}, Errors: {self._errors}'
         if self._filter:
             status_text += f', Filter: {self._filter}'
         self.addstr(row, 0, status_text)
@@ -345,34 +351,28 @@ class Monitor(can.Listener):
 
         self._modified = True
 
-    def try_update_message(self):
-        message = self._queue.get_nowait()
-        frame_id = message.arbitration_id
-        data = message.data
-        timestamp = message.timestamp
-
+    def try_update_message(self, raw_message: can.Message) -> MessageFormattingResult:
         if self._basetime is None:
-            self._basetime = timestamp
+            self._basetime = raw_message.timestamp
 
-        timestamp -= self._basetime
-        self._received += 1
+        data = raw_message.data
+        timestamp = raw_message.timestamp - self._basetime
 
         try:
-            message = self._dbase.get_message_by_frame_id(frame_id)
+            message = self._dbase.get_message_by_frame_id(raw_message.arbitration_id)
         except KeyError:
-            self._discarded += 1
-            return
+            return MessageFormattingResult.UnknownMessage
 
         name = message.name
         try:
             if message.is_container:
                 self._try_update_container(message, timestamp, data)
-                return
+                return MessageFormattingResult.Ok
 
 
             if len(data) < message.length:
                 self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
-                return
+                return MessageFormattingResult.DecodeError
 
             if message.is_multiplexed():
                 name = format_multiplexed_name(message,
@@ -402,10 +402,12 @@ class Monitor(can.Listener):
                 formatted += [14 * ' ' + line for line in lines[2:]]
 
             self._update_formatted_message(name, formatted)
+            return MessageFormattingResult.Ok
         except DecodeError as e:
             # Discard the message in case of any decoding error, like we do when the
             # CAN message ID or length doesn't match what's specified in the DBC.
             self._update_message_error(timestamp, name, data, str(e))
+            return MessageFormattingResult.DecodeError
 
     def _try_update_container(self, dbmsg, timestamp, data):
         decoded = dbmsg.decode(data, decode_containers=True)
@@ -498,14 +500,18 @@ class Monitor(can.Listener):
             f'{timestamp:12.3f} {msg_name} ( undecoded, {error}: 0x{data.hex()} )'
         ]
         self._update_formatted_message(msg_name, formatted)
-        self._discarded += 1
 
     def update_messages(self):
         modified = False
 
         try:
             while True:
-                self.try_update_message()
+                result = self.try_update_message(self._queue.get_nowait())
+                self._received += 1
+                if result == MessageFormattingResult.UnknownMessage:
+                    self._discarded += 1
+                elif result == MessageFormattingResult.DecodeError:
+                    self._errors += 1
                 modified = True
         except queue.Empty:
             pass

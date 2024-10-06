@@ -285,7 +285,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         self.assert_called(
             stdscr.addstr,
             [
-                call(0, 0, 'Received: 1, Discarded: 1, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 1'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000 BATTERY_VT ( undecoded, expected multiplexer id 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34 or 35, but got 36: 0x240098980b00 )'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
@@ -1316,7 +1316,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         self.assert_called(
             stdscr.addstr,
             [
-                call(0, 0, 'Received: 1, Discarded: 1, Errors: 0'),
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 1'),
                 call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
                 call(2, 0, '       0.000 Message1 ( undecoded, unpacking failed: 0x24 )'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')

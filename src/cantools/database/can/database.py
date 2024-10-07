@@ -444,10 +444,13 @@ class Database:
         if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
             sort_signals = None
 
+        if _version := self._version is None:
+            _version = ''
+
         return kcd.dump_string(InternalDatabase(self._messages,
                                                 self._nodes,
                                                 self._buses,
-                                                self._version,
+                                                _version,
                                                 self._dbc),
                                sort_signals=sort_signals)
 

@@ -51,7 +51,7 @@ class Database:
                  messages: Optional[List[Message]] = None,
                  nodes: Optional[List[Node]] = None,
                  buses: Optional[List[Bus]] = None,
-                 version: Optional[str] = "",
+                 version: Optional[str] = None,
                  dbc_specifics: Optional[DbcSpecifics] = None,
                  autosar_specifics: Optional[AutosarDatabaseSpecifics] = None,
                  frame_id_mask: Optional[int] = None,

@@ -452,6 +452,9 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
     }
     network_definition = Element('NetworkDefinition', attrib)
 
+    if database.version is None:
+        database.version = ''
+
     _dump_version(database.version, network_definition)
     _dump_nodes(database.nodes, node_refs, network_definition)
     _dump_messages(database.messages, node_refs, network_definition, sort_signals)

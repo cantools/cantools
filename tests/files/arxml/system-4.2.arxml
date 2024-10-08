@@ -1202,7 +1202,7 @@
                 <COMPU-RATIONAL-COEFFS>
                   <COMPU-NUMERATOR>
                     <V>0</V>
-                    <V>10</V>
+                    <V>1e1</V>
                   </COMPU-NUMERATOR>
                   <COMPU-DENOMINATOR>
                     <V>2</V>

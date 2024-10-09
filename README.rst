@@ -348,6 +348,14 @@ functions only for messages with its signal receivers belonging to that node.
 
 .. code-block:: text
 
+   $ python3 -m cantools generate_c_source --original-casing tests/files/dbc/motohawk.dbc
+   Successfully generated motohawk.h and motohawk.c.
+
+In this example ``--original-casing`` is used to generate
+code using the original casing found in dbc for messages and signals. 
+
+.. code-block:: text
+
    $ cantools generate_c_source tests/files/dbc/motohawk.dbc --node PCM1
    Successfully generated motohawk.h and motohawk.c.
 
@@ -397,7 +405,7 @@ Contributing
 
    .. code-block:: text
 
-      python3 -m pip install -e .[dev]
+      python3 -m pip install -e '.[dev]'
 
 #. Implement the new feature or bug fix.
 

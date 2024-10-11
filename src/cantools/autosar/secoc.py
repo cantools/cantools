@@ -52,7 +52,7 @@ def apply_authenticator(raw_payload: bytes,
     """Given a byte-like object that contains the encoded signals to be
     send, compute the full message which ought to be send.
 
-    This is basically the concatination of the raw payload, the
+    This is basically the concatenation of the raw payload, the
     truncated freshness value and the truncated authenticator for the
     message.
     """

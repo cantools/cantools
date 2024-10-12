@@ -969,7 +969,7 @@ class SystemLoader:
                 comments = self._load_comments(contained_pdu)
 
                 # the bit pattern used to fill in unused bits to avoid
-                # undefined behaviour/informtion leaks
+                # undefined behaviour/information leaks
                 unused_bit_pattern = \
                     self._get_unique_arxml_child(contained_pdu,
                                                  'UNUSED-BIT-PATTERN')
@@ -1234,7 +1234,7 @@ class SystemLoader:
             # would require a major change in the database format.
             for sig in dynalt_signals:
                 # if a given signal is not already under the wings of
-                # a sub-multiplexer signal, we claim it for ourselfs
+                # a sub-multiplexer signal, we claim it for ourselves
                 if sig.multiplexer_signal is None:
                     sig.multiplexer_signal = selector_signal.name
                     sig.multiplexer_ids = [ dynalt_selector_value ]
@@ -1242,7 +1242,7 @@ class SystemLoader:
             signals.extend(dynalt_signals)
 
             # TODO: the cycle time of the multiplexers can be
-            # specified indepently of that of the message. how should
+            # specified independently of that of the message. how should
             # this be handled?
 
         if selector_signal_choices:
@@ -1569,7 +1569,7 @@ class SystemLoader:
         """"Load the initial value of a signal
 
         Supported mechanisms are references to constants and direct
-        specifcation of the value. Note that this method returns a
+        specification of the value. Note that this method returns a
         string which must be converted into the signal's data type by
         the calling code.
         """

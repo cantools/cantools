@@ -630,7 +630,7 @@ class Message:
         ``EncodeError`` exception is raised.
 
         Depending on the parameters specified, the data of the
-        dictionary must adhere to additonal requirements:
+        dictionary must adhere to additional requirements:
 
         :param scaling: If ``False`` no scaling of signals is performed.
 
@@ -683,7 +683,7 @@ class Message:
 
         # This type checking is not really comprehensive and is
         # superfluous if the type hints are respected by the calling
-        # code. That said it guards against accidentially passing a
+        # code. That said it guards against accidentally passing a
         # SignalDict for normal messages...
         if not isinstance(input_data, list):
             raise EncodeError(f'Input data for encoding message "{self.name}" '

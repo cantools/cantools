@@ -201,7 +201,7 @@ class Database:
 
         if not include_format_specifics:
             # ignore format specific attributes if requested. So far,
-            # only DBC and ARXML amend the databaase with format
+            # only DBC and ARXML amend the database with format
             # specific information.
             for x in 'dbc', 'autosar':
                 if x in a_attrib_names:

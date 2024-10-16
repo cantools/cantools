@@ -52,16 +52,9 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install tox
-    - name: Install optional windows dependencies
-      run: |
-        python -m pip install -e ".[windows-all]"
     - name: Test
       run: |
-        tox -e gh,gh_cache
+        pipx run tox -e gh
     - name: Coveralls
       if: matrix.os == 'ubuntu-latest'
       uses: AndreMiras/coveralls-python-action@develop

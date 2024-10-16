@@ -5,8 +5,9 @@ import os
 import re
 import shutil
 import timeit
-import unittest
+import unittest.mock
 from collections import namedtuple
+from pathlib import Path
 from xml.etree import ElementTree
 
 import textparser
@@ -5993,6 +5994,23 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sig.choices[1], 'DRIVER_HEARTBEAT_cmd_SYNC')
         self.assertEqual(sig.choices[2], 'DRIVER_HEARTBEAT_cmd_REBOOT')
 
+    @unittest.mock.patch.dict(os.environ, {'CANTOOLS_CACHE_DIR': 'tests/cache_dir'})
+    def test_cache_env_var(self):
+        cache_dir_path = Path(__file__).parent / "cache_dir"
+
+        # delete existing
+        if cache_dir_path.exists():
+            shutil.rmtree(cache_dir_path)
+
+        # load database
+        cantools.database.load_file('tests/files/dbc/motohawk.dbc')
+
+        # ensure that cache was created
+        self.assertTrue((cache_dir_path / 'cache.db').exists())
+
+        # cleanup
+        if cache_dir_path.exists():
+            shutil.rmtree(cache_dir_path)
 
     def test_sort_signals_by_name(self):
         filename = 'tests/files/dbc/vehicle.dbc'

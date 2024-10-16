@@ -1,6 +1,6 @@
 import os
 from contextlib import nullcontext
-from typing import Callable, MutableMapping, Optional, TextIO, Union, cast
+from typing import Any, Optional, TextIO, Tuple, Union
 
 import diskcache
 
@@ -155,12 +155,12 @@ def load_file(filename: StringPathLike,
         encoding,
         filename)
 
-    if not cache_dir:
-        cache_dir = os.getenv("CANTOOLS_CACHE_DIR", None)
+    cache_dir = cache_dir or os.getenv("CANTOOLS_CACHE_DIR", None)
+    cache_key: Optional[Tuple[Any, ...]] = None
+    db: Union[can.Database, diagnostics.Database]
 
     with diskcache.Cache(cache_dir) if cache_dir else nullcontext() as cache:
-        cache_key = None
-        if cache_dir:
+        if cache:
             # do not cache if user-defined sort_signals function is provided
             # the key cannot be created if function is local or depends on context
             # pickle serializer will fail anyway
@@ -176,10 +176,8 @@ def load_file(filename: StringPathLike,
                     os.path.getmtime(filename),
                 )
 
-        db: Union[can.Database, diagnostics.Database]
-        if cache_key:
             db = cache.get(cache_key)
-            if db:
+            if isinstance(db, (can.Database, diagnostics.Database)):
                 return db
 
         with open(filename, encoding=encoding, errors='replace') as fin:
@@ -190,7 +188,7 @@ def load_file(filename: StringPathLike,
                     strict,
                     sort_signals)
 
-        if cache_key:
+        if cache:
             cache[cache_key] = db
 
         return db

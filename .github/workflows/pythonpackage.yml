@@ -7,32 +7,20 @@ env:
 
 jobs:
   codegen:
-    runs-on: ubuntu-latest
+    runs-on:  ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.12"]
+        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
       fail-fast: false
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install nala
-        pip install -e .
+        python-version: "3.13"
     - name: Test
       run: |
-        env PYTHONPATH=. python examples/hello_world.py
-        env PYTHONPATH=. python examples/diagnostics/did.py
-        make test-c-clean
-        make test-c
-        make test-c-clean
-        CC=gcc make test-c
-        make test-c-clean
-        CC=clang make test-c-src
+        pipx run tox -e codegen
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
@@ -44,12 +32,12 @@ jobs:
     strategy:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
-        python-version: ["3.8", "3.12", "pypy-3.9"]
+        python-version: ["3.8", "3.13", "pypy-3.9"]
       fail-fast: false
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Test
@@ -76,7 +64,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.11
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.12"
     - name: Install dependencies
@@ -100,7 +88,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
     - name: Install dependencies
@@ -117,7 +105,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
       - name: Build wheel and sdist
@@ -133,17 +121,15 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # fetch tags for setuptools-scm
     - name: Set up Python 3.10
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
-    - name: Install pypa/build
-      run: |
-        python -m pip install build --user
     - name: Build a binary wheel and a source tarball
       run: |
-        git clean -dfx
-        python -m build --sdist --wheel --outdir dist/ .
+        pipx run build
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

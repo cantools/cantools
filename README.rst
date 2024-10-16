@@ -1,4 +1,4 @@
-|github-actions| |coverage| |nala|
+|github-actions| |coverage|
 
 About
 =====
@@ -427,8 +427,6 @@ Contributing
    :target: https://coveralls.io/github/cantoolscantools?branch=master
    :alt: Test coverage reports on Coveralls.io
 
-.. |nala| image:: https://img.shields.io/badge/nala-test-blue.svg
-   :target: https://github.com/cantools/nala
 
 .. _small DBC-file: https://github.com/cantools/cantools/blob/master/tests/files/dbc/motohawk.dbc
 

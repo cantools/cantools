@@ -1,0 +1,5 @@
+*
+!.gitignore
+!test_*.[ch]
+!build/
+!CMakeLists.txt

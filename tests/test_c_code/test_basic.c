@@ -1,17 +1,17 @@
 /* Include the generated files first to test that all required header
    files are included. */
-#include "files/c_source/motohawk.h"
-#include "files/c_source/padding_bit_order.h"
-#include "files/c_source/vehicle.h"
-#include "files/c_source/open_actuator.h"
-#include "files/c_source/multiplex.h"
-#include "files/c_source/multiplex_2.h"
-#include "files/c_source/floating_point.h"
-#include "files/c_source/no_signals.h"
-#include "files/c_source/signed.h"
-#include "files/c_source/my_database_name.h"
-#include "files/c_source/min_max_only_6_0.h"
-#include "files/c_source/abs.h"
+#include "motohawk.h"
+#include "padding_bit_order.h"
+#include "vehicle.h"
+#include "open_actuator.h"
+#include "multiplex.h"
+#include "multiplex_2.h"
+#include "floating_point.h"
+#include "no_signals.h"
+#include "signed.h"
+#include "my_database_name.h"
+#include "min_max_only_6_0.h"
+#include "abs.h"
 
 #include <stdio.h>
 #include <stdint.h>

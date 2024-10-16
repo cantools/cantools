@@ -1,6 +1,6 @@
 /* Include the generated files first to test that all required header
    files are included. */
-#include "files/c_source/vehicle.h"
+#include "vehicle.h"
 
 #include <stdio.h>
 #include <stdint.h>

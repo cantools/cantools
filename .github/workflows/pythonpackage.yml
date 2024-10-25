@@ -22,11 +22,6 @@ jobs:
     - name: Test
       run: |
         pipx run tox -e codegen
-    - name: Coveralls
-      uses: AndreMiras/coveralls-python-action@develop
-      with:
-        parallel: true
-        flag-name: Code Generator Test
 
   test:
     runs-on: ${{ matrix.os }}

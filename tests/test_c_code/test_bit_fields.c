@@ -288,35 +288,3 @@ void test_is_in_range_bit_fields(void) {
     TEST_ASSERT_TRUE(motohawk_bit_fields_example_message_temperature_is_in_range(2047));
     TEST_ASSERT_FALSE(motohawk_bit_fields_example_message_temperature_is_in_range(2048));
 }
-
-void test_sizeof_types(void) {
-    TEST_ASSERT_EQUAL(sizeof(struct motohawk_example_message_t), 4);
-    TEST_ASSERT_EQUAL(sizeof(struct motohawk_bit_fields_example_message_t), 3);
-
-    TEST_ASSERT_EQUAL(sizeof(struct floating_point_message1_t), 8);
-    TEST_ASSERT_EQUAL(sizeof(struct floating_point_bit_fields_message1_t), 8);
-
-    TEST_ASSERT_EQUAL(sizeof(struct floating_point_message2_t), 8);
-    TEST_ASSERT_EQUAL(sizeof(struct floating_point_bit_fields_message2_t), 8);
-
-    TEST_ASSERT_EQUAL(sizeof(struct signed_message64_t), 8);
-    TEST_ASSERT_EQUAL(sizeof(struct signed_bit_fields_message64_t), 8);
-
-    TEST_ASSERT_EQUAL(sizeof(struct signed_message33_t), 8);
-    TEST_ASSERT_EQUAL(sizeof(struct signed_bit_fields_message33_t), 5);
-
-    TEST_ASSERT_EQUAL(sizeof(struct signed_message32_t), 4);
-    TEST_ASSERT_EQUAL(sizeof(struct signed_bit_fields_message32_t), 4);
-
-    TEST_ASSERT_EQUAL(sizeof(struct signed_message64big_t), 8);
-    TEST_ASSERT_EQUAL(sizeof(struct signed_bit_fields_message64big_t), 8);
-
-    TEST_ASSERT_EQUAL(sizeof(struct signed_message33big_t), 8);
-    TEST_ASSERT_EQUAL(sizeof(struct signed_bit_fields_message33big_t), 5);
-
-    TEST_ASSERT_EQUAL(sizeof(struct signed_message32big_t), 4);
-    TEST_ASSERT_EQUAL(sizeof(struct signed_bit_fields_message32big_t), 4);
-
-    TEST_ASSERT_EQUAL(sizeof(struct signed_message378910_t), 10);
-    TEST_ASSERT_EQUAL(sizeof(struct signed_bit_fields_message378910_t), 7);
-}

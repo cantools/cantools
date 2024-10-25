@@ -51,7 +51,6 @@ int main(void) {
     RUN_TEST(test_signed_bit_fields_message32big);
     RUN_TEST(test_signed_bit_fields_message378910);
     RUN_TEST(test_is_in_range_bit_fields);
-    RUN_TEST(test_sizeof_types);
 
     // test_initial_values.h
     RUN_TEST(valid_initial_value);

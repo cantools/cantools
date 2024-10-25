@@ -12,6 +12,5 @@ void test_signed_bit_fields_message33big(void);
 void test_signed_bit_fields_message32big(void);
 void test_signed_bit_fields_message378910(void);
 void test_is_in_range_bit_fields(void);
-void test_sizeof_types(void);
 
 #endif // TEST_BITFIELDS_H

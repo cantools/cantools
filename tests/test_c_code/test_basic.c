@@ -19,10 +19,7 @@
 #include <math.h>
 #include "unity.h"
 
-static bool fequal(double v1, double v2)
-{
-    return (fabs(v1 - v2) < 0.000001);
-}
+#define ABS_TOL 0.000001
 
 void test_motohawk_example_message(void) {
     struct {
@@ -564,15 +561,15 @@ void test_is_in_range(void) {
 void test_encode_decode(void) {
     /* Scale=1 and offset=0. */
     TEST_ASSERT_EQUAL(motohawk_example_message_enable_encode(5.0), 5);
-    TEST_ASSERT_TRUE(fequal(motohawk_example_message_enable_decode(5), 5.0));
+    TEST_ASSERT_DOUBLE_WITHIN(ABS_TOL, motohawk_example_message_enable_decode(5), 5.0);
 
     /* Scale=0.1 and offset=0. */
     TEST_ASSERT_EQUAL(motohawk_example_message_average_radius_encode(5.0), 50);
-    TEST_ASSERT_TRUE(fequal(motohawk_example_message_average_radius_decode(50), 5.0));
+    TEST_ASSERT_DOUBLE_WITHIN(ABS_TOL, motohawk_example_message_average_radius_decode(50), 5.0);
 
     /* Scale=0.01 and offset=250. */
     TEST_ASSERT_EQUAL(motohawk_example_message_temperature_encode(251.0), 100);
-    TEST_ASSERT_TRUE(fequal(motohawk_example_message_temperature_decode(100), 251.0));
+    TEST_ASSERT_DOUBLE_WITHIN(ABS_TOL, motohawk_example_message_temperature_decode(100), 251.0);
 }
 
 void test_unpack_does_not_modify_other_mux_signals(void) {

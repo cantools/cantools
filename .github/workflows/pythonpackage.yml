@@ -19,9 +19,13 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox
     - name: Test
       run: |
-        pipx run tox -e codegen
+        tox -e codegen
 
   test:
     runs-on: ${{ matrix.os }}
@@ -36,9 +40,13 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox
     - name: Test
       run: |
-        pipx run tox -e gh
+        tox -e gh
     - name: Coveralls
       if: matrix.os == 'ubuntu-latest'
       uses: AndreMiras/coveralls-python-action@develop
@@ -59,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.11
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.12"
@@ -75,6 +83,7 @@ jobs:
         mypy --python-version 3.10 .
         mypy --python-version 3.11 .
         mypy --python-version 3.12 .
+        mypy --python-version 3.13 .
     - name: Run linters
       run: |
         ruff check ./src
@@ -86,7 +95,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.12"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -103,11 +112,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
       - name: Build wheel and sdist
-        run: pipx run build
+        run: python -m build
       - name: Check build artifacts
-        run: pipx run twine check --strict dist/*
+        run: twine check --strict dist/*
 
   release:
     needs: [test, codegen, linter, build]
@@ -119,13 +132,17 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0  # fetch tags for setuptools-scm
-    - name: Set up Python 3.10
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: "3.12"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
     - name: Build a binary wheel and a source tarball
       run: |
-        pipx run build
+        python -m build
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

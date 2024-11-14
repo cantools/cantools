@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <string.h>
 #include <math.h>
-#include "unity.h"
+#include "test_framework/unity.h"
 
 void test_motohawk_bit_fields_example_message(void) {
     struct {

@@ -525,7 +525,7 @@ class Signals:
                 i12 = signals.index(self.SEP_AXES, i0)
             except ValueError:
                 i12 = None
-            if i1 is None or i12 is not None and i12 < i1:
+            if i1 is None or (i12 is not None and i12 < i1):
                 i1 = i12
 
             subplot_signals = signals[i0:i1]
@@ -792,7 +792,7 @@ class Graph:
     and one more generic matching the rest with another format.
     '''
 
-    __slots__ = ('x', 'y', 'plotted_signal')
+    __slots__ = ('plotted_signal', 'x', 'y')
 
     def __init__(self):
         self.x = []

@@ -26,28 +26,31 @@ def parse_number_string(in_string: str, allow_float: bool=False) \
         if in_string == 'false':
             ret = 0
 
-        # parse hex strings
-        if in_string.startswith('0x'):
-            ret = float.fromhex(in_string)
-
-        # allow octal notation without an "o" after the leading 0
+        # note: prefer parsing as integer first to prevent floating-point precision issues in large numbers.
+        # 1. try int parsing from octal notation without an "o" after the leading 0.
         if len(in_string) > 1 and in_string[0] == '0' and in_string[1].isdigit():
             # interpret strings starting with a 0 as octal because
             # python's int(*, 0) does not for some reason.
             ret = int(in_string, 8)
 
+        # 2. try int parsing with auto-detected base.
         if ret is None:
-            # try float parsing; throws an error, if non-numeric
-            # but handles for example scientific notation
+            # handles python integer literals
+            # see https://docs.python.org/3/reference/lexical_analysis.html#integers
             try:
-                ret = float(in_string)
+                ret = int(in_string, 0)
             except ValueError:
                 pass
 
+        # 3. try float parsing from hex string.
+        if ret is None and in_string.startswith('0x'):
+            ret = float.fromhex(in_string)
+
+        # 4. try float parsing from 'normal' float string
         if ret is None:
-            # try int parsing; handles python integer literals
-            # see https://docs.python.org/3/reference/lexical_analysis.html#integers
-            ret = int(in_string, 0)
+            # throws an error, if non-numeric
+            # but handles for example scientific notation
+            ret = float(in_string)
 
         # check for not allowed non-integer values
         if not allow_float:

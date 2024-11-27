@@ -57,8 +57,6 @@ def parse_number_string(in_string: str, allow_float: bool=False) \
             if ret != int(ret):
                 raise ValueError('Floating point value specified where integer '
                                  'is required')
-
-
             # if an integer is required but a .0 floating point value is
             # specified, we accept the input anyway. (this seems to be an
             # ambiguity in the AUTOSAR specification.)

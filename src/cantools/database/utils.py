@@ -89,8 +89,18 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
             raw_values[name] = value if conversion.is_float else round(value)
             continue
 
-        if isinstance(value, (str, NamedSignalValue)):
+        if isinstance(value, str):
             raw_values[name] = conversion.choice_to_number(value)
+            continue
+
+        if isinstance(value, NamedSignalValue):
+            # validate the given NamedSignalValue first
+            if value != conversion.raw_to_scaled(value.value, decode_choices=True):
+                raise EncodeError(
+                    f"Invalid 'NamedSignalValue' name/value pair not found! Name {value.name}, value {value.value}"
+                )
+
+            raw_values[name] = value.value
             continue
 
         raise EncodeError(

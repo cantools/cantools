@@ -1,14 +1,10 @@
 import re
 import time
 import warnings
+from collections.abc import Iterator
 from typing import (
     TYPE_CHECKING,
-    Dict,
-    Iterator,
-    List,
     Optional,
-    Set,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -22,7 +18,7 @@ if TYPE_CHECKING:
 
 _T1 = TypeVar("_T1")
 _T2 = TypeVar("_T2")
-THelperKind = Tuple[str, int]
+THelperKind = tuple[str, int]
 
 
 HEADER_FMT = '''\
@@ -663,7 +659,7 @@ class CodeGenSignal:
             return ''
 
     @property
-    def unique_choices(self) -> Dict[int, str]:
+    def unique_choices(self) -> dict[int, str]:
         """Make duplicated choice names unique by first appending its value
         and then underscores until unique.
 
@@ -752,7 +748,7 @@ class CodeGenSignal:
         else:
             return cast(int, (2 ** self.signal.length) - 1)
 
-    def segments(self, invert_shift: bool) -> Iterator[Tuple[int, int, str, int]]:
+    def segments(self, invert_shift: bool) -> Iterator[tuple[int, int, str, int]]:
         index, pos = divmod(self.signal.start, 8)
         left = self.signal.length
 
@@ -831,7 +827,7 @@ def camel_to_snake_case(value: str) -> str:
     return value
 
 
-def _strip_blank_lines(lines: List[str]) -> List[str]:
+def _strip_blank_lines(lines: list[str]) -> list[str]:
     try:
         while lines[0] == '':
             lines = lines[1:]
@@ -906,10 +902,10 @@ def _generate_signal(cg_signal: "CodeGenSignal", bit_fields: bool) -> str:
 
 
 def _format_pack_code_mux(cg_message: "CodeGenMessage",
-                          mux: Dict[str, Dict[int, List[str]]],
-                          body_lines_per_index: List[str],
-                          variable_lines: List[str],
-                          helper_kinds: Set[THelperKind]) -> List[str]:
+                          mux: dict[str, dict[int, list[str]]],
+                          body_lines_per_index: list[str],
+                          variable_lines: list[str],
+                          helper_kinds: set[THelperKind]) -> list[str]:
     signal_name, multiplexed_signals = next(iter(mux.items()))
     _format_pack_code_signal(cg_message,
                              signal_name,
@@ -948,9 +944,9 @@ def _format_pack_code_mux(cg_message: "CodeGenMessage",
 
 def _format_pack_code_signal(cg_message: "CodeGenMessage",
                              signal_name: str,
-                             body_lines: List[str],
-                             variable_lines: List[str],
-                             helper_kinds: Set[THelperKind]) -> None:
+                             body_lines: list[str],
+                             variable_lines: list[str],
+                             helper_kinds: set[THelperKind]) -> None:
     cg_signal = cg_message.get_signal_by_name(signal_name)
 
     if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
@@ -981,15 +977,15 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
 
 
 def _format_pack_code_level(cg_message: "CodeGenMessage",
-                            signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
-                            variable_lines: List[str],
-                            helper_kinds: Set[THelperKind]) -> List[str]:
+                            signal_names: Union[list[str], list[dict[str, dict[int, list[str]]]]],
+                            variable_lines: list[str],
+                            helper_kinds: set[THelperKind]) -> list[str]:
     """Format one pack level in a signal tree.
 
     """
 
-    body_lines: List[str] = []
-    muxes_lines: List[str] = []
+    body_lines: list[str] = []
+    muxes_lines: list[str] = []
 
     for signal_name in signal_names:
         if isinstance(signal_name, dict):
@@ -1015,9 +1011,9 @@ def _format_pack_code_level(cg_message: "CodeGenMessage",
 
 
 def _format_pack_code(cg_message: "CodeGenMessage",
-                      helper_kinds: Set[THelperKind]
-                      ) -> Tuple[str, str]:
-    variable_lines: List[str] = []
+                      helper_kinds: set[THelperKind]
+                      ) -> tuple[str, str]:
+    variable_lines: list[str] = []
     body_lines = _format_pack_code_level(cg_message,
                                          cg_message.message.signal_tree,
                                          variable_lines,
@@ -1030,11 +1026,11 @@ def _format_pack_code(cg_message: "CodeGenMessage",
 
 
 def _format_unpack_code_mux(cg_message: "CodeGenMessage",
-                            mux: Dict[str, Dict[int, List[str]]],
-                            body_lines_per_index: List[str],
-                            variable_lines: List[str],
-                            helper_kinds: Set[THelperKind],
-                            node_name: Optional[str]) -> List[str]:
+                            mux: dict[str, dict[int, list[str]]],
+                            body_lines_per_index: list[str],
+                            variable_lines: list[str],
+                            helper_kinds: set[THelperKind],
+                            node_name: Optional[str]) -> list[str]:
     signal_name, multiplexed_signals = next(iter(mux.items()))
     _format_unpack_code_signal(cg_message,
                                signal_name,
@@ -1070,9 +1066,9 @@ def _format_unpack_code_mux(cg_message: "CodeGenMessage",
 
 def _format_unpack_code_signal(cg_message: "CodeGenMessage",
                                signal_name: str,
-                               body_lines: List[str],
-                               variable_lines: List[str],
-                               helper_kinds: Set[THelperKind]) -> None:
+                               body_lines: list[str],
+                               variable_lines: list[str],
+                               helper_kinds: set[THelperKind]) -> None:
     cg_signal = cg_message.get_signal_by_name(signal_name)
     conversion_type_name = f'uint{cg_signal.type_length}_t'
 
@@ -1117,16 +1113,16 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
 
 
 def _format_unpack_code_level(cg_message: "CodeGenMessage",
-                              signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
-                              variable_lines: List[str],
-                              helper_kinds: Set[THelperKind],
-                              node_name: Optional[str]) -> List[str]:
+                              signal_names: Union[list[str], list[dict[str, dict[int, list[str]]]]],
+                              variable_lines: list[str],
+                              helper_kinds: set[THelperKind],
+                              node_name: Optional[str]) -> list[str]:
     """Format one unpack level in a signal tree.
 
     """
 
-    body_lines: List[str] = []
-    muxes_lines: List[str] = []
+    body_lines: list[str] = []
+    muxes_lines: list[str] = []
 
     for signal_name in signal_names:
         if isinstance(signal_name, dict):
@@ -1167,9 +1163,9 @@ def _format_unpack_code_level(cg_message: "CodeGenMessage",
 
 
 def _format_unpack_code(cg_message: "CodeGenMessage",
-                        helper_kinds: Set[THelperKind],
-                        node_name: Optional[str]) -> Tuple[str, str]:
-    variable_lines: List[str] = []
+                        helper_kinds: set[THelperKind],
+                        node_name: Optional[str]) -> tuple[str, str]:
+    variable_lines: list[str] = []
     body_lines = _format_unpack_code_level(cg_message,
                                            cg_message.message.signal_tree,
                                            variable_lines,
@@ -1182,7 +1178,7 @@ def _format_unpack_code(cg_message: "CodeGenMessage",
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> Tuple[str, List[str]]:
+def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> tuple[str, list[str]]:
     members = []
 
     for cg_signal in cg_message.cg_signals:
@@ -1204,7 +1200,7 @@ def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> Tuple[st
     return comment, members
 
 
-def _format_choices(cg_signal: "CodeGenSignal", signal_name: str) -> List[str]:
+def _format_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[str]:
     choices = []
 
     for value, name in sorted(cg_signal.unique_choices.items()):
@@ -1220,7 +1216,7 @@ def _format_choices(cg_signal: "CodeGenSignal", signal_name: str) -> List[str]:
     return choices
 
 
-def _generate_encode_decode(cg_signal: "CodeGenSignal", use_float: bool) -> Tuple[str, str]:
+def _generate_encode_decode(cg_signal: "CodeGenSignal", use_float: bool) -> tuple[str, str]:
     floating_point_type = _get_floating_point_type(use_float)
 
     scale = cg_signal.signal.scale
@@ -1304,7 +1300,7 @@ def _generate_is_in_range(cg_signal: "CodeGenSignal") -> str:
 
 
 def _generate_frame_id_defines(database_name: str,
-                               cg_messages: List["CodeGenMessage"],
+                               cg_messages: list["CodeGenMessage"],
                                node_name: Optional[str]) -> str:
     return '\n'.join([
         f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_FRAME_ID (0x{cg_message.message.frame_id:02x}u)'
@@ -1313,7 +1309,7 @@ def _generate_frame_id_defines(database_name: str,
 
 
 def _generate_frame_length_defines(database_name: str,
-                                   cg_messages: List["CodeGenMessage"],
+                                   cg_messages: list["CodeGenMessage"],
                                    node_name: Optional[str]) -> str:
     result = '\n'.join([
         f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_LENGTH ({cg_message.message.length}u)'
@@ -1324,7 +1320,7 @@ def _generate_frame_length_defines(database_name: str,
 
 
 def _generate_frame_cycle_time_defines(database_name: str,
-                                       cg_messages: List["CodeGenMessage"],
+                                       cg_messages: list["CodeGenMessage"],
                                        node_name: Optional[str]) -> str:
     result = '\n'.join([
         f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_CYCLE_TIME_MS ({cg_message.message.cycle_time}u)'
@@ -1336,7 +1332,7 @@ def _generate_frame_cycle_time_defines(database_name: str,
 
 
 def _generate_is_extended_frame_defines(database_name: str,
-                                        cg_messages: List["CodeGenMessage"],
+                                        cg_messages: list["CodeGenMessage"],
                                         node_name: Optional[str]) -> str:
     result = '\n'.join([
         f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_IS_EXTENDED ({int(cg_message.message.is_extended_frame)})'
@@ -1347,7 +1343,7 @@ def _generate_is_extended_frame_defines(database_name: str,
 
 
 def _generate_choices_defines(database_name: str,
-                              cg_messages: List["CodeGenMessage"],
+                              cg_messages: list["CodeGenMessage"],
                               node_name: Optional[str]) -> str:
     choices_defines = []
 
@@ -1370,7 +1366,7 @@ def _generate_choices_defines(database_name: str,
 
 
 def _generate_frame_name_macros(database_name: str,
-                                cg_messages: List["CodeGenMessage"],
+                                cg_messages: list["CodeGenMessage"],
                                 node_name: Optional[str]) -> str:
     result = '\n'.join([
         f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_NAME "{cg_message.message.name}"'
@@ -1381,7 +1377,7 @@ def _generate_frame_name_macros(database_name: str,
 
 
 def _generate_signal_name_macros(database_name: str,
-                                 cg_messages: List["CodeGenMessage"],
+                                 cg_messages: list["CodeGenMessage"],
                                  node_name: Optional[str]) -> str:
     result = '\n'.join([
         f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_{cg_signal.snake_name.upper()}_NAME "{cg_signal.signal.name}"'
@@ -1392,7 +1388,7 @@ def _generate_signal_name_macros(database_name: str,
 
 
 def _generate_structs(database_name: str,
-                      cg_messages: List["CodeGenMessage"],
+                      cg_messages: list["CodeGenMessage"],
                       bit_fields: bool,
                       node_name: Optional[str]) -> str:
     structs = []
@@ -1429,7 +1425,7 @@ def _get_floating_point_type(use_float: bool) -> str:
 
 
 def _generate_declarations(database_name: str,
-                           cg_messages: List["CodeGenMessage"],
+                           cg_messages: list["CodeGenMessage"],
                            floating_point_numbers: bool,
                            use_float: bool,
                            node_name: Optional[str]) -> str:
@@ -1494,14 +1490,14 @@ def _generate_declarations(database_name: str,
 
 
 def _generate_definitions(database_name: str,
-                          cg_messages: List["CodeGenMessage"],
+                          cg_messages: list["CodeGenMessage"],
                           floating_point_numbers: bool,
                           use_float: bool,
                           node_name: Optional[str],
-                          ) -> Tuple[str, Tuple[Set[THelperKind], Set[THelperKind]]]:
+                          ) -> tuple[str, tuple[set[THelperKind], set[THelperKind]]]:
     definitions = []
-    pack_helper_kinds: Set[THelperKind] = set()
-    unpack_helper_kinds: Set[THelperKind] = set()
+    pack_helper_kinds: set[THelperKind] = set()
+    unpack_helper_kinds: set[THelperKind] = set()
 
     for cg_message in cg_messages:
         signal_definitions = []
@@ -1617,9 +1613,9 @@ def _generate_definitions(database_name: str,
     return '\n'.join(definitions), (pack_helper_kinds, unpack_helper_kinds)
 
 
-def _generate_helpers_kind(kinds: Set[THelperKind],
+def _generate_helpers_kind(kinds: set[THelperKind],
                            left_format: str,
-                           right_format: str) -> List[str]:
+                           right_format: str) -> list[str]:
     formats = {
         'left': left_format,
         'right': right_format
@@ -1635,7 +1631,7 @@ def _generate_helpers_kind(kinds: Set[THelperKind],
     return helpers
 
 
-def _generate_helpers(kinds: Tuple[Set[THelperKind], Set[THelperKind]]) -> str:
+def _generate_helpers(kinds: tuple[set[THelperKind], set[THelperKind]]) -> str:
     pack_helpers = _generate_helpers_kind(kinds[0],
                                           PACK_HELPER_LEFT_SHIFT_FMT,
                                           PACK_HELPER_RIGHT_SHIFT_FMT)
@@ -1651,11 +1647,11 @@ def _generate_helpers(kinds: Tuple[Set[THelperKind], Set[THelperKind]]) -> str:
 
 
 def _generate_fuzzer_source(database_name: str,
-                            cg_messages: List["CodeGenMessage"],
+                            cg_messages: list["CodeGenMessage"],
                             date: str,
                             header_name: str,
                             source_name: str,
-                            fuzzer_source_name: str) -> Tuple[str, str]:
+                            fuzzer_source_name: str) -> tuple[str, str]:
     tests = []
     calls = []
 
@@ -1691,7 +1687,7 @@ def generate(database: "Database",
              bit_fields: bool = False,
              use_float: bool = False,
              node_name: Optional[str] = None,
-             ) -> Tuple[str, str, str, str]:
+             ) -> tuple[str, str, str, str]:
     """Generate C source code from given CAN database `database`.
 
     `database_name` is used as a prefix for all defines, data

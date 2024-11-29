@@ -5,7 +5,7 @@ import logging
 import re
 from collections import OrderedDict as odict
 from itertools import groupby
-from typing import Callable, Iterator, List
+from typing import TYPE_CHECKING, Callable
 from typing import Optional as TypingOptional
 
 import textparser
@@ -25,11 +25,18 @@ from textparser import (
 from ...conversion import BaseConversion
 from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
-from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
+from ...utils import (
+    SORT_SIGNALS_DEFAULT,
+    sort_signals_by_start_bit,
+    type_sort_signals,
+)
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..signal import Signal
 from .utils import num
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 LOGGER = logging.getLogger(__name__)
 
@@ -631,7 +638,7 @@ def _load_message_signals(message_tokens,
                                            enums)
 
 
-def _get_senders(section_name: str) -> List[str]:
+def _get_senders(section_name: str) -> list[str]:
     """Generates a list of senders for a message based on the Send, Receive or Send/Receive
     flag defined in the SYM file. Since the Message object only has a senders property on it,
     it is easiest to translate Send flags into a sender named 'ECU', and translate Receive flags
@@ -845,7 +852,7 @@ def _dump_signal(signal: Signal) -> str:
 
     return signal_str
 
-def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Callable[[List[Signal]], List[Signal]]]) -> str:
+def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Callable[[list[Signal]], list[Signal]]]) -> str:
     signal_dumps = []
     # SYM requires unique signals
     generated_signals = set()
@@ -864,7 +871,7 @@ def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Calla
     else:
         return ''
 
-def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingOptional[int], max_frame_id: TypingOptional[int] = None,
+def _dump_message(message: Message, signals: list[Signal], min_frame_id: TypingOptional[int], max_frame_id: TypingOptional[int] = None,
                   multiplexer_id: TypingOptional[int] = None, multiplexer_signal: TypingOptional[Signal] = None) -> str:
     # Example:
     # [TestMessage]

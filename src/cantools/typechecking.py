@@ -1,16 +1,12 @@
+from collections import OrderedDict
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
-    Mapping,
     NamedTuple,
     Optional,
-    OrderedDict,
-    Sequence,
-    Tuple,
     TypedDict,
     Union,
 )
@@ -31,9 +27,9 @@ class Formats(NamedTuple):
 
 
 StringPathLike = Union[str, "os.PathLike[str]"]
-Comments = Dict[Optional[str], str]
+Comments = dict[Optional[str], str]
 class Codec(TypedDict):
-    signals: List["Signal"]
+    signals: list["Signal"]
     formats: Formats
     multiplexers: Mapping[str, Mapping[int, Any]]
 
@@ -44,19 +40,19 @@ Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]
 # allowing for more complex encode/decode schemes like the one used
 # for AUTOSAR container messages.
 SignalValueType = Union[int, float, str, "NamedSignalValue"]
-SignalDictType = Dict[str, SignalValueType]
+SignalDictType = dict[str, SignalValueType]
 SignalMappingType = Mapping[str, SignalValueType]
 ContainerHeaderSpecType = Union["Message", str, int]
-ContainerUnpackResultType = Sequence[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
-ContainerUnpackListType = List[Union[Tuple["Message", bytes], Tuple[int, bytes]]]
+ContainerUnpackResultType = Sequence[Union[tuple["Message", bytes], tuple[int, bytes]]]
+ContainerUnpackListType = list[Union[tuple["Message", bytes], tuple[int, bytes]]]
 ContainerDecodeResultType = Sequence[
-    Union[Tuple["Message", SignalMappingType], Tuple["Message", bytes], Tuple[int, bytes]]
+    Union[tuple["Message", SignalMappingType], tuple["Message", bytes], tuple[int, bytes]]
 ]
-ContainerDecodeResultListType = List[
-    Union[Tuple["Message", SignalDictType], Tuple["Message", bytes], Tuple[int, bytes]]
+ContainerDecodeResultListType = list[
+    Union[tuple["Message", SignalDictType], tuple["Message", bytes], tuple[int, bytes]]
 ]
 ContainerEncodeInputType = Sequence[
-    Tuple[ContainerHeaderSpecType, Union[bytes, SignalMappingType]]
+    tuple[ContainerHeaderSpecType, Union[bytes, SignalMappingType]]
 ]
 DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]

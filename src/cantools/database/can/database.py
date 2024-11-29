@@ -2,8 +2,6 @@ import logging
 from collections import OrderedDict
 from typing import (
     Any,
-    Dict,
-    List,
     Optional,
     TextIO,
     Union,
@@ -48,9 +46,9 @@ class Database:
     """
 
     def __init__(self,
-                 messages: Optional[List[Message]] = None,
-                 nodes: Optional[List[Node]] = None,
-                 buses: Optional[List[Bus]] = None,
+                 messages: Optional[list[Message]] = None,
+                 nodes: Optional[list[Node]] = None,
+                 buses: Optional[list[Bus]] = None,
                  version: Optional[str] = None,
                  dbc_specifics: Optional[DbcSpecifics] = None,
                  autosar_specifics: Optional[AutosarDatabaseSpecifics] = None,
@@ -61,8 +59,8 @@ class Database:
         self._messages = messages or []
         self._nodes = nodes or []
         self._buses = buses or []
-        self._name_to_message: Dict[str, Message] = {}
-        self._frame_id_to_message: Dict[int, Message] = {}
+        self._name_to_message: dict[str, Message] = {}
+        self._frame_id_to_message: dict[int, Message] = {}
         self._version = version
         self._dbc = dbc_specifics
         self._autosar = autosar_specifics
@@ -76,7 +74,7 @@ class Database:
         self.refresh()
 
     @property
-    def messages(self) -> List[Message]:
+    def messages(self) -> list[Message]:
         """A list of messages in the database.
 
         Use :meth:`.get_message_by_frame_id()` or
@@ -88,7 +86,7 @@ class Database:
         return self._messages
 
     @property
-    def nodes(self) -> List[Node]:
+    def nodes(self) -> list[Node]:
         """A list of nodes in the database.
 
         """
@@ -96,7 +94,7 @@ class Database:
         return self._nodes
 
     @property
-    def buses(self) -> List[Bus]:
+    def buses(self) -> list[Bus]:
         """A list of CAN buses in the database.
 
         """
@@ -180,7 +178,7 @@ class Database:
 
         elif isinstance(a, (list, tuple)):
             # lists and tuples are similar if all elements are similar
-            for i in range(0, len(a)):
+            for i in range(len(a)):
                 if not Database._objects_similar(a[i], b[i], tolerance, include_format_specifics):
                     return False
             return True

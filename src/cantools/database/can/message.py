@@ -4,11 +4,7 @@ import logging
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
-    Dict,
-    List,
     Optional,
-    Set,
-    Tuple,
     Union,
     cast,
 )
@@ -66,16 +62,16 @@ class Message:
                  frame_id: int,
                  name: str,
                  length: int,
-                 signals: List[Signal],
+                 signals: list[Signal],
                  # if the message is a container message, this lists
                  # the messages which it potentially features
-                 contained_messages: Optional[List['Message']] = None,
+                 contained_messages: Optional[list['Message']] = None,
                  # header ID of message if it is part of a container message
                  header_id: Optional[int] = None,
                  header_byte_order: str = 'big_endian',
                  unused_bit_pattern: int = 0x00,
                  comment: Optional[Union[str, Comments]] = None,
-                 senders: Optional[List[str]] = None,
+                 senders: Optional[list[str]] = None,
                  send_type: Optional[str] = None,
                  cycle_time: Optional[int] = None,
                  dbc_specifics: Optional['DbcSpecifics'] = None,
@@ -83,7 +79,7 @@ class Message:
                  is_extended_frame: bool = False,
                  is_fd: bool = False,
                  bus_name: Optional[str] = None,
-                 signal_groups: Optional[List[SignalGroup]] = None,
+                 signal_groups: Optional[list[SignalGroup]] = None,
                  strict: bool = True,
                  protocol: Optional[str] = None,
                  sort_signals: type_sort_signals = sort_signals_by_start_bit,
@@ -114,7 +110,7 @@ class Message:
             self._signals = sort_signals(signals)
         else:
             self._signals = signals
-        self._signal_dict: Dict[str, Signal] = {}
+        self._signal_dict: dict[str, Signal] = {}
         self._contained_messages = contained_messages
 
         # if the 'comment' argument is a string, we assume that is an
@@ -138,7 +134,7 @@ class Message:
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs: Optional[Codec] = None
-        self._signal_tree: Optional[List[Union[str, List[str]]]] = None
+        self._signal_tree: Optional[list[Union[str, list[str]]]] = None
         self._strict = strict
         self._protocol = protocol
         self.refresh()
@@ -153,7 +149,7 @@ class Message:
         """
 
         signals = []
-        multiplexers: Dict[str, Dict[int, Codec]] = {}
+        multiplexers: dict[str, dict[int, Codec]] = {}
 
         # Find all signals matching given parent signal name and given
         # multiplexer id. Root signals' parent and multiplexer id are
@@ -169,7 +165,7 @@ class Message:
                 continue
 
             if signal.is_multiplexer:
-                children_ids: Set[int] = set()
+                children_ids: set[int] = set()
 
                 for s in self._signals:
                     if s.multiplexer_signal != signal.name:
@@ -315,7 +311,7 @@ class Message:
         self._length = value
 
     @property
-    def signals(self) -> List[Signal]:
+    def signals(self) -> list[Signal]:
         """A list of all signals in the message.
 
         """
@@ -331,7 +327,7 @@ class Message:
         return self._contained_messages is not None
 
     @property
-    def contained_messages(self) -> Optional[List['Message']]:
+    def contained_messages(self) -> Optional[list['Message']]:
         """The list of messages potentially contained within this message
 
         """
@@ -359,7 +355,7 @@ class Message:
         self._unused_bit_pattern = value
 
     @property
-    def signal_groups(self) -> Optional[List[SignalGroup]]:
+    def signal_groups(self) -> Optional[list[SignalGroup]]:
         """A list of all signal groups in the message.
 
         """
@@ -367,7 +363,7 @@ class Message:
         return self._signal_groups
 
     @signal_groups.setter
-    def signal_groups(self, value: List[SignalGroup]) -> None:
+    def signal_groups(self, value: list[SignalGroup]) -> None:
         self._signal_groups = value
 
     @property
@@ -407,7 +403,7 @@ class Message:
         self._comments = value
 
     @property
-    def senders(self) -> List[str]:
+    def senders(self) -> list[str]:
         """A list of all sender nodes of this message.
 
         """
@@ -415,7 +411,7 @@ class Message:
         return self._senders
 
     @property
-    def receivers(self) -> Set[str]:
+    def receivers(self) -> set[str]:
         """A set of all receiver nodes of this message.
 
         This is equivalent to the set of nodes which receive at least
@@ -572,7 +568,7 @@ class Message:
         return result
 
     def gather_container(self,
-                         contained_messages: List[ContainerHeaderSpecType],
+                         contained_messages: list[ContainerHeaderSpecType],
                          signal_values: SignalMappingType) \
       -> ContainerDecodeResultType:
 
@@ -782,7 +778,7 @@ class Message:
                         f'or equal to {signal.maximum} in message "{self.name}", '
                         f'but got {scaled_value}.')
 
-    def _encode(self, node: Codec, data: SignalMappingType, scaling: bool) -> Tuple[int, int, List[Signal]]:
+    def _encode(self, node: Codec, data: SignalMappingType, scaling: bool) -> tuple[int, int, list[Signal]]:
         encoded = encode_data(data,
                               node['signals'],
                               node['formats'],

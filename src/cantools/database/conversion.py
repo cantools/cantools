@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from ..typechecking import Choices, SignalValueType
 
@@ -227,7 +227,7 @@ class NamedSignalConversion(BaseConversion):
         self.scale = scale
         self.offset = offset
         self.is_float = is_float
-        self._inverse_choices: Dict[str, int] = {}
+        self._inverse_choices: dict[str, int] = {}
         self.choices: Choices = choices
         self._update_choices()
 

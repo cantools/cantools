@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 
 class AutosarEnd2EndProperties:
@@ -8,7 +8,7 @@ class AutosarEnd2EndProperties:
 
     def __init__(self) -> None:
         self._category: Optional[str] = None
-        self._data_ids: Optional[List[int]] = None
+        self._data_ids: Optional[list[int]] = None
         self._payload_length: int = 0
 
     @property
@@ -26,13 +26,13 @@ class AutosarEnd2EndProperties:
         self._category = value
 
     @property
-    def data_ids(self) -> Optional[List[int]]:
+    def data_ids(self) -> Optional[list[int]]:
         """The list of data IDs applicable
         """
         return self._data_ids
 
     @data_ids.setter
-    def data_ids(self, value: Optional[List[int]]) -> None:
+    def data_ids(self, value: Optional[list[int]]) -> None:
         self._data_ids = value
 
     @property

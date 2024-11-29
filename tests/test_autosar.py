@@ -16,7 +16,7 @@ class CanToolsAutosarTest(unittest.TestCase):
         self.assertIsNotNone(msg.autosar)
         self.assertIsNotNone(msg.autosar.e2e)
         self.assertEqual(msg.autosar.e2e.category, 'p2')
-        self.assertEqual(msg.autosar.e2e.data_ids, list(range(0,16)))
+        self.assertEqual(msg.autosar.e2e.data_ids, list(range(16)))
 
         # test the crc calculation
         did = msg.autosar.e2e.data_ids

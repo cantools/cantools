@@ -1,6 +1,6 @@
 import os
 from contextlib import nullcontext
-from typing import Any, Optional, TextIO, Tuple, Union
+from typing import Any, Optional, TextIO, Union
 
 import diskcache
 
@@ -156,7 +156,7 @@ def load_file(filename: StringPathLike,
         filename)
 
     cache_dir = cache_dir or os.getenv("CANTOOLS_CACHE_DIR", None)
-    cache_key: Optional[Tuple[Any, ...]] = None
+    cache_key: Optional[tuple[Any, ...]] = None
     db: Union[can.Database, diagnostics.Database]
 
     with diskcache.Cache(cache_dir) if cache_dir else nullcontext() as cache:

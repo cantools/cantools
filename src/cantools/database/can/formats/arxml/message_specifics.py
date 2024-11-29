@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .end_to_end_properties import AutosarEnd2EndProperties
@@ -13,7 +13,7 @@ class AutosarMessageSpecifics:
     """
 
     def __init__(self) -> None:
-        self._pdu_paths: List[str] = []
+        self._pdu_paths: list[str] = []
         self._is_nm = False
         self._is_general_purpose = False
         self._secoc: Optional[AutosarSecOCProperties] = None

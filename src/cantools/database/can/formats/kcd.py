@@ -2,7 +2,6 @@
 
 import logging
 from collections import defaultdict
-from typing import Dict
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
@@ -443,7 +442,7 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
     if sort_signals == SORT_SIGNALS_DEFAULT:
         sort_signals = None
 
-    node_refs: Dict[str, int] = {}
+    node_refs: dict[str, int] = {}
 
     attrib = {
         'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',

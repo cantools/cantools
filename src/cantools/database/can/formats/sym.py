@@ -865,7 +865,7 @@ def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Calla
         return ''
 
 def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingOptional[int], max_frame_id: TypingOptional[int] = None,
-                  multiplexer_id: TypingOptional[int] = None, multiplexer_signal: TypingOptional[Signal] = None) -> str:
+                  multiplexer_id: TypingOptional[int] = None, multiplexer_signal: TypingOptional[Signal] = None, multiplexer_signal_names: TypingOptional[List[str]] = None) -> str:
     # Example:
     # [TestMessage]
     # ID=14A30000h
@@ -904,6 +904,11 @@ def _dump_message(message: Message, signals: List[Signal], min_frame_id: TypingO
         multiplexer_signal_name = multiplexer_signal.name
         if not multiplexer_signal_name:
             raise ValueError(f"The name of the multiplexer signal with ID {hex_multiplexer_id} is empty. The database is corrupt.")
+        # Multiplexer signal names must be unique
+        if multiplexer_signal_names is not None:
+            if multiplexer_signal_name in multiplexer_signal_names:
+                multiplexer_signal_name += f"_{multiplexer_id}"
+            multiplexer_signal_names.append(multiplexer_signal_name)
         message_str += f'Mux="{multiplexer_signal_name}" {_convert_start(multiplexer_signal.start, multiplexer_signal.byte_order)},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}\n'
     for signal in signals:
         message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
@@ -944,9 +949,10 @@ def _dump_messages(database: InternalDatabase) -> str:
                 if isinstance(signal_tree_signal, collections.abc.Mapping):
                     signal_name, multiplexed_signals = next(iter(signal_tree_signal.items()))
                     is_first_message = True
+                    multiplexer_signal_names: List[str] = []
                     for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
-                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + non_multiplexed_signals,
-                                                           min_frame_id if is_first_message else None, max_frame_id, multiplexer_id, message.get_signal_by_name(signal_name)))
+                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in (signals_for_multiplexer + non_multiplexed_signals)],
+                                                           min_frame_id if is_first_message else None, max_frame_id, multiplexer_id, message.get_signal_by_name(signal_name), multiplexer_signal_names))
                         is_first_message = False
         else:
             message_dumps.append(_dump_message(message, message.signals, min_frame_id, max_frame_id))

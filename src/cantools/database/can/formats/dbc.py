@@ -1343,18 +1343,38 @@ def _load_signal_multiplexer_values(tokens):
     return signal_multiplexer_values
 
 
-def _load_signal_groups(tokens):
+def _load_signal_groups(tokens, attributes):
     """Load signal groups.
 
     """
 
     signal_groups = defaultdict(list)
 
+
+    def get_attributes(frame_id_dbc, signal):
+        """Get attributes for given signal.
+
+        """
+
+        try:
+            return attributes[frame_id_dbc]['signal'][signal]
+        except KeyError:
+            return None
+
+    def get_signal_name(frame_id_dbc, name):
+        signal_attributes = get_attributes(frame_id_dbc, name)
+
+        try:
+            return signal_attributes['SystemSignalLongSymbol'].value
+        except (KeyError, TypeError):
+            return name
+
     for signal_group in tokens.get('SIG_GROUP_',[]):
         frame_id = int(signal_group[1])
+        signal_names = [get_signal_name(frame_id, signal_name) for signal_name in signal_group[5]]
         signal_groups[frame_id].append(SignalGroup(name=signal_group[2],
                                                    repetitions=int(signal_group[3]),
-                                                   signal_names=signal_group[5]))
+                                                   signal_names=signal_names))
 
     return signal_groups
 
@@ -2049,7 +2069,7 @@ def load_string(string: str, strict: bool = True,
     message_senders = _load_message_senders(tokens, attributes)
     signal_types = _load_signal_types(tokens)
     signal_multiplexer_values = _load_signal_multiplexer_values(tokens)
-    signal_groups = _load_signal_groups(tokens)
+    signal_groups = _load_signal_groups(tokens, attributes)
     messages = _load_messages(tokens,
                               comments,
                               attributes,

@@ -33,10 +33,6 @@ jobs:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
         python-version: ["3.9", "3.13", "pypy-3.9"]
-        exclude:
-          # Re-enable once CPython 3.13.1 is available.
-          # https://github.com/python/cpython/issues/125235
-          - { python-version: "3.13", os: "windows-latest" }
       fail-fast: false
     steps:
     - uses: actions/checkout@v4

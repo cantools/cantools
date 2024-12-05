@@ -1,5 +1,5 @@
 # A CAN signal.
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..conversion import BaseConversion, IdentityConversion
@@ -59,9 +59,9 @@ class Signal:
         unit: Optional[str] = None,
         dbc_specifics: Optional["DbcSpecifics"] = None,
         comment: Optional[Union[str, Comments]] = None,
-        receivers: Optional[List[str]] = None,
+        receivers: Optional[list[str]] = None,
         is_multiplexer: bool = False,
-        multiplexer_ids: Optional[List[int]] = None,
+        multiplexer_ids: Optional[list[int]] = None,
         multiplexer_signal: Optional[str] = None,
         spn: Optional[int] = None,
     ) -> None:
@@ -120,7 +120,7 @@ class Signal:
         self.dbc: Optional[DbcSpecifics] = dbc_specifics
 
         #: A list of all receiver nodes of this signal.
-        self.receivers: List[str] = receivers or []
+        self.receivers: list[str] = receivers or []
 
         #: ``True`` if this is the multiplexer signal in a message, ``False``
         #: otherwise.
@@ -128,7 +128,7 @@ class Signal:
 
         #: The multiplexer ids list if the signal is part of a multiplexed
         #: message, ``None`` otherwise.
-        self.multiplexer_ids: Optional[List[int]] = multiplexer_ids
+        self.multiplexer_ids: Optional[list[int]] = multiplexer_ids
 
         #: The multiplexer signal if the signal is part of a multiplexed
         #: message, ``None`` otherwise.

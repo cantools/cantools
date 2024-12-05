@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class NamedSignalValue:
@@ -13,7 +13,7 @@ class NamedSignalValue:
         self,
         value: int,
         name: str,
-        comments: Optional[Dict[str, str]] = None,
+        comments: Optional[dict[str, str]] = None,
     ) -> None:
         #: The text intended for human consumption which the specified integer
         #: is mapped to.
@@ -25,7 +25,7 @@ class NamedSignalValue:
         self._comments = comments or {}
 
     @property
-    def comments(self) -> Dict[str, str]:
+    def comments(self) -> dict[str, str]:
         """The descriptions of the named value
 
         This is a dictionary containing the descriptions in multiple

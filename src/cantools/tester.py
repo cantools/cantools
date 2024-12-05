@@ -3,7 +3,8 @@
 import queue
 import time
 from collections import UserDict
-from typing import Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Optional
 
 import can
 
@@ -32,10 +33,10 @@ class Messages(UserDict):
 
 
 def _invert_signal_tree(
-        tree :List,
-        cur_mpx: Optional[Dict] = None,
-        ret: Optional[Dict] = None
-) -> Dict:
+        tree: list,
+        cur_mpx: Optional[dict] = None,
+        ret: Optional[dict] = None
+) -> dict:
 
     """The tree is laid out with two kinds of dicts.  Single-element dict
     keyed by string -> multiplexer, which is own dict keyed by
@@ -65,7 +66,7 @@ def _invert_signal_tree(
 
     return ret
 
-def invert_signal_tree(tree: List) -> Dict:
+def invert_signal_tree(tree: list) -> dict:
     """Return a mapping of signals to the multiplex settings that will
     yield the signal.
 

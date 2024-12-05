@@ -1,6 +1,6 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
 import logging
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ...bus import Bus
 
 
-def make_xpath(location: List[str]) -> str:
+def make_xpath(location: list[str]) -> str:
     """Convenience function to traverse the XML element tree more easily
 
     (This function is only used by the EcuExtractLoader.)"""
@@ -59,7 +59,7 @@ class EcuExtractLoader:
         self.sort_signals = sort_signals
 
     def load(self) -> InternalDatabase:
-        buses:List[Bus] = []
+        buses: list[Bus] = []
         messages = []
         version = None
 

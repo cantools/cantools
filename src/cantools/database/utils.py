@@ -3,16 +3,13 @@
 import os.path
 import re
 from collections import OrderedDict
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Callable,
-    Dict,
     Final,
-    List,
     Literal,
     Optional,
-    Sequence,
-    Tuple,
     Union,
 )
 
@@ -41,7 +38,7 @@ except ImportError:
     import bitstruct
 
 
-def format_or(items: List[Union[int, str]]) -> str:
+def format_or(items: list[Union[int, str]]) -> str:
     string_items = [str(item) for item in items]
 
     if len(string_items) == 1:
@@ -51,7 +48,7 @@ def format_or(items: List[Union[int, str]]) -> str:
                                  string_items[-1])
 
 
-def format_and(items: List[Union[int, str]]) -> str:
+def format_and(items: list[Union[int, str]]) -> str:
     string_items = [str(item) for item in items]
 
     if len(string_items) == 1:
@@ -71,7 +68,7 @@ def start_bit(signal: Union["Data", "Signal"]) -> int:
 def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
                           signal_values: SignalMappingType,
                           scaling: bool,
-                          ) -> Dict[str, Union[int, float]]:
+                          ) -> dict[str, Union[int, float]]:
     """
     Convert a dictionary of physical signal values into raw ones.
     """
@@ -178,7 +175,7 @@ def decode_data(data: bytes,
                 del unpacked[signal.name]
 
     # scale the signal values and decode choices
-    decoded: Dict[str, SignalValueType] = {}
+    decoded: dict[str, SignalValueType] = {}
     for signal in signals:
         if (value := unpacked.get(signal.name)) is None:
             # signal value was removed above...
@@ -207,32 +204,32 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
         else:
             return 'u'
 
-    def padding_item(length: int) -> Tuple[str, str, None]:
+    def padding_item(length: int) -> tuple[str, str, None]:
         fmt = f'p{length}'
         padding_mask = '1' * length
 
         return fmt, padding_mask, None
 
-    def data_item(signal: Union["Data", "Signal"]) -> Tuple[str, str, str]:
+    def data_item(signal: Union["Data", "Signal"]) -> tuple[str, str, str]:
         fmt = f'{get_format_string_type(signal)}{signal.length}'
         padding_mask = '0' * signal.length
 
         return fmt, padding_mask, signal.name
 
-    def fmt(items: List[Tuple[str, str, Optional[str]]]) -> str:
+    def fmt(items: list[tuple[str, str, Optional[str]]]) -> str:
         return ''.join([item[0] for item in items])
 
-    def names(items:  List[Tuple[str, str, Optional[str]]]) -> List[str]:
+    def names(items:  list[tuple[str, str, Optional[str]]]) -> list[str]:
         return [item[2] for item in items if item[2] is not None]
 
-    def padding_mask(items: List[Tuple[str, str, Optional[str]]]) -> int:
+    def padding_mask(items: list[tuple[str, str, Optional[str]]]) -> int:
         try:
             return int(''.join([item[1] for item in items]), 2)
         except ValueError:
             return 0
 
-    def create_big() -> Tuple[str, int, List[str]]:
-        items: List[Tuple[str, str, Optional[str]]] = []
+    def create_big() -> tuple[str, int, list[str]]:
+        items: list[tuple[str, str, Optional[str]]] = []
         start = 0
 
         # Select BE signals
@@ -257,8 +254,8 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
 
         return fmt(items), padding_mask(items), names(items)
 
-    def create_little() -> Tuple[str, int, List[str]]:
-        items: List[Tuple[str, str, Optional[str]]] = []
+    def create_little() -> tuple[str, int, list[str]]:
+        items: list[tuple[str, str, Optional[str]]] = []
         end = format_length
 
         for signal in signals[::-1]:
@@ -433,32 +430,32 @@ def prune_database_choices(database: "Database") -> None:
 
 
 SORT_SIGNALS_DEFAULT: Final = 'default'
-type_sort_signals = Union[Callable[[List["Signal"]], List["Signal"]], Literal['default'], None]
+type_sort_signals = Union[Callable[[list["Signal"]], list["Signal"]], Literal['default'], None]
 
 type_sort_attribute = Union[
-    Tuple[Literal['dbc'],     "Attribute", None,   None,      None],
-    Tuple[Literal['node'],    "Attribute", "Node", None,      None],
-    Tuple[Literal['message'], "Attribute", None,   "Message", None],
-    Tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal"],
+    tuple[Literal['dbc'],     "Attribute", None,   None,      None],
+    tuple[Literal['node'],    "Attribute", "Node", None,      None],
+    tuple[Literal['message'], "Attribute", None,   "Message", None],
+    tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal"],
 ]
 
-type_sort_attributes = Union[Callable[[List[type_sort_attribute]], List[type_sort_attribute]], Literal['default'], None]
+type_sort_attributes = Union[Callable[[list[type_sort_attribute]], list[type_sort_attribute]], Literal['default'], None]
 
 type_sort_choices = Union[Callable[[Choices], Choices], None]
 
-def sort_signals_by_start_bit(signals: List["Signal"]) -> List["Signal"]:
+def sort_signals_by_start_bit(signals: list["Signal"]) -> list["Signal"]:
     return sorted(signals, key=start_bit)
 
 
-def sort_signals_by_start_bit_reversed(signals: List["Signal"]) -> List["Signal"]:
+def sort_signals_by_start_bit_reversed(signals: list["Signal"]) -> list["Signal"]:
     return sorted(signals, key=start_bit)[::-1]
 
 
-def sort_signals_by_name(signals: List["Signal"]) -> List["Signal"]:
+def sort_signals_by_name(signals: list["Signal"]) -> list["Signal"]:
     return sorted(signals, key=lambda s: s.name)
 
 
-def sort_signals_by_start_bit_and_mux(signals: List["Signal"]) -> List["Signal"]:
+def sort_signals_by_start_bit_and_mux(signals: list["Signal"]) -> list["Signal"]:
     # sort by start bit
     signals = sorted(signals, key=start_bit)
     # but unmuxed values come first

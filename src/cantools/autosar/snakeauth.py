@@ -30,7 +30,7 @@ class SnakeOilAuthenticator:
 
         # XOR the secret and the data which we ought to authenticate
         result = bytearray([v0]*5)
-        for i in range(0, len(auth_data)):
+        for i in range(len(auth_data)):
             result[i % len(result)] ^= auth_data[i]
             result[i % len(result)] ^= self._secret[i%len(self._secret)]
 

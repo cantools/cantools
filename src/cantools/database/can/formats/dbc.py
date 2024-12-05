@@ -408,8 +408,8 @@ class Parser(textparser.Parser):
 
 class LongNamesConverter:
     def __init__(self) -> None:
-        self._next_index_per_cut_name: typing.DefaultDict[str, int] = defaultdict(int)
-        self._short_names: typing.Set[str] = set()
+        self._next_index_per_cut_name: defaultdict[str, int] = defaultdict(int)
+        self._short_names: set[str] = set()
 
     def convert(self, name: str) -> typing.Optional[str]:
         short_name: typing.Optional[str] = None
@@ -619,7 +619,7 @@ def _bus_is_canfd(database: InternalDatabase) -> bool:
         return False
     return bus_type.value == 'CAN FD'  # type: ignore[no-any-return]
 
-def _dump_attribute_definitions(database: InternalDatabase) -> typing.List[str]:
+def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
     ba_def = []
 
     if database.dbc is None:

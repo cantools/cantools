@@ -9,7 +9,7 @@ authors = [
 ]
 description = "CAN BUS tools."
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = [
     "can",
     "can bus",
@@ -78,12 +78,12 @@ module = [
     "textparser",
     "bitstruct",
     "bitstruct.c",
-    "matplotlib",
 ]
 ignore_missing_imports = true
 
-[tool.ruff.lint]
-select = [
+[tool.ruff]
+line-length = 80
+lint.extend-select = [
     "A",    # flake8-builtins
     "B",    # pyflakes-bugbear
     "C4",   # flake8-comprehensions
@@ -91,19 +91,16 @@ select = [
     "F",    # pyflakes
     "FURB", # refurb
     "I",    # isort
+    "PIE",  # flake8-pie
     "RUF",  # Ruff-specific rules
     "TCH",  # flake8-type-checking
     "UP",   # pyupgrade
     "W",    # pycodestyle Warning
 ]
-ignore = [
+lint.ignore = [
     "E501",   # line too long
     "F541",   # f-string-missing-placeholders
     "RUF012", # mutable-class-default
 ]
-
-[tool.ruff.lint.isort]
-known-first-party = ["cantools"]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
+lint.isort.known-first-party = ["cantools"]
+lint.per-file-ignores."__init__.py" = ["F401"]

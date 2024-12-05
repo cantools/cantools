@@ -15,7 +15,7 @@ class SecOCError(Error):
     """Exception that is raised if something SecOC related goes wrong.
 
     """
-    pass
+
 
 def compute_authenticator(raw_payload: bytes,
                           dbmsg: Message,

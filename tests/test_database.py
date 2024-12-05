@@ -4345,6 +4345,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertFalse('E12345678901234567890123456_0000' in envvar_names)
         self.assertTrue('E12345678901234567890123456789012' in envvar_names)
 
+        # signal groups
+        signal_group = db.messages[9].signal_groups[0]
+        self.assertEqual(signal_group.name, 'SS1234_sg')
+        self.assertEqual(signal_group.signal_names[0], 'SS1234567890123456789012345678901233')
+        self.assertEqual(signal_group.signal_names[1], 'SSS12345678901234567890123456789012')
+
     def test_long_names_converter(self):
         lnc = LongNamesConverter()
         self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLA"), "SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLL")

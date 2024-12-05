@@ -605,6 +605,7 @@ class CodeGenSignal:
     def __init__(self, signal: "Signal") -> None:
         self.signal: Signal = signal
         self.snake_name = camel_to_snake_case(signal.name)
+        self.name = signal.name
 
     @property
     def unit(self) -> str:
@@ -804,6 +805,7 @@ class CodeGenMessage:
 
     def __init__(self, message: "Message") -> None:
         self.message = message
+        self.name = message.name
         self.snake_name = camel_to_snake_case(message.name)
         self.cg_signals = [CodeGenSignal(signal) for signal in message.signals]
 
@@ -883,7 +885,7 @@ def _format_range(cg_signal: "CodeGenSignal") -> str:
         return '-'
 
 
-def _generate_signal(cg_signal: "CodeGenSignal", bit_fields: bool) -> str:
+def _generate_signal(cg_signal: "CodeGenSignal", bit_fields: bool, original_casing: bool) -> str:
     comment = _format_comment(cg_signal.signal.comment)
     range_ = _format_range(cg_signal)
     scale = _get(cg_signal.signal.conversion.scale, '-')
@@ -899,7 +901,7 @@ def _generate_signal(cg_signal: "CodeGenSignal", bit_fields: bool) -> str:
                                       scale=scale,
                                       offset=offset,
                                       type_name=cg_signal.type_name,
-                                      name=cg_signal.snake_name,
+                                      name=cg_signal.name if original_casing else cg_signal.snake_name,
                                       length=length)
 
     return member
@@ -909,15 +911,17 @@ def _format_pack_code_mux(cg_message: "CodeGenMessage",
                           mux: Dict[str, Dict[int, List[str]]],
                           body_lines_per_index: List[str],
                           variable_lines: List[str],
+                          original_casing: bool,
                           helper_kinds: Set[THelperKind]) -> List[str]:
     signal_name, multiplexed_signals = next(iter(mux.items()))
     _format_pack_code_signal(cg_message,
                              signal_name,
                              body_lines_per_index,
                              variable_lines,
-                             helper_kinds)
+                             helper_kinds,
+                             original_casing)
     multiplexed_signals_per_id = sorted(multiplexed_signals.items())
-    signal_name = camel_to_snake_case(signal_name)
+    signal_name = camel_to_snake_case(signal_name) if not original_casing else signal_name
 
     lines = [
         '',
@@ -928,6 +932,7 @@ def _format_pack_code_mux(cg_message: "CodeGenMessage",
         body_lines = _format_pack_code_level(cg_message,
                                              signals_of_multiplexer_id,
                                              variable_lines,
+                                             original_casing,
                                              helper_kinds)
         lines.append('')
         lines.append(f'case {multiplexer_id}:')
@@ -950,16 +955,17 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
                              signal_name: str,
                              body_lines: List[str],
                              variable_lines: List[str],
-                             helper_kinds: Set[THelperKind]) -> None:
+                             helper_kinds: Set[THelperKind],
+                             original_casing: bool,) -> None:
     cg_signal = cg_message.get_signal_by_name(signal_name)
 
     if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
-        variable = f'    uint{cg_signal.type_length}_t {cg_signal.snake_name};'
+        variable = f'    uint{cg_signal.type_length}_t {cg_signal.snake_name if not original_casing else cg_signal.name};'
 
         if cg_signal.signal.conversion.is_float:
-            conversion = f'    memcpy(&{cg_signal.snake_name}, &src_p->{cg_signal.snake_name}, sizeof({cg_signal.snake_name}));'
+            conversion = f'    memcpy(&{cg_signal.snake_name}, &src_p->{cg_signal.snake_name}, sizeof({cg_signal.snake_name if not original_casing else cg_signal.name}));'
         else:
-            conversion = f'    {cg_signal.snake_name} = (uint{cg_signal.type_length}_t)src_p->{cg_signal.snake_name};'
+            conversion = f'    {cg_signal.snake_name} = (uint{cg_signal.type_length}_t)src_p->{cg_signal.snake_name if not original_casing else cg_signal.name};'
 
         variable_lines.append(variable)
         body_lines.append(conversion)
@@ -973,7 +979,7 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
         line = fmt.format(index,
                           shift_direction,
                           cg_signal.type_length,
-                          cg_signal.snake_name,
+                          cg_signal.snake_name if not original_casing else cg_signal.name,
                           shift,
                           mask)
         body_lines.append(line)
@@ -983,6 +989,7 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
 def _format_pack_code_level(cg_message: "CodeGenMessage",
                             signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
                             variable_lines: List[str],
+                            original_casing: bool,
                             helper_kinds: Set[THelperKind]) -> List[str]:
     """Format one pack level in a signal tree.
 
@@ -997,6 +1004,7 @@ def _format_pack_code_level(cg_message: "CodeGenMessage",
                                               signal_name,
                                               body_lines,
                                               variable_lines,
+                                              original_casing,
                                               helper_kinds)
             muxes_lines += mux_lines
         else:
@@ -1004,7 +1012,8 @@ def _format_pack_code_level(cg_message: "CodeGenMessage",
                                      signal_name,
                                      body_lines,
                                      variable_lines,
-                                     helper_kinds)
+                                     helper_kinds,
+                                     original_casing)
 
     body_lines = body_lines + muxes_lines
 
@@ -1015,12 +1024,14 @@ def _format_pack_code_level(cg_message: "CodeGenMessage",
 
 
 def _format_pack_code(cg_message: "CodeGenMessage",
-                      helper_kinds: Set[THelperKind]
+                      helper_kinds: Set[THelperKind],
+                      original_casing: bool
                       ) -> Tuple[str, str]:
     variable_lines: List[str] = []
     body_lines = _format_pack_code_level(cg_message,
                                          cg_message.message.signal_tree,
                                          variable_lines,
+                                         original_casing,
                                          helper_kinds)
 
     if variable_lines:
@@ -1034,15 +1045,17 @@ def _format_unpack_code_mux(cg_message: "CodeGenMessage",
                             body_lines_per_index: List[str],
                             variable_lines: List[str],
                             helper_kinds: Set[THelperKind],
+                            original_casing: bool,
                             node_name: Optional[str]) -> List[str]:
     signal_name, multiplexed_signals = next(iter(mux.items()))
     _format_unpack_code_signal(cg_message,
                                signal_name,
                                body_lines_per_index,
                                variable_lines,
+                               original_casing,
                                helper_kinds)
     multiplexed_signals_per_id = sorted(multiplexed_signals.items())
-    signal_name = camel_to_snake_case(signal_name)
+    signal_name = camel_to_snake_case(signal_name) if not original_casing else signal_name
 
     lines = [
         f'switch (dst_p->{signal_name}) {{'
@@ -1053,6 +1066,7 @@ def _format_unpack_code_mux(cg_message: "CodeGenMessage",
                                                signals_of_multiplexer_id,
                                                variable_lines,
                                                helper_kinds,
+                                               original_casing,
                                                node_name)
         lines.append('')
         lines.append(f'case {multiplexer_id}:')
@@ -1072,12 +1086,13 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
                                signal_name: str,
                                body_lines: List[str],
                                variable_lines: List[str],
+                               original_casing: bool,
                                helper_kinds: Set[THelperKind]) -> None:
     cg_signal = cg_message.get_signal_by_name(signal_name)
     conversion_type_name = f'uint{cg_signal.type_length}_t'
 
     if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
-        variable = f'    {conversion_type_name} {cg_signal.snake_name};'
+        variable = f'    {conversion_type_name} {cg_signal.snake_name if not original_casing else cg_signal.name};'
         variable_lines.append(variable)
 
     segments = cg_signal.segments(invert_shift=True)
@@ -1088,7 +1103,7 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
         else:
             fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
 
-        line = fmt.format(cg_signal.snake_name,
+        line = fmt.format(cg_signal.snake_name if not original_casing else cg_signal.name,
                           '=' if i == 0 else '|=',
                           shift_direction,
                           cg_signal.type_length,
@@ -1099,20 +1114,20 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
         helper_kinds.add((shift_direction, cg_signal.type_length))
 
     if cg_signal.signal.conversion.is_float:
-        conversion = f'    memcpy(&dst_p->{cg_signal.snake_name}, &{cg_signal.snake_name}, sizeof(dst_p->{cg_signal.snake_name}));'
+        conversion = f'    memcpy(&dst_p->{cg_signal.snake_name if not original_casing else cg_signal.name}, &{cg_signal.snake_name if not original_casing else cg_signal.name}, sizeof(dst_p->{cg_signal.snake_name if not original_casing else cg_signal.name}));'
         body_lines.append(conversion)
     elif cg_signal.signal.is_signed:
         mask = ((1 << (cg_signal.type_length - cg_signal.signal.length)) - 1)
 
         if mask != 0:
             mask <<= cg_signal.signal.length
-            formatted = SIGN_EXTENSION_FMT.format(name=cg_signal.snake_name,
+            formatted = SIGN_EXTENSION_FMT.format(name=cg_signal.snake_name if not original_casing else cg_signal.name,
                                                   shift=cg_signal.signal.length - 1,
                                                   mask=mask,
                                                   suffix=cg_signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
 
-        conversion = f'    dst_p->{cg_signal.snake_name} = (int{cg_signal.type_length}_t){cg_signal.snake_name};'
+        conversion = f'    dst_p->{cg_signal.snake_name if not original_casing else cg_signal.name} = (int{cg_signal.type_length}_t){cg_signal.snake_name if not original_casing else cg_signal.name};'
         body_lines.append(conversion)
 
 
@@ -1120,6 +1135,7 @@ def _format_unpack_code_level(cg_message: "CodeGenMessage",
                               signal_names: Union[List[str], List[Dict[str, Dict[int, List[str]]]]],
                               variable_lines: List[str],
                               helper_kinds: Set[THelperKind],
+                              original_casing: bool,
                               node_name: Optional[str]) -> List[str]:
     """Format one unpack level in a signal tree.
 
@@ -1135,6 +1151,7 @@ def _format_unpack_code_level(cg_message: "CodeGenMessage",
                                                 body_lines,
                                                 variable_lines,
                                                 helper_kinds,
+                                                original_casing,
                                                 node_name)
 
             if muxes_lines:
@@ -1149,6 +1166,7 @@ def _format_unpack_code_level(cg_message: "CodeGenMessage",
                                        signal_name,
                                        body_lines,
                                        variable_lines,
+                                       original_casing,
                                        helper_kinds)
 
     if body_lines:
@@ -1168,12 +1186,14 @@ def _format_unpack_code_level(cg_message: "CodeGenMessage",
 
 def _format_unpack_code(cg_message: "CodeGenMessage",
                         helper_kinds: Set[THelperKind],
-                        node_name: Optional[str]) -> Tuple[str, str]:
+                        node_name: Optional[str],
+                        original_casing: bool) -> Tuple[str, str]:
     variable_lines: List[str] = []
     body_lines = _format_unpack_code_level(cg_message,
                                            cg_message.message.signal_tree,
                                            variable_lines,
                                            helper_kinds,
+                                           original_casing,
                                            node_name)
 
     if variable_lines:
@@ -1182,11 +1202,11 @@ def _format_unpack_code(cg_message: "CodeGenMessage",
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> Tuple[str, List[str]]:
+def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool, original_casing: bool) -> Tuple[str, List[str]]:
     members = []
 
     for cg_signal in cg_message.cg_signals:
-        members.append(_generate_signal(cg_signal, bit_fields))
+        members.append(_generate_signal(cg_signal, bit_fields, original_casing))
 
     if not members:
         members = [
@@ -1305,18 +1325,20 @@ def _generate_is_in_range(cg_signal: "CodeGenSignal") -> str:
 
 def _generate_frame_id_defines(database_name: str,
                                cg_messages: List["CodeGenMessage"],
-                               node_name: Optional[str]) -> str:
+                               node_name: Optional[str],
+                               original_casing: bool) -> str:
     return '\n'.join([
-        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_FRAME_ID (0x{cg_message.message.frame_id:02x}u)'
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper() if not original_casing else cg_message.name.upper()}_FRAME_ID (0x{cg_message.message.frame_id:02x}u)'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
 
 def _generate_frame_length_defines(database_name: str,
                                    cg_messages: List["CodeGenMessage"],
-                                   node_name: Optional[str]) -> str:
+                                   node_name: Optional[str],
+                                   original_casing: bool) -> str:
     result = '\n'.join([
-        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_LENGTH ({cg_message.message.length}u)'
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper() if not original_casing else cg_message.name.upper()}_LENGTH ({cg_message.message.length}u)'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
@@ -1325,9 +1347,10 @@ def _generate_frame_length_defines(database_name: str,
 
 def _generate_frame_cycle_time_defines(database_name: str,
                                        cg_messages: List["CodeGenMessage"],
-                                       node_name: Optional[str]) -> str:
+                                       node_name: Optional[str],
+                                       original_casing: bool) -> str:
     result = '\n'.join([
-        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_CYCLE_TIME_MS ({cg_message.message.cycle_time}u)'
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper() if not original_casing else cg_message.name.upper()}_CYCLE_TIME_MS ({cg_message.message.cycle_time}u)'
         for cg_message in cg_messages if cg_message.message.cycle_time is not None and
                                       _is_sender_or_receiver(cg_message, node_name)
     ])
@@ -1337,9 +1360,10 @@ def _generate_frame_cycle_time_defines(database_name: str,
 
 def _generate_is_extended_frame_defines(database_name: str,
                                         cg_messages: List["CodeGenMessage"],
-                                        node_name: Optional[str]) -> str:
+                                        node_name: Optional[str],
+                                        original_casing: bool) -> str:
     result = '\n'.join([
-        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_IS_EXTENDED ({int(cg_message.message.is_extended_frame)})'
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper() if not original_casing else cg_message.name.upper()}_IS_EXTENDED ({int(cg_message.message.is_extended_frame)})'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
@@ -1348,7 +1372,8 @@ def _generate_is_extended_frame_defines(database_name: str,
 
 def _generate_choices_defines(database_name: str,
                               cg_messages: List["CodeGenMessage"],
-                              node_name: Optional[str]) -> str:
+                              node_name: Optional[str],
+                              original_casing: bool) -> str:
     choices_defines = []
 
     for cg_message in cg_messages:
@@ -1359,9 +1384,9 @@ def _generate_choices_defines(database_name: str,
             if not is_sender and not _is_receiver(cg_signal, node_name):
                 continue
 
-            choices = _format_choices(cg_signal, cg_signal.snake_name)
+            choices = _format_choices(cg_signal, cg_signal.snake_name if not original_casing else cg_signal.name)
             signal_choices_defines = '\n'.join([
-                f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_{choice}'
+                f'#define {database_name.upper()}_{cg_message.snake_name.upper() if not original_casing else cg_message.name.upper()}_{choice}'
                 for choice in choices
             ])
             choices_defines.append(signal_choices_defines)
@@ -1371,9 +1396,10 @@ def _generate_choices_defines(database_name: str,
 
 def _generate_frame_name_macros(database_name: str,
                                 cg_messages: List["CodeGenMessage"],
-                                node_name: Optional[str]) -> str:
+                                node_name: Optional[str],
+                                original_casing: bool) -> str:
     result = '\n'.join([
-        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_NAME "{cg_message.message.name}"'
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper() if not original_casing else cg_message.name.upper()}_NAME "{cg_message.message.name}"'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name)
     ])
 
@@ -1382,9 +1408,10 @@ def _generate_frame_name_macros(database_name: str,
 
 def _generate_signal_name_macros(database_name: str,
                                  cg_messages: List["CodeGenMessage"],
-                                 node_name: Optional[str]) -> str:
+                                 node_name: Optional[str],
+                                 original_casing: bool) -> str:
     result = '\n'.join([
-        f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_{cg_signal.snake_name.upper()}_NAME "{cg_signal.signal.name}"'
+        f'#define {database_name.upper()}_{cg_message.snake_name.upper() if not original_casing else cg_message.name.upper()}_{cg_signal.snake_name.upper() if not original_casing else cg_signal.name.upper()}_NAME "{cg_signal.signal.name}"'
         for cg_message in cg_messages if _is_sender_or_receiver(cg_message, node_name) for cg_signal in cg_message.cg_signals
     ])
 
@@ -1394,16 +1421,17 @@ def _generate_signal_name_macros(database_name: str,
 def _generate_structs(database_name: str,
                       cg_messages: List["CodeGenMessage"],
                       bit_fields: bool,
-                      node_name: Optional[str]) -> str:
+                      node_name: Optional[str],
+                      original_casing: bool) -> str:
     structs = []
 
     for cg_message in cg_messages:
         if _is_sender_or_receiver(cg_message, node_name):
-            comment, members = _generate_struct(cg_message, bit_fields)
+            comment, members = _generate_struct(cg_message, bit_fields, original_casing)
             structs.append(
                 STRUCT_FMT.format(comment=comment,
                                   database_message_name=cg_message.message.name,
-                                  message_name=cg_message.snake_name,
+                                  message_name=cg_message.snake_name if not original_casing else cg_message.name,
                                   database_name=database_name,
                                   members='\n\n'.join(members)))
 
@@ -1432,7 +1460,8 @@ def _generate_declarations(database_name: str,
                            cg_messages: List["CodeGenMessage"],
                            floating_point_numbers: bool,
                            use_float: bool,
-                           node_name: Optional[str]) -> str:
+                           node_name: Optional[str],
+                           original_casing: bool) -> str:
     declarations = []
 
     for cg_message in cg_messages:
@@ -1450,23 +1479,23 @@ def _generate_declarations(database_name: str,
                 if is_sender:
                     signal_declaration += SIGNAL_DECLARATION_ENCODE_FMT.format(
                         database_name=database_name,
-                        message_name=cg_message.snake_name,
-                        signal_name=cg_signal.snake_name,
+                        message_name=cg_message.snake_name if not original_casing else cg_message.name,
+                        signal_name=cg_signal.snake_name if not original_casing else cg_signal.name,
                         type_name=cg_signal.type_name,
                         floating_point_type=_get_floating_point_type(use_float))
                 if node_name is None or _is_receiver(cg_signal, node_name):
                     signal_declaration += SIGNAL_DECLARATION_DECODE_FMT.format(
                         database_name=database_name,
-                        message_name=cg_message.snake_name,
-                        signal_name=cg_signal.snake_name,
+                        message_name=cg_message.snake_name if not original_casing else cg_message.name,
+                        signal_name=cg_signal.snake_name if not original_casing else cg_signal.name,
                         type_name=cg_signal.type_name,
                         floating_point_type=_get_floating_point_type(use_float))
 
             if is_sender or _is_receiver(cg_signal, node_name):
                 signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_FMT.format(
                     database_name=database_name,
-                    message_name=cg_message.snake_name,
-                    signal_name=cg_signal.snake_name,
+                    message_name=cg_message.snake_name if not original_casing else cg_message.name,
+                    signal_name=cg_signal.snake_name if not original_casing else cg_signal.name,
                     type_name=cg_signal.type_name)
 
                 signal_declarations.append(signal_declaration)
@@ -1474,15 +1503,15 @@ def _generate_declarations(database_name: str,
         if is_sender:
             declaration += DECLARATION_PACK_FMT.format(database_name=database_name,
                                                        database_message_name=cg_message.message.name,
-                                                       message_name=cg_message.snake_name)
+                                                       message_name=cg_message.snake_name if not original_casing else cg_message.name)
         if is_receiver:
             declaration += DECLARATION_UNPACK_FMT.format(database_name=database_name,
                                                          database_message_name=cg_message.message.name,
-                                                         message_name=cg_message.snake_name)
+                                                         message_name=cg_message.snake_name if not original_casing else cg_message.name)
 
         declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
                                                            database_message_name=cg_message.message.name,
-                                                           message_name=cg_message.snake_name)
+                                                           message_name=cg_message.snake_name if not original_casing else cg_message.name)
 
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
@@ -1498,6 +1527,7 @@ def _generate_definitions(database_name: str,
                           floating_point_numbers: bool,
                           use_float: bool,
                           node_name: Optional[str],
+                          original_casing: bool
                           ) -> Tuple[str, Tuple[Set[THelperKind], Set[THelperKind]]]:
     definitions = []
     pack_helper_kinds: Set[THelperKind] = set()
@@ -1536,16 +1566,16 @@ def _generate_definitions(database_name: str,
                 if is_sender:
                     signal_definition += SIGNAL_DEFINITION_ENCODE_FMT.format(
                         database_name=database_name,
-                        message_name=cg_message.snake_name,
-                        signal_name=cg_signal.snake_name,
+                        message_name=cg_message.snake_name if not original_casing else cg_message.name,
+                        signal_name=cg_signal.snake_name if not original_casing else cg_signal.name,
                         type_name=cg_signal.type_name,
                         encode=encode,
                         floating_point_type=_get_floating_point_type(_use_float))
                 if node_name is None or _is_receiver(cg_signal, node_name):
                     signal_definition += SIGNAL_DEFINITION_DECODE_FMT.format(
                         database_name=database_name,
-                        message_name=cg_message.snake_name,
-                        signal_name=cg_signal.snake_name,
+                        message_name=cg_message.snake_name if not original_casing else cg_message.name,
+                        signal_name=cg_signal.snake_name if not original_casing else cg_signal.name,
                         type_name=cg_signal.type_name,
                         decode=decode,
                         floating_point_type=_get_floating_point_type(_use_float))
@@ -1553,8 +1583,8 @@ def _generate_definitions(database_name: str,
             if is_sender or _is_receiver(cg_signal, node_name):
                 signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_FMT.format(
                     database_name=database_name,
-                    message_name=cg_message.snake_name,
-                    signal_name=cg_signal.snake_name,
+                    message_name=cg_message.snake_name if not original_casing else cg_message.name,
+                    signal_name=cg_signal.snake_name if not original_casing else cg_signal.name,
                     type_name=cg_signal.type_name,
                     unused=unused,
                     check=check)
@@ -1567,10 +1597,12 @@ def _generate_definitions(database_name: str,
 
         if cg_message.message.length > 0:
             pack_variables, pack_body = _format_pack_code(cg_message,
-                                                          pack_helper_kinds)
+                                                          pack_helper_kinds,
+                                                          original_casing)
             unpack_variables, unpack_body = _format_unpack_code(cg_message,
                                                                 unpack_helper_kinds,
-                                                                node_name)
+                                                                node_name,
+                                                                original_casing)
             pack_unused = ''
             unpack_unused = ''
 
@@ -1585,7 +1617,7 @@ def _generate_definitions(database_name: str,
             if is_sender:
                 definition += DEFINITION_PACK_FMT.format(database_name=database_name,
                                                          database_message_name=cg_message.message.name,
-                                                         message_name=cg_message.snake_name,
+                                                         message_name=cg_message.snake_name if not original_casing else cg_message.name,
                                                          message_length=cg_message.message.length,
                                                          pack_unused=pack_unused,
                                                          pack_variables=pack_variables,
@@ -1593,7 +1625,7 @@ def _generate_definitions(database_name: str,
             if is_receiver:
                 definition += DEFINITION_UNPACK_FMT.format(database_name=database_name,
                                                            database_message_name=cg_message.message.name,
-                                                           message_name=cg_message.snake_name,
+                                                           message_name=cg_message.snake_name if not original_casing else cg_message.name,
                                                            message_length=cg_message.message.length,
                                                            unpack_unused=unpack_unused,
                                                            unpack_variables=unpack_variables,
@@ -1601,12 +1633,12 @@ def _generate_definitions(database_name: str,
 
             definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
                                                              database_message_name=cg_message.message.name,
-                                                             message_name=cg_message.snake_name,
+                                                             message_name=cg_message.snake_name if not original_casing else cg_message.name,
                                                              init_body=signals_init_body)
 
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,
-                                                     message_name=cg_message.snake_name)
+                                                     message_name=cg_message.snake_name if not original_casing else cg_message.name)
 
         if signal_definitions:
             definition += '\n' + '\n'.join(signal_definitions)
@@ -1655,12 +1687,13 @@ def _generate_fuzzer_source(database_name: str,
                             date: str,
                             header_name: str,
                             source_name: str,
-                            fuzzer_source_name: str) -> Tuple[str, str]:
+                            fuzzer_source_name: str,
+                            original_casing: bool) -> Tuple[str, str]:
     tests = []
     calls = []
 
     for cg_message in cg_messages:
-        name = f'{database_name}_{camel_to_snake_case(cg_message.message.name)}'
+        name = f'{database_name}_{camel_to_snake_case(cg_message.message.name) if not original_casing else cg_message.name}'
 
         test = TEST_FMT.format(name=name)
         tests.append(test)
@@ -1691,6 +1724,7 @@ def generate(database: "Database",
              bit_fields: bool = False,
              use_float: bool = False,
              node_name: Optional[str] = None,
+             original_casing: bool = False,
              ) -> Tuple[str, str, str, str]:
     """Generate C source code from given CAN database `database`.
 
@@ -1711,6 +1745,9 @@ def generate(database: "Database",
 
     Set `bit_fields` to ``True`` to generate bit fields in structs.
 
+    Set `original_casing` to ``True`` to generate signals and messages with
+    the original name.
+
     Set `use_float` to ``True`` to prefer the `float` type instead
     of the `double` type for floating point numbers.
 
@@ -1726,34 +1763,39 @@ def generate(database: "Database",
     date = time.ctime()
     cg_messages = [CodeGenMessage(message) for message in database.messages]
     include_guard = f'{database_name.upper()}_H'
-    frame_id_defines = _generate_frame_id_defines(database_name, cg_messages, node_name)
+    frame_id_defines = _generate_frame_id_defines(database_name, cg_messages, node_name, original_casing)
     frame_length_defines = _generate_frame_length_defines(database_name,
                                                           cg_messages,
-                                                          node_name)
+                                                          node_name,
+                                                          original_casing)
     is_extended_frame_defines = _generate_is_extended_frame_defines(
         database_name,
         cg_messages,
-        node_name)
+        node_name,
+        original_casing)
     frame_cycle_time_defines = _generate_frame_cycle_time_defines(
         database_name,
         cg_messages,
-        node_name)
-    choices_defines = _generate_choices_defines(database_name, cg_messages, node_name)
+        node_name,
+        original_casing)
+    choices_defines = _generate_choices_defines(database_name, cg_messages, node_name, original_casing)
 
-    frame_name_macros = _generate_frame_name_macros(database_name, cg_messages, node_name)
-    signal_name_macros = _generate_signal_name_macros(database_name, cg_messages, node_name)
+    frame_name_macros = _generate_frame_name_macros(database_name, cg_messages, node_name, original_casing)
+    signal_name_macros = _generate_signal_name_macros(database_name, cg_messages, node_name, original_casing)
 
-    structs = _generate_structs(database_name, cg_messages, bit_fields, node_name)
+    structs = _generate_structs(database_name, cg_messages, bit_fields, node_name, original_casing)
     declarations = _generate_declarations(database_name,
                                           cg_messages,
                                           floating_point_numbers,
                                           use_float,
-                                          node_name)
+                                          node_name,
+                                          original_casing)
     definitions, helper_kinds = _generate_definitions(database_name,
                                                       cg_messages,
                                                       floating_point_numbers,
                                                       use_float,
-                                                      node_name)
+                                                      node_name,
+                                                      original_casing)
     helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(version=__version__,
@@ -1781,6 +1823,7 @@ def generate(database: "Database",
         date,
         header_name,
         source_name,
-        fuzzer_source_name)
+        fuzzer_source_name,
+        original_casing)
 
     return header, source, fuzzer_source, fuzzer_makefile

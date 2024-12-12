@@ -102,7 +102,7 @@ class Parser60(textparser.Parser):
         token_specs = [
             ('SKIP',               r'[ \r\n\t]+'),
             ('COMMENT',            r'//.*?\n'),
-            ('HEXNUMBER',          r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
+            ('HEXNUMBER',          r'-?[0-9A-F]+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
             ('NUMBER',             r'-?\d+(\.\d+)?([eE][+-]?\d+)?'),
             ('STRING',             re_string),
             ('U',                  fr'/u:({re_string}|\S+)'),

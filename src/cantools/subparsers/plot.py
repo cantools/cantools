@@ -413,7 +413,7 @@ class Plotter:
         self.ignore_unknown_frames = args.ignore_unknown_frames
         self.ignore_invalid_data = args.ignore_invalid_data
         self.output_filename = args.output_file
-        self.signals = Signals(args.signals, args.case_sensitive, args.break_time, args, args.auto_color_ylabels)
+        self.signals = Signals(args.signals, args.case_sensitive, args.break_time, args, args.auto_color_ylabels, dbase)
 
         self.x_invalid_syntax = []
         self.x_unknown_frames = []
@@ -499,7 +499,8 @@ class Signals:
 
     # ------- initialization -------
 
-    def __init__(self, signals, case_sensitive, break_time, global_subplot_args, auto_color_ylabels):
+    def __init__(self, signals, case_sensitive, break_time, global_subplot_args, auto_color_ylabels, dbase):
+        self.dbase = dbase
         self.args = signals
         self.global_subplot_args = global_subplot_args
         self.signals = []
@@ -665,6 +666,9 @@ class Signals:
                         splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
                     axis_format_uninitialized = False
                 plt_func = getattr(splot, sgo.plt_func)
+                if self.global_subplot_args.show_units or self.subplot_args[(sgo.subplot, sgo.axis)].show_units:
+                    unit = self.get_signal_unit(signal_name)
+                    signal_name = f"{signal_name} [{unit}]"
                 container = plt_func(x, y, sgo.fmt, label=signal_name)
                 color = self.subplot_args[(sgo.subplot, sgo.axis)].color
                 if color is not None and self.contains_no_color(sgo.fmt):
@@ -745,6 +749,9 @@ class Signals:
 
         return False
 
+    def get_signal_unit(self, signal_name):
+        msg, signal = re.split(self.SEP_SG, signal_name)
+        return self.dbase.get_message_by_name(msg).get_signal_by_name(signal).unit
 
 class Signal:
 
@@ -938,4 +945,8 @@ def add_subplot_options(arg_group):
     arg_group.add_argument('--ylabel')
     arg_group.add_argument('--ymin', type=float)
     arg_group.add_argument('--ymax', type=float)
+    arg_group.add_argument(
+        '-u', '--show-units',
+        action='store_true',
+        help='Add units to the legend labels.')
     return arg_group

@@ -657,6 +657,457 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.init_pair')
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
+    def test_filter_signal(self,
+                    _use_default_colors,
+                    _curs_set,
+                    _init_pair,
+                    is_term_resized,
+                    color_pair,
+                    _bus,
+                    _notifier):
+        # Prepare mocks.
+        stdscr = StdScr(user_input=[
+            'f', 'f', 'a', '\n', 'q'
+        ])
+        args = Args('tests/files/dbc/foobar.dbc')
+        args.fd = True
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=74544,
+            is_extended_id=True,
+            data=b'\x00\x00\x00\x00\x00\x00\x00\x00'))
+        monitor.on_message_received(can.Message(
+            arbitration_id=74545,
+            is_extended_id=True,
+            data=b'\x00\x00\x00\x00\x00'))
+        monitor.on_message_received(can.Message(
+            arbitration_id=74546,
+            is_extended_id=True,
+            data=b'\x00\x00\x00\x00'))
+        monitor.run(1)
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 3, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  Bar('),
+                call(3, 0, '                  Binary32: 0.0'),
+                call(4, 0, '              )'),
+                call(5, 0, '       0.000  Foo('),
+                call(6, 0, '                  Foo: 250.0 degK,'),
+                call(7, 0, '                  Bar: 0.0 m'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  Fum('),
+                call(10, 0, '                  Fum: 0,'),
+                call(11, 0, '                  Fam: Disabled'),
+                call(12, 0, '              )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
+
+                # 'f' pressed to start filtering
+                call(0, 0, 'Received: 3, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  Bar('),
+                call(3, 0, '                  Binary32: 0.0'),
+                call(4, 0, '              )'),
+                call(5, 0, '       0.000  Foo('),
+                call(6, 0, '                  Foo: 250.0 degK,'),
+                call(7, 0, '                  Bar: 0.0 m'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  Fum('),
+                call(10, 0, '                  Fum: 0,'),
+                call(11, 0, '                  Fam: Disabled'),
+                call(12, 0, '              )'),
+                call(29, 0, 'Filter regex: ', 'cyan'),
+                call(29, 14, ' ', 'cyan inverted'),
+                call(29, 15, '                                                 ', 'cyan'),
+
+                # Match on 'f'
+                call(0, 0, 'Received: 3, Discarded: 0, Errors: 0, Filter: f'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  Foo('),
+                call(3, 0, '                  Foo: 250.0 degK,'),
+                call(4, 0, '                  Bar: 0.0 m'),
+                call(5, 0, '              )'),
+                call(6, 0, '       0.000  Fum('),
+                call(7, 0, '                  Fum: 0,'),
+                call(8, 0, '                  Fam: Disabled'),
+                call(9, 0, '              )'),
+                call(29, 0, 'Filter regex: f', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
+
+                # Match on 'fa'
+                call(0, 0, 'Received: 3, Discarded: 0, Errors: 0, Filter: fa'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  Fum('),
+                call(3, 0, '                  Fam: Disabled'),
+                call(4, 0, '              )'),
+                call(29, 0, 'Filter regex: fa', 'cyan'),
+                call(29, 16, ' ', 'cyan inverted'),
+                call(29, 17, '                                               ', 'cyan'),
+
+                # Enter
+                call(0, 0, 'Received: 3, Discarded: 0, Errors: 0, Filter: fa'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  Fum('),
+                call(3, 0, '                  Fam: Disabled'),
+                call(4, 0, '              )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_filter_muxed_signal(self,
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                _bus,
+                                _notifier):
+        # Prepare mocks.
+        stdscr = StdScr(user_input=[
+            'f', 'E', '_', '0', '1', '\n', 'q'
+        ])
+        args = Args('tests/files/dbc/msxii_system_can.dbc')
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=1025,
+            data=b'\x00\x00\x98\x98\x0b\x00'))
+        monitor.on_message_received(can.Message(
+            arbitration_id=1025,
+            data=b'\x01\x00\x98\x98\x0b\x00'))
+        monitor.run(1)
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, '                  BATTERY_VT_INDEX: 0,'),
+                call(4, 0, '                  MODULE_VOLTAGE_00: 39064,'),
+                call(5, 0, '                  MODULE_TEMP_00: 11'),
+                call(6, 0, '              )'),
+                call(7, 0, '       0.000  BATTERY_VT('),
+                call(8, 0, '                  BATTERY_VT_INDEX: 1,'),
+                call(9, 0, '                  MODULE_VOLTAGE_01: 39064,'),
+                call(10, 0, '                  MODULE_TEMP_01: 11'),
+                call(11, 0, '              )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
+
+                # 'f' pressed to start filtering
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, '                  BATTERY_VT_INDEX: 0,'),
+                call(4, 0, '                  MODULE_VOLTAGE_00: 39064,'),
+                call(5, 0, '                  MODULE_TEMP_00: 11'),
+                call(6, 0, '              )'),
+                call(7, 0, '       0.000  BATTERY_VT('),
+                call(8, 0, '                  BATTERY_VT_INDEX: 1,'),
+                call(9, 0, '                  MODULE_VOLTAGE_01: 39064,'),
+                call(10, 0, '                  MODULE_TEMP_01: 11'),
+                call(11, 0, '              )'),
+                call(29, 0, 'Filter regex: ', 'cyan'),
+                call(29, 14, ' ', 'cyan inverted'),
+                call(29, 15, '                                                 ', 'cyan'),
+
+                # Match on 'E'
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0, Filter: E'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, '                  BATTERY_VT_INDEX: 0,'),
+                call(4, 0, '                  MODULE_VOLTAGE_00: 39064,'),
+                call(5, 0, '                  MODULE_TEMP_00: 11'),
+                call(6, 0, '              )'),
+                call(7, 0, '       0.000  BATTERY_VT('),
+                call(8, 0, '                  BATTERY_VT_INDEX: 1,'),
+                call(9, 0, '                  MODULE_VOLTAGE_01: 39064,'),
+                call(10, 0, '                  MODULE_TEMP_01: 11'),
+                call(11, 0, '              )'),
+                call(29, 0, 'Filter regex: E', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
+
+                # Match on 'E_'
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0, Filter: E_'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, '                  MODULE_VOLTAGE_00: 39064,'),
+                call(4, 0, '                  MODULE_TEMP_00: 11'),
+                call(5, 0, '              )'),
+                call(6, 0, '       0.000  BATTERY_VT('),
+                call(7, 0, '                  MODULE_VOLTAGE_01: 39064,'),
+                call(8, 0, '                  MODULE_TEMP_01: 11'),
+                call(9, 0, '              )'),
+                call(29, 0, 'Filter regex: E_', 'cyan'),
+                call(29, 16, ' ', 'cyan inverted'),
+                call(29, 17, '                                               ', 'cyan'),
+
+                # Match on 'E_0'
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0, Filter: E_0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, '                  MODULE_VOLTAGE_00: 39064'),
+                call(4, 0, '              )'),
+                call(5, 0, '       0.000  BATTERY_VT('),
+                call(6, 0, '                  MODULE_VOLTAGE_01: 39064'),
+                call(7, 0, '              )'),
+                call(29, 0, 'Filter regex: E_0', 'cyan'),
+                call(29, 17, ' ', 'cyan inverted'),
+                call(29, 18, '                                              ', 'cyan'),
+
+                # Match on 'E_01'
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0, Filter: E_01'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, '                  MODULE_VOLTAGE_01: 39064'),
+                call(4, 0, '              )'),
+                call(29, 0, 'Filter regex: E_01', 'cyan'),
+                call(29, 18, ' ', 'cyan inverted'),
+                call(29, 19, '                                             ', 'cyan'),
+
+                # Enter
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0, Filter: E_01'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  BATTERY_VT('),
+                call(3, 0, '                  MODULE_VOLTAGE_01: 39064'),
+                call(4, 0, '              )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_filter_container_signal(self,
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                _bus,
+                                _notifier):
+        # Prepare mocks.
+        stdscr = StdScr(user_input=[
+            'f', 'e', '3', '_', 'c', '\n', 'q'
+        ])
+        args = Args('tests/files/arxml/system-4.2.arxml')
+        args.no_strict = True
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.on_message_received(can.Message(
+            arbitration_id=102,
+            data=b'\x0A\x0B\x0C\x09\xE2\xD8\x7F\xD6\x00\x86\xB2\x65\x4F\x1D\x2E\x3F\x07\xC0\x00\x5C\x84\x00\x00\x00\x01\x02\x03\x04\x7A\x0E\x00\x00\x04\x05\x06\x06\x2D\x04\x00\x00\x76\x03\x07\x08\x09\x0A\xC6\xEA\x00\x00\x00\x00\x00\x00\x00\x00'))
+        monitor.run(1)
+
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000 OneToContainThemAll ('),
+                call(3, 0, '                  message1'),
+                call(4, 0, '                  message2'),
+                call(5, 0, '                  message3'),
+                call(6, 0, '                  message3_secured'),
+                call(7, 0, '                  multiplexed_message'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  OneToContainThemAll :: message1('),
+                call(10, 0, '                  message1_SeqCounter: 2826,'),
+                call(11, 0, '                  message1_CRC: 2316,'),
+                call(12, 0, '                  signal6: zero,'),
+                call(13, 0, '                  signal1: 0 m,'),
+                call(14, 0, '                  signal5: 1.9698657873950542e-38'),
+                call(15, 0, '              )'),
+                call(16, 0, '       0.000  OneToContainThemAll :: message2('),
+                call(17, 0, '                  signal3: 0,'),
+                call(18, 0, '                  signal2: 579,'),
+                call(19, 0, '                  signal4: 8'),
+                call(20, 0, '              )'),
+                call(21, 0, '       0.000  OneToContainThemAll :: message3('),
+                call(22, 0, '                  message3_CRC: 10,'),
+                call(23, 0, '                  message3_SeqCounter: 11'),
+                call(24, 0, '              )'),
+                call(25, 0, '       0.000  OneToContainThemAll :: message3_secured('),
+                call(26, 0, '                  message3_CRC: 10,'),
+                call(27, 0, '                  message3_SeqCounter: 11,'),
+                call(28, 0, '                  message3_secured_Freshness: 56,'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
+
+                # 'f' pressed to start filtering
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000 OneToContainThemAll ('),
+                call(3, 0, '                  message1'),
+                call(4, 0, '                  message2'),
+                call(5, 0, '                  message3'),
+                call(6, 0, '                  message3_secured'),
+                call(7, 0, '                  multiplexed_message'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  OneToContainThemAll :: message1('),
+                call(10, 0, '                  message1_SeqCounter: 2826,'),
+                call(11, 0, '                  message1_CRC: 2316,'),
+                call(12, 0, '                  signal6: zero,'),
+                call(13, 0, '                  signal1: 0 m,'),
+                call(14, 0, '                  signal5: 1.9698657873950542e-38'),
+                call(15, 0, '              )'),
+                call(16, 0, '       0.000  OneToContainThemAll :: message2('),
+                call(17, 0, '                  signal3: 0,'),
+                call(18, 0, '                  signal2: 579,'),
+                call(19, 0, '                  signal4: 8'),
+                call(20, 0, '              )'),
+                call(21, 0, '       0.000  OneToContainThemAll :: message3('),
+                call(22, 0, '                  message3_CRC: 10,'),
+                call(23, 0, '                  message3_SeqCounter: 11'),
+                call(24, 0, '              )'),
+                call(25, 0, '       0.000  OneToContainThemAll :: message3_secured('),
+                call(26, 0, '                  message3_CRC: 10,'),
+                call(27, 0, '                  message3_SeqCounter: 11,'),
+                call(28, 0, '                  message3_secured_Freshness: 56,'),
+                call(29, 0, 'Filter regex: ', 'cyan'),
+                call(29, 14, ' ', 'cyan inverted'),
+                call(29, 15, '                                                 ', 'cyan'),
+
+                # Match on 'e'
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: e'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000 OneToContainThemAll ('),
+                call(3, 0, '                  message1'),
+                call(4, 0, '                  message2'),
+                call(5, 0, '                  message3'),
+                call(6, 0, '                  message3_secured'),
+                call(7, 0, '                  multiplexed_message'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  OneToContainThemAll :: message1('),
+                call(10, 0, '                  message1_SeqCounter: 2826,'),
+                call(11, 0, '                  message1_CRC: 2316,'),
+                call(12, 0, '                  signal6: zero,'),
+                call(13, 0, '                  signal1: 0 m,'),
+                call(14, 0, '                  signal5: 1.9698657873950542e-38'),
+                call(15, 0, '              )'),
+                call(16, 0, '       0.000  OneToContainThemAll :: message2('),
+                call(17, 0, '                  signal3: 0,'),
+                call(18, 0, '                  signal2: 579,'),
+                call(19, 0, '                  signal4: 8'),
+                call(20, 0, '              )'),
+                call(21, 0, '       0.000  OneToContainThemAll :: message3('),
+                call(22, 0, '                  message3_CRC: 10,'),
+                call(23, 0, '                  message3_SeqCounter: 11'),
+                call(24, 0, '              )'),
+                call(25, 0, '       0.000  OneToContainThemAll :: message3_secured('),
+                call(26, 0, '                  message3_CRC: 10,'),
+                call(27, 0, '                  message3_SeqCounter: 11,'),
+                call(28, 0, '                  message3_secured_Freshness: 56,'),
+                call(29, 0, 'Filter regex: e', 'cyan'),
+                call(29, 15, ' ', 'cyan inverted'),
+                call(29, 16, '                                                ', 'cyan'),
+
+                # Match on 'e3'
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: e3'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000 OneToContainThemAll ('),
+                call(3, 0, '                  message1'),
+                call(4, 0, '                  message2'),
+                call(5, 0, '                  message3'),
+                call(6, 0, '                  message3_secured'),
+                call(7, 0, '                  multiplexed_message'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  OneToContainThemAll :: message3('),
+                call(10, 0, '                  message3_CRC: 10,'),
+                call(11, 0, '                  message3_SeqCounter: 11'),
+                call(12, 0, '              )'),
+                call(13, 0, '       0.000  OneToContainThemAll :: message3_secured('),
+                call(14, 0, '                  message3_CRC: 10,'),
+                call(15, 0, '                  message3_SeqCounter: 11,'),
+                call(16, 0, '                  message3_secured_Freshness: 56,'),
+                call(17, 0, '                  message3_secured_Authenticator: 728'),
+                call(18, 0, '              )'),
+                call(29, 0, 'Filter regex: e3', 'cyan'),
+                call(29, 16, ' ', 'cyan inverted'),
+                call(29, 17, '                                               ', 'cyan'),
+
+                # Match on 'e3_'
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: e3_'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000 OneToContainThemAll ('),
+                call(3, 0, '                  message1'),
+                call(4, 0, '                  message2'),
+                call(5, 0, '                  message3'),
+                call(6, 0, '                  message3_secured'),
+                call(7, 0, '                  multiplexed_message'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  OneToContainThemAll :: message3('),
+                call(10, 0, '                  message3_CRC: 10,'),
+                call(11, 0, '                  message3_SeqCounter: 11'),
+                call(12, 0, '              )'),
+                call(13, 0, '       0.000  OneToContainThemAll :: message3_secured('),
+                call(14, 0, '                  message3_CRC: 10,'),
+                call(15, 0, '                  message3_SeqCounter: 11,'),
+                call(16, 0, '                  message3_secured_Freshness: 56,'),
+                call(17, 0, '                  message3_secured_Authenticator: 728'),
+                call(18, 0, '              )'),
+                call(29, 0, 'Filter regex: e3_', 'cyan'),
+                call(29, 17, ' ', 'cyan inverted'),
+                call(29, 18, '                                              ', 'cyan'),
+
+                # Match on 'e3_c'
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: e3_c'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  OneToContainThemAll :: message3('),
+                call(3, 0, '                  message3_CRC: 10'),
+                call(4, 0, '              )'),
+                call(5, 0, '       0.000  OneToContainThemAll :: message3_secured('),
+                call(6, 0, '                  message3_CRC: 10'),
+                call(7, 0, '              )'),
+                call(29, 0, 'Filter regex: e3_c', 'cyan'),
+                call(29, 18, ' ', 'cyan inverted'),
+                call(29, 19, '                                             ', 'cyan'),
+
+                # Enter
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0, Filter: e3_c'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  OneToContainThemAll :: message3('),
+                call(3, 0, '                  message3_CRC: 10'),
+                call(4, 0, '              )'),
+                call(5, 0, '       0.000  OneToContainThemAll :: message3_secured('),
+                call(6, 0, '                  message3_CRC: 10'),
+                call(7, 0, '              )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
     def test_reset(self,
                    _use_default_colors,
                    _curs_set,

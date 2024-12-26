@@ -380,7 +380,7 @@ The menu at the bottom of the monitor shows the available commands.
 
 - Quit: Quit the monitor. Ctrl-C can be used as well.
 
-- Filter: Only display messages matching given regular
+- Filter: Only display messages or signals matching given regular
   expression. Press <Enter> to return to the menu from the filter
   input line.
 

@@ -138,12 +138,12 @@ def format_message_by_frame_id(dbase : Database,
             return f' Frame 0x{frame_id:x} is a container message'
 
     try:
-        return format_message(message,
-                            data,
-                            decode_choices,
-                            single_line,
-                            allow_truncated=allow_truncated,
-                            allow_excess=allow_excess)
+        decoded_signals = message.decode_simple(data,
+                                        decode_choices,
+                                        allow_truncated=allow_truncated,
+                                        allow_excess=allow_excess)
+
+        return format_message(message, decoded_signals, single_line)
     except DecodeError as e:
         return f' {e}'
 
@@ -177,16 +177,8 @@ def format_container_message(message : Message,
 
 
 def format_message(message : Message,
-                   data : bytes,
-                   decode_choices : bool,
-                   single_line : bool,
-                   allow_truncated : bool,
-                   allow_excess : bool) -> str:
-    decoded_signals = message.decode_simple(data,
-                                            decode_choices,
-                                            allow_truncated=allow_truncated,
-                                            allow_excess=allow_excess)
-
+                   decoded_signals : SignalDictType,
+                   single_line : bool) -> str:
     formatted_signals = _format_signals(message, decoded_signals)
 
     if single_line:

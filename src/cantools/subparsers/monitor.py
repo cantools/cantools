@@ -381,23 +381,21 @@ class Monitor(can.Listener):
                                                 allow_truncated=True,
                                                 allow_excess=True)
 
+            decoded_signals = message.decode_simple(data,
+                                decode_choices=True,
+                                allow_truncated=True,
+                                allow_excess=True)
+
+            formatted_message = format_message(message,
+                                                decoded_signals,
+                                                single_line=self._single_line)
+
             if self._single_line:
                 formatted = [
-                    f'''{timestamp:12.3f} {format_message(message,
-                                                        data,
-                                                        decode_choices=True,
-                                                        single_line=self._single_line,
-                                                        allow_truncated=True,
-                                                        allow_excess=True)}'''
+                    f'''{timestamp:12.3f} {formatted_message}'''
                 ]
             else:
-                formatted = format_message(message,
-                                        data,
-                                        decode_choices=True,
-                                        single_line=self._single_line,
-                                        allow_truncated=True,
-                                        allow_excess=True)
-                lines = formatted.splitlines()
+                lines = formatted_message.splitlines()
                 formatted = [f'{timestamp:12.3f}  {lines[1]}']
                 formatted += [14 * ' ' + line for line in lines[2:]]
 

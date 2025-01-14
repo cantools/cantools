@@ -666,7 +666,7 @@ class Signals:
                         splot.axes.xaxis.set_major_formatter(lambda x,pos: str(datetime.timedelta(seconds=x)))
                     axis_format_uninitialized = False
                 plt_func = getattr(splot, sgo.plt_func)
-                if self.global_subplot_args.show_units or self.subplot_args[(sgo.subplot, sgo.axis)].show_units:
+                if self.global_subplot_args.show_units and self.subplot_args[(sgo.subplot, sgo.axis)].show_units:
                     unit = self.get_signal_unit(signal_name)
                     signal_name = f"{signal_name} [{unit}]"
                 container = plt_func(x, y, sgo.fmt, label=signal_name)
@@ -946,7 +946,8 @@ def add_subplot_options(arg_group):
     arg_group.add_argument('--ymin', type=float)
     arg_group.add_argument('--ymax', type=float)
     arg_group.add_argument(
-        '-u', '--show-units',
-        action='store_true',
-        help='Add units to the legend labels.')
+        '--no-units',
+        dest='show_units',
+        action='store_false',
+        help='Do not show units in legend labels.')
     return arg_group

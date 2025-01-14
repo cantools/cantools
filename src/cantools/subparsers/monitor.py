@@ -381,17 +381,18 @@ class Monitor(can.Listener):
                     self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
                     return MessageFormattingResult.DecodeError
 
+                decoded_signals = message.decode_simple(data,
+                    decode_choices=True,
+                    allow_truncated=True,
+                    allow_excess=True
+                )
+
                 if message.is_multiplexed():
-                    name = format_multiplexed_name(message,
-                                                    data,
-                                                    decode_choices=True,
-                                                    allow_truncated=True,
-                                                    allow_excess=True)
+                    name = format_multiplexed_name(message, decoded_signals)
 
-                decoded_signals = self._decode_and_filter_signals(name, message, data)
-
+                filtered_signals = self._filter_signals(name, decoded_signals)
                 formatted_message = format_message(message,
-                                                decoded_signals,
+                                                filtered_signals,
                                                 single_line=self._single_line)
 
                 if self._single_line:
@@ -474,26 +475,24 @@ class Monitor(can.Listener):
                     ]
 
             else:
-                full_name = f'{dbmsg.name} :: {cmsg.name}'
-                decoded_signals = self._decode_and_filter_signals(full_name, cmsg, data)
-                formatted = format_message(cmsg, decoded_signals, single_line=self._single_line)
+                name = cmsg.name
+                if cmsg.is_multiplexed():
+                    name = format_multiplexed_name(cmsg, cdata)
+                full_name = f'{dbmsg.name} :: {name}'
+                filtered_signals = self._filter_signals(full_name, cdata)
+                formatted = format_message(cmsg, filtered_signals, single_line=self._single_line)
                 lines = formatted.splitlines()
                 formatted = [f'{timestamp:12.3f}  {full_name}(']
                 formatted += [14 * ' ' + line for line in lines[2:]]
 
             self._update_formatted_message(full_name, formatted)
 
-    def _decode_and_filter_signals(self, name: str, message: database.Message, data: bytes) -> SignalDictType:
-        decoded_signals = message.decode_simple(data,
-                    decode_choices=True,
-                    allow_truncated=True,
-                    allow_excess=True)
-
+    def _filter_signals(self, name: str, signals: SignalDictType) -> SignalDictType:
         if name not in self._message_signals:
-            self._message_signals[name] = self._message_filtered_signals[name] = set(decoded_signals.keys())
+            self._message_signals[name] = self._message_filtered_signals[name] = set(signals.keys())
             self.insort_filtered(name)
 
-        return {s: v for s, v in decoded_signals.items() if s in self._message_filtered_signals[name]}
+        return {s: v for s, v in signals.items() if s in self._message_filtered_signals[name]}
 
     def _update_formatted_message(self, msg_name, formatted, is_error=False):
         old_formatted = self._formatted_messages.get(msg_name, [])

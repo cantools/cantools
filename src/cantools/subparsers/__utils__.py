@@ -187,16 +187,7 @@ def format_message(message : Message,
         return _format_message_multi_line(message, formatted_signals)
 
 def format_multiplexed_name(message : Message,
-                            data : bytes,
-                            decode_choices : bool,
-                            allow_truncated : bool,
-                            allow_excess: bool) -> str:
-    decoded_signals : SignalDictType \
-        = message.decode(data,
-                         decode_choices,
-                         allow_truncated=allow_truncated,
-                         allow_excess=allow_excess) # type: ignore
-
+                            decoded_signals : SignalDictType) -> str:
     # The idea here is that we rely on the sorted order of the Signals, and
     # then simply go through each possible Multiplexer and build a composite
     # key consisting of the Message name prepended to all the possible MUX

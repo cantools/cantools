@@ -1,7 +1,12 @@
 /**
- * The MIT License (MIT)
+ * @file motohawk_no_floating_point_numbers.c
  *
- * Copyright (c) 2018-2019 Erik Moqvist
+ 
+ *
+ * @copyright Copyright (c) 2018-2019 Erik Moqvist
+ *
+ * @par License
+ * The MIT License (MIT)
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -22,10 +27,6 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-
-/**
-
  */
 
 #include <string.h>

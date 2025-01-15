@@ -104,3 +104,4 @@ lint.ignore = [
 ]
 lint.isort.known-first-party = ["cantools"]
 lint.per-file-ignores."__init__.py" = ["F401"]
+lint.per-file-ignores."signal.py" = ["A005"]

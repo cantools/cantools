@@ -1,7 +1,7 @@
 /**
  * @file abs.c
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

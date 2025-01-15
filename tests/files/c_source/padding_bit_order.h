@@ -1,7 +1,7 @@
 /**
  * @file padding_bit_order.h
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

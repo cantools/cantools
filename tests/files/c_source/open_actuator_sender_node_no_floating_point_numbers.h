@@ -1,7 +1,7 @@
 /**
- * @file open_actuator_sender_node_no_floating_point_numbers.h
+ * @file open_actuator.h
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

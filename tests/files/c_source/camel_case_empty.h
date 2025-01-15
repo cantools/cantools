@@ -1,7 +1,7 @@
 /**
  * @file camel_case_empty.h
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

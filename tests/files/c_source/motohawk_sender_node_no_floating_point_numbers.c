@@ -1,7 +1,7 @@
 /**
- * @file motohawk_sender_node_no_floating_point_numbers.c
+ * @file motohawk.c
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

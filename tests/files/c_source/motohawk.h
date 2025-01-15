@@ -1,7 +1,7 @@
 /**
  * @file motohawk.h
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

@@ -1,7 +1,7 @@
 /**
  * @file min_max_only_6_0.c
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

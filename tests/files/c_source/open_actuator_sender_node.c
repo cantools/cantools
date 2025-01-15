@@ -1,7 +1,7 @@
 /**
- * @file open_actuator_sender_node.c
+ * @file open_actuator.c
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

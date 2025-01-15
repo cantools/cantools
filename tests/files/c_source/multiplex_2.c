@@ -1,7 +1,7 @@
 /**
  * @file multiplex_2.c
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

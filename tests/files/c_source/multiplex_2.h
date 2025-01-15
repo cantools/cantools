@@ -1,7 +1,7 @@
 /**
  * @file multiplex_2.h
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

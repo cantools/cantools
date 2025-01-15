@@ -1,7 +1,7 @@
 /**
  * @file floating_point_use_float.h
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

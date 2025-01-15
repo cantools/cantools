@@ -1,7 +1,7 @@
 /**
  * @file my_database_name.h
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

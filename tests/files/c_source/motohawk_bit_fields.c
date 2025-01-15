@@ -1,7 +1,7 @@
 /**
  * @file motohawk_bit_fields.c
  *
- 
+
  *
  * @copyright Copyright (c) 2018-2019 Erik Moqvist
  *

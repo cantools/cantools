@@ -4,6 +4,8 @@ import curses
 import queue
 import re
 import time
+from enum import Enum
+from typing import Any, Union
 
 import can
 from argparse_addons import Integer
@@ -11,16 +13,21 @@ from argparse_addons import Integer
 from cantools.database.errors import DecodeError
 
 from .. import database
+from ..typechecking import SignalDictType
 from .__utils__ import format_message, format_multiplexed_name
 
 
 class QuitError(Exception):
     pass
 
+class MessageFormattingResult(Enum):
+    Ok = 0
+    UnknownMessage = 1
+    DecodeError = 2
 
 class Monitor(can.Listener):
 
-    def __init__(self, stdscr, args):
+    def __init__(self, stdscr: Any, args: argparse.Namespace):
         self._stdscr = stdscr
         print(f'Reading bus description file "{args.database}"...\r')
         self._dbase = database.load_file(args.database,
@@ -29,19 +36,24 @@ class Monitor(can.Listener):
                                          prune_choices=args.prune,
                                          strict=not args.no_strict)
         self._single_line = args.single_line
-        self._filtered_sorted_message_names = []
+        self._filtered_sorted_message_names: list[str] = []
         self._filter = ''
         self._filter_cursor_pos = 0
         self._compiled_filter = None
-        self._formatted_messages = {}
+        self._formatted_messages: dict[str, list[str]] = {}
+        self._raw_messages: dict[str, can.Message] = {}
+        self._message_signals: dict[str, set[str]] = {}
+        self._message_filtered_signals: dict[str, set[str]] = {}
+        self._messages_with_error: set[str] = set()
         self._playing = True
         self._modified = True
         self._show_filter = False
-        self._queue = queue.Queue()
+        self._queue: queue.Queue = queue.Queue()
         self._nrows, self._ncols = stdscr.getmaxyx()
         self._received = 0
         self._discarded = 0
-        self._basetime = None
+        self._errors = 0
+        self._basetime: Union[float, None] = None
         self._page_first_row = 0
 
         stdscr.keypad(True)
@@ -132,7 +144,7 @@ class Monitor(can.Listener):
 
     def draw_stats(self, row):
         status_text = \
-            f'Received: {self._received}, Discarded: {self._discarded}, Errors: 0'
+            f'Received: {self._received}, Discarded: {self._discarded}, Errors: {self._errors}'
         if self._filter:
             status_text += f', Filter: {self._filter}'
         self.addstr(row, 0, status_text)
@@ -338,74 +350,69 @@ class Monitor(can.Listener):
                 self._filter_cursor_pos += 1
 
         self.compile_filter()
-        self._filtered_sorted_message_names = []
 
-        for name in self._formatted_messages:
-            self.insort_filtered(name)
+        # reformat all messages
+        self._filtered_sorted_message_names.clear()
+        self._message_signals.clear()
+        self._formatted_messages.clear()
+        for msg in self._raw_messages.values():
+            self.try_update_message(msg)
 
         self._modified = True
 
-    def try_update_message(self):
-        message = self._queue.get_nowait()
-        frame_id = message.arbitration_id
-        data = message.data
-        timestamp = message.timestamp
-
+    def try_update_message(self, raw_message: can.Message) -> MessageFormattingResult:
         if self._basetime is None:
-            self._basetime = timestamp
+            self._basetime = raw_message.timestamp
 
-        timestamp -= self._basetime
-        self._received += 1
+        data = raw_message.data
+        timestamp = raw_message.timestamp - self._basetime
 
         try:
-            message = self._dbase.get_message_by_frame_id(frame_id)
+            message = self._dbase.get_message_by_frame_id(raw_message.arbitration_id) # type: ignore[union-attr]
         except KeyError:
-            self._discarded += 1
-            return
+            return MessageFormattingResult.UnknownMessage
 
         name = message.name
         try:
             if message.is_container:
                 self._try_update_container(message, timestamp, data)
-                return
-
-
-            if len(data) < message.length:
-                self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
-                return
-
-            if message.is_multiplexed():
-                name = format_multiplexed_name(message,
-                                                data,
-                                                decode_choices=True,
-                                                allow_truncated=True,
-                                                allow_excess=True)
-
-            if self._single_line:
-                formatted = [
-                    f'''{timestamp:12.3f} {format_message(message,
-                                                        data,
-                                                        decode_choices=True,
-                                                        single_line=self._single_line,
-                                                        allow_truncated=True,
-                                                        allow_excess=True)}'''
-                ]
             else:
-                formatted = format_message(message,
-                                        data,
-                                        decode_choices=True,
-                                        single_line=self._single_line,
-                                        allow_truncated=True,
-                                        allow_excess=True)
-                lines = formatted.splitlines()
-                formatted = [f'{timestamp:12.3f}  {lines[1]}']
-                formatted += [14 * ' ' + line for line in lines[2:]]
+                if len(data) < message.length:
+                    self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
+                    return MessageFormattingResult.DecodeError
 
-            self._update_formatted_message(name, formatted)
+                decoded_signals = message.decode_simple(data,
+                    decode_choices=True,
+                    allow_truncated=True,
+                    allow_excess=True
+                )
+
+                if message.is_multiplexed():
+                    name = format_multiplexed_name(message, decoded_signals)
+
+                filtered_signals = self._filter_signals(name, decoded_signals)
+                formatted_message = format_message(message,
+                                                filtered_signals,
+                                                single_line=self._single_line)
+
+                if self._single_line:
+                    formatted = [
+                        f'''{timestamp:12.3f} {formatted_message}'''
+                    ]
+                else:
+                    lines = formatted_message.splitlines()
+                    formatted = [f'{timestamp:12.3f}  {lines[1]}']
+                    formatted += [14 * ' ' + line for line in lines[2:]]
+
+                self._update_formatted_message(name, formatted)
+
+            self._raw_messages[name] = raw_message
+            return MessageFormattingResult.Ok
         except DecodeError as e:
             # Discard the message in case of any decoding error, like we do when the
             # CAN message ID or length doesn't match what's specified in the DBC.
             self._update_message_error(timestamp, name, data, str(e))
+            return MessageFormattingResult.DecodeError
 
     def _try_update_container(self, dbmsg, timestamp, data):
         decoded = dbmsg.decode(data, decode_containers=True)
@@ -436,6 +443,7 @@ class Monitor(can.Listener):
                 [ 14*' ' +          f'    {x}' for x in contained_names ] + \
                 [ 14*' ' +          f')' ]
 
+        self._message_signals[dbmsg.name] = set(contained_names)
         self._update_formatted_message(dbmsg.name, formatted)
 
         # handle the contained messages just as normal messages but
@@ -467,20 +475,26 @@ class Monitor(can.Listener):
                     ]
 
             else:
-                full_name = f'{dbmsg.name} :: {cmsg.name}'
-                formatted = format_message(cmsg,
-                                           data,
-                                           decode_choices=True,
-                                           single_line=self._single_line,
-                                           allow_truncated=True,
-                                           allow_excess=True)
+                name = cmsg.name
+                if cmsg.is_multiplexed():
+                    name = format_multiplexed_name(cmsg, cdata)
+                full_name = f'{dbmsg.name} :: {name}'
+                filtered_signals = self._filter_signals(full_name, cdata)
+                formatted = format_message(cmsg, filtered_signals, single_line=self._single_line)
                 lines = formatted.splitlines()
                 formatted = [f'{timestamp:12.3f}  {full_name}(']
                 formatted += [14 * ' ' + line for line in lines[2:]]
 
             self._update_formatted_message(full_name, formatted)
 
-    def _update_formatted_message(self, msg_name, formatted):
+    def _filter_signals(self, name: str, signals: SignalDictType) -> SignalDictType:
+        if name not in self._message_signals:
+            self._message_signals[name] = self._message_filtered_signals[name] = set(signals.keys())
+            self.insort_filtered(name)
+
+        return {s: v for s, v in signals.items() if s in self._message_filtered_signals[name]}
+
+    def _update_formatted_message(self, msg_name, formatted, is_error=False):
         old_formatted = self._formatted_messages.get(msg_name, [])
 
         # make sure never to decrease the number of lines occupied by
@@ -490,6 +504,11 @@ class Monitor(can.Listener):
 
         self._formatted_messages[msg_name] = formatted
 
+        if is_error:
+            self._messages_with_error.add(msg_name)
+        else:
+            self._messages_with_error.discard(msg_name)
+
         if msg_name not in self._filtered_sorted_message_names:
             self.insort_filtered(msg_name)
 
@@ -497,15 +516,19 @@ class Monitor(can.Listener):
         formatted = [
             f'{timestamp:12.3f} {msg_name} ( undecoded, {error}: 0x{data.hex()} )'
         ]
-        self._update_formatted_message(msg_name, formatted)
-        self._discarded += 1
+        self._update_formatted_message(msg_name, formatted, is_error=True)
 
     def update_messages(self):
         modified = False
 
         try:
             while True:
-                self.try_update_message()
+                result = self.try_update_message(self._queue.get_nowait())
+                self._received += 1
+                if result == MessageFormattingResult.UnknownMessage:
+                    self._discarded += 1
+                elif result == MessageFormattingResult.DecodeError:
+                    self._errors += 1
                 modified = True
         except queue.Empty:
             pass
@@ -528,8 +551,25 @@ class Monitor(can.Listener):
 
         return modified
 
+    def _signals_matching_filter(self, message_name: str) -> set[str]:
+        all_signals = self._message_signals[message_name]
+
+        # return all signals if:
+        # - there is no filter
+        # - message name matches the filter
+        if self._compiled_filter is None or self._compiled_filter.search(message_name):
+            return all_signals
+
+        return {signal for signal in all_signals if self._compiled_filter.search(signal)}
+
+    def _message_matches_filter(self, name: str) -> bool:
+        matched_signals = self._signals_matching_filter(name)
+        if matched_signals:
+            self._message_filtered_signals[name] = matched_signals
+        return bool(matched_signals)
+
     def insort_filtered(self, name):
-        if self._compiled_filter is None or self._compiled_filter.search(name):
+        if name in self._messages_with_error or self._message_matches_filter(name):
             bisect.insort(self._filtered_sorted_message_names,
                           name)
 

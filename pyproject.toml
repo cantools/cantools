@@ -101,7 +101,7 @@ lint.ignore = [
     "E501",   # line too long
     "F541",   # f-string-missing-placeholders
     "RUF012", # mutable-class-default
-    "A005",   # Module shadows a Python standard-library module (needed for signal)
 ]
 lint.isort.known-first-party = ["cantools"]
 lint.per-file-ignores."__init__.py" = ["F401"]
+lint.per-file-ignores."signal.py" = ["A005"]

@@ -48,7 +48,7 @@ def with_fake_screen_width(screen_width):
 
 
 def remove_date_time(string):
-    return re.sub(r'.* This file was generated.*', '', string)
+    return re.sub(r'.*This.* file was generated.*', '', string)
 
 
 def read_file(filename):

@@ -1153,13 +1153,13 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(10, 0, '                  signal1: 0 m,'),
                 call(11, 0, '                  signal5: 4.0'),
                 call(12, 0, '              )'),
-                call(13, 0, '       0.000  OneToContainThemAll :: multiplexed_message__SELECT_HELLO('),
+                call(13, 0, '       0.000  OneToContainThemAll :: multiplexed_message('),
                 call(14, 0, '                  MultiplexedStatic: 1,'),
                 call(15, 0, '                  Hello: 2,'),
                 call(16, 0, '                  OneToContainThemAll_selector1: SELECT_HELLO,'),
                 call(17, 0, '                  MultiplexedStatic2: 2'),
                 call(18, 0, '              )'),
-                call(19, 0, '      10.000  OneToContainThemAll :: multiplexed_message__SELECT_WORLD('),
+                call(19, 0, '      10.000  OneToContainThemAll :: multiplexed_message('),
                 call(20, 0, '                  MultiplexedStatic: 1,'),
                 call(21, 0, '                  World2: 0,'),
                 call(22, 0, '                  World1: 1,'),
@@ -1167,6 +1167,55 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(24, 0, '                  MultiplexedStatic2: 2'),
                 call(25, 0, '              )'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
+            ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_container_multiplex_singleline(self,
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                _bus,
+                                _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/arxml/system-4.2.arxml')
+        args.no_strict = True
+        args.single_line = True
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        # OneToContainThemAll with message1 and multiplexed SELECT_HELLO
+        monitor.on_message_received(can.Message(
+            arbitration_id=102,
+            data=b'\n\x0b\x0c\t{\x00\xc8\x01\x01\x00\x00\xa0@\x07\x08\t\n\x11\x02\x00\x00\x00\x00\x00\x00\x00\x00'))
+        # OneToContainThemAll with message1 and multiplexed SELECT_WORLD
+        monitor.on_message_received(can.Message(
+            arbitration_id=102,
+            timestamp=10,
+            data=b'\n\x0b\x0c\tA\x01\x8e\x02\x00\x00\x00\x80@\x07\x08\t\nQ\x02\x00\x00\x00\x00\x00\x00\x00\x00'))
+        monitor.run(1)
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '      10.000 OneToContainThemAll (message1, multiplexed_message)'),
+                call(3, 0, '      10.000  OneToContainThemAll :: message1(message1_SeqCounter: 321, message1_CRC: 654, signal6: zero, signal1: 0 m, signal5: 4.0)'),
+                call(4, 0, '       0.000  OneToContainThemAll :: multiplexed_message(MultiplexedStatic: 1, Hello: 2, OneToContainThemAll_selector1: SELECT_HELLO, MultiplexedStatic2: 2)'),
+                call(5, 0, '      10.000  OneToContainThemAll :: multiplexed_message(MultiplexedStatic: 1, World2: 0, World1: 1, OneToContainThemAll_selector1: SELECT_WORLD, MultiplexedStatic2: 2)'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
             ])
 
     @patch('can.Notifier')

@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from typing import Optional
 
 from cantools.database.errors import DecodeError
 
@@ -43,20 +44,20 @@ def _format_signals(message, decoded_signals):
     return formatted_signals
 
 
-def _format_message_single_line(message : Message,
+def _format_message_single_line(name : str,
                                 formatted_signals : Iterable[str]) -> str:
-    return ' {}({})'.format(message.name,
+    return ' {}({})'.format(name,
                             ', '.join(formatted_signals))
 
 
-def _format_message_multi_line(message : Message,
+def _format_message_multi_line(name: str,
                                formatted_signals : Iterable[str]) -> str:
     indented_signals = [
         '    ' + formatted_signal
         for formatted_signal in formatted_signals
     ]
 
-    return MULTI_LINE_FMT.format(message=message.name,
+    return MULTI_LINE_FMT.format(message=name,
                                  signals=',\n'.join(indented_signals))
 
 def _format_container_single_line(message : Message,
@@ -71,7 +72,7 @@ def _format_container_single_line(message : Message,
                 contained_list.append(formatted_cm)
             else:
                 formatted_cm_signals = _format_signals(cm, signals)
-                formatted_cm = _format_message_single_line(cm, formatted_cm_signals)
+                formatted_cm = _format_message_single_line(cm.name, formatted_cm_signals)
             contained_list.append(formatted_cm)
         else:
             header_id = cm
@@ -97,7 +98,7 @@ def _format_container_multi_line(message : Message,
                 formatted_cm_signals = _format_signals(cm, signals)
                 formatted_cm = f'{cm.header_id:06x}##'
                 formatted_cm += f'{bytes(unpacked_data[i][1]).hex()} ::'
-                formatted_cm += _format_message_multi_line(cm, formatted_cm_signals)
+                formatted_cm += _format_message_multi_line(cm.name, formatted_cm_signals)
                 formatted_cm = formatted_cm.replace('\n', '\n    ')
                 contained_list.append('    '+formatted_cm.strip())
         else:
@@ -178,13 +179,15 @@ def format_container_message(message : Message,
 
 def format_message(message : Message,
                    decoded_signals : SignalDictType,
-                   single_line : bool) -> str:
+                   single_line : bool,
+                   name: Optional[str] = None) -> str:
     formatted_signals = _format_signals(message, decoded_signals)
+    name = name if name else message.name
 
     if single_line:
-        return _format_message_single_line(message, formatted_signals)
+        return _format_message_single_line(name, formatted_signals)
     else:
-        return _format_message_multi_line(message, formatted_signals)
+        return _format_message_multi_line(name, formatted_signals)
 
 def format_multiplexed_name(message : Message,
                             decoded_signals : SignalDictType) -> str:

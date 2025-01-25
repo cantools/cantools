@@ -387,25 +387,8 @@ class Monitor(can.Listener):
                     allow_excess=True
                 )
 
-                if message.is_multiplexed():
-                    name = format_multiplexed_name(message, decoded_signals)
-
-                filtered_signals = self._filter_signals(name, decoded_signals)
-                formatted_message = format_message(message,
-                                                filtered_signals,
-                                                single_line=self._single_line)
-
-                if self._single_line:
-                    formatted = [
-                        f'''{timestamp:12.3f} {formatted_message}'''
-                    ]
-                else:
-                    lines = formatted_message.splitlines()
-                    formatted = [f'{timestamp:12.3f}  {lines[1]}']
-                    formatted += [14 * ' ' + line for line in lines[2:]]
-
+                name, formatted = self._format_message(timestamp, message, decoded_signals)
                 self._update_formatted_message(name, formatted)
-
             self._raw_messages[name] = raw_message
             return MessageFormattingResult.Ok
         except DecodeError as e:
@@ -473,19 +456,32 @@ class Monitor(can.Listener):
                         ' '*14 +            f'    undecoded: {cdata_str}',
                         ' '*14 +            f')',
                     ]
-
             else:
-                name = cmsg.name
-                if cmsg.is_multiplexed():
-                    name = format_multiplexed_name(cmsg, cdata)
-                full_name = f'{dbmsg.name} :: {name}'
-                filtered_signals = self._filter_signals(full_name, cdata)
-                formatted = format_message(cmsg, filtered_signals, single_line=self._single_line)
-                lines = formatted.splitlines()
-                formatted = [f'{timestamp:12.3f}  {full_name}(']
-                formatted += [14 * ' ' + line for line in lines[2:]]
-
+                full_name, formatted = self._format_message(timestamp, cmsg, cdata, name_prefix=f'{dbmsg.name} :: ')
             self._update_formatted_message(full_name, formatted)
+
+    def _format_message(self, timestamp: float, message: database.Message, decoded_signals: SignalDictType, name_prefix: str = '') -> tuple[str, list[str]]:
+        name = message.name
+        if message.is_multiplexed():
+            name = format_multiplexed_name(message, decoded_signals)
+
+        filtered_signals = self._filter_signals(name, decoded_signals)
+        formatted_message = format_message(message,
+                                           filtered_signals,
+                                           single_line=self._single_line,
+                                           name=f'{name_prefix}{message.name}'
+                                           )
+
+        if self._single_line:
+            formatted = [
+                f'''{timestamp:12.3f} {formatted_message}'''
+            ]
+        else:
+            lines = formatted_message.splitlines()
+            formatted = [f'{timestamp:12.3f}  {lines[1]}']
+            formatted += [14 * ' ' + line for line in lines[2:]]
+
+        return name, formatted
 
     def _filter_signals(self, name: str, signals: SignalDictType) -> SignalDictType:
         if name not in self._message_signals:

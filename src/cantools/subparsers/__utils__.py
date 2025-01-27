@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from typing import Optional
 
 from cantools.database.errors import DecodeError
 
@@ -179,15 +178,13 @@ def format_container_message(message : Message,
 
 def format_message(message : Message,
                    decoded_signals : SignalDictType,
-                   single_line : bool,
-                   name: Optional[str] = None) -> str:
+                   single_line : bool) -> str:
     formatted_signals = format_signals(message, decoded_signals)
-    name = name if name else message.name
 
     if single_line:
-        return _format_message_single_line(name, formatted_signals)
+        return _format_message_single_line(message.name, formatted_signals)
     else:
-        return _format_message_multi_line(name, formatted_signals)
+        return _format_message_multi_line(message.name, formatted_signals)
 
 def format_multiplexed_name(message : Message,
                             decoded_signals : SignalDictType) -> str:

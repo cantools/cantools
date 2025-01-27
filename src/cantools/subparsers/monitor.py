@@ -14,7 +14,7 @@ from cantools.database.errors import DecodeError
 
 from .. import database
 from ..typechecking import SignalDictType
-from .__utils__ import format_message, format_multiplexed_name
+from .__utils__ import format_multiplexed_name, format_signals
 
 
 class QuitError(Exception):
@@ -413,21 +413,8 @@ class Monitor(can.Listener):
 
             contained_names.append(cmsg_name)
 
-        formatted = None
-        if self._single_line:
-            formatted = [
-                f'{timestamp:12.3f} {dbmsg.name} (' \
-                + ', '.join(contained_names) \
-                + ')'
-            ]
-        else:
-            formatted = \
-                [ f'{timestamp:12.3f} {dbmsg.name} (' ] + \
-                [ 14*' ' +          f'    {x}' for x in contained_names ] + \
-                [ 14*' ' +          f')' ]
-
         self._message_signals[dbmsg.name] = set(contained_names)
-        self._update_formatted_message(dbmsg.name, formatted)
+        self._update_formatted_message(dbmsg.name, self._format_lines(timestamp, dbmsg.name, contained_names))
 
         # handle the contained messages just as normal messages but
         # prefix their names with the name of the container followed
@@ -464,24 +451,24 @@ class Monitor(can.Listener):
         name = message.name
         if message.is_multiplexed():
             name = format_multiplexed_name(message, decoded_signals)
+        name = f'{name_prefix}{name}'
 
         filtered_signals = self._filter_signals(name, decoded_signals)
-        formatted_message = format_message(message,
-                                           filtered_signals,
-                                           single_line=self._single_line,
-                                           name=f'{name_prefix}{name}'
-                                           )
+        formatted_signals = format_signals(message, filtered_signals)
+        return name, self._format_lines(timestamp, name, formatted_signals)
 
+    def _format_lines(self, timestamp: float, name: str, items: list[str]) -> list[str]:
+        prefix = f'{timestamp:12.3f}  {name}('
         if self._single_line:
             formatted = [
-                f'''{timestamp:12.3f} {formatted_message}'''
+                f'''{prefix}{', '.join(items)})'''
             ]
         else:
-            lines = formatted_message.splitlines()
-            formatted = [f'{timestamp:12.3f}  {lines[1]}']
-            formatted += [14 * ' ' + line for line in lines[2:]]
+            formatted = [prefix]
+            formatted += [f"{' ':<18}{line}{',' if index + 1 < len(items) else ''}" for index, line in enumerate(items)]
+            formatted += [f"{' ':<14})"]
+        return formatted
 
-        return name, formatted
 
     def _filter_signals(self, name: str, signals: SignalDictType) -> SignalDictType:
         if name not in self._message_signals:

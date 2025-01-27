@@ -19,7 +19,7 @@ MULTI_LINE_FMT = '''
 '''
 
 
-def _format_signals(message, decoded_signals):
+def format_signals(message, decoded_signals):
     formatted_signals = []
 
     for signal in message.signals:
@@ -71,7 +71,7 @@ def _format_container_single_line(message : Message,
                 formatted_cm = f'{cm.name}: Undecodable data: {signals.hex(" ")}'
                 contained_list.append(formatted_cm)
             else:
-                formatted_cm_signals = _format_signals(cm, signals)
+                formatted_cm_signals = format_signals(cm, signals)
                 formatted_cm = _format_message_single_line(cm.name, formatted_cm_signals)
             contained_list.append(formatted_cm)
         else:
@@ -95,7 +95,7 @@ def _format_container_multi_line(message : Message,
                 formatted_cm += f'    {cm.name}: Undecodable data'
                 contained_list.append(formatted_cm)
             else:
-                formatted_cm_signals = _format_signals(cm, signals)
+                formatted_cm_signals = format_signals(cm, signals)
                 formatted_cm = f'{cm.header_id:06x}##'
                 formatted_cm += f'{bytes(unpacked_data[i][1]).hex()} ::'
                 formatted_cm += _format_message_multi_line(cm.name, formatted_cm_signals)
@@ -181,7 +181,7 @@ def format_message(message : Message,
                    decoded_signals : SignalDictType,
                    single_line : bool,
                    name: Optional[str] = None) -> str:
-    formatted_signals = _format_signals(message, decoded_signals)
+    formatted_signals = format_signals(message, decoded_signals)
     name = name if name else message.name
 
     if single_line:

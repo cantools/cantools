@@ -418,7 +418,7 @@ class Monitor(can.Listener):
 
         # handle the contained messages just as normal messages but
         # prefix their names with the name of the container followed
-        # by '.'
+        # by '::'
         for cmsg, cdata in decoded:
             if isinstance(cmsg, int):
                 tmp = dbmsg.get_contained_message_by_header_id(cmsg)
@@ -430,19 +430,7 @@ class Monitor(can.Listener):
                 else:
                     cdata_str = f'0x{cdata.hex()}'
 
-                formatted = []
-                if self._single_line:
-                    formatted = [
-                        f'{timestamp:12.3f}  {full_name}('
-                        f' undecoded: {cdata_str} '
-                        f')'
-                    ]
-                else:
-                    formatted = [
-                        f'{timestamp:12.3f}  {full_name}(',
-                        ' '*14 +            f'    undecoded: {cdata_str}',
-                        ' '*14 +            f')',
-                    ]
+                formatted = self._format_lines(timestamp, full_name, [f'undecoded: {cdata_str}'])
             else:
                 full_name, formatted = self._format_message(timestamp, cmsg, cdata, name_prefix=f'{dbmsg.name} :: ')
             self._update_formatted_message(full_name, formatted)

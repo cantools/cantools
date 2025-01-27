@@ -1168,6 +1168,59 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(25, 0, '              )'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
             ])
+        
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_container_undecoded(self,
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                _bus,
+                                _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/arxml/system-4.2.arxml')
+        args.no_strict = True
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        # OneToContainThemAll with message1 and undecoded trailing data
+        monitor.on_message_received(can.Message(
+            arbitration_id=102,
+            data=b'\n\x0b\x0c\t{\x00\xc8\x01\x04V\x0eI@\x00\x00\x00\x00'))
+        monitor.run(1)
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 0'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  OneToContainThemAll('),
+                call(3, 0, '                  message1,'),
+                call(4, 0, '                  0x0'),
+                call(5, 0, '              )'),
+                call(6, 0, '       0.000  OneToContainThemAll :: 0x0('),
+                call(7, 0, '                  undecoded: <empty>'),
+                call(8, 0, '              )'),
+                call(9, 0, '       0.000  OneToContainThemAll :: message1('),
+                call(10, 0, '                  message1_SeqCounter: 123,'),
+                call(11, 0, '                  message1_CRC: 456,'),
+                call(12, 0, '                  signal6: zero,'),
+                call(13, 0, '                  signal1: 5 m,'),
+                call(14, 0, '                  signal5: 3.1414999961853027'),
+                call(15, 0, '              )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
+            ])
 
     @patch('can.Notifier')
     @patch('can.Bus')

@@ -549,6 +549,10 @@ class Monitor(can.Listener):
         return {signal for signal in all_signals if self._compiled_filter.search(signal)}
 
     def _message_matches_filter(self, name: str) -> bool:
+        # don't filter invalid messages as signals are unknown
+        if name not in self._message_signals:
+            return True
+
         matched_signals = self._signals_matching_filter(name)
         if matched_signals:
             self._message_filtered_signals[name] = matched_signals

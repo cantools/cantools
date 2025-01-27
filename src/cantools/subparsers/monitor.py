@@ -469,7 +469,7 @@ class Monitor(can.Listener):
         formatted_message = format_message(message,
                                            filtered_signals,
                                            single_line=self._single_line,
-                                           name=f'{name_prefix}{message.name}'
+                                           name=f'{name_prefix}{name}'
                                            )
 
         if self._single_line:

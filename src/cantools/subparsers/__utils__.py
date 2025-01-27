@@ -208,4 +208,4 @@ def format_multiplexed_name(message : Message,
             else:
                 result.append('0')
 
-    return '__'.join(result)
+    return ' :: '.join(result)

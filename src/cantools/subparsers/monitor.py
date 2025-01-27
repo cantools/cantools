@@ -457,9 +457,9 @@ class Monitor(can.Listener):
         formatted_signals = format_signals(message, filtered_signals)
         return name, self._format_lines(timestamp, name, formatted_signals)
 
-    def _format_lines(self, timestamp: float, name: str, items: list[str]) -> list[str]:
+    def _format_lines(self, timestamp: float, name: str, items: list[str], single_line: bool=False) -> list[str]:
         prefix = f'{timestamp:12.3f}  {name}('
-        if self._single_line:
+        if self._single_line or single_line:
             formatted = [
                 f'''{prefix}{', '.join(items)})'''
             ]
@@ -496,9 +496,12 @@ class Monitor(can.Listener):
             self.insort_filtered(msg_name)
 
     def _update_message_error(self, timestamp, msg_name, data, error):
-        formatted = [
-            f'{timestamp:12.3f} {msg_name} ( undecoded, {error}: 0x{data.hex()} )'
-        ]
+        formatted = self._format_lines(
+            timestamp,
+            msg_name,
+            [f'undecoded, {error}: 0x{data.hex()}'],
+            single_line=True
+        )
         self._update_formatted_message(msg_name, formatted, is_error=True)
 
     def update_messages(self):

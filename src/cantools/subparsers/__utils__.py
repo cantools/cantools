@@ -199,10 +199,11 @@ def format_multiplexed_name(message : Message,
     for signal in message.signals:
         if signal.is_multiplexer:
             if signal.name in decoded_signals:
-                result.append(str(decoded_signals[signal.name]))
+                value = decoded_signals[signal.name]
             elif signal.raw_initial is not None:
-                result.append(str(signal.raw_initial))
+                value = signal.raw_initial
             else:
-                result.append('0')
+                value = 0
+            result.append(f'{signal.name}={value}')
 
     return ' :: '.join(result)

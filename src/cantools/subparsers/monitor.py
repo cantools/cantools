@@ -14,7 +14,7 @@ from cantools.database.errors import DecodeError
 
 from .. import database
 from ..typechecking import SignalDictType
-from .__utils__ import format_message, format_multiplexed_name
+from .__utils__ import format_multiplexed_name, format_signals
 
 
 class QuitError(Exception):
@@ -387,25 +387,8 @@ class Monitor(can.Listener):
                     allow_excess=True
                 )
 
-                if message.is_multiplexed():
-                    name = format_multiplexed_name(message, decoded_signals)
-
-                filtered_signals = self._filter_signals(name, decoded_signals)
-                formatted_message = format_message(message,
-                                                filtered_signals,
-                                                single_line=self._single_line)
-
-                if self._single_line:
-                    formatted = [
-                        f'''{timestamp:12.3f} {formatted_message}'''
-                    ]
-                else:
-                    lines = formatted_message.splitlines()
-                    formatted = [f'{timestamp:12.3f}  {lines[1]}']
-                    formatted += [14 * ' ' + line for line in lines[2:]]
-
+                name, formatted = self._format_message(timestamp, message, decoded_signals)
                 self._update_formatted_message(name, formatted)
-
             self._raw_messages[name] = raw_message
             return MessageFormattingResult.Ok
         except DecodeError as e:
@@ -430,25 +413,12 @@ class Monitor(can.Listener):
 
             contained_names.append(cmsg_name)
 
-        formatted = None
-        if self._single_line:
-            formatted = [
-                f'{timestamp:12.3f} {dbmsg.name} (' \
-                + ', '.join(contained_names) \
-                + ')'
-            ]
-        else:
-            formatted = \
-                [ f'{timestamp:12.3f} {dbmsg.name} (' ] + \
-                [ 14*' ' +          f'    {x}' for x in contained_names ] + \
-                [ 14*' ' +          f')' ]
-
         self._message_signals[dbmsg.name] = set(contained_names)
-        self._update_formatted_message(dbmsg.name, formatted)
+        self._update_formatted_message(dbmsg.name, self._format_lines(timestamp, dbmsg.name, contained_names))
 
         # handle the contained messages just as normal messages but
         # prefix their names with the name of the container followed
-        # by '.'
+        # by '::'
         for cmsg, cdata in decoded:
             if isinstance(cmsg, int):
                 tmp = dbmsg.get_contained_message_by_header_id(cmsg)
@@ -460,32 +430,33 @@ class Monitor(can.Listener):
                 else:
                     cdata_str = f'0x{cdata.hex()}'
 
-                formatted = []
-                if self._single_line:
-                    formatted = [
-                        f'{timestamp:12.3f}  {full_name}('
-                        f' undecoded: {cdata_str} '
-                        f')'
-                    ]
-                else:
-                    formatted = [
-                        f'{timestamp:12.3f}  {full_name}(',
-                        ' '*14 +            f'    undecoded: {cdata_str}',
-                        ' '*14 +            f')',
-                    ]
-
+                formatted = self._format_lines(timestamp, full_name, [f'undecoded: {cdata_str}'])
             else:
-                name = cmsg.name
-                if cmsg.is_multiplexed():
-                    name = format_multiplexed_name(cmsg, cdata)
-                full_name = f'{dbmsg.name} :: {name}'
-                filtered_signals = self._filter_signals(full_name, cdata)
-                formatted = format_message(cmsg, filtered_signals, single_line=self._single_line)
-                lines = formatted.splitlines()
-                formatted = [f'{timestamp:12.3f}  {full_name}(']
-                formatted += [14 * ' ' + line for line in lines[2:]]
-
+                full_name, formatted = self._format_message(timestamp, cmsg, cdata, name_prefix=f'{dbmsg.name} :: ')
             self._update_formatted_message(full_name, formatted)
+
+    def _format_message(self, timestamp: float, message: database.Message, decoded_signals: SignalDictType, name_prefix: str = '') -> tuple[str, list[str]]:
+        name = message.name
+        if message.is_multiplexed():
+            name = format_multiplexed_name(message, decoded_signals)
+        name = f'{name_prefix}{name}'
+
+        filtered_signals = self._filter_signals(name, decoded_signals)
+        formatted_signals = format_signals(message, filtered_signals)
+        return name, self._format_lines(timestamp, name, formatted_signals)
+
+    def _format_lines(self, timestamp: float, name: str, items: list[str], single_line: bool=False) -> list[str]:
+        prefix = f'{timestamp:12.3f}  {name}('
+        if self._single_line or single_line:
+            formatted = [
+                f'''{prefix}{', '.join(items)})'''
+            ]
+        else:
+            formatted = [prefix]
+            formatted += [f"{' ':<18}{line}{',' if index + 1 < len(items) else ''}" for index, line in enumerate(items)]
+            formatted += [f"{' ':<14})"]
+        return formatted
+
 
     def _filter_signals(self, name: str, signals: SignalDictType) -> SignalDictType:
         if name not in self._message_signals:
@@ -513,9 +484,12 @@ class Monitor(can.Listener):
             self.insort_filtered(msg_name)
 
     def _update_message_error(self, timestamp, msg_name, data, error):
-        formatted = [
-            f'{timestamp:12.3f} {msg_name} ( undecoded, {error}: 0x{data.hex()} )'
-        ]
+        formatted = self._format_lines(
+            timestamp,
+            msg_name,
+            [f'undecoded, {error}: 0x{data.hex()}'],
+            single_line=True
+        )
         self._update_formatted_message(msg_name, formatted, is_error=True)
 
     def update_messages(self):
@@ -563,6 +537,10 @@ class Monitor(can.Listener):
         return {signal for signal in all_signals if self._compiled_filter.search(signal)}
 
     def _message_matches_filter(self, name: str) -> bool:
+        # don't filter invalid messages as signals are unknown
+        if name not in self._message_signals:
+            return True
+
         matched_signals = self._signals_matching_filter(name)
         if matched_signals:
             self._message_filtered_signals[name] = matched_signals

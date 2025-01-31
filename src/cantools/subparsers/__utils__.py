@@ -18,7 +18,7 @@ MULTI_LINE_FMT = '''
 '''
 
 
-def _format_signals(message, decoded_signals):
+def format_signals(message, decoded_signals):
     formatted_signals = []
 
     for signal in message.signals:
@@ -43,20 +43,20 @@ def _format_signals(message, decoded_signals):
     return formatted_signals
 
 
-def _format_message_single_line(message : Message,
+def _format_message_single_line(name : str,
                                 formatted_signals : Iterable[str]) -> str:
-    return ' {}({})'.format(message.name,
+    return ' {}({})'.format(name,
                             ', '.join(formatted_signals))
 
 
-def _format_message_multi_line(message : Message,
+def _format_message_multi_line(name: str,
                                formatted_signals : Iterable[str]) -> str:
     indented_signals = [
         '    ' + formatted_signal
         for formatted_signal in formatted_signals
     ]
 
-    return MULTI_LINE_FMT.format(message=message.name,
+    return MULTI_LINE_FMT.format(message=name,
                                  signals=',\n'.join(indented_signals))
 
 def _format_container_single_line(message : Message,
@@ -70,8 +70,8 @@ def _format_container_single_line(message : Message,
                 formatted_cm = f'{cm.name}: Undecodable data: {signals.hex(" ")}'
                 contained_list.append(formatted_cm)
             else:
-                formatted_cm_signals = _format_signals(cm, signals)
-                formatted_cm = _format_message_single_line(cm, formatted_cm_signals)
+                formatted_cm_signals = format_signals(cm, signals)
+                formatted_cm = _format_message_single_line(cm.name, formatted_cm_signals)
             contained_list.append(formatted_cm)
         else:
             header_id = cm
@@ -94,10 +94,10 @@ def _format_container_multi_line(message : Message,
                 formatted_cm += f'    {cm.name}: Undecodable data'
                 contained_list.append(formatted_cm)
             else:
-                formatted_cm_signals = _format_signals(cm, signals)
+                formatted_cm_signals = format_signals(cm, signals)
                 formatted_cm = f'{cm.header_id:06x}##'
                 formatted_cm += f'{bytes(unpacked_data[i][1]).hex()} ::'
-                formatted_cm += _format_message_multi_line(cm, formatted_cm_signals)
+                formatted_cm += _format_message_multi_line(cm.name, formatted_cm_signals)
                 formatted_cm = formatted_cm.replace('\n', '\n    ')
                 contained_list.append('    '+formatted_cm.strip())
         else:
@@ -179,12 +179,12 @@ def format_container_message(message : Message,
 def format_message(message : Message,
                    decoded_signals : SignalDictType,
                    single_line : bool) -> str:
-    formatted_signals = _format_signals(message, decoded_signals)
+    formatted_signals = format_signals(message, decoded_signals)
 
     if single_line:
-        return _format_message_single_line(message, formatted_signals)
+        return _format_message_single_line(message.name, formatted_signals)
     else:
-        return _format_message_multi_line(message, formatted_signals)
+        return _format_message_multi_line(message.name, formatted_signals)
 
 def format_multiplexed_name(message : Message,
                             decoded_signals : SignalDictType) -> str:
@@ -199,10 +199,11 @@ def format_multiplexed_name(message : Message,
     for signal in message.signals:
         if signal.is_multiplexer:
             if signal.name in decoded_signals:
-                result.append(str(decoded_signals[signal.name]))
+                value = decoded_signals[signal.name]
             elif signal.raw_initial is not None:
-                result.append(str(signal.raw_initial))
+                value = signal.raw_initial
             else:
-                result.append('0')
+                value = 0
+            result.append(f'{signal.name}={value}')
 
-    return '__'.join(result)
+    return ' :: '.join(result)

@@ -91,3 +91,20 @@ class DbcSpecifics:
         """
 
         return self._attribute_definitions_rel
+
+    def __add__(self, other):
+        new = self.__class__(attributes=self._attributes,
+                             attribute_definitions=self._attribute_definitions,
+                             environment_variables=self._environment_variables,
+                             value_tables=self._value_tables,
+                             attributes_rel=self._attributes_rel,
+                             attribute_definitions_rel=self._attribute_definitions_rel)
+
+        new._attributes.update(other._attributes)
+        new._attribute_definitions.update(other._attribute_definitions)
+        new._environment_variables.update(other._environment_variables)
+        new._value_tables.update(other._value_tables)
+        new._attributes_rel.update(other._attributes_rel)
+        new._attribute_definitions_rel.update(other._attribute_definitions_rel)
+
+        return new

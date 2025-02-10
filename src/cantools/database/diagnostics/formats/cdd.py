@@ -62,11 +62,7 @@ def _load_data_types(ecu_doc):
 
     data_types = {}
 
-    types = ecu_doc.findall('DATATYPES/IDENT')
-    types += ecu_doc.findall('DATATYPES/LINCOMP')
-    types += ecu_doc.findall('DATATYPES/TEXTTBL')
-    types += ecu_doc.findall('DATATYPES/STRUCTDT')
-    types += ecu_doc.findall('DATATYPES/EOSITERDT')
+    types = ecu_doc.findall('DATATYPES/*')
 
     for data_type in types:
         # Default values.

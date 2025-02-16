@@ -122,7 +122,7 @@ class Message(UserDict):
                  decode_choices,
                  scaling,
                  padding,
-                 strict: bool = True):
+                 strict = True):
         super().__init__()
         self.database = database
         self._mplex_map = invert_signal_tree(database.signal_tree)

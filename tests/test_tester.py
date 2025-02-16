@@ -315,6 +315,37 @@ class CanToolsTesterTest(unittest.TestCase):
         self.assertEqual(str(cm.exception),
                          "expected bus name in ['TheBusName'], but got 'BadBus'")
 
+    def test_signal_init_out_range(self):
+        """The bus name should be None if no bus is given in the database.
+
+        """
+
+        database = cantools.db.load_file('tests/files/dbc/issue_725.dbc')
+        can_bus = CanBus()
+
+        with self.assertRaises(cantools.tester.Error) as cm:
+            cantools.tester.Tester("Node1",
+                                    database,
+                                    can_bus,
+                                    'test',
+                                    on_message=None,
+                                    decode_choices=False,
+                                    scaling=False)
+
+        self.assertEqual(str(cm.exception),
+                         'Expected signal "Signal1" value smaller than or equal to 250 in message "TestMessage", but got 254.')
+        try:
+            cantools.tester.Tester("Node1",
+                                    database,
+                                    can_bus,
+                                    'test',
+                                    on_message=None,
+                                    decode_choices=False,
+                                    scaling=False,
+                                    strict=False)
+        except Exception as e:
+            self.fail(f"Unexpected exception raised: {e}")
+
     def test_on_message(self):
         """Test the on_message callback.
 

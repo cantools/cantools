@@ -121,7 +121,8 @@ class Message(UserDict):
                  input_queue,
                  decode_choices,
                  scaling,
-                 padding):
+                 padding,
+                 strict = True):
         super().__init__()
         self.database = database
         self._mplex_map = invert_signal_tree(database.signal_tree)
@@ -130,6 +131,7 @@ class Message(UserDict):
         self.decode_choices = decode_choices
         self.scaling = scaling
         self.padding = padding
+        self.strict = strict
         self._input_list = input_list
         self.enabled = True
         self._can_message = None
@@ -250,7 +252,8 @@ class Message(UserDict):
         pruned_data = self.database.gather_signals(self.data)
         data = self.database.encode(pruned_data,
                                     self.scaling,
-                                    self.padding)
+                                    self.padding,
+                                    strict=self.strict)
         self._can_message = can.Message(arbitration_id=arbitration_id,
                                         is_extended_id=extended_id,
                                         data=data)
@@ -316,7 +319,8 @@ class Tester:
                  on_message=None,
                  decode_choices=True,
                  scaling=True,
-                 padding=False):
+                 padding=False,
+                 strict=True):
         self._dut_name = dut_name
         self._bus_name = bus_name
         self._database = database
@@ -351,7 +355,8 @@ class Tester:
                                                        self._input_queue,
                                                        decode_choices,
                                                        scaling,
-                                                       padding)
+                                                       padding,
+                                                       strict=strict)
 
         listener = Listener(self._database,
                             self._messages,

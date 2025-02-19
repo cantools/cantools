@@ -81,7 +81,7 @@ extern "C" {{
 {frame_cycle_time_defines}
 
 /* Signal choices. */
-{choices_defines}
+{choices_declarations}
 
 /* Frame Names. */
 {frame_name_macros}
@@ -600,8 +600,9 @@ INIT_SIGNAL_BODY_TEMPLATE_FMT = '''\
 
 class CodeGenSignal:
 
-    def __init__(self, signal: "Signal") -> None:
+    def __init__(self, signal: "Signal", msg_parent: "CodeGenMessage") -> None:
         self.signal: Signal = signal
+        self.msg_parent = msg_parent
         self.snake_name = camel_to_snake_case(signal.name)
 
     @property
@@ -626,6 +627,11 @@ class CodeGenSignal:
                 type_name = 'float'
             else:
                 type_name = 'double'
+        # If use_enum activated for parent message use the enum type
+        elif self.msg_parent.use_enum_choices and self.signal.choices is not None:
+            # Apply its enum type
+            type_name = f'{self.msg_parent.database_prefix.lower()}_{self.msg_parent.snake_name.lower()}_{self.snake_name.lower()}_t'
+        # Generate normal type
         else:
             type_name = f'int{self.type_length}_t'
 
@@ -800,10 +806,13 @@ class CodeGenSignal:
 
 class CodeGenMessage:
 
-    def __init__(self, message: "Message") -> None:
+    def __init__(self, message: "Message", database_prefix: str, use_enum_choices: bool = False) -> None:
         self.message = message
+        self.database_prefix = database_prefix
         self.snake_name = camel_to_snake_case(message.name)
-        self.cg_signals = [CodeGenSignal(signal) for signal in message.signals]
+        self.use_enum_choices = use_enum_choices
+        self.cg_signals = [CodeGenSignal(signal, self)
+                           for signal in message.signals]
 
     def get_signal_by_name(self, name: str) -> "CodeGenSignal":
         for cg_signal in self.cg_signals:
@@ -1202,7 +1211,7 @@ def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> tuple[st
     return comment, members
 
 
-def _format_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[str]:
+def _format_definition_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[str]:
     choices = []
 
     for value, name in sorted(cg_signal.unique_choices.items()):
@@ -1210,6 +1219,22 @@ def _format_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[str]:
             fmt = '{signal_name}_{name}_CHOICE ({value})'
         else:
             fmt = '{signal_name}_{name}_CHOICE ({value}u)'
+
+        choices.append(fmt.format(signal_name=signal_name.upper(),
+                                  name=str(name),
+                                  value=value))
+
+    return choices
+
+
+def _format_enum_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[str]:
+    choices = []
+
+    for value, name in sorted(cg_signal.unique_choices.items()):
+        if cg_signal.signal.is_signed:
+            fmt = '{signal_name}_{name} = ({value})'
+        else:
+            fmt = '{signal_name}_{name} = ({value}u)'
 
         choices.append(fmt.format(signal_name=signal_name.upper(),
                                   name=str(name),
@@ -1327,7 +1352,7 @@ def _generate_frame_cycle_time_defines(database_name: str,
     result = '\n'.join([
         f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_CYCLE_TIME_MS ({cg_message.message.cycle_time}u)'
         for cg_message in cg_messages if cg_message.message.cycle_time is not None and
-                                      _is_sender_or_receiver(cg_message, node_name)
+        _is_sender_or_receiver(cg_message, node_name)
     ])
 
     return result
@@ -1344,10 +1369,10 @@ def _generate_is_extended_frame_defines(database_name: str,
     return result
 
 
-def _generate_choices_defines(database_name: str,
-                              cg_messages: list["CodeGenMessage"],
-                              node_name: Optional[str]) -> str:
-    choices_defines = []
+def _generate_choices_declarations(database_name: str,
+                                   cg_messages: list["CodeGenMessage"],
+                                   node_name: Optional[str]) -> str:
+    choices_declarations = []
 
     for cg_message in cg_messages:
         is_sender = _is_sender(cg_message, node_name)
@@ -1357,14 +1382,23 @@ def _generate_choices_defines(database_name: str,
             if not is_sender and not _is_receiver(cg_signal, node_name):
                 continue
 
-            choices = _format_choices(cg_signal, cg_signal.snake_name)
-            signal_choices_defines = '\n'.join([
-                f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_{choice}'
-                for choice in choices
-            ])
-            choices_defines.append(signal_choices_defines)
+            signal_choices_declaration = ""
+            if cg_signal.msg_parent.use_enum_choices:  # Generate choice instead of define
+                choices = _format_enum_choices(cg_signal, cg_signal.msg_parent.database_prefix +
+                                               '_' + cg_signal.msg_parent.snake_name + '_' + cg_signal.snake_name)
+                signal_choices_declaration = 'typedef enum {' + (", ").join(
+                    choices) + '} ' + cg_signal.type_name + ';'  # Unique enum name
+            else:  # Generate define
+                choices = _format_definition_choices(
+                    cg_signal, cg_signal.snake_name)
+                signal_choices_declaration = '\n'.join([
+                    f'#define {database_name.upper()}_{cg_message.snake_name.upper()}_{choice}'
+                    for choice in choices
+                ])
+            # Add each element
+            choices_declarations.append(signal_choices_declaration)
 
-    return '\n\n'.join(choices_defines)
+    return '\n\n'.join(choices_declarations)
 
 
 def _generate_frame_name_macros(database_name: str,
@@ -1688,6 +1722,7 @@ def generate(database: "Database",
              floating_point_numbers: bool = True,
              bit_fields: bool = False,
              use_float: bool = False,
+             use_enum_choices: bool = False,
              node_name: Optional[str] = None,
              ) -> tuple[str, str, str, str]:
     """Generate C source code from given CAN database `database`.
@@ -1712,6 +1747,9 @@ def generate(database: "Database",
     Set `use_float` to ``True`` to prefer the `float` type instead
     of the `double` type for floating point numbers.
 
+    Set `use_enum_choices` to ``True`` to generate choice signals as their
+    own enum types.
+
     `node_name` specifies the node for which message packers will be generated.
     For all other messages, unpackers will be generated. If `node_name` is not
     provided, both packers and unpackers will be generated.
@@ -1722,9 +1760,11 @@ def generate(database: "Database",
     """
 
     date = time.ctime()
-    cg_messages = [CodeGenMessage(message) for message in database.messages]
+    cg_messages = [CodeGenMessage(message, database_name, use_enum_choices)
+                   for message in database.messages]
     include_guard = f'{database_name.upper()}_H'
-    frame_id_defines = _generate_frame_id_defines(database_name, cg_messages, node_name)
+    frame_id_defines = _generate_frame_id_defines(
+        database_name, cg_messages, node_name)
     frame_length_defines = _generate_frame_length_defines(database_name,
                                                           cg_messages,
                                                           node_name)
@@ -1736,12 +1776,17 @@ def generate(database: "Database",
         database_name,
         cg_messages,
         node_name)
-    choices_defines = _generate_choices_defines(database_name, cg_messages, node_name)
 
-    frame_name_macros = _generate_frame_name_macros(database_name, cg_messages, node_name)
-    signal_name_macros = _generate_signal_name_macros(database_name, cg_messages, node_name)
+    choices_declarations = _generate_choices_declarations(
+        database_name, cg_messages, node_name)
 
-    structs = _generate_structs(database_name, cg_messages, bit_fields, node_name)
+    frame_name_macros = _generate_frame_name_macros(
+        database_name, cg_messages, node_name)
+    signal_name_macros = _generate_signal_name_macros(
+        database_name, cg_messages, node_name)
+
+    structs = _generate_structs(
+        database_name, cg_messages, bit_fields, node_name)
     declarations = _generate_declarations(database_name,
                                           cg_messages,
                                           floating_point_numbers,
@@ -1762,7 +1807,7 @@ def generate(database: "Database",
                                frame_length_defines=frame_length_defines,
                                is_extended_frame_defines=is_extended_frame_defines,
                                frame_cycle_time_defines=frame_cycle_time_defines,
-                               choices_defines=choices_defines,
+                               choices_declarations=choices_declarations,
                                frame_name_macros=frame_name_macros,
                                signal_name_macros=signal_name_macros,
                                structs=structs,

@@ -1215,14 +1215,13 @@ def _format_definition_choices(cg_signal: "CodeGenSignal", signal_name: str) -> 
     choices = []
 
     for value, name in sorted(cg_signal.unique_choices.items()):
-        if cg_signal.signal.is_signed:
-            fmt = '{signal_name}_{name}_CHOICE ({value})'
-        else:
-            fmt = '{signal_name}_{name}_CHOICE ({value}u)'
+        suffix = '' if cg_signal.signal.is_signed else 'u'
+        fmt = '{signal_name}_{name}_CHOICE ({value}{suffix})'
 
         choices.append(fmt.format(signal_name=signal_name.upper(),
                                   name=str(name),
-                                  value=value))
+                                  value=value,
+                                  suffix=suffix))
 
     return choices
 
@@ -1231,14 +1230,13 @@ def _format_enum_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[s
     choices = []
 
     for value, name in sorted(cg_signal.unique_choices.items()):
-        if cg_signal.signal.is_signed:
-            fmt = '{signal_name}_{name} = ({value})'
-        else:
-            fmt = '{signal_name}_{name} = ({value}u)'
+        suffix = '' if cg_signal.signal.is_signed else 'u'
+        fmt = '{signal_name}_{name} = ({value}{suffix})'
 
         choices.append(fmt.format(signal_name=signal_name.upper(),
                                   name=str(name),
-                                  value=value))
+                                  value=value,
+                                  suffix=suffix))
 
     return choices
 
@@ -1384,8 +1382,8 @@ def _generate_choices_declarations(database_name: str,
 
             signal_choices_declaration = ""
             if cg_signal.msg_parent.use_enum_choices:  # Generate choice instead of define
-                choices = _format_enum_choices(cg_signal, cg_signal.msg_parent.database_prefix +
-                                               '_' + cg_signal.msg_parent.snake_name + '_' + cg_signal.snake_name)
+                choices = _format_enum_choices(cg_signal, '_'.join(
+                    [cg_signal.msg_parent.database_prefix, cg_signal.msg_parent.snake_name, cg_signal.snake_name]))
                 signal_choices_declaration = 'typedef enum {' + (", ").join(
                     choices) + '} ' + cg_signal.type_name + ';'  # Unique enum name
             else:  # Generate define
@@ -1398,7 +1396,7 @@ def _generate_choices_declarations(database_name: str,
             # Add each element
             choices_declarations.append(signal_choices_declaration)
 
-    return '\n\n'.join(choices_declarations)
+    return '\n\n'.join(choices_declarations)  # dont break tests
 
 
 def _generate_frame_name_macros(database_name: str,

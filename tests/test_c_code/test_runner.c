@@ -2,7 +2,7 @@
 #include "test_basic.h"
 #include "test_bit_fields.h"
 #include "test_initial_values.h"
-#include "test_enum.h"
+#include "test_enum_encode_decode.h"
 extern void test_add(void);
 extern void test_subtract(void);
 

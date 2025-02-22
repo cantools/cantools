@@ -1384,8 +1384,8 @@ def _generate_choices_declarations(database_name: str,
             if cg_signal.msg_parent.use_enum_choices:  # Generate choice instead of define
                 choices = _format_enum_choices(cg_signal, '_'.join(
                     [cg_signal.msg_parent.database_prefix, cg_signal.msg_parent.snake_name, cg_signal.snake_name]))
-                signal_choices_declaration = 'typedef enum {' + (", ").join(
-                    choices) + '} ' + cg_signal.type_name + ';'  # Unique enum name
+                signal_choices_declaration = 'typedef enum {\n    ' + (", \n    ").join(
+                    choices) + '\n} ' + cg_signal.type_name + ';'  # Unique enum name
             else:  # Generate define
                 choices = _format_definition_choices(
                     cg_signal, cg_signal.snake_name)

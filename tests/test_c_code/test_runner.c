@@ -61,7 +61,7 @@ int main(void)
     RUN_TEST(nullptr_ptr_initial_value);
 
     // test_enum.h
-    RUN_TEST(test_encode_decode);
+    RUN_TEST(test_enum_codec);
 
     return UNITY_END();
 }

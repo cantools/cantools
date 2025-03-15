@@ -737,7 +737,7 @@ class CodeGenSignal:
         if self.signal.conversion.is_float:
             return None
         elif self.signal.is_signed:
-            return cast(int, -(2 ** (self.signal.length - 1)))
+            return cast("int", -(2 ** (self.signal.length - 1)))
         else:
             return 0
 
@@ -746,9 +746,9 @@ class CodeGenSignal:
         if self.signal.conversion.is_float:
             return None
         elif self.signal.is_signed:
-            return cast(int, (2 ** (self.signal.length - 1)) - 1)
+            return cast("int", (2 ** (self.signal.length - 1)) - 1)
         else:
-            return cast(int, (2 ** self.signal.length) - 1)
+            return cast("int", (2 ** self.signal.length) - 1)
 
     def segments(self, invert_shift: bool) -> Iterator[tuple[int, int, str, int]]:
         index, pos = divmod(self.signal.start, 8)

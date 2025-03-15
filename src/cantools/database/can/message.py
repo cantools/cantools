@@ -755,7 +755,7 @@ class Message:
                 raw_value = signal.conversion.numeric_scaled_to_raw(scaled_value)
             else:
                 scaled_value = cast(
-                    Union[int, float],
+                    'Union[int, float]',
                     signal.conversion.raw_to_scaled(raw_value=signal_value, decode_choices=False)
                 )
                 raw_value = signal_value
@@ -926,7 +926,7 @@ class Message:
 
                 self.assert_container_encodable(data, scaling=scaling)
 
-            return self._encode_container(cast(ContainerEncodeInputType, data),
+            return self._encode_container(cast('ContainerEncodeInputType', data),
                                           scaling,
                                           padding)
 
@@ -944,7 +944,7 @@ class Message:
             raise ValueError('Codec is not initialized.')
 
         encoded, padding_mask, all_signals = self._encode(self._codecs,
-                                                          cast(SignalMappingType, data),
+                                                          cast('SignalMappingType', data),
                                                           scaling)
 
         if padding:

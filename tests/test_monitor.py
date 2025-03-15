@@ -1100,7 +1100,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(7, 0, '              )'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
             ])
-        
+
     @patch('can.Notifier')
     @patch('can.Bus')
     @patch('curses.color_pair')
@@ -1168,7 +1168,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(25, 0, '              )'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
             ])
-        
+
     @patch('can.Notifier')
     @patch('can.Bus')
     @patch('curses.color_pair')

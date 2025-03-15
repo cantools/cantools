@@ -2,19 +2,22 @@
 #include "test_basic.h"
 #include "test_bit_fields.h"
 #include "test_initial_values.h"
-
+#include "test_enum_encode_decode.h"
 extern void test_add(void);
 extern void test_subtract(void);
 
-void setUp(void) {
+void setUp(void)
+{
     // Set up code here
 }
 
-void tearDown(void) {
+void tearDown(void)
+{
     // Clean up code here
 }
 
-int main(void) {
+int main(void)
+{
     UNITY_BEGIN();
 
     // test_basic.h
@@ -56,6 +59,9 @@ int main(void) {
     RUN_TEST(valid_initial_value);
     RUN_TEST(absence_of_initial_value);
     RUN_TEST(nullptr_ptr_initial_value);
+
+    // test_enum.h
+    RUN_TEST(test_enum_codec);
 
     return UNITY_END();
 }

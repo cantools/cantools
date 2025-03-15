@@ -1471,6 +1471,36 @@ BATTERY_VT(
                 self.assert_files_equal(tmpdir / database_c,
                                         'tests/files/c_source/' + database_c)
 
+    def test_generate_c_source_choice_enums(self):
+        databases = [
+            'choices'
+        ]
+
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
+
+            for database in databases:
+                argv = [
+                    'cantools',
+                    'generate_c_source',
+                    '--use-enum-choices',
+                    '--database-name', f'{database}_use_enum_choices',
+                    f'tests/files/dbc/{database}.dbc',
+                    '-o',
+                    str(tmpdir),
+                ]
+
+                database_h = database + '_use_enum_choices.h'
+                database_c = database + '_use_enum_choices.c'
+
+                with patch('sys.argv', argv):
+                    cantools._main()
+
+                self.assert_files_equal(tmpdir / database_h,
+                                        'tests/files/c_source/' + database_h)
+                self.assert_files_equal(tmpdir / database_c,
+                                        'tests/files/c_source/' + database_c)
+
     def test_generate_c_source_sender_node(self):
         databases = [
             'motohawk',

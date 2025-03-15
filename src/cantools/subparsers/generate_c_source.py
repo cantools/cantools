@@ -33,6 +33,7 @@ def _do_generate_c_source(args):
         not args.no_floating_point_numbers,
         args.bit_fields,
         args.use_float,
+        args.use_enum_choices,
         args.node)
 
     os.makedirs(args.output_directory, exist_ok=True)
@@ -55,7 +56,8 @@ def _do_generate_c_source(args):
         with open(fuzzer_path_c, 'w') as fout:
             fout.write(fuzzer_source)
 
-        fuzzer_path_mk = os.path.join(args.output_directory, fuzzer_filename_mk)
+        fuzzer_path_mk = os.path.join(
+            args.output_directory, fuzzer_filename_mk)
 
         with open(fuzzer_path_mk, 'w') as fout:
             fout.write(fuzzer_makefile)
@@ -109,6 +111,11 @@ def add_subparser(subparsers):
         action='store_true',
         default=False,
         help='Use float instead of double for floating point generation.')
+    generate_c_source_parser.add_argument(
+        '--use-enum-choices',
+        action='store_true',
+        default=False,
+        help='Use typedef enum choices instead base signal types')
     generate_c_source_parser.add_argument(
         'infile',
         help='Input database file.')

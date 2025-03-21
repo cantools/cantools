@@ -8,8 +8,8 @@ from enum import Enum
 from typing import Any, Union
 
 import can
-from can.logger import _parse_additional_config
 from argparse_addons import Integer
+from can.logger import _parse_additional_config
 
 from cantools.database.errors import DecodeError
 

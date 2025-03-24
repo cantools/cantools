@@ -77,7 +77,7 @@ class Monitor(can.Listener):
         if args.fd:
             kwargs['fd'] = True
 
-        if hasattr(args, "extra_args") and args.extra_args:
+        if args.extra_args:
             kwargs.update(_parse_additional_config(args.extra_args))
 
         try:

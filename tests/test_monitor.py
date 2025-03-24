@@ -33,6 +33,7 @@ class Args:
         self.fd = False
         self.bus_type = 'socketcan'
         self.channel = 'vcan0'
+        self.extra_args = []
 
 
 class StdScr:
@@ -1942,6 +1943,39 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(2, 0, '       0.000  Message1(undecoded, unpacking failed: 0x24)'),
                 call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
             ])
+
+    @patch('can.Notifier')
+    @patch('can.Bus')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_extra_args_parsing(self,
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                bus,
+                                _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/dbc/motohawk.dbc')
+        args.bus_type = 'socketcand'
+        args.channel = 'can0'
+        args.extra_args = ['--host=192.168.0.10', '--port=29536']
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        monitor.run(1)
+
+        # Check mocks.
+        self.assert_called(bus, [call(bustype='socketcand', channel='can0',
+                                      host='192.168.0.10', port=29536)])
+
 
 if __name__ == '__main__':
     unittest.main()

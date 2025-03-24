@@ -9,13 +9,16 @@ from typing import Any, Union
 
 import can
 from argparse_addons import Integer
-from can.logger import _parse_additional_config
 
 from cantools.database.errors import DecodeError
 
 from .. import database
 from ..typechecking import SignalDictType
-from .__utils__ import format_multiplexed_name, format_signals
+from .__utils__ import (
+    format_multiplexed_name,
+    format_signals,
+    parse_additional_config,
+)
 
 
 class QuitError(Exception):
@@ -78,7 +81,7 @@ class Monitor(can.Listener):
             kwargs['fd'] = True
 
         if args.extra_args:
-            kwargs.update(_parse_additional_config(args.extra_args))
+            kwargs.update(parse_additional_config(args.extra_args))
 
         try:
             return can.Bus(bustype=args.bus_type,

@@ -1,4 +1,6 @@
 from collections.abc import Iterable
+from typing import Dict, Tuple, Union, Sequence
+import re
 
 from cantools.database.errors import DecodeError
 
@@ -9,6 +11,7 @@ from ..typechecking import (
     ContainerDecodeResultType,
     ContainerUnpackResultType,
     SignalDictType,
+    TAdditionalCliArgs
 )
 
 MULTI_LINE_FMT = '''
@@ -207,3 +210,40 @@ def format_multiplexed_name(message : Message,
             result.append(f'{signal.name}={value}')
 
     return ' :: '.join(result)
+
+
+def cast_from_string(string_val: str) -> Union[str, int, float, bool]:
+    """Perform trivial type conversion from :class:`str` values.
+
+    :param string_val:
+        the string, that shall be converted
+    """
+    if re.match(r"^[-+]?\d+$", string_val):
+        # value is integer
+        return int(string_val)
+
+    if re.match(r"^[-+]?\d*\.\d+(?:e[-+]?\d+)?$", string_val):
+        # value is float
+        return float(string_val)
+
+    if re.match(r"^(?:True|False)$", string_val, re.IGNORECASE):
+        # value is bool
+        return string_val.lower() == "true"
+
+    # value is string
+    return string_val
+
+
+def parse_additional_config(unknown_args: Sequence[str]) -> TAdditionalCliArgs:
+    for arg in unknown_args:
+        if not re.match(r"^--[a-zA-Z][a-zA-Z0-9\-]*=\S*?$", arg):
+            raise ValueError(f"Parsing argument {arg} failed")
+
+    def _split_arg(_arg: str) -> Tuple[str, str]:
+        left, right = _arg.split("=", 1)
+        return left.lstrip("-").replace("-", "_"), right
+
+    args: Dict[str, Union[str, int, float, bool]] = {}
+    for key, string_val in map(_split_arg, unknown_args):
+        args[key] = cast_from_string(string_val)
+    return args

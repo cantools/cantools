@@ -1,15 +1,22 @@
 from collections import OrderedDict
 from collections.abc import Mapping, Sequence
+import sys
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Dict,
     Literal,
     NamedTuple,
     Optional,
     TypedDict,
     Union,
 )
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 from bitstruct import CompiledFormatDict
 
@@ -58,3 +65,5 @@ DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
+
+TAdditionalCliArgs: TypeAlias = Dict[str, Union[str, int, float, bool]]

@@ -1,6 +1,6 @@
-from collections.abc import Iterable
-from typing import Dict, Tuple, Union, Sequence
 import re
+from collections.abc import Iterable, Sequence
+from typing import Union
 
 from cantools.database.errors import DecodeError
 
@@ -11,7 +11,7 @@ from ..typechecking import (
     ContainerDecodeResultType,
     ContainerUnpackResultType,
     SignalDictType,
-    TAdditionalCliArgs
+    TAdditionalCliArgs,
 )
 
 MULTI_LINE_FMT = '''
@@ -239,11 +239,11 @@ def parse_additional_config(unknown_args: Sequence[str]) -> TAdditionalCliArgs:
         if not re.match(r"^--[a-zA-Z][a-zA-Z0-9\-]*=\S*?$", arg):
             raise ValueError(f"Parsing argument {arg} failed")
 
-    def _split_arg(_arg: str) -> Tuple[str, str]:
+    def _split_arg(_arg: str) -> tuple[str, str]:
         left, right = _arg.split("=", 1)
         return left.lstrip("-").replace("-", "_"), right
 
-    args: Dict[str, Union[str, int, float, bool]] = {}
+    args: dict[str, Union[str, int, float, bool]] = {}
     for key, string_val in map(_split_arg, unknown_args):
         args[key] = cast_from_string(string_val)
     return args

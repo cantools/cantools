@@ -1,11 +1,10 @@
+import sys
 from collections import OrderedDict
 from collections.abc import Mapping, Sequence
-import sys
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Literal,
     NamedTuple,
     Optional,
@@ -66,4 +65,4 @@ EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
 
-TAdditionalCliArgs: TypeAlias = Dict[str, Union[str, int, float, bool]]
+TAdditionalCliArgs: TypeAlias = dict[str, Union[str, int, float, bool]]

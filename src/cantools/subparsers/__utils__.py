@@ -237,7 +237,8 @@ def cast_from_string(string_val: str) -> Union[str, int, float, bool]:
 def parse_additional_config(unknown_args: Sequence[str]) -> TAdditionalCliArgs:
     for arg in unknown_args:
         if not re.match(r"^--[a-zA-Z][a-zA-Z0-9\-]*=\S*?$", arg):
-            raise ValueError(f"Parsing argument {arg} failed")
+            raise ValueError(f'Parsing argument {arg} failed, use --param=value'
+                             ' to pass additional args to CAN Bus.')
 
     def _split_arg(_arg: str) -> tuple[str, str]:
         left, right = _arg.split("=", 1)

@@ -35,7 +35,8 @@ execute_process(COMMAND cantools generate_c_source --database-name floating_poin
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 execute_process(COMMAND cantools generate_c_source --database-name signed_bit_fields --bit-fields ../files/dbc/signed.dbc 
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
+execute_process(COMMAND cantools generate_c_source --use-enum-choices --database-name choices_use_enum_choices ../files/dbc/choices.dbc  
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 # fetch unity test framework
 add_subdirectory(test_framework)
@@ -56,7 +57,9 @@ set(SOURCES
     my_database_name.c
     motohawk_bit_fields.c
     floating_point_bit_fields.c
-    signed_bit_fields.c)
+    signed_bit_fields.c
+    choices_use_enum_choices.c
+    )
 add_library(cantoolsGenCode ${SOURCES})
 
 # Enable all warnings for the generated source code
@@ -72,6 +75,7 @@ set(TEST_SOURCES
     test_basic.c
     test_bit_fields.c
     test_initial_values.c
+    test_enum_encode_decode.c
 )
 add_executable(test_runner ${TEST_SOURCES})
 target_include_directories(test_runner PRIVATE ${unity_SOURCE_DIR}/include)

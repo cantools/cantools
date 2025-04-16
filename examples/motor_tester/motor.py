@@ -11,7 +11,7 @@ import can
 
 def create_message(speed, load):
     return can.Message(arbitration_id=0x010,
-                       extended_id=False,
+                       is_extended_id=False,
                        data=struct.pack('<HB', speed, load))
 
 

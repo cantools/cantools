@@ -145,9 +145,9 @@ class CanToolsTesterTest(unittest.TestCase):
         tester.start()
 
         # Input the three messages.
-        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x00\x00'))
-        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x00\x01'))
-        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x02\x03'))
+        can_bus.input_message(can.Message(arbitration_id=0x101, is_extended_id=False, data=b'\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x101, is_extended_id=False, data=b'\x00\x01'))
+        can_bus.input_message(can.Message(arbitration_id=0x101, is_extended_id=False, data=b'\x02\x03'))
 
         # Expect Message1 with no filtering.
         message = tester.expect('Message1')
@@ -166,22 +166,22 @@ class CanToolsTesterTest(unittest.TestCase):
         self.assertIsNone(message)
 
         # Expect with timeout, with Message2 discarded when expecting Message1.
-        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, is_extended_id=False, data=b'\x00\x00\x00'))
         message = tester.expect('Message1', timeout=0.5)
         self.assertIsNone(message)
         message = tester.expect('Message2', timeout=0.0)
         self.assertIsNone(message)
 
         # Expect with timeout 0.0 with wrong message in queue.
-        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, is_extended_id=False, data=b'\x00\x00\x00'))
         time.sleep(0.1)
         message = tester.expect('Message1', timeout=0.0)
         self.assertIsNone(message)
 
         # Expect with discard_other_messages set to False.
-        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x03\x00\x00'))
-        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x04\x00\x00'))
-        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x05\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, is_extended_id=False, data=b'\x03\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, is_extended_id=False, data=b'\x04\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x101, is_extended_id=False, data=b'\x05\x00'))
         message = tester.expect('Message1', discard_other_messages=False)
         self.assertEqual(message, {'Signal1': 5, 'Signal2': 0})
         message = tester.expect('Message1', timeout=0.0, discard_other_messages=False)
@@ -205,8 +205,8 @@ class CanToolsTesterTest(unittest.TestCase):
         tester, can_bus = setup_tester('Node1')
         tester.start()
 
-        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x00\x00'))
-        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x101, is_extended_id=False, data=b'\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, is_extended_id=False, data=b'\x00\x00\x00'))
         time.sleep(0.1)
         self.assertIsNone(tester.flush_input())
         message = tester.expect('Message1', timeout=0.0)
@@ -361,13 +361,13 @@ class CanToolsTesterTest(unittest.TestCase):
         tester.start()
 
         # Bad message id.
-        can_bus.input_message(can.Message(arbitration_id=0x7ff, data=b'\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x7ff, is_extended_id=False, data=b'\x00\x00'))
 
         # Disabled message.
-        can_bus.input_message(can.Message(arbitration_id=0x102, data=b'\x00\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x102, is_extended_id=False, data=b'\x00\x00\x00'))
 
         # Good message
-        can_bus.input_message(can.Message(arbitration_id=0x101, data=b'\x00\x00'))
+        can_bus.input_message(can.Message(arbitration_id=0x101, is_extended_id=False, data=b'\x00\x00'))
 
         # Check that only the good message was passed to on_message().
         decoded_message = message_queue.get()

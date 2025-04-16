@@ -397,6 +397,8 @@ class Database:
                            message.name)
 
         masked_frame_id = (message.frame_id & self._frame_id_mask)
+        if message.is_extended_frame:
+            masked_frame_id |= 0x80000000
 
         if masked_frame_id in self._frame_id_to_message:
             LOGGER.warning(
@@ -470,12 +472,15 @@ class Database:
 
         return self._name_to_message[name]
 
-    def get_message_by_frame_id(self, frame_id: int) -> Message:
+    def get_message_by_frame_id(self, frame_id: int, is_extended_frame: Optional[bool] = None) -> Message:
         """Find the message object for given frame id `frame_id`.
 
         """
 
-        return self._frame_id_to_message[frame_id & self._frame_id_mask]
+        if is_extended_frame or frame_id > 0x7FF:
+            frame_id |= 0x80000000
+
+        return self._frame_id_to_message[frame_id & (0x80000000 | self._frame_id_mask)]
 
     def get_node_by_name(self, name: str) -> Node:
         """Find the node object for given name `name`.
@@ -505,6 +510,7 @@ class Database:
                        scaling: bool = True,
                        padding: bool = False,
                        strict: bool = True,
+                       is_extended_frame: Optional[bool] = None,
                        ) -> bytes:
         """Encode given signal data `data` as a message of given frame id or
         name `frame_id_or_name`. For regular Messages, `data` is a
@@ -527,6 +533,8 @@ class Database:
         """
 
         if isinstance(frame_id_or_name, int):
+            if is_extended_frame or frame_id_or_name > 0x7FF:
+                frame_id_or_name |= 0x80000000
             message = self._frame_id_to_message[frame_id_or_name]
         elif isinstance(frame_id_or_name, str):
             message = self._name_to_message[frame_id_or_name]
@@ -541,7 +549,8 @@ class Database:
                        decode_choices: bool = True,
                        scaling: bool = True,
                        decode_containers: bool = False,
-                       allow_truncated:  bool = False
+                       allow_truncated:  bool = False,
+                       is_extended_frame: Optional[bool] = None,
                        ) \
         -> DecodeResultType:
 
@@ -569,6 +578,8 @@ class Database:
         """
 
         if isinstance(frame_id_or_name, int):
+            if is_extended_frame or frame_id_or_name > 0x7FF:
+                frame_id_or_name |= 0x80000000
             message = self._frame_id_to_message[frame_id_or_name]
         elif isinstance(frame_id_or_name, str):
             message = self._name_to_message[frame_id_or_name]

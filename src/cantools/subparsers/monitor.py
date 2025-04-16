@@ -375,7 +375,7 @@ class Monitor(can.Listener):
         timestamp = raw_message.timestamp - self._basetime
 
         try:
-            message = self._dbase.get_message_by_frame_id(raw_message.arbitration_id) # type: ignore[union-attr]
+            message = self._dbase.get_message_by_frame_id(raw_message.arbitration_id, raw_message.is_extended_id) # type: ignore[union-attr]
         except KeyError:
             return MessageFormattingResult.UnknownMessage
 

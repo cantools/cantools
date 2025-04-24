@@ -472,12 +472,12 @@ class Database:
 
         return self._name_to_message[name]
 
-    def get_message_by_frame_id(self, frame_id: int, is_extended_frame: Optional[bool] = None) -> Message:
+    def get_message_by_frame_id(self, frame_id: int, force_extended_id: bool = False) -> Message:
         """Find the message object for given frame id `frame_id`.
 
         """
 
-        if is_extended_frame or frame_id > 0x7FF:
+        if force_extended_id or frame_id > 0x7FF:
             frame_id |= 0x80000000
 
         return self._frame_id_to_message[frame_id & (0x80000000 | self._frame_id_mask)]
@@ -510,7 +510,7 @@ class Database:
                        scaling: bool = True,
                        padding: bool = False,
                        strict: bool = True,
-                       is_extended_frame: Optional[bool] = None,
+                       force_extended_id: bool = False,
                        ) -> bytes:
         """Encode given signal data `data` as a message of given frame id or
         name `frame_id_or_name`. For regular Messages, `data` is a
@@ -533,7 +533,7 @@ class Database:
         """
 
         if isinstance(frame_id_or_name, int):
-            if is_extended_frame or frame_id_or_name > 0x7FF:
+            if force_extended_id or frame_id_or_name > 0x7FF:
                 frame_id_or_name |= 0x80000000
             message = self._frame_id_to_message[frame_id_or_name]
         elif isinstance(frame_id_or_name, str):
@@ -550,7 +550,7 @@ class Database:
                        scaling: bool = True,
                        decode_containers: bool = False,
                        allow_truncated:  bool = False,
-                       is_extended_frame: Optional[bool] = None,
+                       force_extended_id: bool = False,
                        ) \
         -> DecodeResultType:
 
@@ -578,7 +578,7 @@ class Database:
         """
 
         if isinstance(frame_id_or_name, int):
-            if is_extended_frame or frame_id_or_name > 0x7FF:
+            if force_extended_id or frame_id_or_name > 0x7FF:
                 frame_id_or_name |= 0x80000000
             message = self._frame_id_to_message[frame_id_or_name]
         elif isinstance(frame_id_or_name, str):

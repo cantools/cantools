@@ -401,7 +401,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         ]
 
         for frame_id in frame_ids:
-            db.get_message_by_frame_id(frame_id)
+            db.get_message_by_frame_id(frame_id, force_extended_id=True)
 
     def test_dbc_dump_val_table(self):
         filename = 'tests/files/dbc/val_table.dbc'
@@ -1926,10 +1926,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(decoded, {})
 
         frame_id = 0x022
-        encoded = db.encode_message(frame_id, {'Signal3': 'bar'})
+        encoded = db.encode_message(frame_id, {'Signal3': 'bar'}, force_extended_id=True)
         self.assertEqual(len(encoded), 8)
         self.assertEqual(encoded, b'\x00\x08\x00\x00\x00\x00\x00\x00')
-        decoded = db.decode_message(frame_id, encoded)
+        decoded = db.decode_message(frame_id, encoded, force_extended_id=True)
         self.assertEqual(decoded['Signal3'], 'bar')
 
     def test_jopp_6_0_sym(self):
@@ -3466,7 +3466,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.choices, None)
 
         # Message send type.
-        message = db.get_message_by_frame_id(0x39)
+        message = db.get_message_by_frame_id(0x39, force_extended_id=True)
         self.assertEqual(message.cycle_time, 1000)
         self.assertEqual(message.send_type, 'Cyclic')
 
@@ -3528,11 +3528,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with open('tests/files/dbc/attributes.dbc') as fin:
             db = cantools.db.load(fin)
 
-        message = db.get_message_by_frame_id(0x39)
+        message = db.get_message_by_frame_id(0x39, force_extended_id=True)
         self.assertEqual(message.name, 'TheMessage')
         message.frame_id = 0x40
         db.refresh()
-        message = db.get_message_by_frame_id(0x40)
+        message = db.get_message_by_frame_id(0x40, force_extended_id=True)
         self.assertEqual(message.name, 'TheMessage')
         self.assertEqual(message.frame_id, 0x40)
 
@@ -3548,9 +3548,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), "'TheMissingMessage'")
 
         with self.assertRaises(KeyError) as cm:
-            db.get_message_by_frame_id(0x41)
+            db.get_message_by_frame_id(0x41, force_extended_id=True)
 
-        self.assertEqual(cm.exception.args[0], 0x41)
+        self.assertEqual(cm.exception.args[0], 0x80000000 | 0x41)
 
     def test_missing_dbc_specifics(self):
         db = cantools.db.Database()

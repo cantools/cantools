@@ -64,7 +64,7 @@ bus using the `python-can`_ package.
    >>> import can
    >>> can_bus = can.interface.Bus('vcan0', bustype='socketcan')
    >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})
-   >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
+   >>> message = can.Message(arbitration_id=example_message.frame_id, is_extended_id=example_message.is_extended_frame, data=data)
    >>> can_bus.send(message)
 
 Alternatively, a message can be encoded using the `encode_message()`_

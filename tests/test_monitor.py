@@ -183,6 +183,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
         monitor.run(1)
 
@@ -232,6 +233,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
         monitor.run(1)
 
@@ -279,6 +281,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x24\x00\x98\x98\x0b\x00'))
         monitor.run(1)
 
@@ -317,6 +320,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x00\x00\x98\x98\x0b\x00'))
         monitor.run(1)
 
@@ -366,6 +370,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x00\x00\x98\x98\x0b\x00'))
         monitor.run(1)
 
@@ -414,18 +419,22 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=0xc00fefe,
+            is_extended_id=True,
             data=b'\x00\x00\x00\x00\x02\x00\x00\x00',
             timestamp=0.0))
         monitor.on_message_received(can.Message(
             arbitration_id=0xc00fefe,
+            is_extended_id=True,
             data=b'\x00\x00\x00\x00\x01\x00\x00\x00',
             timestamp=1.0))
         monitor.on_message_received(can.Message(
             arbitration_id=0xc00fefe,
+            is_extended_id=True,
             data=b'\x01\x00\x00\x00\x01\x00\x00\x00',
             timestamp=2.0))
         monitor.on_message_received(can.Message(
             arbitration_id=0xc00fefe,
+            is_extended_id=True,
             data=b'\x20\x00\x00\x00\x01\x00\x00\x00',
             timestamp=3.0))
         monitor.run(1)
@@ -482,10 +491,12 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
             timestamp=1.0))
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xd0\x00\x00\x00\x00\x00',
             timestamp=2.1))
         monitor.run(1)
@@ -537,6 +548,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00'))
         monitor.run(1)
 
@@ -789,9 +801,11 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x00\x00\x98\x98\x0b\x00'))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x01\x00\x98\x98\x0b\x00'))
         monitor.run(1)
 
@@ -922,6 +936,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=102,
+            is_extended_id=False,
             data=b'\x0A\x0B\x0C\x09\xE2\xD8\x7F\xD6\x00\x86\xB2\x65\x4F\x1D\x2E\x3F\x07\xC0\x00\x5C\x84\x00\x00\x00\x01\x02\x03\x04\x7A\x0E\x00\x00\x04\x05\x06\x06\x2D\x04\x00\x00\x76\x03\x07\x08\x09\x0A\xC6\xEA\x00\x00\x00\x00\x00\x00\x00\x00'))
         monitor.run(1)
 
@@ -1129,10 +1144,12 @@ class CanToolsMonitorTest(unittest.TestCase):
         # OneToContainThemAll with message1 and multiplexed SELECT_HELLO
         monitor.on_message_received(can.Message(
             arbitration_id=102,
+            is_extended_id=False,
             data=b'\n\x0b\x0c\t{\x00\xc8\x01\x01\x00\x00\xa0@\x07\x08\t\n\x11\x02\x00\x00\x00\x00\x00\x00\x00\x00'))
         # OneToContainThemAll with message1 and multiplexed SELECT_WORLD
         monitor.on_message_received(can.Message(
             arbitration_id=102,
+            is_extended_id=False,
             timestamp=10,
             data=b'\n\x0b\x0c\tA\x01\x8e\x02\x00\x00\x00\x80@\x07\x08\t\nQ\x02\x00\x00\x00\x00\x00\x00\x00\x00'))
         monitor.run(1)
@@ -1197,6 +1214,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # OneToContainThemAll with message1 and undecoded trailing data
         monitor.on_message_received(can.Message(
             arbitration_id=102,
+            is_extended_id=False,
             data=b'\n\x0b\x0c\t{\x00\xc8\x01\x04V\x0eI@\x00\x00\x00\x00'))
         monitor.run(1)
 
@@ -1251,10 +1269,12 @@ class CanToolsMonitorTest(unittest.TestCase):
         # OneToContainThemAll with message1 and multiplexed SELECT_HELLO
         monitor.on_message_received(can.Message(
             arbitration_id=102,
+            is_extended_id=False,
             data=b'\n\x0b\x0c\t{\x00\xc8\x01\x01\x00\x00\xa0@\x07\x08\t\n\x11\x02\x00\x00\x00\x00\x00\x00\x00\x00'))
         # OneToContainThemAll with message1 and multiplexed SELECT_WORLD
         monitor.on_message_received(can.Message(
             arbitration_id=102,
+            is_extended_id=False,
             timestamp=10,
             data=b'\n\x0b\x0c\tA\x01\x8e\x02\x00\x00\x00\x80@\x07\x08\t\nQ\x02\x00\x00\x00\x00\x00\x00\x00\x00'))
         monitor.run(1)
@@ -1299,12 +1319,14 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
             timestamp=3))
 
         # Discarded.
         monitor.on_message_received(can.Message(
             arbitration_id=497,
+            is_extended_id=False,
             data=b'\xc0\x06\xb0\x00\x00\x00\x00\x00',
             timestamp=6))
 
@@ -1315,6 +1337,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Input another before pause.
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xc0\x00\x00\x00\x00\x00',
             timestamp=7))
 
@@ -1323,6 +1346,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Input when paused. Will not be displayed.
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xd0\x00\x00\x00\x00\x00',
             timestamp=10))
 
@@ -1333,6 +1357,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         # Input after reset.
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\x00\x00\x00\x00\x00\x00',
             timestamp=11))
 
@@ -1447,6 +1472,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         for timestamp in range(4):
             monitor.on_message_received(can.Message(
                 arbitration_id=496,
+                is_extended_id=False,
                 data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
                 timestamp=timestamp))
 
@@ -1460,6 +1486,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         for timestamp in range(5, 7):
             monitor.on_message_received(can.Message(
                 arbitration_id=496,
+                is_extended_id=False,
                 data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
                 timestamp=timestamp))
 
@@ -1592,6 +1619,7 @@ class CanToolsMonitorTest(unittest.TestCase):
 
         monitor.on_message_received(can.Message(
             arbitration_id=496,
+            is_extended_id=False,
             data=b'\xc0\x06\xe0\x00\x00\x00\x00\x00',
             timestamp=1))
 
@@ -1660,78 +1688,97 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x00\x00\x98\x98\x0b\x00',
             timestamp=0))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x01\x00\x98\x98\x0b\x00',
             timestamp=1))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x02\x00\x98\x98\x0b\x00',
             timestamp=2))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x03\x00\x98\x98\x0b\x00',
             timestamp=3))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x04\x00\x98\x98\x0b\x00',
             timestamp=4))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x05\x00\x98\x98\x0b\x00',
             timestamp=5))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x06\x00\x98\x98\x0b\x00',
             timestamp=6))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x07\x00\x98\x98\x0b\x00',
             timestamp=7))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x08\x00\x98\x98\x0b\x00',
             timestamp=8))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x09\x00\x98\x98\x0b\x00',
             timestamp=9))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x0a\x00\x98\x98\x0b\x00',
             timestamp=10))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x0b\x00\x98\x98\x0b\x00',
             timestamp=11))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x0c\x00\x98\x98\x0b\x00',
             timestamp=12))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x0d\x00\x98\x98\x0b\x00',
             timestamp=13))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x0e\x00\x98\x98\x0b\x00',
             timestamp=14))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x0f\x00\x98\x98\x0b\x00',
             timestamp=15))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x10\x00\x98\x98\x0b\x00',
             timestamp=16))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x11\x00\x98\x98\x0b\x00',
             timestamp=17))
         monitor.on_message_received(can.Message(
             arbitration_id=1025,
+            is_extended_id=False,
             data=b'\x12\x00\x98\x98\x0b\x00',
             timestamp=18))
         monitor.tick(1)
@@ -1931,6 +1978,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor = Monitor(stdscr, args)
         monitor.on_message_received(can.Message(
             arbitration_id=1,
+            is_extended_id=False,
             data=b'\x24'))
         monitor.run(1)
 

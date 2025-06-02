@@ -1,4 +1,3 @@
-import sys
 from collections import OrderedDict
 from collections.abc import Mapping, Sequence
 from typing import (
@@ -11,11 +10,6 @@ from typing import (
     TypedDict,
     Union,
 )
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
 from bitstruct import CompiledFormatDict
 
@@ -64,5 +58,3 @@ DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
-
-TAdditionalCliArgs: TypeAlias = dict[str, Union[str, int, float, bool]]

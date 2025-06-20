@@ -1478,9 +1478,10 @@ def _generate_declarations(database_name: str,
                                                          database_message_name=cg_message.message.name,
                                                          message_name=cg_message.snake_name)
 
-        declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
-                                                           database_message_name=cg_message.message.name,
-                                                           message_name=cg_message.snake_name)
+        if is_sender or is_receiver:
+            declaration += MESSAGE_DECLARATION_INIT_FMT.format(database_name=database_name,
+                                                            database_message_name=cg_message.message.name,
+                                                            message_name=cg_message.snake_name)
 
         if signal_declarations:
             declaration += '\n' + '\n'.join(signal_declarations)
@@ -1597,10 +1598,11 @@ def _generate_definitions(database_name: str,
                                                            unpack_variables=unpack_variables,
                                                            unpack_body=unpack_body)
 
-            definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
-                                                             database_message_name=cg_message.message.name,
-                                                             message_name=cg_message.snake_name,
-                                                             init_body=signals_init_body)
+            if is_sender or is_receiver:
+                definition += MESSAGE_DEFINITION_INIT_FMT.format(database_name=database_name,
+                                                                database_message_name=cg_message.message.name,
+                                                                message_name=cg_message.snake_name,
+                                                                init_body=signals_init_body)
 
         else:
             definition = EMPTY_DEFINITION_FMT.format(database_name=database_name,

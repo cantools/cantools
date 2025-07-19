@@ -2,6 +2,7 @@ import binascii
 import datetime
 import enum
 import re
+import abc
 
 
 class TimestampFormat(enum.Enum):
@@ -21,7 +22,7 @@ class DataFrame:
                  frame_id: int,
                  is_extended_frame: bool,
                  data: bytes,
-                 timestamp: datetime.datetime,
+                 timestamp: 'datetime.datetime|datetime.timedelta|None',
                  timestamp_format: TimestampFormat):
         """Constructor for DataFrame
 
@@ -40,11 +41,21 @@ class DataFrame:
 
 
 class BasePattern:
+
+    pattern: 're.Pattern[str]'
+
     @classmethod
-    def match(clz, line):
+    def match(clz, line: str) -> 'DataFrame|None':
         mo = clz.pattern.match(line)
         if mo:
             return clz.unpack(mo)
+
+        return None
+
+    @staticmethod
+    @abc.abstractmethod
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
+        raise NotImplementedError()
 
 
 class CandumpDefaultPattern(BasePattern):
@@ -57,7 +68,7 @@ class CandumpDefaultPattern(BasePattern):
         r'^\s*?(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -80,7 +91,7 @@ class CandumpTimestampedPattern(BasePattern):
         r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -89,6 +100,7 @@ class CandumpTimestampedPattern(BasePattern):
         data = binascii.unhexlify(data)
 
         seconds = float(match_object.group('timestamp'))
+        timestamp: 'datetime.timedelta|datetime.datetime'
         if seconds < 662688000:  # 1991-01-01 00:00:00, "Released in 1991, the Mercedes-Benz W140 was the first production vehicle to feature a CAN-based multiplex wiring system."
             timestamp = datetime.timedelta(seconds=seconds)
             timestamp_format = TimestampFormat.RELATIVE
@@ -106,7 +118,7 @@ class CandumpDefaultLogPattern(BasePattern):
         r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>[a-zA-Z0-9]+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>([0-9A-Fa-f]{2})*)(\s+[RT])?$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -129,7 +141,7 @@ class CandumpAbsoluteLogPattern(BasePattern):
         r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -151,7 +163,7 @@ class PCANTracePatternV10(BasePattern):
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV10().match(" 1) 1841 0001 8 00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -179,7 +191,7 @@ class PCANTracePatternV11(BasePattern):
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV11().match("  1)      6357.2  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -207,7 +219,7 @@ class PCANTracePatternV12(BasePattern):
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV12().match("  1)      6357.213 1  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -235,7 +247,7 @@ class PCANTracePatternV13(BasePattern):
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV13().match("  1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -262,7 +274,7 @@ class PCANTracePatternV20(BasePattern):
         r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>\w+)\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV20().match(" 1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -290,7 +302,7 @@ class PCANTracePatternV21(BasePattern):
         r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>.+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
     @staticmethod
-    def unpack(match_object):
+    def unpack(match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV21().match(" 1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>

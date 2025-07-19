@@ -1,9 +1,12 @@
 import io
 import unittest
 
+from freezegun import freeze_time
+
 import cantools
 
 
+@freeze_time(tz_offset=0)
 class TestLogreaderFormats(unittest.TestCase):
     def test_empty_line(self):
         parser = cantools.logreader.Parser()
@@ -145,19 +148,19 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.second, 24)
         self.assertEqual(outp.timestamp.microsecond, 501098)
 
-        outp = parser.parse("(1752918539.271062) vcan0 00000123#1234567890ABCDEF")
-        self.assertEqual(outp.channel, 'vcan0')
-        self.assertEqual(outp.frame_id, 0x123)
-        self.assertEqual(outp.is_extended_frame, True)
-        self.assertEqual(outp.data, b'\x12\x34\x56\x78\x90\xab\xcd\xef')
-        #TODO: this test fails because the timestamp is not parsed correctly
-        self.assertEqual(outp.timestamp.year, 2025)
-        self.assertEqual(outp.timestamp.month, 7)
-        self.assertEqual(outp.timestamp.day, 19)
-        self.assertEqual(outp.timestamp.hour, 11)
-        self.assertEqual(outp.timestamp.minute, 48)
-        self.assertEqual(outp.timestamp.second, 59)
-        self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
+        with freeze_time(tz_offset=2):
+            outp = parser.parse("(1752918539.271062) vcan0 00000123#1234567890ABCDEF")
+            self.assertEqual(outp.channel, 'vcan0')
+            self.assertEqual(outp.frame_id, 0x123)
+            self.assertEqual(outp.is_extended_frame, True)
+            self.assertEqual(outp.data, b'\x12\x34\x56\x78\x90\xab\xcd\xef')
+            self.assertEqual(outp.timestamp.year, 2025)
+            self.assertEqual(outp.timestamp.month, 7)
+            self.assertEqual(outp.timestamp.day, 19)
+            self.assertEqual(outp.timestamp.hour, 11)
+            self.assertEqual(outp.timestamp.minute, 48)
+            self.assertEqual(outp.timestamp.second, 59)
+            self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
 
     def test_candump_log_absolute_timestamp(self):
         parser = cantools.logreader.Parser()

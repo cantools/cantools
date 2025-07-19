@@ -44,17 +44,15 @@ class BasePattern:
 
     pattern: 're.Pattern[str]'
 
-    @classmethod
-    def match(clz, line: str) -> 'DataFrame|None':
-        mo = clz.pattern.match(line)
+    def match(self, line: str) -> 'DataFrame|None':
+        mo = self.pattern.match(line)
         if mo:
-            return clz.unpack(mo)
+            return self.unpack(mo)
 
         return None
 
-    @staticmethod
     @abc.abstractmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         raise NotImplementedError()
 
 
@@ -67,8 +65,7 @@ class CandumpDefaultPattern(BasePattern):
     pattern = re.compile(
         r'^\s*?(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -90,8 +87,10 @@ class CandumpTimestampedPattern(BasePattern):
     pattern = re.compile(
         r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def __init__(self, tz: 'datetime.tzinfo|None') -> None:
+        self.tz = tz
+
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -105,7 +104,7 @@ class CandumpTimestampedPattern(BasePattern):
             timestamp = datetime.timedelta(seconds=seconds)
             timestamp_format = TimestampFormat.RELATIVE
         else:
-            timestamp = datetime.datetime.fromtimestamp(seconds)
+            timestamp = datetime.datetime.fromtimestamp(seconds, self.tz)
             timestamp_format = TimestampFormat.ABSOLUTE
 
         return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
@@ -117,15 +116,17 @@ class CandumpDefaultLogPattern(BasePattern):
     pattern = re.compile(
         r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>[a-zA-Z0-9]+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>([0-9A-Fa-f]{2})*)(\s+[RT])?$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def __init__(self, tz: 'datetime.tzinfo|None') -> None:
+        self.tz = tz
+
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
-        timestamp = datetime.datetime.fromtimestamp(float(match_object.group('timestamp')))
+        timestamp = datetime.datetime.fromtimestamp(float(match_object.group('timestamp')), self.tz)
         timestamp_format = TimestampFormat.ABSOLUTE
 
         return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
@@ -140,8 +141,7 @@ class CandumpAbsoluteLogPattern(BasePattern):
     pattern = re.compile(
         r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -162,8 +162,7 @@ class PCANTracePatternV10(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV10().match(" 1) 1841 0001 8 00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -190,8 +189,7 @@ class PCANTracePatternV11(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV11().match("  1)      6357.2  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -218,8 +216,7 @@ class PCANTracePatternV12(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV12().match("  1)      6357.213 1  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -246,8 +243,7 @@ class PCANTracePatternV13(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV13().match("  1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -273,8 +269,7 @@ class PCANTracePatternV20(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>\w+)\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV20().match(" 1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -301,8 +296,7 @@ class PCANTracePatternV21(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>.+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
-    @staticmethod
-    def unpack(match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         """
         >>> PCANTracePatternV21().match(" 1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
         <logreader.DataFrame object at ...>
@@ -332,13 +326,13 @@ class Parser:
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream=None):
+    def __init__(self, stream=None, *, tz=None):
         self.stream = stream
         self.pattern = None
+        self.tz = tz
 
-    @staticmethod
-    def detect_pattern(line):
-        for p in [CandumpDefaultPattern, CandumpTimestampedPattern, CandumpDefaultLogPattern, CandumpAbsoluteLogPattern, PCANTracePatternV21, PCANTracePatternV20, PCANTracePatternV13, PCANTracePatternV12, PCANTracePatternV11, PCANTracePatternV10]:
+    def detect_pattern(self, line):
+        for p in [CandumpDefaultPattern(), CandumpTimestampedPattern(self.tz), CandumpDefaultLogPattern(self.tz), CandumpAbsoluteLogPattern(), PCANTracePatternV21(), PCANTracePatternV20(), PCANTracePatternV13(), PCANTracePatternV12(), PCANTracePatternV11(), PCANTracePatternV10()]:
             mo = p.pattern.match(line)
             if mo:
                 return p

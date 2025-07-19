@@ -3,6 +3,8 @@ import datetime
 import enum
 import re
 import abc
+import io
+from collections.abc import Iterator
 
 
 class TimestampFormat(enum.Enum):
@@ -326,25 +328,27 @@ class Parser:
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream=None, *, tz=None):
+    def __init__(self, stream: 'io.TextIOBase|None' = None, *, tz: 'datetime.tzinfo|None' = None) -> None:
         self.stream = stream
-        self.pattern = None
+        self.pattern: 'BasePattern|None' = None
         self.tz = tz
 
-    def detect_pattern(self, line):
+    def detect_pattern(self, line: str) -> 'BasePattern|None':
         for p in [CandumpDefaultPattern(), CandumpTimestampedPattern(self.tz), CandumpDefaultLogPattern(self.tz), CandumpAbsoluteLogPattern(), PCANTracePatternV21(), PCANTracePatternV20(), PCANTracePatternV13(), PCANTracePatternV12(), PCANTracePatternV11(), PCANTracePatternV10()]:
             mo = p.pattern.match(line)
             if mo:
                 return p
 
-    def parse(self, line):
+        return None
+
+    def parse(self, line: str) -> 'DataFrame|None':
         if self.pattern is None:
             self.pattern = self.detect_pattern(line)
         if self.pattern is None:
             return None
         return self.pattern.match(line)
 
-    def iterlines(self, keep_unknowns=False):
+    def iterlines(self, keep_unknowns: bool = False) -> 'Iterator[tuple[str, DataFrame|None]]':
         """Returns an generator that yields (str, DataFrame) tuples with the
         raw log entry and a parsed log entry. If keep_unknowns=True, (str,
         None) tuples will be returned for log entries that couldn't be decoded.
@@ -365,7 +369,7 @@ class Parser:
             else:
                 continue
 
-    def __iter__(self):
+    def __iter__(self) -> 'Iterator[DataFrame|None]':
         """Returns DataFrame log entries. Non-parseable log entries is
         discarded."""
         for _, frame in self.iterlines():

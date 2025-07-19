@@ -19,6 +19,7 @@ class DataFrame:
 
     def __init__(self, channel: str,
                  frame_id: int,
+                 is_extended_frame: bool,
                  data: bytes,
                  timestamp: datetime.datetime,
                  timestamp_format: TimestampFormat):
@@ -32,6 +33,7 @@ class DataFrame:
         : """
         self.channel = channel
         self.frame_id = frame_id
+        self.is_extended_frame = is_extended_frame
         self.data = bytes(data)
         self.timestamp = timestamp
         self.timestamp_format = timestamp_format
@@ -58,13 +60,14 @@ class CandumpDefaultPattern(BasePattern):
     def unpack(match_object):
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
         timestamp = None
         timestamp_format = TimestampFormat.MISSING
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class CandumpTimestampedPattern(BasePattern):
@@ -80,6 +83,7 @@ class CandumpTimestampedPattern(BasePattern):
     def unpack(match_object):
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
@@ -92,7 +96,7 @@ class CandumpTimestampedPattern(BasePattern):
             timestamp = datetime.datetime.fromtimestamp(seconds, datetime.timezone.utc)
             timestamp_format = TimestampFormat.ABSOLUTE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class CandumpDefaultLogPattern(BasePattern):
@@ -105,13 +109,14 @@ class CandumpDefaultLogPattern(BasePattern):
     def unpack(match_object):
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
         timestamp = datetime.datetime.fromtimestamp(float(match_object.group('timestamp')), datetime.timezone.utc)
         timestamp_format = TimestampFormat.ABSOLUTE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class CandumpAbsoluteLogPattern(BasePattern):
@@ -127,13 +132,14 @@ class CandumpAbsoluteLogPattern(BasePattern):
     def unpack(match_object):
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
         timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
         timestamp_format = TimestampFormat.ABSOLUTE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class PCANTracePatternV10(BasePattern):
@@ -152,6 +158,7 @@ class PCANTracePatternV10(BasePattern):
         """
         channel = 'pcanx'
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 4
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
@@ -160,7 +167,7 @@ class PCANTracePatternV10(BasePattern):
         timestamp = datetime.timedelta(milliseconds=millis)
         timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class PCANTracePatternV11(BasePattern):
@@ -179,6 +186,7 @@ class PCANTracePatternV11(BasePattern):
         """
         channel = 'pcanx'
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 4
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
@@ -187,7 +195,7 @@ class PCANTracePatternV11(BasePattern):
         timestamp = datetime.timedelta(milliseconds=millis)
         timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class PCANTracePatternV12(BasePattern):
@@ -206,6 +214,7 @@ class PCANTracePatternV12(BasePattern):
         """
         channel = 'pcan' + match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 4
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
@@ -214,7 +223,7 @@ class PCANTracePatternV12(BasePattern):
         timestamp = datetime.timedelta(milliseconds=millis)
         timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class PCANTracePatternV13(BasePattern):
@@ -233,6 +242,7 @@ class PCANTracePatternV13(BasePattern):
         """
         channel = 'pcan' + match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 4
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
@@ -241,7 +251,7 @@ class PCANTracePatternV13(BasePattern):
         timestamp = datetime.timedelta(milliseconds=millis)
         timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class PCANTracePatternV20(BasePattern):
@@ -259,6 +269,7 @@ class PCANTracePatternV20(BasePattern):
         """
         channel = 'pcanx'
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 4
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
@@ -267,7 +278,7 @@ class PCANTracePatternV20(BasePattern):
         timestamp = datetime.timedelta(milliseconds=millis)
         timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class PCANTracePatternV21(BasePattern):
@@ -286,6 +297,7 @@ class PCANTracePatternV21(BasePattern):
         """
         channel = 'pcan' + match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
+        is_extended_frame = len(match_object.group('can_id')) > 4
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
@@ -294,7 +306,7 @@ class PCANTracePatternV21(BasePattern):
         timestamp = datetime.timedelta(milliseconds=millis)
         timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
 
 class Parser:

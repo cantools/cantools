@@ -298,6 +298,14 @@ class Parser:
             return None
         return self.pattern.match(line)
 
+    @typing.overload
+    def iterlines(self) -> 'Iterator[tuple[str, DataFrame]]':
+        pass
+
+    @typing.overload
+    def iterlines(self, keep_unknowns: 'typing.Literal[True]') -> 'Iterator[tuple[str, DataFrame|None]]':
+        pass
+
     def iterlines(self, keep_unknowns: bool = False) -> 'Iterator[tuple[str, DataFrame|None]]':
         """Returns an generator that yields (str, DataFrame) tuples with the
         raw log entry and a parsed log entry. If keep_unknowns=True, (str,
@@ -319,7 +327,7 @@ class Parser:
             else:
                 continue
 
-    def __iter__(self) -> 'Iterator[DataFrame|None]':
+    def __iter__(self) -> 'Iterator[DataFrame]':
         """Returns DataFrame log entries. Non-parseable log entries is
         discarded."""
         for _, frame in self.iterlines():

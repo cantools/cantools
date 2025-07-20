@@ -458,9 +458,6 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.seconds, 1)
         self.assertEqual(outp.timestamp.microseconds, 59900)
 
-    def test_pcan_traceV21(self):
-        parser = cantools.logreader.Parser()
-
         outp = parser.parse("12 1335.156 DT 1 18EFC034 Tx - 8 01 02 03 04 05 06 07 08")
         self.assertEqual(outp.channel, 'pcan1')
         self.assertEqual(outp.frame_id, 0x18EFC034)

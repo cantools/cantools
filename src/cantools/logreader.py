@@ -241,14 +241,17 @@ class PCANTracePatternV20(PCANTracePatternV13):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>\w+)\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>\w+)\s+(?P<dlc>[0-9]+)(\s+(?P<can_data>[0-9A-F ]*))?$')
 
     def parse_channel(self, match_object: 're.Match[str]') -> str:
         return 'pcanx'
 
     def parse_data(self, match_object: 're.Match[str]') -> 'tuple[bytes, bool]':
-        data, is_remote_frame = super().parse_data(match_object)
-        is_remote_frame = match_object.group('type') == 'RR'
+        if match_object.group('type') == 'RR':
+            is_remote_frame = True
+            data = bytes(0)
+        else:
+            data, is_remote_frame = super().parse_data(match_object)
         return data, is_remote_frame
 
 
@@ -261,7 +264,7 @@ class PCANTracePatternV21(PCANTracePatternV20):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>.+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>.+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)(\s+(?P<can_data>[0-9A-F ]*))?$')
 
     def parse_channel(self, match_object: 're.Match[str]') -> str:
         return 'pcan' + match_object.group('channel')

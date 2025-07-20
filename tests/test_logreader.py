@@ -654,8 +654,8 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f4.frame_id, 0x300)
         #f5 = next(frame_iter)  # This is a warning, not a valid CAN frame, and is therefore ignored
         #self.assertEqual(f5.frame_id, 0xFFFFFFFF)
-        f6 = next(frame_iter)  #TODO This is an error, not a valid CAN frame, and should therefore ignored
-        self.assertEqual(f6.frame_id, 0x0008)
+        #f6 = next(frame_iter)  # This is an error, not a valid CAN frame, and is therefore ignored
+        #self.assertEqual(f6.frame_id, 0x0008)
         f7 = next(frame_iter)
         self.assertEqual(f7.frame_id, 0x100)
         with pytest.raises(StopIteration):
@@ -700,9 +700,7 @@ class TestLogreaderStreams(unittest.TestCase):
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x300)
         # FFFFFFFF is a warning, not a valid CAN frame, and is therefore ignored.
-        #TODO: 0008 is an error, not a valid CAN frame, and should therefore be ignored.
-        f5 = next(frame_iter)
-        self.assertEqual(f5.frame_id, 0x008)
+        # 0008 is an error, not a valid CAN frame, and is therefore be ignored.
         f6 = next(frame_iter)
         self.assertEqual(f6.frame_id, 0x100)
         with pytest.raises(StopIteration):
@@ -729,6 +727,7 @@ class TestLogreaderStreams(unittest.TestCase):
      3)      1346.834 1  Warng FFFFFFFF -  4    00 00 00 04 BUSLIGHT
      4)      6377.180 1  Rx        0400 -  8    00 00 00 00 00 00 00 00
      5)      6377.692 1  Rx        04A0 -  8    00 00 00 00 00 00 00 00
+     6)      1349.222 1  Error     0008 -  4    00 19 08 08
 """)
         parser = cantools.logreader.Parser(testvec)
         frame_iter = iter(parser)
@@ -741,6 +740,7 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f3.frame_id, 0x400)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x4A0)
+        # 008 is an error, not a valid CAN frame, and is therefore ignored.
         with pytest.raises(StopIteration):
             next(frame_iter)
 

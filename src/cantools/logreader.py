@@ -58,7 +58,7 @@ class BasePattern:
         return None
 
     @abc.abstractmethod
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> 'DataFrame|None':
         raise NotImplementedError()
 
 
@@ -166,7 +166,7 @@ class PCANTracePatternV10(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
+    def unpack(self, match_object: 're.Match[str]') -> 'DataFrame|None':
         channel = self.parse_channel(match_object)
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 4
@@ -203,8 +203,13 @@ class PCANTracePatternV11(PCANTracePatternV10):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
+    def unpack(self, match_object: 're.Match[str]') -> 'DataFrame|None':
+        if match_object.group('type') in ('Error', 'Warng'):  # yes, they really spell Warning without the 'in'
+            return None
+
+        return super().unpack(match_object)
 
 class PCANTracePatternV12(PCANTracePatternV11):
     """
@@ -215,7 +220,7 @@ class PCANTracePatternV12(PCANTracePatternV11):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
     def parse_channel(self, match_object: 're.Match[str]') -> str:
         return 'pcan' + match_object.group('channel')
@@ -230,7 +235,7 @@ class PCANTracePatternV13(PCANTracePatternV12):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
 
 class PCANTracePatternV20(PCANTracePatternV13):
@@ -264,7 +269,7 @@ class PCANTracePatternV21(PCANTracePatternV20):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>.+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)(\s+(?P<can_data>[0-9A-F ]*))?$')
+        r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)(\s+(?P<can_data>[0-9A-F ]*))?$')
 
     def parse_channel(self, match_object: 're.Match[str]') -> str:
         return 'pcan' + match_object.group('channel')

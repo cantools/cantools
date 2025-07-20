@@ -26,6 +26,7 @@ class DataFrame:
                  frame_id: int,
                  is_extended_frame: bool,
                  data: bytes,
+                 is_remote_frame: bool,
                  timestamp: 'TimestampType',
                  timestamp_format: TimestampFormat):
         """Constructor for DataFrame
@@ -40,6 +41,7 @@ class DataFrame:
         self.frame_id = frame_id
         self.is_extended_frame = is_extended_frame
         self.data = bytes(data)
+        self.is_remote_frame = is_remote_frame
         self.timestamp = timestamp
         self.timestamp_format = timestamp_format
 
@@ -67,11 +69,16 @@ class CandumpBasePattern(BasePattern):
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
+        if data == 'remote request' or data == 'R':
+            is_remote_frame = True
+            data = bytes(0)
+        else:
+            is_remote_frame = False
+            data = data.replace(' ', '')
+            data = binascii.unhexlify(data)
         timestamp, timestamp_format = self.parse_timestamp(match_object)
 
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, is_remote_frame=is_remote_frame, timestamp=timestamp, timestamp_format=timestamp_format)
 
     @abc.abstractmethod
     def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
@@ -85,7 +92,7 @@ class CandumpDefaultPattern(CandumpBasePattern):
     # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1   '.......Á'
     #(Ignore anything after the end of the data to work with candump's ASCII decoding)
     pattern = re.compile(
-        r'^\s*?(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
+        r'^\s*?(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
 
     def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
         timestamp = None
@@ -100,7 +107,7 @@ class CandumpTimestampedPattern(CandumpBasePattern):
     # (000.000000)  vcan0  0C8   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'
     #(Ignore anything after the end of the data to work with candump's ASCII decoding)
     pattern = re.compile(
-        r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
+        r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
 
     def __init__(self, tz: 'datetime.tzinfo|None') -> None:
         self.tz = tz
@@ -122,7 +129,7 @@ class CandumpDefaultLogPattern(CandumpBasePattern):
     # (1579857014.345944) can2 486#82967A6B006B07F8
     # (1613656104.501098) can2 14C##16A0FFE00606E022400000000000000A0FFFF00FFFF25000600000000000000FE
     pattern = re.compile(
-        r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>[a-zA-Z0-9]+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>([0-9A-Fa-f]{2})*)(\s+[RT])?$')
+        r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>[a-zA-Z0-9]+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>R|([0-9A-Fa-f]{2})*)(\s+[RT])?$')
 
     def __init__(self, tz: 'datetime.tzinfo|None') -> None:
         self.tz = tz
@@ -140,7 +147,7 @@ class CandumpAbsoluteLogPattern(CandumpBasePattern):
     # (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'
     #(Ignore anything after the end of the data to work with candump's ASCII decoding)
     pattern = re.compile(
-        r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
+        r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
 
     def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
         timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
@@ -157,24 +164,34 @@ class PCANTracePatternV10(BasePattern):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
     def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         channel = self.parse_channel(match_object)
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 4
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
+        data, is_remote_frame = self.parse_data(match_object)
         millis = float(match_object.group('timestamp'))
         # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
         timestamp = datetime.timedelta(milliseconds=millis)
         timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, is_remote_frame=is_remote_frame, timestamp=timestamp, timestamp_format=timestamp_format)
 
     def parse_channel(self, match_object: 're.Match[str]') -> str:
         return 'pcanx'
+
+    def parse_data(self, match_object: 're.Match[str]') -> 'tuple[bytes, bool]':
+        data = match_object.group('can_data')
+        if data == 'RTR':
+            is_remote_frame = True
+            data = bytes(0)
+        else:
+            is_remote_frame = False
+            data = data.replace(' ', '')
+            data = binascii.unhexlify(data)
+
+        return data, is_remote_frame
 
 
 class PCANTracePatternV11(PCANTracePatternV10):
@@ -186,7 +203,7 @@ class PCANTracePatternV11(PCANTracePatternV10):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
 
 class PCANTracePatternV12(PCANTracePatternV11):
@@ -198,7 +215,7 @@ class PCANTracePatternV12(PCANTracePatternV11):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
     def parse_channel(self, match_object: 're.Match[str]') -> str:
         return 'pcan' + match_object.group('channel')
@@ -213,7 +230,7 @@ class PCANTracePatternV13(PCANTracePatternV12):
     <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
-        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
+        r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
 
 class PCANTracePatternV20(PCANTracePatternV13):
@@ -228,6 +245,11 @@ class PCANTracePatternV20(PCANTracePatternV13):
 
     def parse_channel(self, match_object: 're.Match[str]') -> str:
         return 'pcanx'
+
+    def parse_data(self, match_object: 're.Match[str]') -> 'tuple[bytes, bool]':
+        data, is_remote_frame = super().parse_data(match_object)
+        is_remote_frame = match_object.group('type') == 'RR'
+        return data, is_remote_frame
 
 
 class PCANTracePatternV21(PCANTracePatternV20):

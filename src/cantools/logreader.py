@@ -4,8 +4,10 @@ import enum
 import re
 import abc
 import io
+import typing
 from collections.abc import Iterator
 
+TimestampType: 'typing.TypeAlias' = 'datetime.datetime|datetime.timedelta|None'
 
 class TimestampFormat(enum.Enum):
     """Describes a type of timestamp. ABSOLUTE is referring to UNIX time
@@ -24,7 +26,7 @@ class DataFrame:
                  frame_id: int,
                  is_extended_frame: bool,
                  data: bytes,
-                 timestamp: 'datetime.datetime|datetime.timedelta|None',
+                 timestamp: 'TimestampType',
                  timestamp_format: TimestampFormat):
         """Constructor for DataFrame
 
@@ -58,14 +60,7 @@ class BasePattern:
         raise NotImplementedError()
 
 
-class CandumpDefaultPattern(BasePattern):
-    #candump vcan0
-    # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1
-    #candump vcan0 -a
-    # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1   '.......Á'
-    #(Ignore anything after the end of the data to work with candump's ASCII decoding)
-    pattern = re.compile(
-        r'^\s*?(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
+class CandumpBasePattern(BasePattern):
 
     def unpack(self, match_object: 're.Match[str]') -> DataFrame:
         channel = match_object.group('channel')
@@ -74,13 +69,31 @@ class CandumpDefaultPattern(BasePattern):
         data = match_object.group('can_data')
         data = data.replace(' ', '')
         data = binascii.unhexlify(data)
-        timestamp = None
-        timestamp_format = TimestampFormat.MISSING
+        timestamp, timestamp_format = self.parse_timestamp(match_object)
 
         return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
+    @abc.abstractmethod
+    def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
+        raise NotImplementedError()
 
-class CandumpTimestampedPattern(BasePattern):
+
+class CandumpDefaultPattern(CandumpBasePattern):
+    #candump vcan0
+    # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1
+    #candump vcan0 -a
+    # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1   '.......Á'
+    #(Ignore anything after the end of the data to work with candump's ASCII decoding)
+    pattern = re.compile(
+        r'^\s*?(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
+
+    def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
+        timestamp = None
+        timestamp_format = TimestampFormat.MISSING
+        return timestamp, timestamp_format
+
+
+class CandumpTimestampedPattern(CandumpBasePattern):
     #candump vcan0 -tz
     # (000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
     #candump vcan0 -tz -a
@@ -92,14 +105,7 @@ class CandumpTimestampedPattern(BasePattern):
     def __init__(self, tz: 'datetime.tzinfo|None') -> None:
         self.tz = tz
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        channel = match_object.group('channel')
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 3
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
-
+    def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
         seconds = float(match_object.group('timestamp'))
         timestamp: 'datetime.timedelta|datetime.datetime'
         if seconds < 662688000:  # 1991-01-01 00:00:00, "Released in 1991, the Mercedes-Benz W140 was the first production vehicle to feature a CAN-based multiplex wiring system."
@@ -109,10 +115,10 @@ class CandumpTimestampedPattern(BasePattern):
             timestamp = datetime.datetime.fromtimestamp(seconds, self.tz)
             timestamp_format = TimestampFormat.ABSOLUTE
 
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return timestamp, timestamp_format
 
 
-class CandumpDefaultLogPattern(BasePattern):
+class CandumpDefaultLogPattern(CandumpBasePattern):
     # (1579857014.345944) can2 486#82967A6B006B07F8
     # (1613656104.501098) can2 14C##16A0FFE00606E022400000000000000A0FFFF00FFFF25000600000000000000FE
     pattern = re.compile(
@@ -121,20 +127,13 @@ class CandumpDefaultLogPattern(BasePattern):
     def __init__(self, tz: 'datetime.tzinfo|None') -> None:
         self.tz = tz
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        channel = match_object.group('channel')
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 3
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
+    def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
         timestamp = datetime.datetime.fromtimestamp(float(match_object.group('timestamp')), self.tz)
         timestamp_format = TimestampFormat.ABSOLUTE
+        return timestamp, timestamp_format
 
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
-
-class CandumpAbsoluteLogPattern(BasePattern):
+class CandumpAbsoluteLogPattern(CandumpBasePattern):
     #candump vcan0 -tA
     # (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
     #candump vcan0 -tA -a
@@ -143,17 +142,10 @@ class CandumpAbsoluteLogPattern(BasePattern):
     pattern = re.compile(
         r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>[0-9A-F ]*).*?$')
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        channel = match_object.group('channel')
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 3
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
+    def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
         timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
         timestamp_format = TimestampFormat.ABSOLUTE
-
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+        return timestamp, timestamp_format
 
 
 class PCANTracePatternV10(BasePattern):

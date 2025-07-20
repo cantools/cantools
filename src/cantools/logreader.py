@@ -152,16 +152,15 @@ class PCANTracePatternV10(BasePattern):
     """
     Reference for PCAN trace patterns: https://www.peak-system.com/produktcd/Pdf/English/PEAK_CAN_TRC_File_Format.pdf
     1) 1841 0001 8 00 00 00 00 00 00 00 00
+
+    >>> PCANTracePatternV10().match(" 1) 1841 0001 8 00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+    <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
     def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        """
-        >>> PCANTracePatternV10().match(" 1) 1841 0001 8 00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
-        <logreader.DataFrame object at ...>
-        """
-        channel = 'pcanx'
+        channel = self.parse_channel(match_object)
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 4
         data = match_object.group('can_data')
@@ -174,139 +173,76 @@ class PCANTracePatternV10(BasePattern):
 
         return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
 
+    def parse_channel(self, match_object: 're.Match[str]') -> str:
+        return 'pcanx'
 
-class PCANTracePatternV11(BasePattern):
+
+class PCANTracePatternV11(PCANTracePatternV10):
     """
     Adds "Type" 'Rx' column to 1.0 and 1/10 microsecond resolution
     1)      6357.2 Rx        0401  8    00 00 00 00 00 00 00 00
+
+    >>> PCANTracePatternV11().match("  1)      6357.2  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+    <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        """
-        >>> PCANTracePatternV11().match("  1)      6357.2  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
-        <logreader.DataFrame object at ...>
-        """
-        channel = 'pcanx'
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 4
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
-        millis = float(match_object.group('timestamp'))
-        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
-        timestamp = datetime.timedelta(milliseconds=millis)
-        timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
-
-
-class PCANTracePatternV12(BasePattern):
+class PCANTracePatternV12(PCANTracePatternV11):
     """
     Adds "Bus" column and 1 microsecond resolution to 1.1
     1)      6357.213 1  Rx        0401  8    00 00 00 00 00 00 00 00
+
+    >>> PCANTracePatternV12().match("  1)      6357.213 1  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+    <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        """
-        >>> PCANTracePatternV12().match("  1)      6357.213 1  Rx        0401  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
-        <logreader.DataFrame object at ...>
-        """
-        channel = 'pcan' + match_object.group('channel')
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 4
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
-        millis = float(match_object.group('timestamp'))
-        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
-        timestamp = datetime.timedelta(milliseconds=millis)
-        timestamp_format = TimestampFormat.RELATIVE
-
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+    def parse_channel(self, match_object: 're.Match[str]') -> str:
+        return 'pcan' + match_object.group('channel')
 
 
-class PCANTracePatternV13(BasePattern):
+class PCANTracePatternV13(PCANTracePatternV12):
     """
     Adds "Reserved" '-' column to 1.2
     1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00
+
+    >>> PCANTracePatternV13().match("  1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
+    <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<channel>[0-9])\s+.+\s+(?P<can_id>[0-9A-F]+)\s+-\s+(?P<dlc>[0-9])\s+(?P<can_data>[0-9A-F ]*)$')
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        """
-        >>> PCANTracePatternV13().match("  1)      6357.213 1  Rx        0401 -  8    00 00 00 00 00 00 00 00") #doctest: +ELLIPSIS
-        <logreader.DataFrame object at ...>
-        """
-        channel = 'pcan' + match_object.group('channel')
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 4
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
-        millis = float(match_object.group('timestamp'))
-        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
-        timestamp = datetime.timedelta(milliseconds=millis)
-        timestamp_format = TimestampFormat.RELATIVE
 
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
-
-
-class PCANTracePatternV20(BasePattern):
+class PCANTracePatternV20(PCANTracePatternV13):
     """
      1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00
+
+    >>> PCANTracePatternV20().match(" 1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
+    <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
         r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>\w+)\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        """
-        >>> PCANTracePatternV20().match(" 1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
-        <logreader.DataFrame object at ...>
-        """
-        channel = 'pcanx'
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 4
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
-        millis = float(match_object.group('timestamp'))
-        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
-        timestamp = datetime.timedelta(milliseconds=millis)
-        timestamp_format = TimestampFormat.RELATIVE
-
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+    def parse_channel(self, match_object: 're.Match[str]') -> str:
+        return 'pcanx'
 
 
-class PCANTracePatternV21(BasePattern):
+class PCANTracePatternV21(PCANTracePatternV20):
     """
     "Reserved" '-' and "Bus" to 2.0
      1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00
+
+    >>> PCANTracePatternV21().match(" 1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
+    <logreader.DataFrame object at ...>
     """
     pattern = re.compile(
         r'^\s*?\d+?\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>.+)\s+(?P<channel>[0-9])\s+(?P<can_id>[0-9A-F]+)\s+(?P<rxtx>.+)\s+-\s+(?P<dlc>[0-9]+)\s+(?P<can_data>[0-9A-F ]*)$')
 
-    def unpack(self, match_object: 're.Match[str]') -> DataFrame:
-        """
-        >>> PCANTracePatternV21().match(" 1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00") #doctest: +ELLIPSIS
-        <logreader.DataFrame object at ...>
-        """
-        channel = 'pcan' + match_object.group('channel')
-        frame_id = int(match_object.group('can_id'), 16)
-        is_extended_frame = len(match_object.group('can_id')) > 4
-        data = match_object.group('can_data')
-        data = data.replace(' ', '')
-        data = binascii.unhexlify(data)
-        millis = float(match_object.group('timestamp'))
-        # timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
-        timestamp = datetime.timedelta(milliseconds=millis)
-        timestamp_format = TimestampFormat.RELATIVE
-
-        return DataFrame(channel=channel, frame_id=frame_id, is_extended_frame=is_extended_frame, data=data, timestamp=timestamp, timestamp_format=timestamp_format)
+    def parse_channel(self, match_object: 're.Match[str]') -> str:
+        return 'pcan' + match_object.group('channel')
 
 
 class Parser:

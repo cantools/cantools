@@ -852,3 +852,9 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f7.frame_id, 0x100)
         with pytest.raises(StopIteration):
             next(frame_iter)
+
+
+def test_data_frame_repr() -> None:
+        parser = cantools.logreader.Parser()
+        outp = parser.parse("vcan0  0C8   [8]  F0 00 00 00 00 00 00 00")
+        assert repr(outp) == r"DataFrame(channel = 'vcan0', frame_id = 200, is_extended_frame = False, data = b'\xf0\x00\x00\x00\x00\x00\x00\x00', is_remote_frame = False, timestamp = None, timestamp_format = <TimestampFormat.MISSING: 3>)"

@@ -45,6 +45,10 @@ class DataFrame:
         self.timestamp = timestamp
         self.timestamp_format = timestamp_format
 
+    def __repr__(self) -> str:
+        attrs = ', '.join('%s = %r' % (a, getattr(self, a)) for a in self.__dict__.keys())
+        return '%s(%s)' % (type(self).__name__, attrs)
+
 
 class BasePattern:
 

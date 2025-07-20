@@ -2,6 +2,7 @@ import io
 import datetime
 import unittest
 
+import pytest
 from freezegun import freeze_time
 
 import cantools
@@ -498,6 +499,8 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f3.frame_id, 0x1f4)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x1f3)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_candump_absolute_timestamp(self):
         testvec = io.StringIO("""\
@@ -516,6 +519,8 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f3.frame_id, 0x1f4)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x1f3)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_candump_time_since_start(self):
         testvec = io.StringIO("""\
@@ -534,6 +539,8 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f3.frame_id, 0x1f4)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x1f3)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_candump_log_fd_absolute_time(self):
         testvec = io.StringIO("""\
@@ -543,6 +550,8 @@ class TestLogreaderStreams(unittest.TestCase):
         frame_iter = iter(parser)
         f1 = next(frame_iter)
         self.assertEqual(f1.frame_id, 0x102)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_candump_log(self):
         testvec = io.StringIO("""\
@@ -563,6 +572,8 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f3.frame_id, 0x1f4)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x1f3)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_pcan_traceV10(self):
         testvec = io.StringIO("""\
@@ -592,9 +603,16 @@ class TestLogreaderStreams(unittest.TestCase):
         frame_iter = iter(parser)
         f1 = next(frame_iter)
         self.assertEqual(f1.frame_id, 0x001)
-        #TODO: this test was wrong
-        #f2 = next(frame_iter)
-        #self.assertEqual(f2.frame_id, 0x300)
+        #f2 = next(frame_iter)  # This is an error, not a valid CAN frame, and is therefore ignored
+        #self.assertEqual(f2.frame_id, 0x0008)
+        #f3 = next(frame_iter)  # This is a warning, not a valid CAN frame, and is therefore ignored
+        #self.assertEqual(f3.frame_id, 0xFFFFFFFF)
+        f4 = next(frame_iter)
+        self.assertEqual(f4.frame_id, 0x100)
+        f5 = next(frame_iter)
+        self.assertEqual(f5.frame_id, 0x300)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_pcan_traceV11(self):
         testvec = io.StringIO("""\
@@ -634,8 +652,14 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f3.frame_id, 0x400)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x300)
-        f5 = next(frame_iter)
-        self.assertEqual(f5.frame_id, 0x008)
+        #f5 = next(frame_iter)  # This is a warning, not a valid CAN frame, and is therefore ignored
+        #self.assertEqual(f5.frame_id, 0xFFFFFFFF)
+        f6 = next(frame_iter)  #TODO This is an error, not a valid CAN frame, and should therefore ignored
+        self.assertEqual(f6.frame_id, 0x0008)
+        f7 = next(frame_iter)
+        self.assertEqual(f7.frame_id, 0x100)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_pcan_traceV12(self):
         testvec = io.StringIO("""\
@@ -675,8 +699,14 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f3.frame_id, 0x400)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x300)
+        # FFFFFFFF is a warning, not a valid CAN frame, and is therefore ignored.
+        #TODO: 0008 is an error, not a valid CAN frame, and should therefore be ignored.
         f5 = next(frame_iter)
         self.assertEqual(f5.frame_id, 0x008)
+        f6 = next(frame_iter)
+        self.assertEqual(f6.frame_id, 0x100)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_pcan_traceV13(self):
         testvec = io.StringIO("""\
@@ -706,10 +736,13 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f1.frame_id, 0x401)
         f2 = next(frame_iter)
         self.assertEqual(f2.frame_id, 0x4A1)
+        # FFFFFFFF is a warning, not a valid CAN frame, and is therefore ignored.
         f3 = next(frame_iter)
         self.assertEqual(f3.frame_id, 0x400)
         f4 = next(frame_iter)
         self.assertEqual(f4.frame_id, 0x4A0)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_pcan_traceV20(self):
         testvec = io.StringIO("""\
@@ -752,8 +785,15 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f4.frame_id, 0x300)
         f5 = next(frame_iter)
         self.assertEqual(f5.frame_id, 0x500)
+        # ER is an error frame and ignored.
+        # ST is a hardware status change and ignored.
+        # EC is an error counter change and ignored.
         f6 = next(frame_iter)
         self.assertEqual(f6.frame_id, 0x18EFC034)
+        f7 = next(frame_iter)
+        self.assertEqual(f7.frame_id, 0x100)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
 
     def test_pcan_traceV21(self):
         testvec = io.StringIO("""\
@@ -800,5 +840,15 @@ class TestLogreaderStreams(unittest.TestCase):
         self.assertEqual(f4.frame_id, 0x300)
         f5 = next(frame_iter)
         self.assertEqual(f5.frame_id, 0x500)
+        # ER is an error frame and ignored.
+        # EV is a user defined event and ignored.
+        # EV is a user defined event and ignored.
+        # ST is a hardware status change and ignored.
+        # ER is an error frame and ignored.
+        # EC is an error counter change and ignored.
         f6 = next(frame_iter)
         self.assertEqual(f6.frame_id, 0x18EFC034)
+        f7 = next(frame_iter)
+        self.assertEqual(f7.frame_id, 0x100)
+        with pytest.raises(StopIteration):
+            next(frame_iter)

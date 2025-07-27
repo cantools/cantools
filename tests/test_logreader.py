@@ -853,6 +853,12 @@ class TestLogreaderStreams(unittest.TestCase):
         with pytest.raises(StopIteration):
             next(frame_iter)
 
+    def test_none(self):
+        parser = cantools.logreader.Parser()
+        frame_iter = iter(parser)
+        with pytest.raises(StopIteration):
+            next(frame_iter)
+
 
 def test_data_frame_repr() -> None:
         parser = cantools.logreader.Parser()

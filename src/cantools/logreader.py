@@ -1,11 +1,14 @@
+import abc
 import binascii
 import datetime
 import enum
 import re
-import abc
-import io
 import typing
-from collections.abc import Iterator
+
+if typing.TYPE_CHECKING:
+    import io
+    from collections.abc import Iterator
+
 
 TimestampType: 'typing.TypeAlias' = 'datetime.datetime|datetime.timedelta|None'
 
@@ -46,8 +49,8 @@ class DataFrame:
         self.timestamp_format = timestamp_format
 
     def __repr__(self) -> str:
-        attrs = ', '.join('%s = %r' % (a, getattr(self, a)) for a in self.__dict__.keys())
-        return '%s(%s)' % (type(self).__name__, attrs)
+        attrs = ', '.join(f'{a} = {getattr(self, a)!r}' for a in self.__dict__.keys())
+        return f'{type(self).__name__}({attrs})'
 
 
 class BasePattern:
@@ -118,7 +121,7 @@ class CandumpTimestampedPattern(CandumpBasePattern):
 
     def parse_timestamp(self, match_object: 're.Match[str]') -> 'tuple[TimestampType, TimestampFormat]':
         seconds = float(match_object.group('timestamp'))
-        timestamp: 'datetime.timedelta|datetime.datetime'
+        timestamp: typing.Union[datetime.timedelta, datetime.datetime]
         if seconds < 662688000:  # 1991-01-01 00:00:00, "Released in 1991, the Mercedes-Benz W140 was the first production vehicle to feature a CAN-based multiplex wiring system."
             timestamp = datetime.timedelta(seconds=seconds)
             timestamp_format = TimestampFormat.RELATIVE
@@ -292,7 +295,7 @@ class Parser:
 
     def __init__(self, stream: 'io.TextIOBase|None' = None, *, tz: 'datetime.tzinfo|None' = None) -> None:
         self.stream = stream
-        self.pattern: 'BasePattern|None' = None
+        self.pattern: typing.Optional[BasePattern] = None
         self.tz = tz
 
     def detect_pattern(self, line: str) -> 'BasePattern|None':

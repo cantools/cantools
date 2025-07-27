@@ -393,7 +393,7 @@ Contributing
 
 #. Fork the repository.
 
-#. Install prerequisites.
+#. Install prerequisites. You can skip this if you use `tox`_.
 
    .. code-block:: text
 
@@ -491,3 +491,5 @@ Contributing
 .. _motohawk_sender_node.c: https://github.com/cantools/cantools/blob/master/tests/files/c_source/motohawk_sender_node.c
 
 .. _matplotlib: https://matplotlib.org/
+
+.. _tox: http://tox.readthedocs.org/

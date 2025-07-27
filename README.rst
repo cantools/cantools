@@ -417,6 +417,13 @@ Contributing
 
       tox -e py
 
+#. Check test coverage.
+
+   .. code-block:: text
+
+      tox -e cov
+      firefox htmlcov/index.html
+
 #. Create a pull request.
 
 .. |github-actions| image:: https://github.com/cantools/cantools/actions/workflows/pythonpackage.yml/badge.svg?branch=master

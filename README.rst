@@ -411,6 +411,13 @@ Contributing
       ruff check src
       mypy src
 
+   or
+
+   .. code-block:: text
+
+      tox -e ruff
+      tox -e mypy
+
 #. Run the tests.
 
    .. code-block:: text

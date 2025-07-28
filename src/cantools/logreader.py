@@ -195,8 +195,7 @@ class PCANTracePatternV10(BasePattern):
             data = bytes(0)
         else:
             is_remote_frame = False
-            data = data.replace(' ', '')
-            data = binascii.unhexlify(data)
+            data = bytes.fromhex(data)
 
         return data, is_remote_frame
 

@@ -81,6 +81,7 @@ jobs:
         pip install -e .[plot]
     - name: Static type checking with mypy
       run: |
+        mypy --python-version 3.9 .
         mypy --python-version 3.10 .
         mypy --python-version 3.11 .
         mypy --python-version 3.12 .

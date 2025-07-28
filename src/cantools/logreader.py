@@ -10,7 +10,7 @@ if typing.TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-TimestampType: 'typing.TypeAlias' = 'datetime.datetime|datetime.timedelta|None'
+TimestampType = typing.Union[datetime.datetime, datetime.timedelta, None]
 
 class TimestampFormat(enum.Enum):
     """Describes a type of timestamp. ABSOLUTE is referring to UNIX time

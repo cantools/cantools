@@ -3,7 +3,6 @@ import datetime
 import unittest
 
 import pytest
-from freezegun import freeze_time
 
 import cantools
 
@@ -12,15 +11,15 @@ def utc_plus(offset: int) -> datetime.timezone:
     return datetime.timezone(datetime.timedelta(hours=offset))
 
 
-@freeze_time(tz_offset=0)
 class TestLogreaderFormats(unittest.TestCase):
     def test_empty_line(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
+
         outp = parser.parse("")
         self.assertIsNone(outp)
 
     def test_candump(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("vcan0  0C8   [8]  F0 00 00 00 00 00 00 00")
         self.assertEqual(outp.channel, 'vcan0')
@@ -74,7 +73,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.MISSING)
 
     def test_timestamped_candump(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("(000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00")
         self.assertEqual(outp.channel, 'vcan0')
@@ -115,7 +114,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microseconds, 679614)
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.RELATIVE)
 
-        outp = parser.parse("(1613749650.388103)  can1       0AD  [08]  A6 55 3B CF 3F 1A F5 2A")
+        outp = cantools.logreader.Parser(tz=utc_plus(0)).parse("(1613749650.388103)  can1       0AD  [08]  A6 55 3B CF 3F 1A F5 2A")
         self.assertEqual(outp.channel, 'can1')
         self.assertEqual(outp.frame_id, 0xad)
         self.assertEqual(outp.is_extended_frame, False)
@@ -151,7 +150,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.RELATIVE)
 
     def test_candump_log(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("(1579857014.345944) can2 486#82967A6B006B07F8")
         self.assertEqual(outp.channel, 'can2')
@@ -185,37 +184,36 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.second, 24)
         self.assertEqual(outp.timestamp.microsecond, 501098)
 
-        with freeze_time(tz_offset=2):
-            outp = parser.parse("(1752918539.271062) vcan0 00000123#1234567890ABCDEF")
-            self.assertEqual(outp.channel, 'vcan0')
-            self.assertEqual(outp.frame_id, 0x123)
-            self.assertEqual(outp.is_extended_frame, True)
-            self.assertEqual(outp.data, b'\x12\x34\x56\x78\x90\xab\xcd\xef')
-            self.assertEqual(outp.is_remote_frame, False)
-            self.assertEqual(outp.timestamp.year, 2025)
-            self.assertEqual(outp.timestamp.month, 7)
-            self.assertEqual(outp.timestamp.day, 19)
-            self.assertEqual(outp.timestamp.hour, 11)
-            self.assertEqual(outp.timestamp.minute, 48)
-            self.assertEqual(outp.timestamp.second, 59)
-            self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
+        outp = cantools.logreader.Parser(tz=utc_plus(2)).parse("(1752918539.271062) vcan0 00000123#1234567890ABCDEF")
+        self.assertEqual(outp.channel, 'vcan0')
+        self.assertEqual(outp.frame_id, 0x123)
+        self.assertEqual(outp.is_extended_frame, True)
+        self.assertEqual(outp.data, b'\x12\x34\x56\x78\x90\xab\xcd\xef')
+        self.assertEqual(outp.is_remote_frame, False)
+        self.assertEqual(outp.timestamp.year, 2025)
+        self.assertEqual(outp.timestamp.month, 7)
+        self.assertEqual(outp.timestamp.day, 19)
+        self.assertEqual(outp.timestamp.hour, 11)
+        self.assertEqual(outp.timestamp.minute, 48)
+        self.assertEqual(outp.timestamp.second, 59)
+        self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
 
-            outp = cantools.logreader.Parser(tz=utc_plus(0)).parse(
-                "(1613656104.501098) can3 14C##155B53476F7B82EEEB8E97236AC252B8BBB5B80A6A7734B2F675C6D2CEEC869D3")
-            self.assertEqual(outp.channel, 'can3')
-            self.assertEqual(outp.frame_id, 0x14c)
-            self.assertEqual(outp.is_extended_frame, False)
-            self.assertEqual(
-                outp.data, b'\x55\xB5\x34\x76\xF7\xB8\x2E\xEE\xB8\xE9\x72\x36\xAC\x25\x2B\x8B\xBB\x5B\x80\xA6\xA7\x73\x4B\x2F\x67\x5C\x6D\x2C\xEE\xC8\x69\xD3')
-            self.assertEqual(outp.is_remote_frame, False)
-            self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
-            self.assertEqual(outp.timestamp.year, 2021)
-            self.assertEqual(outp.timestamp.month, 2)
-            self.assertEqual(outp.timestamp.day, 18)
-            self.assertEqual(outp.timestamp.hour, 13)
-            self.assertEqual(outp.timestamp.minute, 48)
-            self.assertEqual(outp.timestamp.second, 24)
-            self.assertEqual(outp.timestamp.microsecond, 501098)
+        outp = cantools.logreader.Parser(tz=utc_plus(0)).parse(
+            "(1613656104.501098) can3 14C##155B53476F7B82EEEB8E97236AC252B8BBB5B80A6A7734B2F675C6D2CEEC869D3")
+        self.assertEqual(outp.channel, 'can3')
+        self.assertEqual(outp.frame_id, 0x14c)
+        self.assertEqual(outp.is_extended_frame, False)
+        self.assertEqual(
+            outp.data, b'\x55\xB5\x34\x76\xF7\xB8\x2E\xEE\xB8\xE9\x72\x36\xAC\x25\x2B\x8B\xBB\x5B\x80\xA6\xA7\x73\x4B\x2F\x67\x5C\x6D\x2C\xEE\xC8\x69\xD3')
+        self.assertEqual(outp.is_remote_frame, False)
+        self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
+        self.assertEqual(outp.timestamp.year, 2021)
+        self.assertEqual(outp.timestamp.month, 2)
+        self.assertEqual(outp.timestamp.day, 18)
+        self.assertEqual(outp.timestamp.hour, 13)
+        self.assertEqual(outp.timestamp.minute, 48)
+        self.assertEqual(outp.timestamp.second, 24)
+        self.assertEqual(outp.timestamp.microsecond, 501098)
 
         outp = cantools.logreader.Parser(tz=utc_plus(2)).parse("(1752918539.271062) vcan0 00000123#1234567890ABCDEF")
         self.assertEqual(outp.channel, 'vcan0')
@@ -246,7 +244,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
 
     def test_candump_log_absolute_timestamp(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("(2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00")
         self.assertEqual(outp.channel, 'vcan0')
@@ -292,7 +290,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
 
     def test_candump_log_ascii(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse(" can1  123   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'")
         self.assertEqual(outp.channel, 'can1')
@@ -303,7 +301,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.MISSING)
 
     def test_candump_log_ascii_timestamped(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("  (1621271100.919019)  can1  123   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'")
         self.assertEqual(outp.channel, 'can1')
@@ -314,7 +312,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
 
     def test_candump_log_ascii_absolute(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("(2020-12-19 12:04:45.485261)  can1  123   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'")
         self.assertEqual(outp.channel, 'can1')
@@ -332,7 +330,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microsecond, 485261)
 
     def test_pcan_traceV10(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("1) 1841 0001 8 F0 00 00 00 00 00 00 00")
         self.assertEqual(outp.channel, 'pcanx')
@@ -355,7 +353,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microseconds, 844000)
 
     def test_pcan_traceV11(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("1)      6357.2 Rx        0401  8    F0 00 00 00 00 00 00 00")
         self.assertEqual(outp.channel, 'pcanx')
@@ -378,7 +376,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microseconds, 352700)
 
     def test_pcan_traceV12(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("1)      6357.213 1  Rx        0401  8    F0 00 00 00 00 00 00 00")
         self.assertEqual(outp.channel, 'pcan1')
@@ -401,7 +399,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microseconds, 352743)
 
     def test_pcan_traceV13(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse("1)      6357.213 1  Rx        0401 -  8    F0 00 00 00 00 00 00 00")
         self.assertEqual(outp.channel, 'pcan1')
@@ -424,7 +422,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microseconds, 352743)
 
     def test_pcan_traceV20(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse(" 1      1059.900 DT 0300 Rx 7 00 00 00 00 04 00 00")
         self.assertEqual(outp.channel, 'pcanx')
@@ -447,7 +445,7 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microseconds, 336543)
 
     def test_pcan_traceV21(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
 
         outp = parser.parse(" 1      1059.900 DT 1 0300 Rx - 7 00 00 00 00 04 00 00")
         self.assertEqual(outp.channel, 'pcan1')
@@ -854,13 +852,15 @@ class TestLogreaderStreams(unittest.TestCase):
             next(frame_iter)
 
     def test_none(self):
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
+
         frame_iter = iter(parser)
         with pytest.raises(StopIteration):
             next(frame_iter)
 
 
 def test_data_frame_repr() -> None:
-        parser = cantools.logreader.Parser()
+        parser = cantools.logreader.Parser(tz=utc_plus(0))
+
         outp = parser.parse("vcan0  0C8   [8]  F0 00 00 00 00 00 00 00")
         assert repr(outp) == r"DataFrame(channel = 'vcan0', frame_id = 200, is_extended_frame = False, data = b'\xf0\x00\x00\x00\x00\x00\x00\x00', is_remote_frame = False, timestamp = None, timestamp_format = <TimestampFormat.MISSING: 3>)"

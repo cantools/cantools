@@ -1,3 +1,6 @@
+__all__ = ["Bus", "Database", "DecodeError", "EncodeError", "Message",
+           "Node", "Signal", "dump_file", "load", "load_file", "load_string"]
+
 import os
 from contextlib import nullcontext
 from typing import Any, Optional, TextIO, Union
@@ -6,10 +9,17 @@ import diskcache
 
 from ..typechecking import StringPathLike
 from . import can, diagnostics, utils
-
-# Remove once less users are using the old package structure.
-from .can import *  # noqa: F403
-from .errors import Error, UnsupportedDatabaseFormatError
+from .can.bus import Bus
+from .can.database import Database
+from .can.message import Message
+from .can.node import Node
+from .can.signal import Signal
+from .errors import (
+    DecodeError,
+    EncodeError,
+    Error,
+    UnsupportedDatabaseFormatError,
+)
 
 
 def _resolve_database_format_and_encoding(database_format,

@@ -9,7 +9,7 @@ from cantools.autosar.snakeauth import SnakeOilAuthenticator
 
 class CanToolsAutosarTest(unittest.TestCase):
     def test_autosar3_e2e_profile2(self):
-        db = cantools.db.load_file('tests/files/arxml/system-3.2.3.arxml')
+        db = cantools.database.load_file('tests/files/arxml/system-3.2.3.arxml')
         msg = db.get_message_by_name('Status')
 
         # verify the parameters
@@ -45,7 +45,7 @@ class CanToolsAutosarTest(unittest.TestCase):
 
         # make sure that profile 5 protected messages cannot be used
         # with the functions for profile 2
-        db2 = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+        db2 = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
         pr5msg = db2.get_message_by_name('Message3')
         self.assertIsNone(cantools.autosar.apply_profile2_crc(b'\xff\xff',
                                                               pr5msg))
@@ -53,7 +53,7 @@ class CanToolsAutosarTest(unittest.TestCase):
                                                               pr5msg))
 
     def test_autosar4_e2e_profile5(self):
-        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+        db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
         msg = db.get_message_by_name('Message3')
 
         # verify the parameters
@@ -91,7 +91,7 @@ class CanToolsAutosarTest(unittest.TestCase):
 
         # make sure that profile 2 protected messages cannot be used
         # with the functions for profile 5
-        db2 = cantools.db.load_file('tests/files/arxml/system-3.2.3.arxml')
+        db2 = cantools.database.load_file('tests/files/arxml/system-3.2.3.arxml')
         pr2msg = db2.get_message_by_name('Status')
         self.assertIsNone(
             cantools.autosar.apply_profile5_crc(b'\xff\xff\xff\xff', pr2msg))
@@ -99,7 +99,7 @@ class CanToolsAutosarTest(unittest.TestCase):
             cantools.autosar.check_profile5_crc(b'\xff\xff\xff\xff', pr2msg))
 
     def test_autosar4_e2e(self):
-        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+        db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
 
         # verify the E2E parameters for a message that uses profile 5
         msg = db.get_message_by_name('Message3')
@@ -136,7 +136,7 @@ class CanToolsAutosarTest(unittest.TestCase):
         self.assertEqual(msg.autosar.e2e.payload_length, 4)
 
     def test_autosar4_secoc(self):
-        db = cantools.db.load_file('tests/files/arxml/system-4.2.arxml')
+        db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
 
         dbmsg = db.get_message_by_name('Message3')
 

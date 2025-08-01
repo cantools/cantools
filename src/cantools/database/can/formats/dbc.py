@@ -438,6 +438,13 @@ def get_dbc_frame_id(message):
 
     return frame_id
 
+def get_dbc_name(name):
+    #replace special chars with "_"
+    name = re.sub(r"\W", "_", name)
+    #multiple "_" are condensated to just 1 "_"
+    name = re.sub(r"_+", "_", name)
+    return name
+
 
 def _get_node_name(attributes, name):
     try:
@@ -1825,6 +1832,36 @@ def try_remove_attribute(dbc, name):
         pass
 
 
+def remove_special_chars(database):
+    for node in database.nodes:
+        new_node_name = get_dbc_name(node.name)
+
+        for message in database.messages:
+            for index, sender in enumerate(message.senders):
+                if sender == node.name:
+                    message.senders[index] = new_node_name
+
+            for signal in message.signals:
+                for index, receiver in enumerate(signal.receivers):
+                    if receiver == node.name:
+                        signal.receivers[index] = new_node_name
+
+        node.name = new_node_name
+
+    for message in database.messages:
+        message.name = get_dbc_name(message.name)
+
+        for signal in message.signals:
+            signal.name = get_dbc_name(signal.name)
+
+        if message.signal_groups is not None:
+            for signal_group in message.signal_groups:
+                signal_group.name = get_dbc_name(signal_group.name)
+                signal_group.signal_names = [get_dbc_name(sig_name) for sig_name in signal_group.signal_names]
+
+    return database
+
+
 def make_node_names_unique(database, shorten_long_names):
     converter = LongNamesConverter()
 
@@ -1931,6 +1968,7 @@ def dump_string(database: InternalDatabase,
     if database.dbc is None:
         database.dbc = DbcSpecifics()
 
+    database = remove_special_chars(database)
     database = make_names_unique(database, shorten_long_names)
     bu = _dump_nodes(database)
     val_table = _dump_value_tables(database)

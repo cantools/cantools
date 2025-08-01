@@ -1,16 +1,17 @@
+__all__ = ["Error", "__author__", "__version__", "database", "j1939", "logreader", "tester"]
+
 import argparse
 import importlib
 import logging
 import os
 import pathlib
 import sys
+import types
+import warnings
 from importlib.metadata import PackageNotFoundError, version
 
-from . import j1939, logreader, tester
+from . import database, j1939, logreader, tester
 from .errors import Error
-
-# Remove once less users are using the old package structure.
-from . import database as db  # isort: skip
 
 __author__ = 'Erik Moqvist'
 
@@ -19,6 +20,22 @@ try:
 except PackageNotFoundError:
     # package is not installed
     pass
+
+
+class _DeprecatedModule(types.ModuleType):
+    def __getattr__(self, name):
+        warnings.warn(
+            "'cantools.db' is deprecated. Please use 'cantools.database' instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return getattr(database, name)
+
+    def __dir__(self):
+        return dir(database)
+
+# Replace `db` with a deprecation proxy
+db = _DeprecatedModule("cantools.db")
 
 
 class _ErrorSubparser:

@@ -2611,10 +2611,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), 'syntax error: line 1, column 0')
 
     def test_bus(self):
-        bus = cantools.db.bus.Bus('foo')
+        bus = cantools.db.Bus('foo')
         self.assertEqual(repr(bus), "bus('foo', None)")
 
-        bus = cantools.db.bus.Bus('foo', 'bar')
+        bus = cantools.db.Bus('foo', 'bar')
         self.assertEqual(repr(bus), "bus('foo', 'bar')")
 
     def test_num(self):

@@ -2,11 +2,13 @@
 import logging
 import math
 import os
+import pickle
 import re
 import shutil
 import timeit
 import unittest.mock
 from collections import namedtuple
+from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -14,17 +16,18 @@ import textparser
 from parameterized import parameterized
 
 import cantools.autosar
-from cantools.database.can.formats.dbc import LongNamesConverter
-from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-
-import cantools
-from cantools.database import Message, Signal, UnsupportedDatabaseFormatError
+import cantools.database
+from cantools.database import Message, Signal
 from cantools.database.can.formats import dbc
+from cantools.database.can.formats.dbc import LongNamesConverter
+from cantools.database.errors import (
+    DecodeError,
+    EncodeError,
+    Error,
+    ParseError,
+    UnsupportedDatabaseFormatError,
+)
+from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
 
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -1741,7 +1744,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.nodes, [])
 
     def test_invalid_kcd(self):
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_string('<WrongRootElement/>',
                                     database_format='kcd')
 
@@ -1754,7 +1757,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_jopp_5_0_sym(self):
         db = cantools.db.Database()
 
-        with self.assertRaises(cantools.db.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             db.add_sym_file('tests/files/sym/jopp-5.0.sym')
 
         self.assertEqual(str(cm.exception), 'Only SYM version 6.0 is supported.')
@@ -2596,7 +2599,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
 
     def test_load_bad_format(self):
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError):
+        with self.assertRaises(UnsupportedDatabaseFormatError):
             cantools.db.load(StringIO(''))
 
     def test_add_bad_kcd_string(self):
@@ -3033,7 +3036,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'Invalid syntax at line 1, column 9: "CM_ BO_ >>!<<"Foo.";"')
 
         # Missing frame id in message comment, using load_string().
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_string('CM_ BO_ "Foo.";')
 
         self.assertEqual(
@@ -3076,7 +3079,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         cantools.db.load_file(filename_sym, database_format='sym')
 
         # KCD database format, but file is DBC.
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(filename_dbc, database_format='kcd')
 
         self.assertEqual(
@@ -3084,7 +3087,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "KCD: \"not well-formed (invalid token): line 1, column 0\"")
 
         # DBC database format, but file is KCD.
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(filename_kcd, database_format='dbc')
 
         self.assertEqual(
@@ -3092,7 +3095,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "DBC: \"Invalid syntax at line 1, column 1: \">>!<<<!--\"\"")
 
         # SYM database format, but file is KCD.
-        with self.assertRaises(cantools.db.UnsupportedDatabaseFormatError) as cm:
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.db.load_file(filename_kcd, database_format='sym')
 
         self.assertEqual(
@@ -3904,7 +3907,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                                 [signal],
                                                 strict=False)
 
-        with self.assertRaises(cantools.database.errors.Error) as cm:
+        with self.assertRaises(Error) as cm:
             cantools.database.can.Database([message])
 
         self.assertEqual(str(cm.exception),
@@ -3963,7 +3966,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         filename = 'tests/files/dbc/issue_63.dbc'
 
-        with self.assertRaises(cantools.database.errors.Error) as cm:
+        with self.assertRaises(Error) as cm:
             cantools.database.load_file(filename)
 
         self.assertEqual(
@@ -5650,7 +5653,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         filename = 'tests/files/sym/issue_138.sym'
 
-        with self.assertRaises(cantools.database.errors.Error) as cm:
+        with self.assertRaises(Error) as cm:
             cantools.database.load_file(filename)
 
         self.assertEqual(
@@ -5847,7 +5850,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_dbc_issue_199_more_than_11_bits_standard_frame_id(self):
         filename = 'tests/files/dbc/issue_199.dbc'
 
-        with self.assertRaises(cantools.database.errors.Error) as cm:
+        with self.assertRaises(Error) as cm:
             cantools.database.load_file(filename)
 
         self.assertEqual(
@@ -5858,7 +5861,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_dbc_issue_199_more_than_29_bits_extended_frame_id(self):
         filename = 'tests/files/dbc/issue_199_extended.dbc'
 
-        with self.assertRaises(cantools.database.errors.Error) as cm:
+        with self.assertRaises(Error) as cm:
             cantools.database.load_file(filename)
 
         self.assertEqual(
@@ -6207,6 +6210,70 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
 
+
+    def test_exceptions_picklable(self):
+        # Error
+        err_msg = "This is an Error()"
+        try:
+            raise Error(err_msg)
+        except Error as exc:
+            pickled = pickle.dumps(exc)
+            unpickled = pickle.loads(pickled)
+            self.assertEqual(err_msg, str(unpickled))
+            self.assertEqual(repr(exc), repr(unpickled))
+
+        # ParseError
+        err_msg = "This is a ParseError()"
+        try:
+            raise ParseError(err_msg)
+        except ParseError as exc:
+            pickled = pickle.dumps(exc)
+            unpickled = pickle.loads(pickled)
+            self.assertEqual(err_msg, str(unpickled))
+            self.assertEqual(repr(exc), repr(unpickled))
+
+        # EncodeError
+        err_msg = "This is an EncodeError()"
+        try:
+            raise EncodeError(err_msg)
+        except EncodeError as exc:
+            pickled = pickle.dumps(exc)
+            unpickled = pickle.loads(pickled)
+            self.assertEqual(err_msg, str(unpickled))
+            self.assertEqual(repr(exc), repr(unpickled))
+
+        # DecodeError
+        err_msg = "This is a DecodeError()"
+        try:
+            raise DecodeError(err_msg)
+        except DecodeError as exc:
+            pickled = pickle.dumps(exc)
+            unpickled = pickle.loads(pickled)
+            self.assertEqual(err_msg, str(unpickled))
+            self.assertEqual(repr(exc), repr(unpickled))
+
+        # UnsupportedDatabaseFormatError
+        e_arxml_msg = "Exception in arxml"
+        e_arxml = Exception(e_arxml_msg)
+        e_dbc_msg = "Exception in dbc"
+        e_dbc = Exception(e_dbc_msg)
+        e_kcd_msg = "Exception in kcd"
+        e_kcd = Exception(e_kcd_msg)
+        e_sym_msg = "Exception in sym"
+        e_sym = Exception(e_sym_msg)
+        e_cdd_msg = "Exception in cdd"
+        e_cdd = Exception(e_cdd_msg)
+        try:
+            raise UnsupportedDatabaseFormatError(e_arxml, e_dbc, e_kcd, e_sym, e_cdd)
+        except UnsupportedDatabaseFormatError as exc:
+            pickled = pickle.dumps(exc)
+            unpickled = pickle.loads(pickled)
+            self.assertEqual(e_arxml_msg, str(unpickled.e_arxml))
+            self.assertEqual(e_dbc_msg, str(unpickled.e_dbc))
+            self.assertEqual(e_kcd_msg, str(unpickled.e_kcd))
+            self.assertEqual(e_sym_msg, str(unpickled.e_sym))
+            self.assertEqual(e_cdd_msg, str(unpickled.e_cdd))
+            self.assertEqual(repr(exc), repr(unpickled))
 
 # This file is not '__main__' when executed via 'python setup.py3
 # test'.

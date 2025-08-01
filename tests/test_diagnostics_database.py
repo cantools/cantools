@@ -2,6 +2,7 @@ import logging
 import unittest
 
 import cantools
+from cantools.database.errors import ParseError
 
 
 class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
@@ -485,7 +486,7 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
     def test_unknown_byteorder(self):
         db = cantools.db.diagnostics.Database()
 
-        with self.assertRaises(cantools.database.ParseError) as pe:
+        with self.assertRaises(ParseError) as pe:
             db.add_cdd_file('tests/files/cdd/invalid-bo-example.cdd', encoding = 'iso-8859-1')
 
         self.assertEqual(str(pe.exception), "Unknown byte order code: 4321")

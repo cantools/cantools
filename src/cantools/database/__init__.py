@@ -9,45 +9,7 @@ from . import can, diagnostics, utils
 
 # Remove once less users are using the old package structure.
 from .can import *  # noqa: F403
-from .errors import Error, ParseError
-
-
-class UnsupportedDatabaseFormatError(Error):
-    """This exception is raised when
-    :func:`~cantools.database.load_file()`,
-    :func:`~cantools.database.load()` and
-    :func:`~cantools.database.load_string()` are unable to parse given
-    database file or string.
-
-    """
-
-    def __init__(self, e_arxml, e_dbc, e_kcd, e_sym, e_cdd):
-        message = []
-
-        if e_arxml is not None:
-            message.append(f'ARXML: "{e_arxml}"')
-
-        if e_dbc is not None:
-            message.append(f'DBC: "{e_dbc}"')
-
-        if e_kcd is not None:
-            message.append(f'KCD: "{e_kcd}"')
-
-        if e_sym is not None:
-            message.append(f'SYM: "{e_sym}"')
-
-        if e_cdd is not None:
-            message.append(f'CDD: "{e_cdd}"')
-
-        message = ', '.join(message)
-
-        super().__init__(message)
-
-        self.e_arxml = e_arxml
-        self.e_dbc = e_dbc
-        self.e_kcd = e_kcd
-        self.e_sym = e_sym
-        self.e_cdd = e_cdd
+from .errors import Error, UnsupportedDatabaseFormatError
 
 
 def _resolve_database_format_and_encoding(database_format,

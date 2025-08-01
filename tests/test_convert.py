@@ -141,7 +141,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_expected_output = self.get_test_file_name('dbc/motohawk_fd.dbc')
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
-        db = cantools.db.load_file(fn_in)
+        db = cantools.database.load_file(fn_in)
 
         # make bus CAN FD
         bus_type_def = AttributeDefinition("BusType",

@@ -9,7 +9,7 @@ from cantools.subparsers.dump import formatting
 class CanToolsDumpTest(unittest.TestCase):
 
     def test_the_homer(self):
-        db = cantools.db.load_file('tests/files/kcd/the_homer.kcd')
+        db = cantools.database.load_file('tests/files/kcd/the_homer.kcd')
 
         self.assertEqual(db.messages[1].signal_tree,
                          [
@@ -47,7 +47,7 @@ class CanToolsDumpTest(unittest.TestCase):
             '   +-- Handbrake')
 
     def test_multiplex(self):
-        db = cantools.db.load_file('tests/files/dbc/multiplex.dbc')
+        db = cantools.database.load_file('tests/files/dbc/multiplex.dbc')
 
         message_1 = db.messages[0]
 
@@ -98,7 +98,7 @@ class CanToolsDumpTest(unittest.TestCase):
             '           +-- BIT_F')
 
     def test_multiplex_choices(self):
-        db = cantools.db.load_file('tests/files/dbc/multiplex_choices.dbc')
+        db = cantools.database.load_file('tests/files/dbc/multiplex_choices.dbc')
 
         message_1 = db.messages[0]
 
@@ -166,53 +166,53 @@ class CanToolsDumpTest(unittest.TestCase):
         #            +-- S8            | 40..48
         #
         signals = [
-            cantools.db.Signal(name='S0',
+            cantools.database.Signal(name='S0',
                                start=0,
                                length=4,
                                is_multiplexer=True),
-            cantools.db.Signal(name='S1',
+            cantools.database.Signal(name='S1',
                                start=4,
                                length=4,
                                is_multiplexer=True,
                                multiplexer_ids=[0],
                                multiplexer_signal='S0'),
-            cantools.db.Signal(name='S2',
+            cantools.database.Signal(name='S2',
                                start=8,
                                length=8,
                                multiplexer_ids=[0],
                                multiplexer_signal='S1'),
-            cantools.db.Signal(name='S3',
+            cantools.database.Signal(name='S3',
                                start=16,
                                length=16,
                                multiplexer_ids=[0],
                                multiplexer_signal='S1'),
-            cantools.db.Signal(name='S4',
+            cantools.database.Signal(name='S4',
                                start=8,
                                length=24,
                                multiplexer_ids=[2],
                                multiplexer_signal='S1'),
-            cantools.db.Signal(name='S5',
+            cantools.database.Signal(name='S5',
                                start=4,
                                length=28,
                                multiplexer_ids=[1],
                                multiplexer_signal='S0'),
-            cantools.db.Signal(name='S6',
+            cantools.database.Signal(name='S6',
                                start=32,
                                length=8,
                                is_multiplexer=True),
-            cantools.db.Signal(name='S7',
+            cantools.database.Signal(name='S7',
                                start=40,
                                length=24,
                                multiplexer_ids=[1],
                                multiplexer_signal='S6'),
-            cantools.db.Signal(name='S8',
+            cantools.database.Signal(name='S8',
                                start=40,
                                length=8,
                                multiplexer_ids=[2],
                                multiplexer_signal='S6')
         ]
 
-        message = cantools.db.Message(frame_id=1,
+        message = cantools.database.Message(frame_id=1,
                                       name='M0',
                                       length=8,
                                       signals=signals)

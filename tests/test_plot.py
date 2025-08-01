@@ -811,7 +811,7 @@ BREMSE_33(
  (2020-12-29 08:48:34.369165)  vcan0  00000000   [8]  06 00 00 00 00 00 00 00
 """
 
-        db = cantools.db.load_file(self.DBC_FILE_CHOICES)
+        db = cantools.database.load_file(self.DBC_FILE_CHOICES)
         choices = db.get_message_by_name("Foo").get_signal_by_name("Foo").choices
 
         xs  = self.parse_time(input_data, self.parse_absolute_time)
@@ -2178,7 +2178,7 @@ Failed to parse line: 'invalid syntax'
  (012.432106)  vcan0  00000000   [8]  00 00 00 00 00 00 00 00
 """
 
-        db = cantools.db.load_file(self.DBC_FILE_CHOICES)
+        db = cantools.database.load_file(self.DBC_FILE_CHOICES)
         choices = db.get_message_by_name("Foo").get_signal_by_name("Foo").choices
 
         xs = self.parse_time(input_data, self.parse_seconds)

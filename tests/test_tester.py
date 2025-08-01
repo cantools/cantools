@@ -50,7 +50,7 @@ def setup_tester(dut_name,
                  on_message=None,
                  decode_choices=False,
                  scaling=False):
-    database = cantools.db.load_file('tests/files/kcd/tester.kcd')
+    database = cantools.database.load_file('tests/files/kcd/tester.kcd')
     can_bus = CanBus()
     tester = cantools.tester.Tester(dut_name,
                                     database,
@@ -278,7 +278,7 @@ class CanToolsTesterTest(unittest.TestCase):
 
         """
 
-        database = cantools.db.load_file('tests/files/kcd/tester.kcd')
+        database = cantools.database.load_file('tests/files/kcd/tester.kcd')
         can_bus = CanBus()
 
         with self.assertRaises(cantools.tester.Error) as cm:
@@ -292,7 +292,7 @@ class CanToolsTesterTest(unittest.TestCase):
 
         """
 
-        database = cantools.db.load_file('tests/files/kcd/tester.kcd')
+        database = cantools.database.load_file('tests/files/kcd/tester.kcd')
         can_bus = CanBus()
 
         with self.assertRaises(cantools.tester.Error) as cm:
@@ -306,7 +306,7 @@ class CanToolsTesterTest(unittest.TestCase):
 
         """
 
-        database = cantools.db.load_file('tests/files/dbc/foobar.dbc')
+        database = cantools.database.load_file('tests/files/dbc/foobar.dbc')
         can_bus = CanBus()
 
         with self.assertRaises(cantools.tester.Error) as cm:
@@ -320,7 +320,7 @@ class CanToolsTesterTest(unittest.TestCase):
 
         """
 
-        database = cantools.db.load_file('tests/files/dbc/issue_725.dbc')
+        database = cantools.database.load_file('tests/files/dbc/issue_725.dbc')
         can_bus = CanBus()
 
         with self.assertRaises(cantools.tester.Error) as cm:

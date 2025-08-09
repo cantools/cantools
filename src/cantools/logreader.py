@@ -2,13 +2,10 @@ import abc
 import binascii
 import datetime
 import enum
+import io
 import re
-from typing import Literal, Optional, Union, TYPE_CHECKING, overload
-
-if TYPE_CHECKING:
-    import io
-    from collections.abc import Iterator
-
+from collections.abc import Iterator
+from typing import Literal, Optional, Union, overload
 
 TimestampType = Optional[Union[datetime.datetime, datetime.timedelta]]
 

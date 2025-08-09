@@ -8,6 +8,9 @@ from collections.abc import Iterator
 from typing import Literal, Optional, Union, overload
 
 TimestampType = Optional[Union[datetime.datetime, datetime.timedelta]]
+TimezoneType = Optional[Union[datetime.tzinfo, Literal['local']]]
+
+TZ_LOCAL: Literal['local'] = 'local'
 
 class TimestampFormat(enum.Enum):
     """Describes a type of timestamp. ABSOLUTE is referring to UNIX time
@@ -113,7 +116,12 @@ class CandumpTimestampedPattern(CandumpBasePattern):
     pattern = re.compile(
         r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>[a-zA-Z0-9]+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
 
-    def __init__(self, tz: Optional[datetime.tzinfo]) -> None:
+    def __init__(self, tz: TimezoneType) -> None:
+        if tz == TZ_LOCAL:
+            tz = None
+            self.convert_to_timezone_aware_object = True
+        else:
+            self.convert_to_timezone_aware_object = False
         self.tz = tz
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
@@ -124,6 +132,8 @@ class CandumpTimestampedPattern(CandumpBasePattern):
             timestamp_format = TimestampFormat.RELATIVE
         else:
             timestamp = datetime.datetime.fromtimestamp(seconds, self.tz)
+            if self.convert_to_timezone_aware_object:
+                timestamp = timestamp.astimezone()
             timestamp_format = TimestampFormat.ABSOLUTE
 
         return timestamp, timestamp_format
@@ -135,11 +145,18 @@ class CandumpDefaultLogPattern(CandumpBasePattern):
     pattern = re.compile(
         r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>[a-zA-Z0-9]+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>R|([0-9A-Fa-f]{2})*)(\s+[RT])?$')
 
-    def __init__(self, tz: Optional[datetime.tzinfo]) -> None:
+    def __init__(self, tz: TimezoneType) -> None:
+        if tz == TZ_LOCAL:
+            tz = None
+            self.convert_to_timezone_aware_object = True
+        else:
+            self.convert_to_timezone_aware_object = False
         self.tz = tz
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
         timestamp = datetime.datetime.fromtimestamp(float(match_object.group('timestamp')), self.tz)
+        if self.convert_to_timezone_aware_object:
+            timestamp = timestamp.astimezone()
         timestamp_format = TimestampFormat.ABSOLUTE
         return timestamp, timestamp_format
 
@@ -289,7 +306,18 @@ class Parser:
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream: Optional[io.TextIOBase] = None, *, tz: Optional[datetime.tzinfo] = None) -> None:
+    def __init__(self, stream: Optional[io.TextIOBase] = None, *, tz: TimezoneType = TZ_LOCAL) -> None:
+        '''
+        :param tz: The timezone which returned datetime objects should have when parsing `candump -l`, `candump -L` or `candump -ta`.
+                   (It cannot be applied to `candump -tA` because the information is missing which timezone the time stamps have.
+                    `candump -td`, `candump -tz` and PCAN trace do not have absolute time stamps but relative time stamps and return timedelta objects instead of datetime objects.)
+                   With `tz=None` naive datetime objects representing the local system time will be returned.
+                   With `tz=TZ_LOCAL` timezone-aware datetime objects in the local system time will be returned.
+                   TZ_LOCAL should be preferred over None to avoid confusion with the naive datetime objects returned when parsing a `candump -tA` log.
+
+        WARNING: Be careful with the datetime objects returned when parsing a `candump -tA` log. They are naive because the information is missing which timezone they represent.
+        Usually naive datetime objects are assumed to represent the local system time but these objects are in the time zone where the log has been recorded.
+        '''
         self.stream = stream
         self.pattern: Optional[BasePattern] = None
         self.tz = tz

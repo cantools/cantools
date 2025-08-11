@@ -1,3 +1,4 @@
+import argparse
 import traceback
 import unittest
 
@@ -18,22 +19,35 @@ if have_curses:
     from cantools.subparsers.monitor import Monitor
 
 
-class Args:
+class Args(argparse.Namespace):
 
     def __init__(self,
                  database,
-                 single_line=False):
-        self.database = database
-        self.encoding = None
-        self.frame_id_mask = None
-        self.prune = False
-        self.no_strict = False
-        self.single_line = single_line
-        self.bit_rate = None
-        self.fd = False
-        self.bus_type = 'socketcan'
-        self.channel = 'vcan0'
-        self.extra_args = []
+                 single_line=False,
+                 legacy_args=False):
+        kwargs = {
+            "database": database,
+            "encoding": None,
+            "frame_id_mask": None,
+            "prune": False,
+            "no_strict": False,
+            "single_line": single_line,
+            "fd": False,
+            "channel": 'vcan0',
+        }
+
+        if legacy_args:
+            # TODO: this branch can be removed once legacy args are removed
+            kwargs["bus_type"] = "socketcan"
+            kwargs["bit_rate"] = None
+            kwargs["extra_args"] = []
+        else:
+            kwargs["interface"] = "socketcan"
+            kwargs["bitrate"] = None
+            kwargs["bus_kwargs"] = []
+
+
+        super().__init__(**kwargs)
 
 
 class StdScr:
@@ -78,7 +92,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             raise e
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -90,7 +104,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                             init_pair,
                             is_term_resized,
                             color_pair,
-                            bus,
+                            _create_bus,
                             notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -113,7 +127,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 call(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
             ])
         self.assert_called(color_pair, [call(1), call(2)])
-        self.assert_called(bus, [call(bustype='socketcan', channel='vcan0')])
+        self.assert_called(_create_bus, [call(args)])
         self.assert_called(
             stdscr.addstr,
             [
@@ -131,7 +145,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -143,7 +157,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                     init_pair,
                     is_term_resized,
                     color_pair,
-                    bus,
+                    _create_bus,
                     notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -156,10 +170,10 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.run(1)
 
         # Check mocks.
-        self.assert_called(bus, [call(bustype='socketcan', channel='vcan0', fd=True)])
+        self.assert_called(_create_bus, [call(args)])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -171,7 +185,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                _init_pair,
                                is_term_resized,
                                color_pair,
-                               _bus,
+                               _create_bus,
                                _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -208,7 +222,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -220,7 +234,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                            _init_pair,
                                            is_term_resized,
                                            color_pair,
-                                           _bus,
+                                           _create_bus,
                                            _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -257,7 +271,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -269,7 +283,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -296,7 +310,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -308,7 +322,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -345,7 +359,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -357,7 +371,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                             _init_pair,
                                             is_term_resized,
                                             color_pair,
-                                            _bus,
+                                            _create_bus,
                                             _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -394,7 +408,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -406,7 +420,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                                      _init_pair,
                                                      is_term_resized,
                                                      color_pair,
-                                                     _bus,
+                                                     _create_bus,
                                                      _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -467,7 +481,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -479,7 +493,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                            _init_pair,
                                            is_term_resized,
                                            color_pair,
-                                           _bus,
+                                           _create_bus,
                                            _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -522,7 +536,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -534,7 +548,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                     _init_pair,
                     is_term_resized,
                     color_pair,
-                    _bus,
+                    _create_bus,
                     _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
@@ -664,7 +678,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -676,7 +690,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                     _init_pair,
                     is_term_resized,
                     color_pair,
-                    _bus,
+                    _create_bus,
                     _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
@@ -775,7 +789,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -787,7 +801,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
@@ -909,7 +923,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -921,7 +935,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
@@ -1118,7 +1132,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1130,7 +1144,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -1188,7 +1202,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1200,7 +1214,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -1242,7 +1256,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1254,7 +1268,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -1293,7 +1307,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1305,7 +1319,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                    _init_pair,
                    is_term_resized,
                    color_pair,
-                   _bus,
+                   _create_bus,
                    _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
@@ -1444,7 +1458,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1456,7 +1470,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                         _init_pair,
                         is_term_resized,
                         color_pair,
-                        _bus,
+                        _create_bus,
                         _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
@@ -1593,7 +1607,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1605,7 +1619,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                     _init_pair,
                     is_term_resized,
                     color_pair,
-                    _bus,
+                    _create_bus,
                     _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[' ', ' ', 'q'],
@@ -1662,7 +1676,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1674,7 +1688,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr(user_input=[
@@ -1953,7 +1967,7 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
-    @patch('can.Bus')
+    @patch('can.cli.create_bus_from_namespace')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')
     @patch('curses.init_pair')
@@ -1965,7 +1979,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _init_pair,
                                 is_term_resized,
                                 color_pair,
-                                _bus,
+                                _create_bus,
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
@@ -2009,7 +2023,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/motohawk.dbc')
+        args = Args('tests/files/dbc/motohawk.dbc', legacy_args=True)
         args.bus_type = 'socketcand'
         args.channel = 'can0'
         args.extra_args = ['--host=192.168.0.10', '--port=29536']
@@ -2021,7 +2035,7 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.run(1)
 
         # Check mocks.
-        self.assert_called(bus, [call(bustype='socketcand', channel='can0',
+        self.assert_called(bus, [call(interface='socketcand', channel='can0',
                                       host='192.168.0.10', port=29536)])
 
 

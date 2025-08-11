@@ -1,5 +1,5 @@
-import io
 import datetime
+import io
 import unittest
 
 import pytest

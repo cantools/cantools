@@ -3,11 +3,13 @@ import bisect
 import curses
 import queue
 import re
+import sys
 import time
+import warnings
 from enum import Enum
 from typing import Any, Union
 
-import can
+import can.cli
 from argparse_addons import Integer
 
 from cantools.database.errors import DecodeError
@@ -68,7 +70,12 @@ class Monitor(can.Listener):
         curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
         curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
-        bus = self.create_bus(args)
+        if "bus_type" in args:
+            # TODO: this branch can be removed once legacy args are removed
+            bus = self.create_bus(args)
+        else:
+            bus = can.cli.create_bus_from_namespace(args)
+
         self._notifier = can.Notifier(bus, [self])
 
     def create_bus(self, args):
@@ -84,7 +91,7 @@ class Monitor(can.Listener):
             kwargs.update(parse_additional_config(args.extra_args))
 
         try:
-            return can.Bus(bustype=args.bus_type,
+            return can.Bus(interface=args.bus_type,
                            channel=args.channel,
                            **kwargs)
         except Exception as exc:
@@ -572,6 +579,39 @@ def _do_monitor(args):
         pass
 
 
+def _check_legacy_args() -> bool:
+    """Return True if legacy CAN bus arguments were given."""
+    args = sys.argv[1:]  # already a list of strings
+
+    # New style explicitly supported -> no legacy mode
+    if "-i" in args or "--interface" in args:
+        return False
+
+    # Special case: "-b" meaning change
+    if "-b" in args:
+        b_index = args.index("-b")
+        # Legacy if the value after -b is non-numeric (old bus type behavior)
+        if len(args) > b_index + 1 and not args[b_index + 1].isdigit():
+            return True
+
+    # Other explicit legacy indicators
+    if any(arg in args for arg in ("--bus-type", "--bit-rate", "-B")):
+        return True
+
+    return False
+
+
+def _warn_legacy_usage():
+    """Emit a warning if legacy args were detected."""
+    warnings.warn(
+        "You are using legacy CAN bus arguments (-b, --bus-type, -B, etc.). "
+        "These are deprecated and will be removed in a future release. "
+        "Please use the new bus argument format via `--interface` and related options.",
+        UserWarning,
+        stacklevel=2
+    )
+
+
 def add_subparser(subparsers):
     monitor_parser = subparsers.add_parser(
         'monitor',
@@ -591,21 +631,6 @@ def add_subparser(subparsers):
               'database. By default the received and database frame ids must '
               'be equal for a match.'))
     monitor_parser.add_argument(
-        '-b', '--bus-type',
-        default='socketcan',
-        help='Python CAN bus type.')
-    monitor_parser.add_argument(
-        '-c', '--channel',
-        default='vcan0',
-        help='Python CAN bus channel.')
-    monitor_parser.add_argument(
-        '-B', '--bit-rate',
-        help='Python CAN bus bit rate.')
-    monitor_parser.add_argument(
-        '-f', '--fd',
-        action='store_true',
-        help='Python CAN CAN-FD bus.')
-    monitor_parser.add_argument(
         '--prune',
         action='store_true',
         help='Refrain from shortening the names of named signal values.')
@@ -613,14 +638,34 @@ def add_subparser(subparsers):
         '--no-strict',
         action='store_true',
         help='Skip database consistency checks.')
+
+    if _check_legacy_args():
+        _warn_legacy_usage()
+        monitor_parser.add_argument(
+            '-b', '--bus-type',
+            default='socketcan',
+            help='(Deprecated) Python CAN bus type.')
+        monitor_parser.add_argument(
+            '-c', '--channel',
+            default='vcan0',
+            help='(Deprecated) Python CAN bus channel.')
+        monitor_parser.add_argument(
+            '-B', '--bit-rate',
+            help='(Deprecated) Python CAN bus bit rate.')
+        monitor_parser.add_argument(
+            '-f', '--fd',
+            action='store_true',
+            help='(Deprecated) Python CAN CAN-FD bus.')
+        monitor_parser.add_argument(
+            'extra_args',
+            nargs=argparse.REMAINDER,
+            help="(Deprecated) Remaining arguments will be used for the interface. "
+                 "Example: `-c can0 -b socketcand --host=192.168.0.10 --port=29536` "
+                 "is equivalent to `Bus('can0', 'socketcand', host='192.168.0.10', port=29536)`")
+    else:
+        can.cli.add_bus_arguments(monitor_parser, filter_arg=True, group_title="bus arguments (python-can)")
+
     monitor_parser.add_argument(
         'database',
         help='Database file.')
-    monitor_parser.add_argument(
-        'extra_args',
-        nargs=argparse.REMAINDER,
-        help="The remaining arguments will be used for the interface."
-        "For example, `-c can0 -b sockectand --host=192.168.0.10 --port=29536`"
-        "is the equivalent to opening the bus with"
-        " `Bus('can0', 'socketcand', host='192.168.0.10', port=29536)`")
     monitor_parser.set_defaults(func=_do_monitor)

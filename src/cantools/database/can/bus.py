@@ -1,6 +1,6 @@
 # A CAN bus.
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 class Bus:
     """A CAN bus.

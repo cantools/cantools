@@ -12,7 +12,7 @@ class Bus:
                  comment: Optional[Union[str, dict[Optional[str], str]]] = None,
                  baudrate: Optional[int] = None,
                  fd_baudrate: Optional[int] = None,
-                 autosar_specifics: dict[Any, Any] = None) -> None:
+                 autosar_specifics: Optional[dict[Any, Any]] = None) -> None:
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
@@ -21,11 +21,11 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = { None: comment }
+            self._comments: dict[Optional[str], str] = { None: comment }
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
-            self._comments = comment
+            self._comments: dict[Optional[str], str] = comment
 
         self._baudrate = baudrate
         self._fd_baudrate = fd_baudrate

@@ -21,11 +21,11 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments: dict[Optional[str], str] = { None: comment }
+            self._comments: Optional[Union[str, dict[Optional[str], str]]] = { None: comment }
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
-            self._comments: dict[Optional[str], str] = comment
+            self._comments = comment
 
         self._baudrate = baudrate
         self._fd_baudrate = fd_baudrate
@@ -83,7 +83,7 @@ class Bus:
         return self._fd_baudrate
 
     @property
-    def autosar(self) -> dict[Any, Any]:
+    def autosar(self) -> Optional[dict[Any, Any]]:
         """An object containing AUTOSAR specific properties of the bus.
 
         """

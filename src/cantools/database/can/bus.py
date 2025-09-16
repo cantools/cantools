@@ -21,7 +21,7 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments: Optional[Union[str, dict[Optional[str], str]]] = { None: comment }
+            self._comments: Optional[dict[Optional[str], str]] = { None: comment }
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary

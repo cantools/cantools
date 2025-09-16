@@ -58,7 +58,7 @@ class Bus:
         return self._comments.get('EN')
 
     @property
-    def comments(self) -> Optional[Union[str, dict[Optional[str], str]]]:
+    def comments(self) -> Optional[dict[Optional[str], str]]:
         """The dictionary with the descriptions of the bus in multiple
         languages. ``None`` if unavailable.
 

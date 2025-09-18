@@ -1260,6 +1260,7 @@ BATTERY_VT(
     def test_generate_c_source(self):
         databases = [
             'motohawk',
+            'motohawk_use_round',
             'padding_bit_order',
             'vehicle',
             'open_actuator',
@@ -1292,6 +1293,8 @@ BATTERY_VT(
                 ]
                 if database == 'floating_point_use_float':
                     argv.append('--use-float')
+                if database == 'motohawk_use_round':
+                    argv.append('--use-round')
 
                 with patch('sys.argv', argv), warnings.catch_warnings(record=True) as w:
                     cantools._main()

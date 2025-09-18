@@ -33,7 +33,8 @@ def _do_generate_c_source(args):
         not args.no_floating_point_numbers,
         args.bit_fields,
         args.use_float,
-        args.node)
+        args.node,
+        args.use_round)
 
     os.makedirs(args.output_directory, exist_ok=True)
 
@@ -109,6 +110,11 @@ def add_subparser(subparsers):
         action='store_true',
         default=False,
         help='Use float instead of double for floating point generation.')
+    generate_c_source_parser.add_argument(
+        '--use-round',
+        action='store_true',
+        default=False,
+        help='Use rounding instead of truncation for floating point conversions.')
     generate_c_source_parser.add_argument(
         'infile',
         help='Input database file.')

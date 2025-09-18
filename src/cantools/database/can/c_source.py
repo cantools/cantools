@@ -131,6 +131,7 @@ SOURCE_FMT = '''\
  * SOFTWARE.
  */
 
+{includes}\
 #include <string.h>
 
 #include "{header}"
@@ -1218,7 +1219,7 @@ def _format_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[str]:
     return choices
 
 
-def _generate_encode_decode(cg_signal: "CodeGenSignal", use_float: bool) -> tuple[str, str]:
+def _generate_encode_decode(cg_signal: "CodeGenSignal", use_float: bool, use_round: bool) -> tuple[str, str]:
     floating_point_type = _get_floating_point_type(use_float)
 
     scale = cg_signal.signal.scale
@@ -1239,6 +1240,9 @@ def _generate_encode_decode(cg_signal: "CodeGenSignal", use_float: bool) -> tupl
     else:
         encoding = f'value / {scale_literal}'
         decoding = f'({floating_point_type})value * {scale_literal}'
+
+    if not cg_signal.signal.is_float and use_round:
+        encoding = f'round{'f' if use_float else ''}({encoding})'
 
     return encoding, decoding
 
@@ -1497,6 +1501,7 @@ def _generate_definitions(database_name: str,
                           floating_point_numbers: bool,
                           use_float: bool,
                           node_name: Optional[str],
+                          use_round: bool,
                           ) -> tuple[str, tuple[set[THelperKind], set[THelperKind]]]:
     definitions = []
     pack_helper_kinds: set[THelperKind] = set()
@@ -1518,7 +1523,7 @@ def _generate_definitions(database_name: str,
             else:
                 _use_float = use_float
 
-            encode, decode = _generate_encode_decode(cg_signal, _use_float)
+            encode, decode = _generate_encode_decode(cg_signal, _use_float, use_round)
             check = _generate_is_in_range(cg_signal)
 
             if _is_receiver(cg_signal, node_name):
@@ -1691,6 +1696,7 @@ def generate(database: "Database",
              bit_fields: bool = False,
              use_float: bool = False,
              node_name: Optional[str] = None,
+             use_round: bool = False,
              ) -> tuple[str, str, str, str]:
     """Generate C source code from given CAN database `database`.
 
@@ -1717,6 +1723,9 @@ def generate(database: "Database",
     `node_name` specifies the node for which message packers will be generated.
     For all other messages, unpackers will be generated. If `node_name` is not
     provided, both packers and unpackers will be generated.
+
+    Set `use_round` to ``True`` to round encoded values to the nearest
+    integer (instead of truncating).
 
     This function returns a tuple of the C header and source files as
     strings.
@@ -1753,7 +1762,8 @@ def generate(database: "Database",
                                                       cg_messages,
                                                       floating_point_numbers,
                                                       use_float,
-                                                      node_name)
+                                                      node_name,
+                                                      use_round)
     helpers = _generate_helpers(helper_kinds)
 
     header = HEADER_FMT.format(file_name=header_name,
@@ -1770,12 +1780,17 @@ def generate(database: "Database",
                                structs=structs,
                                declarations=declarations)
 
+    includes = []
+    if use_round:
+        includes.append('#include <math.h>\n')
+
     source = SOURCE_FMT.format(file_name=source_name,
                                version=__version__,
                                date=date,
                                header=header_name,
                                helpers=helpers,
-                               definitions=definitions)
+                               definitions=definitions,
+                               includes=''.join(includes))
 
     fuzzer_source, fuzzer_makefile = _generate_fuzzer_source(
         database_name,

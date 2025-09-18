@@ -1242,7 +1242,7 @@ def _generate_encode_decode(cg_signal: "CodeGenSignal", use_float: bool, use_rou
         decoding = f'({floating_point_type})value * {scale_literal}'
 
     if not cg_signal.signal.is_float and use_round:
-        encoding = f'round{'f' if use_float else ''}({encoding})'
+        encoding = f'round{"f" if use_float else ""}({encoding})'
 
     return encoding, decoding
 

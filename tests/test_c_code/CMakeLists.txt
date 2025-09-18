@@ -81,7 +81,7 @@ set(TEST_SOURCES
 add_executable(test_runner ${TEST_SOURCES})
 target_include_directories(test_runner PRIVATE ${unity_SOURCE_DIR}/include)
 target_compile_definitions(unity PUBLIC -DUNITY_INCLUDE_DOUBLE)
-target_link_libraries(test_runner unity cantoolsGenCode m)
+target_link_libraries(test_runner unity cantoolsGenCode $<$<NOT:$<C_COMPILER_ID:MSVC>>:m>)
 
 # Add a custom target to run the tests
 add_custom_target(run_tests

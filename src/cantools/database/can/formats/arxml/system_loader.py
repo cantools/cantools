@@ -1179,7 +1179,7 @@ class SystemLoader:
             child_pdu_paths.append(dynalt_pdu_ref)
 
             next_selector_idx, \
-                dynalt_byte_length, \
+                _, \
                 dynalt_signals, \
                 dynalt_cycle_time, \
                 dynalt_child_pdu_paths, \
@@ -1286,7 +1286,7 @@ class SystemLoader:
                 dest_tag_name=static_pdu_ref.attrib.get('DEST'))
 
             next_selector_idx, \
-                byte_length, \
+                _, \
                 static_signals, \
                 _, \
                 static_child_pdu_paths, \

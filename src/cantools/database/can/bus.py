@@ -2,6 +2,8 @@
 
 from typing import Any, Optional, Union
 
+from .formats.arxml import AutosarDatabaseSpecifics
+
 
 class Bus:
     """A CAN bus.
@@ -13,7 +15,7 @@ class Bus:
                  comment: Optional[Union[str, dict[Optional[str], str]]] = None,
                  baudrate: Optional[int] = None,
                  fd_baudrate: Optional[int] = None,
-                 autosar_specifics: Optional[dict[Any, Any]] = None) -> None:
+                 autosar_specifics: Optional[AutosarDatabaseSpecifics] = None) -> None:
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
@@ -84,7 +86,7 @@ class Bus:
         return self._fd_baudrate
 
     @property
-    def autosar(self) -> Optional[dict[Any, Any]]:
+    def autosar(self) -> Optional[AutosarDatabaseSpecifics]:
         """An object containing AUTOSAR specific properties of the bus.
 
         """

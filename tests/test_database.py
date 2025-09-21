@@ -6203,6 +6203,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                           start=9,
                                           length=8)
                     ],
+                    signal_groups=[
+                        can.signal_group.SignalGroup(name='VALIDSIGNALGROUPNAME',
+                                                     signal_names=['valid_signal_name', 'Invalid Signal Name'])
+                    ],
                     senders=['ValidNodeName']),
                 can.message.Message(
                     frame_id=2,
@@ -6214,13 +6218,17 @@ class CanToolsDatabaseTest(unittest.TestCase):
                                           length=8),
                         can.signal.Signal(name='([{Brackets}])',
                                           start=9,
+                                          length=8),
+                        can.signal.Signal(name='13StartsWithNumber',
+                                          start=18,
+                                          length=8),
+                        can.signal.Signal(name='_5StartsWith_',
+                                          start=27,
                                           length=8)
                     ],
                     signal_groups=[
-                        can.signal_group.SignalGroup(name='VALIDSIGNALGROUPNAME',
-                                                     signal_names=['ValidGroupedSignalName', 'invalid grouped signal name']),
                         can.signal_group.SignalGroup(name='iNvAlId SiGnaL gRoUp NaMe',
-                                                     signal_names=['13StartsWithNumber', '_5StartsWith_']),
+                                                     signal_names=['([{Brackets}])', '13StartsWithNumber'])
                     ],
                     senders=['Invalid Node Name'])
             ],
@@ -6245,21 +6253,23 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[0].name, 'valid_signal_name')
         self.assertEqual(message.signals[1].name, 'Invalid_Signal_Name')
 
+        signal_group = message.signal_groups[0]
+        self.assertEqual(signal_group.name, 'VALIDSIGNALGROUPNAME')
+        self.assertEqual(signal_group.signal_names[0], 'valid_signal_name')
+        self.assertEqual(signal_group.signal_names[1], 'Invalid_Signal_Name')
+
         message = db.messages[1]
         self.assertEqual(message.name, 'Invalid_Message_Name')
         self.assertEqual(message.senders, ['Invalid_Node_Name'])
         self.assertEqual(message.signals[0].name, 'Special_Chars__________')
         self.assertEqual(message.signals[1].name, '___Brackets___')
+        self.assertEqual(message.signals[2].name, '_13StartsWithNumber')
+        self.assertEqual(message.signals[3].name, '_5StartsWith_')
 
         signal_group = message.signal_groups[0]
-        self.assertEqual(signal_group.name, 'VALIDSIGNALGROUPNAME')
-        self.assertEqual(signal_group.signal_names[0], 'ValidGroupedSignalName')
-        self.assertEqual(signal_group.signal_names[1], 'invalid_grouped_signal_name')
-
-        signal_group = message.signal_groups[1]
         self.assertEqual(signal_group.name, 'iNvAlId_SiGnaL_gRoUp_NaMe')
-        self.assertEqual(signal_group.signal_names[0], '_13StartsWithNumber')
-        self.assertEqual(signal_group.signal_names[1], '_5StartsWith_')
+        self.assertEqual(signal_group.signal_names[0], '___Brackets___')
+        self.assertEqual(signal_group.signal_names[1], '_13StartsWithNumber')
 
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"

@@ -943,7 +943,7 @@ class Message:
         if self._codecs is None:
             raise ValueError('Codec is not initialized.')
 
-        encoded, padding_mask, all_signals = self._encode(self._codecs,
+        encoded, padding_mask, _all_signals = self._encode(self._codecs,
                                                           cast('SignalMappingType', data),
                                                           scaling)
 

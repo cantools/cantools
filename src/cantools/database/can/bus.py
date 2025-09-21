@@ -1,16 +1,21 @@
 # A CAN bus.
 
+from typing import Any, Optional, Union
+
+from .formats.arxml import AutosarDatabaseSpecifics
+
+
 class Bus:
     """A CAN bus.
 
     """
 
     def __init__(self,
-                 name,
-                 comment=None,
-                 baudrate=None,
-                 fd_baudrate=None,
-                 autosar_specifics=None):
+                 name: str,
+                 comment: Optional[Union[str, dict[Optional[str], str]]] = None,
+                 baudrate: Optional[int] = None,
+                 fd_baudrate: Optional[int] = None,
+                 autosar_specifics: Optional[AutosarDatabaseSpecifics] = None) -> None:
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
@@ -19,7 +24,7 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = { None: comment }
+            self._comments: Optional[dict[Optional[str], str]] = { None: comment }
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -31,7 +36,7 @@ class Bus:
         self._autosar = autosar_specifics
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The bus name as a string.
 
         """
@@ -39,7 +44,7 @@ class Bus:
         return self._name
 
     @property
-    def comment(self):
+    def comment(self) -> Optional[str]:
         """The bus' comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -56,7 +61,7 @@ class Bus:
         return self._comments.get('EN')
 
     @property
-    def comments(self):
+    def comments(self) -> Optional[dict[Optional[str], str]]:
         """The dictionary with the descriptions of the bus in multiple
         languages. ``None`` if unavailable.
 
@@ -64,7 +69,7 @@ class Bus:
         return self._comments
 
     @property
-    def baudrate(self):
+    def baudrate(self) -> Optional[int]:
         """The bus baudrate, or ``None`` if unavailable.
 
         """
@@ -72,7 +77,7 @@ class Bus:
         return self._baudrate
 
     @property
-    def fd_baudrate(self):
+    def fd_baudrate(self) -> Optional[int]:
         """The baudrate used for the payload of CAN-FD frames, or ``None`` if
         unavailable.
 
@@ -81,7 +86,7 @@ class Bus:
         return self._fd_baudrate
 
     @property
-    def autosar(self):
+    def autosar(self) -> Optional[AutosarDatabaseSpecifics]:
         """An object containing AUTOSAR specific properties of the bus.
 
         """
@@ -89,10 +94,10 @@ class Bus:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value):
+    def autosar(self, value: Any) -> None:
         self._autosar = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "bus('{}', {})".format(
             self._name,
             "'" + self.comment + "'" if self.comment is not None else None)

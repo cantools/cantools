@@ -439,10 +439,12 @@ def get_dbc_frame_id(message):
     return frame_id
 
 def get_dbc_name(name):
-    #replace special chars with "_"
-    name = re.sub(r"\W", "_", name)
-    #multiple "_" are condensated to just 1 "_"
-    name = re.sub(r"_+", "_", name)
+    #replace special chars with '_'
+    name = re.sub(r'\W', '_', name)
+    #append '_' if it starts with a number
+    if name[0].isdigit():
+        name = '_' + name
+
     return name
 
 

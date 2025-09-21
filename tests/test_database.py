@@ -6187,6 +6187,80 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assertNotIn('BA_ "SystemSignalLongSymbol"', long_output)
 
+    def test_dbc_remove_special_chars(self):
+        can = cantools.database.can
+        db = cantools.database.Database(
+            messages=[
+                can.message.Message(
+                    frame_id=1,
+                    name='ValidMessageName',
+                    length=8,
+                    signals=[
+                        can.signal.Signal(name='valid_signal_name',
+                                          start=0,
+                                          length=8),
+                        can.signal.Signal(name='Invalid Signal Name',
+                                          start=9,
+                                          length=8)
+                    ],
+                    senders=['ValidNodeName']),
+                can.message.Message(
+                    frame_id=2,
+                    name='Invalid Message Name',
+                    length=8,
+                    signals=[
+                        can.signal.Signal(name='Special Chars="$%&/\'!?^',
+                                          start=0,
+                                          length=8),
+                        can.signal.Signal(name='([{Brackets}])',
+                                          start=9,
+                                          length=8)
+                    ],
+                    signal_groups=[
+                        can.signal_group.SignalGroup(name='VALIDSIGNALGROUPNAME',
+                                                     signal_names=['ValidGroupedSignalName', 'invalid grouped signal name']),
+                        can.signal_group.SignalGroup(name='iNvAlId SiGnaL gRoUp NaMe',
+                                                     signal_names=['13StartsWithNumber', '_5StartsWith_']),
+                    ],
+                    senders=['Invalid Node Name'])
+            ],
+            nodes=[
+                can.node.Node('ValidNodeName', None),
+                can.node.Node('Invalid Node Name', None)
+            ],
+            version='')
+
+        db.refresh()
+        db = cantools.database.load_string(db.as_dbc_string(), 'dbc')
+
+        self.assertEqual(len(db.nodes), 2)
+        self.assertEqual(db.nodes[0].name, 'ValidNodeName')
+        self.assertEqual(db.nodes[1].name, 'Invalid_Node_Name')
+
+        self.assertEqual(len(db.messages), 2)
+
+        message = db.messages[0]
+        self.assertEqual(message.name, 'ValidMessageName')
+        self.assertEqual(message.senders, ['ValidNodeName'])
+        self.assertEqual(message.signals[0].name, 'valid_signal_name')
+        self.assertEqual(message.signals[1].name, 'Invalid_Signal_Name')
+
+        message = db.messages[1]
+        self.assertEqual(message.name, 'Invalid_Message_Name')
+        self.assertEqual(message.senders, ['Invalid_Node_Name'])
+        self.assertEqual(message.signals[0].name, 'Special_Chars__________')
+        self.assertEqual(message.signals[1].name, '___Brackets___')
+
+        signal_group = message.signal_groups[0]
+        self.assertEqual(signal_group.name, 'VALIDSIGNALGROUPNAME')
+        self.assertEqual(signal_group.signal_names[0], 'ValidGroupedSignalName')
+        self.assertEqual(signal_group.signal_names[1], 'invalid_grouped_signal_name')
+
+        signal_group = message.signal_groups[1]
+        self.assertEqual(signal_group.name, 'iNvAlId_SiGnaL_gRoUp_NaMe')
+        self.assertEqual(signal_group.signal_names[0], '_13StartsWithNumber')
+        self.assertEqual(signal_group.signal_names[1], '_5StartsWith_')
+
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"
         db = cantools.db.load_file(filename)

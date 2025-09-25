@@ -20,6 +20,7 @@ void test_signed_message32big(void);
 void test_signed_message378910(void);
 void test_is_in_range(void);
 void test_encode_decode(void);
+void test_encode_decode_trunc_vs_round(void);
 void test_unpack_does_not_modify_other_mux_signals(void);
 
 #endif // TEST_BASIC_H

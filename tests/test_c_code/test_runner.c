@@ -37,6 +37,7 @@ int main(void) {
     RUN_TEST(test_signed_message378910);
     RUN_TEST(test_is_in_range);
     RUN_TEST(test_encode_decode);
+    RUN_TEST(test_encode_decode_trunc_vs_round);
     RUN_TEST(test_unpack_does_not_modify_other_mux_signals);
 
     // test_bit_fields.h

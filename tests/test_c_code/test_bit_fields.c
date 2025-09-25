@@ -1,10 +1,7 @@
 /* Include the generated files first to test that all required header
    files are included. */
-#include "motohawk.h"
 #include "motohawk_bit_fields.h"
-#include "floating_point.h"
 #include "floating_point_bit_fields.h"
-#include "signed.h"
 #include "signed_bit_fields.h"
 
 #include <stdio.h>

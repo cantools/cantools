@@ -1,6 +1,7 @@
 /* Include the generated files first to test that all required header
    files are included. */
 #include "motohawk.h"
+#include "motohawk_use_round.h"
 #include "padding_bit_order.h"
 #include "vehicle.h"
 #include "open_actuator.h"
@@ -570,6 +571,26 @@ void test_encode_decode(void) {
     /* Scale=0.01 and offset=250. */
     TEST_ASSERT_EQUAL(motohawk_example_message_temperature_encode(251.0), 100);
     TEST_ASSERT_DOUBLE_WITHIN(ABS_TOL, motohawk_example_message_temperature_decode(100), 251.0);
+}
+
+void test_encode_decode_trunc_vs_round(void) {
+    /* Scale=0.1 and offset=0. Truncation */
+    TEST_ASSERT_EQUAL(motohawk_example_message_average_radius_encode(2.000000), 20);
+    TEST_ASSERT_EQUAL(motohawk_example_message_average_radius_encode(1.999999), 19);
+    TEST_ASSERT_EQUAL(motohawk_example_message_average_radius_encode(1.950000), 19);
+    TEST_ASSERT_EQUAL(motohawk_example_message_average_radius_encode(1.949999), 19);
+    /* Scale=0.1 and offset=0. Rounding */
+    TEST_ASSERT_EQUAL(motohawk_use_round_example_message_average_radius_encode(2.000000), 20);
+    TEST_ASSERT_EQUAL(motohawk_use_round_example_message_average_radius_encode(1.999999), 20);
+    TEST_ASSERT_EQUAL(motohawk_use_round_example_message_average_radius_encode(1.950000), 20);
+    TEST_ASSERT_EQUAL(motohawk_use_round_example_message_average_radius_encode(1.949999), 19);
+
+    /* Scale=0.01 and offset=250. Truncation */
+    TEST_ASSERT_EQUAL(motohawk_example_message_temperature_encode(234.56), -1543);
+    TEST_ASSERT_DOUBLE_WITHIN(ABS_TOL, motohawk_example_message_temperature_decode(-1543), 234.57);
+    /* Scale=0.01 and offset=250. Rounding */
+    TEST_ASSERT_EQUAL(motohawk_use_round_example_message_temperature_encode(234.56), -1544);
+    TEST_ASSERT_DOUBLE_WITHIN(ABS_TOL, motohawk_use_round_example_message_temperature_decode(-1544), 234.56);
 }
 
 void test_unpack_does_not_modify_other_mux_signals(void) {

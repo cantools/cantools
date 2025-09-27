@@ -6294,6 +6294,42 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
 
+    def test_dropping_attribute_definitions(self):
+        """Test against dropping attribute definitions when adding dbc files
+
+        When adding dbc files to a present database, the previous and the added
+        attribute definitions must be present in the resulting database.
+        """
+        filename1 = "tests/files/dbc/attributes.dbc"
+        filename2 = "tests/files/dbc/attributes_relation.dbc"
+        filename3 = "tests/files/dbc/add_two_dbc_files_1.dbc"
+
+        # Load dbc file that contains attribute definition "TheSignalStringAttribute".
+        db = cantools.db.load_file(filename1)
+
+        # Make sure the attribute definition "TheSignalStringAttribute" is present in db
+        # but "MsgProject" is not.
+        self.assertIn("TheSignalStringAttribute", db.dbc.attribute_definitions)
+        self.assertNotIn("MsgProject", db.dbc.attribute_definitions)
+
+        # add another dbc file. This file does not contain the attribute definition
+        # "TheSignalStringAttribute", but instead "MsgProject".
+        db.add_dbc_file(filename2)
+
+        # Now, both attribute definitions must be present in the database.
+        self.assertIn("TheSignalStringAttribute", db.dbc.attribute_definitions)
+        self.assertIn("MsgProject", db.dbc.attribute_definitions)
+
+        # Load another dbc file that does not have any attribute definitions
+        db = cantools.db.load_file(filename3)
+
+        # This attribute definition must not be in the new database.
+        self.assertNotIn("TheSignalStringAttribute", db.dbc.attribute_definitions)
+
+        db.add_dbc_file(filename1)
+
+        self.assertIn("TheSignalStringAttribute", db.dbc.attribute_definitions)
+
 
     def test_exceptions_picklable(self):
         # Error

@@ -132,7 +132,7 @@ def load_file(filename: StringPathLike,
     db: Union[can.Database, diagnostics.Database]
 
     with diskcache.Cache(cache_dir) if cache_dir else nullcontext() as cache:
-        if cache:
+        if cache is not None:
             # do not cache if user-defined sort_signals function is provided
             # the key cannot be created if function is local or depends on context
             # pickle serializer will fail anyway
@@ -160,7 +160,7 @@ def load_file(filename: StringPathLike,
                     strict,
                     sort_signals)
 
-        if cache:
+        if cache is not None:
             cache[cache_key] = db
 
         return db

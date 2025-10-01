@@ -1,6 +1,8 @@
 # A CAN bus.
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
+
+from ...typechecking import Comments
 
 if TYPE_CHECKING:
     from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
@@ -13,7 +15,7 @@ class Bus:
 
     def __init__(self,
                  name: str,
-                 comment: Optional[Union[str, dict[Optional[str], str]]] = None,
+                 comment: Optional[Union[str, Comments]] = None,
                  baudrate: Optional[int] = None,
                  fd_baudrate: Optional[int] = None,
                  autosar_specifics: Optional["AutosarDatabaseSpecifics"] = None) -> None:
@@ -25,7 +27,7 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments: Optional[dict[Optional[str], str]] = { None: comment }
+            self._comments: Optional[Comments] = { None: comment }
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -62,7 +64,7 @@ class Bus:
         return self._comments.get('EN')
 
     @property
-    def comments(self) -> Optional[dict[Optional[str], str]]:
+    def comments(self) -> Optional[Comments]:
         """The dictionary with the descriptions of the bus in multiple
         languages. ``None`` if unavailable.
 
@@ -95,7 +97,7 @@ class Bus:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: Any) -> None:
+    def autosar(self, value: Optional["AutosarDatabaseSpecifics"]) -> None:
         self._autosar = value
 
     def __repr__(self) -> str:

@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 import bitstruct  # type: ignore
 
@@ -29,7 +29,7 @@ def frame_id_pack(priority: int,
                   data_page: int,
                   pdu_format: int,
                   pdu_specific: int,
-                  source_address: int) -> int:
+                  source_address: int) -> Any:
     """Pack given values as a frame id and return it as an integer.
 
     """
@@ -75,7 +75,7 @@ def frame_id_unpack(frame_id: int) -> FrameId:
     return FrameId(*bitstruct.unpack('u3u1u1u8u8u8', packed))
 
 
-def pgn_pack(reserved: int, data_page: int, pdu_format: int, pdu_specific: int = 0) -> int:
+def pgn_pack(reserved: int, data_page: int, pdu_format: int, pdu_specific: int = 0) -> Any:
     """Pack given values as a parameter group number (PGN) and return it
     as an integer.
 

@@ -1,11 +1,17 @@
 # A DID.
 
 import binascii
+from typing import TypedDict
 
 from cantools.database.diagnostics.data import Data
-from cantools.typechecking import SignalDictType, SignalMappingType
+from cantools.typechecking import Formats, SignalDictType, SignalMappingType
 
 from ..utils import create_encode_decode_formats, decode_data, encode_data
+
+
+class _Codec(TypedDict):
+    datas: list[Data]
+    formats: Formats
 
 
 class Did:
@@ -132,11 +138,11 @@ class Did:
 
         """
 
-        self._codec = {
-            'datas': self._datas,
-            'formats': create_encode_decode_formats(self._datas,
-                                                    self._length)
-        }
+        self._codec = _Codec(
+            datas=self._datas,
+            formats=create_encode_decode_formats(self._datas,
+                                                 self._length)
+        )
 
     def __repr__(self) -> str:
         return f"did('{self._name}', 0x{self._identifier:04x})"

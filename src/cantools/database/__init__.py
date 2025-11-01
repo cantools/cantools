@@ -3,7 +3,7 @@ __all__ = ["Bus", "Database", "DecodeError", "EncodeError", "Message",
 
 import os
 from contextlib import nullcontext
-from typing import Any, Optional, TextIO, Union
+from typing import Any, TextIO
 
 import diskcache
 

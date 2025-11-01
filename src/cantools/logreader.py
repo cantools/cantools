@@ -5,10 +5,10 @@ import enum
 import io
 import re
 from collections.abc import Iterator
-from typing import Literal, Optional, overload
+from typing import Literal, overload
 
-TimestampType = Optional[datetime.datetime | datetime.timedelta]
-TimezoneType = Optional[datetime.tzinfo | Literal['local']]
+TimestampType = datetime.datetime | datetime.timedelta | None
+TimezoneType = datetime.tzinfo | Literal['local'] | None
 
 TZ_LOCAL: Literal['local'] = 'local'
 

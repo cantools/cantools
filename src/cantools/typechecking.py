@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from collections.abc import Callable, Mapping, Sequence
 from typing import (
@@ -13,8 +14,6 @@ from typing import (
 from bitstruct import CompiledFormatDict
 
 if TYPE_CHECKING:
-    import os
-
     from .database import Message, Signal
     from .database.namedsignalvalue import NamedSignalValue
 
@@ -25,7 +24,7 @@ class Formats(NamedTuple):
     padding_mask: int
 
 
-StringPathLike = Union[str, "os.PathLike[str]"]
+StringPathLike = str | os.PathLike[str]
 Comments = dict[str | None, str]
 class Codec(TypedDict):
     signals: list["Signal"]
@@ -53,8 +52,8 @@ ContainerDecodeResultListType = list[
 ContainerEncodeInputType = Sequence[
     tuple[ContainerHeaderSpecType, bytes | SignalMappingType]
 ]
-DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
-EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
+DecodeResultType = SignalDictType | ContainerDecodeResultType
+EncodeInputType = SignalMappingType | ContainerEncodeInputType
 
 SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
 

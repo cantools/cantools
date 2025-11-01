@@ -428,18 +428,17 @@ def prune_database_choices(database: "Database") -> None:
 
 
 SORT_SIGNALS_DEFAULT: Final = 'default'
-type_sort_signals = Union[Callable[[list["Signal"]], list["Signal"]], Literal['default'], None]
+type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
 
-type_sort_attribute = Union[
-    tuple[Literal['dbc'],     "Attribute", None,   None,      None],
-    tuple[Literal['node'],    "Attribute", "Node", None,      None],
-    tuple[Literal['message'], "Attribute", None,   "Message", None],
-    tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal"],
-]
+type_sort_attribute = \
+    tuple[Literal['dbc'],     "Attribute", None,   None,      None] | \
+    tuple[Literal['node'],    "Attribute", "Node", None,      None] | \
+    tuple[Literal['message'], "Attribute", None,   "Message", None] | \
+    tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal"]
 
-type_sort_attributes = Union[Callable[[list[type_sort_attribute]], list[type_sort_attribute]], Literal['default'], None]
+type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
 
-type_sort_choices = Union[Callable[[Choices], Choices], None]
+type_sort_choices = Callable[[Choices], Choices] | None
 
 def sort_signals_by_start_bit(signals: list["Signal"]) -> list["Signal"]:
     return sorted(signals, key=start_bit)

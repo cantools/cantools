@@ -14,7 +14,7 @@ class Data:
     def __init__(self,
                  name: str,
                  start: int,
-                 length: int,
+                 length: Optional[int] = None,
                  byte_order: ByteOrder = 'little_endian',
                  conversion: BaseConversion | None = None,
                  minimum: float | None = None,

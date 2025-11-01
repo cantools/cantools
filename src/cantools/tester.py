@@ -3,11 +3,17 @@
 import queue
 import time
 from collections import UserDict
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 
 import can
 
-from cantools.database.can.message import Message as MessageCls
+from cantools.database.can.database import Database
+from cantools.database.can.message import Message
+from cantools.typechecking import (
+    DecodeResultType,
+    SignalDictType,
+    SignalValueType,
+)
 
 from .errors import Error
 
@@ -17,24 +23,24 @@ class DecodedMessage:
 
     """
 
-    def __init__(self, name, signals):
+    def __init__(self, name: str, signals: DecodeResultType) -> None:
         self.name = name
         self.signals = signals
 
 
-class Messages(UserDict):
-    def __setitem__(self, message_name, value):
+class Messages(UserDict[str, "_TesterMessage"]):
+    def __setitem__(self, message_name: str, value: "_TesterMessage") -> None:
         if getattr(self, '_frozen', False):
             if message_name not in self.data:
                 raise KeyError(message_name)
         self.data[message_name] = value
 
-    def __missing__(self, key):
+    def __missing__(self, key: str) -> None:
         raise Error(f"invalid message name '{key}'")
 
 
 def _invert_signal_tree(
-        tree: list,
+        tree: list[str | list[str]] | None,
         cur_mpx: dict | None = None,
         ret: dict | None = None
 ) -> dict:
@@ -61,13 +67,13 @@ def _invert_signal_tree(
                 _invert_signal_tree(sig_tree, next_mpx, ret)
 
         elif isinstance(sigs, str):
-            ret.setdefault(sigs,[]).append(set(cur_mpx.items()))
+            ret.setdefault(sigs, []).append(set(cur_mpx.items()))
         else:
             raise TypeError(repr(sigs))
 
     return ret
 
-def invert_signal_tree(tree: list) -> dict:
+def invert_signal_tree(tree: list[str | list[str]] | None) -> dict:
     """Return a mapping of signals to the multiplex settings that will
     yield the signal.
 
@@ -78,13 +84,13 @@ def invert_signal_tree(tree: list) -> dict:
 
 class Listener(can.Listener):
 
-    def __init__(self, database, messages, input_queue, on_message):
+    def __init__(self, database: Database, messages: Messages, input_queue: queue.Queue[DecodedMessage], on_message: Callable[[DecodedMessage], None] | None):
         self._database = database
         self._messages = messages
         self._input_queue = input_queue
         self._on_message = on_message
 
-    def on_message_received(self, msg):
+    def on_message_received(self, msg: can.Message) -> None:
         if msg.is_error_frame or msg.is_remote_frame:
             return
 
@@ -112,12 +118,12 @@ class Listener(can.Listener):
         self._input_queue.put(decoded)
 
 
-class Message(UserDict):
+class _TesterMessage(UserDict[str, SignalValueType]):
 
     def __init__(self,
-                 database: MessageCls,
+                 database: Message,
                  can_bus: can.BusABC,
-                 input_list: list[MessageCls],
+                 input_list: list[DecodedMessage],
                  input_queue: queue.Queue[DecodedMessage],
                  decode_choices: bool,
                  scaling: bool,
@@ -134,25 +140,24 @@ class Message(UserDict):
         self.strict = strict
         self._input_list = input_list
         self.enabled = True
-        self._can_message = None
         self._periodic_task = None
         self._signal_names = {s.name for s in self.database.signals}
         self.update(self._prepare_initial_signal_values())
 
     @property
-    def periodic(self):
+    def periodic(self) -> bool:
         return self.database.cycle_time is not None
 
-    def __getitem__(self, signal_name):
+    def __getitem__(self, signal_name: str) -> SignalValueType:
         return self.data[signal_name]
 
-    def __setitem__(self, signal_name, value):
+    def __setitem__(self, signal_name: str, value: SignalValueType) -> None:
         if signal_name not in self._signal_names:
             raise KeyError(signal_name)
         self.data[signal_name] = value
         self._update_can_message()
 
-    def update(self, signals):
+    def update(self, signals: SignalDictType) -> None:
         s = dict(signals)
         new_signal_names = set(s) - self._signal_names
         if new_signal_names:
@@ -161,13 +166,13 @@ class Message(UserDict):
         self.data.update(s)
         self._update_can_message()
 
-    def send(self, signals=None):
+    def send(self, signals: SignalDictType | None = None) -> None:
         if signals is not None:
             self.update(signals)
 
         self._can_bus.send(self._can_message)
 
-    def expect(self, signals=None, timeout=None, discard_other_messages=True):
+    def expect(self, signals: SignalDictType | None = None, timeout: float | None = None, discard_other_messages: bool = True) -> DecodeResultType | None:
         if signals is None:
             signals = {}
 
@@ -180,8 +185,8 @@ class Message(UserDict):
 
         return decoded
 
-    def _expect_input_list(self, signals, discard_other_messages):
-        other_messages = []
+    def _expect_input_list(self, signals: SignalDictType, discard_other_messages: bool) -> DecodeResultType | None:
+        other_messages: list[DecodedMessage] = []
 
         while len(self._input_list) > 0:
             message = self._input_list.pop(0)
@@ -201,7 +206,7 @@ class Message(UserDict):
 
         return decoded
 
-    def _expect_input_queue(self, signals, timeout, discard_other_messages):
+    def _expect_input_queue(self, signals: SignalDictType, timeout: float | None, discard_other_messages: bool) -> DecodeResultType | None:
         if timeout is not None:
             end_time = time.time() + timeout
             remaining_time = timeout
@@ -228,12 +233,12 @@ class Message(UserDict):
                 if remaining_time <= 0:
                     return
 
-    def _filter_expected_message(self, message, signals):
+    def _filter_expected_message(self, message: DecodedMessage, signals: SignalDictType) -> DecodeResultType | None:
         if message.name == self.database.name:
-            if all(message.signals[name] == signals[name] for name in signals):
+            if all(message.signals[name] == signals[name] for name in signals.keys()):
                 return message.signals
 
-    def send_periodic_start(self):
+    def send_periodic_start(self) -> None:
         if not self.enabled:
             return
 
@@ -241,12 +246,12 @@ class Message(UserDict):
             self._can_message,
             self.database.cycle_time / 1000.0)
 
-    def send_periodic_stop(self):
+    def send_periodic_stop(self) -> None:
         if self._periodic_task is not None:
             self._periodic_task.stop()
             self._periodic_task = None
 
-    def _update_can_message(self):
+    def _update_can_message(self) -> None:
         arbitration_id = self.database.frame_id
         extended_id = self.database.is_extended_frame
         pruned_data = self.database.gather_signals(self.data)
@@ -264,11 +269,11 @@ class Message(UserDict):
         if self._periodic_task is not None:
             self._periodic_task.modify_data(self._can_message)
 
-    def _prepare_initial_signal_values(self):
-        initial_sig_values = {}
+    def _prepare_initial_signal_values(self) -> SignalDictType:
+        initial_sig_values: SignalDictType = {}
 
         # Choose a valid set of mux settings
-        mplex_settings = {}
+        mplex_settings: dict[str, int] = {}
         for m0 in reversed(self._mplex_map.values()):
             for m1 in m0:
                 mplex_settings.update(m1)
@@ -315,21 +320,21 @@ class Tester:
     """
 
     def __init__(self,
-                 dut_name,
-                 database,
-                 can_bus,
-                 bus_name=None,
-                 on_message=None,
-                 decode_choices=True,
-                 scaling=True,
-                 padding=False,
-                 strict=True):
+                 dut_name: str,
+                 database: Database,
+                 can_bus: can.BusABC,
+                 bus_name: str | None = None,
+                 on_message: Callable[[DecodedMessage], None] | None = None,
+                 decode_choices: bool = True,
+                 scaling: bool = True,
+                 padding: bool = False,
+                 strict: bool = True) -> None:
         self._dut_name = dut_name
         self._bus_name = bus_name
         self._database = database
         self._can_bus = can_bus
-        self._input_list = []
-        self._input_queue = queue.Queue()
+        self._input_list: list[DecodedMessage] = []
+        self._input_queue: queue.Queue[DecodedMessage] = queue.Queue()
         self._messages = Messages()
         self._is_running = False
 
@@ -352,7 +357,7 @@ class Tester:
 
         for message in database.messages:
             if message.bus_name == bus_name:
-                self._messages[message.name] = Message(message,
+                self._messages[message.name] = _TesterMessage(message,
                                                        can_bus,
                                                        self._input_list,
                                                        self._input_queue,
@@ -368,7 +373,7 @@ class Tester:
         self._notifier = can.Notifier(can_bus, [listener])
         self._messages._frozen = True
 
-    def start(self):
+    def start(self) -> None:
         """Start the tester. Starts sending enabled periodic messages.
 
         >>> tester.start()
@@ -386,7 +391,7 @@ class Tester:
 
         self._is_running = True
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the tester. Periodic messages will not be sent after this
         call. Call :meth:`~cantools.tester.Tester.start()` to resume a
         stopped tester.
@@ -401,7 +406,7 @@ class Tester:
         self._is_running = False
 
     @property
-    def messages(self):
+    def messages(self) -> Messages:
         """Set and get signals in messages. Set signals takes effect
         immediately for started enabled periodic messages. Call
         :meth:`~cantools.tester.Tester.send()` for other messages.
@@ -418,7 +423,7 @@ class Tester:
 
         return self._messages
 
-    def enable(self, message_name):
+    def enable(self, message_name: str) -> None:
         """Enable given message `message_name` and start sending it if its
         periodic and the tester is running.
 
@@ -432,7 +437,7 @@ class Tester:
         if self._is_running and message.periodic:
             message.send_periodic_start()
 
-    def disable(self, message_name):
+    def disable(self, message_name: str) -> None:
         """Disable given message `message_name` and stop sending it if its
         periodic, enabled and the tester is running.
 
@@ -446,7 +451,7 @@ class Tester:
         if self._is_running and message.periodic:
             message.send_periodic_stop()
 
-    def send(self, message_name, signals=None):
+    def send(self, message_name: str, signals: SignalDictType | None = None) -> None:
         """Send given message `message_name` and optional signals `signals`.
 
         >>> tester.send('Message1', {'Signal2': 10})
@@ -457,10 +462,10 @@ class Tester:
         self._messages[message_name].send(signals)
 
     def expect(self,
-               message_name,
-               signals=None,
-               timeout=None,
-               discard_other_messages=True):
+               message_name: str,
+               signals: SignalDictType | None = None,
+               timeout: float | None = None,
+               discard_other_messages: bool =True):
         """Expect given message `message_name` and signal values `signals`
         within `timeout` seconds.
 
@@ -486,7 +491,7 @@ class Tester:
                                                    timeout,
                                                    discard_other_messages)
 
-    def flush_input(self):
+    def flush_input(self) -> None:
         """Flush, or discard, all messages in the input queue.
 
         """

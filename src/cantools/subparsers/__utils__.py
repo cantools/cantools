@@ -20,8 +20,8 @@ MULTI_LINE_FMT = '''
 '''
 
 
-def format_signals(message, decoded_signals):
-    formatted_signals = []
+def format_signals(message: Message, decoded_signals) -> list[str]:
+    formatted_signals: list[str] = []
 
     for signal in message.signals:
         try:
@@ -65,7 +65,7 @@ def _format_container_single_line(message : Message,
                                   unpacked_data : ContainerUnpackResultType,
                                   decoded_data : ContainerDecodeResultType) \
                                   -> str:
-    contained_list = []
+    contained_list: list[str] = []
     for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
             if isinstance(signals, bytes):
@@ -88,7 +88,7 @@ def _format_container_single_line(message : Message,
 def _format_container_multi_line(message : Message,
                                  unpacked_data : ContainerUnpackResultType,
                                  decoded_data : ContainerDecodeResultType) -> str:
-    contained_list = []
+    contained_list: list[str] = []
     for i, (cm, signals) in enumerate(decoded_data):
         if isinstance(cm, Message):
             if isinstance(signals, bytes):

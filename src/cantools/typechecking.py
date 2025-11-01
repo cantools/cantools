@@ -56,5 +56,6 @@ DecodeResultType = SignalDictType | ContainerDecodeResultType
 EncodeInputType = SignalMappingType | ContainerEncodeInputType
 
 SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
+SignalSortFn = Callable[[list["Signal"]], list["Signal"]]
 
 TAdditionalCliArgs: TypeAlias = dict[str, str | int | float | bool]

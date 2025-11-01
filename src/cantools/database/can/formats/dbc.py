@@ -21,6 +21,8 @@ from textparser import (
     tokenize_init,
 )
 
+from cantools.typechecking import SignalSortFn
+
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
@@ -177,15 +179,15 @@ ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
     maximum=100000000000)
 
 
-def to_int(value):
+def to_int(value: typing.Union[int, str]) -> int:
     return int(Decimal(value))
 
-def to_float(value):
+def to_float(value: typing.Union[float, str]) -> float:
     return float(Decimal(value))
 
 class Parser(textparser.Parser):
 
-    def tokenize(self, string):
+    def tokenize(self, text: str) -> list[Token]:
         keywords = {
             'BA_',
             'BA_DEF_',
@@ -257,7 +259,7 @@ class Parser(textparser.Parser):
 
         tokens, token_regex = tokenize_init(token_specs)
 
-        for mo in re.finditer(token_regex, string, re.DOTALL):
+        for mo in re.finditer(token_regex, text, re.DOTALL):
             kind = mo.lastgroup
 
             if kind == 'SKIP':
@@ -276,7 +278,7 @@ class Parser(textparser.Parser):
 
                 tokens.append(Token(kind, value, mo.start()))
             else:
-                raise TokenizeError(string, mo.start())
+                raise TokenizeError(text, mo.start())
 
         return tokens
 
@@ -429,7 +431,7 @@ class LongNamesConverter:
         return short_name
 
 
-def get_dbc_frame_id(message):
+def get_dbc_frame_id(message: Message) -> int:
     frame_id = message.frame_id
 
     if message.is_extended_frame:
@@ -437,7 +439,7 @@ def get_dbc_frame_id(message):
 
     return frame_id
 
-def get_dbc_name(name):
+def get_dbc_name(name: str) -> str:
     #replace special chars with '_'
     name = re.sub(r'\W', '_', name)
     #append '_' if it starts with a number
@@ -447,26 +449,26 @@ def get_dbc_name(name):
     return name
 
 
-def _get_node_name(attributes, name):
+def _get_node_name(attributes, name: str) -> str:
     try:
         return attributes['node'][name]['SystemNodeLongSymbol'].value
     except (KeyError, TypeError):
         return name
 
 
-def _get_environment_variable_name(attributes, name):
+def _get_environment_variable_name(attributes, name: str) -> str:
     try:
         return attributes['envvar'][name]['SystemEnvVarLongSymbol'].value
     except (KeyError, TypeError):
         return name
 
 
-def _dump_version(database):
+def _dump_version(database: InternalDatabase) -> str:
     return '' if database.version is None else database.version
 
 
-def _dump_nodes(database):
-    bu = []
+def _dump_nodes(database: InternalDatabase) -> list[str]:
+    bu: list[str] = []
 
     for node in database.nodes:
         bu.append(node.name)
@@ -474,11 +476,11 @@ def _dump_nodes(database):
     return bu
 
 
-def _dump_value_tables(database):
+def _dump_value_tables(database: InternalDatabase) -> list[str]:
     if database.dbc is None:
         return []
 
-    val_table = []
+    val_table: list[str] = []
 
     for name, choices in database.dbc.value_tables.items():
         choices = [
@@ -490,10 +492,10 @@ def _dump_value_tables(database):
     return [*val_table, '']
 
 
-def _dump_messages(database, sort_signals):
-    bo = []
+def _dump_messages(database: InternalDatabase, sort_signals: typing.Optional[SignalSortFn]) -> list[str]:
+    bo: list[str] = []
 
-    def format_mux(signal):
+    def format_mux(signal: Signal) -> str:
         if signal.is_multiplexer:
             return ' M'
         elif signal.multiplexer_ids is not None:
@@ -501,20 +503,20 @@ def _dump_messages(database, sort_signals):
         else:
             return ''
 
-    def format_receivers(signal):
+    def format_receivers(signal: Signal) -> str:
         if signal.receivers:
             return ' ' + ','.join(signal.receivers)
         else:
             return 'Vector__XXX'
 
-    def format_senders(message):
+    def format_senders(message: Message) -> str:
         if message.senders:
             return message.senders[0]
         else:
             return 'Vector__XXX'
 
     for message in database.messages:
-        msg = []
+        msg: list[str] = []
         msg.append(
             f'BO_ {get_dbc_frame_id(message)} {message.name}: {message.length} {format_senders(message)}')
 
@@ -545,8 +547,8 @@ def _dump_messages(database, sort_signals):
     return bo
 
 
-def _dump_senders(database):
-    bo_tx_bu = []
+def _dump_senders(database: InternalDatabase) -> list[str]:
+    bo_tx_bu: list[str] = []
 
     for message in database.messages:
         if len(message.senders) > 1:
@@ -558,8 +560,8 @@ def _dump_senders(database):
     return bo_tx_bu
 
 
-def _dump_comments(database, sort_signals):
-    cm = []
+def _dump_comments(database: InternalDatabase, sort_signals: typing.Optional[SignalSortFn]) -> list[str]:
+    cm: list[str] = []
 
     for bus in database.buses:
         if bus.comment is not None:
@@ -594,8 +596,8 @@ def _dump_comments(database, sort_signals):
     return cm
 
 
-def _dump_signal_types(database):
-    valtype = []
+def _dump_signal_types(database: InternalDatabase) -> list[str]:
+    valtype: list[str] = []
 
     for message in database.messages:
         for signal in message.signals:
@@ -608,12 +610,12 @@ def _dump_signal_types(database):
     return valtype
 
 
-def _need_startval_def(database):
+def _need_startval_def(database: InternalDatabase) -> bool:
     return any(s.raw_initial is not None
                for m in database.messages
                for s in m.signals)
 
-def _need_cycletime_def(database):
+def _need_cycletime_def(database: InternalDatabase) -> bool:
     # If the user has added cycle times to a database which didn't start with them,
     # we need to add the global attribute definition so the output DBC is valid
     return any(m.cycle_time is not None
@@ -631,7 +633,7 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
     ba_def = []
 
     if database.dbc is None:
-        definitions = OrderedDict()
+        definitions: OrderedDict[str, AttributeDefinition] = OrderedDict()
     else:
         definitions = database.dbc.attribute_definitions
 

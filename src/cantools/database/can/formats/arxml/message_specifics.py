@@ -1,8 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
-if TYPE_CHECKING:
-    from .end_to_end_properties import AutosarEnd2EndProperties
-    from .secoc_properties import AutosarSecOCProperties
+from .end_to_end_properties import AutosarEnd2EndProperties
+from .secoc_properties import AutosarSecOCProperties
 
 
 class AutosarMessageSpecifics:
@@ -21,7 +20,7 @@ class AutosarMessageSpecifics:
         self._signal_group = None
 
     @property
-    def pdu_paths(self):
+    def pdu_paths(self) -> list[str]:
         """The ARXML paths of all PDUs featured by this message.
 
         For the vast majority of messages, this list only has a single
@@ -31,13 +30,13 @@ class AutosarMessageSpecifics:
         return self._pdu_paths
 
     @property
-    def is_nm(self):
+    def is_nm(self) -> bool:
         """True iff the message is used for network management
         """
         return self._is_nm
 
     @property
-    def is_general_purpose(self):
+    def is_general_purpose(self) -> bool:
         """True iff the message is not used for signal-based communication
 
         This comprises messages used for diagnostic and calibration
@@ -47,22 +46,22 @@ class AutosarMessageSpecifics:
         return self._is_general_purpose
 
     @property
-    def is_secured(self):
+    def is_secured(self) -> bool:
         """True iff the message integrity is secured using SecOC
         """
         return self._secoc is not None
 
     @property
-    def secoc(self):
+    def secoc(self) -> Optional[AutosarSecOCProperties]:
         """The properties required to implement secured on-board communication
         """
         return self._secoc
 
     @property
-    def e2e(self) -> Optional['AutosarEnd2EndProperties']:
+    def e2e(self) -> Optional[AutosarEnd2EndProperties]:
         """Returns the end-to-end protection properties for the message"""
         return self._e2e
 
     @e2e.setter
-    def e2e(self, value: Optional['AutosarEnd2EndProperties']) -> None:
+    def e2e(self, value: Optional[AutosarEnd2EndProperties]) -> None:
         self._e2e = value

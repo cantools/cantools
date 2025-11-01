@@ -1,6 +1,10 @@
 # Load and dump a diagnostics database in CDD format.
 import logging
+from collections import OrderedDict
+from typing import Optional
 from xml.etree import ElementTree
+
+from cantools.typechecking import ByteOrder, Choices
 
 from ...conversion import BaseConversion
 from ...errors import ParseError
@@ -15,17 +19,17 @@ LOGGER = logging.getLogger(__name__)
 class DataType:
 
     def __init__(self,
-                 name,
-                 id_,
-                 bit_length,
-                 encoding,
-                 minimum,
-                 maximum,
-                 choices,
-                 byte_order,
-                 unit,
-                 factor,
-                 offset):
+                 name: str,
+                 id_: str,
+                 bit_length: Optional[int],
+                 encoding: Optional[str],
+                 minimum: Optional[int],
+                 maximum: Optional[int],
+                 choices: Optional[Choices],
+                 byte_order: ByteOrder,
+                 unit: Optional[str],
+                 factor: float,
+                 offset: float) -> None:
         self.name = name
         self.id_ = id_
         self.bit_length = bit_length
@@ -33,73 +37,86 @@ class DataType:
         self.minimum = minimum
         self.maximum = maximum
         self.choices = choices
-        self.byte_order = byte_order
+        self.byte_order: ByteOrder = byte_order
         self.unit = unit
         self.factor = factor
         self.offset = offset
 
 
-def _load_choices(data_type):
-    choices = {}
+def _load_choices(data_type: ElementTree.Element) -> Optional[Choices]:
+    choices: Choices = OrderedDict()
 
     for choice in data_type.findall('TEXTMAP'):
         start = int(choice.attrib['s'].strip('()'))
         end = int(choice.attrib['e'].strip('()'))
 
         if start == end:
-            choices[start] = choice.find('TEXT/TUV[1]').text
+            choice_text_elem = choice.find('TEXT/TUV[1]')
+            if choice_text_elem is None:
+                raise KeyError("Could not find TUV element in TEXTMAP!")
+            if choice_text_elem.text is None:
+                raise ValueError(f"Could not find name in TUV!")
+            choices[start] = choice_text_elem.text
 
     if not choices:
-        choices = None
+        return None
 
     return choices
 
 
-def _load_data_types(ecu_doc):
+def _load_data_types(ecu_doc: Optional[ElementTree.Element]) -> dict[str, DataType]:
     """Load all data types found in given ECU doc element.
 
     """
 
-    data_types = {}
+    data_types: dict[str, DataType] = {}
+
+    if ecu_doc is None:
+        return data_types
 
     types = ecu_doc.findall('DATATYPES/*')
 
     for data_type in types:
         # Default values.
-        byte_order = 'big_endian'
+        byte_order: ByteOrder = 'big_endian'
         unit = None
-        factor = 1
-        offset = 0
+        factor = 1.0
+        offset = 0.0
         bit_length = None
         encoding = None
         minimum = None
         maximum = None
 
         # Name and id.
-        type_name = data_type.find('NAME/TUV[1]').text
+        type_name_elem = data_type.find('NAME/TUV[1]')
+        if type_name_elem is None:
+            raise KeyError(f"Could not find TUV element in DATATYPE IDENT with id{data_type.attrib.get("id")}!")
+        type_name = type_name_elem.text
+        if type_name is None:
+            raise ValueError(f"Could not find name in DATATYPE IDENT with id={data_type.attrib.get("id")}!")
         type_id = data_type.attrib['id']
 
         # Load from C-type element.
         ctype = data_type.find('CVALUETYPE')
+        if ctype is not None:
+            for key, value in ctype.attrib.items():
+                if key == 'bl':
+                    bit_length = int(value)
+                elif key == 'enc':
+                    encoding = value
+                elif key == 'minsz':
+                    minimum = int(value)
+                elif key == 'maxsz':
+                    maximum = int(value)
+                else:
+                    LOGGER.debug("Ignoring unsupported attribute '%s'.", key)
 
-        for key, value in ctype.attrib.items():
-            if key == 'bl':
-                bit_length = int(value)
-            elif key == 'enc':
-                encoding = value
-            elif key == 'minsz':
-                minimum = int(value)
-            elif key == 'maxsz':
-                maximum = int(value)
+            if ctype.attrib['bo'] == '21':
+                byte_order = 'big_endian'
+            elif ctype.attrib['bo'] == '12':
+                byte_order = 'little_endian'
             else:
-                LOGGER.debug("Ignoring unsupported attribute '%s'.", key)
-
-        if ctype.attrib['bo'] == '21':
-            byte_order = 'big_endian'
-        elif ctype.attrib['bo'] == '12':
-            byte_order = 'little_endian'
-        else:
-            raise ParseError(f"Unknown byte order code: {ctype.attrib['bo']}")
+                raise ParseError(f"Unknown byte order code: {ctype.attrib['bo']}")
 
         # Load from P-type element.
         ptype_unit = data_type.find('PVALUETYPE/UNIT')
@@ -132,7 +149,7 @@ def _load_data_types(ecu_doc):
     return data_types
 
 
-def _load_data_element(data, offset, data_types):
+def _load_data_element(data: ElementTree.Element, offset: int, data_types: dict[str, DataType]) -> Data:
     """Load given signal element and return a signal object.
 
     """
@@ -152,7 +169,14 @@ def _load_data_element(data, offset, data_types):
         is_float=False
     )
 
-    return Data(name=data.find('QUAL').text,
+    qual_elem = data.find('QUAL')
+    if qual_elem is None:
+        raise ValueError(f"Could not find QUAL in data with id={data.attrib.get("id")}!")
+    name = qual_elem.text
+    if name is None:
+        raise ValueError(f"Could not get QUAL text in data with id={data.attrib.get("id")}!")
+
+    return Data(name=name,
                 start=dbc_start_bitnum,
                 length=data_type.bit_length,
                 byte_order=data_type.byte_order,
@@ -162,13 +186,13 @@ def _load_data_element(data, offset, data_types):
                 unit=data_type.unit)
 
 
-def _load_did_element(did, data_types, did_data_lib):
+def _load_did_element(did: ElementTree.Element, data_types: dict[str, DataType], did_data_lib: dict[str, ElementTree.Element]) -> Did:
     """Load given DID element and return a did object.
 
     """
 
     offset = 0
-    datas = []
+    datas: list[Data] = []
     data_objs = did.findall('SIMPLECOMPCONT/DATAOBJ')
     data_objs += did.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
     did_data_refs = did.findall('SIMPLECOMPCONT/DIDDATAREF')
@@ -188,8 +212,16 @@ def _load_did_element(did, data_types, did_data_lib):
             datas.append(data)
             offset += data.length
 
-    identifier = int(did.find('STATICVALUE').attrib['v'])
-    name = did.find('QUAL').text
+    static_value = did.find('STATICVALUE')
+    if static_value is None:
+        raise KeyError(f"Could not find STATICVALUE element in DID with id={did.attrib.get("id")}!")
+    identifier = int(static_value.attrib['v'])
+    qual_elem = did.find('QUAL')
+    if qual_elem is None:
+        raise ValueError(f"Could not find QUAL in DID with id={did.attrib.get("id")}!")
+    name = qual_elem.text
+    if name is None:
+        raise ValueError(f"Could not get QUAL text in DID with id={did.attrib.get("id")}!")
     length = (offset + 7) // 8
 
     return Did(identifier=identifier,
@@ -198,10 +230,13 @@ def _load_did_element(did, data_types, did_data_lib):
                datas=datas)
 
 
-def _load_did_data_refs(ecu_doc: ElementTree.Element) -> dict[str, ElementTree.Element]:
+def _load_did_data_refs(ecu_doc: Optional[ElementTree.Element]) -> dict[str, ElementTree.Element]:
     """Load DID data references from given ECU doc element.
 
     """
+    if ecu_doc is None:
+        return {}
+
     dids = ecu_doc.find('DIDS')
 
     if dids is None:
@@ -210,17 +245,21 @@ def _load_did_data_refs(ecu_doc: ElementTree.Element) -> dict[str, ElementTree.E
         return {did.attrib['id']: did for did in dids.findall('DID')}
 
 
-def load_string(string):
+def load_string(string: str) -> InternalDatabase:
     """Parse given CDD format string.
 
     """
 
     root = ElementTree.fromstring(string)
     ecu_doc = root.find('ECUDOC')
+    if ecu_doc is None:
+        raise KeyError("Could not find ECUDOC root element!")
     data_types = _load_data_types(ecu_doc)
     did_data_lib = _load_did_data_refs(ecu_doc)
     var = ecu_doc.findall('ECU')[0].find('VAR')
-    dids = []
+    if var is None:
+        raise KeyError(f"Could not find VAR element in ECU with id={ecu_doc.findall('ECU')[0].attrib.get("id")}!")
+    dids: list[Did] = []
 
     for diag_class in var.findall('DIAGCLASS'):
         for diag_inst in diag_class.findall('DIAGINST'):

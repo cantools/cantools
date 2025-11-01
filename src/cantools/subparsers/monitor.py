@@ -12,7 +12,9 @@ from typing import Any
 import can.cli
 from argparse_addons import Integer  # type: ignore
 
+from cantools.database.can.message import Message
 from cantools.database.errors import DecodeError
+from cantools.database.namedsignalvalue import NamedSignalValue
 
 from .. import database
 from ..typechecking import SignalDictType
@@ -54,7 +56,7 @@ class Monitor(can.Listener):
         self._playing = True
         self._modified = True
         self._show_filter = False
-        self._queue: queue.Queue = queue.Queue()
+        self._queue: queue.Queue[can.Message] = queue.Queue()
         self._nrows, self._ncols = stdscr.getmaxyx()
         self._received = 0
         self._discarded = 0
@@ -100,7 +102,7 @@ class Monitor(can.Listener):
                 f"channel='{args.channel}'."
             ) from exc
 
-    def run(self, max_num_keys_per_tick=-1):
+    def run(self, max_num_keys_per_tick : int = -1) -> None:
         while True:
             try:
                 self.tick(max_num_keys_per_tick)
@@ -109,7 +111,7 @@ class Monitor(can.Listener):
 
             time.sleep(0.05)
 
-    def tick(self, max_num_keys=-1):
+    def tick(self, max_num_keys: int = -1) -> None:
         modified = self.update()
 
         if modified:
@@ -117,7 +119,7 @@ class Monitor(can.Listener):
 
         self.process_user_input(max_num_keys)
 
-    def redraw(self):
+    def redraw(self) -> None:
         # Clear the screen.
         self._stdscr.erase()
 
@@ -125,7 +127,7 @@ class Monitor(can.Listener):
         self.draw_stats(0)
         self.draw_title(1)
 
-        lines = []
+        lines: list[str] = []
 
         for name in self._filtered_sorted_message_names:
             for line in self._formatted_messages[name]:
@@ -156,25 +158,25 @@ class Monitor(can.Listener):
         # Refresh the screen.
         self._stdscr.refresh()
 
-    def draw_stats(self, row):
+    def draw_stats(self, row: int) -> None:
         status_text = \
             f'Received: {self._received}, Discarded: {self._discarded}, Errors: {self._errors}'
         if self._filter:
             status_text += f', Filter: {self._filter}'
         self.addstr(row, 0, status_text)
 
-    def draw_title(self, row):
+    def draw_title(self, row: int) -> None:
         self.addstr_color(row,
                           0,
                           self.stretch('   TIMESTAMP  MESSAGE'),
                           curses.color_pair(1))
 
-    def draw_menu(self, row):
+    def draw_menu(self, row: int) -> None:
         if self._show_filter:
             col = 0
 
             # text before cursor
-            text = 'Filter regex: ' + self._filter[:self._filter_cursor_pos]
+            text = f'Filter regex: {self._filter[:self._filter_cursor_pos]}'
             self.addstr_color(row,
                               col,
                               text,
@@ -215,22 +217,22 @@ class Monitor(can.Listener):
                               self.stretch(text),
                               curses.color_pair(2))
 
-    def addstr(self, row, col, text):
+    def addstr(self, row: int, col: int, text: str) -> None:
         try:
             self._stdscr.addstr(row, col, text)
         except curses.error:
             pass
 
-    def addstr_color(self, row, col, text, color):
+    def addstr_color(self, row: int, col: int, text: str, color: int) -> None:
         try:
             self._stdscr.addstr(row, col, text, color)
         except curses.error:
             pass
 
-    def stretch(self, text):
+    def stretch(self, text: str) -> str:
         return text + ' ' * (self._ncols - len(text))
 
-    def process_user_input(self, max_num_keys=-1):
+    def process_user_input(self, max_num_keys: int = -1) -> None:
         while max_num_keys < 0 or max_num_keys > 0:
             max_num_keys -= 1
             try:
@@ -243,7 +245,7 @@ class Monitor(can.Listener):
             else:
                 self.process_user_input_menu(key)
 
-    def process_user_input_menu(self, key):
+    def process_user_input_menu(self, key: str) -> None:
         if key == 'q':
             raise QuitError()
         elif key == 'p':
@@ -277,13 +279,13 @@ class Monitor(can.Listener):
         elif key in ['KEY_NPAGE']:
             self.page_down()
 
-    def line_down(self):
+    def line_down(self) -> None:
         # Increment line
         self._page_first_row += 1
 
         self._modified = True
 
-    def line_up(self):
+    def line_up(self) -> None:
         # Decrement line
         if self._page_first_row > 0:
             self._page_first_row -= 1
@@ -292,7 +294,7 @@ class Monitor(can.Listener):
 
         self._modified = True
 
-    def page_up(self):
+    def page_up(self) -> None:
         num_actual_usable_rows = self._nrows - 2 - 1
 
         # Decrement page
@@ -303,7 +305,7 @@ class Monitor(can.Listener):
 
         self._modified = True
 
-    def page_down(self):
+    def page_down(self) -> None:
         num_actual_usable_rows = self._nrows - 2 - 1
 
         # Increment page
@@ -311,13 +313,13 @@ class Monitor(can.Listener):
 
         self._modified = True
 
-    def compile_filter(self):
+    def compile_filter(self) -> None:
         try:
             self._compiled_filter = re.compile(self._filter, re.IGNORECASE)
         except (TypeError, re.error):
             self._compiled_filter = None
 
-    def process_user_input_filter(self, key):
+    def process_user_input_filter(self, key: str) -> None:
         if key == '\n':
             self._show_filter = False
             curses.curs_set(False)
@@ -382,7 +384,7 @@ class Monitor(can.Listener):
         timestamp = raw_message.timestamp - self._basetime
 
         try:
-            message = self._dbase.get_message_by_frame_id(raw_message.arbitration_id, raw_message.is_extended_id) # type: ignore[union-attr]
+            message = self._dbase.get_message_by_frame_id(raw_message.arbitration_id, raw_message.is_extended_id)
         except KeyError:
             return MessageFormattingResult.UnknownMessage
 
@@ -411,20 +413,21 @@ class Monitor(can.Listener):
             self._update_message_error(timestamp, name, data, str(e))
             return MessageFormattingResult.DecodeError
 
-    def _try_update_container(self, dbmsg, timestamp, data):
+    def _try_update_container(self, dbmsg: Message, timestamp: float, data: bytes) -> None:
         decoded = dbmsg.decode(data, decode_containers=True)
 
         # handle the "table of contents" of the container message. To
         # avoid too much visual turmoil and the resulting usability issues,
         # we always put the contained messages on a single line
-        contained_names = []
+        contained_names: list[str] = []
         for cmsg, _ in decoded:
             if isinstance(cmsg, int):
                 tmp = dbmsg.get_contained_message_by_header_id(cmsg)
                 cmsg_name = f'0x{cmsg:x}' if tmp is None else tmp.name
-            else:
+            elif isinstance(cmsg, NamedSignalValue):
                 cmsg_name = cmsg.name
-
+            else:
+                cmsg_name = ""
             contained_names.append(cmsg_name)
 
         self._message_signals[dbmsg.name] = set(contained_names)
@@ -479,7 +482,7 @@ class Monitor(can.Listener):
 
         return {s: v for s, v in signals.items() if s in self._message_filtered_signals[name]}
 
-    def _update_formatted_message(self, msg_name, formatted, is_error=False):
+    def _update_formatted_message(self, msg_name: str, formatted: list[str], is_error: bool = False) -> None:
         old_formatted = self._formatted_messages.get(msg_name, [])
 
         # make sure never to decrease the number of lines occupied by
@@ -497,7 +500,7 @@ class Monitor(can.Listener):
         if msg_name not in self._filtered_sorted_message_names:
             self.insort_filtered(msg_name)
 
-    def _update_message_error(self, timestamp, msg_name, data, error):
+    def _update_message_error(self, timestamp: float, msg_name: str, data: bytes, error: str) -> None:
         formatted = self._format_lines(
             timestamp,
             msg_name,
@@ -506,7 +509,7 @@ class Monitor(can.Listener):
         )
         self._update_formatted_message(msg_name, formatted, is_error=True)
 
-    def update_messages(self):
+    def update_messages(self) -> bool:
         modified = False
 
         try:
@@ -523,7 +526,7 @@ class Monitor(can.Listener):
 
         return modified
 
-    def update(self):
+    def update(self) -> bool:
         if self._playing:
             modified = self.update_messages()
         else:
@@ -560,17 +563,17 @@ class Monitor(can.Listener):
             self._message_filtered_signals[name] = matched_signals
         return bool(matched_signals)
 
-    def insort_filtered(self, name):
+    def insort_filtered(self, name: str) -> None:
         if name in self._messages_with_error or self._message_matches_filter(name):
             bisect.insort(self._filtered_sorted_message_names,
                           name)
 
-    def on_message_received(self, msg):
+    def on_message_received(self, msg: can.Message) -> None:
         self._queue.put(msg)
 
 
-def _do_monitor(args):
-    def monitor(stdscr):
+def _do_monitor(args) -> None:
+    def monitor(stdscr) -> None:
         Monitor(stdscr, args).run()
 
     try:

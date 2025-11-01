@@ -3,13 +3,11 @@
 import os.path
 import re
 from collections import OrderedDict
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import (
     TYPE_CHECKING,
-    Callable,
     Final,
     Literal,
-    Optional,
     Union,
 )
 
@@ -38,7 +36,7 @@ except ImportError:
     import bitstruct
 
 
-def format_or(items: list[Union[int, str]]) -> str:
+def format_or(items: list[int | str]) -> str:
     string_items = [str(item) for item in items]
 
     if len(string_items) == 1:
@@ -48,7 +46,7 @@ def format_or(items: list[Union[int, str]]) -> str:
                                  string_items[-1])
 
 
-def format_and(items: list[Union[int, str]]) -> str:
+def format_and(items: list[int | str]) -> str:
     string_items = [str(item) for item in items]
 
     if len(string_items) == 1:
@@ -68,7 +66,7 @@ def start_bit(signal: Union["Data", "Signal"]) -> int:
 def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
                           signal_values: SignalMappingType,
                           scaling: bool,
-                          ) -> dict[str, Union[int, float]]:
+                          ) -> dict[str, int | float]:
     """
     Convert a dictionary of physical signal values into raw ones.
     """
@@ -216,20 +214,20 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
 
         return fmt, padding_mask, signal.name
 
-    def fmt(items: list[tuple[str, str, Optional[str]]]) -> str:
+    def fmt(items: list[tuple[str, str, str | None]]) -> str:
         return ''.join([item[0] for item in items])
 
-    def names(items:  list[tuple[str, str, Optional[str]]]) -> list[str]:
+    def names(items:  list[tuple[str, str, str | None]]) -> list[str]:
         return [item[2] for item in items if item[2] is not None]
 
-    def padding_mask(items: list[tuple[str, str, Optional[str]]]) -> int:
+    def padding_mask(items: list[tuple[str, str, str | None]]) -> int:
         try:
             return int(''.join([item[1] for item in items]), 2)
         except ValueError:
             return 0
 
     def create_big() -> tuple[str, int, list[str]]:
-        items: list[tuple[str, str, Optional[str]]] = []
+        items: list[tuple[str, str, str | None]] = []
         start = 0
 
         # Select BE signals
@@ -255,7 +253,7 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
         return fmt(items), padding_mask(items), names(items)
 
     def create_little() -> tuple[str, int, list[str]]:
-        items: list[tuple[str, str, Optional[str]]] = []
+        items: list[tuple[str, str, str | None]] = []
         end = format_length
 
         for signal in signals[::-1]:

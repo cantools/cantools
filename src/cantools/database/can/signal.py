@@ -1,5 +1,5 @@
 # A CAN signal.
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..conversion import BaseConversion, IdentityConversion
@@ -51,19 +51,19 @@ class Signal:
         length: int,
         byte_order: ByteOrder = "little_endian",
         is_signed: bool = False,
-        raw_initial: Optional[Union[int, float]] = None,
-        raw_invalid: Optional[Union[int, float]] = None,
-        conversion: Optional[BaseConversion] = None,
-        minimum: Optional[float] = None,
-        maximum: Optional[float] = None,
-        unit: Optional[str] = None,
+        raw_initial: int | float | None = None,
+        raw_invalid: int | float | None = None,
+        conversion: BaseConversion | None = None,
+        minimum: float | None = None,
+        maximum: float | None = None,
+        unit: str | None = None,
         dbc_specifics: Optional["DbcSpecifics"] = None,
-        comment: Optional[Union[str, Comments]] = None,
-        receivers: Optional[list[str]] = None,
+        comment: str | Comments | None = None,
+        receivers: list[str] | None = None,
         is_multiplexer: bool = False,
-        multiplexer_ids: Optional[list[int]] = None,
-        multiplexer_signal: Optional[str] = None,
-        spn: Optional[int] = None,
+        multiplexer_ids: list[int] | None = None,
+        multiplexer_signal: str | None = None,
+        spn: int | None = None,
     ) -> None:
         # avoid using properties to improve encoding/decoding performance
 
@@ -75,10 +75,10 @@ class Signal:
         self.conversion: BaseConversion = conversion or IdentityConversion(is_float=False)
 
         #: The scaled minimum value of the signal, or ``None`` if unavailable.
-        self.minimum: Optional[float] = minimum
+        self.minimum: float | None = minimum
 
         #: The scaled maximum value of the signal, or ``None`` if unavailable.
-        self.maximum: Optional[float] = maximum
+        self.maximum: float | None = maximum
 
         #: The start bit position of the signal within its message.
         self.start: int = start
@@ -95,29 +95,29 @@ class Signal:
 
         #: The internal representation of the initial value of the signal,
         #: or ``None`` if unavailable.
-        self.raw_initial: Optional[Union[int, float]] = raw_initial
+        self.raw_initial: int | float | None = raw_initial
 
         #: The initial value of the signal in units of the physical world,
         #: or ``None`` if unavailable.
-        self.initial: Optional[SignalValueType] = (
+        self.initial: SignalValueType | None = (
             self.conversion.raw_to_scaled(raw_initial) if raw_initial is not None else None
         )
 
         #: The raw value representing that the signal is invalid,
         #: or ``None`` if unavailable.
-        self.raw_invalid: Optional[Union[int, float]] = raw_invalid
+        self.raw_invalid: int | float | None = raw_invalid
 
         #: The scaled value representing that the signal is invalid,
         #: or ``None`` if unavailable.
-        self.invalid: Optional[SignalValueType] = (
+        self.invalid: SignalValueType | None = (
             self.conversion.raw_to_scaled(raw_invalid) if raw_invalid is not None else None
         )
 
         #: The unit of the signal as a string, or ``None`` if unavailable.
-        self.unit: Optional[str] = unit
+        self.unit: str | None = unit
 
         #: An object containing dbc specific properties like e.g. attributes.
-        self.dbc: Optional[DbcSpecifics] = dbc_specifics
+        self.dbc: DbcSpecifics | None = dbc_specifics
 
         #: A list of all receiver nodes of this signal.
         self.receivers: list[str] = receivers or []
@@ -128,19 +128,19 @@ class Signal:
 
         #: The multiplexer ids list if the signal is part of a multiplexed
         #: message, ``None`` otherwise.
-        self.multiplexer_ids: Optional[list[int]] = multiplexer_ids
+        self.multiplexer_ids: list[int] | None = multiplexer_ids
 
         #: The multiplexer signal if the signal is part of a multiplexed
         #: message, ``None`` otherwise.
-        self.multiplexer_signal: Optional[str] = multiplexer_signal
+        self.multiplexer_signal: str | None = multiplexer_signal
 
         #: The J1939 Suspect Parameter Number (SPN) value if the signal
         #: has this attribute, ``None`` otherwise.
-        self.spn: Optional[int] = spn
+        self.spn: int | None = spn
 
         #: The dictionary with the descriptions of the signal in multiple
         #: languages. ``None`` if unavailable.
-        self.comments: Optional[Comments]
+        self.comments: Comments | None
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the
@@ -155,7 +155,7 @@ class Signal:
             self.comments = comment
 
     def raw_to_scaled(
-        self, raw_value: Union[int, float], decode_choices: bool = True
+        self, raw_value: int | float, decode_choices: bool = True
     ) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
 
@@ -169,7 +169,7 @@ class Signal:
         """
         return self.conversion.raw_to_scaled(raw_value, decode_choices)
 
-    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> int | float:
         """Convert a scaled value to the internal raw value.
 
         :param scaled_value:
@@ -180,12 +180,12 @@ class Signal:
         return self.conversion.scaled_to_raw(scaled_value)
 
     @property
-    def scale(self) -> Union[int, float]:
+    def scale(self) -> int | float:
         """The scale factor of the signal value."""
         return self.conversion.scale
 
     @scale.setter
-    def scale(self, value: Union[int, float]) -> None:
+    def scale(self, value: int | float) -> None:
         self.conversion = self.conversion.factory(
             scale=value,
             offset=self.conversion.offset,
@@ -194,12 +194,12 @@ class Signal:
         )
 
     @property
-    def offset(self) -> Union[int, float]:
+    def offset(self) -> int | float:
         """The offset of the signal value."""
         return self.conversion.offset
 
     @offset.setter
-    def offset(self, value: Union[int, float]) -> None:
+    def offset(self, value: int | float) -> None:
         self.conversion = self.conversion.factory(
             scale=self.conversion.scale,
             offset=value,
@@ -208,13 +208,13 @@ class Signal:
         )
 
     @property
-    def choices(self) -> Optional[Choices]:
+    def choices(self) -> Choices | None:
         """A dictionary mapping signal values to enumerated choices, or
         ``None`` if unavailable."""
         return self.conversion.choices
 
     @choices.setter
-    def choices(self, choices: Optional[Choices]) -> None:
+    def choices(self, choices: Choices | None) -> None:
         self.conversion = self.conversion.factory(
             scale=self.conversion.scale,
             offset=self.conversion.offset,
@@ -237,7 +237,7 @@ class Signal:
         )
 
     @property
-    def comment(self) -> Optional[str]:
+    def comment(self) -> str | None:
         """The signal comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -254,13 +254,13 @@ class Signal:
         return self.comments.get("EN")
 
     @comment.setter
-    def comment(self, value: Optional[str]) -> None:
+    def comment(self, value: str | None) -> None:
         if value is None:
             self.comments = None
         else:
             self.comments = {None: value}
 
-    def choice_to_number(self, choice: Union[str, NamedSignalValue]) -> int:
+    def choice_to_number(self, choice: str | NamedSignalValue) -> int:
         try:
             return self.conversion.choice_to_number(choice)
         except KeyError as exc:

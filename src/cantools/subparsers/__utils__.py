@@ -1,6 +1,5 @@
 import re
 from collections.abc import Iterable, Sequence
-from typing import Union
 
 from cantools.database.errors import DecodeError
 
@@ -212,7 +211,7 @@ def format_multiplexed_name(message : Message,
     return ' :: '.join(result)
 
 
-def cast_from_string(string_val: str) -> Union[str, int, float, bool]:
+def cast_from_string(string_val: str) -> str | int | float | bool:
     """Perform trivial type conversion from :class:`str` values.
 
     :param string_val:
@@ -244,7 +243,7 @@ def parse_additional_config(unknown_args: Sequence[str]) -> TAdditionalCliArgs:
         left, right = _arg.split("=", 1)
         return left.lstrip("-").replace("-", "_"), right
 
-    args: dict[str, Union[str, int, float, bool]] = {}
+    args: dict[str, str | int | float | bool] = {}
     for key, string_val in map(_split_arg, unknown_args):
         args[key] = cast_from_string(string_val)
     return args

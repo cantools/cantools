@@ -1,4 +1,3 @@
-from typing import Optional
 
 
 class AutosarEnd2EndProperties:
@@ -7,12 +6,12 @@ class AutosarEnd2EndProperties:
     """
 
     def __init__(self) -> None:
-        self._category: Optional[str] = None
-        self._data_ids: Optional[list[int]] = None
+        self._category: str | None = None
+        self._data_ids: list[int] | None = None
         self._payload_length: int = 0
 
     @property
-    def category(self) -> Optional[str]:
+    def category(self) -> str | None:
         """The category string of the applicable end-to-end protection
         mechanism
 
@@ -22,17 +21,17 @@ class AutosarEnd2EndProperties:
         return self._category
 
     @category.setter
-    def category(self, value: Optional[str]) -> None:
+    def category(self, value: str | None) -> None:
         self._category = value
 
     @property
-    def data_ids(self) -> Optional[list[int]]:
+    def data_ids(self) -> list[int] | None:
         """The list of data IDs applicable
         """
         return self._data_ids
 
     @data_ids.setter
-    def data_ids(self, value: Optional[list[int]]) -> None:
+    def data_ids(self, value: list[int] | None) -> None:
         self._data_ids = value
 
     @property

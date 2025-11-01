@@ -16,7 +16,7 @@ class Node:
 
     def __init__(self,
                  name: str,
-                 comment: Optional[typing.Union[str, Comments]] = None,
+                 comment: str | Comments | None = None,
                  dbc_specifics: Optional["DbcSpecifics"] = None,
                  autosar_specifics: Optional["AutosarNodeSpecifics"] = None,
                  ) -> None:
@@ -26,7 +26,7 @@ class Node:
         # English comment. This is slightly hacky, because the
         # function's behavior depends on the type of the passed
         # argument, but it is quite convenient...
-        self._comments: Optional[Comments]
+        self._comments: Comments | None
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
             self._comments = {None: comment}
@@ -51,7 +51,7 @@ class Node:
         self._name = value
 
     @property
-    def comment(self) -> Optional[str]:
+    def comment(self) -> str | None:
         """The node's comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -68,11 +68,11 @@ class Node:
         return self._comments.get('EN')
 
     @comment.setter
-    def comment(self, value: Optional[str]) -> None:
+    def comment(self, value: str | None) -> None:
         self._comment = value
 
     @property
-    def comments(self) -> Optional[Comments]:
+    def comments(self) -> Comments | None:
         """The dictionary with the descriptions of the bus in multiple
         languages. ``None`` if unavailable.
 

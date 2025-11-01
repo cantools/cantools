@@ -1,4 +1,3 @@
-from typing import Optional
 
 
 class AutosarSecOCProperties:
@@ -10,13 +9,13 @@ class AutosarSecOCProperties:
     "scaffolding" around them...
     """
     def __init__(self,
-                 auth_algorithm_name: Optional[str],
-                 freshness_algorithm_name: Optional[str],
-                 payload_length: Optional[int],
-                 data_id: Optional[int],
-                 auth_tx_bit_length: Optional[int],
-                 freshness_bit_length: Optional[int],
-                 freshness_tx_bit_length: Optional[int],
+                 auth_algorithm_name: str | None,
+                 freshness_algorithm_name: str | None,
+                 payload_length: int | None,
+                 data_id: int | None,
+                 auth_tx_bit_length: int | None,
+                 freshness_bit_length: int | None,
+                 freshness_tx_bit_length: int | None,
                  ):
 
         self._auth_algorithm_name = auth_algorithm_name
@@ -30,7 +29,7 @@ class AutosarSecOCProperties:
         self._auth_tx_bit_length = auth_tx_bit_length
 
     @property
-    def freshness_algorithm_name(self) -> Optional[str]:
+    def freshness_algorithm_name(self) -> str | None:
         """The name of the algorithm used for verifying the freshness of a
         message.
 
@@ -41,7 +40,7 @@ class AutosarSecOCProperties:
         return self._freshness_algorithm_name
 
     @property
-    def auth_algorithm_name(self) -> Optional[str]:
+    def auth_algorithm_name(self) -> str | None:
         """The name of the algorithm used for authentication
 
         Note that the algorithms themselves are manufacturer-specific,
@@ -50,7 +49,7 @@ class AutosarSecOCProperties:
         return self._auth_algorithm_name
 
     @property
-    def payload_length(self) -> Optional[int]:
+    def payload_length(self) -> int | None:
         """Returns the number of bytes covered by the payload of the secured
         message
 
@@ -60,7 +59,7 @@ class AutosarSecOCProperties:
         return self._payload_length
 
     @property
-    def data_id(self) -> Optional[int]:
+    def data_id(self) -> int | None:
         """The data ID required for authentication.
 
         Be aware that this is a different data ID than that required
@@ -69,13 +68,13 @@ class AutosarSecOCProperties:
         return self._data_id
 
     @property
-    def freshness_bit_length(self) -> Optional[int]:
+    def freshness_bit_length(self) -> int | None:
         """The number of bits of the full freshness counter.
         """
         return self._freshness_bit_length
 
     @property
-    def freshness_tx_bit_length(self) -> Optional[int]:
+    def freshness_tx_bit_length(self) -> int | None:
         """The number of least-significant bits of the freshness counter that
         is send as part of the secured frame.
 
@@ -86,7 +85,7 @@ class AutosarSecOCProperties:
         return self._freshness_tx_bit_length
 
     @property
-    def auth_tx_bit_length(self) -> Optional[int]:
+    def auth_tx_bit_length(self) -> int | None:
         """The number of most significant bits of the authenticator object
         send as part of the secured frame
 

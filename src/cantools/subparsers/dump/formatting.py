@@ -183,7 +183,7 @@ def layout_string(message, signal_names=True):
         # Signals union line.
         signals_union = ''
 
-        for chars in zip(*signals):
+        for chars in zip(*signals, strict=False):
             head = chars.count('<')
             dash = chars.count('-')
             tail = chars.count('x')
@@ -346,7 +346,7 @@ def layout_string(message, signal_names=True):
 
         return [
             axis_line + line
-            for axis_line, line in zip(axis_lines, lines)
+            for axis_line, line in zip(axis_lines, lines, strict=False)
         ]
 
     lines, number_of_bytes, number_width = format_byte_lines()

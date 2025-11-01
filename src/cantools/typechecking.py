@@ -5,7 +5,6 @@ from typing import (
     Any,
     Literal,
     NamedTuple,
-    Optional,
     TypeAlias,
     TypedDict,
     Union,
@@ -27,7 +26,7 @@ class Formats(NamedTuple):
 
 
 StringPathLike = Union[str, "os.PathLike[str]"]
-Comments = dict[Optional[str], str]
+Comments = dict[str | None, str]
 class Codec(TypedDict):
     signals: list["Signal"]
     formats: Formats
@@ -43,20 +42,20 @@ SignalValueType = Union[int, float, str, "NamedSignalValue"]
 SignalDictType = dict[str, SignalValueType]
 SignalMappingType = Mapping[str, SignalValueType]
 ContainerHeaderSpecType = Union["Message", str, int]
-ContainerUnpackResultType = Sequence[Union[tuple["Message", bytes], tuple[int, bytes]]]
-ContainerUnpackListType = list[Union[tuple["Message", bytes], tuple[int, bytes]]]
+ContainerUnpackResultType = Sequence[tuple["Message", bytes] | tuple[int, bytes]]
+ContainerUnpackListType = list[tuple["Message", bytes] | tuple[int, bytes]]
 ContainerDecodeResultType = Sequence[
-    Union[tuple["Message", SignalMappingType], tuple["Message", bytes], tuple[int, bytes]]
+    tuple["Message", SignalMappingType] | tuple["Message", bytes] | tuple[int, bytes]
 ]
 ContainerDecodeResultListType = list[
-    Union[tuple["Message", SignalDictType], tuple["Message", bytes], tuple[int, bytes]]
+    tuple["Message", SignalDictType] | tuple["Message", bytes] | tuple[int, bytes]
 ]
 ContainerEncodeInputType = Sequence[
-    tuple[ContainerHeaderSpecType, Union[bytes, SignalMappingType]]
+    tuple[ContainerHeaderSpecType, bytes | SignalMappingType]
 ]
 DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
 
-TAdditionalCliArgs: TypeAlias = dict[str, Union[str, int, float, bool]]
+TAdditionalCliArgs: TypeAlias = dict[str, str | int | float | bool]

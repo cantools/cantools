@@ -1,5 +1,4 @@
 # DID data.
-from typing import Optional, Union
 
 from ...typechecking import ByteOrder, Choices, SignalValueType
 from ..can.signal import NamedSignalValue
@@ -17,10 +16,10 @@ class Data:
                  start: int,
                  length: int,
                  byte_order: ByteOrder = 'little_endian',
-                 conversion: Optional[BaseConversion] = None,
-                 minimum: Optional[float] = None,
-                 maximum: Optional[float] = None,
-                 unit: Optional[str] = None,
+                 conversion: BaseConversion | None = None,
+                 minimum: float | None = None,
+                 maximum: float | None = None,
+                 unit: str | None = None,
                  ) -> None:
         #: The data name as a string.
         self.name: str = name
@@ -39,10 +38,10 @@ class Data:
         self.byte_order: ByteOrder = byte_order
 
         #: The minimum value of the data, or ``None`` if unavailable.
-        self.minimum: Optional[float] = minimum
+        self.minimum: float | None = minimum
 
         #: The maximum value of the data, or ``None`` if unavailable.
-        self.maximum: Optional[float] = maximum
+        self.maximum: float | None = maximum
 
         #: The unit of the data as a string, or ``None`` if unavailable.
         self.unit = unit
@@ -51,7 +50,7 @@ class Data:
         self.is_signed: bool = False
 
     def raw_to_scaled(
-        self, raw_value: Union[int, float], decode_choices: bool = True
+        self, raw_value: int | float, decode_choices: bool = True
     ) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
 
@@ -65,7 +64,7 @@ class Data:
         """
         return self.conversion.raw_to_scaled(raw_value, decode_choices)
 
-    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> int | float:
         """Convert a scaled value to the internal raw value.
 
         :param scaled_value:
@@ -75,7 +74,7 @@ class Data:
         """
         return self.conversion.scaled_to_raw(scaled_value)
 
-    def choice_to_number(self, string: Union[str, NamedSignalValue]) -> int:
+    def choice_to_number(self, string: str | NamedSignalValue) -> int:
         try:
             return self.conversion.choice_to_number(string)
         except KeyError as exc:
@@ -83,12 +82,12 @@ class Data:
             raise KeyError(err_msg) from exc
 
     @property
-    def scale(self) -> Union[int, float]:
+    def scale(self) -> int | float:
         """The scale factor of the signal value."""
         return self.conversion.scale
 
     @scale.setter
-    def scale(self, value: Union[int, float]) -> None:
+    def scale(self, value: int | float) -> None:
         self.conversion = self.conversion.factory(
             scale=value,
             offset=self.conversion.offset,
@@ -97,12 +96,12 @@ class Data:
         )
 
     @property
-    def offset(self) -> Union[int, float]:
+    def offset(self) -> int | float:
         """The offset of the signal value."""
         return self.conversion.offset
 
     @offset.setter
-    def offset(self, value: Union[int, float]) -> None:
+    def offset(self, value: int | float) -> None:
         self.conversion = self.conversion.factory(
             scale=self.conversion.scale,
             offset=value,
@@ -111,13 +110,13 @@ class Data:
         )
 
     @property
-    def choices(self) -> Optional[Choices]:
+    def choices(self) -> Choices | None:
         """A dictionary mapping signal values to enumerated choices, or
         ``None`` if unavailable."""
         return self.conversion.choices
 
     @choices.setter
-    def choices(self, choices: Optional[Choices]) -> None:
+    def choices(self, choices: Choices | None) -> None:
         self.conversion = self.conversion.factory(
             scale=self.conversion.scale,
             offset=self.conversion.offset,

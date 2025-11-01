@@ -4,7 +4,6 @@ import queue
 import time
 from collections import UserDict
 from collections.abc import Mapping
-from typing import Optional
 
 import can
 
@@ -34,8 +33,8 @@ class Messages(UserDict):
 
 def _invert_signal_tree(
         tree: list,
-        cur_mpx: Optional[dict] = None,
-        ret: Optional[dict] = None
+        cur_mpx: dict | None = None,
+        ret: dict | None = None
 ) -> dict:
 
     """The tree is laid out with two kinds of dicts.  Single-element dict

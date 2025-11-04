@@ -465,7 +465,7 @@ class Tester:
                message_name: str,
                signals: SignalDictType | None = None,
                timeout: float | None = None,
-               discard_other_messages: bool =True):
+               discard_other_messages: bool = True) -> DecodeResultType | None:
         """Expect given message `message_name` and signal values `signals`
         within `timeout` seconds.
 

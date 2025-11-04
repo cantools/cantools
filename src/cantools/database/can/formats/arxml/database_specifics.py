@@ -3,11 +3,11 @@ class AutosarDatabaseSpecifics:
 
     """
     def __init__(self,
-                 arxml_version):
+                 arxml_version: str) -> None:
         self._arxml_version = arxml_version
 
     @property
-    def arxml_version(self):
+    def arxml_version(self) -> str:
         """The used version of ARXML file format
 
         Note that due to technical reasons we always return version

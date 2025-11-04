@@ -22,6 +22,8 @@ from textparser import (
     tokenize_init,
 )
 
+from cantools.typechecking import ByteOrder
+
 from ...conversion import BaseConversion
 from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
@@ -72,7 +74,7 @@ class Parser60(textparser.Parser):
         'Type'
     }
 
-    def tokenize(self, string):
+    def tokenize(self, text: str) -> list[Token]:
         names = {
             'LPAREN':      '(',
             'RPAREN':      ')',
@@ -146,7 +148,7 @@ class Parser60(textparser.Parser):
 
         tokens, token_regex = tokenize_init(token_specs)
 
-        for mo in re.finditer(token_regex, string, re.DOTALL):
+        for mo in re.finditer(token_regex, text, re.DOTALL):
             kind = mo.lastgroup
 
             if kind == 'SKIP':
@@ -154,7 +156,7 @@ class Parser60(textparser.Parser):
             elif kind == 'STRING':
                 value = mo.group(kind)[1:-1].replace('\\"', '"')
                 tokens.append(Token(kind, value, mo.start()))
-            elif kind != 'MISMATCH':
+            elif kind != 'MISMATCH' and kind is not None:
                 value = mo.group(kind)
 
                 if value in self.KEYWORDS:
@@ -165,11 +167,11 @@ class Parser60(textparser.Parser):
 
                 tokens.append(Token(kind, value, mo.start()))
             else:
-                raise TokenizeError(string, mo.start())
+                raise TokenizeError(text, mo.start())
 
         return tokens
 
-    def grammar(self):
+    def grammar(self) -> Sequence:
         word = choice('WORD', *list(self.KEYWORDS))
         version = Sequence('FormatVersion', '=', 'NUMBER', 'COMMENT')
         title = Sequence('Title' , '=', 'STRING')
@@ -265,7 +267,7 @@ class Parser60(textparser.Parser):
         return grammar
 
 
-def _get_section_tokens(tokens, name):
+def _get_section_tokens(tokens: list[Token], name):
     rows = []
     for section in tokens[3]:
         if section[0] == name:
@@ -274,7 +276,7 @@ def _get_section_tokens(tokens, name):
     return rows
 
 
-def _load_comment(tokens):
+def _load_comment(tokens: list[Token]):
     return tokens[3:].rstrip('\r\n')
 
 
@@ -285,7 +287,7 @@ def _get_enum(enums, name):
         raise ParseError(f"Enum '{name}' is not defined.") from None
 
 
-def _load_enums(tokens):
+def _load_enums(tokens: list[Token]):
     section = _get_section_tokens(tokens, '{ENUMS}')
     all_enums = {}
 
@@ -304,7 +306,7 @@ def _load_enums(tokens):
     return all_enums
 
 
-def _load_signal_type_and_length(type_, tokens, enums):
+def _load_signal_type_and_length(type_, tokens: list[Token], enums):
     # Default values.
     is_signed = False
     is_float = False
@@ -343,7 +345,7 @@ def _load_signal_type_and_length(type_, tokens, enums):
     return is_signed, is_float, length, enum, minimum, maximum
 
 
-def _load_signal_attributes(tokens, enum, enums, minimum, maximum, spn):
+def _load_signal_attributes(tokens: list[Token], enum, enums, minimum, maximum, spn):
     # Default values.
     factor = 1
     offset = 0
@@ -445,7 +447,7 @@ def _load_signals(tokens, enums):
 
 
 def _load_message_signal(tokens,
-                         signals,
+                         signals: list[Signal],
                          multiplexer_signal,
                          multiplexer_ids):
     signal = signals[tokens[2]]
@@ -475,7 +477,7 @@ def _load_message_signal(tokens,
                   multiplexer_signal=multiplexer_signal,
                   spn=signal.spn)
 
-def _convert_start(start, byte_order):
+def _convert_start(start: int, byte_order: ByteOrder):
     if byte_order == 'big_endian':
         start = (8 * (start // 8) + (7 - (start % 8)))
     return start
@@ -619,13 +621,13 @@ def _load_muxed_message_signals(message_tokens,
     return result
 
 
-def _is_multiplexed(message_tokens):
+def _is_multiplexed(message_tokens: list[Token]) -> bool:
     return 'Mux' in message_tokens[3]
 
 
 def _load_message_signals(message_tokens,
                           message_section_tokens,
-                          signals,
+                          signals: list[Signal],
                           enums):
     if _is_multiplexed(message_tokens):
         return _load_muxed_message_signals(message_tokens,
@@ -655,15 +657,15 @@ def _get_senders(section_name: str) -> list[str]:
     else:
         raise ValueError(f'Unexpected message section named {section_name}')
 
-def _load_message(frame_id,
-                  is_extended_frame,
+def _load_message(frame_id: int,
+                  is_extended_frame: bool,
                   message_tokens,
                   message_section_tokens,
-                  signals,
+                  signals: list[Signal],
                   enums,
-                  strict,
-                  sort_signals,
-                  section_name):
+                  strict: bool,
+                  sort_signals: type_sort_signals,
+                  section_name) -> Message:
     #print(message_tokens)
     # Default values.
     name = message_tokens[1]
@@ -729,12 +731,12 @@ def _parse_message_frame_ids(message):
     return frame_ids, is_extended_frame(message_id[2], message_type)
 
 
-def _load_message_section(section_name, tokens, signals, enums, strict, sort_signals):
+def _load_message_section(section_name, tokens, signals: list[NamedSignalValue], enums, strict: bool, sort_signals: type_sort_signals):
     def has_frame_id(message):
         return 'ID' in message[3]
 
     message_section_tokens = _get_section_tokens(tokens, section_name)
-    messages = []
+    messages: list[Message] = []
 
     for message_tokens in message_section_tokens:
         if not has_frame_id(message_tokens):
@@ -757,7 +759,7 @@ def _load_message_section(section_name, tokens, signals, enums, strict, sort_sig
     return messages
 
 
-def _load_messages(tokens, signals, enums, strict, sort_signals):
+def _load_messages(tokens: list[Token], signals, enums, strict: bool, sort_signals: type_sort_signals):
     messages = _load_message_section('{SEND}', tokens, signals, enums, strict, sort_signals)
     messages += _load_message_section('{RECEIVE}', tokens, signals, enums, strict, sort_signals)
     messages += _load_message_section('{SENDRECEIVE}', tokens, signals, enums, strict, sort_signals)
@@ -853,9 +855,9 @@ def _dump_signal(signal: Signal) -> str:
     return signal_str
 
 def _dump_signals(database: InternalDatabase, sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> str:
-    signal_dumps = []
+    signal_dumps: list[str] = []
     # SYM requires unique signals
-    generated_signals = set()
+    generated_signals: set[str] = set()
     for message in database.messages:
         if sort_signals:
             signals = sort_signals(message.signals)

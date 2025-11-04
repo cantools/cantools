@@ -1,9 +1,13 @@
 # Load and dump a CAN database in KCD format.
 
+from collections.abc import Callable
 import logging
 from collections import defaultdict
+from typing import Optional
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
+
+from cantools.typechecking import ByteOrder
 
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
@@ -29,7 +33,7 @@ NAMESPACES = {'ns': NAMESPACE}
 ROOT_TAG = f'{{{NAMESPACE}}}NetworkDefinition'
 
 
-def _start_bit(offset, byte_order):
+def _start_bit(offset: int, byte_order: ByteOrder) -> int:
     if byte_order == 'big_endian':
         return (8 * (offset // 8) + (7 - (offset % 8)))
     else:
@@ -42,7 +46,7 @@ def _get_node_name_by_id(nodes, node_id):
             return node['name']
 
 
-def _load_signal_element(signal, nodes):
+def _load_signal_element(signal: ElementTree.Element, nodes) -> Signal:
     """Load given signal element and return a signal object.
 
     """
@@ -167,7 +171,7 @@ def _load_multiplex_element(mux, nodes):
     return signals
 
 
-def _load_message_element(message, bus_name, nodes, strict, sort_signals):
+def _load_message_element(message: ElementTree.Element, bus_name, nodes, strict, sort_signals):
     """Load given message element and return a message object.
 
     """
@@ -212,7 +216,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
                                                 sender.attrib['id']))
 
     # Find all signals in this message.
-    signals = []
+    signals: list[Signal] = []
 
     for mux in message.iterfind('ns:Multiplex', NAMESPACES):
         signals += _load_multiplex_element(mux, nodes)
@@ -244,7 +248,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
                    sort_signals=sort_signals)
 
 
-def _indent_xml(element, indent, level=0):
+def _indent_xml(element: ElementTree.Element, indent, level: int = 0):
     i = "\n" + level * indent
 
     if len(element):
@@ -269,7 +273,7 @@ def _dump_notes(parent, comment):
     notes.text = comment
 
 
-def _dump_signal(signal, node_refs, signal_element):
+def _dump_signal(signal: Signal, node_refs, signal_element):
     signal_element.set('name', signal.name)
 
     offset = _start_bit(signal.start, signal.byte_order)
@@ -351,7 +355,7 @@ def _dump_mux_group(multiplexer_id,
                      node_refs,
                      SubElement(mux_group, 'Signal'))
 
-def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
+def _dump_mux_groups(multiplexer_name: str, signals: list[Signal], node_refs: dict[str, int], parent: ElementTree.Element):
     signals_per_count = defaultdict(list)
 
     for signal in signals:
@@ -368,7 +372,7 @@ def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
                         parent)
 
 
-def _dump_message(message, bus, node_refs, sort_signals):
+def _dump_message(message: Message, bus: ElementTree.Element, node_refs: dict[str, int], sort_signals: Optional[Callable[[list[Signal]], list[Signal]]]) -> None:
     frame_id = f'0x{message.frame_id:03X}'
     message_element = SubElement(bus,
                                  'Message',
@@ -417,18 +421,18 @@ def _dump_message(message, bus, node_refs, sort_signals):
                          SubElement(message_element, 'Signal'))
 
 
-def _dump_version(version, parent):
+def _dump_version(version: Optional[str], parent: ElementTree.Element):
     if version is not None:
         SubElement(parent, 'Document', version=version)
 
 
-def _dump_nodes(nodes, node_refs, parent):
+def _dump_nodes(nodes: list[Node], node_refs: dict[str, int], parent: ElementTree.Element):
     for node_id, node in enumerate(nodes, 1):
         SubElement(parent, 'Node', id=str(node_id), name=node.name)
         node_refs[node.name] = node_id
 
 
-def _dump_messages(messages, node_refs, parent, sort_signals):
+def _dump_messages(messages: list[Message], node_refs: dict[str, int], parent: ElementTree.Element, sort_signals: type_sort_signals) -> None:
     bus = SubElement(parent, 'Bus', name='Bus')
 
     for message in messages:
@@ -475,8 +479,8 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
         raise ValueError(f'Expected root element tag {ROOT_TAG}, but got {root.tag}.')
 
     nodes = [node.attrib for node in root.iterfind('./ns:Node', NAMESPACES)]
-    buses = []
-    messages = []
+    buses: list[Bus] = []
+    messages: list[Message] = []
 
     try:
         document = root.find('ns:Document', NAMESPACES)

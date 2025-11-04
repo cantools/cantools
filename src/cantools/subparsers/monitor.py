@@ -604,7 +604,7 @@ def _check_legacy_args() -> bool:
     return False
 
 
-def _warn_legacy_usage():
+def _warn_legacy_usage() -> None:
     """Emit a warning if legacy args were detected."""
     warnings.warn(
         "You are using legacy CAN bus arguments (-b, --bus-type, -B, etc.). "
@@ -615,7 +615,7 @@ def _warn_legacy_usage():
     )
 
 
-def add_subparser(subparsers):
+def add_subparser(subparsers) -> None:
     monitor_parser = subparsers.add_parser(
         'monitor',
         description='Monitor CAN bus traffic in a text based user interface.',

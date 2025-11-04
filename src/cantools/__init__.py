@@ -9,6 +9,7 @@ import sys
 import types
 import warnings
 from importlib.metadata import PackageNotFoundError, version
+from typing import Any
 
 from . import database, j1939, logreader, tester
 from .errors import Error
@@ -23,7 +24,7 @@ except PackageNotFoundError:
 
 
 class _DeprecatedModule(types.ModuleType):
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         warnings.warn(
             "'cantools.db' is deprecated. Please use 'cantools.database' instead.",
             DeprecationWarning,

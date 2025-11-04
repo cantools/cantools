@@ -4,7 +4,7 @@ import datetime
 import enum
 import io
 import re
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import Literal, overload
 
 TimestampType = datetime.datetime | datetime.timedelta | None
@@ -323,7 +323,8 @@ class Parser:
         self.tz = tz
 
     def detect_pattern(self, line: str) -> BasePattern | None:
-        for p in [CandumpDefaultPattern(), CandumpTimestampedPattern(self.tz), CandumpDefaultLogPattern(self.tz), CandumpAbsoluteLogPattern(), PCANTracePatternV21(), PCANTracePatternV20(), PCANTracePatternV13(), PCANTracePatternV12(), PCANTracePatternV11(), PCANTracePatternV10()]:
+        patterns: Sequence[BasePattern] = [CandumpDefaultPattern(), CandumpTimestampedPattern(self.tz), CandumpDefaultLogPattern(self.tz), CandumpAbsoluteLogPattern(), PCANTracePatternV21(), PCANTracePatternV20(), PCANTracePatternV13(), PCANTracePatternV12(), PCANTracePatternV11(), PCANTracePatternV10()]
+        for p in patterns:
             mo = p.pattern.match(line)
             if mo:
                 return p

@@ -1,6 +1,6 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
@@ -60,7 +60,7 @@ class EcuExtractLoader:
 
     def load(self) -> InternalDatabase:
         buses: list[Bus] = []
-        messages = []
+        messages: list[Message] = []
         version = None
 
         ecuc_value_collection = self.root.find(ECUC_VALUE_COLLECTION_XPATH,
@@ -212,7 +212,7 @@ class EcuExtractLoader:
 
         return frame_id, length, is_extended_frame
 
-    def load_signal(self, xpath):
+    def load_signal(self, xpath) -> Optional[Signal]:
         ecuc_container_value = self.find_value(xpath)
         if ecuc_container_value is None:
             return None
@@ -229,7 +229,7 @@ class EcuExtractLoader:
         unit = None
         choices = None
         comments = None
-        receivers = []
+        receivers: list[str] = []
 
         # Bit position, length, byte order, is_signed and is_float.
         bit_position = None

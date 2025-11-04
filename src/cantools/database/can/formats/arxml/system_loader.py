@@ -3,7 +3,8 @@ import logging
 import re
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any
+from typing import Any, Optional, Union
+from xml.etree import ElementTree
 
 from ....conversion import BaseConversion, IdentityConversion
 from ....namedsignalvalue import NamedSignalValue
@@ -97,7 +98,7 @@ class SystemLoader:
 
         self._create_arxml_reference_dicts()
 
-    def autosar_version_newer(self, major, minor=None, patch=None):
+    def autosar_version_newer(self, major: int, minor: Optional[int] = None, patch: Optional[int] = None):
         """Returns true iff the AUTOSAR version specified in the ARXML it at
         least as the version specified by the function parameters
 
@@ -313,7 +314,7 @@ class SystemLoader:
 
     # given a list of Message objects and an reference to a PDU by its absolute ARXML path,
     # return the subset of messages of the list which feature the specified PDU.
-    def __get_messages_of_pdu(self, msg_list, pdu_path):
+    def __get_messages_of_pdu(self, msg_list: list[Message], pdu_path):
         pdu_messages = \
             [ x for x in msg_list if pdu_path in x.autosar.pdu_paths ]
 
@@ -1957,7 +1958,7 @@ class SystemLoader:
             unit, \
             comments
 
-    def _load_signal_type(self, i_signal):
+    def _load_signal_type(self, i_signal) -> tuple[bool, bool]:
         is_signed = False
         is_float = False
 
@@ -2083,14 +2084,14 @@ class SystemLoader:
         return result
 
 
-    def _create_arxml_reference_dicts(self):
+    def _create_arxml_reference_dicts(self) -> None:
         self._node_to_arxml_path = {}
         self._arxml_path_to_node = {}
         self._package_default_refbase_path = {}
         # given a package name, produce a refbase label to ARXML path dictionary
         self._package_refbase_paths = {}
 
-        def add_sub_references(elem, elem_path, cur_package_path=""):
+        def add_sub_references(elem, elem_path, cur_package_path="") -> None:
             """Recursively add all ARXML references contained within an XML
             element to the dictionaries to handle ARXML references"""
 
@@ -2167,7 +2168,7 @@ class SystemLoader:
         self._arxml_path_to_node = {}
         add_sub_references(self._root, '')
 
-    def _get_arxml_children(self, base_elems, children_location):
+    def _get_arxml_children(self, base_elems: Union[ElementTree.Element, list[ElementTree.Element], None], children_location: Union[str, list[str]]):
         """Locate a set of ElementTree child nodes at a given location.
 
         This is a method that retrieves a list of ElementTree nodes

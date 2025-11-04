@@ -120,7 +120,7 @@ def pgn_unpack(pgn: int) -> PGN:
     return PGN(*bitstruct.unpack('u1u1u8u8', packed))
 
 
-def pgn_from_frame_id(frame_id: int) -> int:
+def pgn_from_frame_id(frame_id: int) -> Any:
     """Get the parameter group number (PGN) from given frame id.
 
     """

@@ -17,7 +17,7 @@ class SignalGroup:
         self._signal_names = signal_names or []
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The signal group name as a string.
 
         """
@@ -25,11 +25,11 @@ class SignalGroup:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def repetitions(self):
+    def repetitions(self) -> int:
         """The signal group repetitions.
 
         """
@@ -37,11 +37,11 @@ class SignalGroup:
         return self._repetitions
 
     @repetitions.setter
-    def repetitions(self, value):
+    def repetitions(self, value: int) -> None:
         self._repetitions = value
 
     @property
-    def signal_names(self):
+    def signal_names(self) -> list[str]:
         """The signal names in the signal group
 
         """
@@ -49,8 +49,8 @@ class SignalGroup:
         return self._signal_names
 
     @signal_names.setter
-    def signal_names(self, value):
+    def signal_names(self, value: list[str]) -> None:
         self._signal_names = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"signal_group('{self._name}', {self._repetitions}, {self._signal_names})"

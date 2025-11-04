@@ -22,9 +22,9 @@ from .errors import (
 )
 
 
-def _resolve_database_format_and_encoding(database_format,
-                                          encoding,
-                                          filename):
+def _resolve_database_format_and_encoding(database_format: Optional[str],
+                                          encoding: Optional[str],
+                                          filename: StringPathLike) -> tuple[str, str]:
     if database_format is None:
         database_format = os.path.splitext(filename)[1][1:].lower()
 
@@ -165,11 +165,11 @@ def load_file(filename: StringPathLike,
 
         return db
 
-def dump_file(database,
-              filename,
-              database_format=None,
-              encoding=None,
-              sort_signals=utils.SORT_SIGNALS_DEFAULT):
+def dump_file(database: can.Database,
+              filename: StringPathLike,
+              database_format: Optional[str] = None,
+              encoding: Optional[str] = None,
+              sort_signals: utils.type_sort_signals = utils.SORT_SIGNALS_DEFAULT) -> None:
     """Dump given database `database` to given file `filename`.
 
     Depending on the output file format signals may be sorted by default.

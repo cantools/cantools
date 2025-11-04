@@ -1,7 +1,5 @@
 import argparse
 import os
-import sys
-from typing import Optional
 
 from cantools.database.can.message import Message
 
@@ -36,12 +34,9 @@ def _print_j1939_frame_id(message: Message) -> None:
     print(f'      Destination:    {destination}')
     print(f'      Format:         {pdu_format}')
 
-def _dump_can_message(message: Message, with_comments: bool = False, name_prefix: str = '', WIDTH: Optional[int] = None):
-    cycle_time = message.cycle_time
+def _dump_can_message(message: Message, width: int, with_comments: bool = False, name_prefix: str = '') -> None:
+    cycle_time = message.cycle_time if message.cycle_time is not None else '-'
     signal_choices_string = formatting.signal_choices_string(message)
-
-    if cycle_time is None:
-        cycle_time = '-'
 
     if len(message.senders) == 0:
         message.senders.append('-')
@@ -53,7 +48,7 @@ def _dump_can_message(message: Message, with_comments: bool = False, name_prefix
         print(f'  Id:             0x{message.frame_id:x}')
     if message.header_id is not None and name_prefix:
         # only print the header ID for child messages
-        print(f'  Header id:      0x{message._header_id:06x}')
+        print(f'  Header id:      0x{message.header_id:06x}')
 
     if message.protocol == 'j1939':
         _print_j1939_frame_id(message)
@@ -68,8 +63,9 @@ def _dump_can_message(message: Message, with_comments: bool = False, name_prefix
     if message.is_container:
         print('  Possibly contained children:')
         print()
-        for child in message.contained_messages:
-            print(f'      {message.name} :: {child.name}')
+        if message.contained_messages:
+            for child in message.contained_messages:
+                print(f'      {message.name} :: {child.name}')
         print()
     else:
         print('  Layout:')
@@ -83,7 +79,7 @@ def _dump_can_message(message: Message, with_comments: bool = False, name_prefix
         print()
         print('\n'.join([
             ('    ' + line).rstrip()
-            for line in formatting.signal_tree_string(message, WIDTH, with_comments=with_comments).splitlines()
+            for line in formatting.signal_tree_string(message, width, with_comments=with_comments).splitlines()
         ]))
         print()
 
@@ -101,14 +97,14 @@ def _dump_can_message(message: Message, with_comments: bool = False, name_prefix
         # dump the layout of the child messages of the container
         for child in message.contained_messages:
             _dump_can_message(child,
+                              width=width,
                               with_comments=with_comments,
-                              WIDTH=WIDTH,
                               name_prefix=f'{message.name} :: ')
 
 def _dump_can_database(dbase: CanDatabase, with_comments: bool = False) -> None:
-    WIDTH = 80
+    width = 80
     try:
-        WIDTH, _ = os.get_terminal_size()
+        width, _ = os.get_terminal_size()
     except OSError:
         pass
 
@@ -118,8 +114,8 @@ def _dump_can_database(dbase: CanDatabase, with_comments: bool = False) -> None:
 
     for message in dbase.messages:
         _dump_can_message(message,
-                          with_comments=with_comments,
-                          WIDTH=WIDTH)
+                          width=width,
+                          with_comments=with_comments)
 
 
 
@@ -128,24 +124,25 @@ def _dump_diagnostics_database(dbase: DiagnosticsDatabase) -> None:
     print()
     print('  ' + 72 * '-')
 
-    for did in dbase.dids:
-        print()
-        print(f'  Name:       {did.name}')
-        print(f'  Length:     {did.length} bytes')
-        print('  Layout:')
-        print()
-
-        for data in did.datas:
-            print(f'    Name:      {data.name}')
-            print(f'    Start bit: {data.start}')
-            print(f'    Length:    {data.length}')
+    if dbase.dids:
+        for did in dbase.dids:
+            print()
+            print(f'  Name:       {did.name}')
+            print(f'  Length:     {did.length} bytes')
+            print('  Layout:')
             print()
 
-        print()
-        print('  ' + 72 * '-')
+            for data in did.datas:
+                print(f'    Name:      {data.name}')
+                print(f'    Start bit: {data.start}')
+                print(f'    Length:    {data.length}')
+                print()
+
+            print()
+            print('  ' + 72 * '-')
 
 
-def _do_dump(args):
+def _do_dump(args) -> None:
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                prune_choices=args.prune,
@@ -153,13 +150,11 @@ def _do_dump(args):
 
     if isinstance(dbase, CanDatabase):
         _dump_can_database(dbase, args.with_comments)
-    elif isinstance(dbase, DiagnosticsDatabase):
-        _dump_diagnostics_database(dbase)
     else:
-        sys.exit('Unsupported database type.')
+        _dump_diagnostics_database(dbase)
 
 
-def add_subparser(subparsers):
+def add_subparser(subparsers) -> None:
     dump_parser = subparsers.add_parser(
         'dump',
         description='Dump given database in a human readable format.',

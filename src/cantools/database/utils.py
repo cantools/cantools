@@ -24,7 +24,7 @@ from .namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
     from ..database import Database
-    from ..database.can.attribute import Attribute
+    from ..database.can.attribute import AttributeType
     from ..database.can.message import Message
     from ..database.can.node import Node
     from ..database.can.signal import Signal
@@ -46,7 +46,7 @@ def format_or(items: list[int | str]) -> str:
                                  string_items[-1])
 
 
-def format_and(items: list[int | str]) -> str:
+def format_and(items: Sequence[Union[int, str]]) -> str:
     string_items = [str(item) for item in items]
 
     if len(string_items) == 1:
@@ -56,21 +56,21 @@ def format_and(items: list[int | str]) -> str:
                                   string_items[-1])
 
 
-def start_bit(signal: Union["Data", "Signal"]) -> int:
+def start_bit(signal: "Signal") -> int:
     if signal.byte_order == 'big_endian':
         return 8 * (signal.start // 8) + (7 - (signal.start % 8))
     else:
         return signal.start
 
 
-def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
+def _encode_signal_values(signals: Sequence["Signal"],
                           signal_values: SignalMappingType,
                           scaling: bool,
                           ) -> dict[str, int | float]:
     """
     Convert a dictionary of physical signal values into raw ones.
     """
-    raw_values = {}
+    raw_values: dict[str, Union[int, float]] = {}
     for signal in signals:
         name = signal.name
         conversion = signal.conversion
@@ -430,11 +430,12 @@ def prune_database_choices(database: "Database") -> None:
 SORT_SIGNALS_DEFAULT: Final = 'default'
 type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
 
-type_sort_attribute = \
-    tuple[Literal['dbc'],     "Attribute", None,   None,      None] | \
-    tuple[Literal['node'],    "Attribute", "Node", None,      None] | \
-    tuple[Literal['message'], "Attribute", None,   "Message", None] | \
-    tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal"]
+type_sort_attribute = Union[
+    tuple[Literal['dbc'],     "AttributeType", None,   None,      None],
+    tuple[Literal['node'],    "AttributeType", "Node", None,      None],
+    tuple[Literal['message'], "AttributeType", None,   "Message", None],
+    tuple[Literal['signal'],  "AttributeType", None,   "Message", "Signal"],
+]
 
 type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
 

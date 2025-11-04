@@ -424,10 +424,10 @@ class Monitor(can.Listener):
             if isinstance(cmsg, int):
                 tmp = dbmsg.get_contained_message_by_header_id(cmsg)
                 cmsg_name = f'0x{cmsg:x}' if tmp is None else tmp.name
-            elif isinstance(cmsg, NamedSignalValue):
+            elif isinstance(cmsg, Message):
                 cmsg_name = cmsg.name
             else:
-                cmsg_name = ""
+                cmsg_name = cmsg
             contained_names.append(cmsg_name)
 
         self._message_signals[dbmsg.name] = set(contained_names)

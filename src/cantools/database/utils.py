@@ -63,7 +63,7 @@ def start_bit(signal: "Signal") -> int:
         return signal.start
 
 
-def _encode_signal_values(signals: Sequence["Signal"],
+def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
                           signal_values: SignalMappingType,
                           scaling: bool,
                           ) -> dict[str, int | float]:

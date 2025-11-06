@@ -8,7 +8,6 @@ from typing import (
 from ...typechecking import DecodeResultType, EncodeInputType, StringPathLike
 from ..errors import DecodeError
 from ..utils import (
-    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     type_sort_attributes,
     type_sort_choices,
@@ -410,8 +409,8 @@ class Database:
         self._frame_id_to_message[masked_frame_id] = message
 
     def as_dbc_string(self, *,
-                      sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
-                      sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                      sort_signals:type_sort_signals=None,
+                      sort_attribute_signals:type_sort_signals=None,
                       sort_attributes:type_sort_attributes=None,
                       sort_choices:type_sort_choices=None,
                       shorten_long_names:bool=True) -> str:
@@ -421,7 +420,7 @@ class Database:
               comments, value table definitions and attributes
 
         """
-        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
+        if not self._sort_signals and sort_signals is None:
             sort_signals = None
 
         return dbc.dump_string(InternalDatabase(self._messages,
@@ -435,11 +434,11 @@ class Database:
                                sort_choices=sort_choices,
                                shorten_long_names=shorten_long_names)
 
-    def as_kcd_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+    def as_kcd_string(self, *, sort_signals:type_sort_signals=None) -> str:
         """Return the database as a string formatted as a KCD file.
 
         """
-        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
+        if not self._sort_signals and sort_signals is None:
             sort_signals = None
 
         return kcd.dump_string(InternalDatabase(self._messages,
@@ -449,11 +448,11 @@ class Database:
                                                 self._dbc),
                                sort_signals=sort_signals)
 
-    def as_sym_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+    def as_sym_string(self, *, sort_signals:type_sort_signals=None) -> str:
         """Return the database as a string formatted as a SYM file.
 
         """
-        if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
+        if not self._sort_signals and sort_signals is None:
             sort_signals = None
 
         return sym.dump_string(InternalDatabase(self._messages,

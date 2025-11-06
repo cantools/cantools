@@ -21,12 +21,9 @@ from textparser import (
     tokenize_init,
 )
 
-from cantools.typechecking import SignalSortFn
-
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
-    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     sort_signals_by_start_bit_reversed,
     type_sort_attributes,
@@ -492,7 +489,7 @@ def _dump_value_tables(database: InternalDatabase) -> list[str]:
     return [*val_table, '']
 
 
-def _dump_messages(database: InternalDatabase, sort_signals: typing.Optional[SignalSortFn]) -> list[str]:
+def _dump_messages(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
     bo: list[str] = []
 
     def format_mux(signal: Signal) -> str:
@@ -560,7 +557,7 @@ def _dump_senders(database: InternalDatabase) -> list[str]:
     return bo_tx_bu
 
 
-def _dump_comments(database: InternalDatabase, sort_signals: typing.Optional[SignalSortFn]) -> list[str]:
+def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
     cm: list[str] = []
 
     for bus in database.buses:
@@ -1964,8 +1961,8 @@ def make_names_unique(database: InternalDatabase, shorten_long_names: bool) -> N
 
 
 def dump_string(database: InternalDatabase,
-                sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
-                sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                sort_signals:type_sort_signals=None,
+                sort_attribute_signals:type_sort_signals=None,
                 sort_attributes:type_sort_attributes=None,
                 sort_choices:type_sort_choices=None,
                 shorten_long_names:bool=True) -> str:
@@ -1976,9 +1973,9 @@ def dump_string(database: InternalDatabase,
 
     """
 
-    if sort_signals == SORT_SIGNALS_DEFAULT:
+    if sort_signals is None:
         sort_signals = sort_signals_by_start_bit_reversed
-    if sort_attribute_signals == SORT_SIGNALS_DEFAULT:
+    if sort_attribute_signals is None:
         sort_attribute_signals = sort_signals_by_start_bit_reversed
 
     # Make a deep copy of the database as names and attributes will be

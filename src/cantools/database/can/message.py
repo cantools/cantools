@@ -25,7 +25,6 @@ from ...typechecking import (
 from ..errors import DecodeError, EncodeError, Error
 from ..namedsignalvalue import NamedSignalValue
 from ..utils import (
-    SORT_SIGNALS_DEFAULT,
     create_encode_decode_formats,
     decode_data,
     encode_data,
@@ -103,9 +102,7 @@ class Message:
         self._name = name
         self._length = length
         self._unused_bit_pattern = unused_bit_pattern
-        if sort_signals == SORT_SIGNALS_DEFAULT:
-            self._signals = sort_signals_by_start_bit(signals)
-        elif callable(sort_signals):
+        if callable(sort_signals):
             self._signals = sort_signals(signals)
         else:
             self._signals = signals

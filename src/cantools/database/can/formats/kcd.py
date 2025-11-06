@@ -12,7 +12,6 @@ from cantools.typechecking import ByteOrder
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
-    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     start_bit,
     type_sort_signals,
@@ -439,13 +438,10 @@ def _dump_messages(messages: list[Message], node_refs: dict[str, int], parent: E
         _dump_message(message, bus, node_refs, sort_signals)
 
 
-def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=None) -> str:
     """Format given database in KCD file format.
 
     """
-    if sort_signals == SORT_SIGNALS_DEFAULT:
-        sort_signals = None
-
     node_refs: dict[str, int] = {}
 
     attrib = {

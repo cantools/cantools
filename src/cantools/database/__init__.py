@@ -169,7 +169,7 @@ def dump_file(database: can.Database,
               filename: StringPathLike,
               database_format: Optional[str] = None,
               encoding: Optional[str] = None,
-              sort_signals: utils.type_sort_signals = utils.SORT_SIGNALS_DEFAULT) -> None:
+              sort_signals: utils.type_sort_signals = None) -> None:
     """Dump given database `database` to given file `filename`.
 
     Depending on the output file format signals may be sorted by default.

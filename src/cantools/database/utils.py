@@ -6,7 +6,6 @@ from collections import OrderedDict
 from collections.abc import Callable, Sequence
 from typing import (
     TYPE_CHECKING,
-    Final,
     Literal,
     Union,
 )
@@ -46,7 +45,7 @@ def format_or(items: list[int | str]) -> str:
                                  string_items[-1])
 
 
-def format_and(items: Sequence[Union[int, str]]) -> str:
+def format_and(items: Sequence[int | str]) -> str:
     string_items = [str(item) for item in items]
 
     if len(string_items) == 1:
@@ -70,7 +69,7 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
     """
     Convert a dictionary of physical signal values into raw ones.
     """
-    raw_values: dict[str, Union[int, float]] = {}
+    raw_values: dict[str, int | float] = {}
     for signal in signals:
         name = signal.name
         conversion = signal.conversion
@@ -427,8 +426,7 @@ def prune_database_choices(database: "Database") -> None:
                     prune_signal_choices(cs)
 
 
-SORT_SIGNALS_DEFAULT: Final = 'default'
-type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
+type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | None
 
 type_sort_attribute = Union[
     tuple[Literal['dbc'],     "AttributeType", None,   None,      None],

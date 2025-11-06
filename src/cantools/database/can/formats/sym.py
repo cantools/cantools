@@ -4,7 +4,6 @@ import collections
 import logging
 import re
 from collections import OrderedDict as odict
-from collections.abc import Callable
 from itertools import groupby
 from typing import TYPE_CHECKING
 
@@ -28,7 +27,6 @@ from ...conversion import BaseConversion
 from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
-    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     type_sort_signals,
 )
@@ -854,7 +852,7 @@ def _dump_signal(signal: Signal) -> str:
 
     return signal_str
 
-def _dump_signals(database: InternalDatabase, sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> str:
+def _dump_signals(database: InternalDatabase, sort_signals: type_sort_signals) -> str:
     signal_dumps: list[str] = []
     # SYM requires unique signals
     generated_signals: set[str] = set()
@@ -976,13 +974,10 @@ def _dump_messages(database: InternalDatabase) -> str:
         messages_dump += '{SENDRECEIVE}\n' + '\n'.join(send_receive_messages) + '\n'
     return messages_dump
 
-def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> str:
     """Format given database in SYM file format.
 
     """
-    if sort_signals == SORT_SIGNALS_DEFAULT:
-        sort_signals = sort_signals_by_start_bit
-
     sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
     sym_str += 'Title="SYM Database"\n\n'
 

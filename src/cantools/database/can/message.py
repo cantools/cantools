@@ -5,7 +5,6 @@ from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
     Optional,
-    Union,
     cast,
 )
 
@@ -65,23 +64,23 @@ class Message:
                  signals: list[Signal],
                  # if the message is a container message, this lists
                  # the messages which it potentially features
-                 contained_messages: Optional[list['Message']] = None,
+                 contained_messages: list['Message'] | None = None,
                  # header ID of message if it is part of a container message
-                 header_id: Optional[int] = None,
+                 header_id: int | None = None,
                  header_byte_order: str = 'big_endian',
                  unused_bit_pattern: int = 0x00,
-                 comment: Optional[Union[str, Comments]] = None,
-                 senders: Optional[list[str]] = None,
-                 send_type: Optional[str] = None,
-                 cycle_time: Optional[int] = None,
+                 comment: str | Comments | None = None,
+                 senders: list[str] | None = None,
+                 send_type: str | None = None,
+                 cycle_time: int | None = None,
                  dbc_specifics: Optional['DbcSpecifics'] = None,
                  autosar_specifics: Optional['AutosarMessageSpecifics'] = None,
                  is_extended_frame: bool = False,
                  is_fd: bool = False,
-                 bus_name: Optional[str] = None,
-                 signal_groups: Optional[list[SignalGroup]] = None,
+                 bus_name: str | None = None,
+                 signal_groups: list[SignalGroup] | None = None,
                  strict: bool = True,
-                 protocol: Optional[str] = None,
+                 protocol: str | None = None,
                  sort_signals: type_sort_signals = sort_signals_by_start_bit,
                  ) -> None:
         frame_id_bit_length = frame_id.bit_length()
@@ -117,7 +116,7 @@ class Message:
         # english comment. this is slightly hacky because the
         # function's behavior depends on the type of the passed
         # argument, but it is quite convenient...
-        self._comments: Optional[Comments]
+        self._comments: Comments | None
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
             self._comments = {None: comment}
@@ -133,15 +132,15 @@ class Message:
         self._autosar = autosar_specifics
         self._bus_name = bus_name
         self._signal_groups = signal_groups
-        self._codecs: Optional[Codec] = None
-        self._signal_tree: Optional[list[Union[str, list[str]]]] = None
+        self._codecs: Codec | None = None
+        self._signal_tree: list[str | list[str]] | None = None
         self._strict = strict
         self._protocol = protocol
         self.refresh()
 
     def _create_codec(self,
-                      parent_signal: Optional[str] = None,
-                      multiplexer_id: Optional[int] = None,
+                      parent_signal: str | None = None,
+                      multiplexer_id: int | None = None,
                       ) -> Codec:
         """Create a codec of all signals with given parent signal. This is a
         recursive function.
@@ -226,7 +225,7 @@ class Message:
         return nodes
 
     @property
-    def header_id(self) -> Optional[int]:
+    def header_id(self) -> int | None:
         """The header ID of the message if it is part of a container message.
 
         """
@@ -327,7 +326,7 @@ class Message:
         return self._contained_messages is not None
 
     @property
-    def contained_messages(self) -> Optional[list['Message']]:
+    def contained_messages(self) -> list['Message'] | None:
         """The list of messages potentially contained within this message
 
         """
@@ -355,7 +354,7 @@ class Message:
         self._unused_bit_pattern = value
 
     @property
-    def signal_groups(self) -> Optional[list[SignalGroup]]:
+    def signal_groups(self) -> list[SignalGroup] | None:
         """A list of all signal groups in the message.
 
         """
@@ -367,7 +366,7 @@ class Message:
         self._signal_groups = value
 
     @property
-    def comment(self) -> Optional[str]:
+    def comment(self) -> str | None:
         """The message comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -384,7 +383,7 @@ class Message:
         return self._comments.get('EN')
 
     @comment.setter
-    def comment(self, value: Optional[str]) -> None:
+    def comment(self, value: str | None) -> None:
         if value is None:
             self._comments = None
         else:
@@ -434,7 +433,7 @@ class Message:
         return result
 
     @property
-    def send_type(self) -> Optional[str]:
+    def send_type(self) -> str | None:
         """The message send type, or ``None`` if unavailable.
 
         """
@@ -442,7 +441,7 @@ class Message:
         return self._send_type
 
     @property
-    def cycle_time(self) -> Optional[int]:
+    def cycle_time(self) -> int | None:
         """The message cycle time, or ``None`` if unavailable.
 
         """
@@ -450,7 +449,7 @@ class Message:
         return self._cycle_time
 
     @cycle_time.setter
-    def cycle_time(self, value: Optional[int]) -> None:
+    def cycle_time(self, value: int | None) -> None:
         self._cycle_time = value
 
     @property
@@ -480,7 +479,7 @@ class Message:
         self._autosar = value
 
     @property
-    def bus_name(self) -> Optional[str]:
+    def bus_name(self) -> str | None:
         """The message bus name, or ``None`` if unavailable.
 
         """
@@ -488,11 +487,11 @@ class Message:
         return self._bus_name
 
     @bus_name.setter
-    def bus_name(self, value: Optional[str]) -> None:
+    def bus_name(self, value: str | None) -> None:
         self._bus_name = value
 
     @property
-    def protocol(self) -> Optional[str]:
+    def protocol(self) -> str | None:
         """The message protocol, or ``None`` if unavailable. Only one protocol
         is currently supported; ``'j1939'``.
 
@@ -501,7 +500,7 @@ class Message:
         return self._protocol
 
     @protocol.setter
-    def protocol(self, value: Optional[str]) -> None:
+    def protocol(self, value: str | None) -> None:
         self._protocol = value
 
     @property
@@ -522,7 +521,7 @@ class Message:
 
     def gather_signals(self,
                        input_data: SignalMappingType,
-                       node: Optional[Codec] = None) \
+                       node: Codec | None = None) \
       -> SignalDictType:
 
         '''Given a superset of all signals required to encode the message,
@@ -755,7 +754,7 @@ class Message:
                 raw_value = signal.conversion.numeric_scaled_to_raw(scaled_value)
             else:
                 scaled_value = cast(
-                    'Union[int, float]',
+                    'int | float',
                     signal.conversion.raw_to_scaled(raw_value=signal_value, decode_choices=False)
                 )
                 raw_value = signal_value
@@ -1292,7 +1291,7 @@ class Message:
                     f'The signal {signal.name} length {signal.length} is not greater than 0 in '
                     f'message {self.name}.')
 
-    def refresh(self, strict: Optional[bool] = None) -> None:
+    def refresh(self, strict: bool | None = None) -> None:
         """Refresh the internal message state.
 
         If `strict` is ``True`` an exception is raised if any signals

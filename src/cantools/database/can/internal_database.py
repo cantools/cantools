@@ -1,6 +1,5 @@
 # Internal CAN database.
 
-from typing import Optional
 
 from .bus import Bus
 from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
@@ -18,9 +17,9 @@ class InternalDatabase:
                  messages: list[Message],
                  nodes: list[Node],
                  buses: list[Bus],
-                 version : Optional[str],
-                 dbc_specifics: Optional[DbcSpecifics] = None,
-                 autosar_specifics: Optional[AutosarDatabaseSpecifics] = None):
+                 version : str | None,
+                 dbc_specifics: DbcSpecifics | None = None,
+                 autosar_specifics: AutosarDatabaseSpecifics | None = None):
         self.messages = messages
         self.nodes = nodes
         self.buses = buses

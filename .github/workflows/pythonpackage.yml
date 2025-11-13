@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
-        python-version: ["3.9", "3.13"]
+        python-version: ["3.10", "3.14"]
       fail-fast: false
     steps:
     - uses: actions/checkout@v4
@@ -32,10 +32,10 @@ jobs:
     strategy:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
-        python-version: ["3.9", "3.13", "pypy-3.10"]
+        python-version: ["3.10", "3.14", "pypy-3.11"]
         exclude:
           - os: windows-latest
-            python-version: pypy-3.10
+            python-version: pypy-3.11
       fail-fast: false
     steps:
     - uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.14"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -81,11 +81,11 @@ jobs:
         pip install -e .[plot]
     - name: Static type checking with mypy
       run: |
-        mypy --python-version 3.9 .
         mypy --python-version 3.10 .
         mypy --python-version 3.11 .
         mypy --python-version 3.12 .
         mypy --python-version 3.13 .
+        mypy --python-version 3.14 .
     - name: Run linters
       run: |
         ruff check ./src
@@ -97,7 +97,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.14"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -114,7 +114,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -137,7 +137,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: "3.14"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

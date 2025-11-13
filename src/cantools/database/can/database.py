@@ -2,9 +2,7 @@ import logging
 from collections import OrderedDict
 from typing import (
     Any,
-    Optional,
     TextIO,
-    Union,
 )
 
 from ...typechecking import DecodeResultType, EncodeInputType, StringPathLike
@@ -46,13 +44,13 @@ class Database:
     """
 
     def __init__(self,
-                 messages: Optional[list[Message]] = None,
-                 nodes: Optional[list[Node]] = None,
-                 buses: Optional[list[Bus]] = None,
-                 version: Optional[str] = None,
-                 dbc_specifics: Optional[DbcSpecifics] = None,
-                 autosar_specifics: Optional[AutosarDatabaseSpecifics] = None,
-                 frame_id_mask: Optional[int] = None,
+                 messages: list[Message] | None = None,
+                 nodes: list[Node] | None = None,
+                 buses: list[Bus] | None = None,
+                 version: str | None = None,
+                 dbc_specifics: DbcSpecifics | None = None,
+                 autosar_specifics: AutosarDatabaseSpecifics | None = None,
+                 frame_id_mask: int | None = None,
                  strict: bool = True,
                  sort_signals: type_sort_signals = sort_signals_by_start_bit,
                  ) -> None:
@@ -102,7 +100,7 @@ class Database:
         return self._buses
 
     @property
-    def version(self) -> Optional[str]:
+    def version(self) -> str | None:
         """The database version, or ``None`` if unavailable.
 
         """
@@ -110,11 +108,11 @@ class Database:
         return self._version
 
     @version.setter
-    def version(self, value: Optional[str]) -> None:
+    def version(self, value: str | None) -> None:
         self._version = value
 
     @property
-    def dbc(self) -> Optional[DbcSpecifics]:
+    def dbc(self) -> DbcSpecifics | None:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -122,11 +120,11 @@ class Database:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value: Optional[DbcSpecifics]) -> None:
+    def dbc(self, value: DbcSpecifics | None) -> None:
         self._dbc = value
 
     @property
-    def autosar(self) -> Optional[AutosarDatabaseSpecifics]:
+    def autosar(self) -> AutosarDatabaseSpecifics | None:
         """An object containing AUTOSAR specific properties like e.g. attributes.
 
         """
@@ -134,7 +132,7 @@ class Database:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: Optional[AutosarDatabaseSpecifics]) -> None:
+    def autosar(self, value: AutosarDatabaseSpecifics | None) -> None:
         self._autosar = value
 
 
@@ -505,7 +503,7 @@ class Database:
         raise KeyError(name)
 
     def encode_message(self,
-                       frame_id_or_name: Union[int, str],
+                       frame_id_or_name: int | str,
                        data: EncodeInputType,
                        scaling: bool = True,
                        padding: bool = False,
@@ -544,7 +542,7 @@ class Database:
         return message.encode(data, scaling, padding, strict)
 
     def decode_message(self,
-                       frame_id_or_name: Union[int, str],
+                       frame_id_or_name: int | str,
                        data: bytes,
                        decode_choices: bool = True,
                        scaling: bool = True,

@@ -1,7 +1,6 @@
-from typing import Union
 
 
-def num(number_as_string: str) -> Union[int, float]:
+def num(number_as_string: str) -> int | float:
     """Convert given string to an integer or a float.
 
     """

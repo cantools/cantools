@@ -1,6 +1,6 @@
 # A CAN bus.
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
@@ -13,9 +13,9 @@ class Bus:
 
     def __init__(self,
                  name: str,
-                 comment: Optional[Union[str, dict[Optional[str], str]]] = None,
-                 baudrate: Optional[int] = None,
-                 fd_baudrate: Optional[int] = None,
+                 comment: str | dict[str | None, str] | None = None,
+                 baudrate: int | None = None,
+                 fd_baudrate: int | None = None,
                  autosar_specifics: Optional["AutosarDatabaseSpecifics"] = None) -> None:
         self._name = name
 
@@ -25,7 +25,7 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments: Optional[dict[Optional[str], str]] = { None: comment }
+            self._comments: dict[str | None, str] | None = { None: comment }
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -45,7 +45,7 @@ class Bus:
         return self._name
 
     @property
-    def comment(self) -> Optional[str]:
+    def comment(self) -> str | None:
         """The bus' comment, or ``None`` if unavailable.
 
         Note that we implicitly try to return the English comment if
@@ -62,7 +62,7 @@ class Bus:
         return self._comments.get('EN')
 
     @property
-    def comments(self) -> Optional[dict[Optional[str], str]]:
+    def comments(self) -> dict[str | None, str] | None:
         """The dictionary with the descriptions of the bus in multiple
         languages. ``None`` if unavailable.
 
@@ -70,7 +70,7 @@ class Bus:
         return self._comments
 
     @property
-    def baudrate(self) -> Optional[int]:
+    def baudrate(self) -> int | None:
         """The bus baudrate, or ``None`` if unavailable.
 
         """
@@ -78,7 +78,7 @@ class Bus:
         return self._baudrate
 
     @property
-    def fd_baudrate(self) -> Optional[int]:
+    def fd_baudrate(self) -> int | None:
         """The baudrate used for the payload of CAN-FD frames, or ``None`` if
         unavailable.
 

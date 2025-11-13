@@ -4,9 +4,9 @@ import collections
 import logging
 import re
 from collections import OrderedDict as odict
+from collections.abc import Callable
 from itertools import groupby
-from typing import TYPE_CHECKING, Callable
-from typing import Optional as TypingOptional
+from typing import TYPE_CHECKING
 
 import textparser
 from textparser import (
@@ -852,7 +852,7 @@ def _dump_signal(signal: Signal) -> str:
 
     return signal_str
 
-def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Callable[[list[Signal]], list[Signal]]]) -> str:
+def _dump_signals(database: InternalDatabase, sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> str:
     signal_dumps = []
     # SYM requires unique signals
     generated_signals = set()
@@ -871,8 +871,8 @@ def _dump_signals(database: InternalDatabase, sort_signals: TypingOptional[Calla
     else:
         return ''
 
-def _dump_message(message: Message, signals: list[Signal], min_frame_id: TypingOptional[int], max_frame_id: TypingOptional[int] = None,
-                  multiplexer_id: TypingOptional[int] = None, multiplexer_signal: TypingOptional[Signal] = None) -> str:
+def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | None, max_frame_id: int | None = None,
+                  multiplexer_id: int | None = None, multiplexer_signal: Signal | None = None) -> str:
     # Example:
     # [TestMessage]
     # ID=14A30000h

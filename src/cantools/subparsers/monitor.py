@@ -7,7 +7,7 @@ import sys
 import time
 import warnings
 from enum import Enum
-from typing import Any, Union
+from typing import Any
 
 import can.cli
 from argparse_addons import Integer
@@ -59,7 +59,7 @@ class Monitor(can.Listener):
         self._received = 0
         self._discarded = 0
         self._errors = 0
-        self._basetime: Union[float, None] = None
+        self._basetime: float | None = None
         self._page_first_row = 0
 
         stdscr.keypad(True)

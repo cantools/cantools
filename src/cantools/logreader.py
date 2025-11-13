@@ -5,10 +5,10 @@ import enum
 import io
 import re
 from collections.abc import Iterator
-from typing import Literal, Optional, Union, overload
+from typing import Literal, overload
 
-TimestampType = Optional[Union[datetime.datetime, datetime.timedelta]]
-TimezoneType = Optional[Union[datetime.tzinfo, Literal['local']]]
+TimestampType = datetime.datetime | datetime.timedelta | None
+TimezoneType = datetime.tzinfo | Literal['local'] | None
 
 TZ_LOCAL: Literal['local'] = 'local'
 
@@ -57,7 +57,7 @@ class BasePattern:
 
     pattern: re.Pattern[str]
 
-    def match(self, line: str) -> Optional[DataFrame]:
+    def match(self, line: str) -> DataFrame | None:
         mo = self.pattern.match(line)
         if mo:
             return self.unpack(mo)
@@ -65,7 +65,7 @@ class BasePattern:
         return None
 
     @abc.abstractmethod
-    def unpack(self, match_object: re.Match[str]) -> Optional[DataFrame]:
+    def unpack(self, match_object: re.Match[str]) -> DataFrame | None:
         raise NotImplementedError()
 
 
@@ -126,7 +126,7 @@ class CandumpTimestampedPattern(CandumpBasePattern):
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
         seconds = float(match_object.group('timestamp'))
-        timestamp: Union[datetime.timedelta, datetime.datetime]
+        timestamp: datetime.timedelta | datetime.datetime
         if seconds < 662688000:  # 1991-01-01 00:00:00, "Released in 1991, the Mercedes-Benz W140 was the first production vehicle to feature a CAN-based multiplex wiring system."
             timestamp = datetime.timedelta(seconds=seconds)
             timestamp_format = TimestampFormat.RELATIVE
@@ -187,7 +187,7 @@ class PCANTracePatternV10(BasePattern):
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
-    def unpack(self, match_object: re.Match[str]) -> Optional[DataFrame]:
+    def unpack(self, match_object: re.Match[str]) -> DataFrame | None:
         channel = self.parse_channel(match_object)
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 4
@@ -225,7 +225,7 @@ class PCANTracePatternV11(PCANTracePatternV10):
     pattern = re.compile(
         r'^\s*?\d+\)\s*?(?P<timestamp>\d+.\d+)\s+(?P<type>\w+)\s+(?P<can_id>[0-9A-F]+)\s+(?P<dlc>[0-9])\s+(?P<can_data>RTR|[0-9A-F ]*)$')
 
-    def unpack(self, match_object: re.Match[str]) -> Optional[DataFrame]:
+    def unpack(self, match_object: re.Match[str]) -> DataFrame | None:
         if match_object.group('type') in ('Error', 'Warng'):  # yes, they really spell Warning without the 'in'
             return None
 
@@ -306,7 +306,7 @@ class Parser:
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream: Optional[io.TextIOBase] = None, *, tz: TimezoneType = TZ_LOCAL) -> None:
+    def __init__(self, stream: io.TextIOBase | None = None, *, tz: TimezoneType = TZ_LOCAL) -> None:
         '''
         :param tz: The timezone which returned datetime objects should have when parsing `candump -l`, `candump -L` or `candump -ta`.
                    (It cannot be applied to `candump -tA` because the information is missing which timezone the time stamps have.
@@ -319,10 +319,10 @@ class Parser:
         Usually naive datetime objects are assumed to represent the local system time but these objects are in the time zone where the log has been recorded.
         '''
         self.stream = stream
-        self.pattern: Optional[BasePattern] = None
+        self.pattern: BasePattern | None = None
         self.tz = tz
 
-    def detect_pattern(self, line: str) -> Optional[BasePattern]:
+    def detect_pattern(self, line: str) -> BasePattern | None:
         for p in [CandumpDefaultPattern(), CandumpTimestampedPattern(self.tz), CandumpDefaultLogPattern(self.tz), CandumpAbsoluteLogPattern(), PCANTracePatternV21(), PCANTracePatternV20(), PCANTracePatternV13(), PCANTracePatternV12(), PCANTracePatternV11(), PCANTracePatternV10()]:
             mo = p.pattern.match(line)
             if mo:
@@ -330,7 +330,7 @@ class Parser:
 
         return None
 
-    def parse(self, line: str) -> Optional[DataFrame]:
+    def parse(self, line: str) -> DataFrame | None:
         if self.pattern is None:
             self.pattern = self.detect_pattern(line)
         if self.pattern is None:
@@ -342,10 +342,10 @@ class Parser:
         pass
 
     @overload
-    def iterlines(self, keep_unknowns: Literal[True]) -> Iterator[tuple[str, Optional[DataFrame]]]:
+    def iterlines(self, keep_unknowns: Literal[True]) -> Iterator[tuple[str, DataFrame | None]]:
         pass
 
-    def iterlines(self, keep_unknowns: bool = False) -> Iterator[tuple[str, Optional[DataFrame]]]:
+    def iterlines(self, keep_unknowns: bool = False) -> Iterator[tuple[str, DataFrame | None]]:
         """Returns an generator that yields (str, DataFrame) tuples with the
         raw log entry and a parsed log entry. If keep_unknowns=True, (str,
         None) tuples will be returned for log entries that couldn't be decoded.

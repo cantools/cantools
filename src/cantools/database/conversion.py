@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
 from ..typechecking import Choices, SignalValueType
 
@@ -21,13 +21,13 @@ class BaseConversion(ABC):
     is_float: bool
 
     #: an optional mapping of raw values to their corresponding text value
-    choices: Optional[Choices]
+    choices: Choices | None
 
     @staticmethod
     def factory(
         scale: float = 1,
         offset: float = 0,
-        choices: Optional[Choices] = None,
+        choices: Choices | None = None,
         is_float: bool = False,
     ) -> "BaseConversion":
         """Factory method that returns an instance of a conversion subclass based on the given parameters.
@@ -67,7 +67,7 @@ class BaseConversion(ABC):
     @abstractmethod
     def raw_to_scaled(
         self,
-        raw_value: Union[int, float],
+        raw_value: int | float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
@@ -83,7 +83,7 @@ class BaseConversion(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> int | float:
         """Convert a scaled value to the internal raw value.
 
         :param scaled_value:
@@ -95,8 +95,8 @@ class BaseConversion(ABC):
 
     @abstractmethod
     def numeric_scaled_to_raw(
-        self, scaled_value: Union[int, float]
-    ) -> Union[int, float]:
+        self, scaled_value: int | float
+    ) -> int | float:
         """Convert a numeric scaled value to the internal raw value.
 
         :param scaled_value:
@@ -124,12 +124,12 @@ class IdentityConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: Union[int, float],
+        raw_value: int | float,
         decode_choices: bool = True,
-    ) -> Union[int, float]:
+    ) -> int | float:
         return raw_value
 
-    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> int | float:
         if not isinstance(scaled_value, (int, float)):
             raise TypeError(
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
@@ -137,8 +137,8 @@ class IdentityConversion(BaseConversion):
         return self.numeric_scaled_to_raw(scaled_value)
 
     def numeric_scaled_to_raw(
-        self, scaled_value: Union[int, float]
-    ) -> Union[int, float]:
+        self, scaled_value: int | float
+    ) -> int | float:
         return scaled_value if self.is_float else round(scaled_value)
 
     def __repr__(self) -> str:
@@ -155,12 +155,12 @@ class LinearIntegerConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: Union[int, float],
+        raw_value: int | float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         return raw_value * self.scale + self.offset
 
-    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> int | float:
         if not isinstance(scaled_value, (int, float)):
             raise TypeError(
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
@@ -168,8 +168,8 @@ class LinearIntegerConversion(BaseConversion):
         return self.numeric_scaled_to_raw(scaled_value)
 
     def numeric_scaled_to_raw(
-        self, scaled_value: Union[int, float]
-    ) -> Union[int, float]:
+        self, scaled_value: int | float
+    ) -> int | float:
         # try to avoid a loss of precision whenever possible
         _raw = scaled_value - self.offset
         quotient, remainder = divmod(_raw, self.scale)
@@ -193,12 +193,12 @@ class LinearConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: Union[int, float],
+        raw_value: int | float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         return raw_value * self.scale + self.offset
 
-    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> int | float:
         if not isinstance(scaled_value, (int, float)):
             raise TypeError(
                 f"'scaled_value' must have type 'int' or 'float' (is {type(scaled_value)})"
@@ -206,8 +206,8 @@ class LinearConversion(BaseConversion):
         return self.numeric_scaled_to_raw(scaled_value)
 
     def numeric_scaled_to_raw(
-        self, scaled_value: Union[int, float]
-    ) -> Union[int, float]:
+        self, scaled_value: int | float
+    ) -> int | float:
         _raw = (scaled_value - self.offset) / self.scale
         return _raw if self.is_float else round(_raw)
 
@@ -242,14 +242,14 @@ class NamedSignalConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: Union[int, float],
+        raw_value: int | float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         if decode_choices and (choice := self.choices.get(raw_value)) is not None:  # type: ignore[arg-type]
             return choice
         return self._conversion.raw_to_scaled(raw_value, False)
 
-    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> int | float:
         if isinstance(scaled_value, (int, float)):
             return self._conversion.scaled_to_raw(scaled_value)
 
@@ -263,8 +263,8 @@ class NamedSignalConversion(BaseConversion):
         raise TypeError
 
     def numeric_scaled_to_raw(
-        self, scaled_value: Union[int, float]
-    ) -> Union[int, float]:
+        self, scaled_value: int | float
+    ) -> int | float:
         return self._conversion.scaled_to_raw(scaled_value)
 
     def set_choices(self, choices: Choices) -> None:
@@ -292,7 +292,7 @@ class NamedSignalConversion(BaseConversion):
         )
 
 
-def _is_integer(value: Union[int, float]) -> bool:
+def _is_integer(value: int | float) -> bool:
     if isinstance(value, int) or (hasattr(value, "is_integer") and value.is_integer()):
         return True
     elif isinstance(value, float):

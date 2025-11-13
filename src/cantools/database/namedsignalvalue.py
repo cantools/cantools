@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 
 class NamedSignalValue:
@@ -13,7 +13,7 @@ class NamedSignalValue:
         self,
         value: int,
         name: str,
-        comments: Optional[dict[str, str]] = None,
+        comments: dict[str, str] | None = None,
     ) -> None:
         #: The text intended for human consumption which the specified integer
         #: is mapped to.

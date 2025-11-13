@@ -1,5 +1,4 @@
 # A signal group.
-from typing import Optional
 
 
 class SignalGroup:
@@ -12,7 +11,7 @@ class SignalGroup:
     def __init__(self,
                  name: str,
                  repetitions: int = 1,
-                 signal_names: Optional[list[str]] = None) -> None:
+                 signal_names: list[str] | None = None) -> None:
         self._name = name
         self._repetitions = repetitions
         self._signal_names = signal_names or []

@@ -9,7 +9,7 @@ authors = [
 ]
 description = "CAN BUS tools."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = [
     "can",
     "can bus",

@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 from ..errors import Error as _Error
 
@@ -29,11 +29,11 @@ class UnsupportedDatabaseFormatError(Error):
     """
 
     def __init__(self,
-                 e_arxml: Optional[Exception],
-                 e_dbc: Optional[Exception],
-                 e_kcd: Optional[Exception],
-                 e_sym: Optional[Exception],
-                 e_cdd: Optional[Exception]) -> None:
+                 e_arxml: Exception | None,
+                 e_dbc: Exception | None,
+                 e_kcd: Exception | None,
+                 e_sym: Exception | None,
+                 e_cdd: Exception | None) -> None:
         message_chunks: list[str] = []
 
         if e_arxml is not None:
@@ -61,5 +61,5 @@ class UnsupportedDatabaseFormatError(Error):
         self.e_sym = e_sym
         self.e_cdd = e_cdd
 
-    def __reduce__(self) -> Union[str, tuple[Any, ...]]:
+    def __reduce__(self) -> str | tuple[Any, ...]:
         return type(self), (self.e_arxml, self.e_dbc, self.e_kcd, self.e_sym, self.e_cdd), {}

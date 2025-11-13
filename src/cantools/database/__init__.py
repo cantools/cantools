@@ -3,7 +3,7 @@ __all__ = ["Bus", "Database", "DecodeError", "EncodeError", "Message",
 
 import os
 from contextlib import nullcontext
-from typing import Any, Optional, TextIO, Union
+from typing import Any, TextIO
 
 import diskcache
 
@@ -40,14 +40,14 @@ def _resolve_database_format_and_encoding(database_format,
     return database_format, encoding
 
 def load_file(filename: StringPathLike,
-              database_format: Optional[str] = None,
-              encoding: Optional[str] = None,
-              frame_id_mask: Optional[int] = None,
+              database_format: str | None = None,
+              encoding: str | None = None,
+              frame_id_mask: int | None = None,
               prune_choices: bool = False,
               strict: bool = True,
-              cache_dir: Optional[str] = None,
+              cache_dir: str | None = None,
               sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit,
-              ) -> Union[can.Database, diagnostics.Database]:
+              ) -> can.Database | diagnostics.Database:
     """Open, read and parse given database file and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -128,8 +128,8 @@ def load_file(filename: StringPathLike,
         filename)
 
     cache_dir = cache_dir or os.getenv("CANTOOLS_CACHE_DIR", None)
-    cache_key: Optional[tuple[Any, ...]] = None
-    db: Union[can.Database, diagnostics.Database]
+    cache_key: tuple[Any, ...] | None = None
+    db: can.Database | diagnostics.Database
 
     with diskcache.Cache(cache_dir) if cache_dir else nullcontext() as cache:
         if cache is not None:
@@ -217,11 +217,11 @@ def dump_file(database,
 
 
 def load(fp: TextIO,
-         database_format: Optional[str] = None,
-         frame_id_mask: Optional[int] = None,
+         database_format: str | None = None,
+         frame_id_mask: int | None = None,
          prune_choices: bool = False,
          strict: bool = True,
-         sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> Union[can.Database, diagnostics.Database]:
+         sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) -> can.Database | diagnostics.Database:
     """Read and parse given database file-like object and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with
@@ -251,12 +251,12 @@ def load(fp: TextIO,
 
 
 def load_string(string: str,
-                database_format: Optional[str] = None,
-                frame_id_mask: Optional[int] = None,
+                database_format: str | None = None,
+                frame_id_mask: int | None = None,
                 prune_choices: bool = False,
                 strict: bool = True,
                 sort_signals: utils.type_sort_signals = utils.sort_signals_by_start_bit) \
-        -> Union[can.Database, diagnostics.Database]:
+        -> can.Database | diagnostics.Database:
     """Parse given database string and return a
     :class:`can.Database<.can.Database>` or
     :class:`diagnostics.Database<.diagnostics.Database>` object with

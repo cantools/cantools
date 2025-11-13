@@ -1,7 +1,6 @@
 # Load and dump a CAN database in DBC format.
 
 import re
-import typing
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from decimal import Decimal
@@ -411,8 +410,8 @@ class LongNamesConverter:
         self._next_index_per_cut_name: defaultdict[str, int] = defaultdict(int)
         self._short_names: set[str] = set()
 
-    def convert(self, name: str) -> typing.Optional[str]:
-        short_name: typing.Optional[str] = None
+    def convert(self, name: str) -> str | None:
+        short_name: str | None = None
 
         if len(name) == 32:
             self._short_names.add(name)

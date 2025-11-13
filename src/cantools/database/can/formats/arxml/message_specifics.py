@@ -16,8 +16,8 @@ class AutosarMessageSpecifics:
         self._pdu_paths: list[str] = []
         self._is_nm = False
         self._is_general_purpose = False
-        self._secoc: Optional[AutosarSecOCProperties] = None
-        self._e2e: Optional[AutosarEnd2EndProperties] = None
+        self._secoc: AutosarSecOCProperties | None = None
+        self._e2e: AutosarEnd2EndProperties | None = None
         self._signal_group = None
 
     @property

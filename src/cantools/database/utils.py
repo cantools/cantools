@@ -197,16 +197,20 @@ _format_cache: dict[tuple[tuple, int], Formats] = {}
 _FORMAT_CACHE_SIZE = 1024
 
 
-def _signal_cache_key(signal: Union["Data", "Signal"]) -> tuple:
-    """Build a lightweight cache key from format-relevant signal properties."""
-    return (
-        signal.name,
-        signal.start,
-        signal.length,
-        signal.byte_order,
-        signal.is_signed,
-        signal.conversion.is_float
+def _format_cache_key(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> tuple[tuple[tuple[str, int, int, str, bool, bool], ...], int]:
+    """Build a cache key from signals."""
+    signal_keys = tuple(
+        (
+            signal.name,
+            signal.start,
+            signal.length,
+            signal.byte_order,
+            signal.is_signed,
+            signal.conversion.is_float
+        )
+        for signal in signals
     )
+    return (signal_keys, number_of_bytes)
 
 
 def _check_format_cache(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Optional[Formats]:
@@ -215,8 +219,7 @@ def _check_format_cache(signals: Sequence[Union["Data", "Signal"]], number_of_by
     Returns the cached Formats object if found, None otherwise.
     Also handles FIFO eviction when cache is full.
     """
-    signal_keys = tuple(_signal_cache_key(signal) for signal in signals)
-    cache_key = (signal_keys, number_of_bytes)
+    cache_key = _format_cache_key(signals, number_of_bytes)
 
     if cache_key in _format_cache:
         return _format_cache[cache_key]
@@ -230,8 +233,7 @@ def _check_format_cache(signals: Sequence[Union["Data", "Signal"]], number_of_by
 
 def _store_format_cache(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int, formats: Formats) -> None:
     """Store computed formats in cache for future reuse."""
-    signal_keys = tuple(_signal_cache_key(signal) for signal in signals)
-    cache_key = (signal_keys, number_of_bytes)
+    cache_key = _format_cache_key(signals, number_of_bytes)
     _format_cache[cache_key] = formats
 
 

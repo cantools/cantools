@@ -210,7 +210,7 @@ def _load_did_element(did: ElementTree.Element, data_types: dict[str, DataType],
 
         if data:
             datas.append(data)
-            offset += data.length
+            offset += data.length or 0
 
     static_value = did.find('STATICVALUE')
     if static_value is None:

@@ -1,6 +1,7 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional, Union
+from xml.etree.ElementTree import Element
 
 from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
@@ -9,6 +10,8 @@ from ...message import Message
 from ...signal import Signal
 
 if TYPE_CHECKING:
+    from cantools.typechecking import ByteOrder
+
     from ...bus import Bus
 
 
@@ -51,7 +54,7 @@ REFERENCE_VALUES_XPATH = make_xpath([
 class EcuExtractLoader:
 
     def __init__(self,
-                 root:Any,
+                 root: Element[str],
                  strict:bool,
                  sort_signals:type_sort_signals=sort_signals_by_start_bit):
         self.root = root
@@ -97,7 +100,7 @@ class EcuExtractLoader:
                                 buses,
                                 version)
 
-    def load_message(self, com_i_pdu):
+    def load_message(self, com_i_pdu: Element):
         # Default values.
         interval = None
         senders = []
@@ -193,9 +196,9 @@ class EcuExtractLoader:
 
     def load_message_rx_tx(self,
                            com_pdu_id_ref,
-                           parameter_can_id,
-                           parameter_dlc,
-                           parameter_can_id_type):
+                           parameter_can_id: str,
+                           parameter_dlc: str,
+                           parameter_can_id_type: str):
         can_if_tx_pdu_cfg = self.find_can_if_rx_tx_pdu_cfg(com_pdu_id_ref)
         frame_id = None
         length = None
@@ -234,7 +237,7 @@ class EcuExtractLoader:
         # Bit position, length, byte order, is_signed and is_float.
         bit_position = None
         length = None
-        byte_order = None
+        byte_order: Optional[ByteOrder] = None
 
         for parameter, value in self.iter_parameter_values(ecuc_container_value):
             if parameter == 'ComBitPosition':
@@ -287,7 +290,7 @@ class EcuExtractLoader:
                       comment=comments,
                       )
 
-    def find_com_config(self, xpath):
+    def find_com_config(self, xpath) -> Optional[Element]:
         return self.root.find(make_xpath([
             "AR-PACKAGES",
             "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[1]),
@@ -312,7 +315,7 @@ class EcuExtractLoader:
         ]),
                               NAMESPACES)
 
-    def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref):
+    def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref: str) -> Union[Element, None]:
         messages = self.root.iterfind(
             make_xpath([
                 "AR-PACKAGES",
@@ -343,7 +346,7 @@ class EcuExtractLoader:
                     if value == com_pdu_id_ref:
                         return message
 
-    def iter_parameter_values(self, param_conf_container):
+    def iter_parameter_values(self, param_conf_container: Element):
         parameters = param_conf_container.find(PARAMETER_VALUES_XPATH,
                                                NAMESPACES)
 
@@ -358,7 +361,7 @@ class EcuExtractLoader:
 
             yield name, value
 
-    def iter_reference_values(self, param_conf_container):
+    def iter_reference_values(self, param_conf_container: Element):
         references = param_conf_container.find(REFERENCE_VALUES_XPATH,
                                                NAMESPACES)
 

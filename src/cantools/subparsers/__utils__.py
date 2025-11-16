@@ -10,6 +10,7 @@ from ..typechecking import (
     ContainerDecodeResultType,
     ContainerUnpackResultType,
     SignalDictType,
+    SignalMappingType,
     TAdditionalCliArgs,
 )
 
@@ -20,7 +21,7 @@ MULTI_LINE_FMT = '''
 '''
 
 
-def format_signals(message: Message, decoded_signals) -> list[str]:
+def format_signals(message: Message, decoded_signals: SignalMappingType) -> list[str]:
     formatted_signals: list[str] = []
 
     for signal in message.signals:
@@ -189,7 +190,7 @@ def format_message(message : Message,
         return _format_message_multi_line(message.name, formatted_signals)
 
 def format_multiplexed_name(message : Message,
-                            decoded_signals : SignalDictType) -> str:
+                            decoded_signals : SignalMappingType) -> str:
     # The idea here is that we rely on the sorted order of the Signals, and
     # then simply go through each possible Multiplexer and build a composite
     # key consisting of the Message name prepended to all the possible MUX

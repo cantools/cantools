@@ -1,9 +1,11 @@
 # A CAN message.
 
 import logging
+from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
+    Any,
     Optional,
     cast,
 )
@@ -21,6 +23,7 @@ from ...typechecking import (
     EncodeInputType,
     SignalDictType,
     SignalMappingType,
+    SignalValueType,
 )
 from ..errors import DecodeError, EncodeError, Error
 from ..namedsignalvalue import NamedSignalValue
@@ -196,13 +199,13 @@ class Message:
             'multiplexers': multiplexers
         }
 
-    def _create_signal_tree(self, codec: Codec):
+    def _create_signal_tree(self, codec: Codec) -> Sequence[Union[str, Mapping[str, Mapping[int, Any]]]]:
         """Create a multiplexing tree node of given codec. This is a recursive
         function.
 
         """
 
-        nodes = []
+        nodes: list[Union[str, dict[str, dict[int, Any]]]] = []
 
         for signal in codec['signals']:
             multiplexers = codec['multiplexers']
@@ -532,7 +535,7 @@ class Message:
             node = self._codecs
         assert node is not None
 
-        result = {}
+        result: dict[str, SignalValueType] = {}
 
         for signal in node['signals']:
             val = input_data.get(signal.name)

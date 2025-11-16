@@ -3,7 +3,6 @@ __all__ = ["AutosarBusSpecifics", "AutosarDatabaseSpecifics",
            "AutosarNodeSpecifics", "AutosarSecOCProperties", "load_string"]
 
 import re
-from typing import Any
 from xml.etree import ElementTree
 
 from ....utils import sort_signals_by_start_bit, type_sort_signals
@@ -18,7 +17,7 @@ from .secoc_properties import AutosarSecOCProperties
 from .system_loader import SystemLoader
 
 
-def is_ecu_extract(root: Any # For whatever reason, mypy does not
+def is_ecu_extract(root: ElementTree.Element # For whatever reason, mypy does not
                              # accept 'ElementTree' here...
                    ) -> bool:
     """Given the root object of an ARXML file's ElementTree,

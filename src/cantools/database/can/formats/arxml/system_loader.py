@@ -179,7 +179,7 @@ class SystemLoader:
                                 version=None,
                                 autosar_specifics=autosar_specifics)
 
-    def _load_buses(self, package_list):
+    def _load_buses(self, package_list: list[ElementTree.Element]) -> list[Bus]:
         """Recursively extract all buses of all CAN clusters of a list of
         AUTOSAR packages.
 
@@ -187,7 +187,7 @@ class SystemLoader:
                 packages and their sub-packages
         """
 
-        buses = []
+        buses: list[Bus] = []
 
         for package in package_list:
             can_clusters = \
@@ -288,7 +288,7 @@ class SystemLoader:
         return buses
 
     # deal with the senders of messages and the receivers of signals
-    def _load_senders_and_receivers(self, package_list, messages):
+    def _load_senders_and_receivers(self, package_list: list[ElementTree.Element], messages: list[Message]) -> None:
         if package_list is None:
             return
 
@@ -314,7 +314,7 @@ class SystemLoader:
 
     # given a list of Message objects and an reference to a PDU by its absolute ARXML path,
     # return the subset of messages of the list which feature the specified PDU.
-    def __get_messages_of_pdu(self, msg_list: list[Message], pdu_path):
+    def __get_messages_of_pdu(self, msg_list: list[Message], pdu_path: str) -> list[Message]:
         pdu_messages = \
             [ x for x in msg_list if pdu_path in x.autosar.pdu_paths ]
 
@@ -336,7 +336,7 @@ class SystemLoader:
 
         return pdu_messages
 
-    def _load_senders_receivers_of_ecu(self, ecu_instance, messages):
+    def _load_senders_receivers_of_ecu(self, ecu_instance: ElementTree.Element[str], messages: list[Message]) -> None:
         # get the name of the ECU. Note that in cantools, ECUs
         # are called 'nodes' for all intents and purposes...
         ecu_name = \
@@ -392,7 +392,7 @@ class SystemLoader:
                         if ecu_name not in pdu_message.senders:
                             pdu_message.senders.append(ecu_name)
 
-    def _load_senders_receivers_of_nm_pdus(self, package, messages):
+    def _load_senders_receivers_of_nm_pdus(self, package: ElementTree.Element, messages: list[Message]):
         ####
         # senders and receivers of network management messages
         ####
@@ -636,7 +636,7 @@ class SystemLoader:
             if sub_package_list is not None:
                 self._load_e2e_properties(sub_package_list, messages)
 
-    def _load_messages(self, package_list):
+    def _load_messages(self, package_list: ElementTree.Element) -> list[Message]:
         """Recursively extract all messages of all CAN clusters of a list of
         AUTOSAR packages.
 
@@ -644,7 +644,7 @@ class SystemLoader:
                 packages and their sub-packages
         """
 
-        messages = []
+        messages: list[Message] = []
 
         # load all messages of all packages in an list of XML package elements
         for package in package_list.iterfind('./ns:AR-PACKAGE',
@@ -666,7 +666,7 @@ class SystemLoader:
 
         return messages
 
-    def _load_package_messages(self, package_elem):
+    def _load_package_messages(self, package_elem: ElementTree.Element[str]) -> list[Message]:
         """This code extracts the information about CAN clusters of an
         individual AR package
         """
@@ -716,7 +716,7 @@ class SystemLoader:
 
         return messages
 
-    def _load_message(self, bus_name, can_frame_triggering):
+    def _load_message(self, bus_name: Union[str, None], can_frame_triggering: ElementTree.Element[str]) -> Message:
         """Load given message and return a message object.
         """
 
@@ -832,7 +832,7 @@ class SystemLoader:
             self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
 
         payload_length = self._get_unique_arxml_child(payload_pdu, 'LENGTH')
-        payload_length = parse_number_string(payload_length.text)
+        payload_length = parse_number_string(payload_length.text, allow_float=False)
 
         if autosar_specifics.e2e is None:
             # use the data id from the signal group associated with
@@ -1993,7 +1993,7 @@ class SystemLoader:
 
     def _get_absolute_arxml_path(self,
                                  base_elem,
-                                 arxml_path,
+                                 arxml_path: str,
                                  refbase_name=None):
         """Return the absolute ARXML path of a reference
 
@@ -2091,7 +2091,7 @@ class SystemLoader:
         # given a package name, produce a refbase label to ARXML path dictionary
         self._package_refbase_paths = {}
 
-        def add_sub_references(elem, elem_path, cur_package_path="") -> None:
+        def add_sub_references(elem: ElementTree.Element, elem_path, cur_package_path: str="") -> None:
             """Recursively add all ARXML references contained within an XML
             element to the dictionaries to handle ARXML references"""
 
@@ -2168,7 +2168,7 @@ class SystemLoader:
         self._arxml_path_to_node = {}
         add_sub_references(self._root, '')
 
-    def _get_arxml_children(self, base_elems: Union[ElementTree.Element, list[ElementTree.Element], None], children_location: Union[str, list[str]]):
+    def _get_arxml_children(self, base_elems: Union[ElementTree.Element, list[ElementTree.Element], None], children_location: Union[str, list[str]]) -> list[ElementTree.Element]:
         """Locate a set of ElementTree child nodes at a given location.
 
         This is a method that retrieves a list of ElementTree nodes
@@ -2216,7 +2216,7 @@ class SystemLoader:
 
         # make sure that the base elements are iterable. for
         # convenience we also allow it to be an individiual node.
-        if type(base_elems).__name__ == 'Element':
+        if isinstance(base_elems, ElementTree.Element):
             base_elems = [base_elems]
 
         for child_tag_name in children_location:
@@ -2236,10 +2236,10 @@ class SystemLoader:
                 child_tag_name = child_tag_name[1:]
 
             # traverse the specified path one level deeper
-            result = []
+            result: list[ElementTree.Element[str]] = []
 
             for base_elem in base_elems:
-                local_result = []
+                local_result: list[ElementTree.Element[str]] = []
 
                 for child_elem in base_elem:
                     ctt = f'{{{self.xml_namespace}}}{child_tag_name}'
@@ -2273,7 +2273,7 @@ class SystemLoader:
 
         return base_elems
 
-    def _get_unique_arxml_child(self, base_elem, child_location):
+    def _get_unique_arxml_child(self, base_elem: ElementTree.Element[str], child_location: str | list[str]) -> Union[ElementTree.Element, None]:
         """This method does the same as get_arxml_children, but it assumes
         that the location yields at most a single node.
 
@@ -2292,10 +2292,10 @@ class SystemLoader:
             raise ValueError(f'{child_location} does not resolve into a '
                              f'unique node')
 
-    def _get_can_frame(self, can_frame_triggering):
+    def _get_can_frame(self, can_frame_triggering: ElementTree.Element):
         return self._get_unique_arxml_child(can_frame_triggering, '&FRAME')
 
-    def _get_i_signal(self, i_signal_to_i_pdu_mapping):
+    def _get_i_signal(self, i_signal_to_i_pdu_mapping: ElementTree.Element):
         if self.autosar_version_newer(4):
             return self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                                 '&I-SIGNAL')

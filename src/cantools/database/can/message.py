@@ -274,7 +274,7 @@ class Message:
         self._is_extended_frame = value
 
     @property
-    def is_fd(self):
+    def is_fd(self) -> bool:
         """``True`` if the message requires CAN-FD, ``False`` otherwise.
 
         """
@@ -282,7 +282,7 @@ class Message:
         return self._is_fd
 
     @is_fd.setter
-    def is_fd(self, value):
+    def is_fd(self, value: bool) -> None:
         self._is_fd = value
 
     @property

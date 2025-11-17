@@ -39,7 +39,7 @@ class Node:
         self._autosar = autosar_specifics
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The node name as a string.
 
         """
@@ -47,7 +47,7 @@ class Node:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property

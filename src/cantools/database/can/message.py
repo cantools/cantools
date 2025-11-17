@@ -199,13 +199,13 @@ class Message:
             'multiplexers': multiplexers
         }
 
-    def _create_signal_tree(self, codec: Codec) -> Sequence[Union[str, Mapping[str, Mapping[int, Any]]]]:
+    def _create_signal_tree(self, codec: Codec) -> Sequence[str | Mapping[str, Mapping[int, Any]]]:
         """Create a multiplexing tree node of given codec. This is a recursive
         function.
 
         """
 
-        nodes: list[Union[str, dict[str, dict[int, Any]]]] = []
+        nodes: list[str | dict[str, dict[int, Any]]] = []
 
         for signal in codec['signals']:
             multiplexers = codec['multiplexers']

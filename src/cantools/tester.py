@@ -7,6 +7,8 @@ from collections.abc import Mapping
 
 import can
 
+from cantools.database.can.message import Message as MessageCls
+
 from .errors import Error
 
 
@@ -113,14 +115,14 @@ class Listener(can.Listener):
 class Message(UserDict):
 
     def __init__(self,
-                 database,
-                 can_bus,
-                 input_list,
-                 input_queue,
-                 decode_choices,
-                 scaling,
-                 padding,
-                 strict = True):
+                 database: MessageCls,
+                 can_bus: can.BusABC,
+                 input_list: list[MessageCls],
+                 input_queue: queue.Queue[DecodedMessage],
+                 decode_choices: bool,
+                 scaling: bool,
+                 padding: bool,
+                 strict: bool = True) -> None:
         super().__init__()
         self.database = database
         self._mplex_map = invert_signal_tree(database.signal_tree)
@@ -254,7 +256,10 @@ class Message(UserDict):
                                     strict=self.strict)
         self._can_message = can.Message(arbitration_id=arbitration_id,
                                         is_extended_id=extended_id,
-                                        data=data)
+                                        data=data,
+                                        is_fd=self.database.is_fd,
+                                        dlc=self.database.length,
+                                        check=True)
 
         if self._periodic_task is not None:
             self._periodic_task.modify_data(self._can_message)

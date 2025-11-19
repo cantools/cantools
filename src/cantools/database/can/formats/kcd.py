@@ -2,13 +2,16 @@
 
 import logging
 from collections import defaultdict
+from collections.abc import Callable
+from typing import cast
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
+
+from cantools.typechecking import ByteOrder, Choices
 
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
-    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     start_bit,
     type_sort_signals,
@@ -29,29 +32,30 @@ NAMESPACES = {'ns': NAMESPACE}
 ROOT_TAG = f'{{{NAMESPACE}}}NetworkDefinition'
 
 
-def _start_bit(offset, byte_order):
+def _start_bit(offset: int, byte_order: ByteOrder) -> int:
     if byte_order == 'big_endian':
         return (8 * (offset // 8) + (7 - (offset % 8)))
     else:
         return offset
 
 
-def _get_node_name_by_id(nodes, node_id):
+def _get_node_name_by_id(nodes: list[dict[str, str]], node_id: str) -> str:
     for node in nodes:
         if node['id'] == node_id:
             return node['name']
+    raise RuntimeError(f"Node ID {node_id} not found in nodes!")
 
 
-def _load_signal_element(signal, nodes):
+def _load_signal_element(signal: ElementTree.Element, nodes: list[dict[str, str]]) -> Signal:
     """Load given signal element and return a signal object.
 
     """
 
     # Default values.
-    name = None
-    offset = None
+    name: str | None = None
+    offset: int | None = None
     length = 1
-    byte_order = 'little_endian'
+    byte_order: ByteOrder = 'little_endian'
     is_signed = False
     is_float = False
     minimum = None
@@ -61,7 +65,7 @@ def _load_signal_element(signal, nodes):
     unit = None
     labels = None
     notes = None
-    receivers = []
+    receivers: list[str] = []
 
     # Signal XML attributes.
     for key, value in signal.attrib.items():
@@ -72,7 +76,8 @@ def _load_signal_element(signal, nodes):
         elif key == 'length':
             length = int(value)
         elif key == 'endianess':
-            byte_order = f'{value}_endian'
+            assert(value in ("big", "little"))
+            byte_order = cast('ByteOrder', f'{value}_endian')
         else:
             LOGGER.debug("Ignoring unsupported signal attribute '%s'.", key)
 
@@ -108,7 +113,7 @@ def _load_signal_element(signal, nodes):
     label_set = signal.find('ns:LabelSet', NAMESPACES)
 
     if label_set is not None:
-        labels = {}
+        labels: Choices = {}
 
         for label in label_set.iterfind('ns:Label', NAMESPACES):
             label_value = int(label.attrib['value'])
@@ -132,6 +137,11 @@ def _load_signal_element(signal, nodes):
         is_float=is_float,
     )
 
+    if name is None:
+        raise RuntimeError("Signal did not contain 'name' key to parse name!")
+    if offset is None:
+        raise RuntimeError("Signal did not contain 'offset' key to parse offset!")
+
     return Signal(name=name,
                   start=_start_bit(offset, byte_order),
                   length=length,
@@ -146,7 +156,7 @@ def _load_signal_element(signal, nodes):
                   )
 
 
-def _load_multiplex_element(mux, nodes):
+def _load_multiplex_element(mux: Element, nodes):
     """Load given multiplex elements and its signals and return list of signals.
 
     """
@@ -167,7 +177,7 @@ def _load_multiplex_element(mux, nodes):
     return signals
 
 
-def _load_message_element(message, bus_name, nodes, strict, sort_signals):
+def _load_message_element(message: ElementTree.Element, bus_name: str, nodes: list[dict[str, str]], strict: bool, sort_signals: type_sort_signals) -> Message:
     """Load given message element and return a message object.
 
     """
@@ -179,7 +189,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
     notes = None
     length = 'auto'
     interval = None
-    senders = []
+    senders: list[str] = []
 
     # Message XML attributes.
     for key, value in message.attrib.items():
@@ -212,7 +222,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
                                                 sender.attrib['id']))
 
     # Find all signals in this message.
-    signals = []
+    signals: list[Signal] = []
 
     for mux in message.iterfind('ns:Multiplex', NAMESPACES):
         signals += _load_multiplex_element(mux, nodes)
@@ -229,6 +239,11 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
     else:
         length = int(length)
 
+    if frame_id is None:
+        raise RuntimeError("Message did not contain 'id' key to parse frame ID!")
+    if name is None:
+        raise RuntimeError("Message did not contain 'name' key to parse name!")
+
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,
                    name=name,
@@ -244,7 +259,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
                    sort_signals=sort_signals)
 
 
-def _indent_xml(element, indent, level=0):
+def _indent_xml(element: ElementTree.Element, indent: str, level: int = 0) -> None:
     i = "\n" + level * indent
 
     if len(element):
@@ -264,12 +279,12 @@ def _indent_xml(element, indent, level=0):
             element.tail = i
 
 
-def _dump_notes(parent, comment):
+def _dump_notes(parent: ElementTree.Element, comment: str) -> None:
     notes = SubElement(parent, 'Notes')
     notes.text = comment
 
 
-def _dump_signal(signal, node_refs, signal_element):
+def _dump_signal(signal: Signal, node_refs: dict[str, int], signal_element: ElementTree.Element):
     signal_element.set('name', signal.name)
 
     offset = _start_bit(signal.start, signal.byte_order)
@@ -340,8 +355,8 @@ def _dump_signal(signal, node_refs, signal_element):
 
 def _dump_mux_group(multiplexer_id,
                     multiplexed_signals,
-                    node_refs,
-                    parent):
+                    node_refs: dict[str, int],
+                    parent: ElementTree.Element):
     mux_group = SubElement(parent,
                            'MuxGroup',
                            count=str(multiplexer_id))
@@ -351,7 +366,7 @@ def _dump_mux_group(multiplexer_id,
                      node_refs,
                      SubElement(mux_group, 'Signal'))
 
-def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
+def _dump_mux_groups(multiplexer_name: str, signals: list[Signal], node_refs: dict[str, int], parent: ElementTree.Element):
     signals_per_count = defaultdict(list)
 
     for signal in signals:
@@ -368,7 +383,7 @@ def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
                         parent)
 
 
-def _dump_message(message, bus, node_refs, sort_signals):
+def _dump_message(message: Message, bus: ElementTree.Element, node_refs: dict[str, int], sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> None:
     frame_id = f'0x{message.frame_id:03X}'
     message_element = SubElement(bus,
                                  'Message',
@@ -417,31 +432,28 @@ def _dump_message(message, bus, node_refs, sort_signals):
                          SubElement(message_element, 'Signal'))
 
 
-def _dump_version(version, parent):
+def _dump_version(version: str | None, parent: ElementTree.Element):
     if version is not None:
         SubElement(parent, 'Document', version=version)
 
 
-def _dump_nodes(nodes, node_refs, parent):
+def _dump_nodes(nodes: list[Node], node_refs: dict[str, int], parent: ElementTree.Element):
     for node_id, node in enumerate(nodes, 1):
         SubElement(parent, 'Node', id=str(node_id), name=node.name)
         node_refs[node.name] = node_id
 
 
-def _dump_messages(messages, node_refs, parent, sort_signals):
+def _dump_messages(messages: list[Message], node_refs: dict[str, int], parent: ElementTree.Element, sort_signals: type_sort_signals) -> None:
     bus = SubElement(parent, 'Bus', name='Bus')
 
     for message in messages:
         _dump_message(message, bus, node_refs, sort_signals)
 
 
-def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=None) -> str:
     """Format given database in KCD file format.
 
     """
-    if sort_signals == SORT_SIGNALS_DEFAULT:
-        sort_signals = None
-
     node_refs: dict[str, int] = {}
 
     attrib = {
@@ -475,8 +487,8 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
         raise ValueError(f'Expected root element tag {ROOT_TAG}, but got {root.tag}.')
 
     nodes = [node.attrib for node in root.iterfind('./ns:Node', NAMESPACES)]
-    buses = []
-    messages = []
+    buses: list[Bus] = []
+    messages: list[Message] = []
 
     try:
         document = root.find('ns:Document', NAMESPACES)

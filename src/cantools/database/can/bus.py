@@ -1,9 +1,11 @@
 # A CAN bus.
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
+
+from ...typechecking import Comments
 
 if TYPE_CHECKING:
-    from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
+    from .formats.arxml.bus_specifics import AutosarBusSpecifics
 
 
 class Bus:
@@ -13,10 +15,10 @@ class Bus:
 
     def __init__(self,
                  name: str,
-                 comment: str | dict[str | None, str] | None = None,
+                 comment: str | Comments | None = None,
                  baudrate: int | None = None,
                  fd_baudrate: int | None = None,
-                 autosar_specifics: Optional["AutosarDatabaseSpecifics"] = None) -> None:
+                 autosar_specifics: Optional["AutosarBusSpecifics"] = None) -> None:
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
@@ -25,7 +27,7 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments: dict[str | None, str] | None = { None: comment }
+            self._comments: Comments | None = { None: comment }
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -62,7 +64,7 @@ class Bus:
         return self._comments.get('EN')
 
     @property
-    def comments(self) -> dict[str | None, str] | None:
+    def comments(self) -> Comments | None:
         """The dictionary with the descriptions of the bus in multiple
         languages. ``None`` if unavailable.
 
@@ -87,7 +89,7 @@ class Bus:
         return self._fd_baudrate
 
     @property
-    def autosar(self) -> Optional["AutosarDatabaseSpecifics"]:
+    def autosar(self) -> Optional["AutosarBusSpecifics"]:
         """An object containing AUTOSAR specific properties of the bus.
 
         """
@@ -95,7 +97,7 @@ class Bus:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: Any) -> None:
+    def autosar(self, value: Optional["AutosarBusSpecifics"]) -> None:
         self._autosar = value
 
     def __repr__(self) -> str:

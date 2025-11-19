@@ -1,8 +1,17 @@
 # A DID.
 
 import binascii
+from typing import TypedDict
+
+from cantools.database.diagnostics.data import Data
+from cantools.typechecking import Formats, SignalDictType, SignalMappingType
 
 from ..utils import create_encode_decode_formats, decode_data, encode_data
+
+
+class _Codec(TypedDict):
+    datas: list[Data]
+    formats: Formats
 
 
 class Did:
@@ -11,19 +20,18 @@ class Did:
     """
 
     def __init__(self,
-                 identifier,
-                 name,
-                 length,
-                 datas):
+                 identifier: int,
+                 name: str,
+                 length: int,
+                 datas: list[Data]) -> None:
         self._identifier = identifier
         self._name = name
         self._length = length
         self._datas = datas
-        self._codec = None
         self.refresh()
 
     @property
-    def identifier(self):
+    def identifier(self) -> int:
         """The did identifier as an integer.
 
         """
@@ -31,11 +39,11 @@ class Did:
         return self._identifier
 
     @identifier.setter
-    def identifier(self, value):
+    def identifier(self, value: int) -> None:
         self._identifier = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The did name as a string.
 
         """
@@ -43,23 +51,23 @@ class Did:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def length(self):
-        """The did name as a string.
+    def length(self) -> int:
+        """The did length as an int.
 
         """
 
         return self._length
 
     @length.setter
-    def length(self, value):
+    def length(self, value: int) -> None:
         self._length = value
 
     @property
-    def datas(self):
+    def datas(self) -> list[Data]:
         """The did datas as a string.
 
         """
@@ -67,17 +75,17 @@ class Did:
         return self._datas
 
     @datas.setter
-    def datas(self, value):
+    def datas(self, value: list[Data]) -> None:
         self._datas = value
 
-    def get_data_by_name(self, name):
+    def get_data_by_name(self, name: str) -> Data:
         for data in self._datas:
             if data.name == name:
                 return data
 
         raise KeyError(name)
 
-    def encode(self, data, scaling=True):
+    def encode(self, data: SignalMappingType, scaling: bool = True) -> bytes:
         """Encode given data as a DID of this type.
 
         If `scaling` is ``False`` no scaling of datas is performed.
@@ -93,16 +101,16 @@ class Did:
                               self._codec['formats'],
                               scaling)
         encoded |= (0x80 << (8 * self._length))
-        encoded = hex(encoded)[4:].rstrip('L')
+        encoded_str = hex(encoded)[4:].rstrip('L')
 
-        return binascii.unhexlify(encoded)[:self._length]
+        return binascii.unhexlify(encoded_str)[:self._length]
 
     def decode(self,
-               data,
-               decode_choices=True,
-               scaling=True,
-               allow_truncated=False,
-               allow_excess=True):
+               data: bytes,
+               decode_choices: bool = True,
+               scaling: bool = True,
+               allow_truncated: bool = False,
+               allow_excess: bool = True) -> SignalDictType:
         """Decode given data as a DID of this type.
 
         If `decode_choices` is ``False`` scaled values are not
@@ -125,16 +133,16 @@ class Did:
                            allow_truncated,
                            allow_excess)
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Refresh the internal DID state.
 
         """
 
-        self._codec = {
-            'datas': self._datas,
-            'formats': create_encode_decode_formats(self._datas,
-                                                    self._length)
-        }
+        self._codec = _Codec(
+            datas=self._datas,
+            formats=create_encode_decode_formats(self._datas,
+                                                 self._length)
+        )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"did('{self._name}', 0x{self._identifier:04x})"

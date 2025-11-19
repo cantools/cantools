@@ -1,10 +1,9 @@
 # A CAN bus node (or Board unit)
-import typing
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from ...typechecking import Comments
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from ...database.can.formats.arxml import AutosarNodeSpecifics
     from ...database.can.formats.dbc import DbcSpecifics
 
@@ -80,7 +79,7 @@ class Node:
         return self._comments
 
     @property
-    def dbc(self):
+    def dbc(self) -> Optional["DbcSpecifics"]:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -88,11 +87,11 @@ class Node:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value):
+    def dbc(self, value: Optional["DbcSpecifics"]) -> None:
         self._dbc = value
 
     @property
-    def autosar(self):
+    def autosar(self) -> Optional["AutosarNodeSpecifics"]:
         """An object containing AUTOSAR specific properties of the node.
 
         """
@@ -100,10 +99,10 @@ class Node:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value):
+    def autosar(self, value: Optional["AutosarNodeSpecifics"]) -> None:
         self._autosar = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "node('{}', {})".format(
             self._name,
             "'" + self.comment + "'" if self.comment is not None else None)

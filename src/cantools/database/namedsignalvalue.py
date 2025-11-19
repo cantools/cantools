@@ -1,5 +1,7 @@
 from typing import Any
 
+from cantools.typechecking import Comments
+
 
 class NamedSignalValue:
     """Represents a named value of a signal.
@@ -13,7 +15,7 @@ class NamedSignalValue:
         self,
         value: int,
         name: str,
-        comments: dict[str, str] | None = None,
+        comments: Comments | None = None,
     ) -> None:
         #: The text intended for human consumption which the specified integer
         #: is mapped to.
@@ -25,7 +27,7 @@ class NamedSignalValue:
         self._comments = comments or {}
 
     @property
-    def comments(self) -> dict[str, str]:
+    def comments(self) -> Comments:
         """The descriptions of the named value
 
         This is a dictionary containing the descriptions in multiple

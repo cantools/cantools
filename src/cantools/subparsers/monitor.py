@@ -14,7 +14,6 @@ from argparse_addons import Integer  # type: ignore
 
 from cantools.database.can.message import Message
 from cantools.database.errors import DecodeError
-from cantools.database.namedsignalvalue import NamedSignalValue
 
 from .. import database
 from ..typechecking import SignalDictType

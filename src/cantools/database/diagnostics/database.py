@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, TextIO
+from typing import TextIO
 
 from cantools.database.diagnostics.did import Did
 from cantools.typechecking import StringPathLike
@@ -20,14 +20,14 @@ class Database:
     """
 
     def __init__(self,
-                 dids: Optional[list[Did]] = None):
+                 dids: list[Did] | None = None):
         self._name_to_did: dict[str, Did] = {}
         self._identifier_to_did: dict[int, Did] = {}
         self._dids = dids if dids else []
         self.refresh()
 
     @property
-    def dids(self) -> Optional[list[Did]]:
+    def dids(self) -> list[Did] | None:
         """A list of DIDs in the database.
 
         """

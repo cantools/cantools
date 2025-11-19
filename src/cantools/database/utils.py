@@ -10,6 +10,7 @@ from typing import (
     Union,
 )
 
+from ..database.can.attribute import AttributeType
 from ..typechecking import (
     ByteOrder,
     Choices,
@@ -19,11 +20,9 @@ from ..typechecking import (
     SignalValueType,
 )
 from .errors import DecodeError, EncodeError
-from .namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
     from ..database import Database
-    from ..database.can.attribute import AttributeType
     from ..database.can.message import Message
     from ..database.can.node import Node
     from ..database.can.signal import Signal
@@ -82,12 +81,10 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
 
             raw_values[name] = value if conversion.is_float else round(value)
             continue
-
-        if isinstance(value, str):
+        elif isinstance(value, str):
             raw_values[name] = conversion.choice_to_number(value)
             continue
-
-        if isinstance(value, NamedSignalValue):
+        else:
             # validate the given NamedSignalValue first
             if value != conversion.raw_to_scaled(value.value, decode_choices=True):
                 raise EncodeError(
@@ -428,14 +425,13 @@ def prune_database_choices(database: "Database") -> None:
 
 type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | None
 
-type_sort_attribute = Union[
-    tuple[Literal['dbc'],     "AttributeType", None,   None,      None],
-    tuple[Literal['node'],    "AttributeType", "Node", None,      None],
-    tuple[Literal['message'], "AttributeType", None,   "Message", None],
-    tuple[Literal['signal'],  "AttributeType", None,   "Message", "Signal"],
-]
+type_sort_attribute = \
+    tuple[Literal['dbc'],     AttributeType, None,   None,      None] | \
+    tuple[Literal['node'],    AttributeType, "Node", None,      None] | \
+    tuple[Literal['message'], AttributeType, None,   "Message", None] | \
+    tuple[Literal['signal'],  AttributeType, None,   "Message", "Signal"]
 
-type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
+type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | None
 
 type_sort_choices = Callable[[Choices], Choices] | None
 

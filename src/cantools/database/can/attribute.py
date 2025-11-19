@@ -1,4 +1,4 @@
-from typing import Generic, Union
+from typing import Generic
 
 from .attribute_definition import AttributeDefinition, AttributeValueType
 
@@ -46,4 +46,4 @@ class Attribute(Generic[AttributeValueType]):
         return f"attribute('{self.name}', {self.value})"
 
 
-AttributeType = Union[Attribute[str], Attribute[int], Attribute[float]]
+AttributeType = Attribute[str] | Attribute[int] | Attribute[float]

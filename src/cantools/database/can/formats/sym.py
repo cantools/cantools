@@ -1,9 +1,9 @@
 # Load and dump a CAN database in SYM format.
 
-import collections
 import logging
 import re
-from collections import OrderedDict as odict
+from collections import OrderedDict
+from collections.abc import Mapping
 from itertools import groupby
 from typing import TYPE_CHECKING
 
@@ -265,8 +265,8 @@ class Parser60(textparser.Parser):
         return grammar
 
 
-def _get_section_tokens(tokens: list[Token], name):
-    rows = []
+def _get_section_tokens(tokens: list[Token], name: str) -> list[list[Any]]:
+    rows: list[list[Any]] = []
     for section in tokens[3]:
         if section[0] == name:
             rows.extend([row for row in section[1] if isinstance(row, list)])
@@ -278,7 +278,7 @@ def _load_comment(tokens: list[Token]):
     return tokens[3:].rstrip('\r\n')
 
 
-def _get_enum(enums, name):
+def _get_enum(enums, name: str):
     try:
         return enums[name]
     except KeyError:
@@ -293,7 +293,7 @@ def _load_enums(tokens: list[Token]):
         if values:
             values = values[0]
 
-        enum = odict()
+        enum = OrderedDict()
         for v in values:
             value = num(v[0])
             value_name = v[2]
@@ -304,7 +304,7 @@ def _load_enums(tokens: list[Token]):
     return all_enums
 
 
-def _load_signal_type_and_length(type_, tokens: list[Token], enums):
+def _load_signal_type_and_length(type_: str, tokens: list[Token], enums):
     # Default values.
     is_signed = False
     is_float = False
@@ -377,7 +377,7 @@ def _load_signal_attributes(tokens: list[Token], enum, enums, minimum, maximum, 
     return unit, factor, offset, enum, minimum, maximum, spn
 
 
-def _load_signal(tokens, enums):
+def _load_signal(tokens: list[Token], enums):
     # Default values.
     name = tokens[2]
     byte_order = 'little_endian'
@@ -433,9 +433,9 @@ def _load_signal(tokens, enums):
                   spn=spn)
 
 
-def _load_signals(tokens, enums):
+def _load_signals(tokens, enums) -> dict[str, Signal]:
     section = _get_section_tokens(tokens, '{SIGNALS}')
-    signals = {}
+    signals: dict[str, Signal] = {}
 
     for signal in section:
         signal = _load_signal(signal, enums)
@@ -765,7 +765,7 @@ def _load_messages(tokens: list[Token], signals, enums, strict: bool, sort_signa
     return messages
 
 
-def _load_version(tokens):
+def _load_version(tokens) -> str | None:
     return tokens[1][2]
 
 
@@ -944,11 +944,11 @@ def _dump_messages(database: InternalDatabase) -> str:
             non_multiplexed_signals = []
             # Store all non-multiplexed signals first
             for signal_tree_signal in message.signal_tree:
-                if not isinstance(signal_tree_signal, collections.abc.Mapping):
+                if not isinstance(signal_tree_signal, Mapping):
                     non_multiplexed_signals.append(signal_tree_signal)
 
             for signal_tree_signal in message.signal_tree:
-                if isinstance(signal_tree_signal, collections.abc.Mapping):
+                if isinstance(signal_tree_signal, Mapping):
                     signal_name, multiplexed_signals = next(iter(signal_tree_signal.items()))
                     is_first_message = True
                     for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
@@ -987,7 +987,7 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=so
 
     return sym_str
 
-def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
+def load_string(string: str, strict: bool = True, sort_signals: type_sort_signals = sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given string.
 
     """

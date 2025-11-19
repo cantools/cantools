@@ -1,4 +1,4 @@
-from typing import Generic, Optional, TypeVar, Union
+from typing import Generic, TypeVar
 
 AttributeValueType = TypeVar('AttributeValueType', str, int, float)
 
@@ -10,19 +10,19 @@ class AttributeDefinition(Generic[AttributeValueType]):
 
     def __init__(self,
                  name: str,
-                 default_value: Optional[AttributeValueType] = None,
-                 kind: Optional[str] = None,
-                 type_name: Optional[str] = None,
-                 minimum: Union[int, float, None] = None,
-                 maximum: Union[int, float, None] = None,
-                 choices: Optional[list[str]] = None) -> None:
+                 default_value: AttributeValueType | None = None,
+                 kind: str | None = None,
+                 type_name: str | None = None,
+                 minimum: int | float | None = None,
+                 maximum: int | float | None = None,
+                 choices: list[str] | None = None) -> None:
         self._name = name
-        self._default_value: Optional[AttributeValueType] = default_value
+        self._default_value: AttributeValueType | None = default_value
         self._kind = kind
         self._type_name = type_name
         self._minimum = minimum
         self._maximum = maximum
-        self._choices = choices
+        self._choices = choices or []
 
     @property
     def name(self) -> str:
@@ -33,7 +33,7 @@ class AttributeDefinition(Generic[AttributeValueType]):
         return self._name
 
     @property
-    def default_value(self) -> Optional[AttributeValueType]:
+    def default_value(self) -> AttributeValueType | None:
         """The default value that this attribute has, or ``None`` if
         unavailable.
 
@@ -42,11 +42,11 @@ class AttributeDefinition(Generic[AttributeValueType]):
         return self._default_value
 
     @default_value.setter
-    def default_value(self, value: Optional[AttributeValueType]) -> None:
+    def default_value(self, value: AttributeValueType | None) -> None:
         self._default_value = value
 
     @property
-    def kind(self) -> Optional[str]:
+    def kind(self) -> str | None:
         """The attribute kind (BU_, BO_, SG_), or ``None`` if unavailable.
 
         """
@@ -54,7 +54,7 @@ class AttributeDefinition(Generic[AttributeValueType]):
         return self._kind
 
     @property
-    def type_name(self) -> Optional[str]:
+    def type_name(self) -> str | None:
         """The attribute type (INT, HEX, FLOAT, STRING, ENUM), or ``None`` if
         unavailable.
 
@@ -63,7 +63,7 @@ class AttributeDefinition(Generic[AttributeValueType]):
         return self._type_name
 
     @property
-    def minimum(self) -> Union[int, float, None]:
+    def minimum(self) -> int | float | None:
         """The minimum value of the attribute, or ``None`` if unavailable.
 
         """
@@ -71,11 +71,11 @@ class AttributeDefinition(Generic[AttributeValueType]):
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value: Union[int, float, None]) -> None:
+    def minimum(self, value: int | float | None) -> None:
         self._minimum = value
 
     @property
-    def maximum(self) -> Union[int, float, None]:
+    def maximum(self) -> int | float | None:
         """The maximum value of the attribute, or ``None`` if unavailable.
 
         """
@@ -83,11 +83,11 @@ class AttributeDefinition(Generic[AttributeValueType]):
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value: Union[int, float, None]) -> None:
+    def maximum(self, value: int | float | None) -> None:
         self._maximum = value
 
     @property
-    def choices(self) -> Optional[list[str]]:
+    def choices(self) -> list[str]:
         """A dictionary mapping attribute values to enumerated choices, or
         ``None`` if unavailable.
 
@@ -102,4 +102,4 @@ class AttributeDefinition(Generic[AttributeValueType]):
     def __repr__(self) -> str:
         return f"attribute_definition('{self._name}', {self._default_value})"
 
-AttributeDefinitionType = Union[AttributeDefinition[str], AttributeDefinition[int], AttributeDefinition[float]]
+AttributeDefinitionType = AttributeDefinition[str] | AttributeDefinition[int] | AttributeDefinition[float]

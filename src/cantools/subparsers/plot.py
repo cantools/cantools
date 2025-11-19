@@ -55,7 +55,7 @@ import datetime
 import re
 import struct
 import sys
-from typing import Any, Optional
+from typing import Any
 
 from argparse_addons import Integer  # type: ignore
 
@@ -153,7 +153,7 @@ class TimestampParser:
         if self.args.stop is not None:
             self.args.stop = parse(self.args.stop, x0)
 
-    def parse_user_input_relative_time(self, user_input: str, first_timestamp) -> float:
+    def parse_user_input_relative_time(self, user_input: str, first_timestamp: int) -> float:
         try:
             return float(user_input)
         except ValueError:
@@ -175,7 +175,7 @@ class TimestampParser:
 
         raise ValueError(f"Failed to parse relative time {user_input!r}.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.').")
 
-    def strptimedelta_in_seconds(self, user_input: str, pattern: str) -> Optional[float]:
+    def strptimedelta_in_seconds(self, user_input: str, pattern: str) -> float | None:
         '''
         Parse the string representation of a time delta object.
         Return value: int in seconds or None if parsing failed.
@@ -203,7 +203,7 @@ class TimestampParser:
         d = {key:int(d[key]) for key in d}
         return ((d.pop('day',0)*24 + d.pop('hour',0))*60 + d.pop('min',0))*60 + seconds
 
-    def parse_user_input_absolute_time(self, user_input: str, first_timestamp) -> datetime.datetime:
+    def parse_user_input_absolute_time(self, user_input: str, first_timestamp: int) -> datetime.datetime:
         patterns_year = ['%Y-%m-%d', '%d.%m.%Y']
         patterns_month = ['%m-%d', '%d.%m.']
         patterns_day = ['%d.']
@@ -239,7 +239,7 @@ class TimestampParser:
 
         raise ValueError(f"Failed to parse absolute time {user_input!r}.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.').")
 
-    def first_parse_timestamp(self, timestamp, linenumber):
+    def first_parse_timestamp(self, timestamp: str | None, linenumber: int) -> datetime.datetime:
         if timestamp is None:
             self.use_timestamp = False
             return linenumber
@@ -273,7 +273,7 @@ class TimestampParser:
         self.use_timestamp = False
         return linenumber
 
-    def parse_timestamp(self, timestamp, linenumber):
+    def parse_timestamp(self, timestamp: str, linenumber: int):
         if self.use_timestamp is None:
             x = self.first_parse_timestamp(timestamp, linenumber)
             self.init_start_stop(x)
@@ -284,15 +284,15 @@ class TimestampParser:
         else:
             return linenumber
 
-    def parse_absolute_timestamp(self, timestamp) -> datetime.datetime:
+    def parse_absolute_timestamp(self, timestamp: str) -> datetime.datetime:
         return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
 
     @staticmethod
-    def parse_absolute_seconds(timestamp) -> datetime.datetime:
+    def parse_absolute_seconds(timestamp: str) -> datetime.datetime:
         return datetime.datetime.fromtimestamp(float(timestamp))
 
     @staticmethod
-    def parse_seconds(timestamp) -> float:
+    def parse_seconds(timestamp: str) -> float:
         return float(timestamp)
 
     def get_label(self) -> str:

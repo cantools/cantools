@@ -40,11 +40,11 @@ db = _DeprecatedModule("cantools.db")
 
 
 class _ErrorSubparser:
-    def __init__(self, subparser_name, error_message) -> None:
+    def __init__(self, subparser_name: str, error_message: str) -> None:
         self.subparser_name = subparser_name
         self.error_message = error_message
 
-    def add_subparser(self, subparser_list) -> None:
+    def add_subparser(self, subparser_list: "argparse._SubParsersAction[argparse.ArgumentParser]") -> None:
         err_parser = \
             subparser_list.add_parser(self.subparser_name,
                                       description = self.error_message)
@@ -55,7 +55,7 @@ class _ErrorSubparser:
     def _print_error(self, args) -> None:
         raise ImportError(self.error_message)
 
-def _load_subparser(subparser_name, subparsers) -> None:
+def _load_subparser(subparser_name: str, subparsers: "argparse._SubParsersAction[argparse.ArgumentParser]") -> None:
     """Load a subparser for a CLI command in a safe manner.
 
     i.e., if the subparser cannot be loaded due to an import error or

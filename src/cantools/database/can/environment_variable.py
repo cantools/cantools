@@ -1,4 +1,3 @@
-from typing import Optional, Union
 
 
 class EnvironmentVariable:
@@ -9,14 +8,14 @@ class EnvironmentVariable:
     def __init__(self,
                  name: str,
                  env_type: int,
-                 minimum: Union[int, float],
-                 maximum: Union[int, float],
+                 minimum: int | float,
+                 maximum: int | float,
                  unit: str,
-                 initial_value: Union[int, float],
+                 initial_value: int | float,
                  env_id: int,
                  access_type: str,
                  access_node: str,
-                 comment: Optional[str]) -> None:
+                 comment: str | None) -> None:
         self._name = name
         self._env_type = env_type
         self._minimum = minimum
@@ -49,7 +48,7 @@ class EnvironmentVariable:
         self._env_type = value
 
     @property
-    def minimum(self) -> Union[int, float]:
+    def minimum(self) -> int | float:
         """The minimum value of the environment variable.
 
         """
@@ -57,11 +56,11 @@ class EnvironmentVariable:
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value: Union[int, float]) -> None:
+    def minimum(self, value: int | float) -> None:
         self._minimum = value
 
     @property
-    def maximum(self) -> Union[int, float]:
+    def maximum(self) -> int | float:
         """The maximum value of the environment variable.
 
         """
@@ -69,7 +68,7 @@ class EnvironmentVariable:
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value: Union[int, float]) -> None:
+    def maximum(self, value: int | float) -> None:
         self._maximum = value
 
     @property
@@ -85,7 +84,7 @@ class EnvironmentVariable:
         self._unit = value
 
     @property
-    def initial_value(self) -> Union[int, float]:
+    def initial_value(self) -> int | float:
         """The initial value of the environment variable.
 
         """
@@ -93,7 +92,7 @@ class EnvironmentVariable:
         return self._initial_value
 
     @initial_value.setter
-    def initial_value(self, value: Union[int, float]) -> None:
+    def initial_value(self, value: int | float) -> None:
         self._initial_value = value
 
     @property
@@ -133,7 +132,7 @@ class EnvironmentVariable:
         self._access_node = value
 
     @property
-    def comment(self) -> Optional[str]:
+    def comment(self) -> str | None:
         """The environment variable comment, or ``None`` if unavailable.
 
         """

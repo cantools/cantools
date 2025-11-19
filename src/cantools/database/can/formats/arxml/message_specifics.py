@@ -1,4 +1,3 @@
-from typing import Optional
 
 from .end_to_end_properties import AutosarEnd2EndProperties
 from .secoc_properties import AutosarSecOCProperties
@@ -52,16 +51,16 @@ class AutosarMessageSpecifics:
         return self._secoc is not None
 
     @property
-    def secoc(self) -> Optional[AutosarSecOCProperties]:
+    def secoc(self) -> AutosarSecOCProperties | None:
         """The properties required to implement secured on-board communication
         """
         return self._secoc
 
     @property
-    def e2e(self) -> Optional[AutosarEnd2EndProperties]:
+    def e2e(self) -> AutosarEnd2EndProperties | None:
         """Returns the end-to-end protection properties for the message"""
         return self._e2e
 
     @e2e.setter
-    def e2e(self, value: Optional[AutosarEnd2EndProperties]) -> None:
+    def e2e(self, value: AutosarEnd2EndProperties | None) -> None:
         self._e2e = value

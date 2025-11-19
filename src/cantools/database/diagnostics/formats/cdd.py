@@ -1,7 +1,6 @@
 # Load and dump a diagnostics database in CDD format.
 import logging
 from collections import OrderedDict
-from typing import Optional
 from xml.etree import ElementTree
 
 from cantools.typechecking import ByteOrder, Choices
@@ -21,13 +20,13 @@ class DataType:
     def __init__(self,
                  name: str,
                  id_: str,
-                 bit_length: Optional[int],
-                 encoding: Optional[str],
-                 minimum: Optional[int],
-                 maximum: Optional[int],
-                 choices: Optional[Choices],
+                 bit_length: int | None,
+                 encoding: str | None,
+                 minimum: int | None,
+                 maximum: int | None,
+                 choices: Choices | None,
                  byte_order: ByteOrder,
-                 unit: Optional[str],
+                 unit: str | None,
                  factor: float,
                  offset: float) -> None:
         self.name = name
@@ -43,7 +42,7 @@ class DataType:
         self.offset = offset
 
 
-def _load_choices(data_type: ElementTree.Element) -> Optional[Choices]:
+def _load_choices(data_type: ElementTree.Element) -> Choices | None:
     choices: Choices = OrderedDict()
 
     for choice in data_type.findall('TEXTMAP'):
@@ -64,7 +63,7 @@ def _load_choices(data_type: ElementTree.Element) -> Optional[Choices]:
     return choices
 
 
-def _load_data_types(ecu_doc: Optional[ElementTree.Element]) -> dict[str, DataType]:
+def _load_data_types(ecu_doc: ElementTree.Element | None) -> dict[str, DataType]:
     """Load all data types found in given ECU doc element.
 
     """
@@ -230,7 +229,7 @@ def _load_did_element(did: ElementTree.Element, data_types: dict[str, DataType],
                datas=datas)
 
 
-def _load_did_data_refs(ecu_doc: Optional[ElementTree.Element]) -> dict[str, ElementTree.Element]:
+def _load_did_data_refs(ecu_doc: ElementTree.Element | None) -> dict[str, ElementTree.Element]:
     """Load DID data references from given ECU doc element.
 
     """

@@ -3,8 +3,9 @@ import logging
 import re
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, Optional, Union
 from xml.etree import ElementTree
+
+from cantools.typechecking import Comments
 
 from ....conversion import BaseConversion, IdentityConversion
 from ....namedsignalvalue import NamedSignalValue
@@ -26,9 +27,9 @@ LOGGER = logging.getLogger(__name__)
 
 class SystemLoader:
     def __init__(self,
-                 root:Any,
-                 strict:bool,
-                 sort_signals:type_sort_signals=sort_signals_by_start_bit):
+                 root: ElementTree.Element,
+                 strict: bool,
+                 sort_signals: type_sort_signals = sort_signals_by_start_bit) -> None:
         self._root = root
         self._strict = strict
         self._sort_signals = sort_signals
@@ -98,7 +99,7 @@ class SystemLoader:
 
         self._create_arxml_reference_dicts()
 
-    def autosar_version_newer(self, major: int, minor: Optional[int] = None, patch: Optional[int] = None):
+    def autosar_version_newer(self, major: int, minor: int | None = None, patch: int | None = None) -> bool:
         """Returns true iff the AUTOSAR version specified in the ARXML it at
         least as the version specified by the function parameters
 
@@ -179,7 +180,7 @@ class SystemLoader:
                                 version=None,
                                 autosar_specifics=autosar_specifics)
 
-    def _load_buses(self, package_list: list[ElementTree.Element]) -> list[Bus]:
+    def _load_buses(self, package_list: ElementTree.Element) -> list[Bus]:
         """Recursively extract all buses of all CAN clusters of a list of
         AUTOSAR packages.
 
@@ -232,14 +233,14 @@ class SystemLoader:
                     # base signaling rate
                     baudrate = self._get_unique_arxml_child(variant, 'BAUDRATE')
                     if baudrate is not None:
-                        baudrate = parse_number_string(baudrate.text)
+                        baudrate = parse_number_string(baudrate.text, allow_float=False)
 
                     # baudrate for the payload of CAN-FD frames. (None if
                     # this bus does not use CAN-FD.)
                     fd_baudrate = \
                         self._get_unique_arxml_child(variant, 'CAN-FD-BAUDRATE')
                     if fd_baudrate is not None:
-                        fd_baudrate = parse_number_string(fd_baudrate.text)
+                        fd_baudrate = parse_number_string(fd_baudrate.text, allow_float=False)
 
                     buses.append(Bus(name=name,
                                      comment=comments,
@@ -263,7 +264,7 @@ class SystemLoader:
                     baudrate = self._get_unique_arxml_child(can_cluster,
                                                             'SPEED')
                     if baudrate is not None:
-                        baudrate = parse_number_string(baudrate.text)
+                        baudrate = parse_number_string(baudrate.text, allow_float=False)
 
                     # AUTOSAR 3 does not seem to support CAN-FD
                     fd_baudrate = None
@@ -288,10 +289,7 @@ class SystemLoader:
         return buses
 
     # deal with the senders of messages and the receivers of signals
-    def _load_senders_and_receivers(self, package_list: list[ElementTree.Element], messages: list[Message]) -> None:
-        if package_list is None:
-            return
-
+    def _load_senders_and_receivers(self, package_list: ElementTree.Element, messages: list[Message]) -> None:
         for package in self._get_arxml_children(package_list, '*AR-PACKAGE'):
             for ecu_instance in self._get_arxml_children(package,
                                                          [
@@ -336,7 +334,7 @@ class SystemLoader:
 
         return pdu_messages
 
-    def _load_senders_receivers_of_ecu(self, ecu_instance: ElementTree.Element[str], messages: list[Message]) -> None:
+    def _load_senders_receivers_of_ecu(self, ecu_instance: ElementTree.Element, messages: list[Message]) -> None:
         # get the name of the ECU. Note that in cantools, ECUs
         # are called 'nodes' for all intents and purposes...
         ecu_name = \
@@ -468,7 +466,7 @@ class SystemLoader:
                         if ecu_name not in pdu_message.senders:
                             pdu_message.senders.append(ecu_name)
 
-    def _load_system(self, package_list, messages):
+    def _load_system(self, package_list: ElementTree.Element, messages):
         """Internalize the information specified by the system.
 
         Note that, even though there might at most be a single system
@@ -517,7 +515,7 @@ class SystemLoader:
                 if message.is_container:
                     message.header_byte_order = container_header_byte_order
 
-    def _load_nodes(self, package_list):
+    def _load_nodes(self, package_list: ElementTree.Element) -> list[Node]:
         """Recursively extract all nodes (ECU-instances in AUTOSAR-speak) of
         all CAN clusters of a list of AUTOSAR packages.
 
@@ -525,7 +523,7 @@ class SystemLoader:
                 packages and their sub-packages
         """
 
-        nodes = []
+        nodes: list[Node] = []
 
         for package in package_list:
             for ecu in self._get_arxml_children(package,
@@ -666,7 +664,7 @@ class SystemLoader:
 
         return messages
 
-    def _load_package_messages(self, package_elem: ElementTree.Element[str]) -> list[Message]:
+    def _load_package_messages(self, package_elem: ElementTree.Element) -> list[Message]:
         """This code extracts the information about CAN clusters of an
         individual AR package
         """
@@ -716,7 +714,7 @@ class SystemLoader:
 
         return messages
 
-    def _load_message(self, bus_name: Union[str, None], can_frame_triggering: ElementTree.Element[str]) -> Message:
+    def _load_message(self, bus_name: str | None, can_frame_triggering: ElementTree.Element) -> Message:
         """Load given message and return a message object.
         """
 
@@ -824,10 +822,10 @@ class SystemLoader:
                        sort_signals=self._sort_signals)
 
     def _load_secured_properties(self,
-                                 message_name,
-                                 pdu,
-                                 signals,
-                                 autosar_specifics):
+                                 message_name: str,
+                                 pdu: ElementTree.Element,
+                                 signals: list[Signal],
+                                 autosar_specifics: AutosarMessageSpecifics) -> None:
         payload_pdu = \
             self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
 
@@ -1342,21 +1340,21 @@ class SystemLoader:
 
         return signals
 
-    def _load_message_name(self, can_frame_triggering):
+    def _load_message_name(self, can_frame_triggering: ElementTree.Element) -> str:
         return self._get_unique_arxml_child(can_frame_triggering,
                                             'SHORT-NAME').text
 
-    def _load_message_frame_id(self, can_frame_triggering):
+    def _load_message_frame_id(self, can_frame_triggering: ElementTree.Element) -> str:
         return parse_number_string(
             self._get_unique_arxml_child(can_frame_triggering,
                                          'IDENTIFIER').text)
 
-    def _load_message_length(self, can_frame):
+    def _load_message_length(self, can_frame: ElementTree.Element) -> str:
         return parse_number_string(
             self._get_unique_arxml_child(can_frame,
                                          'FRAME-LENGTH').text)
 
-    def _load_message_is_extended_frame(self, can_frame_triggering):
+    def _load_message_is_extended_frame(self, can_frame_triggering: ElementTree.Element) -> bool:
         can_addressing_mode = \
             self._get_unique_arxml_child(can_frame_triggering,
                                          'CAN-ADDRESSING-MODE')
@@ -1364,8 +1362,8 @@ class SystemLoader:
         return False if can_addressing_mode is None \
                      else can_addressing_mode.text == 'EXTENDED'
 
-    def _load_comments(self, node):
-        result = {}
+    def _load_comments(self, node: ElementTree.Element) -> Comments:
+        result: Comments = {}
 
         for l_2 in self._get_arxml_children(node, ['DESC', '*L-2']):
             if l_2.text is None:
@@ -1384,8 +1382,8 @@ class SystemLoader:
         return result
 
     def _load_e2e_data_id_from_signal_group(self,
-                                            pdu,
-                                            autosar_specifics):
+                                            pdu: ElementTree.Element,
+                                            autosar_specifics: AutosarMessageSpecifics) -> None:
 
         pdu_length = self._get_unique_arxml_child(pdu, 'LENGTH')
         pdu_length = parse_number_string(pdu_length.text)
@@ -1440,7 +1438,7 @@ class SystemLoader:
         e2e_props.payload_length = pdu_length
         autosar_specifics.e2e = e2e_props
 
-    def _load_signal(self, i_signal_to_i_pdu_mapping):
+    def _load_signal(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> Signal | None:
         """Load given signal and return a signal object.
 
         """
@@ -1531,7 +1529,7 @@ class SystemLoader:
         )
         return signal
 
-    def _load_signal_name(self, i_signal):
+    def _load_signal_name(self, i_signal: ElementTree.Element) -> str:
         system_signal_name_elem = \
             self._get_unique_arxml_child(i_signal,
                                          [
@@ -1543,16 +1541,16 @@ class SystemLoader:
 
         return self._get_unique_arxml_child(i_signal, 'SHORT-NAME').text
 
-    def _load_signal_start_position(self, i_signal_to_i_pdu_mapping):
+    def _load_signal_start_position(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> int:
         pos = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                            'START-POSITION').text
-        return parse_number_string(pos)
+        return parse_number_string(pos, allow_float=False)
 
-    def _load_signal_length(self, i_signal, system_signal):
+    def _load_signal_length(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element) -> int:
         i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
 
         if i_signal_length is not None:
-            return parse_number_string(i_signal_length.text)
+            return parse_number_string(i_signal_length.text, allow_float=False)
 
         if not self.autosar_version_newer(4) and system_signal is not None:
             # AUTOSAR3 supports specifying the signal length via the
@@ -1562,7 +1560,7 @@ class SystemLoader:
 
             if system_signal_length is not None:
                 # get the length from the system signal.
-                return parse_number_string(system_signal_length.text)
+                return parse_number_string(system_signal_length.text, allow_float=False)
 
         return None # error?!
 
@@ -2168,7 +2166,7 @@ class SystemLoader:
         self._arxml_path_to_node = {}
         add_sub_references(self._root, '')
 
-    def _get_arxml_children(self, base_elems: Union[ElementTree.Element, list[ElementTree.Element], None], children_location: Union[str, list[str]]) -> list[ElementTree.Element]:
+    def _get_arxml_children(self, base_elems: ElementTree.Element | list[ElementTree.Element] | None, children_location: str | list[str]) -> list[ElementTree.Element]:
         """Locate a set of ElementTree child nodes at a given location.
 
         This is a method that retrieves a list of ElementTree nodes
@@ -2236,10 +2234,10 @@ class SystemLoader:
                 child_tag_name = child_tag_name[1:]
 
             # traverse the specified path one level deeper
-            result: list[ElementTree.Element[str]] = []
+            result: list[ElementTree.Element] = []
 
             for base_elem in base_elems:
-                local_result: list[ElementTree.Element[str]] = []
+                local_result: list[ElementTree.Element] = []
 
                 for child_elem in base_elem:
                     ctt = f'{{{self.xml_namespace}}}{child_tag_name}'
@@ -2273,7 +2271,7 @@ class SystemLoader:
 
         return base_elems
 
-    def _get_unique_arxml_child(self, base_elem: ElementTree.Element[str], child_location: str | list[str]) -> Union[ElementTree.Element, None]:
+    def _get_unique_arxml_child(self, base_elem: ElementTree.Element, child_location: str | list[str]) -> ElementTree.Element | None:
         """This method does the same as get_arxml_children, but it assumes
         that the location yields at most a single node.
 
@@ -2303,7 +2301,7 @@ class SystemLoader:
             return self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                                 '&SIGNAL')
 
-    def _get_pdu(self, can_frame):
+    def _get_pdu(self, can_frame: ElementTree.Element):
         return self._get_unique_arxml_child(can_frame,
                                             [
                                                 'PDU-TO-FRAME-MAPPINGS',
@@ -2311,7 +2309,7 @@ class SystemLoader:
                                                 '&PDU'
                                             ])
 
-    def _get_pdu_path(self, can_frame):
+    def _get_pdu_path(self, can_frame: ElementTree.Element):
         pdu_ref = self._get_unique_arxml_child(can_frame,
                                                [
                                                    'PDU-TO-FRAME-MAPPINGS',
@@ -2325,7 +2323,7 @@ class SystemLoader:
 
         return pdu_ref
 
-    def _get_compu_method(self, system_signal):
+    def _get_compu_method(self, system_signal: ElementTree.Element):
         if self.autosar_version_newer(4):
             return self._get_unique_arxml_child(system_signal,
                                                 [
@@ -2342,7 +2340,7 @@ class SystemLoader:
                                                     '&COMPU-METHOD'
                                                 ])
 
-    def _get_sw_base_type(self, i_signal):
+    def _get_sw_base_type(self, i_signal: ElementTree.Element):
         return self._get_unique_arxml_child(i_signal,
                                             [
                                                '&NETWORK-REPRESENTATION-PROPS',

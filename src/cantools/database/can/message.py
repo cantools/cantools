@@ -133,7 +133,7 @@ class Message:
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs: Codec | None = None
-        self._signal_tree: list[str | list[str]] | None = None
+        self._signal_tree: list[str | dict[str, dict[int, Any]]] | None = None
         self._strict = strict
         self._protocol = protocol
         self.refresh()
@@ -390,7 +390,7 @@ class Message:
             self._comments = {None: value}
 
     @property
-    def comments(self) -> Optional[Comments]:
+    def comments(self) -> Comments | None:
         """The dictionary with the descriptions of the message in multiple
         languages. ``None`` if unavailable.
 
@@ -420,15 +420,13 @@ class Message:
         result: set[str] = set()
 
         for sig in self.signals:
-            if sig.receivers is not None:
-                result.update(sig.receivers)
+            result.update(sig.receivers)
 
         if self.is_container:
             assert self.contained_messages is not None
             for cmsg in self.contained_messages:
                 for sig in cmsg.signals:
-                    if sig.receivers is not None:
-                        result.update(sig.receivers)
+                    result.update(sig.receivers)
 
         return result
 
@@ -1227,7 +1225,7 @@ class Message:
 
         return bool(self._codecs['multiplexers'])
 
-    def _check_signal(self, message_bits, signal: Signal) -> None:
+    def _check_signal(self, message_bits: list[str | None], signal: Signal) -> None:
         signal_bits = signal.length * [signal.name]
 
         if signal.byte_order == 'big_endian':
@@ -1261,7 +1259,7 @@ class Message:
 
                 message_bits[offset] = signal.name
 
-    def _check_mux(self, message_bits, mux) -> None:
+    def _check_mux(self, message_bits: list[None], mux) -> None:
         signal_name, children = next(iter(mux.items()))
         self._check_signal(message_bits,
                            self.get_signal_by_name(signal_name))
@@ -1276,7 +1274,7 @@ class Message:
                 if child_bit is not None:
                     message_bits[i] = child_bit
 
-    def _check_signal_tree(self, message_bits, signal_tree) -> None:
+    def _check_signal_tree(self, message_bits: list[str | None], signal_tree) -> None:
         for signal_name in signal_tree:
             if isinstance(signal_name, dict):
                 self._check_mux(message_bits, signal_name)

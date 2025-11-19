@@ -1,11 +1,13 @@
-from typing import Any, NamedTuple
+from dataclasses import dataclass
+from typing import Any
 
 import bitstruct  # type: ignore
 
 from .errors import Error
 
 
-class FrameId(NamedTuple):
+@dataclass
+class FrameId:
     priority: int
     reserved: int
     data_page: int
@@ -13,7 +15,8 @@ class FrameId(NamedTuple):
     pdu_specific: int
     source_address: int
 
-class PGN(NamedTuple):
+@dataclass
+class PGN:
     reserved: int
     data_page: int
     pdu_format: int

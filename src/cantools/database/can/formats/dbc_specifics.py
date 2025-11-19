@@ -1,7 +1,6 @@
 # Store the specific DBC format properties of objects
 
 from collections import OrderedDict
-from typing import Optional
 
 from cantools.database.can.attribute import AttributeType
 from cantools.database.can.attribute_definition import AttributeDefinitionType
@@ -12,12 +11,12 @@ from cantools.typechecking import Choices
 class DbcSpecifics:
 
     def __init__(self,
-                 attributes: Optional[OrderedDict[str, AttributeType]] = None,
-                 attribute_definitions: Optional[OrderedDict[str, AttributeDefinitionType]] = None,
-                 environment_variables: Optional[OrderedDict[str, EnvironmentVariable]] = None,
-                 value_tables: Optional[OrderedDict[str, Choices]] = None,
-                 attributes_rel: Optional[OrderedDict[str, AttributeType]] = None,
-                 attribute_definitions_rel: Optional[OrderedDict[str, AttributeDefinitionType]] = None):
+                 attributes: OrderedDict[str, AttributeType] | None = None,
+                 attribute_definitions: OrderedDict[str, AttributeDefinitionType] | None = None,
+                 environment_variables: OrderedDict[str, EnvironmentVariable] | None = None,
+                 value_tables: OrderedDict[str, Choices] | None = None,
+                 attributes_rel: OrderedDict[str, AttributeType] | None = None,
+                 attribute_definitions_rel: OrderedDict[str, AttributeDefinitionType] | None = None):
         self._attributes = attributes or OrderedDict()
         self._attribute_definitions = attribute_definitions or OrderedDict()
         self._environment_variables = environment_variables or OrderedDict()

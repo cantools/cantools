@@ -60,10 +60,10 @@ def _load_signal_element(signal: ElementTree.Element, nodes: list[dict[str, str]
     is_float = False
     minimum = None
     maximum = None
-    slope = 1
-    intercept = 0
+    slope: int | float = 1
+    intercept: int | float = 0
     unit = None
-    labels = None
+    labels: Choices | None = None
     notes = None
     receivers: list[str] = []
 
@@ -104,16 +104,13 @@ def _load_signal_element(signal: ElementTree.Element, nodes: list[dict[str, str]
                              key)
 
     # Notes.
-    try:
-        notes = signal.find('ns:Notes', NAMESPACES).text
-    except AttributeError:
-        pass
+    notes = signal.findtext('ns:Notes', default=None, namespaces=NAMESPACES)
 
     # Label set XML element.
     label_set = signal.find('ns:LabelSet', NAMESPACES)
 
     if label_set is not None:
-        labels: Choices = {}
+        labels = {}
 
         for label in label_set.iterfind('ns:Label', NAMESPACES):
             label_value = int(label.attrib['value'])
@@ -156,7 +153,7 @@ def _load_signal_element(signal: ElementTree.Element, nodes: list[dict[str, str]
                   )
 
 
-def _load_multiplex_element(mux: Element, nodes):
+def _load_multiplex_element(mux: Element, nodes: list[dict[str, str]]) -> list[Signal]:
     """Load given multiplex elements and its signals and return list of signals.
 
     """
@@ -187,8 +184,8 @@ def _load_message_element(message: ElementTree.Element, bus_name: str, nodes: li
     frame_id = None
     is_extended_frame = False
     notes = None
-    length = 'auto'
-    interval = None
+    length: int = 0
+    interval: int | None = None
     senders: list[str] = []
 
     # Message XML attributes.
@@ -200,7 +197,7 @@ def _load_message_element(message: ElementTree.Element, bus_name: str, nodes: li
         elif key == 'format':
             is_extended_frame = (value == 'extended')
         elif key == 'length':
-            length = value  # 'auto' needs additional processing after knowing all signals
+            length = int(value)
         elif key == 'interval':
             interval = int(value)
         else:
@@ -208,10 +205,7 @@ def _load_message_element(message: ElementTree.Element, bus_name: str, nodes: li
             # TODO: triggered, count, remote
 
     # Comment.
-    try:
-        notes = message.find('ns:Notes', NAMESPACES).text
-    except AttributeError:
-        pass
+    notes = message.findtext('ns:Notes', default=None, namespaces=NAMESPACES)
 
     # Senders.
     producer = message.find('ns:Producer', NAMESPACES)
@@ -230,14 +224,12 @@ def _load_message_element(message: ElementTree.Element, bus_name: str, nodes: li
     for signal in message.iterfind('ns:Signal', NAMESPACES):
         signals.append(_load_signal_element(signal, nodes))
 
-    if length == 'auto':
+    # 0 length means length was not specified
+    # Must be inferred based on processing after knowing all signals
+    if length == 0:
         if signals:
             last_signal = sorted(signals, key=start_bit)[-1]
             length = (start_bit(last_signal) + last_signal.length + 7) // 8
-        else:
-            length = 0
-    else:
-        length = int(length)
 
     if frame_id is None:
         raise RuntimeError("Message did not contain 'id' key to parse frame ID!")
@@ -284,7 +276,7 @@ def _dump_notes(parent: ElementTree.Element, comment: str) -> None:
     notes.text = comment
 
 
-def _dump_signal(signal: Signal, node_refs: dict[str, int], signal_element: ElementTree.Element):
+def _dump_signal(signal: Signal, node_refs: dict[str, int], signal_element: ElementTree.Element) -> None:
     signal_element.set('name', signal.name)
 
     offset = _start_bit(signal.start, signal.byte_order)
@@ -349,14 +341,14 @@ def _dump_signal(signal: Signal, node_refs: dict[str, int], signal_element: Elem
     if signal.choices:
         label_set = SubElement(signal_element, 'LabelSet')
 
-        for value, name in signal.choices.items():
-            SubElement(label_set, 'Label', name=str(name), value=str(value))
+        for choice_value, name in signal.choices.items():
+            SubElement(label_set, 'Label', name=str(name), value=str(choice_value))
 
 
-def _dump_mux_group(multiplexer_id,
-                    multiplexed_signals,
+def _dump_mux_group(multiplexer_id: int,
+                    multiplexed_signals: list[Signal],
                     node_refs: dict[str, int],
-                    parent: ElementTree.Element):
+                    parent: ElementTree.Element) -> None:
     mux_group = SubElement(parent,
                            'MuxGroup',
                            count=str(multiplexer_id))
@@ -366,13 +358,16 @@ def _dump_mux_group(multiplexer_id,
                      node_refs,
                      SubElement(mux_group, 'Signal'))
 
-def _dump_mux_groups(multiplexer_name: str, signals: list[Signal], node_refs: dict[str, int], parent: ElementTree.Element):
-    signals_per_count = defaultdict(list)
+def _dump_mux_groups(multiplexer_name: str, signals: list[Signal], node_refs: dict[str, int], parent: ElementTree.Element) -> None:
+    signals_per_count: dict[int, list[Signal]] = defaultdict(list)
 
     for signal in signals:
         if signal.multiplexer_signal != multiplexer_name:
             continue
 
+        # TODO refactor Signal class multiplexer field to take empty list instead of None
+        if not signal.multiplexer_ids:
+            raise RuntimeError("Signal is a multiplexer but not IDs were previded!")
         multiplexer_id = signal.multiplexer_ids[0]
         signals_per_count[multiplexer_id].append(signal)
 
@@ -432,12 +427,12 @@ def _dump_message(message: Message, bus: ElementTree.Element, node_refs: dict[st
                          SubElement(message_element, 'Signal'))
 
 
-def _dump_version(version: str | None, parent: ElementTree.Element):
+def _dump_version(version: str | None, parent: ElementTree.Element) -> None:
     if version is not None:
         SubElement(parent, 'Document', version=version)
 
 
-def _dump_nodes(nodes: list[Node], node_refs: dict[str, int], parent: ElementTree.Element):
+def _dump_nodes(nodes: list[Node], node_refs: dict[str, int], parent: ElementTree.Element) -> None:
     for node_id, node in enumerate(nodes, 1):
         SubElement(parent, 'Node', id=str(node_id), name=node.name)
         node_refs[node.name] = node_id

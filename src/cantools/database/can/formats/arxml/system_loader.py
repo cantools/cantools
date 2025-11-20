@@ -180,7 +180,7 @@ class SystemLoader:
                                 version=None,
                                 autosar_specifics=autosar_specifics)
 
-    def _load_buses(self, package_list: ElementTree.Element) -> list[Bus]:
+    def _load_buses(self, package_list: ElementTree.Element | None) -> list[Bus]:
         """Recursively extract all buses of all CAN clusters of a list of
         AUTOSAR packages.
 
@@ -189,6 +189,9 @@ class SystemLoader:
         """
 
         buses: list[Bus] = []
+
+        if package_list is None:
+            return buses
 
         for package in package_list:
             can_clusters = \
@@ -214,7 +217,7 @@ class SystemLoader:
                                                      '*CAN-CLUSTER-CONDITIONAL',
                                                  ])
 
-                    if variants is None or len(variants) == 0:
+                    if len(variants) == 0:
                         # WTH?
                         continue
                     elif len(variants) > 1:
@@ -289,7 +292,10 @@ class SystemLoader:
         return buses
 
     # deal with the senders of messages and the receivers of signals
-    def _load_senders_and_receivers(self, package_list: ElementTree.Element, messages: list[Message]) -> None:
+    def _load_senders_and_receivers(self, package_list: ElementTree.Element | None, messages: list[Message]) -> None:
+        if package_list is None:
+            return
+
         for package in self._get_arxml_children(package_list, '*AR-PACKAGE'):
             for ecu_instance in self._get_arxml_children(package,
                                                          [
@@ -466,7 +472,7 @@ class SystemLoader:
                         if ecu_name not in pdu_message.senders:
                             pdu_message.senders.append(ecu_name)
 
-    def _load_system(self, package_list: ElementTree.Element, messages):
+    def _load_system(self, package_list: ElementTree.Element | None, messages: list[Message]) -> None:
         """Internalize the information specified by the system.
 
         Note that, even though there might at most be a single system
@@ -474,6 +480,9 @@ class SystemLoader:
         mandated, so we have to go through the whole package hierarchy
         for this.
         """
+
+        if package_list is None:
+            return
 
         for package in package_list:
             system = self._get_unique_arxml_child(package,
@@ -515,7 +524,7 @@ class SystemLoader:
                 if message.is_container:
                     message.header_byte_order = container_header_byte_order
 
-    def _load_nodes(self, package_list: ElementTree.Element) -> list[Node]:
+    def _load_nodes(self, package_list: ElementTree.Element | None) -> list[Node]:
         """Recursively extract all nodes (ECU-instances in AUTOSAR-speak) of
         all CAN clusters of a list of AUTOSAR packages.
 
@@ -524,6 +533,9 @@ class SystemLoader:
         """
 
         nodes: list[Node] = []
+
+        if package_list is None:
+            return nodes
 
         for package in package_list:
             for ecu in self._get_arxml_children(package,
@@ -634,7 +646,7 @@ class SystemLoader:
             if sub_package_list is not None:
                 self._load_e2e_properties(sub_package_list, messages)
 
-    def _load_messages(self, package_list: ElementTree.Element) -> list[Message]:
+    def _load_messages(self, package_list: ElementTree.Element | None) -> list[Message]:
         """Recursively extract all messages of all CAN clusters of a list of
         AUTOSAR packages.
 
@@ -643,6 +655,9 @@ class SystemLoader:
         """
 
         messages: list[Message] = []
+
+        if package_list is None:
+            return messages
 
         # load all messages of all packages in an list of XML package elements
         for package in package_list.iterfind('./ns:AR-PACKAGE',

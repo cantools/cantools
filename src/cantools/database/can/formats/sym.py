@@ -274,7 +274,7 @@ def _get_section_tokens(tokens: list[Token], name: str) -> list[list[Any]]:
     return rows
 
 
-def _load_comment(tokens: list[Token]):
+def _load_comment(tokens: list[Token]) -> str:
     return tokens[3:].rstrip('\r\n')
 
 

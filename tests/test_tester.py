@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import time
 import unittest
 from queue import Empty, Queue
@@ -5,6 +6,7 @@ from queue import Empty, Queue
 import can
 
 import cantools
+from cantools.tester import DecodedMessage
 
 
 class CanBus(can.BusABC):
@@ -46,10 +48,10 @@ class CanBus(can.BusABC):
         self._input_queue.put(message)
 
 
-def setup_tester(dut_name,
-                 on_message=None,
-                 decode_choices=False,
-                 scaling=False):
+def setup_tester(dut_name: str,
+                 on_message: Callable[[DecodedMessage], None] | None = None,
+                 decode_choices: bool = False,
+                 scaling: bool = False) -> tuple[cantools.tester.Tester, CanBus]:
     database = cantools.database.load_file('tests/files/kcd/tester.kcd')
     can_bus = CanBus()
     tester = cantools.tester.Tester(dut_name,

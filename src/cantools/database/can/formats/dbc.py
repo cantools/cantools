@@ -28,12 +28,17 @@ from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     sort_signals_by_start_bit,
     sort_signals_by_start_bit_reversed,
+    type_sort_attribute,
     type_sort_attributes,
     type_sort_choices,
     type_sort_signals,
 )
 from ..attribute import Attribute, AttributeType
-from ..attribute_definition import AttributeDefinition, AttributeDefinitionType
+from ..attribute_definition import (
+    AttributeDefinition,
+    AttributeDefinitionType,
+    AttributeValueType,
+)
 from ..bus import Bus
 from ..environment_variable import EnvironmentVariable
 from ..internal_database import InternalDatabase
@@ -484,11 +489,11 @@ def _dump_value_tables(database: InternalDatabase) -> list[str]:
     val_table: list[str] = []
 
     for name, choices in database.dbc.value_tables.items():
-        choices = [
+        choices_text = [
             f'{number} "{text}"'
             for number, text in sorted(choices.items(), reverse=True)
         ]
-        val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices)))
+        val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices_text)))
 
     return [*val_table, '']
 
@@ -623,7 +628,7 @@ def _need_cycletime_def(database: InternalDatabase) -> bool:
                for m in database.messages)
 
 def _bus_is_canfd(database: InternalDatabase) -> bool:
-    if database.dbc is NotImplemented:
+    if database.dbc is None:
         return False
     bus_type = database.dbc.attributes.get('BusType', None)
     if bus_type is None:
@@ -652,13 +657,11 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
         if 'CANFD_BRS' not in definitions:
             definitions['CANFD_BRS'] = ATTRIBUTE_DEFINITION_CANFD_BRS
 
-    def get_value(definition: AttributeDefinitionType, value) -> str:
+    def get_value(definition: AttributeDefinitionType, value: int | float | None) -> str:
         if definition.minimum is None:
-            value = ''
+            return ''
         else:
-            value = f' {value}'
-
-        return value
+            return f' {value}'
 
     def get_minimum(definition: AttributeDefinitionType) -> str:
         return get_value(definition, definition.minimum)
@@ -693,13 +696,11 @@ def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
     else:
         definitions = database.dbc.attribute_definitions_rel
 
-    def get_value(definition: AttributeDefinitionType, value) -> str:
+    def get_value(definition: AttributeDefinitionType, value: int | float | None) -> str:
         if definition.minimum is None:
-            value = ''
+            return ''
         else:
-            value = f' {value}'
-
-        return value
+            return f' {value}'
 
     def get_minimum(definition: AttributeDefinitionType) -> str:
         return get_value(definition, definition.minimum)
@@ -766,7 +767,7 @@ def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[
 
 
 def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals, sort_attributes: type_sort_attributes) -> list[str]:
-    attributes: list[type_sort_attributes] = []
+    attributes: list[type_sort_attribute] = []
 
     def get_value(attribute: AttributeType) -> str | int | float:
         result = attribute.value
@@ -889,15 +890,10 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
 def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
     ba_rel: list[str] = []
 
-    def get_value(attribute: Attribute):
-        result = attribute.value
+    def get_value(attribute: AttributeType) -> str | int | float:
+        return f'"{attribute.value}"' if attribute.definition.type_name == "STRING" else attribute.value
 
-        if attribute.definition.type_name == "STRING":
-            result = '"' + attribute.value + '"'
-
-        return result
-
-    if database.dbc is not None and database.dbc.attributes_rel is not None:
+    if database.dbc is not None:
         attributes_rel = database.dbc.attributes_rel
         for frame_id, element in attributes_rel.items():
             if "signal" in element:
@@ -1047,7 +1043,7 @@ def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
 
 
 def _load_comments(tokens):
-    comments = defaultdict(dict)
+    comments: dict[str | int, dict[str, str]] = defaultdict(dict)
 
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
@@ -1408,7 +1404,7 @@ def _load_signals(tokens,
     except KeyError:
         pass
 
-    def get_attributes(frame_id_dbc, signal):
+    def get_attributes(frame_id_dbc: int, signal):
         """Get attributes for given signal.
 
         """
@@ -1418,7 +1414,7 @@ def _load_signals(tokens,
         except KeyError:
             return None
 
-    def get_comment(frame_id_dbc, signal):
+    def get_comment(frame_id_dbc: int, signal):
         """Get comment for given signal.
 
         """
@@ -1428,7 +1424,7 @@ def _load_signals(tokens,
         except KeyError:
             return None
 
-    def get_choices(frame_id_dbc, signal):
+    def get_choices(frame_id_dbc: int, signal):
         """Get choices for given signal.
 
         """
@@ -1476,19 +1472,19 @@ def _load_signals(tokens,
         elif signal[0] != multiplexer_signal:
             return multiplexer_signal
 
-    def get_receivers(receivers: list[str]):
+    def get_receivers(receivers: list[str]) -> list[str]:
         if receivers == ['Vector__XXX']:
             receivers = []
 
         return [_get_node_name(attributes, receiver) for receiver in receivers]
 
-    def get_minimum(minimum, maximum):
+    def get_minimum(minimum: str, maximum: str) -> int | float | None:
         if minimum == maximum == '0':
             return None
         else:
             return num(minimum)
 
-    def get_maximum(minimum, maximum):
+    def get_maximum(minimum: str, maximum: str) -> int | float | None:
         if minimum == maximum == '0':
             return None
         else:
@@ -1589,10 +1585,10 @@ def _load_messages(tokens,
                    message_senders,
                    signal_types,
                    signal_multiplexer_values,
-                   strict,
-                   bus_name,
+                   strict: bool,
+                   bus_name: str | None,
                    signal_groups,
-                   sort_signals):
+                   sort_signals: type_sort_signals) -> list[Message]:
     """Load messages.
 
     """
@@ -1702,7 +1698,7 @@ def _load_messages(tokens,
         except KeyError:
             return None
 
-    messages = []
+    messages: list[Message] = []
 
     for message in tokens.get('BO_', []):
         # Any message named VECTOR__INDEPENDENT_SIG_MSG contains
@@ -1814,30 +1810,29 @@ def _load_nodes(tokens, comments, attributes, definitions):
 
     return nodes
 
-
-def get_attribute_definition(database: InternalDatabase, name: str, default: AttributeDefinitionType) -> AttributeDefinitionType:
+def get_attribute_definition(database: InternalDatabase, name: str, default: AttributeDefinition[AttributeValueType]) -> AttributeDefinition[AttributeValueType]:
     if database.dbc is None:
         database.dbc = DbcSpecifics()
 
     if name not in database.dbc.attribute_definitions:
         database.dbc.attribute_definitions[name] = default
 
-    return database.dbc.attribute_definitions[name]
+    return cast('AttributeDefinition[AttributeValueType]', database.dbc.attribute_definitions[name])
 
 
-def get_long_node_name_attribute_definition(database: InternalDatabase) -> AttributeDefinitionType:
+def get_long_node_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
     return get_attribute_definition(database,
                                     'SystemNodeLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_NODE_NAME)
 
 
-def get_long_message_name_attribute_definition(database: InternalDatabase) -> AttributeDefinitionType:
+def get_long_message_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
     return get_attribute_definition(database,
                                     'SystemMessageLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME)
 
 
-def get_long_signal_name_attribute_definition(database: InternalDatabase) -> AttributeDefinitionType:
+def get_long_signal_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
     return get_attribute_definition(database,
                                     'SystemSignalLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME)
@@ -1901,7 +1896,7 @@ def make_node_names_unique(database: InternalDatabase, shorten_long_names: bool)
         if node.dbc is None:
             node.dbc = DbcSpecifics()
 
-        node.dbc.attributes['SystemNodeLongSymbol'] = Attribute(
+        node.dbc.attributes['SystemNodeLongSymbol'] = Attribute[str](
             node.name,
             get_long_node_name_attribute_definition(database))
         node.name = name
@@ -1946,7 +1941,7 @@ def make_signal_names_unique(database: InternalDatabase, shorten_long_names: boo
             signal.name = name
 
 
-def make_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+def make_names_unique(database: InternalDatabase, shorten_long_names: bool) -> InternalDatabase:
     """Make message, signal and node names unique and add attributes for
     their long names.
 
@@ -2023,7 +2018,7 @@ def dump_string(database: InternalDatabase,
 def get_definitions_dict(definitions, defaults) -> OrderedDict[str, AttributeDefinitionType]:
     result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
 
-    def convert_value(definition, value):
+    def convert_value(definition: AttributeDefinitionType, value: int | float | str) -> int | float:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
@@ -2063,7 +2058,7 @@ def get_definitions_dict(definitions, defaults) -> OrderedDict[str, AttributeDef
 def get_definitions_rel_dict(definitions, defaults):
     result = OrderedDict()
 
-    def convert_value(definition, value):
+    def convert_value(definition: AttributeDefinitionType, value: int | float | str) -> int | float:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':

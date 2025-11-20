@@ -210,6 +210,7 @@ class Message:
         for signal in codec['signals']:
             multiplexers = codec['multiplexers']
 
+            node: str | dict[str, dict[int, Any]]
             if signal.name in multiplexers:
                 node = {
                     signal.name: {

@@ -226,13 +226,6 @@ class SystemLoader:
 
                     variant = variants[0]
 
-                    # version of the CAN standard
-                    proto_version = \
-                        self._get_unique_arxml_child(variant,
-                                                     'PROTOCOL-VERSION')
-                    if proto_version is not None:
-                        proto_version = proto_version.text
-
                     # base signaling rate
                     baudrate = self._get_unique_arxml_child(variant, 'BAUDRATE')
                     if baudrate is not None:
@@ -255,13 +248,6 @@ class SystemLoader:
                         self._get_unique_arxml_child(can_cluster,
                                                      'SHORT-NAME').text
                     comments = self._load_comments(can_cluster)
-
-                    # version of the CAN standard
-                    proto_version = \
-                        self._get_unique_arxml_child(can_cluster,
-                                                     'PROTOCOL-VERSION')
-                    if proto_version is not None:
-                        proto_version = proto_version.text
 
                     # base signaling rate
                     baudrate = self._get_unique_arxml_child(can_cluster,

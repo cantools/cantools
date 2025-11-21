@@ -305,10 +305,19 @@ class Database:
         database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
-        self._nodes = database.nodes
-        self._buses = database.buses
-        self._version = database.version
-        self._dbc = database.dbc
+        self._nodes += database.nodes
+        self._buses += database.buses
+
+        if self._version is None:
+            self._version = database.version
+        elif database.version is not None:
+            self._version += database.version
+
+        if self._dbc is None:
+            self._dbc = database.dbc
+        else:
+            self._dbc += database.dbc
+
         self.refresh()
 
     def add_kcd(self, fp: TextIO) -> None:

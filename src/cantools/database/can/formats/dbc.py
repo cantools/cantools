@@ -1649,12 +1649,15 @@ def _load_messages(tokens,
         message_attributes = get_attributes(frame_id_dbc)
 
         try:
+            ref_definitions = definitions['VFrameFormat']
+            if ref_definitions.type_name == 'INT':
+                ref_definitions = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
             frame_format = message_attributes['VFrameFormat'].value
-            frame_format = definitions['VFrameFormat'].choices[frame_format]
+            frame_format = ref_definitions.choices[frame_format]
         except (KeyError, TypeError):
             try:
-                frame_format = definitions['VFrameFormat'].default_value
-            except (KeyError, TypeError):
+                frame_format = ref_definitions.default_value
+            except (KeyError, TypeError, UnboundLocalError):
                 frame_format = None
 
         return frame_format

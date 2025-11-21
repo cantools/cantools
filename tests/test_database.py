@@ -6293,6 +6293,27 @@ class CanToolsDatabaseTest(unittest.TestCase):
         msgex = db.get_message_by_name('TestMsg_Ex')
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
+        
+    def test_fd_detection_int(self):
+        filename = "tests/files/dbc/fd_test_int.dbc"
+        db = cantools.database.load_file(filename)
+        
+        msgfdex = db.get_message_by_name('TestMsg_FDEx')
+        self.assertEqual(True, msgfdex.is_fd)
+        self.assertEqual(True, msgfdex.is_extended_frame)
+
+        msgfdstd = db.get_message_by_name('TestMsg_FDStd')
+        self.assertEqual(True, msgfdstd.is_fd)
+        self.assertEqual(False, msgfdstd.is_extended_frame)
+
+        msgstd = db.get_message_by_name('TestMsg_Std')
+        self.assertEqual(False, msgstd.is_fd)
+        self.assertEqual(False, msgstd.is_extended_frame)
+
+        msgex = db.get_message_by_name('TestMsg_Ex')
+        self.assertEqual(False, msgex.is_fd)
+        self.assertEqual(True, msgex.is_extended_frame)
+        
 
 
     def test_exceptions_picklable(self):

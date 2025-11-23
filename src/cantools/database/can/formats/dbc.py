@@ -1647,17 +1647,20 @@ def _load_messages(tokens,
         """Get frame format for a given message"""
 
         message_attributes = get_attributes(frame_id_dbc)
+        ref_definitions = definitions.get('VFrameFormat', None)
+        if ref_definitions is None:
+            return None
+
+        if ref_definitions.type_name == 'INT':
+            ref_definitions = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
 
         try:
-            ref_definitions = definitions['VFrameFormat']
-            if ref_definitions.type_name == 'INT':
-                ref_definitions = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
             frame_format = message_attributes['VFrameFormat'].value
             frame_format = ref_definitions.choices[frame_format]
         except (KeyError, TypeError):
             try:
                 frame_format = ref_definitions.default_value
-            except (KeyError, TypeError, UnboundLocalError):
+            except (KeyError, TypeError):
                 frame_format = None
 
         return frame_format

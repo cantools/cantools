@@ -1658,10 +1658,7 @@ def _load_messages(tokens,
             frame_format = message_attributes['VFrameFormat'].value
             frame_format = ref_definitions.choices[frame_format]
         except (KeyError, TypeError):
-            try:
-                frame_format = ref_definitions.default_value
-            except (KeyError, TypeError):
-                frame_format = None
+            frame_format = ref_definitions.default_value
 
         return frame_format
 

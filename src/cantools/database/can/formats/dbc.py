@@ -818,9 +818,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
                 v_frame_format_str = 'ExtendedCAN'
             else:
                 v_frame_format_str = 'StandardCAN'
-
-            if v_frame_format_def.type_name == 'INT':
-                v_frame_format_def = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
+            v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)
             # only set the VFrameFormat if it valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
@@ -1569,6 +1567,20 @@ def _load_signals(tokens,
     return signals
 
 
+def _get_enum_vframeformat_attribute(int_attribute):
+    """Get VFrameFormat attribute definition as ENUM.
+
+    """
+
+    if int_attribute.type_name != 'INT':
+        return int_attribute
+
+    default_value = int_attribute.default_value
+    enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
+    enum_attribute.default_value = enum_attribute.choices[default_value]
+
+    return enum_attribute
+
 def _load_messages(tokens,
                    comments,
                    attributes,
@@ -1654,8 +1666,7 @@ def _load_messages(tokens,
         if ref_definitions is None:
             return None
 
-        if ref_definitions.type_name == 'INT':
-            ref_definitions = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
+        ref_definitions = _get_enum_vframeformat_attribute(ref_definitions)
 
         try:
             frame_format = message_attributes['VFrameFormat'].value

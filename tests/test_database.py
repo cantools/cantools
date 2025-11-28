@@ -6314,12 +6314,32 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
         
-    def test_int_vframeformat_definition(self):
+        self.assert_dbc_dump(db, filename)
+        
+    def test_int_vframeformat_dump(self):
         filename = "tests/files/dbc/fd_test_int.dbc"
         db = cantools.database.load_file(filename)
+        self.assert_dbc_dump(db, filename)
         
+        filename = "tests/files/dbc/variable_dlc.dbc"
+        db = cantools.database.load_file(filename)
         self.assert_dbc_dump(db, filename)
 
+    def test_int_vframeformat_default_value(self):
+        filename = "tests/files/dbc/vframeformat_int.dbc"
+        db = cantools.database.load_file(filename)
+        
+        msgex = db.get_message_by_name('TestMsg_J1939')
+        self.assertEqual(False, msgex.is_fd)
+        self.assertEqual(True, msgex.is_extended_frame)
+        
+        msgex = db.get_message_by_name('TestMsg_Std')
+        self.assertEqual(False, msgex.is_fd)
+        self.assertEqual(False, msgex.is_extended_frame)
+        
+        # TestMsg_J1939 should saved as J1939 format
+        self.assert_dbc_dump(db, filename)
+        
     def test_exceptions_picklable(self):
         # Error
         err_msg = "This is an Error()"

@@ -6314,7 +6314,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
         
-
+    def test_int_vframeformat_definition(self):
+        filename = "tests/files/dbc/fd_test_int.dbc"
+        db = cantools.database.load_file(filename)
+        
+        self.assert_dbc_dump(db, filename)
 
     def test_exceptions_picklable(self):
         # Error

@@ -819,15 +819,25 @@ def _dump_attributes(database, sort_signals, sort_attributes):
             else:
                 v_frame_format_str = 'StandardCAN'
 
-            # only set the VFrameFormat if it valid according to the attribute definition
-            if (
-                v_frame_format_str in v_frame_format_def.choices
-                and v_frame_format_str != v_frame_format_def.default_value
-            ):
-                msg_attributes['VFrameFormat'] = Attribute(
-                    value=v_frame_format_def.choices.index(v_frame_format_str),
-                    definition=v_frame_format_def,
-                )
+            if v_frame_format_def.type_name == "ENUM":
+                # only set the VFrameFormat if it valid according to the attribute definition
+                if (
+                    v_frame_format_str in v_frame_format_def.choices
+                    and v_frame_format_str != v_frame_format_def.default_value
+                ):
+                    msg_attributes['VFrameFormat'] = Attribute(
+                        value=v_frame_format_def.choices.index(v_frame_format_str),
+                        definition=v_frame_format_def,
+                    )
+                    
+            elif v_frame_format_def.type_name == "INT":
+                v_frame_format_index = ATTRIBUTE_DEFINITION_VFRAMEFORMAT.choices.index(v_frame_format_str)
+                if v_frame_format_index != v_frame_format_def.default_value:
+                    msg_attributes['VFrameFormat'] = Attribute(
+                        value=v_frame_format_index,
+                        definition=v_frame_format_def,
+                    )
+                
 
         # output all message attributes
         for attribute in msg_attributes.values():

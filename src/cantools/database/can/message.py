@@ -1,11 +1,9 @@
 # A CAN message.
 
 import logging
-from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
-    Any,
     Optional,
     cast,
 )
@@ -133,7 +131,7 @@ class Message:
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs: Codec | None = None
-        self._signal_tree: list[str | dict[str, dict[int, Any]]] | None = None
+        self._signal_tree: list[str | dict[str, dict[int, Codec]]] | None = None
         self._strict = strict
         self._protocol = protocol
         self.refresh()
@@ -199,18 +197,18 @@ class Message:
             'multiplexers': multiplexers
         }
 
-    def _create_signal_tree(self, codec: Codec) -> Sequence[str | Mapping[str, Mapping[int, Any]]]:
+    def _create_signal_tree(self, codec: Codec) -> list[str | dict[str, dict[int, Codec]]]:
         """Create a multiplexing tree node of given codec. This is a recursive
         function.
 
         """
 
-        nodes: list[str | dict[str, dict[int, Any]]] = []
+        nodes: list[str | dict[str, dict[int, Codec]]] = []
 
         for signal in codec['signals']:
             multiplexers = codec['multiplexers']
 
-            node: str | dict[str, dict[int, Any]]
+            node: str | dict[str, dict[int, Codec]]
             if signal.name in multiplexers:
                 node = {
                     signal.name: {
@@ -503,7 +501,7 @@ class Message:
         self._protocol = value
 
     @property
-    def signal_tree(self) -> list[str | dict[str, dict[int, Any]]] | None:
+    def signal_tree(self) -> list[str | dict[str, dict[int, Codec]]] | None:
         """All signal names and multiplexer ids as a tree. Multiplexer signals
         are dictionaries, while other signals are strings.
 

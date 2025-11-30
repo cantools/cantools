@@ -2,20 +2,29 @@
 
 import queue
 import time
-from collections import UserDict
-from collections.abc import Callable, Mapping
+from collections import UserDict, defaultdict
+from collections.abc import Callable, Iterable, Mapping
+from typing import Protocol, TypeVar
 
 import can
 
 from cantools.database.can.database import Database
 from cantools.database.can.message import Message
 from cantools.typechecking import (
+    Codec,
     DecodeResultType,
     SignalDictType,
     SignalValueType,
 )
 
 from .errors import Error
+
+_KT = TypeVar("_KT")
+_VT_co = TypeVar("_VT_co", covariant=True)
+
+class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
+    def keys(self) -> Iterable[_KT]: ...
+    def __getitem__(self, __key: _KT) -> _VT_co: ...
 
 
 class DecodedMessage:
@@ -40,10 +49,10 @@ class Messages(UserDict[str, "_TesterMessage"]):
 
 
 def _invert_signal_tree(
-        tree: list[str | list[str]] | None,
-        cur_mpx: dict | None = None,
-        ret: dict | None = None
-) -> dict:
+        tree: list[str | dict[str, dict[int, Codec]]] | None,
+        cur_mpx: dict[str, int] | None = None,
+        ret: dict[str, list[set[tuple[str, int]]]] | None = None
+) -> dict[str, list[set[tuple[str, int]]]]:
 
     """The tree is laid out with two kinds of dicts.  Single-element dict
     keyed by string -> multiplexer, which is own dict keyed by
@@ -51,8 +60,11 @@ def _invert_signal_tree(
 
     """
 
+    if not tree:
+        return {}
+
     if ret is None:
-        ret = {}
+        ret = defaultdict(list)
 
     if cur_mpx is None:
         cur_mpx = {}
@@ -67,13 +79,13 @@ def _invert_signal_tree(
                 _invert_signal_tree(sig_tree, next_mpx, ret)
 
         elif isinstance(sigs, str):
-            ret.setdefault(sigs, []).append(set(cur_mpx.items()))
+            ret[sigs].append(set(cur_mpx.items()))
         else:
             raise TypeError(repr(sigs))
 
     return ret
 
-def invert_signal_tree(tree: list[str | list[str]] | None) -> dict:
+def invert_signal_tree(tree: list[str | dict[str, dict[int, Codec]]] | None) -> dict[str, list[set[tuple[str, int]]]]:
     """Return a mapping of signals to the multiplex settings that will
     yield the signal.
 
@@ -157,8 +169,8 @@ class _TesterMessage(UserDict[str, SignalValueType]):
         self.data[signal_name] = value
         self._update_can_message()
 
-    def update(self, signals: SignalDictType) -> None:
-        s = dict(signals)
+    def update(self, m: SupportsKeysAndGetItem[str, SignalValueType], /) -> None:
+        s = dict(m)
         new_signal_names = set(s) - self._signal_names
         if new_signal_names:
             raise KeyError(repr(new_signal_names))
@@ -217,7 +229,7 @@ class _TesterMessage(UserDict[str, SignalValueType]):
             try:
                 message = self._input_queue.get(timeout=remaining_time)
             except queue.Empty:
-                return
+                return None
 
             decoded = self._filter_expected_message(message, signals)
 
@@ -231,10 +243,13 @@ class _TesterMessage(UserDict[str, SignalValueType]):
                 remaining_time = end_time - time.time()
 
                 if remaining_time <= 0:
-                    return
+                    return None
 
     def _filter_expected_message(self, message: DecodedMessage, signals: SignalDictType) -> DecodeResultType | None:
         if message.name == self.database.name:
+            # type()/isinstance() cannot handle SignalDictType directly, but
+            # luckily there's only one dict signature in DecodedMessage.signals's type
+            assert(type(message.signals) is dict)
             if all(message.signals[name] == signals[name] for name in signals.keys()):
                 return message.signals
 
@@ -242,6 +257,7 @@ class _TesterMessage(UserDict[str, SignalValueType]):
         if not self.enabled:
             return
 
+        assert(self.periodic)
         self._periodic_task = self._can_bus.send_periodic(
             self._can_message,
             self.database.cycle_time / 1000.0)
@@ -267,6 +283,7 @@ class _TesterMessage(UserDict[str, SignalValueType]):
                                         check=True)
 
         if self._periodic_task is not None:
+            assert(isinstance(self._periodic_task, can.ModifiableCyclicTaskABC))
             self._periodic_task.modify_data(self._can_message)
 
     def _prepare_initial_signal_values(self) -> SignalDictType:

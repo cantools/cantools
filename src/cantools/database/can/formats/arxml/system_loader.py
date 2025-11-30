@@ -911,17 +911,17 @@ class SystemLoader:
                                   {'FOR-ALL':
                                    f'Truncated freshness value for '
                                    f"'{message_name}'"}))
-        if auth_tx_len is not None and auth_tx_len > 0:
-            n0 = payload_length*8 + (fresh_tx_len//8)*8 + (7-fresh_tx_len%8)
-            signals.append(Signal(name=f'{message_name}_Authenticator',
-                                  start=n0,
-                                  length=auth_tx_len,
-                                  byte_order='big_endian',
-                                  conversion=IdentityConversion(is_float=False),
-                                  comment=\
-                                  { 'FOR-ALL':
-                                    f'Truncated authenticator value for '
-                                    f"'{message_name}'"}))
+            if auth_tx_len is not None and auth_tx_len > 0:
+                n0 = payload_length*8 + (fresh_tx_len//8)*8 + (7-fresh_tx_len%8)
+                signals.append(Signal(name=f'{message_name}_Authenticator',
+                                    start=n0,
+                                    length=auth_tx_len,
+                                    byte_order='big_endian',
+                                    conversion=IdentityConversion(is_float=False),
+                                    comment=\
+                                    { 'FOR-ALL':
+                                        f'Truncated authenticator value for '
+                                        f"'{message_name}'"}))
 
         # note that the length of the authenificator is implicit:
         # e.g., for an MD5 based message authencation code, it would
@@ -949,7 +949,7 @@ class SystemLoader:
 
             header_type = self._get_unique_arxml_child(pdu, 'HEADER-TYPE')
 
-            if header_type.text != 'SHORT-HEADER':
+            if header_type and header_type.text and header_type.text != 'SHORT-HEADER':
                 LOGGER.warning(f'Only short headers are currently supported '
                                f'for container frames. Frame "{frame_name}" '
                                f'Uses "{header_type.text}"!')
@@ -1631,7 +1631,7 @@ class SystemLoader:
 
             return self._load_arxml_init_value_string_helper(system_signal)
 
-    def _load_arxml_invalid_int_value(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element):
+    def _load_arxml_invalid_int_value(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element) -> int | bool | None:
         """Load a signal's internal value which indicates that it is not valid
 
         i.e., this returns the value which is transferred over the bus
@@ -1652,10 +1652,10 @@ class SystemLoader:
                                                  'VALUE',
                                              ])
 
-            if invalid_val is None:
+            if invalid_val is None or not invalid_val.text:
                 return None
 
-            return parse_number_string(invalid_val.text)
+            return parse_number_string(invalid_val.text, allow_float=False)
 
         else:
             invalid_val = \
@@ -1674,15 +1674,15 @@ class SystemLoader:
                                                        'INTEGER-LITERAL',
                                                        'VALUE',
                                                    ])
-            if literal is not None:
-                return parse_number_string(literal.text)
+            if literal is not None and literal.text:
+                return parse_number_string(literal.text, allow_float=False)
 
             literal = self._get_unique_arxml_child(invalid_val,
                                                    [
                                                        'BOOLEAN-LITERAL',
                                                        'VALUE',
                                                    ])
-            if literal is not None:
+            if literal is not None and literal.text:
                 return literal.text.lower().strip() == 'true'
 
             return None
@@ -1734,7 +1734,7 @@ class SystemLoader:
             ref_elem = signal_elem.find(f'./ns:INIT-VALUE-REF',
                                         self._xml_namespaces)
 
-            if ref_elem is None:
+            if ref_elem is None or not ref_elem.text:
                 # no initial value found here
                 return None
 
@@ -1788,7 +1788,7 @@ class SystemLoader:
         return res.text
 
     def _load_texttable(self, compu_method: ElementTree.Element) -> Choices:
-        choices: Choices = {}
+        choices: Choices = OrderedDict()
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -1812,7 +1812,7 @@ class SystemLoader:
 
         return choices
 
-    def _load_linear_scale(self, compu_scale: ElementTree.Element):
+    def _load_linear_scale(self, compu_scale: ElementTree.Element) -> tuple[float, float, float, float]:
         # load the scaling factor an offset
         compu_rational_coeffs = \
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
@@ -1837,21 +1837,19 @@ class SystemLoader:
                     f'Expected 1 denominator value for linear scaling, but '
                     f'got {len(denominators)}.')
 
-            denominator = parse_number_string(denominators[0].text, True)
-            factor = parse_number_string(numerators[1].text, True) / denominator
-            offset = parse_number_string(numerators[0].text, True) / denominator
+            if denominators[0].text and numerators[1].text and numerators[0].text:
+                denominator = parse_number_string(denominators[0].text, True)
+                factor = parse_number_string(numerators[1].text, True) / denominator
+                offset = parse_number_string(numerators[0].text, True) / denominator
+            else:
+                raise RuntimeError(f"Denominator {denominators[0]} or numerators ({numerators[1]}, {numerators[0]}) empty!")
 
         # load the domain interval of the scale
         lower_limit, upper_limit = self._load_scale_limits(compu_scale)
 
-        # sanity checks
-        if lower_limit is not None and \
-             upper_limit is not None and \
-             lower_limit > upper_limit:
-            LOGGER.warning(f'An valid interval should be provided for '
+        if lower_limit > upper_limit:
+            raise RuntimeError(f'An valid interval should be provided for '
                            f'the domain of scaled signals.')
-            lower_limit = None
-            upper_limit = None
 
         if factor <= 0.0:
             LOGGER.warning(f'Signal scaling is currently only '
@@ -1860,12 +1858,14 @@ class SystemLoader:
                            f'results!')
 
         # convert interval of the domain to the interval of the range
-        minimum = None if lower_limit is None else lower_limit*factor + offset
-        maximum = None if upper_limit is None else upper_limit*factor + offset
+        minimum = lower_limit*factor + offset
+        maximum = upper_limit*factor + offset
 
         return minimum, maximum, factor, offset
 
-    def _load_linear(self, compu_method: ElementTree.Element, is_float):
+    def _load_linear(self, compu_method: ElementTree.Element, is_float: bool) -> tuple[float, float, float, float]:
+        # TODO figure out how to refactor this function since ._load_linear_scale() always returns a valid scale now
+        # Before it didn't, and so this method checked that only one element provided a scale to work with.
         minimum: float | None = None
         maximum: float | None = None
         factor = 1.0
@@ -1905,12 +1905,12 @@ class SystemLoader:
 
         return lower_limit, upper_limit
 
-    def _load_scale_linear_and_texttable(self, compu_method: ElementTree.Element, is_float):
+    def _load_scale_linear_and_texttable(self, compu_method: ElementTree.Element, is_float: bool) -> tuple[float | None, float | None, float, float, Choices]:
         minimum: float | None = None
         maximum: float | None = None
         factor = 1.0
         offset = 0.0
-        choices = {}
+        choices: Choices = OrderedDict()
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -1950,7 +1950,7 @@ class SystemLoader:
 
         return minimum, maximum, factor, offset, choices
 
-    def _load_system_signal(self, system_signal: ElementTree.Element, is_float: bool):
+    def _load_system_signal(self, system_signal: ElementTree.Element, is_float: bool) -> tuple[float | None, float | None, float, float, Choices | None, str | None, Comments | None]:
         minimum: float | None = None
         maximum: float | None = None
         factor = 1.0
@@ -2012,16 +2012,15 @@ class SystemLoader:
         base_type = self._get_sw_base_type(i_signal)
 
         if base_type is not None:
-            base_type_encoding = \
+            base_type_encoding_elem = \
                 self._get_unique_arxml_child(base_type, '&BASE-TYPE-ENCODING')
 
-            if base_type_encoding is None:
-                btt = base_type.find('./ns:SHORT-NAME', self._xml_namespaces)
-                btt = btt.text
+            if base_type_encoding_elem is None:
+                btt = base_type.findtext('./ns:SHORT-NAME', "", self._xml_namespaces)
                 raise ValueError(
                     f'BASE-TYPE-ENCODING in base type "{btt}" does not exist.')
 
-            base_type_encoding = base_type_encoding.text
+            base_type_encoding = base_type_encoding_elem.text
 
             if base_type_encoding in ('2C', '1C', 'SM'):
                 # types which use two-complement, one-complement or
@@ -2138,17 +2137,17 @@ class SystemLoader:
         # given a package name, produce a refbase label to ARXML path dictionary
         self._package_refbase_paths: dict[str, dict[str, str]] = {}
 
-        def add_sub_references(elem: ElementTree.Element, elem_path, cur_package_path: str="") -> None:
+        def add_sub_references(elem: ElementTree.Element, elem_path: str, cur_package_path: str = "") -> None:
             """Recursively add all ARXML references contained within an XML
             element to the dictionaries to handle ARXML references"""
 
             # check if a short name has been attached to the current
             # element. If yes update the ARXML path for this element
             # and its children
-            short_name = elem.find(f'ns:SHORT-NAME', self._xml_namespaces)
+            short_name_elem = elem.find(f'ns:SHORT-NAME', self._xml_namespaces)
 
-            if short_name is not None:
-                short_name = short_name.text
+            if short_name_elem is not None and short_name_elem.text:
+                short_name = short_name_elem.text
                 elem_path = f'{elem_path}/{short_name}'
 
                 if elem_path in self._arxml_path_to_node:
@@ -2156,13 +2155,15 @@ class SystemLoader:
                                      f"path '{elem_path}'")
 
                 self._arxml_path_to_node[elem_path] = elem
+            else:
+                short_name = None
 
             # register the ARXML path name of the current element
             self._node_to_arxml_path[elem] = elem_path
 
             # if the current element is a package, update the ARXML
             # package path
-            if elem.tag == f'{{{self.xml_namespace}}}AR-PACKAGE':
+            if elem.tag == f'{{{self.xml_namespace}}}AR-PACKAGE' and short_name:
                 cur_package_path = f'{cur_package_path}/{short_name}'
 
             # handle reference bases (for relative references)
@@ -2172,10 +2173,12 @@ class SystemLoader:
                 refbase_path = elem.find('./ns:PACKAGE-REF',
                                          self._xml_namespaces).text.strip()
 
-                is_default = elem.find('./ns:IS-DEFAULT', self._xml_namespaces)
+                is_default_elem = elem.find('./ns:IS-DEFAULT', self._xml_namespaces)
 
-                if is_default is not None:
-                    is_default = (is_default.text.strip().lower() == "true")
+                if is_default_elem is not None and is_default_elem.text:
+                    is_default = (is_default_elem.text.strip().lower() == "true")
+                else:
+                    raise RuntimeError("IS-DEFAULT element missing or empty!")
 
                 current_default_refbase_path = \
                     self._package_default_refbase_path.get(cur_package_path)
@@ -2188,10 +2191,12 @@ class SystemLoader:
                     self._package_default_refbase_path[cur_package_path] = \
                         refbase_path
 
-                is_global = elem.find('./ns:IS-GLOBAL', self._xml_namespaces)
+                is_global_elem = elem.find('./ns:IS-GLOBAL', self._xml_namespaces)
 
-                if is_global is not None:
-                    is_global = (is_global.text.strip().lower() == "true")
+                if is_global_elem is not None and is_global_elem.text:
+                    is_global = (is_global_elem.text.strip().lower() == "true")
+                else:
+                    raise RuntimeError("IS-GLOBAL element missing or empty!")
 
                 if is_global:
                     raise ValueError(f'Non-canonical relative references are '
@@ -2339,10 +2344,10 @@ class SystemLoader:
             raise ValueError(f'{child_location} does not resolve into a '
                              f'unique node')
 
-    def _get_can_frame(self, can_frame: ElementTree.Element):
+    def _get_can_frame(self, can_frame: ElementTree.Element) -> ElementTree.Element | None:
         return self._get_unique_arxml_child(can_frame, '&FRAME')
 
-    def _get_i_signal(self, i_signal_to_i_pdu_mapping: ElementTree.Element):
+    def _get_i_signal(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> ElementTree.Element | None:
         if self.autosar_version_newer(4):
             return self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                                 '&I-SIGNAL')
@@ -2350,7 +2355,7 @@ class SystemLoader:
             return self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                                 '&SIGNAL')
 
-    def _get_pdu(self, can_frame: ElementTree.Element):
+    def _get_pdu(self, can_frame: ElementTree.Element) -> ElementTree.Element | None:
         return self._get_unique_arxml_child(can_frame,
                                             [
                                                 'PDU-TO-FRAME-MAPPINGS',
@@ -2358,19 +2363,21 @@ class SystemLoader:
                                                 '&PDU'
                                             ])
 
-    def _get_pdu_path(self, can_frame: ElementTree.Element):
+    def _get_pdu_path(self, can_frame: ElementTree.Element) -> str:
         pdu_ref = self._get_unique_arxml_child(can_frame,
                                                [
                                                    'PDU-TO-FRAME-MAPPINGS',
                                                    '&PDU-TO-FRAME-MAPPING',
                                                    'PDU-REF'
                                                ])
-        if pdu_ref is not None:
-            pdu_ref = self._get_absolute_arxml_path(pdu_ref,
+        if pdu_ref is not None and pdu_ref.text:
+            pdu_path = self._get_absolute_arxml_path(pdu_ref,
                                                     pdu_ref.text,
                                                     pdu_ref.attrib.get('BASE'))
+        else:
+            raise RuntimeError("PDU reference element not found or PDU reference element empty!")
 
-        return pdu_ref
+        return pdu_path
 
     def _get_compu_method(self, system_signal: ElementTree.Element) -> ElementTree.Element | None:
         if self.autosar_version_newer(4):
@@ -2389,7 +2396,7 @@ class SystemLoader:
                                                     '&COMPU-METHOD'
                                                 ])
 
-    def _get_sw_base_type(self, i_signal: ElementTree.Element):
+    def _get_sw_base_type(self, i_signal: ElementTree.Element) -> ElementTree.Element | None:
         return self._get_unique_arxml_child(i_signal,
                                             [
                                                '&NETWORK-REPRESENTATION-PROPS',

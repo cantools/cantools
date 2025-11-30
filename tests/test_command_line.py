@@ -1363,7 +1363,7 @@ BATTERY_VT(
         with tempfile.TemporaryDirectory() as _tmpdir:
             tmpdir = Path(_tmpdir)
 
-            for database, node in zip(databases, nodes):
+            for database, node in zip(databases, nodes, strict=True):
                 argv = [
                     'cantools',
                     'generate_c_source',
@@ -1487,7 +1487,7 @@ BATTERY_VT(
         with tempfile.TemporaryDirectory() as _tmpdir:
             tmpdir = Path(_tmpdir)
 
-            for database, node in zip(databases, nodes):
+            for database, node in zip(databases, nodes, strict=True):
                 argv = [
                     'cantools',
                     'generate_c_source',

@@ -2249,7 +2249,7 @@ Failed to parse line: 'invalid syntax'
         """
         actual_output = actual_output.splitlines()
         expected_output = expected_output.splitlines()
-        for ln_actual, ln_expected in zip(actual_output, expected_output):
+        for ln_actual, ln_expected in zip(actual_output, expected_output, strict=True):
             if ln_expected.endswith(self.ELLIPSIS):
                 ln_expected = ln_expected[:-self.LEN_ELLIPSIS]
                 ln_actual = ln_actual[:len(ln_expected)]

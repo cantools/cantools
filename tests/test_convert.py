@@ -63,7 +63,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
             else:
                 def sort(signals):
                     return signals
-            for sig1, sig2 in zip(sort(msg1.signals), sort(msg2.signals)):
+            for sig1, sig2 in zip(sort(msg1.signals), sort(msg2.signals), strict=True):
                 for a in signal_attributes:
                     if a in ignore_signal_attributes:
                         continue

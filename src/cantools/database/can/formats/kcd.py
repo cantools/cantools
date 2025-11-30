@@ -1,7 +1,7 @@
 # Load and dump a CAN database in KCD format.
 
 import logging
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from collections.abc import Callable
 from typing import cast
 from xml.etree import ElementTree
@@ -82,10 +82,10 @@ def _load_signal_element(signal: ElementTree.Element, nodes: list[dict[str, str]
             LOGGER.debug("Ignoring unsupported signal attribute '%s'.", key)
 
     # Value XML element.
-    value = signal.find('ns:Value', NAMESPACES)
+    value_elem = signal.find('ns:Value', NAMESPACES)
 
-    if value is not None:
-        for key, _value in value.attrib.items():
+    if value_elem is not None:
+        for key, _value in value_elem.attrib.items():
             if key == 'min':
                 minimum = num(_value)
             elif key == 'max':
@@ -110,7 +110,7 @@ def _load_signal_element(signal: ElementTree.Element, nodes: list[dict[str, str]
     label_set = signal.find('ns:LabelSet', NAMESPACES)
 
     if label_set is not None:
-        labels = {}
+        labels = OrderedDict()
 
         for label in label_set.iterfind('ns:Label', NAMESPACES):
             label_value = int(label.attrib['value'])

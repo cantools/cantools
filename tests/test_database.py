@@ -2476,7 +2476,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(sig.multiplexer_signal, None)
 
         expected_choices = [(1, 'A'), (2, 'B'), (3, 'C'), (4, 'D')]
-        for choice, expected_choice in zip(msg2.signals[7].choices.items(), expected_choices):
+        for choice, expected_choice in zip(msg2.signals[7].choices.items(), expected_choices, strict=True):
             self.assertEqual(choice, expected_choice)
 
     def test_big_endian(self):
@@ -6293,11 +6293,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
         msgex = db.get_message_by_name('TestMsg_Ex')
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
-        
+
     def test_fd_detection_int(self):
         filename = "tests/files/dbc/fd_test_int.dbc"
         db = cantools.database.load_file(filename)
-        
+
         msgfdex = db.get_message_by_name('TestMsg_FDEx')
         self.assertEqual(True, msgfdex.is_fd)
         self.assertEqual(True, msgfdex.is_extended_frame)
@@ -6313,14 +6313,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         msgex = db.get_message_by_name('TestMsg_Ex')
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
-        
+
         self.assert_dbc_dump(db, filename)
-        
+
     def test_int_vframeformat_dump(self):
         filename = "tests/files/dbc/fd_test_int.dbc"
         db = cantools.database.load_file(filename)
         self.assert_dbc_dump(db, filename)
-        
+
         filename = "tests/files/dbc/variable_dlc.dbc"
         db = cantools.database.load_file(filename)
         self.assert_dbc_dump(db, filename)
@@ -6328,18 +6328,18 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_int_vframeformat_default_value(self):
         filename = "tests/files/dbc/vframeformat_int.dbc"
         db = cantools.database.load_file(filename)
-        
+
         msgex = db.get_message_by_name('TestMsg_J1939')
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(True, msgex.is_extended_frame)
-        
+
         msgex = db.get_message_by_name('TestMsg_Std')
         self.assertEqual(False, msgex.is_fd)
         self.assertEqual(False, msgex.is_extended_frame)
-        
+
         # TestMsg_J1939 should saved as J1939 format
         self.assert_dbc_dump(db, filename)
-        
+
     def test_exceptions_picklable(self):
         # Error
         err_msg = "This is an Error()"

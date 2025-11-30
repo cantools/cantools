@@ -818,7 +818,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
                 v_frame_format_str = 'ExtendedCAN'
             else:
                 v_frame_format_str = 'StandardCAN'
-
+            v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)
             # only set the VFrameFormat if it valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
@@ -828,6 +828,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
                     value=v_frame_format_def.choices.index(v_frame_format_str),
                     definition=v_frame_format_def,
                 )
+
 
         # output all message attributes
         for attribute in msg_attributes.values():
@@ -1566,6 +1567,20 @@ def _load_signals(tokens,
     return signals
 
 
+def _get_enum_vframeformat_attribute(int_attribute):
+    """Get VFrameFormat attribute definition as ENUM.
+
+    """
+
+    if int_attribute.type_name != 'INT':
+        return int_attribute
+
+    default_value = int_attribute.default_value
+    enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
+    enum_attribute.default_value = enum_attribute.choices[default_value]
+
+    return enum_attribute
+
 def _load_messages(tokens,
                    comments,
                    attributes,
@@ -1647,15 +1662,17 @@ def _load_messages(tokens,
         """Get frame format for a given message"""
 
         message_attributes = get_attributes(frame_id_dbc)
+        ref_definitions = definitions.get('VFrameFormat', None)
+        if ref_definitions is None:
+            return None
+
+        ref_definitions = _get_enum_vframeformat_attribute(ref_definitions)
 
         try:
             frame_format = message_attributes['VFrameFormat'].value
-            frame_format = definitions['VFrameFormat'].choices[frame_format]
+            frame_format = ref_definitions.choices[frame_format]
         except (KeyError, TypeError):
-            try:
-                frame_format = definitions['VFrameFormat'].default_value
-            except (KeyError, TypeError):
-                frame_format = None
+            frame_format = ref_definitions.default_value
 
         return frame_format
 

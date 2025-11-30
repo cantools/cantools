@@ -311,7 +311,7 @@ class SystemLoader:
 
         # add all messages featured by container frames
         for message in msg_list:
-            if message.contained_messages is None:
+            if not message.is_container:
                 continue
 
             pdu_messages.extend(
@@ -939,7 +939,7 @@ class SystemLoader:
                 auth_tx_bit_length=auth_tx_len)
 
 
-    def _load_pdu(self, pdu: ElementTree.Element, frame_name: str, next_selector_idx: int) -> tuple[int, int, list[Signal], int | None, list[str], list[Message] | None]:
+    def _load_pdu(self, pdu: ElementTree.Element, frame_name: str, next_selector_idx: int) -> tuple[int, int, list[Signal], int | None, list[str], list[Message]]:
         is_secured = pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU'
         is_container = pdu.tag == f'{{{self.xml_namespace}}}CONTAINER-I-PDU'
         is_multiplexed = pdu.tag == f'{{{self.xml_namespace}}}MULTIPLEXED-I-PDU'
@@ -959,7 +959,7 @@ class SystemLoader:
                     [], \
                     None, \
                     [], \
-                    None
+                    []
 
             contained_pdus = \
                 self._get_arxml_children(pdu,
@@ -1003,7 +1003,7 @@ class SystemLoader:
                                        frame_name,
                                        next_selector_idx)
 
-                assert contained_inner_messages is None, \
+                assert len(contained_inner_messages) == 0, \
                     "Nested containers are not supported!"
 
                 contained_pdu_path = self._node_to_arxml_path[contained_pdu]
@@ -1128,7 +1128,7 @@ class SystemLoader:
             signals, \
             cycle_time, \
             child_pdu_paths, \
-            None
+            []
 
     def _load_multiplexed_pdu(self, pdu: ElementTree.Element, frame_name: str, next_selector_idx: int) -> tuple[list[Signal], int | None, list[str]]:
         child_pdu_paths: list[str] = []

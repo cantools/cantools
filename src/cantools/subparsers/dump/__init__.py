@@ -63,7 +63,7 @@ def _dump_can_message(message: Message, width: int, with_comments: bool = False,
     if message.is_container:
         print('  Possibly contained children:')
         print()
-        if message.contained_messages:
+        if message.is_container:
             for child in message.contained_messages:
                 print(f'      {message.name} :: {child.name}')
         print()

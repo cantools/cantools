@@ -108,7 +108,7 @@ class Message:
         else:
             self._signals = signals
         self._signal_dict: dict[str, Signal] = {}
-        self._contained_messages = contained_messages
+        self._contained_messages = contained_messages or []
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the
@@ -322,10 +322,10 @@ class Message:
 
         """
 
-        return self._contained_messages is not None
+        return len(self._contained_messages) > 0
 
     @property
-    def contained_messages(self) -> list['Message'] | None:
+    def contained_messages(self) -> list['Message']:
         """The list of messages potentially contained within this message
 
         """
@@ -422,7 +422,6 @@ class Message:
             result.update(sig.receivers)
 
         if self.is_container:
-            assert self.contained_messages is not None
             for cmsg in self.contained_messages:
                 for sig in cmsg.signals:
                     result.update(sig.receivers)
@@ -1175,7 +1174,7 @@ class Message:
     def get_contained_message_by_header_id(self, header_id: int) \
         -> Optional['Message']:
 
-        if self.contained_messages is None:
+        if len(self.contained_messages) == 0:
             return None
 
         tmp = [ x for x in self.contained_messages if x.header_id == header_id ]
@@ -1191,7 +1190,7 @@ class Message:
     def get_contained_message_by_name(self, name: str) \
         -> Optional['Message']:
 
-        if self.contained_messages is None:
+        if len(self.contained_messages) == 0:
             return None
 
         tmp = [ x for x in self.contained_messages if x.name == name ]

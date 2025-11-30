@@ -417,7 +417,7 @@ def prune_database_choices(database: "Database") -> None:
         for signal in message.signals:
             prune_signal_choices(signal)
 
-        if message.contained_messages is not None:
+        if message.is_container:
             for cm in message.contained_messages:
                 for cs in cm.signals:
                     prune_signal_choices(cs)

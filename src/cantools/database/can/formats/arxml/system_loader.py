@@ -3,9 +3,10 @@ import logging
 import re
 from collections import OrderedDict
 from copy import deepcopy
+from typing import Literal, overload
 from xml.etree import ElementTree
 
-from cantools.typechecking import Comments
+from cantools.typechecking import ByteOrder, Choices, Comments
 
 from ....conversion import BaseConversion, IdentityConversion
 from ....namedsignalvalue import NamedSignalValue
@@ -205,11 +206,16 @@ class SystemLoader:
             for can_cluster in can_clusters:
                 autosar_specifics = AutosarBusSpecifics()
 
+                name_elem = \
+                        self._get_unique_arxml_child(can_cluster, 'SHORT-NAME')
+                if name_elem is None:
+                    raise RuntimeError("SHORT-NAME element missing!")
+                name = name_elem.text
+                if name is None:
+                    raise RuntimeError("SHORT-NAME element missing text!")
+                comments = self._load_comments(can_cluster)
+
                 if self.autosar_version_newer(4):
-                    name = \
-                        self._get_unique_arxml_child(can_cluster,
-                                                     'SHORT-NAME').text
-                    comments = self._load_comments(can_cluster)
                     variants = \
                         self._get_arxml_children(can_cluster,
                                                  [
@@ -227,42 +233,37 @@ class SystemLoader:
                     variant = variants[0]
 
                     # base signaling rate
-                    baudrate = self._get_unique_arxml_child(variant, 'BAUDRATE')
-                    if baudrate is not None:
-                        baudrate = parse_number_string(baudrate.text, allow_float=False)
+                    baudrate_elem = self._get_unique_arxml_child(variant, 'BAUDRATE')
+                    if baudrate_elem is not None and baudrate_elem.text is not None:
+                        baudrate = parse_number_string(baudrate_elem.text, allow_float=False)
+                    else:
+                        baudrate = None
 
                     # baudrate for the payload of CAN-FD frames. (None if
                     # this bus does not use CAN-FD.)
-                    fd_baudrate = \
+                    fd_baudrate_elem = \
                         self._get_unique_arxml_child(variant, 'CAN-FD-BAUDRATE')
-                    if fd_baudrate is not None:
-                        fd_baudrate = parse_number_string(fd_baudrate.text, allow_float=False)
-
-                    buses.append(Bus(name=name,
-                                     comment=comments,
-                                     autosar_specifics=autosar_specifics,
-                                     baudrate=baudrate,
-                                     fd_baudrate=fd_baudrate))
+                    if fd_baudrate_elem is not None and fd_baudrate_elem.text is not None:
+                        fd_baudrate = parse_number_string(fd_baudrate_elem.text, allow_float=False)
+                    else:
+                        fd_baudrate = None
                 else: # AUTOSAR 3
-                    name = \
-                        self._get_unique_arxml_child(can_cluster,
-                                                     'SHORT-NAME').text
-                    comments = self._load_comments(can_cluster)
-
                     # base signaling rate
-                    baudrate = self._get_unique_arxml_child(can_cluster,
+                    baudrate_elem = self._get_unique_arxml_child(can_cluster,
                                                             'SPEED')
-                    if baudrate is not None:
-                        baudrate = parse_number_string(baudrate.text, allow_float=False)
+                    if baudrate_elem is not None and baudrate_elem.text is not None:
+                        baudrate = parse_number_string(baudrate_elem.text, allow_float=False)
+                    else:
+                        baudrate = None
 
                     # AUTOSAR 3 does not seem to support CAN-FD
                     fd_baudrate = None
 
-                    buses.append(Bus(name=name,
-                                     comment=comments,
-                                     autosar_specifics=autosar_specifics,
-                                     baudrate=baudrate,
-                                     fd_baudrate=fd_baudrate))
+                buses.append(Bus(name=name,
+                                    comment=comments,
+                                    autosar_specifics=autosar_specifics,
+                                    baudrate=baudrate,
+                                    fd_baudrate=fd_baudrate))
 
             # handle all sub-packages
             if self.autosar_version_newer(4):
@@ -306,7 +307,7 @@ class SystemLoader:
     # return the subset of messages of the list which feature the specified PDU.
     def __get_messages_of_pdu(self, msg_list: list[Message], pdu_path: str) -> list[Message]:
         pdu_messages = \
-            [ x for x in msg_list if pdu_path in x.autosar.pdu_paths ]
+            [ x for x in msg_list if x.autosar and pdu_path in x.autosar.pdu_paths ]
 
         # add all messages featured by container frames
         for message in msg_list:
@@ -316,7 +317,8 @@ class SystemLoader:
             pdu_messages.extend(
                 [
                     x for x in message.contained_messages
-                          if pdu_path in x.autosar.pdu_paths
+                          if x.autosar and
+                          pdu_path in x.autosar.pdu_paths
                  ])
 
         if len(pdu_messages) < 1:
@@ -329,9 +331,13 @@ class SystemLoader:
     def _load_senders_receivers_of_ecu(self, ecu_instance: ElementTree.Element, messages: list[Message]) -> None:
         # get the name of the ECU. Note that in cantools, ECUs
         # are called 'nodes' for all intents and purposes...
-        ecu_name = \
+        ecu_name_elem = \
             self._get_unique_arxml_child(ecu_instance,
-                                         'SHORT-NAME').text.strip()
+                                         'SHORT-NAME')
+        if ecu_name_elem is not None and ecu_name_elem.text:
+            ecu_name = ecu_name_elem.text.strip()
+        else:
+            raise RuntimeError("ECU name element missing or text empty!")
 
 
         ####
@@ -350,10 +356,13 @@ class SystemLoader:
 
         for pdu_group in self._get_arxml_children(ecu_instance,
                                                   pdu_groups_spec):
-            comm_dir = \
+            comm_dir_elem = \
                 self._get_unique_arxml_child(pdu_group,
                                              'COMMUNICATION-DIRECTION')
-            comm_dir = comm_dir.text
+            if comm_dir_elem is not None and comm_dir_elem.text:
+                comm_dir = comm_dir_elem.text
+            else:
+                raise RuntimeError("Communication direction element missing or text empty!")
 
             if self.autosar_version_newer(4):
                 pdu_spec = [
@@ -368,7 +377,7 @@ class SystemLoader:
                 ]
 
             for pdu in self._get_arxml_children(pdu_group, pdu_spec):
-                pdu_path = self._node_to_arxml_path.get(pdu)
+                pdu_path = self._node_to_arxml_path[pdu]
                 pdu_messages = \
                     self.__get_messages_of_pdu(messages, pdu_path)
 
@@ -382,7 +391,7 @@ class SystemLoader:
                         if ecu_name not in pdu_message.senders:
                             pdu_message.senders.append(ecu_name)
 
-    def _load_senders_receivers_of_nm_pdus(self, package: ElementTree.Element, messages: list[Message]):
+    def _load_senders_receivers_of_nm_pdus(self, package: ElementTree.Element, messages: list[Message]) -> None:
         ####
         # senders and receivers of network management messages
         ####
@@ -411,14 +420,16 @@ class SystemLoader:
                 if controller_ref is None:
                     continue
 
-                controller_ref = controller_ref.text
+                controller_ref_text = controller_ref.text
+                if controller_ref_text is None:
+                    raise RuntimeError("Controller ref text is empty!")
 
                 # strip away the last element of the reference's path
                 # to get the ECU instance corresponding to the network
                 # controller. This approach is a bit hacky because it
                 # may break down if reference bases are used. (which
                 # seems to be very rarely.)
-                ecu_ref = '/'.join(controller_ref.split('/')[:-1])
+                ecu_ref = '/'.join(controller_ref_text.split('/')[:-1])
                 ecu = self._follow_arxml_reference(
                     base_elem=nm_node,
                     arxml_path=ecu_ref,
@@ -427,7 +438,11 @@ class SystemLoader:
                 if ecu is None:
                     continue
 
-                ecu_name = self._get_unique_arxml_child(ecu, 'SHORT-NAME').text
+                ecu_name_elem = self._get_unique_arxml_child(ecu, 'SHORT-NAME')
+                if ecu_name_elem is not None and ecu_name_elem.text:
+                    ecu_name = ecu_name_elem.text
+                else:
+                    raise RuntimeError("ECU name element missing or text empty!")
 
                 # deal with receive PDUs
                 for rx_pdu in self._get_arxml_children(nm_node,
@@ -435,7 +450,7 @@ class SystemLoader:
                                                            'RX-NM-PDU-REFS',
                                                            '*&RX-NM-PDU'
                                                        ]):
-                    pdu_path = self._node_to_arxml_path.get(rx_pdu)
+                    pdu_path = self._node_to_arxml_path[rx_pdu]
                     pdu_messages = self.__get_messages_of_pdu(messages,
                                                               pdu_path)
 
@@ -450,7 +465,7 @@ class SystemLoader:
                                                            'TX-NM-PDU-REFS',
                                                            '*&TX-NM-PDU'
                                                        ]):
-                    pdu_path = self._node_to_arxml_path.get(tx_pdu)
+                    pdu_path = self._node_to_arxml_path[tx_pdu]
                     pdu_messages = self.__get_messages_of_pdu(messages,
                                                               pdu_path)
 
@@ -493,12 +508,12 @@ class SystemLoader:
                 continue
 
             # set the byte order of all container messages
-            container_header_byte_order = \
+            container_header_byte_order_elem = \
                 self._get_unique_arxml_child(system,
                                             'CONTAINER-I-PDU-HEADER-BYTE-ORDER')
 
-            if container_header_byte_order is not None:
-                container_header_byte_order = container_header_byte_order.text
+            if container_header_byte_order_elem is not None:
+                container_header_byte_order = container_header_byte_order_elem.text
                 if container_header_byte_order == 'MOST-SIGNIFICANT-BYTE-LAST':
                     container_header_byte_order = 'little_endian'
                 else:
@@ -529,11 +544,15 @@ class SystemLoader:
                                                     'ELEMENTS',
                                                     '*ECU-INSTANCE',
                                                 ]):
-                name = self._get_unique_arxml_child(ecu, "SHORT-NAME").text
+                ecu_name_elem = self._get_unique_arxml_child(ecu, "SHORT-NAME")
+                if ecu_name_elem is not None and ecu_name_elem.text:
+                    ecu_name = ecu_name_elem.text
+                else:
+                    raise RuntimeError("ECU name element missing or text empty!")
                 comments = self._load_comments(ecu)
                 autosar_specifics = AutosarNodeSpecifics()
 
-                nodes.append(Node(name=name,
+                nodes.append(Node(name=ecu_name,
                                   comment=comments,
                                   autosar_specifics=autosar_specifics))
 
@@ -670,7 +689,7 @@ class SystemLoader:
         individual AR package
         """
 
-        messages = []
+        messages: list[Message] = []
 
         can_clusters = self._get_arxml_children(package_elem,
                                                 [
@@ -678,8 +697,12 @@ class SystemLoader:
                                                     '*&CAN-CLUSTER',
                                                 ])
         for can_cluster in can_clusters:
-            bus_name = self._get_unique_arxml_child(can_cluster,
-                                                    'SHORT-NAME').text
+            bus_name_elem = self._get_unique_arxml_child(can_cluster,
+                                                    'SHORT-NAME')
+            if bus_name_elem is not None and bus_name_elem.text:
+                bus_name = bus_name_elem.text
+            else:
+                raise RuntimeError("Bus name element missing or text empty!")
             if self.autosar_version_newer(4):
                 frame_triggerings_spec = \
                     [
@@ -721,10 +744,11 @@ class SystemLoader:
 
         # Default values.
         cycle_time = None
-        senders = []
         autosar_specifics = AutosarMessageSpecifics()
 
         can_frame = self._get_can_frame(can_frame_triggering)
+        if can_frame is None:
+            raise RuntimeError("CAN frame element not found!")
 
         # Name, frame id, length, is_extended_frame and comment.
         name = self._load_message_name(can_frame)
@@ -800,10 +824,7 @@ class SystemLoader:
         # the bit pattern used to fill in unused bits to avoid
         # undefined behaviour/information leaks
         unused_bit_pattern = \
-            self._get_unique_arxml_child(pdu, 'UNUSED-BIT-PATTERN')
-        unused_bit_pattern = \
-            0xff if unused_bit_pattern is None \
-            else parse_number_string(unused_bit_pattern.text)
+            self._load_int_value(pdu, 'UNUSED-BIT-PATTERN', raise_error=False) or 0xff
 
         return Message(bus_name=bus_name,
                        frame_id=frame_id,
@@ -811,7 +832,7 @@ class SystemLoader:
                        is_fd=is_fd,
                        name=name,
                        length=length,
-                       senders=senders,
+                       senders=[],
                        send_type=None,
                        cycle_time=cycle_time,
                        signals=signals,
@@ -829,9 +850,10 @@ class SystemLoader:
                                  autosar_specifics: AutosarMessageSpecifics) -> None:
         payload_pdu = \
             self._get_unique_arxml_child(pdu, [ '&PAYLOAD', '&I-PDU' ])
+        if payload_pdu is None:
+            raise RuntimeError("Element could not be found!")
 
-        payload_length = self._get_unique_arxml_child(payload_pdu, 'LENGTH')
-        payload_length = parse_number_string(payload_length.text, allow_float=False)
+        payload_length = self._load_int_value(payload_pdu, 'LENGTH', raise_error=True)
 
         if autosar_specifics.e2e is None:
             # use the data id from the signal group associated with
@@ -841,41 +863,41 @@ class SystemLoader:
                                                      autosar_specifics)
 
         # data specifying the SecOC "footer" of a secured frame
-        auth_algo = self._get_unique_arxml_child(pdu, [
+        auth_algo_elem = self._get_unique_arxml_child(pdu, [
             '&AUTHENTICATION-PROPS',
             'SHORT-NAME' ])
-        if auth_algo is not None:
-            auth_algo = auth_algo.text
+        if auth_algo_elem is not None:
+            auth_algo = auth_algo_elem.text
+        else:
+            auth_algo = None
 
-        fresh_algo = self._get_unique_arxml_child(pdu, [
+        fresh_algo_elem = self._get_unique_arxml_child(pdu, [
             '&FRESHNESS-PROPS',
             'SHORT-NAME' ])
-        if fresh_algo is not None:
-            fresh_algo = fresh_algo.text
+        if fresh_algo_elem is not None:
+            fresh_algo = fresh_algo_elem.text
+        else:
+            fresh_algo = None
 
-        data_id = self._get_unique_arxml_child(pdu, [
+        data_id = self._load_int_value(pdu, [
             'SECURE-COMMUNICATION-PROPS',
-            'DATA-ID' ])
-        if data_id is not None:
-            data_id = parse_number_string(data_id.text)
+            'DATA-ID' ],
+            raise_error=True)
 
-        auth_tx_len = self._get_unique_arxml_child(pdu, [
+        auth_tx_len = self._load_int_value(pdu, [
             '&AUTHENTICATION-PROPS',
-            'AUTH-INFO-TX-LENGTH' ])
-        if auth_tx_len is not None:
-            auth_tx_len = parse_number_string(auth_tx_len.text)
+            'AUTH-INFO-TX-LENGTH' ],
+            raise_error=False)
 
-        fresh_len = self._get_unique_arxml_child(pdu, [
+        fresh_len = self._load_int_value(pdu, [
             '&FRESHNESS-PROPS',
-            'FRESHNESS-VALUE-LENGTH' ])
-        if fresh_len is not None:
-            fresh_len = parse_number_string(fresh_len.text)
+            'FRESHNESS-VALUE-LENGTH' ],
+            raise_error=False)
 
-        fresh_tx_len = self._get_unique_arxml_child(pdu, [
+        fresh_tx_len = self._load_int_value(pdu, [
             '&FRESHNESS-PROPS',
-            'FRESHNESS-VALUE-TX-LENGTH' ])
-        if fresh_tx_len is not None:
-            fresh_tx_len = parse_number_string(fresh_tx_len.text)
+            'FRESHNESS-VALUE-TX-LENGTH' ],
+            raise_error=False)
 
         # add "pseudo signals" for the truncated freshness value and
         # the truncated authenticator
@@ -906,7 +928,7 @@ class SystemLoader:
         # be 128 bits long which algorithm is used is highly
         # manufacturer specific and determined via the authenticator
         # name.
-        autosar_specifics._secoc = \
+        autosar_specifics.secoc = \
             AutosarSecOCProperties(
                 auth_algorithm_name=auth_algo,
                 freshness_algorithm_name=fresh_algo,
@@ -917,14 +939,13 @@ class SystemLoader:
                 auth_tx_bit_length=auth_tx_len)
 
 
-    def _load_pdu(self, pdu, frame_name, next_selector_idx):
+    def _load_pdu(self, pdu: ElementTree.Element, frame_name: str, next_selector_idx: int) -> tuple[int, int, list[Signal], int | None, list[str], list[Message] | None]:
         is_secured = pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU'
         is_container = pdu.tag == f'{{{self.xml_namespace}}}CONTAINER-I-PDU'
         is_multiplexed = pdu.tag == f'{{{self.xml_namespace}}}MULTIPLEXED-I-PDU'
 
         if is_container:
-            max_length = self._get_unique_arxml_child(pdu, 'LENGTH')
-            max_length = parse_number_string(max_length.text)
+            max_length = self._load_int_value(pdu, 'LENGTH', raise_error=True)
 
             header_type = self._get_unique_arxml_child(pdu, 'HEADER-TYPE')
 
@@ -947,35 +968,30 @@ class SystemLoader:
                                              '*&CONTAINED-PDU-TRIGGERING',
                                              '&I-PDU'
                                          ])
-            child_pdu_paths = []
-            contained_messages = []
+            child_pdu_paths: list[str] = []
+            contained_messages: list[Message] = []
             for contained_pdu in contained_pdus:
-                name = \
+                name_elem = \
                     self._get_unique_arxml_child(contained_pdu, 'SHORT-NAME')
-                name = name.text
+                if name_elem is not None and name_elem.text:
+                    name = name_elem.text
+                else:
+                    raise RuntimeError("PDU does not have a name or name is empty!")
 
-                length = \
-                    self._get_unique_arxml_child(contained_pdu, 'LENGTH')
-                length = parse_number_string(length.text)
+                length = self._load_int_value(contained_pdu, 'LENGTH', raise_error=True)
 
-                header_id = \
-                    self._get_unique_arxml_child(contained_pdu,
+                header_id = self._load_int_value(contained_pdu,
                                                  [
                                                      'CONTAINED-I-PDU-PROPS',
                                                      'HEADER-ID-SHORT-HEADER'
-                                                 ])
-                header_id = parse_number_string(header_id.text)
+                                                 ], raise_error=True)
 
                 comments = self._load_comments(contained_pdu)
 
                 # the bit pattern used to fill in unused bits to avoid
                 # undefined behaviour/information leaks
                 unused_bit_pattern = \
-                    self._get_unique_arxml_child(contained_pdu,
-                                                 'UNUSED-BIT-PATTERN')
-                unused_bit_pattern = \
-                    0xff if unused_bit_pattern is None \
-                    else parse_number_string(unused_bit_pattern.text)
+                    self._load_int_value(contained_pdu, 'UNUSED-BIT-PATTERN', raise_error=False) or 0xff
 
                 next_selector_idx, \
                     payload_length, \
@@ -996,7 +1012,7 @@ class SystemLoader:
 
                 # create the autosar specifics of the contained_message
                 contained_autosar_specifics = AutosarMessageSpecifics()
-                contained_autosar_specifics._pdu_paths = contained_pdu_paths
+                contained_autosar_specifics.pdu_paths = contained_pdu_paths
                 is_secured = \
                     (contained_pdu.tag ==
                      f'{{{self.xml_namespace}}}SECURED-I-PDU')
@@ -1064,12 +1080,13 @@ class SystemLoader:
                 contained_messages
 
         # load all data associated with this PDU.
-        signals = []
         child_pdu_paths = []
 
-        byte_length = self._get_unique_arxml_child(pdu, 'LENGTH')
-        if byte_length is not None:
-            byte_length = parse_number_string(byte_length.text)
+        byte_length_elem = self._get_unique_arxml_child(pdu, 'LENGTH')
+        if byte_length_elem is not None and byte_length_elem.text:
+            byte_length = parse_number_string(byte_length_elem.text, allow_float=False)
+        else:
+            raise RuntimeError("PDU does not have length or length is empty!")
 
         if self.autosar_version_newer(4):
             time_period_location = [
@@ -1089,12 +1106,12 @@ class SystemLoader:
                 'VALUE',
             ]
 
-        time_period = \
+        time_period_elem = \
             self._get_unique_arxml_child(pdu, time_period_location)
 
         cycle_time = None
-        if time_period is not None:
-            cycle_time = int(float(time_period.text) * 1000)
+        if time_period_elem is not None and time_period_elem.text:
+            cycle_time = int(float(time_period_elem.text) * 1000)
 
         # ordinary non-multiplexed message
         signals = self._load_pdu_signals(pdu)
@@ -1113,27 +1130,24 @@ class SystemLoader:
             child_pdu_paths, \
             None
 
-    def _load_multiplexed_pdu(self, pdu, frame_name, next_selector_idx):
-        child_pdu_paths = []
+    def _load_multiplexed_pdu(self, pdu: ElementTree.Element, frame_name: str, next_selector_idx: int) -> tuple[list[Signal], int | None, list[str]]:
+        child_pdu_paths: list[str] = []
 
         selector_pos = \
-            self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-START-POSITION')
-        selector_pos = parse_number_string(selector_pos.text)
+            self._load_int_value(pdu, 'SELECTOR-FIELD-START-POSITION', raise_error=True)
 
         selector_len = \
-            self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-LENGTH')
-        selector_len = parse_number_string(selector_len.text)
+            self._load_int_value(pdu, 'SELECTOR-FIELD-LENGTH', raise_error=True)
 
-        selector_byte_order = \
+        selector_byte_order: ByteOrder = 'little_endian'
+        selector_byte_order_elem = \
             self._get_unique_arxml_child(pdu, 'SELECTOR-FIELD-BYTE-ORDER')
-        if selector_byte_order is not None:
-            if selector_byte_order.text == 'MOST-SIGNIFICANT-BYTE-FIRST':
+        if selector_byte_order_elem is not None:
+            if selector_byte_order_elem.text == 'MOST-SIGNIFICANT-BYTE-FIRST':
                 selector_byte_order = 'big_endian'
             else:
-                assert selector_byte_order.text == 'MOST-SIGNIFICANT-BYTE-LAST'
+                assert selector_byte_order_elem.text == 'MOST-SIGNIFICANT-BYTE-LAST'
                 selector_byte_order = 'little_endian'
-        else:
-            selector_byte_order = 'little_endian'
 
         selector_signal = Signal(
             name=f'{frame_name}_selector{next_selector_idx}',
@@ -1161,23 +1175,25 @@ class SystemLoader:
                 '*DYNAMIC-PART-ALTERNATIVE',
             ]
 
-        selector_signal_choices = OrderedDict()
+        selector_signal_choices: Choices = OrderedDict()
 
         # the cycle time of the message
         cycle_time = None
 
         for dynalt in self._get_arxml_children(pdu, dynpart_spec):
-            dynalt_selector_value = \
-                self._get_unique_arxml_child(dynalt, 'SELECTOR-FIELD-CODE')
-            dynalt_selector_value = parse_number_string(dynalt_selector_value.text)
-            dynalt_pdu = self._get_unique_arxml_child(dynalt, '&I-PDU')
-            dynalt_pdu_ref = self._get_unique_arxml_child(dynalt, 'I-PDU-REF')
-            dynalt_pdu_ref = \
-                self._get_absolute_arxml_path(dynalt,
-                                              dynalt_pdu_ref.text,
-                                              dynalt_pdu_ref.attrib.get('BASE'))
-            child_pdu_paths.append(dynalt_pdu_ref)
+            dynalt_pdu_ref_elem = self._get_unique_arxml_child(dynalt, 'I-PDU-REF')
+            if dynalt_pdu_ref_elem is not None and dynalt_pdu_ref_elem.text:
+                dynalt_pdu_ref_path = \
+                    self._get_absolute_arxml_path(dynalt,
+                                                dynalt_pdu_ref_elem.text,
+                                                dynalt_pdu_ref_elem.attrib.get('BASE'))
+                child_pdu_paths.append(dynalt_pdu_ref_path)
+            else:
+                raise RuntimeError("Dynamic part does not have a PDU reference or is empty!")
 
+            dynalt_pdu = self._get_unique_arxml_child(dynalt, '&I-PDU')
+            if dynalt_pdu is None:
+                raise RuntimeError("Dynamic part PDU could not be found!")
             next_selector_idx, \
                 _, \
                 dynalt_signals, \
@@ -1197,11 +1213,17 @@ class SystemLoader:
                 else:
                     cycle_time = dynalt_cycle_time
 
-            is_initial = \
+            dynalt_selector_value_elem = \
+                self._get_unique_arxml_child(dynalt, 'SELECTOR-FIELD-CODE')
+            if dynalt_selector_value_elem is not None and dynalt_selector_value_elem.text:
+                dynalt_selector_value = parse_number_string(dynalt_selector_value_elem.text, allow_float=False)
+            else:
+                raise RuntimeError("Dynamic part selector missing or empty!")
+            is_initial_elem = \
                 self._get_unique_arxml_child(dynalt, 'INITIAL-DYNAMIC-PART')
             is_initial = \
                 True \
-                if is_initial is not None and is_initial.text == 'true' \
+                if is_initial_elem is not None and is_initial_elem.text == 'true' \
                 else False
             if is_initial:
                 assert selector_signal.raw_initial is None
@@ -1298,8 +1320,8 @@ class SystemLoader:
 
         return signals, cycle_time, child_pdu_paths
 
-    def _load_pdu_signals(self, pdu):
-        signals = []
+    def _load_pdu_signals(self, pdu: ElementTree.Element) -> list[Signal]:
+        signals: list[Signal] = []
 
         if self.autosar_version_newer(4):
             # in AR4, "normal" PDUs use I-SIGNAL-TO-PDU-MAPPINGS whilst network
@@ -1341,29 +1363,43 @@ class SystemLoader:
 
         return signals
 
-    def _load_message_name(self, can_frame_triggering: ElementTree.Element) -> str:
-        return self._get_unique_arxml_child(can_frame_triggering,
-                                            'SHORT-NAME').text
+    def _load_message_name(self, can_frame: ElementTree.Element) -> str:
+        message_name_elem = self._get_unique_arxml_child(can_frame, 'SHORT-NAME')
+        if message_name_elem is not None and message_name_elem.text:
+            return message_name_elem.text
+        else:
+            raise RuntimeError("Message name element missing or text empty!")
 
-    def _load_message_frame_id(self, can_frame_triggering: ElementTree.Element) -> str:
-        return parse_number_string(
-            self._get_unique_arxml_child(can_frame_triggering,
-                                         'IDENTIFIER').text)
+    @overload
+    def _load_int_value(self, can_frame: ElementTree.Element, child_location: str | list[str], raise_error: Literal[True]) -> int:
+        ...
+    @overload
+    def _load_int_value(self, can_frame: ElementTree.Element, child_location: str | list[str], raise_error: Literal[False]) -> int | None:
+        ...
+    def _load_int_value(self, can_frame: ElementTree.Element, child_location: str | list[str], raise_error: bool = True) -> int | None:
+        elem = self._get_unique_arxml_child(can_frame, child_location)
+        if elem is not None and elem.text:
+            return parse_number_string(elem.text, allow_float=False)
+        elif raise_error:
+            raise RuntimeError(f"Element {can_frame.text} child {child_location} missing or text empty!")
+        else:
+            return None
 
-    def _load_message_length(self, can_frame: ElementTree.Element) -> str:
-        return parse_number_string(
-            self._get_unique_arxml_child(can_frame,
-                                         'FRAME-LENGTH').text)
+    def _load_message_frame_id(self, can_frame: ElementTree.Element) -> int:
+        return self._load_int_value(can_frame, 'IDENTIFIER', raise_error=True)
 
-    def _load_message_is_extended_frame(self, can_frame_triggering: ElementTree.Element) -> bool:
+    def _load_message_length(self, can_frame: ElementTree.Element) -> int:
+        return self._load_int_value(can_frame, 'FRAME-LENGTH', raise_error=True)
+
+    def _load_message_is_extended_frame(self, can_frame: ElementTree.Element) -> bool:
         can_addressing_mode = \
-            self._get_unique_arxml_child(can_frame_triggering,
+            self._get_unique_arxml_child(can_frame,
                                          'CAN-ADDRESSING-MODE')
 
         return False if can_addressing_mode is None \
                      else can_addressing_mode.text == 'EXTENDED'
 
-    def _load_comments(self, node: ElementTree.Element) -> Comments:
+    def _load_comments(self, node: ElementTree.Element) -> Comments | None:
         result: Comments = {}
 
         for l_2 in self._get_arxml_children(node, ['DESC', '*L-2']):
@@ -1386,11 +1422,10 @@ class SystemLoader:
                                             pdu: ElementTree.Element,
                                             autosar_specifics: AutosarMessageSpecifics) -> None:
 
-        pdu_length = self._get_unique_arxml_child(pdu, 'LENGTH')
-        pdu_length = parse_number_string(pdu_length.text)
+        pdu_length = self._load_int_value(pdu, 'LENGTH', raise_error=True)
 
         # the signal group associated with this message
-        signal_group = \
+        signal_groups = \
             self._get_arxml_children(pdu,
                                      [
                                          'I-SIGNAL-TO-PDU-MAPPINGS',
@@ -1398,13 +1433,13 @@ class SystemLoader:
                                          '&I-SIGNAL-GROUP',
                                      ])
 
-        if len(signal_group) == 0:
+        if len(signal_groups) == 0:
             return
-        elif len(signal_group) > 1:
+        elif len(signal_groups) > 1:
             #raise ValueError(f'Multiple signal groups specified for '
             #                 f'pdu "{pdu_name}"')
             pass
-        signal_group = signal_group[-1]
+        signal_group = signal_groups[-1]
 
         trans_props = self._get_unique_arxml_child(signal_group, [
                 'TRANSFORMATION-I-SIGNAL-PROPSS',
@@ -1429,9 +1464,12 @@ class SystemLoader:
         did_elems = self._get_arxml_children(trans_props, [
                 'DATA-IDS',
                 '*DATA-ID'])
-        data_ids = []
+        data_ids: list[int] = []
         for did_elem in did_elems:
-            data_ids.append(parse_number_string(did_elem.text))
+            if did_elem.text:
+                data_ids.append(parse_number_string(did_elem.text, allow_float=False))
+            else:
+                raise RuntimeError("Data ID text is empty!")
 
         e2e_props = AutosarEnd2EndProperties()
         e2e_props.category = category
@@ -1469,7 +1507,7 @@ class SystemLoader:
         unit = None
         choices = None
         comments = None
-        receivers = []
+        receivers: list[str] = []
 
         if self.autosar_version_newer(4):
             i_signal_spec = '&I-SIGNAL'
@@ -1478,6 +1516,8 @@ class SystemLoader:
 
         i_signal = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                                 i_signal_spec)
+        if i_signal is None:
+            raise RuntimeError("I Signal not found!")
         # Name, start position, length and byte order.
         name = self._load_signal_name(i_signal)
 
@@ -1547,25 +1587,29 @@ class SystemLoader:
                                            'START-POSITION').text
         return parse_number_string(pos, allow_float=False)
 
-    def _load_signal_length(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element) -> int:
-        i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
+    def _load_signal_length(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element | None) -> int:
+        if self.autosar_version_newer(4):
+            i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
 
-        if i_signal_length is not None:
-            return parse_number_string(i_signal_length.text, allow_float=False)
-
-        if not self.autosar_version_newer(4) and system_signal is not None:
+            if i_signal_length is not None and i_signal_length.text:
+                return parse_number_string(i_signal_length.text, allow_float=False)
+            else:
+                raise RuntimeError("Signal length element missing or empty!")
+        elif system_signal is not None:
             # AUTOSAR3 supports specifying the signal length via the
             # system signal. (AR4 does not.)
             system_signal_length = \
                 self._get_unique_arxml_child(system_signal, 'LENGTH')
 
-            if system_signal_length is not None:
+            if system_signal_length is not None and system_signal_length.text:
                 # get the length from the system signal.
                 return parse_number_string(system_signal_length.text, allow_float=False)
+            else:
+                raise RuntimeError("System signal length element missing or empty!")
 
-        return None # error?!
+        raise RuntimeError("System signal missing for AUTOSAR 3 query!")
 
-    def _load_arxml_init_value_string(self, i_signal, system_signal):
+    def _load_arxml_init_value_string(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element) -> str | None:
         """"Load the initial value of a signal
 
         Supported mechanisms are references to constants and direct
@@ -1587,7 +1631,7 @@ class SystemLoader:
 
             return self._load_arxml_init_value_string_helper(system_signal)
 
-    def _load_arxml_invalid_int_value(self, i_signal, system_signal):
+    def _load_arxml_invalid_int_value(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element):
         """Load a signal's internal value which indicates that it is not valid
 
         i.e., this returns the value which is transferred over the bus
@@ -1643,7 +1687,7 @@ class SystemLoader:
 
             return None
 
-    def _load_arxml_init_value_string_helper(self, signal_elem):
+    def _load_arxml_init_value_string_helper(self, signal_elem: ElementTree.Element) -> str | None:
         """"Helper function for loading thge initial value of a signal
 
         This function avoids code duplication between loading the
@@ -1708,7 +1752,7 @@ class SystemLoader:
                 literal_spec.find(f'./ns:VALUE', self._xml_namespaces)
             return None if literal_value is None else literal_value.text
 
-    def _load_signal_byte_order(self, i_signal_to_i_pdu_mapping):
+    def _load_signal_byte_order(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> ByteOrder:
         packing_byte_order = \
             self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                          'PACKING-BYTE-ORDER')
@@ -1719,7 +1763,7 @@ class SystemLoader:
         else:
             return 'little_endian'
 
-    def _load_system_signal_unit(self, system_signal, compu_method):
+    def _load_system_signal_unit(self, system_signal: ElementTree.Element, compu_method: ElementTree.Element | None) -> str | None:
         res = self._get_unique_arxml_child(system_signal,
                                            [
                                                'PHYSICAL-PROPS',
@@ -1743,8 +1787,8 @@ class SystemLoader:
             return None
         return res.text
 
-    def _load_texttable(self, compu_method):
-        choices = {}
+    def _load_texttable(self, compu_method: ElementTree.Element) -> Choices:
+        choices: Choices = {}
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -1768,7 +1812,7 @@ class SystemLoader:
 
         return choices
 
-    def _load_linear_scale(self, compu_scale):
+    def _load_linear_scale(self, compu_scale: ElementTree.Element):
         # load the scaling factor an offset
         compu_rational_coeffs = \
             self._get_unique_arxml_child(compu_scale, '&COMPU-RATIONAL-COEFFS')
@@ -1821,9 +1865,9 @@ class SystemLoader:
 
         return minimum, maximum, factor, offset
 
-    def _load_linear(self, compu_method, is_float):
-        minimum = None
-        maximum = None
+    def _load_linear(self, compu_method: ElementTree.Element, is_float):
+        minimum: float | None = None
+        maximum: float | None = None
         factor = 1.0
         offset = 0.0
 
@@ -1843,23 +1887,27 @@ class SystemLoader:
 
         return minimum, maximum, factor, offset
 
-    def _load_scale_limits(self, compu_scale):
-        lower_limit = \
+    def _load_scale_limits(self, compu_scale: ElementTree.Element) -> tuple[int | float, int | float]:
+        lower_limit_elem = \
             self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
-        upper_limit = \
+        upper_limit_elem = \
             self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
 
-        if lower_limit is not None:
-            lower_limit = parse_number_string(lower_limit.text)
+        if lower_limit_elem is not None and lower_limit_elem.text:
+            lower_limit = parse_number_string(lower_limit_elem.text, allow_float=True)
+        else:
+            raise RuntimeError("Lower limit missing or empty!")
 
-        if upper_limit is not None:
-            upper_limit = parse_number_string(upper_limit.text)
+        if upper_limit_elem is not None and upper_limit_elem.text:
+            upper_limit = parse_number_string(upper_limit_elem.text, allow_float=True)
+        else:
+            raise RuntimeError("Upper limit missing or empty!")
 
         return lower_limit, upper_limit
 
-    def _load_scale_linear_and_texttable(self, compu_method, is_float):
-        minimum = None
-        maximum = None
+    def _load_scale_linear_and_texttable(self, compu_method: ElementTree.Element, is_float):
+        minimum: float | None = None
+        maximum: float | None = None
         factor = 1.0
         offset = 0.0
         choices = {}
@@ -1902,12 +1950,12 @@ class SystemLoader:
 
         return minimum, maximum, factor, offset, choices
 
-    def _load_system_signal(self, system_signal, is_float):
-        minimum = None
-        maximum = None
+    def _load_system_signal(self, system_signal: ElementTree.Element, is_float: bool):
+        minimum: float | None = None
+        maximum: float | None = None
         factor = 1.0
         offset = 0.0
-        choices = None
+        choices: Choices | None = None
 
         compu_method = self._get_compu_method(system_signal)
 
@@ -1957,7 +2005,7 @@ class SystemLoader:
             unit, \
             comments
 
-    def _load_signal_type(self, i_signal) -> tuple[bool, bool]:
+    def _load_signal_type(self, i_signal: ElementTree.Element) -> tuple[bool, bool]:
         is_signed = False
         is_float = False
 
@@ -1991,9 +2039,9 @@ class SystemLoader:
         return is_signed, is_float
 
     def _get_absolute_arxml_path(self,
-                                 base_elem,
+                                 base_elem: ElementTree.Element,
                                  arxml_path: str,
-                                 refbase_name=None):
+                                 refbase_name: str | None = None) -> str:
         """Return the absolute ARXML path of a reference
 
         Relative ARXML paths are converted into absolute ones.
@@ -2053,10 +2101,10 @@ class SystemLoader:
         return f'{refbase_path}/{arxml_path}'
 
     def _follow_arxml_reference(self,
-                                base_elem,
-                                arxml_path,
-                                dest_tag_name=None,
-                                refbase_name=None):
+                                base_elem: ElementTree.Element,
+                                arxml_path: str,
+                                dest_tag_name: str | None = None,
+                                refbase_name: str | None = None) -> ElementTree.Element | None:
         """Resolve an ARXML reference
 
         It returns the ElementTree node which corresponds to the given
@@ -2084,11 +2132,11 @@ class SystemLoader:
 
 
     def _create_arxml_reference_dicts(self) -> None:
-        self._node_to_arxml_path = {}
-        self._arxml_path_to_node = {}
-        self._package_default_refbase_path = {}
+        self._node_to_arxml_path: dict[ElementTree.Element, str] = {}
+        self._arxml_path_to_node: dict[str, ElementTree.Element] = {}
+        self._package_default_refbase_path: dict[str, str] = {}
         # given a package name, produce a refbase label to ARXML path dictionary
-        self._package_refbase_paths = {}
+        self._package_refbase_paths: dict[str, dict[str, str]] = {}
 
         def add_sub_references(elem: ElementTree.Element, elem_path, cur_package_path: str="") -> None:
             """Recursively add all ARXML references contained within an XML
@@ -2291,8 +2339,8 @@ class SystemLoader:
             raise ValueError(f'{child_location} does not resolve into a '
                              f'unique node')
 
-    def _get_can_frame(self, can_frame_triggering: ElementTree.Element):
-        return self._get_unique_arxml_child(can_frame_triggering, '&FRAME')
+    def _get_can_frame(self, can_frame: ElementTree.Element):
+        return self._get_unique_arxml_child(can_frame, '&FRAME')
 
     def _get_i_signal(self, i_signal_to_i_pdu_mapping: ElementTree.Element):
         if self.autosar_version_newer(4):
@@ -2324,7 +2372,7 @@ class SystemLoader:
 
         return pdu_ref
 
-    def _get_compu_method(self, system_signal: ElementTree.Element):
+    def _get_compu_method(self, system_signal: ElementTree.Element) -> ElementTree.Element | None:
         if self.autosar_version_newer(4):
             return self._get_unique_arxml_child(system_signal,
                                                 [

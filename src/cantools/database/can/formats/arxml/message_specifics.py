@@ -28,6 +28,10 @@ class AutosarMessageSpecifics:
         """
         return self._pdu_paths
 
+    @pdu_paths.setter
+    def pdu_paths(self, value: list[str]) -> None:
+        self._pdu_paths = value
+
     @property
     def is_nm(self) -> bool:
         """True iff the message is used for network management
@@ -55,6 +59,10 @@ class AutosarMessageSpecifics:
         """The properties required to implement secured on-board communication
         """
         return self._secoc
+
+    @secoc.setter
+    def secoc(self, value: AutosarSecOCProperties | None) -> None:
+        self._secoc = value
 
     @property
     def e2e(self) -> AutosarEnd2EndProperties | None:

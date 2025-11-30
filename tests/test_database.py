@@ -3343,6 +3343,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_event_attributes(self):
         db = cantools.database.load_file('tests/files/dbc/attribute_Event.dbc')
+        assert(isinstance(db, cantools.database.can.database.Database))
 
         self.assertEqual(db.messages[0].send_type, 'Event')
         self.assertEqual(db.messages[0].frame_id, 1234)

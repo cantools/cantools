@@ -1580,7 +1580,7 @@ def _get_enum_vframeformat_attribute(int_attribute):
 def _load_messages(tokens,
                    comments,
                    attributes,
-                   definitions,
+                   definitions: OrderedDict[str, AttributeDefinitionType],
                    choices,
                    message_senders,
                    signal_types,
@@ -2108,7 +2108,7 @@ def load_string(string: str, strict: bool = True,
     defaults = _load_attribute_definition_defaults(tokens)
     definitions_relation = _load_attribute_definitions_relation(tokens)
     defaults_relation = _load_attribute_definition_relation_defaults(tokens)
-    attribute_definitions = get_definitions_dict(definitions, defaults)
+    attribute_definitions: OrderedDict[str, AttributeDefinitionType] = get_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
     attribute_rel_definitions = get_definitions_rel_dict(definitions_relation, defaults_relation)
     attributes_rel = _load_attributes_rel(tokens, attribute_rel_definitions)

@@ -503,7 +503,7 @@ class Message:
         self._protocol = value
 
     @property
-    def signal_tree(self):
+    def signal_tree(self) -> list[str | dict[str, dict[int, Any]]] | None:
         """All signal names and multiplexer ids as a tree. Multiplexer signals
         are dictionaries, while other signals are strings.
 

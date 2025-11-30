@@ -577,12 +577,12 @@ def _load_muxed_message_signals(message_tokens,
 
         return [int(mux_id, base=base)]
 
+    byte_order: ByteOrder = 'little_endian'
     mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
     if '-m' in mux_tokens[7]:
         byte_order = 'big_endian'
-    else:
-        byte_order = 'little_endian'
+
     start = int(mux_tokens[3])
     start = _convert_start(start, byte_order)
     if mux_tokens[8]:
@@ -702,11 +702,11 @@ def _load_message(frame_id: int,
                    sort_signals=sort_signals)
 
 
-def _parse_message_frame_ids(message):
-    def to_int(string):
+def _parse_message_frame_ids(message) -> tuple[range, bool]:
+    def to_int(string: str) -> int:
         return int(string, 16)
 
-    def is_extended_frame(string, type_str):
+    def is_extended_frame(string: str, type_str: str) -> bool:
         # Length of 9 includes terminating 'h' for hex
         return len(string) == 9 or type_str.lower() in ['extended', 'fdextended']
 
@@ -917,13 +917,13 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
     return message_str
 
 def _dump_messages(database: InternalDatabase) -> str:
-    send_messages = []
-    receive_messages = []
-    send_receive_messages = []
+    send_messages: list[str] = []
+    receive_messages: list[str] = []
+    send_receive_messages: list[str] = []
     message_name: str
     messages_with_name: Iterator[Message]
     for message_name, messages_with_name in groupby(sorted(database.messages, key=lambda m: m.name), key=lambda m: m.name):
-        message_dumps = []
+        message_dumps: list[str] = []
         # Cantools represents SYM CAN ID range with multiple messages - need to dedup multiple cantools messages
         # into a single message with a CAN ID range
         messages_with_name_list = list(messages_with_name)
@@ -941,7 +941,7 @@ def _dump_messages(database: InternalDatabase) -> str:
                 raise ValueError(f'Expected {frame_id_range} messages with name {message_name} - given {num_messages_with_name}')
 
         if message.is_multiplexed():
-            non_multiplexed_signals = []
+            non_multiplexed_signals: list[str] = []
             # Store all non-multiplexed signals first
             for signal_tree_signal in message.signal_tree:
                 if not isinstance(signal_tree_signal, Mapping):

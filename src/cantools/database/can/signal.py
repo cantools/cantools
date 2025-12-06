@@ -161,6 +161,16 @@ class Signal:
 
     @staticmethod
     def _calc_lsb(start: int, length: int, byte_order: ByteOrder) -> int:
+        """Calculate the least significant bit of a signal.
+
+        :param raw_value:
+            The raw value
+        :param decode_choices:
+            If `decode_choices` is ``False`` scaled values are not
+            converted to choice strings (if available).
+        :return:
+            The calculated scaled value
+        """
         if byte_order == "little_endian":
             return start
 

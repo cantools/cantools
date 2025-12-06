@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Final,
     Literal,
+    TypedDict,
     Union,
 )
 
@@ -224,8 +225,12 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
     sorted_signals = sorted(signals, key=start_bit)
 
     # Group signals to avoid overlaps
-    groups = []
-    
+    class Group(TypedDict):
+        signals: list[Union["Data", "Signal"]]
+        end: int
+
+    groups: list[Group] = []
+
     for signal in sorted_signals:
         signal_start = start_bit(signal)
         placed = False
@@ -235,10 +240,10 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
                 group['end'] = signal_start + signal.length
                 placed = True
                 break
-        
+
         if not placed:
             groups.append({
-                'signals': [signal], 
+                'signals': [signal],
                 'end': signal_start + signal.length
             })
 
@@ -277,18 +282,18 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
             except ValueError:
                 return 0
 
-        def create_big() -> tuple[str, int, list[str]]:
+        def create_big(group_signals: list[Union["Data", "Signal"]]) -> tuple[str, int, list[str]]:
             items: list[tuple[str, str, str | None]] = []
             start = 0
 
             # Select BE signals (filtered from current group)
             be_signals = [signal for signal in group_signals if signal.byte_order == "big_endian"]
-            
+
             # Since group_signals are already sorted by start_bit, and we know they are non-overlapping in this group
             # We can iterate them. But wait, create_big in original code re-sorts by network order.
             # start_bit() returns network order bit index for BE.
             # So group_signals (sorted by start_bit) are already in network order.
-            
+
             for signal in be_signals:
                 padding_length = (start_bit(signal) - start)
 
@@ -304,17 +309,17 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
 
             return fmt(items), padding_mask(items), names(items)
 
-        def create_little() -> tuple[str, int, list[str]]:
+        def create_little(group_signals: list[Union["Data", "Signal"]]) -> tuple[str, int, list[str]]:
             items: list[tuple[str, str, str | None]] = []
             end = format_length
-            
+
             # Filter LE signals from group
             le_signals = [signal for signal in group_signals if signal.byte_order != 'big_endian']
 
             # Process in reverse order (highest start bit first)
             # group_signals is sorted by start bit ascending.
             # So we check reversed(le_signals)
-            
+
             for signal in reversed(le_signals):
                 padding_length = end - (signal.start + signal.length)
 
@@ -336,8 +341,8 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
 
             return fmt(items), value, names(items)
 
-        big_fmt, big_padding_mask, big_names = create_big()
-        little_fmt, little_padding_mask, little_names = create_little()
+        big_fmt, big_padding_mask, big_names = create_big(group_signals)
+        little_fmt, little_padding_mask, little_names = create_little(group_signals)
 
         try:
             big_compiled = bitstruct.c.compile(big_fmt, big_names)

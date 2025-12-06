@@ -9,6 +9,7 @@ from typing import (
     Final,
     Literal,
     Union,
+    TypedDict,
 )
 
 from ..typechecking import (
@@ -224,7 +225,11 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
     sorted_signals = sorted(signals, key=start_bit)
 
     # Group signals to avoid overlaps
-    groups = []
+    class Group(TypedDict):
+        signals: list[Union["Data", "Signal"]]
+        end: int
+
+    groups: list[Group] = []
     
     for signal in sorted_signals:
         signal_start = start_bit(signal)

@@ -173,14 +173,12 @@ class Signal:
         """
         if byte_order == "little_endian":
             return start
-
         current = start
         for _ in range(length - 1):
             if (current % 8) == 0:
                 current += 15
             else:
                 current -= 1
-
         return current
 
     def raw_to_scaled(

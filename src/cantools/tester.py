@@ -4,7 +4,7 @@ import queue
 import time
 from collections import UserDict, defaultdict
 from collections.abc import Callable, Iterable, Mapping
-from typing import Protocol, TypeVar
+from typing import TYPE_CHECKING, Protocol, TypeVar, overload
 
 import can
 
@@ -19,12 +19,15 @@ from cantools.typechecking import (
 
 from .errors import Error
 
-_KT = TypeVar("_KT")
-_VT_co = TypeVar("_VT_co", covariant=True)
+if TYPE_CHECKING:
+    from _typeshed import SupportsKeysAndGetItem
 
-class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
-    def keys(self) -> Iterable[_KT]: ...
-    def __getitem__(self, __key: _KT) -> _VT_co: ...
+# _KT = TypeVar("_KT")
+# _VT_co = TypeVar("_VT_co", covariant=True)
+
+# class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
+#     def keys(self) -> Iterable[_KT]: ...
+#     def __getitem__(self, __key: _KT) -> _VT_co: ...
 
 
 class DecodedMessage:
@@ -38,8 +41,10 @@ class DecodedMessage:
 
 
 class Messages(UserDict[str, "_TesterMessage"]):
+    frozen = False
+
     def __setitem__(self, message_name: str, value: "_TesterMessage") -> None:
-        if getattr(self, '_frozen', False):
+        if self.frozen:
             if message_name not in self.data:
                 raise KeyError(message_name)
         self.data[message_name] = value
@@ -169,7 +174,7 @@ class _TesterMessage(UserDict[str, SignalValueType]):
         self.data[signal_name] = value
         self._update_can_message()
 
-    def update(self, m: SupportsKeysAndGetItem[str, SignalValueType], /) -> None:
+    def update(self, m: SupportsKeysAndGetItem[str, SignalValueType], /, **kwargs: SignalValueType) -> None:
         s = dict(m)
         new_signal_names = set(s) - self._signal_names
         if new_signal_names:
@@ -252,6 +257,7 @@ class _TesterMessage(UserDict[str, SignalValueType]):
             assert(type(message.signals) is dict)
             if all(message.signals[name] == signals[name] for name in signals.keys()):
                 return message.signals
+        return None
 
     def send_periodic_start(self) -> None:
         if not self.enabled:
@@ -388,7 +394,7 @@ class Tester:
                             self._input_queue,
                             on_message)
         self._notifier = can.Notifier(can_bus, [listener])
-        self._messages._frozen = True
+        self._messages.frozen = True
 
     def start(self) -> None:
         """Start the tester. Starts sending enabled periodic messages.

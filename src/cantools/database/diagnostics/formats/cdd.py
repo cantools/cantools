@@ -20,7 +20,7 @@ class DataType:
     def __init__(self,
                  name: str,
                  id_: str,
-                 bit_length: int | None,
+                 bit_length: int,
                  encoding: str | None,
                  minimum: int | None,
                  maximum: int | None,
@@ -79,9 +79,9 @@ def _load_data_types(ecu_doc: ElementTree.Element | None) -> dict[str, DataType]
         # Default values.
         byte_order: ByteOrder = 'big_endian'
         unit = None
-        factor = 1
-        offset = 0
-        bit_length = None
+        factor: float = 1
+        offset: float = 0
+        bit_length = 0
         encoding = None
         minimum = None
         maximum = None
@@ -132,6 +132,9 @@ def _load_data_types(ecu_doc: ElementTree.Element | None) -> dict[str, DataType]
         if comp is not None:
             factor = float(comp.attrib['f'])
             offset = float(comp.attrib['o'])
+
+        if bit_length == 0:
+            raise RuntimeError("CVALUETYPE element cannot have bit length 0!")
 
         data_types[type_id] = DataType(type_name,
                                        type_id,

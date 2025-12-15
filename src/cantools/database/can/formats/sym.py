@@ -278,22 +278,22 @@ def _load_comment(tokens: list[Token]) -> str:
     return tokens[3:].rstrip('\r\n')
 
 
-def _get_enum(enums, name: str):
+def _get_enum(enums: dict[str, Any], name: str) -> Any:
     try:
         return enums[name]
     except KeyError:
         raise ParseError(f"Enum '{name}' is not defined.") from None
 
 
-def _load_enums(tokens: list[Token]):
+def _load_enums(tokens: list[Token]) -> dict[str, dict[int | float, NamedSignalValue]]:
     section = _get_section_tokens(tokens, '{ENUMS}')
-    all_enums = {}
+    all_enums: dict[str, dict[int | float, NamedSignalValue]] = {}
 
     for _, _, name, _, values, _, _ in section:
         if values:
             values = values[0]
 
-        enum = OrderedDict()
+        enum: dict[int | float, NamedSignalValue] = OrderedDict()
         for v in values:
             value = num(v[0])
             value_name = v[2]
@@ -729,7 +729,7 @@ def _parse_message_frame_ids(message) -> tuple[range, bool]:
     return frame_ids, is_extended_frame(message_id[2], message_type)
 
 
-def _load_message_section(section_name, tokens, signals: list[NamedSignalValue], enums, strict: bool, sort_signals: type_sort_signals):
+def _load_message_section(section_name: str, tokens: list[Token], signals: list[NamedSignalValue], enums, strict: bool, sort_signals: type_sort_signals):
     def has_frame_id(message):
         return 'ID' in message[3]
 

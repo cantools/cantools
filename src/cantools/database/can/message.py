@@ -1,6 +1,7 @@
 # A CAN message.
 
 import logging
+from collections.abc import Sequence
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
@@ -1223,8 +1224,8 @@ class Message:
 
         return bool(self._codecs['multiplexers'])
 
-    def _check_signal(self, message_bits: list[str | None], signal: Signal) -> None:
-        signal_bits = signal.length * [signal.name]
+    def _check_signal(self, message_bits: list[None], signal: Signal) -> None:
+        signal_bits: list[str] | list[str | None] = signal.length * [signal.name]
 
         if signal.byte_order == 'big_endian':
             padding = start_bit(signal) * [None]
@@ -1257,7 +1258,7 @@ class Message:
 
                 message_bits[offset] = signal.name
 
-    def _check_mux(self, message_bits: list[None], mux) -> None:
+    def _check_mux(self, message_bits: list[None], mux: dict[str, dict[int, Codec]]) -> None:
         signal_name, children = next(iter(mux.items()))
         self._check_signal(message_bits,
                            self.get_signal_by_name(signal_name))
@@ -1272,7 +1273,7 @@ class Message:
                 if child_bit is not None:
                     message_bits[i] = child_bit
 
-    def _check_signal_tree(self, message_bits: list[str | None], signal_tree) -> None:
+    def _check_signal_tree(self, message_bits: list[None], signal_tree: list[str | dict[str, dict[int, Codec]]]) -> None:
         for signal_name in signal_tree:
             if isinstance(signal_name, dict):
                 self._check_mux(message_bits, signal_name)
@@ -1307,7 +1308,7 @@ class Message:
 
         if strict:
             message_bits = 8 * self.length * [None]
-            self._check_signal_tree(message_bits, self.signal_tree)
+            self._check_signal_tree(message_bits, self._signal_tree)
 
     def __repr__(self) -> str:
         return \

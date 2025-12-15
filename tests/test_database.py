@@ -1,5 +1,4 @@
 
-from dataclasses import astuple
 import logging
 import math
 import os
@@ -9,6 +8,7 @@ import shutil
 import timeit
 import unittest.mock
 from collections import namedtuple
+from dataclasses import astuple
 from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
@@ -892,7 +892,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (4096, False, None),  # raw value outside unsigned 12bit range
         ]
     )
-    def test_encode_signal_strict_negative_scaling(self, value, scaling, expected_result):
+    def test_encode_signal_strict_negative_scaling(self, value: int | str, scaling: bool, expected_result: bytes | None):
         """Test encoding of a signal with negative scaling (=-0.01),
         a value range from 4070-4100 and a value table."""
         db = cantools.database.Database()

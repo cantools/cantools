@@ -54,7 +54,7 @@ def format_and(items: Sequence[int | str]) -> str:
                                   string_items[-1])
 
 
-def start_bit(signal: "Signal") -> int:
+def start_bit(signal: Union["Signal", "Data"]) -> int:
     if signal.byte_order == 'big_endian':
         return 8 * (signal.start // 8) + (7 - (signal.start % 8))
     else:

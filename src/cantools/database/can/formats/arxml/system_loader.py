@@ -1,5 +1,6 @@
 # Load a CAN database in ARXML format.
 import logging
+import math
 import re
 from collections import OrderedDict
 from copy import deepcopy
@@ -1296,6 +1297,8 @@ class SystemLoader:
 
         for static_pdu_ref in self._get_arxml_children(pdu,
                                                        static_pdu_refs_spec):
+            if not static_pdu_ref.text:
+                raise RuntimeError("Static PDU text is empty!")
             static_pdu_path = \
                 self._get_absolute_arxml_path(pdu,
                                               static_pdu_ref.text,
@@ -1306,6 +1309,7 @@ class SystemLoader:
                 base_elem=pdu,
                 arxml_path=static_pdu_path,
                 dest_tag_name=static_pdu_ref.attrib.get('DEST'))
+            assert static_pdu is not None
 
             next_selector_idx, \
                 _, \
@@ -1539,7 +1543,7 @@ class SystemLoader:
         initial_string = self._load_arxml_init_value_string(i_signal, system_signal)
         if initial_string is not None:
             try:
-                raw_initial = parse_number_string(initial_string)
+                raw_initial = parse_number_string(initial_string, allow_float=True)
             except ValueError:
                 LOGGER.warning(f'The initial value ("{initial_string}") of signal '
                                f'{name} does not represent a number')
@@ -1577,25 +1581,36 @@ class SystemLoader:
                                              '&SYSTEM-SIGNAL',
                                              'SHORT-NAME'
                                          ])
-        if system_signal_name_elem is not None and len(system_signal_name_elem):
+        if system_signal_name_elem and system_signal_name_elem.text:
             return system_signal_name_elem.text
 
-        return self._get_unique_arxml_child(i_signal, 'SHORT-NAME').text
+        signal_name_elem = self._get_unique_arxml_child(i_signal, 'SHORT-NAME')
+        if signal_name_elem and signal_name_elem.text:
+            return signal_name_elem.text
+        else:
+            # TODO Determine if signals should be able to be missing a name
+            LOGGER.warning(f'SIGNAL is missing SHORT-NAME element or element is empty!')
+            return ''
 
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> int:
-        pos = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
-                                           'START-POSITION').text
-        return parse_number_string(pos, allow_float=False)
+        pos_elem = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
+                                           'START-POSITION')
+        if pos_elem and pos_elem.text:
+            return parse_number_string(pos_elem.text, allow_float=False)
+        else:
+            LOGGER.warning(f'SIGNAL is missing START-POSITION element or element is empty!')
+            return 0
 
     def _load_signal_length(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element | None) -> int:
         if self.autosar_version_newer(4):
             i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
 
-            if i_signal_length is not None and i_signal_length.text:
+            if i_signal_length and i_signal_length.text:
                 return parse_number_string(i_signal_length.text, allow_float=False)
             else:
-                raise RuntimeError("Signal length element missing or empty!")
-        elif system_signal is not None:
+                LOGGER.warning(f'SIGNAL is missing LENGTH element or element is empty!')
+                return 0
+        elif system_signal:
             # AUTOSAR3 supports specifying the signal length via the
             # system signal. (AR4 does not.)
             system_signal_length = \
@@ -1609,7 +1624,7 @@ class SystemLoader:
 
         raise RuntimeError("System signal missing for AUTOSAR 3 query!")
 
-    def _load_arxml_init_value_string(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element) -> str | None:
+    def _load_arxml_init_value_string(self, i_signal: ElementTree.Element | None, system_signal: ElementTree.Element | None) -> str | None:
         """"Load the initial value of a signal
 
         Supported mechanisms are references to constants and direct
@@ -1631,7 +1646,7 @@ class SystemLoader:
 
             return self._load_arxml_init_value_string_helper(system_signal)
 
-    def _load_arxml_invalid_int_value(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element) -> int | bool | None:
+    def _load_arxml_invalid_int_value(self, i_signal: ElementTree.Element, system_signal: ElementTree.Element | None) -> int | bool | None:
         """Load a signal's internal value which indicates that it is not valid
 
         i.e., this returns the value which is transferred over the bus
@@ -1658,6 +1673,7 @@ class SystemLoader:
             return parse_number_string(invalid_val.text, allow_float=False)
 
         else:
+            assert system_signal is not None
             invalid_val = \
                 self._get_unique_arxml_child(system_signal,
                                              [
@@ -1798,6 +1814,7 @@ class SystemLoader:
                                                     ]):
             vt = \
                 self._get_unique_arxml_child(compu_scale, ['&COMPU-CONST', 'VT'])
+            assert vt is not None and vt.text is not None
 
             # the current scale is an enumeration value
             lower_limit, upper_limit = self._load_scale_limits(compu_scale)
@@ -1866,40 +1883,44 @@ class SystemLoader:
     def _load_linear(self, compu_method: ElementTree.Element, is_float: bool) -> tuple[float, float, float, float]:
         # TODO figure out how to refactor this function since ._load_linear_scale() always returns a valid scale now
         # Before it didn't, and so this method checked that only one element provided a scale to work with.
-        minimum: float | None = None
-        maximum: float | None = None
+        minimum: float = math.nan
+        maximum: float = math.nan
         factor = 1.0
         offset = 0.0
 
-        for compu_scale in self._get_arxml_children(compu_method,
+        compu_scales = self._get_arxml_children(compu_method,
                                                     [
                                                         'COMPU-INTERNAL-TO-PHYS',
                                                         'COMPU-SCALES',
                                                         '&COMPU-SCALE'
-                                                    ]):
-            if minimum is not None or maximum is not None:
-                LOGGER.warning(f'Signal scaling featuring multiple segments '
+                                                    ])
+        if len(compu_scales) > 1:
+            LOGGER.warning(f'Signal scaling featuring multiple segments '
                                f'is currently unsupported. Expect spurious '
                                f'results!')
 
+        for compu_scale in compu_scales:
             minimum, maximum, factor, offset = \
                 self._load_linear_scale(compu_scale)
 
+        if minimum == math.nan or maximum == math.nan:
+            raise RuntimeError("Minimum or maximum is still NaN!")
+
         return minimum, maximum, factor, offset
 
-    def _load_scale_limits(self, compu_scale: ElementTree.Element) -> tuple[int | float, int | float]:
+    def _load_scale_limits(self, compu_scale: ElementTree.Element) -> tuple[int, int]:
         lower_limit_elem = \
             self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
         upper_limit_elem = \
             self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
 
         if lower_limit_elem is not None and lower_limit_elem.text:
-            lower_limit = parse_number_string(lower_limit_elem.text, allow_float=True)
+            lower_limit = parse_number_string(lower_limit_elem.text, allow_float=False)
         else:
             raise RuntimeError("Lower limit missing or empty!")
 
         if upper_limit_elem is not None and upper_limit_elem.text:
-            upper_limit = parse_number_string(upper_limit_elem.text, allow_float=True)
+            upper_limit = parse_number_string(upper_limit_elem.text, allow_float=False)
         else:
             raise RuntimeError("Upper limit missing or empty!")
 
@@ -1927,6 +1948,7 @@ class SystemLoader:
                 lower_limit, upper_limit = self._load_scale_limits(compu_scale)
                 assert(lower_limit is not None \
                        and lower_limit == upper_limit)
+                assert vt.text is not None
                 value = lower_limit
                 name = vt.text
                 comments = self._load_comments(compu_scale)
@@ -1978,14 +2000,14 @@ class SystemLoader:
                         unit,
                         comments)
 
-            category = category.text
+            category_text = category.text
 
-            if category == 'TEXTTABLE':
+            if category_text == 'TEXTTABLE':
                 choices = self._load_texttable(compu_method)
-            elif category == 'LINEAR':
+            elif category_text == 'LINEAR':
                 minimum, maximum, factor, offset = \
                     self._load_linear(compu_method,  is_float)
-            elif category == 'SCALE_LINEAR_AND_TEXTTABLE':
+            elif category_text == 'SCALE_LINEAR_AND_TEXTTABLE':
                 (minimum,
                  maximum,
                  factor,
@@ -1994,13 +2016,13 @@ class SystemLoader:
                                                                   is_float)
             else:
                 LOGGER.debug('Compu method category %s is not yet implemented.',
-                             category)
+                             category_text)
 
         return \
             minimum, \
             maximum, \
-            1.0 if factor is None else factor, \
-            0.0 if offset is None else offset, \
+            factor, \
+            offset, \
             choices, \
             unit, \
             comments
@@ -2168,10 +2190,14 @@ class SystemLoader:
 
             # handle reference bases (for relative references)
             if elem.tag == f'{{{self.xml_namespace}}}REFERENCE-BASE':
-                refbase_name = elem.find('./ns:SHORT-LABEL',
-                                         self._xml_namespaces).text.strip()
-                refbase_path = elem.find('./ns:PACKAGE-REF',
-                                         self._xml_namespaces).text.strip()
+                refbase_name = elem.findtext('./ns:SHORT-LABEL',
+                                         namespaces=self._xml_namespaces)
+                assert refbase_name is not None
+                refbase_name = refbase_name.strip()
+                refbase_path = elem.findtext('./ns:PACKAGE-REF',
+                                         namespaces=self._xml_namespaces)
+                assert refbase_path is not None
+                refbase_path = refbase_path.strip()
 
                 is_default_elem = elem.find('./ns:IS-DEFAULT', self._xml_namespaces)
 
@@ -2300,6 +2326,8 @@ class SystemLoader:
                     if child_elem.tag == ctt:
                         local_result.append(child_elem)
                     elif child_elem.tag == cttr:
+                        if not child_elem.text:
+                            raise RuntimeError(f"Child element {child_elem} text empty!")
                         tmp = self._follow_arxml_reference(
                             base_elem=base_elem,
                             arxml_path=child_elem.text,

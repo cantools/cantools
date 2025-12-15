@@ -71,6 +71,14 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 exclude = "^(?!src).*$"
 
+[[tool.mypy.overrides]]
+module = "cantools.database.can.formats.dbc"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "cantools.database.can.formats.sym"
+ignore_errors = true
+
 [tool.ruff]
 line-length = 80
 lint.extend-select = [

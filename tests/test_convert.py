@@ -9,6 +9,7 @@ from unittest import mock
 import cantools
 from cantools.database.can.attribute import Attribute
 from cantools.database.can.attribute_definition import AttributeDefinition
+from cantools.database.can.signal import Signal
 from cantools.typechecking import StringPathLike
 
 
@@ -96,11 +97,12 @@ class CanToolsConvertFullTest(unittest.TestCase):
     def test_dbc_dump_sort_signals_by_name(self):
         fn_in = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
         fn_expected_output = self.get_test_file_name('dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc')
-        def sort_signals(signals):
+        def sort_signals(signals: list[Signal]) -> list[Signal]:
             return sorted(signals, key=lambda sig: sig.name)
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
         db = cantools.database.load_file(fn_in, prune_choices=False)
+        assert(isinstance(db, cantools.database.can.database.Database))
         cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
 
         self.assertFileEqual(fn_expected_output, fn_out)

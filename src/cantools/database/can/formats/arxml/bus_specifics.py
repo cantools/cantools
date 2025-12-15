@@ -2,5 +2,5 @@ class AutosarBusSpecifics:
     """This class collects the AUTOSAR specific information of a CAN bus
 
     """
-    def __init__(self):
+    def __init__(self) -> None:
         pass

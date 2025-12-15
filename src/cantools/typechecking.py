@@ -11,7 +11,7 @@ from typing import (
     Union,
 )
 
-from bitstruct import CompiledFormatDict
+from bitstruct import CompiledFormatDict  # type: ignore
 
 if TYPE_CHECKING:
     from .database import Message, Signal

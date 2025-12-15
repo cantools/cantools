@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 
-from argparse_addons import Integer
+from argparse_addons import Integer  # type: ignore
 
 from .. import database, logreader
 from .__utils__ import format_message_by_frame_id

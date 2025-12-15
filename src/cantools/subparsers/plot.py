@@ -56,7 +56,7 @@ import re
 import struct
 import sys
 
-from argparse_addons import Integer
+from argparse_addons import Integer  # type: ignore
 
 try:
     from matplotlib import pyplot as plt

@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Any
 
 import can.cli
-from argparse_addons import Integer
+from argparse_addons import Integer  # type: ignore
 
 from cantools.database.errors import DecodeError
 

@@ -5,7 +5,7 @@ from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from decimal import Decimal
 
-import textparser
+import textparser  # type: ignore
 from textparser import (
     Any,
     AnyUntil,

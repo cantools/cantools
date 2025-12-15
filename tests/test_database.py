@@ -12,8 +12,8 @@ from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
 
-import textparser
-from parameterized import parameterized
+import textparser  # type: ignore
+from parameterized import parameterized  # type: ignore
 
 import cantools.autosar
 import cantools.database

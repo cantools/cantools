@@ -5,7 +5,7 @@ import os
 from contextlib import nullcontext
 from typing import Any, TextIO
 
-import diskcache
+import diskcache  # type: ignore
 
 from ..typechecking import StringPathLike
 from . import can, diagnostics, utils

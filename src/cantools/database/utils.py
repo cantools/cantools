@@ -31,9 +31,9 @@ if TYPE_CHECKING:
     from ..database.diagnostics import Data
 
 try:
-    import bitstruct.c
+    import bitstruct.c  # type: ignore
 except ImportError:
-    import bitstruct
+    import bitstruct  # type: ignore
 
 
 def format_or(items: list[int | str]) -> str:

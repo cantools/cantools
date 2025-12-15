@@ -2,7 +2,7 @@
 # (SecOC, i.e., verification of the authenticity of the sender of
 # messages.)
 
-import bitstruct
+import bitstruct  # type: ignore
 
 from ..database.can.message import Message
 from ..errors import Error

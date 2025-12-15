@@ -71,16 +71,6 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 exclude = "^(?!src).*$"
 
-[[tool.mypy.overrides]]
-module = [
-    "argparse_addons",
-    "diskcache",
-    "textparser",
-    "bitstruct",
-    "bitstruct.c",
-]
-ignore_missing_imports = true
-
 [tool.ruff]
 line-length = 80
 lint.extend-select = [

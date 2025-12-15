@@ -8,7 +8,7 @@ from collections.abc import Callable
 from itertools import groupby
 from typing import TYPE_CHECKING
 
-import textparser
+import textparser  # type: ignore
 from textparser import (
     Any,
     DelimitedList,

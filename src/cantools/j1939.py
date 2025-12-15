@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-import bitstruct
+import bitstruct  # type: ignore
 
 from .errors import Error
 

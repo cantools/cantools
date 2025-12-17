@@ -146,86 +146,124 @@ class Database:
         This means that small discrepanceies stemming from
         e.g. rounding errors are ignored.
         """
-        return self._objects_similar(self, other, tolerance, include_format_specifics)
+        return not self._differences(other,
+                                     tolerance=tolerance,
+                                     include_format_specifics=include_format_specifics)
 
-    @staticmethod
-    def _objects_similar(a: Any,
-                         b: Any,
-                         tolerance: float,
-                         include_format_specifics: bool) -> bool:
+    def _differences(self,
+                     other: "Database",
+                     *,
+                     tolerance: float = 1e-12,
+                     include_format_specifics: bool = True) -> list[dict[str, str]]:
+        """Return a list of differences between this Database and `other`.
 
-        if type(a) is not type(b):
-            # the types of the objects do not match
-            return False
-        elif a is None:
-            # a and b are None
-            return True
-        elif isinstance(a, (int, str, set)):
-            # the values of the objects must be equal
-            return bool(a == b)
-        elif isinstance(a, float):
-            # floating point objects are be compared inexactly
-            if abs(a) > 1:
-                if abs(1.0 - b/a) > tolerance:
-                    return False
-            else:
-                if abs(b - a) > tolerance:
-                    return False
+        Each difference is a dict with keys: ``path``, ``self``, ``other``, ``reason``.
+        """
+        diffs: list[dict[str, str]] = []
+        seen: set[tuple[int, int]] = set()
 
-            return True
+        def path_to_str(path_parts: list[str]) -> str:
+            if not path_parts:
+                return '<root>'
+            return ''.join(path_parts)
 
-        elif isinstance(a, (list, tuple)):
-            # lists and tuples are similar if all elements are similar
-            for i in range(len(a)):
-                if not Database._objects_similar(a[i], b[i], tolerance, include_format_specifics):
-                    return False
-            return True
+        def add_diff(path_parts: list[str], a_val: Any, b_val: Any, reason: str) -> None:
+            diffs.append({
+                'path': path_to_str(path_parts),
+                'self': str(a_val),
+                'other': str(b_val),
+                'reason': reason,
+            })
 
-        elif isinstance(a, (dict, OrderedDict)):
-            # dictionaries are similar if they feature the same keys and
-            # all elements are similar
-            if a.keys() != b.keys():
-                return False
-            for key in a:
-                if not Database._objects_similar(a[key], b[key], tolerance, include_format_specifics):
-                    return False
-            return True
+        def compare(a: Any, b: Any, path_parts: list[str]) -> None:
+            pair_id = (id(a), id(b))
+            if pair_id in seen:
+                return
+            seen.add(pair_id)
 
-        # assume that `a` and `b` are objects of custom classes
-        a_attrib_names = dir(a)
-        b_attrib_names = dir(b)
+            if type(a) is not type(b):
+                add_diff(path_parts, type(a), type(b), 'type-mismatch')
+                return
 
-        if not include_format_specifics:
-            # ignore format specific attributes if requested. So far,
-            # only DBC and ARXML amend the database with format
-            # specific information.
-            for x in 'dbc', 'autosar':
-                if x in a_attrib_names:
-                    a_attrib_names.remove(x)
-                if x in b_attrib_names:
-                    b_attrib_names.remove(x)
+            if a is None:
+                return
 
-        # both objects must exhibit the same attributes and member functions
-        if a_attrib_names != b_attrib_names:
-            return False
+            if isinstance(a, (int, str, set, bool)):
+                if a != b:
+                    add_diff(path_parts, a, b, 'value-mismatch')
+                return
 
-        for attrib_name in a_attrib_names:
-            if attrib_name.startswith('_'):
-                # ignore non-public attributes
-                continue
+            if isinstance(a, float):
+                if abs(a) > 1:
+                    if abs(1.0 - b / a) > tolerance:
+                        add_diff(path_parts, a, b, 'float-rel-diff')
+                else:
+                    if abs(b - a) > tolerance:
+                        add_diff(path_parts, a, b, 'float-abs-diff')
+                return
 
-            a_attrib = getattr(a, attrib_name)
-            b_attrib = getattr(b, attrib_name)
+            if isinstance(a, (list, tuple)):
+                if len(a) != len(b):
+                    add_diff(path_parts, len(a), len(b), 'length-mismatch')
+                min_len = min(len(a), len(b))
+                for i in range(min_len):
+                    compare(a[i], b[i], [*path_parts, f'[{i}]'])
+                return
 
-            if type(a_attrib) is not type(b_attrib):
-                return False
-            elif callable(a_attrib):
-                # ignore callable attributes
-                continue
-            elif not Database._objects_similar(a_attrib, b_attrib, tolerance, include_format_specifics):
-                return False
+            if isinstance(a, (dict, OrderedDict)):
+                keys_a = set(a.keys())
+                keys_b = set(b.keys())
+                for k in sorted(keys_a - keys_b, key=lambda x: str(x)):
+                    add_diff([*path_parts, f'[{k!r}]'], a[k], None, 'key-only-in-a')
+                for k in sorted(keys_b - keys_a, key=lambda x: str(x)):
+                    add_diff([*path_parts, f'[{k!r}]'], None, b[k], 'key-only-in-b')
+                for k in sorted(keys_a & keys_b, key=lambda x: str(x)):
+                    compare(a[k], b[k], [*path_parts, f'[{k!r}]'])
+                return
 
-        return True
+            # get attributes
+            a_names = dir(a)
+            b_names = dir(b)
+
+            if not include_format_specifics:
+                for x in ('dbc', 'autosar'):
+                    if x in a_names:
+                        a_names.remove(x)
+                    if x in b_names:
+                        b_names.remove(x)
+
+            if a_names != b_names:
+                add_diff(path_parts, sorted(a_names), sorted(b_names), 'attrib-names-mismatch')
+                return
+
+            for name in a_names:
+                if name == 'messages' and hasattr(a, '_frame_id_to_message'):
+                    # compare messages independent of order
+                    compare(a._frame_id_to_message, b._frame_id_to_message, ["_frame_id_to_message"])
+                    continue
+
+                if name == 'signals' and hasattr(a, '_signal_dict'):
+                    # compare messages independent of order
+                    compare(a._signal_dict, b._signal_dict, ["_signal_dict"])
+                    continue
+
+                if name.startswith('_'):
+                    # skip private attributes
+                    continue
+
+                a_attr = getattr(a, name)
+                b_attr = getattr(b, name)
+                if callable(a_attr) or callable(b_attr):
+                    continue
+                if type(a_attr) is not type(b_attr):
+                    add_diff([*path_parts, f'.{name}'], type(a_attr), type(b_attr), 'attrib-type-mismatch')
+                    continue
+                compare(a_attr, b_attr, [*path_parts, f'.{name}'])
+
+        # compare root
+        compare(self, other, [])
+
+        return diffs
 
     def add_arxml(self, fp: TextIO) -> None:
         """Read and parse ARXML data from given file-like object and add the

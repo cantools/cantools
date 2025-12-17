@@ -6393,7 +6393,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     @parameterized.expand([
         ('dbc', 'abs.dbc'),
         ('dbc', 'choices.dbc'),
-        # ('dbc', 'emc32.dbc'),  # TODO: dump .dbc.environment_variables
+        ('dbc', 'emc32.dbc'),
         # ('dbc', 'foobar.dbc'),  # TODO: add CANFD_BRS
         ('dbc', 'j1939.dbc'),
         # ('dbc', 'long_names.dbc'),  # TODO: issue 766

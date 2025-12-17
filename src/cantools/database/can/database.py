@@ -185,7 +185,8 @@ class Database:
                 add_diff(path_parts, type(a), type(b), 'type-mismatch')
                 return
 
-            if a is None:
+            if callable(a) or a is None:
+                # nothing to compare
                 return
 
             if isinstance(a, (int, str, set, bool)):
@@ -239,12 +240,12 @@ class Database:
             for name in a_names:
                 if name == 'messages' and hasattr(a, '_frame_id_to_message'):
                     # compare messages independent of order
-                    compare(a._frame_id_to_message, b._frame_id_to_message, ["_frame_id_to_message"])
+                    compare(a._frame_id_to_message, b._frame_id_to_message, [*path_parts, "._frame_id_to_message"])
                     continue
 
                 if name == 'signals' and hasattr(a, '_signal_dict'):
                     # compare messages independent of order
-                    compare(a._signal_dict, b._signal_dict, ["_signal_dict"])
+                    compare(a._signal_dict, b._signal_dict, [*path_parts, "._signal_dict"])
                     continue
 
                 if name.startswith('_'):
@@ -253,11 +254,6 @@ class Database:
 
                 a_attr = getattr(a, name)
                 b_attr = getattr(b, name)
-                if callable(a_attr) or callable(b_attr):
-                    continue
-                if type(a_attr) is not type(b_attr):
-                    add_diff([*path_parts, f'.{name}'], type(a_attr), type(b_attr), 'attrib-type-mismatch')
-                    continue
                 compare(a_attr, b_attr, [*path_parts, f'.{name}'])
 
         # compare root

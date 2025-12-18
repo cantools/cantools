@@ -1314,6 +1314,7 @@ def _load_choices(tokens):
 
     for _choice in tokens.get('VAL_', []):
         if len(_choice[1]) == 0:
+            # No optional frame id specified, ignore this VAL_/choice.
             continue
 
         od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in _choice[3])
@@ -1468,7 +1469,12 @@ def _load_signals(tokens,
         """
 
         try:
-            return choices[frame_id_dbc][signal]
+            # Remove the selected signal from the choices dict, this
+            # lets us validate that all VAL_ choices specified by the
+            # DBC are used by Messages.
+            c = choices[frame_id_dbc][signal]
+            del(choices[frame_id_dbc][signal])
+            return c
         except KeyError:
             return None
 
@@ -1534,7 +1540,12 @@ def _load_signals(tokens,
         """
 
         try:
-            return signal_types[frame_id_dbc][signal] in FLOAT_SIGNAL_TYPES
+            # Remove the selected signal type from the signal_types
+            # dict, this lets us validate that all SIG_VALTYPE_ entries
+            # specified by the DBC are used by Messages.
+            signal_type = signal_types[frame_id_dbc][signal]
+            del(signal_types[frame_id_dbc][signal])
+            return signal_type in FLOAT_SIGNAL_TYPES
         except KeyError:
             return False
 
@@ -2177,6 +2188,26 @@ def load_string(string: str, strict: bool = True,
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes)
+    # There shouldn't be any choices/VAL_ entries left, each one should
+    # have been claimed by a Message above.
+    unused_choices = [ ]
+    for frame_id in choices.keys():
+        for c in choices[frame_id]:
+            unused_choices.append(f"VAL_ {frame_id} {c}")
+    if len(unused_choices) > 0:
+        errors = "\n    ".join(unused_choices)
+        raise ValueError(f'unused VAL_ entries in DBC:\n    {errors}')
+
+    # There shouldn't be any SIG_VALTYPE_ signal_type entries left,
+    # each one should have been claimed by a Message above.
+    unused_signal_types = [ ]
+    for frame_id in signal_types.keys():
+        for signal_type in signal_types[frame_id]:
+            unused_signal_types.append(f"SIG_VALTYPE_ {frame_id} {signal_type}")
+    if len(unused_signal_types) > 0:
+        errors = "\n    ".join(unused_signal_types)
+        raise ValueError(f'unused SIG_VALTYPE_ entries in DBC:\n    {errors}')
+
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
                                  attribute_definitions,
                                  environment_variables,

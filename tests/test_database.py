@@ -28,6 +28,7 @@ from cantools.database.errors import (
     UnsupportedDatabaseFormatError,
 )
 from cantools.database.utils import sort_choices_by_value, sort_signals_by_name
+from cantools.typechecking import ContainerDecodeResultType, EncodeInputType
 
 
 class CanToolsDatabaseTest(unittest.TestCase):
@@ -1073,10 +1074,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         """
 
         db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
-
+        assert(isinstance(db, cantools.database.can.database.Database))
         db_msg = db.get_message_by_name('OneToContainThemAll')
 
-        orig_msg = [
+        orig_msg: EncodeInputType = [
             (
                 'message1',
                 {

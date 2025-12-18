@@ -950,7 +950,7 @@ class SystemLoader:
 
             header_type = self._get_unique_arxml_child(pdu, 'HEADER-TYPE')
 
-            if header_type and header_type.text and header_type.text != 'SHORT-HEADER':
+            if header_type is not None and header_type.text and header_type.text != 'SHORT-HEADER':
                 LOGGER.warning(f'Only short headers are currently supported '
                                f'for container frames. Frame "{frame_name}" '
                                f'Uses "{header_type.text}"!')
@@ -1581,11 +1581,11 @@ class SystemLoader:
                                              '&SYSTEM-SIGNAL',
                                              'SHORT-NAME'
                                          ])
-        if system_signal_name_elem and system_signal_name_elem.text:
+        if system_signal_name_elem is not None and system_signal_name_elem.text:
             return system_signal_name_elem.text
 
         signal_name_elem = self._get_unique_arxml_child(i_signal, 'SHORT-NAME')
-        if signal_name_elem and signal_name_elem.text:
+        if signal_name_elem is not None and signal_name_elem.text:
             return signal_name_elem.text
         else:
             # TODO Determine if signals should be able to be missing a name
@@ -1595,7 +1595,7 @@ class SystemLoader:
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> int:
         pos_elem = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                            'START-POSITION')
-        if pos_elem and pos_elem.text:
+        if pos_elem is not None and pos_elem.text:
             return parse_number_string(pos_elem.text, allow_float=False)
         else:
             LOGGER.warning(f'SIGNAL is missing START-POSITION element or element is empty!')
@@ -1605,12 +1605,12 @@ class SystemLoader:
         if self.autosar_version_newer(4):
             i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
 
-            if i_signal_length and i_signal_length.text:
+            if i_signal_length is not None and i_signal_length.text:
                 return parse_number_string(i_signal_length.text, allow_float=False)
             else:
                 LOGGER.warning(f'SIGNAL is missing LENGTH element or element is empty!')
                 return 0
-        elif system_signal:
+        elif system_signal is not None:
             # AUTOSAR3 supports specifying the signal length via the
             # system signal. (AR4 does not.)
             system_signal_length = \

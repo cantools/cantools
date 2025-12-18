@@ -86,7 +86,7 @@ DBC_FMT = (
     '{bo}\r\n'
     '\r\n'
     '{bo_tx_bu}\r\n'
-    '\r\n'
+    '{ev}\r\n'
     '\r\n'
     '{cm}\r\n'
     '{ba_def}\r\n'
@@ -591,6 +591,13 @@ def _dump_comments(database, sort_signals):
                         name=signal.name,
                         comment=signal.comment.replace('"', '\\"')))
 
+    if database.dbc is not None:
+        # Dump environment variable comments (CM_ EV_ <name> "comment";)
+        for env in database.dbc.environment_variables.values():
+            if env.comment is not None:
+                escaped_comment = env.comment.replace('"', '\\"')
+                cm.append(f'CM_ EV_ {env.name} "{escaped_comment}";')
+
     return cm
 
 
@@ -1044,6 +1051,33 @@ def _dump_signal_mux_values(database):
                 f'SG_MUL_VAL_ {get_dbc_frame_id(message)} {signal.name} {signal.multiplexer_signal} {ranges};')
 
     return sig_mux_values
+
+
+def _dump_environment_variables(database: InternalDatabase) -> list[str]:
+    """Dump environment variables (EV_ entries)."""
+    ev_lines: list[str] = []
+
+    if database.dbc is None:
+        return ev_lines
+
+    for name, env in database.dbc.environment_variables.items():
+        # Prepare values, using empty strings for None where appropriate
+        env_type = env.env_type if env.env_type is not None else ''
+        minimum = '' if env.minimum is None else env.minimum
+        maximum = '' if env.maximum is None else env.maximum
+        # escape unit quotes
+        unit = '' if env.unit is None else env.unit.replace('"', '\\"')
+        initial = '' if env.initial_value is None else env.initial_value
+        env_id = '' if env.env_id is None else env.env_id
+        access_type = '' if env.access_type is None else env.access_type
+        access_node = '' if env.access_node is None else env.access_node
+
+        escaped_unit = unit
+        ev_lines.append(
+            f'EV_ {name}: {env_type} [{minimum}|{maximum}] "{escaped_unit}" {initial} {env_id} {access_type} {access_node};'
+        )
+
+    return ev_lines
 
 
 def _load_comments(tokens):
@@ -2003,12 +2037,14 @@ def dump_string(database: InternalDatabase,
     val = _dump_choices(database, sort_attribute_signals, sort_choices)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
+    ev = _dump_environment_variables(database)
 
     return DBC_FMT.format(version=_dump_version(database),
                           bu=' '.join(bu),
                           val_table='\r\n'.join(val_table),
                           bo='\r\n\r\n'.join(bo),
                           bo_tx_bu='\r\n'.join(bo_tx_bu),
+                          ev='\r\n\r\n'.join(ev),
                           cm='\r\n'.join(cm),
                           signal_types='\r\n'.join(signal_types),
                           ba_def='\r\n'.join(ba_def),

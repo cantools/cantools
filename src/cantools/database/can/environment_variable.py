@@ -13,7 +13,8 @@ class EnvironmentVariable:
                  env_id,
                  access_type,
                  access_node,
-                 comment):
+                 comment,
+                 dbc_specifics=None):
         self._name = name
         self._env_type = env_type
         self._minimum = minimum
@@ -24,6 +25,7 @@ class EnvironmentVariable:
         self._access_type = access_type
         self._access_node = access_node
         self._comment = comment
+        self._dbc = dbc_specifics
 
     @property
     def name(self):
@@ -32,6 +34,10 @@ class EnvironmentVariable:
         """
 
         return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     @property
     def env_type(self):
@@ -140,6 +146,18 @@ class EnvironmentVariable:
     @comment.setter
     def comment(self, value):
         self._comment = value
+
+    @property
+    def dbc(self):
+        """An object containing dbc specific properties like e.g. attributes.
+
+        """
+
+        return self._dbc
+
+    @dbc.setter
+    def dbc(self, value):
+        self._dbc = value
 
     def __repr__(self):
         return "environment_variable('{}', {}, {}, {}, '{}', {}, {}, '{}', '{}', {})".format(

@@ -301,9 +301,18 @@ class Parser(textparser.Parser):
             'BO_', 'NUMBER', 'WORD', ':', 'NUMBER', 'WORD', ZeroOrMore(signal))
 
         environment_variable = Sequence(
-            'EV_', 'WORD', ':', 'NUMBER',
-            '[', 'NUMBER', '|', 'NUMBER', ']',
-            'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD', ';')
+            choice('EV_', 'ENVVAR_DATA_'),  # Allow for 'ENVVAR_DATA_' as well as 'EV_'
+            'WORD',                        # Expect a WORD (e.g., 'FaultID2')
+            ':',                           # Followed by a colon
+            'NUMBER',                      # And a number (e.g., '3')
+            Optional(                      # Optional additional parts (like in the original)
+                Sequence(
+                    '[', 'NUMBER', '|', 'NUMBER', ']',
+                    'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD'
+                )
+            ),
+            ';'                            # End with a semicolon
+        )
 
         comment = Sequence(
             'CM_',
@@ -1295,20 +1304,34 @@ def _load_environment_variables(tokens, comments, attributes):
 
     for env_var in tokens.get('EV_', []):
         name = _get_environment_variable_name(attributes, env_var[1])
-        environment_variables[name] = EnvironmentVariable(
-            name=name,
-            env_type=int(env_var[3]),
-            minimum=num(env_var[5]),
-            maximum=num(env_var[7]),
-            unit=env_var[9],
-            initial_value=num(env_var[10]),
-            env_id=int(env_var[11]),
-            access_type=env_var[12],
-            access_node=env_var[13],
-            comment=comments.get(env_var[1], None))
+        
+        #In case of a env var with less attributes fill the not found attrributes with None
+        if(len(env_var)<10): 
+            environment_variables[name] = EnvironmentVariable(
+                name=name,
+                env_type=int(env_var[3]),
+                minimum=None,
+                maximum=None,
+                unit=None,
+                initial_value=None,
+                env_id=None,
+                access_type=None,
+                access_node=None,
+                comment=comments.get(env_var[1], None))
+        else:
+            environment_variables[name] = EnvironmentVariable(
+                name=name,
+                env_type=int(env_var[3]),
+                minimum=num(env_var[5]),
+                maximum=num(env_var[7]),
+                unit=env_var[9],
+                initial_value=num(env_var[10]),
+                env_id=int(env_var[11]),
+                access_type=env_var[12],
+                access_node=env_var[13],
+                comment=comments.get(env_var[1], None))
 
     return environment_variables
-
 def _load_choices(tokens):
     choices = defaultdict(dict)
 

@@ -1,6 +1,9 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
+from collections.abc import Generator, Iterator
 import logging
 from typing import TYPE_CHECKING, Any
+import typing
+from xml.etree.ElementTree import Element
 
 from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
@@ -9,6 +12,8 @@ from ...message import Message
 from ...signal import Signal
 
 if TYPE_CHECKING:
+    from cantools.typechecking import ByteOrder
+
     from ...bus import Bus
 
 
@@ -51,7 +56,7 @@ REFERENCE_VALUES_XPATH = make_xpath([
 class EcuExtractLoader:
 
     def __init__(self,
-                 root:Any,
+                 root: Element,
                  strict:bool,
                  sort_signals:type_sort_signals=sort_signals_by_start_bit):
         self.root = root
@@ -60,18 +65,19 @@ class EcuExtractLoader:
 
     def load(self) -> InternalDatabase:
         buses: list[Bus] = []
-        messages = []
+        messages: list[Message] = []
         version = None
 
         ecuc_value_collection = self.root.find(ECUC_VALUE_COLLECTION_XPATH,
                                                NAMESPACES)
+        assert ecuc_value_collection is not None
         values_refs = ecuc_value_collection.iterfind(
             ECUC_MODULE_CONFIGURATION_VALUES_REF_XPATH,
             NAMESPACES)
         com_xpaths = [
             value_ref.text
             for value_ref in values_refs
-            if value_ref.text.endswith('/Com')
+            if value_ref.text and value_ref.text.endswith('/Com')
         ]
 
         if len(com_xpaths) != 1:
@@ -79,11 +85,12 @@ class EcuExtractLoader:
                 f'Expected 1 /Com, but got {len(com_xpaths)}.')
 
         com_config = self.find_com_config(com_xpaths[0] + '/ComConfig')
+        assert com_config is not None
 
         for ecuc_container_value in com_config:
-            definition_ref = ecuc_container_value.find(DEFINITION_REF_XPATH,
-                                                       NAMESPACES).text
+            definition_ref = ecuc_container_value.findtext(DEFINITION_REF_XPATH, namespaces=NAMESPACES)
 
+            assert definition_ref is not None
             if not definition_ref.endswith('ComIPdu'):
                 continue
 
@@ -97,26 +104,27 @@ class EcuExtractLoader:
                                 buses,
                                 version)
 
-    def load_message(self, com_i_pdu):
+    def load_message(self, com_i_pdu: Element) -> Message | None:
         # Default values.
         interval = None
-        senders = []
+        senders: list[str] = []
         comments = None
 
         # Name, frame id, length and is_extended_frame.
-        name = com_i_pdu.find(SHORT_NAME_XPATH, NAMESPACES).text
+        name = com_i_pdu.findtext(SHORT_NAME_XPATH, namespaces=NAMESPACES)
+        assert name is not None
         direction = None
 
-        for parameter, value in self.iter_parameter_values(com_i_pdu):
+        for parameter, param_value in self.iter_parameter_values(com_i_pdu):
             if parameter == 'ComIPduDirection':
-                direction = value
+                direction = param_value
                 break
 
         com_pdu_id_ref = None
 
-        for reference, value in self.iter_reference_values(com_i_pdu):
+        for reference, ref_value in self.iter_reference_values(com_i_pdu):
             if reference == 'ComPduIdRef':
-                com_pdu_id_ref = value
+                com_pdu_id_ref = ref_value
                 break
 
         if com_pdu_id_ref is None:
@@ -150,18 +158,19 @@ class EcuExtractLoader:
         # ToDo: interval, senders, comments
 
         # Find all signals in this message.
-        signals = []
+        signals: list[Signal] = []
         values = com_i_pdu.iterfind(ECUC_REFERENCE_VALUE_XPATH,
                                     NAMESPACES)
 
         for value in values:
-            definition_ref = value.find(DEFINITION_REF_XPATH,
-                                        NAMESPACES).text
+            definition_ref = value.findtext(DEFINITION_REF_XPATH, namespaces=NAMESPACES)
+            assert definition_ref is not None
             if not definition_ref.endswith('ComIPduSignalRef'):
                 continue
 
-            value_ref = value.find(VALUE_REF_XPATH, NAMESPACES)
-            signal = self.load_signal(value_ref.text)
+            value_ref = value.findtext(VALUE_REF_XPATH, namespaces=NAMESPACES)
+            assert value_ref is not None
+            signal = self.load_signal(value_ref)
 
             if signal is not None:
                 signals.append(signal)
@@ -179,23 +188,23 @@ class EcuExtractLoader:
                        strict=self.strict,
                        sort_signals=self.sort_signals)
 
-    def load_message_tx(self, com_pdu_id_ref):
+    def load_message_tx(self, com_pdu_id_ref: str) -> tuple[int | None, int | None, bool | None]:
         return self.load_message_rx_tx(com_pdu_id_ref,
                                        'CanIfTxPduCanId',
                                        'CanIfTxPduDlc',
                                        'CanIfTxPduCanIdType')
 
-    def load_message_rx(self, com_pdu_id_ref):
+    def load_message_rx(self, com_pdu_id_ref: str) -> tuple[int | None, int | None, bool | None]:
         return self.load_message_rx_tx(com_pdu_id_ref,
                                        'CanIfRxPduCanId',
                                        'CanIfRxPduDlc',
                                        'CanIfRxPduCanIdType')
 
     def load_message_rx_tx(self,
-                           com_pdu_id_ref,
-                           parameter_can_id,
-                           parameter_dlc,
-                           parameter_can_id_type):
+                           com_pdu_id_ref: str,
+                           parameter_can_id: str,
+                           parameter_dlc: str,
+                           parameter_can_id_type: str) -> tuple[int | None, int | None, bool | None]:
         can_if_tx_pdu_cfg = self.find_can_if_rx_tx_pdu_cfg(com_pdu_id_ref)
         frame_id = None
         length = None
@@ -212,12 +221,13 @@ class EcuExtractLoader:
 
         return frame_id, length, is_extended_frame
 
-    def load_signal(self, xpath):
+    def load_signal(self, xpath: str) -> Signal | None:
         ecuc_container_value = self.find_value(xpath)
         if ecuc_container_value is None:
             return None
 
-        name = ecuc_container_value.find(SHORT_NAME_XPATH, NAMESPACES).text
+        name = ecuc_container_value.findtext(SHORT_NAME_XPATH, namespaces=NAMESPACES)
+        assert name is not None
 
         # Default values.
         is_signed = False
@@ -229,12 +239,12 @@ class EcuExtractLoader:
         unit = None
         choices = None
         comments = None
-        receivers = []
+        receivers: list[str] = []
 
         # Bit position, length, byte order, is_signed and is_float.
         bit_position = None
         length = None
-        byte_order = None
+        byte_order: ByteOrder | None = None
 
         for parameter, value in self.iter_parameter_values(ecuc_container_value):
             if parameter == 'ComBitPosition':
@@ -242,7 +252,11 @@ class EcuExtractLoader:
             elif parameter == 'ComBitSize':
                 length = int(value)
             elif parameter == 'ComSignalEndianness':
-                byte_order = value.lower()
+                lowercase_val = value.lower()
+                if lowercase_val not in typing.get_args(ByteOrder):
+                    raise ValueError(f"ComSignalEndianness value {lowercase_val} is not little_endian' or 'big_endian'!")
+                else:
+                    byte_order = typing.cast('ByteOrder', lowercase_val)
             elif parameter == 'ComSignalType':
                 if value in ['SINT8', 'SINT16', 'SINT32']:
                     is_signed = True
@@ -287,7 +301,7 @@ class EcuExtractLoader:
                       comment=comments,
                       )
 
-    def find_com_config(self, xpath):
+    def find_com_config(self, xpath: str) -> Element | None:
         return self.root.find(make_xpath([
             "AR-PACKAGES",
             "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[1]),
@@ -299,7 +313,7 @@ class EcuExtractLoader:
         ]),
                               NAMESPACES)
 
-    def find_value(self, xpath):
+    def find_value(self, xpath: str) -> Element | None:
         return self.root.find(make_xpath([
             "AR-PACKAGES",
             "AR-PACKAGE/[ns:SHORT-NAME='{}']".format(xpath.split('/')[1]),
@@ -312,7 +326,7 @@ class EcuExtractLoader:
         ]),
                               NAMESPACES)
 
-    def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref):
+    def find_can_if_rx_tx_pdu_cfg(self, com_pdu_id_ref: str) -> Element | None:
         messages = self.root.iterfind(
             make_xpath([
                 "AR-PACKAGES",
@@ -328,8 +342,9 @@ class EcuExtractLoader:
             NAMESPACES)
 
         for message in messages:
-            definition_ref = message.find(DEFINITION_REF_XPATH,
-                                          NAMESPACES).text
+            definition_ref = message.findtext(DEFINITION_REF_XPATH,
+                                          namespaces=NAMESPACES)
+            assert definition_ref is not None
 
             if definition_ref.endswith('CanIfTxPduCfg'):
                 expected_reference = 'CanIfTxPduRef'
@@ -343,7 +358,9 @@ class EcuExtractLoader:
                     if value == com_pdu_id_ref:
                         return message
 
-    def iter_parameter_values(self, param_conf_container):
+        return None
+
+    def iter_parameter_values(self, param_conf_container: Element) -> Iterator[tuple[str, str]]:
         parameters = param_conf_container.find(PARAMETER_VALUES_XPATH,
                                                NAMESPACES)
 
@@ -351,14 +368,16 @@ class EcuExtractLoader:
             raise ValueError('PARAMETER-VALUES does not exist.')
 
         for parameter in parameters:
-            definition_ref = parameter.find(DEFINITION_REF_XPATH,
-                                            NAMESPACES).text
-            value = parameter.find(VALUE_XPATH, NAMESPACES).text
+            definition_ref = parameter.findtext(DEFINITION_REF_XPATH,
+                                            namespaces=NAMESPACES)
+            assert definition_ref is not None
+            value = parameter.findtext(VALUE_XPATH, namespaces=NAMESPACES)
+            assert value is not None
             name = definition_ref.split('/')[-1]
 
             yield name, value
 
-    def iter_reference_values(self, param_conf_container):
+    def iter_reference_values(self, param_conf_container: Element) -> Iterator[tuple[str, str]]:
         references = param_conf_container.find(REFERENCE_VALUES_XPATH,
                                                NAMESPACES)
 
@@ -366,9 +385,11 @@ class EcuExtractLoader:
             raise ValueError('REFERENCE-VALUES does not exist.')
 
         for reference in references:
-            definition_ref = reference.find(DEFINITION_REF_XPATH,
-                                            NAMESPACES).text
-            value = reference.find(VALUE_REF_XPATH, NAMESPACES).text
+            definition_ref = reference.findtext(DEFINITION_REF_XPATH,
+                                            namespaces=NAMESPACES)
+            assert definition_ref is not None
+            value = reference.findtext(VALUE_REF_XPATH, namespaces=NAMESPACES)
+            assert value is not None
             name = definition_ref.split('/')[-1]
 
             yield name, value

@@ -1,7 +1,17 @@
 # utility functions that are helpful when dealing with ARXML files
+from typing import Literal, overload
 
 
-def parse_number_string(in_string: str, allow_float: bool=False) \
+@overload
+def parse_number_string(in_string: str, allow_float: Literal[True]) -> int | float:
+    ...
+@overload
+def parse_number_string(in_string: str, allow_float: Literal[False]) -> int:
+    ...
+@overload
+def parse_number_string(in_string: str, allow_float: bool) -> int | float:
+    ...
+def parse_number_string(in_string: str, allow_float: bool = False) \
     -> int | float:
     """Convert a string representing numeric value that is specified
     within an ARXML file to either an integer or a floating point object

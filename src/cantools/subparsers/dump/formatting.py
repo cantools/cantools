@@ -1,5 +1,8 @@
 import textwrap
 
+from cantools.database.can.message import Message
+from cantools.database.can.signal import Signal
+
 from ...database.utils import start_bit
 
 
@@ -14,12 +17,12 @@ class Colors:
     UNDERLINE = '\033[4m'
 
 
-def signal_tree_string(message, console_width=80, with_comments=False):
+def signal_tree_string(message: Message, console_width: int = 80, with_comments: bool = False) -> str:
     """Returns the message signal tree as a string.
 
     """
 
-    def get_prefix(index, length):
+    def get_prefix(index: int, length: int) -> str:
         if index < length - 1:
             return '|   '
         else:
@@ -28,12 +31,12 @@ def signal_tree_string(message, console_width=80, with_comments=False):
     def add_prefix(prefix, lines):
         return [prefix + line for line in lines]
 
-    def format_signal_line(signal_name):
+    def format_signal_line(signal_name: str) -> str:
         siginst = message.get_signal_by_name(signal_name)
         signal_name_line = signal_name
 
         if with_comments:
-            com = []
+            com: list[str] = []
             if siginst.comment:
                 com.append(siginst.comment)
             if siginst.unit:
@@ -94,7 +97,7 @@ def signal_tree_string(message, console_width=80, with_comments=False):
     return '\n'.join(lines)
 
 
-def layout_string(message, signal_names=True):
+def layout_string(message: Message, signal_names: bool = True) -> str:
     """Returns the message layout as an ASCII art string. Each signal is
     an arrow from LSB ``x`` to MSB ``<``. Overlapping signal bits
     are set to ``X``.
@@ -133,8 +136,8 @@ def layout_string(message, signal_names=True):
 
     """
 
-    def format_big():
-        signals = []
+    def format_big() -> list[str]:
+        signals: list[str] = []
 
         for signal in message._signals:
             if signal.byte_order != 'big_endian':
@@ -146,10 +149,10 @@ def layout_string(message, signal_names=True):
 
         return signals
 
-    def format_little():
-        signals = []
+    def format_little() -> list[str]:
+        signals: list[str] = []
 
-        for signal in message._signals:
+        for signal in message.signals:
             if signal.byte_order != 'little_endian':
                 continue
 
@@ -168,7 +171,7 @@ def layout_string(message, signal_names=True):
 
         return signals
 
-    def format_byte_lines():
+    def format_byte_lines() -> tuple[list[str], int, int]:
         # Signal lines.
         signals = format_big() + format_little()
 
@@ -206,13 +209,13 @@ def layout_string(message, signal_names=True):
             for i in range(0, len(signals_union), 24)
         ]
 
-        unused_byte_lines = (message._length - len(byte_lines))
+        unused_byte_lines = (message.length - len(byte_lines))
 
         if unused_byte_lines > 0:
             byte_lines += unused_byte_lines * [24 * ' ']
 
         # Insert bits separators into each byte line.
-        lines = []
+        lines: list[str] = []
 
         for byte_line in byte_lines:
             line = ''
@@ -244,14 +247,14 @@ def layout_string(message, signal_names=True):
         # Add byte numbering.
         number_width = len(str(len(lines))) + 4
         number_fmt = f'{{:{number_width - 1}d}} {{}}'
-        a = []
+        a: list[str] = []
 
         for number, line in enumerate(lines):
             a.append(number_fmt.format(number, line))
 
         return a, len(lines), number_width
 
-    def add_header_lines(lines, number_width):
+    def add_header_lines(lines: list[str], number_width: int) -> list[str]:
         padding = number_width * ' '
 
         return [
@@ -262,9 +265,9 @@ def layout_string(message, signal_names=True):
             *lines,
         ]
 
-    def add_horizontal_lines(byte_lines, number_width):
+    def add_horizontal_lines(byte_lines: list[str], number_width: int) -> list[str]:
         padding = number_width * ' '
-        lines = []
+        lines: list[str] = []
 
         for byte_line in byte_lines:
             lines.append(byte_line)
@@ -272,7 +275,7 @@ def layout_string(message, signal_names=True):
 
         return lines
 
-    def name_bit(signal):
+    def name_bit(signal: Signal) -> int:
         offset = start_bit(signal) + signal.length - 1
 
         if signal.byte_order == 'big_endian':
@@ -280,23 +283,23 @@ def layout_string(message, signal_names=True):
         else:
             return offset
 
-    def add_signal_names(input_lines,
-                         number_of_bytes,
-                         number_width):
+    def add_signal_names(input_lines: list[str],
+                         number_of_bytes: int,
+                         number_width: int) -> list[str]:
         # Find MSB and name of all signals.
         padding = number_width * ' '
-        signals_per_byte = [[] for _ in range(number_of_bytes)]
+        signals_per_byte: list[list[tuple[int, str]]] = [[] for _ in range(number_of_bytes)]
 
-        for signal in message._signals:
+        for signal in message.signals:
             byte, bit = divmod(name_bit(signal), 8)
             signals_per_byte[byte].append((bit, '+-- ' + signal.name))
 
         # Format signal lines.
-        signal_lines_per_byte = []
+        signal_lines_per_byte: list[list[str]] = []
 
         for signals in signals_per_byte:
             signals = sorted(signals)
-            signals_lines = []
+            signals_lines: list[str] = []
 
             for signal in signals:
                 line = number_width * ' ' + '  ' + signal[1]
@@ -315,7 +318,7 @@ def layout_string(message, signal_names=True):
             signal_lines_per_byte.append(signals_lines)
 
         # Insert the signals names lines among other lines.
-        lines = []
+        lines: list[str] = []
 
         for number in range(number_of_bytes):
             lines += input_lines[2 * number: 2 * number + 2]
@@ -329,7 +332,7 @@ def layout_string(message, signal_names=True):
 
         return lines
 
-    def add_y_axis_name(lines):
+    def add_y_axis_name(lines: list[str]) -> list[str]:
         number_of_matrix_lines = (len(lines) - 3)
 
         if number_of_matrix_lines < 5:
@@ -364,14 +367,14 @@ def layout_string(message, signal_names=True):
     return '\n'.join(lines)
 
 
-def signal_choices_string(message):
+def signal_choices_string(message: Message) -> str:
     """Returns the signal choices as a string.
 
     """
 
-    lines = []
+    lines: list[str] = []
 
-    for signal in message._signals:
+    for signal in message.signals:
         if signal.choices:
             lines.append('')
             lines.append(signal.name)

@@ -9,6 +9,8 @@ from unittest import mock
 import cantools
 from cantools.database.can.attribute import Attribute
 from cantools.database.can.attribute_definition import AttributeDefinition
+from cantools.database.can.signal import Signal
+from cantools.typechecking import StringPathLike
 
 
 class CanToolsConvertFullTest(unittest.TestCase):
@@ -20,17 +22,17 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
     # ------- aux functions -------
 
-    def get_test_file_name(self, fn):
+    def get_test_file_name(self, fn: str) -> str:
         return os.path.join(os.path.split(__file__)[0], 'files', *fn.split('/'))
 
-    def get_out_file_name(self, fn_in, ext):
+    def get_out_file_name(self, fn_in: str, ext: str) -> str:
         fn = fn_in
         fn = os.path.splitext(fn)[0] + ext
         fn = os.path.split(fn)[1]
         fn = os.path.join(tempfile.mkdtemp(), fn)
         return fn
 
-    def assertFileEqual(self, fn1, fn2, encoding=None):
+    def assertFileEqual(self, fn1: StringPathLike, fn2: StringPathLike, encoding: str | None = None) -> None:
         with open(fn1, encoding=encoding) as f:
             content1 = list(f)
         with open(fn2, encoding=encoding) as f:
@@ -72,7 +74,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
 
                 #print()
 
-    def remove_out_file(self, fn_out):
+    def remove_out_file(self, fn_out: str) -> None:
         path = os.path.split(fn_out)[0]
         shutil.rmtree(path)
 
@@ -84,6 +86,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_expected_output = filename
 
         db = cantools.database.load_file(filename, prune_choices=False, sort_signals=None)
+        assert(isinstance(db, cantools.database.can.database.Database))
         cantools.database.dump_file(db, fn_out)
 
         self.assertFileEqual(fn_expected_output, fn_out)
@@ -94,11 +97,12 @@ class CanToolsConvertFullTest(unittest.TestCase):
     def test_dbc_dump_sort_signals_by_name(self):
         fn_in = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
         fn_expected_output = self.get_test_file_name('dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc')
-        def sort_signals(signals):
+        def sort_signals(signals: list[Signal]) -> list[Signal]:
             return sorted(signals, key=lambda sig: sig.name)
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
         db = cantools.database.load_file(fn_in, prune_choices=False)
+        assert(isinstance(db, cantools.database.can.database.Database))
         cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
 
         self.assertFileEqual(fn_expected_output, fn_out)
@@ -110,6 +114,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
         db = cantools.database.load_file(fn_in, prune_choices=False)
+        assert(isinstance(db, cantools.database.can.database.Database))
         cantools.database.dump_file(db, fn_out)
 
         self.assertFileEqual(fn_expected_output, fn_out)
@@ -121,7 +126,9 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_out2 = self.get_out_file_name("loaded-with-sort-signals-by-name", ext='.dbc')
 
         db1 = cantools.database.load_file(fn_in)
+        assert(isinstance(db1, cantools.database.can.database.Database))
         db2 = cantools.database.load_file(fn_in, sort_signals = lambda signals: sorted(signals, key=lambda sig: sig.name))
+        assert(isinstance(db2, cantools.database.can.database.Database))
 
         msg1 = db1.get_message_by_name('RT_DL1MK3_GPS_Speed')
         msg2 = db2.get_message_by_name('RT_DL1MK3_GPS_Speed')

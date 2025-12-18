@@ -1,39 +1,38 @@
-from collections import namedtuple
+from dataclasses import dataclass
+from typing import Any
 
 import bitstruct  # type: ignore
 
 from .errors import Error
 
-FrameId = namedtuple('FrameId',
-                     [
-                         'priority',
-                         'reserved',
-                         'data_page',
-                         'pdu_format',
-                         'pdu_specific',
-                         'source_address',
-                     ])
+
+@dataclass
+class FrameId:
+    priority: int
+    reserved: int
+    data_page: int
+    pdu_format: int
+    pdu_specific: int
+    source_address: int
+
+@dataclass
+class PGN:
+    reserved: int
+    data_page: int
+    pdu_format: int
+    pdu_specific: int
 
 
-PGN = namedtuple('PGN',
-                 [
-                     'reserved',
-                     'data_page',
-                     'pdu_format',
-                     'pdu_specific'
-                 ])
-
-
-def is_pdu_format_1(pdu_format):
+def is_pdu_format_1(pdu_format: int) -> bool:
     return (pdu_format < 240)
 
 
-def frame_id_pack(priority,
-                  reserved,
-                  data_page,
-                  pdu_format,
-                  pdu_specific,
-                  source_address):
+def frame_id_pack(priority: int,
+                  reserved: int,
+                  data_page: int,
+                  pdu_format: int,
+                  pdu_specific: int,
+                  source_address: int) -> Any:
     """Pack given values as a frame id and return it as an integer.
 
     """
@@ -65,7 +64,7 @@ def frame_id_pack(priority,
     return bitstruct.unpack('u29', packed)[0]
 
 
-def frame_id_unpack(frame_id):
+def frame_id_unpack(frame_id: int) -> FrameId:
     """Unpack given frame id and return a tuple of priority, reserved,
     data page, PDU format, PDU specific and source address.
 
@@ -79,13 +78,13 @@ def frame_id_unpack(frame_id):
     return FrameId(*bitstruct.unpack('u3u1u1u8u8u8', packed))
 
 
-def pgn_pack(reserved, data_page, pdu_format, pdu_specific=0):
+def pgn_pack(reserved: int, data_page: int, pdu_format: int, pdu_specific: int = 0) -> Any:
     """Pack given values as a parameter group number (PGN) and return it
     as an integer.
 
     """
 
-    if pdu_format < 240 and pdu_specific != 0:
+    if is_pdu_format_1(pdu_format) and pdu_specific != 0:
         raise Error(
             f'Expected PDU specific 0 when PDU format is 0..239, but got {pdu_specific}.')
 
@@ -110,7 +109,7 @@ def pgn_pack(reserved, data_page, pdu_format, pdu_specific=0):
     return bitstruct.unpack('u18', packed)[0]
 
 
-def pgn_unpack(pgn):
+def pgn_unpack(pgn: int) -> PGN:
     """Unpack given parameter group number (PGN) and return a tuple of
     Reserved, Data Page, PDU Format and PDU Specific.
 
@@ -124,14 +123,14 @@ def pgn_unpack(pgn):
     return PGN(*bitstruct.unpack('u1u1u8u8', packed))
 
 
-def pgn_from_frame_id(frame_id):
+def pgn_from_frame_id(frame_id: int) -> Any:
     """Get the parameter group number (PGN) from given frame id.
 
     """
 
     unpacked = frame_id_unpack(frame_id)
 
-    if unpacked.pdu_format < 240:
+    if is_pdu_format_1(unpacked.pdu_format):
         pdu_specific = 0
     else:
         pdu_specific = unpacked.pdu_specific

@@ -3,7 +3,6 @@ from collections import OrderedDict
 from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
-    Any,
     Literal,
     NamedTuple,
     TypeAlias,
@@ -29,7 +28,7 @@ Comments = dict[str | None, str]
 class Codec(TypedDict):
     signals: list["Signal"]
     formats: Formats
-    multiplexers: Mapping[str, Mapping[int, Any]]
+    multiplexers: Mapping[str, Mapping[int, "Codec"]]
 
 ByteOrder = Literal["little_endian", "big_endian"]
 Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]

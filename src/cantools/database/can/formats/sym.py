@@ -1,10 +1,9 @@
 # Load and dump a CAN database in SYM format.
 
-import collections
 import logging
 import re
-from collections import OrderedDict as odict
-from collections.abc import Callable
+from collections import OrderedDict
+from collections.abc import Mapping
 from itertools import groupby
 from typing import TYPE_CHECKING
 
@@ -22,11 +21,12 @@ from textparser import (
     tokenize_init,
 )
 
+from cantools.typechecking import ByteOrder
+
 from ...conversion import BaseConversion
 from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
-    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     type_sort_signals,
 )
@@ -72,7 +72,7 @@ class Parser60(textparser.Parser):
         'Type'
     }
 
-    def tokenize(self, string):
+    def tokenize(self, text: str) -> list[Token]:
         names = {
             'LPAREN':      '(',
             'RPAREN':      ')',
@@ -146,7 +146,7 @@ class Parser60(textparser.Parser):
 
         tokens, token_regex = tokenize_init(token_specs)
 
-        for mo in re.finditer(token_regex, string, re.DOTALL):
+        for mo in re.finditer(token_regex, text, re.DOTALL):
             kind = mo.lastgroup
 
             if kind == 'SKIP':
@@ -154,7 +154,7 @@ class Parser60(textparser.Parser):
             elif kind == 'STRING':
                 value = mo.group(kind)[1:-1].replace('\\"', '"')
                 tokens.append(Token(kind, value, mo.start()))
-            elif kind != 'MISMATCH':
+            elif kind != 'MISMATCH' and kind is not None:
                 value = mo.group(kind)
 
                 if value in self.KEYWORDS:
@@ -165,11 +165,11 @@ class Parser60(textparser.Parser):
 
                 tokens.append(Token(kind, value, mo.start()))
             else:
-                raise TokenizeError(string, mo.start())
+                raise TokenizeError(text, mo.start())
 
         return tokens
 
-    def grammar(self):
+    def grammar(self) -> Sequence:
         word = choice('WORD', *list(self.KEYWORDS))
         version = Sequence('FormatVersion', '=', 'NUMBER', 'COMMENT')
         title = Sequence('Title' , '=', 'STRING')
@@ -265,8 +265,8 @@ class Parser60(textparser.Parser):
         return grammar
 
 
-def _get_section_tokens(tokens, name):
-    rows = []
+def _get_section_tokens(tokens: list[Token], name: str) -> list[list[Any]]:
+    rows: list[list[Any]] = []
     for section in tokens[3]:
         if section[0] == name:
             rows.extend([row for row in section[1] if isinstance(row, list)])
@@ -274,26 +274,26 @@ def _get_section_tokens(tokens, name):
     return rows
 
 
-def _load_comment(tokens):
+def _load_comment(tokens: list[Token]) -> str:
     return tokens[3:].rstrip('\r\n')
 
 
-def _get_enum(enums, name):
+def _get_enum(enums: dict[str, Any], name: str) -> Any:
     try:
         return enums[name]
     except KeyError:
         raise ParseError(f"Enum '{name}' is not defined.") from None
 
 
-def _load_enums(tokens):
+def _load_enums(tokens: list[Token]) -> dict[str, dict[int | float, NamedSignalValue]]:
     section = _get_section_tokens(tokens, '{ENUMS}')
-    all_enums = {}
+    all_enums: dict[str, dict[int | float, NamedSignalValue]] = {}
 
     for _, _, name, _, values, _, _ in section:
         if values:
             values = values[0]
 
-        enum = odict()
+        enum: dict[int | float, NamedSignalValue] = OrderedDict()
         for v in values:
             value = num(v[0])
             value_name = v[2]
@@ -304,7 +304,7 @@ def _load_enums(tokens):
     return all_enums
 
 
-def _load_signal_type_and_length(type_, tokens, enums):
+def _load_signal_type_and_length(type_: str, tokens: list[Token], enums):
     # Default values.
     is_signed = False
     is_float = False
@@ -343,7 +343,7 @@ def _load_signal_type_and_length(type_, tokens, enums):
     return is_signed, is_float, length, enum, minimum, maximum
 
 
-def _load_signal_attributes(tokens, enum, enums, minimum, maximum, spn):
+def _load_signal_attributes(tokens: list[Token], enum, enums, minimum, maximum, spn):
     # Default values.
     factor = 1
     offset = 0
@@ -377,7 +377,7 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, spn):
     return unit, factor, offset, enum, minimum, maximum, spn
 
 
-def _load_signal(tokens, enums):
+def _load_signal(tokens: list[Token], enums):
     # Default values.
     name = tokens[2]
     byte_order = 'little_endian'
@@ -433,9 +433,9 @@ def _load_signal(tokens, enums):
                   spn=spn)
 
 
-def _load_signals(tokens, enums):
+def _load_signals(tokens, enums) -> dict[str, Signal]:
     section = _get_section_tokens(tokens, '{SIGNALS}')
-    signals = {}
+    signals: dict[str, Signal] = {}
 
     for signal in section:
         signal = _load_signal(signal, enums)
@@ -445,7 +445,7 @@ def _load_signals(tokens, enums):
 
 
 def _load_message_signal(tokens,
-                         signals,
+                         signals: list[Signal],
                          multiplexer_signal,
                          multiplexer_ids):
     signal = signals[tokens[2]]
@@ -475,7 +475,7 @@ def _load_message_signal(tokens,
                   multiplexer_signal=multiplexer_signal,
                   spn=signal.spn)
 
-def _convert_start(start, byte_order):
+def _convert_start(start: int, byte_order: ByteOrder):
     if byte_order == 'big_endian':
         start = (8 * (start // 8) + (7 - (start % 8)))
     return start
@@ -577,12 +577,12 @@ def _load_muxed_message_signals(message_tokens,
 
         return [int(mux_id, base=base)]
 
+    byte_order: ByteOrder = 'little_endian'
     mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
     if '-m' in mux_tokens[7]:
         byte_order = 'big_endian'
-    else:
-        byte_order = 'little_endian'
+
     start = int(mux_tokens[3])
     start = _convert_start(start, byte_order)
     if mux_tokens[8]:
@@ -619,13 +619,13 @@ def _load_muxed_message_signals(message_tokens,
     return result
 
 
-def _is_multiplexed(message_tokens):
+def _is_multiplexed(message_tokens: list[Token]) -> bool:
     return 'Mux' in message_tokens[3]
 
 
 def _load_message_signals(message_tokens,
                           message_section_tokens,
-                          signals,
+                          signals: list[Signal],
                           enums):
     if _is_multiplexed(message_tokens):
         return _load_muxed_message_signals(message_tokens,
@@ -655,15 +655,15 @@ def _get_senders(section_name: str) -> list[str]:
     else:
         raise ValueError(f'Unexpected message section named {section_name}')
 
-def _load_message(frame_id,
-                  is_extended_frame,
+def _load_message(frame_id: int,
+                  is_extended_frame: bool,
                   message_tokens,
                   message_section_tokens,
-                  signals,
+                  signals: list[Signal],
                   enums,
-                  strict,
-                  sort_signals,
-                  section_name):
+                  strict: bool,
+                  sort_signals: type_sort_signals,
+                  section_name) -> Message:
     #print(message_tokens)
     # Default values.
     name = message_tokens[1]
@@ -702,11 +702,11 @@ def _load_message(frame_id,
                    sort_signals=sort_signals)
 
 
-def _parse_message_frame_ids(message):
-    def to_int(string):
+def _parse_message_frame_ids(message) -> tuple[range, bool]:
+    def to_int(string: str) -> int:
         return int(string, 16)
 
-    def is_extended_frame(string, type_str):
+    def is_extended_frame(string: str, type_str: str) -> bool:
         # Length of 9 includes terminating 'h' for hex
         return len(string) == 9 or type_str.lower() in ['extended', 'fdextended']
 
@@ -729,12 +729,12 @@ def _parse_message_frame_ids(message):
     return frame_ids, is_extended_frame(message_id[2], message_type)
 
 
-def _load_message_section(section_name, tokens, signals, enums, strict, sort_signals):
+def _load_message_section(section_name: str, tokens: list[Token], signals: list[NamedSignalValue], enums, strict: bool, sort_signals: type_sort_signals):
     def has_frame_id(message):
         return 'ID' in message[3]
 
     message_section_tokens = _get_section_tokens(tokens, section_name)
-    messages = []
+    messages: list[Message] = []
 
     for message_tokens in message_section_tokens:
         if not has_frame_id(message_tokens):
@@ -757,7 +757,7 @@ def _load_message_section(section_name, tokens, signals, enums, strict, sort_sig
     return messages
 
 
-def _load_messages(tokens, signals, enums, strict, sort_signals):
+def _load_messages(tokens: list[Token], signals, enums, strict: bool, sort_signals: type_sort_signals):
     messages = _load_message_section('{SEND}', tokens, signals, enums, strict, sort_signals)
     messages += _load_message_section('{RECEIVE}', tokens, signals, enums, strict, sort_signals)
     messages += _load_message_section('{SENDRECEIVE}', tokens, signals, enums, strict, sort_signals)
@@ -765,7 +765,7 @@ def _load_messages(tokens, signals, enums, strict, sort_signals):
     return messages
 
 
-def _load_version(tokens):
+def _load_version(tokens) -> str | None:
     return tokens[1][2]
 
 
@@ -852,10 +852,10 @@ def _dump_signal(signal: Signal) -> str:
 
     return signal_str
 
-def _dump_signals(database: InternalDatabase, sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> str:
-    signal_dumps = []
+def _dump_signals(database: InternalDatabase, sort_signals: type_sort_signals) -> str:
+    signal_dumps: list[str] = []
     # SYM requires unique signals
-    generated_signals = set()
+    generated_signals: set[str] = set()
     for message in database.messages:
         if sort_signals:
             signals = sort_signals(message.signals)
@@ -917,13 +917,13 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
     return message_str
 
 def _dump_messages(database: InternalDatabase) -> str:
-    send_messages = []
-    receive_messages = []
-    send_receive_messages = []
+    send_messages: list[str] = []
+    receive_messages: list[str] = []
+    send_receive_messages: list[str] = []
     message_name: str
     messages_with_name: Iterator[Message]
     for message_name, messages_with_name in groupby(sorted(database.messages, key=lambda m: m.name), key=lambda m: m.name):
-        message_dumps = []
+        message_dumps: list[str] = []
         # Cantools represents SYM CAN ID range with multiple messages - need to dedup multiple cantools messages
         # into a single message with a CAN ID range
         messages_with_name_list = list(messages_with_name)
@@ -941,14 +941,14 @@ def _dump_messages(database: InternalDatabase) -> str:
                 raise ValueError(f'Expected {frame_id_range} messages with name {message_name} - given {num_messages_with_name}')
 
         if message.is_multiplexed():
-            non_multiplexed_signals = []
+            non_multiplexed_signals: list[str] = []
             # Store all non-multiplexed signals first
             for signal_tree_signal in message.signal_tree:
-                if not isinstance(signal_tree_signal, collections.abc.Mapping):
+                if not isinstance(signal_tree_signal, Mapping):
                     non_multiplexed_signals.append(signal_tree_signal)
 
             for signal_tree_signal in message.signal_tree:
-                if isinstance(signal_tree_signal, collections.abc.Mapping):
+                if isinstance(signal_tree_signal, Mapping):
                     signal_name, multiplexed_signals = next(iter(signal_tree_signal.items()))
                     is_first_message = True
                     for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
@@ -974,13 +974,10 @@ def _dump_messages(database: InternalDatabase) -> str:
         messages_dump += '{SENDRECEIVE}\n' + '\n'.join(send_receive_messages) + '\n'
     return messages_dump
 
-def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
+def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> str:
     """Format given database in SYM file format.
 
     """
-    if sort_signals == SORT_SIGNALS_DEFAULT:
-        sort_signals = sort_signals_by_start_bit
-
     sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
     sym_str += 'Title="SYM Database"\n\n'
 
@@ -990,7 +987,7 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
 
     return sym_str
 
-def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
+def load_string(string: str, strict: bool = True, sort_signals: type_sort_signals = sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given string.
 
     """

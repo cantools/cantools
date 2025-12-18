@@ -9,7 +9,7 @@ from .__utils__ import format_message_by_frame_id
 
 logging.basicConfig(level=logging.WARNING)
 
-def _do_decode(args):
+def _do_decode(args) -> None:
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
@@ -35,7 +35,7 @@ def _do_decode(args):
         print(line)
 
 
-def add_subparser(subparsers):
+def add_subparser(subparsers) -> None:
     decode_parser = subparsers.add_parser(
         'decode',
         description=('Decode "candump" CAN frames read from standard input '

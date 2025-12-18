@@ -2,8 +2,10 @@
 
 import re
 from collections import OrderedDict, defaultdict
+from collections.abc import Mapping
 from copy import deepcopy
 from decimal import Decimal
+from typing import cast
 
 import textparser  # type: ignore
 from textparser import (
@@ -24,15 +26,19 @@ from textparser import (
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
-    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     sort_signals_by_start_bit_reversed,
+    type_sort_attribute,
     type_sort_attributes,
     type_sort_choices,
     type_sort_signals,
 )
-from ..attribute import Attribute
-from ..attribute_definition import AttributeDefinition
+from ..attribute import Attribute, AttributeType
+from ..attribute_definition import (
+    AttributeDefinition,
+    AttributeDefinitionType,
+    AttributeValueType,
+)
 from ..bus import Bus
 from ..environment_variable import EnvironmentVariable
 from ..internal_database import InternalDatabase
@@ -177,15 +183,15 @@ ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
     maximum=100000000000)
 
 
-def to_int(value):
+def to_int(value: int | str) -> int:
     return int(Decimal(value))
 
-def to_float(value):
+def to_float(value: float | str) -> float:
     return float(Decimal(value))
 
 class Parser(textparser.Parser):
 
-    def tokenize(self, string):
+    def tokenize(self, text: str) -> list[Token]:
         keywords = {
             'BA_',
             'BA_DEF_',
@@ -257,8 +263,10 @@ class Parser(textparser.Parser):
 
         tokens, token_regex = tokenize_init(token_specs)
 
-        for mo in re.finditer(token_regex, string, re.DOTALL):
+        for mo in re.finditer(token_regex, text, re.DOTALL):
             kind = mo.lastgroup
+            if kind is None:
+                raise RuntimeError("DBC did not match expected regex parser syntax!")
 
             if kind == 'SKIP':
                 pass
@@ -276,7 +284,7 @@ class Parser(textparser.Parser):
 
                 tokens.append(Token(kind, value, mo.start()))
             else:
-                raise TokenizeError(string, mo.start())
+                raise TokenizeError(text, mo.start())
 
         return tokens
 
@@ -429,7 +437,7 @@ class LongNamesConverter:
         return short_name
 
 
-def get_dbc_frame_id(message):
+def get_dbc_frame_id(message: Message) -> int:
     frame_id = message.frame_id
 
     if message.is_extended_frame:
@@ -437,7 +445,7 @@ def get_dbc_frame_id(message):
 
     return frame_id
 
-def get_dbc_name(name):
+def get_dbc_name(name: str) -> str:
     #replace special chars with '_'
     name = re.sub(r'\W', '_', name)
     #append '_' if it starts with a number
@@ -447,26 +455,26 @@ def get_dbc_name(name):
     return name
 
 
-def _get_node_name(attributes, name):
+def _get_node_name(attributes, name: str) -> str:
     try:
         return attributes['node'][name]['SystemNodeLongSymbol'].value
     except (KeyError, TypeError):
         return name
 
 
-def _get_environment_variable_name(attributes, name):
+def _get_environment_variable_name(attributes, name: str) -> str:
     try:
         return attributes['envvar'][name]['SystemEnvVarLongSymbol'].value
     except (KeyError, TypeError):
         return name
 
 
-def _dump_version(database):
+def _dump_version(database: InternalDatabase) -> str:
     return '' if database.version is None else database.version
 
 
-def _dump_nodes(database):
-    bu = []
+def _dump_nodes(database: InternalDatabase) -> list[str]:
+    bu: list[str] = []
 
     for node in database.nodes:
         bu.append(node.name)
@@ -474,26 +482,26 @@ def _dump_nodes(database):
     return bu
 
 
-def _dump_value_tables(database):
+def _dump_value_tables(database: InternalDatabase) -> list[str]:
     if database.dbc is None:
         return []
 
-    val_table = []
+    val_table: list[str] = []
 
     for name, choices in database.dbc.value_tables.items():
-        choices = [
+        choices_text = [
             f'{number} "{text}"'
             for number, text in sorted(choices.items(), reverse=True)
         ]
-        val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices)))
+        val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices_text)))
 
     return [*val_table, '']
 
 
-def _dump_messages(database, sort_signals):
-    bo = []
+def _dump_messages(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
+    bo: list[str] = []
 
-    def format_mux(signal):
+    def format_mux(signal: Signal) -> str:
         if signal.is_multiplexer:
             return ' M'
         elif signal.multiplexer_ids is not None:
@@ -501,20 +509,20 @@ def _dump_messages(database, sort_signals):
         else:
             return ''
 
-    def format_receivers(signal):
+    def format_receivers(signal: Signal) -> str:
         if signal.receivers:
             return ' ' + ','.join(signal.receivers)
         else:
             return 'Vector__XXX'
 
-    def format_senders(message):
+    def format_senders(message: Message) -> str:
         if message.senders:
             return message.senders[0]
         else:
             return 'Vector__XXX'
 
     for message in database.messages:
-        msg = []
+        msg: list[str] = []
         msg.append(
             f'BO_ {get_dbc_frame_id(message)} {message.name}: {message.length} {format_senders(message)}')
 
@@ -545,8 +553,8 @@ def _dump_messages(database, sort_signals):
     return bo
 
 
-def _dump_senders(database):
-    bo_tx_bu = []
+def _dump_senders(database: InternalDatabase) -> list[str]:
+    bo_tx_bu: list[str] = []
 
     for message in database.messages:
         if len(message.senders) > 1:
@@ -558,8 +566,8 @@ def _dump_senders(database):
     return bo_tx_bu
 
 
-def _dump_comments(database, sort_signals):
-    cm = []
+def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
+    cm: list[str] = []
 
     for bus in database.buses:
         if bus.comment is not None:
@@ -601,8 +609,8 @@ def _dump_comments(database, sort_signals):
     return cm
 
 
-def _dump_signal_types(database):
-    valtype = []
+def _dump_signal_types(database: InternalDatabase) -> list[str]:
+    valtype: list[str] = []
 
     for message in database.messages:
         for signal in message.signals:
@@ -615,30 +623,30 @@ def _dump_signal_types(database):
     return valtype
 
 
-def _need_startval_def(database):
+def _need_startval_def(database: InternalDatabase) -> bool:
     return any(s.raw_initial is not None
                for m in database.messages
                for s in m.signals)
 
-def _need_cycletime_def(database):
+def _need_cycletime_def(database: InternalDatabase) -> bool:
     # If the user has added cycle times to a database which didn't start with them,
     # we need to add the global attribute definition so the output DBC is valid
     return any(m.cycle_time is not None
                for m in database.messages)
 
 def _bus_is_canfd(database: InternalDatabase) -> bool:
-    if database.dbc is None or database.dbc.attributes is None:
+    if database.dbc is None:
         return False
     bus_type = database.dbc.attributes.get('BusType', None)
     if bus_type is None:
         return False
-    return bus_type.value == 'CAN FD'  # type: ignore[no-any-return]
+    return bus_type.value == 'CAN FD'
 
 def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
-    ba_def = []
+    ba_def: list[str] = []
 
     if database.dbc is None:
-        definitions = OrderedDict()
+        definitions: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
     else:
         definitions = database.dbc.attribute_definitions
 
@@ -656,21 +664,19 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
         if 'CANFD_BRS' not in definitions:
             definitions['CANFD_BRS'] = ATTRIBUTE_DEFINITION_CANFD_BRS
 
-    def get_value(definition, value):
+    def get_value(definition: AttributeDefinitionType, value: int | float | None) -> str:
         if definition.minimum is None:
-            value = ''
+            return ''
         else:
-            value = f' {value}'
+            return f' {value}'
 
-        return value
-
-    def get_minimum(definition):
+    def get_minimum(definition: AttributeDefinitionType) -> str:
         return get_value(definition, definition.minimum)
 
-    def get_maximum(definition):
+    def get_maximum(definition: AttributeDefinitionType) -> str:
         return get_value(definition, definition.maximum)
 
-    def get_kind(definition):
+    def get_kind(definition: AttributeDefinitionType) -> str:
         return '' if definition.kind is None else definition.kind + ' '
 
     for definition in definitions.values():
@@ -689,26 +695,24 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
     return ba_def
 
 
-def _dump_attribute_definitions_rel(database):
-    ba_def_rel = []
+def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
+    ba_def_rel: list[str] = []
 
     if database.dbc is None:
-        definitions = OrderedDict()
+        definitions: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
     else:
         definitions = database.dbc.attribute_definitions_rel
 
-    def get_value(definition, value):
+    def get_value(definition: AttributeDefinitionType, value: int | float | None) -> str:
         if definition.minimum is None:
-            value = ''
+            return ''
         else:
-            value = f' {value}'
+            return f' {value}'
 
-        return value
-
-    def get_minimum(definition):
+    def get_minimum(definition: AttributeDefinitionType) -> str:
         return get_value(definition, definition.minimum)
 
-    def get_maximum(definition):
+    def get_maximum(definition: AttributeDefinitionType) -> str:
         return get_value(definition, definition.maximum)
 
     for definition in definitions.values():
@@ -727,11 +731,11 @@ def _dump_attribute_definitions_rel(database):
     return ba_def_rel
 
 
-def _dump_attribute_definition_defaults(database):
-    ba_def_def = []
+def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
+    ba_def_def: list[str] = []
 
     if database.dbc is None:
-        definitions = OrderedDict()
+        definitions: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
     else:
         definitions = database.dbc.attribute_definitions
 
@@ -748,11 +752,11 @@ def _dump_attribute_definition_defaults(database):
     return ba_def_def
 
 
-def _dump_attribute_definition_defaults_rel(database):
-    ba_def_def_rel = []
+def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[str]:
+    ba_def_def_rel: list[str] = []
 
     if database.dbc is None:
-        definitions = OrderedDict()
+        definitions: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
     else:
         definitions = database.dbc.attribute_definitions_rel
 
@@ -769,10 +773,10 @@ def _dump_attribute_definition_defaults_rel(database):
     return ba_def_def_rel
 
 
-def _dump_attributes(database, sort_signals, sort_attributes):
-    attributes = []
+def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals, sort_attributes: type_sort_attributes) -> list[str]:
+    attributes: list[type_sort_attribute] = []
 
-    def get_value(attribute):
+    def get_value(attribute: AttributeType) -> str | int | float:
         result = attribute.value
 
         if attribute.definition.type_name == "STRING":
@@ -781,40 +785,37 @@ def _dump_attributes(database, sort_signals, sort_attributes):
         return result
 
     if database.dbc is not None:
-        if database.dbc.attributes is not None:
-            for attribute in database.dbc.attributes.values():
-                attributes.append(('dbc', attribute, None, None, None))
+        for attribute in database.dbc.attributes.values():
+            attributes.append(('dbc', attribute, None, None, None))
 
     for node in database.nodes:
         if node.dbc is not None:
-            if node.dbc.attributes is not None:
-                for attribute in node.dbc.attributes.values():
-                    attributes.append(('node', attribute, node, None, None))
+            for attribute in node.dbc.attributes.values():
+                attributes.append(('node', attribute, node, None, None))
 
     for message in database.messages:
         # retrieve the ordered dictionary of message attributes
-        msg_attributes = OrderedDict()
-        if message.dbc is not None and message.dbc.attributes is not None:
+        msg_attributes: OrderedDict[str, AttributeType] = OrderedDict()
+        if message.dbc is not None:
             msg_attributes.update(message.dbc.attributes)
 
         # synchronize the attribute for the message cycle time with
         # the cycle time specified by the message object
-        gen_msg_cycle_time_def: AttributeDefinition  # type: ignore[annotation-unchecked]
         msg_cycle_time = message.cycle_time or 0
-        if gen_msg_cycle_time_def := database.dbc.attribute_definitions.get("GenMsgCycleTime"):
-            if msg_cycle_time != gen_msg_cycle_time_def.default_value:
-                msg_attributes['GenMsgCycleTime'] = Attribute(
-                    value=msg_cycle_time,
-                    definition=gen_msg_cycle_time_def,
-                )
+        if database.dbc is not None:
+            if gen_msg_cycle_time_def := cast('AttributeDefinition[int]', database.dbc.attribute_definitions.get("GenMsgCycleTime")):
+                if msg_cycle_time != gen_msg_cycle_time_def.default_value:
+                    msg_attributes['GenMsgCycleTime'] = Attribute[int](
+                        value=msg_cycle_time,
+                        definition=gen_msg_cycle_time_def,
+                    )
+                elif 'GenMsgCycleTime' in msg_attributes:
+                    del msg_attributes['GenMsgCycleTime']
             elif 'GenMsgCycleTime' in msg_attributes:
                 del msg_attributes['GenMsgCycleTime']
-        elif 'GenMsgCycleTime' in msg_attributes:
-            del msg_attributes['GenMsgCycleTime']
 
         # if bus is CAN FD, set VFrameFormat
-        v_frame_format_def: AttributeDefinition  # type: ignore[annotation-unchecked]
-        if v_frame_format_def := database.dbc.attribute_definitions.get("VFrameFormat"):
+        if v_frame_format_def := cast('AttributeDefinition[str]', database.dbc.attribute_definitions.get("VFrameFormat")):
             if message.protocol == 'j1939':
                 v_frame_format_str = 'J1939PG'
             elif message.is_fd and message.is_extended_frame:
@@ -848,8 +849,8 @@ def _dump_attributes(database, sort_signals, sort_attributes):
             signals = message.signals
         for signal in signals:
             # retrieve the ordered dictionary of signal attributes
-            sig_attributes = OrderedDict()
-            if signal.dbc is not None and signal.dbc.attributes is not None:
+            sig_attributes: OrderedDict[str, AttributeType] = OrderedDict()
+            if signal.dbc is not None:
                 sig_attributes = signal.dbc.attributes
 
             # synchronize the attribute for the signal start value with
@@ -868,7 +869,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
     if sort_attributes:
         attributes = sort_attributes(attributes)
 
-    ba = []
+    ba: list[str] = []
     for typ, attribute, node, message, signal in attributes:
         if typ == 'dbc':
             ba.append(f'BA_ "{attribute.definition.name}" '
@@ -893,18 +894,13 @@ def _dump_attributes(database, sort_signals, sort_attributes):
     return ba
 
 
-def _dump_attributes_rel(database, sort_signals):
-    ba_rel = []
+def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
+    ba_rel: list[str] = []
 
-    def get_value(attribute):
-        result = attribute.value
+    def get_value(attribute: AttributeType) -> str | int | float:
+        return f'"{attribute.value}"' if attribute.definition.type_name == "STRING" else attribute.value
 
-        if attribute.definition.type_name == "STRING":
-            result = '"' + attribute.value + '"'
-
-        return result
-
-    if database.dbc is not None and database.dbc.attributes_rel is not None:
+    if database.dbc is not None:
         attributes_rel = database.dbc.attributes_rel
         for frame_id, element in attributes_rel.items():
             if "signal" in element:
@@ -930,8 +926,8 @@ def _dump_attributes_rel(database, sort_signals):
     return ba_rel
 
 
-def _dump_choices(database, sort_signals, sort_choices):
-    val = []
+def _dump_choices(database: InternalDatabase, sort_signals: type_sort_signals, sort_choices: type_sort_choices) -> list[str]:
+    val: list[str] = []
 
     for message in database.messages:
         if sort_signals:
@@ -956,8 +952,8 @@ def _dump_choices(database, sort_signals, sort_choices):
     return val
 
 
-def _dump_signal_groups(database):
-    sig_group = []
+def _dump_signal_groups(database: InternalDatabase) -> list[str]:
+    sig_group: list[str] = []
 
     for message in database.messages:
         if message.signal_groups is None:
@@ -977,7 +973,7 @@ def _dump_signal_groups(database):
     return sig_group
 
 
-def _is_extended_mux_needed(messages):
+def _is_extended_mux_needed(messages: list[Message]) -> bool:
     """Check for messages with more than one mux signal or signals with
     more than one multiplexer value.
 
@@ -1001,7 +997,7 @@ def _is_extended_mux_needed(messages):
     return False
 
 
-def _create_mux_ranges(multiplexer_ids):
+def _create_mux_ranges(multiplexer_ids: list[int]) -> list[list[int]]:
     """Create a list of ranges based on a list of single values.
 
     Example:
@@ -1013,7 +1009,7 @@ def _create_mux_ranges(multiplexer_ids):
     ordered = sorted(multiplexer_ids)
     # Anything but ordered[0] - 1
     prev_value = ordered[0]
-    ranges = []
+    ranges: list[list[int]] = []
 
     for value in ordered:
         if value == prev_value + 1:
@@ -1026,7 +1022,7 @@ def _create_mux_ranges(multiplexer_ids):
     return ranges
 
 
-def _dump_signal_mux_values(database):
+def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
     """Create multiplex entries ("SG_MUL_VAL_") if extended multiplexing
     is used.
 
@@ -1035,7 +1031,7 @@ def _dump_signal_mux_values(database):
     if not _is_extended_mux_needed(database.messages):
         return []
 
-    sig_mux_values = []
+    sig_mux_values: list[str] = []
 
     for message in database.messages:
         for signal in message.signals:
@@ -1081,7 +1077,7 @@ def _dump_environment_variables(database: InternalDatabase) -> list[str]:
 
 
 def _load_comments(tokens):
-    comments = defaultdict(dict)
+    comments: dict[str | int, dict[str, str]] = defaultdict(dict)
 
     for comment in tokens.get('CM_', []):
         if not isinstance(comment[1], list):
@@ -1139,8 +1135,8 @@ def _load_attribute_definition_relation_defaults(tokens):
     return defaults
 
 
-def _load_attributes(tokens, definitions):
-    attributes = OrderedDict()
+def _load_attributes(tokens, definitions: Mapping[str, AttributeDefinitionType]):
+    attributes: dict[str | int, dict] = OrderedDict()
     attributes['node'] = OrderedDict()
 
     def to_object(attribute):
@@ -1291,7 +1287,7 @@ def _load_value_tables(tokens):
 
 
 def _load_environment_variables(tokens, comments, attributes):
-    environment_variables = OrderedDict()
+    environment_variables: dict[str, EnvironmentVariable] = OrderedDict()
 
     for env_var in tokens.get('EV_', []):
         name = _get_environment_variable_name(attributes, env_var[1])
@@ -1331,7 +1327,7 @@ def _load_message_senders(tokens, attributes):
 
     """
 
-    message_senders = defaultdict(list)
+    message_senders: dict[int, list[str]] = defaultdict(list)
 
     for senders in tokens.get('BO_TX_BU_', []):
         frame_id = int(senders[1])
@@ -1394,7 +1390,7 @@ def _load_signal_groups(tokens, attributes):
     signal_groups = defaultdict(list)
 
 
-    def get_attributes(frame_id_dbc, signal):
+    def get_attributes(frame_id_dbc: int, signal: Signal):
         """Get attributes for given signal.
 
         """
@@ -1404,7 +1400,7 @@ def _load_signal_groups(tokens, attributes):
         except KeyError:
             return None
 
-    def get_signal_name(frame_id_dbc, name):
+    def get_signal_name(frame_id_dbc: int, name: str):
         signal_attributes = get_attributes(frame_id_dbc, name)
 
         try:
@@ -1429,7 +1425,7 @@ def _load_signals(tokens,
                   choices,
                   signal_types,
                   signal_multiplexer_values,
-                  frame_id_dbc,
+                  frame_id_dbc: int,
                   multiplexer_signal):
     signal_to_multiplexer = {}
 
@@ -1442,7 +1438,7 @@ def _load_signals(tokens,
     except KeyError:
         pass
 
-    def get_attributes(frame_id_dbc, signal):
+    def get_attributes(frame_id_dbc: int, signal):
         """Get attributes for given signal.
 
         """
@@ -1452,7 +1448,7 @@ def _load_signals(tokens,
         except KeyError:
             return None
 
-    def get_comment(frame_id_dbc, signal):
+    def get_comment(frame_id_dbc: int, signal):
         """Get comment for given signal.
 
         """
@@ -1462,7 +1458,7 @@ def _load_signals(tokens,
         except KeyError:
             return None
 
-    def get_choices(frame_id_dbc, signal):
+    def get_choices(frame_id_dbc: int, signal):
         """Get choices for given signal.
 
         """
@@ -1510,25 +1506,25 @@ def _load_signals(tokens,
         elif signal[0] != multiplexer_signal:
             return multiplexer_signal
 
-    def get_receivers(receivers):
+    def get_receivers(receivers: list[str]) -> list[str]:
         if receivers == ['Vector__XXX']:
             receivers = []
 
         return [_get_node_name(attributes, receiver) for receiver in receivers]
 
-    def get_minimum(minimum, maximum):
+    def get_minimum(minimum: str, maximum: str) -> int | float | None:
         if minimum == maximum == '0':
             return None
         else:
             return num(minimum)
 
-    def get_maximum(minimum, maximum):
+    def get_maximum(minimum: str, maximum: str) -> int | float | None:
         if minimum == maximum == '0':
             return None
         else:
             return num(maximum)
 
-    def get_is_float(frame_id_dbc, signal):
+    def get_is_float(frame_id_dbc: int, signal):
         """Get is_float for given signal.
 
         """
@@ -1538,7 +1534,7 @@ def _load_signals(tokens,
         except KeyError:
             return False
 
-    def get_signal_name(frame_id_dbc, name):
+    def get_signal_name(frame_id_dbc: int, name: str):
         signal_attributes = get_attributes(frame_id_dbc, name)
 
         try:
@@ -1546,7 +1542,7 @@ def _load_signals(tokens,
         except (KeyError, TypeError):
             return name
 
-    def get_signal_initial_value(frame_id_dbc, name):
+    def get_signal_initial_value(frame_id_dbc: int, name: str):
         signal_attributes = get_attributes(frame_id_dbc, name)
 
         try:
@@ -1554,7 +1550,7 @@ def _load_signals(tokens,
         except (KeyError, TypeError):
             return None
 
-    def get_signal_spn(frame_id_dbc, name):
+    def get_signal_spn(frame_id_dbc: int, name: str):
         signal_attributes = get_attributes(frame_id_dbc, name)
         if signal_attributes is not None and 'SPN' in signal_attributes:
             if (value := signal_attributes['SPN'].value) is not None:
@@ -1618,20 +1614,20 @@ def _get_enum_vframeformat_attribute(int_attribute):
 def _load_messages(tokens,
                    comments,
                    attributes,
-                   definitions,
+                   definitions: OrderedDict[str, AttributeDefinitionType],
                    choices,
                    message_senders,
                    signal_types,
                    signal_multiplexer_values,
-                   strict,
-                   bus_name,
+                   strict: bool,
+                   bus_name: str | None,
                    signal_groups,
-                   sort_signals):
+                   sort_signals: type_sort_signals) -> list[Message]:
     """Load messages.
 
     """
 
-    def get_attributes(frame_id_dbc):
+    def get_attributes(frame_id_dbc: int):
         """Get attributes for given message.
 
         """
@@ -1651,7 +1647,7 @@ def _load_messages(tokens,
         except KeyError:
             return None
 
-    def get_send_type(frame_id_dbc):
+    def get_send_type(frame_id_dbc: int):
         """Get send type for a given message.
 
         """
@@ -1674,7 +1670,7 @@ def _load_messages(tokens,
 
         return result
 
-    def get_cycle_time(frame_id_dbc):
+    def get_cycle_time(frame_id_dbc: int):
         """Get cycle time for a given message.
 
         """
@@ -1692,7 +1688,7 @@ def _load_messages(tokens,
         return gen_msg_cycle_time_def.default_value or None
 
 
-    def get_frame_format(frame_id_dbc):
+    def get_frame_format(frame_id_dbc: int):
         """Get frame format for a given message"""
 
         message_attributes = get_attributes(frame_id_dbc)
@@ -1710,7 +1706,7 @@ def _load_messages(tokens,
 
         return frame_format
 
-    def get_protocol(frame_id_dbc):
+    def get_protocol(frame_id_dbc: int):
         """Get protocol for a given message.
 
         """
@@ -1722,7 +1718,7 @@ def _load_messages(tokens,
         else:
             return None
 
-    def get_message_name(frame_id_dbc, name):
+    def get_message_name(frame_id_dbc: int, name):
         message_attributes = get_attributes(frame_id_dbc)
 
         try:
@@ -1730,13 +1726,13 @@ def _load_messages(tokens,
         except (KeyError, TypeError):
             return name
 
-    def get_signal_groups(frame_id_dbc):
+    def get_signal_groups(frame_id_dbc: int):
         try:
             return signal_groups[frame_id_dbc]
         except KeyError:
             return None
 
-    messages = []
+    messages: list[Message] = []
 
     for message in tokens.get('BO_', []):
         # Any message named VECTOR__INDEPENDENT_SIG_MSG contains
@@ -1810,7 +1806,7 @@ def _load_messages(tokens,
     return messages
 
 
-def _load_version(tokens):
+def _load_version(tokens) -> str | None:
     return tokens.get('VERSION', [[None, None]])[0][1]
 
 
@@ -1848,43 +1844,40 @@ def _load_nodes(tokens, comments, attributes, definitions):
 
     return nodes
 
-
-def get_attribute_definition(database, name, default):
+def get_attribute_definition(database: InternalDatabase, name: str, default: AttributeDefinition[AttributeValueType]) -> AttributeDefinition[AttributeValueType]:
     if database.dbc is None:
         database.dbc = DbcSpecifics()
 
     if name not in database.dbc.attribute_definitions:
         database.dbc.attribute_definitions[name] = default
 
-    return database.dbc.attribute_definitions[name]
+    return cast('AttributeDefinition[AttributeValueType]', database.dbc.attribute_definitions[name])
 
 
-def get_long_node_name_attribute_definition(database):
+def get_long_node_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
     return get_attribute_definition(database,
                                     'SystemNodeLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_NODE_NAME)
 
 
-def get_long_message_name_attribute_definition(database):
+def get_long_message_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
     return get_attribute_definition(database,
                                     'SystemMessageLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME)
 
 
-def get_long_signal_name_attribute_definition(database):
+def get_long_signal_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
     return get_attribute_definition(database,
                                     'SystemSignalLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME)
 
 
-def try_remove_attribute(dbc, name):
-    try:
+def try_remove_attribute(dbc: DbcSpecifics | None, name: str) -> None:
+    if dbc and name in dbc.attributes:
         dbc.attributes.pop(name)
-    except (KeyError, AttributeError):
-        pass
 
 
-def remove_special_chars(database):
+def remove_special_chars(database: InternalDatabase) -> InternalDatabase:
     for node in database.nodes:
         new_node_name = get_dbc_name(node.name)
 
@@ -1914,7 +1907,7 @@ def remove_special_chars(database):
     return database
 
 
-def make_node_names_unique(database, shorten_long_names):
+def make_node_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     converter = LongNamesConverter()
 
     for node in database.nodes:
@@ -1937,13 +1930,13 @@ def make_node_names_unique(database, shorten_long_names):
         if node.dbc is None:
             node.dbc = DbcSpecifics()
 
-        node.dbc.attributes['SystemNodeLongSymbol'] = Attribute(
+        node.dbc.attributes['SystemNodeLongSymbol'] = Attribute[str](
             node.name,
             get_long_node_name_attribute_definition(database))
         node.name = name
 
 
-def make_message_names_unique(database, shorten_long_names):
+def make_message_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     converter = LongNamesConverter()
 
     for message in database.messages:
@@ -1962,7 +1955,7 @@ def make_message_names_unique(database, shorten_long_names):
         message.name = name
 
 
-def make_signal_names_unique(database, shorten_long_names):
+def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     converter = LongNamesConverter()
 
     for message in database.messages:
@@ -1982,7 +1975,7 @@ def make_signal_names_unique(database, shorten_long_names):
             signal.name = name
 
 
-def make_names_unique(database, shorten_long_names):
+def make_names_unique(database: InternalDatabase, shorten_long_names: bool) -> InternalDatabase:
     """Make message, signal and node names unique and add attributes for
     their long names.
 
@@ -1996,8 +1989,8 @@ def make_names_unique(database, shorten_long_names):
 
 
 def dump_string(database: InternalDatabase,
-                sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
-                sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                sort_signals:type_sort_signals=None,
+                sort_attribute_signals:type_sort_signals=None,
                 sort_attributes:type_sort_attributes=None,
                 sort_choices:type_sort_choices=None,
                 shorten_long_names:bool=True) -> str:
@@ -2008,9 +2001,9 @@ def dump_string(database: InternalDatabase,
 
     """
 
-    if sort_signals == SORT_SIGNALS_DEFAULT:
+    if sort_signals is None:
         sort_signals = sort_signals_by_start_bit_reversed
-    if sort_attribute_signals == SORT_SIGNALS_DEFAULT:
+    if sort_attribute_signals is None:
         sort_attribute_signals = sort_signals_by_start_bit_reversed
 
     # Make a deep copy of the database as names and attributes will be
@@ -2058,10 +2051,10 @@ def dump_string(database: InternalDatabase,
                           sig_mux_values='\r\n'.join(sig_mux_values))
 
 
-def get_definitions_dict(definitions, defaults):
-    result = OrderedDict()
+def get_definitions_dict(definitions, defaults) -> OrderedDict[str, AttributeDefinitionType]:
+    result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
 
-    def convert_value(definition, value):
+    def convert_value(definition: AttributeDefinitionType, value: int | float | str) -> int | float:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
@@ -2101,7 +2094,7 @@ def get_definitions_dict(definitions, defaults):
 def get_definitions_rel_dict(definitions, defaults):
     result = OrderedDict()
 
-    def convert_value(definition, value):
+    def convert_value(definition: AttributeDefinitionType, value: int | float | str) -> int | float:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
@@ -2151,7 +2144,7 @@ def load_string(string: str, strict: bool = True,
     defaults = _load_attribute_definition_defaults(tokens)
     definitions_relation = _load_attribute_definitions_relation(tokens)
     defaults_relation = _load_attribute_definition_relation_defaults(tokens)
-    attribute_definitions = get_definitions_dict(definitions, defaults)
+    attribute_definitions: OrderedDict[str, AttributeDefinitionType] = get_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
     attribute_rel_definitions = get_definitions_rel_dict(definitions_relation, defaults_relation)
     attributes_rel = _load_attributes_rel(tokens, attribute_rel_definitions)

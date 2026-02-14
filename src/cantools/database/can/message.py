@@ -125,7 +125,7 @@ class Message:
             # multi-lingual dictionary
             self._comments = comment
 
-        self._senders = senders if senders else []
+        self._senders = senders or []
         self._send_type = send_type
         self._cycle_time = cycle_time
         self._dbc = dbc_specifics

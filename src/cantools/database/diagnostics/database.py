@@ -19,7 +19,7 @@ class Database:
                  dids=None):
         self._name_to_did = {}
         self._identifier_to_did = {}
-        self._dids = dids if dids else []
+        self._dids = dids or []
         self.refresh()
 
     @property

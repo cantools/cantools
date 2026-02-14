@@ -91,7 +91,7 @@ class SystemLoader:
         self.autosar_version_patch = \
             0 if m.group(3) is None else int(m.group(3)[1:])
 
-        if self.autosar_version_major != 4 and self.autosar_version_major != 3:
+        if self.autosar_version_major not in {4, 3}:
             raise ValueError('This class only supports AUTOSAR '
                              'versions 3 and 4')
 
@@ -785,11 +785,12 @@ class SystemLoader:
         autosar_specifics._pdu_paths.extend(child_pdu_paths)
         autosar_specifics._is_nm = \
             (pdu.tag == f'{{{self.xml_namespace}}}NM-PDU')
-        autosar_specifics._is_general_purpose = \
-            (pdu.tag == f'{{{self.xml_namespace}}}N-PDU') or \
-            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-PDU') or \
-            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU') or \
-            (pdu.tag == f'{{{self.xml_namespace}}}USER-DEFINED-I-PDU')
+        autosar_specifics._is_general_purpose = pdu.tag in {
+            f'{{{self.xml_namespace}}}N-PDU',
+            f'{{{self.xml_namespace}}}GENERAL-PURPOSE-PDU',
+            f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU',
+            f'{{{self.xml_namespace}}}USER-DEFINED-I-PDU',
+        }
         is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 

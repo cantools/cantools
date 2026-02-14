@@ -3,7 +3,7 @@
 import datetime
 import unittest
 
-import cantools.subparsers.plot as plot
+from cantools.subparsers import plot
 
 
 class CanToolsPlotUnittests(unittest.TestCase):

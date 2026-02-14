@@ -198,9 +198,8 @@ class Database:
                 if abs(a) > 1:
                     if abs(1.0 - b / a) > tolerance:
                         add_diff(path_parts, a, b, 'float-rel-diff')
-                else:
-                    if abs(b - a) > tolerance:
-                        add_diff(path_parts, a, b, 'float-abs-diff')
+                elif abs(b - a) > tolerance:
+                    add_diff(path_parts, a, b, 'float-abs-diff')
                 return
 
             if isinstance(a, (list, tuple)):
@@ -214,11 +213,11 @@ class Database:
             if isinstance(a, (dict, OrderedDict)):
                 keys_a = set(a.keys())
                 keys_b = set(b.keys())
-                for k in sorted(keys_a - keys_b, key=lambda x: str(x)):
+                for k in sorted(keys_a - keys_b, key=str):
                     add_diff([*path_parts, f'[{k!r}]'], a[k], None, 'key-only-in-a')
-                for k in sorted(keys_b - keys_a, key=lambda x: str(x)):
+                for k in sorted(keys_b - keys_a, key=str):
                     add_diff([*path_parts, f'[{k!r}]'], None, b[k], 'key-only-in-b')
-                for k in sorted(keys_a & keys_b, key=lambda x: str(x)):
+                for k in sorted(keys_a & keys_b, key=str):
                     compare(a[k], b[k], [*path_parts, f'[{k!r}]'])
                 return
 

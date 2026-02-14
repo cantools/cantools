@@ -268,13 +268,13 @@ class Monitor(can.Listener):
             self._filter_cursor_pos = len(self._filter)
             self._modified = True
             curses.curs_set(True)
-        elif key in ['KEY_UP']:
+        elif key == 'KEY_UP':
             self.line_up()
-        elif key in ['KEY_DOWN']:
+        elif key == 'KEY_DOWN':
             self.line_down()
-        elif key in ['KEY_PPAGE']:
+        elif key == 'KEY_PPAGE':
             self.page_up()
-        elif key in ['KEY_NPAGE']:
+        elif key == 'KEY_NPAGE':
             self.page_down()
 
     def line_down(self):
@@ -345,23 +345,22 @@ class Monitor(can.Listener):
         elif key == 'KEY_RIGHT':
             if self._filter_cursor_pos < len(self._filter):
                 self._filter_cursor_pos += 1
-        elif key in ['KEY_UP']:
+        elif key == 'KEY_UP':
             self.line_up()
-        elif key in ['KEY_DOWN']:
+        elif key == 'KEY_DOWN':
             self.line_down()
-        elif key in ['KEY_PPAGE']:
+        elif key == 'KEY_PPAGE':
             self.page_up()
-        elif key in ['KEY_NPAGE']:
+        elif key == 'KEY_NPAGE':
             self.page_down()
-        else:
-            # we ignore keys with more than one character here. These
-            # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.
-            if len(key) == 1:
-                self._filter = \
-                    self._filter[:self._filter_cursor_pos] + \
-                    key + \
-                    self._filter[self._filter_cursor_pos:]
-                self._filter_cursor_pos += 1
+        # we ignore keys with more than one character here. These
+        # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.
+        elif len(key) == 1:
+            self._filter = \
+                self._filter[:self._filter_cursor_pos] + \
+                key + \
+                self._filter[self._filter_cursor_pos:]
+            self._filter_cursor_pos += 1
 
         self.compile_filter()
 

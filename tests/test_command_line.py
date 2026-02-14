@@ -14,6 +14,11 @@ try:
 except ImportError:
     from io import StringIO
 
+try:
+    import curses
+except ImportError:
+    curses = None
+
 import cantools
 import cantools.database
 
@@ -23,11 +28,8 @@ def with_fake_screen_width(screen_width):
         @functools.wraps(test_method)
         def wrapper(*args, **kwargs):
             default_curses = None
-            try:
-                import curses
-            except ImportError:
-                pass
-            else:
+
+            if curses is not None:
                 default_curses = curses
                 curses_mock_name = 'curses_mock'
                 curses_mock = types.ModuleType(curses_mock_name)
@@ -854,11 +856,11 @@ BATTERY_VT(
   Signal tree:
 
     -- {root}
-       +-- Enable [94mEnable signal comment [-][0m
-       +-- AverageRadius [94mAverageRadius signal comment [m][0m
-       +-- Temperature [94mTemperature with a really long and complicated comment
+       +-- Enable \x1b[94mEnable signal comment [-]\x1b[0m
+       +-- AverageRadius \x1b[94mAverageRadius signal comment [m]\x1b[0m
+       +-- Temperature \x1b[94mTemperature with a really long and complicated comment
                        that probably require many many lines in a decently wide
-                       terminal [degK][0m
+                       terminal [degK]\x1b[0m
 
   Signal choices:
 
@@ -943,7 +945,7 @@ BATTERY_VT(
   Signal tree:
 
     -- {root}
-       +-- Multiplexor [94mDefines data content for response messages.[0m
+       +-- Multiplexor \x1b[94mDefines data content for response messages.\x1b[0m
            +-- 8
            |   +-- BIT_J
            |   +-- BIT_C

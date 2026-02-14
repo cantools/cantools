@@ -784,12 +784,11 @@ class CodeGenSignal:
                     shift_direction = 'left'
                 else:
                     shift_direction = 'right'
+            elif shift < 0:
+                shift = -shift
+                shift_direction = 'right'
             else:
-                if shift < 0:
-                    shift = -shift
-                    shift_direction = 'right'
-                else:
-                    shift_direction = 'left'
+                shift_direction = 'left'
 
             yield index, shift, shift_direction, mask
 

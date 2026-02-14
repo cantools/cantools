@@ -1,8 +1,8 @@
 # DID data.
 
-from ...typechecking import ByteOrder, Choices, SignalValueType
-from ..can.signal import NamedSignalValue
-from ..conversion import BaseConversion, IdentityConversion
+from cantools.database.conversion import BaseConversion, IdentityConversion
+from cantools.database.namedsignalvalue import NamedSignalValue
+from cantools.typechecking import ByteOrder, Choices, SignalValueType
 
 
 class Data:

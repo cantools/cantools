@@ -337,8 +337,7 @@ def layout_string(message, signal_names=True):
 
         start_index = 4 + ((number_of_matrix_lines - 4) // 2 - 1)
 
-        if start_index < 4:
-            start_index = 4
+        start_index = max(start_index, 4)
 
         axis_lines = start_index * ['  ']
         axis_lines += [' B', ' y', ' t', ' e']

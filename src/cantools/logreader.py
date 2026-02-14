@@ -76,7 +76,7 @@ class CandumpBasePattern(BasePattern):
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
-        if data == 'remote request' or data == 'R':
+        if data in {'remote request', 'R'}:
             is_remote_frame = True
             data = bytes(0)
         else:

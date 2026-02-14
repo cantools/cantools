@@ -353,15 +353,14 @@ class Monitor(can.Listener):
             self.page_up()
         elif key == 'KEY_NPAGE':
             self.page_down()
-        else:
-            # we ignore keys with more than one character here. These
-            # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.
-            if len(key) == 1:
-                self._filter = \
-                    self._filter[:self._filter_cursor_pos] + \
-                    key + \
-                    self._filter[self._filter_cursor_pos:]
-                self._filter_cursor_pos += 1
+        # we ignore keys with more than one character here. These
+        # (mostly?) are control keys like KEY_UP, KEY_DOWN, etc.
+        elif len(key) == 1:
+            self._filter = \
+                self._filter[:self._filter_cursor_pos] + \
+                key + \
+                self._filter[self._filter_cursor_pos:]
+            self._filter_cursor_pos += 1
 
         self.compile_filter()
 

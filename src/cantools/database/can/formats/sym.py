@@ -818,14 +818,13 @@ def _get_signal_type(signal: Signal) -> str:
             return 'double'
         else:
             return 'float'
+    elif signal.is_signed:
+        return 'signed'
     else:
-        if signal.is_signed:
-            return 'signed'
-        else:
-            if signal.length == 1 and signal.minimum == 0 and signal.maximum == 1:
-                return 'bit'
+        if signal.length == 1 and signal.minimum == 0 and signal.maximum == 1:
+            return 'bit'
 
-            return 'unsigned'
+        return 'unsigned'
 
 def _dump_signal(signal: Signal) -> str:
     # Example:

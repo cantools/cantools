@@ -259,9 +259,8 @@ def _indent_xml(element, indent, level=0):
 
         if not child.tail or not child.tail.strip():
             child.tail = i
-    else:
-        if level and (not element.tail or not element.tail.strip()):
-            element.tail = i
+    elif level and (not element.tail or not element.tail.strip()):
+        element.tail = i
 
 
 def _dump_notes(parent, comment):

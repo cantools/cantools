@@ -82,15 +82,20 @@ lint.extend-select = [
     "FURB", # refurb
     "I",    # isort
     "PIE",  # flake8-pie
+    "PL",   # pylint
     "RUF",  # Ruff-specific rules
     "TCH",  # flake8-type-checking
     "UP",   # pyupgrade
     "W",    # pycodestyle Warning
 ]
 lint.ignore = [
-    "E501",   # line too long
-    "F541",   # f-string-missing-placeholders
-    "RUF012", # mutable-class-default
+    "E501",    # line too long
+    "F541",    # f-string-missing-placeholders
+    "PLR09",   # too-many-this, too-many-that
+    "PLR2004", # magic-value-comparison
+    "PLW1641", # eq-without-hash
+    "PLW2901", # redefined-loop-name
+    "RUF012",  # mutable-class-default
 ]
 lint.isort.known-first-party = ["cantools"]
 lint.per-file-ignores."signal.py" = ["A005"]

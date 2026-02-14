@@ -116,6 +116,11 @@ FLOAT_LENGTH_TO_SIGNAL_TYPE = {
     64: SIGNAL_TYPE_DOUBLE
 }
 
+ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME = AttributeDefinition(
+    'SystemEnvVarLongSymbol',
+    default_value='',
+    kind='EV_',
+    type_name='STRING')
 ATTRIBUTE_DEFINITION_LONG_NODE_NAME = AttributeDefinition(
     'SystemNodeLongSymbol',
     default_value='',
@@ -406,27 +411,20 @@ class Parser(textparser.Parser):
 
 
 class LongNamesConverter:
-    def __init__(self) -> None:
-        self._next_index_per_cut_name: defaultdict[str, int] = defaultdict(int)
-        self._short_names: set[str] = set()
+    def __init__(self, long_names: list[str]) -> None:
 
-    def convert(self, name: str) -> str | None:
-        short_name: str | None = None
+        self.long_to_short: dict[str, str] = {}
+        self.short_to_long: dict[str, str] = {}
 
-        if len(name) == 32:
-            self._short_names.add(name)
-        elif len(name) > 32:
-            cut_name = name[:27]
-            short_name = name[:32]
+        for long_name in sorted(long_names, key=lambda s: (len(s), s)):
+            short_name = long_name[:32]
+            index = -1
+            while short_name in self.short_to_long:
+                index += 1
+                short_name = f'{short_name[:27]}_{index:04d}'
 
-            if short_name in self._short_names:
-                index = self._next_index_per_cut_name[cut_name]
-                self._next_index_per_cut_name[cut_name] = index + 1
-                short_name = f'{cut_name}_{index:04d}'
-            else:
-                self._short_names.add(short_name)
-
-        return short_name
+            self.long_to_short[long_name] = short_name
+            self.short_to_long[short_name] = long_name
 
 
 def get_dbc_frame_id(message):
@@ -783,13 +781,19 @@ def _dump_attributes(database, sort_signals, sort_attributes):
     if database.dbc is not None:
         if database.dbc.attributes is not None:
             for attribute in database.dbc.attributes.values():
-                attributes.append(('dbc', attribute, None, None, None))
+                attributes.append(('dbc', attribute, None, None, None, None))
+
+        for envvar in database.dbc.environment_variables.values():
+            if envvar.dbc is not None:
+                if envvar.dbc.attributes is not None:
+                    for attribute in envvar.dbc.attributes.values():
+                        attributes.append(('envvar', attribute, None, None, None, envvar))
 
     for node in database.nodes:
         if node.dbc is not None:
             if node.dbc.attributes is not None:
                 for attribute in node.dbc.attributes.values():
-                    attributes.append(('node', attribute, node, None, None))
+                    attributes.append(('node', attribute, node, None, None, None))
 
     for message in database.messages:
         # retrieve the ordered dictionary of message attributes
@@ -839,7 +843,7 @@ def _dump_attributes(database, sort_signals, sort_attributes):
 
         # output all message attributes
         for attribute in msg_attributes.values():
-            attributes.append(('message', attribute, None, message, None))
+            attributes.append(('message', attribute, None, message, None, None))
 
         # handle the signals contained in the message
         if sort_signals:
@@ -863,15 +867,20 @@ def _dump_attributes(database, sort_signals, sort_attributes):
 
             # output all signal attributes
             for attribute in sig_attributes.values():
-                attributes.append(('signal', attribute, None, message, signal))
+                attributes.append(('signal', attribute, None, message, signal, None))
 
     if sort_attributes:
         attributes = sort_attributes(attributes)
 
     ba = []
-    for typ, attribute, node, message, signal in attributes:
+    for typ, attribute, node, message, signal, envvar in attributes:
         if typ == 'dbc':
             ba.append(f'BA_ "{attribute.definition.name}" '
+                      f'{get_value(attribute)};')
+        elif typ == 'envvar':
+            ba.append(f'BA_ "{attribute.definition.name}" '
+                      f'{attribute.definition.kind} '
+                      f'{envvar.name} '
                       f'{get_value(attribute)};')
         elif typ == 'node':
             ba.append(f'BA_ "{attribute.definition.name}" '
@@ -1060,7 +1069,7 @@ def _dump_environment_variables(database: InternalDatabase) -> list[str]:
     if database.dbc is None:
         return ev_lines
 
-    for name, env in database.dbc.environment_variables.items():
+    for env in database.dbc.environment_variables.values():
         # Prepare values, using empty strings for None where appropriate
         env_type = env.env_type if env.env_type is not None else ''
         minimum = '' if env.minimum is None else env.minimum
@@ -1074,7 +1083,7 @@ def _dump_environment_variables(database: InternalDatabase) -> list[str]:
 
         escaped_unit = unit
         ev_lines.append(
-            f'EV_ {name}: {env_type} [{minimum}|{maximum}] "{escaped_unit}" {initial} {env_id} {access_type} {access_node};'
+            f'EV_ {env.name}: {env_type} [{minimum}|{maximum}] "{escaped_unit}" {initial} {env_id} {access_type} {access_node};'
         )
 
     return ev_lines
@@ -1142,6 +1151,7 @@ def _load_attribute_definition_relation_defaults(tokens):
 def _load_attributes(tokens, definitions):
     attributes = OrderedDict()
     attributes['node'] = OrderedDict()
+    attributes['envvar'] = OrderedDict()
 
     def to_object(attribute):
         value = attribute[3]
@@ -1195,9 +1205,6 @@ def _load_attributes(tokens, definitions):
                 attributes['node'][node][name] = to_object(attribute)
             elif kind == 'EV_':
                 envvar = item[1]
-
-                if 'envvar' not in attributes:
-                    attributes['envvar'] = OrderedDict()
 
                 if envvar not in attributes['envvar']:
                     attributes['envvar'][envvar] = OrderedDict()
@@ -1290,13 +1297,14 @@ def _load_value_tables(tokens):
     return value_tables
 
 
-def _load_environment_variables(tokens, comments, attributes):
+def _load_environment_variables(tokens, comments, attributes, attribute_definitions):
     environment_variables = OrderedDict()
 
     for env_var in tokens.get('EV_', []):
-        name = _get_environment_variable_name(attributes, env_var[1])
-        environment_variables[name] = EnvironmentVariable(
-            name=name,
+        short_name = env_var[1]
+        long_name = _get_environment_variable_name(attributes, short_name)
+        environment_variables[long_name] = EnvironmentVariable(
+            name=long_name,
             env_type=int(env_var[3]),
             minimum=num(env_var[5]),
             maximum=num(env_var[7]),
@@ -1305,7 +1313,9 @@ def _load_environment_variables(tokens, comments, attributes):
             env_id=int(env_var[11]),
             access_type=env_var[12],
             access_node=env_var[13],
-            comment=comments.get(env_var[1], None))
+            comment=comments.get(env_var[1], None),
+            dbc_specifics=DbcSpecifics(attributes['envvar'].get(short_name, None),
+                                       attribute_definitions))
 
     return environment_variables
 
@@ -1859,6 +1869,12 @@ def get_attribute_definition(database, name, default):
     return database.dbc.attribute_definitions[name]
 
 
+def get_long_envvar_name_attribute_definition(database):
+    return get_attribute_definition(database,
+                                    'SystemEnvVarLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME)
+
+
 def get_long_node_name_attribute_definition(database):
     return get_attribute_definition(database,
                                     'SystemNodeLongSymbol',
@@ -1914,75 +1930,103 @@ def remove_special_chars(database):
     return database
 
 
-def make_node_names_unique(database, shorten_long_names):
-    converter = LongNamesConverter()
+def make_node_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    converter = LongNamesConverter([node.name for node in database.nodes])
 
     for node in database.nodes:
-        name = converter.convert(node.name)
+        long_name = node.name
+        short_name = converter.long_to_short[long_name]
         try_remove_attribute(node.dbc, 'SystemNodeLongSymbol')
 
-        if name is None or not shorten_long_names:
+        if (long_name == short_name) or not shorten_long_names:
             continue
 
         for message in database.messages:
             for index, sender in enumerate(message.senders):
                 if sender == node.name:
-                    message.senders[index] = name
+                    message.senders[index] = short_name
 
             for signal in message.signals:
                 for index, receiver in enumerate(signal.receivers):
                     if receiver == node.name:
-                        signal.receivers[index] = name
+                        signal.receivers[index] = short_name
 
         if node.dbc is None:
             node.dbc = DbcSpecifics()
 
         node.dbc.attributes['SystemNodeLongSymbol'] = Attribute(
-            node.name,
+            long_name,
             get_long_node_name_attribute_definition(database))
-        node.name = name
+        node.name = short_name
 
 
-def make_message_names_unique(database, shorten_long_names):
-    converter = LongNamesConverter()
+def make_message_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    converter = LongNamesConverter([message.name for message in database.messages])
 
     for message in database.messages:
-        name = converter.convert(message.name)
+        long_name = message.name
+        short_name = converter.long_to_short[long_name]
         try_remove_attribute(message.dbc, 'SystemMessageLongSymbol')
 
-        if name is None or not shorten_long_names:
+        if (long_name == short_name) or not shorten_long_names:
             continue
 
         if message.dbc is None:
             message.dbc = DbcSpecifics()
 
         message.dbc.attributes['SystemMessageLongSymbol'] = Attribute(
-            message.name,
+            long_name,
             get_long_message_name_attribute_definition(database))
-        message.name = name
+        message.name = short_name
 
 
-def make_signal_names_unique(database, shorten_long_names):
-    converter = LongNamesConverter()
-
+def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     for message in database.messages:
+        converter = LongNamesConverter([signal.name for signal in message.signals])
         for signal in message.signals:
-            name = converter.convert(signal.name)
+            long_name = signal.name
+            short_name = converter.long_to_short[long_name]
             try_remove_attribute(signal.dbc, 'SystemSignalLongSymbol')
 
-            if name is None or not shorten_long_names:
+            if (long_name == short_name) or not shorten_long_names:
                 continue
 
             if signal.dbc is None:
                 signal.dbc = DbcSpecifics()
 
             signal.dbc.attributes['SystemSignalLongSymbol'] = Attribute(
-                signal.name,
+                long_name,
                 get_long_signal_name_attribute_definition(database))
-            signal.name = name
+            signal.name = short_name
+
+        if shorten_long_names and message.signal_groups:
+            for signal_group in message.signal_groups:
+                signal_group.signal_names = [converter.long_to_short[long_name]
+                                             for long_name in signal_group.signal_names]
 
 
-def make_names_unique(database, shorten_long_names):
+def make_envvar_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    if database.dbc is None:
+        return
+
+    envvars = database.dbc.environment_variables.values()
+    converter = LongNamesConverter([envvar.name for envvar in envvars])
+
+    for envvar in envvars:
+        long_name = envvar.name
+        short_name = converter.long_to_short[long_name]
+        try_remove_attribute(envvar.dbc, 'SystemEnvVarLongSymbol')
+
+        if (long_name == short_name) or not shorten_long_names:
+            continue
+
+        envvar.dbc.attributes['SystemEnvVarLongSymbol'] = Attribute(
+            long_name,
+            get_long_envvar_name_attribute_definition(database))
+        envvar.name = short_name
+
+
+def make_names_unique(database: InternalDatabase, shorten_long_names: bool) -> InternalDatabase:
     """Make message, signal and node names unique and add attributes for
     their long names.
 
@@ -1991,6 +2035,7 @@ def make_names_unique(database, shorten_long_names):
     make_node_names_unique(database, shorten_long_names)
     make_message_names_unique(database, shorten_long_names)
     make_signal_names_unique(database, shorten_long_names)
+    make_envvar_names_unique(database, shorten_long_names)
 
     return database
 
@@ -2176,7 +2221,7 @@ def load_string(string: str, strict: bool = True,
                               sort_signals)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
-    environment_variables = _load_environment_variables(tokens, comments, attributes)
+    environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions)
     dbc_specifics = DbcSpecifics(attributes.get('database', None),
                                  attribute_definitions,
                                  environment_variables,

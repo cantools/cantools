@@ -4341,11 +4341,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_group.signal_names[1], 'SSS12345678901234567890123456789012')
 
     def test_long_names_converter(self):
-        lnc = LongNamesConverter()
-        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLA"), "SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLL")
-        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLB"), "SSSSSSSSSSSSSSSSSSSSSSSSSSS_0000")
-        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLA"), "SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLL")
-        self.assertEqual(lnc.convert("SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLB"), "SSSSSSSSSSSSSSSSSSSSSSSSSSS_0001")
+        lnc = LongNamesConverter([
+            "SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLA",
+            "SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLB",
+            "SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLA",
+            "SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLB",
+        ])
+        self.assertEqual(lnc.long_to_short["SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLA"], "SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLL")
+        self.assertEqual(lnc.long_to_short["SSSSSSSSSSSSSSSSSSSSSSSSSSSXLLLLB"], "SSSSSSSSSSSSSSSSSSSSSSSSSSS_0000")
+        self.assertEqual(lnc.long_to_short["SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLA"], "SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLL")
+        self.assertEqual(lnc.long_to_short["SSSSSSSSSSSSSSSSSSSSSSSSSSSYLLLLB"], "SSSSSSSSSSSSSSSSSSSSSSSSSSS_0001")
 
     def test_illegal_namespace(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
@@ -6396,7 +6401,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         ('dbc', 'emc32.dbc'),
         # ('dbc', 'foobar.dbc'),  # TODO: add CANFD_BRS
         ('dbc', 'j1939.dbc'),
-        # ('dbc', 'long_names.dbc'),  # TODO: issue 766
+        ('dbc', 'long_names.dbc'),
         ('dbc', 'long_names_multiple_relations.dbc'),
         ('dbc', 'motohawk.dbc'),
         ('dbc', 'multiplex.dbc'),
@@ -6410,10 +6415,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
     ])
     def test_dump_and_load_equivalence(self, fmt, name):
         db_path = Path(__file__).parent / 'files' / fmt / name
-        expected_db = cantools.database.load_file(db_path)
+        expected_db = cantools.database.load_file(db_path, database_format=fmt)
 
         dumped_str = getattr(expected_db, f'as_{fmt}_string')()
-        dumped_db = cantools.database.load_string(dumped_str)
+        dumped_db = cantools.database.load_string(dumped_str, database_format=fmt)
 
         diff = "\n".join(map(str, expected_db._differences(dumped_db)))
         self.assertTrue(len(diff) == 0, diff)

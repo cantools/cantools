@@ -221,7 +221,8 @@ class Parser60(textparser.Parser):
                                               sig_default,
                                               sig_long_name,
                                               sig_enum,
-                                              sig_places)),
+                                              sig_places,
+                                              sig_spn)),
                             Optional('COMMENT'))
 
         symbol = Sequence('[', Any(), ']',

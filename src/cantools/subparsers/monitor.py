@@ -560,6 +560,9 @@ class Monitor(can.Listener):
         return bool(matched_signals)
 
     def insort_filtered(self, name):
+        if name in self._filtered_sorted_message_names:
+            return
+
         if name in self._messages_with_error or self._message_matches_filter(name):
             bisect.insort(self._filtered_sorted_message_names,
                           name)

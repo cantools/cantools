@@ -34,6 +34,7 @@ class Args(argparse.Namespace):
             "single_line": single_line,
             "fd": False,
             "channel": 'vcan0',
+            "filter_regex": '',
         }
 
         if legacy_args:

@@ -43,7 +43,7 @@ class Monitor(can.Listener):
                                          strict=not args.no_strict)
         self._single_line = args.single_line
         self._filtered_sorted_message_names: list[str] = []
-        self._filter = ''
+        self._filter = args.filter_regex
         self._filter_cursor_pos = 0
         self._compiled_filter = None
         self._formatted_messages: dict[str, list[str]] = {}
@@ -61,6 +61,9 @@ class Monitor(can.Listener):
         self._errors = 0
         self._basetime: float | None = None
         self._page_first_row = 0
+
+        if self._filter is not None:
+            self.compile_filter()
 
         stdscr.keypad(True)
         stdscr.nodelay(True)
@@ -637,6 +640,9 @@ def add_subparser(subparsers):
         '--no-strict',
         action='store_true',
         help='Skip database consistency checks.')
+    monitor_parser.add_argument(
+        '-f', '--filter-regex',
+        help='Use given filter regex.')
 
     if _check_legacy_args():
         _warn_legacy_usage()

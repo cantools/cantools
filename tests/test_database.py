@@ -5465,6 +5465,30 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.minimum, 0.0)
         self.assertEqual(signal_1.maximum, 4.0)
 
+    def test_system_float_limits_and_missing_compu_scale_arxml(self):
+        # regression test for two edge cases
+        db = cantools.database.load_file(
+            'tests/files/arxml/system-float-limits-missing-compu-scale-4.2.arxml')
+
+        self.assertEqual(len(db.messages), 1)
+        message = db.messages[0]
+        self.assertEqual(message.name, 'FrameA')
+        self.assertEqual(len(message.signals), 1)
+
+        signal = message.signals[0]
+        self.assertEqual(signal.name, 'SignalA')
+
+        # float limits: choices keyed by 0.0 and 1.0 (not integers 0 and 1)
+        self.assertIn(0.0, signal.choices)
+        self.assertIn(1.0, signal.choices)
+        self.assertEqual(signal.choices[0.0], 'OFF')
+        self.assertEqual(signal.choices[1.0], 'ON')
+
+        # missing-lower-limit entry: lower_limit was absent, so it was inferred
+        # from upper_limit=2 and the entry is present rather than dropped.
+        self.assertIn(2, signal.choices)
+        self.assertEqual(signal.choices[2], 'INVALID')
+
     def test_system_bad_root_tag(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.database.load_file(

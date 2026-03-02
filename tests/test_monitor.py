@@ -2007,6 +2007,63 @@ class CanToolsMonitorTest(unittest.TestCase):
             ])
 
     @patch('can.Notifier')
+    @patch('can.cli.create_bus_from_namespace')
+    @patch('curses.color_pair')
+    @patch('curses.is_term_resized')
+    @patch('curses.init_pair')
+    @patch('curses.curs_set')
+    @patch('curses.use_default_colors')
+    def test_malformed_and_correct_frame(self,
+                                _use_default_colors,
+                                _curs_set,
+                                _init_pair,
+                                is_term_resized,
+                                color_pair,
+                                _create_bus,
+                                _notifier):
+        # Prepare mocks.
+        stdscr = StdScr()
+        args = Args('tests/files/dbc/foobar.dbc')
+        args.no_strict = True
+        color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
+        is_term_resized.return_value = False
+
+        # Run monitor.
+        monitor = Monitor(stdscr, args)
+        # malformed message
+        monitor.on_message_received(can.Message(
+            arbitration_id=0x12332,
+            is_extended_id=True,
+            data=b'\x00'))
+        monitor.update_messages()
+        monitor.redraw()
+        # correct message
+        monitor.on_message_received(can.Message(
+            arbitration_id=0x12332,
+            is_extended_id=True,
+            data=b'\x11\x22\x33\x44'))
+        monitor.update_messages()
+        monitor.redraw()
+
+        # Check mocks.
+        self.assert_called(
+            stdscr.addstr,
+            [
+                # malformed message
+                call(0, 0, 'Received: 1, Discarded: 0, Errors: 1'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  Bar(undecoded, 3 bytes too short: 0x00)'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan'),
+                # correct message replaces the error
+                call(0, 0, 'Received: 2, Discarded: 0, Errors: 1'),
+                call(1, 0, '   TIMESTAMP  MESSAGE                                           ', 'green'),
+                call(2, 0, '       0.000  Bar('),
+                call(3, 0, '                  Binary32: 716.5322875976562'),
+                call(4, 0, '              )'),
+                call(29, 0, 'q: Quit, f: Filter, p: Play/Pause, r: Reset                     ', 'cyan')
+            ])
+
+    @patch('can.Notifier')
     @patch('can.Bus')
     @patch('curses.color_pair')
     @patch('curses.is_term_resized')

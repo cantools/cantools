@@ -105,12 +105,14 @@ class Parser60(textparser.Parser):
         }
 
         re_string = r'"(\\"|[^"])*?"'
+        re_number = r'-?\d+(\.\d+)?([eE][+-]?\d+)?'
 
         token_specs = [
             ('SKIP',               r'[ \r\n\t]+'),
             ('COMMENT',            r'//.*?\n'),
             ('HEXNUMBER',          r'-?\d+\.?[0-9A-F]*([eE][+-]?\d+)?(h)'),
-            ('NUMBER',             r'-?\d+(\.\d+)?([eE][+-]?\d+)?'),
+            ('RANGE',              fr'{re_number}\.\.{re_number}'),
+            ('NUMBER',             re_number),
             ('STRING',             re_string),
             ('U',                  fr'/u:({re_string}|\S+)'),
             ('F',                  r'/f:'),
@@ -177,7 +179,7 @@ class Parser60(textparser.Parser):
         float_decimal_places = Sequence('FloatDecimalPlaces' , '=', 'NUMBER')
         bit_rate_switch = Sequence('BRS' , '=', word)
 
-        enum_value = Sequence('NUMBER', '=', 'STRING')
+        enum_value = Sequence(choice('RANGE', 'NUMBER'), '=', 'STRING')
         delim = Sequence(',', Optional('COMMENT'))
         enum = Sequence('Enum', '=', word,
                         '(', Optional(DelimitedList(enum_value, delim=delim)), ')',
@@ -292,6 +294,20 @@ def _load_enums(tokens):
     for _, _, name, _, values, _, _ in section:
         if values:
             values = values[0]
+
+        i = 0
+        while i < len(values):
+            if ".." in values[i][0]:
+                ranged_value = values.pop(i)
+                range_start, range_end = map(num, ranged_value[0].split('..'))
+
+                expanded_values = [[str(value), ranged_value[1], ranged_value[2]]
+                                   for value in range(range_start, range_end + 1)]
+
+                values[i:i] = expanded_values
+
+            else:
+                i += 1
 
         enum = odict()
         for v in values:

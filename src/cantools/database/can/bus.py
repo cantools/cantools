@@ -1,9 +1,9 @@
 # A CAN bus.
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
+    from .formats.arxml.bus_specifics import AutosarBusSpecifics
 
 
 class Bus:
@@ -16,7 +16,7 @@ class Bus:
                  comment: str | dict[str | None, str] | None = None,
                  baudrate: int | None = None,
                  fd_baudrate: int | None = None,
-                 autosar_specifics: Optional["AutosarDatabaseSpecifics"] = None) -> None:
+                 autosar_specifics: Optional["AutosarBusSpecifics"] = None) -> None:
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
@@ -87,7 +87,7 @@ class Bus:
         return self._fd_baudrate
 
     @property
-    def autosar(self) -> Optional["AutosarDatabaseSpecifics"]:
+    def autosar(self) -> Optional["AutosarBusSpecifics"]:
         """An object containing AUTOSAR specific properties of the bus.
 
         """
@@ -95,7 +95,7 @@ class Bus:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: Any) -> None:
+    def autosar(self, value: Optional["AutosarBusSpecifics"]) -> None:
         self._autosar = value
 
     def __repr__(self) -> str:

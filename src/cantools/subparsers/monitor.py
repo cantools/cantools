@@ -43,7 +43,7 @@ class Monitor(can.Listener):
                                          strict=not args.no_strict)
         self._single_line = args.single_line
         self._filtered_sorted_message_names: list[str] = []
-        self._filter = args.filter_regex
+        self._filter = args.filter_regex or ''
         self._filter_cursor_pos = 0
         self._compiled_filter = None
         self._formatted_messages: dict[str, list[str]] = {}

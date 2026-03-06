@@ -1851,10 +1851,10 @@ class SystemLoader:
             self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
 
         if lower_limit is not None:
-            lower_limit = parse_number_string(lower_limit.text)
+            lower_limit = parse_number_string(lower_limit.text, allow_float=True)
 
         if upper_limit is not None:
-            upper_limit = parse_number_string(upper_limit.text)
+            upper_limit = parse_number_string(upper_limit.text, allow_float=True)
 
         return lower_limit, upper_limit
 
@@ -1878,8 +1878,21 @@ class SystemLoader:
             if vt is not None:
                 # the current scale is an enumeration value
                 lower_limit, upper_limit = self._load_scale_limits(compu_scale)
-                assert(lower_limit is not None \
-                       and lower_limit == upper_limit)
+                # both limits missing or inconsistent: invalid enumeration value
+                if lower_limit is None and upper_limit is None:
+                    LOGGER.warning(f'Invalid value specified for enumeration {vt}: '
+                                   f'[{lower_limit}, {upper_limit}]')
+                    continue
+                # if exactly one limit is missing, assume a single point interval
+                if lower_limit is None:
+                    lower_limit = upper_limit
+                elif upper_limit is None:
+                    upper_limit = lower_limit
+                # at this point both limits are non-None; they must be equal.
+                if lower_limit != upper_limit:
+                    LOGGER.warning(f'Invalid value specified for enumeration {vt}: '
+                                   f'[{lower_limit}, {upper_limit}]')
+                    continue
                 value = lower_limit
                 name = vt.text
                 comments = self._load_comments(compu_scale)

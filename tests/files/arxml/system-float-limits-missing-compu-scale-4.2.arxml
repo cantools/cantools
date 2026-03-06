@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test file covering two edge cases in SCALE-LINEAR-AND-TEXTTABLE compu methods:
+     1. Float values for LOWER-LIMIT / UPPER-LIMIT (parsed with allow_float=True)
+     2. A text-table entry with a missing LOWER-LIMIT (only UPPER-LIMIT present),
+        which should be tolerated with a warning instead of raising an AssertionError.
+-->
+<AUTOSAR xsi:schemaLocation="http://autosar.org/schema/r4.0 autosar_4-2-1.xsd"
+         xmlns="http://autosar.org/schema/r4.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <AR-PACKAGES>
+
+    <!-- ================================================================
+         SYSTEM / top-level entry-point
+         ================================================================ -->
+    <AR-PACKAGE>
+      <SHORT-NAME>Platform</SHORT-NAME>
+      <ELEMENTS>
+        <SYSTEM>
+          <SHORT-NAME>System</SHORT-NAME>
+          <FIBEX-ELEMENTS>
+            <FIBEX-ELEMENT-REF-CONDITIONAL>
+              <FIBEX-ELEMENT-REF DEST="CAN-FRAME">/Frame/FrameA</FIBEX-ELEMENT-REF>
+            </FIBEX-ELEMENT-REF-CONDITIONAL>
+          </FIBEX-ELEMENTS>
+        </SYSTEM>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+    <!-- ================================================================
+         CAN CLUSTER
+         ================================================================ -->
+    <AR-PACKAGE>
+      <SHORT-NAME>Cluster</SHORT-NAME>
+      <ELEMENTS>
+        <CAN-CLUSTER>
+          <SHORT-NAME>MY_CLUSTER</SHORT-NAME>
+          <CAN-CLUSTER-VARIANTS>
+            <CAN-CLUSTER-CONDITIONAL>
+              <BAUDRATE>500000</BAUDRATE>
+              <PHYSICAL-CHANNELS>
+                <CAN-PHYSICAL-CHANNEL>
+                  <SHORT-NAME>CHNL</SHORT-NAME>
+                  <FRAME-TRIGGERINGS>
+                    <CAN-FRAME-TRIGGERING>
+                      <SHORT-NAME>FT_FrameA</SHORT-NAME>
+                      <FRAME-REF DEST="CAN-FRAME">/Frame/FrameA</FRAME-REF>
+                      <CAN-ADDRESSING-MODE>STANDARD</CAN-ADDRESSING-MODE>
+                      <CAN-FRAME-RX-BEHAVIOR>CAN-20</CAN-FRAME-RX-BEHAVIOR>
+                      <CAN-FRAME-TX-BEHAVIOR>CAN-20</CAN-FRAME-TX-BEHAVIOR>
+                      <IDENTIFIER>1</IDENTIFIER>
+                    </CAN-FRAME-TRIGGERING>
+                  </FRAME-TRIGGERINGS>
+                </CAN-PHYSICAL-CHANNEL>
+              </PHYSICAL-CHANNELS>
+              <PROTOCOL-NAME>CAN</PROTOCOL-NAME>
+              <PROTOCOL-VERSION>2.0</PROTOCOL-VERSION>
+            </CAN-CLUSTER-CONDITIONAL>
+          </CAN-CLUSTER-VARIANTS>
+        </CAN-CLUSTER>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+    <!-- ================================================================
+         FRAME
+         ================================================================ -->
+    <AR-PACKAGE>
+      <SHORT-NAME>Frame</SHORT-NAME>
+      <ELEMENTS>
+        <CAN-FRAME>
+          <SHORT-NAME>FrameA</SHORT-NAME>
+          <FRAME-LENGTH>2</FRAME-LENGTH>
+          <PDU-TO-FRAME-MAPPINGS>
+            <PDU-TO-FRAME-MAPPING>
+              <SHORT-NAME>PTF_FrameA</SHORT-NAME>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <PDU-REF DEST="I-SIGNAL-I-PDU">/PDU/PduA</PDU-REF>
+              <START-POSITION>0</START-POSITION>
+            </PDU-TO-FRAME-MAPPING>
+          </PDU-TO-FRAME-MAPPINGS>
+        </CAN-FRAME>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+    <!-- ================================================================
+         PDU
+         ================================================================ -->
+    <AR-PACKAGE>
+      <SHORT-NAME>PDU</SHORT-NAME>
+      <ELEMENTS>
+        <I-SIGNAL-I-PDU>
+          <SHORT-NAME>PduA</SHORT-NAME>
+          <LENGTH>2</LENGTH>
+          <I-SIGNAL-TO-PDU-MAPPINGS>
+            <I-SIGNAL-TO-I-PDU-MAPPING>
+              <SHORT-NAME>SignalA</SHORT-NAME>
+              <I-SIGNAL-REF DEST="I-SIGNAL">/ISignal/SignalA</I-SIGNAL-REF>
+              <PACKING-BYTE-ORDER>MOST-SIGNIFICANT-BYTE-LAST</PACKING-BYTE-ORDER>
+              <START-POSITION>7</START-POSITION>
+              <TRANSFER-PROPERTY>TRIGGERED</TRANSFER-PROPERTY>
+            </I-SIGNAL-TO-I-PDU-MAPPING>
+          </I-SIGNAL-TO-PDU-MAPPINGS>
+          <UNUSED-BIT-PATTERN>0</UNUSED-BIT-PATTERN>
+        </I-SIGNAL-I-PDU>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+    <!-- ================================================================
+         I-SIGNAL
+         ================================================================ -->
+    <AR-PACKAGE>
+      <SHORT-NAME>ISignal</SHORT-NAME>
+      <ELEMENTS>
+        <I-SIGNAL>
+          <SHORT-NAME>SignalA</SHORT-NAME>
+          <LENGTH>8</LENGTH>
+          <SYSTEM-SIGNAL-REF DEST="SYSTEM-SIGNAL">/Signal/SignalA</SYSTEM-SIGNAL-REF>
+        </I-SIGNAL>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+    <!-- ================================================================
+         SYSTEM SIGNAL
+         ================================================================ -->
+    <AR-PACKAGE>
+      <SHORT-NAME>Signal</SHORT-NAME>
+      <ELEMENTS>
+        <SYSTEM-SIGNAL>
+          <SHORT-NAME>SignalA</SHORT-NAME>
+          <PHYSICAL-PROPS>
+            <SW-DATA-DEF-PROPS-VARIANTS>
+              <SW-DATA-DEF-PROPS-CONDITIONAL>
+                <COMPU-METHOD-REF DEST="COMPU-METHOD">/Semantics/CM_SignalA</COMPU-METHOD-REF>
+              </SW-DATA-DEF-PROPS-CONDITIONAL>
+            </SW-DATA-DEF-PROPS-VARIANTS>
+          </PHYSICAL-PROPS>
+        </SYSTEM-SIGNAL>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+    <!-- ================================================================
+         COMPU METHOD  –  SCALE_LINEAR_AND_TEXTTABLE with:
+           * float-valued LOWER-LIMIT / UPPER-LIMIT  (edge case #1)
+           * a text-table entry where LOWER-LIMIT is absent  (edge case #2,
+             the entry should be silently skipped with a warning)
+         ================================================================ -->
+    <AR-PACKAGE>
+      <SHORT-NAME>Semantics</SHORT-NAME>
+      <ELEMENTS>
+        <COMPU-METHOD>
+          <SHORT-NAME>CM_SignalA</SHORT-NAME>
+          <CATEGORY>SCALE_LINEAR_AND_TEXTTABLE</CATEGORY>
+          <COMPU-INTERNAL-TO-PHYS>
+            <COMPU-SCALES>
+
+              <!-- Text-table entry: limits are floats (0.0 == 0.0) -->
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0.0</LOWER-LIMIT>
+                <UPPER-LIMIT>0.0</UPPER-LIMIT>
+                <COMPU-CONST>
+                  <VT>OFF</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+
+              <!-- Text-table entry: limits are floats (1.0 == 1.0) -->
+              <COMPU-SCALE>
+                <LOWER-LIMIT>1.0</LOWER-LIMIT>
+                <UPPER-LIMIT>1.0</UPPER-LIMIT>
+                <COMPU-CONST>
+                  <VT>ON</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+
+              <!-- Text-table entry: only UPPER-LIMIT is present (missing LOWER-LIMIT).
+                   Before the fix this triggered an AssertionError; after the fix
+                   it is tolerated with a LOGGER warning and an inferred LOWER-LIMIT,
+                   so that the value 2 with text 'INVALID' is still available. -->
+              <COMPU-SCALE>
+                <UPPER-LIMIT>2</UPPER-LIMIT>
+                <COMPU-CONST>
+                  <VT>INVALID</VT>
+                </COMPU-CONST>
+              </COMPU-SCALE>
+
+              <!-- Linear scale covering the valid range with float limits -->
+              <COMPU-SCALE>
+                <LOWER-LIMIT>0.0</LOWER-LIMIT>
+                <UPPER-LIMIT>1.0</UPPER-LIMIT>
+                <COMPU-RATIONAL-COEFFS>
+                  <COMPU-NUMERATOR>
+                    <V>0</V>
+                    <V>1</V>
+                  </COMPU-NUMERATOR>
+                  <COMPU-DENOMINATOR>
+                    <V>1</V>
+                  </COMPU-DENOMINATOR>
+                </COMPU-RATIONAL-COEFFS>
+              </COMPU-SCALE>
+
+            </COMPU-SCALES>
+          </COMPU-INTERNAL-TO-PHYS>
+        </COMPU-METHOD>
+      </ELEMENTS>
+    </AR-PACKAGE>
+
+  </AR-PACKAGES>
+</AUTOSAR>

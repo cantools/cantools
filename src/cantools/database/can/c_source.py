@@ -1527,7 +1527,7 @@ def _generate_declarations(database_name: str,
                     message_name=cg_message.snake_name,
                     signal_name=cg_signal.snake_name,
                     type_name=cg_signal.type_name)
-                
+
                 signal_declaration += SIGNAL_DECLARATION_IS_IN_RANGE_PHYS_FMT.format(
                     database_name=database_name,
                     message_name=cg_message.snake_name,
@@ -1626,7 +1626,7 @@ def _generate_definitions(database_name: str,
                     type_name=cg_signal.type_name,
                     unused=unused,
                     check=check)
-                
+
                 signal_definition += SIGNAL_DEFINITION_IS_IN_RANGE_PHYS_FMT.format(
                     database_name=database_name,
                     message_name=cg_message.snake_name,

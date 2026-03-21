@@ -1,0 +1,12 @@
+VERSION ""
+NS_ :
+BS_:
+BU_:
+
+BO_ 100 TestMessage: 3 Vector__XXX
+ SG_ SignalWithBoth    : 0|8@1+  (1,0)  [0|100]   "km/h"  Vector__XXX
+ SG_ SignalWithOnlyMax : 8|8@1+  (1,0)  [0|0]     ""      Vector__XXX
+ SG_ SignalNoBounds    : 16|8@1+ (1,0)  [0|0]     ""      Vector__XXX
+
+BO_ 200 SensorMessage: 1 Vector__XXX
+ SG_ Temp : 0|8@1- (0.5,40) [-40|87.5] "degC" Vector__XXX

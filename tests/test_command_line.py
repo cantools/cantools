@@ -1629,7 +1629,7 @@ BATTERY_VT(
             self.assertIn(
                 'bool is_in_range_phys_test_message_signal_no_bounds_is_in_range_phys(double value)\n'
                 '{\n'
-                '    (double)value;\n\n'
+                '    (void)value;\n\n'
                 '    return (true);\n'
                 '}',
                 c_content

@@ -1355,8 +1355,7 @@ def _generate_is_in_range_phys(cg_signal: "CodeGenSignal", use_float: bool) -> t
         check.append(f"(value <= {float(maximum)}{f_suffix})")
 
     if not check:
-        floating_point_type = _get_floating_point_type(use_float)
-        return "true", f"    ({floating_point_type})value;\n\n"
+        return "true", "    (void)value;\n\n"
     elif len(check) == 1:
         return check[0][1:-1], ""
     else:

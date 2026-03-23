@@ -1580,6 +1580,104 @@ BATTERY_VT(
                 self.assertFalse((tmpdir / fuzzer_c).exists())
                 self.assertFalse((tmpdir / fuzzer_mk).exists())
 
+    def test_generate_c_source_is_in_phys_range(self):
+        """
+        Test that is_in_phys_range() is generated correctly for signals with min/max bounds.
+        """
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
+
+            argv = [
+                'cantools',
+                'generate_c_source',
+                'tests/files/dbc/is_in_phys_range.dbc',
+                '-o',
+                str(tmpdir),
+            ]
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            c_content = (tmpdir / 'is_in_phys_range.c').read_text()
+            h_content = (tmpdir / 'is_in_phys_range.h').read_text()
+
+            # declaration in .h
+            self.assertIn(
+                'bool is_in_phys_range_test_message_signal_with_both_is_in_phys_range(double value);',
+                h_content
+            )
+
+            # signal with min and max
+            self.assertIn(
+                'bool is_in_phys_range_test_message_signal_with_both_is_in_phys_range(double value)\n'
+                '{\n'
+                '    return ((value >= 0.0) && (value <= 100.0));\n'
+                '}',
+                c_content
+            )
+
+            # signal with scale/offset — limits in physical domain, not raw
+            self.assertIn(
+                'bool is_in_phys_range_sensor_message_temp_is_in_phys_range(double value)\n'
+                '{\n'
+                '    return ((value >= -40.0) && (value <= 87.5));\n'
+                '}',
+                c_content
+            )
+
+            # signal with no bounds — must generate true and suppress unused parameter warning
+            self.assertIn(
+                'bool is_in_phys_range_test_message_signal_no_bounds_is_in_phys_range(double value)\n'
+                '{\n'
+                '    (void)value;\n\n'
+                '    return (true);\n'
+                '}',
+                c_content
+            )
+
+    def test_generate_c_source_is_in_phys_range_use_float(self):
+        """Test that is_in_phys_range() uses float literals when --use-float is specified."""
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
+
+            argv = [
+                'cantools',
+                'generate_c_source',
+                '--use-float',
+                'tests/files/dbc/is_in_phys_range.dbc',
+                '-o',
+                str(tmpdir),
+            ]
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            c_content = (tmpdir / 'is_in_phys_range.c').read_text()
+            h_content = (tmpdir / 'is_in_phys_range.h').read_text()
+
+            # declaration uses float in .h
+            self.assertIn(
+                'bool is_in_phys_range_test_message_signal_with_both_is_in_phys_range(float value);',
+                h_content
+            )
+
+            # float literals with f suffix
+            self.assertIn(
+                'bool is_in_phys_range_test_message_signal_with_both_is_in_phys_range(float value)\n'
+                '{\n'
+                '    return ((value >= 0.0f) && (value <= 100.0f));\n'
+                '}',
+                c_content
+            )
+
+            # scale/offset signal also uses float literals
+            self.assertIn(
+                'bool is_in_phys_range_sensor_message_temp_is_in_phys_range(float value)\n'
+                '{\n'
+                '    return ((value >= -40.0f) && (value <= 87.5f));\n'
+                '}',
+                c_content
+            )
 
 if __name__ == '__main__':
     unittest.main()

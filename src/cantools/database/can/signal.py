@@ -89,6 +89,11 @@ class Signal:
         #: Signal byte order as ``'little_endian'`` or ``'big_endian'``.
         self.byte_order: ByteOrder = byte_order
 
+        #: The least significant bit of the signal.
+        self.lsb: int = self._calc_lsb(start, length, byte_order)
+
+        #: ``True`` if the signal is signed, ``False`` otherwise. Ignore this
+
         #: ``True`` if the signal is signed, ``False`` otherwise. Ignore this
         #: attribute if :attr:`is_float` is ``True``.
         self.is_signed: bool = is_signed
@@ -153,6 +158,29 @@ class Signal:
             # assume that we have either no comment at all or a
             # multilingual dictionary
             self.comments = comment
+
+    @staticmethod
+    def _calc_lsb(start: int, length: int, byte_order: ByteOrder) -> int:
+        """Calculate the bit position of the least significant bit of a signal.
+
+        :param start:
+            The start bit of the signal
+        :param length:
+            The length of the signal in bits
+        :param byte_order:
+            The byte order of the signal
+        :return:
+            The bit position of the least significant bit of the signal
+        """
+        if byte_order == "little_endian":
+            return start
+        current = start
+        for _ in range(length - 1):
+            if (current % 8) == 0:
+                current += 15
+            else:
+                current -= 1
+        return current
 
     def raw_to_scaled(
         self, raw_value: int | float, decode_choices: bool = True

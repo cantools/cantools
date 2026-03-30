@@ -171,6 +171,7 @@ def _load_did_element(did, data_types, did_data_lib):
     datas = []
     data_objs = did.findall('SIMPLECOMPCONT/DATAOBJ')
     data_objs += did.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
+    data_objs += did.findall('SIMPLECOMPCONT/STRUCT/DATAOBJ')
     did_data_refs = did.findall('SIMPLECOMPCONT/DIDDATAREF')
 
     for data_ref in did_data_refs:

@@ -33,6 +33,7 @@ def _print_j1939_frame_id(message):
     print(f'      Destination:    {destination}')
     print(f'      Format:         {pdu_format}')
 
+
 def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
     cycle_time = message.cycle_time
     signal_choices_string = formatting.signal_choices_string(message)
@@ -102,6 +103,20 @@ def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
                               WIDTH=WIDTH,
                               name_prefix=f'{message.name} :: ')
 
+
+def _dump_can_signal(dbase: CanDatabase, signal_name: str, with_comments: bool) -> None:
+    WIDTH = 80
+    try:
+        message = dbase.get_message_by_name(signal_name)
+    except KeyError:
+        raise KeyError(f'Unknown signal {signal_name}') from KeyError
+
+    print('================================= Message =================================')
+    _dump_can_message(message,
+                      with_comments,
+                      WIDTH=WIDTH)
+
+
 def _dump_can_database(dbase, with_comments=False):
     WIDTH = 80
     try:
@@ -117,7 +132,6 @@ def _dump_can_database(dbase, with_comments=False):
         _dump_can_message(message,
                           with_comments=with_comments,
                           WIDTH=WIDTH)
-
 
 
 def _dump_diagnostics_database(dbase):
@@ -147,9 +161,12 @@ def _do_dump(args):
                                encoding=args.encoding,
                                prune_choices=args.prune,
                                strict=not args.no_strict)
-
+    signal_name = args.signal
     if isinstance(dbase, CanDatabase):
-        _dump_can_database(dbase, args.with_comments)
+        if signal_name is None:
+            _dump_can_database(dbase, args.with_comments)
+        else:
+            _dump_can_signal(dbase, signal_name, args.with_comments)
     elif isinstance(dbase, DiagnosticsDatabase):
         _dump_diagnostics_database(dbase)
     else:
@@ -175,5 +192,11 @@ def add_subparser(subparsers):
     dump_parser.add_argument(
         'database',
         help='Database file.')
-    dump_parser.add_argument('--with-comments', action='store_true', default=False)
+    dump_parser.add_argument(
+        '--with-comments',
+        action='store_true',
+        help='Print the comments.')
+    dump_parser.add_argument(
+        '-s', '--signal',
+        help='Print only the specified signal.')
     dump_parser.set_defaults(func=_do_dump)

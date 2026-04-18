@@ -104,12 +104,12 @@ def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
                               name_prefix=f'{message.name} :: ')
 
 
-def _dump_can_signal(dbase: CanDatabase, signal_name: str, with_comments: bool) -> None:
+def _dump_can_single_message(dbase: CanDatabase, message_name: str, with_comments: bool) -> None:
     WIDTH = 80
     try:
-        message = dbase.get_message_by_name(signal_name)
+        message = dbase.get_message_by_name(message_name)
     except KeyError:
-        raise KeyError(f'Unknown signal {signal_name}') from KeyError
+        raise KeyError(f'Unknown message {message_name}') from KeyError
 
     print('================================= Message =================================')
     _dump_can_message(message,
@@ -161,12 +161,12 @@ def _do_dump(args):
                                encoding=args.encoding,
                                prune_choices=args.prune,
                                strict=not args.no_strict)
-    signal_name = args.signal
+    message_name = args.message
     if isinstance(dbase, CanDatabase):
-        if signal_name is None:
-            _dump_can_database(dbase, args.with_comments)
+        if message_name is not None:
+            _dump_can_single_message(dbase, message_name, args.with_comments)
         else:
-            _dump_can_signal(dbase, signal_name, args.with_comments)
+            _dump_can_database(dbase, args.with_comments)
     elif isinstance(dbase, DiagnosticsDatabase):
         _dump_diagnostics_database(dbase)
     else:
@@ -197,6 +197,6 @@ def add_subparser(subparsers):
         action='store_true',
         help='Print the comments.')
     dump_parser.add_argument(
-        '-s', '--signal',
-        help='Print only the specified signal.')
+        '-m', '--message',
+        help='Print only the specified message.')
     dump_parser.set_defaults(func=_do_dump)

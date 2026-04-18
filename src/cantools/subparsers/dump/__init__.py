@@ -3,6 +3,7 @@ import os
 import sys
 
 from ... import database
+from ...database import Message
 from ...database.can.database import Database as CanDatabase
 from ...database.diagnostics.database import Database as DiagnosticsDatabase
 from ...database.utils import format_and
@@ -104,20 +105,7 @@ def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
                               name_prefix=f'{message.name} :: ')
 
 
-def _dump_can_single_message(dbase: CanDatabase, message_name: str, with_comments: bool) -> None:
-    WIDTH = 80
-    try:
-        message = dbase.get_message_by_name(message_name)
-    except KeyError:
-        raise KeyError(f'Unknown message {message_name}') from KeyError
-
-    print('================================= Message =================================')
-    _dump_can_message(message,
-                      with_comments,
-                      WIDTH=WIDTH)
-
-
-def _dump_can_database(dbase, with_comments=False):
+def _dump_can_messages(msg_list: list[Message], with_comments: bool = False) -> None:
     WIDTH = 80
     try:
         WIDTH, _ = os.get_terminal_size()
@@ -128,7 +116,7 @@ def _dump_can_database(dbase, with_comments=False):
     print()
     print('  ' + 72 * '-')
 
-    for message in dbase.messages:
+    for message in msg_list:
         _dump_can_message(message,
                           with_comments=with_comments,
                           WIDTH=WIDTH)
@@ -163,10 +151,15 @@ def _do_dump(args):
                                strict=not args.no_strict)
     message_name = args.message
     if isinstance(dbase, CanDatabase):
-        if message_name is not None:
-            _dump_can_single_message(dbase, message_name, args.with_comments)
+        if message_name is None:
+            _dump_can_messages(dbase.messages, args.with_comments)
         else:
-            _dump_can_database(dbase, args.with_comments)
+            try:
+                message = dbase.get_message_by_name(message_name)
+            except KeyError:
+                raise KeyError(f'Unknown message {message_name}') from KeyError
+            _dump_can_messages([message], args.with_comments)
+
     elif isinstance(dbase, DiagnosticsDatabase):
         _dump_diagnostics_database(dbase)
     else:

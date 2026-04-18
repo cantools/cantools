@@ -3,6 +3,7 @@ import os
 import sys
 
 from ... import database
+from ...database import Message
 from ...database.can.database import Database as CanDatabase
 from ...database.diagnostics.database import Database as DiagnosticsDatabase
 from ...database.utils import format_and
@@ -32,6 +33,7 @@ def _print_j1939_frame_id(message):
     print(f'      Source:         0x{unpacked.source_address:02x}')
     print(f'      Destination:    {destination}')
     print(f'      Format:         {pdu_format}')
+
 
 def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
     cycle_time = message.cycle_time
@@ -102,7 +104,8 @@ def _dump_can_message(message, with_comments=False, name_prefix='', WIDTH=None):
                               WIDTH=WIDTH,
                               name_prefix=f'{message.name} :: ')
 
-def _dump_can_database(dbase, with_comments=False):
+
+def _dump_can_messages(msg_list: list[Message], with_comments: bool = False) -> None:
     WIDTH = 80
     try:
         WIDTH, _ = os.get_terminal_size()
@@ -113,11 +116,10 @@ def _dump_can_database(dbase, with_comments=False):
     print()
     print('  ' + 72 * '-')
 
-    for message in dbase.messages:
+    for message in msg_list:
         _dump_can_message(message,
                           with_comments=with_comments,
                           WIDTH=WIDTH)
-
 
 
 def _dump_diagnostics_database(dbase):
@@ -147,9 +149,17 @@ def _do_dump(args):
                                encoding=args.encoding,
                                prune_choices=args.prune,
                                strict=not args.no_strict)
-
+    message_name = args.message
     if isinstance(dbase, CanDatabase):
-        _dump_can_database(dbase, args.with_comments)
+        if message_name is None:
+            _dump_can_messages(dbase.messages, args.with_comments)
+        else:
+            try:
+                message = dbase.get_message_by_name(message_name)
+            except KeyError:
+                raise KeyError(f'Unknown message {message_name}') from KeyError
+            _dump_can_messages([message], args.with_comments)
+
     elif isinstance(dbase, DiagnosticsDatabase):
         _dump_diagnostics_database(dbase)
     else:
@@ -175,5 +185,11 @@ def add_subparser(subparsers):
     dump_parser.add_argument(
         'database',
         help='Database file.')
-    dump_parser.add_argument('--with-comments', action='store_true', default=False)
+    dump_parser.add_argument(
+        '--with-comments',
+        action='store_true',
+        help='Print the comments.')
+    dump_parser.add_argument(
+        '-m', '--message',
+        help='Print only the specified message.')
     dump_parser.set_defaults(func=_do_dump)

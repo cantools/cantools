@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Final,
     Literal,
+    TypedDict,
     Union,
 )
 
@@ -35,6 +36,12 @@ try:
     import bitstruct.c  # type: ignore
 except ImportError:
     import bitstruct  # type: ignore
+
+
+class CompositeFormats:
+    def __init__(self, codecs: list[Formats]):
+        self.codecs = codecs
+        self.padding_mask = 0
 
 
 def format_or(items: list[int | str]) -> str:
@@ -109,18 +116,27 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
 
 def encode_data(signal_values: SignalMappingType,
                 signals: Sequence[Union["Signal", "Data"]],
-                formats: Formats,
+                formats: Union[Formats, "CompositeFormats"],
                 scaling: bool
                 ) -> int:
     if len(signals) == 0:
         return 0
 
     raw_signal_values = _encode_signal_values(signals, signal_values, scaling)
-    big_packed = formats.big_endian.pack(raw_signal_values)
-    little_packed = formats.little_endian.pack(raw_signal_values)
-    packed_union = int.from_bytes(big_packed, "big") | int.from_bytes(little_packed, "little")
 
-    return packed_union
+    if isinstance(formats, CompositeFormats):
+        packed_union = 0
+        for codec in formats.codecs:
+            big_packed = codec.big_endian.pack(raw_signal_values)
+            little_packed = codec.little_endian.pack(raw_signal_values)
+            packed_union |= int.from_bytes(big_packed, "big") | int.from_bytes(little_packed, "little")
+        return packed_union
+    else:
+        big_packed = formats.big_endian.pack(raw_signal_values)
+        little_packed = formats.little_endian.pack(raw_signal_values)
+        packed_union = int.from_bytes(big_packed, "big") | int.from_bytes(little_packed, "little")
+
+        return packed_union
 
 
 def decode_data(data: bytes,
@@ -149,14 +165,25 @@ def decode_data(data: bytes,
             raise DecodeError(f"Wrong data size: {actual_length} instead of "
                               f"{expected_length} bytes")
 
-    try:
-        unpacked = {
-            **formats.big_endian.unpack(data),
-            **formats.little_endian.unpack(data[::-1]),
-        }
-    except (bitstruct.Error, ValueError) as e:
-        # bitstruct returns different errors in PyPy and cpython
-        raise DecodeError("unpacking failed") from e
+    if isinstance(formats, CompositeFormats):
+        unpacked = {}
+        for codec in formats.codecs:
+            try:
+                unpacked.update({
+                    **codec.big_endian.unpack(data),
+                    **codec.little_endian.unpack(data[::-1]),
+                })
+            except (bitstruct.Error, ValueError) as e:
+                raise DecodeError("unpacking failed") from e
+    else:
+        try:
+            unpacked = {
+                **formats.big_endian.unpack(data),
+                **formats.little_endian.unpack(data[::-1]),
+            }
+        except (bitstruct.Error, ValueError) as e:
+            # bitstruct returns different errors in PyPy and cpython
+            raise DecodeError("unpacking failed") from e
 
     if actual_length < expected_length and allow_truncated:
         # remove signals that are outside available data bytes
@@ -192,111 +219,150 @@ def decode_data(data: bytes,
     return decoded
 
 
-def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
+def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Union[Formats, "CompositeFormats"]:
     format_length = (8 * number_of_bytes)
 
-    def get_format_string_type(signal: Union["Data", "Signal"]) -> str:
-        if signal.conversion.is_float:
-            return 'f'
-        elif signal.is_signed:
-            return 's'
-        else:
-            return 'u'
+    # Sort signals by start bit
+    sorted_signals = sorted(signals, key=start_bit)
 
-    def padding_item(length: int) -> tuple[str, str, None]:
-        fmt = f'p{length}'
-        padding_mask = '1' * length
+    # Group signals to avoid overlaps
+    class Group(TypedDict):
+        signals: list[Union["Data", "Signal"]]
+        end: int
 
-        return fmt, padding_mask, None
+    groups: list[Group] = []
 
-    def data_item(signal: Union["Data", "Signal"]) -> tuple[str, str, str]:
-        fmt = f'{get_format_string_type(signal)}{signal.length}'
-        padding_mask = '0' * signal.length
+    for signal in sorted_signals:
+        signal_start = start_bit(signal)
+        placed = False
+        for group in groups:
+            if signal_start >= group['end']:
+                group['signals'].append(signal)
+                group['end'] = signal_start + signal.length
+                placed = True
+                break
 
-        return fmt, padding_mask, signal.name
+        if not placed:
+            groups.append({
+                'signals': [signal],
+                'end': signal_start + signal.length
+            })
 
-    def fmt(items: list[tuple[str, str, str | None]]) -> str:
-        return ''.join([item[0] for item in items])
+    list_of_formats = []
 
-    def names(items:  list[tuple[str, str, str | None]]) -> list[str]:
-        return [item[2] for item in items if item[2] is not None]
+    for group in groups:
+        group_signals = group['signals']
 
-    def padding_mask(items: list[tuple[str, str, str | None]]) -> int:
+        def get_format_string_type(signal: Union["Data", "Signal"]) -> str:
+            if signal.conversion.is_float:
+                return 'f'
+            elif signal.is_signed:
+                return 's'
+            else:
+                return 'u'
+
+        def padding_item(length: int) -> tuple[str, str, None]:
+            fmt = f'p{length}'
+            padding_mask = '1' * length
+            return fmt, padding_mask, None
+
+        def data_item(signal: Union["Data", "Signal"]) -> tuple[str, str, str]:
+            fmt = f'{get_format_string_type(signal)}{signal.length}'
+            padding_mask = '0' * signal.length
+            return fmt, padding_mask, signal.name
+
+        def fmt(items: list[tuple[str, str, str | None]]) -> str:
+            return ''.join([item[0] for item in items])
+
+        def names(items:  list[tuple[str, str, str | None]]) -> list[str]:
+            return [item[2] for item in items if item[2] is not None]
+
+        def padding_mask(items: list[tuple[str, str, str | None]]) -> int:
+            try:
+                return int(''.join([item[1] for item in items]), 2)
+            except ValueError:
+                return 0
+
+        def create_big(group_signals: list[Union["Data", "Signal"]]) -> tuple[str, int, list[str]]:
+            items: list[tuple[str, str, str | None]] = []
+            start = 0
+
+            # Select BE signals (filtered from current group)
+            be_signals = [signal for signal in group_signals if signal.byte_order == "big_endian"]
+
+            # Since group_signals are already sorted by start_bit, and we know they are non-overlapping in this group
+            # We can iterate them. But wait, create_big in original code re-sorts by network order.
+            # start_bit() returns network order bit index for BE.
+            # So group_signals (sorted by start_bit) are already in network order.
+
+            for signal in be_signals:
+                padding_length = (start_bit(signal) - start)
+
+                if padding_length > 0:
+                    items.append(padding_item(padding_length))
+
+                items.append(data_item(signal))
+                start = (start_bit(signal) + signal.length)
+
+            if start < format_length:
+                length = format_length - start
+                items.append(padding_item(length))
+
+            return fmt(items), padding_mask(items), names(items)
+
+        def create_little(group_signals: list[Union["Data", "Signal"]]) -> tuple[str, int, list[str]]:
+            items: list[tuple[str, str, str | None]] = []
+            end = format_length
+
+            # Filter LE signals from group
+            le_signals = [signal for signal in group_signals if signal.byte_order != 'big_endian']
+
+            # Process in reverse order (highest start bit first)
+            # group_signals is sorted by start bit ascending.
+            # So we check reversed(le_signals)
+
+            for signal in reversed(le_signals):
+                padding_length = end - (signal.start + signal.length)
+
+                if padding_length > 0:
+                    items.append(padding_item(padding_length))
+
+                items.append(data_item(signal))
+                end = signal.start
+
+            if end > 0:
+                items.append(padding_item(end))
+
+            value = padding_mask(items)
+
+            if format_length > 0:
+                length = len(''.join([item[1] for item in items]))
+                _packed = bitstruct.pack(f'u{length}', value)
+                value = int.from_bytes(_packed, "little")
+
+            return fmt(items), value, names(items)
+
+        big_fmt, big_padding_mask, big_names = create_big(group_signals)
+        little_fmt, little_padding_mask, little_names = create_little(group_signals)
+
         try:
-            return int(''.join([item[1] for item in items]), 2)
-        except ValueError:
-            return 0
+            big_compiled = bitstruct.c.compile(big_fmt, big_names)
+        except Exception:
+            big_compiled = bitstruct.compile(big_fmt, big_names)
 
-    def create_big() -> tuple[str, int, list[str]]:
-        items: list[tuple[str, str, str | None]] = []
-        start = 0
+        try:
+            little_compiled = bitstruct.c.compile(little_fmt, little_names)
+        except Exception:
+            little_compiled = bitstruct.compile(little_fmt, little_names)
 
-        # Select BE signals
-        be_signals = [signal for signal in signals if signal.byte_order == "big_endian"]
+        list_of_formats.append(Formats(big_compiled,
+                    little_compiled,
+                    big_padding_mask & little_padding_mask))
 
-        # Ensure BE signals are sorted in network order
-        sorted_signals = sorted(be_signals, key = lambda signal: sawtooth_to_network_bitnum(signal.start))
-
-        for signal in sorted_signals:
-
-            padding_length = (start_bit(signal) - start)
-
-            if padding_length > 0:
-                items.append(padding_item(padding_length))
-
-            items.append(data_item(signal))
-            start = (start_bit(signal) + signal.length)
-
-        if start < format_length:
-            length = format_length - start
-            items.append(padding_item(length))
-
-        return fmt(items), padding_mask(items), names(items)
-
-    def create_little() -> tuple[str, int, list[str]]:
-        items: list[tuple[str, str, str | None]] = []
-        end = format_length
-
-        for signal in signals[::-1]:
-            if signal.byte_order == 'big_endian':
-                continue
-
-            padding_length = end - (signal.start + signal.length)
-
-            if padding_length > 0:
-                items.append(padding_item(padding_length))
-
-            items.append(data_item(signal))
-            end = signal.start
-
-        if end > 0:
-            items.append(padding_item(end))
-
-        value = padding_mask(items)
-
-        if format_length > 0:
-            length = len(''.join([item[1] for item in items]))
-            _packed = bitstruct.pack(f'u{length}', value)
-            value = int.from_bytes(_packed, "little")
-
-        return fmt(items), value, names(items)
-
-    big_fmt, big_padding_mask, big_names = create_big()
-    little_fmt, little_padding_mask, little_names = create_little()
-
-    try:
-        big_compiled = bitstruct.c.compile(big_fmt, big_names)
-    except Exception:
-        big_compiled = bitstruct.compile(big_fmt, big_names)
-
-    try:
-        little_compiled = bitstruct.c.compile(little_fmt, little_names)
-    except Exception:
-        little_compiled = bitstruct.compile(little_fmt, little_names)
-
-    return Formats(big_compiled,
-                   little_compiled,
-                   big_padding_mask & little_padding_mask)
+    if len(list_of_formats) == 1:
+        return list_of_formats[0]
+    else:
+        return CompositeFormats(list_of_formats)
 
 
 def sawtooth_to_network_bitnum(sawtooth_bitnum: int) -> int:

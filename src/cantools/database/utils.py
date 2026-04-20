@@ -192,7 +192,55 @@ def decode_data(data: bytes,
     return decoded
 
 
+_format_cache: dict[tuple[tuple, int], Formats] = {}
+_FORMAT_CACHE_SIZE = 1024
+
+
+def _format_cache_key(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> tuple[tuple[tuple[str, int, int, str, bool, bool], ...], int]:
+    """Build a cache key from signals."""
+    signal_keys = tuple(
+        (
+            signal.name,
+            signal.start,
+            signal.length,
+            signal.byte_order,
+            signal.is_signed,
+            signal.conversion.is_float
+        )
+        for signal in signals
+    )
+    return (signal_keys, number_of_bytes)
+
+
+def _check_format_cache(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Optional[Formats]:
+    """Check if formats for this signal configuration exist in cache.
+
+    Returns the cached Formats object if found, None otherwise.
+    Also handles FIFO eviction when cache is full.
+    """
+    cache_key = _format_cache_key(signals, number_of_bytes)
+
+    if cache_key in _format_cache:
+        return _format_cache[cache_key]
+
+    if len(_format_cache) >= _FORMAT_CACHE_SIZE:
+        first_key = next(iter(_format_cache))
+        del _format_cache[first_key]
+
+    return None
+
+
+def _store_format_cache(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int, formats: Formats) -> None:
+    """Store computed formats in cache for future reuse."""
+    cache_key = _format_cache_key(signals, number_of_bytes)
+    _format_cache[cache_key] = formats
+
+
 def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], number_of_bytes: int) -> Formats:
+    cached_result = _check_format_cache(signals, number_of_bytes)
+    if cached_result is not None:
+        return cached_result
+
     format_length = (8 * number_of_bytes)
 
     def get_format_string_type(signal: Union["Data", "Signal"]) -> str:
@@ -294,9 +342,13 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
     except Exception:
         little_compiled = bitstruct.compile(little_fmt, little_names)
 
-    return Formats(big_compiled,
+    result = Formats(big_compiled,
                    little_compiled,
                    big_padding_mask & little_padding_mask)
+
+    _store_format_cache(signals, number_of_bytes, result)
+
+    return result
 
 
 def sawtooth_to_network_bitnum(sawtooth_bitnum: int) -> int:

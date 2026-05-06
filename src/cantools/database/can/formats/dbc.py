@@ -411,10 +411,14 @@ class Parser(textparser.Parser):
 
 
 class LongNamesConverter:
-    def __init__(self, long_names: list[str]) -> None:
+    def __init__(self, long_names: list[str], reserved_short_names: set[str] | None = None) -> None:
 
         self.long_to_short: dict[str, str] = {}
         self.short_to_long: dict[str, str] = {}
+
+        if reserved_short_names:
+            for name in reserved_short_names:
+                self.short_to_long[name] = '\x00'
 
         for long_name in sorted(long_names, key=lambda s: (len(s), s)):
             short_name = long_name[:32]
@@ -1578,8 +1582,9 @@ def _load_signals(tokens,
     signals = []
 
     for signal in tokens:
+        token_short = signal[1][0]
         signals.append(
-            Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
+            Signal(name=get_signal_name(frame_id_dbc, token_short),
                    start=int(signal[3]),
                    length=int(signal[5]),
                    receivers=get_receivers(signal[20]),
@@ -1587,26 +1592,34 @@ def _load_signals(tokens,
                                if signal[7] == '0'
                                else 'little_endian'),
                    is_signed=(signal[8] == '-'),
-                   raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
+                   raw_initial=get_signal_initial_value(frame_id_dbc, token_short),
                    conversion=BaseConversion.factory(
                        scale=num(signal[10]),
                        offset=num(signal[12]),
-                       is_float=get_is_float(frame_id_dbc, signal[1][0]),
-                       choices=get_choices(frame_id_dbc, signal[1][0]),
+                       is_float=get_is_float(frame_id_dbc, token_short),
+                       choices=get_choices(frame_id_dbc, token_short),
                    ),
                    minimum=get_minimum(signal[15], signal[17]),
                    maximum=get_maximum(signal[15], signal[17]),
                    unit=(None if signal[19] == '' else signal[19]),
-                   spn=get_signal_spn(frame_id_dbc, signal[1][0]),
-                   dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
+                   spn=get_signal_spn(frame_id_dbc, token_short),
+                   dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, token_short),
                                               definitions),
                    comment=get_comment(frame_id_dbc,
-                                       signal[1][0]),
+                                       token_short),
                    is_multiplexer=get_is_multiplexer(signal),
                    multiplexer_ids=get_multiplexer_ids(signal[1],
                                                        multiplexer_signal),
                    multiplexer_signal=get_multiplexer_signal(signal[1],
                                                              multiplexer_signal)))
+        # If the original DBC file shortened this signal, store the original short name as a
+        # hidden Python attribute (not in dbc.attributes, so never written to output).
+        # This lets make_signal_names_unique preserve the original short name in DBC
+        created = signals[-1]
+        if created.name != token_short:
+            if created.dbc is None:
+                created.dbc = DbcSpecifics()
+            created.dbc._orig_dbc_short_name = (created.name, token_short)
 
     return signals
 
@@ -1959,6 +1972,14 @@ def make_node_names_unique(database: InternalDatabase, shorten_long_names: bool)
             get_long_node_name_attribute_definition(database))
         node.name = short_name
 
+        # Update attributes_rel: rename node_name keys from long_name to short_name
+        if database.dbc is not None and database.dbc.attributes_rel is not None:
+            for element in database.dbc.attributes_rel.values():
+                if 'signal' in element:
+                    for signal_lst in element['signal'].values():
+                        if long_name in signal_lst['node']:
+                            signal_lst['node'][short_name] = signal_lst['node'].pop(long_name)
+
 
 def make_message_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     converter = LongNamesConverter([message.name for message in database.messages])
@@ -1981,11 +2002,54 @@ def make_message_names_unique(database: InternalDatabase, shorten_long_names: bo
 
 
 def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    # Build one DBC wide converter so short names are unique across all messages,
+    # not just within each individual message.
+    # Only feed LongNamesConverter with signals that do not have a preserved short name
+    names_to_shorten = list({
+        sig.name
+        for message in database.messages
+        for sig in message.signals
+        if sig.dbc is None
+            or sig.dbc._orig_dbc_short_name is None
+            or sig.dbc._orig_dbc_short_name[0] != sig.name
+    })
+    # Collect short names already locked in by existing signals so the
+    # converter never generates a duplicate for a newly added signal.
+    reserved_short_names = {
+        sig.dbc._orig_dbc_short_name[1]
+        for message in database.messages
+        for sig in message.signals
+        if sig.dbc is not None
+            and sig.dbc._orig_dbc_short_name is not None
+            and sig.dbc._orig_dbc_short_name[0] == sig.name
+    }
+    converter = LongNamesConverter(names_to_shorten, reserved_short_names=reserved_short_names)
+
     for message in database.messages:
-        converter = LongNamesConverter([signal.name for signal in message.signals])
+        # get the attributes_rel signal dict for this message (if present)
+        sig_attrs_rel = None
+        if database.dbc is not None and database.dbc.attributes_rel is not None:
+            frame_id_dbc = get_dbc_frame_id(message)
+            sig_attrs_rel = database.dbc.attributes_rel.get(frame_id_dbc, {}).get('signal')
+
         for signal in message.signals:
             long_name = signal.name
-            short_name = converter.long_to_short[long_name]
+
+            # Use preserved short name if available (existing signals),
+            # otherwise fall back to cantools generated short name.
+            orig_short = None
+            if signal.dbc is not None and signal.dbc._orig_dbc_short_name is not None:
+                orig_long, orig_short_candidate = signal.dbc._orig_dbc_short_name
+                del signal.dbc._orig_dbc_short_name
+                if long_name == orig_long:
+                    orig_short = orig_short_candidate
+
+            short_name = None
+            if orig_short is not None:
+                short_name = orig_short
+            else:
+                short_name = converter.long_to_short.get(long_name, long_name)
+
             try_remove_attribute(signal.dbc, 'SystemSignalLongSymbol')
 
             if (long_name == short_name) or not shorten_long_names:
@@ -1999,11 +2063,22 @@ def make_signal_names_unique(database: InternalDatabase, shorten_long_names: boo
                 get_long_signal_name_attribute_definition(database))
             signal.name = short_name
 
-        if shorten_long_names and message.signal_groups:
-            for signal_group in message.signal_groups:
-                signal_group.signal_names = [converter.long_to_short[long_name]
-                                             for long_name in signal_group.signal_names]
+            # Rename attributes_rel key from long name to the resolved short name.
+            if sig_attrs_rel is not None and long_name in sig_attrs_rel:
+                sig_attrs_rel[short_name] = sig_attrs_rel.pop(long_name)
 
+        if shorten_long_names and message.signal_groups:
+            # For signal_groups, build a combined long short map covering all signals.
+            all_long_to_short = {sig.name: sig.name for sig in message.signals}
+            for sig in message.signals:
+                # After renaming, sig.name is already the short name.
+                # We need the original long name, which is in SystemSignalLongSymbol.
+                if sig.dbc and sig.dbc.attributes and 'SystemSignalLongSymbol' in sig.dbc.attributes:
+                    all_long_to_short[sig.dbc.attributes['SystemSignalLongSymbol'].value] = sig.name
+            for signal_group in message.signal_groups:
+                signal_group.signal_names = [
+                    all_long_to_short.get(n, n) for n in signal_group.signal_names
+                ]
 
 def make_envvar_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     if database.dbc is None:

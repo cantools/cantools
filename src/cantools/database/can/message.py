@@ -1,12 +1,14 @@
 # A CAN message.
 
 import logging
+from collections.abc import MutableSequence
 from copy import deepcopy
 from typing import (
-    TYPE_CHECKING,
     Optional,
     cast,
 )
+
+from cantools.database.can.formats.dbc_specifics import DbcSpecifics
 
 from ...typechecking import (
     Codec,
@@ -21,6 +23,7 @@ from ...typechecking import (
     EncodeInputType,
     SignalDictType,
     SignalMappingType,
+    SignalValueType,
 )
 from ..errors import DecodeError, EncodeError, Error
 from ..namedsignalvalue import NamedSignalValue
@@ -34,14 +37,13 @@ from ..utils import (
     start_bit,
     type_sort_signals,
 )
+from .formats.arxml.message_specifics import AutosarMessageSpecifics
 from .signal import Signal
 from .signal_group import SignalGroup
 
-if TYPE_CHECKING:
-    from .formats.arxml import AutosarMessageSpecifics
-    from .formats.dbc import DbcSpecifics
-
 LOGGER = logging.getLogger(__name__)
+
+SignalTreeType = list[str | dict[str, dict[int, list[str]]]]
 
 
 class Message:
@@ -73,8 +75,8 @@ class Message:
                  senders: list[str] | None = None,
                  send_type: str | None = None,
                  cycle_time: int | None = None,
-                 dbc_specifics: Optional['DbcSpecifics'] = None,
-                 autosar_specifics: Optional['AutosarMessageSpecifics'] = None,
+                 dbc_specifics: DbcSpecifics | None = None,
+                 autosar_specifics: AutosarMessageSpecifics | None = None,
                  is_extended_frame: bool = False,
                  is_fd: bool = False,
                  bus_name: str | None = None,
@@ -110,7 +112,7 @@ class Message:
         else:
             self._signals = signals
         self._signal_dict: dict[str, Signal] = {}
-        self._contained_messages = contained_messages
+        self._contained_messages = contained_messages or []
 
         # if the 'comment' argument is a string, we assume that is an
         # english comment. this is slightly hacky because the
@@ -119,7 +121,7 @@ class Message:
         self._comments: Comments | None
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = {None: comment}
+            self._comments = cast("Comments", {None: comment})
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -128,12 +130,12 @@ class Message:
         self._senders = senders or []
         self._send_type = send_type
         self._cycle_time = cycle_time
-        self._dbc = dbc_specifics
-        self._autosar = autosar_specifics
+        self._dbc = dbc_specifics or DbcSpecifics()
+        self._autosar = autosar_specifics or AutosarMessageSpecifics()
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs: Codec | None = None
-        self._signal_tree: list[str | list[str]] | None = None
+        self._signal_tree: SignalTreeType = []
         self._strict = strict
         self._protocol = protocol
         self.refresh()
@@ -147,7 +149,7 @@ class Message:
 
         """
 
-        signals = []
+        signals: list[Signal] = []
         multiplexers: dict[str, dict[int, Codec]] = {}
 
         # Find all signals matching given parent signal name and given
@@ -199,17 +201,18 @@ class Message:
             'multiplexers': multiplexers
         }
 
-    def _create_signal_tree(self, codec):
+    def _create_signal_tree(self, codec: Codec) -> SignalTreeType:
         """Create a multiplexing tree node of given codec. This is a recursive
         function.
 
         """
 
-        nodes = []
+        nodes: SignalTreeType = []
 
         for signal in codec['signals']:
             multiplexers = codec['multiplexers']
 
+            node: str | dict[str, dict[int, SignalTreeType]]
             if signal.name in multiplexers:
                 node = {
                     signal.name: {
@@ -220,7 +223,7 @@ class Message:
             else:
                 node = signal.name
 
-            nodes.append(node)
+            nodes.append(cast('str | dict[str, dict[int, list[str]]]', node))
 
         return nodes
 
@@ -323,10 +326,10 @@ class Message:
 
         """
 
-        return self._contained_messages is not None
+        return len(self._contained_messages) > 0
 
     @property
-    def contained_messages(self) -> list['Message'] | None:
+    def contained_messages(self) -> list['Message']:
         """The list of messages potentially contained within this message
 
         """
@@ -344,7 +347,7 @@ class Message:
         return self._unused_bit_pattern
 
     @unused_bit_pattern.setter
-    def unused_bit_pattern(self, value):
+    def unused_bit_pattern(self, value: int) -> None:
         if value < 0 or value > 255:
             LOGGER.info(f'Invalid unused bit pattern "{value}". Must be '
                         f'an integer between 0 and 255')
@@ -387,10 +390,10 @@ class Message:
         if value is None:
             self._comments = None
         else:
-            self._comments = {None: value}
+            self._comments = cast("Comments", {None: value})
 
     @property
-    def comments(self):
+    def comments(self) -> Comments | None:
         """The dictionary with the descriptions of the message in multiple
         languages. ``None`` if unavailable.
 
@@ -398,7 +401,7 @@ class Message:
         return self._comments
 
     @comments.setter
-    def comments(self, value):
+    def comments(self, value: Comments) -> None:
         self._comments = value
 
     @property
@@ -417,18 +420,15 @@ class Message:
         one of the signals contained in the message.
 
         """
-        result = set()
+        result: set[str] = set()
 
         for sig in self.signals:
-            if sig.receivers is not None:
-                result.update(sig.receivers)
+            result.update(sig.receivers)
 
         if self.is_container:
-            assert self.contained_messages is not None
             for cmsg in self.contained_messages:
                 for sig in cmsg.signals:
-                    if sig.receivers is not None:
-                        result.update(sig.receivers)
+                    result.update(sig.receivers)
 
         return result
 
@@ -453,7 +453,7 @@ class Message:
         self._cycle_time = value
 
     @property
-    def dbc(self) -> Optional['DbcSpecifics']:
+    def dbc(self) -> DbcSpecifics:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -461,11 +461,11 @@ class Message:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value: Optional['DbcSpecifics']) -> None:
+    def dbc(self, value: DbcSpecifics) -> None:
         self._dbc = value
 
     @property
-    def autosar(self) -> Optional['AutosarMessageSpecifics']:
+    def autosar(self) -> AutosarMessageSpecifics:
         """An object containing AUTOSAR specific properties
 
         e.g. auxiliary data required to implement CRCs, secure on-board
@@ -475,7 +475,7 @@ class Message:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: Optional['AutosarMessageSpecifics']) -> None:
+    def autosar(self, value: AutosarMessageSpecifics) -> None:
         self._autosar = value
 
     @property
@@ -504,7 +504,7 @@ class Message:
         self._protocol = value
 
     @property
-    def signal_tree(self):
+    def signal_tree(self) -> SignalTreeType:
         """All signal names and multiplexer ids as a tree. Multiplexer signals
         are dictionaries, while other signals are strings.
 
@@ -535,7 +535,7 @@ class Message:
             node = self._codecs
         assert node is not None
 
-        result = {}
+        result: dict[str, SignalValueType] = {}
 
         for signal in node['signals']:
             val = input_data.get(signal.name)
@@ -547,7 +547,7 @@ class Message:
         for mux_signal_name, mux_nodes in node['multiplexers'].items():
             mux_num = self._get_mux_number(input_data, mux_signal_name)
             mux_node = mux_nodes.get(mux_num)
-            if mux_num is None or mux_node is None:
+            if mux_node is None:
                 multiplexers = node['multiplexers']
                 try:
                     expected_str = \
@@ -1178,7 +1178,7 @@ class Message:
     def get_contained_message_by_header_id(self, header_id: int) \
         -> Optional['Message']:
 
-        if self.contained_messages is None:
+        if len(self.contained_messages) == 0:
             return None
 
         tmp = [ x for x in self.contained_messages if x.header_id == header_id ]
@@ -1194,7 +1194,7 @@ class Message:
     def get_contained_message_by_name(self, name: str) \
         -> Optional['Message']:
 
-        if self.contained_messages is None:
+        if len(self.contained_messages) == 0:
             return None
 
         tmp = [ x for x in self.contained_messages if x.name == name ]
@@ -1227,17 +1227,17 @@ class Message:
 
         return bool(self._codecs['multiplexers'])
 
-    def _check_signal(self, message_bits, signal):
-        signal_bits = signal.length * [signal.name]
+    def _check_signal(self, message_bits: MutableSequence[str | None], signal: Signal) -> None:
+        signal_bits: list[str | None] = cast('list[str | None]', signal.length * [signal.name])
 
         if signal.byte_order == 'big_endian':
-            padding = start_bit(signal) * [None]
+            padding = cast('list[str | None]', start_bit(signal) * [None])
             signal_bits = padding + signal_bits
         else:
-            signal_bits += signal.start * [None]
+            signal_bits = signal_bits + cast('list[str | None]', signal.start * [None])
 
             if len(signal_bits) < len(message_bits):
-                padding = (len(message_bits) - len(signal_bits)) * [None]
+                padding = cast('list[str | None]', (len(message_bits) - len(signal_bits)) * [None])
                 reversed_signal_bits = padding + signal_bits
             else:
                 reversed_signal_bits = signal_bits
@@ -1261,7 +1261,7 @@ class Message:
 
                 message_bits[offset] = signal.name
 
-    def _check_mux(self, message_bits, mux):
+    def _check_mux(self, message_bits: MutableSequence[str | None], mux: dict[str, dict[int, list[str]]]) -> None:
         signal_name, children = next(iter(mux.items()))
         self._check_signal(message_bits,
                            self.get_signal_by_name(signal_name))
@@ -1270,13 +1270,13 @@ class Message:
         for multiplexer_id in sorted(children):
             child_tree = children[multiplexer_id]
             child_message_bits = deepcopy(children_message_bits)
-            self._check_signal_tree(child_message_bits, child_tree)
+            self._check_signal_tree(child_message_bits, cast('SignalTreeType', child_tree))
 
             for i, child_bit in enumerate(child_message_bits):
                 if child_bit is not None:
                     message_bits[i] = child_bit
 
-    def _check_signal_tree(self, message_bits, signal_tree):
+    def _check_signal_tree(self, message_bits: MutableSequence[str | None], signal_tree: SignalTreeType) -> None:
         for signal_name in signal_tree:
             if isinstance(signal_name, dict):
                 self._check_mux(message_bits, signal_name)
@@ -1284,7 +1284,7 @@ class Message:
                 self._check_signal(message_bits,
                                    self.get_signal_by_name(signal_name))
 
-    def _check_signal_lengths(self):
+    def _check_signal_lengths(self) -> None:
         for signal in self._signals:
             if signal.length <= 0:
                 raise Error(
@@ -1310,8 +1310,11 @@ class Message:
             strict = self._strict
 
         if strict:
-            message_bits = 8 * self.length * [None]
-            self._check_signal_tree(message_bits, self.signal_tree)
+            message_bits: MutableSequence[str | None] = cast(
+                'MutableSequence[str | None]',
+                [None] * (8 * self.length)
+            )
+            self._check_signal_tree(message_bits, self._signal_tree)
 
     def __repr__(self) -> str:
         return \

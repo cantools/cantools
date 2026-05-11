@@ -24,5 +24,5 @@ class InternalDatabase:
         self.nodes = nodes
         self.buses = buses
         self.version = version
-        self.dbc = dbc_specifics
+        self.dbc = dbc_specifics or DbcSpecifics()
         self.autosar = autosar_specifics

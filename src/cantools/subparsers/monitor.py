@@ -397,7 +397,7 @@ class Monitor(can.Listener):
                     self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
                     return MessageFormattingResult.DecodeError
 
-                decoded_signals = message.decode_simple(data,
+                decoded_signals = message.decode_simple(bytes(data),
                     decode_choices=True,
                     allow_truncated=True,
                     allow_excess=True

@@ -951,7 +951,7 @@ def _dump_messages(database: InternalDatabase) -> str:
                     signal_name, multiplexed_signals = next(iter(signal_tree_signal.items()))
                     is_first_message = True
                     for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
-                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + non_multiplexed_signals,
+                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + [message.get_signal_by_name(s) for s in non_multiplexed_signals],
                                                            min_frame_id if is_first_message else None, max_frame_id, multiplexer_id, message.get_signal_by_name(signal_name)))
                         is_first_message = False
         else:

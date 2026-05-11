@@ -1,12 +1,12 @@
 # A CAN signal.
-from typing import TYPE_CHECKING, Optional
+from typing import cast
+
+from cantools.database.can.formats.dbc_specifics import DbcSpecifics
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..conversion import BaseConversion, IdentityConversion
 from ..namedsignalvalue import NamedSignalValue
 
-if TYPE_CHECKING:
-    from ...database.can.formats.dbc import DbcSpecifics
 
 class Signal:
     """A CAN signal with position, size, unit and other information. A
@@ -57,7 +57,7 @@ class Signal:
         minimum: float | None = None,
         maximum: float | None = None,
         unit: str | None = None,
-        dbc_specifics: Optional["DbcSpecifics"] = None,
+        dbc_specifics: DbcSpecifics | None = None,
         comment: str | Comments | None = None,
         receivers: list[str] | None = None,
         is_multiplexer: bool = False,
@@ -117,7 +117,7 @@ class Signal:
         self.unit: str | None = unit
 
         #: An object containing dbc specific properties like e.g. attributes.
-        self.dbc: DbcSpecifics | None = dbc_specifics
+        self.dbc: DbcSpecifics = dbc_specifics or DbcSpecifics()
 
         #: A list of all receiver nodes of this signal.
         self.receivers: list[str] = receivers or []
@@ -148,7 +148,7 @@ class Signal:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self.comments = {None: comment}
+            self.comments = cast("Comments", {None: comment})
         else:
             # assume that we have either no comment at all or a
             # multilingual dictionary
@@ -258,7 +258,7 @@ class Signal:
         if value is None:
             self.comments = None
         else:
-            self.comments = {None: value}
+            self.comments = cast("Comments", {None: value})
 
     def choice_to_number(self, choice: str | NamedSignalValue) -> int:
         try:

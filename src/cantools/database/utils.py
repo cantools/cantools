@@ -20,11 +20,10 @@ from ..typechecking import (
     SignalValueType,
 )
 from .errors import DecodeError, EncodeError
-from .namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
     from ..database import Database
-    from ..database.can.attribute import Attribute
+    from ..database.can.attribute import AttributeType
     from ..database.can.environment_variable import EnvironmentVariable
     from ..database.can.message import Message
     from ..database.can.node import Node
@@ -47,7 +46,7 @@ def format_or(items: list[int | str]) -> str:
                                  string_items[-1])
 
 
-def format_and(items: list[int | str]) -> str:
+def format_and(items: Sequence[int | str]) -> str:
     string_items = [str(item) for item in items]
 
     if len(string_items) == 1:
@@ -57,7 +56,7 @@ def format_and(items: list[int | str]) -> str:
                                   string_items[-1])
 
 
-def start_bit(signal: Union["Data", "Signal"]) -> int:
+def start_bit(signal: Union["Signal", "Data"]) -> int:
     if signal.byte_order == 'big_endian':
         return 8 * (signal.start // 8) + (7 - (signal.start % 8))
     else:
@@ -71,7 +70,7 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
     """
     Convert a dictionary of physical signal values into raw ones.
     """
-    raw_values = {}
+    raw_values: dict[str, int | float] = {}
     for signal in signals:
         name = signal.name
         conversion = signal.conversion
@@ -84,12 +83,10 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
 
             raw_values[name] = value if conversion.is_float else round(value)
             continue
-
-        if isinstance(value, str):
+        elif isinstance(value, str):
             raw_values[name] = conversion.choice_to_number(value)
             continue
-
-        if isinstance(value, NamedSignalValue):
+        else:
             # validate the given NamedSignalValue first
             if value != conversion.raw_to_scaled(value.value, decode_choices=True):
                 raise EncodeError(
@@ -422,7 +419,7 @@ def prune_database_choices(database: "Database") -> None:
         for signal in message.signals:
             prune_signal_choices(signal)
 
-        if message.contained_messages is not None:
+        if message.is_container:
             for cm in message.contained_messages:
                 for cs in cm.signals:
                     prune_signal_choices(cs)
@@ -432,11 +429,11 @@ SORT_SIGNALS_DEFAULT: Final = 'default'
 type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
 
 type_sort_attribute = \
-    tuple[Literal['dbc'],     "Attribute", None,   None,      None,     None] | \
-    tuple[Literal['node'],    "Attribute", "Node", None,      None,     None] | \
-    tuple[Literal['message'], "Attribute", None,   "Message", None,     None] | \
-    tuple[Literal['signal'],  "Attribute", None,   "Message", "Signal", None] | \
-    tuple[Literal['envvar'],  "Attribute", None,   None,      None,     "EnvironmentVariable"]
+    tuple[Literal['dbc'],     "AttributeType", None,   None,      None,     None] | \
+    tuple[Literal['node'],    "AttributeType", "Node", None,      None,     None] | \
+    tuple[Literal['message'], "AttributeType", None,   "Message", None,     None] | \
+    tuple[Literal['signal'],  "AttributeType", None,   "Message", "Signal", None] | \
+    tuple[Literal['envvar'],  "AttributeType", None,   None,      None,     "EnvironmentVariable"]
 
 type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
 

@@ -9,6 +9,7 @@ from unittest import mock
 import cantools
 from cantools.database.can.attribute import Attribute
 from cantools.database.can.attribute_definition import AttributeDefinition
+from cantools.database.utils import sort_signals_by_name
 
 
 class CanToolsConvertFullTest(unittest.TestCase):
@@ -94,12 +95,10 @@ class CanToolsConvertFullTest(unittest.TestCase):
     def test_dbc_dump_sort_signals_by_name(self):
         fn_in = self.get_test_file_name('dbc/socialledge-written-by-cantools.dbc')
         fn_expected_output = self.get_test_file_name('dbc/socialledge-written-by-cantools-with-sort-signals-by-name.dbc')
-        def sort_signals(signals):
-            return sorted(signals, key=lambda sig: sig.name)
         fn_out = self.get_out_file_name(fn_expected_output, ext='.dbc')
 
         db = cantools.database.load_file(fn_in, prune_choices=False)
-        cantools.database.dump_file(db, fn_out, sort_signals=sort_signals)
+        cantools.database.dump_file(db, fn_out, sort_signals=sort_signals_by_name)
 
         self.assertFileEqual(fn_expected_output, fn_out)
         self.remove_out_file(fn_out)
@@ -121,7 +120,7 @@ class CanToolsConvertFullTest(unittest.TestCase):
         fn_out2 = self.get_out_file_name("loaded-with-sort-signals-by-name", ext='.dbc')
 
         db1 = cantools.database.load_file(fn_in)
-        db2 = cantools.database.load_file(fn_in, sort_signals = lambda signals: sorted(signals, key=lambda sig: sig.name))
+        db2 = cantools.database.load_file(fn_in, sort_signals=sort_signals_by_name)
 
         msg1 = db1.get_message_by_name('RT_DL1MK3_GPS_Speed')
         msg2 = db2.get_message_by_name('RT_DL1MK3_GPS_Speed')

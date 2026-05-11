@@ -37,6 +37,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
+    "matplotlib-stubs",
     "mypy",
     "pipx",
     "ruff",

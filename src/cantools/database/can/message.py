@@ -1191,9 +1191,6 @@ class Message:
     def get_contained_message_by_name(self, name: str) \
         -> Optional['Message']:
 
-        if len(self.contained_messages) == 0:
-            return None
-
         tmp = [ x for x in self.contained_messages if x.name == name ]
 
         if len(tmp) == 0:

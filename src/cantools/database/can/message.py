@@ -1178,9 +1178,6 @@ class Message:
     def get_contained_message_by_header_id(self, header_id: int) \
         -> Optional['Message']:
 
-        if len(self.contained_messages) == 0:
-            return None
-
         tmp = [ x for x in self.contained_messages if x.header_id == header_id ]
 
         if len(tmp) == 0:

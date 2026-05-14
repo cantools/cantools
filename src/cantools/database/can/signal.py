@@ -1,5 +1,4 @@
 # A CAN signal.
-from typing import cast
 
 from cantools.database.can.formats.dbc_specifics import DbcSpecifics
 
@@ -148,7 +147,7 @@ class Signal:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self.comments = cast("Comments", {None: comment})
+            self.comments = Comments({None: comment})
         else:
             # assume that we have either no comment at all or a
             # multilingual dictionary
@@ -258,7 +257,7 @@ class Signal:
         if value is None:
             self.comments = None
         else:
-            self.comments = cast("Comments", {None: value})
+            self.comments = Comments({None: value})
 
     def choice_to_number(self, choice: str | NamedSignalValue) -> int:
         try:

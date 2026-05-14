@@ -146,7 +146,6 @@ Passenger:
             self.assertEqual(actual_output, expected_output)
 
     def test_arxml4(self):
-        self.maxDiff = None
         args = Args('tests/files/arxml/system-4.2.arxml')
         args.print_nodes = True
 

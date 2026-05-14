@@ -1,5 +1,5 @@
 # A CAN bus node (or Board unit)
-from typing import Optional, cast
+from typing import Optional
 
 from cantools.database.can.formats.arxml.node_specifics import (
     AutosarNodeSpecifics,
@@ -29,7 +29,7 @@ class Node:
         self._comments: Comments | None
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = cast("Comments", {None: comment})
+            self._comments = Comments({None: comment})
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary

@@ -25,7 +25,7 @@ class Formats(NamedTuple):
 
 
 StringPathLike = str | os.PathLike[str]
-Comments = OrderedDict[str | None, str]
+Comments = dict[str | None, str]
 class Codec(TypedDict):
     signals: list["Signal"]
     formats: Formats

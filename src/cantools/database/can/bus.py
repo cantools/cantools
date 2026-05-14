@@ -1,6 +1,6 @@
 # A CAN bus.
 
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, Optional
 
 from ...typechecking import Comments
 
@@ -27,7 +27,7 @@ class Bus:
         # argument, but it is quite convenient...
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments: Comments | None = cast("Comments", {None: comment})
+            self._comments: Comments | None = Comments({None: comment})
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary

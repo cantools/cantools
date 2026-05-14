@@ -121,7 +121,7 @@ class Message:
         self._comments: Comments | None
         if isinstance(comment, str):
             # use the first comment in the dictionary as "The" comment
-            self._comments = cast("Comments", {None: comment})
+            self._comments = Comments({None: comment})
         else:
             # assume that we have either no comment at all or a
             # multi-lingual dictionary
@@ -390,7 +390,7 @@ class Message:
         if value is None:
             self._comments = None
         else:
-            self._comments = cast("Comments", {None: value})
+            self._comments = Comments({None: value})
 
     @property
     def comments(self) -> Comments | None:

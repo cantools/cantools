@@ -34,9 +34,9 @@ class DbcSpecifics:
 
         return self._attributes
 
-    @attributes.setter
-    def attributes(self, value: OrderedDict[str, AttributeType]) -> None:
-        self._attributes = value
+    # @attributes.setter
+    # def attributes(self, value: OrderedDict[str, AttributeType]) -> None:
+    #     self._attributes = value
 
     @property
     def attribute_definitions(self) -> OrderedDict[str, AttributeDefinitionType]:

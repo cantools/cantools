@@ -26,7 +26,6 @@ dependencies = [
     "bitstruct>=8.16.1",
     "python-can>=4.6.0",
     "textparser>=0.21.1",
-    "diskcache",
     "argparse_addons",
     "crccheck",
 ]
@@ -36,6 +35,7 @@ dynamic = ["version"]
 # can be empty if no extra settings are needed, presence enables setuptools_scm
 
 [project.optional-dependencies]
+cache = ["diskcache"]
 dev = [
     "mypy",
     "pipx",

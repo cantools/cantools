@@ -6008,6 +6008,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             break
         self.assert_dbc_dump(db, filename)
 
+    @unittest.skipUnless(cantools.database._DISKCACHE_AVAILABLE, "diskcache not installed")
     def test_cache_prune_choices(self):
         filename = 'tests/files/dbc/socialledge.dbc'
         db = cantools.database.load_file(filename, prune_choices=False, cache_dir=self.cache_dir)
@@ -6018,6 +6019,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(sig.choices[1], 'DRIVER_HEARTBEAT_cmd_SYNC')
         self.assertEqual(sig.choices[2], 'DRIVER_HEARTBEAT_cmd_REBOOT')
 
+    @unittest.skipUnless(cantools.database._DISKCACHE_AVAILABLE, "diskcache not installed")
     @unittest.mock.patch.dict(os.environ, {'CANTOOLS_CACHE_DIR': 'tests/cache_dir'})
     def test_cache_env_var(self):
         cache_dir_path = Path(__file__).parent / "cache_dir"
@@ -6035,6 +6037,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # cleanup
         if cache_dir_path.exists():
             shutil.rmtree(cache_dir_path)
+
+    def test_cache_warning_when_diskcache_unavailable(self):
+        with unittest.mock.patch.object(cantools.database, '_DISKCACHE_AVAILABLE', False):
+            with self.assertWarns(UserWarning) as cm:
+                cantools.database.load_file(
+                    'tests/files/dbc/motohawk.dbc',
+                    cache_dir=self.cache_dir,
+                )
+            self.assertIn('diskcache', str(cm.warning))
 
     def test_sort_signals_by_name(self):
         filename = 'tests/files/dbc/vehicle.dbc'

@@ -710,13 +710,10 @@ def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
     return ba_def_rel
 
 
-def _dump_attribute_definition_defaults(database):
-    ba_def_def = []
+def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
+    ba_def_def: list[str] = []
 
-    if database.dbc is None:
-        definitions = OrderedDict()
-    else:
-        definitions = database.dbc.attribute_definitions
+    definitions = database.dbc.attribute_definitions
 
     for definition in definitions.values():
         if definition.default_value is not None:
@@ -731,13 +728,10 @@ def _dump_attribute_definition_defaults(database):
     return ba_def_def
 
 
-def _dump_attribute_definition_defaults_rel(database):
-    ba_def_def_rel = []
+def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[str]:
+    ba_def_def_rel: list[str] = []
 
-    if database.dbc is None:
-        definitions = OrderedDict()
-    else:
-        definitions = database.dbc.attribute_definitions_rel
+    definitions = database.dbc.attribute_definitions_rel
 
     for definition in definitions.values():
         if definition.default_value is not None:
@@ -798,7 +792,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
                 v_frame_format_str = 'ExtendedCAN'
             else:
                 v_frame_format_str = 'StandardCAN'
-            v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)  # type: ignore
+            v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)
             # only set the VFrameFormat if it valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
@@ -1028,9 +1022,6 @@ def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
 def _dump_environment_variables(database: InternalDatabase) -> list[str]:
     """Dump environment variables (EV_ entries)."""
     ev_lines: list[str] = []
-
-    if database.dbc is None:
-        return ev_lines
 
     for env in database.dbc.environment_variables.values():
         # Prepare values, using empty strings for None where appropriate
@@ -1574,16 +1565,21 @@ def _load_signals(tokens,
     return signals
 
 
-def _get_enum_vframeformat_attribute(attribute: AttributeDefinition[str]) -> AttributeDefinition[str]:
+def _get_enum_vframeformat_attribute(attribute: AttributeDefinitionType) -> AttributeDefinition[str]:
     """Get VFrameFormat attribute definition as ENUM.
 
+    VFrameFormat can be defined as either an INT or an ENUM attribute in DBC files. If it is not defined,
+    cantools uses :py:data:`ATTRIBUTE_DEFINITION_VFRAMEFORMAT`. If the attribute is defined in the DBC as an ENUM,
+    then cantools uses the file's definition directly. If the DBC defines the attribute as an INT, then
+    we must convert that to an ENUM using the choices defined in :py:data:`ATTRIBUTE_DEFINITION_VFRAMEFORMAT`.
     """
 
     if attribute.type_name != 'INT':
-        return attribute
+        return typing.cast("AttributeDefinition[str]", attribute)
 
-    print("This codepath is hit!")
-    default_value = attribute.default_value
+    typed_attribute = typing.cast("AttributeDefinition[int]", attribute)
+    default_value = typed_attribute.default_value
+    assert default_value is not None, "Default value for VFrameFormat attribute must be defined if the attribute is defined as an INT."
     enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
     enum_attribute.default_value = enum_attribute.choices[default_value]
 

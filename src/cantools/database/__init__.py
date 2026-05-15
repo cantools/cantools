@@ -140,6 +140,7 @@ def load_file(filename: StringPathLike,
         warnings.warn(
             "diskcache is not installed; caching is disabled. "
             "Install it with: pip install cantools[cache]",
+            UserWarning,
             stacklevel=2,
         )
         cache_dir = None

@@ -6046,6 +6046,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                     cache_dir=self.cache_dir,
                 )
             self.assertIn('diskcache', str(cm.warning))
+        self.assertFalse(os.path.exists(self.cache_dir))
 
     def test_sort_signals_by_name(self):
         filename = 'tests/files/dbc/vehicle.dbc'

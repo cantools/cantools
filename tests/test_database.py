@@ -6036,6 +6036,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
         if cache_dir_path.exists():
             shutil.rmtree(cache_dir_path)
 
+    def test_cache_warning_when_diskcache_unavailable(self):
+        with unittest.mock.patch.object(cantools.database, '_DISKCACHE_AVAILABLE', False):
+            with self.assertWarns(UserWarning) as cm:
+                cantools.database.load_file(
+                    'tests/files/dbc/motohawk.dbc',
+                    cache_dir=self.cache_dir,
+                )
+            self.assertIn('diskcache', str(cm.warning))
+        self.assertFalse(os.path.exists(self.cache_dir))
+
     def test_sort_signals_by_name(self):
         filename = 'tests/files/dbc/vehicle.dbc'
         def sort_signals(signals):

@@ -2,10 +2,15 @@ __all__ = ["Bus", "Database", "DecodeError", "EncodeError", "Message",
            "Node", "Signal", "dump_file", "load", "load_file", "load_string"]
 
 import os
+import warnings
 from contextlib import nullcontext
 from typing import Any, TextIO
 
-import diskcache  # type: ignore
+try:
+    import diskcache  # type: ignore
+    _DISKCACHE_AVAILABLE = True
+except ImportError:
+    _DISKCACHE_AVAILABLE = False
 
 from ..typechecking import StringPathLike
 from . import can, diagnostics, utils
@@ -107,6 +112,9 @@ def load_file(filename: StringPathLike,
     cache will significantly reduce the load time when reloading the
     same file. The cache directory is automatically created if it does
     not exist. Remove the cache directory `cache_dir` to clear the cache.
+    Requires the optional ``diskcache`` package
+    (``pip install cantools[cache]``); if it is not installed, a
+    warning is issued and caching is disabled.
 
     See :func:`~cantools.database.load_string()` for descriptions of
     other arguments.
@@ -128,6 +136,14 @@ def load_file(filename: StringPathLike,
         filename)
 
     cache_dir = cache_dir or os.getenv("CANTOOLS_CACHE_DIR", None)
+    if cache_dir and not _DISKCACHE_AVAILABLE:
+        warnings.warn(
+            "diskcache is not installed; caching is disabled. "
+            "Install it with: pip install cantools[cache]",
+            UserWarning,
+            stacklevel=2,
+        )
+        cache_dir = None
     cache_key: tuple[Any, ...] | None = None
     db: can.Database | diagnostics.Database
 

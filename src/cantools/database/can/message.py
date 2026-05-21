@@ -1,7 +1,7 @@
 # A CAN message.
 
 import logging
-from collections.abc import MutableSequence
+from collections.abc import MutableSequence, Sequence
 from copy import deepcopy
 from typing import (
     Optional,
@@ -43,7 +43,9 @@ from .signal_group import SignalGroup
 
 LOGGER = logging.getLogger(__name__)
 
-SignalTreeType = list[str | dict[str, dict[int, list[str]]]]
+SignalTreeMuxElemType = dict[str, dict[int, Sequence[str]]]
+SignalTreeElemType = str | SignalTreeMuxElemType
+SignalTreeType = Sequence[SignalTreeElemType]
 
 
 class Message:
@@ -207,7 +209,7 @@ class Message:
 
         """
 
-        nodes: SignalTreeType = []
+        nodes: list[SignalTreeElemType] = []
 
         for signal in codec['signals']:
             multiplexers = codec['multiplexers']
@@ -223,7 +225,7 @@ class Message:
             else:
                 node = signal.name
 
-            nodes.append(cast('str | dict[str, dict[int, list[str]]]', node))
+            nodes.append(cast('SignalTreeElemType', node))
 
         return nodes
 
@@ -1255,7 +1257,7 @@ class Message:
 
                 message_bits[offset] = signal.name
 
-    def _check_mux(self, message_bits: MutableSequence[str | None], mux: dict[str, dict[int, list[str]]]) -> None:
+    def _check_mux(self, message_bits: MutableSequence[str | None], mux: dict[str, dict[int, Sequence[str]]]) -> None:
         signal_name, children = next(iter(mux.items()))
         self._check_signal(message_bits,
                            self.get_signal_by_name(signal_name))
@@ -1264,7 +1266,7 @@ class Message:
         for multiplexer_id in sorted(children):
             child_tree = children[multiplexer_id]
             child_message_bits = deepcopy(children_message_bits)
-            self._check_signal_tree(child_message_bits, cast('SignalTreeType', child_tree))
+            self._check_signal_tree(child_message_bits, child_tree)
 
             for i, child_bit in enumerate(child_message_bits):
                 if child_bit is not None:

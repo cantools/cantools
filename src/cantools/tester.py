@@ -7,7 +7,7 @@ from collections.abc import Mapping
 
 import can
 
-from cantools.database.can.message import Message as MessageCls
+from cantools.database.can.message import Message as MessageCls, SignalTreeType
 
 from .errors import Error
 
@@ -34,7 +34,7 @@ class Messages(UserDict):
 
 
 def _invert_signal_tree(
-        tree: list,
+        tree: SignalTreeType,
         cur_mpx: dict | None = None,
         ret: dict | None = None
 ) -> dict:
@@ -67,7 +67,7 @@ def _invert_signal_tree(
 
     return ret
 
-def invert_signal_tree(tree: list) -> dict:
+def invert_signal_tree(tree: SignalTreeType) -> dict:
     """Return a mapping of signals to the multiplex settings that will
     yield the signal.
 

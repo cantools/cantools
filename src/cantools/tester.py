@@ -7,7 +7,8 @@ from collections.abc import Mapping
 
 import can
 
-from cantools.database.can.message import Message as MessageCls, SignalTreeType
+from cantools.database.can.message import Message as MessageCls
+from cantools.database.can.message import SignalTreeType
 
 from .errors import Error
 

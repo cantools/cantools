@@ -58,8 +58,6 @@ ExampleMessage:
   Size: 8 bytes
   Is extended frame: False
   Is CAN-FD frame: False
-  Is network management frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -525,8 +523,6 @@ Message1:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
-  Is network management frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -559,8 +555,6 @@ Message2:
   Is extended frame: False
   Is CAN-FD frame: False
   Cycle time: 100 ms
-  Is network management frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -650,8 +644,6 @@ Message4:
   Size: 5 bytes
   Is extended frame: False
   Is CAN-FD frame: False
-  Is network management frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}
@@ -694,8 +686,6 @@ Message3:
   Size: 8 bytes
   Is extended frame: True
   Is CAN-FD frame: False
-  Is network management frame: False
-  Is secured: False
   Signal tree:
 
     -- {root}

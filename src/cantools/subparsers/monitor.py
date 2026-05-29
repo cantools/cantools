@@ -644,7 +644,7 @@ def add_subparser(subparsers):
         action='store_true',
         help='Skip database consistency checks.')
     monitor_parser.add_argument(
-        '-f', '--filter-regex',
+        '--filter-regex',
         help='Use given filter regex.')
 
     if _check_legacy_args():

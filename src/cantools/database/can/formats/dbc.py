@@ -656,10 +656,11 @@ def _bus_is_canfd(database: InternalDatabase) -> bool:
     return bus_type.value == 'CAN FD'
 
 def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
-    if database.dbc is None:
-        return  []
-
     ba_def: list[str] = []
+
+    if database.dbc is None:
+        return  ba_def
+
     definitions = database.dbc.attribute_definitions
 
     # define "GenMsgCycleTime" attribute for specifying the cycle
@@ -696,10 +697,11 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
 
 
 def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
-    if database.dbc is None:
-        return  []
-
     ba_def_rel: list[str] = []
+
+    if database.dbc is None:
+        return  ba_def_rel
+
     definitions = database.dbc.attribute_definitions_rel
 
     for definition in definitions.values():
@@ -719,10 +721,11 @@ def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
 
 
 def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
-    if database.dbc is None:
-        return  []
-
     ba_def_def: list[str] = []
+
+    if database.dbc is None:
+        return  ba_def_def
+
     definitions = database.dbc.attribute_definitions
 
     for definition in definitions.values():
@@ -739,10 +742,11 @@ def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]
 
 
 def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[str]:
-    if database.dbc is None:
-        return  []
-
     ba_def_def_rel: list[str] = []
+
+    if database.dbc is None:
+        return  ba_def_def_rel
+
     definitions = database.dbc.attribute_definitions_rel
 
     for definition in definitions.values():
@@ -759,8 +763,10 @@ def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[
 
 
 def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals, sort_attributes: type_sort_attributes) -> list[str]:
+    ba: list[str] = []
+
     if database.dbc is None:
-        return  []
+        return  ba
 
     attributes: list[type_sort_attribute] = []
 
@@ -852,7 +858,6 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     if callable(sort_attributes):
         attributes = sort_attributes(attributes)
 
-    ba: list[str] = []
     for typ, attribute_to_dump, node_to_dump, message_to_dump, signal_to_dump, envvar_to_dump in attributes:
         if typ == 'dbc':
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
@@ -888,10 +893,11 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
 
 
 def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_signals) -> str | list[str]:
-    if database.dbc is None:
-        return  []
-
     ba_rel: list[str] = []
+
+    if database.dbc is None:
+        return  ba_rel
+
     attributes_rel = database.dbc.attributes_rel
     for frame_id, element in attributes_rel.items():
         if "signal" in element:
@@ -1042,25 +1048,16 @@ def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
 
 def _dump_environment_variables(database: InternalDatabase) -> list[str]:
     """Dump environment variables (EV_ entries)."""
-    if database.dbc is None:
-        return  []
-
     ev_lines: list[str] = []
-    for env in database.dbc.environment_variables.values():
-        # Prepare values, using empty strings for None where appropriate
-        env_type = env.env_type if env.env_type is not None else ''
-        minimum = '' if env.minimum is None else env.minimum
-        maximum = '' if env.maximum is None else env.maximum
-        # escape unit quotes
-        unit = '' if env.unit is None else env.unit.replace('"', '\\"')
-        initial = '' if env.initial_value is None else env.initial_value
-        env_id = '' if env.env_id is None else env.env_id
-        access_type = '' if env.access_type is None else env.access_type
-        access_node = '' if env.access_node is None else env.access_node
 
-        escaped_unit = unit
+    if database.dbc is None:
+        return  ev_lines
+
+    for env in database.dbc.environment_variables.values():
+        # escape unit quotes
+        unit = env.unit.replace('"', '\\"')
         ev_lines.append(
-            f'EV_ {env.name}: {env_type} [{minimum}|{maximum}] "{escaped_unit}" {initial} {env_id} {access_type} {access_node};'
+            f'EV_ {env.name}: {env.env_type} [{env.minimum}|{env.maximum}] "{unit}" {env.initial_value} {env.env_id} {env.access_type} {env.access_node};'
         )
 
     return ev_lines

@@ -60,7 +60,7 @@ class Database:
         self._name_to_message: dict[str, Message] = {}
         self._frame_id_to_message: dict[int, Message] = {}
         self._version = version
-        self._dbc = dbc_specifics or DbcSpecifics()
+        self._dbc = dbc_specifics
         self._autosar = autosar_specifics
 
         if frame_id_mask is None:
@@ -112,7 +112,7 @@ class Database:
         self._version = value
 
     @property
-    def dbc(self) -> DbcSpecifics:
+    def dbc(self) -> DbcSpecifics | None:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -120,7 +120,7 @@ class Database:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value: DbcSpecifics) -> None:
+    def dbc(self, value: DbcSpecifics | None) -> None:
         self._dbc = value
 
     @property

@@ -132,8 +132,8 @@ class Message:
         self._senders = senders or []
         self._send_type = send_type
         self._cycle_time = cycle_time
-        self._dbc = dbc_specifics or DbcSpecifics()
-        self._autosar = autosar_specifics or AutosarMessageSpecifics()
+        self._dbc = dbc_specifics
+        self._autosar = autosar_specifics
         self._bus_name = bus_name
         self._signal_groups = signal_groups
         self._codecs: Codec | None = None
@@ -455,7 +455,7 @@ class Message:
         self._cycle_time = value
 
     @property
-    def dbc(self) -> DbcSpecifics:
+    def dbc(self) -> DbcSpecifics | None:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -463,11 +463,11 @@ class Message:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value: DbcSpecifics) -> None:
+    def dbc(self, value: DbcSpecifics | None) -> None:
         self._dbc = value
 
     @property
-    def autosar(self) -> AutosarMessageSpecifics:
+    def autosar(self) -> AutosarMessageSpecifics | None:
         """An object containing AUTOSAR specific properties
 
         e.g. auxiliary data required to implement CRCs, secure on-board
@@ -477,7 +477,7 @@ class Message:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: AutosarMessageSpecifics) -> None:
+    def autosar(self, value: AutosarMessageSpecifics | None) -> None:
         self._autosar = value
 
     @property

@@ -499,12 +499,13 @@ def _dump_nodes(database: InternalDatabase) -> list[str]:
 def _dump_value_tables(database: InternalDatabase) -> list[str]:
     val_table: list[str] = []
 
-    for name, choices in database.dbc.value_tables.items():
-        choices_list = [
-            f'{number} "{text}"'
-            for number, text in sorted(choices.items(), reverse=True)
-        ]
-        val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices_list)))
+    if database.dbc is not None:
+        for name, choices in database.dbc.value_tables.items():
+            choices_list = [
+                f'{number} "{text}"'
+                for number, text in sorted(choices.items(), reverse=True)
+            ]
+            val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices_list)))
 
     return [*val_table, '']
 
@@ -646,14 +647,19 @@ def _need_cycletime_def(database: InternalDatabase) -> bool:
                for m in database.messages)
 
 def _bus_is_canfd(database: InternalDatabase) -> bool:
+    if database.dbc is None:
+        return False
+
     bus_type = database.dbc.attributes.get('BusType', None)
     if bus_type is None:
         return False
     return bus_type.value == 'CAN FD'
 
 def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
-    ba_def: list[str] = []
+    if database.dbc is None:
+        return  []
 
+    ba_def: list[str] = []
     definitions = database.dbc.attribute_definitions
 
     # define "GenMsgCycleTime" attribute for specifying the cycle
@@ -690,8 +696,10 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
 
 
 def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
-    ba_def_rel: list[str] = []
+    if database.dbc is None:
+        return  []
 
+    ba_def_rel: list[str] = []
     definitions = database.dbc.attribute_definitions_rel
 
     for definition in definitions.values():
@@ -711,8 +719,10 @@ def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
 
 
 def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
-    ba_def_def: list[str] = []
+    if database.dbc is None:
+        return  []
 
+    ba_def_def: list[str] = []
     definitions = database.dbc.attribute_definitions
 
     for definition in definitions.values():
@@ -729,8 +739,10 @@ def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]
 
 
 def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[str]:
-    ba_def_def_rel: list[str] = []
+    if database.dbc is None:
+        return  []
 
+    ba_def_def_rel: list[str] = []
     definitions = database.dbc.attribute_definitions_rel
 
     for definition in definitions.values():
@@ -747,6 +759,9 @@ def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[
 
 
 def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals, sort_attributes: type_sort_attributes) -> list[str]:
+    if database.dbc is None:
+        return  []
+
     attributes: list[type_sort_attribute] = []
 
     for attribute in database.dbc.attributes.values():
@@ -761,27 +776,31 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             attributes.append(('node', attribute, node, None, None, None))
 
     for message in database.messages:
-        # retrieve the ordered dictionary of message attributes
-        msg_attributes = message.dbc.attributes
+        msg_attributes = OrderedDict[str, AttributeType]()
+        if message.dbc is not None:
+            msg_attributes = deepcopy(message.dbc.attributes)
 
         # synchronize the attribute for the message cycle time with
         # the cycle time specified by the message object
-        gen_msg_cycle_time_def: AttributeDefinition[int] | None
         msg_cycle_time = message.cycle_time or 0
-        if gen_msg_cycle_time_def := typing.cast("AttributeDefinition[int] | None", database.dbc.attribute_definitions.get("GenMsgCycleTime")):
-            if msg_cycle_time != gen_msg_cycle_time_def.default_value:
-                msg_attributes['GenMsgCycleTime'] = Attribute(
-                    value=msg_cycle_time,
-                    definition=gen_msg_cycle_time_def,
-                )
-            elif 'GenMsgCycleTime' in msg_attributes:
-                del msg_attributes['GenMsgCycleTime']
+
+        gen_msg_cycle_time_def = None
+        if message.dbc is not None:
+            gen_msg_cycle_time_def = database.dbc.attribute_definitions.get("GenMsgCycleTime")
+
+        if gen_msg_cycle_time_def is not None and msg_cycle_time != gen_msg_cycle_time_def.default_value:
+            msg_attributes['GenMsgCycleTime'] = Attribute(
+                value=msg_cycle_time,
+                definition=typing.cast('AttributeDefinition[int]', gen_msg_cycle_time_def),
+            )
         elif 'GenMsgCycleTime' in msg_attributes:
             del msg_attributes['GenMsgCycleTime']
 
         # if bus is CAN FD, set VFrameFormat
-        v_frame_format_def: AttributeDefinitionType | None
-        if v_frame_format_def := database.dbc.attribute_definitions.get("VFrameFormat"):
+        v_frame_format_def = None
+        if database.dbc is not None:
+            v_frame_format_def = database.dbc.attribute_definitions.get("VFrameFormat")
+        if v_frame_format_def is not None:
             if message.protocol == 'j1939':
                 v_frame_format_str = 'J1939PG'
             elif message.is_fd and message.is_extended_frame:
@@ -869,8 +888,10 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
 
 
 def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_signals) -> str | list[str]:
-    ba_rel: list[str] = []
+    if database.dbc is None:
+        return  []
 
+    ba_rel: list[str] = []
     attributes_rel = database.dbc.attributes_rel
     for frame_id, element in attributes_rel.items():
         if "signal" in element:
@@ -1021,8 +1042,10 @@ def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
 
 def _dump_environment_variables(database: InternalDatabase) -> list[str]:
     """Dump environment variables (EV_ entries)."""
-    ev_lines: list[str] = []
+    if database.dbc is None:
+        return  []
 
+    ev_lines: list[str] = []
     for env in database.dbc.environment_variables.values():
         # Prepare values, using empty strings for None where appropriate
         env_type = env.env_type if env.env_type is not None else ''
@@ -1927,7 +1950,8 @@ def make_message_names_unique(database: InternalDatabase, shorten_long_names: bo
     for message in database.messages:
         long_name = message.name
         short_name = converter.long_to_short[long_name]
-        try_remove_attribute(message.dbc, 'SystemMessageLongSymbol')
+        if message.dbc is not None:
+            try_remove_attribute(message.dbc, 'SystemMessageLongSymbol')
 
         if (long_name == short_name) or not shorten_long_names:
             continue

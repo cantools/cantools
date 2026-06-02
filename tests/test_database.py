@@ -4423,7 +4423,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.nodes), 2)
         self.assertEqual(len(db.messages), 2)
         self.assertTrue(db.autosar is not None)
-        self.assertTrue(db.dbc is not None)
+        self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "3.2.3")
 
         node1 = db.nodes[0]
@@ -4446,7 +4446,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(mux_message.signals), 6)
         self.assertEqual(mux_message.comments, None)
         self.assertEqual(mux_message.bus_name, 'Network')
-        self.assertTrue(mux_message.dbc is not None)
+        self.assertTrue(mux_message.dbc is None)
         self.assertTrue(mux_message.autosar is not None)
         self.assertEqual(mux_message.autosar.pdu_paths, [
             '/Network/CanCluster/CAN/PDUs/Multiplexed',
@@ -4569,7 +4569,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_1.signals), 6)
         self.assertEqual(message_1.comments["EN"], 'The lonely frame description')
         self.assertEqual(message_1.bus_name, 'Network')
-        self.assertTrue(message_1.dbc is not None)
+        self.assertTrue(message_1.dbc is None)
         self.assertTrue(message_1.autosar is not None)
         self.assertEqual(message_1.autosar.pdu_paths, [ '/Network/CanCluster/CAN/PDUs/Status' ])
 
@@ -4705,7 +4705,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.nodes), 3)
         self.assertEqual(len(db.messages), 8)
         self.assertTrue(db.autosar is not None)
-        self.assertTrue(db.dbc is not None)
+        self.assertTrue(db.dbc is None)
         self.assertEqual(db.autosar.arxml_version, "4.0.0")
 
         node1 = db.nodes[0]
@@ -4735,7 +4735,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_message.bus_name, 'Cluster0')
         self.assertEqual(mux_message.comments, None)
         self.assertEqual(mux_message.comment, None)
-        self.assertTrue(mux_message.dbc is not None)
+        self.assertTrue(mux_message.dbc is None)
         self.assertTrue(mux_message.autosar is not None)
         self.assertEqual(mux_message.autosar.pdu_paths, [
             '/MultiplexedIPdu/multiplexed_message',
@@ -4851,7 +4851,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                              'DE': 'Kommentar eins',
                              'EN': 'Comment one'
                          })
-        self.assertTrue(message_1.dbc is not None)
+        self.assertTrue(message_1.dbc is None)
         self.assertTrue(message_1.autosar is not None)
         self.assertEqual(message_1.autosar.pdu_paths, [ '/ISignalIPdu/message1' ])
 
@@ -4976,7 +4976,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_2.signals), 3)
         self.assertEqual(message_2.comment, None)
         self.assertEqual(message_2.bus_name, 'Cluster0')
-        self.assertTrue(message_2.dbc is not None)
+        self.assertTrue(message_2.dbc is None)
         self.assertTrue(message_2.autosar is not None)
         self.assertEqual(message_2.autosar.pdu_paths, [ '/ISignalIPdu/message2' ])
 
@@ -5049,7 +5049,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_3.signals), 4)
         self.assertEqual(message_3.comment, None)
         self.assertEqual(message_3.bus_name, 'Cluster0')
-        self.assertTrue(message_3.dbc is not None)
+        self.assertTrue(message_3.dbc is None)
         self.assertTrue(message_3.autosar is not None)
         self.assertEqual(message_3.autosar.pdu_paths,
                          [
@@ -5143,7 +5143,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(message_4.signals), 3)
         self.assertEqual(message_4.comment, None)
         self.assertEqual(message_4.bus_name, 'Cluster0')
-        self.assertTrue(message_4.dbc is not None)
+        self.assertTrue(message_4.dbc is None)
         self.assertTrue(message_4.autosar is not None)
         self.assertEqual(message_4.autosar.pdu_paths, [ '/ISignalIPdu/message4' ])
 
@@ -5177,7 +5177,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(container_message._contained_messages), 5)
         header_ids = sorted([cm.header_id for cm in container_message._contained_messages])
         self.assertEqual(header_ids, [ 0x010203, 0x040506, 0x070809, 0x0a0b0c, 0x1d2e3f ])
-        self.assertTrue(container_message.dbc is not None)
+        self.assertTrue(container_message.dbc is None)
         self.assertTrue(container_message.autosar is not None)
         self.assertEqual(container_message.autosar.pdu_paths,
             [
@@ -5204,7 +5204,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(nm_message.signals), 1)
         self.assertEqual(nm_message.comment, None)
         self.assertEqual(nm_message.bus_name, 'Cluster0')
-        self.assertTrue(nm_message.dbc is not None)
+        self.assertTrue(nm_message.dbc is None)
         self.assertTrue(nm_message.autosar is not None)
 
         msg_without_pdu = db.messages[7]
@@ -5218,7 +5218,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(msg_without_pdu.signals), 0)
         self.assertEqual(msg_without_pdu.comment, None)
         self.assertEqual(msg_without_pdu.bus_name, 'Cluster0')
-        self.assertTrue(msg_without_pdu.dbc is not None)
+        self.assertTrue(msg_without_pdu.dbc is None)
         self.assertTrue(msg_without_pdu.autosar is not None)
 
     def test_system_arxml_traversal(self):

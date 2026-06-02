@@ -32,6 +32,7 @@ def compute_authenticator(raw_payload: bytes,
     secoc_props = dbmsg.autosar.secoc
     n_fresh = secoc_props.freshness_bit_length
     payload_len = secoc_props.payload_length
+    assert payload_len is not None
 
     # build the data that needs to be passed to authentificator function
     auth_data = bitstruct.pack(f'u16' # data ID
@@ -75,9 +76,11 @@ def apply_authenticator(raw_payload: bytes,
     # get the last N bits of the freshness value.
     secoc_props = dbmsg.autosar.secoc
     n_fresh_tx = secoc_props.freshness_tx_bit_length
+    assert n_fresh_tx is not None
     mask = (1 << n_fresh_tx) - 1
     truncated_freshness_value = freshness_value&mask
     payload_len = secoc_props.payload_length
+    assert payload_len is not None
 
     bitstruct.pack_into(f'u{n_fresh_tx}r{secoc_props.auth_tx_bit_length}',
                         result,

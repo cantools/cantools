@@ -1,20 +1,26 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cantools.database.can.formats.dbc_specifics import DbcSpecifics
+
+
 class EnvironmentVariable:
     """A CAN environment variable.
 
     """
 
     def __init__(self,
-                 name,
-                 env_type,
-                 minimum,
-                 maximum,
-                 unit,
-                 initial_value,
-                 env_id,
-                 access_type,
-                 access_node,
-                 comment,
-                 dbc_specifics=None):
+                 name: str,
+                 env_type: int,
+                 minimum: int | float,
+                 maximum: int | float,
+                 unit: str,
+                 initial_value: int | float,
+                 env_id: int,
+                 access_type: str,
+                 access_node: str,
+                 comment: str | None,
+                 dbc_specifics: "DbcSpecifics") -> None:
         self._name = name
         self._env_type = env_type
         self._minimum = minimum
@@ -28,7 +34,7 @@ class EnvironmentVariable:
         self._dbc = dbc_specifics
 
     @property
-    def name(self):
+    def name(self) -> str:
         """The environment variable name as a string.
 
         """
@@ -36,11 +42,11 @@ class EnvironmentVariable:
         return self._name
 
     @name.setter
-    def name(self, value):
+    def name(self, value: str) -> None:
         self._name = value
 
     @property
-    def env_type(self):
+    def env_type(self) -> int:
         """The environment variable type value.
 
         """
@@ -48,11 +54,11 @@ class EnvironmentVariable:
         return self._env_type
 
     @env_type.setter
-    def env_type(self, value):
+    def env_type(self, value: int) -> None:
         self._env_type = value
 
     @property
-    def minimum(self):
+    def minimum(self) -> int | float:
         """The minimum value of the environment variable.
 
         """
@@ -60,11 +66,11 @@ class EnvironmentVariable:
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value):
+    def minimum(self, value: int | float) -> None:
         self._minimum = value
 
     @property
-    def maximum(self):
+    def maximum(self) -> int | float:
         """The maximum value of the environment variable.
 
         """
@@ -72,11 +78,11 @@ class EnvironmentVariable:
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value):
+    def maximum(self, value: int | float) -> None:
         self._maximum = value
 
     @property
-    def unit(self):
+    def unit(self) -> str:
         """ The units in which the environment variable is expressed as a string.
 
         """
@@ -84,11 +90,11 @@ class EnvironmentVariable:
         return self._unit
 
     @unit.setter
-    def unit(self, value):
+    def unit(self, value: str) -> None:
         self._unit = value
 
     @property
-    def initial_value(self):
+    def initial_value(self) -> int | float:
         """The initial value of the environment variable.
 
         """
@@ -96,11 +102,11 @@ class EnvironmentVariable:
         return self._initial_value
 
     @initial_value.setter
-    def initial_value(self, value):
+    def initial_value(self, value: int | float) -> None:
         self._initial_value = value
 
     @property
-    def env_id(self):
+    def env_id(self) -> int:
         """The id value of the environment variable.
 
         """
@@ -108,11 +114,11 @@ class EnvironmentVariable:
         return self._env_id
 
     @env_id.setter
-    def env_id(self, value):
+    def env_id(self, value: int) -> None:
         self._env_id = value
 
     @property
-    def access_type(self):
+    def access_type(self) -> str:
         """The environment variable access type as a string.
 
         """
@@ -120,11 +126,11 @@ class EnvironmentVariable:
         return self._access_type
 
     @access_type.setter
-    def access_type(self, value):
+    def access_type(self, value: str) -> None:
         self._access_type = value
 
     @property
-    def access_node(self):
+    def access_node(self) -> str:
         """The environment variable access node as a string.
 
         """
@@ -132,11 +138,11 @@ class EnvironmentVariable:
         return self._access_node
 
     @access_node.setter
-    def access_node(self, value):
+    def access_node(self, value: str) -> None:
         self._access_node = value
 
     @property
-    def comment(self):
+    def comment(self) -> str | None:
         """The environment variable comment, or ``None`` if unavailable.
 
         """
@@ -144,11 +150,11 @@ class EnvironmentVariable:
         return self._comment
 
     @comment.setter
-    def comment(self, value):
+    def comment(self, value: str | None) -> None:
         self._comment = value
 
     @property
-    def dbc(self):
+    def dbc(self) -> "DbcSpecifics":
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -156,10 +162,10 @@ class EnvironmentVariable:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value):
+    def dbc(self, value: "DbcSpecifics") -> None:
         self._dbc = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "environment_variable('{}', {}, {}, {}, '{}', {}, {}, '{}', '{}', {})".format(
             self._name,
             self._env_type,

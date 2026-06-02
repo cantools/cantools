@@ -6,8 +6,9 @@ import re
 from typing import Any
 from xml.etree import ElementTree
 
+from cantools.database.can.internal_database import InternalDatabase
+
 from ....utils import sort_signals_by_start_bit, type_sort_signals
-from ...internal_database import InternalDatabase
 from .bus_specifics import AutosarBusSpecifics
 from .database_specifics import AutosarDatabaseSpecifics
 from .ecu_extract_loader import EcuExtractLoader

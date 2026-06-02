@@ -68,7 +68,7 @@ class Database:
 
         self._frame_id_mask = frame_id_mask
         self._strict = strict
-        self._sort_signals = sort_signals
+        self._sort_signals: type_sort_signals = sort_signals
         self.refresh()
 
     @property

@@ -3352,7 +3352,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.type_name, 'STRING')
         self.assertEqual(attribute.definition.minimum, None)
         self.assertEqual(attribute.definition.maximum, None)
-        self.assertEqual(attribute.definition.choices, None)
+        self.assertEqual(attribute.definition.choices, [])
 
         attribute = attributes['GenSigSendType']
         self.assertEqual(attribute.name, 'GenSigSendType')
@@ -3398,7 +3398,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.type_name, 'HEX')
         self.assertEqual(attribute.definition.minimum, 0)
         self.assertEqual(attribute.definition.maximum, 8)
-        self.assertEqual(attribute.definition.choices, None)
+        self.assertEqual(attribute.definition.choices, [])
 
         attribute = attributes['TheFloatAttribute']
         self.assertEqual(attribute.name, 'TheFloatAttribute')
@@ -3410,7 +3410,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.type_name, 'FLOAT')
         self.assertEqual(attribute.definition.minimum, 5.0)
         self.assertEqual(attribute.definition.maximum, 87.0)
-        self.assertEqual(attribute.definition.choices, None)
+        self.assertEqual(attribute.definition.choices, [])
 
         # Node attributes.
         node = db.nodes[0]
@@ -3427,7 +3427,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.type_name, 'INT')
         self.assertEqual(attribute.definition.minimum, 50)
         self.assertEqual(attribute.definition.maximum, 150)
-        self.assertEqual(attribute.definition.choices, None)
+        self.assertEqual(attribute.definition.choices, [])
 
         # Database attributes.
         attribute = db.dbc.attributes['BusType']
@@ -3440,7 +3440,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.type_name, 'STRING')
         self.assertEqual(attribute.definition.minimum, None)
         self.assertEqual(attribute.definition.maximum, None)
-        self.assertEqual(attribute.definition.choices, None)
+        self.assertEqual(attribute.definition.choices, [])
 
         attribute = db.dbc.attributes['TheNetworkAttribute']
         self.assertEqual(attribute.name, 'TheNetworkAttribute')
@@ -3452,7 +3452,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.type_name, 'INT')
         self.assertEqual(attribute.definition.minimum, 0)
         self.assertEqual(attribute.definition.maximum, 100)
-        self.assertEqual(attribute.definition.choices, None)
+        self.assertEqual(attribute.definition.choices, [])
 
         # Message send type.
         message = db.get_message_by_frame_id(0x39, force_extended_id=True)
@@ -3479,7 +3479,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(attribute.definition.type_name, 'INT')
         self.assertEqual(attribute.definition.minimum, -9223372036854780000)
         self.assertEqual(attribute.definition.maximum, 18446744073709600000)
-        self.assertEqual(attribute.definition.choices, None)
+        self.assertEqual(attribute.definition.choices, [])
 
     def test_setters(self):
         with open('tests/files/dbc/attributes.dbc') as fin:
@@ -6341,6 +6341,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         self.assert_dbc_dump(db, filename)
 
+    # TODO Check here
     def test_int_vframeformat_dump(self):
         filename = "tests/files/dbc/fd_test_int.dbc"
         db = cantools.database.load_file(filename)
@@ -6350,6 +6351,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         self.assert_dbc_dump(db, filename)
 
+    # TODO Check here
     def test_int_vframeformat_default_value(self):
         filename = "tests/files/dbc/vframeformat_int.dbc"
         db = cantools.database.load_file(filename)

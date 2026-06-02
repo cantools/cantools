@@ -9,6 +9,7 @@ from typing import (
 )
 
 from cantools import __version__
+from cantools.database.can.message import SignalTreeMuxElemType, SignalTreeType
 
 if TYPE_CHECKING:
     from cantools.database.can import Database, Message, Signal
@@ -927,7 +928,7 @@ def _generate_signal(cg_signal: "CodeGenSignal", bit_fields: bool) -> str:
 
 
 def _format_pack_code_mux(cg_message: "CodeGenMessage",
-                          mux: dict[str, dict[int, list[str]]],
+                          mux: SignalTreeMuxElemType,
                           body_lines_per_index: list[str],
                           variable_lines: list[str],
                           helper_kinds: set[THelperKind]) -> list[str]:
@@ -947,7 +948,7 @@ def _format_pack_code_mux(cg_message: "CodeGenMessage",
 
     for multiplexer_id, signals_of_multiplexer_id in multiplexed_signals_per_id:
         body_lines = _format_pack_code_level(cg_message,
-                                             signals_of_multiplexer_id,
+                                             cast("SignalTreeType", signals_of_multiplexer_id),
                                              variable_lines,
                                              helper_kinds)
         lines.append('')
@@ -1002,7 +1003,7 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
 
 
 def _format_pack_code_level(cg_message: "CodeGenMessage",
-                            signal_names: list[str] | list[dict[str, dict[int, list[str]]]],
+                            signal_names: SignalTreeType,
                             variable_lines: list[str],
                             helper_kinds: set[THelperKind]) -> list[str]:
     """Format one pack level in a signal tree.
@@ -1051,7 +1052,7 @@ def _format_pack_code(cg_message: "CodeGenMessage",
 
 
 def _format_unpack_code_mux(cg_message: "CodeGenMessage",
-                            mux: dict[str, dict[int, list[str]]],
+                            mux: SignalTreeMuxElemType,
                             body_lines_per_index: list[str],
                             variable_lines: list[str],
                             helper_kinds: set[THelperKind],
@@ -1071,7 +1072,7 @@ def _format_unpack_code_mux(cg_message: "CodeGenMessage",
 
     for multiplexer_id, signals_of_multiplexer_id in multiplexed_signals_per_id:
         body_lines = _format_unpack_code_level(cg_message,
-                                               signals_of_multiplexer_id,
+                                               cast("SignalTreeType", signals_of_multiplexer_id),
                                                variable_lines,
                                                helper_kinds,
                                                node_name)
@@ -1138,7 +1139,7 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
 
 
 def _format_unpack_code_level(cg_message: "CodeGenMessage",
-                              signal_names: list[str] | list[dict[str, dict[int, list[str]]]],
+                              signal_names: SignalTreeType,
                               variable_lines: list[str],
                               helper_kinds: set[THelperKind],
                               node_name: str | None) -> list[str]:

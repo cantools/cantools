@@ -96,7 +96,7 @@ def _print_message(message: Message,
             print(f'{indent}    {s}')
         print()
 
-    if message.contained_messages is not None:
+    if message.is_container:
         print(f'{indent}  Potentially contained messages:')
         print()
         for contained_message in message.contained_messages:

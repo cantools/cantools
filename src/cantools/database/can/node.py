@@ -17,8 +17,8 @@ class Node:
     def __init__(self,
                  name: str,
                  comment: str | Comments | None = None,
-                 dbc_specifics: Optional["DbcSpecifics"] = None,
-                 autosar_specifics: Optional["AutosarNodeSpecifics"] = None,
+                 dbc_specifics: DbcSpecifics | None = None,
+                 autosar_specifics: AutosarNodeSpecifics | None = None,
                  ) -> None:
         self._name = name
 
@@ -80,7 +80,7 @@ class Node:
         return self._comments
 
     @property
-    def dbc(self) -> DbcSpecifics:
+    def dbc(self) -> DbcSpecifics | None:
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -88,11 +88,11 @@ class Node:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value: DbcSpecifics) -> None:
+    def dbc(self, value: DbcSpecifics | None) -> None:
         self._dbc = value
 
     @property
-    def autosar(self) -> AutosarNodeSpecifics:
+    def autosar(self) -> AutosarNodeSpecifics | None:
         """An object containing AUTOSAR specific properties of the node.
 
         """
@@ -100,7 +100,7 @@ class Node:
         return self._autosar
 
     @autosar.setter
-    def autosar(self, value: AutosarNodeSpecifics) -> None:
+    def autosar(self, value: AutosarNodeSpecifics | None) -> None:
         self._autosar = value
 
     def __repr__(self) -> str:

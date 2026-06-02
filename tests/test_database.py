@@ -8,6 +8,7 @@ import shutil
 import timeit
 import unittest.mock
 from collections import namedtuple
+from dataclasses import astuple
 from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
@@ -877,7 +878,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (4096, False, None),  # raw value outside unsigned 12bit range
         ]
     )
-    def test_encode_signal_strict_negative_scaling(self, value, scaling, expected_result):
+    def test_encode_signal_strict_negative_scaling(self, value: int | str, scaling: bool, expected_result: bytes | None):
         """Test encoding of a signal with negative scaling (=-0.01),
         a value range from 4070-4100 and a value table."""
         db = cantools.database.Database()
@@ -3328,6 +3329,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_event_attributes(self):
         db = cantools.database.load_file('tests/files/dbc/attribute_Event.dbc')
+        assert(isinstance(db, cantools.database.can.database.Database))
 
         self.assertEqual(db.messages[0].send_type, 'Event')
         self.assertEqual(db.messages[0].frame_id, 1234)
@@ -4006,7 +4008,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             packed = cantools.j1939.frame_id_pack(*data[:-1])
             self.assertEqual(packed, data.packed)
             unpacked = cantools.j1939.frame_id_unpack(packed)
-            self.assertEqual(unpacked, data[:-1])
+            self.assertEqual(astuple(unpacked), data[:-1])
 
     def test_j1939_frame_id_pack_bad_data(self):
         Data = namedtuple('Data',
@@ -4118,7 +4120,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             packed = cantools.j1939.pgn_pack(*data[:4])
             self.assertEqual(packed, data.packed)
             unpacked = cantools.j1939.pgn_unpack(packed)
-            self.assertEqual(unpacked, data[:4])
+            self.assertEqual(astuple(unpacked), data[:4])
 
     def test_j1939_pgn_pack_bad_data(self):
         Data = namedtuple('Data',

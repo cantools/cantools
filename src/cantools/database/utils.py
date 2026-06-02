@@ -6,7 +6,6 @@ from collections import OrderedDict
 from collections.abc import Callable, Sequence
 from typing import (
     TYPE_CHECKING,
-    Final,
     Literal,
     Union,
 )
@@ -425,8 +424,7 @@ def prune_database_choices(database: "Database") -> None:
                     prune_signal_choices(cs)
 
 
-SORT_SIGNALS_DEFAULT: Final = 'default'
-type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
+type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | None
 
 type_sort_attribute = \
     tuple[Literal['dbc'],     "AttributeType", None,   None,      None,     None] | \
@@ -435,7 +433,7 @@ type_sort_attribute = \
     tuple[Literal['signal'],  "AttributeType", None,   "Message", "Signal", None] | \
     tuple[Literal['envvar'],  "AttributeType", None,   None,      None,     "EnvironmentVariable"]
 
-type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
+type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | None
 
 type_sort_choices = Callable[[Choices], Choices] | None
 

@@ -3,7 +3,6 @@ __all__ = ["AutosarBusSpecifics", "AutosarDatabaseSpecifics",
            "AutosarNodeSpecifics", "AutosarSecOCProperties", "load_string"]
 
 import re
-from typing import Any
 from xml.etree import ElementTree
 
 from cantools.database.can.internal_database import InternalDatabase
@@ -19,9 +18,7 @@ from .secoc_properties import AutosarSecOCProperties
 from .system_loader import SystemLoader
 
 
-def is_ecu_extract(root: Any # For whatever reason, mypy does not
-                             # accept 'ElementTree' here...
-                   ) -> bool:
+def is_ecu_extract(root: ElementTree.Element) -> bool:
     """Given the root object of an ARXML file's ElementTree,
     determine if the file represents an ECU extract.
 

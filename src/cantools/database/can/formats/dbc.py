@@ -146,6 +146,13 @@ ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME = AttributeDefinition(
     kind='SG_',
     type_name='STRING')
 
+ATTRIBUTE_DEFINITION_BAUDRATE = AttributeDefinition(
+    name='Baudrate',
+    default_value=125_000,
+    type_name='INT',
+    minimum=0,
+    maximum=10*1024*1024)
+
 ATTRIBUTE_DEFINITION_VFRAMEFORMAT = AttributeDefinition(
     name='VFrameFormat',
     default_value='StandardCAN',
@@ -670,6 +677,10 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
     if 'GenSigStartValue' not in definitions and _need_startval_def(database):
         definitions['GenSigStartValue'] = ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE
 
+    # create 'Baudrate' attribute definition
+    if len(database.buses) == 1 and database.buses[0].baudrate is not None:
+        definitions['Baudrate'] = ATTRIBUTE_DEFINITION_BAUDRATE
+
     # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if bus is CAN FD
     if _bus_is_canfd(database):
         if 'VFrameFormat' not in definitions:
@@ -770,16 +781,38 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
 
     attributes: list[type_sort_attribute] = []
 
+    # we use a copy of the original cantools database object with the
+    # .dbc objects added...
+    assert database.dbc is not None
+
+    # remove the old 'Baudrate' attribute if it exists
+    if database.dbc.attributes.get('Baudrate') is not None:
+        del database.dbc.attributes['Baudrate']
+
+    # add a new 'Baudrate' attribute
+    baudrate = None
+    if len(database.buses) == 1:
+        baudrate = database.buses[0].baudrate
+    if baudrate is not None:
+        baudrate_attr_def = database.dbc.attribute_definitions.get('Baudrate')
+        assert baudrate_attr_def is not None
+        database.dbc.attributes['Baudrate'] = Attribute[int](
+                    value=int(baudrate),
+                    definition=typing.cast("AttributeDefinition[int]", baudrate_attr_def),
+                )
+
     for attribute in database.dbc.attributes.values():
         attributes.append(('dbc', attribute, None, None, None, None))
 
     for envvar in database.dbc.environment_variables.values():
-        for attribute in envvar.dbc.attributes.values():
-            attributes.append(('envvar', attribute, None, None, None, envvar))
+        if envvar.dbc is not None:
+            for attribute in envvar.dbc.attributes.values():
+                attributes.append(('envvar', attribute, None, None, None, envvar))
 
     for node in database.nodes:
-        for attribute in node.dbc.attributes.values():
-            attributes.append(('node', attribute, node, None, None, None))
+        if node.dbc is not None:
+            for attribute in node.dbc.attributes.values():
+                attributes.append(('node', attribute, node, None, None, None))
 
     for message in database.messages:
         msg_attributes = OrderedDict[str, AttributeType]()
@@ -797,7 +830,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         if gen_msg_cycle_time_def is not None and msg_cycle_time != gen_msg_cycle_time_def.default_value:
             msg_attributes['GenMsgCycleTime'] = Attribute(
                 value=msg_cycle_time,
-                definition=typing.cast('AttributeDefinition[int]', gen_msg_cycle_time_def),
+                definition=typing.cast("AttributeDefinition[int]", gen_msg_cycle_time_def),
             )
         elif 'GenMsgCycleTime' in msg_attributes:
             del msg_attributes['GenMsgCycleTime']
@@ -1386,7 +1419,7 @@ def _load_signal_groups(tokens, attributes):
         try:
             return attributes[frame_id_dbc]['signal'][signal]
         except KeyError:
-            return None
+            return OrderedDict()
 
     def get_signal_name(frame_id_dbc, name):
         signal_attributes = get_attributes(frame_id_dbc, name)
@@ -1434,7 +1467,7 @@ def _load_signals(tokens,
         try:
             return attributes[frame_id_dbc]['signal'][signal]
         except KeyError:
-            return None
+            return OrderedDict()
 
     def get_comment(frame_id_dbc, signal):
         """Get comment for given signal.
@@ -1480,7 +1513,10 @@ def _load_signals(tokens,
             pass
 
         if ids:
+            # make the IDs unique (and sort them)
             return list(set(ids))
+
+        return None
 
     def get_multiplexer_signal(signal, multiplexer_signal):
         if len(signal) != 2:
@@ -1540,7 +1576,7 @@ def _load_signals(tokens,
 
     def get_signal_spn(frame_id_dbc, name):
         signal_attributes = get_attributes(frame_id_dbc, name)
-        if signal_attributes is not None and 'SPN' in signal_attributes:
+        if 'SPN' in signal_attributes:
             if (value := signal_attributes['SPN'].value) is not None:
                 return value
 

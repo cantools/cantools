@@ -1596,7 +1596,7 @@ class SystemLoader:
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> int:
         pos_elem = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
                                            'START-POSITION')
-        if pos_elem and pos_elem.text:
+        if pos_elem is not None and pos_elem.text:
             return parse_number_string(pos_elem.text, allow_float=False)
         else:
             LOGGER.warning(f'SIGNAL is missing START-POSITION element or element is empty!')
@@ -1606,12 +1606,12 @@ class SystemLoader:
         if self.autosar_version_newer(4):
             i_signal_length = self._get_unique_arxml_child(i_signal, 'LENGTH')
 
-            if i_signal_length and i_signal_length.text:
+            if i_signal_length is not None and i_signal_length.text:
                 return parse_number_string(i_signal_length.text, allow_float=False)
             else:
                 LOGGER.warning(f'SIGNAL is missing LENGTH element or element is empty!')
                 return 0
-        elif system_signal:
+        elif system_signal is not None:
             # AUTOSAR3 supports specifying the signal length via the
             # system signal. (AR4 does not.)
             system_signal_length = \
@@ -1904,7 +1904,7 @@ class SystemLoader:
             minimum, maximum, factor, offset = \
                 self._load_linear_scale(compu_scale)
 
-        if minimum == math.nan or maximum == math.nan:
+        if math.isnan(minimum) or math.isnan(maximum):
             raise RuntimeError("Minimum or maximum is still NaN!")
 
         return minimum, maximum, factor, offset

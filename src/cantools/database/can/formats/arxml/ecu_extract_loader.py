@@ -1,9 +1,11 @@
 # Load an ECU extract CAN database from an ARXML formatted file.
-from collections.abc import Generator, Iterator
 import logging
-from typing import TYPE_CHECKING, Any
 import typing
+from collections.abc import Iterator
+from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
+
+from cantools.typechecking import ByteOrder
 
 from ....conversion import BaseConversion
 from ....utils import sort_signals_by_start_bit, type_sort_signals
@@ -12,7 +14,6 @@ from ...message import Message
 from ...signal import Signal
 
 if TYPE_CHECKING:
-    from cantools.typechecking import ByteOrder
 
     from ...bus import Bus
 

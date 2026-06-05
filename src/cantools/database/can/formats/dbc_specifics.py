@@ -8,11 +8,6 @@ from cantools.database.can.attribute_definition import AttributeDefinitionType
 from cantools.database.can.environment_variable import EnvironmentVariable
 from cantools.typechecking import Choices
 
-from cantools.database.can.attribute import AttributeType
-from cantools.database.can.attribute_definition import AttributeDefinitionType
-from cantools.database.can.environment_variable import EnvironmentVariable
-from cantools.typechecking import Choices
-
 
 class DbcSpecifics:
 

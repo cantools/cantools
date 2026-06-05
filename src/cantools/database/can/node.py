@@ -1,6 +1,4 @@
 # A CAN bus node (or Board unit)
-from typing import Optional
-
 from cantools.database.can.formats.arxml.node_specifics import (
     AutosarNodeSpecifics,
 )

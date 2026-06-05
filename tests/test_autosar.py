@@ -1,7 +1,7 @@
 # unit tests for the autosar specifics of message and database objects
 # (message.autosar and db.autosar)
-from typing import cast
 import unittest
+from typing import cast
 
 import cantools
 import cantools.autosar

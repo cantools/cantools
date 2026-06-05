@@ -6,7 +6,6 @@ from collections import OrderedDict, defaultdict
 from collections.abc import Mapping
 from copy import deepcopy
 from decimal import Decimal
-from typing import cast
 
 import textparser  # type: ignore
 from textparser import (

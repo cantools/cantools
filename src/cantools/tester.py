@@ -3,25 +3,20 @@
 import queue
 import time
 from collections import UserDict, defaultdict
-from collections.abc import Callable, Iterable, Mapping
-from typing import TYPE_CHECKING, Protocol, TypeVar, overload
+from collections.abc import Callable, Mapping
 
 import can
+# from _typeshed import SupportsKeysAndGetItem
 
-from cantools.database.can.message import Message as MessageCls
-from cantools.database.can.message import SignalTreeType
 from cantools.database.can.database import Database
+from cantools.database.can.message import Message, SignalTreeType
 from cantools.typechecking import (
-    Codec,
     DecodeResultType,
     SignalDictType,
     SignalValueType,
 )
 
 from .errors import Error
-
-if TYPE_CHECKING:
-    from _typeshed import SupportsKeysAndGetItem
 
 # _KT = TypeVar("_KT")
 # _VT_co = TypeVar("_VT_co", covariant=True)
@@ -175,7 +170,8 @@ class _TesterMessage(UserDict[str, SignalValueType]):
         self.data[signal_name] = value
         self._update_can_message()
 
-    def update(self, m: SupportsKeysAndGetItem[str, SignalValueType], /, **kwargs: SignalValueType) -> None:
+    # def update(self, m: SupportsKeysAndGetItem[str, SignalValueType], /, **kwargs: SignalValueType) -> None:
+    def update(self, m, /, **kwargs: SignalValueType) -> None:
         s = dict(m)
         new_signal_names = set(s) - self._signal_names
         if new_signal_names:

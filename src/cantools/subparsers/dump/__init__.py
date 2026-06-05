@@ -4,7 +4,6 @@ import os
 from cantools.database.can.message import Message
 
 from ... import database
-from ...database import Message
 from ...database.can.database import Database as CanDatabase
 from ...database.diagnostics.database import Database as DiagnosticsDatabase
 from ...database.utils import format_and
@@ -104,7 +103,7 @@ def _dump_can_message(message: Message, width: int, with_comments: bool = False,
 
 
 def _dump_can_messages(msg_list: list[Message], with_comments: bool = False) -> None:
-    WIDTH = 80
+    width = 80
     try:
         width, _ = os.get_terminal_size()
     except OSError:

@@ -951,7 +951,7 @@ class SystemLoader:
 
             header_type = self._get_unique_arxml_child(pdu, 'HEADER-TYPE')
 
-            if header_type and header_type.text and header_type.text != 'SHORT-HEADER':
+            if header_type is not None and header_type.text and header_type.text != 'SHORT-HEADER':
                 LOGGER.warning(f'Only short headers are currently supported '
                                f'for container frames. Frame "{frame_name}" '
                                f'Uses "{header_type.text}"!')
@@ -1582,16 +1582,16 @@ class SystemLoader:
                                              '&SYSTEM-SIGNAL',
                                              'SHORT-NAME'
                                          ])
-        if system_signal_name_elem and system_signal_name_elem.text:
+        if system_signal_name_elem is not None and system_signal_name_elem.text:
             return system_signal_name_elem.text
 
         signal_name_elem = self._get_unique_arxml_child(i_signal, 'SHORT-NAME')
-        if signal_name_elem and signal_name_elem.text:
+        if signal_name_elem is not None and signal_name_elem.text:
             return signal_name_elem.text
-        else:
-            # TODO Determine if signals should be able to be missing a name
-            LOGGER.warning(f'SIGNAL is missing SHORT-NAME element or element is empty!')
-            return ''
+
+        # TODO Determine if signals should be able to be missing a name
+        LOGGER.warning(f'SIGNAL is missing SHORT-NAME element or element is empty!')
+        return ''
 
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping: ElementTree.Element) -> int:
         pos_elem = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,
@@ -1909,30 +1909,29 @@ class SystemLoader:
 
         return minimum, maximum, factor, offset
 
-    def _load_scale_limits(self, compu_scale: ElementTree.Element) -> tuple[int, int]:
+    def _load_scale_limits(self, compu_scale: ElementTree.Element) -> tuple[int | float | None, int | float | None]:
+        lower_limit = None
+        upper_limit = None
+
         lower_limit_elem = \
             self._get_unique_arxml_child(compu_scale, 'LOWER-LIMIT')
         upper_limit_elem = \
             self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
 
         if lower_limit_elem is not None and lower_limit_elem.text:
-            lower_limit = parse_number_string(lower_limit_elem.text, allow_float=False)
-        else:
-            raise RuntimeError("Lower limit missing or empty!")
+            lower_limit = parse_number_string(lower_limit_elem.text, allow_float=True)
 
         if upper_limit_elem is not None and upper_limit_elem.text:
-            upper_limit = parse_number_string(upper_limit_elem.text, allow_float=False)
-        else:
-            raise RuntimeError("Upper limit missing or empty!")
+            upper_limit = parse_number_string(upper_limit_elem.text, allow_float=True)
 
         return lower_limit, upper_limit
 
     def _load_scale_linear_and_texttable(self, compu_method: ElementTree.Element, is_float: bool) -> tuple[float | None, float | None, float, float, Choices]:
-        minimum: float | None = None
-        maximum: float | None = None
+        minimum = None
+        maximum = None
         factor = 1.0
         offset = 0.0
-        choices: Choices = OrderedDict()
+        choices = {}
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [
@@ -1962,7 +1961,6 @@ class SystemLoader:
                     LOGGER.warning(f'Invalid value specified for enumeration {vt}: '
                                    f'[{lower_limit}, {upper_limit}]')
                     continue
-                assert vt.text is not None
                 value = lower_limit
                 name = vt.text
                 comments = self._load_comments(compu_scale)

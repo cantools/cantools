@@ -780,8 +780,9 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             attributes.append(('envvar', attribute, None, None, None, envvar))
 
     for node in database.nodes:
-        for attribute in node.dbc.attributes.values():
-            attributes.append(('node', attribute, node, None, None, None))
+        if node.dbc is not None:
+            for attribute in node.dbc.attributes.values():
+                attributes.append(('node', attribute, node, None, None, None))
 
     for message in database.messages:
         msg_attributes = OrderedDict[str, AttributeType]()

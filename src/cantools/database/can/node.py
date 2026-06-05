@@ -33,8 +33,8 @@ class Node:
             # multi-lingual dictionary
             self._comments = comment
 
-        self._dbc = dbc_specifics or DbcSpecifics()
-        self._autosar = autosar_specifics or AutosarNodeSpecifics()
+        self._dbc = dbc_specifics
+        self._autosar = autosar_specifics
 
     @property
     def name(self) -> str:

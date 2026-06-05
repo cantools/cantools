@@ -377,7 +377,7 @@ def _dump_mux_groups(multiplexer_name: str, signals: list[Signal], node_refs: di
                         parent)
 
 
-def _dump_message(message: Message, bus: ElementTree.Element, node_refs: dict[str, int], sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> None:
+def _dump_message(message: Message, bus: ElementTree.Element, node_refs: dict[str, int], sort_signals: type_sort_signals) -> None:
     frame_id = f'0x{message.frame_id:03X}'
     message_element = SubElement(bus,
                                  'Message',
@@ -405,7 +405,7 @@ def _dump_message(message: Message, bus: ElementTree.Element, node_refs: dict[st
                        id=str(node_refs[sender]))
 
     # Signals.
-    if sort_signals:
+    if callable(sort_signals):
         signals = sort_signals(message.signals)
     else:
         signals = message.signals

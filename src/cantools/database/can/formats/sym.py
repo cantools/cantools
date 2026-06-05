@@ -856,7 +856,7 @@ def _dump_signals(database: InternalDatabase, sort_signals: type_sort_signals) -
     # SYM requires unique signals
     generated_signals: set[str] = set()
     for message in database.messages:
-        if sort_signals:
+        if callable(sort_signals):
             signals = sort_signals(message.signals)
         else:
             signals = message.signals

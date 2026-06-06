@@ -17,7 +17,6 @@ from ..typechecking import SignalDictType
 from .__utils__ import (
     format_multiplexed_name,
     format_signals,
-    parse_additional_config,
 )
 
 
@@ -59,6 +58,8 @@ class Monitor(can.Listener):
         self._errors = 0
         self._basetime: float | None = None
         self._page_first_row = 0
+        bus = can.cli.create_bus_from_namespace(args)
+        self._notifier = can.Notifier(bus, [self])
 
         if self._filter is not None:
             self.compile_filter()
@@ -70,36 +71,6 @@ class Monitor(can.Listener):
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
         curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_CYAN)
         curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
-
-        if "bus_type" in args:
-            # TODO: this branch can be removed once legacy args are removed
-            bus = self.create_bus(args)
-        else:
-            bus = can.cli.create_bus_from_namespace(args)
-
-        self._notifier = can.Notifier(bus, [self])
-
-    def create_bus(self, args):
-        kwargs = {}
-
-        if args.bit_rate is not None:
-            kwargs['bitrate'] = int(args.bit_rate)
-
-        if args.fd:
-            kwargs['fd'] = True
-
-        if args.extra_args:
-            kwargs.update(parse_additional_config(args.extra_args))
-
-        try:
-            return can.Bus(interface=args.bus_type,
-                           channel=args.channel,
-                           **kwargs)
-        except Exception as exc:
-            raise Exception(
-                f"Failed to create CAN bus with bustype='{args.bus_type}' and "
-                f"channel='{args.channel}'."
-            ) from exc
 
     def run(self, max_num_keys_per_tick=-1):
         while True:

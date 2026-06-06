@@ -3,7 +3,7 @@ import argparse
 from .. import database
 
 
-def _do_convert(args) -> None:
+def _do_convert(args: argparse.Namespace) -> None:
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
                                prune_choices=args.prune,
@@ -15,7 +15,7 @@ def _do_convert(args) -> None:
                        encoding=args.encoding)
 
 
-def add_subparser(subparsers) -> None:
+def add_subparser(subparsers):
     convert_parser = subparsers.add_parser(
         'convert',
         description='Convert given database from one format to another.',

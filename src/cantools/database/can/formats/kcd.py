@@ -2,7 +2,6 @@
 
 import logging
 from collections import OrderedDict, defaultdict
-from collections.abc import Callable
 from typing import cast
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement

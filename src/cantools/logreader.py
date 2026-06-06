@@ -2,10 +2,9 @@ import abc
 import binascii
 import datetime
 import enum
-import io
 import re
 from collections.abc import Iterator, Sequence
-from typing import Literal, overload
+from typing import Literal, TextIO, overload
 
 TimestampType = datetime.datetime | datetime.timedelta | None
 TimezoneType = datetime.tzinfo | Literal['local'] | None
@@ -306,7 +305,7 @@ class Parser:
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream: io.TextIOBase | None = None, *, tz: TimezoneType = TZ_LOCAL) -> None:
+    def __init__(self, stream: TextIO | None = None, *, tz: TimezoneType = TZ_LOCAL) -> None:
         '''
         :param tz: The timezone which returned datetime objects should have when parsing `candump -l`, `candump -L` or `candump -ta`.
                    (It cannot be applied to `candump -tA` because the information is missing which timezone the time stamps have.

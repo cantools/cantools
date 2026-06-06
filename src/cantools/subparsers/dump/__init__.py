@@ -143,7 +143,7 @@ def _dump_diagnostics_database(dbase: DiagnosticsDatabase) -> None:
             print('  ' + 72 * '-')
 
 
-def _do_dump(args) -> None:
+def _do_dump(args: argparse.Namespace) -> None:
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                prune_choices=args.prune,
@@ -158,14 +158,11 @@ def _do_dump(args) -> None:
             except KeyError:
                 raise KeyError(f'Unknown message {message_name}') from KeyError
             _dump_can_messages([message], args.with_comments)
-
-    elif isinstance(dbase, DiagnosticsDatabase):
-        _dump_diagnostics_database(dbase)
     else:
         _dump_diagnostics_database(dbase)
 
 
-def add_subparser(subparsers) -> None:
+def add_subparser(subparsers):
     dump_parser = subparsers.add_parser(
         'dump',
         description='Dump given database in a human readable format.',

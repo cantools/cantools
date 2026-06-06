@@ -425,7 +425,7 @@ def prune_database_choices(database: "Database") -> None:
                     prune_signal_choices(cs)
 
 SORT_SIGNALS_DEFAULT: Final = 'default'
-type_sort_signals = Union[Callable[[list["Signal"]], list["Signal"]], Literal['default'], None]
+type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
 
 type_sort_attribute = \
     tuple[Literal['dbc'],     "AttributeType", None,   None,      None,     None] | \

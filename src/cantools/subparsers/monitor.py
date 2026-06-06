@@ -34,7 +34,7 @@ class MessageFormattingResult(Enum):
 
 class Monitor(can.Listener):
 
-    def __init__(self, stdscr: Any, args: argparse.Namespace):
+    def __init__(self, stdscr: Any, args: argparse.Namespace) -> None:
         self._stdscr = stdscr
         print(f'Reading bus description file "{args.database}"...\r')
         self._dbase = database.load_file(args.database,

@@ -6,8 +6,8 @@ from collections import UserDict, defaultdict
 from collections.abc import Callable, Mapping
 
 import can
-# from _typeshed import SupportsKeysAndGetItem
 
+# from _typeshed import SupportsKeysAndGetItem
 from cantools.database.can.database import Database
 from cantools.database.can.message import Message, SignalTreeType
 from cantools.typechecking import (

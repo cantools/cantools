@@ -46,9 +46,9 @@ def signal_tree_string(message: Message, console_width: int = 80, with_comments:
             if len(comstr) > 0:
                 signal_name_line = f'{signal_name} {Colors.OKBLUE}{comstr}{Colors.ENDC}'
 
-        signal_name_line = textwrap.wrap(signal_name_line, width=console_width - 2, initial_indent='+-- ',
+        signal_name_line_list = textwrap.wrap(signal_name_line, width=console_width - 2, initial_indent='+-- ',
                                          subsequent_indent=(' ' * (8 + len(signal_name))))
-        signal_name_line = '\n'.join(signal_name_line)
+        signal_name_line = '\n'.join(signal_name_line_list)
 
         return signal_name_line
 
@@ -139,7 +139,7 @@ def layout_string(message: Message, signal_names: bool = True) -> str:
     def format_big() -> list[str]:
         signals: list[str] = []
 
-        for signal in message._signals:
+        for signal in message.signals:
             if signal.byte_order != 'big_endian':
                 continue
 
@@ -290,9 +290,9 @@ def layout_string(message: Message, signal_names: bool = True) -> str:
         padding = number_width * ' '
         signals_per_byte: list[list[tuple[int, str]]] = [[] for _ in range(number_of_bytes)]
 
-        for signal in message.signals:
-            byte, bit = divmod(name_bit(signal), 8)
-            signals_per_byte[byte].append((bit, '+-- ' + signal.name))
+        for msg_signal in message.signals:
+            byte, bit = divmod(name_bit(msg_signal), 8)
+            signals_per_byte[byte].append((bit, '+-- ' + msg_signal.name))
 
         # Format signal lines.
         signal_lines_per_byte: list[list[str]] = []

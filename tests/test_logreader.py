@@ -73,6 +73,16 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.is_remote_frame, True)
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.MISSING)
 
+        outp = parser.parse("  vcan-0  123   [8]  00 01 02 03 04 05 06 07")
+        self.assertEqual(outp.channel, 'vcan-0')
+        self.assertEqual(outp.frame_id, 0x123)
+        self.assertEqual(outp.data, bytes(range(8)))
+
+        outp = parser.parse("  vcan.0  123   [8]  00 01 02 03 04 05 06 07")
+        self.assertEqual(outp.channel, 'vcan.0')
+        self.assertEqual(outp.frame_id, 0x123)
+        self.assertEqual(outp.data, bytes(range(8)))
+
     def test_timestamped_candump(self):
         parser = cantools.logreader.Parser()
 
@@ -203,6 +213,30 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.second, 24)
         self.assertEqual(outp.timestamp.microsecond, 501098)
         #self.assertEqual(outp.timestamp.tzinfo, utc_plus(0))  # bug in freezegun: tzlocal() != datetime.timezone.utc
+
+        outp = parser.parse("(1780715436.846782) vcan-0 123#0001020304050607")
+        self.assertEqual(outp.channel, 'vcan-0')
+        self.assertEqual(outp.frame_id, 0x123)
+        self.assertEqual(outp.data, bytes(range(8)))
+        self.assertEqual(outp.timestamp.year, 2026)
+        self.assertEqual(outp.timestamp.month, 6)
+        self.assertEqual(outp.timestamp.day, 6)
+        self.assertEqual(outp.timestamp.hour, 3)
+        self.assertEqual(outp.timestamp.minute, 10)
+        self.assertEqual(outp.timestamp.second, 36)
+        self.assertEqual(outp.timestamp.microsecond, 846782)
+
+        outp = parser.parse("(1780715439.417805) vcan.0 123#0001020304050607")
+        self.assertEqual(outp.channel, 'vcan.0')
+        self.assertEqual(outp.frame_id, 0x123)
+        self.assertEqual(outp.data, bytes(range(8)))
+        self.assertEqual(outp.timestamp.year, 2026)
+        self.assertEqual(outp.timestamp.month, 6)
+        self.assertEqual(outp.timestamp.day, 6)
+        self.assertEqual(outp.timestamp.hour, 3)
+        self.assertEqual(outp.timestamp.minute, 10)
+        self.assertEqual(outp.timestamp.second, 39)
+        self.assertEqual(outp.timestamp.microsecond, 417805)
 
         with freeze_time(tz_offset=2):
             outp = parser.parse("(1752918539.271062) vcan0 00000123#1234567890ABCDEF")

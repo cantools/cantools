@@ -6,7 +6,6 @@ from typing import (
     Any,
     Literal,
     NamedTuple,
-    TypeAlias,
     TypedDict,
     Union,
 )
@@ -56,5 +55,3 @@ DecodeResultType = SignalDictType | ContainerDecodeResultType
 EncodeInputType = SignalMappingType | ContainerEncodeInputType
 
 SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
-
-TAdditionalCliArgs: TypeAlias = dict[str, str | int | float | bool]

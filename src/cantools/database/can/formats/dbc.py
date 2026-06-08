@@ -679,7 +679,14 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
 
     # create 'Baudrate' attribute definition
     if len(database.buses) == 1 and database.buses[0].baudrate is not None:
-        definitions['Baudrate'] = ATTRIBUTE_DEFINITION_BAUDRATE
+        # add a definition of the `Baudrate` attribute if it is needed
+        # and not yet present
+        if 'Baudrate' not in definitions:
+            definitions['Baudrate'] = ATTRIBUTE_DEFINITION_BAUDRATE
+    # remove the definition of the `Baudrate` attribute if it is
+    # not needed
+    elif 'Baudrate' in definitions:
+        del definitions['Baudrate']
 
     # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if bus is CAN FD
     if _bus_is_canfd(database):
@@ -781,11 +788,9 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
 
     attributes: list[type_sort_attribute] = []
 
-    # we use a copy of the original cantools database object with the
-    # .dbc objects added...
-    assert database.dbc is not None
-
-    # remove the old 'Baudrate' attribute if it exists
+    # remove the old 'Baudrate' attribute if it exists. We synchronize
+    # that DBC attribute with the `.baudrate` attribute of the
+    # high-level bus description object below.
     if database.dbc.attributes.get('Baudrate') is not None:
         del database.dbc.attributes['Baudrate']
 

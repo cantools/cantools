@@ -28,7 +28,7 @@ StringPathLike = str | os.PathLike[str]
 Comments = dict[str | None, str]
 class Codec(TypedDict):
     signals: list["Signal"]
-    formats: Formats
+    formats: Formats | Any
     multiplexers: Mapping[str, Mapping[int, Any]]
 
 ByteOrder = Literal["little_endian", "big_endian"]

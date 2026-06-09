@@ -424,7 +424,6 @@ def prune_database_choices(database: "Database") -> None:
                 for cs in cm.signals:
                     prune_signal_choices(cs)
 
-
 SORT_SIGNALS_DEFAULT: Final = 'default'
 type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
 
@@ -435,7 +434,7 @@ type_sort_attribute = \
     tuple[Literal['signal'],  "AttributeType", None,   "Message", "Signal", None] | \
     tuple[Literal['envvar'],  "AttributeType", None,   None,      None,     "EnvironmentVariable"]
 
-type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
+type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | None
 
 type_sort_choices = Callable[[Choices], Choices] | None
 

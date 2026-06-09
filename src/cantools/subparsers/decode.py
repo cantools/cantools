@@ -9,12 +9,13 @@ from .__utils__ import format_message_by_frame_id
 
 logging.basicConfig(level=logging.WARNING)
 
-def _do_decode(args):
+def _do_decode(args: argparse.Namespace) -> None:
     dbase = database.load_file(args.database,
                                encoding=args.encoding,
                                frame_id_mask=args.frame_id_mask,
                                prune_choices=args.prune,
                                strict=not args.no_strict)
+    assert isinstance(dbase, database.Database)
     decode_choices = not args.no_decode_choices
     decode_containers = not args.no_decode_containers
     allow_truncated = args.no_strict

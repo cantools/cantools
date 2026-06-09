@@ -11,6 +11,12 @@ from cantools.typechecking import Choices
 
 class DbcSpecifics:
 
+    # Temporary attribute used during DBC load/dump to preserve the original
+    # short name from the DBC file. Stored as (long_name, short_name) so that
+    # the preserved short name is only used if the signal has not been renamed.
+    # Not serialised to output.
+    _orig_dbc_short_name: tuple[str, str] | None = None
+
     def __init__(self,
                  attributes: OrderedDict[str, AttributeType] | None = None,
                  attribute_definitions: OrderedDict[str, AttributeDefinitionType] | None = None,

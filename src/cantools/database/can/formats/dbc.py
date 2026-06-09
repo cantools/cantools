@@ -29,6 +29,7 @@ from cantools.typechecking import Comments
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
+    SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     sort_signals_by_start_bit_reversed,
     type_sort_attribute,
@@ -2027,8 +2028,8 @@ def make_names_unique(database: InternalDatabase, shorten_long_names: bool) -> I
 
 
 def dump_string(database: InternalDatabase,
-                sort_signals:type_sort_signals=None,
-                sort_attribute_signals:type_sort_signals=None,
+                sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
+                sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
                 sort_attributes:type_sort_attributes=None,
                 sort_choices:type_sort_choices=None,
                 shorten_long_names:bool=True) -> str:
@@ -2039,9 +2040,9 @@ def dump_string(database: InternalDatabase,
 
     """
 
-    if sort_signals is None:
+    if sort_signals is SORT_SIGNALS_DEFAULT:
         sort_signals = sort_signals_by_start_bit_reversed
-    if sort_attribute_signals is None:
+    if sort_attribute_signals is SORT_SIGNALS_DEFAULT:
         sort_attribute_signals = sort_signals_by_start_bit_reversed
 
     # Make a deep copy of the database as names and attributes will be

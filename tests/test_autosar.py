@@ -1,7 +1,6 @@
 # unit tests for the autosar specifics of message and database objects
 # (message.autosar and db.autosar)
 import unittest
-from typing import cast
 
 import cantools
 import cantools.autosar
@@ -10,7 +9,8 @@ from cantools.autosar.snakeauth import SnakeOilAuthenticator
 
 class CanToolsAutosarTest(unittest.TestCase):
     def test_autosar3_e2e_profile2(self):
-        db = cast('cantools.database.can.database.Database', cantools.database.load_file('tests/files/arxml/system-3.2.3.arxml'))
+        db = cantools.database.load_file('tests/files/arxml/system-3.2.3.arxml')
+        assert isinstance(db, cantools.database.can.database.Database)
         msg = db.get_message_by_name('Status')
 
         # verify the parameters

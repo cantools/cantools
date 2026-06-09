@@ -3,7 +3,8 @@
 import queue
 import time
 from collections import UserDict, defaultdict
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
+from typing import Any, overload
 
 import can
 
@@ -121,7 +122,7 @@ class Listener(can.Listener):
             return
 
         decoded = DecodedMessage(database_message.name,
-                                 database_message.decode(msg.data,
+                                 database_message.decode(bytes(msg.data),
                                                          message.decode_choices,
                                                          message.scaling))
 
@@ -153,7 +154,7 @@ class _TesterMessage(UserDict[str, SignalValueType]):
         self.strict = strict
         self._input_list = input_list
         self.enabled = True
-        self._periodic_task = None
+        self._periodic_task: can.CyclicSendTaskABC | None = None
         self._signal_names = {s.name for s in self.database.signals}
         self.update(self._prepare_initial_signal_values())
 
@@ -171,8 +172,25 @@ class _TesterMessage(UserDict[str, SignalValueType]):
         self._update_can_message()
 
     # def update(self, m: SupportsKeysAndGetItem[str, SignalValueType], /, **kwargs: SignalValueType) -> None:
-    def update(self, m, /, **kwargs: SignalValueType) -> None:
-        s = dict(m)
+    # def update(self, m: Mapping[str, SignalValueType] | None = None, /, **kwargs: SignalValueType) -> None:
+    @overload
+    def update(self, __m: Mapping[str, SignalValueType], /, **kwargs: SignalValueType) -> None: ...
+
+    # Overload 2: Iterable of pairs + Kwargs
+    @overload
+    def update(self, __m: Iterable[tuple[str, SignalValueType]], /, **kwargs: SignalValueType) -> None: ...
+
+    # Overload 3: Kwargs only
+    @overload
+    def update(self, /, **kwargs: SignalValueType) -> None: ...
+
+    # Overload 4: No arguments at all (d.update())
+    # @overload
+    # def update(self) -> None: ...
+
+    # The actual runtime implementation signature
+    def update(self, __m: Any = None, /, **kwargs: SignalValueType) -> None:
+        s = dict(__m)
         new_signal_names = set(s) - self._signal_names
         if new_signal_names:
             raise KeyError(repr(new_signal_names))
@@ -260,7 +278,8 @@ class _TesterMessage(UserDict[str, SignalValueType]):
         if not self.enabled:
             return
 
-        assert(self.periodic)
+        # This should be able to be assert self.periodic, but that is not yet supported by Mypy.
+        assert(self.database.cycle_time is not None)
         self._periodic_task = self._can_bus.send_periodic(
             self._can_message,
             self.database.cycle_time / 1000.0)

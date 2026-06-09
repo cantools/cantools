@@ -5,18 +5,19 @@ import queue
 import re
 import sys
 import time
+import typing
 import warnings
 from enum import Enum
-from typing import Any
 
 import can.cli
 from argparse_addons import Integer  # type: ignore
 
+from cantools.database.can.database import Database
 from cantools.database.can.message import Message
 from cantools.database.errors import DecodeError
 
 from .. import database
-from ..typechecking import SignalDictType
+from ..typechecking import ContainerDecodeResultType, SignalDictType, SignalMappingType
 from .__utils__ import (
     format_multiplexed_name,
     format_signals,
@@ -34,19 +35,19 @@ class MessageFormattingResult(Enum):
 
 class Monitor(can.Listener):
 
-    def __init__(self, stdscr: Any, args: argparse.Namespace) -> None:
+    def __init__(self, stdscr: curses.window, args: argparse.Namespace) -> None:
         self._stdscr = stdscr
         print(f'Reading bus description file "{args.database}"...\r')
-        self._dbase = database.load_file(args.database,
+        self._dbase: Database = typing.cast(Database, database.load_file(args.database,
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,
                                          prune_choices=args.prune,
-                                         strict=not args.no_strict)
+                                         strict=not args.no_strict))
         self._single_line = args.single_line
         self._filtered_sorted_message_names: list[str] = []
         self._filter = args.filter_regex or ''
         self._filter_cursor_pos = 0
-        self._compiled_filter = None
+        self._compiled_filter: re.Pattern[str] | None = None
         self._formatted_messages: dict[str, list[str]] = {}
         self._raw_messages: dict[str, can.Message] = {}
         self._message_signals: dict[str, set[str]] = {}
@@ -381,7 +382,7 @@ class Monitor(can.Listener):
         if self._basetime is None:
             self._basetime = raw_message.timestamp
 
-        data = raw_message.data
+        data = bytes(raw_message.data)
         timestamp = raw_message.timestamp - self._basetime
 
         try:
@@ -398,7 +399,7 @@ class Monitor(can.Listener):
                     self._update_message_error(timestamp, name, data, f'{message.length - len(data)} bytes too short')
                     return MessageFormattingResult.DecodeError
 
-                decoded_signals = message.decode_simple(bytes(data),
+                decoded_signals = message.decode_simple(data,
                     decode_choices=True,
                     allow_truncated=True,
                     allow_excess=True
@@ -416,6 +417,7 @@ class Monitor(can.Listener):
 
     def _try_update_container(self, dbmsg: Message, timestamp: float, data: bytes) -> None:
         decoded = dbmsg.decode(data, decode_containers=True)
+        assert isinstance(decoded, type(ContainerDecodeResultType))
 
         # handle the "table of contents" of the container message. To
         # avoid too much visual turmoil and the resulting usability issues,
@@ -446,10 +448,15 @@ class Monitor(can.Listener):
                 if len(cdata) == 0:
                     cdata_str = f'<empty>'
                 else:
+                    # Mypy cannot infer that cdata is bytes here,
+                    # but it must be because otherwise the decoding of the container message would have failed.
+                    assert isinstance(cdata, bytes)
                     cdata_str = f'0x{cdata.hex()}'
 
                 formatted = self._format_lines(timestamp, full_name, [f'undecoded: {cdata_str}'])
             else:
+                assert isinstance(cmsg, Message)
+                assert isinstance(cdata, type(SignalDictType))
                 full_name, formatted = self._format_message(timestamp, cmsg, cdata, name_prefix=f'{dbmsg.name} :: ')
             self._update_formatted_message(full_name, formatted)
 
@@ -576,8 +583,8 @@ class Monitor(can.Listener):
         self._queue.put(msg)
 
 
-def _do_monitor(args) -> None:
-    def monitor(stdscr) -> None:
+def _do_monitor(args: argparse.Namespace) -> None:
+    def monitor(stdscr: curses.window) -> None:
         Monitor(stdscr, args).run()
 
     try:
@@ -619,7 +626,7 @@ def _warn_legacy_usage() -> None:
     )
 
 
-def add_subparser(subparsers) -> None:
+def add_subparser(subparsers):
     monitor_parser = subparsers.add_parser(
         'monitor',
         description='Monitor CAN bus traffic in a text based user interface.',

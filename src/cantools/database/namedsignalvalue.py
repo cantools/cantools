@@ -13,7 +13,7 @@ class NamedSignalValue:
 
     def __init__(
         self,
-        value: int,
+        value: int | float,
         name: str,
         comments: Comments | None = None,
     ) -> None:

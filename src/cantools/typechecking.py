@@ -28,10 +28,10 @@ Comments = dict[str | None, str]
 class Codec(TypedDict):
     signals: list["Signal"]
     formats: Formats
-    multiplexers: Mapping[str, Mapping[int, "Codec"]]
+    multiplexers: Mapping[str, Mapping[int | float, "Codec"]]
 
 ByteOrder = Literal["little_endian", "big_endian"]
-Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]
+Choices = OrderedDict[int | float, Union[str, "NamedSignalValue"]]
 
 # Type aliases. Introduced to reduce type annotation complexity while
 # allowing for more complex encode/decode schemes like the one used

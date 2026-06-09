@@ -4,8 +4,10 @@ import logging
 from collections.abc import MutableSequence, Sequence
 from copy import deepcopy
 from typing import (
+    Literal,
     Optional,
     cast,
+    overload,
 )
 
 from cantools.database.can.formats.dbc_specifics import DbcSpecifics
@@ -149,7 +151,7 @@ class Message:
         """
 
         signals: list[Signal] = []
-        multiplexers: dict[str, dict[int, Codec]] = {}
+        multiplexers: dict[str, dict[int | float, Codec]] = {}
 
         # Find all signals matching given parent signal name and given
         # multiplexer id. Root signals' parent and multiplexer id are
@@ -165,7 +167,7 @@ class Message:
                 continue
 
             if signal.is_multiplexer:
-                children_ids: set[int] = set()
+                children_ids: set[int | float] = set()
 
                 for s in self._signals:
                     if s.multiplexer_signal != signal.name:

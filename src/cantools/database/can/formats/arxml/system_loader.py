@@ -1864,6 +1864,8 @@ class SystemLoader:
 
         # load the domain interval of the scale
         lower_limit, upper_limit = self._load_scale_limits(compu_scale)
+        if lower_limit is None or upper_limit is None:
+            raise RuntimeError(f'Lower limit of scale {compu_scale} is missing!')
 
         if lower_limit > upper_limit:
             raise RuntimeError(f'An valid interval should be provided for '
@@ -1931,7 +1933,7 @@ class SystemLoader:
         maximum = None
         factor = 1.0
         offset = 0.0
-        choices = {}
+        choices: Choices = OrderedDict()
 
         for compu_scale in self._get_arxml_children(compu_method,
                                                     [

@@ -4,10 +4,8 @@ import logging
 from collections.abc import MutableSequence, Sequence
 from copy import deepcopy
 from typing import (
-    Literal,
     Optional,
     cast,
-    overload,
 )
 
 from cantools.database.can.formats.dbc_specifics import DbcSpecifics

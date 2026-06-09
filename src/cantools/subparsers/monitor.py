@@ -12,17 +12,22 @@ from enum import Enum
 import can.cli
 from argparse_addons import Integer  # type: ignore
 
-from cantools.database.can.database import Database
 from cantools.database.can.message import Message
 from cantools.database.errors import DecodeError
 
 from .. import database
-from ..typechecking import ContainerDecodeResultType, SignalDictType, SignalMappingType
+from ..typechecking import (
+    ContainerDecodeResultType,
+    SignalDictType,
+)
 from .__utils__ import (
     format_multiplexed_name,
     format_signals,
     parse_additional_config,
 )
+
+if typing.TYPE_CHECKING:
+    from cantools.database.can.database import Database
 
 
 class QuitError(Exception):
@@ -38,7 +43,7 @@ class Monitor(can.Listener):
     def __init__(self, stdscr: curses.window, args: argparse.Namespace) -> None:
         self._stdscr = stdscr
         print(f'Reading bus description file "{args.database}"...\r')
-        self._dbase: Database = typing.cast(Database, database.load_file(args.database,
+        self._dbase = typing.cast('Database', database.load_file(args.database,
                                          encoding=args.encoding,
                                          frame_id_mask=args.frame_id_mask,
                                          prune_choices=args.prune,

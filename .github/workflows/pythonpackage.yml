@@ -5,6 +5,9 @@ on: [push, pull_request]
 env:
   PY_COLORS: "1"
 
+permissions:
+  contents: read
+
 jobs:
   codegen:
     runs-on:  ${{ matrix.os }}
@@ -14,9 +17,12 @@ jobs:
         python-version: ["3.10", "3.14"]
       fail-fast: false
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -38,9 +44,12 @@ jobs:
             python-version: pypy-3.11
       fail-fast: false
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -52,7 +61,7 @@ jobs:
         tox -e gh
     - name: Coveralls
       if: matrix.os == 'ubuntu-latest'
-      uses: AndreMiras/coveralls-python-action@develop
+      uses: AndreMiras/coveralls-python-action@ac868b9540fad490f7ca82b8ca00480fd751ed19
       with:
         parallel: true
         flag-name: Test ${{ matrix.os }} ${{ matrix.python-version }}
@@ -62,16 +71,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
-        uses: AndreMiras/coveralls-python-action@develop
+        uses: AndreMiras/coveralls-python-action@ac868b9540fad490f7ca82b8ca00480fd751ed19
         with:
           parallel-finished: true
 
   linter:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
         python-version: "3.14"
     - name: Install dependencies
@@ -93,9 +105,12 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
         python-version: "3.14"
     - name: Install dependencies
@@ -110,9 +125,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
         with:
           python-version: "3.14"
       - name: Install dependencies
@@ -125,17 +143,23 @@ jobs:
         run: twine check --strict dist/*
 
   release:
-    needs: [test, codegen, linter, build]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/cantools
+    permissions:
+      id-token: write
+      attestations: write
 
+    if: startsWith(github.ref, 'refs/tags')
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
       with:
-        fetch-depth: 0  # fetch tags for setuptools-scm
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
         python-version: "3.14"
     - name: Install dependencies
@@ -145,8 +169,9 @@ jobs:
     - name: Build a binary wheel and a source tarball
       run: |
         python -m build
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Generate artifact attestation
+      uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32  # 4.1.0
       with:
-        skip-existing: true
-        password: ${{ secrets.pypi_password }}
+        subject-path: 'dist/*'
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # 1.14.0

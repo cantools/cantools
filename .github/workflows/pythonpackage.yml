@@ -126,7 +126,7 @@ jobs:
         pip install -e .
     - name: Build documentation
       run: |
-        python -m sphinx -Ean docs build
+        python -m sphinx -b html -Wan --keep-going docs build
 
   build:
     runs-on: ubuntu-latest

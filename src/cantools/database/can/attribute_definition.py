@@ -47,7 +47,7 @@ class AttributeDefinition(Generic[AttributeValueType]):
 
     @property
     def kind(self) -> str | None:
-        """The attribute kind (BU_, BO_, SG_), or ``None`` if unavailable.
+        """The attribute kind (BU\\_, BO\\_, SG\\_), or ``None`` if unavailable.
 
         """
 

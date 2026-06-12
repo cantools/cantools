@@ -451,7 +451,7 @@ class Database:
         """Return the database as a string formatted as a DBC file.
            sort_signals defines how to sort signals in message definitions
            sort_attribute_signals defines how to sort signals in metadata -
-              comments, value table definitions and attributes
+           comments, value table definitions and attributes
 
         """
         if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:

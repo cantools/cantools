@@ -143,8 +143,10 @@ jobs:
         run: twine check --strict dist/*
 
   release:
-    needs: [test, codegen, linter, build]
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/cantools
     permissions:
       id-token: write
       attestations: write
@@ -173,6 +175,3 @@ jobs:
         subject-path: 'dist/*'
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # 1.14.0
-      with:
-        skip-existing: true
-        password: ${{ secrets.pypi_password }}

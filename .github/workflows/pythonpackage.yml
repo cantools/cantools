@@ -5,6 +5,9 @@ on: [push, pull_request]
 env:
   PY_COLORS: "1"
 
+permissions:
+  contents: read
+
 jobs:
   codegen:
     runs-on:  ${{ matrix.os }}
@@ -15,6 +18,9 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
@@ -39,6 +45,9 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
@@ -70,6 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
@@ -94,6 +106,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+      with:
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
@@ -111,6 +126,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
         with:
@@ -127,13 +145,17 @@ jobs:
   release:
     needs: [test, codegen, linter, build]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags')
+    permissions:
+      id-token: write
+      attestations: write
 
+    if: startsWith(github.ref, 'refs/tags')
     steps:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # 6.0.2
       with:
-        fetch-depth: 0  # fetch tags for setuptools-scm
+        fetch-depth: 0
+        persist-credentials: false
     - name: Set up Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
@@ -145,6 +167,10 @@ jobs:
     - name: Build a binary wheel and a source tarball
       run: |
         python -m build
+    - name: Generate artifact attestation
+      uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32  # 4.1.0
+      with:
+        subject-path: 'dist/*'
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # 1.14.0
       with:

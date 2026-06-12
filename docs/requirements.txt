@@ -1,2 +1,2 @@
-Sphinx==6.*
+Sphinx==8.*
 sphinx_rtd_theme

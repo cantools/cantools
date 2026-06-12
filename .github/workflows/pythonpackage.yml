@@ -1,6 +1,12 @@
 name: Python package
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    tags:
+      - 'v*'
+    branches-ignore:
+      - 'dependabot/**'
 
 env:
   PY_COLORS: "1"

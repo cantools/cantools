@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import os
+import platform
 import unittest
 from io import StringIO
 from unittest import mock
 
 import matplotlib.pyplot as plt
+import pytest
 
 import cantools
 
@@ -15,6 +17,8 @@ class CanToolsPlotTest(unittest.TestCase):
     DBC_FILE = os.path.join(os.path.split(__file__)[0], 'files/dbc/abs.dbc')
     FN_OUT = "out.pdf"
 
+    @pytest.mark.xfail(platform.python_implementation() == "PyPy",
+                       reason="matplotlib might fail on PyPy")
     def test_plot_tz(self):
         self.assertFalse(os.path.exists(self.FN_OUT))
         argv = ['cantools', 'plot', '-o', self.FN_OUT, self.DBC_FILE]
@@ -38,6 +42,8 @@ class CanToolsPlotTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.FN_OUT))
         os.remove(self.FN_OUT)
 
+    @pytest.mark.xfail(platform.python_implementation() == "PyPy",
+                       reason="matplotlib might fail on PyPy")
     def test_plot_style(self):
         self.assertFalse(os.path.exists(self.FN_OUT))
         argv = ['cantools', 'plot', '--style', 'seaborn-v0_8-muted', '-o', self.FN_OUT, self.DBC_FILE]

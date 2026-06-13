@@ -31,6 +31,48 @@ Functions and classes
 .. autoclass:: cantools.database.can.Signal
     :members:
 
+.. autoclass:: cantools.database.can.Node
+    :members:
+
+.. autoclass:: cantools.database.can.Bus
+    :members:
+
+.. autoclass:: cantools.database.can.signal_group.SignalGroup
+    :members:
+
+.. autoclass:: cantools.database.can.attribute_definition.AttributeDefinition
+    :members:
+
+.. autoclass:: cantools.database.can.attribute_definition.AttributeValueType
+    :members:
+
+.. autoclass:: cantools.database.can.attribute.Attribute
+    :members:
+
+.. autoclass:: cantools.database.can.environment_variable.EnvironmentVariable
+    :members:
+
+.. autoclass:: cantools.database.can.formats.dbc_specifics.DbcSpecifics
+    :members:
+
+.. autoclass:: cantools.database.can.formats.arxml.AutosarDatabaseSpecifics
+    :members:
+
+.. autoclass:: cantools.database.can.formats.arxml.AutosarMessageSpecifics
+    :members:
+
+.. autoclass:: cantools.database.can.formats.arxml.AutosarNodeSpecifics
+    :members:
+
+.. autoclass:: cantools.database.can.formats.arxml.AutosarSecOCProperties
+    :members:
+
+.. autoclass:: cantools.database.can.formats.arxml.AutosarEnd2EndProperties
+    :members:
+
+.. autoclass:: cantools.database.can.formats.arxml.AutosarBusSpecifics
+    :members:
+
 .. autoclass:: cantools.database.namedsignalvalue.NamedSignalValue
     :members:
 
@@ -61,6 +103,9 @@ Functions and classes
    .. data:: signals
 
       Message signals.
+
+.. autoclass:: cantools.typechecking.Codec
+    :members:
 
 Coding style
 ============

@@ -6,7 +6,6 @@ from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from decimal import Decimal
 
-import textparser  # type: ignore
 from textparser import (
     Any,
     AnyUntil,
@@ -14,6 +13,7 @@ from textparser import (
     OneOrMore,
     OneOrMoreDict,
     Optional,
+    Parser,
     Sequence,
     Token,
     TokenizeError,
@@ -219,7 +219,7 @@ def _get_attribute_value(attribute: AttributeType) -> str | int | float:
 
         return result
 
-class Parser(textparser.Parser):
+class DbcParser(Parser):
 
     def tokenize(self, string):
         keywords = {
@@ -1662,7 +1662,7 @@ def _load_messages(tokens,
 
     """
 
-    def get_attributes(frame_id_dbc: int) -> Any:
+    def get_attributes(frame_id_dbc: int) -> typing.Any:
         """Get attributes for given message.
 
         """
@@ -2212,7 +2212,7 @@ def load_string(string: str, strict: bool = True,
 
     """
 
-    tokens = Parser().parse(string)
+    tokens = DbcParser().parse(string)
 
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)

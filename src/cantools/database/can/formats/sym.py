@@ -8,11 +8,11 @@ from collections.abc import Callable
 from itertools import groupby
 from typing import TYPE_CHECKING
 
-import textparser  # type: ignore
 from textparser import (
     Any,
     DelimitedList,
     Optional,
+    Parser,
     Sequence,
     Token,
     TokenizeError,
@@ -48,7 +48,7 @@ SEND_MESSAGE_SENDER = 'ECU'
 RECEIVE_MESSAGE_SENDER = 'Peripherals'
 
 
-class Parser60(textparser.Parser):
+class SymParser60(Parser):
     """Create the SYM 6.0 parser.
 
     """
@@ -997,7 +997,7 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
     if not re.search('^FormatVersion=6.0', string, re.MULTILINE):
         raise ParseError('Only SYM version 6.0 is supported.')
 
-    tokens = Parser60().parse(string)
+    tokens = SymParser60().parse(string)
 
     version = _load_version(tokens)
     enums = _load_enums(tokens)

@@ -74,7 +74,7 @@ class Data:
         """
         return self.conversion.scaled_to_raw(scaled_value)
 
-    def choice_to_number(self, string: str | NamedSignalValue) -> int:
+    def choice_to_number(self, string: str | NamedSignalValue) -> int | float:
         try:
             return self.conversion.choice_to_number(string)
         except KeyError as exc:

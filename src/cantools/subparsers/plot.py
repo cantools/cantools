@@ -55,8 +55,11 @@ import datetime
 import re
 import struct
 import sys
+from typing import TYPE_CHECKING, Any
 
 from argparse_addons import Integer  # type: ignore
+
+from cantools.database.can.database import Database
 
 try:
     from matplotlib import pyplot as plt
@@ -65,6 +68,9 @@ except ImportError:
 
 from .. import database, errors
 from ..database.namedsignalvalue import NamedSignalValue
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
 
@@ -94,18 +100,18 @@ RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s+[0-9.+-]+(\s+.*)?,?|\)')
 RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?P<data>[\dA-F]*)(\s+[RT])?$')
 
 
-def _mo_unpack(mo):
+def _mo_unpack(mo: re.Match[str]) -> tuple[str | None, int, bytes]:
     '''extract the data from a re match object'''
     timestamp = mo.group('time')
     frame_id = mo.group('frameid')
     frame_id = '0' * (8 - len(frame_id)) + frame_id
     frame_id = binascii.unhexlify(frame_id)
-    frame_id = struct.unpack('>I', frame_id)[0]
+    frame_id_int: int = struct.unpack('>I', frame_id)[0]
     data = mo.group('data')
     data = data.replace(' ', '')
     data = binascii.unhexlify(data)
 
-    return timestamp, frame_id, data
+    return timestamp, frame_id_int, data
 
 class TimestampParser:
 
@@ -127,21 +133,24 @@ class TimestampParser:
 
     FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
-    def __init__(self, args):
-        self.use_timestamp = None
-        self.relative = None
-        self._parse_timestamp = None
-        self.first_timestamp = None
+    def __init__(self, args: argparse.Namespace) -> None:
+        self.use_timestamp: bool | None = None
+        self.relative: bool | None = None
+        self._parse_timestamp: Callable[[str], datetime.datetime | float] | None = None
+        self.first_timestamp: datetime.datetime | None = None
         self.args = args
 
-    def init_start_stop(self, x0):
+    def init_start_stop(self, x0: int | datetime.datetime | float) -> None:
+        parse: Callable[[str, int | datetime.datetime | float], datetime.datetime | float | int]
         if self.use_timestamp and self.relative:
             parse = self.parse_user_input_relative_time
         elif self.use_timestamp:
             parse = self.parse_user_input_absolute_time
         else:
-            def parse(s, _x0):
+            def parse_fn(s: str, _x0: Any) -> int:
                 return int(s)
+
+            parse = parse_fn
 
         if self.args.start is not None:
             self.args.start = parse(self.args.start, x0)
@@ -150,7 +159,7 @@ class TimestampParser:
         if self.args.stop is not None:
             self.args.stop = parse(self.args.stop, x0)
 
-    def parse_user_input_relative_time(self, user_input, first_timestamp):
+    def parse_user_input_relative_time(self, user_input: str, first_timestamp: Any) -> float:
         try:
             return float(user_input)
         except ValueError:
@@ -172,7 +181,7 @@ class TimestampParser:
 
         raise ValueError(f"Failed to parse relative time {user_input!r}.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.').")
 
-    def strptimedelta_in_seconds(self, user_input, pattern):
+    def strptimedelta_in_seconds(self, user_input: str, pattern: str) -> float | None:
         '''
         Parse the string representation of a time delta object.
         Return value: int in seconds or None if parsing failed.
@@ -197,10 +206,10 @@ class TimestampParser:
 
         d = m.groupdict('0')
         seconds = float(d.pop('s','0') + '.' + d.pop('ms','0'))
-        d = {key:int(d[key]) for key in d}
+        d = { key: int(d[key]) for key in d }
         return ((d.pop('day',0)*24 + d.pop('hour',0))*60 + d.pop('min',0))*60 + seconds
 
-    def parse_user_input_absolute_time(self, user_input, first_timestamp):
+    def parse_user_input_absolute_time(self, user_input: str, first_timestamp: datetime.datetime) -> datetime.datetime:
         patterns_year = ['%Y-%m-%d', '%d.%m.%Y']
         patterns_month = ['%m-%d', '%d.%m.']
         patterns_day = ['%d.']
@@ -236,7 +245,7 @@ class TimestampParser:
 
         raise ValueError(f"Failed to parse absolute time {user_input!r}.\n\nPlease note that an input like 'xx:xx' is ambiguous. It could be either 'HH:MM' or 'MM:SS'. Please specify what you want by adding a leading or trailing colon: 'HH:MM:' or ':MM:SS' (or 'MM:SS.').")
 
-    def first_parse_timestamp(self, timestamp, linenumber):
+    def first_parse_timestamp(self, timestamp: str | None, linenumber: int) -> int | datetime.datetime | float:
         if timestamp is None:
             self.use_timestamp = False
             return linenumber
@@ -270,29 +279,30 @@ class TimestampParser:
         self.use_timestamp = False
         return linenumber
 
-    def parse_timestamp(self, timestamp, linenumber):
+    def parse_timestamp(self, timestamp: str | None, linenumber: int) -> datetime.datetime | float | int:
         if self.use_timestamp is None:
             x = self.first_parse_timestamp(timestamp, linenumber)
             self.init_start_stop(x)
             return x
 
         if self.use_timestamp:
+            assert self._parse_timestamp is not None
             return self._parse_timestamp(timestamp)
         else:
             return linenumber
 
-    def parse_absolute_timestamp(self, timestamp):
+    def parse_absolute_timestamp(self, timestamp: str) -> datetime.datetime:
         return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
 
     @staticmethod
-    def parse_absolute_seconds(timestamp):
+    def parse_absolute_seconds(timestamp: str) -> datetime.datetime:
         return datetime.datetime.fromtimestamp(float(timestamp))
 
     @staticmethod
-    def parse_seconds(timestamp):
+    def parse_seconds(timestamp: str) -> float:
         return float(timestamp)
 
-    def get_label(self):
+    def get_label(self) -> str:
         if self.use_timestamp:
             if self.relative:
                 label = "relative time"
@@ -306,7 +316,7 @@ class TimestampParser:
 
         return label
 
-def _do_decode(args):
+def _do_decode(args: argparse.Namespace) -> None:
     '''
     The entry point of the program.
     It iterates over all input lines, parses them
@@ -317,7 +327,7 @@ def _do_decode(args):
 
     if args.list_styles:
         print("available matplotlib styles:")
-        for style in plt.style.available:
+        for style in plt.style.available:  # type: ignore[attr-defined]
             print(f"- {style}")
         return
 
@@ -335,7 +345,8 @@ def _do_decode(args):
                                frame_id_mask=args.frame_id_mask,
                                prune_choices=args.prune,
                                strict=not args.no_strict)
-    re_format = None
+    assert isinstance(dbase, Database)
+    re_format: re.Pattern[str] | None = None
     timestamp_parser = TimestampParser(args)
     if args.show_invalid_syntax:
         # we cannot use a timestamp if we have failed to parse the line
@@ -344,11 +355,11 @@ def _do_decode(args):
         timestamp_parser.use_timestamp = False
 
     if args.style is not None:
-        plt.style.use(args.style)
+        plt.style.use(args.style)  # type: ignore[attr-defined]
 
     plotter = Plotter(dbase, args)
 
-    line_number = 1
+    line_number: int = 1
     while True:
         line = sys.stdin.readline()
 
@@ -403,7 +414,7 @@ class Plotter:
 
     # ------- initialization -------
 
-    def __init__(self, dbase, args):
+    def __init__(self, dbase: Database, args: argparse.Namespace) -> None:
         self.dbase = dbase
         self.decode_choices = not args.no_decode_choices
         self.show_invalid_syntax = args.show_invalid_syntax
@@ -415,13 +426,13 @@ class Plotter:
         self.output_filename = args.output_file
         self.signals = Signals(args.signals, args.case_sensitive, args.break_time, args, args.auto_color_ylabels, dbase)
 
-        self.x_invalid_syntax = []
-        self.x_unknown_frames = []
-        self.x_invalid_data = []
+        self.x_invalid_syntax: list[int] = []
+        self.x_unknown_frames: list[datetime.datetime | float | int] = []
+        self.x_invalid_data: list[datetime.datetime | float | int] = []
 
     # ------- while reading data -------
 
-    def add_msg(self, timestamp, frame_id, data):
+    def add_msg(self, timestamp: datetime.datetime | float | int, frame_id: int, data: bytes) -> None:
         try:
             message = self.dbase.get_message_by_frame_id(frame_id)
         except KeyError:
@@ -440,15 +451,16 @@ class Plotter:
                 print(f'Failed to parse data of frame id {frame_id} (0x{frame_id:x}): {e}')
             return
 
-        for signal in decoded_signals:
+        assert isinstance(decoded_signals, dict)
+        for signal_name, signal_value in decoded_signals.items():
             x = timestamp
-            y = decoded_signals[signal]
+            y = signal_value
             if isinstance(y, NamedSignalValue):
                 y = str(y)
-            signal = message.name + '.' + signal
+            signal = message.name + '.' + signal_name
             self.signals.add_value(signal, x, y)
 
-    def failed_to_parse_line(self, timestamp, line):
+    def failed_to_parse_line(self, timestamp: int, line: str) -> None:
         if self.show_invalid_syntax:
             self.x_invalid_syntax.append(timestamp)
         if not self.ignore_invalid_syntax:
@@ -456,7 +468,7 @@ class Plotter:
 
     # ------- at end -------
 
-    def plot(self, xlabel):
+    def plot(self, xlabel: str) -> None:
         self.signals.plot(xlabel, self.x_invalid_syntax, self.x_unknown_frames, self.x_invalid_data)
         if self.output_filename:
             plt.savefig(self.output_filename)
@@ -499,14 +511,14 @@ class Signals:
 
     # ------- initialization -------
 
-    def __init__(self, signals, case_sensitive, break_time, global_subplot_args, auto_color_ylabels, dbase):
+    def __init__(self, signals: list[str], case_sensitive: bool, break_time: float, global_subplot_args: argparse.Namespace, auto_color_ylabels: bool, dbase: Database) -> None:
         self.dbase = dbase
         self.args = signals
         self.global_subplot_args = global_subplot_args
-        self.signals = []
-        self.values = {}
+        self.signals: list[Signal] = []
+        self.values: dict[str, Graph] = {}
         self.re_flags = 0 if case_sensitive else re.IGNORECASE
-        self.break_time = break_time
+        self.break_time: float | datetime.timedelta = break_time
         self.break_time_uninit = True
         self.subplot = self.FIRST_SUBPLOT
         self.subplot_axis = self.FIRST_AXIS
@@ -555,17 +567,15 @@ class Signals:
 
         self.compile_reo()
 
-    def init_break_time(self, datatype):
-        if self.break_time <= 0:
-            self.break_time = None
-        elif datatype == datetime.datetime:
+    def init_break_time(self, datatype: type) -> None:
+        if datatype == datetime.datetime:
             self.half_break_time = datetime.timedelta(seconds=self.break_time/2)
             self.break_time = datetime.timedelta(seconds=self.break_time)
         else:
             self.half_break_time = self.break_time / 2
         self.break_time_uninit = False
 
-    def add_signal(self, signal):
+    def add_signal(self, signal: str) -> None:
         if self.SEP_FMT in signal:
             signal, fmt = signal.split(self.SEP_FMT, 1)
             if fmt.startswith(self.FMT_STEM):
@@ -592,12 +602,12 @@ class Signals:
         sgo = Signal(reo, self.subplot, self.subplot_axis, plt_func, fmt)
         self.signals.append(sgo)
 
-    def compile_reo(self):
+    def compile_reo(self) -> None:
         self.reo = re.compile('|'.join(sg.reo.pattern for sg in self.signals), re.IGNORECASE)
 
     # ------- while reading data -------
 
-    def add_value(self, signal, x, y):
+    def add_value(self, signal: str, x: datetime.datetime | float | int, y: Any) -> None:
         if not self.is_displayed_signal(signal):
             return
 
@@ -723,7 +733,7 @@ class Signals:
         self.legend_handles = []
         self.legend_labels = []
 
-    def contains_no_color(self, fmt):
+    def contains_no_color(self, fmt: str) -> bool:
         for c in fmt:
             if c in PYPLOT_BASE_COLORS:
                 return False
@@ -749,7 +759,7 @@ class Signals:
 
         return False
 
-    def get_signal_unit(self, signal_name):
+    def get_signal_unit(self, signal_name: str) -> str | None:
         msg, signal = re.split(self.SEP_SG, signal_name)
         return self.dbase.get_message_by_name(msg).get_signal_by_name(signal).unit
 

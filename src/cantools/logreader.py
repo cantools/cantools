@@ -2,10 +2,9 @@ import abc
 import binascii
 import datetime
 import enum
-import io
 import re
-from collections.abc import Iterator
-from typing import Literal, overload
+from collections.abc import Iterator, Sequence
+from typing import Literal, TextIO, overload
 
 TimestampType = datetime.datetime | datetime.timedelta | None
 TimezoneType = datetime.tzinfo | Literal['local'] | None
@@ -306,7 +305,7 @@ class Parser:
                 print(f'{frame.timestamp}: {frame.frame_id}')
     """
 
-    def __init__(self, stream: io.TextIOBase | None = None, *, tz: TimezoneType = TZ_LOCAL) -> None:
+    def __init__(self, stream: TextIO | None = None, *, tz: TimezoneType = TZ_LOCAL) -> None:
         '''
         :param tz: The timezone which returned datetime objects should have when parsing `candump -l`, `candump -L` or `candump -ta`.
                    (It cannot be applied to `candump -tA` because the information is missing which timezone the time stamps have.
@@ -323,7 +322,8 @@ class Parser:
         self.tz = tz
 
     def detect_pattern(self, line: str) -> BasePattern | None:
-        for p in [CandumpDefaultPattern(), CandumpTimestampedPattern(self.tz), CandumpDefaultLogPattern(self.tz), CandumpAbsoluteLogPattern(), PCANTracePatternV21(), PCANTracePatternV20(), PCANTracePatternV13(), PCANTracePatternV12(), PCANTracePatternV11(), PCANTracePatternV10()]:
+        patterns: Sequence[BasePattern] = [CandumpDefaultPattern(), CandumpTimestampedPattern(self.tz), CandumpDefaultLogPattern(self.tz), CandumpAbsoluteLogPattern(), PCANTracePatternV21(), PCANTracePatternV20(), PCANTracePatternV13(), PCANTracePatternV12(), PCANTracePatternV11(), PCANTracePatternV10()]
+        for p in patterns:
             mo = p.pattern.match(line)
             if mo:
                 return p

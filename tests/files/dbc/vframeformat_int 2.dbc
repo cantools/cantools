@@ -1,0 +1,14 @@
+VERSION ""
+BS_:
+BU_: Test
+
+BO_ 2164195584 TestMsg_J1939: 8 Test
+ SG_ TestSig_Copy_1 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 7 TestMsg_Std: 8 Test
+ SG_ TestSig_Copy_2 : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+
+BA_DEF_ BO_  "VFrameFormat" INT 0 3;
+BA_DEF_DEF_  "VFrameFormat" 3;
+BA_ "VFrameFormat" BO_ 7 0;

@@ -259,7 +259,7 @@ class Signal:
         else:
             self.comments = Comments({None: value})
 
-    def choice_to_number(self, choice: str | NamedSignalValue) -> int:
+    def choice_to_number(self, choice: str | NamedSignalValue) -> int | float:
         try:
             return self.conversion.choice_to_number(choice)
         except KeyError as exc:

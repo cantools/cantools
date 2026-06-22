@@ -106,7 +106,7 @@ class BaseConversion(ABC):
         """
         raise NotImplementedError
 
-    def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
+    def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int | float:
         raise KeyError
 
     @abstractmethod
@@ -227,7 +227,7 @@ class NamedSignalConversion(BaseConversion):
         self.scale = scale
         self.offset = offset
         self.is_float = is_float
-        self._inverse_choices: dict[str, int] = {}
+        self._inverse_choices: dict[str, int | float] = {}
         self.choices: Choices = choices
         self._update_choices()
 
@@ -245,7 +245,7 @@ class NamedSignalConversion(BaseConversion):
         raw_value: int | float,
         decode_choices: bool = True,
     ) -> SignalValueType:
-        if decode_choices and (choice := self.choices.get(raw_value)) is not None:  # type: ignore[arg-type]
+        if decode_choices and (choice := self.choices.get(raw_value)) is not None:
             return choice
         return self._conversion.raw_to_scaled(raw_value, False)
 
@@ -275,7 +275,7 @@ class NamedSignalConversion(BaseConversion):
         # we simply assume that the choices are invertible
         self._inverse_choices = {str(x[1]): x[0] for x in self.choices.items()}
 
-    def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int:
+    def choice_to_number(self, choice: Union[str, "NamedSignalValue"]) -> int | float:
         return self._inverse_choices[str(choice)]
 
     def __repr__(self) -> str:

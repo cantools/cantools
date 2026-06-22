@@ -3,7 +3,7 @@ import argparse
 from .. import database
 
 
-def _do_convert(args):
+def _do_convert(args: argparse.Namespace) -> None:
     dbase = database.load_file(args.infile,
                                encoding=args.encoding,
                                prune_choices=args.prune,

@@ -36,7 +36,7 @@ class DataType:
         self.minimum = minimum
         self.maximum = maximum
         self.choices = choices
-        self.byte_order = byte_order
+        self.byte_order: ByteOrder = byte_order
         self.unit = unit
         self.factor = factor
         self.offset = offset
@@ -50,10 +50,12 @@ def _load_choices(data_type: ElementTree.Element) -> Choices | None:
         end = int(choice.attrib['e'].strip('()'))
 
         if start == end:
-            choice_text = choice.findtext('TEXT/TUV[1]')
-            if choice_text is None:
+            choice_text_elem = choice.find('TEXT/TUV[1]')
+            if choice_text_elem is None:
+                raise KeyError("Could not find TUV element in TEXTMAP!")
+            if choice_text_elem.text is None:
                 raise ValueError(f"Could not find name in TUV!")
-            choices[start] = choice_text
+            choices[start] = choice_text_elem.text
 
     if not choices:
         return None
@@ -85,7 +87,10 @@ def _load_data_types(ecu_doc: ElementTree.Element | None) -> dict[str, DataType]
         maximum = None
 
         # Name and id.
-        type_name = data_type.findtext('NAME/TUV[1]')
+        type_name_elem = data_type.find('NAME/TUV[1]')
+        if type_name_elem is None:
+            raise KeyError(f"Could not find TUV element in DATATYPE IDENT with id{data_type.attrib.get('id')}!")
+        type_name = type_name_elem.text
         if type_name is None:
             raise ValueError(f"Could not find name in DATATYPE IDENT with id={data_type.attrib.get('id')}!")
         type_id = data_type.attrib['id']
@@ -163,7 +168,10 @@ def _load_data_element(data: ElementTree.Element, offset: int, data_types: dict[
         is_float=False
     )
 
-    name = data.findtext('QUAL')
+    qual_elem = data.find('QUAL')
+    if qual_elem is None:
+        raise ValueError(f"Could not find QUAL in data with id={data.attrib.get('id')}!")
+    name = qual_elem.text
     if name is None:
         raise ValueError(f"Could not get QUAL text in data with id={data.attrib.get('id')}!")
 
@@ -207,7 +215,10 @@ def _load_did_element(did: ElementTree.Element, data_types: dict[str, DataType],
     if static_value is None:
         raise KeyError(f"Could not find STATICVALUE element in DID with id={did.attrib.get('id')}!")
     identifier = int(static_value.attrib['v'])
-    name = did.findtext('QUAL')
+    qual_elem = did.find('QUAL')
+    if qual_elem is None:
+        raise ValueError(f"Could not find QUAL in DID with id={did.attrib.get('id')}!")
+    name = qual_elem.text
     if name is None:
         raise ValueError(f"Could not get QUAL text in DID with id={did.attrib.get('id')}!")
     length = (offset + 7) // 8

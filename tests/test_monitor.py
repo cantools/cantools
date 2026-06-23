@@ -23,8 +23,7 @@ class Args(argparse.Namespace):
 
     def __init__(self,
                  database,
-                 single_line=False,
-                 legacy_args=False):
+                 single_line=False):
         kwargs = {
             "database": database,
             "encoding": None,
@@ -35,19 +34,10 @@ class Args(argparse.Namespace):
             "fd": False,
             "channel": 'vcan0',
             "filter_regex": '',
+            "interface": "socketcan",
+            "bitrate": None,
+            "bus_kwargs": [],
         }
-
-        if legacy_args:
-            # TODO: this branch can be removed once legacy args are removed
-            kwargs["bus_type"] = "socketcan"
-            kwargs["bit_rate"] = None
-            kwargs["extra_args"] = []
-        else:
-            kwargs["interface"] = "socketcan"
-            kwargs["bitrate"] = None
-            kwargs["bus_kwargs"] = []
-
-
         super().__init__(**kwargs)
 
 
@@ -2071,7 +2061,7 @@ class CanToolsMonitorTest(unittest.TestCase):
     @patch('curses.init_pair')
     @patch('curses.curs_set')
     @patch('curses.use_default_colors')
-    def test_extra_args_parsing(self,
+    def test_bus_kwargs_parsing(self,
                                 _use_default_colors,
                                 _curs_set,
                                 _init_pair,
@@ -2081,10 +2071,10 @@ class CanToolsMonitorTest(unittest.TestCase):
                                 _notifier):
         # Prepare mocks.
         stdscr = StdScr()
-        args = Args('tests/files/dbc/motohawk.dbc', legacy_args=True)
-        args.bus_type = 'socketcand'
+        args = Args('tests/files/dbc/motohawk.dbc')
+        args.interface = 'socketcand'
         args.channel = 'can0'
-        args.extra_args = ['--host=192.168.0.10', '--port=29536']
+        args.bus_kwargs = {'host': '192.168.0.10', 'port': 29536}
         color_pair.side_effect = lambda i: self.color_pair_side_effect[i]
         is_term_resized.return_value = False
 
@@ -2093,8 +2083,8 @@ class CanToolsMonitorTest(unittest.TestCase):
         monitor.run(1)
 
         # Check mocks.
-        self.assert_called(bus, [call(interface='socketcand', channel='can0',
-                                      host='192.168.0.10', port=29536)])
+        self.assert_called(bus, [call(single_handle=True, interface='socketcand', channel='can0',
+                                      host='192.168.0.10', port=29536, bitrate=None, fd=False)])
 
 
 if __name__ == '__main__':

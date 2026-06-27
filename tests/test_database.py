@@ -5769,6 +5769,24 @@ class CanToolsDatabaseTest(unittest.TestCase):
         db = cantools.database.load_file(filename)
         self.assert_dbc_dump(db, filename_dumped)
 
+    def test_issue_784_ba_rel_uses_shortened_signal_name(self):
+        """Test that BA_REL_ entries use the shortened signal name."""
+
+        filename = 'tests/files/dbc/issue_784.dbc'
+        db = cantools.database.load_file(filename)
+        dumped = db.as_dbc_string()
+
+        self.assertIn(
+            'BA_REL_ "SigTimeoutTime" BU_SG_REL_ '
+            'ECU2_123456789012345678901234567 SG_ 82 '
+            'signal_1_123456789012345678_0000 6000;',
+            dumped)
+        self.assertNotIn(
+            'BA_REL_ "SigTimeoutTime" BU_SG_REL_ '
+            'ECU2_123456789012345678901234567 SG_ 82 '
+            'signal_1_12345678901234567890124 6000;',
+            dumped)
+
     def test_database_version(self):
         # default value if db created from scratch (map None to ''):
         db = cantools.database.Database()

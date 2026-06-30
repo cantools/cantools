@@ -865,7 +865,7 @@ def _dump_signals(database: InternalDatabase, sort_signals: Callable[[list[Signa
                 generated_signals.add(signal.name)
                 signal_dumps.append(_dump_signal(signal))
 
-    if signals:
+    if signal_dumps:
         return '{SIGNALS}\n' + '\n'.join(signal_dumps)
     else:
         return ''

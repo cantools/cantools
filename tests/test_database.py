@@ -1962,6 +1962,39 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(len(db.messages), 1)
         self.assertEqual(db.messages[0].name, 'Symbol1')
 
+    def test_as_sym_string_empty_database(self):
+        # as_sym_string() on a database with no messages must not crash
+        # (regression: _dump_signals checked an unbound loop variable).
+        db = cantools.database.Database(messages=[])
+
+        sym = db.as_sym_string()
+        self.assertIn('FormatVersion', sym)
+        # ... and round-trips back to an empty database.
+        reloaded = cantools.database.load_string(sym, 'sym')
+        self.assertEqual(len(reloaded.messages), 0)
+
+    def test_as_sym_string_last_message_without_signals(self):
+        # When the last message has no signals, the {SIGNALS} block defining
+        # the earlier messages' signals must still be written; otherwise the
+        # emitted SYM references signals it never defines and cannot be re-read
+        # (regression: the guard used the loop variable, not the accumulator).
+        speed = Signal(name='Speed', start=0, length=8)
+        with_signals = Message(frame_id=0x100, name='HasSignals',
+                               length=8, signals=[speed])
+        without_signals = Message(frame_id=0x101, name='NoSignals',
+                                  length=8, signals=[])
+        db = cantools.database.Database(
+            messages=[with_signals, without_signals])
+
+        sym = db.as_sym_string()
+        self.assertIn('{SIGNALS}', sym)
+
+        reloaded = cantools.database.load_string(sym, 'sym')
+        by_name = {m.name: [s.name for s in m.signals]
+                   for m in reloaded.messages}
+        self.assertEqual(by_name['HasSignals'], ['Speed'])
+        self.assertEqual(by_name['NoSignals'], [])
+
     def test_signal_types_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/signal-types-6.0.sym')
 

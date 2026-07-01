@@ -828,9 +828,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         # the cycle time specified by the message object
         msg_cycle_time = message.cycle_time or 0
 
-        gen_msg_cycle_time_def = None
-        if message.dbc is not None:
-            gen_msg_cycle_time_def = database.dbc.attribute_definitions.get("GenMsgCycleTime")
+        gen_msg_cycle_time_def = database.dbc.attribute_definitions.get("GenMsgCycleTime")
 
         if gen_msg_cycle_time_def is not None and msg_cycle_time != gen_msg_cycle_time_def.default_value:
             msg_attributes['GenMsgCycleTime'] = Attribute(

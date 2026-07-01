@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
     from .attribute import AttributeType
     from .attribute_definition import AttributeDefinitionType
-    from .dbc import DbcRelationAttributes
     from .dbc_environment_variable import DbcEnvironmentVariable
+    from .dbc_loader import DbcRelationAttributes
 
 class DbcSpecifics:
 

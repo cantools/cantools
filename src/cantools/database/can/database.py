@@ -17,7 +17,7 @@ from ..utils import (
 from .bus import Bus
 from .formats import arxml, kcd, sym
 from .formats.arxml import AutosarDatabaseSpecifics
-from .formats.dbc import DbcSpecifics, dbc
+from .formats.dbc import DbcSpecifics, dbc_loader, dbc_writer
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node
@@ -335,7 +335,7 @@ class Database:
 
         """
 
-        database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
+        database = dbc_loader.load_string(string, self._strict, sort_signals=self._sort_signals)
 
         self._messages += database.messages
         self._nodes = database.nodes
@@ -457,11 +457,11 @@ class Database:
         if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
             sort_signals = None
 
-        return dbc.dump_string(InternalDatabase(self._messages,
-                                                self._nodes,
-                                                self._buses,
-                                                self._version,
-                                                self._dbc),
+        return dbc_writer.dump_string(InternalDatabase(self._messages,
+                                                       self._nodes,
+                                                       self._buses,
+                                                       self._version,
+                                                       self._dbc),
                                sort_signals=sort_signals,
                                sort_attribute_signals=sort_attribute_signals,
                                sort_attributes=sort_attributes,

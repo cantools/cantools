@@ -18,8 +18,8 @@ from parameterized import parameterized  # type: ignore
 import cantools.autosar
 import cantools.database
 from cantools.database import Message, Signal
-from cantools.database.can.formats.dbc import dbc
-from cantools.database.can.formats.dbc.dbc import LongNamesConverter
+from cantools.database.can.formats.dbc import dbc_loader
+from cantools.database.can.formats.dbc.dbc_writer import LongNamesConverter
 from cantools.database.errors import (
     DecodeError,
     EncodeError,
@@ -3012,7 +3012,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # No valid entry.
         with self.assertRaises(textparser.ParseError) as cm:
 
-            dbc.load_string('abc')
+            dbc_loader.load_string('abc')
 
         self.assertEqual(
             str(cm.exception),
@@ -3020,8 +3020,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Bad message frame id.
         with self.assertRaises(textparser.ParseError) as cm:
-            dbc.load_string('VERSION "1.0"\n'
-                            'BO_ dssd\n')
+            dbc_loader.load_string('VERSION "1.0"\n'
+                                   'BO_ dssd\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -3029,8 +3029,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Bad entry key.
         with self.assertRaises(textparser.ParseError) as cm:
-            dbc.load_string('VERSION "1.0"\n'
-                            'dd\n')
+            dbc_loader.load_string('VERSION "1.0"\n'
+                                   'dd\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -3038,8 +3038,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Missing colon in message.
         with self.assertRaises(textparser.ParseError) as cm:
-            dbc.load_string('VERSION "1.0"\n'
-                            'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
+            dbc_loader.load_string('VERSION "1.0"\n'
+                                   'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
 
         self.assertEqual(
             str(cm.exception),
@@ -3048,7 +3048,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         # Missing frame id in message comment.
         with self.assertRaises(textparser.ParseError) as cm:
-            dbc.load_string('CM_ BO_ "Foo.";')
+            dbc_loader.load_string('CM_ BO_ "Foo.";')
 
         self.assertEqual(
             str(cm.exception),

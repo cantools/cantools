@@ -1,0 +1,1068 @@
+# Serialize a CAN database to DBC format.
+
+import re
+from collections import OrderedDict
+from copy import deepcopy
+
+from cantools.database.can.internal_database import InternalDatabase
+
+from ....errors import ParseError
+from ....utils import (
+    SORT_SIGNALS_DEFAULT,
+    sort_signals_by_start_bit_reversed,
+    type_sort_attribute,
+    type_sort_attributes,
+    type_sort_choices,
+    type_sort_signals,
+)
+from ...message import Message
+from ...signal import Signal
+from .attribute import Attribute, AttributeType
+from .attribute_definition import (
+    AttributeDefinition,
+    AttributeDefinitionType,
+)
+from .dbc_loader import (
+    ATTRIBUTE_DEFINITION_VFRAMEFORMAT,
+    _get_enum_vframeformat_definition,
+    dbc_assert_type,
+    get_dbc_frame_id,
+)
+from .dbc_specifics import DbcSpecifics
+
+DBC_FMT = (
+    'VERSION "{version}"\r\n'
+    '\r\n'
+    '\r\n'
+    'NS_ : \r\n'
+    '\tNS_DESC_\r\n'
+    '\tCM_\r\n'
+    '\tBA_DEF_\r\n'
+    '\tBA_\r\n'
+    '\tVAL_\r\n'
+    '\tCAT_DEF_\r\n'
+    '\tCAT_\r\n'
+    '\tFILTER\r\n'
+    '\tBA_DEF_DEF_\r\n'
+    '\tEV_DATA_\r\n'
+    '\tENVVAR_DATA_\r\n'
+    '\tSGTYPE_\r\n'
+    '\tSGTYPE_VAL_\r\n'
+    '\tBA_DEF_SGTYPE_\r\n'
+    '\tBA_SGTYPE_\r\n'
+    '\tSIG_TYPE_REF_\r\n'
+    '\tVAL_TABLE_\r\n'
+    '\tSIG_GROUP_\r\n'
+    '\tSIG_VALTYPE_\r\n'
+    '\tSIGTYPE_VALTYPE_\r\n'
+    '\tBO_TX_BU_\r\n'
+    '\tBA_DEF_REL_\r\n'
+    '\tBA_REL_\r\n'
+    '\tBA_DEF_DEF_REL_\r\n'
+    '\tBU_SG_REL_\r\n'
+    '\tBU_EV_REL_\r\n'
+    '\tBU_BO_REL_\r\n'
+    '\tSG_MUL_VAL_\r\n'
+    '\r\n'
+    'BS_:\r\n'
+    '\r\n'
+    'BU_: {bu}\r\n'
+    '{val_table}'
+    '\r\n'
+    '\r\n'
+    '{bo}\r\n'
+    '\r\n'
+    '{bo_tx_bu}\r\n'
+    '{ev}\r\n'
+    '\r\n'
+    '{cm}\r\n'
+    '{ba_def}\r\n'
+    '{ba_def_rel}'
+    '{ba_def_def}\r\n'
+    '{ba_def_def_rel}'
+    '{ba}\r\n'
+    '{ba_rel}'
+    '{val}\r\n'
+    '{signal_types}\r\n'
+    '{sig_group}\r\n'
+    '{sig_mux_values}\r\n'
+)
+
+# map bit length to float signal type.
+FLOAT_LENGTH_TO_SIGNAL_TYPE = {
+    32: 1,  # SIGNAL_TYPE_FLOAT
+    64: 2,  # SIGNAL_TYPE_DOUBLE
+}
+
+ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME = AttributeDefinition(
+    'SystemEnvVarLongSymbol',
+    default_value='',
+    kind='EV_',
+    type_name='STRING')
+
+ATTRIBUTE_DEFINITION_LONG_NODE_NAME = AttributeDefinition(
+    'SystemNodeLongSymbol',
+    default_value='',
+    kind='BU_',
+    type_name='STRING')
+
+ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME = AttributeDefinition(
+    'SystemMessageLongSymbol',
+    default_value='',
+    kind='BO_',
+    type_name='STRING')
+
+ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME = AttributeDefinition(
+    'SystemSignalLongSymbol',
+    default_value='',
+    kind='SG_',
+    type_name='STRING')
+
+ATTRIBUTE_DEFINITION_BAUDRATE = AttributeDefinition(
+    name='Baudrate',
+    default_value=125_000,
+    type_name='INT',
+    minimum=0,
+    maximum=10*1024*1024)
+
+ATTRIBUTE_DEFINITION_CANFD_BRS = AttributeDefinition(
+    name='CANFD_BRS',
+    default_value='1',
+    kind='BO_',
+    type_name='ENUM',
+    choices=['0', '1'])
+
+ATTRIBUTE_DEFINITION_GENMSGCYCLETIME = AttributeDefinition(
+    name='GenMsgCycleTime',
+    default_value=0,
+    kind='BO_',
+    type_name='INT',
+    minimum=0,
+    maximum=2**16-1)
+
+ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
+    name='GenSigStartValue',
+    default_value=0.0,
+    kind='SG_',
+    type_name='FLOAT',
+    minimum=0,
+    maximum=100000000000)
+
+
+class LongNamesConverter:
+    def __init__(self, long_names: list[str]) -> None:
+
+        self.long_to_short: dict[str, str] = {}
+        self.short_to_long: dict[str, str] = {}
+
+        for long_name in sorted(long_names, key=lambda s: (len(s), s)):
+            short_name = long_name[:32]
+            index = -1
+            while short_name in self.short_to_long:
+                index += 1
+                short_name = f'{short_name[:27]}_{index:04d}'
+
+            self.long_to_short[long_name] = short_name
+            self.short_to_long[short_name] = long_name
+
+
+def get_dbc_name(name: str) -> str:
+    # replace special chars with '_'
+    name = re.sub(r'\W', '_', name)
+    # prepend '_' if it starts with a number
+    if name[0].isdigit():
+        name = '_' + name
+
+    return name
+
+
+def get_attribute_definition(database: InternalDatabase, name: str, default: AttributeDefinitionType) -> AttributeDefinitionType:
+    if database.dbc is None:
+        database.dbc = DbcSpecifics()
+
+    if name not in database.dbc.attribute_definitions:
+        database.dbc.attribute_definitions[name] = default
+
+    return database.dbc.attribute_definitions[name]
+
+
+def get_long_envvar_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+    return dbc_assert_type(get_attribute_definition(database,
+                                    'SystemEnvVarLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME), AttributeDefinition)
+
+
+def get_long_node_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+    return dbc_assert_type(get_attribute_definition(database,
+                                    'SystemNodeLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_NODE_NAME), AttributeDefinition)
+
+
+def get_long_message_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+    return dbc_assert_type(get_attribute_definition(database,
+                                    'SystemMessageLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME), AttributeDefinition)
+
+
+def get_long_signal_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+    return dbc_assert_type(get_attribute_definition(database,
+                                    'SystemSignalLongSymbol',
+                                    ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME), AttributeDefinition)
+
+
+def try_remove_attribute(dbc: DbcSpecifics, name: str) -> None:
+    if dbc is not None and name in dbc.attributes:
+        dbc.attributes.pop(name)
+
+
+def remove_special_chars(database: InternalDatabase) -> InternalDatabase:
+    for node in database.nodes:
+        new_node_name = get_dbc_name(node.name)
+
+        for message in database.messages:
+            for index, sender in enumerate(message.senders):
+                if sender == node.name:
+                    message.senders[index] = new_node_name
+
+            for signal in message.signals:
+                for index, receiver in enumerate(signal.receivers):
+                    if receiver == node.name:
+                        signal.receivers[index] = new_node_name
+
+        node.name = new_node_name
+
+    for message in database.messages:
+        message.name = get_dbc_name(message.name)
+
+        for signal in message.signals:
+            signal.name = get_dbc_name(signal.name)
+
+        if message.signal_groups is not None:
+            for signal_group in message.signal_groups:
+                signal_group.name = get_dbc_name(signal_group.name)
+                signal_group.signal_names = [get_dbc_name(sig_name) for sig_name in signal_group.signal_names]
+
+    return database
+
+
+def make_node_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    converter = LongNamesConverter([node.name for node in database.nodes])
+
+    for node in database.nodes:
+        long_name = node.name
+        short_name = converter.long_to_short[long_name]
+        try_remove_attribute(node.dbc, 'SystemNodeLongSymbol')
+
+        if (long_name == short_name) or not shorten_long_names:
+            continue
+
+        for message in database.messages:
+            for index, sender in enumerate(message.senders):
+                if sender == node.name:
+                    message.senders[index] = short_name
+
+            for signal in message.signals:
+                for index, receiver in enumerate(signal.receivers):
+                    if receiver == node.name:
+                        signal.receivers[index] = short_name
+
+        if node.dbc is None:
+            node.dbc = DbcSpecifics()
+
+        node.dbc.attributes['SystemNodeLongSymbol'] = Attribute(
+            long_name,
+            get_long_node_name_attribute_definition(database))
+        node.name = short_name
+
+
+def make_message_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    converter = LongNamesConverter([message.name for message in database.messages])
+
+    for message in database.messages:
+        long_name = message.name
+        short_name = converter.long_to_short[long_name]
+        if message.dbc is not None:
+            try_remove_attribute(message.dbc, 'SystemMessageLongSymbol')
+
+        if (long_name == short_name) or not shorten_long_names:
+            continue
+
+        if message.dbc is None:
+            message.dbc = DbcSpecifics()
+
+        message.dbc.attributes['SystemMessageLongSymbol'] = Attribute(
+            long_name,
+            get_long_message_name_attribute_definition(database))
+        message.name = short_name
+
+
+def update_signal_relation_attribute_names(database: InternalDatabase,
+                                           message: Message,
+                                           converter: LongNamesConverter,
+                                           shorten_long_names: bool) -> None:
+    if database.dbc is None or database.dbc.relation_attributes is None or not shorten_long_names:
+        return
+
+    frame_id = get_dbc_frame_id(message)
+
+    signal_map = database.dbc.relation_attributes.node_signal_relations.get(frame_id)
+    if signal_map is None:
+        return
+
+    updated_signal_map = OrderedDict()
+    for signal_name, value in signal_map.items():
+        signal_name = converter.long_to_short.get(signal_name, signal_name)
+        updated_signal_map[signal_name] = value
+
+    database.dbc.relation_attributes.node_signal_relations[frame_id] = updated_signal_map
+
+
+def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    for message in database.messages:
+        converter = LongNamesConverter([signal.name for signal in message.signals])
+        update_signal_relation_attribute_names(
+            database,
+            message,
+            converter,
+            shorten_long_names)
+
+        for signal in message.signals:
+            long_name = signal.name
+            short_name = converter.long_to_short[long_name]
+            try_remove_attribute(signal.dbc, 'SystemSignalLongSymbol')
+
+            if (long_name == short_name) or not shorten_long_names:
+                continue
+
+            if signal.dbc is None:
+                signal.dbc = DbcSpecifics()
+
+            signal.dbc.attributes['SystemSignalLongSymbol'] = Attribute(
+                long_name,
+                get_long_signal_name_attribute_definition(database))
+            signal.name = short_name
+
+        if shorten_long_names and message.signal_groups:
+            for signal_group in message.signal_groups:
+                signal_group.signal_names = [converter.long_to_short[long_name]
+                                             for long_name in signal_group.signal_names]
+
+
+def make_envvar_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
+    if database.dbc is None:
+        return
+
+    envvars = database.dbc.environment_variables.values()
+    converter = LongNamesConverter([envvar.name for envvar in envvars])
+
+    for envvar in envvars:
+        long_name = envvar.name
+        short_name = converter.long_to_short[long_name]
+        try_remove_attribute(envvar.dbc, 'SystemEnvVarLongSymbol')
+
+        if (long_name == short_name) or not shorten_long_names:
+            continue
+
+        envvar.dbc.attributes['SystemEnvVarLongSymbol'] = Attribute(
+            long_name,
+            get_long_envvar_name_attribute_definition(database))
+        envvar.name = short_name
+
+
+def make_names_unique(database: InternalDatabase, shorten_long_names: bool) -> InternalDatabase:
+    """Make message, signal and node names unique and add attributes for
+    their long names.
+
+    """
+
+    make_node_names_unique(database, shorten_long_names)
+    make_message_names_unique(database, shorten_long_names)
+    make_signal_names_unique(database, shorten_long_names)
+    make_envvar_names_unique(database, shorten_long_names)
+
+    return database
+
+
+def _dump_version(database: InternalDatabase) -> str:
+    return '' if database.version is None else database.version
+
+
+def _dump_nodes(database: InternalDatabase) -> list[str]:
+    bu: list[str] = []
+
+    for node in database.nodes:
+        bu.append(node.name)
+
+    return bu
+
+
+def _dump_value_tables(database: InternalDatabase) -> list[str]:
+    val_table: list[str] = []
+
+    if database.dbc is not None:
+        for name, choices in database.dbc.value_tables.items():
+            choices_list = [
+                f'{number} "{text}"'
+                for number, text in sorted(choices.items(), reverse=True)
+            ]
+            val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices_list)))
+
+    return [*val_table, '']
+
+
+def _dump_messages(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
+    bo: list[str] = []
+
+    def format_mux(signal: Signal) -> str:
+        if signal.is_multiplexer:
+            return ' M'
+        elif signal.multiplexer_ids is not None:
+            return f' m{signal.multiplexer_ids[0]}'
+        else:
+            return ''
+
+    def format_receivers(signal: Signal) -> str:
+        if signal.receivers:
+            return ' ' + ','.join(signal.receivers)
+        else:
+            return 'Vector__XXX'
+
+    def format_senders(message: Message) -> str:
+        if message.senders:
+            return message.senders[0]
+        else:
+            return 'Vector__XXX'
+
+    for message in database.messages:
+        msg: list[str] = []
+        msg.append(
+            f'BO_ {get_dbc_frame_id(message)} {message.name}: {message.length} {format_senders(message)}')
+
+        if callable(sort_signals):
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
+            fmt = (' SG_ {name}{mux} : {start}|{length}@{byte_order}{sign}'
+                   ' ({scale},{offset})'
+                   ' [{minimum}|{maximum}] "{unit}" {receivers}')
+            msg.append(fmt.format(
+                name=signal.name,
+                mux=format_mux(signal),
+                start=signal.start,
+                length=signal.length,
+                receivers=format_receivers(signal),
+                byte_order=(0 if signal.byte_order == 'big_endian' else 1),
+                sign=('-' if signal.is_signed else '+'),
+                scale=signal.scale,
+                offset=signal.offset,
+                minimum=(0 if signal.minimum is None else signal.minimum),
+                maximum=(0 if signal.maximum is None else signal.maximum),
+                unit='' if signal.unit is None else signal.unit))
+
+        bo.append('\r\n'.join(msg))
+
+    return bo
+
+
+def _dump_senders(database: InternalDatabase) -> list[str]:
+    bo_tx_bu: list[str] = []
+
+    for message in database.messages:
+        if len(message.senders) > 1:
+            bo_tx_bu.append(
+                'BO_TX_BU_ {frame_id} : {senders};'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    senders=','.join(message.senders)))
+
+    return bo_tx_bu
+
+
+def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
+    cm: list[str] = []
+
+    for bus in database.buses:
+        if bus.comment is not None:
+            cm.append(f'CM_ "{bus.comment}";')
+
+    for node in database.nodes:
+        if node.comment is not None:
+            cm.append(
+                'CM_ BU_ {name} "{comment}";'.format(
+                    name=node.name,
+                    comment=node.comment.replace('"', '\\"')))
+
+    for message in database.messages:
+        if message.comment is not None:
+            cm.append(
+                'CM_ BO_ {frame_id} "{comment}";'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    comment=message.comment.replace('"', '\\"')))
+
+        if callable(sort_signals):
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
+            if signal.comment is not None:
+                cm.append(
+                    'CM_ SG_ {frame_id} {name} "{comment}";'.format(
+                        frame_id=get_dbc_frame_id(message),
+                        name=signal.name,
+                        comment=signal.comment.replace('"', '\\"')))
+
+    if database.dbc is not None:
+        # Dump environment variable comments (CM_ EV_ <name> "comment";)
+        for env in database.dbc.environment_variables.values():
+            if env.comment is not None:
+                escaped_comment = env.comment.replace('"', '\\"')
+                cm.append(f'CM_ EV_ {env.name} "{escaped_comment}";')
+
+    return cm
+
+
+def _dump_signal_types(database: InternalDatabase) -> list[str]:
+    valtype: list[str] = []
+
+    for message in database.messages:
+        for signal in message.signals:
+            if not signal.is_float:
+                continue
+
+            valtype.append(
+                f'SIG_VALTYPE_ {get_dbc_frame_id(message)} {signal.name} : {FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]};')
+
+    return valtype
+
+
+def _need_startval_def(database: InternalDatabase) -> bool:
+    return any(s.raw_initial is not None
+               for m in database.messages
+               for s in m.signals)
+
+
+def _need_cycletime_def(database: InternalDatabase) -> bool:
+    # If the user has added cycle times to a database which didn't start with them,
+    # we need to add the global attribute definition so the output DBC is valid
+    return any(m.cycle_time is not None
+               for m in database.messages)
+
+
+def _bus_is_canfd(database: InternalDatabase) -> bool:
+    if database.dbc is None:
+        return False
+
+    bus_type = database.dbc.attributes.get('BusType', None)
+    if bus_type is None:
+        return False
+    return bus_type.value == 'CAN FD'
+
+
+def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
+    if database.dbc is None:
+        return []
+
+    definitions = database.dbc.attribute_definitions
+
+    # define "GenMsgCycleTime" attribute for specifying the cycle
+    # times of messages if it has not been explicitly defined
+    if 'GenMsgCycleTime' not in definitions and _need_cycletime_def(database):
+        definitions['GenMsgCycleTime'] = ATTRIBUTE_DEFINITION_GENMSGCYCLETIME
+    if 'GenSigStartValue' not in definitions and _need_startval_def(database):
+        definitions['GenSigStartValue'] = ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE
+
+    # create 'Baudrate' attribute definition
+    if len(database.buses) == 1 and database.buses[0].baudrate is not None:
+        # add a definition of the `Baudrate` attribute if it is needed
+        # and not yet present
+        if 'Baudrate' not in definitions:
+            definitions['Baudrate'] = ATTRIBUTE_DEFINITION_BAUDRATE
+    # remove the definition of the `Baudrate` attribute if it is
+    # not needed
+    elif 'Baudrate' in definitions:
+        del definitions['Baudrate']
+
+    # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if bus is CAN FD
+    if _bus_is_canfd(database):
+        if 'VFrameFormat' not in definitions:
+            definitions['VFrameFormat'] = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
+        if 'CANFD_BRS' not in definitions:
+            definitions['CANFD_BRS'] = ATTRIBUTE_DEFINITION_CANFD_BRS
+
+    def get_kind(definition: AttributeDefinitionType) -> str:
+        return '' if definition.kind is None else definition.kind + ' '
+
+    attribute_definition_lines = []
+    for definition in definitions.values():
+        if definition.type_name == 'ENUM':
+            choices = ','.join([f'"{choice}"'
+                                for choice in definition.choices])
+            attribute_definition_lines.append(
+                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}  {choices};')
+        elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
+            attribute_definition_lines.append(
+                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}{definition.formatted_minimum}{definition.formatted_maximum};')
+        elif definition.type_name == 'STRING':
+            attribute_definition_lines.append(
+                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name} ;')
+
+    return attribute_definition_lines
+
+
+def _dump_relation_attribute_definitions(database: InternalDatabase) -> list[str]:
+    if database.dbc is None:
+        return []
+
+    definitions = database.dbc.relation_attribute_definitions
+
+    relation_attribute_definition_lines: list[str] = []
+    for definition in definitions.values():
+        if definition.type_name == 'ENUM':
+            choices = ','.join([f'"{choice}"'
+                                for choice in definition.choices])
+            relation_attribute_definition_lines.append(
+                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}  {choices};')
+        elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
+            relation_attribute_definition_lines.append(
+                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}{definition.formatted_minimum}{definition.formatted_maximum};')
+        elif definition.type_name == 'STRING':
+            relation_attribute_definition_lines.append(
+                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name} ;')
+
+    return relation_attribute_definition_lines
+
+
+def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
+    ba_def_def: list[str] = []
+
+    if database.dbc is None:
+        return  ba_def_def
+
+    definitions = database.dbc.attribute_definitions
+
+    for definition in definitions.values():
+        if definition.default_value is not None:
+            if definition.type_name in ['STRING', 'ENUM']:
+                fmt = 'BA_DEF_DEF_  "{name}" "{value}";'
+            else:
+                fmt = 'BA_DEF_DEF_  "{name}" {value};'
+
+            ba_def_def.append(fmt.format(name=definition.name,
+                                         value=definition.default_value))
+
+    return ba_def_def
+
+
+def _dump_relation_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
+    if database.dbc is None:
+        return []
+
+    definitions = database.dbc.relation_attribute_definitions
+
+    relation_attribute_definition_default_lines: list[str] = []
+    for definition in definitions.values():
+        if definition.default_value is not None:
+            if definition.type_name in ['STRING', 'ENUM']:
+                fmt = 'BA_DEF_DEF_REL_ "{name}" "{value}";'
+            else:
+                fmt = 'BA_DEF_DEF_REL_ "{name}" {value};'
+
+            relation_attribute_definition_default_lines.append(
+                fmt.format(name=definition.name,
+                           value=definition.default_value))
+
+    return relation_attribute_definition_default_lines
+
+
+def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals, sort_attributes: type_sort_attributes) -> list[str]:
+    if database.dbc is None:
+        return []
+
+    attributes: list[type_sort_attribute] = []
+
+    # remove the old 'Baudrate' attribute if it exists. We synchronize
+    # that DBC attribute with the `.baudrate` attribute of the
+    # high-level bus description object below.
+    if 'Baudrate' in database.dbc.attributes:
+        del database.dbc.attributes['Baudrate']
+
+    # add a new 'Baudrate' attribute
+    baudrate = None
+    if len(database.buses) == 1:
+        baudrate = database.buses[0].baudrate
+    if baudrate is not None:
+        baudrate_attribute_definition = database.dbc.attribute_definitions.get('Baudrate')
+        if baudrate_attribute_definition is None:
+            raise ParseError('Database defines a baudrate but no definition for '
+                             'the corresponding attribute')
+        database.dbc.attributes['Baudrate'] = Attribute[int](
+                    value=int(baudrate),
+                    definition=dbc_assert_type(baudrate_attribute_definition, AttributeDefinition),
+                )
+
+    for attribute in database.dbc.attributes.values():
+        attributes.append(('dbc', attribute, None, None, None, None))
+
+    for envvar in database.dbc.environment_variables.values():
+        if envvar.dbc is not None:
+            for attribute in envvar.dbc.attributes.values():
+                attributes.append(('envvar', attribute, None, None, None, envvar))
+
+    for node in database.nodes:
+        if node.dbc is not None:
+            for attribute in node.dbc.attributes.values():
+                attributes.append(('node', attribute, node, None, None, None))
+
+    for message in database.messages:
+        msg_attributes = OrderedDict[str, AttributeType]()
+        if message.dbc is not None:
+            msg_attributes = deepcopy(message.dbc.attributes)
+
+        # synchronize the attribute for the message cycle time with
+        # the cycle time specified by the message object
+        msg_cycle_time = message.cycle_time or 0
+
+        gen_msg_cycle_time_def = database.dbc.attribute_definitions.get('GenMsgCycleTime')
+
+        if gen_msg_cycle_time_def is not None and msg_cycle_time != gen_msg_cycle_time_def.default_value:
+            msg_attributes['GenMsgCycleTime'] = Attribute(
+                value=msg_cycle_time,
+                definition=dbc_assert_type(gen_msg_cycle_time_def, AttributeDefinition),
+            )
+        elif 'GenMsgCycleTime' in msg_attributes:
+            del msg_attributes['GenMsgCycleTime']
+
+        # if bus is CAN FD, set VFrameFormat
+        v_frame_format_def = None
+        if database.dbc is not None:
+            v_frame_format_def = database.dbc.attribute_definitions.get('VFrameFormat')
+        if v_frame_format_def is not None:
+            if message.protocol == 'j1939':
+                v_frame_format_str = 'J1939PG'
+            elif message.is_fd and message.is_extended_frame:
+                v_frame_format_str = 'ExtendedCAN_FD'
+            elif message.is_fd:
+                v_frame_format_str = 'StandardCAN_FD'
+            elif message.is_extended_frame:
+                v_frame_format_str = 'ExtendedCAN'
+            else:
+                v_frame_format_str = 'StandardCAN'
+            v_frame_format_def = _get_enum_vframeformat_definition(v_frame_format_def)
+            # only set the VFrameFormat if it is valid according to the attribute definition
+            if (
+                v_frame_format_str in v_frame_format_def.choices
+                and v_frame_format_str != v_frame_format_def.default_value
+            ):
+                msg_attributes['VFrameFormat'] = Attribute(
+                    value=str(v_frame_format_def.choices.index(v_frame_format_str)),
+                    definition=v_frame_format_def,
+                )
+
+
+        # output all message attributes
+        for attribute in msg_attributes.values():
+            attributes.append(('message', attribute, None, message, None, None))
+
+        # handle the signals contained in the message
+        if callable(sort_signals):
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
+            # retrieve the ordered dictionary of signal attributes
+            sig_attributes = signal.dbc.attributes
+
+            # synchronize the attribute for the signal start value with
+            # the start value specified by the message object
+            if signal.raw_initial is None and 'GenSigStartValue' in sig_attributes:
+                del sig_attributes['GenSigStartValue']
+            elif signal.raw_initial is not None:
+                sig_attributes['GenSigStartValue'] = Attribute(
+                    value=signal.raw_initial,
+                    definition=ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE)
+
+            # output all signal attributes
+            for attribute in sig_attributes.values():
+                attributes.append(('signal', attribute, None, message, signal, None))
+
+    if callable(sort_attributes):
+        attributes = sort_attributes(attributes)
+
+    attribute_lines: list[str] = []
+    for attribute_type, attribute_to_dump, node_to_dump, message_to_dump, signal_to_dump, envvar_to_dump in attributes:
+        if attribute_type == 'dbc':
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_type == 'envvar':
+            if envvar_to_dump is None:
+                raise ParseError(
+                    f'Need to dump environment variable, but none has been specified')
+
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{envvar_to_dump.name} '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_type == 'node':
+            if node_to_dump is None:
+                raise ParseError(
+                    'Need to dump node, but none has been specified')
+
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{node_to_dump.name} '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_type == 'message':
+            if message_to_dump is None:
+                raise ParseError(
+                    'Need to dump message, but none has been specified')
+
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{get_dbc_frame_id(message_to_dump)} '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_type == 'signal':
+            if signal_to_dump is None:
+                raise ParseError(
+                    'Need to dump signal, but none has been specified')
+            if message_to_dump is None:
+                raise ParseError(
+                    'Need to dump message, but none has been specified')
+
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{get_dbc_frame_id(message_to_dump)} '
+                                   f'{signal_to_dump.name} '
+                                   f'{attribute_to_dump.formatted_value};')
+
+    return attribute_lines
+
+
+def _dump_relation_attributes(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
+    if database.dbc is None or database.dbc.relation_attributes is None:
+        return []
+
+    relation_attributes = database.dbc.relation_attributes
+    relation_attribute_lines: list[str] = []
+    for frame_id, signal_map in relation_attributes.node_signal_relations.items():
+        for signal_name, node_map in signal_map.items():
+            for node_name, attribute_map in node_map.items():
+                for attribute in attribute_map.values():
+                    relation_attribute_lines.append(f'BA_REL_ "{attribute.definition.name}" '
+                                                    f'BU_SG_REL_ '
+                                                    f'{node_name} '
+                                                    f'SG_ '
+                                                    f'{frame_id} '
+                                                    f'{signal_name} '
+                                                    f'{attribute.formatted_value};')
+    for frame_id, node_map in relation_attributes.node_message_relations.items():
+        for node_name, attribute_map in node_map.items():
+            for attribute in attribute_map.values():
+                relation_attribute_lines.append(f'BA_REL_ "{attribute.definition.name}" '
+                                                f'BU_BO_REL_ '
+                                                f'{node_name} '
+                                                f'{frame_id} '
+                                                f'{attribute.formatted_value};')
+
+    return relation_attribute_lines
+
+
+def _dump_choices(database: InternalDatabase, sort_signals: type_sort_signals, sort_choices: type_sort_choices) -> list[str]:
+    choice_lines: list[str] = []
+    for message in database.messages:
+        if callable(sort_signals):
+            signals = sort_signals(message.signals)
+        else:
+            signals = message.signals
+        for signal in signals:
+            if signal.choices is None:
+                continue
+
+            if sort_choices:
+                choices = sort_choices(signal.choices)
+            else:
+                choices = signal.choices
+
+            choice_lines.append(
+                'VAL_ {frame_id} {name} {choices} ;'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    name=signal.name,
+                    choices=' '.join([f'{value} "{text}"' for value, text in choices.items()])))
+
+    return choice_lines
+
+
+def _dump_signal_groups(database: InternalDatabase) -> list[str]:
+    sig_group: list[str] = []
+
+    for message in database.messages:
+        if message.signal_groups is None:
+            continue
+
+        for signal_group in message.signal_groups:
+            all_sig_names = [sig.name for sig in message.signals]
+            signal_group.signal_names = list(filter(lambda sig_name: sig_name in all_sig_names, signal_group.signal_names))
+            sig_group.append(
+                'SIG_GROUP_ {frame_id} {signal_group_name} {repetitions} : {signal_names};'.format(
+                    frame_id=get_dbc_frame_id(message),
+                    signal_group_name=signal_group.name,
+                    repetitions=signal_group.repetitions,
+                    signal_names=' '.join(signal_group.signal_names)
+                ))
+
+    return sig_group
+
+
+def _is_extended_mux_needed(messages: list[Message]) -> bool:
+    """Check for messages with more than one mux signal or signals with
+    more than one multiplexer value.
+
+    """
+
+    for message in messages:
+        multiplexers = [
+            signal.name
+            for signal in message.signals
+            if signal.is_multiplexer
+        ]
+
+        if len(multiplexers) > 1:
+            return True
+
+        for signal in message.signals:
+            if signal.multiplexer_ids:
+                if len(signal.multiplexer_ids) > 1:
+                    return True
+
+    return False
+
+
+def _create_mux_ranges(multiplexer_ids: list[int]) -> list[list[int]]:
+    """Create a list of ranges based on a list of single values.
+
+    Example:
+        Input:  [1, 2, 3, 5,      7, 8, 9]
+        Output: [[1, 3], [5, 5], [7, 9]]
+
+    """
+
+    ordered = sorted(multiplexer_ids)
+    # Anything but ordered[0] - 1
+    prev_value = ordered[0]
+    ranges: list[list[int]] = []
+
+    for value in ordered:
+        if value == prev_value + 1:
+            ranges[-1][1] = value
+        else:
+            ranges.append([value, value])
+
+        prev_value = value
+
+    return ranges
+
+
+def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
+    """Create multiplex entries ("SG_MUL_VAL_") if extended multiplexing
+    is used.
+
+    """
+
+    if not _is_extended_mux_needed(database.messages):
+        return []
+
+    sig_mux_values: list[str] = []
+
+    for message in database.messages:
+        for signal in message.signals:
+            if not signal.multiplexer_ids:
+                continue
+
+            ranges = ', '.join([
+                f'{minimum}-{maximum}'
+                for minimum, maximum in _create_mux_ranges(signal.multiplexer_ids)
+            ])
+
+            sig_mux_values.append(
+                f'SG_MUL_VAL_ {get_dbc_frame_id(message)} {signal.name} {signal.multiplexer_signal} {ranges};')
+
+    return sig_mux_values
+
+
+def _dump_environment_variables(database: InternalDatabase) -> list[str]:
+    """Dump environment variables (EV_ entries)."""
+    ev_lines: list[str] = []
+
+    if database.dbc is None:
+        return ev_lines
+
+    for env in database.dbc.environment_variables.values():
+        # escape unit quotes
+        unit = env.unit.replace('"', '\\"')
+        ev_lines.append(
+            f'EV_ {env.name}: {env.env_type} [{env.minimum}|{env.maximum}] "{unit}" {env.initial_value} {env.env_id} {env.access_type} {env.access_node};'
+        )
+
+    return ev_lines
+
+
+def dump_string(database: InternalDatabase,
+                sort_signals: type_sort_signals = SORT_SIGNALS_DEFAULT,
+                sort_attribute_signals: type_sort_signals = SORT_SIGNALS_DEFAULT,
+                sort_attributes: type_sort_attributes = None,
+                sort_choices: type_sort_choices = None,
+                shorten_long_names: bool = True) -> str:
+    """Format database in DBC file format.
+       sort_signals defines how to sort signals in message definitions
+       sort_attribute_signals defines how to sort signals in metadata -
+          comments, value table definitions and attributes
+
+    """
+
+    if sort_signals == SORT_SIGNALS_DEFAULT:
+        sort_signals = sort_signals_by_start_bit_reversed
+    if sort_attribute_signals == SORT_SIGNALS_DEFAULT:
+        sort_attribute_signals = sort_signals_by_start_bit_reversed
+
+    # Make a deep copy of the database as names and attributes will be
+    # modified for items with long names.
+    database = deepcopy(database)
+
+    if database.dbc is None:
+        database.dbc = DbcSpecifics()
+
+    database = remove_special_chars(database)
+    database = make_names_unique(database, shorten_long_names)
+    bu = _dump_nodes(database)
+    val_table = _dump_value_tables(database)
+    bo = _dump_messages(database, sort_signals)
+    bo_tx_bu = _dump_senders(database)
+    cm = _dump_comments(database, sort_attribute_signals)
+    signal_types = _dump_signal_types(database)
+    ba_def = _dump_attribute_definitions(database)
+    ba_def_rel = _dump_relation_attribute_definitions(database)
+    ba_def_def = _dump_attribute_definition_defaults(database)
+    ba_def_def_rel = _dump_relation_attribute_definition_defaults(database)
+    ba = _dump_attributes(database, sort_attribute_signals, sort_attributes)
+    ba_rel = _dump_relation_attributes(database, sort_attribute_signals)
+    val = _dump_choices(database, sort_attribute_signals, sort_choices)
+    sig_group = _dump_signal_groups(database)
+    sig_mux_values = _dump_signal_mux_values(database)
+    ev = _dump_environment_variables(database)
+
+    return DBC_FMT.format(version=_dump_version(database),
+                          bu=' '.join(bu),
+                          val_table='\r\n'.join(val_table),
+                          bo='\r\n\r\n'.join(bo),
+                          bo_tx_bu='\r\n'.join(bo_tx_bu),
+                          ev='\r\n\r\n'.join(ev),
+                          cm='\r\n'.join(cm),
+                          signal_types='\r\n'.join(signal_types),
+                          ba_def='\r\n'.join(ba_def),
+                          ba_def_rel=''.join([elem+'\r\n' for elem in ba_def_rel]),
+                          ba_def_def='\r\n'.join(ba_def_def),
+                          ba_def_def_rel=''.join([elem+'\r\n' for elem in ba_def_def_rel]),
+                          ba='\r\n'.join(ba),
+                          ba_rel=''.join([elem+'\r\n' for elem in ba_rel]),
+                          val='\r\n'.join(val),
+                          sig_group='\r\n'.join(sig_group),
+                          sig_mux_values='\r\n'.join(sig_mux_values))

@@ -2001,9 +2001,38 @@ def make_message_names_unique(database: InternalDatabase, shorten_long_names: bo
         message.name = short_name
 
 
+def update_signal_attribute_rel_names(database: InternalDatabase,
+                                      message: Message,
+                                      converter: LongNamesConverter,
+                                      shorten_long_names: bool) -> None:
+    if database.dbc is None or not shorten_long_names:
+        return
+
+    frame_id = get_dbc_frame_id(message)
+
+    try:
+        signal_attributes_rel = database.dbc.attributes_rel[frame_id]['signal']
+    except KeyError:
+        return
+
+    updated_signal_attributes_rel = OrderedDict()
+
+    for signal_name, value in signal_attributes_rel.items():
+        signal_name = converter.long_to_short.get(signal_name, signal_name)
+        updated_signal_attributes_rel[signal_name] = value
+
+    database.dbc.attributes_rel[frame_id]['signal'] = updated_signal_attributes_rel
+
+
 def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     for message in database.messages:
         converter = LongNamesConverter([signal.name for signal in message.signals])
+        update_signal_attribute_rel_names(
+            database,
+            message,
+            converter,
+            shorten_long_names)
+
         for signal in message.signals:
             long_name = signal.name
             short_name = converter.long_to_short[long_name]
@@ -2204,6 +2233,39 @@ def get_definitions_rel_dict(definitions, defaults):
     return result
 
 
+def update_signal_attribute_rel_names_after_load(messages: list[Message],
+                                                 attributes: typing.Any,
+                                                 attributes_rel: typing.Any) -> None:
+    for message in messages:
+        frame_id = get_dbc_frame_id(message)
+
+        try:
+            signal_attributes_rel = attributes_rel[frame_id]['signal']
+        except KeyError:
+            continue
+
+        try:
+            signal_attributes = attributes[frame_id]['signal']
+        except KeyError:
+            signal_attributes = {}
+
+        short_to_signal_name = {}
+        for signal_name, value in signal_attributes.items():
+            try:
+                short_to_signal_name[signal_name] = (
+                    value['SystemSignalLongSymbol'].value)
+            except KeyError:
+                pass
+
+        updated_signal_attributes_rel = OrderedDict()
+
+        for signal_name, value in signal_attributes_rel.items():
+            signal_name = short_to_signal_name.get(signal_name, signal_name)
+            updated_signal_attributes_rel[signal_name] = value
+
+        attributes_rel[frame_id]['signal'] = updated_signal_attributes_rel
+
+
 def load_string(string: str, strict: bool = True,
                 sort_signals: type_sort_signals = sort_signals_by_start_bit) -> InternalDatabase:
     """Parse given string.
@@ -2240,6 +2302,10 @@ def load_string(string: str, strict: bool = True,
                               bus.name if bus else None,
                               signal_groups,
                               sort_signals)
+    update_signal_attribute_rel_names_after_load(
+        messages,
+        attributes,
+        attributes_rel)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions)

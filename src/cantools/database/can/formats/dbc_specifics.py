@@ -3,8 +3,10 @@
 from collections import OrderedDict
 from typing import Any
 
-from cantools.database.can.attribute import AttributeType
-from cantools.database.can.attribute_definition import AttributeDefinitionType
+from cantools.database.can.dbc_attribute import DbcAttributeType
+from cantools.database.can.dbc_attribute_definition import (
+    DbcAttributeDefinitionType,
+)
 from cantools.database.can.environment_variable import EnvironmentVariable
 from cantools.typechecking import Choices
 
@@ -12,12 +14,12 @@ from cantools.typechecking import Choices
 class DbcSpecifics:
 
     def __init__(self,
-                 attributes: OrderedDict[str, AttributeType] | None = None,
-                 attribute_definitions: OrderedDict[str, AttributeDefinitionType] | None = None,
+                 attributes: OrderedDict[str, DbcAttributeType] | None = None,
+                 attribute_definitions: OrderedDict[str, DbcAttributeDefinitionType] | None = None,
                  environment_variables: OrderedDict[str, EnvironmentVariable] | None = None,
                  value_tables: OrderedDict[str, Choices] | None = None,
                  attributes_rel: OrderedDict[int, dict[Any, Any]] | None =None,
-                 attribute_definitions_rel: OrderedDict[str, AttributeDefinitionType] | None = None) -> None:
+                 attribute_definitions_rel: OrderedDict[str, DbcAttributeDefinitionType] | None = None) -> None:
         self._attributes = attributes or OrderedDict()
         self._attribute_definitions = attribute_definitions or OrderedDict()
         self._environment_variables = environment_variables or OrderedDict()
@@ -26,7 +28,7 @@ class DbcSpecifics:
         self._attribute_definitions_rel = attribute_definitions_rel or OrderedDict()
 
     @property
-    def attributes(self) -> OrderedDict[str, AttributeType]:
+    def attributes(self) -> OrderedDict[str, DbcAttributeType]:
         """The DBC specific attributes of the parent object (database, node,
         message or signal) as a dictionary.
 
@@ -35,7 +37,7 @@ class DbcSpecifics:
         return self._attributes
 
     @property
-    def attribute_definitions(self) -> OrderedDict[str, AttributeDefinitionType]:
+    def attribute_definitions(self) -> OrderedDict[str, DbcAttributeDefinitionType]:
         """The DBC specific attribute definitions as dictionary.
 
         """
@@ -69,7 +71,7 @@ class DbcSpecifics:
         return self._attributes_rel
 
     @property
-    def attribute_definitions_rel(self) -> OrderedDict[str, AttributeDefinitionType]:
+    def attribute_definitions_rel(self) -> OrderedDict[str, DbcAttributeDefinitionType]:
         """The DBC specific attribute definitions rel as dictionary.
 
         """

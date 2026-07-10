@@ -7,9 +7,9 @@ import unittest
 from unittest import mock
 
 import cantools
-from cantools.database.can.formats.attribute import Attribute
-from cantools.database.can.formats.attribute_definition import (
-    AttributeDefinition,
+from cantools.database.can.formats.dbc.dbc_attribute import DbcAttribute
+from cantools.database.can.formats.dbc.dbc_attribute_definition import (
+    DbcAttributeDefinition,
 )
 from cantools.database.utils import sort_signals_by_name
 
@@ -145,12 +145,12 @@ class CanToolsConvertFullTest(unittest.TestCase):
         db = cantools.database.load_file(fn_in)
 
         # make bus CAN FD
-        bus_type_def = AttributeDefinition("BusType",
-                                           type_name="STRING",
-                                           default_value="")
+        bus_type_def = DbcAttributeDefinition("BusType",
+                                              type_name="STRING",
+                                              default_value="")
         db.dbc.attribute_definitions["BusType"] = bus_type_def
-        db.dbc.attributes["BusType"] = Attribute(value="CAN FD",
-                                                 definition=bus_type_def)
+        db.dbc.attributes["BusType"] = DbcAttribute(value="CAN FD",
+                                                    definition=bus_type_def)
 
         # make message extended and FD
         msg = db.get_message_by_name("ExampleMessage")

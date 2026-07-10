@@ -40,13 +40,13 @@ Functions and classes
 .. autoclass:: cantools.database.can.signal_group.SignalGroup
     :members:
 
-.. autoclass:: cantools.database.can.formats.dbc.attribute_definition.AttributeDefinition
+.. autoclass:: cantools.database.can.formats.dbc.dbc_attribute_definition.DbcAttributeDefinition
     :members:
 
-.. autoclass:: cantools.database.can.formats.dbc.attribute_definition.AttributeValueType
+.. autoclass:: cantools.database.can.formats.dbc.dbc_attribute_definition.DbcAttributeValueType
     :members:
 
-.. autoclass:: cantools.database.can.formats.dbc.attribute.Attribute
+.. autoclass:: cantools.database.can.formats.dbc.dbc_attribute.DbcAttribute
     :members:
 
 .. autoclass:: cantools.database.can.formats.dbc.dbc_environment_variable.DbcEnvironmentVariable

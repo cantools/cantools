@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cantools.database.can.formats.dbc_specifics import DbcSpecifics
+    from .dbc_specifics import DbcSpecifics
 
 
 class EnvironmentVariable:

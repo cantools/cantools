@@ -1,11 +1,15 @@
 # Internal CAN database.
 
+from __future__ import annotations
 
-from .bus import Bus
-from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
-from .formats.dbc_specifics import DbcSpecifics
-from .message import Message
-from .node import Node
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .bus import Bus
+    from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
+    from .formats.dbc.dbc_specifics import DbcSpecifics
+    from .message import Message
+    from .node import Node
 
 
 class InternalDatabase:

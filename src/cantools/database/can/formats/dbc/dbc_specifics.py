@@ -6,14 +6,12 @@ from collections import OrderedDict
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cantools.database.can.attribute import AttributeType
-    from cantools.database.can.attribute_definition import (
-        AttributeDefinitionType,
-    )
-    from cantools.database.can.environment_variable import EnvironmentVariable
     from cantools.typechecking import Choices
 
+    from .attribute import AttributeType
+    from .attribute_definition import AttributeDefinitionType
     from .dbc import DbcRelationAttributes
+    from .environment_variable import EnvironmentVariable
 
 class DbcSpecifics:
 

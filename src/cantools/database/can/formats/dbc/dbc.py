@@ -29,10 +29,10 @@ from textparser import (
 from cantools.database.can.internal_database import InternalDatabase
 from cantools.typechecking import Choices
 
-from ...conversion import BaseConversion
-from ...errors import ParseError
-from ...namedsignalvalue import NamedSignalValue
-from ...utils import (
+from ....conversion import BaseConversion
+from ....errors import ParseError
+from ....namedsignalvalue import NamedSignalValue
+from ....utils import (
     SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
     sort_signals_by_start_bit_reversed,
@@ -41,19 +41,19 @@ from ...utils import (
     type_sort_choices,
     type_sort_signals,
 )
-from ..attribute import Attribute, AttributeType
-from ..attribute_definition import (
+from ...bus import Bus
+from ...message import Message
+from ...node import Node
+from ...signal import Signal
+from ...signal_group import SignalGroup
+from ..utils import num
+from .attribute import Attribute, AttributeType
+from .attribute_definition import (
     AttributeDefinition,
     AttributeDefinitionType,
 )
-from ..bus import Bus
-from ..environment_variable import EnvironmentVariable
-from ..message import Message
-from ..node import Node
-from ..signal import Signal
-from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
-from .utils import num
+from .environment_variable import EnvironmentVariable
 
 # Type alias for the parsed token dict produced by DbcParser.parse()
 DbcTokens = dict[str, list[MatchObject]]

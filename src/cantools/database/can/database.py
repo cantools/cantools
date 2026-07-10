@@ -15,9 +15,9 @@ from ..utils import (
     type_sort_signals,
 )
 from .bus import Bus
-from .formats import arxml, dbc, kcd, sym
+from .formats import arxml, kcd, sym
 from .formats.arxml import AutosarDatabaseSpecifics
-from .formats.dbc import DbcSpecifics
+from .formats.dbc import DbcSpecifics, dbc
 from .internal_database import InternalDatabase
 from .message import Message
 from .node import Node

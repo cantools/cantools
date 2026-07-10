@@ -1,10 +1,12 @@
 # A CAN bus node (or Board unit)
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from cantools.database.can.formats.arxml.node_specifics import (
     AutosarNodeSpecifics,
 )
-from cantools.database.can.formats.dbc_specifics import DbcSpecifics
+
+if TYPE_CHECKING:
+    from .formats.dbc.dbc_specifics import DbcSpecifics
 
 from ...typechecking import Comments
 
@@ -21,6 +23,8 @@ class Node:
                  dbc_specifics: Optional["DbcSpecifics"] = None,
                  autosar_specifics: Optional["AutosarNodeSpecifics"] = None,
                  ) -> None:
+        from .formats.dbc.dbc_specifics import DbcSpecifics  # noqa: PLC0415
+
         self._name = name
 
         # If the 'comment' argument is a string, we assume that is an
@@ -81,7 +85,7 @@ class Node:
         return self._comments
 
     @property
-    def dbc(self) -> DbcSpecifics:
+    def dbc(self) -> "DbcSpecifics":
         """An object containing dbc specific properties like e.g. attributes.
 
         """
@@ -89,7 +93,7 @@ class Node:
         return self._dbc
 
     @dbc.setter
-    def dbc(self, value: DbcSpecifics) -> None:
+    def dbc(self, value: "DbcSpecifics") -> None:
         self._dbc = value
 
     @property

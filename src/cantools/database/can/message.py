@@ -1,14 +1,14 @@
 # A CAN message.
 
+from __future__ import annotations
+
 import logging
 from collections.abc import MutableSequence, Sequence
 from copy import deepcopy
 from typing import (
-    Optional,
+    TYPE_CHECKING,
     cast,
 )
-
-from cantools.database.can.formats.dbc_specifics import DbcSpecifics
 
 from ...typechecking import (
     Codec,
@@ -37,9 +37,12 @@ from ..utils import (
     start_bit,
     type_sort_signals,
 )
-from .formats.arxml.message_specifics import AutosarMessageSpecifics
-from .signal import Signal
-from .signal_group import SignalGroup
+
+if TYPE_CHECKING:
+    from .formats.arxml.message_specifics import AutosarMessageSpecifics
+    from .formats.dbc.dbc_specifics import DbcSpecifics
+    from .signal import Signal
+    from .signal_group import SignalGroup
 
 LOGGER = logging.getLogger(__name__)
 
@@ -68,7 +71,7 @@ class Message:
                  signals: list[Signal],
                  # if the message is a container message, this lists
                  # the messages which it potentially features
-                 contained_messages: list['Message'] | None = None,
+                 contained_messages: list[Message] | None = None,
                  # header ID of message if it is part of a container message
                  header_id: int | None = None,
                  header_byte_order: str = 'big_endian',
@@ -331,7 +334,7 @@ class Message:
         return len(self._contained_messages) > 0
 
     @property
-    def contained_messages(self) -> list['Message']:
+    def contained_messages(self) -> list[Message]:
         """The list of messages potentially contained within this message
 
         """
@@ -1178,7 +1181,7 @@ class Message:
         return result
 
     def get_contained_message_by_header_id(self, header_id: int) \
-        -> Optional['Message']:
+        -> Message | None:
 
         tmp = [ x for x in self.contained_messages if x.header_id == header_id ]
 
@@ -1191,7 +1194,7 @@ class Message:
         return tmp[0]
 
     def get_contained_message_by_name(self, name: str) \
-        -> Optional['Message']:
+        -> Message | None:
 
         tmp = [ x for x in self.contained_messages if x.name == name ]
 

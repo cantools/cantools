@@ -7,8 +7,10 @@ import unittest
 from unittest import mock
 
 import cantools
-from cantools.database.can.attribute import Attribute
-from cantools.database.can.attribute_definition import AttributeDefinition
+from cantools.database.can.formats.attribute import Attribute
+from cantools.database.can.formats.attribute_definition import (
+    AttributeDefinition,
+)
 from cantools.database.utils import sort_signals_by_name
 
 

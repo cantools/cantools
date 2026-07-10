@@ -202,22 +202,6 @@ def to_int(value: typing.Any) -> int:
 def to_float(value: typing.Any) -> float:
     return float(Decimal(value))
 
-def _get_value(definition: AttributeDefinitionType, value: int | float | None) -> str:
-        return '' if definition.minimum is None else f' {value}'
-
-def _get_minimum(definition: AttributeDefinitionType) -> str:
-    return _get_value(definition, definition.minimum)
-
-def _get_maximum(definition: AttributeDefinitionType) -> str:
-    return _get_value(definition, definition.maximum)
-
-def _get_attribute_value(attribute: AttributeType) -> str | int | float:
-        result = attribute.value
-
-        if attribute.definition.type_name == "STRING":
-            result = f'"{attribute.value}"'
-
-        return result
 
 class DbcParser(Parser):
 
@@ -706,7 +690,7 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
                 f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}  {choices};')
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
             ba_def.append(
-                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}{_get_minimum(definition)}{_get_maximum(definition)};')
+                f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}{definition.formatted_minimum}{definition.formatted_maximum};')
         elif definition.type_name == 'STRING':
             ba_def.append(
                 f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name} ;')
@@ -730,7 +714,7 @@ def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}  {choices};')
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
             ba_def_rel.append(
-                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}{_get_minimum(definition)}{_get_maximum(definition)};')
+                f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}{definition.formatted_minimum}{definition.formatted_maximum};')
         elif definition.type_name == 'STRING':
             ba_def_rel.append(
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name} ;')
@@ -897,25 +881,25 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     for typ, attribute_to_dump, node_to_dump, message_to_dump, signal_to_dump, envvar_to_dump in attributes:
         if typ == 'dbc':
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
-                      f'{_get_attribute_value(attribute_to_dump)};')
+                      f'{attribute_to_dump.formatted_value};')
         elif typ == 'envvar':
             assert envvar_to_dump is not None
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.definition.kind} '
                       f'{envvar_to_dump.name} '
-                      f'{_get_attribute_value(attribute_to_dump)};')
+                      f'{attribute_to_dump.formatted_value};')
         elif typ == 'node':
             assert node_to_dump is not None
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.definition.kind} '
                       f'{node_to_dump.name} '
-                      f'{_get_attribute_value(attribute_to_dump)};')
+                      f'{attribute_to_dump.formatted_value};')
         elif typ == 'message':
             assert message_to_dump is not None
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.definition.kind} '
                       f'{get_dbc_frame_id(message_to_dump)} '
-                      f'{_get_attribute_value(attribute_to_dump)};')
+                      f'{attribute_to_dump.formatted_value};')
         elif typ == 'signal':
             assert signal_to_dump is not None
             assert message_to_dump is not None
@@ -923,7 +907,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
                       f'{attribute_to_dump.definition.kind} '
                       f'{get_dbc_frame_id(message_to_dump)} '
                       f'{signal_to_dump.name} '
-                      f'{_get_attribute_value(attribute_to_dump)};')
+                      f'{attribute_to_dump.formatted_value};')
 
     return ba
 
@@ -946,7 +930,7 @@ def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_sig
                                         f'SG_ '
                                         f'{frame_id} '
                                         f'{signal_name} '
-                                        f'{_get_attribute_value(attribute)};')
+                                        f'{attribute.formatted_value};')
         elif "node" in element:
             for node_name, node_dict in element['node'].items():
                 for attribute in node_dict.values():
@@ -954,7 +938,7 @@ def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_sig
                                     f'BU_BO_REL_ '
                                     f'{node_name} '
                                     f'{frame_id} '
-                                    f'{_get_attribute_value(attribute)};')
+                                    f'{attribute.formatted_value};')
 
     return ba_rel
 

@@ -75,6 +75,13 @@ class AttributeDefinition(Generic[AttributeValueType]):
         self._minimum = value
 
     @property
+    def formatted_minimum(self) -> str:
+        """The defined minimum value of the attribute definition as it appears in the DBC file
+
+        """
+        return '' if self._minimum is None else f' {self._minimum}'
+
+    @property
     def maximum(self) -> int | float | None:
         """The maximum value of the attribute, or ``None`` if unavailable.
 
@@ -85,6 +92,13 @@ class AttributeDefinition(Generic[AttributeValueType]):
     @maximum.setter
     def maximum(self, value: int | float | None) -> None:
         self._maximum = value
+
+    @property
+    def formatted_maximum(self) -> str:
+        """The defined maximum value of the attribute definition as it appears in the DBC file
+
+        """
+        return '' if self._maximum is None else f' {self._maximum}'
 
     @property
     def choices(self) -> list[str]:

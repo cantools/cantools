@@ -6,12 +6,14 @@ from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
 from decimal import Decimal
+from typing import TypeVar
 
 from textparser import (
     Any,
     AnyUntil,
     DelimitedList,
     Grammar,
+    MatchObject,
     OneOrMore,
     OneOrMoreDict,
     Optional,
@@ -25,8 +27,10 @@ from textparser import (
 )
 
 from cantools.database.can.internal_database import InternalDatabase
+from cantools.typechecking import Choices
 
 from ...conversion import BaseConversion
+from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
@@ -50,6 +54,14 @@ from ..signal import Signal
 from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
 from .utils import num
+
+# Type alias for the parsed token dict produced by DbcParser.parse()
+DbcTokens = dict[str, list[MatchObject]]
+
+# A single parsed token item: textparser always produces list-shaped
+# nodes for Sequence/ZeroOrMore/OneOrMoreDict rules, so we cast to
+# this at loop entry
+TokenList = list[MatchObject]
 
 # Attribute value types produced during parsing (before they become
 # Attribute objects)
@@ -117,6 +129,35 @@ class DbcComments:
     # comments for all signals featured by the database:
     #     signals[message_arbitration_id][signal_name] -> signal_comment
     signals: dict[int, dict[str, str]] = field(default_factory=dict)
+
+# Signal multiplexer values:
+#   mux_values_dict[frame_id][mux_signal_name][signal_name] -> list[mux_id]
+MuxSignalValues = dict[str, dict[str, list[int]]]
+MuxValues = dict[int, MuxSignalValues]
+
+# Attribute definition defaults from BA_DEF_DEF_ tokens keyed on the
+# attribute name
+DbcAttributeDefaults = OrderedDict[str, DbcAttributeValue]
+
+# Set of value tables: name -> { int_value: NamedSignalValue }
+ValueTables = OrderedDict[str, Choices]
+
+# Choices dict: choices[frame_id][signal_name] -> {choice_int_value: choice_string_value}
+ChoicesDict = defaultdict[int, dict[str, Choices]]
+
+
+
+_T = TypeVar('_T')
+def dbc_assert_type(x: object, t: type[_T]) -> _T:
+    """Ensure that object `x` is of type `t`
+
+    Return `x` if this is the case, or raise a `ParseError` if it is not.
+    """
+    if not isinstance(x, t):
+        raise ParseError(
+            f'Expected {t.__name__}, got {type(x).__name__}: {x!r}')
+    return x
+
 
 DBC_FMT = (
     'VERSION "{version}"\r\n'
@@ -276,7 +317,7 @@ def to_float(value: DbcAttributeValue) -> float:
 
 class DbcParser(Parser):
 
-    def tokenize(self, string):
+    def tokenize(self, string: str) -> list[Token]:
         keywords = {
             'BA_',
             'BA_DEF_',
@@ -349,7 +390,7 @@ class DbcParser(Parser):
         tokens, token_regex = tokenize_init(token_specs)
 
         for mo in re.finditer(token_regex, string, re.DOTALL):
-            kind = mo.lastgroup
+            kind: str = mo.lastgroup  # type: ignore[assignment]
 
             if kind == 'SKIP':
                 pass
@@ -529,13 +570,13 @@ def get_dbc_name(name: str) -> str:
     return name
 
 
-def _get_node_long_name(attributes, node_short_name):
+def _get_node_long_name(attributes: DbcAttributes, node_short_name: str) -> str:
     attrib = attributes.nodes.get(node_short_name, OrderedDict()).get('SystemNodeLongSymbol')
     if attrib is not None:
         return str(attrib.value)
     return node_short_name
 
-def _get_envvar_long_name(attributes, envvar_short_name):
+def _get_envvar_long_name(attributes: DbcAttributes, envvar_short_name: str) -> str:
     attrib = attributes.envvars.get(envvar_short_name, OrderedDict()).get('SystemEnvVarLongSymbol')
     if attrib is not None:
         return str(attrib.value)
@@ -852,11 +893,9 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         baudrate = database.buses[0].baudrate
     if baudrate is not None:
         baudrate_attribute_definition = database.dbc.attribute_definitions.get('Baudrate')
-        assert baudrate_attribute_definition is not None
-        database.dbc.attributes['Baudrate'] = Attribute[int](
-                    value=int(baudrate),
-                    definition=typing.cast('AttributeDefinition[int]', baudrate_attribute_definition),
-                )
+        if baudrate_attribute_definition is None:
+            raise ParseError('Database defines a baudrate but no definition for '
+                             'the corresponding attribute')
 
     for attribute in database.dbc.attributes.values():
         attributes.append(('dbc', attribute, None, None, None, None))
@@ -885,7 +924,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         if gen_msg_cycle_time_def is not None and msg_cycle_time != gen_msg_cycle_time_def.default_value:
             msg_attributes['GenMsgCycleTime'] = Attribute(
                 value=msg_cycle_time,
-                definition=typing.cast('AttributeDefinition[int]', gen_msg_cycle_time_def),
+                definition=dbc_assert_type(gen_msg_cycle_time_def, AttributeDefinition),
             )
         elif 'GenMsgCycleTime' in msg_attributes:
             del msg_attributes['GenMsgCycleTime']
@@ -946,31 +985,45 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     if callable(sort_attributes):
         attributes = sort_attributes(attributes)
 
-    for typ, attribute_to_dump, node_to_dump, message_to_dump, signal_to_dump, envvar_to_dump in attributes:
-        if typ == 'dbc':
+    for attribute_type, attribute_to_dump, node_to_dump, message_to_dump, signal_to_dump, envvar_to_dump in attributes:
+        if attribute_type == 'dbc':
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.formatted_value};')
-        elif typ == 'envvar':
-            assert envvar_to_dump is not None
+        elif attribute_type == 'envvar':
+            if envvar_to_dump is None:
+                raise ParseError(
+                    f'Need to dump environment variable, but none has been specified')
+
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.definition.kind} '
                       f'{envvar_to_dump.name} '
                       f'{attribute_to_dump.formatted_value};')
-        elif typ == 'node':
-            assert node_to_dump is not None
+        elif attribute_type == 'node':
+            if node_to_dump is None:
+                raise ParseError(
+                    'Need to dump node, but none has been specified')
+
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.definition.kind} '
                       f'{node_to_dump.name} '
                       f'{attribute_to_dump.formatted_value};')
-        elif typ == 'message':
-            assert message_to_dump is not None
+        elif attribute_type == 'message':
+            if message_to_dump is None:
+                raise ParseError(
+                    'Need to dump message, but none has been specified')
+
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.definition.kind} '
                       f'{get_dbc_frame_id(message_to_dump)} '
                       f'{attribute_to_dump.formatted_value};')
-        elif typ == 'signal':
-            assert signal_to_dump is not None
-            assert message_to_dump is not None
+        elif attribute_type == 'signal':
+            if signal_to_dump is None:
+                raise ParseError(
+                    'Need to dump signal, but none has been specified')
+            if message_to_dump is None:
+                raise ParseError(
+                    'Need to dump message, but none has been specified')
+
             ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
                       f'{attribute_to_dump.definition.kind} '
                       f'{get_dbc_frame_id(message_to_dump)} '
@@ -1150,112 +1203,118 @@ def _dump_environment_variables(database: InternalDatabase) -> list[str]:
     return ev_lines
 
 
-def _load_comments(tokens):
+def _load_comments(tokens: DbcTokens) -> DbcComments:
     comments = DbcComments()
 
-    for comment_tokens in tokens.get('CM_', []):
+    for _comment_tokens in tokens.get('CM_', []):
+        comment_tokens = dbc_assert_type(_comment_tokens, list)
         if not isinstance(comment_tokens[1], list):
             # the CM_ token is a string, i.e., it is a bus comment. We
             # implement CANdb++ behavior and concatenate all bus
             # comments.
             if comments.bus is None:
                 comments.bus = ''
-            comments.bus += comment_tokens[1]
+            comments.bus += dbc_assert_type(comment_tokens[1], str)
             continue
 
-        item = comment_tokens[1]
-        kind = item[0]
+        item: TokenList = comment_tokens[1]
+        kind = dbc_assert_type(item[0], str)
 
         if kind == 'SG_':
             # signal comment
-            frame_id = int(item[1])
-            signal_name = item[2]
+            frame_id = int(dbc_assert_type(item[1], str))
+            signal_name = dbc_assert_type(item[2], str)
             if frame_id not in comments.signals:
                 comments.signals[frame_id] = {}
             message_signal_comments = comments.signals[frame_id]
-            message_signal_comments[signal_name] = item[3]
+            message_signal_comments[signal_name] = dbc_assert_type(item[3], str)
         elif kind == 'BO_':
             # message comment
-            frame_id = int(item[1])
-            comments.messages[frame_id] = item[2]
+            frame_id = int(dbc_assert_type(item[1], str))
+            comments.messages[frame_id] = dbc_assert_type(item[2], str)
         elif kind == 'BU_':
             # node comment
-            node_name = item[1]
-            comments.nodes[node_name] = item[2]
+            node_name = dbc_assert_type(item[1], str)
+            comments.nodes[node_name] = dbc_assert_type(item[2], str)
         elif kind == 'EV_':
             # environment variable comment
-            envvar_name = item[1]
-            comments.envvars[envvar_name] = item[2]
+            envvar_name = dbc_assert_type(item[1], str)
+            comments.envvars[envvar_name] = dbc_assert_type(item[2], str)
 
     return comments
 
 
-def _load_attribute_definitions(tokens):
+def _load_attribute_definitions(tokens: DbcTokens) -> list[MatchObject]:
     return tokens.get('BA_DEF_', [])
 
 
-def _load_attribute_definition_defaults(tokens):
-    defaults = OrderedDict()
+def _load_attribute_definition_defaults(tokens: DbcTokens) -> DbcAttributeDefaults:
+    defaults: DbcAttributeDefaults = OrderedDict()
 
-    for default_attr in tokens.get('BA_DEF_DEF_', []):
-        defaults[default_attr[1]] = default_attr[2]
+    for _default_attr in tokens.get('BA_DEF_DEF_', []):
+        default_attr = dbc_assert_type(_default_attr, list)
+        defaults[dbc_assert_type(default_attr[1], str)] = typing.cast('DbcAttributeValue', default_attr[2])
 
     return defaults
 
 
-def _load_relation_attribute_definitions(tokens):
+def _load_relation_attribute_definitions(tokens: DbcTokens) -> list[MatchObject]:
     return tokens.get('BA_DEF_REL_', [])
 
 
-def _load_relation_attribute_definition_defaults(tokens):
-    defaults = OrderedDict()
+def _load_relation_attribute_definition_defaults(tokens: DbcTokens) -> DbcAttributeDefaults:
+    defaults: DbcAttributeDefaults = OrderedDict()
 
-    for default_attr in tokens.get('BA_DEF_DEF_REL_', []):
-        defaults[default_attr[1]] = default_attr[2]
+    for _default_attr in tokens.get('BA_DEF_DEF_REL_', []):
+        default_attr = dbc_assert_type(_default_attr, list)
+        defaults[dbc_assert_type(default_attr[1], str)] = typing.cast('DbcAttributeValue', default_attr[2])
 
     return defaults
 
 
-def _load_attributes(tokens, definitions):
+def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, AttributeDefinitionType]) -> DbcAttributes:
     attributes = DbcAttributes()
 
-    def to_attribute_object(attribute_tokens):
-        raw_value = attribute_tokens[3]
-        definition = definitions[attribute_tokens[1]]
+    def to_attribute_object(attribute_tokens: TokenList) -> AttributeType:
+        raw_value = dbc_assert_type(attribute_tokens[3], str)
+        definition = definitions[dbc_assert_type(attribute_tokens[1], str)]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
             return Attribute[int](value=to_int(raw_value),
-                                  definition=definition)
+                                  definition=typing.cast('AttributeDefinition[int]', definition))
         elif definition.type_name == 'FLOAT':
             return Attribute[float](value=to_float(raw_value),
-                                    definition=definition)
+                                    definition=typing.cast('AttributeDefinition[float]', definition))
 
         return Attribute[str](value=raw_value,
-                              definition=definition)
+                              definition=typing.cast('AttributeDefinition[str]', definition))
 
     for _attribute_tokens in tokens.get('BA_', []):
-        attribute_tokens = _attribute_tokens
-        attribute_name = attribute_tokens[1]
+        attribute_tokens = dbc_assert_type(_attribute_tokens, list)
+        attribute_name = dbc_assert_type(attribute_tokens[1], str)
 
+        if not isinstance(attribute_tokens[2], list):
+            raise ParseError('Second token of attribute must be a list, '
+                             f'got {type(attribute_tokens[2]).__name__}')
         if len(attribute_tokens[2]) > 0:
-            attribute_items = attribute_tokens[2][0]
-            attribute_kind = attribute_items[0]
+            attribute_items = dbc_assert_type(dbc_assert_type(attribute_tokens[2], list)[0], list)
+            attribute_kind = dbc_assert_type(attribute_items[0], str)
 
             if attribute_kind == 'SG_':
-                frame_id_dbc = int(attribute_items[1])
+                frame_id_dbc = int(dbc_assert_type(attribute_items[1], str))
 
                 if frame_id_dbc not in attributes.signals:
                     attributes.signals[frame_id_dbc] = OrderedDict()
                 message_signal_attrs = attributes.signals[frame_id_dbc]
 
-                signal_name = attribute_items[2]
+                signal_name = dbc_assert_type(attribute_items[2], str)
                 if signal_name not in message_signal_attrs:
                     message_signal_attrs[signal_name] = OrderedDict()
                 signal_attrs = message_signal_attrs[signal_name]
 
                 signal_attrs[attribute_name] = to_attribute_object(attribute_tokens)
             elif attribute_kind == 'BO_':
-                frame_id_dbc = int(attribute_items[1])
+                frame_id_dbc = int(dbc_assert_type(attribute_items[1], str))
 
                 if frame_id_dbc not in attributes.messages:
                     attributes.messages[frame_id_dbc] = OrderedDict()
@@ -1263,13 +1322,13 @@ def _load_attributes(tokens, definitions):
 
                 message_attrs[attribute_name] = to_attribute_object(attribute_tokens)
             elif attribute_kind == 'BU_':
-                node_name = attribute_items[1]
+                node_name = dbc_assert_type(attribute_items[1], str)
 
                 if node_name not in attributes.nodes:
                     attributes.nodes[node_name] = OrderedDict()
                 attributes.nodes[node_name][attribute_name] = to_attribute_object(attribute_tokens)
             elif attribute_kind == 'EV_':
-                envvar_name = attribute_items[1]
+                envvar_name = dbc_assert_type(attribute_items[1], str)
 
                 if envvar_name not in attributes.envvars:
                     attributes.envvars[envvar_name] = OrderedDict()
@@ -1283,27 +1342,31 @@ def _load_attributes(tokens, definitions):
     return attributes
 
 
-def _load_relation_attributes(tokens, definitions):
+def _load_relation_attributes(tokens: DbcTokens, definitions: OrderedDict[str, AttributeDefinitionType]) -> DbcRelationAttributes:
     relation_attributes = DbcRelationAttributes()
 
-    def to_relation_attribute_object(attribute, value):
-        definition = definitions[attribute[1]]
+    def to_relation_attribute_object(attribute_tokens: TokenList, value: DbcAttributeValue) -> AttributeType:
+        definition = definitions[dbc_assert_type(attribute_tokens[1], str)]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
-            value = to_int(value)
+            return Attribute[int](value=to_int(value),
+                                  definition=typing.cast('AttributeDefinition[int]', definition))
         elif definition.type_name == 'FLOAT':
-            value = to_float(value)
+            return Attribute[float](value=to_float(value),
+                                    definition=typing.cast('AttributeDefinition[float]', definition))
+        else:
+            return Attribute[str](str(value),
+                                  definition=typing.cast('AttributeDefinition[str]', definition))
 
-        return Attribute(value=value, definition=definition)
-
-    for relation_attribute_tokens in tokens.get('BA_REL_', []):
-        attribute_name = relation_attribute_tokens[1]
-        relation_type = relation_attribute_tokens[2]
-        node_name = relation_attribute_tokens[3]
+    for _relation_attribute_tokens in tokens.get('BA_REL_', []):
+        relation_attribute_tokens = dbc_assert_type(_relation_attribute_tokens, list)
+        attribute_name = dbc_assert_type(relation_attribute_tokens[1], str)
+        relation_type = dbc_assert_type(relation_attribute_tokens[2], str)
+        node_name = dbc_assert_type(relation_attribute_tokens[3], str)
 
         if relation_type == 'BU_SG_REL_':
-            frame_id_dbc = int(relation_attribute_tokens[5])
-            signal_name = relation_attribute_tokens[6]
+            frame_id_dbc = int(dbc_assert_type(relation_attribute_tokens[5], str))
+            signal_name = dbc_assert_type(relation_attribute_tokens[6], str)
 
             if frame_id_dbc not in relation_attributes.node_signal_relations:
                 relation_attributes.node_signal_relations[frame_id_dbc] = OrderedDict()
@@ -1313,10 +1376,10 @@ def _load_relation_attributes(tokens, definitions):
                 relation_attributes.node_signal_relations[frame_id_dbc][signal_name][node_name] = OrderedDict()
 
             relation_attributes.node_signal_relations[frame_id_dbc][signal_name][node_name][attribute_name] = \
-                to_relation_attribute_object(relation_attribute_tokens, relation_attribute_tokens[7])
+                to_relation_attribute_object(relation_attribute_tokens, dbc_assert_type(relation_attribute_tokens[7], str))
 
         elif relation_type == 'BU_BO_REL_':
-            frame_id_dbc = int(relation_attribute_tokens[4])
+            frame_id_dbc = int(dbc_assert_type(relation_attribute_tokens[4], str))
 
             if frame_id_dbc not in relation_attributes.node_message_relations:
                 relation_attributes.node_message_relations[frame_id_dbc] = OrderedDict()
@@ -1324,175 +1387,182 @@ def _load_relation_attributes(tokens, definitions):
                 relation_attributes.node_message_relations[frame_id_dbc][node_name] = OrderedDict()
 
             relation_attributes.node_message_relations[frame_id_dbc][node_name][attribute_name] = \
-                to_relation_attribute_object(relation_attribute_tokens, relation_attribute_tokens[5])
+                to_relation_attribute_object(relation_attribute_tokens, dbc_assert_type(relation_attribute_tokens[5], str))
 
     return relation_attributes
 
 
-def _load_value_tables(tokens):
+def _load_value_tables(tokens: DbcTokens) -> OrderedDict[str, Choices]:
     """Load value tables, that is, choice definitions.
 
     """
 
-    value_tables = OrderedDict()
+    value_tables: OrderedDict[str, Choices] = OrderedDict()
 
-    for value_table in tokens.get('VAL_TABLE_', []):
-        name = value_table[1]
-        choices = {int(number): NamedSignalValue(int(number), text) for number, text in value_table[2]}
-        value_tables[name] = choices
+    for _value_table in tokens.get('VAL_TABLE_', []):
+        value_table = dbc_assert_type(_value_table, list)
+        name = dbc_assert_type(value_table[1], str)
+        number_text_pairs = dbc_assert_type(value_table[2], list)
+        value_tables[name] = OrderedDict((int(number), NamedSignalValue(int(number), text))
+                                         for number, text in number_text_pairs)
 
     return value_tables
 
 
-def _load_environment_variables(tokens, comments, attributes, attribute_definitions):
-    environment_variables = OrderedDict()
+def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, AttributeDefinitionType]) -> OrderedDict[str, EnvironmentVariable]:
+    environment_variables: OrderedDict[str, EnvironmentVariable] = OrderedDict()
 
-    for env_var in tokens.get('EV_', []):
-        short_name = env_var[1]
+    for _env_var in tokens.get('EV_', []):
+        env_var = dbc_assert_type(_env_var, list)
+        short_name = dbc_assert_type(env_var[1], str)
         long_name = _get_envvar_long_name(attributes, short_name)
         environment_variables[long_name] = EnvironmentVariable(
             name=long_name,
-            env_type=int(env_var[3]),
-            minimum=num(env_var[5]),
-            maximum=num(env_var[7]),
-            unit=env_var[9],
-            initial_value=num(env_var[10]),
-            env_id=int(env_var[11]),
-            access_type=env_var[12],
-            access_node=env_var[13],
+            env_type=int(dbc_assert_type(env_var[3], str)),
+            minimum=num(dbc_assert_type(env_var[5], str)),
+            maximum=num(dbc_assert_type(env_var[7], str)),
+            unit=dbc_assert_type(env_var[9], str),
+            initial_value=num(dbc_assert_type(env_var[10], str)),
+            env_id=int(dbc_assert_type(env_var[11], str)),
+            access_type=dbc_assert_type(env_var[12], str),
+            access_node=dbc_assert_type(env_var[13], str),
             comment=comments.envvars.get(short_name),
             dbc_specifics=DbcSpecifics(attributes=attributes.envvars.get(short_name),
                                        attribute_definitions=attribute_definitions))
 
     return environment_variables
 
-def _load_choices(tokens):
-    choices = defaultdict(dict)
+def _load_choices(tokens: DbcTokens) -> ChoicesDict:
+    choices: ChoicesDict = defaultdict(dict)
 
-    for _choice in tokens.get('VAL_', []):
-        if len(_choice[1]) == 0:
+    for _choice_token in tokens.get('VAL_', []):
+        choice_token = dbc_assert_type(_choice_token, list)
+        frame_id_list = dbc_assert_type(choice_token[1], list)
+        if len(frame_id_list) == 0:
             continue
 
-        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in _choice[3])
+        pairs = dbc_assert_type(choice_token[3], list)
+        od: Choices = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in pairs)
 
         if len(od) == 0:
             continue
 
-        frame_id = int(_choice[1][0])
-        choices[frame_id][_choice[2]] = od
+        frame_id = int(frame_id_list[0])
+        choices[frame_id][dbc_assert_type(choice_token[2], str)] = od
 
     return choices
 
-def _load_message_senders(tokens, attributes):
+def _load_message_senders(tokens: DbcTokens, attributes: DbcAttributes) -> defaultdict[int, list[str]]:
     """Load additional message senders.
 
     """
 
-    message_senders = defaultdict(list)
+    message_senders: defaultdict[int, list[str]] = defaultdict(list)
 
-    for senders in tokens.get('BO_TX_BU_', []):
-        frame_id = int(senders[1])
+    for _senders in tokens.get('BO_TX_BU_', []):
+        senders = dbc_assert_type(_senders, list)
+        frame_id = int(dbc_assert_type(senders[1], str))
         message_senders[frame_id] += [
-            _get_node_long_name(attributes, sender) for sender in senders[3]
+            _get_node_long_name(attributes, sender) for sender in dbc_assert_type(senders[3], list)
         ]
 
     return message_senders
 
 
-def _load_signal_types(tokens):
+def _load_signal_types(tokens: DbcTokens) -> defaultdict[int, dict[str, int]]:
     """Load signal types.
 
     """
 
-    signal_types = defaultdict(dict)
+    signal_types: defaultdict[int, dict[str, int]] = defaultdict(dict)
 
-    for signal_type in tokens.get('SIG_VALTYPE_', []):
-        frame_id = int(signal_type[1])
-        signal_name = signal_type[2]
-        signal_types[frame_id][signal_name] = int(signal_type[4])
+    for _signal_type in tokens.get('SIG_VALTYPE_', []):
+        signal_type = dbc_assert_type(_signal_type, list)
+        frame_id = int(dbc_assert_type(signal_type[1], str))
+        signal_name = dbc_assert_type(signal_type[2], str)
+        signal_types[frame_id][signal_name] = int(dbc_assert_type(signal_type[4], str))
 
     return signal_types
 
 
-def _load_signal_multiplexer_values(tokens):
+def _load_signal_multiplexer_values(tokens: DbcTokens) -> MuxValues:
     """Load additional signal multiplexer values.
 
     """
 
-    signal_multiplexer_values = defaultdict(dict)
+    signal_multiplexer_values: MuxValues = defaultdict(dict)
 
-    for signal_multiplexer_value in tokens.get('SG_MUL_VAL_', []):
-        frame_id = int(signal_multiplexer_value[1])
-        signal_name = signal_multiplexer_value[2]
-        multiplexer_signal = signal_multiplexer_value[3]
-        multiplexer_ids = []
+    for _smv in tokens.get('SG_MUL_VAL_', []):
+        smv = dbc_assert_type(_smv, list)
+        frame_id = int(dbc_assert_type(smv[1], str))
+        signal_name = dbc_assert_type(smv[2], str)
+        mux_signal_name = dbc_assert_type(smv[3], str)
+        multiplexer_ids: list[int] = []
 
-        for lower, upper in signal_multiplexer_value[4]:
-            lower = int(lower)
-            upper = int(upper[1:])
+        for lower_str, upper_str in dbc_assert_type(smv[4], list):
+            lower = int(lower_str)
+            upper = int(upper_str[1:])
             # TODO: Probably store ranges as tuples to not run out of
             #       memory on huge ranges.
             multiplexer_ids.extend(range(lower, upper + 1))
 
-        if multiplexer_signal not in signal_multiplexer_values[frame_id]:
-            signal_multiplexer_values[frame_id][multiplexer_signal] = {}
-
-        multiplexer_signal = signal_multiplexer_values[frame_id][multiplexer_signal]
-        multiplexer_signal[signal_name] = multiplexer_ids
+        mux_signal = signal_multiplexer_values[frame_id].setdefault(mux_signal_name, {})
+        mux_signal[signal_name] = multiplexer_ids
 
     return signal_multiplexer_values
 
 
-def _load_signal_groups(tokens, attributes):
+def _load_signal_groups(tokens: DbcTokens, attributes: DbcAttributes) -> defaultdict[int, list[SignalGroup]]:
     """Load signal groups.
 
     """
 
-    signal_groups = defaultdict(list)
+    signal_groups: defaultdict[int, list[SignalGroup]] = defaultdict(list)
 
-
-    def get_signal_attributes(frame_id_dbc, signal_short_name):
+    def get_signal_attributes(frame_id_dbc: int, signal_short_name: str) -> DbcAttributeMap:
         """Get attributes for given signal.
 
         """
 
-        return attributes.signals.get(frame_id_dbc, {}).get(signal_short_name, OrderedDict())
+        frame_signal_attribs: dict[str, DbcAttributeMap] = attributes.signals.get(frame_id_dbc, {})
+        return frame_signal_attribs.get(signal_short_name, OrderedDict())
 
-    def get_signal_long_name(frame_id_dbc, signal_short_name):
+    def get_signal_long_name(frame_id_dbc: int, signal_short_name: str) -> str:
         signal_attributes = get_signal_attributes(frame_id_dbc, signal_short_name)
         if (attrib := signal_attributes.get('SystemSignalLongSymbol')) is not None:
             return str(attrib.value)
 
         return signal_short_name
 
-    for signal_group in tokens.get('SIG_GROUP_',[]):
-        frame_id = int(signal_group[1])
-        signal_names = [get_signal_long_name(frame_id, signal_short_name) for signal_short_name in signal_group[5]]
-        signal_groups[frame_id].append(SignalGroup(name=signal_group[2],
-                                                   repetitions=int(signal_group[3]),
+    for _sg in tokens.get('SIG_GROUP_',[]):
+        sg = dbc_assert_type(_sg, list)
+        frame_id = int(dbc_assert_type(sg[1], str))
+        signal_names = [get_signal_long_name(frame_id, sn) for sn in dbc_assert_type(sg[5], list)]
+        signal_groups[frame_id].append(SignalGroup(name=dbc_assert_type(sg[2], str),
+                                                   repetitions=int(dbc_assert_type(sg[3], str)),
                                                    signal_names=signal_names))
 
     return signal_groups
 
 
-def _load_signals(tokens,
-                  comments,
-                  attributes,
-                  definitions,
-                  choices,
-                  signal_types,
-                  signal_multiplexer_values,
-                  frame_id_dbc,
-                  multiplexer_signal):
-    signal_to_multiplexer = {}
+def _load_signals(tokens: list[MatchObject],
+                  comments: DbcComments,
+                  attributes: DbcAttributes,
+                  definitions: OrderedDict[str, AttributeDefinitionType] | None,
+                  choices: ChoicesDict,
+                  signal_types: dict[int, dict[str, int]],
+                  signal_multiplexer_values: MuxValues,
+                  frame_id_dbc: int,
+                  multiplexer_signal: str | None) -> list[Signal]:
+    signal_to_multiplexer: dict[str, str] = {}
 
-    frame_mux_values = signal_multiplexer_values.get(frame_id_dbc, {})
+    frame_mux_values: MuxSignalValues = signal_multiplexer_values.get(frame_id_dbc, {})
+
     for multiplexer_name, items in frame_mux_values.items():
         for name in items:
             signal_to_multiplexer[name] = multiplexer_name
-    signal_multiplexer_values = frame_mux_values
 
-    def get_signal_attributes(frame_id_dbc, signal_name):
+    def get_signal_attributes(frame_id_dbc: int, signal_name: str) -> DbcAttributeMap:
         """Get attributes for given signal.
 
         """
@@ -1502,7 +1572,7 @@ def _load_signals(tokens,
 
         return OrderedDict()
 
-    def get_signal_comment(frame_id_dbc, signal_name):
+    def get_signal_comment(frame_id_dbc: int, signal_name: str) -> str | None:
         """Get comment for given signal.
 
         """
@@ -1511,38 +1581,38 @@ def _load_signals(tokens,
             return None
         return message_signal_comments.get(signal_name)
 
-        frame_cmt = comments.get(frame_id_dbc, {})
-        signal_cmt = frame_cmt.get('signal', {})
-        return signal_cmt.get(signal_name)
-
-    def get_signal_choices(frame_id_dbc, signal):
+    def get_signal_choices(frame_id_dbc: int, signal_name: str) -> Choices | None:
         """Get choices for given signal.
 
         """
+        message_choices = choices.get(frame_id_dbc)
+        if message_choices is None:
+            return None
 
-        return choices.get(frame_id_dbc, {}).get(signal)
+        return message_choices.get(signal_name)
 
-    def get_signal_is_multiplexer(signal):
-        if len(signal[1]) == 2:
-            return signal[1][1].endswith('M')
+    def get_signal_is_multiplexer(signal_tokens: TokenList) -> bool:
+        mux_field = dbc_assert_type(signal_tokens[1], list)
+        if len(mux_field) == 2:
+            return dbc_assert_type(mux_field[1], str).endswith('M')
         else:
             return False
 
-    def get_signal_multiplexer_ids(signal, multiplexer_signal):
-        ids = []
+    def get_signal_multiplexer_ids(mux_field: list[str], multiplexer_signal: str | None) -> list[int] | None:
+        ids: list[int] = []
+        signal_name = mux_field[0]
 
         if multiplexer_signal is not None:
-            if len(signal) == 2 and not signal[1].endswith('M'):
-                value = signal[1][1:].rstrip('M')
+            if len(mux_field) == 2 and not mux_field[1].endswith('M'):
+                value = mux_field[1][1:].rstrip('M')
                 ids.append(int(value))
         else:
-            multiplexer_signal = get_multiplexer_signal(signal,
-                                                        multiplexer_signal)
+            multiplexer_signal = get_multiplexer_signal(mux_field, multiplexer_signal)
 
         if multiplexer_signal is not None:
-            mux_entry = signal_multiplexer_values.get(multiplexer_signal)
-            if mux_entry is not None and signal[0] in mux_entry:
-                ids.extend(mux_entry[signal[0]])
+            mux_entry = frame_mux_values.get(multiplexer_signal)
+            if mux_entry is not None and signal_name in mux_entry:
+                ids.extend(mux_entry[signal_name])
 
         if ids:
             # make the IDs unique (and sort them)
@@ -1550,7 +1620,7 @@ def _load_signals(tokens,
 
         return None
 
-    def get_multiplexer_signal(mux_field, multiplexer_signal_name):
+    def get_multiplexer_signal(mux_field: list[str], multiplexer_signal_name: str | None) -> str | None:
         if len(mux_field) != 2:
             return None
 
@@ -1562,25 +1632,25 @@ def _load_signals(tokens,
 
         return None
 
-    def get_signal_receivers(receivers):
+    def get_signal_receivers(receivers: list[str]) -> list[str]:
         if receivers == ['Vector__XXX']:
             receivers = []
 
         return [_get_node_long_name(attributes, receiver) for receiver in receivers]
 
-    def get_signal_minimum(minimum, maximum):
+    def get_signal_minimum(minimum: str, maximum: str) -> int | float | None:
         if minimum == maximum == '0':
             return None
         else:
             return num(minimum)
 
-    def get_signal_maximum(minimum, maximum):
+    def get_signal_maximum(minimum: str, maximum: str) -> int | float | None:
         if minimum == maximum == '0':
             return None
         else:
             return num(maximum)
 
-    def get_signal_is_float(frame_id_dbc, signal):
+    def get_signal_is_float(frame_id_dbc: int, signal: str) -> bool:
         """Get is_float for given signal.
 
         """
@@ -1588,67 +1658,77 @@ def _load_signals(tokens,
         frame_signal_types = signal_types.get(frame_id_dbc)
         if frame_signal_types is None:
             return False
-        return frame_signal_types.get(signal) in FLOAT_SIGNAL_TYPES
+        signal_type = frame_signal_types.get(signal)
+        return signal_type in FLOAT_SIGNAL_TYPES
 
-    def get_signal_name(frame_id_dbc, name):
-        signal_attributes = get_signal_attributes(frame_id_dbc, name)
+    def get_signal_long_name(frame_id_dbc: int, signal_short_name: str) -> str:
+        signal_attributes = get_signal_attributes(frame_id_dbc, signal_short_name)
+        if signal_attributes is None:
+            return signal_short_name
 
-        attrib = signal_attributes.get('SystemSignalLongSymbol')
-        if attrib is not None:
+        if (attrib := signal_attributes.get('SystemSignalLongSymbol')) is not None:
+            return str(attrib.value)
+
+        return signal_short_name
+
+    def get_signal_initial_value(frame_id_dbc: int, signal_short_name: str) -> int | float | None:
+        signal_attributes = get_signal_attributes(frame_id_dbc, signal_short_name)
+        if signal_attributes is None:
+            return None
+
+        if (attrib := signal_attributes.get('GenSigStartValue')) is not None:
+            if not isinstance(attrib.value, (int, float)):
+                raise ParseError(
+                    f'Expected int or float, got {type(attrib.value).__name__}: {attrib.value!r}')
+
             return attrib.value
-        return name
 
-    def get_signal_initial_value(frame_id_dbc, name):
-        signal_attributes = get_signal_attributes(frame_id_dbc, name)
-
-        attrib = signal_attributes.get('GenSigStartValue')
-        if attrib is not None:
-            return attrib.value
         return None
 
-    def get_signal_spn(frame_id_dbc, name):
+    def get_signal_spn(frame_id_dbc: int, name: str) -> int | None:
         signal_attributes = get_signal_attributes(frame_id_dbc, name)
-        if 'SPN' in signal_attributes:
-            if (value := signal_attributes['SPN'].value) is not None:
-                return value
+        if signal_attributes is None:
+            return None
+        elif (spn_attrib := signal_attributes.get('SPN')) is not None:
+            return dbc_assert_type(spn_attrib.value, int)
 
         if definitions is not None and 'SPN' in definitions:
-            return definitions['SPN'].default_value
+            return typing.cast('int | None', definitions['SPN'].default_value)
 
         return None
 
     signals = []
 
-    for signal in tokens:
+    for _signal_tok in tokens:
+        signal_tok = dbc_assert_type(_signal_tok, list)
+        mux_field = dbc_assert_type(signal_tok[1], list)
+        signal_name = mux_field[0]
         signals.append(
-            Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
-                   start=int(signal[3]),
-                   length=int(signal[5]),
-                   receivers=get_signal_receivers(signal[20]),
+            Signal(name=get_signal_long_name(frame_id_dbc, signal_name),
+                   start=int(dbc_assert_type(signal_tok[3], str)),
+                   length=int(dbc_assert_type(signal_tok[5], str)),
+                   receivers=get_signal_receivers(dbc_assert_type(signal_tok[20], list)),
                    byte_order=('big_endian'
-                               if signal[7] == '0'
+                               if signal_tok[7] == '0'
                                else 'little_endian'),
-                   is_signed=(signal[8] == '-'),
-                   raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
+                   is_signed=(signal_tok[8] == '-'),
+                   raw_initial=get_signal_initial_value(frame_id_dbc, signal_name),
                    conversion=BaseConversion.factory(
-                       scale=num(signal[10]),
-                       offset=num(signal[12]),
-                       is_float=get_signal_is_float(frame_id_dbc, signal[1][0]),
-                       choices=get_signal_choices(frame_id_dbc, signal[1][0]),
+                       scale=num(dbc_assert_type(signal_tok[10], str)),
+                       offset=num(dbc_assert_type(signal_tok[12], str)),
+                       is_float=get_signal_is_float(frame_id_dbc, signal_name),
+                       choices=get_signal_choices(frame_id_dbc, signal_name),
                    ),
-                   minimum=get_signal_minimum(signal[15], signal[17]),
-                   maximum=get_signal_maximum(signal[15], signal[17]),
-                   unit=(None if signal[19] == '' else signal[19]),
-                   spn=get_signal_spn(frame_id_dbc, signal[1][0]),
-                   dbc_specifics=DbcSpecifics(attributes=get_signal_attributes(frame_id_dbc, signal[1][0]),
+                   minimum=get_signal_minimum(dbc_assert_type(signal_tok[15], str), dbc_assert_type(signal_tok[17], str)),
+                   maximum=get_signal_maximum(dbc_assert_type(signal_tok[15], str), dbc_assert_type(signal_tok[17], str)),
+                   unit=(None if signal_tok[19] == '' else dbc_assert_type(signal_tok[19], str)),
+                   spn=get_signal_spn(frame_id_dbc, signal_name),
+                   dbc_specifics=DbcSpecifics(attributes=get_signal_attributes(frame_id_dbc, signal_name),
                                               attribute_definitions=definitions),
-                   comment=get_signal_comment(frame_id_dbc,
-                                              signal[1][0]),
-                   is_multiplexer=get_signal_is_multiplexer(signal),
-                   multiplexer_ids=get_signal_multiplexer_ids(signal[1],
-                                                       multiplexer_signal),
-                   multiplexer_signal=get_multiplexer_signal(signal[1],
-                                                             multiplexer_signal)))
+                   comment=get_signal_comment(frame_id_dbc, signal_name),
+                   is_multiplexer=get_signal_is_multiplexer(signal_tok),
+                   multiplexer_ids=get_signal_multiplexer_ids(mux_field, multiplexer_signal),
+                   multiplexer_signal=get_multiplexer_signal(mux_field, multiplexer_signal)))
 
     return signals
 
@@ -1663,40 +1743,43 @@ def _get_enum_vframeformat_definition(attribute_definition: AttributeDefinitionT
     """
 
     if attribute_definition.type_name != 'INT':
-        return typing.cast('AttributeDefinition[str]', attribute_definition)
+        return dbc_assert_type(attribute_definition, AttributeDefinition)
 
-    default_value = attribute_definition.default_value
-    assert default_value is not None, 'Default value for VFrameFormat attribute must be defined if the attribute is defined as an INT.'
-    assert isinstance(default_value, int)
+    typed_attribute = dbc_assert_type(attribute_definition, AttributeDefinition)
+    default_value = typed_attribute.default_value
+
+    if default_value is None:
+        raise ParseError('Default value for VFrameFormat attribute must be defined '
+                         'if the attribute is defined as an INT.')
     enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
     enum_attribute.default_value = enum_attribute.choices[default_value]
 
     return enum_attribute
 
-def _load_messages(tokens,
-                   comments,
-                   attributes,
-                   definitions,
-                   choices,
-                   message_senders,
-                   signal_types,
-                   signal_multiplexer_values,
-                   strict,
-                   bus_name,
-                   signal_groups,
-                   sort_signals):
+def _load_messages(tokens: DbcTokens,
+                   comments: DbcComments,
+                   attributes: DbcAttributes,
+                   definitions: OrderedDict[str, AttributeDefinitionType],
+                   choices: ChoicesDict,
+                   message_senders: dict[int, list[str]],
+                   signal_types: dict[int, dict[str, int]],
+                   signal_multiplexer_values: MuxValues,
+                   strict: bool,
+                   bus_name: str | None,
+                   signal_groups: dict[int, list[SignalGroup]],
+                   sort_signals: type_sort_signals) -> list[Message]:
     """Load messages.
 
     """
 
-    def get_message_attributes(frame_id_dbc: int) -> typing.Any:
+    def get_message_attributes(frame_id_dbc: int) -> DbcAttributeMap | None:
         """Get attributes for given message.
 
         """
 
         return attributes.messages.get(frame_id_dbc)
 
-    def get_message_comment(frame_id_dbc):
+    def get_message_comment(frame_id_dbc: int) -> str | None:
         """Get comment for given message.
 
         """
@@ -1708,21 +1791,26 @@ def _load_messages(tokens,
 
         """
 
-        result = None
-        message_attributes = get_message_attributes(frame_id_dbc)
-
         send_type_def = definitions.get('GenMsgSendType')
         if send_type_def is None:
             return None
+
+        message_attributes = get_message_attributes(frame_id_dbc)
+        result: str | None = None
         if message_attributes is not None:
             send_type_attr = message_attributes.get('GenMsgSendType')
             if send_type_attr is not None:
-                result = send_type_attr.value
-                if send_type_def.choices and result is not None:
-                    result = send_type_def.choices[int(result)]
+                raw_result = send_type_attr.value
+                if send_type_def.choices and raw_result is not None:
+                    result = send_type_def.choices[int(raw_result)]
+                else:
+                    result = dbc_assert_type(raw_result, str)
         if result is None:
             if (tmp := send_type_def.default_value) is not None:
-                result = str(tmp)
+                result = dbc_assert_type(tmp, str)
+
+        if result is None:
+            result = dbc_assert_type(send_type_def.default_value, str)
 
         return result
 
@@ -1739,9 +1827,9 @@ def _load_messages(tokens,
         if message_attributes:
             gen_msg_cycle_time_attr = message_attributes.get('GenMsgCycleTime')
             if gen_msg_cycle_time_attr:
-                return gen_msg_cycle_time_attr.value or None
+                return typing.cast('int | None', gen_msg_cycle_time_attr.value or None)
 
-        return gen_msg_cycle_time_def.default_value or None
+        return typing.cast('int | None', gen_msg_cycle_time_def.default_value or None)
 
 
     def get_message_frame_format(frame_id_dbc: int) -> str | None:
@@ -1757,7 +1845,7 @@ def _load_messages(tokens,
         frame_format: str | None
         if message_attributes is not None and 'VFrameFormat' in message_attributes:
             frame_format_choice = message_attributes['VFrameFormat'].value
-            frame_format = ref_definitions.choices[frame_format_choice]
+            frame_format = ref_definitions.choices[dbc_assert_type(frame_format_choice, int)]
         else:
             frame_format = ref_definitions.default_value
 
@@ -1780,14 +1868,16 @@ def _load_messages(tokens,
 
         if message_attributes is not None and 'SystemMessageLongSymbol' in message_attributes:
             return str(message_attributes['SystemMessageLongSymbol'].value)
+
         return message_short_name
 
-    def get_message_signal_groups(frame_id_dbc):
+    def get_message_signal_groups(frame_id_dbc: int) -> list[SignalGroup] | None:
         return signal_groups.get(frame_id_dbc)
 
     messages = []
 
-    for message in tokens.get('BO_', []):
+    for _message in tokens.get('BO_', []):
+        message = dbc_assert_type(_message, list)
         # Any message named VECTOR__INDEPENDENT_SIG_MSG contains
         # signals not assigned to any message. Cantools does not yet
         # support unassigned signals. Discard them for now.
@@ -1795,7 +1885,7 @@ def _load_messages(tokens,
             continue
 
         # Frame id.
-        frame_id_dbc = int(message[1])
+        frame_id_dbc = int(dbc_assert_type(message[1], str))
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
         frame_format = get_message_frame_format(frame_id_dbc)
@@ -1805,7 +1895,7 @@ def _load_messages(tokens,
             is_fd = False
 
         # Senders.
-        senders = [_get_node_long_name(attributes, message[5])]
+        senders = [_get_node_long_name(attributes, dbc_assert_type(message[5], str))]
 
         for node in message_senders.get(frame_id_dbc, []):
             if node not in senders:
@@ -1815,18 +1905,21 @@ def _load_messages(tokens,
             senders = []
 
         # Signal multiplexing.
-        multiplexer_signal = None
+        multiplexer_signal: str | None = None
 
-        for signal in message[6]:
-            if len(signal[1]) == 2:
-                if signal[1][1].endswith('M'):
+        for _sig in dbc_assert_type(message[6], list):
+            sig = dbc_assert_type(_sig, list)
+            mux_field = dbc_assert_type(sig[1], list)
+            if len(mux_field) == 2:
+                if mux_field[1].endswith('M'):
                     if multiplexer_signal is None:
-                        multiplexer_signal = signal[1][0]
+                        multiplexer_signal = mux_field[0]
                     else:
                         multiplexer_signal = None
                         break
 
-        signals = _load_signals(message[6],
+        signal_tokens = dbc_assert_type(message[6], list)
+        signals = _load_signals(signal_tokens,
                                 comments,
                                 attributes,
                                 definitions,
@@ -1839,8 +1932,8 @@ def _load_messages(tokens,
         messages.append(
             Message(frame_id=frame_id,
                     is_extended_frame=is_extended_frame,
-                    name=get_message_name(frame_id_dbc, message[2]),
-                    length=int(message[4], 0),
+                    name=get_message_name(frame_id_dbc, dbc_assert_type(message[2], str)),
+                    length=int(dbc_assert_type(message[4], str), 0),
                     senders=senders,
                     send_type=get_message_send_type(frame_id_dbc),
                     cycle_time=get_message_cycle_time(frame_id_dbc),
@@ -1859,23 +1952,23 @@ def _load_messages(tokens,
     return messages
 
 
-def _load_version(tokens):
+def _load_version(tokens: DbcTokens) -> str | None:
     version_tokens = tokens.get('VERSION', [])
     if not version_tokens:
         return None
-    return version_tokens[0][1]
+    return typing.cast('str | None', dbc_assert_type(version_tokens[0], list)[1])
 
 
-def _load_bus(attributes, comments):
+def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     bus_name_attr = attributes.database.get('DBName')
     bus_name = ''
     if bus_name_attr is not None:
-        bus_name = bus_name_attr.value
+        bus_name = dbc_assert_type(bus_name_attr.value, str)
 
     bus_baudrate_attr = attributes.database.get('Baudrate')
     bus_baudrate = None
     if bus_baudrate_attr is not None:
-        bus_baudrate = bus_baudrate_attr.value
+        bus_baudrate = dbc_assert_type(bus_baudrate_attr.value, int)
 
     bus_comment = comments.bus
 
@@ -1885,15 +1978,16 @@ def _load_bus(attributes, comments):
     return Bus(bus_name, baudrate=bus_baudrate, comment=bus_comment)
 
 
-def _load_nodes(tokens, comments, attributes, definitions):
+def _load_nodes(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, AttributeDefinitionType]) -> list[Node] | None:
     nodes = None
 
-    for token in tokens.get('BU_', []):
+    for _token in tokens.get('BU_', []):
+        token = dbc_assert_type(_token, list)
         nodes = [Node(name=_get_node_long_name(attributes, node_short_name),
                       comment=comments.nodes.get(node_short_name),
-                      dbc_specifics=DbcSpecifics(attributes=attributes.nodes.get(node_short_name),
-                                                 attribute_definitions=definitions))
-                 for node_short_name in token[2]]
+                      dbc_specifics=DbcSpecifics(attributes=attributes.nodes.get(node_short_name, None),
+                                                 attribute_definitions=attribute_definitions))
+                 for node_short_name in dbc_assert_type(token[2], list)]
 
     return nodes
 
@@ -1909,27 +2003,27 @@ def get_attribute_definition(database: InternalDatabase, name: str, default: Att
 
 
 def get_long_envvar_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
+    return dbc_assert_type(get_attribute_definition(database,
                                     'SystemEnvVarLongSymbol',
-                                    ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME))
+                                    ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME), AttributeDefinition)
 
 
 def get_long_node_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
+    return dbc_assert_type(get_attribute_definition(database,
                                     'SystemNodeLongSymbol',
-                                    ATTRIBUTE_DEFINITION_LONG_NODE_NAME))
+                                    ATTRIBUTE_DEFINITION_LONG_NODE_NAME), AttributeDefinition)
 
 
 def get_long_message_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
+    return dbc_assert_type(get_attribute_definition(database,
                                     'SystemMessageLongSymbol',
-                                    ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME))
+                                    ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME), AttributeDefinition)
 
 
 def get_long_signal_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
+    return dbc_assert_type(get_attribute_definition(database,
                                     'SystemSignalLongSymbol',
-                                    ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME))
+                                    ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME), AttributeDefinition)
 
 
 def try_remove_attribute(dbc: DbcSpecifics, name: str) -> None:
@@ -2168,10 +2262,10 @@ def dump_string(database: InternalDatabase,
                           sig_mux_values='\r\n'.join(sig_mux_values))
 
 
-def get_attribute_definitions_dict(definitions, defaults):
-    result = OrderedDict()
+def get_attribute_definitions_dict(definitions: list[MatchObject], defaults: DbcAttributeDefaults) -> OrderedDict[str, AttributeDefinitionType]:
+    result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
 
-    def convert_value(definition, value):
+    def convert_value(definition: AttributeDefinitionType, value: DbcAttributeValue) -> DbcAttributeValue:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
@@ -2179,26 +2273,25 @@ def get_attribute_definitions_dict(definitions, defaults):
 
         return value
 
-    for item in definitions:
-        if len(item[1]) > 0:
-            kind = item[1][0]
-        else:
-            kind = None
+    for _item in definitions:
+        item = dbc_assert_type(_item, list)
+        kind_list = dbc_assert_type(item[1], list)
+        kind: str | None = kind_list[0] if len(kind_list) > 0 else None
 
-        definition = AttributeDefinition(name=item[2],
+        definition = AttributeDefinition(name=dbc_assert_type(item[2], str),
                                          kind=kind,
-                                         type_name=item[3])
-        values = item[4][0]
+                                         type_name=dbc_assert_type(item[3], str))
+        values = dbc_assert_type(dbc_assert_type(item[4], list)[0], list)
 
         if len(values) > 0:
             if definition.type_name == 'ENUM':
-                definition.choices = values
+                definition.choices = dbc_assert_type(values, list)
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = convert_value(definition, values[0])
-                definition.maximum = convert_value(definition, values[1])
+                definition.minimum = typing.cast('int | float', convert_value(definition, typing.cast('DbcAttributeValue', values[0])))
+                definition.maximum = typing.cast('int | float', convert_value(definition, typing.cast('DbcAttributeValue', values[1])))
 
         if definition.name in defaults:
-            definition.default_value = convert_value(definition, defaults[definition.name])
+            definition.default_value = convert_value(definition, defaults[definition.name])  # type: ignore[assignment]
         else:
             definition.default_value = None
 
@@ -2207,10 +2300,10 @@ def get_attribute_definitions_dict(definitions, defaults):
     return result
 
 
-def get_relation_definitions_dict(definitions, defaults):
-    result = OrderedDict()
+def get_relation_definitions_dict(definitions: list[MatchObject], defaults: DbcAttributeDefaults) -> OrderedDict[str, AttributeDefinitionType]:
+    result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
 
-    def convert_value(definition, value):
+    def convert_value(definition: AttributeDefinitionType, value: DbcAttributeValue) -> DbcAttributeValue:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
@@ -2218,26 +2311,26 @@ def get_relation_definitions_dict(definitions, defaults):
 
         return value
 
-    for item in definitions:
-        if len(item[1]) > 0:
-            kind = item[1][0]
-        else:
-            kind = None
+    for _item in definitions:
+        item = dbc_assert_type(_item, list)
+        kind_list = dbc_assert_type(item[1], list)
+        kind: str | None = kind_list[0] if len(kind_list) > 0 else None
 
-        definition = AttributeDefinition(name=item[2],
+        definition = AttributeDefinition(name=dbc_assert_type(item[2], str),
                                          kind=kind,
-                                         type_name=item[3])
-        values = item[4]
+                                         type_name=dbc_assert_type(item[3], str))
+        values = dbc_assert_type(item[4], list)
 
         if len(values) > 0:
             if definition.type_name == 'ENUM':
-                definition.choices = values[0]
+                definition.choices = dbc_assert_type(values[0], list)
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = convert_value(definition, values[0][0])
-                definition.maximum = convert_value(definition, values[0][1])
+                inner = dbc_assert_type(values[0], list)
+                definition.minimum = typing.cast('int | float', convert_value(definition, inner[0]))
+                definition.maximum = typing.cast('int | float', convert_value(definition, inner[1]))
 
         if definition.name in defaults:
-            definition.default_value = convert_value(definition, defaults[definition.name])
+            definition.default_value = convert_value(definition, defaults[definition.name])  # type: ignore[assignment]
         else:
             definition.default_value = None
 
@@ -2276,15 +2369,15 @@ def load_string(string: str, strict: bool = True,
 
     """
 
-    tokens = DbcParser().parse(string)
+    tokens: DbcTokens = dbc_assert_type(DbcParser().parse(string), dict)
 
     comments = _load_comments(tokens)
-    definitions = _load_attribute_definitions(tokens)
+    attribute_definitions = _load_attribute_definitions(tokens)
     defaults = _load_attribute_definition_defaults(tokens)
     relation_definitions = _load_relation_attribute_definitions(tokens)
     relation_defaults = _load_relation_attribute_definition_defaults(tokens)
-    attribute_definitions = get_attribute_definitions_dict(definitions, defaults)
-    attributes = _load_attributes(tokens, attribute_definitions)
+    attribute_definitions_dict = get_attribute_definitions_dict(attribute_definitions, defaults)
+    attributes = _load_attributes(tokens, attribute_definitions_dict)
     relation_attribute_definitions = get_relation_definitions_dict(relation_definitions, relation_defaults)
     relation_attributes = _load_relation_attributes(tokens, relation_attribute_definitions)
     bus = _load_bus(attributes, comments)
@@ -2297,7 +2390,7 @@ def load_string(string: str, strict: bool = True,
     messages = _load_messages(tokens,
                               comments,
                               attributes,
-                              attribute_definitions,
+                              attribute_definitions_dict,
                               choices,
                               message_senders,
                               signal_types,
@@ -2310,18 +2403,18 @@ def load_string(string: str, strict: bool = True,
         messages,
         attributes,
         relation_attributes)
-    nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
+    nodes = _load_nodes(tokens, comments, attributes, attribute_definitions_dict)
     version = _load_version(tokens)
-    environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions)
+    environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions_dict)
     dbc_specifics = DbcSpecifics(attributes=attributes.database or None,
-                                 attribute_definitions=attribute_definitions,
+                                 attribute_definitions=attribute_definitions_dict,
                                  environment_variables=environment_variables,
                                  value_tables=value_tables,
                                  relation_attributes=relation_attributes,
                                  relation_attribute_definitions=relation_attribute_definitions)
 
     return InternalDatabase(messages,
-                            nodes,
+                            nodes or [],
                             [bus] if bus else [],
                             version,
                             dbc_specifics)

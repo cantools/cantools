@@ -10,8 +10,9 @@ from ...typechecking import Comments
 
 
 class Node:
-    """An NODE on the CAN bus.
+    """An participant on the CAN bus.
 
+    Usually this corresponds to an electronic control unit (ECU).
     """
 
     def __init__(self,

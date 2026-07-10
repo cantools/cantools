@@ -10,6 +10,7 @@ from textparser import (
     Any,
     AnyUntil,
     DelimitedList,
+    Grammar,
     OneOrMore,
     OneOrMoreDict,
     Optional,
@@ -306,7 +307,7 @@ class DbcParser(Parser):
 
         return tokens
 
-    def grammar(self):
+    def grammar(self) -> Grammar:
         version = Sequence('VERSION', 'STRING')
 
         ns = Sequence('NS_', ':', AnyUntil(Sequence(Any(), ':')))
@@ -407,28 +408,26 @@ class DbcParser(Parser):
         signal_group = Sequence(
             'SIG_GROUP_', 'NUMBER', 'WORD', 'NUMBER', ':', ZeroOrMore('WORD'), ';')
 
-        return OneOrMoreDict(
-            choice(
-                message,
-                comment,
-                attribute_definition,
-                value_table,
-                choice_,
-                attribute,
-                attribute_rel_sg,
-                attribute_rel_bo,
-                attribute_definition_rel,
-                attribute_definition_default,
-                attribute_definition_default_rel,
-                signal_group,
-                signal_type,
-                signal_multiplexer_values,
-                message_add_sender,
-                environment_variable,
-                nodes,
-                ns,
-                bs,
-                version))
+        return Grammar(OneOrMoreDict(choice(message,
+                                            comment,
+                                            attribute_definition,
+                                            value_table,
+                                            choice_,
+                                            attribute,
+                                            attribute_rel_sg,
+                                            attribute_rel_bo,
+                                            attribute_definition_rel,
+                                            attribute_definition_default,
+                                            attribute_definition_default_rel,
+                                            signal_group,
+                                            signal_type,
+                                            signal_multiplexer_values,
+                                            message_add_sender,
+                                            environment_variable,
+                                            nodes,
+                                            ns,
+                                            bs,
+                                            version)))
 
 
 class LongNamesConverter:

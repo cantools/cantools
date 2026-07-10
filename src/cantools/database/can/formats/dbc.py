@@ -776,7 +776,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     # remove the old 'Baudrate' attribute if it exists. We synchronize
     # that DBC attribute with the `.baudrate` attribute of the
     # high-level bus description object below.
-    if database.dbc.attributes.get('Baudrate') is not None:
+    if 'Baudrate' in database.dbc.attributes:
         del database.dbc.attributes['Baudrate']
 
     # add a new 'Baudrate' attribute

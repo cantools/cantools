@@ -49,7 +49,7 @@ Functions and classes
 .. autoclass:: cantools.database.can.formats.dbc.attribute.Attribute
     :members:
 
-.. autoclass:: cantools.database.can.formats.dbc.environment_variable.EnvironmentVariable
+.. autoclass:: cantools.database.can.formats.dbc.dbc_environment_variable.DbcEnvironmentVariable
     :members:
 
 .. autoclass:: cantools.database.can.formats.dbc.dbc_specifics.DbcSpecifics

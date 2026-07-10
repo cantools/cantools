@@ -23,7 +23,10 @@ from .errors import DecodeError, EncodeError
 
 if TYPE_CHECKING:
     from ..database import Database
-    from ..database.can.formats.dbc import AttributeType, EnvironmentVariable
+    from ..database.can.formats.dbc import (
+        AttributeType,
+        DbcEnvironmentVariable,
+    )
     from ..database.can.message import Message
     from ..database.can.node import Node
     from ..database.can.signal import Signal
@@ -432,7 +435,7 @@ type_sort_attribute = \
     tuple[Literal['node'],    "AttributeType", "Node", None,      None,     None] | \
     tuple[Literal['message'], "AttributeType", None,   "Message", None,     None] | \
     tuple[Literal['signal'],  "AttributeType", None,   "Message", "Signal", None] | \
-    tuple[Literal['envvar'],  "AttributeType", None,   None,      None,     "EnvironmentVariable"]
+    tuple[Literal['envvar'],  "AttributeType", None,   None,      None,     "DbcEnvironmentVariable"]
 
 type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
 

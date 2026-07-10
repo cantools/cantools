@@ -52,8 +52,8 @@ from .attribute_definition import (
     AttributeDefinition,
     AttributeDefinitionType,
 )
+from .dbc_environment_variable import DbcEnvironmentVariable
 from .dbc_specifics import DbcSpecifics
-from .environment_variable import EnvironmentVariable
 
 # Type alias for the parsed token dict produced by DbcParser.parse()
 DbcTokens = dict[str, list[MatchObject]]
@@ -1409,14 +1409,14 @@ def _load_value_tables(tokens: DbcTokens) -> OrderedDict[str, Choices]:
     return value_tables
 
 
-def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, AttributeDefinitionType]) -> OrderedDict[str, EnvironmentVariable]:
-    environment_variables: OrderedDict[str, EnvironmentVariable] = OrderedDict()
+def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, AttributeDefinitionType]) -> OrderedDict[str, DbcEnvironmentVariable]:
+    environment_variables: OrderedDict[str, DbcEnvironmentVariable] = OrderedDict()
 
     for _env_var in tokens.get('EV_', []):
         env_var = dbc_assert_type(_env_var, list)
         short_name = dbc_assert_type(env_var[1], str)
         long_name = _get_envvar_long_name(attributes, short_name)
-        environment_variables[long_name] = EnvironmentVariable(
+        environment_variables[long_name] = DbcEnvironmentVariable(
             name=long_name,
             env_type=int(dbc_assert_type(env_var[3], str)),
             minimum=num(dbc_assert_type(env_var[5], str)),

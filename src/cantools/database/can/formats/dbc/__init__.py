@@ -5,8 +5,8 @@ from .attribute_definition import (
     AttributeValueType,
 )
 from .dbc import dump_string, load_string
+from .dbc_environment_variable import DbcEnvironmentVariable
 from .dbc_specifics import DbcSpecifics
-from .environment_variable import EnvironmentVariable
 
 __all__ = [
     "Attribute",
@@ -14,8 +14,8 @@ __all__ = [
     "AttributeDefinitionType",
     "AttributeType",
     "AttributeValueType",
+    "DbcEnvironmentVariable",
     "DbcSpecifics",
-    "EnvironmentVariable",
     "dump_string",
     "load_string",
 ]

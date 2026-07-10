@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .attribute import AttributeType
     from .attribute_definition import AttributeDefinitionType
     from .dbc import DbcRelationAttributes
-    from .environment_variable import EnvironmentVariable
+    from .dbc_environment_variable import DbcEnvironmentVariable
 
 class DbcSpecifics:
 
@@ -19,7 +19,7 @@ class DbcSpecifics:
                  *,
                  attributes: OrderedDict[str, AttributeType] | None = None,
                  attribute_definitions: OrderedDict[str, AttributeDefinitionType] | None = None,
-                 environment_variables: OrderedDict[str, EnvironmentVariable] | None = None,
+                 environment_variables: OrderedDict[str, DbcEnvironmentVariable] | None = None,
                  value_tables: OrderedDict[str, Choices] | None = None,
                  relation_attributes: DbcRelationAttributes | None = None,
                  relation_attribute_definitions: OrderedDict[str, AttributeDefinitionType] | None = None) -> None:
@@ -57,7 +57,7 @@ class DbcSpecifics:
         return self._value_tables
 
     @property
-    def environment_variables(self) -> OrderedDict[str, EnvironmentVariable]:
+    def environment_variables(self) -> OrderedDict[str, DbcEnvironmentVariable]:
         """An ordered dictionary of all environment variables. Only valid for
         DBC specifiers on database level.
 

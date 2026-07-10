@@ -50,6 +50,9 @@ from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
 from .utils import num
 
+# Attribute value types produced during parsing (before they become Attribute objects)
+AttributeValue = str | int | float
+
 DBC_FMT = (
     'VERSION "{version}"\r\n'
     '\r\n'
@@ -196,12 +199,15 @@ ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
     maximum=100000000000)
 
 
-def to_int(value: typing.Any) -> int:
-    return int(Decimal(value))
+def to_int(value: AttributeValue) -> int:
+    if isinstance(value, str):
+        return int(Decimal(value))
+    return int(value)
 
-def to_float(value: typing.Any) -> float:
-    return float(Decimal(value))
-
+def to_float(value: AttributeValue) -> float:
+    if isinstance(value, str):
+        return float(Decimal(value))
+    return float(value)
 
 class DbcParser(Parser):
 

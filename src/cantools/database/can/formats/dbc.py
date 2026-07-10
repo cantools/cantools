@@ -455,9 +455,9 @@ def get_dbc_frame_id(message: Message) -> int:
     return frame_id
 
 def get_dbc_name(name: str) -> str:
-    #replace special chars with '_'
+    # replace special chars with '_'
     name = re.sub(r'\W', '_', name)
-    #append '_' if it starts with a number
+    # prepend '_' if it starts with a number
     if name[0].isdigit():
         name = '_' + name
 
@@ -840,7 +840,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             else:
                 v_frame_format_str = 'StandardCAN'
             v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)
-            # only set the VFrameFormat if it valid according to the attribute definition
+            # only set the VFrameFormat if it is valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
                 and v_frame_format_str != v_frame_format_def.default_value
@@ -1288,7 +1288,7 @@ def _load_value_tables(tokens):
     for value_table in tokens.get('VAL_TABLE_', []):
         name = value_table[1]
         choices = {int(number): NamedSignalValue(int(number), text) for number, text in value_table[2]}
-        #choices = {int(number): text for number, text in value_table[2]}
+        # choices = {int(number): text for number, text in value_table[2]}
         value_tables[name] = choices
 
     return value_tables
@@ -1380,7 +1380,7 @@ def _load_signal_multiplexer_values(tokens):
         for lower, upper in signal_multiplexer_value[4]:
             lower = int(lower)
             upper = int(upper[1:])
-            # ToDo: Probably store ranges as tuples to not run out of
+            # TODO: Probably store ranges as tuples to not run out of
             #       memory on huge ranges.
             multiplexer_ids.extend(range(lower, upper + 1))
 

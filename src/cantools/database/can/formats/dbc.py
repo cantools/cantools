@@ -1573,7 +1573,7 @@ def _load_signals(tokens,
 
         return None
 
-    signals: list[Signal] = []
+    signals = []
 
     for signal in tokens:
         signals.append(

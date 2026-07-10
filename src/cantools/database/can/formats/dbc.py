@@ -24,7 +24,6 @@ from textparser import (
 )
 
 from cantools.database.can.internal_database import InternalDatabase
-from cantools.typechecking import Comments
 
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
@@ -1404,18 +1403,17 @@ def _load_signal_groups(tokens, attributes):
 
         """
 
-        try:
-            return attributes[frame_id_dbc]['signal'][signal_short_name]
-        except KeyError:
-            return OrderedDict()
+        frame_signals = attributes.get(frame_id_dbc, {})
+        signal_map = frame_signals.get('signal', {})
+        return signal_map.get(signal_short_name, OrderedDict())
 
     def get_signal_long_name(frame_id_dbc, signal_short_name):
         signal_attributes = get_signal_attributes(frame_id_dbc, signal_short_name)
 
-        try:
-            return signal_attributes['SystemSignalLongSymbol'].value
-        except (KeyError, TypeError):
-            return signal_short_name
+        attrib = signal_attributes.get('SystemSignalLongSymbol')
+        if attrib is not None:
+            return attrib.value
+        return signal_short_name
 
     for signal_group in tokens.get('SIG_GROUP_',[]):
         frame_id = int(signal_group[1])
@@ -1438,44 +1436,36 @@ def _load_signals(tokens,
                   multiplexer_signal):
     signal_to_multiplexer = {}
 
-    try:
-        signal_multiplexer_values = signal_multiplexer_values[frame_id_dbc]
-
-        for multiplexer_name, items in signal_multiplexer_values.items():
-            for name in items:
-                signal_to_multiplexer[name] = multiplexer_name
-    except KeyError:
-        pass
+    frame_mux_values = signal_multiplexer_values.get(frame_id_dbc, {})
+    for multiplexer_name, items in frame_mux_values.items():
+        for name in items:
+            signal_to_multiplexer[name] = multiplexer_name
+    signal_multiplexer_values = frame_mux_values
 
     def get_signal_attributes(frame_id_dbc, signal_name):
         """Get attributes for given signal.
 
         """
 
-        try:
-            return attributes[frame_id_dbc]['signal'][signal_name]
-        except KeyError:
-            return OrderedDict()
+        frame_signals = attributes.get(frame_id_dbc, {})
+        signal_map = frame_signals.get('signal', {})
+        return signal_map.get(signal_name, OrderedDict())
 
     def get_signal_comment(frame_id_dbc, signal_name):
         """Get comment for given signal.
 
         """
 
-        try:
-            return comments[frame_id_dbc]['signal'][signal_name]
-        except KeyError:
-            return None
+        frame_cmt = comments.get(frame_id_dbc, {})
+        signal_cmt = frame_cmt.get('signal', {})
+        return signal_cmt.get(signal_name)
 
     def get_signal_choices(frame_id_dbc, signal):
         """Get choices for given signal.
 
         """
 
-        try:
-            return choices[frame_id_dbc][signal]
-        except KeyError:
-            return None
+        return choices.get(frame_id_dbc, {}).get(signal)
 
     def get_signal_is_multiplexer(signal):
         if len(signal[1]) == 2:
@@ -1494,11 +1484,10 @@ def _load_signals(tokens,
             multiplexer_signal = get_multiplexer_signal(signal,
                                                         multiplexer_signal)
 
-        try:
-            ids.extend(
-                signal_multiplexer_values[multiplexer_signal][signal[0]])
-        except KeyError:
-            pass
+        if multiplexer_signal is not None:
+            mux_entry = signal_multiplexer_values.get(multiplexer_signal)
+            if mux_entry is not None and signal[0] in mux_entry:
+                ids.extend(mux_entry[signal[0]])
 
         if ids:
             # make the IDs unique (and sort them)
@@ -1541,26 +1530,26 @@ def _load_signals(tokens,
 
         """
 
-        try:
-            return signal_types[frame_id_dbc][signal] in FLOAT_SIGNAL_TYPES
-        except KeyError:
+        frame_signal_types = signal_types.get(frame_id_dbc)
+        if frame_signal_types is None:
             return False
+        return frame_signal_types.get(signal) in FLOAT_SIGNAL_TYPES
 
     def get_signal_name(frame_id_dbc, name):
         signal_attributes = get_signal_attributes(frame_id_dbc, name)
 
-        try:
-            return signal_attributes['SystemSignalLongSymbol'].value
-        except (KeyError, TypeError):
-            return name
+        attrib = signal_attributes.get('SystemSignalLongSymbol')
+        if attrib is not None:
+            return attrib.value
+        return name
 
     def get_signal_initial_value(frame_id_dbc, name):
         signal_attributes = get_signal_attributes(frame_id_dbc, name)
 
-        try:
-            return signal_attributes['GenSigStartValue'].value
-        except (KeyError, TypeError):
-            return None
+        attrib = signal_attributes.get('GenSigStartValue')
+        if attrib is not None:
+            return attrib.value
+        return None
 
     def get_signal_spn(frame_id_dbc, name):
         signal_attributes = get_signal_attributes(frame_id_dbc, name)
@@ -1650,20 +1639,16 @@ def _load_messages(tokens,
 
         """
 
-        try:
-            return attributes[frame_id_dbc]['message']
-        except KeyError:
-            return None
+        frame_attrs = attributes.get(frame_id_dbc, {})
+        return frame_attrs.get('message')
 
-    def get_message_comment(frame_id_dbc: int) -> str | Comments | None:
+    def get_message_comment(frame_id_dbc: int) -> str | None:
         """Get comment for given message.
 
         """
 
-        try:
-            return typing.cast('str', comments[frame_id_dbc]['message'])
-        except KeyError:
-            return None
+        frame_comments = comments.get(frame_id_dbc, {})
+        return typing.cast('str', frame_comments.get('message'))
 
     def get_message_send_type(frame_id_dbc: int) -> str | None:
         """Get send type for a given message.
@@ -1673,18 +1658,18 @@ def _load_messages(tokens,
         result = None
         message_attributes = get_message_attributes(frame_id_dbc)
 
-        try:
-            result = message_attributes['GenMsgSendType'].value
-
-            # if definitions is enum (otherwise above value is maintained) -> Prevents ValueError
-            if definitions['GenMsgSendType'].choices:
-                # Resolve ENUM index to ENUM text
-                result = definitions['GenMsgSendType'].choices[int(result)]
-        except (KeyError, TypeError):
-            try:
-                result = definitions['GenMsgSendType'].default_value
-            except (KeyError, TypeError):
-                result = None
+        send_type_def = definitions.get('GenMsgSendType')
+        if send_type_def is None:
+            return None
+        if message_attributes is not None:
+            send_type_attr = message_attributes.get('GenMsgSendType')
+            if send_type_attr is not None:
+                result = send_type_attr.value
+                if send_type_def.choices and result is not None:
+                    result = send_type_def.choices[int(result)]
+        if result is None:
+            if (tmp := send_type_def.default_value) is not None:
+                result = str(tmp)
 
         return result
 
@@ -1717,10 +1702,10 @@ def _load_messages(tokens,
         ref_definitions = _get_enum_vframeformat_attribute(ref_definitions)
 
         frame_format: str | None
-        try:
+        if message_attributes is not None and 'VFrameFormat' in message_attributes:
             frame_format_choice = message_attributes['VFrameFormat'].value
             frame_format = ref_definitions.choices[frame_format_choice]
-        except (KeyError, TypeError):
+        else:
             frame_format = ref_definitions.default_value
 
         return frame_format
@@ -1740,16 +1725,12 @@ def _load_messages(tokens,
     def get_message_long_name(frame_id_dbc: int, message_short_name: str) -> str:
         message_attributes = get_message_attributes(frame_id_dbc)
 
-        try:
-            return message_attributes['SystemMessageLongSymbol'].value  # type: ignore[no-any-return]
-        except (KeyError, TypeError):
-            return message_short_name
+        if message_attributes is not None and 'SystemMessageLongSymbol' in message_attributes:
+            return str(message_attributes['SystemMessageLongSymbol'].value)
+        return message_short_name
 
-    def get_message_signal_groups(frame_id_dbc: int) -> list[SignalGroup] | None:
-        try:
-            return signal_groups[frame_id_dbc]  # type: ignore[no-any-return]
-        except KeyError:
-            return None
+    def get_message_signal_groups(frame_id_dbc):
+        return signal_groups.get(frame_id_dbc)
 
     messages = []
 
@@ -1830,20 +1811,12 @@ def _load_version(tokens):
 
 
 def _load_bus(attributes, comments):
-    try:
-        bus_name = attributes['database']['DBName'].value
-    except KeyError:
-        bus_name = ''
-
-    try:
-        bus_baudrate = attributes['database']['Baudrate'].value
-    except KeyError:
-        bus_baudrate = None
-
-    try:
-        bus_comment = comments['database']['bus']
-    except KeyError:
-        bus_comment = None
+    db_attrs = attributes.get('database', {})
+    db_name_attr = db_attrs.get('DBName')
+    bus_name = str(db_name_attr.value) if db_name_attr is not None else ''
+    db_baudrate_attr = db_attrs.get('Baudrate')
+    bus_baudrate = db_baudrate_attr.value if db_baudrate_attr is not None else None
+    bus_comment = comments.get('database', {}).get('bus')
 
     if not any([bus_name, bus_baudrate, bus_comment]):
         return None
@@ -1899,10 +1872,8 @@ def get_long_signal_name_attribute_definition(database: InternalDatabase) -> Att
 
 
 def try_remove_attribute(dbc: DbcSpecifics, name: str) -> None:
-    try:
+    if dbc is not None and name in dbc.attributes:
         dbc.attributes.pop(name)
-    except (KeyError, AttributeError):
-        pass
 
 
 def remove_special_chars(database: InternalDatabase) -> InternalDatabase:
@@ -1995,9 +1966,9 @@ def update_signal_attribute_rel_names(database: InternalDatabase,
 
     frame_id = get_dbc_frame_id(message)
 
-    try:
-        signal_attributes_rel = database.dbc.attributes_rel[frame_id]['signal']
-    except KeyError:
+    frame_rel = database.dbc.attributes_rel.get(frame_id, {})
+    signal_attributes_rel = frame_rel.get('signal')
+    if signal_attributes_rel is None:
         return
 
     updated_signal_attributes_rel = OrderedDict()
@@ -2167,10 +2138,9 @@ def get_attribute_definitions_dict(definitions: typing.Any, defaults: typing.Any
                 definition.minimum = convert_value(definition, values[0])
                 definition.maximum = convert_value(definition, values[1])
 
-        try:
-            value = defaults[definition.name]
-            definition.default_value = convert_value(definition, value)
-        except KeyError:
+        if definition.name in defaults:
+            definition.default_value = convert_value(definition, defaults[definition.name])
+        else:
             definition.default_value = None
 
         result[definition.name] = definition
@@ -2207,10 +2177,9 @@ def get_definitions_rel_dict(definitions, defaults):
                 definition.minimum = convert_value(definition, values[0][0])
                 definition.maximum = convert_value(definition, values[0][1])
 
-        try:
-            value = defaults[definition.name]
-            definition.default_value = convert_value(definition, value)
-        except KeyError:
+        if definition.name in defaults:
+            definition.default_value = convert_value(definition, defaults[definition.name])
+        else:
             definition.default_value = None
 
         result[definition.name] = definition
@@ -2224,23 +2193,17 @@ def update_signal_attribute_rel_names_after_load(messages: list[Message],
     for message in messages:
         frame_id = get_dbc_frame_id(message)
 
-        try:
-            signal_attributes_rel = attributes_rel[frame_id]['signal']
-        except KeyError:
+        frame_rel = attributes_rel.get(frame_id, {})
+        signal_attributes_rel = frame_rel.get('signal')
+        if signal_attributes_rel is None:
             continue
 
-        try:
-            signal_attributes = attributes[frame_id]['signal']
-        except KeyError:
-            signal_attributes = {}
+        signal_attributes = attributes.get(frame_id, {}).get('signal', {})
 
         short_to_signal_name = {}
         for signal_name, value in signal_attributes.items():
-            try:
-                short_to_signal_name[signal_name] = (
-                    value['SystemSignalLongSymbol'].value)
-            except KeyError:
-                pass
+            if 'SystemSignalLongSymbol' in value:
+                short_to_signal_name[signal_name] = value['SystemSignalLongSymbol'].value
 
         updated_signal_attributes_rel = OrderedDict()
 

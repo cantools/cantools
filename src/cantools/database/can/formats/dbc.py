@@ -51,8 +51,10 @@ from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
 from .utils import num
 
-# Attribute value types produced during parsing (before they become Attribute objects)
-AttributeValue = str | int | float
+# Attribute value types produced during parsing (before they become
+# Attribute objects)
+DbcAttributeValue = str | int | float
+
 # The type returned by _load_comments()
 @dataclass(slots=True, kw_only=True)
 class DbcComments:
@@ -224,12 +226,12 @@ ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
     maximum=100000000000)
 
 
-def to_int(value: AttributeValue) -> int:
+def to_int(value: DbcAttributeValue) -> int:
     if isinstance(value, str):
         return int(Decimal(value))
     return int(value)
 
-def to_float(value: AttributeValue) -> float:
+def to_float(value: DbcAttributeValue) -> float:
     if isinstance(value, str):
         return float(Decimal(value))
     return float(value)

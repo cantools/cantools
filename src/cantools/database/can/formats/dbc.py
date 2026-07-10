@@ -1310,8 +1310,8 @@ def _load_environment_variables(tokens, comments, attributes, attribute_definiti
             access_type=env_var[12],
             access_node=env_var[13],
             comment=comments.get(env_var[1], None),
-            dbc_specifics=DbcSpecifics(attributes['envvar'].get(short_name, None),
-                                       attribute_definitions))
+            dbc_specifics=DbcSpecifics(attributes=attributes['envvar'].get(short_name, None),
+                                       attribute_definitions=attribute_definitions))
 
     return environment_variables
 
@@ -1587,8 +1587,8 @@ def _load_signals(tokens,
                    maximum=get_signal_maximum(signal[15], signal[17]),
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
-                   dbc_specifics=DbcSpecifics(get_signal_attributes(frame_id_dbc, signal[1][0]),
-                                              definitions),
+                   dbc_specifics=DbcSpecifics(attributes=get_signal_attributes(frame_id_dbc, signal[1][0]),
+                                              attribute_definitions=definitions),
                    comment=get_signal_comment(frame_id_dbc,
                                               signal[1][0]),
                    is_multiplexer=get_signal_is_multiplexer(signal),
@@ -1793,8 +1793,8 @@ def _load_messages(tokens,
                     senders=senders,
                     send_type=get_message_send_type(frame_id_dbc),
                     cycle_time=get_message_cycle_time(frame_id_dbc),
-                    dbc_specifics=DbcSpecifics(get_message_attributes(frame_id_dbc),
-                                               definitions),
+                    dbc_specifics=DbcSpecifics(attributes=get_message_attributes(frame_id_dbc),
+                                               attribute_definitions=definitions),
                     signals=signals,
                     comment=get_message_comment(frame_id_dbc),
                     strict=strict,
@@ -1832,8 +1832,8 @@ def _load_nodes(tokens, comments, attributes, definitions):
     for token in tokens.get('BU_', []):
         nodes = [Node(name=_get_node_long_name(attributes, node),
                       comment=comments.get(node, None),
-                      dbc_specifics=DbcSpecifics(attributes['node'].get(node, None),
-                                                 definitions))
+                      dbc_specifics=DbcSpecifics(attributes=attributes['node'].get(node, None),
+                                                 attribute_definitions=definitions))
                  for node in token[2]]
 
     return nodes

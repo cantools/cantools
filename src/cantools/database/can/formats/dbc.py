@@ -737,7 +737,7 @@ def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]
 
     for definition in definitions.values():
         if definition.default_value is not None:
-            if definition.type_name in ["STRING", "ENUM"]:
+            if definition.type_name in ['STRING', 'ENUM']:
                 fmt = 'BA_DEF_DEF_  "{name}" "{value}";'
             else:
                 fmt = 'BA_DEF_DEF_  "{name}" {value};'
@@ -758,7 +758,7 @@ def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[
 
     for definition in definitions.values():
         if definition.default_value is not None:
-            if definition.type_name in ["STRING", "ENUM"]:
+            if definition.type_name in ['STRING', 'ENUM']:
                 fmt = 'BA_DEF_DEF_REL_ "{name}" "{value}";'
             else:
                 fmt = 'BA_DEF_DEF_REL_ "{name}" {value};'
@@ -792,7 +792,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         assert baudrate_attr_def is not None
         database.dbc.attributes['Baudrate'] = Attribute[int](
                     value=int(baudrate),
-                    definition=typing.cast("AttributeDefinition[int]", baudrate_attr_def),
+                    definition=typing.cast('AttributeDefinition[int]', baudrate_attr_def),
                 )
 
     for attribute in database.dbc.attributes.values():
@@ -817,12 +817,12 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         # the cycle time specified by the message object
         msg_cycle_time = message.cycle_time or 0
 
-        gen_msg_cycle_time_def = database.dbc.attribute_definitions.get("GenMsgCycleTime")
+        gen_msg_cycle_time_def = database.dbc.attribute_definitions.get('GenMsgCycleTime')
 
         if gen_msg_cycle_time_def is not None and msg_cycle_time != gen_msg_cycle_time_def.default_value:
             msg_attributes['GenMsgCycleTime'] = Attribute(
                 value=msg_cycle_time,
-                definition=typing.cast("AttributeDefinition[int]", gen_msg_cycle_time_def),
+                definition=typing.cast('AttributeDefinition[int]', gen_msg_cycle_time_def),
             )
         elif 'GenMsgCycleTime' in msg_attributes:
             del msg_attributes['GenMsgCycleTime']
@@ -830,7 +830,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         # if bus is CAN FD, set VFrameFormat
         v_frame_format_def = None
         if database.dbc is not None:
-            v_frame_format_def = database.dbc.attribute_definitions.get("VFrameFormat")
+            v_frame_format_def = database.dbc.attribute_definitions.get('VFrameFormat')
         if v_frame_format_def is not None:
             if message.protocol == 'j1939':
                 v_frame_format_str = 'J1939PG'
@@ -925,7 +925,7 @@ def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_sig
 
     attributes_rel = database.dbc.attributes_rel
     for frame_id, element in attributes_rel.items():
-        if "signal" in element:
+        if 'signal' in element:
             for signal_name, signal_lst in element['signal'].items():
                 for node_name, node_dict in signal_lst['node'].items():
                     for attribute in node_dict.values():
@@ -936,7 +936,7 @@ def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_sig
                                         f'{frame_id} '
                                         f'{signal_name} '
                                         f'{attribute.formatted_value};')
-        elif "node" in element:
+        elif 'node' in element:
             for node_name, node_dict in element['node'].items():
                 for attribute in node_dict.values():
                     ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
@@ -1238,7 +1238,7 @@ def _load_attributes_rel(tokens, definitions):
         rel_type = attribute[2]
         node = attribute[3]
 
-        if rel_type == "BU_SG_REL_":
+        if rel_type == 'BU_SG_REL_':
 
             frame_id_dbc = int(attribute[5])
             signal = attribute[6]
@@ -1260,7 +1260,7 @@ def _load_attributes_rel(tokens, definitions):
 
             attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_object(attribute, attribute[7])
 
-        elif rel_type == "BU_BO_REL_":
+        elif rel_type == 'BU_BO_REL_':
             frame_id_dbc = int(attribute[4])
 
             if frame_id_dbc not in attributes_rel:
@@ -1623,11 +1623,11 @@ def _get_enum_vframeformat_attribute(attribute: AttributeDefinitionType) -> Attr
     """
 
     if attribute.type_name != 'INT':
-        return typing.cast("AttributeDefinition[str]", attribute)
+        return typing.cast('AttributeDefinition[str]', attribute)
 
-    typed_attribute = typing.cast("AttributeDefinition[int]", attribute)
+    typed_attribute = typing.cast('AttributeDefinition[int]', attribute)
     default_value = typed_attribute.default_value
-    assert default_value is not None, "Default value for VFrameFormat attribute must be defined if the attribute is defined as an INT."
+    assert default_value is not None, 'Default value for VFrameFormat attribute must be defined if the attribute is defined as an INT.'
     enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
     enum_attribute.default_value = enum_attribute.choices[default_value]
 
@@ -1770,7 +1770,7 @@ def _load_messages(tokens,
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
         frame_format = get_frame_format(frame_id_dbc)
         if frame_format is not None:
-            is_fd = frame_format.endswith("CAN_FD")
+            is_fd = frame_format.endswith('CAN_FD')
         else:
             is_fd = False
 
@@ -1879,25 +1879,25 @@ def get_attribute_definition(database: InternalDatabase, name: str, default: Att
 
 
 def get_long_envvar_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast("AttributeDefinition[str]", get_attribute_definition(database,
+    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
                                     'SystemEnvVarLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME))
 
 
 def get_long_node_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast("AttributeDefinition[str]", get_attribute_definition(database,
+    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
                                     'SystemNodeLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_NODE_NAME))
 
 
 def get_long_message_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast("AttributeDefinition[str]", get_attribute_definition(database,
+    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
                                     'SystemMessageLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME))
 
 
 def get_long_signal_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
-    return typing.cast("AttributeDefinition[str]", get_attribute_definition(database,
+    return typing.cast('AttributeDefinition[str]', get_attribute_definition(database,
                                     'SystemSignalLongSymbol',
                                     ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME))
 
@@ -2132,11 +2132,11 @@ def dump_string(database: InternalDatabase,
                           cm='\r\n'.join(cm),
                           signal_types='\r\n'.join(signal_types),
                           ba_def='\r\n'.join(ba_def),
-                          ba_def_rel="".join([elem+"\r\n" for elem in ba_def_rel]),
+                          ba_def_rel=''.join([elem+'\r\n' for elem in ba_def_rel]),
                           ba_def_def='\r\n'.join(ba_def_def),
-                          ba_def_def_rel="".join([elem+"\r\n" for elem in ba_def_def_rel]),
+                          ba_def_def_rel=''.join([elem+'\r\n' for elem in ba_def_def_rel]),
                           ba='\r\n'.join(ba),
-                          ba_rel="".join([elem+"\r\n" for elem in ba_rel]),
+                          ba_rel=''.join([elem+'\r\n' for elem in ba_rel]),
                           val='\r\n'.join(val),
                           sig_group='\r\n'.join(sig_group),
                           sig_mux_values='\r\n'.join(sig_mux_values))
@@ -2165,7 +2165,7 @@ def get_definitions_dict(definitions: typing.Any, defaults: typing.Any) -> Order
         values = item[4][0]
 
         if len(values) > 0:
-            if definition.type_name == "ENUM":
+            if definition.type_name == 'ENUM':
                 definition.choices = values
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
                 definition.minimum = convert_value(definition, values[0])
@@ -2205,7 +2205,7 @@ def get_definitions_rel_dict(definitions, defaults):
         values = item[4]
 
         if len(values) > 0:
-            if definition.type_name == "ENUM":
+            if definition.type_name == 'ENUM':
                 definition.choices = values[0]
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
                 definition.minimum = convert_value(definition, values[0][0])

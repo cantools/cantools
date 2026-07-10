@@ -6037,12 +6037,11 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_relation_attributes(self):
         filename = 'tests/files/dbc/attributes_relation.dbc'
         db = cantools.database.load_file(filename)
-        for _key, frame in db.dbc.attributes_rel.items():
-            signal = frame.get("signal")
-            if "signal_1" in signal.keys():
-                rel_attributes = signal["signal_1"]["node"]["ECU2"]
-                first_timeout_attr = rel_attributes["SigFirstTimeoutTime"]
-                timeout_attr = rel_attributes["SigTimeoutTime"]
+        for _frame_id, signal_map in db.dbc.relation_attributes.node_signal_relations.items():
+            if 'signal_1' in signal_map:
+                rel_attributes = signal_map['signal_1']['ECU2']
+                first_timeout_attr = rel_attributes['SigFirstTimeoutTime']
+                timeout_attr = rel_attributes['SigTimeoutTime']
                 self.assertEqual(first_timeout_attr.value, 24000)
                 self.assertEqual(timeout_attr.value, 6000)
                 break
@@ -6051,10 +6050,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_relation_message_attributes(self):
         filename = 'tests/files/dbc/BU_BO_REL_Message.dbc'
         db = cantools.database.load_file(filename)
-        for _key, frame in db.dbc.attributes_rel.items():
-            node = frame.get("node")
-            rel_attributes = node["ECU1"]
-            msg_attr = rel_attributes["MsgProject"]
+        for _frame_id, node_map in db.dbc.relation_attributes.node_message_relations.items():
+            rel_attributes = node_map['ECU1']
+            msg_attr = rel_attributes['MsgProject']
             self.assertEqual(msg_attr.value, 2)
             break
         self.assert_dbc_dump(db, filename)

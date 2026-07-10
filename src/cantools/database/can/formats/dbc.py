@@ -82,6 +82,17 @@ class DbcAttributes:
     #     envvars[envvar_name][attribute_name] -> attribute_object
     envvars: OrderedDict[str, DbcAttributeMap] = field(default_factory=OrderedDict)
 
+# The type returned by _load_relation_attributes()
+@dataclass(slots=True, kw_only=True)
+class DbcRelationAttributes:
+    # BU_SG_REL_ attributes:
+    #     node_signal_relations[frame_id][signal_name][node_name][attribute_name] -> attribute_object
+    node_signal_relations: OrderedDict[int, OrderedDict[str, OrderedDict[str, DbcAttributeMap]]] = field(default_factory=OrderedDict)
+
+    # BU_BO_REL_ attributes:
+    #     node_message_relations[frame_id][node_name][attribute_name] -> attribute_object
+    node_message_relations: OrderedDict[int, OrderedDict[str, DbcAttributeMap]] = field(default_factory=OrderedDict)
+
 # The type returned by _load_comments()
 @dataclass(slots=True, kw_only=True)
 class DbcComments:
@@ -415,7 +426,7 @@ class DbcParser(Parser):
             choice('NUMBER', 'STRING'),
             ';')
 
-        attribute_definition_rel = Sequence(
+        relation_attribute_definition = Sequence(
             'BA_DEF_REL_',
             Optional(choice('BU_SG_REL_', 'BU_BO_REL_')),
             'STRING',
@@ -423,14 +434,14 @@ class DbcParser(Parser):
             Optional(choice(DelimitedList('STRING'), OneOrMore('NUMBER'))),
             ';')
 
-        attribute_definition_default_rel = Sequence(
+        relation_attribute_default_definition = Sequence(
             'BA_DEF_DEF_REL_', 'STRING', choice('NUMBER', 'STRING'), ';')
 
-        attribute_rel_sg = Sequence(
+        signal_relation_attribute = Sequence(
             'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
             'WORD', choice('NUMBER', 'STRING'), ';')
 
-        attribute_rel_bo = Sequence(
+        message_relation_attribute = Sequence(
             'BA_REL_', 'STRING', 'BU_BO_REL_', 'WORD', 'NUMBER',
             choice('NUMBER', 'STRING'), ';')
 
@@ -467,11 +478,11 @@ class DbcParser(Parser):
                                             value_table,
                                             choice_,
                                             attribute,
-                                            attribute_rel_sg,
-                                            attribute_rel_bo,
-                                            attribute_definition_rel,
+                                            signal_relation_attribute,
+                                            message_relation_attribute,
+                                            relation_attribute_definition,
                                             attribute_definition_default,
-                                            attribute_definition_default_rel,
+                                            relation_attribute_default_definition,
                                             signal_group,
                                             signal_type,
                                             signal_multiplexer_values,
@@ -754,28 +765,28 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
     return ba_def
 
 
-def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
-    ba_def_rel: list[str] = []
+def _dump_relation_attribute_definitions(database: InternalDatabase) -> list[str]:
+    relation_attribute_definitions: list[str] = []
 
     if database.dbc is None:
-        return  ba_def_rel
+        return relation_attribute_definitions
 
-    definitions = database.dbc.attribute_definitions_rel
+    definitions = database.dbc.relation_attribute_definitions
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
             choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
-            ba_def_rel.append(
+            relation_attribute_definitions.append(
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}  {choices};')
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-            ba_def_rel.append(
+            relation_attribute_definitions.append(
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}{definition.formatted_minimum}{definition.formatted_maximum};')
         elif definition.type_name == 'STRING':
-            ba_def_rel.append(
+            relation_attribute_definitions.append(
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name} ;')
 
-    return ba_def_rel
+    return relation_attribute_definitions
 
 
 def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
@@ -799,13 +810,13 @@ def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]
     return ba_def_def
 
 
-def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[str]:
-    ba_def_def_rel: list[str] = []
+def _dump_relation_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
+    relation_attribute_definition_defaults: list[str] = []
 
     if database.dbc is None:
-        return  ba_def_def_rel
+        return  relation_attribute_definition_defaults
 
-    definitions = database.dbc.attribute_definitions_rel
+    definitions = database.dbc.relation_attribute_definitions
 
     for definition in definitions.values():
         if definition.default_value is not None:
@@ -814,10 +825,11 @@ def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[
             else:
                 fmt = 'BA_DEF_DEF_REL_ "{name}" {value};'
 
-            ba_def_def_rel.append(fmt.format(name=definition.name,
-                                             value=definition.default_value))
+            relation_attribute_definition_defaults.append(
+                fmt.format(name=definition.name,
+                           value=definition.default_value))
 
-    return ba_def_def_rel
+    return relation_attribute_definition_defaults
 
 
 def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals, sort_attributes: type_sort_attributes) -> list[str]:
@@ -839,11 +851,11 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     if len(database.buses) == 1:
         baudrate = database.buses[0].baudrate
     if baudrate is not None:
-        baudrate_attr_def = database.dbc.attribute_definitions.get('Baudrate')
-        assert baudrate_attr_def is not None
+        baudrate_attribute_definition = database.dbc.attribute_definitions.get('Baudrate')
+        assert baudrate_attribute_definition is not None
         database.dbc.attributes['Baudrate'] = Attribute[int](
                     value=int(baudrate),
-                    definition=typing.cast('AttributeDefinition[int]', baudrate_attr_def),
+                    definition=typing.cast('AttributeDefinition[int]', baudrate_attribute_definition),
                 )
 
     for attribute in database.dbc.attributes.values():
@@ -968,35 +980,34 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     return ba
 
 
-def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_signals) -> str | list[str]:
-    ba_rel: list[str] = []
+def _dump_relation_attributes(database: InternalDatabase, sort_signals: type_sort_signals) -> str | list[str]:
+    relation_attribute_strings: list[str] = []
 
-    if database.dbc is None:
-        return  ba_rel
+    if database.dbc is None or database.dbc.relation_attributes is None:
+        return relation_attribute_strings
 
-    attributes_rel = database.dbc.attributes_rel
-    for frame_id, element in attributes_rel.items():
-        if 'signal' in element:
-            for signal_name, signal_lst in element['signal'].items():
-                for node_name, node_dict in signal_lst['node'].items():
-                    for attribute in node_dict.values():
-                        ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                        f'BU_SG_REL_ '
-                                        f'{node_name} '
-                                        f'SG_ '
-                                        f'{frame_id} '
-                                        f'{signal_name} '
-                                        f'{attribute.formatted_value};')
-        elif 'node' in element:
-            for node_name, node_dict in element['node'].items():
-                for attribute in node_dict.values():
-                    ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                    f'BU_BO_REL_ '
-                                    f'{node_name} '
-                                    f'{frame_id} '
-                                    f'{attribute.formatted_value};')
+    relation_attributes = database.dbc.relation_attributes
+    for frame_id, signal_map in relation_attributes.node_signal_relations.items():
+        for signal_name, node_map in signal_map.items():
+            for node_name, attribute_map in node_map.items():
+                for attribute in attribute_map.values():
+                    relation_attribute_strings.append(f'BA_REL_ "{attribute.definition.name}" '
+                                                      f'BU_SG_REL_ '
+                                                      f'{node_name} '
+                                                      f'SG_ '
+                                                      f'{frame_id} '
+                                                      f'{signal_name} '
+                                                      f'{attribute.formatted_value};')
+    for frame_id, node_map in relation_attributes.node_message_relations.items():
+        for node_name, attribute_map in node_map.items():
+            for attribute in attribute_map.values():
+                relation_attribute_strings.append(f'BA_REL_ "{attribute.definition.name}" '
+                                                  f'BU_BO_REL_ '
+                                                  f'{node_name} '
+                                                  f'{frame_id} '
+                                                  f'{attribute.formatted_value};')
 
-    return ba_rel
+    return relation_attribute_strings
 
 
 def _dump_choices(database: InternalDatabase, sort_signals: type_sort_signals, sort_choices: type_sort_choices) -> list[str]:
@@ -1192,11 +1203,11 @@ def _load_attribute_definition_defaults(tokens):
     return defaults
 
 
-def _load_attribute_definitions_relation(tokens):
+def _load_relation_attribute_definitions(tokens):
     return tokens.get('BA_DEF_REL_', [])
 
 
-def _load_attribute_definition_relation_defaults(tokens):
+def _load_relation_attribute_definition_defaults(tokens):
     defaults = OrderedDict()
 
     for default_attr in tokens.get('BA_DEF_DEF_REL_', []):
@@ -1272,11 +1283,10 @@ def _load_attributes(tokens, definitions):
     return attributes
 
 
-def _load_attributes_rel(tokens, definitions):
-    attributes_rel = OrderedDict()
+def _load_relation_attributes(tokens, definitions):
+    relation_attributes = DbcRelationAttributes()
 
-    def to_attribute_rel_object(attribute, value):
-
+    def to_relation_attribute_object(attribute, value):
         definition = definitions[attribute[1]]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
@@ -1284,54 +1294,39 @@ def _load_attributes_rel(tokens, definitions):
         elif definition.type_name == 'FLOAT':
             value = to_float(value)
 
-        return Attribute(value=value,
-                         definition=definition)
+        return Attribute(value=value, definition=definition)
 
-    for attribute_rel_tokens in tokens.get('BA_REL_', []):
-        name = attribute_rel_tokens[1]
-        rel_type = attribute_rel_tokens[2]
-        node = attribute_rel_tokens[3]
+    for relation_attribute_tokens in tokens.get('BA_REL_', []):
+        attribute_name = relation_attribute_tokens[1]
+        relation_type = relation_attribute_tokens[2]
+        node_name = relation_attribute_tokens[3]
 
-        if rel_type == 'BU_SG_REL_':
+        if relation_type == 'BU_SG_REL_':
+            frame_id_dbc = int(relation_attribute_tokens[5])
+            signal_name = relation_attribute_tokens[6]
 
-            frame_id_dbc = int(attribute_rel_tokens[5])
-            signal = attribute_rel_tokens[6]
+            if frame_id_dbc not in relation_attributes.node_signal_relations:
+                relation_attributes.node_signal_relations[frame_id_dbc] = OrderedDict()
+            if signal_name not in relation_attributes.node_signal_relations[frame_id_dbc]:
+                relation_attributes.node_signal_relations[frame_id_dbc][signal_name] = OrderedDict()
+            if node_name not in relation_attributes.node_signal_relations[frame_id_dbc][signal_name]:
+                relation_attributes.node_signal_relations[frame_id_dbc][signal_name][node_name] = OrderedDict()
 
-            if frame_id_dbc not in attributes_rel:
-                attributes_rel[frame_id_dbc] = {}
+            relation_attributes.node_signal_relations[frame_id_dbc][signal_name][node_name][attribute_name] = \
+                to_relation_attribute_object(relation_attribute_tokens, relation_attribute_tokens[7])
 
-            if 'signal' not in attributes_rel[frame_id_dbc]:
-                attributes_rel[frame_id_dbc]['signal'] = OrderedDict()
+        elif relation_type == 'BU_BO_REL_':
+            frame_id_dbc = int(relation_attribute_tokens[4])
 
-            if signal not in attributes_rel[frame_id_dbc]['signal']:
-                attributes_rel[frame_id_dbc]['signal'][signal] = OrderedDict()
+            if frame_id_dbc not in relation_attributes.node_message_relations:
+                relation_attributes.node_message_relations[frame_id_dbc] = OrderedDict()
+            if node_name not in relation_attributes.node_message_relations[frame_id_dbc]:
+                relation_attributes.node_message_relations[frame_id_dbc][node_name] = OrderedDict()
 
-            if 'node' not in attributes_rel[frame_id_dbc]['signal'][signal]:
-                attributes_rel[frame_id_dbc]['signal'][signal]['node'] = OrderedDict()
+            relation_attributes.node_message_relations[frame_id_dbc][node_name][attribute_name] = \
+                to_relation_attribute_object(relation_attribute_tokens, relation_attribute_tokens[5])
 
-            if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
-                attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
-
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[7])
-
-        elif rel_type == 'BU_BO_REL_':
-            frame_id_dbc = int(attribute_rel_tokens[4])
-
-            if frame_id_dbc not in attributes_rel:
-                attributes_rel[frame_id_dbc] = {}
-
-            if 'node' not in attributes_rel[frame_id_dbc]:
-                attributes_rel[frame_id_dbc]['node'] = OrderedDict()
-
-            if node not in attributes_rel[frame_id_dbc]['node']:
-                attributes_rel[frame_id_dbc]['node'][node] = OrderedDict()
-
-            attributes_rel[frame_id_dbc]['node'][node][name] = to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[5])
-
-        else:
-            pass
-
-    return attributes_rel
+    return relation_attributes
 
 
 def _load_value_tables(tokens):
@@ -2023,33 +2018,31 @@ def make_message_names_unique(database: InternalDatabase, shorten_long_names: bo
         message.name = short_name
 
 
-def update_signal_attribute_rel_names(database: InternalDatabase,
-                                      message: Message,
-                                      converter: LongNamesConverter,
-                                      shorten_long_names: bool) -> None:
-    if database.dbc is None or not shorten_long_names:
+def update_signal_relation_attribute_names(database: InternalDatabase,
+                                           message: Message,
+                                           converter: LongNamesConverter,
+                                           shorten_long_names: bool) -> None:
+    if database.dbc is None or database.dbc.relation_attributes is None or not shorten_long_names:
         return
 
     frame_id = get_dbc_frame_id(message)
 
-    frame_rel = database.dbc.attributes_rel.get(frame_id, {})
-    signal_attributes_rel = frame_rel.get('signal')
-    if signal_attributes_rel is None:
+    signal_map = database.dbc.relation_attributes.node_signal_relations.get(frame_id)
+    if signal_map is None:
         return
 
-    updated_signal_attributes_rel = OrderedDict()
-
-    for signal_name, value in signal_attributes_rel.items():
+    updated_signal_map = OrderedDict()
+    for signal_name, value in signal_map.items():
         signal_name = converter.long_to_short.get(signal_name, signal_name)
-        updated_signal_attributes_rel[signal_name] = value
+        updated_signal_map[signal_name] = value
 
-    database.dbc.attributes_rel[frame_id]['signal'] = updated_signal_attributes_rel
+    database.dbc.relation_attributes.node_signal_relations[frame_id] = updated_signal_map
 
 
 def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     for message in database.messages:
         converter = LongNamesConverter([signal.name for signal in message.signals])
-        update_signal_attribute_rel_names(
+        update_signal_relation_attribute_names(
             database,
             message,
             converter,
@@ -2146,11 +2139,11 @@ def dump_string(database: InternalDatabase,
     cm = _dump_comments(database, sort_attribute_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
-    ba_def_rel = _dump_attribute_definitions_rel(database)
+    ba_def_rel = _dump_relation_attribute_definitions(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
-    ba_def_def_rel = _dump_attribute_definition_defaults_rel(database)
+    ba_def_def_rel = _dump_relation_attribute_definition_defaults(database)
     ba = _dump_attributes(database, sort_attribute_signals, sort_attributes)
-    ba_rel = _dump_attributes_rel(database, sort_attribute_signals)
+    ba_rel = _dump_relation_attributes(database, sort_attribute_signals)
     val = _dump_choices(database, sort_attribute_signals, sort_choices)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
@@ -2214,7 +2207,7 @@ def get_attribute_definitions_dict(definitions, defaults):
     return result
 
 
-def get_definitions_rel_dict(definitions, defaults):
+def get_relation_definitions_dict(definitions, defaults):
     result = OrderedDict()
 
     def convert_value(definition, value):
@@ -2253,31 +2246,28 @@ def get_definitions_rel_dict(definitions, defaults):
     return result
 
 
-def update_signal_attribute_rel_names_after_load(messages: list[Message],
-                                                 attributes: typing.Any,
-                                                 attributes_rel: typing.Any) -> None:
+def update_signal_relation_attribute_names_after_load(messages: list[Message],
+                                                      attributes: DbcAttributes,
+                                                      relation_attributes: DbcRelationAttributes) -> None:
     for message in messages:
         frame_id = get_dbc_frame_id(message)
 
-        frame_rel = attributes_rel.get(frame_id, {})
-        signal_attributes_rel = frame_rel.get('signal')
-        if signal_attributes_rel is None:
+        signal_map = relation_attributes.node_signal_relations.get(frame_id)
+        if signal_map is None:
             continue
 
-        signal_attributes = attributes.signals.get(frame_id, {})
-
-        short_to_signal_name = {}
+        signal_attributes: OrderedDict[str, DbcAttributeMap] = attributes.signals.get(frame_id, OrderedDict())
+        short_to_signal_name: dict[str, str] = {}
         for signal_name, value in signal_attributes.items():
             if 'SystemSignalLongSymbol' in value:
-                short_to_signal_name[signal_name] = value['SystemSignalLongSymbol'].value
+                short_to_signal_name[signal_name] = str(value['SystemSignalLongSymbol'].value)
 
-        updated_signal_attributes_rel = OrderedDict()
+        updated_signal_map: OrderedDict[str, OrderedDict[str, OrderedDict[str, AttributeType]]] = OrderedDict()
+        for signal_name, node_map in signal_map.items():
+            new_signal_name = short_to_signal_name.get(signal_name, signal_name)
+            updated_signal_map[new_signal_name] = node_map
 
-        for signal_name, value in signal_attributes_rel.items():
-            signal_name = short_to_signal_name.get(signal_name, signal_name)
-            updated_signal_attributes_rel[signal_name] = value
-
-        attributes_rel[frame_id]['signal'] = updated_signal_attributes_rel
+        relation_attributes.node_signal_relations[frame_id] = updated_signal_map
 
 
 def load_string(string: str, strict: bool = True,
@@ -2291,12 +2281,12 @@ def load_string(string: str, strict: bool = True,
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)
     defaults = _load_attribute_definition_defaults(tokens)
-    definitions_relation = _load_attribute_definitions_relation(tokens)
-    defaults_relation = _load_attribute_definition_relation_defaults(tokens)
+    relation_definitions = _load_relation_attribute_definitions(tokens)
+    relation_defaults = _load_relation_attribute_definition_defaults(tokens)
     attribute_definitions = get_attribute_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
-    attribute_rel_definitions = get_definitions_rel_dict(definitions_relation, defaults_relation)
-    attributes_rel = _load_attributes_rel(tokens, attribute_rel_definitions)
+    relation_attribute_definitions = get_relation_definitions_dict(relation_definitions, relation_defaults)
+    relation_attributes = _load_relation_attributes(tokens, relation_attribute_definitions)
     bus = _load_bus(attributes, comments)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
@@ -2316,10 +2306,10 @@ def load_string(string: str, strict: bool = True,
                               bus.name if bus else None,
                               signal_groups,
                               sort_signals)
-    update_signal_attribute_rel_names_after_load(
+    update_signal_relation_attribute_names_after_load(
         messages,
         attributes,
-        attributes_rel)
+        relation_attributes)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions)
@@ -2327,8 +2317,8 @@ def load_string(string: str, strict: bool = True,
                                  attribute_definitions=attribute_definitions,
                                  environment_variables=environment_variables,
                                  value_tables=value_tables,
-                                 attributes_rel=attributes_rel,
-                                 attribute_definitions_rel=attribute_rel_definitions)
+                                 relation_attributes=relation_attributes,
+                                 relation_attribute_definitions=relation_attribute_definitions)
 
     return InternalDatabase(messages,
                             nodes,

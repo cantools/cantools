@@ -301,4 +301,16 @@ autodoc_type_aliases = {
 # disable specific warnings
 nitpick_ignore = [
     ("py:class", "TypeAliasForwardRef"),
+    # type aliases — not resolvable as py:class targets
+    ("py:class", "ByteOrder"),
+    ("py:class", "Choices"),
+    ("py:class", "Comments"),
+    ("py:class", "SignalValueType"),
+    ("py:class", "type_sort_signals"),
+    ("py:class", "AttributeType"),
+    ("py:class", "AttributeDefinitionType"),
+    ("py:class", "DbcEnvironmentVariable"),
+    ("py:class", "DbcRelationAttributes"),
+    ("py:class", "DbcSpecifics"),
+    ("py:class", "cantools.database.can.formats.dbc_specifics.DbcSpecifics"),
 ]

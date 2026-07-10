@@ -4,6 +4,7 @@ import re
 import typing
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
+from dataclasses import dataclass, field
 from decimal import Decimal
 
 from textparser import (
@@ -57,6 +58,31 @@ if typing.TYPE_CHECKING:
     from types import MappingProxyType
 
 EMPTY_DICT = typing.cast("MappingProxyType[typing.Any, typing.Any]", {})
+
+# The type of the object returned by _load_comments()
+@dataclass(slots=True, kw_only=True)
+class DbcComments:
+    # comment for the database as a whole
+    database: str|None = None
+
+    # comment for the CAN bus described by the database
+    bus: str|None = None
+
+    # comments for all nodes on the CAN bus:
+    #     nodes[node_name] -> node_comment
+    nodes: dict[str, str] = field(default_factory=dict)
+
+    # comments for environment variables mentioned in the database:
+    #     envvars[envvar_name] -> envvar_comment
+    envvars: dict[str, str] = field(default_factory=dict)
+
+    # comments for messages featured by the database:
+    #     messages[message_arbitration_id] -> message_comment
+    messages: dict[int, str] = field(default_factory=dict)
+
+    # comments for all signals featured by the database:
+    #     signals[message_arbitration_id][signal_name] -> signal_comment
+    signals: dict[int, dict[str, str]] = field(default_factory=dict)
 
 DBC_FMT = (
     'VERSION "{version}"\r\n'
@@ -1091,34 +1117,41 @@ def _dump_environment_variables(database: InternalDatabase) -> list[str]:
 
 
 def _load_comments(tokens):
-    comments = defaultdict(dict)
+    comments = DbcComments()
 
-    for comment in tokens.get('CM_', []):
-        if not isinstance(comment[1], list):
-            # CANdb++ behaviour: all bus comments are concatenated
-            existing_comment = comments['database'].get('bus', '')
-            comments['database']['bus'] = existing_comment + comment[1]
+    for comment_tokens in tokens.get('CM_', []):
+        if not isinstance(comment_tokens[1], list):
+            # the CM_ token is a string, i.e., it is a bus comment. We
+            # implement CANdb++ behavior and concatenate all bus
+            # comments.
+            if comments.bus is None:
+                comments.bus = ''
+            comments.bus += comment_tokens[1]
             continue
 
-        item = comment[1]
+        item = comment_tokens[1]
         kind = item[0]
 
         if kind == 'SG_':
+            # signal comment
             frame_id = int(item[1])
-
-            if 'signal' not in comments[frame_id]:
-                comments[frame_id]['signal'] = {}
-
-            comments[frame_id]['signal'][item[2]] = item[3]
+            signal_name = item[2]
+            if frame_id not in comments.signals:
+                comments.signals[frame_id] = {}
+            message_signal_comments = comments.signals[frame_id]
+            message_signal_comments[signal_name] = item[3]
         elif kind == 'BO_':
+            # message comment
             frame_id = int(item[1])
-            comments[frame_id]['message'] = item[2]
+            comments.messages[frame_id] = item[2]
         elif kind == 'BU_':
+            # node comment
             node_name = item[1]
-            comments[node_name] = item[2]
+            comments.nodes[node_name] = item[2]
         elif kind == 'EV_':
+            # environment variable comment
             envvar_name = item[1]
-            comments[envvar_name] = item[2]
+            comments.envvars[envvar_name] = item[2]
 
     return comments
 
@@ -1314,8 +1347,8 @@ def _load_environment_variables(tokens, comments, attributes, attribute_definiti
             env_id=int(env_var[11]),
             access_type=env_var[12],
             access_node=env_var[13],
-            comment=comments.get(env_var[1], None),
-            dbc_specifics=DbcSpecifics(attributes=attributes['envvar'].get(short_name, None),
+            comment=comments.envvars.get(short_name),
+            dbc_specifics=DbcSpecifics(attributes=attributes['envvar'].get(short_name),
                                        attribute_definitions=attribute_definitions))
 
     return environment_variables
@@ -1467,6 +1500,10 @@ def _load_signals(tokens,
         """Get comment for given signal.
 
         """
+        message_signal_comments = comments.signals.get(frame_id_dbc)
+        if message_signal_comments is None:
+            return None
+        return message_signal_comments.get(signal_name)
 
         frame_cmt = comments.get(frame_id_dbc, EMPTY_DICT)
         signal_cmt = frame_cmt.get('signal', EMPTY_DICT)
@@ -1654,13 +1691,12 @@ def _load_messages(tokens,
         frame_attrs = attributes.get(frame_id_dbc, EMPTY_DICT)
         return frame_attrs.get('message')
 
-    def get_message_comment(frame_id_dbc: int) -> str | None:
+    def get_message_comment(frame_id_dbc):
         """Get comment for given message.
 
         """
 
-        frame_comments = comments.get(frame_id_dbc, EMPTY_DICT)
-        return typing.cast('str', frame_comments.get('message'))
+        return comments.messages.get(frame_id_dbc)
 
     def get_message_send_type(frame_id_dbc: int) -> str | None:
         """Get send type for a given message.
@@ -1828,7 +1864,7 @@ def _load_bus(attributes, comments):
     bus_name = str(db_name_attr.value) if db_name_attr is not None else ''
     db_baudrate_attr = db_attrs.get('Baudrate')
     bus_baudrate = db_baudrate_attr.value if db_baudrate_attr is not None else None
-    bus_comment = comments.get('database', EMPTY_DICT).get('bus')
+    bus_comment = comments.bus
 
     if not any([bus_name, bus_baudrate, bus_comment]):
         return None
@@ -1840,11 +1876,11 @@ def _load_nodes(tokens, comments, attributes, definitions):
     nodes = None
 
     for token in tokens.get('BU_', []):
-        nodes = [Node(name=_get_node_long_name(attributes, node),
-                      comment=comments.get(node, None),
-                      dbc_specifics=DbcSpecifics(attributes=attributes['node'].get(node, None),
+        nodes = [Node(name=_get_node_long_name(attributes, node_short_name),
+                      comment=comments.nodes.get(node_short_name),
+                      dbc_specifics=DbcSpecifics(attributes=attributes['node'].get(node_short_name, None),
                                                  attribute_definitions=definitions))
-                 for node in token[2]]
+                 for node_short_name in token[2]]
 
     return nodes
 

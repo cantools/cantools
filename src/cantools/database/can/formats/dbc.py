@@ -1287,7 +1287,6 @@ def _load_value_tables(tokens):
     for value_table in tokens.get('VAL_TABLE_', []):
         name = value_table[1]
         choices = {int(number): NamedSignalValue(int(number), text) for number, text in value_table[2]}
-        # choices = {int(number): text for number, text in value_table[2]}
         value_tables[name] = choices
 
     return value_tables

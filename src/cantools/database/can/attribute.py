@@ -35,6 +35,16 @@ class Attribute(Generic[AttributeValueType]):
         self._value = value
 
     @property
+    def formatted_value(self) -> str:
+        """The value of the attribute as it appears in the DBC file
+
+        """
+        if self.definition.type_name == "STRING":
+            return f'"{self._value}"'
+
+        return f'{self._value}'
+
+    @property
     def definition(self) -> AttributeDefinition[AttributeValueType]:
         """The attribute definition.
 

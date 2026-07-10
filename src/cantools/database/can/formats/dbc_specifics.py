@@ -12,6 +12,7 @@ from cantools.typechecking import Choices
 class DbcSpecifics:
 
     def __init__(self,
+                 *,
                  attributes: OrderedDict[str, AttributeType] | None = None,
                  attribute_definitions: OrderedDict[str, AttributeDefinitionType] | None = None,
                  environment_variables: OrderedDict[str, EnvironmentVariable] | None = None,

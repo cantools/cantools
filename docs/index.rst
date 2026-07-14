@@ -43,8 +43,7 @@ Functions and classes
 .. autoclass:: cantools.database.can.attribute_definition.AttributeDefinition
     :members:
 
-.. autoclass:: cantools.database.can.attribute_definition.AttributeValueType
-    :members:
+.. autodata:: cantools.database.can.attribute_definition.AttributeValueTypeVar
 
 .. autoclass:: cantools.database.can.attribute.Attribute
     :members:

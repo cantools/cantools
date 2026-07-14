@@ -41,7 +41,7 @@ from ..attribute import Attribute, AttributeType
 from ..attribute_definition import (
     AttributeDefinition,
     AttributeDefinitionType,
-    AttributeValueType,
+    AttributeValue,
 )
 from ..bus import Bus
 from ..environment_variable import EnvironmentVariable
@@ -198,12 +198,12 @@ ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition(
     maximum=100000000000)
 
 
-def to_int(value: AttributeValueType) -> int:
+def to_int(value: AttributeValue) -> int:
     if isinstance(value, str):
         return int(Decimal(value))
     return int(value)
 
-def to_float(value: AttributeValueType) -> float:
+def to_float(value: AttributeValue) -> float:
     if isinstance(value, str):
         return float(Decimal(value))
     return float(value)

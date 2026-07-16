@@ -1,18 +1,18 @@
 from typing import Generic
 
-from .attribute_definition import AttributeDefinition, AttributeValueType
+from .attribute_definition import AttributeDefinition, AttributeValueTypeVar
 
 
-class Attribute(Generic[AttributeValueType]):
+class Attribute(Generic[AttributeValueTypeVar]):
     """An attribute that can be associated with nodes/messages/signals.
 
     """
 
     def __init__(self,
-                 value: AttributeValueType,
-                 definition: AttributeDefinition[AttributeValueType]) -> None:
-        self._value: AttributeValueType = value
-        self._definition: AttributeDefinition[AttributeValueType] = definition
+                 value: AttributeValueTypeVar,
+                 definition: AttributeDefinition[AttributeValueTypeVar]) -> None:
+        self._value: AttributeValueTypeVar = value
+        self._definition: AttributeDefinition[AttributeValueTypeVar] = definition
 
     @property
     def name(self) -> str:
@@ -23,7 +23,7 @@ class Attribute(Generic[AttributeValueType]):
         return self._definition.name
 
     @property
-    def value(self) -> AttributeValueType:
+    def value(self) -> AttributeValueTypeVar:
         """The value that this attribute has.
 
         """
@@ -31,11 +31,21 @@ class Attribute(Generic[AttributeValueType]):
         return self._value
 
     @value.setter
-    def value(self, value: AttributeValueType) -> None:
+    def value(self, value: AttributeValueTypeVar) -> None:
         self._value = value
 
     @property
-    def definition(self) -> AttributeDefinition[AttributeValueType]:
+    def formatted_value(self) -> str:
+        """The value of the attribute as it appears in the DBC file
+
+        """
+        if self.definition.type_name == "STRING":
+            return f'"{self._value}"'
+
+        return f'{self._value}'
+
+    @property
+    def definition(self) -> AttributeDefinition[AttributeValueTypeVar]:
         """The attribute definition.
 
         """

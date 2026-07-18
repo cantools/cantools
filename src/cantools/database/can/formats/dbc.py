@@ -24,6 +24,7 @@ from textparser import (
 )
 
 from cantools.database.can.internal_database import InternalDatabase
+from cantools.typechecking import Comments
 
 from ...conversion import BaseConversion
 from ...namedsignalvalue import NamedSignalValue
@@ -1655,13 +1656,13 @@ def _load_messages(tokens,
         except KeyError:
             return None
 
-    def get_message_comment(frame_id_dbc):
+    def get_message_comment(frame_id_dbc: int) -> str | Comments | None:
         """Get comment for given message.
 
         """
 
         try:
-            return comments[frame_id_dbc]['message']
+            return typing.cast('str', comments[frame_id_dbc]['message'])
         except KeyError:
             return None
 
@@ -2138,8 +2139,8 @@ def dump_string(database: InternalDatabase,
                           sig_mux_values='\r\n'.join(sig_mux_values))
 
 
-def get_attribute_definitions_dict(definitions, defaults):
-    result = OrderedDict()
+def get_attribute_definitions_dict(definitions: typing.Any, defaults: typing.Any) -> OrderedDict[str, AttributeDefinitionType]:
+    result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
 
     def convert_value(definition, value):
         if definition.type_name in ['INT', 'HEX']:

@@ -463,19 +463,17 @@ def get_dbc_name(name: str) -> str:
     return name
 
 
-def _get_node_name(attributes, name):
-    try:
-        return attributes['node'][name]['SystemNodeLongSymbol'].value
-    except (KeyError, TypeError):
-        return name
+def _get_node_long_name(attributes, node_short_name):
+    attrib = attributes.get('node', {}).get(node_short_name, {}).get('SystemNodeLongSymbol')
+    if attrib is not None:
+        return str(attrib.value)
+    return node_short_name
 
-
-def _get_environment_variable_name(attributes, name):
-    try:
-        return attributes['envvar'][name]['SystemEnvVarLongSymbol'].value
-    except (KeyError, TypeError):
-        return name
-
+def _get_envvar_long_name(attributes, envvar_short_name):
+    attrib = attributes.get('envvar', {}).get(envvar_short_name, {}).get('SystemEnvVarLongSymbol')
+    if attrib is not None:
+        return str(attrib.value)
+    return envvar_short_name
 
 def _dump_version(database: InternalDatabase) -> str:
     return '' if database.version is None else database.version
@@ -1113,8 +1111,8 @@ def _load_comments(tokens):
             node_name = item[1]
             comments[node_name] = item[2]
         elif kind == 'EV_':
-            environment_variable_name = item[1]
-            comments[environment_variable_name] = item[2]
+            envvar_name = item[1]
+            comments[envvar_name] = item[2]
 
     return comments
 
@@ -1150,24 +1148,25 @@ def _load_attributes(tokens, definitions):
     attributes['node'] = OrderedDict()
     attributes['envvar'] = OrderedDict()
 
-    def to_object(attribute):
-        value = attribute[3]
-
-        definition = definitions[attribute[1]]
+    def to_attribute_object(attribute_tokens):
+        raw_value = attribute_tokens[3]
+        definition = definitions[attribute_tokens[1]]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
-            value = to_int(value)
+            value = to_int(raw_value)
         elif definition.type_name == 'FLOAT':
-            value = to_float(value)
+            value = to_float(raw_value)
+        else:
+            value = raw_value
 
         return Attribute(value=value,
                          definition=definition)
 
-    for attribute in tokens.get('BA_', []):
-        name = attribute[1]
+    for attribute_tokens in tokens.get('BA_', []):
+        name = attribute_tokens[1]
 
-        if len(attribute[2]) > 0:
-            item = attribute[2][0]
+        if len(attribute_tokens[2]) > 0:
+            item = attribute_tokens[2][0]
             kind = item[0]
 
             if kind == 'SG_':
@@ -1184,7 +1183,7 @@ def _load_attributes(tokens, definitions):
                 if signal not in attributes[frame_id_dbc]['signal']:
                     attributes[frame_id_dbc]['signal'][signal] = OrderedDict()
 
-                attributes[frame_id_dbc]['signal'][signal][name] = to_object(attribute)
+                attributes[frame_id_dbc]['signal'][signal][name] = to_attribute_object(attribute_tokens)
             elif kind == 'BO_':
                 frame_id_dbc = int(item[1])
 
@@ -1192,26 +1191,26 @@ def _load_attributes(tokens, definitions):
                     attributes[frame_id_dbc] = {}
                     attributes[frame_id_dbc]['message'] = OrderedDict()
 
-                attributes[frame_id_dbc]['message'][name] = to_object(attribute)
+                attributes[frame_id_dbc]['message'][name] = to_attribute_object(attribute_tokens)
             elif kind == 'BU_':
                 node = item[1]
 
                 if node not in attributes['node']:
                     attributes['node'][node] = OrderedDict()
 
-                attributes['node'][node][name] = to_object(attribute)
+                attributes['node'][node][name] = to_attribute_object(attribute_tokens)
             elif kind == 'EV_':
                 envvar = item[1]
 
                 if envvar not in attributes['envvar']:
                     attributes['envvar'][envvar] = OrderedDict()
 
-                attributes['envvar'][envvar][name] = to_object(attribute)
+                attributes['envvar'][envvar][name] = to_attribute_object(attribute_tokens)
         else:
             if 'database' not in attributes:
                 attributes['database'] = OrderedDict()
 
-            attributes['database'][name] = to_object(attribute)
+            attributes['database'][name] = to_attribute_object(attribute_tokens)
 
     return attributes
 
@@ -1219,7 +1218,7 @@ def _load_attributes(tokens, definitions):
 def _load_attributes_rel(tokens, definitions):
     attributes_rel = OrderedDict()
 
-    def to_object(attribute, value):
+    def to_attribute_rel_object(attribute, value):
 
         definition = definitions[attribute[1]]
 
@@ -1231,15 +1230,15 @@ def _load_attributes_rel(tokens, definitions):
         return Attribute(value=value,
                          definition=definition)
 
-    for attribute in tokens.get('BA_REL_', []):
-        name = attribute[1]
-        rel_type = attribute[2]
-        node = attribute[3]
+    for attribute_rel_tokens in tokens.get('BA_REL_', []):
+        name = attribute_rel_tokens[1]
+        rel_type = attribute_rel_tokens[2]
+        node = attribute_rel_tokens[3]
 
         if rel_type == 'BU_SG_REL_':
 
-            frame_id_dbc = int(attribute[5])
-            signal = attribute[6]
+            frame_id_dbc = int(attribute_rel_tokens[5])
+            signal = attribute_rel_tokens[6]
 
             if frame_id_dbc not in attributes_rel:
                 attributes_rel[frame_id_dbc] = {}
@@ -1256,10 +1255,10 @@ def _load_attributes_rel(tokens, definitions):
             if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
                 attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
 
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_object(attribute, attribute[7])
+            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[7])
 
         elif rel_type == 'BU_BO_REL_':
-            frame_id_dbc = int(attribute[4])
+            frame_id_dbc = int(attribute_rel_tokens[4])
 
             if frame_id_dbc not in attributes_rel:
                 attributes_rel[frame_id_dbc] = {}
@@ -1270,7 +1269,7 @@ def _load_attributes_rel(tokens, definitions):
             if node not in attributes_rel[frame_id_dbc]['node']:
                 attributes_rel[frame_id_dbc]['node'][node] = OrderedDict()
 
-            attributes_rel[frame_id_dbc]['node'][node][name] = to_object(attribute, attribute[5])
+            attributes_rel[frame_id_dbc]['node'][node][name] = to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[5])
 
         else:
             pass
@@ -1299,7 +1298,7 @@ def _load_environment_variables(tokens, comments, attributes, attribute_definiti
 
     for env_var in tokens.get('EV_', []):
         short_name = env_var[1]
-        long_name = _get_environment_variable_name(attributes, short_name)
+        long_name = _get_envvar_long_name(attributes, short_name)
         environment_variables[long_name] = EnvironmentVariable(
             name=long_name,
             env_type=int(env_var[3]),
@@ -1343,7 +1342,7 @@ def _load_message_senders(tokens, attributes):
     for senders in tokens.get('BO_TX_BU_', []):
         frame_id = int(senders[1])
         message_senders[frame_id] += [
-            _get_node_name(attributes, sender) for sender in senders[3]
+            _get_node_long_name(attributes, sender) for sender in senders[3]
         ]
 
     return message_senders
@@ -1401,27 +1400,27 @@ def _load_signal_groups(tokens, attributes):
     signal_groups = defaultdict(list)
 
 
-    def get_attributes(frame_id_dbc, signal):
+    def get_signal_attributes(frame_id_dbc, signal_short_name):
         """Get attributes for given signal.
 
         """
 
         try:
-            return attributes[frame_id_dbc]['signal'][signal]
+            return attributes[frame_id_dbc]['signal'][signal_short_name]
         except KeyError:
             return OrderedDict()
 
-    def get_signal_name(frame_id_dbc, name):
-        signal_attributes = get_attributes(frame_id_dbc, name)
+    def get_signal_long_name(frame_id_dbc, signal_short_name):
+        signal_attributes = get_signal_attributes(frame_id_dbc, signal_short_name)
 
         try:
             return signal_attributes['SystemSignalLongSymbol'].value
         except (KeyError, TypeError):
-            return name
+            return signal_short_name
 
     for signal_group in tokens.get('SIG_GROUP_',[]):
         frame_id = int(signal_group[1])
-        signal_names = [get_signal_name(frame_id, signal_name) for signal_name in signal_group[5]]
+        signal_names = [get_signal_long_name(frame_id, signal_short_name) for signal_short_name in signal_group[5]]
         signal_groups[frame_id].append(SignalGroup(name=signal_group[2],
                                                    repetitions=int(signal_group[3]),
                                                    signal_names=signal_names))
@@ -1449,27 +1448,27 @@ def _load_signals(tokens,
     except KeyError:
         pass
 
-    def get_attributes(frame_id_dbc, signal):
+    def get_signal_attributes(frame_id_dbc, signal_name):
         """Get attributes for given signal.
 
         """
 
         try:
-            return attributes[frame_id_dbc]['signal'][signal]
+            return attributes[frame_id_dbc]['signal'][signal_name]
         except KeyError:
             return OrderedDict()
 
-    def get_comment(frame_id_dbc, signal):
+    def get_signal_comment(frame_id_dbc, signal_name):
         """Get comment for given signal.
 
         """
 
         try:
-            return comments[frame_id_dbc]['signal'][signal]
+            return comments[frame_id_dbc]['signal'][signal_name]
         except KeyError:
             return None
 
-    def get_choices(frame_id_dbc, signal):
+    def get_signal_choices(frame_id_dbc, signal):
         """Get choices for given signal.
 
         """
@@ -1479,13 +1478,13 @@ def _load_signals(tokens,
         except KeyError:
             return None
 
-    def get_is_multiplexer(signal):
+    def get_signal_is_multiplexer(signal):
         if len(signal[1]) == 2:
             return signal[1][1].endswith('M')
         else:
             return False
 
-    def get_multiplexer_ids(signal, multiplexer_signal):
+    def get_signal_multiplexer_ids(signal, multiplexer_signal):
         ids = []
 
         if multiplexer_signal is not None:
@@ -1508,37 +1507,37 @@ def _load_signals(tokens,
 
         return None
 
-    def get_multiplexer_signal(signal, multiplexer_signal):
-        if len(signal) != 2:
-            return
+    def get_multiplexer_signal(mux_field, multiplexer_signal_name):
+        if len(mux_field) != 2:
+            return None
 
+        signal_name = mux_field[0]
         if multiplexer_signal is None:
-            try:
-                return signal_to_multiplexer[signal[0]]
-            except KeyError:
-                pass
-        elif signal[0] != multiplexer_signal:
-            return multiplexer_signal
+            return signal_to_multiplexer.get(signal_name)
+        elif signal_name != multiplexer_signal_name:
+            return multiplexer_signal_name
 
-    def get_receivers(receivers: list[str]) -> list[str]:
+        return None
+
+    def get_signal_receivers(receivers):
         if receivers == ['Vector__XXX']:
             receivers = []
 
-        return [_get_node_name(attributes, receiver) for receiver in receivers]
+        return [_get_node_long_name(attributes, receiver) for receiver in receivers]
 
-    def get_minimum(minimum: str, maximum: str) -> int | float | None:
+    def get_signal_minimum(minimum, maximum):
         if minimum == maximum == '0':
             return None
         else:
             return num(minimum)
 
-    def get_maximum(minimum: str, maximum: str) -> int | float | None:
+    def get_signal_maximum(minimum, maximum):
         if minimum == maximum == '0':
             return None
         else:
             return num(maximum)
 
-    def get_is_float(frame_id_dbc, signal):
+    def get_signal_is_float(frame_id_dbc, signal):
         """Get is_float for given signal.
 
         """
@@ -1549,7 +1548,7 @@ def _load_signals(tokens,
             return False
 
     def get_signal_name(frame_id_dbc, name):
-        signal_attributes = get_attributes(frame_id_dbc, name)
+        signal_attributes = get_signal_attributes(frame_id_dbc, name)
 
         try:
             return signal_attributes['SystemSignalLongSymbol'].value
@@ -1557,7 +1556,7 @@ def _load_signals(tokens,
             return name
 
     def get_signal_initial_value(frame_id_dbc, name):
-        signal_attributes = get_attributes(frame_id_dbc, name)
+        signal_attributes = get_signal_attributes(frame_id_dbc, name)
 
         try:
             return signal_attributes['GenSigStartValue'].value
@@ -1565,7 +1564,7 @@ def _load_signals(tokens,
             return None
 
     def get_signal_spn(frame_id_dbc, name):
-        signal_attributes = get_attributes(frame_id_dbc, name)
+        signal_attributes = get_signal_attributes(frame_id_dbc, name)
         if 'SPN' in signal_attributes:
             if (value := signal_attributes['SPN'].value) is not None:
                 return value
@@ -1582,7 +1581,7 @@ def _load_signals(tokens,
             Signal(name=get_signal_name(frame_id_dbc, signal[1][0]),
                    start=int(signal[3]),
                    length=int(signal[5]),
-                   receivers=get_receivers(signal[20]),
+                   receivers=get_signal_receivers(signal[20]),
                    byte_order=('big_endian'
                                if signal[7] == '0'
                                else 'little_endian'),
@@ -1591,19 +1590,19 @@ def _load_signals(tokens,
                    conversion=BaseConversion.factory(
                        scale=num(signal[10]),
                        offset=num(signal[12]),
-                       is_float=get_is_float(frame_id_dbc, signal[1][0]),
-                       choices=get_choices(frame_id_dbc, signal[1][0]),
+                       is_float=get_signal_is_float(frame_id_dbc, signal[1][0]),
+                       choices=get_signal_choices(frame_id_dbc, signal[1][0]),
                    ),
-                   minimum=get_minimum(signal[15], signal[17]),
-                   maximum=get_maximum(signal[15], signal[17]),
+                   minimum=get_signal_minimum(signal[15], signal[17]),
+                   maximum=get_signal_maximum(signal[15], signal[17]),
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
-                   dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
+                   dbc_specifics=DbcSpecifics(get_signal_attributes(frame_id_dbc, signal[1][0]),
                                               definitions),
-                   comment=get_comment(frame_id_dbc,
-                                       signal[1][0]),
-                   is_multiplexer=get_is_multiplexer(signal),
-                   multiplexer_ids=get_multiplexer_ids(signal[1],
+                   comment=get_signal_comment(frame_id_dbc,
+                                              signal[1][0]),
+                   is_multiplexer=get_signal_is_multiplexer(signal),
+                   multiplexer_ids=get_signal_multiplexer_ids(signal[1],
                                                        multiplexer_signal),
                    multiplexer_signal=get_multiplexer_signal(signal[1],
                                                              multiplexer_signal)))
@@ -1647,7 +1646,7 @@ def _load_messages(tokens,
 
     """
 
-    def get_attributes(frame_id_dbc: int) -> typing.Any:
+    def get_message_attributes(frame_id_dbc: int) -> typing.Any:
         """Get attributes for given message.
 
         """
@@ -1657,23 +1656,23 @@ def _load_messages(tokens,
         except KeyError:
             return None
 
-    def get_comment(frame_id_dbc: int) -> str | Comments | None:
+    def get_message_comment(frame_id_dbc: int) -> str | Comments | None:
         """Get comment for given message.
 
         """
 
         try:
-            return comments[frame_id_dbc]['message']  # type: ignore[no-any-return]
+            return typing.cast('str', comments[frame_id_dbc]['message'])
         except KeyError:
             return None
 
-    def get_send_type(frame_id_dbc: int) -> str | None:
+    def get_message_send_type(frame_id_dbc: int) -> str | None:
         """Get send type for a given message.
 
         """
 
         result = None
-        message_attributes = get_attributes(frame_id_dbc)
+        message_attributes = get_message_attributes(frame_id_dbc)
 
         try:
             result = message_attributes['GenMsgSendType'].value
@@ -1690,11 +1689,11 @@ def _load_messages(tokens,
 
         return result
 
-    def get_cycle_time(frame_id_dbc: int) -> int | None:
+    def get_message_cycle_time(frame_id_dbc: int) -> int | None:
         """Get cycle time for a given message.
 
         """
-        message_attributes = get_attributes(frame_id_dbc)
+        message_attributes = get_message_attributes(frame_id_dbc)
 
         gen_msg_cycle_time_def = definitions.get('GenMsgCycleTime')
         if gen_msg_cycle_time_def is None:
@@ -1708,10 +1707,10 @@ def _load_messages(tokens,
         return gen_msg_cycle_time_def.default_value or None
 
 
-    def get_frame_format(frame_id_dbc: int) -> str | None:
+    def get_message_frame_format(frame_id_dbc: int) -> str | None:
         """Get frame format for a given message"""
 
-        message_attributes = get_attributes(frame_id_dbc)
+        message_attributes = get_message_attributes(frame_id_dbc)
         ref_definitions = definitions.get('VFrameFormat', None)
         if ref_definitions is None:
             return None
@@ -1727,33 +1726,33 @@ def _load_messages(tokens,
 
         return frame_format
 
-    def get_protocol(frame_id_dbc: int) -> str | None:
+    def get_message_protocol(frame_id_dbc: int) -> str | None:
         """Get protocol for a given message.
 
         """
 
-        frame_format = get_frame_format(frame_id_dbc)
+        frame_format = get_message_frame_format(frame_id_dbc)
 
         if frame_format == 'J1939PG':
             return 'j1939'
         else:
             return None
 
-    def get_message_name(frame_id_dbc: int, name: str) -> str:
-        message_attributes = get_attributes(frame_id_dbc)
+    def get_message_long_name(frame_id_dbc: int, message_short_name: str) -> str:
+        message_attributes = get_message_attributes(frame_id_dbc)
 
         try:
             return message_attributes['SystemMessageLongSymbol'].value  # type: ignore[no-any-return]
         except (KeyError, TypeError):
-            return name
+            return message_short_name
 
-    def get_signal_groups(frame_id_dbc: int) -> list[SignalGroup] | None:
+    def get_message_signal_groups(frame_id_dbc: int) -> list[SignalGroup] | None:
         try:
             return signal_groups[frame_id_dbc]  # type: ignore[no-any-return]
         except KeyError:
             return None
 
-    messages: list[Message] = []
+    messages = []
 
     for message in tokens.get('BO_', []):
         # Any message named VECTOR__INDEPENDENT_SIG_MSG contains
@@ -1766,14 +1765,14 @@ def _load_messages(tokens,
         frame_id_dbc = int(message[1])
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
-        frame_format = get_frame_format(frame_id_dbc)
+        frame_format = get_message_frame_format(frame_id_dbc)
         if frame_format is not None:
             is_fd = frame_format.endswith('CAN_FD')
         else:
             is_fd = False
 
         # Senders.
-        senders = [_get_node_name(attributes, message[5])]
+        senders = [_get_node_long_name(attributes, message[5])]
 
         for node in message_senders.get(frame_id_dbc, []):
             if node not in senders:
@@ -1807,20 +1806,20 @@ def _load_messages(tokens,
         messages.append(
             Message(frame_id=frame_id,
                     is_extended_frame=is_extended_frame,
-                    name=get_message_name(frame_id_dbc, message[2]),
+                    name=get_message_long_name(frame_id_dbc, message[2]),
                     length=int(message[4], 0),
                     senders=senders,
-                    send_type=get_send_type(frame_id_dbc),
-                    cycle_time=get_cycle_time(frame_id_dbc),
-                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc),
+                    send_type=get_message_send_type(frame_id_dbc),
+                    cycle_time=get_message_cycle_time(frame_id_dbc),
+                    dbc_specifics=DbcSpecifics(get_message_attributes(frame_id_dbc),
                                                definitions),
                     signals=signals,
-                    comment=get_comment(frame_id_dbc),
+                    comment=get_message_comment(frame_id_dbc),
                     strict=strict,
                     unused_bit_pattern=0xff,
-                    protocol=get_protocol(frame_id_dbc),
+                    protocol=get_message_protocol(frame_id_dbc),
                     bus_name=bus_name,
-                    signal_groups=get_signal_groups(frame_id_dbc),
+                    signal_groups=get_message_signal_groups(frame_id_dbc),
                     sort_signals=sort_signals,
                     is_fd=is_fd))
 
@@ -1857,7 +1856,7 @@ def _load_nodes(tokens, comments, attributes, definitions):
     nodes = None
 
     for token in tokens.get('BU_', []):
-        nodes = [Node(name=_get_node_name(attributes, node),
+        nodes = [Node(name=_get_node_long_name(attributes, node),
                       comment=comments.get(node, None),
                       dbc_specifics=DbcSpecifics(attributes['node'].get(node, None),
                                                  definitions))
@@ -2140,7 +2139,7 @@ def dump_string(database: InternalDatabase,
                           sig_mux_values='\r\n'.join(sig_mux_values))
 
 
-def get_definitions_dict(definitions: typing.Any, defaults: typing.Any) -> OrderedDict[str, AttributeDefinitionType]:
+def get_attribute_definitions_dict(definitions: typing.Any, defaults: typing.Any) -> OrderedDict[str, AttributeDefinitionType]:
     result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
 
     def convert_value(definition, value):
@@ -2266,7 +2265,7 @@ def load_string(string: str, strict: bool = True,
     defaults = _load_attribute_definition_defaults(tokens)
     definitions_relation = _load_attribute_definitions_relation(tokens)
     defaults_relation = _load_attribute_definition_relation_defaults(tokens)
-    attribute_definitions = get_definitions_dict(definitions, defaults)
+    attribute_definitions = get_attribute_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
     attribute_rel_definitions = get_definitions_rel_dict(definitions_relation, defaults_relation)
     attributes_rel = _load_attributes_rel(tokens, attribute_rel_definitions)
@@ -2296,12 +2295,12 @@ def load_string(string: str, strict: bool = True,
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions)
-    dbc_specifics = DbcSpecifics(attributes.get('database', None),
-                                 attribute_definitions,
-                                 environment_variables,
-                                 value_tables,
-                                 attributes_rel,
-                                 attribute_rel_definitions)
+    dbc_specifics = DbcSpecifics(attributes=attributes.get('database', None),
+                                 attribute_definitions=attribute_definitions,
+                                 environment_variables=environment_variables,
+                                 value_tables=value_tables,
+                                 attributes_rel=attributes_rel,
+                                 attribute_definitions_rel=attribute_rel_definitions)
 
     return InternalDatabase(messages,
                             nodes,

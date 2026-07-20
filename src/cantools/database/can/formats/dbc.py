@@ -454,9 +454,9 @@ def get_dbc_frame_id(message: Message) -> int:
     return frame_id
 
 def get_dbc_name(name: str) -> str:
-    #replace special chars with '_'
+    # replace special chars with '_'
     name = re.sub(r'\W', '_', name)
-    #append '_' if it starts with a number
+    # prepend '_' if it starts with a number
     if name[0].isdigit():
         name = '_' + name
 
@@ -776,7 +776,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     # remove the old 'Baudrate' attribute if it exists. We synchronize
     # that DBC attribute with the `.baudrate` attribute of the
     # high-level bus description object below.
-    if database.dbc.attributes.get('Baudrate') is not None:
+    if 'Baudrate' in database.dbc.attributes:
         del database.dbc.attributes['Baudrate']
 
     # add a new 'Baudrate' attribute
@@ -839,7 +839,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             else:
                 v_frame_format_str = 'StandardCAN'
             v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)
-            # only set the VFrameFormat if it valid according to the attribute definition
+            # only set the VFrameFormat if it is valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
                 and v_frame_format_str != v_frame_format_def.default_value
@@ -1287,7 +1287,6 @@ def _load_value_tables(tokens):
     for value_table in tokens.get('VAL_TABLE_', []):
         name = value_table[1]
         choices = {int(number): NamedSignalValue(int(number), text) for number, text in value_table[2]}
-        #choices = {int(number): text for number, text in value_table[2]}
         value_tables[name] = choices
 
     return value_tables
@@ -1310,8 +1309,8 @@ def _load_environment_variables(tokens, comments, attributes, attribute_definiti
             access_type=env_var[12],
             access_node=env_var[13],
             comment=comments.get(env_var[1], None),
-            dbc_specifics=DbcSpecifics(attributes['envvar'].get(short_name, None),
-                                       attribute_definitions))
+            dbc_specifics=DbcSpecifics(attributes=attributes['envvar'].get(short_name, None),
+                                       attribute_definitions=attribute_definitions))
 
     return environment_variables
 
@@ -1379,7 +1378,7 @@ def _load_signal_multiplexer_values(tokens):
         for lower, upper in signal_multiplexer_value[4]:
             lower = int(lower)
             upper = int(upper[1:])
-            # ToDo: Probably store ranges as tuples to not run out of
+            # TODO: Probably store ranges as tuples to not run out of
             #       memory on huge ranges.
             multiplexer_ids.extend(range(lower, upper + 1))
 
@@ -1574,7 +1573,7 @@ def _load_signals(tokens,
 
         return None
 
-    signals: list[Signal] = []
+    signals = []
 
     for signal in tokens:
         signals.append(
@@ -1597,8 +1596,8 @@ def _load_signals(tokens,
                    maximum=get_signal_maximum(signal[15], signal[17]),
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
-                   dbc_specifics=DbcSpecifics(get_signal_attributes(frame_id_dbc, signal[1][0]),
-                                              definitions),
+                   dbc_specifics=DbcSpecifics(attributes=get_signal_attributes(frame_id_dbc, signal[1][0]),
+                                              attribute_definitions=definitions),
                    comment=get_signal_comment(frame_id_dbc,
                                               signal[1][0]),
                    is_multiplexer=get_signal_is_multiplexer(signal),
@@ -1811,8 +1810,8 @@ def _load_messages(tokens,
                     senders=senders,
                     send_type=get_message_send_type(frame_id_dbc),
                     cycle_time=get_message_cycle_time(frame_id_dbc),
-                    dbc_specifics=DbcSpecifics(get_message_attributes(frame_id_dbc),
-                                               definitions),
+                    dbc_specifics=DbcSpecifics(attributes=get_message_attributes(frame_id_dbc),
+                                               attribute_definitions=definitions),
                     signals=signals,
                     comment=get_message_comment(frame_id_dbc),
                     strict=strict,
@@ -1858,8 +1857,8 @@ def _load_nodes(tokens, comments, attributes, definitions):
     for token in tokens.get('BU_', []):
         nodes = [Node(name=_get_node_long_name(attributes, node),
                       comment=comments.get(node, None),
-                      dbc_specifics=DbcSpecifics(attributes['node'].get(node, None),
-                                                 definitions))
+                      dbc_specifics=DbcSpecifics(attributes=attributes['node'].get(node, None),
+                                                 attribute_definitions=definitions))
                  for node in token[2]]
 
     return nodes

@@ -51,6 +51,14 @@ from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
 from .utils import num
 
+# make mypy complain if we assign a value to the empty dictionary but
+# do not pay the runtime performance penalty of MappingProxyType.
+if typing.TYPE_CHECKING:
+    from types import MappingProxyType
+    empty_dict = MappingProxyType[typing.Any, typing.Any]({})
+else:
+    empty_dict = {}
+
 DBC_FMT = (
     'VERSION "{version}"\r\n'
     '\r\n'
@@ -463,13 +471,13 @@ def get_dbc_name(name: str) -> str:
 
 
 def _get_node_long_name(attributes, node_short_name):
-    attrib = attributes.get('node', {}).get(node_short_name, {}).get('SystemNodeLongSymbol')
+    attrib = attributes.get('node', empty_dict).get(node_short_name, empty_dict).get('SystemNodeLongSymbol')
     if attrib is not None:
         return str(attrib.value)
     return node_short_name
 
 def _get_envvar_long_name(attributes, envvar_short_name):
-    attrib = attributes.get('envvar', {}).get(envvar_short_name, {}).get('SystemEnvVarLongSymbol')
+    attrib = attributes.get('envvar', empty_dict).get(envvar_short_name, empty_dict).get('SystemEnvVarLongSymbol')
     if attrib is not None:
         return str(attrib.value)
     return envvar_short_name
@@ -1403,9 +1411,11 @@ def _load_signal_groups(tokens, attributes):
 
         """
 
-        frame_signals = attributes.get(frame_id_dbc, {})
-        signal_map = frame_signals.get('signal', {})
-        return signal_map.get(signal_short_name, OrderedDict())
+        frame_signals = attributes.get(frame_id_dbc, empty_dict)
+        signal_map = frame_signals.get('signal', empty_dict)
+        if (result := signal_map.get(signal_short_name)) is not None:
+            return result
+        return OrderedDict()
 
     def get_signal_long_name(frame_id_dbc, signal_short_name):
         signal_attributes = get_signal_attributes(frame_id_dbc, signal_short_name)
@@ -1436,7 +1446,7 @@ def _load_signals(tokens,
                   multiplexer_signal):
     signal_to_multiplexer = {}
 
-    frame_mux_values = signal_multiplexer_values.get(frame_id_dbc, {})
+    frame_mux_values = signal_multiplexer_values.get(frame_id_dbc, empty_dict)
     for multiplexer_name, items in frame_mux_values.items():
         for name in items:
             signal_to_multiplexer[name] = multiplexer_name
@@ -1447,17 +1457,20 @@ def _load_signals(tokens,
 
         """
 
-        frame_signals = attributes.get(frame_id_dbc, {})
-        signal_map = frame_signals.get('signal', {})
-        return signal_map.get(signal_name, OrderedDict())
+        frame_signals = attributes.get(frame_id_dbc, empty_dict)
+        signal_map = frame_signals.get('signal', empty_dict)
+        if (result := signal_map.get(signal_name)) is not None:
+            return result
+
+        return OrderedDict()
 
     def get_signal_comment(frame_id_dbc, signal_name):
         """Get comment for given signal.
 
         """
 
-        frame_cmt = comments.get(frame_id_dbc, {})
-        signal_cmt = frame_cmt.get('signal', {})
+        frame_cmt = comments.get(frame_id_dbc, empty_dict)
+        signal_cmt = frame_cmt.get('signal', empty_dict)
         return signal_cmt.get(signal_name)
 
     def get_signal_choices(frame_id_dbc, signal):
@@ -1465,7 +1478,7 @@ def _load_signals(tokens,
 
         """
 
-        return choices.get(frame_id_dbc, {}).get(signal)
+        return choices.get(frame_id_dbc, empty_dict).get(signal)
 
     def get_signal_is_multiplexer(signal):
         if len(signal[1]) == 2:
@@ -1639,7 +1652,7 @@ def _load_messages(tokens,
 
         """
 
-        frame_attrs = attributes.get(frame_id_dbc, {})
+        frame_attrs = attributes.get(frame_id_dbc, empty_dict)
         return frame_attrs.get('message')
 
     def get_message_comment(frame_id_dbc: int) -> str | None:
@@ -1647,7 +1660,7 @@ def _load_messages(tokens,
 
         """
 
-        frame_comments = comments.get(frame_id_dbc, {})
+        frame_comments = comments.get(frame_id_dbc, empty_dict)
         return typing.cast('str', frame_comments.get('message'))
 
     def get_message_send_type(frame_id_dbc: int) -> str | None:
@@ -1811,12 +1824,12 @@ def _load_version(tokens):
 
 
 def _load_bus(attributes, comments):
-    db_attrs = attributes.get('database', {})
+    db_attrs = attributes.get('database', empty_dict)
     db_name_attr = db_attrs.get('DBName')
     bus_name = str(db_name_attr.value) if db_name_attr is not None else ''
     db_baudrate_attr = db_attrs.get('Baudrate')
     bus_baudrate = db_baudrate_attr.value if db_baudrate_attr is not None else None
-    bus_comment = comments.get('database', {}).get('bus')
+    bus_comment = comments.get('database', empty_dict).get('bus')
 
     if not any([bus_name, bus_baudrate, bus_comment]):
         return None
@@ -1966,7 +1979,7 @@ def update_signal_attribute_rel_names(database: InternalDatabase,
 
     frame_id = get_dbc_frame_id(message)
 
-    frame_rel = database.dbc.attributes_rel.get(frame_id, {})
+    frame_rel = database.dbc.attributes_rel.get(frame_id, empty_dict)
     signal_attributes_rel = frame_rel.get('signal')
     if signal_attributes_rel is None:
         return
@@ -2193,12 +2206,12 @@ def update_signal_attribute_rel_names_after_load(messages: list[Message],
     for message in messages:
         frame_id = get_dbc_frame_id(message)
 
-        frame_rel = attributes_rel.get(frame_id, {})
+        frame_rel = attributes_rel.get(frame_id, empty_dict)
         signal_attributes_rel = frame_rel.get('signal')
         if signal_attributes_rel is None:
             continue
 
-        signal_attributes = attributes.get(frame_id, {}).get('signal', {})
+        signal_attributes = attributes.get(frame_id, empty_dict).get('signal', empty_dict)
 
         short_to_signal_name = {}
         for signal_name, value in signal_attributes.items():

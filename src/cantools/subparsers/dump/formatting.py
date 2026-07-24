@@ -221,9 +221,7 @@ def layout_string(message, signal_names=True):
             for i in range(0, 24, 3):
                 byte_triple = byte_line[i:i + 3]
 
-                if i == 0:
-                    line += '|'
-                elif byte_triple[0] in ' <>x':
+                if i == 0 or byte_triple[0] in ' <>x':
                     line += '|'
                 elif byte_triple[0] == 'X':
                     if prev_byte == 'X':

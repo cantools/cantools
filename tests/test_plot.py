@@ -68,7 +68,7 @@ class SubplotMock(mock.Mock):
                 self.__kw[key] = False
 
         if kw:
-            raise TypeError("{}() got unexpected keyword argument(s): {}".format(type(self).__name__, ', '.join(key for key in kw.keys())))
+            raise TypeError("{}() got unexpected keyword argument(s): {}".format(type(self).__name__, ', '.join(key for key in kw)))
 
         if parent:
             parent.attach_mock(self, 'subplot()')
@@ -164,11 +164,9 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with PyplotMock() as plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     def test_plot_ta(self):
@@ -186,7 +184,7 @@ class CanToolsPlotTest(unittest.TestCase):
 """
 
         xs = [x+1608822980 for x in (.872678, .873316, .873745, .874138, .874524, .874921, .875305, .875685, .876130)]
-        xs = [datetime.datetime.fromtimestamp(x) for x in xs]
+        xs = [datetime.datetime.fromtimestamp(x) for x in xs]  # noqa: DTZ006
         ys_fl = [20.328125, 22.109375, 21.671875, 20.78125,  20.390625, 18.109375, 14.4375,   10.609375, 3.78125 ]
         ys_fr = [20.21875,  22.328125, 22.21875,  21.21875,  20.390625, 18.0,      14.4375,   10.9375,   3.671875]
         ys_rl = [20.4375,   22.328125, 21.671875, 21.21875,  20.71875,  18.0,      14.328125, 10.5,      3.671875]
@@ -202,11 +200,9 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with PyplotMock() as plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     def test_plot_tz(self):
@@ -245,13 +241,11 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.set_xlabel(self.XLABEL_tz),
         ]]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
 
     def test_plot_td(self):
@@ -285,11 +279,9 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with PyplotMock() as plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     def test_plot_l(self):
@@ -318,11 +310,9 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with PyplotMock() as plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     def test_plot_no_timestamps(self):
@@ -351,11 +341,9 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with PyplotMock() as plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
 
     def test_plot_cantools_decode(self):
         argv = ['cantools', 'plot', self.DBC_FILE]
@@ -403,13 +391,10 @@ BREMSE_33(
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertEqual(stdout.getvalue(), expected_output)
-                        self.assertListEqual(plt.mock_calls, expected_calls)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertEqual(stdout.getvalue(), expected_output)
+            self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     # ------- test different file formats -------
@@ -440,11 +425,9 @@ BREMSE_33(
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with PyplotMock() as plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     # ------- test signal command line argument(s) -------
@@ -484,13 +467,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_subplots(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '--', 'BREMSE_33.*', '-', '--no-units', 'BREMSE_2.*']
@@ -543,13 +524,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_two_axes_with_auto_ylabels_and_one_legend(self):
         argv = ['cantools', 'plot', '--no-units', self.DBC_FILE, '*_33.*fl*:b', ',', '*_2.*fl*:r']
@@ -593,13 +572,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_color(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '--', '--color', 'C0', '--ylabel', 'Bremse 33', '*_33.*fl*', ',', '--color', 'C1', '--ylabel', 'Bremse 2', '*_2.*fl*']
@@ -648,13 +625,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_autocolor(self):
         self.maxDiff = None
@@ -724,13 +699,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_format(self):
         col_33 = "b"
@@ -788,13 +761,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_choices_stem(self):
         argv = ['cantools', 'plot', '--no-units', self.DBC_FILE_CHOICES, 'Foo:|']
@@ -832,13 +803,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_no_decode_choices(self):
         argv = ['cantools', 'plot', '--no-decode-choices', self.DBC_FILE_CHOICES, 'Foo:|']
@@ -872,13 +841,11 @@ BREMSE_33(
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_case_sensitive(self):
         argv = ['cantools', 'plot', '--case-sensitive', self.DBC_FILE, '*fl*']
@@ -905,18 +872,15 @@ BREMSE_33(
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertEqual(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
 
     # ------- test error handling -------
@@ -937,11 +901,11 @@ invalid syntax
  (2020-12-29 11:33:28.295229)  vcan0  0000024A   [8]  CC 05 CC 05 E9 05 DB 05
 '''
         xs33 = [
-            datetime.datetime(2020, 12, 29, 11, 33, 24, 285921),
-            datetime.datetime(2020, 12, 29, 11, 33, 25, 288070),
-            datetime.datetime(2020, 12, 29, 11, 33, 26, 290617),
-            datetime.datetime(2020, 12, 29, 11, 33, 27, 292325),
-            datetime.datetime(2020, 12, 29, 11, 33, 28, 294690),
+            datetime.datetime(2020, 12, 29, 11, 33, 24, 285921),  # noqa: DTZ001
+            datetime.datetime(2020, 12, 29, 11, 33, 25, 288070),  # noqa: DTZ001
+            datetime.datetime(2020, 12, 29, 11, 33, 26, 290617),  # noqa: DTZ001
+            datetime.datetime(2020, 12, 29, 11, 33, 27, 292325),  # noqa: DTZ001
+            datetime.datetime(2020, 12, 29, 11, 33, 28, 294690),  # noqa: DTZ001
         ]
         xs33_ln = [1,4,6,8,11]
         whlspeed_fl_bremse2 = [20.421875, 20.578125, 20.78125, 22.078125, 23.1875]
@@ -983,18 +947,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
 
     # --ignore-*
@@ -1027,18 +988,15 @@ Failed to parse data of frame id 586 (0x24a): ...
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_ignore_unknown_frameid(self):
         argv = ['cantools', 'plot', '--ignore-unknown-frames', self.DBC_FILE, '*33.*']
@@ -1068,18 +1026,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_ignore_invalid_data(self):
         argv = ['cantools', 'plot', '--ignore-invalid-data', self.DBC_FILE, '*33.*']
@@ -1110,18 +1065,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_quiet(self):
         argv = ['cantools', 'plot', '-q', self.DBC_FILE, '*33.*']
@@ -1148,18 +1100,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertEqual(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
 
     # --show-*
@@ -1197,18 +1146,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_show_unknown_frames(self):
         argv = ['cantools', 'plot', '--show-unknown-frames', self.DBC_FILE, '*33.*']
@@ -1245,18 +1191,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_show_invalid_syntax(self):
         argv = ['cantools', 'plot', '--show-invalid-syntax', self.DBC_FILE, '*33.*']
@@ -1293,18 +1236,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_show_all_errors(self):
         argv = ['cantools', 'plot', '-s', self.DBC_FILE, '*33.*']
@@ -1347,18 +1287,15 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(data.input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
+        with mock.patch('sys.stdin', StringIO(data.input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
 
-                        actual_output = stdout.getvalue()
-                        self.assertLinesMatch(actual_output, expected_output)
+            actual_output = stdout.getvalue()
+            self.assertLinesMatch(actual_output, expected_output)
 
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
 
     # ------- test other command line options -------
@@ -1399,33 +1336,31 @@ Failed to parse line: 'invalid syntax'
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    subplot = subplots[0]
-                    for i in range(len(whlspeed_0)):
-                        call = subplot.mock_calls[i]
-                        actual_xs = call[1][0]
-                        actual_ys = call[1][1]
-                        label = call[2]['label']
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            subplot = subplots[0]
+            for i in range(len(whlspeed_0)):
+                call = subplot.mock_calls[i]
+                actual_xs = call[1][0]
+                actual_ys = call[1][1]
+                label = call[2]['label']
 
-                        n0 = len(whlspeed_0[i])
-                        n1 = len(whlspeed_1[i])
-                        self.assertEqual(len(actual_xs), len(actual_ys), f"numbers of actual x and y values do not match for signal {label}")
-                        self.assertEqual(len(actual_xs), len(xs)+1, f"number of x values does not match for signal {label}")
-                        self.assertEqual(len(actual_ys), n0+n1+1, f"number of y values does not match for signal {label}")
+                n0 = len(whlspeed_0[i])
+                n1 = len(whlspeed_1[i])
+                self.assertEqual(len(actual_xs), len(actual_ys), f"numbers of actual x and y values do not match for signal {label}")
+                self.assertEqual(len(actual_xs), len(xs)+1, f"number of x values does not match for signal {label}")
+                self.assertEqual(len(actual_ys), n0+n1+1, f"number of y values does not match for signal {label}")
 
-                        for j in range(1, len(actual_xs)):
-                            self.assertLess(actual_xs[j-1], actual_xs[j], f"actual x values are not strictly increasing for signal {label}")
-                        self.assertEqual(actual_xs[:n0], xs[:n0], f"first half of x values does not match for signal {label}")
-                        self.assertEqual(actual_xs[-n1:], xs[-n1:], f"second half of x values does not match for signal {label}")
+                for j in range(1, len(actual_xs)):
+                    self.assertLess(actual_xs[j-1], actual_xs[j], f"actual x values are not strictly increasing for signal {label}")
+                self.assertEqual(actual_xs[:n0], xs[:n0], f"first half of x values does not match for signal {label}")
+                self.assertEqual(actual_xs[-n1:], xs[-n1:], f"second half of x values does not match for signal {label}")
 
-                        self.assertEqual(actual_ys[:n0], whlspeed_0[i], f"first half of y values does not match for signal {label}")
-                        self.assertEqual(actual_ys[n0], None, f"expected separating value is not at it's place for signal {label}")
-                        self.assertEqual(actual_ys[-n1:], whlspeed_1[i], f"second half of y values does not match for signal {label}")
-                        #self.assertEqual(actual_ys[-n1:], actual_ys[n1+1:], "this test is a duplicate of len == n0+n1+1")
+                self.assertEqual(actual_ys[:n0], whlspeed_0[i], f"first half of y values does not match for signal {label}")
+                self.assertEqual(actual_ys[n0], None, f"expected separating value is not at it's place for signal {label}")
+                self.assertEqual(actual_ys[-n1:], whlspeed_1[i], f"second half of y values does not match for signal {label}")
+                #self.assertEqual(actual_ys[-n1:], actual_ys[n1+1:], "this test is a duplicate of len == n0+n1+1")
 
     def test_break_time_none(self):
         argv = ['cantools', 'plot', '--break-time', '-1', self.DBC_FILE]
@@ -1470,13 +1405,11 @@ Failed to parse line: 'invalid syntax'
             ],
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                with plt:
-                    cantools._main()
-                    self.assertListEqual(plt.mock_calls, expected_calls)
-                    for i in range(len(expected_subplot_calls)):
-                        self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
 
     def test_output_file(self):
@@ -1514,13 +1447,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = f"Result written to {fn}\n"
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_start_absolute_seconds(self):
         argv = ['cantools', 'plot', '--start', '20', self.DBC_FILE, '*FL']
@@ -1554,13 +1484,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_stop_line_numbers(self):
         argv = ['cantools', 'plot', '--stop', '4', self.DBC_FILE, '*FL']
@@ -1592,13 +1519,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_start_stop_relative(self):
         argv = ['cantools', 'plot', '--start', '86400', '--stop', '2 days', '--break-time', '-1', self.DBC_FILE, '*FL']
@@ -1631,13 +1555,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock(ignore_axes=True) as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock(ignore_axes=True) as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
 
     def test_stop_is_based_on_start_and_xlabel_shows_start(self):
@@ -1671,13 +1592,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
 
     # ------- subplot options -------
@@ -1717,15 +1635,12 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_title(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '*fl', '--', '--title', 'Test']
@@ -1748,13 +1663,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_xlabel(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '--', '--xlabel', '', '*fl', '-', '*fl?*']
@@ -1797,15 +1709,12 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_ymin(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '--', '--ymin', '0']
@@ -1837,13 +1746,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_ymax(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '--', '--ymin', '20', '--ymax', '40']
@@ -1875,13 +1781,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
 
     # ------- global subplot options -------
@@ -1921,15 +1824,12 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_global_title(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '*fl', '--title', 'Test']
@@ -1952,13 +1852,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_global_xlabel(self):
         argv = ['cantools', 'plot', '--xlabel', '', self.DBC_FILE, '*fl', '-', '*fl?*']
@@ -2001,15 +1898,12 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_global_ymin(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '--ymin', '0']
@@ -2041,13 +1935,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
     def test_global_ymax(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '--ymin', '20', '--ymax', '40']
@@ -2079,13 +1970,10 @@ Failed to parse line: 'invalid syntax'
         stdout = StringIO()
         expected_output = ""
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with PyplotMock() as plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        self.assertEqual(stdout.getvalue(), expected_output)
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
 
 
     # ------- other tests -------
@@ -2115,14 +2003,11 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_do_not_replot(self):
         argv = ['cantools', 'plot', self.DBC_FILE, '*fl:-o', '*:o']
@@ -2159,14 +2044,11 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
     def test_do_replot(self):
         argv = ['cantools', 'plot', self.DBC_FILE_CHOICES, "Foo:b-", "Foo:rd"]
@@ -2202,14 +2084,11 @@ Failed to parse line: 'invalid syntax'
 
         stdout = StringIO()
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.stdout', stdout):
-                with mock.patch('sys.argv', argv):
-                    with plt:
-                        cantools._main()
-                        self.assertListEqual(plt.mock_calls, expected_calls)
-                        for i in range(len(expected_subplot_calls)):
-                            self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            for i in range(len(expected_subplot_calls)):
+                self.assertListEqual(subplots[i].mock_calls, expected_subplot_calls[i], msg=f"calls don't match for subplot {i}")
 
 
     # ------- auxiliary functions -------
@@ -2228,10 +2107,10 @@ Failed to parse line: 'invalid syntax'
         return out
 
     def parse_absolute_time(self, timestamp):
-        return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
+        return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)  # noqa: DTZ007
 
     def parse_absolute_seconds(self, timestamp):
-        return datetime.datetime.fromtimestamp(float(timestamp))
+        return datetime.datetime.fromtimestamp(float(timestamp))  # noqa: DTZ006
 
     def parse_seconds(self, timestamp):
         return float(timestamp)

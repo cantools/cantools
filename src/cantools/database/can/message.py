@@ -725,7 +725,7 @@ class Message:
     def _get_mux_number(self, decoded: SignalMappingType, signal_name: str) -> int:
         mux = decoded[signal_name]
 
-        if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
+        if isinstance(mux, (str, NamedSignalValue)):
             signal = self.get_signal_by_name(signal_name)
             try:
                 mux = signal.conversion.choice_to_number(str(mux))
@@ -765,19 +765,17 @@ class Message:
                 # skip range check if raw value exists in value table
                 continue
 
-            if signal.minimum is not None:
-                if scaled_value < signal.minimum - abs(signal.conversion.scale)*1e-6:
+            if signal.minimum is not None and scaled_value < signal.minimum - abs(signal.conversion.scale)*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value greater than '
                         f'or equal to {signal.minimum} in message "{self.name}", '
                         f'but got {scaled_value}.')
 
-            if signal.maximum is not None:
-                if scaled_value > signal.maximum + abs(signal.conversion.scale)*1e-6:
-                    raise EncodeError(
-                        f'Expected signal "{signal.name}" value smaller than '
-                        f'or equal to {signal.maximum} in message "{self.name}", '
-                        f'but got {scaled_value}.')
+            if signal.maximum is not None and scaled_value > signal.maximum + abs(signal.conversion.scale)*1e-6:
+                raise EncodeError(
+                    f'Expected signal "{signal.name}" value smaller than '
+                    f'or equal to {signal.maximum} in message "{self.name}", '
+                    f'but got {scaled_value}.')
 
     def _encode(self, node: Codec, data: SignalMappingType, scaling: bool) -> tuple[int, int, list[Signal]]:
         encoded = encode_data(data,

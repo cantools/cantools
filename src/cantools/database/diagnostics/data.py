@@ -50,7 +50,7 @@ class Data:
         self.is_signed: bool = False
 
     def raw_to_scaled(
-        self, raw_value: int | float, decode_choices: bool = True
+        self, raw_value: float, decode_choices: bool = True
     ) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
 
@@ -87,7 +87,7 @@ class Data:
         return self.conversion.scale
 
     @scale.setter
-    def scale(self, value: int | float) -> None:
+    def scale(self, value: float) -> None:
         self.conversion = self.conversion.factory(
             scale=value,
             offset=self.conversion.offset,
@@ -101,7 +101,7 @@ class Data:
         return self.conversion.offset
 
     @offset.setter
-    def offset(self, value: int | float) -> None:
+    def offset(self, value: float) -> None:
         self.conversion = self.conversion.factory(
             scale=self.conversion.scale,
             offset=value,

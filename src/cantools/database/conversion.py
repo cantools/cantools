@@ -67,7 +67,7 @@ class BaseConversion(ABC):
     @abstractmethod
     def raw_to_scaled(
         self,
-        raw_value: int | float,
+        raw_value: float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
@@ -95,7 +95,7 @@ class BaseConversion(ABC):
 
     @abstractmethod
     def numeric_scaled_to_raw(
-        self, scaled_value: int | float
+        self, scaled_value: float
     ) -> int | float:
         """Convert a numeric scaled value to the internal raw value.
 
@@ -124,7 +124,7 @@ class IdentityConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: int | float,
+        raw_value: float,
         decode_choices: bool = True,
     ) -> int | float:
         return raw_value
@@ -137,7 +137,7 @@ class IdentityConversion(BaseConversion):
         return self.numeric_scaled_to_raw(scaled_value)
 
     def numeric_scaled_to_raw(
-        self, scaled_value: int | float
+        self, scaled_value: float
     ) -> int | float:
         return scaled_value if self.is_float else round(scaled_value)
 
@@ -155,7 +155,7 @@ class LinearIntegerConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: int | float,
+        raw_value: float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         return raw_value * self.scale + self.offset
@@ -168,7 +168,7 @@ class LinearIntegerConversion(BaseConversion):
         return self.numeric_scaled_to_raw(scaled_value)
 
     def numeric_scaled_to_raw(
-        self, scaled_value: int | float
+        self, scaled_value: float
     ) -> int | float:
         # try to avoid a loss of precision whenever possible
         _raw = scaled_value - self.offset
@@ -193,7 +193,7 @@ class LinearConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: int | float,
+        raw_value: float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         return raw_value * self.scale + self.offset
@@ -206,7 +206,7 @@ class LinearConversion(BaseConversion):
         return self.numeric_scaled_to_raw(scaled_value)
 
     def numeric_scaled_to_raw(
-        self, scaled_value: int | float
+        self, scaled_value: float
     ) -> int | float:
         _raw = (scaled_value - self.offset) / self.scale
         return _raw if self.is_float else round(_raw)
@@ -242,7 +242,7 @@ class NamedSignalConversion(BaseConversion):
 
     def raw_to_scaled(
         self,
-        raw_value: int | float,
+        raw_value: float,
         decode_choices: bool = True,
     ) -> SignalValueType:
         if decode_choices and (choice := self.choices.get(raw_value)) is not None:  # type: ignore[arg-type]
@@ -263,7 +263,7 @@ class NamedSignalConversion(BaseConversion):
         raise TypeError
 
     def numeric_scaled_to_raw(
-        self, scaled_value: int | float
+        self, scaled_value: float
     ) -> int | float:
         return self._conversion.scaled_to_raw(scaled_value)
 
@@ -292,7 +292,7 @@ class NamedSignalConversion(BaseConversion):
         )
 
 
-def _is_integer(value: int | float) -> bool:
+def _is_integer(value: float) -> bool:
     if isinstance(value, int) or (hasattr(value, "is_integer") and value.is_integer()):
         return True
     elif isinstance(value, float):

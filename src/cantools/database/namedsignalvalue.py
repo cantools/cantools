@@ -1,4 +1,3 @@
-from typing import Any
 
 
 class NamedSignalValue:
@@ -49,7 +48,7 @@ class NamedSignalValue:
     def __repr__(self) -> str:
         return f"'{self.name}'"
 
-    def __eq__(self, x: Any) -> bool:
+    def __eq__(self, x: object) -> bool:
         if isinstance(x, NamedSignalValue):
             return (
                 x.value == self.value

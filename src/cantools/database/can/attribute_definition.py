@@ -14,8 +14,8 @@ class AttributeDefinition(Generic[AttributeValueTypeVar]):
                  default_value: AttributeValueTypeVar | None = None,
                  kind: str | None = None,
                  type_name: str | None = None,
-                 minimum: int | float | None = None,
-                 maximum: int | float | None = None,
+                 minimum: float | None = None,
+                 maximum: float | None = None,
                  choices: list[str] | None = None) -> None:
         self._name = name
         self._default_value: AttributeValueTypeVar | None = default_value
@@ -72,7 +72,7 @@ class AttributeDefinition(Generic[AttributeValueTypeVar]):
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value: int | float | None) -> None:
+    def minimum(self, value: float | None) -> None:
         self._minimum = value
 
     @property
@@ -91,7 +91,7 @@ class AttributeDefinition(Generic[AttributeValueTypeVar]):
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value: int | float | None) -> None:
+    def maximum(self, value: float | None) -> None:
         self._maximum = value
 
     @property

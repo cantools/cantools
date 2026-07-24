@@ -40,14 +40,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
         if have.keys() != expect.keys():
             raise AssertionError(f'keys differ: {have} != {expect}')
 
-        for key in have.keys():
+        for key in have:
             self.assertEqual(str(have[key]), str(expect[key]))
 
     def assertEqualChoicesDict(self, have, expect):
         if have.keys() != expect.keys():
             raise AssertionError(f'keys differ: {have.keys()} != {expect.keys()}')
 
-        for key in have.keys():
+        for key in have:
             self.assertEqualChoicesDictHelper_(have[key], expect[key])
 
     def assert_dbc_dump(self, db, filename):
@@ -322,14 +322,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'CanFd',
                 {'Fie': 0x123456789abcdef, 'Fas': 0xdeadbeefdeadbeef},
-                b'\xef\xcd\xab\x89\x67\x45\x23\x01'
+                (b'\xef\xcd\xab\x89\x67\x45\x23\x01'
                 b'\xef\xbe\xad\xde\xef\xbe\xad\xde'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00')
             )
         ]
 
@@ -362,14 +362,14 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 0x12333,
                 {'Fie': 0x123456789abcdef, 'Fas': 0xdeadbeefdeadbeef},
-                b'\xef\xcd\xab\x89\x67\x45\x23\x01'
+                (b'\xef\xcd\xab\x89\x67\x45\x23\x01'
                 b'\xef\xbe\xad\xde\xef\xbe\xad\xde'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
                 b'\x00\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00\x00\x00\x00'
+                b'\x00\x00\x00\x00\x00\x00\x00\x00')
             )
         ]
 
@@ -790,38 +790,38 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message1',
                 0,
-                'Expected signal "Signal1" value greater than or equal to 1 in '
-                'message "Message1", but got 0.'
+                ('Expected signal "Signal1" value greater than or equal to 1 in '
+                'message "Message1", but got 0.')
             ),
             (
                 'Message1',
                 3,
-                'Expected signal "Signal1" value smaller than or equal to 2 in '
-                'message "Message1", but got 3.'
+                ('Expected signal "Signal1" value smaller than or equal to 2 in '
+                'message "Message1", but got 3.')
             ),
             (
                 'Message2',
                 0,
-                'Expected signal "Signal1" value greater than or equal to 1 in '
-                'message "Message2", but got 0.'
+                ('Expected signal "Signal1" value greater than or equal to 1 in '
+                'message "Message2", but got 0.')
             ),
             (
                 'Message3',
                 3,
-                'Expected signal "Signal1" value smaller than or equal to 2 in '
-                'message "Message3", but got 3.'
+                ('Expected signal "Signal1" value smaller than or equal to 2 in '
+                'message "Message3", but got 3.')
             ),
             (
                 'Message4',
                 1.9,
-                'Expected signal "Signal1" value greater than or equal to 2 in '
-                'message "Message4", but got 1.9.'
+                ('Expected signal "Signal1" value greater than or equal to 2 in '
+                'message "Message4", but got 1.9.')
             ),
             (
                 'Message4',
                 8.1,
-                'Expected signal "Signal1" value smaller than or equal to 8 in '
-                'message "Message4", but got 8.1.'
+                ('Expected signal "Signal1" value smaller than or equal to 8 in '
+                'message "Message4", but got 8.1.')
             )
         ]
 
@@ -6037,9 +6037,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_relation_attributes(self):
         filename = 'tests/files/dbc/attributes_relation.dbc'
         db = cantools.database.load_file(filename)
-        for _key, frame in db.dbc.attributes_rel.items():
+        for frame in db.dbc.attributes_rel.values():
             signal = frame.get("signal")
-            if "signal_1" in signal.keys():
+            if "signal_1" in signal:
                 rel_attributes = signal["signal_1"]["node"]["ECU2"]
                 first_timeout_attr = rel_attributes["SigFirstTimeoutTime"]
                 timeout_attr = rel_attributes["SigTimeoutTime"]
@@ -6051,7 +6051,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_relation_message_attributes(self):
         filename = 'tests/files/dbc/BU_BO_REL_Message.dbc'
         db = cantools.database.load_file(filename)
-        for _key, frame in db.dbc.attributes_rel.items():
+        for frame in db.dbc.attributes_rel.values():
             node = frame.get("node")
             rel_attributes = node["ECU1"]
             msg_attr = rel_attributes["MsgProject"]

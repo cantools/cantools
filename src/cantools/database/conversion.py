@@ -245,7 +245,7 @@ class NamedSignalConversion(BaseConversion):
         raw_value: float,
         decode_choices: bool = True,
     ) -> SignalValueType:
-        if decode_choices and (choice := self.choices.get(raw_value)) is not None:  # type: ignore[arg-type]
+        if decode_choices and (choice := self.choices.get(int(raw_value))) is not None:
             return choice
         return self._conversion.raw_to_scaled(raw_value, False)
 

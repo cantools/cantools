@@ -97,11 +97,7 @@ class Monitor(can.Listener):
         self.draw_stats(0)
         self.draw_title(1)
 
-        lines = []
-
-        for name in self._filtered_sorted_message_names:
-            for line in self._formatted_messages[name]:
-                lines.append(line)
+        lines = [line for name in self._filtered_sorted_message_names for line in self._formatted_messages[name]]
 
         # Only render the visible screen. We only have (self._nrows - 3)
         # available rows to draw on, due to the persistent TUI features that

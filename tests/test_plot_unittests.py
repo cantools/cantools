@@ -76,7 +76,7 @@ class CanToolsPlotUnittests(unittest.TestCase):
     def parse_time(self, s):
         for pattern in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f"):
             try:
-                return datetime.datetime.strptime(s, pattern)
+                return datetime.datetime.strptime(s, pattern)  # noqa: DTZ007
             except ValueError:
                 pass
         raise ValueError('Failed to parse time {s}')

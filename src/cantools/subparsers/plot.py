@@ -226,7 +226,16 @@ class TimestampParser:
         ]:
             for p in patterns:
                 try:
-                    out = datetime.datetime.strptime(user_input, p)
+                    # HACK: ensure that an absolute year is specified
+                    # to make it work with python >= 3.15 (and get
+                    # around the deprecation warning for earlier
+                    # versions). We use 1904 because it is a leap year
+                    # and because it should be clear that this is not
+                    # the real year of the specified date.
+                    if '%Y' not in p and '%d' in p:
+                        out = datetime.datetime.strptime('1904 ' + user_input, '%Y ' + p)  # noqa: DTZ007
+                    else:
+                        out = datetime.datetime.strptime(user_input, p)  # noqa: DTZ007
                 except ValueError:
                     pass
                 else:
@@ -282,11 +291,11 @@ class TimestampParser:
             return linenumber
 
     def parse_absolute_timestamp(self, timestamp):
-        return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)
+        return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)  # noqa: DTZ007
 
     @staticmethod
     def parse_absolute_seconds(timestamp):
-        return datetime.datetime.fromtimestamp(float(timestamp))
+        return datetime.datetime.fromtimestamp(float(timestamp))  # noqa: DTZ006
 
     @staticmethod
     def parse_seconds(timestamp):
@@ -742,12 +751,9 @@ class Signals:
             # if the user bothers to type out the same regex twice
             # it is probably intended to be plotted twice
             return True
-        if '.' not in current_signal.reo.pattern:
-            # if the user bothers to type out a complete signal name without wildcards
-            # he/she probably means to plot this signal even if it has been plotted already
-            return True
-
-        return False
+        # if the user bothers to type out a complete signal name without wildcards
+        # he/she probably means to plot this signal even if it has been plotted already
+        return '.' not in current_signal.reo.pattern
 
     def get_signal_unit(self, signal_name):
         msg, signal = re.split(self.SEP_SG, signal_name)

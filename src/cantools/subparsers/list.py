@@ -9,7 +9,7 @@ from ..database.namedsignalvalue import NamedSignalValue
 from .dump.formatting import signal_tree_string
 
 
-def _format_val(val: float | int | str | NamedSignalValue | None,
+def _format_val(val: float | str | NamedSignalValue | None,
                 unit: str,
                 value_format_specifier: str) \
         -> str:

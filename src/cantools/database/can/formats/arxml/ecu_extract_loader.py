@@ -339,9 +339,8 @@ class EcuExtractLoader:
                 continue
 
             for reference, value in self.iter_reference_values(message):
-                if reference == expected_reference:
-                    if value == com_pdu_id_ref:
-                        return message
+                if reference == expected_reference and value == com_pdu_id_ref:
+                    return message
 
     def iter_parameter_values(self, param_conf_container):
         parameters = param_conf_container.find(PARAMETER_VALUES_XPATH,

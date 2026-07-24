@@ -35,9 +35,8 @@ class CanToolsPlotTest(unittest.TestCase):
  (009.014779)  vcan0  00000343   [8]  CB 02 BC 02 B5 02 D2 02
 """
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                cantools._main()
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv):
+            cantools._main()
 
         self.assertTrue(os.path.exists(self.FN_OUT))
         os.remove(self.FN_OUT)
@@ -60,9 +59,8 @@ class CanToolsPlotTest(unittest.TestCase):
  (009.014779)  vcan0  00000343   [8]  CB 02 BC 02 B5 02 D2 02
 """
 
-        with mock.patch('sys.stdin', StringIO(input_data)):
-            with mock.patch('sys.argv', argv):
-                cantools._main()
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv):
+            cantools._main()
 
         self.assertTrue(os.path.exists(self.FN_OUT))
         os.remove(self.FN_OUT)
@@ -76,9 +74,8 @@ class CanToolsPlotTest(unittest.TestCase):
         expected += "".join(f"\n- {s}" for s in plt.style.available)
         expected += "\n"
 
-        with mock.patch('sys.stdout', stdout):
-            with mock.patch('sys.argv', argv):
-                cantools._main()
+        with mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv):
+            cantools._main()
 
         self.assertEqual(stdout.getvalue(), expected)
 

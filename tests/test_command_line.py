@@ -110,12 +110,10 @@ IO_DEBUG(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_decode_timestamp_absolute(self):
         argv = [
@@ -154,12 +152,10 @@ IO_DEBUG(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_decode_timestamp_zero(self):
         argv = [
@@ -198,12 +194,10 @@ IO_DEBUG(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_decode_can_fd(self):
         argv = ['cantools', 'decode', 'tests/files/dbc/foobar.dbc']
@@ -221,12 +215,10 @@ CanFd(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_decode_log_format(self):
         argv = [
@@ -289,12 +281,10 @@ IO_DEBUG(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_single_line_decode(self):
         argv = [
@@ -325,12 +315,10 @@ IO_DEBUG(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_single_line_decode_log_format(self):
         argv = [
@@ -361,12 +349,10 @@ IO_DEBUG(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_decode_muxed_data(self):
         argv = [
@@ -635,12 +621,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_decode_single_line_muxed_data(self):
         argv = [
@@ -730,12 +714,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdin', StringIO(input_data)):
-            with patch('sys.stdout', stdout):
-                with patch('sys.argv', argv):
-                    cantools._main()
-                    actual_output = stdout.getvalue()
-                    self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_dump(self):
         argv = [
@@ -800,11 +782,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdout', stdout):
-            with patch('sys.argv', argv):
-                cantools._main()
-                actual_output = stdout.getvalue()
-                self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     @with_fake_screen_width(screen_width=80)
     def test_dump_with_comments(self):
@@ -873,11 +854,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdout', stdout):
-            with patch('sys.argv', argv):
-                cantools._main()
-                actual_output = stdout.getvalue()
-                self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     @with_fake_screen_width(screen_width=80)
     def test_dump_with_comments_mux(self):
@@ -974,11 +954,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdout', stdout):
-            with patch('sys.argv', argv):
-                cantools._main()
-                actual_output = stdout.getvalue()
-                self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_dump_no_sender(self):
         argv = [
@@ -1019,11 +998,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdout', stdout):
-            with patch('sys.argv', argv):
-                cantools._main()
-                actual_output = stdout.getvalue()
-                self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_dump_signal_choices(self):
         argv = [
@@ -1098,11 +1076,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdout', stdout):
-            with patch('sys.argv', argv):
-                cantools._main()
-                actual_output = stdout.getvalue()
-                self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_dump_j1939(self):
         argv = [
@@ -1203,11 +1180,10 @@ BATTERY_VT(
 
         stdout = StringIO()
 
-        with patch('sys.stdout', stdout):
-            with patch('sys.argv', argv):
-                cantools._main()
-                actual_output = stdout.getvalue()
-                self.assertEqual(actual_output, expected_output)
+        with patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
 
     def test_convert(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1251,13 +1227,12 @@ BATTERY_VT(
             'test_command_line_convert.foo'
         ]
 
-        with patch('sys.argv', argv):
-            with self.assertRaises(SystemExit) as cm:
-                cantools._main()
+        with patch('sys.argv', argv), self.assertRaises(SystemExit) as cm:
+            cantools._main()
 
             self.assertEqual(
-                str(cm.exception),
-                "error: Unsupported output database format 'foo'.")
+            str(cm.exception),
+            "error: Unsupported output database format 'foo'.")
 
     def test_generate_c_source(self):
         databases = [

@@ -49,7 +49,7 @@ class DataFrame:
         self.timestamp_format = timestamp_format
 
     def __repr__(self) -> str:
-        attrs = ', '.join(f'{a} = {getattr(self, a)!r}' for a in self.__dict__.keys())
+        attrs = ', '.join(f'{a} = {getattr(self, a)!r}' for a in self.__dict__)
         return f'{type(self).__name__}({attrs})'
 
 
@@ -171,7 +171,7 @@ class CandumpAbsoluteLogPattern(CandumpBasePattern):
         r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
-        timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")  # noqa: DTZ007
         timestamp_format = TimestampFormat.ABSOLUTE
         return timestamp, timestamp_format
 

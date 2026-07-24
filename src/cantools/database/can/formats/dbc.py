@@ -1014,9 +1014,8 @@ def _is_extended_mux_needed(messages: list[Message]) -> bool:
             return True
 
         for signal in message.signals:
-            if signal.multiplexer_ids:
-                if len(signal.multiplexer_ids) > 1:
-                    return True
+            if signal.multiplexer_ids and len(signal.multiplexer_ids) > 1:
+                return True
 
     return False
 
@@ -1565,9 +1564,9 @@ def _load_signals(tokens,
 
     def get_signal_spn(frame_id_dbc, name):
         signal_attributes = get_signal_attributes(frame_id_dbc, name)
-        if 'SPN' in signal_attributes:
-            if (value := signal_attributes['SPN'].value) is not None:
-                return value
+        if 'SPN' in signal_attributes and \
+           (value := signal_attributes['SPN'].value) is not None:
+            return value
 
         if definitions is not None and 'SPN' in definitions:
             return definitions['SPN'].default_value
@@ -1679,9 +1678,8 @@ def _load_messages(tokens,
                 result = send_type_attr.value
                 if send_type_def.choices and result is not None:
                     result = send_type_def.choices[int(result)]
-        if result is None:
-            if (tmp := send_type_def.default_value) is not None:
-                result = str(tmp)
+        if result is None and (tmp := send_type_def.default_value) is not None:
+            result = str(tmp)
 
         return result
 
@@ -1777,13 +1775,12 @@ def _load_messages(tokens,
         multiplexer_signal = None
 
         for signal in message[6]:
-            if len(signal[1]) == 2:
-                if signal[1][1].endswith('M'):
-                    if multiplexer_signal is None:
-                        multiplexer_signal = signal[1][0]
-                    else:
-                        multiplexer_signal = None
-                        break
+            if len(signal[1]) == 2 and signal[1][1].endswith('M'):
+                if multiplexer_signal is None:
+                    multiplexer_signal = signal[1][0]
+                else:
+                    multiplexer_signal = None
+                    break
 
         signals = _load_signals(message[6],
                                 comments,

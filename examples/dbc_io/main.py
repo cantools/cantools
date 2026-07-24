@@ -24,8 +24,8 @@ try:
     print("Input cycle time: ", message.cycle_time)
     message.cycle_time = 2000
     print("Output cycle time:", message.cycle_time)
-except KeyError as e:
-    raise e
+except KeyError:
+    raise
 
 # Manipulate the message frame id.
 print("Input frame id: ", hex(message.frame_id))

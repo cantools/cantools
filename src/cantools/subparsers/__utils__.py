@@ -30,8 +30,7 @@ def format_signals(message, decoded_signals):
         signal_name = signal.name
 
         if signal.unit is None or \
-           isinstance(value, NamedSignalValue) or \
-           isinstance(value, str):
+           isinstance(value, (NamedSignalValue, str)):
 
             formatted_signal = f'{signal_name}: {value}'
 

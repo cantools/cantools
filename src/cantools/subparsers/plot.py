@@ -226,7 +226,16 @@ class TimestampParser:
         ]:
             for p in patterns:
                 try:
-                    out = datetime.datetime.strptime(user_input, p)
+                    # HACK: ensure that an absolute year is specified
+                    # to make it work with python >= 3.15 (and get
+                    # around the deprecation warning for earlier
+                    # versions). We use 1904 because it is a leap year
+                    # and because it should be clear that this is not
+                    # the real year of the specified date.
+                    if '%Y' not in p and '%d' in p:
+                        out = datetime.datetime.strptime('1904 ' + user_input, '%Y ' + p)
+                    else:
+                        out = datetime.datetime.strptime(user_input, p)
                 except ValueError:
                     pass
                 else:

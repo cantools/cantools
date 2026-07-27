@@ -886,7 +886,7 @@ def _format_range(cg_signal: "CodeGenSignal") -> str:
     minimum = cg_signal.signal.minimum
     maximum = cg_signal.signal.maximum
 
-    def phys_to_raw(x: int | float) -> int | float:
+    def phys_to_raw(x: float) -> int | float:
         raw_val = cg_signal.signal.scaled_to_raw(x)
         if cg_signal.signal.is_float:
             return float(raw_val)
@@ -1173,9 +1173,8 @@ def _format_unpack_code_level(cg_message: "CodeGenMessage",
                                        variable_lines,
                                        helper_kinds)
 
-    if body_lines:
-        if body_lines[-1] != '':
-            body_lines.append('')
+    if body_lines and body_lines[-1] != '':
+        body_lines.append('')
 
     if muxes_lines:
         muxes_lines.append('')
@@ -1212,10 +1211,10 @@ def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> tuple[st
 
     if not members:
         members = [
-            '    /**\n'
+            ('    /**\n'
             '     * Dummy signal in empty message.\n'
             '     */\n'
-            '    uint8_t dummy;'
+            '    uint8_t dummy;')
         ]
 
     if cg_message.message.comment is None:
@@ -1283,17 +1282,13 @@ def _generate_is_in_range(cg_signal: "CodeGenSignal") -> str:
     if maximum is not None:
         maximum = cg_signal.signal.scaled_to_raw(maximum)
 
-    if minimum is None and cg_signal.minimum_can_raw_value is not None:
-        if cg_signal.minimum_ctype_value is None:
-            minimum = cg_signal.minimum_can_raw_value
-        elif cg_signal.minimum_can_raw_value > cg_signal.minimum_ctype_value:
-            minimum = cg_signal.minimum_can_raw_value
+    if (minimum is None and cg_signal.minimum_can_raw_value is not None) and \
+       (cg_signal.minimum_ctype_value is None or cg_signal.minimum_can_raw_value > cg_signal.minimum_ctype_value):
+        minimum = cg_signal.minimum_can_raw_value
 
-    if maximum is None and cg_signal.maximum_can_raw_value is not None:
-        if cg_signal.maximum_ctype_value is None:
-            maximum = cg_signal.maximum_can_raw_value
-        elif cg_signal.maximum_can_raw_value < cg_signal.maximum_ctype_value:
-            maximum = cg_signal.maximum_can_raw_value
+    if (maximum is None and cg_signal.maximum_can_raw_value is not None) and \
+       (cg_signal.maximum_ctype_value is None or cg_signal.maximum_can_raw_value < cg_signal.maximum_ctype_value):
+        maximum = cg_signal.maximum_can_raw_value
 
     suffix = cg_signal.type_suffix
     check = []

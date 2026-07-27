@@ -72,7 +72,7 @@ class CanToolsMonitorTest(unittest.TestCase):
     def assert_called(self, mock, expected, verbose=False):
         try:
             self.assertEqual(mock.call_args_list, expected)
-        except AssertionError as e:
+        except AssertionError:
             if verbose:
                 nl = ",\n "
                 print(f"Assertion failed:")
@@ -80,7 +80,7 @@ class CanToolsMonitorTest(unittest.TestCase):
                 print(f"Got: {nl.join(str(x) for x in mock.call_args_list)}")
                 print("Traceback:")
                 traceback.print_stack()
-            raise e
+            raise
 
     @patch('can.Notifier')
     @patch('can.cli.create_bus_from_namespace')

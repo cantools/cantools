@@ -25,9 +25,8 @@ class DecodedMessage:
 
 class Messages(UserDict):
     def __setitem__(self, message_name, value):
-        if getattr(self, '_frozen', False):
-            if message_name not in self.data:
-                raise KeyError(message_name)
+        if getattr(self, '_frozen', False) and message_name not in self.data:
+            raise KeyError(message_name)
         self.data[message_name] = value
 
     def __missing__(self, key):
@@ -230,9 +229,8 @@ class Message(UserDict):
                     return
 
     def _filter_expected_message(self, message, signals):
-        if message.name == self.database.name:
-            if all(message.signals[name] == signals[name] for name in signals):
-                return message.signals
+        if message.name == self.database.name and all(message.signals[name] == signals[name] for name in signals):
+            return message.signals
 
     def send_periodic_start(self):
         if not self.enabled:

@@ -12,10 +12,10 @@ class EnvironmentVariable:
     def __init__(self,
                  name: str,
                  env_type: int,
-                 minimum: int | float,
-                 maximum: int | float,
+                 minimum: float,
+                 maximum: float,
                  unit: str,
-                 initial_value: int | float,
+                 initial_value: float,
                  env_id: int,
                  access_type: str,
                  access_node: str,
@@ -66,7 +66,7 @@ class EnvironmentVariable:
         return self._minimum
 
     @minimum.setter
-    def minimum(self, value: int | float) -> None:
+    def minimum(self, value: float) -> None:
         self._minimum = value
 
     @property
@@ -78,7 +78,7 @@ class EnvironmentVariable:
         return self._maximum
 
     @maximum.setter
-    def maximum(self, value: int | float) -> None:
+    def maximum(self, value: float) -> None:
         self._maximum = value
 
     @property
@@ -102,7 +102,7 @@ class EnvironmentVariable:
         return self._initial_value
 
     @initial_value.setter
-    def initial_value(self, value: int | float) -> None:
+    def initial_value(self, value: float) -> None:
         self._initial_value = value
 
     @property

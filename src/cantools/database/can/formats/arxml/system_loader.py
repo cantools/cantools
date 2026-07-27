@@ -740,11 +740,11 @@ class SystemLoader:
         tx_behavior = \
             self._get_unique_arxml_child(can_frame_triggering,
                                          'CAN-FRAME-TX-BEHAVIOR')
-        if rx_behavior is not None and tx_behavior is not None:
-            if rx_behavior.text != tx_behavior.text:
-                LOGGER.warning(f'Frame "{name}" specifies different receive '
-                               f'and send behavior. This is currently '
-                               f'unsupported by cantools.')
+        if rx_behavior is not None and tx_behavior is not None and \
+           rx_behavior.text != tx_behavior.text:
+            LOGGER.warning(f'Frame "{name}" specifies different receive '
+                           f'and send behavior. This is currently '
+                           f'unsupported by cantools.')
 
         is_fd = \
             (rx_behavior is not None and rx_behavior.text == 'CAN-FD') or \
@@ -1201,9 +1201,7 @@ class SystemLoader:
             is_initial = \
                 self._get_unique_arxml_child(dynalt, 'INITIAL-DYNAMIC-PART')
             is_initial = \
-                True \
-                if is_initial is not None and is_initial.text == 'true' \
-                else False
+                bool(is_initial is not None and is_initial.text == 'true')
             if is_initial:
                 assert selector_signal.raw_initial is None
                 selector_signal.raw_initial = dynalt_selector_value

@@ -14,7 +14,7 @@ def parse_number_string(in_string: str, allow_float: bool=False) \
     - Some ARXML editors seem to sometimes include a dot in integer
       numbers (e.g., they produce "123.0" instead of "123")
     """
-    ret: None | int | float = None
+    ret: int | float | None = None
     in_string = in_string.strip().lower()
 
     if len(in_string) > 0:

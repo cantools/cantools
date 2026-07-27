@@ -222,7 +222,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
 
     if length == 'auto':
         if signals:
-            last_signal = sorted(signals, key=start_bit)[-1]
+            last_signal = max(signals, key=start_bit)
             length = (start_bit(last_signal) + last_signal.length + 7) // 8
         else:
             length = 0

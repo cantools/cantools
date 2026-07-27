@@ -570,7 +570,7 @@ class Database:
         elif isinstance(frame_id_or_name, str):
             message = self._name_to_message[frame_id_or_name]
         else:
-            raise ValueError(f"Invalid frame_id_or_name '{frame_id_or_name}'")
+            raise ValueError(f"Invalid frame_id_or_name '{frame_id_or_name}'") # noqa: TRY004
 
         return message.encode(data, scaling, padding, strict)
 
@@ -615,7 +615,7 @@ class Database:
         elif isinstance(frame_id_or_name, str):
             message = self._name_to_message[frame_id_or_name]
         else:
-            raise ValueError(f"Invalid frame_id_or_name '{frame_id_or_name}'")
+            raise ValueError(f"Invalid frame_id_or_name '{frame_id_or_name}'") # noqa: TRY004
 
         if message.is_container:
             if decode_containers:

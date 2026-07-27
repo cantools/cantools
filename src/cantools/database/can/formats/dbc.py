@@ -63,10 +63,10 @@ EMPTY_DICT = typing.cast("MappingProxyType[typing.Any, typing.Any]", {})
 @dataclass(slots=True, kw_only=True)
 class DbcComments:
     # comment for the database as a whole
-    database: str|None = None
+    database: str | None = None
 
     # comment for the CAN bus described by the database
-    bus: str|None = None
+    bus: str | None = None
 
     # comments for all nodes on the CAN bus:
     #     nodes[node_name] -> node_comment
@@ -1503,10 +1503,6 @@ def _load_signals(tokens,
         if message_signal_comments is None:
             return None
         return message_signal_comments.get(signal_name)
-
-        frame_cmt = comments.get(frame_id_dbc, EMPTY_DICT)
-        signal_cmt = frame_cmt.get('signal', EMPTY_DICT)
-        return signal_cmt.get(signal_name)
 
     def get_signal_choices(frame_id_dbc, signal):
         """Get choices for given signal.

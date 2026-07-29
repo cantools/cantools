@@ -19,6 +19,28 @@ class TestLogreaderFormats(unittest.TestCase):
         outp = parser.parse("")
         self.assertIsNone(outp)
 
+    def test_candump_error_frame(self):
+        parser = cantools.logreader.Parser()
+
+        outp = parser.parse(
+            "  vcan0  20000004   [8]  00 00 00 00 00 00 00 00   ERRORFRAME")
+        self.assertIsNone(outp)
+
+    def test_candump_error_frame_timestamped(self):
+        parser = cantools.logreader.Parser()
+
+        outp = parser.parse(
+            " (000.000000)  vcan0  20000004   [8]  00 00 00 00 00 00 00 00   ERRORFRAME")
+        self.assertIsNone(outp)
+
+    def test_candump_error_frame_absolute(self):
+        parser = cantools.logreader.Parser()
+
+        outp = parser.parse(
+            " (2020-12-19 12:04:45.485261)  vcan0  20000004   [8]  "
+            "00 00 00 00 00 00 00 00   ERRORFRAME")
+        self.assertIsNone(outp)
+
     def test_candump(self):
         parser = cantools.logreader.Parser()
 
@@ -557,6 +579,17 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp.microseconds, 336543)
 
 class TestLogreaderStreams(unittest.TestCase):
+    def test_candump_error_frame_in_stream(self):
+        parser = cantools.logreader.Parser(io.StringIO("""\
+  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
+  vcan0  20000004   [8]  00 00 00 00 00 00 00 00   ERRORFRAME
+  vcan0  064   [2]  F0 01
+"""))
+        frames = list(parser)
+        self.assertEqual(len(frames), 2)
+        self.assertEqual(frames[0].frame_id, 0xc8)
+        self.assertEqual(frames[1].frame_id, 0x64)
+
     def test_candump(self):
         testvec = io.StringIO("""\
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00

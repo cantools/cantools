@@ -71,7 +71,12 @@ class BasePattern:
 
 class CandumpBasePattern(BasePattern):
 
-    def unpack(self, match_object: re.Match[str]) -> DataFrame:
+    def unpack(self, match_object: re.Match[str]) -> DataFrame | None:
+        if match_object.groupdict().get('error_frame'):
+            # Error frames carry no payload. Skip them, mirroring how
+            # PCANTracePatternV11 skips 'Error' rows.
+            return None
+
         channel = match_object.group('channel')
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
@@ -97,9 +102,11 @@ class CandumpDefaultPattern(CandumpBasePattern):
     # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1
     #candump vcan0 -a
     # vcan0  1F0   [8]  00 00 00 00 00 00 1B C1   '.......Á'
+    #candump vcan0 (with error frames enabled)
+    # vcan0  20000004   [8]  00 00 00 00 00 00 00 00   ERRORFRAME
     #(Ignore anything after the end of the data to work with candump's ASCII decoding)
     pattern = re.compile(
-        r'^\s*?(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
+        r'^\s*?(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|(?:[0-9A-F]{2} *)*)\s*(?P<error_frame>ERRORFRAME)?.*?$')
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
         timestamp = None
@@ -112,9 +119,11 @@ class CandumpTimestampedPattern(CandumpBasePattern):
     # (000.000000)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
     #candump vcan0 -tz -a
     # (000.000000)  vcan0  0C8   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'
+    #candump vcan0 -tz (with error frames enabled)
+    # (000.000000)  vcan0  20000004   [8]  00 00 00 00 00 00 00 00   ERRORFRAME
     #(Ignore anything after the end of the data to work with candump's ASCII decoding)
     pattern = re.compile(
-        r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
+        r'^\s*?\((?P<timestamp>[\d.]+)\)\s+(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|(?:[0-9A-F]{2} *)*)\s*(?P<error_frame>ERRORFRAME)?.*?$')
 
     def __init__(self, tz: TimezoneType) -> None:
         if tz == TZ_LOCAL:
@@ -166,9 +175,11 @@ class CandumpAbsoluteLogPattern(CandumpBasePattern):
     # (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
     #candump vcan0 -tA -a
     # (2020-12-19 12:04:45.485261)  vcan0  0C8   [8]  31 30 30 2E 35 20 46 4D   '100.5 FM'
+    #candump vcan0 -tA (with error frames enabled)
+    # (2020-12-19 12:04:45.485261)  vcan0  20000004   [8]  00 00 00 00 00 00 00 00   ERRORFRAME
     #(Ignore anything after the end of the data to work with candump's ASCII decoding)
     pattern = re.compile(
-        r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|[0-9A-F ]*).*?$')
+        r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|(?:[0-9A-F]{2} *)*)\s*(?P<error_frame>ERRORFRAME)?.*?$')
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
         timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")  # noqa: DTZ007

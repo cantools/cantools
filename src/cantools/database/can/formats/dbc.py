@@ -59,6 +59,34 @@ if typing.TYPE_CHECKING:
 
 EMPTY_DICT = typing.cast("MappingProxyType[typing.Any, typing.Any]", {})
 
+# attribute_name -> attribute_object
+DbcAttributeMap = OrderedDict[str, AttributeType]
+
+# The internalized attributes for the whole dataset returned by
+# _load_attributes()
+@dataclass(slots=True, kw_only=True)
+class DbcAttributes:
+    # global database attributes:
+    #     database[attribute_name] -> attribute_object
+    database: DbcAttributeMap = field(default_factory=OrderedDict)
+
+    # message-specific attributes:
+    #     messages[dbc_frame_id][attribute_name] -> attribute_object
+    messages: OrderedDict[int, DbcAttributeMap] = field(default_factory=OrderedDict)
+
+    # signal-specific attributes:
+    #     signals[dbc_frame_id][signal_name][attribute_name] -> attribute_object
+    signals: OrderedDict[int, OrderedDict[str, DbcAttributeMap]] = field(default_factory=OrderedDict)
+
+    # node-specific attributes:
+    #     nodes[node_name][attribute_name] -> attribute_object
+    nodes: OrderedDict[str, DbcAttributeMap] = field(default_factory=OrderedDict)
+
+    # environment-variable-specific attributes:
+    #     envvars[envvar_name][attribute_name] -> attribute_object
+    envvars: OrderedDict[str, DbcAttributeMap] = field(default_factory=OrderedDict)
+
+
 # The type of the object returned by _load_comments()
 @dataclass(slots=True, kw_only=True)
 class DbcComments:
@@ -496,13 +524,13 @@ def get_dbc_name(name: str) -> str:
 
 
 def _get_node_long_name(attributes, node_short_name):
-    attrib = attributes.get('node', EMPTY_DICT).get(node_short_name, EMPTY_DICT).get('SystemNodeLongSymbol')
+    attrib = attributes.nodes.get(node_short_name, EMPTY_DICT).get('SystemNodeLongSymbol')
     if attrib is not None:
         return str(attrib.value)
     return node_short_name
 
 def _get_envvar_long_name(attributes, envvar_short_name):
-    attrib = attributes.get('envvar', EMPTY_DICT).get(envvar_short_name, EMPTY_DICT).get('SystemEnvVarLongSymbol')
+    attrib = attributes.envvars.get(envvar_short_name, EMPTY_DICT).get('SystemEnvVarLongSymbol')
     if attrib is not None:
         return str(attrib.value)
     return envvar_short_name
@@ -1182,73 +1210,67 @@ def _load_attribute_definition_relation_defaults(tokens):
 
 
 def _load_attributes(tokens, definitions):
-    attributes = OrderedDict()
-    attributes['node'] = OrderedDict()
-    attributes['envvar'] = OrderedDict()
+    attributes = DbcAttributes()
 
     def to_attribute_object(attribute_tokens):
         raw_value = attribute_tokens[3]
         definition = definitions[attribute_tokens[1]]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
-            value = to_int(raw_value)
+            return Attribute[int](value=to_int(raw_value),
+                                  definition=definition)
         elif definition.type_name == 'FLOAT':
-            value = to_float(raw_value)
-        else:
-            value = raw_value
+            return Attribute[float](value=to_float(raw_value),
+                                    definition=definition)
 
-        return Attribute(value=value,
-                         definition=definition)
+        return Attribute[str](value=raw_value,
+                              definition=definition)
 
     for attribute_tokens in tokens.get('BA_', []):
-        name = attribute_tokens[1]
+        attribute_name = attribute_tokens[1]
 
         if len(attribute_tokens[2]) > 0:
-            item = attribute_tokens[2][0]
-            kind = item[0]
+            attribute_items = attribute_tokens[2][0]
+            attribute_kind = attribute_items[0]
 
-            if kind == 'SG_':
-                frame_id_dbc = int(item[1])
-                signal = item[2]
+            if attribute_kind == 'SG_':
+                frame_id_dbc = int(attribute_items[1])
 
-                if frame_id_dbc not in attributes:
-                    attributes[frame_id_dbc] = {}
-                    attributes[frame_id_dbc]['message'] = OrderedDict()
+                if frame_id_dbc not in attributes.signals:
+                    attributes.signals[frame_id_dbc] = OrderedDict()
+                message_signal_attrs = attributes.signals[frame_id_dbc]
 
-                if 'signal' not in attributes[frame_id_dbc]:
-                    attributes[frame_id_dbc]['signal'] = OrderedDict()
+                signal_name = attribute_items[2]
+                if signal_name not in message_signal_attrs:
+                    message_signal_attrs[signal_name] = OrderedDict()
+                signal_attrs = message_signal_attrs[signal_name]
 
-                if signal not in attributes[frame_id_dbc]['signal']:
-                    attributes[frame_id_dbc]['signal'][signal] = OrderedDict()
+                signal_attrs[attribute_name] = to_attribute_object(attribute_tokens)
+            elif attribute_kind == 'BO_':
+                frame_id_dbc = int(attribute_items[1])
 
-                attributes[frame_id_dbc]['signal'][signal][name] = to_attribute_object(attribute_tokens)
-            elif kind == 'BO_':
-                frame_id_dbc = int(item[1])
+                if frame_id_dbc not in attributes.messages:
+                    attributes.messages[frame_id_dbc] = OrderedDict()
+                message_attrs = attributes.messages[frame_id_dbc]
 
-                if frame_id_dbc not in attributes:
-                    attributes[frame_id_dbc] = {}
-                    attributes[frame_id_dbc]['message'] = OrderedDict()
+                message_attrs[attribute_name] = to_attribute_object(attribute_tokens)
+            elif attribute_kind == 'BU_':
+                node_name = attribute_items[1]
 
-                attributes[frame_id_dbc]['message'][name] = to_attribute_object(attribute_tokens)
-            elif kind == 'BU_':
-                node = item[1]
+                if node_name not in attributes.nodes:
+                    attributes.nodes[node_name] = OrderedDict()
+                attributes.nodes[node_name][attribute_name] = to_attribute_object(attribute_tokens)
+            elif attribute_kind == 'EV_':
+                envvar_name = attribute_items[1]
 
-                if node not in attributes['node']:
-                    attributes['node'][node] = OrderedDict()
+                if envvar_name not in attributes.envvars:
+                    attributes.envvars[envvar_name] = OrderedDict()
+                envvar_attribs = attributes.envvars[envvar_name]
 
-                attributes['node'][node][name] = to_attribute_object(attribute_tokens)
-            elif kind == 'EV_':
-                envvar = item[1]
-
-                if envvar not in attributes['envvar']:
-                    attributes['envvar'][envvar] = OrderedDict()
-
-                attributes['envvar'][envvar][name] = to_attribute_object(attribute_tokens)
+                envvar_attribs[attribute_name] = to_attribute_object(attribute_tokens)
         else:
-            if 'database' not in attributes:
-                attributes['database'] = OrderedDict()
-
-            attributes['database'][name] = to_attribute_object(attribute_tokens)
+            db_attrs = attributes.database
+            db_attrs[attribute_name] = to_attribute_object(attribute_tokens)
 
     return attributes
 
@@ -1347,7 +1369,7 @@ def _load_environment_variables(tokens, comments, attributes, attribute_definiti
             access_type=env_var[12],
             access_node=env_var[13],
             comment=comments.envvars.get(short_name),
-            dbc_specifics=DbcSpecifics(attributes=attributes['envvar'].get(short_name),
+            dbc_specifics=DbcSpecifics(attributes=attributes.envvars.get(short_name),
                                        attribute_definitions=attribute_definitions))
 
     return environment_variables
@@ -1442,18 +1464,13 @@ def _load_signal_groups(tokens, attributes):
 
         """
 
-        frame_signals = attributes.get(frame_id_dbc, EMPTY_DICT)
-        signal_map = frame_signals.get('signal', EMPTY_DICT)
-        if (result := signal_map.get(signal_short_name)) is not None:
-            return result
-        return EMPTY_DICT
+        return attributes.signals.get(frame_id_dbc, EMPTY_DICT).get(signal_short_name, EMPTY_DICT)
 
     def get_signal_long_name(frame_id_dbc, signal_short_name):
         signal_attributes = get_signal_attributes(frame_id_dbc, signal_short_name)
+        if (attrib := signal_attributes.get('SystemSignalLongSymbol')) is not None:
+            return str(attrib.value)
 
-        attrib = signal_attributes.get('SystemSignalLongSymbol')
-        if attrib is not None:
-            return attrib.value
         return signal_short_name
 
     for signal_group in tokens.get('SIG_GROUP_',[]):
@@ -1487,11 +1504,9 @@ def _load_signals(tokens,
         """Get attributes for given signal.
 
         """
-
-        frame_signals = attributes.get(frame_id_dbc, EMPTY_DICT)
-        signal_map = frame_signals.get('signal', EMPTY_DICT)
-        if (result := signal_map.get(signal_name)) is not None:
-            return result
+        if (msg_sig_attribs := attributes.signals.get(frame_id_dbc)) is not None and \
+           (sig_attribs := msg_sig_attribs.get(signal_name)) is not None:
+            return sig_attribs
 
         return EMPTY_DICT
 
@@ -1683,8 +1698,7 @@ def _load_messages(tokens,
 
         """
 
-        frame_attrs = attributes.get(frame_id_dbc, EMPTY_DICT)
-        return frame_attrs.get('message')
+        return attributes.messages.get(frame_id_dbc)
 
     def get_message_comment(frame_id_dbc):
         """Get comment for given message.
@@ -1852,11 +1866,16 @@ def _load_version(tokens):
 
 
 def _load_bus(attributes, comments):
-    db_attrs = attributes.get('database', EMPTY_DICT)
-    db_name_attr = db_attrs.get('DBName')
-    bus_name = str(db_name_attr.value) if db_name_attr is not None else ''
-    db_baudrate_attr = db_attrs.get('Baudrate')
-    bus_baudrate = db_baudrate_attr.value if db_baudrate_attr is not None else None
+    bus_name_attr = attributes.database.get('DBName')
+    bus_name = ''
+    if bus_name_attr is not None:
+        bus_name = bus_name_attr.value
+
+    bus_baudrate_attr = attributes.database.get('Baudrate')
+    bus_baudrate = None
+    if bus_baudrate_attr is not None:
+        bus_baudrate = bus_baudrate_attr.value
+
     bus_comment = comments.bus
 
     if not any([bus_name, bus_baudrate, bus_comment]):
@@ -1871,7 +1890,7 @@ def _load_nodes(tokens, comments, attributes, definitions):
     for token in tokens.get('BU_', []):
         nodes = [Node(name=_get_node_long_name(attributes, node_short_name),
                       comment=comments.nodes.get(node_short_name),
-                      dbc_specifics=DbcSpecifics(attributes=attributes['node'].get(node_short_name, None),
+                      dbc_specifics=DbcSpecifics(attributes=attributes.nodes.get(node_short_name),
                                                  attribute_definitions=definitions))
                  for node_short_name in token[2]]
 
@@ -2239,7 +2258,7 @@ def update_signal_attribute_rel_names_after_load(messages: list[Message],
         if signal_attributes_rel is None:
             continue
 
-        signal_attributes = attributes.get(frame_id, EMPTY_DICT).get('signal', EMPTY_DICT)
+        signal_attributes = attributes.signals.get(frame_id, EMPTY_DICT)
 
         short_to_signal_name = {}
         for signal_name, value in signal_attributes.items():
@@ -2298,7 +2317,7 @@ def load_string(string: str, strict: bool = True,
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions)
-    dbc_specifics = DbcSpecifics(attributes=attributes.get('database', None),
+    dbc_specifics = DbcSpecifics(attributes=attributes.database or None,
                                  attribute_definitions=attribute_definitions,
                                  environment_variables=environment_variables,
                                  value_tables=value_tables,

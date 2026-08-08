@@ -212,7 +212,7 @@ class SymParser60(Parser):
 
         variable = Sequence('Var', '=', Any(), word,
                             'NUMBER', ',', 'NUMBER',
-                            ZeroOrMore(choice('-v', '-m', '-s', '-h')),
+                            ZeroOrMore(choice('-v', '-m', '-s', '-h', '-b')),
                             ZeroOrMore(choice(sig_unit,
                                               sig_factor,
                                               sig_offset,

@@ -911,7 +911,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
                 v_frame_format_str = 'ExtendedCAN'
             else:
                 v_frame_format_str = 'StandardCAN'
-            v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)
+            v_frame_format_def = _get_enum_vframeformat_definition(v_frame_format_def)
             # only set the VFrameFormat if it is valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
@@ -1654,7 +1654,7 @@ def _load_signals(tokens,
     return signals
 
 
-def _get_enum_vframeformat_attribute(attribute: AttributeDefinitionType) -> AttributeDefinition[str]:
+def _get_enum_vframeformat_definition(attribute_definition: AttributeDefinitionType) -> AttributeDefinition[str]:
     """Get VFrameFormat attribute definition as ENUM.
 
     VFrameFormat can be defined as either an INT or an ENUM attribute in DBC files. If it is not defined,
@@ -1663,12 +1663,12 @@ def _get_enum_vframeformat_attribute(attribute: AttributeDefinitionType) -> Attr
     we must convert that to an ENUM using the choices defined in :py:data:`ATTRIBUTE_DEFINITION_VFRAMEFORMAT`.
     """
 
-    if attribute.type_name != 'INT':
-        return typing.cast('AttributeDefinition[str]', attribute)
+    if attribute_definition.type_name != 'INT':
+        return typing.cast('AttributeDefinition[str]', attribute_definition)
 
-    typed_attribute = typing.cast('AttributeDefinition[int]', attribute)
-    default_value = typed_attribute.default_value
+    default_value = attribute_definition.default_value
     assert default_value is not None, 'Default value for VFrameFormat attribute must be defined if the attribute is defined as an INT.'
+    assert isinstance(default_value, int)
     enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
     enum_attribute.default_value = enum_attribute.choices[default_value]
 
@@ -1752,7 +1752,7 @@ def _load_messages(tokens,
         if ref_definitions is None:
             return None
 
-        ref_definitions = _get_enum_vframeformat_attribute(ref_definitions)
+        ref_definitions = _get_enum_vframeformat_definition(ref_definitions)
 
         frame_format: str | None
         if message_attributes is not None and 'VFrameFormat' in message_attributes:

@@ -87,6 +87,18 @@ class DbcAttributes:
     envvars: OrderedDict[str, DbcAttributeMap] = field(default_factory=OrderedDict)
 
 
+# The type of the object returned by _load_relation_attributes()
+@dataclass(slots=True, kw_only=True)
+class DbcRelationAttributes:
+    # BU_SG_REL_ attributes:
+    #     node_signal_relations[frame_id][signal_name][node_name][attribute_name] -> attribute_object
+    node_signal_relations: OrderedDict[int, OrderedDict[str, OrderedDict[str, DbcAttributeMap]]] = field(default_factory=OrderedDict)
+
+    # BU_BO_REL_ attributes:
+    #     node_message_relations[frame_id][node_name][attribute_name] -> attribute_object
+    node_message_relations: OrderedDict[int, OrderedDict[str, DbcAttributeMap]] = field(default_factory=OrderedDict)
+
+
 # The type of the object returned by _load_comments()
 @dataclass(slots=True, kw_only=True)
 class DbcComments:
@@ -976,30 +988,29 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
 def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_signals) -> str | list[str]:
     ba_rel: list[str] = []
 
-    if database.dbc is None:
+    if database.dbc is None or database.dbc.attributes_rel is None:
         return  ba_rel
 
     attributes_rel = database.dbc.attributes_rel
-    for frame_id, element in attributes_rel.items():
-        if 'signal' in element:
-            for signal_name, signal_lst in element['signal'].items():
-                for node_name, node_dict in signal_lst['node'].items():
-                    for attribute in node_dict.values():
-                        ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                        f'BU_SG_REL_ '
-                                        f'{node_name} '
-                                        f'SG_ '
-                                        f'{frame_id} '
-                                        f'{signal_name} '
-                                        f'{attribute.formatted_value};')
-        elif 'node' in element:
-            for node_name, node_dict in element['node'].items():
-                for attribute in node_dict.values():
+    for frame_id, signal_map in attributes_rel.node_signal_relations.items():
+        for signal_name, node_map in signal_map.items():
+            for node_name, attribute_map in node_map.items():
+                for attribute in attribute_map.values():
                     ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                    f'BU_BO_REL_ '
-                                    f'{node_name} '
-                                    f'{frame_id} '
-                                    f'{attribute.formatted_value};')
+                                  f'BU_SG_REL_ '
+                                  f'{node_name} '
+                                  f'SG_ '
+                                  f'{frame_id} '
+                                  f'{signal_name} '
+                                  f'{attribute.formatted_value};')
+    for frame_id, node_map in attributes_rel.node_message_relations.items():
+        for node_name, attribute_map in node_map.items():
+            for attribute in attribute_map.values():
+                ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
+                              f'BU_BO_REL_ '
+                              f'{node_name} '
+                              f'{frame_id} '
+                              f'{attribute.formatted_value};')
 
     return ba_rel
 
@@ -1276,10 +1287,9 @@ def _load_attributes(tokens, definitions):
 
 
 def _load_attributes_rel(tokens, definitions):
-    attributes_rel = OrderedDict()
+    attributes_rel = DbcRelationAttributes()
 
     def to_attribute_rel_object(attribute, value):
-
         definition = definitions[attribute[1]]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
@@ -1296,43 +1306,29 @@ def _load_attributes_rel(tokens, definitions):
         node = attribute_rel_tokens[3]
 
         if rel_type == 'BU_SG_REL_':
-
             frame_id_dbc = int(attribute_rel_tokens[5])
             signal = attribute_rel_tokens[6]
 
-            if frame_id_dbc not in attributes_rel:
-                attributes_rel[frame_id_dbc] = {}
+            if frame_id_dbc not in attributes_rel.node_signal_relations:
+                attributes_rel.node_signal_relations[frame_id_dbc] = OrderedDict()
+            if signal not in attributes_rel.node_signal_relations[frame_id_dbc]:
+                attributes_rel.node_signal_relations[frame_id_dbc][signal] = OrderedDict()
+            if node not in attributes_rel.node_signal_relations[frame_id_dbc][signal]:
+                attributes_rel.node_signal_relations[frame_id_dbc][signal][node] = OrderedDict()
 
-            if 'signal' not in attributes_rel[frame_id_dbc]:
-                attributes_rel[frame_id_dbc]['signal'] = OrderedDict()
-
-            if signal not in attributes_rel[frame_id_dbc]['signal']:
-                attributes_rel[frame_id_dbc]['signal'][signal] = OrderedDict()
-
-            if 'node' not in attributes_rel[frame_id_dbc]['signal'][signal]:
-                attributes_rel[frame_id_dbc]['signal'][signal]['node'] = OrderedDict()
-
-            if node not in attributes_rel[frame_id_dbc]['signal'][signal]['node']:
-                attributes_rel[frame_id_dbc]['signal'][signal]['node'][node] = OrderedDict()
-
-            attributes_rel[frame_id_dbc]['signal'][signal]['node'][node][name] = to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[7])
+            attributes_rel.node_signal_relations[frame_id_dbc][signal][node][name] = \
+                to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[7])
 
         elif rel_type == 'BU_BO_REL_':
             frame_id_dbc = int(attribute_rel_tokens[4])
 
-            if frame_id_dbc not in attributes_rel:
-                attributes_rel[frame_id_dbc] = {}
+            if frame_id_dbc not in attributes_rel.node_message_relations:
+                attributes_rel.node_message_relations[frame_id_dbc] = OrderedDict()
+            if node not in attributes_rel.node_message_relations[frame_id_dbc]:
+                attributes_rel.node_message_relations[frame_id_dbc][node] = OrderedDict()
 
-            if 'node' not in attributes_rel[frame_id_dbc]:
-                attributes_rel[frame_id_dbc]['node'] = OrderedDict()
-
-            if node not in attributes_rel[frame_id_dbc]['node']:
-                attributes_rel[frame_id_dbc]['node'][node] = OrderedDict()
-
-            attributes_rel[frame_id_dbc]['node'][node][name] = to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[5])
-
-        else:
-            pass
+            attributes_rel.node_message_relations[frame_id_dbc][node][name] = \
+                to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[5])
 
     return attributes_rel
 
@@ -2021,23 +2017,21 @@ def update_signal_attribute_rel_names(database: InternalDatabase,
                                       message: Message,
                                       converter: LongNamesConverter,
                                       shorten_long_names: bool) -> None:
-    if database.dbc is None or not shorten_long_names:
+    if database.dbc is None or database.dbc.attributes_rel is None or not shorten_long_names:
         return
 
     frame_id = get_dbc_frame_id(message)
 
-    frame_rel = database.dbc.attributes_rel.get(frame_id, EMPTY_DICT)
-    signal_attributes_rel = frame_rel.get('signal')
+    signal_attributes_rel = database.dbc.attributes_rel.node_signal_relations.get(frame_id)
     if signal_attributes_rel is None:
         return
 
     updated_signal_attributes_rel = OrderedDict()
-
     for signal_name, value in signal_attributes_rel.items():
         signal_name = converter.long_to_short.get(signal_name, signal_name)
         updated_signal_attributes_rel[signal_name] = value
 
-    database.dbc.attributes_rel[frame_id]['signal'] = updated_signal_attributes_rel
+    database.dbc.attributes_rel.node_signal_relations[frame_id] = updated_signal_attributes_rel
 
 
 def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
@@ -2248,30 +2242,27 @@ def get_definitions_rel_dict(definitions, defaults):
 
 
 def update_signal_attribute_rel_names_after_load(messages: list[Message],
-                                                 attributes: typing.Any,
-                                                 attributes_rel: typing.Any) -> None:
+                                                 attributes: DbcAttributes,
+                                                 attributes_rel: DbcRelationAttributes) -> None:
     for message in messages:
         frame_id = get_dbc_frame_id(message)
 
-        frame_rel = attributes_rel.get(frame_id, EMPTY_DICT)
-        signal_attributes_rel = frame_rel.get('signal')
+        signal_attributes_rel = attributes_rel.node_signal_relations.get(frame_id)
         if signal_attributes_rel is None:
             continue
 
-        signal_attributes = attributes.signals.get(frame_id, EMPTY_DICT)
-
-        short_to_signal_name = {}
+        signal_attributes: OrderedDict[str, DbcAttributeMap] = attributes.signals.get(frame_id) or OrderedDict()
+        short_to_signal_name: dict[str, str] = {}
         for signal_name, value in signal_attributes.items():
             if 'SystemSignalLongSymbol' in value:
-                short_to_signal_name[signal_name] = value['SystemSignalLongSymbol'].value
+                short_to_signal_name[signal_name] = str(value['SystemSignalLongSymbol'].value)
 
-        updated_signal_attributes_rel = OrderedDict()
-
-        for signal_name, value in signal_attributes_rel.items():
+        updated_signal_attributes_rel: OrderedDict[str, OrderedDict[str, DbcAttributeMap]] = OrderedDict()
+        for signal_name, node_attrs in signal_attributes_rel.items():
             signal_name = short_to_signal_name.get(signal_name, signal_name)
-            updated_signal_attributes_rel[signal_name] = value
+            updated_signal_attributes_rel[signal_name] = node_attrs
 
-        attributes_rel[frame_id]['signal'] = updated_signal_attributes_rel
+        attributes_rel.node_signal_relations[frame_id] = updated_signal_attributes_rel
 
 
 def load_string(string: str, strict: bool = True,

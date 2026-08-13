@@ -67,7 +67,6 @@ def _format_container_single_line(message : Message,
         if isinstance(cm, Message):
             if isinstance(signals, bytes):
                 formatted_cm = f'{cm.name}: Undecodable data: {signals.hex(" ")}'
-                contained_list.append(formatted_cm)
             else:
                 formatted_cm_signals = format_signals(cm, signals)
                 formatted_cm = _format_message_single_line(cm.name, formatted_cm_signals)

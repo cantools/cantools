@@ -432,7 +432,7 @@ class DbcParser(Parser):
             choice('NUMBER', 'STRING'),
             ';')
 
-        attribute_definition_rel = Sequence(
+        relation_attribute_definition = Sequence(
             'BA_DEF_REL_',
             Optional(choice('BU_SG_REL_', 'BU_BO_REL_')),
             'STRING',
@@ -440,14 +440,14 @@ class DbcParser(Parser):
             Optional(choice(DelimitedList('STRING'), OneOrMore('NUMBER'))),
             ';')
 
-        attribute_definition_default_rel = Sequence(
+        relation_attribute_default_definition = Sequence(
             'BA_DEF_DEF_REL_', 'STRING', choice('NUMBER', 'STRING'), ';')
 
-        attribute_rel_sg = Sequence(
+        signal_relation_attribute = Sequence(
             'BA_REL_', 'STRING', 'BU_SG_REL_', 'WORD', 'SG_', 'NUMBER',
             'WORD', choice('NUMBER', 'STRING'), ';')
 
-        attribute_rel_bo = Sequence(
+        message_relation_attribute = Sequence(
             'BA_REL_', 'STRING', 'BU_BO_REL_', 'WORD', 'NUMBER',
             choice('NUMBER', 'STRING'), ';')
 
@@ -484,11 +484,11 @@ class DbcParser(Parser):
                                             value_table,
                                             choice_,
                                             attribute,
-                                            attribute_rel_sg,
-                                            attribute_rel_bo,
-                                            attribute_definition_rel,
+                                            signal_relation_attribute,
+                                            message_relation_attribute,
+                                            relation_attribute_definition,
                                             attribute_definition_default,
-                                            attribute_definition_default_rel,
+                                            relation_attribute_default_definition,
                                             signal_group,
                                             signal_type,
                                             signal_multiplexer_values,
@@ -552,12 +552,12 @@ def _dump_version(database: InternalDatabase) -> str:
 
 
 def _dump_nodes(database: InternalDatabase) -> list[str]:
-    bu: list[str] = []
+    node_names: list[str] = []
 
     for node in database.nodes:
-        bu.append(node.name)
+        node_names.append(node.name)
 
-    return bu
+    return node_names
 
 
 def _dump_value_tables(database: InternalDatabase) -> list[str]:
@@ -575,7 +575,7 @@ def _dump_value_tables(database: InternalDatabase) -> list[str]:
 
 
 def _dump_messages(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
-    bo: list[str] = []
+    message_lines: list[str] = []
 
     def format_mux(signal: Signal) -> str:
         if signal.is_multiplexer:
@@ -624,41 +624,41 @@ def _dump_messages(database: InternalDatabase, sort_signals: type_sort_signals) 
                 maximum=(0 if signal.maximum is None else signal.maximum),
                 unit='' if signal.unit is None else signal.unit))
 
-        bo.append('\r\n'.join(msg))
+        message_lines.append('\r\n'.join(msg))
 
-    return bo
+    return message_lines
 
 
 def _dump_senders(database: InternalDatabase) -> list[str]:
-    bo_tx_bu: list[str] = []
+    sender_lines: list[str] = []
 
     for message in database.messages:
         if len(message.senders) > 1:
-            bo_tx_bu.append(
+            sender_lines.append(
                 'BO_TX_BU_ {frame_id} : {senders};'.format(
                     frame_id=get_dbc_frame_id(message),
                     senders=','.join(message.senders)))
 
-    return bo_tx_bu
+    return sender_lines
 
 
 def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
-    cm: list[str] = []
+    comment_lines: list[str] = []
 
     for bus in database.buses:
         if bus.comment is not None:
-            cm.append(f'CM_ "{bus.comment}";')
+            comment_lines.append(f'CM_ "{bus.comment}";')
 
     for node in database.nodes:
         if node.comment is not None:
-            cm.append(
+            comment_lines.append(
                 'CM_ BU_ {name} "{comment}";'.format(
                     name=node.name,
                     comment=node.comment.replace('"', '\\"')))
 
     for message in database.messages:
         if message.comment is not None:
-            cm.append(
+            comment_lines.append(
                 'CM_ BO_ {frame_id} "{comment}";'.format(
                     frame_id=get_dbc_frame_id(message),
                     comment=message.comment.replace('"', '\\"')))
@@ -669,7 +669,7 @@ def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) 
             signals = message.signals
         for signal in signals:
             if signal.comment is not None:
-                cm.append(
+                comment_lines.append(
                     'CM_ SG_ {frame_id} {name} "{comment}";'.format(
                         frame_id=get_dbc_frame_id(message),
                         name=signal.name,
@@ -677,26 +677,26 @@ def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) 
 
     if database.dbc is not None:
         # Dump environment variable comments (CM_ EV_ <name> "comment";)
-        for env in database.dbc.environment_variables.values():
-            if env.comment is not None:
-                escaped_comment = env.comment.replace('"', '\\"')
-                cm.append(f'CM_ EV_ {env.name} "{escaped_comment}";')
+        for envvar in database.dbc.environment_variables.values():
+            if envvar.comment is not None:
+                escaped_comment = envvar.comment.replace('"', '\\"')
+                comment_lines.append(f'CM_ EV_ {envvar.name} "{escaped_comment}";')
 
-    return cm
+    return comment_lines
 
 
 def _dump_signal_types(database: InternalDatabase) -> list[str]:
-    valtype: list[str] = []
+    signal_type_lines: list[str] = []
 
     for message in database.messages:
         for signal in message.signals:
             if not signal.is_float:
                 continue
 
-            valtype.append(
+            signal_type_lines.append(
                 f'SIG_VALTYPE_ {get_dbc_frame_id(message)} {signal.name} : {FLOAT_LENGTH_TO_SIGNAL_TYPE[signal.length]};')
 
-    return valtype
+    return signal_type_lines
 
 
 def _need_startval_def(database: InternalDatabase) -> bool:
@@ -720,10 +720,10 @@ def _bus_is_canfd(database: InternalDatabase) -> bool:
     return bus_type.value == 'CAN FD'
 
 def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
-    ba_def: list[str] = []
+    attribute_definition_lines: list[str] = []
 
     if database.dbc is None:
-        return  ba_def
+        return attribute_definition_lines
 
     definitions = database.dbc.attribute_definitions
 
@@ -759,47 +759,47 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
         if definition.type_name == 'ENUM':
             choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
-            ba_def.append(
+            attribute_definition_lines.append(
                 f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}  {choices};')
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-            ba_def.append(
+            attribute_definition_lines.append(
                 f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name}{definition.formatted_minimum}{definition.formatted_maximum};')
         elif definition.type_name == 'STRING':
-            ba_def.append(
+            attribute_definition_lines.append(
                 f'BA_DEF_ {get_kind(definition)} "{definition.name}" {definition.type_name} ;')
 
-    return ba_def
+    return attribute_definition_lines
 
 
-def _dump_attribute_definitions_rel(database: InternalDatabase) -> list[str]:
-    ba_def_rel: list[str] = []
+def _dump_relation_attribute_definitions(database: InternalDatabase) -> list[str]:
+    relation_attribute_definition_lines: list[str] = []
 
     if database.dbc is None:
-        return  ba_def_rel
+        return relation_attribute_definition_lines
 
-    definitions = database.dbc.attribute_definitions_rel
+    definitions = database.dbc.relation_attribute_definitions
 
     for definition in definitions.values():
         if definition.type_name == 'ENUM':
             choices = ','.join([f'"{choice}"'
                                 for choice in definition.choices])
-            ba_def_rel.append(
+            relation_attribute_definition_lines.append(
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}  {choices};')
         elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-            ba_def_rel.append(
+            relation_attribute_definition_lines.append(
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name}{definition.formatted_minimum}{definition.formatted_maximum};')
         elif definition.type_name == 'STRING':
-            ba_def_rel.append(
+            relation_attribute_definition_lines.append(
                 f'BA_DEF_REL_ {definition.kind}  "{definition.name}" {definition.type_name} ;')
 
-    return ba_def_rel
+    return relation_attribute_definition_lines
 
 
 def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
-    ba_def_def: list[str] = []
+    attribute_definition_default_lines: list[str] = []
 
     if database.dbc is None:
-        return  ba_def_def
+        return attribute_definition_default_lines
 
     definitions = database.dbc.attribute_definitions
 
@@ -810,19 +810,19 @@ def _dump_attribute_definition_defaults(database: InternalDatabase) -> list[str]
             else:
                 fmt = 'BA_DEF_DEF_  "{name}" {value};'
 
-            ba_def_def.append(fmt.format(name=definition.name,
-                                         value=definition.default_value))
+            attribute_definition_default_lines.append(fmt.format(name=definition.name,
+                                                                 value=definition.default_value))
 
-    return ba_def_def
+    return attribute_definition_default_lines
 
 
-def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[str]:
-    ba_def_def_rel: list[str] = []
+def _dump_relation_attribute_definition_defaults(database: InternalDatabase) -> list[str]:
+    relation_attribute_definition_default_lines: list[str] = []
 
     if database.dbc is None:
-        return  ba_def_def_rel
+        return relation_attribute_definition_default_lines
 
-    definitions = database.dbc.attribute_definitions_rel
+    definitions = database.dbc.relation_attribute_definitions
 
     for definition in definitions.values():
         if definition.default_value is not None:
@@ -831,17 +831,18 @@ def _dump_attribute_definition_defaults_rel(database: InternalDatabase) -> list[
             else:
                 fmt = 'BA_DEF_DEF_REL_ "{name}" {value};'
 
-            ba_def_def_rel.append(fmt.format(name=definition.name,
-                                             value=definition.default_value))
+            relation_attribute_definition_default_lines.append(
+                fmt.format(name=definition.name,
+                           value=definition.default_value))
 
-    return ba_def_def_rel
+    return relation_attribute_definition_default_lines
 
 
 def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals, sort_attributes: type_sort_attributes) -> list[str]:
-    ba: list[str] = []
+    attribute_lines: list[str] = []
 
     if database.dbc is None:
-        return  ba
+        return attribute_lines
 
     attributes: list[type_sort_attribute] = []
 
@@ -856,11 +857,11 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     if len(database.buses) == 1:
         baudrate = database.buses[0].baudrate
     if baudrate is not None:
-        baudrate_attr_def = database.dbc.attribute_definitions.get('Baudrate')
-        assert baudrate_attr_def is not None
+        baudrate_attribute_definition = database.dbc.attribute_definitions.get('Baudrate')
+        assert baudrate_attribute_definition is not None
         database.dbc.attributes['Baudrate'] = Attribute[int](
                     value=int(baudrate),
-                    definition=typing.cast('AttributeDefinition[int]', baudrate_attr_def),
+                    definition=typing.cast('AttributeDefinition[int]', baudrate_attribute_definition),
                 )
 
     for attribute in database.dbc.attributes.values():
@@ -910,7 +911,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
                 v_frame_format_str = 'ExtendedCAN'
             else:
                 v_frame_format_str = 'StandardCAN'
-            v_frame_format_def = _get_enum_vframeformat_attribute(v_frame_format_def)
+            v_frame_format_def = _get_enum_vframeformat_definition(v_frame_format_def)
             # only set the VFrameFormat if it is valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
@@ -951,72 +952,72 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     if callable(sort_attributes):
         attributes = sort_attributes(attributes)
 
-    for typ, attribute_to_dump, node_to_dump, message_to_dump, signal_to_dump, envvar_to_dump in attributes:
-        if typ == 'dbc':
-            ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
-                      f'{attribute_to_dump.formatted_value};')
-        elif typ == 'envvar':
+    for attribute_kind, attribute_to_dump, node_to_dump, message_to_dump, signal_to_dump, envvar_to_dump in attributes:
+        if attribute_kind == 'dbc':
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_kind == 'envvar':
             assert envvar_to_dump is not None
-            ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
-                      f'{attribute_to_dump.definition.kind} '
-                      f'{envvar_to_dump.name} '
-                      f'{attribute_to_dump.formatted_value};')
-        elif typ == 'node':
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{envvar_to_dump.name} '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_kind == 'node':
             assert node_to_dump is not None
-            ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
-                      f'{attribute_to_dump.definition.kind} '
-                      f'{node_to_dump.name} '
-                      f'{attribute_to_dump.formatted_value};')
-        elif typ == 'message':
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{node_to_dump.name} '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_kind == 'message':
             assert message_to_dump is not None
-            ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
-                      f'{attribute_to_dump.definition.kind} '
-                      f'{get_dbc_frame_id(message_to_dump)} '
-                      f'{attribute_to_dump.formatted_value};')
-        elif typ == 'signal':
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{get_dbc_frame_id(message_to_dump)} '
+                                   f'{attribute_to_dump.formatted_value};')
+        elif attribute_kind == 'signal':
             assert signal_to_dump is not None
             assert message_to_dump is not None
-            ba.append(f'BA_ "{attribute_to_dump.definition.name}" '
-                      f'{attribute_to_dump.definition.kind} '
-                      f'{get_dbc_frame_id(message_to_dump)} '
-                      f'{signal_to_dump.name} '
-                      f'{attribute_to_dump.formatted_value};')
+            attribute_lines.append(f'BA_ "{attribute_to_dump.definition.name}" '
+                                   f'{attribute_to_dump.definition.kind} '
+                                   f'{get_dbc_frame_id(message_to_dump)} '
+                                   f'{signal_to_dump.name} '
+                                   f'{attribute_to_dump.formatted_value};')
 
-    return ba
+    return attribute_lines
 
 
-def _dump_attributes_rel(database: InternalDatabase, sort_signals: type_sort_signals) -> str | list[str]:
-    ba_rel: list[str] = []
+def _dump_relation_attributes(database: InternalDatabase, sort_signals: type_sort_signals) -> str | list[str]:
+    relation_attribute_lines: list[str] = []
 
-    if database.dbc is None or database.dbc.attributes_rel is None:
-        return  ba_rel
+    if database.dbc is None or database.dbc.relation_attributes is None:
+        return relation_attribute_lines
 
-    attributes_rel = database.dbc.attributes_rel
-    for frame_id, signal_map in attributes_rel.node_signal_relations.items():
+    relation_attributes = database.dbc.relation_attributes
+    for frame_id, signal_map in relation_attributes.node_signal_relations.items():
         for signal_name, node_map in signal_map.items():
             for node_name, attribute_map in node_map.items():
                 for attribute in attribute_map.values():
-                    ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                                  f'BU_SG_REL_ '
-                                  f'{node_name} '
-                                  f'SG_ '
-                                  f'{frame_id} '
-                                  f'{signal_name} '
-                                  f'{attribute.formatted_value};')
-    for frame_id, node_map in attributes_rel.node_message_relations.items():
+                    relation_attribute_lines.append(f'BA_REL_ "{attribute.definition.name}" '
+                                                    f'BU_SG_REL_ '
+                                                    f'{node_name} '
+                                                    f'SG_ '
+                                                    f'{frame_id} '
+                                                    f'{signal_name} '
+                                                    f'{attribute.formatted_value};')
+    for frame_id, node_map in relation_attributes.node_message_relations.items():
         for node_name, attribute_map in node_map.items():
             for attribute in attribute_map.values():
-                ba_rel.append(f'BA_REL_ "{attribute.definition.name}" '
-                              f'BU_BO_REL_ '
-                              f'{node_name} '
-                              f'{frame_id} '
-                              f'{attribute.formatted_value};')
+                relation_attribute_lines.append(f'BA_REL_ "{attribute.definition.name}" '
+                                                f'BU_BO_REL_ '
+                                                f'{node_name} '
+                                                f'{frame_id} '
+                                                f'{attribute.formatted_value};')
 
-    return ba_rel
+    return relation_attribute_lines
 
 
 def _dump_choices(database: InternalDatabase, sort_signals: type_sort_signals, sort_choices: type_sort_choices) -> list[str]:
-    val: list[str] = []
+    choice_lines: list[str] = []
 
     for message in database.messages:
         if callable(sort_signals):
@@ -1032,17 +1033,17 @@ def _dump_choices(database: InternalDatabase, sort_signals: type_sort_signals, s
             else:
                 choices = signal.choices
 
-            val.append(
+            choice_lines.append(
                 'VAL_ {frame_id} {name} {choices} ;'.format(
                     frame_id=get_dbc_frame_id(message),
                     name=signal.name,
                     choices=' '.join([f'{value} "{text}"' for value, text in choices.items()])))
 
-    return val
+    return choice_lines
 
 
 def _dump_signal_groups(database: InternalDatabase) -> list[str]:
-    sig_group: list[str] = []
+    signal_group_lines: list[str] = []
 
     for message in database.messages:
         if message.signal_groups is None:
@@ -1051,7 +1052,7 @@ def _dump_signal_groups(database: InternalDatabase) -> list[str]:
         for signal_group in message.signal_groups:
             all_sig_names = [sig.name for sig in message.signals]
             signal_group.signal_names = list(filter(lambda sig_name: sig_name in all_sig_names, signal_group.signal_names))
-            sig_group.append(
+            signal_group_lines.append(
                 'SIG_GROUP_ {frame_id} {signal_group_name} {repetitions} : {signal_names};'.format(
                     frame_id=get_dbc_frame_id(message),
                     signal_group_name=signal_group.name,
@@ -1059,7 +1060,7 @@ def _dump_signal_groups(database: InternalDatabase) -> list[str]:
                     signal_names=' '.join(signal_group.signal_names)
                 ))
 
-    return sig_group
+    return signal_group_lines
 
 
 def _is_extended_mux_needed(messages: list[Message]) -> bool:
@@ -1119,7 +1120,7 @@ def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
     if not _is_extended_mux_needed(database.messages):
         return []
 
-    sig_mux_values: list[str] = []
+    sig_mux_values_lines: list[str] = []
 
     for message in database.messages:
         for signal in message.signals:
@@ -1131,27 +1132,27 @@ def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
                 for minimum, maximum in _create_mux_ranges(signal.multiplexer_ids)
             ])
 
-            sig_mux_values.append(
+            sig_mux_values_lines.append(
                 f'SG_MUL_VAL_ {get_dbc_frame_id(message)} {signal.name} {signal.multiplexer_signal} {ranges};')
 
-    return sig_mux_values
+    return sig_mux_values_lines
 
 
 def _dump_environment_variables(database: InternalDatabase) -> list[str]:
     """Dump environment variables (EV_ entries)."""
-    ev_lines: list[str] = []
+    envvar_lines: list[str] = []
 
     if database.dbc is None:
-        return  ev_lines
+        return envvar_lines
 
-    for env in database.dbc.environment_variables.values():
+    for envvar in database.dbc.environment_variables.values():
         # escape unit quotes
-        unit = env.unit.replace('"', '\\"')
-        ev_lines.append(
-            f'EV_ {env.name}: {env.env_type} [{env.minimum}|{env.maximum}] "{unit}" {env.initial_value} {env.env_id} {env.access_type} {env.access_node};'
+        unit = envvar.unit.replace('"', '\\"')
+        envvar_lines.append(
+            f'EV_ {envvar.name}: {envvar.env_type} [{envvar.minimum}|{envvar.maximum}] "{unit}" {envvar.initial_value} {envvar.env_id} {envvar.access_type} {envvar.access_node};'
         )
 
-    return ev_lines
+    return envvar_lines
 
 
 def _load_comments(tokens):
@@ -1207,11 +1208,11 @@ def _load_attribute_definition_defaults(tokens):
     return defaults
 
 
-def _load_attribute_definitions_relation(tokens):
+def _load_relation_attribute_definitions(tokens):
     return tokens.get('BA_DEF_REL_', [])
 
 
-def _load_attribute_definition_relation_defaults(tokens):
+def _load_relation_attribute_definition_defaults(tokens):
     defaults = OrderedDict()
 
     for default_attr in tokens.get('BA_DEF_DEF_REL_', []):
@@ -1286,10 +1287,10 @@ def _load_attributes(tokens, definitions):
     return attributes
 
 
-def _load_attributes_rel(tokens, definitions):
-    attributes_rel = DbcRelationAttributes()
+def _load_relation_attributes(tokens, definitions):
+    relation_attributes = DbcRelationAttributes()
 
-    def to_attribute_rel_object(attribute, value):
+    def to_relation_attribute_object(attribute, value):
         definition = definitions[attribute[1]]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
@@ -1300,37 +1301,37 @@ def _load_attributes_rel(tokens, definitions):
         return Attribute(value=value,
                          definition=definition)
 
-    for attribute_rel_tokens in tokens.get('BA_REL_', []):
-        name = attribute_rel_tokens[1]
-        rel_type = attribute_rel_tokens[2]
-        node = attribute_rel_tokens[3]
+    for relation_attribute_tokens in tokens.get('BA_REL_', []):
+        attribute_name = relation_attribute_tokens[1]
+        relation_type = relation_attribute_tokens[2]
+        node_name = relation_attribute_tokens[3]
 
-        if rel_type == 'BU_SG_REL_':
-            frame_id_dbc = int(attribute_rel_tokens[5])
-            signal = attribute_rel_tokens[6]
+        if relation_type == 'BU_SG_REL_':
+            frame_id_dbc = int(relation_attribute_tokens[5])
+            signal_name = relation_attribute_tokens[6]
 
-            if frame_id_dbc not in attributes_rel.node_signal_relations:
-                attributes_rel.node_signal_relations[frame_id_dbc] = OrderedDict()
-            if signal not in attributes_rel.node_signal_relations[frame_id_dbc]:
-                attributes_rel.node_signal_relations[frame_id_dbc][signal] = OrderedDict()
-            if node not in attributes_rel.node_signal_relations[frame_id_dbc][signal]:
-                attributes_rel.node_signal_relations[frame_id_dbc][signal][node] = OrderedDict()
+            if frame_id_dbc not in relation_attributes.node_signal_relations:
+                relation_attributes.node_signal_relations[frame_id_dbc] = OrderedDict()
+            if signal_name not in relation_attributes.node_signal_relations[frame_id_dbc]:
+                relation_attributes.node_signal_relations[frame_id_dbc][signal_name] = OrderedDict()
+            if node_name not in relation_attributes.node_signal_relations[frame_id_dbc][signal_name]:
+                relation_attributes.node_signal_relations[frame_id_dbc][signal_name][node_name] = OrderedDict()
 
-            attributes_rel.node_signal_relations[frame_id_dbc][signal][node][name] = \
-                to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[7])
+            relation_attributes.node_signal_relations[frame_id_dbc][signal_name][node_name][attribute_name] = \
+                to_relation_attribute_object(relation_attribute_tokens, relation_attribute_tokens[7])
 
-        elif rel_type == 'BU_BO_REL_':
-            frame_id_dbc = int(attribute_rel_tokens[4])
+        elif relation_type == 'BU_BO_REL_':
+            frame_id_dbc = int(relation_attribute_tokens[4])
 
-            if frame_id_dbc not in attributes_rel.node_message_relations:
-                attributes_rel.node_message_relations[frame_id_dbc] = OrderedDict()
-            if node not in attributes_rel.node_message_relations[frame_id_dbc]:
-                attributes_rel.node_message_relations[frame_id_dbc][node] = OrderedDict()
+            if frame_id_dbc not in relation_attributes.node_message_relations:
+                relation_attributes.node_message_relations[frame_id_dbc] = OrderedDict()
+            if node_name not in relation_attributes.node_message_relations[frame_id_dbc]:
+                relation_attributes.node_message_relations[frame_id_dbc][node_name] = OrderedDict()
 
-            attributes_rel.node_message_relations[frame_id_dbc][node][name] = \
-                to_attribute_rel_object(attribute_rel_tokens, attribute_rel_tokens[5])
+            relation_attributes.node_message_relations[frame_id_dbc][node_name][attribute_name] = \
+                to_relation_attribute_object(relation_attribute_tokens, relation_attribute_tokens[5])
 
-    return attributes_rel
+    return relation_attributes
 
 
 def _load_value_tables(tokens):
@@ -1351,19 +1352,19 @@ def _load_value_tables(tokens):
 def _load_environment_variables(tokens, comments, attributes, attribute_definitions):
     environment_variables = OrderedDict()
 
-    for env_var in tokens.get('EV_', []):
-        short_name = env_var[1]
+    for envvar_tokens in tokens.get('EV_', []):
+        short_name = envvar_tokens[1]
         long_name = _get_envvar_long_name(attributes, short_name)
         environment_variables[long_name] = EnvironmentVariable(
             name=long_name,
-            env_type=int(env_var[3]),
-            minimum=num(env_var[5]),
-            maximum=num(env_var[7]),
-            unit=env_var[9],
-            initial_value=num(env_var[10]),
-            env_id=int(env_var[11]),
-            access_type=env_var[12],
-            access_node=env_var[13],
+            env_type=int(envvar_tokens[3]),
+            minimum=num(envvar_tokens[5]),
+            maximum=num(envvar_tokens[7]),
+            unit=envvar_tokens[9],
+            initial_value=num(envvar_tokens[10]),
+            env_id=int(envvar_tokens[11]),
+            access_type=envvar_tokens[12],
+            access_node=envvar_tokens[13],
             comment=comments.envvars.get(short_name),
             dbc_specifics=DbcSpecifics(attributes=attributes.envvars.get(short_name),
                                        attribute_definitions=attribute_definitions))
@@ -1373,17 +1374,17 @@ def _load_environment_variables(tokens, comments, attributes, attribute_definiti
 def _load_choices(tokens):
     choices = defaultdict(dict)
 
-    for _choice in tokens.get('VAL_', []):
-        if len(_choice[1]) == 0:
+    for choice_tokens in tokens.get('VAL_', []):
+        if len(choice_tokens[1]) == 0:
             continue
 
-        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in _choice[3])
+        od = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in choice_tokens[3])
 
         if len(od) == 0:
             continue
 
-        frame_id = int(_choice[1][0])
-        choices[frame_id][_choice[2]] = od
+        frame_id = int(choice_tokens[1][0])
+        choices[frame_id][choice_tokens[2]] = od
 
     return choices
 
@@ -1653,7 +1654,7 @@ def _load_signals(tokens,
     return signals
 
 
-def _get_enum_vframeformat_attribute(attribute: AttributeDefinitionType) -> AttributeDefinition[str]:
+def _get_enum_vframeformat_definition(attribute_definition: AttributeDefinitionType) -> AttributeDefinition[str]:
     """Get VFrameFormat attribute definition as ENUM.
 
     VFrameFormat can be defined as either an INT or an ENUM attribute in DBC files. If it is not defined,
@@ -1662,12 +1663,12 @@ def _get_enum_vframeformat_attribute(attribute: AttributeDefinitionType) -> Attr
     we must convert that to an ENUM using the choices defined in :py:data:`ATTRIBUTE_DEFINITION_VFRAMEFORMAT`.
     """
 
-    if attribute.type_name != 'INT':
-        return typing.cast('AttributeDefinition[str]', attribute)
+    if attribute_definition.type_name != 'INT':
+        return typing.cast('AttributeDefinition[str]', attribute_definition)
 
-    typed_attribute = typing.cast('AttributeDefinition[int]', attribute)
-    default_value = typed_attribute.default_value
+    default_value = attribute_definition.default_value
     assert default_value is not None, 'Default value for VFrameFormat attribute must be defined if the attribute is defined as an INT.'
+    assert isinstance(default_value, int)
     enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
     enum_attribute.default_value = enum_attribute.choices[default_value]
 
@@ -1751,7 +1752,7 @@ def _load_messages(tokens,
         if ref_definitions is None:
             return None
 
-        ref_definitions = _get_enum_vframeformat_attribute(ref_definitions)
+        ref_definitions = _get_enum_vframeformat_definition(ref_definitions)
 
         frame_format: str | None
         if message_attributes is not None and 'VFrameFormat' in message_attributes:
@@ -2013,31 +2014,31 @@ def make_message_names_unique(database: InternalDatabase, shorten_long_names: bo
         message.name = short_name
 
 
-def update_signal_attribute_rel_names(database: InternalDatabase,
-                                      message: Message,
-                                      converter: LongNamesConverter,
-                                      shorten_long_names: bool) -> None:
-    if database.dbc is None or database.dbc.attributes_rel is None or not shorten_long_names:
+def update_signal_relation_attribute_names(database: InternalDatabase,
+                                           message: Message,
+                                           converter: LongNamesConverter,
+                                           shorten_long_names: bool) -> None:
+    if database.dbc is None or database.dbc.relation_attributes is None or not shorten_long_names:
         return
 
     frame_id = get_dbc_frame_id(message)
 
-    signal_attributes_rel = database.dbc.attributes_rel.node_signal_relations.get(frame_id)
-    if signal_attributes_rel is None:
+    signal_map = database.dbc.relation_attributes.node_signal_relations.get(frame_id)
+    if signal_map is None:
         return
 
-    updated_signal_attributes_rel = OrderedDict()
-    for signal_name, value in signal_attributes_rel.items():
+    updated_signal_map = OrderedDict()
+    for signal_name, value in signal_map.items():
         signal_name = converter.long_to_short.get(signal_name, signal_name)
-        updated_signal_attributes_rel[signal_name] = value
+        updated_signal_map[signal_name] = value
 
-    database.dbc.attributes_rel.node_signal_relations[frame_id] = updated_signal_attributes_rel
+    database.dbc.relation_attributes.node_signal_relations[frame_id] = updated_signal_map
 
 
 def make_signal_names_unique(database: InternalDatabase, shorten_long_names: bool) -> None:
     for message in database.messages:
         converter = LongNamesConverter([signal.name for signal in message.signals])
-        update_signal_attribute_rel_names(
+        update_signal_relation_attribute_names(
             database,
             message,
             converter,
@@ -2134,11 +2135,11 @@ def dump_string(database: InternalDatabase,
     cm = _dump_comments(database, sort_attribute_signals)
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
-    ba_def_rel = _dump_attribute_definitions_rel(database)
+    ba_def_rel = _dump_relation_attribute_definitions(database)
     ba_def_def = _dump_attribute_definition_defaults(database)
-    ba_def_def_rel = _dump_attribute_definition_defaults_rel(database)
+    ba_def_def_rel = _dump_relation_attribute_definition_defaults(database)
     ba = _dump_attributes(database, sort_attribute_signals, sort_attributes)
-    ba_rel = _dump_attributes_rel(database, sort_attribute_signals)
+    ba_rel = _dump_relation_attributes(database, sort_attribute_signals)
     val = _dump_choices(database, sort_attribute_signals, sort_choices)
     sig_group = _dump_signal_groups(database)
     sig_mux_values = _dump_signal_mux_values(database)
@@ -2202,7 +2203,7 @@ def get_attribute_definitions_dict(definitions: typing.Any, defaults: typing.Any
     return result
 
 
-def get_definitions_rel_dict(definitions, defaults):
+def get_relation_definitions_dict(definitions, defaults):
     result = OrderedDict()
 
     def convert_value(definition, value):
@@ -2241,14 +2242,14 @@ def get_definitions_rel_dict(definitions, defaults):
     return result
 
 
-def update_signal_attribute_rel_names_after_load(messages: list[Message],
-                                                 attributes: DbcAttributes,
-                                                 attributes_rel: DbcRelationAttributes) -> None:
+def update_signal_relation_attribute_names_after_load(messages: list[Message],
+                                                      attributes: DbcAttributes,
+                                                      relation_attributes: DbcRelationAttributes) -> None:
     for message in messages:
         frame_id = get_dbc_frame_id(message)
 
-        signal_attributes_rel = attributes_rel.node_signal_relations.get(frame_id)
-        if signal_attributes_rel is None:
+        signal_map = relation_attributes.node_signal_relations.get(frame_id)
+        if signal_map is None:
             continue
 
         signal_attributes: OrderedDict[str, DbcAttributeMap] = attributes.signals.get(frame_id) or OrderedDict()
@@ -2257,12 +2258,12 @@ def update_signal_attribute_rel_names_after_load(messages: list[Message],
             if 'SystemSignalLongSymbol' in value:
                 short_to_signal_name[signal_name] = str(value['SystemSignalLongSymbol'].value)
 
-        updated_signal_attributes_rel: OrderedDict[str, OrderedDict[str, DbcAttributeMap]] = OrderedDict()
-        for signal_name, node_attrs in signal_attributes_rel.items():
-            signal_name = short_to_signal_name.get(signal_name, signal_name)
-            updated_signal_attributes_rel[signal_name] = node_attrs
+        updated_signal_map: OrderedDict[str, OrderedDict[str, DbcAttributeMap]] = OrderedDict()
+        for signal_name, node_attrs in signal_map.items():
+            new_signal_name = short_to_signal_name.get(signal_name, signal_name)
+            updated_signal_map[new_signal_name] = node_attrs
 
-        attributes_rel.node_signal_relations[frame_id] = updated_signal_attributes_rel
+        relation_attributes.node_signal_relations[frame_id] = updated_signal_map
 
 
 def load_string(string: str, strict: bool = True,
@@ -2276,12 +2277,12 @@ def load_string(string: str, strict: bool = True,
     comments = _load_comments(tokens)
     definitions = _load_attribute_definitions(tokens)
     defaults = _load_attribute_definition_defaults(tokens)
-    definitions_relation = _load_attribute_definitions_relation(tokens)
-    defaults_relation = _load_attribute_definition_relation_defaults(tokens)
+    relation_definitions = _load_relation_attribute_definitions(tokens)
+    relation_defaults = _load_relation_attribute_definition_defaults(tokens)
     attribute_definitions = get_attribute_definitions_dict(definitions, defaults)
     attributes = _load_attributes(tokens, attribute_definitions)
-    attribute_rel_definitions = get_definitions_rel_dict(definitions_relation, defaults_relation)
-    attributes_rel = _load_attributes_rel(tokens, attribute_rel_definitions)
+    relation_attribute_definitions = get_relation_definitions_dict(relation_definitions, relation_defaults)
+    relation_attributes = _load_relation_attributes(tokens, relation_attribute_definitions)
     bus = _load_bus(attributes, comments)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
@@ -2301,10 +2302,10 @@ def load_string(string: str, strict: bool = True,
                               bus.name if bus else None,
                               signal_groups,
                               sort_signals)
-    update_signal_attribute_rel_names_after_load(
+    update_signal_relation_attribute_names_after_load(
         messages,
         attributes,
-        attributes_rel)
+        relation_attributes)
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions)
@@ -2312,8 +2313,8 @@ def load_string(string: str, strict: bool = True,
                                  attribute_definitions=attribute_definitions,
                                  environment_variables=environment_variables,
                                  value_tables=value_tables,
-                                 attributes_rel=attributes_rel,
-                                 attribute_definitions_rel=attribute_rel_definitions)
+                                 relation_attributes=relation_attributes,
+                                 relation_attribute_definitions=relation_attribute_definitions)
 
     return InternalDatabase(messages,
                             nodes,

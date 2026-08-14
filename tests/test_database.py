@@ -6035,9 +6035,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assert_dbc_dump(db, expected)
 
     def test_relation_attributes(self):
-        filename = 'tests/files/dbc/attributes_relation.dbc'
+        filename = 'tests/files/dbc/relation_attributes.dbc'
         db = cantools.database.load_file(filename)
-        for signal_map in db.dbc.attributes_rel.node_signal_relations.values():
+        for signal_map in db.dbc.relation_attributes.node_signal_relations.values():
             if 'signal_1' in signal_map:
                 rel_attributes = signal_map['signal_1']['ECU2']
                 first_timeout_attr = rel_attributes['SigFirstTimeoutTime']
@@ -6050,7 +6050,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_relation_message_attributes(self):
         filename = 'tests/files/dbc/BU_BO_REL_Message.dbc'
         db = cantools.database.load_file(filename)
-        for node_map in db.dbc.attributes_rel.node_message_relations.values():
+        for node_map in db.dbc.relation_attributes.node_message_relations.values():
             rel_attributes = node_map['ECU1']
             msg_attr = rel_attributes['MsgProject']
             self.assertEqual(msg_attr.value, 2)

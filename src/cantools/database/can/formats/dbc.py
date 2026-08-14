@@ -1254,13 +1254,13 @@ def _load_attribute_definitions(tokens: DbcTokens) -> list[MatchObject]:
 
 
 def _load_attribute_definition_defaults(tokens: DbcTokens) -> DbcAttributeDefaults:
-    defaults: DbcAttributeDefaults = OrderedDict()
+    attribute_definition_defaults: DbcAttributeDefaults = OrderedDict()
 
-    for _default_attr in tokens.get('BA_DEF_DEF_', []):
-        default_attr = dbc_assert_type(_default_attr, list)
-        defaults[dbc_assert_type(default_attr[1], str)] = typing.cast('AttributeValue', default_attr[2])
+    for _attribute_definition_default_tokens in tokens.get('BA_DEF_DEF_', []):
+        attribute_definition_default_tokens = dbc_assert_type(_attribute_definition_default_tokens, list)
+        attribute_definition_defaults[dbc_assert_type(attribute_definition_default_tokens[1], str)] = typing.cast('AttributeValue', attribute_definition_default_tokens[2])
 
-    return defaults
+    return attribute_definition_defaults
 
 
 def _load_relation_attribute_definitions(tokens: DbcTokens) -> list[MatchObject]:
@@ -1268,13 +1268,13 @@ def _load_relation_attribute_definitions(tokens: DbcTokens) -> list[MatchObject]
 
 
 def _load_relation_attribute_definition_defaults(tokens: DbcTokens) -> DbcAttributeDefaults:
-    defaults: DbcAttributeDefaults = OrderedDict()
+    relation_attribute_definition_defaults: DbcAttributeDefaults = OrderedDict()
 
-    for _default_attr in tokens.get('BA_DEF_DEF_REL_', []):
-        default_attr = dbc_assert_type(_default_attr, list)
-        defaults[dbc_assert_type(default_attr[1], str)] = typing.cast('AttributeValue', default_attr[2])
+    for _relation_attribute_definition_default_tokens in tokens.get('BA_DEF_DEF_REL_', []):
+        relation_attribute_definition_default_tokens = dbc_assert_type(_relation_attribute_definition_default_tokens, list)
+        relation_attribute_definition_defaults[dbc_assert_type(relation_attribute_definition_default_tokens[1], str)] = typing.cast('AttributeValue', relation_attribute_definition_default_tokens[2])
 
-    return defaults
+    return relation_attribute_definition_defaults
 
 
 def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, AttributeDefinitionType]) -> DbcAttributes:
@@ -1404,10 +1404,10 @@ def _load_value_tables(tokens: DbcTokens) -> OrderedDict[str, Choices]:
 
     value_tables: OrderedDict[str, Choices] = OrderedDict()
 
-    for _value_table in tokens.get('VAL_TABLE_', []):
-        value_table = dbc_assert_type(_value_table, list)
-        name = dbc_assert_type(value_table[1], str)
-        number_text_pairs = dbc_assert_type(value_table[2], list)
+    for _value_table_tokens in tokens.get('VAL_TABLE_', []):
+        value_table_tokens = dbc_assert_type(_value_table_tokens, list)
+        name = dbc_assert_type(value_table_tokens[1], str)
+        number_text_pairs = dbc_assert_type(value_table_tokens[2], list)
         value_tables[name] = OrderedDict((int(number), NamedSignalValue(int(number), text))
                                          for number, text in number_text_pairs)
 
@@ -1464,11 +1464,11 @@ def _load_message_senders(tokens: DbcTokens, attributes: DbcAttributes) -> defau
 
     message_senders: defaultdict[int, list[str]] = defaultdict(list)
 
-    for _senders in tokens.get('BO_TX_BU_', []):
-        senders = dbc_assert_type(_senders, list)
-        frame_id = int(dbc_assert_type(senders[1], str))
+    for _sender_tokens in tokens.get('BO_TX_BU_', []):
+        sender_tokens = dbc_assert_type(_sender_tokens, list)
+        frame_id = int(dbc_assert_type(sender_tokens[1], str))
         message_senders[frame_id] += [
-            _get_node_long_name(attributes, sender) for sender in dbc_assert_type(senders[3], list)
+            _get_node_long_name(attributes, sender) for sender in dbc_assert_type(sender_tokens[3], list)
         ]
 
     return message_senders
@@ -1481,11 +1481,11 @@ def _load_signal_types(tokens: DbcTokens) -> defaultdict[int, dict[str, int]]:
 
     signal_types: defaultdict[int, dict[str, int]] = defaultdict(dict)
 
-    for _signal_type in tokens.get('SIG_VALTYPE_', []):
-        signal_type = dbc_assert_type(_signal_type, list)
-        frame_id = int(dbc_assert_type(signal_type[1], str))
-        signal_name = dbc_assert_type(signal_type[2], str)
-        signal_types[frame_id][signal_name] = int(dbc_assert_type(signal_type[4], str))
+    for _signal_type_tokens in tokens.get('SIG_VALTYPE_', []):
+        signal_type_tokens = dbc_assert_type(_signal_type_tokens, list)
+        frame_id = int(dbc_assert_type(signal_type_tokens[1], str))
+        signal_name = dbc_assert_type(signal_type_tokens[2], str)
+        signal_types[frame_id][signal_name] = int(dbc_assert_type(signal_type_tokens[4], str))
 
     return signal_types
 
@@ -1497,14 +1497,14 @@ def _load_signal_multiplexer_values(tokens: DbcTokens) -> MuxValues:
 
     signal_multiplexer_values: MuxValues = defaultdict(dict)
 
-    for _signal_multiplexer_value in tokens.get('SG_MUL_VAL_', []):
-        signal_multiplexer_value = dbc_assert_type(_signal_multiplexer_value, list)
-        frame_id = int(dbc_assert_type(signal_multiplexer_value[1], str))
-        signal_name = dbc_assert_type(signal_multiplexer_value[2], str)
-        multiplexer_signal_name = dbc_assert_type(signal_multiplexer_value[3], str)
+    for _signal_multiplexer_value_tokens in tokens.get('SG_MUL_VAL_', []):
+        signal_multiplexer_value_tokens = dbc_assert_type(_signal_multiplexer_value_tokens, list)
+        frame_id = int(dbc_assert_type(signal_multiplexer_value_tokens[1], str))
+        signal_name = dbc_assert_type(signal_multiplexer_value_tokens[2], str)
+        multiplexer_signal_name = dbc_assert_type(signal_multiplexer_value_tokens[3], str)
         multiplexer_ids: list[int] = []
 
-        for lower_str, upper_str in dbc_assert_type(signal_multiplexer_value[4], list):
+        for lower_str, upper_str in dbc_assert_type(signal_multiplexer_value_tokens[4], list):
             lower = int(lower_str)
             upper = int(upper_str[1:])
             # TODO: Probably store ranges as tuples to not run out of
@@ -1545,12 +1545,12 @@ def _load_signal_groups(tokens: DbcTokens, attributes: DbcAttributes) -> default
 
         return signal_short_name
 
-    for _signal_group in tokens.get('SIG_GROUP_',[]):
-        signal_group = dbc_assert_type(_signal_group, list)
-        frame_id = int(dbc_assert_type(signal_group[1], str))
-        signal_names = [get_signal_long_name(frame_id, sn) for sn in dbc_assert_type(signal_group[5], list)]
-        signal_groups[frame_id].append(SignalGroup(name=dbc_assert_type(signal_group[2], str),
-                                                   repetitions=int(dbc_assert_type(signal_group[3], str)),
+    for _signal_group_tokens in tokens.get('SIG_GROUP_',[]):
+        signal_group_tokens = dbc_assert_type(_signal_group_tokens, list)
+        frame_id = int(dbc_assert_type(signal_group_tokens[1], str))
+        signal_names = [get_signal_long_name(frame_id, sn) for sn in dbc_assert_type(signal_group_tokens[5], list)]
+        signal_groups[frame_id].append(SignalGroup(name=dbc_assert_type(signal_group_tokens[2], str),
+                                                   repetitions=int(dbc_assert_type(signal_group_tokens[3], str)),
                                                    signal_names=signal_names))
 
     return signal_groups

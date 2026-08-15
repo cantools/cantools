@@ -156,7 +156,7 @@ def format_container_message(message : Message,
         unpacked_message = message.unpack_container(data,
                                                     allow_truncated=allow_truncated)
         decoded_message = message.decode_container(data,
-                                                   decode_choices=True,
+                                                   decode_choices=decode_choices,
                                                    scaling=True,
                                                    allow_truncated=allow_truncated,
                                                    allow_excess=allow_excess)

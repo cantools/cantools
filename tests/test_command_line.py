@@ -742,6 +742,30 @@ BATTERY_VT(
             actual_output = stdout.getvalue()
             self.assertEqual(actual_output, expected_output)
 
+    def test_decode_no_decode_choices_contained_message(self):
+        argv = [
+            'cantools',
+            'decode',
+            '--no-decode-choices',
+            '--single-line',
+            'tests/files/arxml/system-4.2.arxml'
+        ]
+
+        input_data = """\
+  vcan0  066   [13]  0A 0B 0C 09 01 00 02 00 00 00 00 00 00
+"""
+
+        expected_output = """\
+  vcan0  066   [13]  0A 0B 0C 09 01 00 02 00 00 00 00 00 00 :: OneToContainThemAll( message1(message1_SeqCounter: 1, message1_CRC: 2, signal6: 0.0 wp, signal1: 0 m, signal5: 0.0))
+"""
+
+        stdout = StringIO()
+
+        with patch('sys.stdin', StringIO(input_data)), patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
     def test_dump(self):
         argv = [
             'cantools',

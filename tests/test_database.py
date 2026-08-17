@@ -1729,6 +1729,12 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.version, None)
         self.assertEqual(db.nodes, [])
 
+    def test_auto_message_length_kcd(self):
+        db = cantools.database.load_file(
+            'tests/files/kcd/auto_message_length.kcd')
+
+        self.assertEqual(db.messages[0].length, 8)
+
     def test_invalid_kcd(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.database.load_string('<WrongRootElement/>',

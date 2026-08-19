@@ -3920,6 +3920,131 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(message_1.signals[0].start, 8)
             self.assertEqual(message_1.signals[0].length, 1)
 
+    def test_overlapping_little_endian_signals_decode_and_encode(self):
+        # Issue #205: overlapping Intel signals (bit flags plus the
+        # whole byte as a status code) used to raise "Short data".
+        dbc = '''VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_:
+
+BO_ 287 Message01: 1 Vector__XXX
+ SG_ Flag1 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Flag2 : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Flag3 : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Flag4 : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Flag5 : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Flag6 : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Flag7 : 6|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Flag8 : 7|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Status : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+'''
+        db = cantools.database.load_string(dbc, strict=False)
+        decoded = db.decode_message(287, b'\x00')
+        self.assertEqual(decoded, {
+            'Flag1': 0,
+            'Flag2': 0,
+            'Flag3': 0,
+            'Flag4': 0,
+            'Flag5': 0,
+            'Flag6': 0,
+            'Flag7': 0,
+            'Flag8': 0,
+            'Status': 0,
+        })
+
+        decoded = db.decode_message(287, b'\xaa')
+        self.assertEqual(decoded, {
+            'Flag1': 0,
+            'Flag2': 1,
+            'Flag3': 0,
+            'Flag4': 1,
+            'Flag5': 0,
+            'Flag6': 1,
+            'Flag7': 0,
+            'Flag8': 1,
+            'Status': 0b10101010,
+        })
+
+        encoded = db.encode_message(287, decoded, strict=False)
+        self.assertEqual(encoded, b'\xaa')
+
+    def test_overlapping_big_endian_signals_decode_and_encode(self):
+        status = cantools.database.can.Signal(
+            'Status', 7, 8, 'big_endian')
+        msb = cantools.database.can.Signal(
+            'Msb', 7, 1, 'big_endian')
+        message = cantools.database.can.Message(
+            1, 'M', 1, [status, msb], strict=False)
+
+        decoded = message.decode(b'\x80')
+        self.assertEqual(decoded, {'Status': 0x80, 'Msb': 1})
+
+        encoded = message.encode(decoded, strict=False)
+        self.assertEqual(encoded, b'\x80')
+
+    def test_overlapping_signals_issue_205_sym(self):
+        # Reduced/obfuscated SYM based on a real multiplexed boot-log
+        # frame: a 32-bit status word shares its MSB with a 1-bit flag
+        # (issue #205).
+        filename = 'tests/files/sym/issue_205.sym'
+
+        with self.assertRaises(cantools.database.Error) as cm:
+            cantools.database.load_file(filename, strict=True)
+
+        self.assertIn('overlapping', str(cm.exception))
+
+        db = cantools.database.load_file(filename, strict=False)
+        self.assertEqual(len(db.messages), 1)
+
+        flags_frame = bytes([0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x80])
+        decoded = db.decode_message('BootLog', flags_frame)
+        self.assertEqual(decoded, {
+            'Selector': 0x030000,
+            'StatusWord': 0x80000000,
+            'StatusMsb': 1,
+        })
+        encoded = db.encode_message('BootLog', decoded, strict=False)
+        self.assertEqual(encoded, flags_frame)
+
+        # Non-overlapping mux variant still decodes individual bits.
+        reset_frame = bytes([0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00])
+        decoded = db.decode_message('BootLog', reset_frame)
+        self.assertEqual(decoded['Selector'], 0)
+        self.assertEqual(decoded['StatusBitA'], 1)
+        self.assertEqual(decoded['StatusBitB'], 0)
+
     def test_database_signals_check_failure(self):
         signal = cantools.database.can.Signal('S',
                                               7,

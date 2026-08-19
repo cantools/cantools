@@ -14,6 +14,7 @@ from typing import (
 from ..typechecking import (
     ByteOrder,
     Choices,
+    CompiledFormatDict,
     Formats,
     SignalDictType,
     SignalMappingType,
@@ -231,7 +232,7 @@ def _group_non_overlapping_signals(
     return layers
 
 
-def _compile_bitstruct(fmt: str, names: list[str]):
+def _compile_bitstruct(fmt: str, names: list[str]) -> CompiledFormatDict:
     try:
         return bitstruct.c.compile(fmt, names)
     except Exception:

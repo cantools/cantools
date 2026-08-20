@@ -4045,6 +4045,43 @@ BO_ 287 Message01: 1 Vector__XXX
         self.assertEqual(decoded['StatusBitA'], 1)
         self.assertEqual(decoded['StatusBitB'], 0)
 
+    def test_overlapping_multiplexed_signals_decode_and_encode(self):
+        # Codecs are compiled per multiplexer variant, so overlapping
+        # signals in a muxed frame use extra bitstruct layers too.
+        mux = cantools.database.can.Signal(
+            'Mux', 0, 8, is_multiplexer=True)
+        status = cantools.database.can.Signal(
+            'Status', 8, 8,
+            multiplexer_ids=[1],
+            multiplexer_signal='Mux')
+        flag = cantools.database.can.Signal(
+            'Flag', 8, 1,
+            multiplexer_ids=[1],
+            multiplexer_signal='Mux')
+        other = cantools.database.can.Signal(
+            'Other', 8, 8,
+            multiplexer_ids=[0],
+            multiplexer_signal='Mux')
+        message = cantools.database.can.Message(
+            1, 'M', 2, [mux, status, flag, other], strict=False)
+
+        decoded = message.decode(b'\x01\xab')
+        self.assertEqual(decoded, {
+            'Mux': 1,
+            'Status': 0xab,
+            'Flag': 1,
+        })
+        encoded = message.encode(decoded, strict=False)
+        self.assertEqual(encoded, b'\x01\xab')
+
+        decoded = message.decode(b'\x00\x55')
+        self.assertEqual(decoded, {
+            'Mux': 0,
+            'Other': 0x55,
+        })
+        encoded = message.encode(decoded, strict=False)
+        self.assertEqual(encoded, b'\x00\x55')
+
     def test_database_signals_check_failure(self):
         signal = cantools.database.can.Signal('S',
                                               7,

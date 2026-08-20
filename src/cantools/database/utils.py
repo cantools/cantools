@@ -31,12 +31,10 @@ if TYPE_CHECKING:
     from ..database.can.signal import Signal
     from ..database.diagnostics import Data
 
-import bitstruct  # type: ignore
-
 try:
     import bitstruct.c  # type: ignore
 except ImportError:
-    pass
+    import bitstruct  # type: ignore
 
 
 def format_or(items: list[int | str]) -> str:
@@ -108,11 +106,21 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
 
 
 def _pack_formats(formats: Formats, raw_signal_values: dict[str, int | float]) -> int:
+    """Pack raw signal values into a big-endian integer payload.
+
+    The primary big- and little-endian codecs cover the first
+    internally non-overlapping layer. ``formats.extra_layers`` holds
+    additional (big, little) codecs for overlapping signals that
+    cannot share a bitstruct format string with that first layer, for
+    example bit flags plus a status field on the same bits. Those
+    layers are packed separately and OR-ed together.
+    """
     packed_union = (
         int.from_bytes(formats.big_endian.pack(raw_signal_values), "big")
         | int.from_bytes(formats.little_endian.pack(raw_signal_values), "little")
     )
 
+    # Overlapping signals: extra codecs OR-ed into the same payload.
     for big_endian, little_endian in formats.extra_layers:
         packed_union |= (
             int.from_bytes(big_endian.pack(raw_signal_values), "big")
@@ -165,6 +173,7 @@ def decode_data(data: bytes,
             **formats.big_endian.unpack(data),
             **formats.little_endian.unpack(data[::-1]),
         }
+        # Merge overlapping interpretations from extra bitstruct layers.
         for big_endian, little_endian in formats.extra_layers:
             unpacked.update(big_endian.unpack(data))
             unpacked.update(little_endian.unpack(data[::-1]))
@@ -355,6 +364,8 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
     for layer in compiled_layers[1:]:
         padding &= layer.padding_mask
 
+    # Remaining layers are overlapping signals that did not fit in the
+    # first internally non-overlapping bitstruct format.
     extra_layers = tuple(
         (layer.big_endian, layer.little_endian)
         for layer in compiled_layers[1:]

@@ -1,10 +1,15 @@
 # A CAN signal.
 
-from cantools.database.can.formats.dbc_specifics import DbcSpecifics
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
 from ..conversion import BaseConversion, IdentityConversion
-from ..namedsignalvalue import NamedSignalValue
+
+if TYPE_CHECKING:
+    from ..namedsignalvalue import NamedSignalValue
+    from .formats.dbc.dbc_specifics import DbcSpecifics
 
 
 class Signal:
@@ -64,6 +69,7 @@ class Signal:
         multiplexer_signal: str | None = None,
         spn: int | None = None,
     ) -> None:
+        from .formats.dbc.dbc_specifics import DbcSpecifics  # noqa: PLC0415
         # avoid using properties to improve encoding/decoding performance
 
         #: The signal name as a string.

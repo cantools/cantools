@@ -23,8 +23,7 @@ from .errors import DecodeError, EncodeError
 
 if TYPE_CHECKING:
     from ..database import Database
-    from ..database.can.attribute import AttributeType
-    from ..database.can.environment_variable import EnvironmentVariable
+    from ..database.can.formats.dbc import AttributeType, EnvironmentVariable
     from ..database.can.message import Message
     from ..database.can.node import Node
     from ..database.can.signal import Signal

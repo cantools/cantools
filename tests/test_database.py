@@ -2851,6 +2851,64 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         with self.assertRaises(UnsupportedDatabaseFormatError):
             cantools.database.load(StringIO(''))
 
+    def test_load_string_warns_about_an_unrelated_error(self):
+        """An error unrelated to the format is reported with its traceback."""
+        duplicate_message_dbc = (
+            'VERSION ""\n'
+            '\n'
+            'BU_: ECU\n'
+            '\n'
+            'BO_ 256 Msg: 8 ECU\n'
+            ' SG_ Sig1 : 0|8@1+ (1,0) [0|0] "" ECU\n'
+            '\n'
+            'BO_ 256 Msg: 8 ECU\n'
+            ' SG_ Sig2 : 8|8@1+ (1,0) [0|0] "" ECU\n'
+        )
+
+        # emit() raises OSError on the duplicate-message warning the loader logs
+        class FailingHandler(logging.Handler):
+            def emit(self, record):
+                raise OSError(5, 'Input/output error')
+
+        logger = logging.getLogger('cantools')
+        handler = FailingHandler()
+        logger.addHandler(handler)
+        propagate = logger.propagate
+        logger.propagate = False
+
+        try:
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                with self.assertRaises(UnsupportedDatabaseFormatError):
+                    cantools.database.load_string(duplicate_message_dbc,
+                                                  strict=False)
+        finally:
+            logger.removeHandler(handler)
+            logger.propagate = propagate
+
+        reported = [str(w.message) for w in caught
+                    if 'does not say whether' in str(w.message)]
+        self.assertEqual(len(reported), 1)
+        self.assertIn('probing for dbc raised OSError', reported[0])
+        self.assertIn('github.com/cantools/cantools/issues', reported[0])
+        self.assertIn('Input/output error', reported[0])
+
+    def test_load_string_does_not_warn_about_a_format_error(self):
+        """A string which is simply not a database warns about nothing."""
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            with self.assertRaises(UnsupportedDatabaseFormatError):
+                cantools.database.load_string('not a database at all')
+
+        self.assertEqual([w for w in caught
+                          if 'does not say whether' in str(w.message)], [])
+
+    def test_load_string_still_reports_a_bad_format(self):
+        """Narrowing the probe must not stop genuine format failures being caught."""
+        for content in ['not a database at all', '', '\x00\x01\x02']:
+            with self.assertRaises(UnsupportedDatabaseFormatError):
+                cantools.database.load_string(content)
+
     def test_add_bad_kcd_string(self):
         db = cantools.database.Database()
 

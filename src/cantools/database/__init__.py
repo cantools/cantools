@@ -2,9 +2,13 @@ __all__ = ["Bus", "Database", "DecodeError", "EncodeError", "Message",
            "Node", "Signal", "dump_file", "load", "load_file", "load_string"]
 
 import os
+import traceback
 import warnings
 from contextlib import nullcontext
 from typing import Any, TextIO
+from xml.etree import ElementTree
+
+import textparser
 
 try:
     import diskcache  # type: ignore
@@ -25,6 +29,34 @@ from .errors import (
     Error,
     UnsupportedDatabaseFormatError,
 )
+
+_FORMAT_PROBE_ERRORS: tuple[type[Exception], ...] = (
+    Error,
+    textparser.ParseError,
+    ElementTree.ParseError,
+    ValueError,
+    KeyError,
+)
+
+_UNEXPECTED_PROBE_ERROR = (
+    "probing for {database_format} raised {error}, which does not say whether "
+    "the string is in that format. The string was reported as an unsupported "
+    "database instead. Please open an issue at "
+    "https://github.com/cantools/cantools/issues with the traceback below.\n{traceback}"
+)
+
+
+def _warn_unexpected_probe_error(database_format: str, exc: Exception) -> None:
+    """Warn that a probe failed for a reason unrelated to the format."""
+    warnings.warn(
+        _UNEXPECTED_PROBE_ERROR.format(
+            database_format=database_format,
+            error=type(exc).__name__,
+            traceback="".join(traceback.format_exception(exc)),
+        ),
+        UserWarning,
+        stacklevel=2,
+    )
 
 
 def _resolve_database_format_and_encoding(database_format: str | None,
@@ -339,25 +371,37 @@ def load_string(string: str,
     if database_format in ['arxml', None]:
         try:
             return load_can_database('arxml')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_arxml = e
         except Exception as e:
+            _warn_unexpected_probe_error('arxml', e)
             e_arxml = e
 
     if database_format in ['dbc', None]:
         try:
             return load_can_database('dbc')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_dbc = e
         except Exception as e:
+            _warn_unexpected_probe_error('dbc', e)
             e_dbc = e
 
     if database_format in ['kcd', None]:
         try:
             return load_can_database('kcd')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_kcd = e
         except Exception as e:
+            _warn_unexpected_probe_error('kcd', e)
             e_kcd = e
 
     if database_format in ['sym', None]:
         try:
             return load_can_database('sym')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_sym = e
         except Exception as e:
+            _warn_unexpected_probe_error('sym', e)
             e_sym = e
 
     if database_format in ['cdd', None]:
@@ -365,7 +409,10 @@ def load_string(string: str,
             db = diagnostics.Database()
             db.add_cdd_string(string)
             return db
+        except _FORMAT_PROBE_ERRORS as e:
+            e_cdd = e
         except Exception as e:
+            _warn_unexpected_probe_error('cdd', e)
             e_cdd = e
 
     if database_format is not None:

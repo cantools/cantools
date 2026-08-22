@@ -2627,6 +2627,51 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with self.assertRaises(UnsupportedDatabaseFormatError):
             cantools.database.load(StringIO(''))
 
+    def test_load_string_lets_unrelated_errors_through(self):
+        """An error unrelated to the format must not be reported as a parse failure.
+
+        Format probing runs each parser in turn and remembers why it failed. An
+        exception which says nothing about the format - here one raised by a
+        logging handler while cantools emits a warning of its own - has to reach
+        the caller with its own traceback instead.
+        """
+        duplicate_message_dbc = (
+            'VERSION ""\n'
+            '\n'
+            'BU_: ECU\n'
+            '\n'
+            'BO_ 256 Msg: 8 ECU\n'
+            ' SG_ Sig1 : 0|8@1+ (1,0) [0|0] "" ECU\n'
+            '\n'
+            'BO_ 256 Msg: 8 ECU\n'
+            ' SG_ Sig2 : 8|8@1+ (1,0) [0|0] "" ECU\n'
+        )
+
+        class FailingHandler(logging.Handler):
+            def emit(self, record):
+                raise OSError(1, 'Incorrect function')
+
+        logger = logging.getLogger('cantools')
+        handler = FailingHandler()
+        logger.addHandler(handler)
+        propagate = logger.propagate
+        logger.propagate = False
+
+        try:
+            with self.assertRaises(OSError) as cm:
+                cantools.database.load_string(duplicate_message_dbc, strict=False)
+        finally:
+            logger.removeHandler(handler)
+            logger.propagate = propagate
+
+        self.assertEqual(cm.exception.errno, 1)
+
+    def test_load_string_still_reports_a_bad_format(self):
+        """Narrowing the probe must not stop genuine format failures being caught."""
+        for content in ['not a database at all', '', '\x00\x01\x02']:
+            with self.assertRaises(UnsupportedDatabaseFormatError):
+                cantools.database.load_string(content)
+
     def test_add_bad_kcd_string(self):
         db = cantools.database.Database()
 

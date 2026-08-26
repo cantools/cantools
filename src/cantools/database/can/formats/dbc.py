@@ -1991,13 +1991,7 @@ def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     bus_baudrate_attr = attributes.database.get('Baudrate')
     bus_baudrate = None
     if bus_baudrate_attr is not None:
-        try:
-            bus_baudrate = dbc_assert_type(bus_baudrate_attr.value, int)
-        except ParseError as original_error:
-            try:
-                bus_baudrate = int(dbc_assert_type(bus_baudrate_attr.value, float))
-            except ParseError as second_error:
-                raise second_error from original_error
+        bus_baudrate = int(float(bus_baudrate_attr.value))
 
     bus_comment = comments.bus
 

@@ -299,6 +299,15 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[0].is_float, False)
         self.assertEqual(message.signals[0].length, 64)
 
+    def test_dbc_load_bus_float_baudrate(self):
+        db = cantools.database.load_string(
+            'VERSION "1.0"\n'
+            'BA_DEF_ "Baudrate" FLOAT 0 1000000;\n'
+            'BA_ "Baudrate" 500000.0;\n')
+
+        self.assertEqual(len(db.buses), 1)
+        self.assertEqual(db.buses[0].baudrate, 500000)
+
     def test_foobar_encode_decode(self):
         db = cantools.database.Database()
         db.add_dbc_file('tests/files/dbc/foobar.dbc')

@@ -25,7 +25,7 @@ classifiers = [
 dependencies = [
     "bitstruct>=8.16.1",
     "python-can>=4.6.0",
-    "textparser>=0.21.1",
+    "textparser>=0.26",
     "argparse_addons",
     "crccheck",
 ]

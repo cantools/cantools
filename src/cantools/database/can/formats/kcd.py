@@ -98,11 +98,13 @@ def _load_signal_element(signal, nodes):
                 LOGGER.debug("Ignoring unsupported signal value attribute '%s'.",
                              key)
 
-    # Notes.
-    try:
-        notes = signal.find('ns:Notes', NAMESPACES).text
-    except AttributeError:
-        pass
+    # Notes. A Notes element may contain more than just a leading text
+    # node (e.g. line breaks), so gather all of its text instead of only
+    # the part before the first child element.
+    notes_element = signal.find('ns:Notes', NAMESPACES)
+
+    if notes_element is not None:
+        notes = ''.join(notes_element.itertext())
 
     # Label set XML element.
     label_set = signal.find('ns:LabelSet', NAMESPACES)
@@ -197,11 +199,12 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
             # TODO: triggered, count, remote
 
-    # Comment.
-    try:
-        notes = message.find('ns:Notes', NAMESPACES).text
-    except AttributeError:
-        pass
+    # Comment. See the note in _load_signal_element about why all of the
+    # text is gathered rather than just the leading text node.
+    notes_element = message.find('ns:Notes', NAMESPACES)
+
+    if notes_element is not None:
+        notes = ''.join(notes_element.itertext())
 
     # Senders.
     producer = message.find('ns:Producer', NAMESPACES)

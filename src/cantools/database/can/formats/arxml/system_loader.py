@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from ....conversion import BaseConversion, IdentityConversion
+from ....errors import ParseError
 from ....namedsignalvalue import NamedSignalValue
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
@@ -35,7 +36,7 @@ class SystemLoader:
         m = re.match(r'^\{(.*)\}AUTOSAR$', self._root.tag)
 
         if not m:
-            raise ValueError(f"No XML namespace specified or illegal root tag "
+            raise ParseError(f"No XML namespace specified or illegal root tag "
                              f"name '{self._root.tag}'")
 
         xml_namespace = m.group(1)
@@ -74,14 +75,14 @@ class SystemLoader:
                     autosar_version_string = m.group(1)
 
                 else:
-                    raise ValueError(f"Unrecognized AUTOSAR XML namespace "
+                    raise ParseError(f"Unrecognized AUTOSAR XML namespace "
                                      f"'{xml_namespace}'")
 
         m = re.match(r'^([0-9]*)(\.[0-9]*)?(\.[0-9]*)?$',
                      autosar_version_string)
 
         if not m:
-            raise ValueError(f"Could not parse AUTOSAR version "
+            raise ParseError(f"Could not parse AUTOSAR version "
                              f"'{autosar_version_string}'")
 
         self.autosar_version_major = \
@@ -92,7 +93,7 @@ class SystemLoader:
             0 if m.group(3) is None else int(m.group(3)[1:])
 
         if self.autosar_version_major not in {4, 3}:
-            raise ValueError('This class only supports AUTOSAR '
+            raise ParseError('This class only supports AUTOSAR '
                              'versions 3 and 4')
 
         self._create_arxml_reference_dicts()
@@ -1780,7 +1781,7 @@ class SystemLoader:
                                                   ['&COMPU-NUMERATOR', '*&V'])
 
             if len(numerators) != 2:
-                raise ValueError(
+                raise ParseError(
                     f'Expected 2 numerator values for linear scaling, but '
                     f'got {len(numerators)}.')
 
@@ -1788,7 +1789,7 @@ class SystemLoader:
                                                     ['&COMPU-DENOMINATOR', '*&V'])
 
             if len(denominators) != 1:
-                raise ValueError(
+                raise ParseError(
                     f'Expected 1 denominator value for linear scaling, but '
                     f'got {len(denominators)}.')
 
@@ -1982,7 +1983,7 @@ class SystemLoader:
             if base_type_encoding is None:
                 btt = base_type.find('./ns:SHORT-NAME', self._xml_namespaces)
                 btt = btt.text
-                raise ValueError(
+                raise ParseError(
                     f'BASE-TYPE-ENCODING in base type "{btt}" does not exist.')
 
             base_type_encoding = base_type_encoding.text
@@ -2059,7 +2060,7 @@ class SystemLoader:
                 break
 
         if refbase_path is None:
-            raise ValueError(f"Unknown reference base '{refbase_name}' "
+            raise ParseError(f"Unknown reference base '{refbase_name}' "
                              f"for relative ARXML reference '{arxml_path}'")
 
         return f'{refbase_path}/{arxml_path}'
@@ -2116,7 +2117,7 @@ class SystemLoader:
                 elem_path = f'{elem_path}/{short_name}'
 
                 if elem_path in self._arxml_path_to_node:
-                    raise ValueError(f"File contains multiple elements with "
+                    raise ParseError(f"File contains multiple elements with "
                                      f"path '{elem_path}'")
 
                 self._arxml_path_to_node[elem_path] = elem
@@ -2145,7 +2146,7 @@ class SystemLoader:
                     self._package_default_refbase_path.get(cur_package_path)
 
                 if is_default and current_default_refbase_path is not None:
-                    raise ValueError(f'Multiple default reference bases bases '
+                    raise ParseError(f'Multiple default reference bases bases '
                                      f'specified for package '
                                      f'"{cur_package_path}".')
                 elif is_default:
@@ -2158,7 +2159,7 @@ class SystemLoader:
                     is_global = (is_global.text.strip().lower() == "true")
 
                 if is_global:
-                    raise ValueError(f'Non-canonical relative references are '
+                    raise ParseError(f'Non-canonical relative references are '
                                      f'not yet supported.')
 
                 # ensure that a dictionary for the refbases of the package exists
@@ -2166,7 +2167,7 @@ class SystemLoader:
                     self._package_refbase_paths[cur_package_path] = {}
                 elif refbase_name in \
                      self._package_refbase_paths[cur_package_path]:
-                    raise ValueError(f'Package "{cur_package_path}" specifies '
+                    raise ParseError(f'Package "{cur_package_path}" specifies '
                                      f'multiple reference bases named '
                                      f'"{refbase_name}".')
                 self._package_refbase_paths[cur_package_path][refbase_name] = \
@@ -2216,7 +2217,7 @@ class SystemLoader:
         """
 
         if base_elems is None:
-            raise ValueError(
+            raise ParseError(
                 'Cannot retrieve a child element of a non-existing node!')
 
         # make sure that the children_location is a list. for convenience we
@@ -2266,7 +2267,7 @@ class SystemLoader:
                             refbase_name=child_elem.attrib.get('BASE'))
 
                         if tmp is None:
-                            raise ValueError(f'Encountered dangling reference '
+                            raise ParseError(f'Encountered dangling reference '
                                              f'{child_tag_name}-REF of type '
                                              f'"{child_elem.attrib.get("DEST")}": '
                                              f'{child_elem.text}')
@@ -2274,7 +2275,7 @@ class SystemLoader:
                         local_result.append(tmp)
 
                 if not is_nodeset and len(local_result) > 1:
-                    raise ValueError(f'Encountered a a non-unique child node '
+                    raise ParseError(f'Encountered a a non-unique child node '
                                      f'of type {child_tag_name} which ought to '
                                      f'be unique')
 
@@ -2288,7 +2289,7 @@ class SystemLoader:
         """This method does the same as get_arxml_children, but it assumes
         that the location yields at most a single node.
 
-        It returns None if no match was found and it raises ValueError
+        It returns None if no match was found and it raises ParseError
         if multiple nodes match the location, i.e., the returned
         object can be used directly if the corresponding node is
         assumed to be present.
@@ -2300,7 +2301,7 @@ class SystemLoader:
         elif len(tmp) == 1:
             return tmp[0]
         else:
-            raise ValueError(f'{child_location} does not resolve into a '
+            raise ParseError(f'{child_location} does not resolve into a '
                              f'unique node')
 
     def _get_can_frame(self, can_frame_triggering):

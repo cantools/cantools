@@ -3,6 +3,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from ....conversion import BaseConversion
+from ....errors import ParseError
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...internal_database import InternalDatabase
 from ...message import Message
@@ -75,7 +76,7 @@ class EcuExtractLoader:
         ]
 
         if len(com_xpaths) != 1:
-            raise ValueError(
+            raise ParseError(
                 f'Expected 1 /Com, but got {len(com_xpaths)}.')
 
         com_config = self.find_com_config(com_xpaths[0] + '/ComConfig')
@@ -120,7 +121,7 @@ class EcuExtractLoader:
                 break
 
         if com_pdu_id_ref is None:
-            raise ValueError('No ComPduIdRef reference found.')
+            raise ParseError('No ComPduIdRef reference found.')
 
         if direction == 'SEND':
             frame_id, length, is_extended_frame = self.load_message_tx(
@@ -347,7 +348,7 @@ class EcuExtractLoader:
                                                NAMESPACES)
 
         if parameters is None:
-            raise ValueError('PARAMETER-VALUES does not exist.')
+            raise ParseError('PARAMETER-VALUES does not exist.')
 
         for parameter in parameters:
             definition_ref = parameter.find(DEFINITION_REF_XPATH,
@@ -362,7 +363,7 @@ class EcuExtractLoader:
                                                NAMESPACES)
 
         if references is None:
-            raise ValueError('REFERENCE-VALUES does not exist.')
+            raise ParseError('REFERENCE-VALUES does not exist.')
 
         for reference in references:
             definition_ref = reference.find(DEFINITION_REF_XPATH,

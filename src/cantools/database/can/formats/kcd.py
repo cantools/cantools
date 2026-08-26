@@ -6,6 +6,7 @@ from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
 from ...conversion import BaseConversion
+from ...errors import ParseError
 from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
@@ -471,11 +472,14 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
 
     """
 
-    root = ElementTree.fromstring(string)
+    try:
+        root = ElementTree.fromstring(string)
+    except ElementTree.ParseError as e:
+        raise ParseError(str(e)) from e
 
     # Should be replaced with a validation using the XSD file.
     if root.tag != ROOT_TAG:
-        raise ValueError(f'Expected root element tag {ROOT_TAG}, but got {root.tag}.')
+        raise ParseError(f'Expected root element tag {ROOT_TAG}, but got {root.tag}.')
 
     nodes = [node.attrib for node in root.iterfind('./ns:Node', NAMESPACES)]
     buses = []

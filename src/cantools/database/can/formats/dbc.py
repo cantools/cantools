@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import TypeVar
 
+import textparser
 from textparser import (
     Any,
     AnyUntil,
@@ -2392,7 +2393,10 @@ def load_string(string: str, strict: bool = True,
 
     """
 
-    tokens: DbcTokens = dbc_assert_type(DbcParser().parse(string), dict)
+    try:
+        tokens: DbcTokens = dbc_assert_type(DbcParser().parse(string), dict)
+    except (TokenizeError, textparser.ParseError) as e:
+        raise ParseError(str(e)) from e
 
     comments = _load_comments(tokens)
     attribute_definitions = _load_attribute_definitions(tokens)

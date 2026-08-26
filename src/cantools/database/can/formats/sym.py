@@ -8,6 +8,7 @@ from collections.abc import Callable
 from itertools import groupby
 from typing import TYPE_CHECKING
 
+import textparser
 from textparser import (
     Any,
     DelimitedList,
@@ -653,7 +654,7 @@ def _get_senders(section_name: str) -> list[str]:
     elif section_name == '{SENDRECEIVE}':
         return [SEND_MESSAGE_SENDER, RECEIVE_MESSAGE_SENDER]
     else:
-        raise ValueError(f'Unexpected message section named {section_name}')
+        raise ParseError(f'Unexpected message section named {section_name}')
 
 def _load_message(frame_id,
                   is_extended_frame,
@@ -997,7 +998,10 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
     if not re.search('^FormatVersion=6.0', string, re.MULTILINE):
         raise ParseError('Only SYM version 6.0 is supported.')
 
-    tokens = SymParser60().parse(string)
+    try:
+        tokens = SymParser60().parse(string)
+    except (TokenizeError, textparser.ParseError) as e:
+        raise ParseError(str(e)) from e
 
     version = _load_version(tokens)
     enums = _load_enums(tokens)

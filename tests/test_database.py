@@ -12,14 +12,14 @@ from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
 
-import textparser  # type: ignore
 from parameterized import parameterized  # type: ignore
 
 import cantools.autosar
 import cantools.database
 from cantools.database import Message, Signal
-from cantools.database.can.formats import dbc
+from cantools.database.can.formats import arxml, dbc, kcd, sym
 from cantools.database.can.formats.dbc import LongNamesConverter
+from cantools.database.diagnostics.formats import cdd
 from cantools.database.errors import (
     DecodeError,
     EncodeError,
@@ -2397,7 +2397,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_add_bad_sym_string(self):
         db = cantools.database.Database()
 
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             db.add_sym_string('FormatVersion=6.0\n'
                               'Foo="Jopp"')
 
@@ -2654,10 +2654,48 @@ class CanToolsDatabaseTest(unittest.TestCase):
     def test_add_bad_kcd_string(self):
         db = cantools.database.Database()
 
-        with self.assertRaises(ElementTree.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             db.add_kcd_string('not xml')
 
         self.assertEqual(str(cm.exception), 'syntax error: line 1, column 0')
+
+    def test_malformed_string_raises_parse_error(self):
+        cases = [
+            ('dbc', dbc.load_string, 'abc',
+             'Invalid syntax at line 1, column 1: ">>!<<abc"'),
+            ('kcd', kcd.load_string, 'not xml',
+             'syntax error: line 1, column 0'),
+            ('kcd', kcd.load_string, '<WrongRootElement/>',
+             ('Expected root element tag '
+              '{http://kayak.2codeornot2code.org/1.0}NetworkDefinition, but '
+              'got WrongRootElement.')),
+            ('sym', sym.load_string, 'FormatVersion=6.0\nFoo="Jopp"',
+             'Invalid syntax at line 2, column 1: ">>!<<Foo="Jopp""'),
+            ('arxml', arxml.load_string, 'not xml',
+             'syntax error: line 1, column 0'),
+            ('arxml', arxml.load_string, '<AUTOSAR/>',
+             "No XML namespace specified or illegal root tag name 'AUTOSAR'"),
+            ('cdd', cdd.load_string, 'not xml',
+             'syntax error: line 1, column 0'),
+            ('cdd', cdd.load_string, '<ROOT/>',
+             'Could not find ECUDOC root element!'),
+        ]
+
+        for fmt, load, string, message in cases:
+            with self.subTest(fmt=fmt, string=string):
+                with self.assertRaises(ParseError) as cm:
+                    load(string)
+
+                self.assertNotIsInstance(cm.exception, ValueError)
+                self.assertEqual(str(cm.exception), message)
+
+                with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+                    cantools.database.load_string(string, database_format=fmt)
+
+                self.assertIsInstance(getattr(cm.exception, f'e_{fmt}'),
+                                      ParseError)
+                self.assertEqual(str(cm.exception),
+                                 f'{fmt.upper()}: "{message}"')
 
     def test_bus(self):
         bus = cantools.database.Bus('foo')
@@ -2670,7 +2708,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(cantools.database.can.formats.utils.num('1'), 1)
         self.assertEqual(cantools.database.can.formats.utils.num('1.0'), 1.0)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             cantools.database.can.formats.utils.num('x')
 
     def test_timing(self):
@@ -3040,7 +3078,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
     def test_dbc_parse_error_messages(self):
         # No valid entry.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
 
             dbc.load_string('abc')
 
@@ -3049,7 +3087,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'Invalid syntax at line 1, column 1: ">>!<<abc"')
 
         # Bad message frame id.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc.load_string('VERSION "1.0"\n'
                             'BO_ dssd\n')
 
@@ -3058,7 +3096,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'Invalid syntax at line 2, column 5: "BO_ >>!<<dssd"')
 
         # Bad entry key.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc.load_string('VERSION "1.0"\n'
                             'dd\n')
 
@@ -3067,7 +3105,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'Invalid syntax at line 2, column 1: ">>!<<dd"')
 
         # Missing colon in message.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc.load_string('VERSION "1.0"\n'
                             'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
 
@@ -3077,7 +3115,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             '>>!<<8 EMV_Statusmeldungen"')
 
         # Missing frame id in message comment.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc.load_string('CM_ BO_ "Foo.";')
 
         self.assertEqual(
@@ -4424,7 +4462,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'ARXML: "Unrecognized XML namespace \'http://autosar.org/schema/argh4.0\'"')
 
         root = ElementTree.parse('tests/files/arxml/system-illegal-namespace-4.2.arxml').getroot()
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             cantools.database.can.formats.arxml.SystemLoader(root, strict=False)
 
         self.assertEqual(
@@ -4440,7 +4478,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'ARXML: "No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.0}AUTOSARGH\'"')
 
         root = ElementTree.parse('tests/files/arxml/system-illegal-root-4.2.arxml').getroot()
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             cantools.database.can.formats.arxml.SystemLoader(root, strict=False)
 
         self.assertEqual(
@@ -5296,7 +5334,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         loader = cantools.database.can.formats.arxml.SystemLoader(root, strict=True)
 
         # a base node must always be specified
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             loader._get_arxml_children(None, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "Cannot retrieve a child element of a non-existing node!")
 
@@ -5329,7 +5367,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
                          ])
 
         # test unique location specifier if child nodes exist
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             loader._get_arxml_children(loader._root, ["AR-PACKAGES", "AR-PACKAGE"])
         self.assertEqual(str(cm.exception),
                          "Encountered a a non-unique child node of type AR-PACKAGE which ought to be unique")
@@ -5340,7 +5378,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(foo, bar)
 
         # test non-unique location while assuming that it is unique
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             loader._get_unique_arxml_child(loader._root, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "['AR-PACKAGES', '*AR-PACKAGE'] does not resolve into a unique node")
 

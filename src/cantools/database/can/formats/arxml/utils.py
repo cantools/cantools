@@ -1,5 +1,7 @@
 # utility functions that are helpful when dealing with ARXML files
 
+from ....errors import ParseError
+
 
 def parse_number_string(in_string: str, allow_float: bool=False) \
     -> int | float:
@@ -54,7 +56,7 @@ def parse_number_string(in_string: str, allow_float: bool=False) \
         # check for not allowed non-integer values
         if not allow_float:
             if ret != int(ret):
-                raise ValueError('Floating point value specified where integer '
+                raise ParseError('Floating point value specified where integer '
                                  'is required')
             # if an integer is required but a .0 floating point value is
             # specified, we accept the input anyway. (this seems to be an

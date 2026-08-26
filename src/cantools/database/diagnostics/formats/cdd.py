@@ -52,7 +52,7 @@ def _load_choices(data_type: ElementTree.Element) -> Choices | None:
         if start == end:
             choice_text = choice.findtext('TEXT/TUV[1]')
             if choice_text is None:
-                raise ValueError(f"Could not find name in TUV!")
+                raise ParseError(f"Could not find name in TUV!")
             choices[start] = choice_text
 
     if not choices:
@@ -87,7 +87,7 @@ def _load_data_types(ecu_doc: ElementTree.Element | None) -> dict[str, DataType]
         # Name and id.
         type_name = data_type.findtext('NAME/TUV[1]')
         if type_name is None:
-            raise ValueError(f"Could not find name in DATATYPE IDENT with id={data_type.attrib.get('id')}!")
+            raise ParseError(f"Could not find name in DATATYPE IDENT with id={data_type.attrib.get('id')}!")
         type_id = data_type.attrib['id']
 
         # Load from C-type element.
@@ -165,7 +165,7 @@ def _load_data_element(data: ElementTree.Element, offset: int, data_types: dict[
 
     name = data.findtext('QUAL')
     if name is None:
-        raise ValueError(f"Could not get QUAL text in data with id={data.attrib.get('id')}!")
+        raise ParseError(f"Could not get QUAL text in data with id={data.attrib.get('id')}!")
 
     return Data(name=name,
                 start=dbc_start_bitnum,
@@ -205,11 +205,11 @@ def _load_did_element(did: ElementTree.Element, data_types: dict[str, DataType],
 
     static_value = did.find('STATICVALUE')
     if static_value is None:
-        raise KeyError(f"Could not find STATICVALUE element in DID with id={did.attrib.get('id')}!")
+        raise ParseError(f"Could not find STATICVALUE element in DID with id={did.attrib.get('id')}!")
     identifier = int(static_value.attrib['v'])
     name = did.findtext('QUAL')
     if name is None:
-        raise ValueError(f"Could not get QUAL text in DID with id={did.attrib.get('id')}!")
+        raise ParseError(f"Could not get QUAL text in DID with id={did.attrib.get('id')}!")
     length = (offset + 7) // 8
 
     return Did(identifier=identifier,
@@ -238,15 +238,19 @@ def load_string(string: str) -> InternalDatabase:
 
     """
 
-    root = ElementTree.fromstring(string)
+    try:
+        root = ElementTree.fromstring(string)
+    except ElementTree.ParseError as e:
+        raise ParseError(str(e)) from e
+
     ecu_doc = root.find('ECUDOC')
     if ecu_doc is None:
-        raise KeyError("Could not find ECUDOC root element!")
+        raise ParseError("Could not find ECUDOC root element!")
     data_types = _load_data_types(ecu_doc)
     did_data_lib = _load_did_data_refs(ecu_doc)
     var = ecu_doc.findall('ECU')[0].find('VAR')
     if var is None:
-        raise KeyError(f"Could not find VAR element in ECU with id={ecu_doc.findall('ECU')[0].attrib.get('id')}!")
+        raise ParseError(f"Could not find VAR element in ECU with id={ecu_doc.findall('ECU')[0].attrib.get('id')}!")
     dids: list[Did] = []
 
     for diag_class in var.findall('DIAGCLASS'):

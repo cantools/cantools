@@ -3166,6 +3166,158 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
                       '(this is a bug in cantools that ought to be fixed)',
                       str(cm.exception))
 
+    def test_malformed_content_raises_parse_error(self):
+        # the string is in the format and tokenizes, but a value in it
+        # cannot be used or a reference cannot be resolved. this is a
+        # statement about the input, so it is a ParseError and not a
+        # bug that load_string() reports
+        kcd_string = (
+            '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
+            '<Node id="1" name="N"/>'
+            '<Bus name="B"><Message id="0x1" name="M">'
+            '<Signal name="S" offset="0" length="8">'
+            '<LabelSet><Label name="L" value="1"/></LabelSet>'
+            '</Signal></Message></Bus></NetworkDefinition>')
+        sym_string = ('FormatVersion=6.0 // Do not edit this line!\n'
+                      '{SIGNALS}\n'
+                      'Sig=S unsigned 8\n'
+                      '{SENDRECEIVE}\n'
+                      '[M]\n'
+                      'ID=001h\n'
+                      'Sig=S 0\n')
+        sym_multiplexed_string = ('FormatVersion=6.0 // Do not edit this line!\n'
+                                  '{SENDRECEIVE}\n'
+                                  '[M]\n'
+                                  'ID=001h\n'
+                                  'Len=4\n'
+                                  'Mux=A 0,8 1\n'
+                                  'Var=X unsigned 8,1\n'
+                                  '[M]\n'
+                                  'Len=8.5\n'
+                                  'Mux=B 0,8 2\n'
+                                  'Var=Y unsigned 8,1\n')
+        dbc_string = ('VERSION "1"\n'
+                      'BO_ 1 M: 8 N\n'
+                      ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n')
+        cdd_string = (
+            '<CANDELA><ECUDOC>'
+            '<DATATYPES><IDENT id="t"><NAME><TUV>T</TUV></NAME>'
+            '<CVALUETYPE bl="8" bo="21"/></IDENT></DATATYPES>'
+            '<ECU><VAR><DIAGCLASS><DIAGINST id="d"><SIMPLECOMPCONT>'
+            '<DATAOBJ id="x" dtref="t"><QUAL>Q</QUAL></DATAOBJ>'
+            '</SIMPLECOMPCONT><STATICVALUE v="1"/><QUAL>D</QUAL>'
+            '</DIAGINST></DIAGCLASS></VAR></ECU>'
+            '</ECUDOC></CANDELA>')
+
+        with open('tests/files/arxml/system-4.2.arxml', encoding='utf-8') as fin:
+            arxml_string = fin.read()
+
+        with open('tests/files/arxml/ecu-extract-4.2.arxml',
+                  encoding='utf-8') as fin:
+            ecu_extract_string = fin.read()
+
+        for load, string in [(kcd.load_string, kcd_string),
+                             (sym.load_string, sym_string),
+                             (dbc.load_string, dbc_string),
+                             (cdd.load_string, cdd_string)]:
+            load(string)
+
+        cases = [
+            ('kcd', kcd.load_string,
+             kcd_string.replace('length="8"', 'length=""'),
+             ("Expected an integer for attribute 'length' of Signal 'S', "
+              "but got ''.")),
+            ('kcd', kcd.load_string,
+             kcd_string.replace('value="1"', 'value="x"'),
+             ("Expected an integer for attribute 'value' of Label 'L', "
+              "but got 'x'.")),
+            ('kcd', kcd.load_string,
+             kcd_string.replace(' offset="0"', ''),
+             "Missing attribute 'offset' of Signal 'S'."),
+            ('sym', sym.load_string,
+             sym_string.replace('Sig=S 0', 'Sig=U 0'),
+             "Signal 'U' is not defined."),
+            ('sym', sym.load_string,
+             sym_string.replace('unsigned 8', 'unsigned 8.5'),
+             ("Expected an integer for the length of signal 'S', "
+              "but got '8.5'.")),
+            ('sym', sym.load_string,
+             sym_multiplexed_string,
+             ("Expected an integer for the length of message 'M', "
+              "but got '8.5'.")),
+            ('dbc', dbc.load_string,
+             dbc_string.replace('BO_ 1 M', 'BO_ 1.5 M'),
+             "Expected an integer for the frame id of BO_ M, but got '1.5'."),
+            ('dbc', dbc.load_string,
+             dbc_string + 'BA_ "Nope" BO_ 1 1;\n',
+             "Attribute 'Nope' is not defined."),
+            ('dbc', dbc.load_string,
+             dbc_string + ('BA_DEF_ BO_ "F" FLOAT 0 10;\n'
+                           'BA_ "F" BO_ 1 "sNaN";\n'),
+             "Expected a number as attribute value, but got 'sNaN'."),
+            ('dbc', dbc.load_string,
+             dbc_string + 'BA_DEF_ "A" INT 0;\n',
+             "Expected a minimum and a maximum for attribute 'A', but got '0'."),
+            ('dbc', dbc.load_string,
+             dbc_string + 'BA_DEF_ "A" FLOAT 1.5;\n',
+             ("Expected a minimum and a maximum for attribute 'A', "
+              "but got '1.5'.")),
+            ('dbc', dbc.load_string,
+             dbc_string + 'BA_DEF_REL_ BU_SG_REL_ "R" INT 0;\n',
+             ("Expected a minimum and a maximum for relation attribute 'R', "
+              "but got '0'.")),
+            ('dbc', dbc.load_string,
+             dbc_string + 'BA_DEF_REL_ BU_BO_REL_ "R" FLOAT 1.5;\n',
+             ("Expected a minimum and a maximum for relation attribute 'R', "
+              "but got '1.5'.")),
+            ('arxml', arxml.load_string,
+             arxml_string.replace('<FRAME-LENGTH>2<', '<FRAME-LENGTH>x<', 1),
+             "Expected a number, but got 'x'"),
+            ('arxml', arxml.load_string,
+             re.sub(r'(ComBitPosition</DEFINITION-REF>\s*<VALUE>)4',
+                    r'\1x',
+                    ecu_extract_string,
+                    count=1),
+             ("Expected an integer for parameter 'ComBitPosition', "
+              "but got 'x'.")),
+            ('cdd', cdd.load_string,
+             cdd_string.replace('bl="8"', 'bl="x"'),
+             ("Expected an integer for attribute 'bl' of CVALUETYPE in data "
+              "type T, but got 'x'.")),
+            ('cdd', cdd.load_string,
+             cdd_string.replace('dtref="t"', 'dtref="u"'),
+             'Could not find data type u referenced by data with id=x!'),
+        ]
+
+        for fmt, load, string, message in cases:
+            with self.subTest(fmt=fmt, message=message):
+                with self.assertRaises(ParseError) as cm:
+                    load(string)
+
+                self.assertEqual(str(cm.exception), message)
+
+                with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+                    cantools.database.load_string(string)
+
+                self.assertIsInstance(getattr(cm.exception, f'e_{fmt}'),
+                                      ParseError)
+                self.assertNotIn('bug in cantools', str(cm.exception))
+
+    def test_dbc_attribute_definition_ignores_extra_bounds(self):
+        db = dbc.load_string('VERSION "1"\n'
+                             'BO_ 1 M: 8 N\n'
+                             ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n'
+                             'BA_DEF_ "I" INT 0 1 2;\n'
+                             'BA_DEF_REL_ BU_SG_REL_ "R" INT 0 1 2;\n')
+
+        definition = db.dbc.attribute_definitions['I']
+        self.assertEqual(definition.minimum, 0)
+        self.assertEqual(definition.maximum, 1)
+
+        definition = db.dbc.relation_attribute_definitions['R']
+        self.assertEqual(definition.minimum, 0)
+        self.assertEqual(definition.maximum, 1)
+
     def test_bus(self):
         bus = cantools.database.Bus('foo')
         self.assertEqual(repr(bus), "bus('foo', None)")

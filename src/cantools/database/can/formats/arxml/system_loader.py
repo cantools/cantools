@@ -93,8 +93,8 @@ class SystemLoader:
             0 if m.group(3) is None else int(m.group(3)[1:])
 
         if self.autosar_version_major not in {4, 3}:
-            raise ParseError('This class only supports AUTOSAR '
-                             'versions 3 and 4')
+            raise NotImplementedError('This class only supports AUTOSAR '
+                                      'versions 3 and 4')
 
         self._create_arxml_reference_dicts()
 
@@ -2159,8 +2159,8 @@ class SystemLoader:
                     is_global = (is_global.text.strip().lower() == "true")
 
                 if is_global:
-                    raise ParseError(f'Non-canonical relative references are '
-                                     f'not yet supported.')
+                    raise NotImplementedError(f'Non-canonical relative references are '
+                                              f'not yet supported.')
 
                 # ensure that a dictionary for the refbases of the package exists
                 if cur_package_path not in self._package_refbase_paths:

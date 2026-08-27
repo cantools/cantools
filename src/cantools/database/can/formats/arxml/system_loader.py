@@ -1096,7 +1096,7 @@ class SystemLoader:
 
         cycle_time = None
         if time_period is not None:
-            cycle_time = int(float(time_period.text) * 1000)
+            cycle_time = int(parse_number_string(time_period.text, True) * 1000)
 
         # ordinary non-multiplexed message
         signals = self._load_pdu_signals(pdu)
@@ -1500,7 +1500,7 @@ class SystemLoader:
         if initial_string is not None:
             try:
                 raw_initial = parse_number_string(initial_string)
-            except ValueError:
+            except ParseError:
                 LOGGER.warning(f'The initial value ("{initial_string}") of signal '
                                f'{name} does not represent a number')
 
@@ -1757,10 +1757,11 @@ class SystemLoader:
 
             # the current scale is an enumeration value
             lower_limit, upper_limit = self._load_scale_limits(compu_scale)
-            assert lower_limit is not None \
-                   and lower_limit == upper_limit, \
-                   f'Invalid value specified for enumeration {vt}: ' \
-                   f'[{lower_limit}, {upper_limit}]'
+
+            if lower_limit is None or lower_limit != upper_limit:
+                raise ParseError(f'Invalid value specified for enumeration '
+                                 f'{vt}: [{lower_limit}, {upper_limit}]')
+
             value = lower_limit
             name = vt.text
             comments = self._load_comments(compu_scale)
@@ -1794,6 +1795,11 @@ class SystemLoader:
                     f'got {len(denominators)}.')
 
             denominator = parse_number_string(denominators[0].text, True)
+
+            if denominator == 0:
+                raise ParseError(
+                    'The denominator of a linear scaling must not be zero.')
+
             factor = parse_number_string(numerators[1].text, True) / denominator
             offset = parse_number_string(numerators[0].text, True) / denominator
 

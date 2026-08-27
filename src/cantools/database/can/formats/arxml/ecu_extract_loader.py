@@ -8,6 +8,7 @@ from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...signal import Signal
+from ..utils import parse_int
 
 if TYPE_CHECKING:
     from ...bus import Bus
@@ -80,6 +81,9 @@ class EcuExtractLoader:
                 f'Expected 1 /Com, but got {len(com_xpaths)}.')
 
         com_config = self.find_com_config(com_xpaths[0] + '/ComConfig')
+
+        if com_config is None:
+            raise ParseError(f'Could not find ComConfig for {com_xpaths[0]}.')
 
         for ecuc_container_value in com_config:
             definition_ref = ecuc_container_value.find(DEFINITION_REF_XPATH,
@@ -205,9 +209,9 @@ class EcuExtractLoader:
         if can_if_tx_pdu_cfg is not None:
             for parameter, value in self.iter_parameter_values(can_if_tx_pdu_cfg):
                 if parameter == parameter_can_id:
-                    frame_id = int(value)
+                    frame_id = parse_int(value, f"parameter '{parameter}'")
                 elif parameter == parameter_dlc:
-                    length = int(value)
+                    length = parse_int(value, f"parameter '{parameter}'")
                 elif parameter == parameter_can_id_type:
                     is_extended_frame = (value == 'EXTENDED_CAN')
 
@@ -239,9 +243,9 @@ class EcuExtractLoader:
 
         for parameter, value in self.iter_parameter_values(ecuc_container_value):
             if parameter == 'ComBitPosition':
-                bit_position = int(value)
+                bit_position = parse_int(value, f"parameter '{parameter}'")
             elif parameter == 'ComBitSize':
-                length = int(value)
+                length = parse_int(value, f"parameter '{parameter}'")
             elif parameter == 'ComSignalEndianness':
                 byte_order = value.lower()
             elif parameter == 'ComSignalType':

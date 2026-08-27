@@ -2778,6 +2778,109 @@ class CanToolsDatabaseTest(unittest.TestCase):
                       '(this is a bug in cantools that ought to be fixed)',
                       str(cm.exception))
 
+    def test_malformed_content_raises_parse_error(self):
+        # the string is in the format and tokenizes, but a value in it
+        # cannot be used or a reference cannot be resolved. this is a
+        # statement about the input, so it is a ParseError and not a
+        # bug that load_string() reports
+        kcd_string = (
+            '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
+            '<Node id="1" name="N"/>'
+            '<Bus name="B"><Message id="0x1" name="M">'
+            '<Signal name="S" offset="0" length="8">'
+            '<LabelSet><Label name="L" value="1"/></LabelSet>'
+            '</Signal></Message></Bus></NetworkDefinition>')
+        sym_string = ('FormatVersion=6.0 // Do not edit this line!\n'
+                      '{SIGNALS}\n'
+                      'Sig=S unsigned 8\n'
+                      '{SENDRECEIVE}\n'
+                      '[M]\n'
+                      'ID=001h\n'
+                      'Sig=S 0\n')
+        dbc_string = ('VERSION "1"\n'
+                      'BO_ 1 M: 8 N\n'
+                      ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n')
+        cdd_string = (
+            '<CANDELA><ECUDOC>'
+            '<DATATYPES><IDENT id="t"><NAME><TUV>T</TUV></NAME>'
+            '<CVALUETYPE bl="8" bo="21"/></IDENT></DATATYPES>'
+            '<ECU><VAR><DIAGCLASS><DIAGINST id="d"><SIMPLECOMPCONT>'
+            '<DATAOBJ id="x" dtref="t"><QUAL>Q</QUAL></DATAOBJ>'
+            '</SIMPLECOMPCONT><STATICVALUE v="1"/><QUAL>D</QUAL>'
+            '</DIAGINST></DIAGCLASS></VAR></ECU>'
+            '</ECUDOC></CANDELA>')
+
+        with open('tests/files/arxml/system-4.2.arxml', encoding='utf-8') as fin:
+            arxml_string = fin.read()
+
+        with open('tests/files/arxml/ecu-extract-4.2.arxml',
+                  encoding='utf-8') as fin:
+            ecu_extract_string = fin.read()
+
+        for load, string in [(kcd.load_string, kcd_string),
+                             (sym.load_string, sym_string),
+                             (dbc.load_string, dbc_string),
+                             (cdd.load_string, cdd_string)]:
+            load(string)
+
+        cases = [
+            ('kcd', kcd.load_string,
+             kcd_string.replace('length="8"', 'length=""'),
+             ("Expected an integer for attribute 'length' of Signal 'S', "
+              "but got ''.")),
+            ('kcd', kcd.load_string,
+             kcd_string.replace('value="1"', 'value="x"'),
+             ("Expected an integer for attribute 'value' of Label 'L', "
+              "but got 'x'.")),
+            ('kcd', kcd.load_string,
+             kcd_string.replace(' offset="0"', ''),
+             "Missing attribute 'offset' of Signal 'S'."),
+            ('sym', sym.load_string,
+             sym_string.replace('Sig=S 0', 'Sig=U 0'),
+             "Signal 'U' is not defined."),
+            ('sym', sym.load_string,
+             sym_string.replace('unsigned 8', 'unsigned 8.5'),
+             ("Expected an integer for the length of signal 'S', "
+              "but got '8.5'.")),
+            ('dbc', dbc.load_string,
+             dbc_string.replace('BO_ 1 M', 'BO_ 1.5 M'),
+             "Expected an integer for the frame id of BO_ M, but got '1.5'."),
+            ('dbc', dbc.load_string,
+             dbc_string + 'BA_ "Nope" BO_ 1 1;\n',
+             "Attribute 'Nope' is not defined."),
+            ('arxml', arxml.load_string,
+             arxml_string.replace('<FRAME-LENGTH>2<', '<FRAME-LENGTH>x<', 1),
+             "Expected a number, but got 'x'"),
+            ('arxml', arxml.load_string,
+             re.sub(r'(ComBitPosition</DEFINITION-REF>\s*<VALUE>)4',
+                    r'\1x',
+                    ecu_extract_string,
+                    count=1),
+             ("Expected an integer for parameter 'ComBitPosition', "
+              "but got 'x'.")),
+            ('cdd', cdd.load_string,
+             cdd_string.replace('bl="8"', 'bl="x"'),
+             ("Expected an integer for attribute 'bl' of CVALUETYPE in data "
+              "type T, but got 'x'.")),
+            ('cdd', cdd.load_string,
+             cdd_string.replace('dtref="t"', 'dtref="u"'),
+             'Could not find data type u referenced by data with id=x!'),
+        ]
+
+        for fmt, load, string, message in cases:
+            with self.subTest(fmt=fmt, message=message):
+                with self.assertRaises(ParseError) as cm:
+                    load(string)
+
+                self.assertEqual(str(cm.exception), message)
+
+                with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+                    cantools.database.load_string(string)
+
+                self.assertIsInstance(getattr(cm.exception, f'e_{fmt}'),
+                                      ParseError)
+                self.assertNotIn('bug in cantools', str(cm.exception))
+
     def test_bus(self):
         bus = cantools.database.Bus('foo')
         self.assertEqual(repr(bus), "bus('foo', None)")

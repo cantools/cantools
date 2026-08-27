@@ -19,7 +19,7 @@ from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node
 from ..signal import Signal
-from .utils import num
+from .utils import num, parse_int
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,6 +41,31 @@ def _get_node_name_by_id(nodes, node_id):
     for node in nodes:
         if node['id'] == node_id:
             return node['name']
+
+
+def _where(element):
+    tag = element.tag.rsplit('}', 1)[-1]
+    name = element.get('name')
+
+    if name is None:
+        return f"element '{tag}'"
+
+    return f"{tag} '{name}'"
+
+
+def _attribute(element, key):
+    try:
+        return element.attrib[key]
+    except KeyError:
+        raise ParseError(
+            f"Missing attribute '{key}' of {_where(element)}.") from None
+
+
+def _parse_int_attribute(element, key, value=None, base=10):
+    if value is None:
+        value = _attribute(element, key)
+
+    return parse_int(value, f"attribute '{key}' of {_where(element)}", base)
 
 
 def _load_signal_element(signal, nodes):
@@ -69,13 +94,16 @@ def _load_signal_element(signal, nodes):
         if key == 'name':
             name = value
         elif key == 'offset':
-            offset = int(value)
+            offset = _parse_int_attribute(signal, key, value)
         elif key == 'length':
-            length = int(value)
+            length = _parse_int_attribute(signal, key, value)
         elif key == 'endianess':
             byte_order = f'{value}_endian'
         else:
             LOGGER.debug("Ignoring unsupported signal attribute '%s'.", key)
+
+    if offset is None:
+        raise ParseError(f"Missing attribute 'offset' of {_where(signal)}.")
 
     # Value XML element.
     value = signal.find('ns:Value', NAMESPACES)
@@ -114,8 +142,8 @@ def _load_signal_element(signal, nodes):
         labels = {}
 
         for label in label_set.iterfind('ns:Label', NAMESPACES):
-            label_value = int(label.attrib['value'])
-            label_name = label.attrib['name']
+            label_value = _parse_int_attribute(label, 'value')
+            label_name = _attribute(label, 'name')
             labels[label_value] = NamedSignalValue(label_value, label_name)
 
         # TODO: Label groups.
@@ -126,7 +154,7 @@ def _load_signal_element(signal, nodes):
     if consumer is not None:
         for receiver in consumer.iterfind('ns:NodeRef', NAMESPACES):
             receivers.append(_get_node_name_by_id(nodes,
-                                                  receiver.attrib['id']))
+                                                  _attribute(receiver, 'id')))
 
     conversion = BaseConversion.factory(
         scale=slope,
@@ -159,11 +187,11 @@ def _load_multiplex_element(mux, nodes):
     signals = [mux_signal]
 
     for mux_group in mux.iterfind('ns:MuxGroup', NAMESPACES):
-        multiplexer_id = mux_group.attrib['count']
+        multiplexer_id = _parse_int_attribute(mux_group, 'count')
 
         for signal_element in mux_group.iterfind('ns:Signal', NAMESPACES):
             signal = _load_signal_element(signal_element, nodes)
-            signal.multiplexer_ids = [int(multiplexer_id)]
+            signal.multiplexer_ids = [multiplexer_id]
             signal.multiplexer_signal = mux_signal.name
             signals.append(signal)
 
@@ -189,16 +217,19 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
         if key == 'name':
             name = value
         elif key == 'id':
-            frame_id = int(value, 0)
+            frame_id = _parse_int_attribute(message, key, value, base=0)
         elif key == 'format':
             is_extended_frame = (value == 'extended')
         elif key == 'length':
             length = value  # 'auto' needs additional processing after knowing all signals
         elif key == 'interval':
-            interval = int(value)
+            interval = _parse_int_attribute(message, key, value)
         else:
             LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
             # TODO: triggered, count, remote
+
+    if frame_id is None:
+        raise ParseError(f"Missing attribute 'id' of {_where(message)}.")
 
     # Comment. See the note in _load_signal_element about why all of the
     # text is gathered rather than just the leading text node.
@@ -213,7 +244,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
     if producer is not None:
         for sender in producer.iterfind('ns:NodeRef', NAMESPACES):
             senders.append(_get_node_name_by_id(nodes,
-                                                sender.attrib['id']))
+                                                _attribute(sender, 'id')))
 
     # Find all signals in this message.
     signals = []
@@ -232,7 +263,7 @@ def _load_message_element(message, bus_name, nodes, strict, sort_signals):
         else:
             length = 0
     else:
-        length = int(length)
+        length = _parse_int_attribute(message, 'length', length)
 
     return Message(frame_id=frame_id,
                    is_extended_frame=is_extended_frame,
@@ -481,7 +512,10 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
     if root.tag != ROOT_TAG:
         raise ParseError(f'Expected root element tag {ROOT_TAG}, but got {root.tag}.')
 
-    nodes = [node.attrib for node in root.iterfind('./ns:Node', NAMESPACES)]
+    nodes = [
+        {'id': _attribute(node, 'id'), 'name': _attribute(node, 'name')}
+        for node in root.iterfind('./ns:Node', NAMESPACES)
+    ]
     buses = []
     messages = []
 
@@ -492,8 +526,10 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
         version = None
 
     for bus in root.iterfind('ns:Bus', NAMESPACES):
-        bus_name = bus.attrib['name']
-        bus_baudrate = int(bus.get('baudrate', 500000))
+        bus_name = _attribute(bus, 'name')
+        bus_baudrate = _parse_int_attribute(bus,
+                                            'baudrate',
+                                            bus.get('baudrate', '500000'))
         buses.append(Bus(bus_name, baudrate=bus_baudrate))
 
         for message in bus.iterfind('ns:Message', NAMESPACES):

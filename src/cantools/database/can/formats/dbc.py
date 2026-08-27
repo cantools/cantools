@@ -1991,7 +1991,7 @@ def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     bus_baudrate_attr = attributes.database.get('Baudrate')
     bus_baudrate = None
     if bus_baudrate_attr is not None:
-        bus_baudrate = dbc_assert_type(bus_baudrate_attr.value, int)
+        bus_baudrate = int(float(bus_baudrate_attr.value))
 
     bus_comment = comments.bus
 

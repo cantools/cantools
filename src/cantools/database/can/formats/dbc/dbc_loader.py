@@ -5,7 +5,7 @@ import typing
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import TypeVar
 
 import textparser
@@ -49,6 +49,7 @@ from .dbc_attribute_definition import (
     DbcAttributeDefinitionType,
     DbcAttributeValue,
 )
+from ..utils import num, parse_int
 from .dbc_environment_variable import DbcEnvironmentVariable
 from .dbc_specifics import DbcSpecifics
 
@@ -184,12 +185,20 @@ ATTRIBUTE_DEFINITION_VFRAMEFORMAT = DbcAttributeDefinition(
 
 def to_int(value: DbcAttributeValue) -> int:
     if isinstance(value, str):
-        return int(Decimal(value))
+        try:
+            return int(Decimal(value))
+        except (InvalidOperation, ValueError, OverflowError):
+            raise ParseError(
+                f"Expected an integer attribute value, but got '{value}'.") from None
     return int(value)
 
 def to_float(value: DbcAttributeValue) -> float:
     if isinstance(value, str):
-        return float(Decimal(value))
+        try:
+            return float(Decimal(value))
+        except InvalidOperation:
+            raise ParseError(
+                f"Expected a number as attribute value, but got '{value}'.") from None
     return float(value)
 
 class DbcParser(Parser):
@@ -458,7 +467,8 @@ def _load_comments(tokens: DbcTokens) -> DbcComments:
 
         if kind == 'SG_':
             # signal comment
-            frame_id = int(dbc_assert_type(item[1], str))
+            frame_id = parse_int(dbc_assert_type(item[1], str),
+                                 'the frame id of CM_ SG_')
             signal_name = dbc_assert_type(item[2], str)
             if frame_id not in comments.signals:
                 comments.signals[frame_id] = {}
@@ -466,7 +476,8 @@ def _load_comments(tokens: DbcTokens) -> DbcComments:
             message_signal_comments[signal_name] = dbc_assert_type(item[3], str)
         elif kind == 'BO_':
             # message comment
-            frame_id = int(dbc_assert_type(item[1], str))
+            frame_id = parse_int(dbc_assert_type(item[1], str),
+                                 'the frame id of CM_ BO_')
             comments.messages[frame_id] = dbc_assert_type(item[2], str)
         elif kind == 'BU_':
             # node comment
@@ -513,7 +524,13 @@ def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, DbcAttribu
 
     def to_attribute_object(attribute_tokens: TokenList) -> DbcAttributeType:
         raw_value = dbc_assert_type(attribute_tokens[3], str)
-        definition = definitions[dbc_assert_type(attribute_tokens[1], str)]
+        attribute_name = dbc_assert_type(attribute_tokens[1], str)
+
+        try:
+            definition = definitions[attribute_name]
+        except KeyError:
+            raise ParseError(
+                f"Attribute '{attribute_name}' is not defined.") from None
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
             return DbcAttribute[int](value=to_int(raw_value),
@@ -537,7 +554,8 @@ def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, DbcAttribu
             attribute_kind = dbc_assert_type(attribute_items[0], str)
 
             if attribute_kind == 'SG_':
-                frame_id_dbc = int(dbc_assert_type(attribute_items[1], str))
+                frame_id_dbc = parse_int(dbc_assert_type(attribute_items[1], str),
+                                         'the frame id of BA_ SG_')
 
                 if frame_id_dbc not in attributes.signals:
                     attributes.signals[frame_id_dbc] = OrderedDict()
@@ -550,7 +568,8 @@ def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, DbcAttribu
 
                 signal_attrs[attribute_name] = to_attribute_object(attribute_tokens)
             elif attribute_kind == 'BO_':
-                frame_id_dbc = int(dbc_assert_type(attribute_items[1], str))
+                frame_id_dbc = parse_int(dbc_assert_type(attribute_items[1], str),
+                                         'the frame id of BA_ BO_')
 
                 if frame_id_dbc not in attributes.messages:
                     attributes.messages[frame_id_dbc] = OrderedDict()
@@ -601,7 +620,8 @@ def _load_relation_attributes(tokens: DbcTokens, definitions: OrderedDict[str, D
         node_name = dbc_assert_type(relation_attribute_tokens[3], str)
 
         if relation_type == 'BU_SG_REL_':
-            frame_id_dbc = int(dbc_assert_type(relation_attribute_tokens[5], str))
+            frame_id_dbc = parse_int(dbc_assert_type(relation_attribute_tokens[5], str),
+                                     'the frame id of BA_REL_ BU_SG_REL_')
             signal_name = dbc_assert_type(relation_attribute_tokens[6], str)
 
             if frame_id_dbc not in relation_attributes.node_signal_relations:
@@ -615,7 +635,8 @@ def _load_relation_attributes(tokens: DbcTokens, definitions: OrderedDict[str, D
                 to_relation_attribute_object(relation_attribute_tokens, dbc_assert_type(relation_attribute_tokens[7], str))
 
         elif relation_type == 'BU_BO_REL_':
-            frame_id_dbc = int(dbc_assert_type(relation_attribute_tokens[4], str))
+            frame_id_dbc = parse_int(dbc_assert_type(relation_attribute_tokens[4], str),
+                                     'the frame id of BA_REL_ BU_BO_REL_')
 
             if frame_id_dbc not in relation_attributes.node_message_relations:
                 relation_attributes.node_message_relations[frame_id_dbc] = OrderedDict()
@@ -639,8 +660,13 @@ def _load_value_tables(tokens: DbcTokens) -> OrderedDict[str, Choices]:
         value_table_tokens = dbc_assert_type(_value_table_tokens, list)
         name = dbc_assert_type(value_table_tokens[1], str)
         number_text_pairs = dbc_assert_type(value_table_tokens[2], list)
-        value_tables[name] = OrderedDict((int(number), NamedSignalValue(int(number), text))
-                                         for number, text in number_text_pairs)
+        value_table: Choices = OrderedDict()
+
+        for number, text in number_text_pairs:
+            value = parse_int(number, f'a value of VAL_TABLE_ {name}')
+            value_table[value] = NamedSignalValue(value, text)
+
+        value_tables[name] = value_table
 
     return value_tables
 
@@ -654,12 +680,14 @@ def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attrib
         long_name = _get_envvar_long_name(attributes, short_name)
         environment_variables[long_name] = DbcEnvironmentVariable(
             name=long_name,
-            env_type=int(dbc_assert_type(envvar_tokens[3], str)),
+            env_type=parse_int(dbc_assert_type(envvar_tokens[3], str),
+                               f'the type of EV_ {short_name}'),
             minimum=num(dbc_assert_type(envvar_tokens[5], str)),
             maximum=num(dbc_assert_type(envvar_tokens[7], str)),
             unit=dbc_assert_type(envvar_tokens[9], str),
             initial_value=num(dbc_assert_type(envvar_tokens[10], str)),
-            env_id=int(dbc_assert_type(envvar_tokens[11], str)),
+            env_id=parse_int(dbc_assert_type(envvar_tokens[11], str),
+                             f'the id of EV_ {short_name}'),
             access_type=dbc_assert_type(envvar_tokens[12], str),
             access_nodes=[
                 dbc_assert_type(access_node, str)
@@ -693,14 +721,20 @@ def _load_choices(tokens: DbcTokens) -> ChoicesDict:
             # No optional frame id specified, ignore this VAL_/choice.
             continue
 
+        signal_name = dbc_assert_type(choice_tokens[2], str)
         pairs = dbc_assert_type(choice_tokens[3], list)
-        od: Choices = OrderedDict((int(v[0]), NamedSignalValue(int(v[0]), v[1])) for v in pairs)
+        od: Choices = OrderedDict()
+
+        for v in pairs:
+            value = parse_int(v[0], f'a value of VAL_ {signal_name}')
+            od[value] = NamedSignalValue(value, v[1])
 
         if len(od) == 0:
             continue
 
-        frame_id = int(frame_id_list[0])
-        choices[frame_id][dbc_assert_type(choice_tokens[2], str)] = od
+        frame_id = parse_int(frame_id_list[0],
+                             f'the frame id of VAL_ {signal_name}')
+        choices[frame_id][signal_name] = od
 
     return choices
 
@@ -713,7 +747,8 @@ def _load_message_senders(tokens: DbcTokens, attributes: DbcAttributes) -> defau
 
     for _sender_tokens in tokens.get('BO_TX_BU_', []):
         sender_tokens = dbc_assert_type(_sender_tokens, list)
-        frame_id = int(dbc_assert_type(sender_tokens[1], str))
+        frame_id = parse_int(dbc_assert_type(sender_tokens[1], str),
+                             'the frame id of BO_TX_BU_')
         message_senders[frame_id] += [
             _get_node_long_name(attributes, sender) for sender in dbc_assert_type(sender_tokens[3], list)
         ]
@@ -730,9 +765,12 @@ def _load_signal_types(tokens: DbcTokens) -> defaultdict[int, dict[str, int]]:
 
     for _signal_type_tokens in tokens.get('SIG_VALTYPE_', []):
         signal_type_tokens = dbc_assert_type(_signal_type_tokens, list)
-        frame_id = int(dbc_assert_type(signal_type_tokens[1], str))
+        frame_id = parse_int(dbc_assert_type(signal_type_tokens[1], str),
+                             'the frame id of SIG_VALTYPE_')
         signal_name = dbc_assert_type(signal_type_tokens[2], str)
-        signal_types[frame_id][signal_name] = int(dbc_assert_type(signal_type_tokens[4], str))
+        signal_types[frame_id][signal_name] = parse_int(
+            dbc_assert_type(signal_type_tokens[4], str),
+            f'the type of SIG_VALTYPE_ {signal_name}')
 
     return signal_types
 
@@ -746,14 +784,17 @@ def _load_signal_multiplexer_values(tokens: DbcTokens) -> MuxValues:
 
     for _signal_multiplexer_value_tokens in tokens.get('SG_MUL_VAL_', []):
         signal_multiplexer_value_tokens = dbc_assert_type(_signal_multiplexer_value_tokens, list)
-        frame_id = int(dbc_assert_type(signal_multiplexer_value_tokens[1], str))
+        frame_id = parse_int(dbc_assert_type(signal_multiplexer_value_tokens[1], str),
+                             'the frame id of SG_MUL_VAL_')
         signal_name = dbc_assert_type(signal_multiplexer_value_tokens[2], str)
         multiplexer_signal_name = dbc_assert_type(signal_multiplexer_value_tokens[3], str)
         multiplexer_ids: list[int] = []
 
         for lower_str, upper_str in dbc_assert_type(signal_multiplexer_value_tokens[4], list):
-            lower = int(lower_str)
-            upper = int(upper_str[1:])
+            lower = parse_int(lower_str,
+                              f'a multiplexer value of SG_MUL_VAL_ {signal_name}')
+            upper = parse_int(upper_str[1:],
+                              f'a multiplexer value of SG_MUL_VAL_ {signal_name}')
             # TODO: Probably store ranges as tuples to not run out of
             #       memory on huge ranges.
             multiplexer_ids.extend(range(lower, upper + 1))
@@ -794,10 +835,14 @@ def _load_signal_groups(tokens: DbcTokens, attributes: DbcAttributes) -> default
 
     for _signal_group_tokens in tokens.get('SIG_GROUP_',[]):
         signal_group_tokens = dbc_assert_type(_signal_group_tokens, list)
-        frame_id = int(dbc_assert_type(signal_group_tokens[1], str))
+        name = dbc_assert_type(signal_group_tokens[2], str)
+        frame_id = parse_int(dbc_assert_type(signal_group_tokens[1], str),
+                             f'the frame id of SIG_GROUP_ {name}')
+        repetitions = parse_int(dbc_assert_type(signal_group_tokens[3], str),
+                                f'the repetitions of SIG_GROUP_ {name}')
         signal_names = [get_signal_long_name(frame_id, sn) for sn in dbc_assert_type(signal_group_tokens[5], list)]
-        signal_groups[frame_id].append(SignalGroup(name=dbc_assert_type(signal_group_tokens[2], str),
-                                                   repetitions=int(dbc_assert_type(signal_group_tokens[3], str)),
+        signal_groups[frame_id].append(SignalGroup(name=name,
+                                                   repetitions=repetitions,
                                                    signal_names=signal_names))
 
     return signal_groups
@@ -998,8 +1043,10 @@ def _load_signals(tokens: list[MatchObject],
         signal_name = mux_field[0]
         signals.append(
             Signal(name=get_signal_long_name(frame_id_dbc, signal_name),
-                   start=int(dbc_assert_type(signal_tokens[3], str)),
-                   length=int(dbc_assert_type(signal_tokens[5], str)),
+                   start=parse_int(dbc_assert_type(signal_tokens[3], str),
+                                   f'the start bit of SG_ {signal_name}'),
+                   length=parse_int(dbc_assert_type(signal_tokens[5], str),
+                                    f'the length of SG_ {signal_name}'),
                    receivers=get_signal_receivers(dbc_assert_type(signal_tokens[20], list)),
                    byte_order=('big_endian'
                                if signal_tokens[7] == '0'
@@ -1043,7 +1090,13 @@ def _get_enum_vframeformat_definition(attribute_definition: DbcAttributeDefiniti
         raise ParseError('Default value for VFrameFormat attribute must be defined '
                          'if the attribute is defined as an INT.')
     enum_attribute = deepcopy(ATTRIBUTE_DEFINITION_VFRAMEFORMAT)
-    enum_attribute.default_value = enum_attribute.choices[int(default_value)]
+    index = to_int(default_value)
+
+    if enum_attribute.choices is None or not 0 <= index < len(enum_attribute.choices):
+        raise ParseError(f'Default value {default_value} of the VFrameFormat '
+                         'attribute is out of range.')
+
+    enum_attribute.default_value = enum_attribute.choices[index]
 
     return enum_attribute
 
@@ -1093,7 +1146,13 @@ def _load_messages(tokens: DbcTokens,
             if send_type_attr is not None:
                 raw_result = send_type_attr.value
                 if send_type_def.choices and raw_result is not None:
-                    result = send_type_def.choices[int(raw_result)]
+                    index = to_int(raw_result)
+
+                    if not 0 <= index < len(send_type_def.choices):
+                        raise ParseError(f'GenMsgSendType {raw_result} of the message '
+                                         f'with frame id {frame_id_dbc} is out of range.')
+
+                    result = send_type_def.choices[index]
                 else:
                     result = dbc_assert_type(raw_result, str)
 
@@ -1173,7 +1232,8 @@ def _load_messages(tokens: DbcTokens,
             continue
 
         # Frame id.
-        frame_id_dbc = int(dbc_assert_type(message_tokens[1], str))
+        frame_id_dbc = parse_int(dbc_assert_type(message_tokens[1], str),
+                                 f'the frame id of BO_ {message_tokens[2]}')
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
         frame_format = get_message_frame_format(frame_id_dbc)
@@ -1220,7 +1280,9 @@ def _load_messages(tokens: DbcTokens,
             Message(frame_id=frame_id,
                     is_extended_frame=is_extended_frame,
                     name=get_message_long_name(frame_id_dbc, dbc_assert_type(message_tokens[2], str)),
-                    length=int(dbc_assert_type(message_tokens[4], str), 0),
+                    length=parse_int(dbc_assert_type(message_tokens[4], str),
+                                     f'the length of BO_ {message_tokens[2]}',
+                                     0),
                     senders=senders,
                     send_type=get_message_send_type(frame_id_dbc),
                     cycle_time=get_message_cycle_time(frame_id_dbc),

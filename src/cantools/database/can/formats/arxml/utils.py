@@ -1,7 +1,9 @@
 # utility functions that are helpful when dealing with ARXML files
 
+from ....errors import ParseError
 
-def parse_number_string(in_string: str, allow_float: bool=False) \
+
+def parse_number_string(in_string: str | None, allow_float: bool=False) \
     -> int | float:
     """Convert a string representing numeric value that is specified
     within an ARXML file to either an integer or a floating point object
@@ -14,6 +16,17 @@ def parse_number_string(in_string: str, allow_float: bool=False) \
     - Some ARXML editors seem to sometimes include a dot in integer
       numbers (e.g., they produce "123.0" instead of "123")
     """
+    if in_string is None:
+        raise ParseError('Expected a number, but the element is empty')
+
+    try:
+        return _parse_number_string(in_string, allow_float)
+    except ValueError:
+        raise ParseError(f"Expected a number, but got '{in_string.strip()}'") \
+            from None
+
+
+def _parse_number_string(in_string: str, allow_float: bool) -> int | float:
     ret: int | float | None = None
     in_string = in_string.strip().lower()
 
@@ -54,7 +67,7 @@ def parse_number_string(in_string: str, allow_float: bool=False) \
         # check for not allowed non-integer values
         if not allow_float:
             if ret != int(ret):
-                raise ValueError('Floating point value specified where integer '
+                raise ParseError('Floating point value specified where integer '
                                  'is required')
             # if an integer is required but a .0 floating point value is
             # specified, we accept the input anyway. (this seems to be an

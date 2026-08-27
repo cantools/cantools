@@ -1,6 +1,7 @@
 __all__ = ["Bus", "Database", "DecodeError", "EncodeError", "Message",
            "Node", "Signal", "dump_file", "load", "load_file", "load_string"]
 
+import logging
 import os
 import warnings
 from contextlib import nullcontext
@@ -24,7 +25,10 @@ from .errors import (
     EncodeError,
     Error,
     UnsupportedDatabaseFormatError,
+    format_load_error,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 
 def _resolve_database_format_and_encoding(database_format: str | None,
@@ -122,7 +126,8 @@ def load_file(filename: StringPathLike,
     Raises an
     :class:`~cantools.database.UnsupportedDatabaseFormatError`
     exception if given file does not contain a supported database
-    format.
+    format and a :class:`NotImplementedError` if the file uses a
+    variant of a supported format which is not supported.
 
     >>> db = cantools.database.load_file('foo.dbc')
     >>> db.version
@@ -249,7 +254,8 @@ def load(fp: TextIO,
     Raises an
     :class:`~cantools.database.UnsupportedDatabaseFormatError`
     exception if given file-like object does not contain a supported
-    database format.
+    database format and a :class:`NotImplementedError` if it uses a
+    variant of a supported format which is not supported.
 
     >>> with open('foo.kcd') as fin:
     ...    db = cantools.database.load(fin)
@@ -297,7 +303,8 @@ def load_string(string: str,
     Raises an
     :class:`~cantools.database.UnsupportedDatabaseFormatError`
     exception if given string does not contain a supported database
-    format.
+    format and a :class:`NotImplementedError` if the string uses a
+    variant of a supported format which is not supported.
 
     >>> with open('foo.dbc') as fin:
     ...    db = cantools.database.load_string(fin.read())
@@ -311,13 +318,12 @@ def load_string(string: str,
             f"expected database format 'arxml', 'dbc', 'kcd', 'sym', 'cdd' or "
             f"None, but got '{database_format}'")
 
-    e_arxml = None
-    e_dbc = None
-    e_kcd = None
-    e_sym = None
-    e_cdd = None
+    def load_database(fmt: str) -> can.Database | diagnostics.Database:
+        if fmt == 'cdd':
+            diagnostics_db = diagnostics.Database()
+            diagnostics_db.add_cdd_string(string)
+            return diagnostics_db
 
-    def load_can_database(fmt: str) -> can.Database:
         db = can.Database(frame_id_mask=frame_id_mask,
                           strict=strict,
                           sort_signals=sort_signals)
@@ -336,48 +342,42 @@ def load_string(string: str,
 
         return db
 
-    if database_format in ['arxml', None]:
-        try:
-            return load_can_database('arxml')
-        except Exception as e:
-            e_arxml = e
-
-    if database_format in ['dbc', None]:
-        try:
-            return load_can_database('dbc')
-        except Exception as e:
-            e_dbc = e
-
-    if database_format in ['kcd', None]:
-        try:
-            return load_can_database('kcd')
-        except Exception as e:
-            e_kcd = e
-
-    if database_format in ['sym', None]:
-        try:
-            return load_can_database('sym')
-        except Exception as e:
-            e_sym = e
-
-    if database_format in ['cdd', None]:
-        try:
-            db = diagnostics.Database()
-            db.add_cdd_string(string)
-            return db
-        except Exception as e:
-            e_cdd = e
-
-    if database_format is not None:
-        # raise an error while keeping the traceback of the original
-        # exception usable. note that for this we cannot auto-detect
-        # the format because the probing mechanism raises an exception
-        # for every single supported database format in this case
-        exc = e_arxml or e_dbc or e_kcd or e_sym or e_cdd
-        raise UnsupportedDatabaseFormatError(e_arxml,
-                                             e_dbc,
-                                             e_kcd,
-                                             e_sym,
-                                             e_cdd) from exc
+    if database_format is None:
+        formats = ['arxml', 'dbc', 'kcd', 'sym', 'cdd']
     else:
-        raise UnsupportedDatabaseFormatError(e_arxml, e_dbc, e_kcd, e_sym, e_cdd)
+        formats = [database_format]
+
+    errors: dict[str, Exception] = {}
+
+    for fmt in formats:
+        try:
+            return load_database(fmt)
+        except Error as e:
+            # the string cannot be loaded as this format. try the next
+            # one
+            errors[fmt] = e
+        except NotImplementedError:
+            # the string is in this format, but the loader does not
+            # support this variant of it. trying further formats is
+            # pointless
+            raise
+        except Exception as e:
+            # loaders are supposed to raise ParseError for everything
+            # that is wrong with the input, so this is a bug. report
+            # it, but do not let it get in the way of the other formats
+            LOGGER.warning(format_load_error(fmt, e))
+            errors[fmt] = e
+
+    exc = UnsupportedDatabaseFormatError(errors.get('arxml'),
+                                         errors.get('dbc'),
+                                         errors.get('kcd'),
+                                         errors.get('sym'),
+                                         errors.get('cdd'))
+
+    if database_format is None:
+        raise exc
+
+    # keep the traceback of the loader's exception usable. this is not
+    # possible when probing because then there is one exception per
+    # format
+    raise exc from errors[database_format]

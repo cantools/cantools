@@ -8,6 +8,7 @@ from collections.abc import Callable
 from itertools import groupby
 from typing import TYPE_CHECKING
 
+import textparser
 from textparser import (
     Any,
     DelimitedList,
@@ -33,7 +34,7 @@ from ...utils import (
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..signal import Signal
-from .utils import num
+from .utils import num, parse_int
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -304,7 +305,7 @@ def _load_enums(tokens):
     return all_enums
 
 
-def _load_signal_type_and_length(type_, tokens, enums):
+def _load_signal_type_and_length(name, type_, tokens, enums):
     # Default values.
     is_signed = False
     is_float = False
@@ -313,11 +314,17 @@ def _load_signal_type_and_length(type_, tokens, enums):
     minimum = None
     maximum = None
 
+    def length_from_tokens():
+        if not tokens:
+            raise ParseError(f"Missing length of signal '{name}'.")
+
+        return parse_int(tokens[0], f"the length of signal '{name}'")
+
     if type_ == 'signed':
         is_signed = True
-        length = int(tokens[0])
+        length = length_from_tokens()
     elif type_ == 'unsigned':
-        length = int(tokens[0])
+        length = length_from_tokens()
     elif type_ == 'float':
         is_float = True
         length = 32
@@ -334,10 +341,10 @@ def _load_signal_type_and_length(type_, tokens, enums):
         length = 8
     elif type_ in ['string', 'raw']:
         # As unsigned integer for now.
-        length = int(tokens[0])
+        length = length_from_tokens()
     else:
         # Enum. As unsigned integer for now.
-        length = int(tokens[0])
+        length = length_from_tokens()
         enum = _get_enum(enums, type_)
 
     return is_signed, is_float, length, enum, minimum, maximum
@@ -364,7 +371,7 @@ def _load_signal_attributes(tokens, enum, enums, minimum, maximum, spn):
             elif key == '/e:':
                 enum = _get_enum(enums, value)
             elif key == '/spn:':
-                spn = int(value)
+                spn = parse_int(value, 'the SPN')
             else:
                 LOGGER.debug("Ignoring unsupported message attribute '%s'.", key)
         elif item.startswith('/u:"'):
@@ -390,7 +397,8 @@ def _load_signal(tokens, enums):
      length,
      enum,
      minimum,
-     maximum) = _load_signal_type_and_length(tokens[3],
+     maximum) = _load_signal_type_and_length(name,
+                                             tokens[3],
                                              tokens[4],
                                              enums)
 
@@ -448,8 +456,14 @@ def _load_message_signal(tokens,
                          signals,
                          multiplexer_signal,
                          multiplexer_ids):
-    signal = signals[tokens[2]]
-    start = int(tokens[3])
+    name = tokens[2]
+
+    try:
+        signal = signals[name]
+    except KeyError:
+        raise ParseError(f"Signal '{name}' is not defined.") from None
+
+    start = parse_int(tokens[3], f"the start bit of signal '{name}'")
     start = _convert_start(start, signal.byte_order)
 
     conversion = BaseConversion.factory(
@@ -487,7 +501,7 @@ def _load_message_variable(tokens,
     # Default values.
     name = tokens[2]
     byte_order = 'little_endian'
-    start = int(tokens[4])
+    start = parse_int(tokens[4], f"the start bit of variable '{name}'")
     comment = None
     spn = None
 
@@ -497,7 +511,8 @@ def _load_message_variable(tokens,
      length,
      enum,
      minimum,
-     maximum) = _load_signal_type_and_length(tokens[3],
+     maximum) = _load_signal_type_and_length(name,
+                                             tokens[3],
                                              [tokens[6]],
                                              enums)
 
@@ -575,7 +590,9 @@ def _load_muxed_message_signals(message_tokens,
             base = 16
             mux_id = mux_id[:-1]
 
-        return [int(mux_id, base=base)]
+        return [parse_int(mux_id,
+                          f"the multiplexer value of '{mux_tokens[2]}'",
+                          base)]
 
     mux_tokens = message_tokens[3]['Mux'][0]
     multiplexer_signal = mux_tokens[2]
@@ -583,7 +600,8 @@ def _load_muxed_message_signals(message_tokens,
         byte_order = 'big_endian'
     else:
         byte_order = 'little_endian'
-    start = int(mux_tokens[3])
+    start = parse_int(mux_tokens[3],
+                      f"the start bit of multiplexer '{multiplexer_signal}'")
     start = _convert_start(start, byte_order)
     if mux_tokens[8]:
         comment = _load_comment(mux_tokens[8][0])
@@ -592,7 +610,9 @@ def _load_muxed_message_signals(message_tokens,
     result = [
         Signal(name=multiplexer_signal,
                start=start,
-               length=int(mux_tokens[5]),
+               length=parse_int(
+                   mux_tokens[5],
+                   f"the length of multiplexer '{multiplexer_signal}'"),
                byte_order=byte_order,
                is_multiplexer=True,
                comment=comment,
@@ -608,7 +628,13 @@ def _load_muxed_message_signals(message_tokens,
 
     for tokens in message_section_tokens:
         if tokens[1] == message_tokens[1] and tokens != message_tokens:
-            mux_tokens = tokens[3]['Mux'][0]
+            try:
+                mux_tokens = tokens[3]['Mux'][0]
+            except KeyError:
+                raise ParseError(
+                    f"Missing Mux entry in a definition of the multiplexed "
+                    f"message '{tokens[1]}'.") from None
+
             multiplexer_ids = get_mutliplexer_ids(mux_tokens)
             result += _load_message_signals_inner(tokens,
                                                   signals,
@@ -653,7 +679,7 @@ def _get_senders(section_name: str) -> list[str]:
     elif section_name == '{SENDRECEIVE}':
         return [SEND_MESSAGE_SENDER, RECEIVE_MESSAGE_SENDER]
     else:
-        raise ValueError(f'Unexpected message section named {section_name}')
+        raise ParseError(f'Unexpected message section named {section_name}')
 
 def _load_message(frame_id,
                   is_extended_frame,
@@ -672,7 +698,8 @@ def _load_message(frame_id,
     comment = None
 
     if 'Len' in message_tokens[3]:
-        length = int(message_tokens[3]['Len'][0][2])
+        length = parse_int(message_tokens[3]['Len'][0][2],
+                           f"the length of message '{name}'")
 
     # Cycle time.
     try:
@@ -703,8 +730,10 @@ def _load_message(frame_id,
 
 
 def _parse_message_frame_ids(message):
+    name = message[1]
+
     def to_int(string):
-        return int(string, 16)
+        return parse_int(string, f"the frame id of message '{name}'", 16)
 
     def is_extended_frame(string, type_str):
         # Length of 9 includes terminating 'h' for hex
@@ -997,7 +1026,10 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
     if not re.search('^FormatVersion=6.0', string, re.MULTILINE):
         raise ParseError('Only SYM version 6.0 is supported.')
 
-    tokens = SymParser60().parse(string)
+    try:
+        tokens = SymParser60().parse(string)
+    except (TokenizeError, textparser.ParseError) as e:
+        raise ParseError(str(e)) from e
 
     version = _load_version(tokens)
     enums = _load_enums(tokens)

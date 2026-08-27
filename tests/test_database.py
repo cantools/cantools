@@ -12,6 +12,7 @@ from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
 
+import pytest
 from parameterized import parameterized  # type: ignore
 
 import cantools.autosar
@@ -2758,6 +2759,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             self.assertEqual(str(cm.exception), bug)
             self.assertIsInstance(cm.exception.__cause__, RuntimeError)
 
+    @pytest.mark.loader_may_raise
     def test_load_string_sort_signals_exception(self):
         # an exception raised by the sort_signals callback is not a
         # statement about the input, so it ends up in the same class as
@@ -2880,6 +2882,36 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 self.assertIsInstance(getattr(cm.exception, f'e_{fmt}'),
                                       ParseError)
                 self.assertNotIn('bug in cantools', str(cm.exception))
+
+    def test_files_raise_only_parse_error(self):
+        # load every file of the test suite as every format. a loader
+        # either succeeds or raises ParseError (or Error in strict
+        # mode); anything else is reported as a bug by load_string()
+        encodings = {'.dbc': 'cp1252', '.sym': 'cp1252', '.cdd': 'iso-8859-1'}
+
+        for path in sorted(Path('tests/files').rglob('*')):
+            if not path.is_file():
+                continue
+
+            with open(path,
+                      encoding=encodings.get(path.suffix, 'utf-8'),
+                      errors='replace') as fin:
+                string = fin.read()
+
+            for database_format in ['arxml', 'dbc', 'kcd', 'sym', 'cdd', None]:
+                for strict in [True, False]:
+                    with self.subTest(file=str(path),
+                                      database_format=database_format,
+                                      strict=strict):
+                        try:
+                            cantools.database.load_string(
+                                string,
+                                database_format=database_format,
+                                strict=strict)
+                        except NotImplementedError:
+                            pass
+                        except UnsupportedDatabaseFormatError as e:
+                            self.assertNotIn('bug in cantools', str(e))
 
     def test_bus(self):
         bus = cantools.database.Bus('foo')

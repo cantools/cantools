@@ -2697,6 +2697,87 @@ class CanToolsDatabaseTest(unittest.TestCase):
                 self.assertEqual(str(cm.exception),
                                  f'{fmt.upper()}: "{message}"')
 
+    def test_load_string_probing(self):
+        # ParseError: the string is not in this format, try the next one
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.database.load_string('abc')
+
+        for e in [cm.exception.e_arxml,
+                  cm.exception.e_dbc,
+                  cm.exception.e_kcd,
+                  cm.exception.e_sym,
+                  cm.exception.e_cdd]:
+            self.assertIsInstance(e, ParseError)
+
+        # NotImplementedError: the string is in this format, do not try
+        # further formats
+        unsupported = '<AUTOSAR xmlns="http://autosar.org/2.1.DAI.0"/>'
+
+        with (unittest.mock.patch.object(dbc, 'load_string',
+                                         wraps=dbc.load_string) as load_dbc,
+              self.assertRaises(NotImplementedError) as cm):
+            cantools.database.load_string(unsupported)
+
+        self.assertEqual(str(cm.exception),
+                         'This class only supports AUTOSAR versions 3 and 4')
+        load_dbc.assert_not_called()
+
+        with self.assertRaises(NotImplementedError):
+            cantools.database.load_string(unsupported, database_format='arxml')
+
+        # anything else is a bug in a loader: report it and try the next
+        # format anyway
+        kcd_string = (
+            '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
+            '<Bus name="B"><Message id="0x1" name="M">'
+            '<Signal name="S" offset="0" length="8"/>'
+            '</Message></Bus></NetworkDefinition>')
+        bug = ('DBC: "RuntimeError: boom" '
+               '(this is a bug in cantools that ought to be fixed)')
+
+        with unittest.mock.patch.object(dbc, 'load_string',
+                                        side_effect=RuntimeError('boom')):
+            with self.assertLogs('cantools.database', level='WARNING') as logs:
+                db = cantools.database.load_string(kcd_string)
+
+            self.assertEqual(db.messages[0].name, 'M')
+            self.assertEqual(logs.output, [f'WARNING:cantools.database:{bug}'])
+
+            with (self.assertLogs('cantools.database', level='WARNING'),
+                  self.assertRaises(UnsupportedDatabaseFormatError) as cm):
+                cantools.database.load_string('abc')
+
+            self.assertIsInstance(cm.exception.e_dbc, RuntimeError)
+            self.assertIsInstance(cm.exception.e_kcd, ParseError)
+            self.assertIn(bug, str(cm.exception))
+
+            with (self.assertLogs('cantools.database', level='WARNING'),
+                  self.assertRaises(UnsupportedDatabaseFormatError) as cm):
+                cantools.database.load_string('abc', database_format='dbc')
+
+            self.assertEqual(str(cm.exception), bug)
+            self.assertIsInstance(cm.exception.__cause__, RuntimeError)
+
+    def test_load_string_sort_signals_exception(self):
+        # an exception raised by the sort_signals callback is not a
+        # statement about the input, so it ends up in the same class as
+        # a bug in a loader
+        sentinel = TypeError('raised by sort_signals')
+
+        def sort_signals(signals):
+            raise sentinel
+
+        with (self.assertLogs('cantools.database', level='WARNING'),
+              self.assertRaises(UnsupportedDatabaseFormatError) as cm):
+            cantools.database.load_string(
+                'VERSION "1"\nBO_ 1 M: 8 N\n SG_ S : 0|8@1+ (1,0) [0|0] "" N\n',
+                sort_signals=sort_signals)
+
+        self.assertIs(cm.exception.e_dbc, sentinel)
+        self.assertIn('DBC: "TypeError: raised by sort_signals" '
+                      '(this is a bug in cantools that ought to be fixed)',
+                      str(cm.exception))
+
     def test_bus(self):
         bus = cantools.database.Bus('foo')
         self.assertEqual(repr(bus), "bus('foo', None)")

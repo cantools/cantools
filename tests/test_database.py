@@ -18,8 +18,8 @@ from parameterized import parameterized  # type: ignore
 import cantools.autosar
 import cantools.database
 from cantools.database import Message, Signal
-from cantools.database.can.formats import dbc
-from cantools.database.can.formats.dbc import LongNamesConverter
+from cantools.database.can.formats.dbc import dbc
+from cantools.database.can.formats.dbc.dbc import LongNamesConverter
 from cantools.database.errors import (
     DecodeError,
     EncodeError,

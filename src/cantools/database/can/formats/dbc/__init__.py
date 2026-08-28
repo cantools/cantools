@@ -4,8 +4,9 @@ from .attribute_definition import (
     AttributeDefinitionType,
     AttributeValue,
 )
-from .dbc import dump_string, load_string
+from .dbc_loader import load_string
 from .dbc_specifics import DbcSpecifics
+from .dbc_writer import dump_string
 from .environment_variable import EnvironmentVariable
 
 __all__ = [

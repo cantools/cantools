@@ -24,7 +24,7 @@ from .errors import DecodeError, EncodeError
 if TYPE_CHECKING:
     from ..database import Database
     from ..database.can.formats.dbc import (
-        AttributeType,
+        DbcAttributeType,
         DbcEnvironmentVariable,
     )
     from ..database.can.message import Message
@@ -431,11 +431,11 @@ SORT_SIGNALS_DEFAULT: Final = 'default'
 type_sort_signals = Callable[[list["Signal"]], list["Signal"]] | Literal['default'] | None
 
 type_sort_attribute = \
-    tuple[Literal['dbc'],     "AttributeType", None,   None,      None,     None] | \
-    tuple[Literal['node'],    "AttributeType", "Node", None,      None,     None] | \
-    tuple[Literal['message'], "AttributeType", None,   "Message", None,     None] | \
-    tuple[Literal['signal'],  "AttributeType", None,   "Message", "Signal", None] | \
-    tuple[Literal['envvar'],  "AttributeType", None,   None,      None,     "DbcEnvironmentVariable"]
+    tuple[Literal['dbc'],     "DbcAttributeType", None,   None,      None,     None] | \
+    tuple[Literal['node'],    "DbcAttributeType", "Node", None,      None,     None] | \
+    tuple[Literal['message'], "DbcAttributeType", None,   "Message", None,     None] | \
+    tuple[Literal['signal'],  "DbcAttributeType", None,   "Message", "Signal", None] | \
+    tuple[Literal['envvar'],  "DbcAttributeType", None,   None,      None,     "DbcEnvironmentVariable"]
 
 type_sort_attributes = Callable[[list[type_sort_attribute]], list[type_sort_attribute]] | Literal['default'] | None
 

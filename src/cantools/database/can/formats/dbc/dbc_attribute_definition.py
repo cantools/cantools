@@ -1,9 +1,9 @@
 from typing import Generic, TypeVar
 
-AttributeValue = str | int | float
-AttributeValueTypeVar = TypeVar('AttributeValueTypeVar', str, int, float)
+DbcAttributeValue = str | int | float
+DbcAttributeValueTypeVar = TypeVar('DbcAttributeValueTypeVar', str, int, float)
 
-class AttributeDefinition(Generic[AttributeValueTypeVar]):
+class DbcAttributeDefinition(Generic[DbcAttributeValueTypeVar]):
     """A definition of an attribute that can be associated with attributes
     in nodes/messages/signals.
 
@@ -11,14 +11,14 @@ class AttributeDefinition(Generic[AttributeValueTypeVar]):
 
     def __init__(self,
                  name: str,
-                 default_value: AttributeValueTypeVar | None = None,
+                 default_value: DbcAttributeValueTypeVar | None = None,
                  kind: str | None = None,
                  type_name: str | None = None,
                  minimum: float | None = None,
                  maximum: float | None = None,
                  choices: list[str] | None = None) -> None:
         self._name = name
-        self._default_value: AttributeValueTypeVar | None = default_value
+        self._default_value: DbcAttributeValueTypeVar | None = default_value
         self._kind = kind
         self._type_name = type_name
         self._minimum = minimum
@@ -34,7 +34,7 @@ class AttributeDefinition(Generic[AttributeValueTypeVar]):
         return self._name
 
     @property
-    def default_value(self) -> AttributeValueTypeVar | None:
+    def default_value(self) -> DbcAttributeValueTypeVar | None:
         """The default value that this attribute has, or ``None`` if
         unavailable.
 
@@ -43,7 +43,7 @@ class AttributeDefinition(Generic[AttributeValueTypeVar]):
         return self._default_value
 
     @default_value.setter
-    def default_value(self, value: AttributeValueTypeVar | None) -> None:
+    def default_value(self, value: DbcAttributeValueTypeVar | None) -> None:
         self._default_value = value
 
     @property
@@ -117,4 +117,4 @@ class AttributeDefinition(Generic[AttributeValueTypeVar]):
     def __repr__(self) -> str:
         return f"attribute_definition('{self._name}', {self._default_value})"
 
-AttributeDefinitionType = AttributeDefinition[str] | AttributeDefinition[int] | AttributeDefinition[float]
+DbcAttributeDefinitionType = DbcAttributeDefinition[str] | DbcAttributeDefinition[int] | DbcAttributeDefinition[float]

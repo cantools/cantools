@@ -315,8 +315,8 @@ nitpick_ignore = [
     ("py:class", "SignalValueType"),
     ("py:class", "cantools.typechecking.SignalValueType"),
     ("py:class", "type_sort_signals"),
-    ("py:class", "AttributeType"),
-    ("py:class", "AttributeDefinitionType"),
-    ("py:class", "cantools.database.can.formats.dbc.attribute_definition.AttributeValueTypeVar"),
+    ("py:class", "DbcAttributeType"),
+    ("py:class", "DbcAttributeDefinitionType"),
+    ("py:class", "cantools.database.can.formats.dbc.dbc_attribute_definition.DbcAttributeValueTypeVar"),
     ("py:class", "DbcRelationAttributes"),
 ]

@@ -1,22 +1,22 @@
-from .attribute import Attribute, AttributeType
-from .attribute_definition import (
-    AttributeDefinition,
-    AttributeDefinitionType,
-    AttributeValue,
+from .dbc_attribute import DbcAttribute, DbcAttributeType
+from .dbc_attribute_definition import (
+    DbcAttributeDefinition,
+    DbcAttributeDefinitionType,
+    DbcAttributeValue,
 )
+from .dbc_environment_variable import DbcEnvironmentVariable
 from .dbc_loader import load_string
 from .dbc_specifics import DbcSpecifics
 from .dbc_writer import dump_string
-from .environment_variable import EnvironmentVariable
 
 __all__ = [
-    "Attribute",
-    "AttributeDefinition",
-    "AttributeDefinitionType",
-    "AttributeType",
-    "AttributeValue",
+    "DbcAttribute",
+    "DbcAttributeDefinition",
+    "DbcAttributeDefinitionType",
+    "DbcAttributeType",
+    "DbcAttributeValue",
+    "DbcEnvironmentVariable",
     "DbcSpecifics",
-    "EnvironmentVariable",
     "dump_string",
     "load_string",
 ]

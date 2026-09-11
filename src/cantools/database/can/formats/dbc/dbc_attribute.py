@@ -1,18 +1,21 @@
 from typing import Generic
 
-from .attribute_definition import AttributeDefinition, AttributeValueTypeVar
+from .dbc_attribute_definition import (
+    DbcAttributeDefinition,
+    DbcAttributeValueTypeVar,
+)
 
 
-class Attribute(Generic[AttributeValueTypeVar]):
+class DbcAttribute(Generic[DbcAttributeValueTypeVar]):
     """An attribute that can be associated with nodes/messages/signals.
 
     """
 
     def __init__(self,
-                 value: AttributeValueTypeVar,
-                 definition: AttributeDefinition[AttributeValueTypeVar]) -> None:
-        self._value: AttributeValueTypeVar = value
-        self._definition: AttributeDefinition[AttributeValueTypeVar] = definition
+                 value: DbcAttributeValueTypeVar,
+                 definition: DbcAttributeDefinition[DbcAttributeValueTypeVar]) -> None:
+        self._value: DbcAttributeValueTypeVar = value
+        self._definition: DbcAttributeDefinition[DbcAttributeValueTypeVar] = definition
 
     @property
     def name(self) -> str:
@@ -23,7 +26,7 @@ class Attribute(Generic[AttributeValueTypeVar]):
         return self._definition.name
 
     @property
-    def value(self) -> AttributeValueTypeVar:
+    def value(self) -> DbcAttributeValueTypeVar:
         """The value that this attribute has.
 
         """
@@ -31,7 +34,7 @@ class Attribute(Generic[AttributeValueTypeVar]):
         return self._value
 
     @value.setter
-    def value(self, value: AttributeValueTypeVar) -> None:
+    def value(self, value: DbcAttributeValueTypeVar) -> None:
         self._value = value
 
     @property
@@ -45,7 +48,7 @@ class Attribute(Generic[AttributeValueTypeVar]):
         return f'{self._value}'
 
     @property
-    def definition(self) -> AttributeDefinition[AttributeValueTypeVar]:
+    def definition(self) -> DbcAttributeDefinition[DbcAttributeValueTypeVar]:
         """The attribute definition.
 
         """
@@ -56,4 +59,4 @@ class Attribute(Generic[AttributeValueTypeVar]):
         return f"attribute('{self.name}', {self.value})"
 
 
-AttributeType = Attribute[str] | Attribute[int] | Attribute[float]
+DbcAttributeType = DbcAttribute[str] | DbcAttribute[int] | DbcAttribute[float]

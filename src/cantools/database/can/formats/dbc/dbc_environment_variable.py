@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from .dbc_specifics import DbcSpecifics
 
 
-class EnvironmentVariable:
+class DbcEnvironmentVariable:
     """A CAN environment variable.
 
     """

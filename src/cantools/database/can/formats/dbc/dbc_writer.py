@@ -18,10 +18,10 @@ from ....utils import (
 )
 from ...message import Message
 from ...signal import Signal
-from .attribute import Attribute, AttributeType
-from .attribute_definition import (
-    AttributeDefinition,
-    AttributeDefinitionType,
+from .dbc_attribute import DbcAttribute, DbcAttributeType
+from .dbc_attribute_definition import (
+    DbcAttributeDefinition,
+    DbcAttributeDefinitionType,
 )
 from .dbc_loader import (
     ATTRIBUTE_DEFINITION_VFRAMEFORMAT,
@@ -103,44 +103,44 @@ FLOAT_LENGTH_TO_SIGNAL_TYPE = {
     64: SIGNAL_TYPE_DOUBLE
 }
 
-ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME = AttributeDefinition(
+ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME = DbcAttributeDefinition(
     'SystemEnvVarLongSymbol',
     default_value='',
     kind='EV_',
     type_name='STRING')
-ATTRIBUTE_DEFINITION_LONG_NODE_NAME = AttributeDefinition(
+ATTRIBUTE_DEFINITION_LONG_NODE_NAME = DbcAttributeDefinition(
     'SystemNodeLongSymbol',
     default_value='',
     kind='BU_',
     type_name='STRING')
 
-ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME = AttributeDefinition(
+ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME = DbcAttributeDefinition(
     'SystemMessageLongSymbol',
     default_value='',
     kind='BO_',
     type_name='STRING')
 
-ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME = AttributeDefinition(
+ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME = DbcAttributeDefinition(
     'SystemSignalLongSymbol',
     default_value='',
     kind='SG_',
     type_name='STRING')
 
-ATTRIBUTE_DEFINITION_BAUDRATE = AttributeDefinition(
+ATTRIBUTE_DEFINITION_BAUDRATE = DbcAttributeDefinition(
     name='Baudrate',
     default_value=125_000,
     type_name='INT',
     minimum=0,
     maximum=10*1024*1024)
 
-ATTRIBUTE_DEFINITION_CANFD_BRS = AttributeDefinition(
+ATTRIBUTE_DEFINITION_CANFD_BRS = DbcAttributeDefinition(
     name='CANFD_BRS',
     default_value='1',
     kind='BO_',
     type_name='ENUM',
     choices=['0', '1'])
 
-ATTRIBUTE_DEFINITION_GENMSGCYCLETIME = AttributeDefinition(
+ATTRIBUTE_DEFINITION_GENMSGCYCLETIME = DbcAttributeDefinition(
     name='GenMsgCycleTime',
     default_value=0,
     kind='BO_',
@@ -148,7 +148,7 @@ ATTRIBUTE_DEFINITION_GENMSGCYCLETIME = AttributeDefinition(
     minimum=0,
     maximum=2**16-1)
 
-ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = AttributeDefinition[float](
+ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = DbcAttributeDefinition[float](
     name='GenSigStartValue',
     default_value=0.0,
     kind='SG_',
@@ -184,7 +184,7 @@ def get_dbc_name(name: str) -> str:
     return name
 
 
-def get_attribute_definition(database: InternalDatabase, name: str, default: AttributeDefinitionType) -> AttributeDefinitionType:
+def get_attribute_definition(database: InternalDatabase, name: str, default: DbcAttributeDefinitionType) -> DbcAttributeDefinitionType:
     if database.dbc is None:
         database.dbc = DbcSpecifics()
 
@@ -194,28 +194,28 @@ def get_attribute_definition(database: InternalDatabase, name: str, default: Att
     return database.dbc.attribute_definitions[name]
 
 
-def get_long_envvar_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+def get_long_envvar_name_attribute_definition(database: InternalDatabase) -> DbcAttributeDefinition[str]:
     return dbc_assert_type(get_attribute_definition(database,
                                                     'SystemEnvVarLongSymbol',
-                                                    ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME), AttributeDefinition)
+                                                    ATTRIBUTE_DEFINITION_LONG_ENVVAR_NAME), DbcAttributeDefinition)
 
 
-def get_long_node_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+def get_long_node_name_attribute_definition(database: InternalDatabase) -> DbcAttributeDefinition[str]:
     return dbc_assert_type(get_attribute_definition(database,
                                                     'SystemNodeLongSymbol',
-                                                    ATTRIBUTE_DEFINITION_LONG_NODE_NAME), AttributeDefinition)
+                                                    ATTRIBUTE_DEFINITION_LONG_NODE_NAME), DbcAttributeDefinition)
 
 
-def get_long_message_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+def get_long_message_name_attribute_definition(database: InternalDatabase) -> DbcAttributeDefinition[str]:
     return dbc_assert_type(get_attribute_definition(database,
                                                     'SystemMessageLongSymbol',
-                                                    ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME), AttributeDefinition)
+                                                    ATTRIBUTE_DEFINITION_LONG_MESSAGE_NAME), DbcAttributeDefinition)
 
 
-def get_long_signal_name_attribute_definition(database: InternalDatabase) -> AttributeDefinition[str]:
+def get_long_signal_name_attribute_definition(database: InternalDatabase) -> DbcAttributeDefinition[str]:
     return dbc_assert_type(get_attribute_definition(database,
                                                     'SystemSignalLongSymbol',
-                                                    ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME), AttributeDefinition)
+                                                    ATTRIBUTE_DEFINITION_LONG_SIGNAL_NAME), DbcAttributeDefinition)
 
 
 def try_remove_attribute(dbc: DbcSpecifics, name: str) -> None:
@@ -277,7 +277,7 @@ def make_node_names_unique(database: InternalDatabase, shorten_long_names: bool)
         if node.dbc is None:
             node.dbc = DbcSpecifics()
 
-        node.dbc.attributes['SystemNodeLongSymbol'] = Attribute(
+        node.dbc.attributes['SystemNodeLongSymbol'] = DbcAttribute(
             long_name,
             get_long_node_name_attribute_definition(database))
         node.name = short_name
@@ -298,7 +298,7 @@ def make_message_names_unique(database: InternalDatabase, shorten_long_names: bo
         if message.dbc is None:
             message.dbc = DbcSpecifics()
 
-        message.dbc.attributes['SystemMessageLongSymbol'] = Attribute(
+        message.dbc.attributes['SystemMessageLongSymbol'] = DbcAttribute(
             long_name,
             get_long_message_name_attribute_definition(database))
         message.name = short_name
@@ -345,7 +345,7 @@ def make_signal_names_unique(database: InternalDatabase, shorten_long_names: boo
             if signal.dbc is None:
                 signal.dbc = DbcSpecifics()
 
-            signal.dbc.attributes['SystemSignalLongSymbol'] = Attribute(
+            signal.dbc.attributes['SystemSignalLongSymbol'] = DbcAttribute(
                 long_name,
                 get_long_signal_name_attribute_definition(database))
             signal.name = short_name
@@ -371,7 +371,7 @@ def make_envvar_names_unique(database: InternalDatabase, shorten_long_names: boo
         if (long_name == short_name) or not shorten_long_names:
             continue
 
-        envvar.dbc.attributes['SystemEnvVarLongSymbol'] = Attribute(
+        envvar.dbc.attributes['SystemEnvVarLongSymbol'] = DbcAttribute(
             long_name,
             get_long_envvar_name_attribute_definition(database))
         envvar.name = short_name
@@ -599,7 +599,7 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
         if 'CANFD_BRS' not in definitions:
             definitions['CANFD_BRS'] = ATTRIBUTE_DEFINITION_CANFD_BRS
 
-    def get_kind(definition: AttributeDefinitionType) -> str:
+    def get_kind(definition: DbcAttributeDefinitionType) -> str:
         return '' if definition.kind is None else definition.kind + ' '
 
     for definition in definitions.values():
@@ -708,10 +708,9 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         if baudrate_attribute_definition is None:
             raise ParseError('Database defines a baudrate but no definition for '
                              'the corresponding attribute')
-        database.dbc.attributes['Baudrate'] = Attribute[int](
+        database.dbc.attributes['Baudrate'] = DbcAttribute[int](
             value=int(baudrate),
-            definition=typing.cast('AttributeDefinition[int]', baudrate_attribute_definition))
-
+            definition=typing.cast('DbcAttributeDefinition[int]', baudrate_attribute_definition))
 
     for attribute in database.dbc.attributes.values():
         attributes.append(('dbc', attribute, None, None, None, None))
@@ -727,7 +726,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
                 attributes.append(('node', attribute, node, None, None, None))
 
     for message in database.messages:
-        msg_attributes = OrderedDict[str, AttributeType]()
+        msg_attributes = OrderedDict[str, DbcAttributeType]()
         if message.dbc is not None:
             msg_attributes = deepcopy(message.dbc.attributes)
 
@@ -738,9 +737,9 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         gen_msg_cycle_time_def = database.dbc.attribute_definitions.get('GenMsgCycleTime')
 
         if gen_msg_cycle_time_def is not None and msg_cycle_time != gen_msg_cycle_time_def.default_value:
-            msg_attributes['GenMsgCycleTime'] = Attribute(
+            msg_attributes['GenMsgCycleTime'] = DbcAttribute(
                 value=msg_cycle_time,
-                definition=dbc_assert_type(gen_msg_cycle_time_def, AttributeDefinition),
+                definition=dbc_assert_type(gen_msg_cycle_time_def, DbcAttributeDefinition),
             )
         elif 'GenMsgCycleTime' in msg_attributes:
             del msg_attributes['GenMsgCycleTime']
@@ -766,7 +765,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
                 v_frame_format_str in v_frame_format_def.choices
                 and v_frame_format_str != v_frame_format_def.default_value
             ):
-                msg_attributes['VFrameFormat'] = Attribute(
+                msg_attributes['VFrameFormat'] = DbcAttribute(
                     value=str(v_frame_format_def.choices.index(v_frame_format_str)),
                     definition=v_frame_format_def,
                 )
@@ -790,7 +789,7 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             if signal.raw_initial is None and 'GenSigStartValue' in sig_attributes:
                 del sig_attributes['GenSigStartValue']
             elif signal.raw_initial is not None:
-                sig_attributes['GenSigStartValue'] = Attribute[float](
+                sig_attributes['GenSigStartValue'] = DbcAttribute[float](
                     value=float(signal.raw_initial),
                     definition=ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE)
 

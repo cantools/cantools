@@ -42,14 +42,14 @@ from ...node import Node
 from ...signal import Signal
 from ...signal_group import SignalGroup
 from ..utils import num
-from .attribute import Attribute, AttributeType
-from .attribute_definition import (
-    AttributeDefinition,
-    AttributeDefinitionType,
-    AttributeValue,
+from .dbc_attribute import DbcAttribute, DbcAttributeType
+from .dbc_attribute_definition import (
+    DbcAttributeDefinition,
+    DbcAttributeDefinitionType,
+    DbcAttributeValue,
 )
+from .dbc_environment_variable import DbcEnvironmentVariable
 from .dbc_specifics import DbcSpecifics
-from .environment_variable import EnvironmentVariable
 
 # make mypy complain if we assign a value to the empty dictionary but
 # do not pay the runtime performance penalty of MappingProxyType.
@@ -66,7 +66,7 @@ DbcTokens = dict[str, list[MatchObject]]
 TokenList = list[MatchObject]
 
 # attribute_name -> attribute_object
-DbcAttributeMap = OrderedDict[str, AttributeType]
+DbcAttributeMap = OrderedDict[str, DbcAttributeType]
 
 # The internalized attributes for the whole dataset returned by
 # _load_attributes()
@@ -137,7 +137,7 @@ MuxValues = dict[int, MuxSignalValues]
 
 # Attribute definition defaults from BA_DEF_DEF_ tokens:
 #   attrib_default_dict[attribute_name] -> attribute_value
-DbcAttributeDefaults = OrderedDict[str, AttributeValue]
+DbcAttributeDefaults = OrderedDict[str, DbcAttributeValue]
 
 # Value tables:
 #   value_tables_dict[value_table_name] -> { choice_int_value: choice_string_value }
@@ -167,7 +167,7 @@ FLOAT_SIGNAL_TYPES = [
     SIGNAL_TYPE_DOUBLE
 ]
 
-ATTRIBUTE_DEFINITION_VFRAMEFORMAT = AttributeDefinition(
+ATTRIBUTE_DEFINITION_VFRAMEFORMAT = DbcAttributeDefinition(
     name='VFrameFormat',
     default_value='StandardCAN',
     kind='BO_',
@@ -181,12 +181,12 @@ ATTRIBUTE_DEFINITION_VFRAMEFORMAT = AttributeDefinition(
              'reserved', 'reserved',
              'StandardCAN_FD', 'ExtendedCAN_FD'])
 
-def to_int(value: AttributeValue) -> int:
+def to_int(value: DbcAttributeValue) -> int:
     if isinstance(value, str):
         return int(Decimal(value))
     return int(value)
 
-def to_float(value: AttributeValue) -> float:
+def to_float(value: DbcAttributeValue) -> float:
     if isinstance(value, str):
         return float(Decimal(value))
     return float(value)
@@ -484,7 +484,7 @@ def _load_attribute_definition_defaults(tokens: DbcTokens) -> DbcAttributeDefaul
 
     for _attribute_definition_default_tokens in tokens.get('BA_DEF_DEF_', []):
         attribute_definition_default_tokens = dbc_assert_type(_attribute_definition_default_tokens, list)
-        attribute_definition_defaults[dbc_assert_type(attribute_definition_default_tokens[1], str)] = typing.cast('AttributeValue', attribute_definition_default_tokens[2])
+        attribute_definition_defaults[dbc_assert_type(attribute_definition_default_tokens[1], str)] = typing.cast('DbcAttributeValue', attribute_definition_default_tokens[2])
 
     return attribute_definition_defaults
 
@@ -498,27 +498,27 @@ def _load_relation_attribute_definition_defaults(tokens: DbcTokens) -> DbcAttrib
 
     for _relation_attribute_definition_default_tokens in tokens.get('BA_DEF_DEF_REL_', []):
         relation_attribute_definition_default_tokens = dbc_assert_type(_relation_attribute_definition_default_tokens, list)
-        relation_attribute_definition_defaults[dbc_assert_type(relation_attribute_definition_default_tokens[1], str)] = typing.cast('AttributeValue', relation_attribute_definition_default_tokens[2])
+        relation_attribute_definition_defaults[dbc_assert_type(relation_attribute_definition_default_tokens[1], str)] = typing.cast('DbcAttributeValue', relation_attribute_definition_default_tokens[2])
 
     return relation_attribute_definition_defaults
 
 
-def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, AttributeDefinitionType]) -> DbcAttributes:
+def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, DbcAttributeDefinitionType]) -> DbcAttributes:
     attributes = DbcAttributes()
 
-    def to_attribute_object(attribute_tokens: TokenList) -> AttributeType:
+    def to_attribute_object(attribute_tokens: TokenList) -> DbcAttributeType:
         raw_value = dbc_assert_type(attribute_tokens[3], str)
         definition = definitions[dbc_assert_type(attribute_tokens[1], str)]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
-            return Attribute[int](value=to_int(raw_value),
-                                  definition=typing.cast('AttributeDefinition[int]', definition))
+            return DbcAttribute[int](value=to_int(raw_value),
+                                     definition=typing.cast('DbcAttributeDefinition[int]', definition))
         elif definition.type_name == 'FLOAT':
-            return Attribute[float](value=to_float(raw_value),
-                                    definition=typing.cast('AttributeDefinition[float]', definition))
+            return DbcAttribute[float](value=to_float(raw_value),
+                                       definition=typing.cast('DbcAttributeDefinition[float]', definition))
 
-        return Attribute[str](value=raw_value,
-                              definition=typing.cast('AttributeDefinition[str]', definition))
+        return DbcAttribute[str](value=raw_value,
+                                 definition=typing.cast('DbcAttributeDefinition[str]', definition))
 
     for _attribute_tokens in tokens.get('BA_', []):
         attribute_tokens = dbc_assert_type(_attribute_tokens, list)
@@ -573,21 +573,21 @@ def _load_attributes(tokens: DbcTokens, definitions: OrderedDict[str, AttributeD
     return attributes
 
 
-def _load_relation_attributes(tokens: DbcTokens, definitions: OrderedDict[str, AttributeDefinitionType]) -> DbcRelationAttributes:
+def _load_relation_attributes(tokens: DbcTokens, definitions: OrderedDict[str, DbcAttributeDefinitionType]) -> DbcRelationAttributes:
     relation_attributes = DbcRelationAttributes()
 
-    def to_relation_attribute_object(attribute_tokens: TokenList, value: AttributeValue) -> AttributeType:
+    def to_relation_attribute_object(attribute_tokens: TokenList, value: DbcAttributeValue) -> DbcAttributeType:
         definition = definitions[dbc_assert_type(attribute_tokens[1], str)]
 
         if definition.type_name in ['INT', 'HEX', 'ENUM']:
-            return Attribute[int](value=to_int(value),
-                                  definition=typing.cast('AttributeDefinition[int]', definition))
+            return DbcAttribute[int](value=to_int(value),
+                                     definition=typing.cast('DbcAttributeDefinition[int]', definition))
         elif definition.type_name == 'FLOAT':
-            return Attribute[float](value=to_float(value),
-                                    definition=typing.cast('AttributeDefinition[float]', definition))
+            return DbcAttribute[float](value=to_float(value),
+                                       definition=typing.cast('DbcAttributeDefinition[float]', definition))
         else:
-            return Attribute[str](str(value),
-                                  definition=typing.cast('AttributeDefinition[str]', definition))
+            return DbcAttribute[str](str(value),
+                                     definition=typing.cast('DbcAttributeDefinition[str]', definition))
 
     for _relation_attribute_tokens in tokens.get('BA_REL_', []):
         relation_attribute_tokens = dbc_assert_type(_relation_attribute_tokens, list)
@@ -640,14 +640,14 @@ def _load_value_tables(tokens: DbcTokens) -> OrderedDict[str, Choices]:
     return value_tables
 
 
-def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, AttributeDefinitionType]) -> OrderedDict[str, EnvironmentVariable]:
-    environment_variables: OrderedDict[str, EnvironmentVariable] = OrderedDict()
+def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, DbcAttributeDefinitionType]) -> OrderedDict[str, DbcEnvironmentVariable]:
+    environment_variables: OrderedDict[str, DbcEnvironmentVariable] = OrderedDict()
 
     for _envvar_tokens in tokens.get('EV_', []):
         envvar_tokens = dbc_assert_type(_envvar_tokens, list)
         short_name = dbc_assert_type(envvar_tokens[1], str)
         long_name = _get_envvar_long_name(attributes, short_name)
-        environment_variables[long_name] = EnvironmentVariable(
+        environment_variables[long_name] = DbcEnvironmentVariable(
             name=long_name,
             env_type=int(dbc_assert_type(envvar_tokens[3], str)),
             minimum=num(dbc_assert_type(envvar_tokens[5], str)),
@@ -785,7 +785,7 @@ def _load_signal_groups(tokens: DbcTokens, attributes: DbcAttributes) -> default
 def _load_signals(tokens: list[MatchObject],
                   comments: DbcComments,
                   attributes: DbcAttributes,
-                  definitions: OrderedDict[str, AttributeDefinitionType] | None,
+                  definitions: OrderedDict[str, DbcAttributeDefinitionType] | None,
                   choices: ChoicesDict,
                   signal_types: dict[int, dict[str, int]],
                   signal_multiplexer_values: MuxValues,
@@ -988,7 +988,7 @@ def _load_signals(tokens: list[MatchObject],
     return signals
 
 
-def _get_enum_vframeformat_definition(attribute_definition: AttributeDefinitionType) -> AttributeDefinition[str]:
+def _get_enum_vframeformat_definition(attribute_definition: DbcAttributeDefinitionType) -> DbcAttributeDefinition[str]:
     """Get VFrameFormat attribute definition as ENUM.
 
     VFrameFormat can be defined as either an INT or an ENUM attribute in DBC files. If it is not defined,
@@ -998,7 +998,7 @@ def _get_enum_vframeformat_definition(attribute_definition: AttributeDefinitionT
     """
 
     if attribute_definition.type_name != 'INT':
-        return dbc_assert_type(attribute_definition, AttributeDefinition)
+        return dbc_assert_type(attribute_definition, DbcAttributeDefinition)
 
     default_value = attribute_definition.default_value
     if default_value is None:
@@ -1012,7 +1012,7 @@ def _get_enum_vframeformat_definition(attribute_definition: AttributeDefinitionT
 def _load_messages(tokens: DbcTokens,
                    comments: DbcComments,
                    attributes: DbcAttributes,
-                   definitions: OrderedDict[str, AttributeDefinitionType],
+                   definitions: OrderedDict[str, DbcAttributeDefinitionType],
                    choices: ChoicesDict,
                    message_senders: dict[int, list[str]],
                    signal_types: dict[int, dict[str, int]],
@@ -1227,7 +1227,7 @@ def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     return Bus(bus_name, baudrate=bus_baudrate, comment=bus_comment)
 
 
-def _load_nodes(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, AttributeDefinitionType]) -> list[Node] | None:
+def _load_nodes(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, DbcAttributeDefinitionType]) -> list[Node] | None:
     nodes = None
 
     for _node_tokens in tokens.get('BU_', []):
@@ -1241,10 +1241,10 @@ def _load_nodes(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttribu
     return nodes
 
 
-def get_attribute_definitions_dict(definitions_tokens: list[MatchObject], defaults: DbcAttributeDefaults) -> OrderedDict[str, AttributeDefinitionType]:
-    result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
+def get_attribute_definitions_dict(definitions_tokens: list[MatchObject], defaults: DbcAttributeDefaults) -> OrderedDict[str, DbcAttributeDefinitionType]:
+    result: OrderedDict[str, DbcAttributeDefinitionType] = OrderedDict()
 
-    def convert_value(definition: AttributeDefinitionType, value: AttributeValue) -> AttributeValue:
+    def convert_value(definition: DbcAttributeDefinitionType, value: DbcAttributeValue) -> DbcAttributeValue:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
@@ -1257,17 +1257,17 @@ def get_attribute_definitions_dict(definitions_tokens: list[MatchObject], defaul
         kind_list = dbc_assert_type(definition_tokens[1], list)
         kind: str | None = kind_list[0] if len(kind_list) > 0 else None
 
-        definition = AttributeDefinition(name=dbc_assert_type(definition_tokens[2], str),
-                                         kind=kind,
-                                         type_name=dbc_assert_type(definition_tokens[3], str))
+        definition = DbcAttributeDefinition(name=dbc_assert_type(definition_tokens[2], str),
+                                            kind=kind,
+                                            type_name=dbc_assert_type(definition_tokens[3], str))
         values = dbc_assert_type(dbc_assert_type(definition_tokens[4], list)[0], list)
 
         if len(values) > 0:
             if definition.type_name == 'ENUM':
                 definition.choices = dbc_assert_type(values, list)
             elif definition.type_name in ['INT', 'FLOAT', 'HEX']:
-                definition.minimum = typing.cast('int | float', convert_value(definition, typing.cast('AttributeValue', values[0])))
-                definition.maximum = typing.cast('int | float', convert_value(definition, typing.cast('AttributeValue', values[1])))
+                definition.minimum = typing.cast('int | float', convert_value(definition, typing.cast('DbcAttributeValue', values[0])))
+                definition.maximum = typing.cast('int | float', convert_value(definition, typing.cast('DbcAttributeValue', values[1])))
 
         if definition.name in defaults:
             definition.default_value = convert_value(definition, defaults[definition.name])  # type: ignore[assignment]
@@ -1279,10 +1279,10 @@ def get_attribute_definitions_dict(definitions_tokens: list[MatchObject], defaul
     return result
 
 
-def get_relation_definitions_dict(definitions_tokens: list[MatchObject], defaults: DbcAttributeDefaults) -> OrderedDict[str, AttributeDefinitionType]:
-    result: OrderedDict[str, AttributeDefinitionType] = OrderedDict()
+def get_relation_definitions_dict(definitions_tokens: list[MatchObject], defaults: DbcAttributeDefaults) -> OrderedDict[str, DbcAttributeDefinitionType]:
+    result: OrderedDict[str, DbcAttributeDefinitionType] = OrderedDict()
 
-    def convert_value(definition: AttributeDefinitionType, value: AttributeValue) -> AttributeValue:
+    def convert_value(definition: DbcAttributeDefinitionType, value: DbcAttributeValue) -> DbcAttributeValue:
         if definition.type_name in ['INT', 'HEX']:
             value = to_int(value)
         elif definition.type_name == 'FLOAT':
@@ -1295,9 +1295,9 @@ def get_relation_definitions_dict(definitions_tokens: list[MatchObject], default
         kind_list = dbc_assert_type(definition_tokens[1], list)
         kind: str | None = kind_list[0] if len(kind_list) > 0 else None
 
-        definition = AttributeDefinition(name=dbc_assert_type(definition_tokens[2], str),
-                                         kind=kind,
-                                         type_name=dbc_assert_type(definition_tokens[3], str))
+        definition = DbcAttributeDefinition(name=dbc_assert_type(definition_tokens[2], str),
+                                            kind=kind,
+                                            type_name=dbc_assert_type(definition_tokens[3], str))
         values = dbc_assert_type(definition_tokens[4], list)
 
         if len(values) > 0:

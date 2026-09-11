@@ -5,6 +5,9 @@ import os
 import warnings
 from contextlib import nullcontext
 from typing import Any, TextIO
+from xml.etree import ElementTree
+
+import textparser
 
 try:
     import diskcache  # type: ignore
@@ -24,6 +27,20 @@ from .errors import (
     EncodeError,
     Error,
     UnsupportedDatabaseFormatError,
+)
+
+# Exceptions which mean "this string is not in the format being probed for".
+# Anything else - an OSError from a logging handler, a MemoryError, a bug in
+# cantools itself - is not a statement about the format and must reach the
+# caller with its own traceback instead of being reported as a parse failure.
+_FORMAT_PROBE_ERRORS: tuple[type[Exception], ...] = (
+    Error,
+    textparser.ParseError,
+    ElementTree.ParseError,
+    # arxml and kcd reject an unexpected root tag with a plain ValueError,
+    # cdd reports a missing ECUDOC root with a KeyError.
+    ValueError,
+    KeyError,
 )
 
 
@@ -339,25 +356,25 @@ def load_string(string: str,
     if database_format in ['arxml', None]:
         try:
             return load_can_database('arxml')
-        except Exception as e:
+        except _FORMAT_PROBE_ERRORS as e:
             e_arxml = e
 
     if database_format in ['dbc', None]:
         try:
             return load_can_database('dbc')
-        except Exception as e:
+        except _FORMAT_PROBE_ERRORS as e:
             e_dbc = e
 
     if database_format in ['kcd', None]:
         try:
             return load_can_database('kcd')
-        except Exception as e:
+        except _FORMAT_PROBE_ERRORS as e:
             e_kcd = e
 
     if database_format in ['sym', None]:
         try:
             return load_can_database('sym')
-        except Exception as e:
+        except _FORMAT_PROBE_ERRORS as e:
             e_sym = e
 
     if database_format in ['cdd', None]:
@@ -365,7 +382,7 @@ def load_string(string: str,
             db = diagnostics.Database()
             db.add_cdd_string(string)
             return db
-        except Exception as e:
+        except _FORMAT_PROBE_ERRORS as e:
             e_cdd = e
 
     if database_format is not None:

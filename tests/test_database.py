@@ -330,6 +330,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[0].is_float, False)
         self.assertEqual(message.signals[0].length, 64)
 
+    def test_environment_variable_data(self):
+        filename = 'tests/files/dbc/environment_variable_data.dbc'
+        db = cantools.database.load_file(filename)
+
+        data = db.dbc.environment_variables['DataEnvVar']
+        self.assertEqual(data.data_size, 10)
+
+        plain = db.dbc.environment_variables['PlainEnvVar']
+        self.assertEqual(plain.data_size, None)
+
+        # The entry survives a dump/load round trip.
+        dumped = db.as_dbc_string()
+        self.assertIn('ENVVAR_DATA_ DataEnvVar: 10;', dumped)
+
+        dumped_db = cantools.database.load_string(dumped)
+        self.assertEqual(
+            dumped_db.dbc.environment_variables['DataEnvVar'].data_size, 10)
+        self.assertEqual(
+            dumped_db.dbc.environment_variables['PlainEnvVar'].data_size, None)
+
     def test_dbc_load_bus_float_baudrate(self):
         db = cantools.database.load_string(
             'VERSION "1.0"\n'

@@ -7,6 +7,7 @@ import re
 import shutil
 import timeit
 import unittest.mock
+import warnings
 from collections import namedtuple
 from io import StringIO
 from pathlib import Path
@@ -215,7 +216,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         env_var_2.initial_value = 0
         env_var_2.env_id = 12
         env_var_2.access_type = 'DUMMY_NODE_VECTOR0'
-        env_var_2.access_node = 'Vector__XXX'
+        env_var_2.access_nodes = ['Vector__XXX']
         env_var_2.comment = 'Elevation Head'
         self.assertEqual(env_var_2.env_type, 1)
         self.assertEqual(env_var_2.minimum, -180)
@@ -230,6 +231,36 @@ class CanToolsDatabaseTest(unittest.TestCase):
             repr(env_var_2),
             "environment_variable('EMC_TrdPower', 1, -180, 400, 'deg', 0, 12,"
             " 'DUMMY_NODE_VECTOR0', 'Vector__XXX', 'Elevation Head')")
+
+    def test_environment_variable_multiple_access_nodes(self):
+        filename = 'tests/files/dbc/environment_variable_multiple_access_nodes.dbc'
+        db = cantools.database.load_file(filename)
+
+        single = db.dbc.environment_variables['SingleNode']
+        self.assertEqual(single.access_nodes, ['NodeA'])
+
+        # A single node is not lossy, so it does not warn.
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            self.assertEqual(single.access_node, 'NodeA')
+
+        multiple = db.dbc.environment_variables['MultipleNodes']
+        self.assertEqual(multiple.access_nodes, ['NodeA', 'NodeB', 'NodeC'])
+
+        # The singular attribute is lossy here, so it warns.
+        with self.assertWarns(UserWarning):
+            self.assertEqual(multiple.access_node, 'NodeA')
+
+        # The access nodes survive a dump/load round trip.
+        dumped_db = cantools.database.load_string(db.as_dbc_string())
+        self.assertEqual(
+            dumped_db.dbc.environment_variables['MultipleNodes'].access_nodes,
+            ['NodeA', 'NodeB', 'NodeC'])
+
+        # The singular setter is deprecated but still works.
+        with self.assertWarns(DeprecationWarning):
+            multiple.access_node = 'NodeB'
+        self.assertEqual(multiple.access_nodes, ['NodeB'])
 
     def test_foobar(self):
         db = cantools.database.Database()

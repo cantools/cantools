@@ -1,3 +1,4 @@
+import warnings
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,7 +19,7 @@ class DbcEnvironmentVariable:
                  initial_value: float,
                  env_id: int,
                  access_type: str,
-                 access_node: str,
+                 access_nodes: list[str],
                  comment: str | None,
                  dbc_specifics: "DbcSpecifics") -> None:
         self._name = name
@@ -29,7 +30,7 @@ class DbcEnvironmentVariable:
         self._initial_value = initial_value
         self._env_id = env_id
         self._access_type = access_type
-        self._access_node = access_node
+        self._access_nodes = access_nodes
         self._comment = comment
         self._dbc = dbc_specifics
 
@@ -131,15 +132,42 @@ class DbcEnvironmentVariable:
 
     @property
     def access_node(self) -> str:
-        """The environment variable access node as a string.
+        """The first environment variable access node as a string.
+
+        Kept for compatibility; use ``access_nodes`` to get all of them.
 
         """
 
-        return self._access_node
+        if len(self._access_nodes) > 1:
+            warnings.warn(
+                f"'{self._name}' has {len(self._access_nodes)} access nodes, "
+                "only the first is returned; use 'access_nodes'",
+                UserWarning,
+                stacklevel=2,
+            )
+
+        return self._access_nodes[0]
 
     @access_node.setter
     def access_node(self, value: str) -> None:
-        self._access_node = value
+        warnings.warn(
+            "'access_node' is deprecated, use 'access_nodes' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self._access_nodes = [value]
+
+    @property
+    def access_nodes(self) -> list[str]:
+        """The environment variable access nodes as a list of strings.
+
+        """
+
+        return self._access_nodes
+
+    @access_nodes.setter
+    def access_nodes(self, value: list[str]) -> None:
+        self._access_nodes = value
 
     @property
     def comment(self) -> str | None:
@@ -175,5 +203,5 @@ class DbcEnvironmentVariable:
             self._initial_value,
             self._env_id,
             self._access_type,
-            self._access_node,
+            ','.join(self._access_nodes),
             "'" + self._comment + "'" if self._comment is not None else None)

@@ -311,7 +311,7 @@ class DbcParser(Parser):
         environment_variable = Sequence(
             'EV_', 'WORD', ':', 'NUMBER',
             '[', 'NUMBER', '|', 'NUMBER', ']',
-            'STRING', 'NUMBER', 'NUMBER', 'WORD', 'WORD', ';')
+            'STRING', 'NUMBER', 'NUMBER', 'WORD', DelimitedList('WORD'), ';')
 
         comment = Sequence(
             'CM_',
@@ -656,7 +656,10 @@ def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attrib
             initial_value=num(dbc_assert_type(envvar_tokens[10], str)),
             env_id=int(dbc_assert_type(envvar_tokens[11], str)),
             access_type=dbc_assert_type(envvar_tokens[12], str),
-            access_node=dbc_assert_type(envvar_tokens[13], str),
+            access_nodes=[
+                dbc_assert_type(access_node, str)
+                for access_node in dbc_assert_type(envvar_tokens[13], list)
+            ],
             comment=comments.envvars.get(short_name),
             dbc_specifics=DbcSpecifics(attributes=attributes.envvars.get(short_name),
                                        attribute_definitions=attribute_definitions))

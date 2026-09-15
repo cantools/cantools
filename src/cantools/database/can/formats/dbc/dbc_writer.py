@@ -1010,7 +1010,7 @@ def _dump_environment_variables(database: InternalDatabase) -> list[str]:
         # escape unit quotes
         unit = envvar.unit.replace('"', '\\"')
         envvar_lines.append(
-            f'EV_ {envvar.name}: {envvar.env_type} [{envvar.minimum}|{envvar.maximum}] "{unit}" {envvar.initial_value} {envvar.env_id} {envvar.access_type} {envvar.access_node};'
+            f'EV_ {envvar.name}: {envvar.env_type} [{envvar.minimum}|{envvar.maximum}] "{unit}" {envvar.initial_value} {envvar.env_id} {envvar.access_type} {",".join(envvar.access_nodes)};'
         )
 
     return envvar_lines

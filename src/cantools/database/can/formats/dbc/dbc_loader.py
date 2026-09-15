@@ -313,6 +313,9 @@ class DbcParser(Parser):
             '[', 'NUMBER', '|', 'NUMBER', ']',
             'STRING', 'NUMBER', 'NUMBER', 'WORD', DelimitedList('WORD'), ';')
 
+        environment_variable_data = Sequence(
+            'ENVVAR_DATA_', 'WORD', ':', 'NUMBER', ';')
+
         comment = Sequence(
             'CM_',
             choice(
@@ -405,6 +408,7 @@ class DbcParser(Parser):
                                             signal_multiplexer_values,
                                             message_add_sender,
                                             environment_variable,
+                                            environment_variable_data,
                                             nodes,
                                             ns,
                                             bs,
@@ -661,8 +665,20 @@ def _load_environment_variables(tokens: DbcTokens, comments: DbcComments, attrib
                 for access_node in dbc_assert_type(envvar_tokens[13], list)
             ],
             comment=comments.envvars.get(short_name),
+            data_size=None,
             dbc_specifics=DbcSpecifics(attributes=attributes.envvars.get(short_name),
                                        attribute_definitions=attribute_definitions))
+
+    for _envvar_data_tokens in tokens.get('ENVVAR_DATA_', []):
+        envvar_data_tokens = dbc_assert_type(_envvar_data_tokens, list)
+        short_name = dbc_assert_type(envvar_data_tokens[1], str)
+        long_name = _get_envvar_long_name(attributes, short_name)
+        envvar = environment_variables.get(long_name)
+
+        # an ENVVAR_DATA_ entry for an unknown variable is ignored rather
+        # than rejected, so that the rest of the database still loads
+        if envvar is not None:
+            envvar.data_size = int(dbc_assert_type(envvar_data_tokens[3], str))
 
     return environment_variables
 

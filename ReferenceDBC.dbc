@@ -1,0 +1,515 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: ABS_Presumed
+
+
+BO_ 520 Msg_208: 8 Vector__XXX
+ SG_ ID_0x208_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x208_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x208_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x208_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x208_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x208_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x208_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x208_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 521 Msg_209: 8 Vector__XXX
+ SG_ ID_0x209_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x209_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x209_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x209_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x209_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x209_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x209_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x209_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 528 Msg_210: 8 Vector__XXX
+ SG_ ID_0x210_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x210_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x210_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x210_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x210_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x210_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x210_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x210_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1376 Msg_560: 8 Vector__XXX
+ SG_ ID_0x560_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x560_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x560_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x560_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x560_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x560_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x560_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x560_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1504 Msg_5E0: 8 Vector__XXX
+ SG_ ID_0x5E0_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5E0_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5E0_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5E0_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5E0_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5E0_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5E0_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5E0_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1728 Msg_6C0: 8 Vector__XXX
+ SG_ ID_0x6C0_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6C0_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6C0_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6C0_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6C0_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6C0_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6C0_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6C0_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1377 Msg_561: 8 Vector__XXX
+ SG_ ID_0x561_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x561_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x561_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x561_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x561_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x561_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x561_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x561_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1889 Msg_761: 8 Vector__XXX
+ SG_ ID_0x761_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x761_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x761_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x761_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x761_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x761_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x761_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x761_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1409 Msg_581: 8 Vector__XXX
+ SG_ ID_0x581_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x581_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x581_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x581_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x581_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x581_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x581_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x581_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1441 Msg_5A1: 8 Vector__XXX
+ SG_ ID_0x5A1_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5A1_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5A1_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5A1_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5A1_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5A1_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5A1_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x5A1_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 865 Msg_361: 8 Vector__XXX
+ SG_ ID_0x361_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x361_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x361_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x361_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x361_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x361_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x361_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x361_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 929 Msg_3A1: 8 Vector__XXX
+ SG_ ID_0x3A1_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x3A1_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x3A1_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x3A1_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x3A1_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x3A1_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x3A1_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x3A1_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 129 Msg_081: 8 Vector__XXX
+ SG_ ID_0x081_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x081_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x081_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x081_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x081_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x081_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x081_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x081_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 161 Msg_0A1: 8 Vector__XXX
+ SG_ ID_0x0A1_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0A1_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0A1_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0A1_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0A1_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0A1_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0A1_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0A1_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 513 Msg_201: 8 Vector__XXX
+ SG_ ID_0x201_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x201_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x201_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x201_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x201_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x201_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x201_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x201_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 577 Msg_241: 8 Vector__XXX
+ SG_ ID_0x241_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x241_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x241_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x241_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x241_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x241_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x241_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x241_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 204 Msg_0CC: 5 ABS_Presumed
+ SG_ sig_0CC_AiM_Steering_Speed : 15|8@0+ (4,0) [0|1020] "deg/s" Vector__XXX
+ SG_ sig_0CC_b0_L4_Counter : 3|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ sig_0CC_b4_L2_Counter : 5|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ sig_0CC_b6_L2_Counter : 7|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ sig_0CC_AiM_SteeringAngle : 31|16@0- (0.1,0) [-3276.8|3276.7] "deg" Vector__XXX
+ SG_ ID_0x0CC_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0CC_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0CC_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0CC_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0CC_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 175 Msg_0AF: 8 ABS_Presumed
+ SG_ sig_0AF_b48_L12_Roll : 43|12@0+ (1,-2048) [-2048|2047] "" Vector__XXX
+ SG_ sig_0AF_b44_L12_Latitudinal_Acce : 39|12@0+ (1,-2048) [-2048|2047] "" Vector__XXX
+ SG_ sig_0AF_b24_L12_Pitch_Accel : 19|12@0+ (1,-2048) [-2048|2047] "" Vector__XXX
+ SG_ sig_0AF_b20_L4_Counter : 23|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ sig_0AF_b0_L8_CRC8 : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ ID_0x0AF_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0AF_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0AF_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0AF_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0AF_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0AF_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0AF_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x0AF_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1414 Msg_586: 8 ABS_Presumed
+ SG_ sig_586_b56_L12 : 51|12@0+ (1,0) [0|4095] "" Vector__XXX
+ SG_ sig_586_b32_L1_BrakeSwitch : 32|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_586_b46_L1 : 46|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_586_b28_L12 : 31|12@0+ (1,-2048) [-2048|2047] "" Vector__XXX
+ SG_ sig_586_b16_L8 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ sig_586_b2_L1 : 2|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_586_b8_L10 : 1|10@0+ (1,0) [0|1023] "" Vector__XXX
+ SG_ sig_586_b4_L1 : 4|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ID_0x586_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x586_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x586_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x586_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x586_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x586_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x586_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x586_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1382 Msg_566: 8 ABS_Presumed
+ SG_ sig_566_B56_L13_Distance_Meter_2 : 52|13@0+ (1,0) [0|8191] "" Vector__XXX
+ SG_ sig_566_B40_L13_Distance_Meter_1 : 36|13@0+ (1,0) [0|8191] "" Vector__XXX
+ SG_ sig_566_B24_L13_VehicleSpeed : 20|13@0+ (1,0) [0|8191] "" Vector__XXX
+ SG_ sig_566_b39_L1_Copy_1 : 39|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_566_b23_L1 : 23|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ID_0x566_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x566_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x566_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x566_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x566_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x566_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x566_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x566_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 422 Msg_1A6: 8 ABS_Presumed
+ SG_ ID_0x1A6_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x1A6_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x1A6_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x1A6_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x1A6_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x1A6_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x1A6_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x1A6_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 390 Msg_186: 8 ABS_Presumed
+ SG_ sig_186_b63_L6 : 52|6@0+ (1,0) [0|63] "" Vector__XXX
+ SG_ sig_186_b24_L12 : 19|12@0+ (1,-2048) [-2048|2047] "" Vector__XXX
+ SG_ ID_0x186_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x186_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x186_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x186_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x186_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x186_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x186_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x186_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 358 Msg_166: 8 ABS_Presumed
+ SG_ sig_166_b53_L3_Wheel_Encoded : 55|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ sig_166_b37_L3_Wheel_Encoded : 39|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ sig_166_b21_L3_Wheel_Encoded : 23|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ sig_166_b5_L3_Wheel_Encoded : 7|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ sig_166_b56_L13_WheelSpeed3 : 52|13@0+ (1,0) [0|8191] "" Vector__XXX
+ SG_ sig_166_b40_L13_WheelSpeed2 : 36|13@0+ (1,0) [0|8191] "" Vector__XXX
+ SG_ sig_166_b24_L13_WheelSpeed1 : 20|13@0+ (1,0) [0|8191] "" Vector__XXX
+ SG_ sig_166_b8_L13_WheelSpeed4 : 4|13@0+ (1,0) [0|8191] "" Vector__XXX
+ SG_ ID_0x166_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x166_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x166_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x166_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x166_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x166_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x166_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x166_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 326 Msg_146: 8 ABS_Presumed
+ SG_ sig_146_b61_L1 : 56|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_146_b55_L10 : 32|10@0+ (1,0) [0|1023] "" Vector__XXX
+ SG_ sig_146_b25_L3_counter : 27|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ sig_146_b0_L1 : 0|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_146_b3_L1 : 3|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ID_0x146_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x146_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x146_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x146_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x146_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x146_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x146_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x146_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 70 Msg_046: 8 ABS_Presumed
+ SG_ sig_056_b16_L10 : 9|10@0+ (1,0) [0|1023] "" Vector__XXX
+ SG_ sig_046_b10_L1 : 10|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_046_b6_L1 : 6|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_046_b29_L1 : 29|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ sig_046_b44_L12 : 39|12@0+ (1,-2048) [-2048|2047] "" Vector__XXX
+ SG_ ID_0x046_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x046_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x046_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x046_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x046_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x046_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x046_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x046_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 545 Msg_221: 8 Vector__XXX
+ SG_ ID_0x221_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x221_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x221_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x221_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x221_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x221_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x221_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x221_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 609 Msg_261: 8 Vector__XXX
+ SG_ ID_0x261_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x261_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x261_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x261_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x261_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x261_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x261_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x261_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1775 Msg_6EF: 8 ABS_Presumed
+ SG_ ID_0x6EF_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6EF_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6EF_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6EF_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6EF_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6EF_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6EF_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x6EF_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 75 Msg_04B: 8 Vector__XXX
+ SG_ ID_0x04B_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x04B_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x04B_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x04B_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x04B_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x04B_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x04B_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x04B_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 107 Msg_06B: 8 Vector__XXX
+ SG_ ID_0x06B_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x06B_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x06B_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x06B_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x06B_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x06B_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x06B_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x06B_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 345 Msg_159: 8 Vector__XXX
+ SG_ ID_0x159_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x159_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x159_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x159_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x159_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x159_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x159_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x159_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 523 Msg_20B: 8 Vector__XXX
+ SG_ ID_0x20B_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x20B_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x20B_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x20B_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x20B_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x20B_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x20B_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x20B_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 555 Msg_22B: 8 Vector__XXX
+ SG_ ID_0x22B_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x22B_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x22B_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x22B_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x22B_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x22B_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x22B_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x22B_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 587 Msg_24B: 8 Vector__XXX
+ SG_ ID_0x24B_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x24B_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x24B_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x24B_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x24B_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x24B_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x24B_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x24B_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1387 Msg_56B: 8 Vector__XXX
+ SG_ ID_0x56B_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x56B_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x56B_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x56B_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x56B_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x56B_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x56B_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x56B_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1406 Msg_57E: 2 Vector__XXX
+ SG_ ID_0x57E_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x57E_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1388 Msg_56C: 1 ABS_Presumed
+ SG_ ID_0x56C_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 515 Msg_203: 8 Vector__XXX
+ SG_ ID_0x203_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x203_B1 : 15|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x203_B2 : 23|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x203_B3 : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x203_B4 : 39|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x203_B5 : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x203_B6 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ID_0x203_B7 : 63|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1391 Msg_56F: 1 ABS_Presumed
+ SG_ ID_0x56F_B0 : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+
+
+
+CM_ "Automated DBC Message Creation tool by Mitch Minton";
+CM_ BO_ 520 "30Hz";
+CM_ BO_ 521 "30Hz";
+CM_ BO_ 528 "30Hz";
+CM_ BO_ 1376 "10Hz";
+CM_ BO_ 1504 "10Hz";
+CM_ BO_ 1728 "10Hz";
+CM_ BO_ 1377 "20Hz";
+CM_ BO_ 1889 "10Hz";
+CM_ BO_ 1409 "10Hz";
+CM_ BO_ 1441 "20Hz";
+CM_ BO_ 865 "100Hz";
+CM_ BO_ 929 "100Hz";
+CM_ BO_ 129 "100Hz";
+CM_ BO_ 161 "100Hz";
+CM_ BO_ 513 "100Hz";
+CM_ BO_ 577 "100Hz";
+CM_ BO_ 204 "100Hz ABS Presumed";
+CM_ SG_ 204 sig_0CC_AiM_Steering_Speed "Static 0x07";
+CM_ SG_ 204 sig_0CC_b0_L4_Counter "initial value 0: Counts from 0-15, ";
+CM_ SG_ 204 sig_0CC_b4_L2_Counter "Increments every message, 0,1,2,3, Repeat , initial value 0";
+CM_ SG_ 204 sig_0CC_b6_L2_Counter "Initial Value = 1, Decrements every 4 messages. 3,2,1,0, repeat";
+CM_ BO_ 175 "100Hz ABS Presumed";
+CM_ SG_ 175 sig_0AF_b48_L12_Roll "offset by raw 0x800";
+CM_ SG_ 175 sig_0AF_b44_L12_Latitudinal_Acce "offset by raw 0x800";
+CM_ SG_ 175 sig_0AF_b24_L12_Pitch_Accel "offset by raw 0x800";
+CM_ SG_ 175 sig_0AF_b20_L4_Counter "0 to 15 Counter";
+CM_ SG_ 175 sig_0AF_b0_L8_CRC8 "Polynomial: 0x1D
+
+;Init: 0xFF;
+
+RefIn: False;RefOut: False;
+
+XorOut: 0xFF";
+CM_ BO_ 1414 "10Hz ABS Presumed";
+CM_ BO_ 1382 "10Hz ABS Presumed";
+CM_ BO_ 422 "50 Hz ABS Presumed  ALL 0x00's";
+CM_ BO_ 390 "50 Hz ABS Presumed";
+CM_ BO_ 358 "50 Hz ABS Presumed";
+CM_ SG_ 358 sig_166_b24_L13_WheelSpeed1 "0kph = 44";
+CM_ BO_ 326 "50 Hz ABS Presumed";
+CM_ SG_ 326 sig_146_b25_L3_counter "initial value 1:Counter 0-7 and repeats,";
+CM_ BO_ 70 "50Hz - ABS presumed";
+CM_ SG_ 70 sig_046_b44_L12 "Offset of raw 0x800. Steering Wheel Angle?";
+CM_ BO_ 545 "30Hz";
+CM_ BO_ 609 "30Hz";
+CM_ BO_ 1775 "50Hz Maybe ABS - init 18 messages, static struct of 18 messages...";
+CM_ BO_ 75 "100Hz";
+CM_ BO_ 107 "100Hz";
+CM_ BO_ 345 "50 Hz";
+CM_ BO_ 523 "100Hz";
+CM_ BO_ 555 "100Hz";
+CM_ BO_ 587 "100Hz";
+CM_ BO_ 1387 "10Hz";
+CM_ BO_ 1406 "10Hz";
+CM_ BO_ 1388 "4Hz ABS Presumed Static 0x00
+";
+CM_ BO_ 515 "10Hz";
+CM_ BO_ 1391 "2Hz ABS Presumed Statice 0x00";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_ SG_  "SystemSignalLongSymbol" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+BA_DEF_DEF_  "SystemSignalLongSymbol" "";
+BA_ "SystemSignalLongSymbol" SG_ 175 sig_0AF_b44_L12_Latitudinal_Acce "sig_0AF_b44_L12_Latitudinal_Acceleration";
+

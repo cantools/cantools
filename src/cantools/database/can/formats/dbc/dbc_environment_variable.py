@@ -21,6 +21,7 @@ class DbcEnvironmentVariable:
                  access_type: str,
                  access_nodes: list[str],
                  comment: str | None,
+                 data_size: int | None,
                  dbc_specifics: "DbcSpecifics") -> None:
         self._name = name
         self._env_type = env_type
@@ -32,6 +33,7 @@ class DbcEnvironmentVariable:
         self._access_type = access_type
         self._access_nodes = access_nodes
         self._comment = comment
+        self._data_size = data_size
         self._dbc = dbc_specifics
 
     @property
@@ -168,6 +170,19 @@ class DbcEnvironmentVariable:
     @access_nodes.setter
     def access_nodes(self, value: list[str]) -> None:
         self._access_nodes = value
+
+    @property
+    def data_size(self) -> int | None:
+        """The size of the environment variable data in bytes, or ``None`` if
+        the database does not declare the variable as data.
+
+        """
+
+        return self._data_size
+
+    @data_size.setter
+    def data_size(self, value: int | None) -> None:
+        self._data_size = value
 
     @property
     def comment(self) -> str | None:

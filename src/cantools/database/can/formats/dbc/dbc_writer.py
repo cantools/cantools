@@ -1000,7 +1000,7 @@ def _dump_signal_mux_values(database: InternalDatabase) -> list[str]:
 
 
 def _dump_environment_variables(database: InternalDatabase) -> list[str]:
-    """Dump environment variables (EV_ entries)."""
+    """Dump environment variables (EV_ and ENVVAR_DATA_ entries)."""
     envvar_lines: list[str] = []
 
     if database.dbc is None:
@@ -1012,6 +1012,12 @@ def _dump_environment_variables(database: InternalDatabase) -> list[str]:
         envvar_lines.append(
             f'EV_ {envvar.name}: {envvar.env_type} [{envvar.minimum}|{envvar.maximum}] "{unit}" {envvar.initial_value} {envvar.env_id} {envvar.access_type} {",".join(envvar.access_nodes)};'
         )
+
+    for envvar in database.dbc.environment_variables.values():
+        if envvar.data_size is not None:
+            envvar_lines.append(
+                f'ENVVAR_DATA_ {envvar.name}: {envvar.data_size};'
+            )
 
     return envvar_lines
 

@@ -1,0 +1,25 @@
+FormatVersion=6.0 // Do not edit this line!
+Title="Untitled"
+
+{ENUMS}
+
+{SIGNALS}
+Sig=StatusWord unsigned 32
+Sig=StatusMsb unsigned 1
+Sig=StatusBitA unsigned 1
+Sig=StatusBitB unsigned 1
+
+{SENDRECEIVE}
+
+[BootLog]
+ID=75Fh
+Len=8
+Mux=Selector 0,24 0
+Sig=StatusBitA 33
+Sig=StatusBitB 34
+
+[BootLog]
+Len=8
+Mux=Flags 0,24 030000h
+Sig=StatusWord 32
+Sig=StatusMsb 63

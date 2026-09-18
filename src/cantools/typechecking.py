@@ -21,6 +21,9 @@ class Formats(NamedTuple):
     big_endian: CompiledFormatDict
     little_endian: CompiledFormatDict
     padding_mask: int
+    # Additional (big, little) codecs for overlapping signals. Each
+    # layer is internally non-overlapping so bitstruct can unpack it.
+    extra_layers: tuple[tuple[CompiledFormatDict, CompiledFormatDict], ...] = ()
 
 
 StringPathLike = str | os.PathLike[str]

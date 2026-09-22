@@ -2011,6 +2011,75 @@ class CanToolsDatabaseTest(unittest.TestCase):
         decoded = db.decode_message(frame_id, encoded, force_extended_id=True)
         self.assertEqual(decoded['Signal3'], 'bar')
 
+    @parameterized.expand([
+        ('a', 'A0h', 0xA0),
+        ('b', 'B0h', 0xB0),
+        ('c', 'C0h', 0xC0),
+        ('d', 'D0h', 0xD0),
+        ('e', 'E0h', 0xE0),
+        ('f', 'F0h', 0xF0),
+        ('digit_hex', '9Fh', 0x9F),
+        ('zero_padded_hex', '0A0h', 0xA0),
+        ('decimal', '160', 160),
+    ])
+    def test_sym_hexadecimal_multiplexer_value(self, _, value, expected):
+        database = cantools.database.load_string(f'''\
+FormatVersion=6.0 // Do not edit this line!
+Title="Hexadecimal multiplexer"
+
+{{SENDRECEIVE}}
+[Example]
+ID=100h
+Len=2
+Mux=Selector 0,8 {value}
+Var=Value unsigned 8,8
+''', 'sym')
+
+        message = database.messages[0]
+        signal = message.get_signal_by_name('Value')
+        self.assertEqual(signal.multiplexer_ids, [expected])
+        self.assertEqual(message.decode(bytes([expected, 42])),
+                         {'Selector': expected, 'Value': 42})
+
+    def test_sym_invalid_hexadecimal_multiplexer_value(self):
+        with self.assertRaisesRegex(UnsupportedDatabaseFormatError,
+                                    'Invalid syntax'):
+            cantools.database.load_string('''\
+FormatVersion=6.0 // Do not edit this line!
+Title="Invalid multiplexer value"
+
+{SENDRECEIVE}
+[Example]
+ID=100h
+Len=2
+Mux=Selector 0,8 A0h_suffix
+Var=Value unsigned 8,8
+''', 'sym')
+
+    def test_sym_hexadecimal_name(self):
+        database = cantools.database.load_string('''\
+FormatVersion=6.0 // Do not edit this line!
+Title="Hexadecimal-looking name"
+
+{ENUMS}
+Enum=Ah(0="zero")
+
+{SIGNALS}
+Sig=Value Ah 8
+Sig=Character char
+
+{SENDRECEIVE}
+[Example]
+ID=100h
+Len=2
+Sig=Value 0
+Sig=Character 8
+''', 'sym')
+
+        message = database.messages[0]
+        self.assertEqual(message.get_signal_by_name('Value').choices, {0: 'zero'})
+        self.assertEqual(message.get_signal_by_name('Character').length, 8)
+
     def test_jopp_6_0_sym(self):
         self.internal_test_jopp_6_0_sym(False)
 

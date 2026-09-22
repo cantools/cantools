@@ -9,10 +9,12 @@ from itertools import groupby
 from typing import TYPE_CHECKING
 
 from textparser import (
+    MISMATCH,
     Any,
     DelimitedList,
     Optional,
     Parser,
+    Pattern,
     Sequence,
     Token,
     TokenizeError,
@@ -46,6 +48,19 @@ MAX_SIGNAL_NAME_LENGTH = 32
 SEND_MESSAGE_SENDER = 'ECU'
 # If a message is in the RECEIVE section of a SYM file, it is sent by the Peripheral devices
 RECEIVE_MESSAGE_SENDER = 'Peripherals'
+
+
+class _HexNumber(Pattern):
+    """Recognize hexadecimal values without reclassifying symbol names."""
+
+    def match(self, tokens):
+        token = tokens.peek()
+        if (token.kind == 'HEXNUMBER'
+                or (token.kind == 'WORD'
+                    and re.fullmatch(r'[A-F][0-9A-F]*h', token.value))):
+            return tokens.get_value()
+
+        return MISMATCH
 
 
 class SymParser60(Parser):
@@ -231,7 +246,7 @@ class SymParser60(Parser):
                                        Optional('COMMENT')),
                               Sequence('Len', '=', 'NUMBER'),
                               Sequence('Mux', '=', Any(), 'NUMBER', ',',
-                                       'NUMBER', choice('NUMBER', 'HEXNUMBER'),
+                                       'NUMBER', choice('NUMBER', _HexNumber()),
                                        ZeroOrMore(choice('-t', '-m')),
                                        Optional('COMMENT')),
                               Sequence('CycleTime', '=', 'NUMBER', Optional('-p')),

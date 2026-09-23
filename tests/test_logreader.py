@@ -339,6 +339,15 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
         self.assertEqual(outp.timestamp.tzinfo, utc_plus(2))
 
+        outp = cantools.logreader.Parser(tz=utc_plus(2)).parse("(1752923603.673608) vcan0 00000123#R8")
+        self.assertEqual(outp.channel, 'vcan0')
+        self.assertEqual(outp.frame_id, 0x123)
+        self.assertEqual(outp.is_extended_frame, True)
+        self.assertEqual(outp.data, b'')
+        self.assertEqual(outp.is_remote_frame, True)
+        self.assertEqual(outp.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
+        self.assertEqual(outp.timestamp.tzinfo, utc_plus(2))
+
     def test_candump_log_absolute_timestamp(self):
         parser = cantools.logreader.Parser()
 

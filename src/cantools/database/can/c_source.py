@@ -875,11 +875,16 @@ def _get(value: _T1 | None, default: _T2) -> _T1 | _T2:
 def _format_comment(comment: str | None) -> str:
     if comment:
         return '\n'.join([
-            '     * ' + line.rstrip()
+            '     * ' + _escape_c_comment(line.rstrip())
             for line in comment.splitlines()
         ]) + '\n     *\n'
     else:
         return ''
+
+
+def _escape_c_comment(comment: str) -> str:
+    """Keep DBC text from opening or closing a generated C comment."""
+    return comment.replace('/*', '/ *').replace('*/', '* /')
 
 
 def _format_range(cg_signal: "CodeGenSignal") -> str:
@@ -1220,7 +1225,7 @@ def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> tuple[st
     if cg_message.message.comment is None:
         comment = ''
     else:
-        comment = f' * {cg_message.message.comment}\n *\n'
+        comment = f' * {_escape_c_comment(cg_message.message.comment)}\n *\n'
 
     return comment, members
 

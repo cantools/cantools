@@ -129,6 +129,15 @@ static inline uint32_t unpack_right_shift_u32(
     return (uint32_t)((uint32_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return (uint64_t)(int64_t)value;
+    }
+
+    return (uint64_t)value;
+}
+
 int abs_bremse_33_pack(
     uint8_t *dst_p,
     const struct abs_bremse_33_t *src_p,
@@ -184,7 +193,7 @@ int abs_bremse_33_init(struct abs_bremse_33_t *msg_p)
 
 uint16_t abs_bremse_33_whlspeed_fl_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_33_whlspeed_fl_decode(uint16_t value)
@@ -204,7 +213,7 @@ bool abs_bremse_33_whlspeed_fl_is_in_phys_range(double value)
 
 uint16_t abs_bremse_33_whlspeed_fr_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_33_whlspeed_fr_decode(uint16_t value)
@@ -224,7 +233,7 @@ bool abs_bremse_33_whlspeed_fr_is_in_phys_range(double value)
 
 uint16_t abs_bremse_33_whlspeed_rl_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_33_whlspeed_rl_decode(uint16_t value)
@@ -244,7 +253,7 @@ bool abs_bremse_33_whlspeed_rl_is_in_phys_range(double value)
 
 uint16_t abs_bremse_33_whlspeed_rr_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_33_whlspeed_rr_decode(uint16_t value)
@@ -509,7 +518,7 @@ int abs_mm5_10_tx1_init(struct abs_mm5_10_tx1_t *msg_p)
 
 uint16_t abs_mm5_10_tx1_yaw_rate_encode(double value)
 {
-    return (uint16_t)((value - -163.84) / 0.005);
+    return (uint16_t)(cantools_unsigned_from_double((value - -163.84) / 0.005));
 }
 
 double abs_mm5_10_tx1_yaw_rate_decode(uint16_t value)
@@ -529,7 +538,7 @@ bool abs_mm5_10_tx1_yaw_rate_is_in_phys_range(double value)
 
 uint16_t abs_mm5_10_tx1_ay1_encode(double value)
 {
-    return (uint16_t)((value - -4.1768) / 0.000127465);
+    return (uint16_t)(cantools_unsigned_from_double((value - -4.1768) / 0.000127465));
 }
 
 double abs_mm5_10_tx1_ay1_decode(uint16_t value)
@@ -594,7 +603,7 @@ int abs_mm5_10_tx2_init(struct abs_mm5_10_tx2_t *msg_p)
 
 uint16_t abs_mm5_10_tx2_roll_rate_encode(double value)
 {
-    return (uint16_t)((value - -163.84) / 0.005);
+    return (uint16_t)(cantools_unsigned_from_double((value - -163.84) / 0.005));
 }
 
 double abs_mm5_10_tx2_roll_rate_decode(uint16_t value)
@@ -616,7 +625,7 @@ bool abs_mm5_10_tx2_roll_rate_is_in_phys_range(double value)
 
 uint16_t abs_mm5_10_tx2_ax1_encode(double value)
 {
-    return (uint16_t)((value - -4.1768) / 0.000127465);
+    return (uint16_t)(cantools_unsigned_from_double((value - -4.1768) / 0.000127465));
 }
 
 double abs_mm5_10_tx2_ax1_decode(uint16_t value)
@@ -677,7 +686,7 @@ int abs_mm5_10_tx3_init(struct abs_mm5_10_tx3_t *msg_p)
 
 uint16_t abs_mm5_10_tx3_az_encode(double value)
 {
-    return (uint16_t)((value - -4.1768) / 0.000127465);
+    return (uint16_t)(cantools_unsigned_from_double((value - -4.1768) / 0.000127465));
 }
 
 double abs_mm5_10_tx3_az_decode(uint16_t value)
@@ -750,7 +759,7 @@ int abs_bremse_2_init(struct abs_bremse_2_t *msg_p)
 
 uint16_t abs_bremse_2_whlspeed_fl_bremse2_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_2_whlspeed_fl_bremse2_decode(uint16_t value)
@@ -770,7 +779,7 @@ bool abs_bremse_2_whlspeed_fl_bremse2_is_in_phys_range(double value)
 
 uint16_t abs_bremse_2_whlspeed_fr_bremse2_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_2_whlspeed_fr_bremse2_decode(uint16_t value)
@@ -790,7 +799,7 @@ bool abs_bremse_2_whlspeed_fr_bremse2_is_in_phys_range(double value)
 
 uint16_t abs_bremse_2_whlspeed_rl_bremse2_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_2_whlspeed_rl_bremse2_decode(uint16_t value)
@@ -810,7 +819,7 @@ bool abs_bremse_2_whlspeed_rl_bremse2_is_in_phys_range(double value)
 
 uint16_t abs_bremse_2_whlspeed_rr_bremse2_encode(double value)
 {
-    return (uint16_t)(value / 0.015625);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.015625));
 }
 
 double abs_bremse_2_whlspeed_rr_bremse2_decode(uint16_t value)
@@ -869,7 +878,7 @@ int abs_abs_switch_init(struct abs_abs_switch_t *msg_p)
 
 uint8_t abs_abs_switch_abs_switchposition_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_abs_switch_abs_switchposition_decode(uint8_t value)
@@ -970,7 +979,7 @@ int abs_bremse_31_init(struct abs_bremse_31_t *msg_p)
 
 uint16_t abs_bremse_31_idle_time_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_31_idle_time_decode(uint16_t value)
@@ -1043,7 +1052,7 @@ int abs_bremse_32_init(struct abs_bremse_32_t *msg_p)
 
 uint8_t abs_bremse_32_acc_fa_encode(double value)
 {
-    return (uint8_t)(value / 0.05);
+    return (uint8_t)(cantools_unsigned_from_double(value / 0.05));
 }
 
 double abs_bremse_32_acc_fa_decode(uint8_t value)
@@ -1063,7 +1072,7 @@ bool abs_bremse_32_acc_fa_is_in_phys_range(double value)
 
 uint8_t abs_bremse_32_acc_ra_encode(double value)
 {
-    return (uint8_t)(value / 0.05);
+    return (uint8_t)(cantools_unsigned_from_double(value / 0.05));
 }
 
 double abs_bremse_32_acc_ra_decode(uint8_t value)
@@ -1083,7 +1092,7 @@ bool abs_bremse_32_acc_ra_is_in_phys_range(double value)
 
 uint8_t abs_bremse_32_wheel_quality_fl_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_32_wheel_quality_fl_decode(uint8_t value)
@@ -1103,7 +1112,7 @@ bool abs_bremse_32_wheel_quality_fl_is_in_phys_range(double value)
 
 uint8_t abs_bremse_32_wheel_quality_fr_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_32_wheel_quality_fr_decode(uint8_t value)
@@ -1123,7 +1132,7 @@ bool abs_bremse_32_wheel_quality_fr_is_in_phys_range(double value)
 
 uint8_t abs_bremse_32_wheel_quality_rl_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_32_wheel_quality_rl_decode(uint8_t value)
@@ -1143,7 +1152,7 @@ bool abs_bremse_32_wheel_quality_rl_is_in_phys_range(double value)
 
 uint8_t abs_bremse_32_wheel_quality_rr_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_32_wheel_quality_rr_decode(uint8_t value)
@@ -1216,7 +1225,7 @@ int abs_bremse_51_init(struct abs_bremse_51_t *msg_p)
 
 uint16_t abs_bremse_51_ax1_abs_int_encode(double value)
 {
-    return (uint16_t)((value - -4.1768) / 0.00012742);
+    return (uint16_t)(cantools_unsigned_from_double((value - -4.1768) / 0.00012742));
 }
 
 double abs_bremse_51_ax1_abs_int_decode(uint16_t value)
@@ -1238,7 +1247,7 @@ bool abs_bremse_51_ax1_abs_int_is_in_phys_range(double value)
 
 uint16_t abs_bremse_51_ay1_abs_int_encode(double value)
 {
-    return (uint16_t)((value - -4.1768) / 0.00012742);
+    return (uint16_t)(cantools_unsigned_from_double((value - -4.1768) / 0.00012742));
 }
 
 double abs_bremse_51_ay1_abs_int_decode(uint16_t value)
@@ -1260,7 +1269,7 @@ bool abs_bremse_51_ay1_abs_int_is_in_phys_range(double value)
 
 uint8_t abs_bremse_51_if_variant_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_51_if_variant_decode(uint8_t value)
@@ -1280,7 +1289,7 @@ bool abs_bremse_51_if_variant_is_in_phys_range(double value)
 
 uint8_t abs_bremse_51_if_revision_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_51_if_revision_decode(uint8_t value)
@@ -1300,7 +1309,7 @@ bool abs_bremse_51_if_revision_is_in_phys_range(double value)
 
 uint8_t abs_bremse_51_if_chksum_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_51_if_chksum_decode(uint8_t value)
@@ -1495,7 +1504,7 @@ int abs_bremse_52_init(struct abs_bremse_52_t *msg_p)
 
 uint8_t abs_bremse_52_mplx_sw_info_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_mplx_sw_info_decode(uint8_t value)
@@ -1517,7 +1526,7 @@ bool abs_bremse_52_mplx_sw_info_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_sw_version_high_upper_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_sw_version_high_upper_decode(uint8_t value)
@@ -1539,7 +1548,7 @@ bool abs_bremse_52_sw_version_high_upper_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_bb_dig1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_bb_dig1_decode(uint8_t value)
@@ -1561,7 +1570,7 @@ bool abs_bremse_52_bb_dig1_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_01_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_01_decode(uint8_t value)
@@ -1583,7 +1592,7 @@ bool abs_bremse_52_appl_id_01_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_08_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_08_decode(uint8_t value)
@@ -1605,7 +1614,7 @@ bool abs_bremse_52_appl_id_08_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_date_01_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_date_01_decode(uint8_t value)
@@ -1625,7 +1634,7 @@ bool abs_bremse_52_appl_date_01_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_sw_can_ident_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_sw_can_ident_decode(uint8_t value)
@@ -1647,7 +1656,7 @@ bool abs_bremse_52_sw_can_ident_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_hu_date_year_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_hu_date_year_decode(uint8_t value)
@@ -1667,7 +1676,7 @@ bool abs_bremse_52_hu_date_year_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_sw_version_high_lower_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_sw_version_high_lower_decode(uint8_t value)
@@ -1689,7 +1698,7 @@ bool abs_bremse_52_sw_version_high_lower_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_bb_dig2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_bb_dig2_decode(uint8_t value)
@@ -1711,7 +1720,7 @@ bool abs_bremse_52_bb_dig2_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_02_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_02_decode(uint8_t value)
@@ -1733,7 +1742,7 @@ bool abs_bremse_52_appl_id_02_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_09_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_09_decode(uint8_t value)
@@ -1755,7 +1764,7 @@ bool abs_bremse_52_appl_id_09_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_date_02_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_date_02_decode(uint8_t value)
@@ -1775,7 +1784,7 @@ bool abs_bremse_52_appl_date_02_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_hu_date_month_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_hu_date_month_decode(uint8_t value)
@@ -1795,7 +1804,7 @@ bool abs_bremse_52_hu_date_month_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_sw_version_mid_upper_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_sw_version_mid_upper_decode(uint8_t value)
@@ -1817,7 +1826,7 @@ bool abs_bremse_52_sw_version_mid_upper_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_bb_dig3_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_bb_dig3_decode(uint8_t value)
@@ -1839,7 +1848,7 @@ bool abs_bremse_52_bb_dig3_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_03_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_03_decode(uint8_t value)
@@ -1861,7 +1870,7 @@ bool abs_bremse_52_appl_id_03_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_10_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_10_decode(uint8_t value)
@@ -1883,7 +1892,7 @@ bool abs_bremse_52_appl_id_10_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_date_03_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_date_03_decode(uint8_t value)
@@ -1903,7 +1912,7 @@ bool abs_bremse_52_appl_date_03_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_hu_date_day_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_hu_date_day_decode(uint8_t value)
@@ -1923,7 +1932,7 @@ bool abs_bremse_52_hu_date_day_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_sw_version_mid_lower_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_sw_version_mid_lower_decode(uint8_t value)
@@ -1945,7 +1954,7 @@ bool abs_bremse_52_sw_version_mid_lower_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_bb_dig4_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_bb_dig4_decode(uint8_t value)
@@ -1967,7 +1976,7 @@ bool abs_bremse_52_bb_dig4_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_04_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_04_decode(uint8_t value)
@@ -1989,7 +1998,7 @@ bool abs_bremse_52_appl_id_04_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_11_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_11_decode(uint8_t value)
@@ -2011,7 +2020,7 @@ bool abs_bremse_52_appl_id_11_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_date_04_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_date_04_decode(uint8_t value)
@@ -2031,7 +2040,7 @@ bool abs_bremse_52_appl_date_04_is_in_phys_range(double value)
 
 uint32_t abs_bremse_52_ecu_serial_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_ecu_serial_decode(uint32_t value)
@@ -2051,7 +2060,7 @@ bool abs_bremse_52_ecu_serial_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_sw_version_low_upper_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_sw_version_low_upper_decode(uint8_t value)
@@ -2073,7 +2082,7 @@ bool abs_bremse_52_sw_version_low_upper_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_bb_dig5_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_bb_dig5_decode(uint8_t value)
@@ -2095,7 +2104,7 @@ bool abs_bremse_52_bb_dig5_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_05_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_05_decode(uint8_t value)
@@ -2117,7 +2126,7 @@ bool abs_bremse_52_appl_id_05_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_12_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_12_decode(uint8_t value)
@@ -2139,7 +2148,7 @@ bool abs_bremse_52_appl_id_12_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_date_05_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_date_05_decode(uint8_t value)
@@ -2159,7 +2168,7 @@ bool abs_bremse_52_appl_date_05_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_sw_version_low_lower_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_sw_version_low_lower_decode(uint8_t value)
@@ -2181,7 +2190,7 @@ bool abs_bremse_52_sw_version_low_lower_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_bb_dig6_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_bb_dig6_decode(uint8_t value)
@@ -2203,7 +2212,7 @@ bool abs_bremse_52_bb_dig6_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_06_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_06_decode(uint8_t value)
@@ -2225,7 +2234,7 @@ bool abs_bremse_52_appl_id_06_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_13_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_13_decode(uint8_t value)
@@ -2247,7 +2256,7 @@ bool abs_bremse_52_appl_id_13_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_date_06_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_date_06_decode(uint8_t value)
@@ -2267,7 +2276,7 @@ bool abs_bremse_52_appl_date_06_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_bb_dig7_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_bb_dig7_decode(uint8_t value)
@@ -2289,7 +2298,7 @@ bool abs_bremse_52_bb_dig7_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_07_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_07_decode(uint8_t value)
@@ -2311,7 +2320,7 @@ bool abs_bremse_52_appl_id_07_is_in_phys_range(double value)
 
 uint8_t abs_bremse_52_appl_id_14_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_52_appl_id_14_decode(uint8_t value)
@@ -2382,7 +2391,7 @@ int abs_bremse_50_init(struct abs_bremse_50_t *msg_p)
 
 uint16_t abs_bremse_50_brake_bal_at50_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double abs_bremse_50_brake_bal_at50_decode(uint16_t value)
@@ -2402,7 +2411,7 @@ bool abs_bremse_50_brake_bal_at50_is_in_phys_range(double value)
 
 uint8_t abs_bremse_50_brake_bal_at50_advice_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_50_brake_bal_at50_advice_decode(uint8_t value)
@@ -2422,7 +2431,7 @@ bool abs_bremse_50_brake_bal_at50_advice_is_in_phys_range(double value)
 
 uint16_t abs_bremse_50_brake_bal_pct_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double abs_bremse_50_brake_bal_pct_decode(uint16_t value)
@@ -2442,7 +2451,7 @@ bool abs_bremse_50_brake_bal_pct_is_in_phys_range(double value)
 
 uint8_t abs_bremse_50_brake_bal_pct_advice_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_50_brake_bal_pct_advice_decode(uint8_t value)
@@ -2553,7 +2562,7 @@ int abs_bremse_53_init(struct abs_bremse_53_t *msg_p)
 
 uint8_t abs_bremse_53_switch_position_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_switch_position_decode(uint8_t value)
@@ -2593,7 +2602,7 @@ bool abs_bremse_53_p_fa_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_bls_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_bls_decode(uint8_t value)
@@ -2613,7 +2622,7 @@ bool abs_bremse_53_bls_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_bremse_53_cnt_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_bremse_53_cnt_decode(uint8_t value)
@@ -2633,7 +2642,7 @@ bool abs_bremse_53_bremse_53_cnt_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_abs_malfunction_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_abs_malfunction_decode(uint8_t value)
@@ -2653,7 +2662,7 @@ bool abs_bremse_53_abs_malfunction_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_abs_active_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_abs_active_decode(uint8_t value)
@@ -2673,7 +2682,7 @@ bool abs_bremse_53_abs_active_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_ebd_lamp_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_ebd_lamp_decode(uint8_t value)
@@ -2693,7 +2702,7 @@ bool abs_bremse_53_ebd_lamp_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_abs_lamp_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_abs_lamp_decode(uint8_t value)
@@ -2713,7 +2722,7 @@ bool abs_bremse_53_abs_lamp_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_fl_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_fl_decode(uint8_t value)
@@ -2733,7 +2742,7 @@ bool abs_bremse_53_diag_fl_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_fr_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_fr_decode(uint8_t value)
@@ -2753,7 +2762,7 @@ bool abs_bremse_53_diag_fr_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_rl_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_rl_decode(uint8_t value)
@@ -2773,7 +2782,7 @@ bool abs_bremse_53_diag_rl_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_rr_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_rr_decode(uint8_t value)
@@ -2793,7 +2802,7 @@ bool abs_bremse_53_diag_rr_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_abs_unit_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_abs_unit_decode(uint8_t value)
@@ -2813,7 +2822,7 @@ bool abs_bremse_53_diag_abs_unit_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_fuse_valve_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_fuse_valve_decode(uint8_t value)
@@ -2833,7 +2842,7 @@ bool abs_bremse_53_diag_fuse_valve_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_fuse_pump_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_fuse_pump_decode(uint8_t value)
@@ -2853,7 +2862,7 @@ bool abs_bremse_53_diag_fuse_pump_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_p_fa_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_p_fa_decode(uint8_t value)
@@ -2873,7 +2882,7 @@ bool abs_bremse_53_diag_p_fa_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_p_ra_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_p_ra_decode(uint8_t value)
@@ -2893,7 +2902,7 @@ bool abs_bremse_53_diag_p_ra_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_diag_yrs_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_diag_yrs_decode(uint8_t value)
@@ -2913,7 +2922,7 @@ bool abs_bremse_53_diag_yrs_is_in_phys_range(double value)
 
 uint8_t abs_bremse_53_abs_fault_info_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double abs_bremse_53_abs_fault_info_decode(uint8_t value)

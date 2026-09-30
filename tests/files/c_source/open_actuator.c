@@ -81,6 +81,15 @@ static inline uint16_t unpack_right_shift_u16(
     return (uint16_t)((uint16_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return (uint64_t)(int64_t)value;
+    }
+
+    return (uint64_t)value;
+}
+
 int open_actuator_control_cmd_pack(
     uint8_t *dst_p,
     const struct open_actuator_control_cmd_t *src_p,
@@ -153,7 +162,7 @@ int open_actuator_control_cmd_init(struct open_actuator_control_cmd_t *msg_p)
 
 uint8_t open_actuator_control_cmd_crc8_cmd1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_control_cmd_crc8_cmd1_decode(uint8_t value)
@@ -175,7 +184,7 @@ bool open_actuator_control_cmd_crc8_cmd1_is_in_phys_range(double value)
 
 uint8_t open_actuator_control_cmd_target_mode_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_control_cmd_target_mode_decode(uint8_t value)
@@ -195,7 +204,7 @@ bool open_actuator_control_cmd_target_mode_is_in_phys_range(double value)
 
 uint8_t open_actuator_control_cmd_target_motor_id_cmd1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_control_cmd_target_motor_id_cmd1_decode(uint8_t value)
@@ -255,7 +264,7 @@ bool open_actuator_control_cmd_torque_command_8_is_in_phys_range(double value)
 
 uint8_t open_actuator_control_cmd_torque_close_loop_max_32_encode(double value)
 {
-    return (uint8_t)(value / 0.186666);
+    return (uint8_t)(cantools_unsigned_from_double(value / 0.186666));
 }
 
 double open_actuator_control_cmd_torque_close_loop_max_32_decode(uint8_t value)
@@ -275,7 +284,7 @@ bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_phys_range(double 
 
 uint8_t open_actuator_control_cmd_counter_cmd1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_control_cmd_counter_cmd1_decode(uint8_t value)
@@ -344,7 +353,7 @@ int open_actuator_limits_cmd_init(struct open_actuator_limits_cmd_t *msg_p)
 
 uint8_t open_actuator_limits_cmd_crc8_cmd2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_limits_cmd_crc8_cmd2_decode(uint8_t value)
@@ -366,7 +375,7 @@ bool open_actuator_limits_cmd_crc8_cmd2_is_in_phys_range(double value)
 
 uint8_t open_actuator_limits_cmd_counter_cmd2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_limits_cmd_counter_cmd2_decode(uint8_t value)
@@ -386,7 +395,7 @@ bool open_actuator_limits_cmd_counter_cmd2_is_in_phys_range(double value)
 
 uint16_t open_actuator_limits_cmd_velocity_limit_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_limits_cmd_velocity_limit_decode(uint16_t value)
@@ -410,7 +419,7 @@ bool open_actuator_limits_cmd_velocity_limit_is_in_phys_range(double value)
 
 uint16_t open_actuator_limits_cmd_accel_limit_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_limits_cmd_accel_limit_decode(uint16_t value)
@@ -492,7 +501,7 @@ int open_actuator_control_status_init(struct open_actuator_control_status_t *msg
 
 uint8_t open_actuator_control_status_crc8_stat1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_control_status_crc8_stat1_decode(uint8_t value)
@@ -514,7 +523,7 @@ bool open_actuator_control_status_crc8_stat1_is_in_phys_range(double value)
 
 uint8_t open_actuator_control_status_counter_stat1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_control_status_counter_stat1_decode(uint8_t value)
@@ -554,7 +563,7 @@ bool open_actuator_control_status_torque_actual_is_in_phys_range(double value)
 
 uint8_t open_actuator_control_status_torque_close_loop_actual_encode(double value)
 {
-    return (uint8_t)(value / 0.125);
+    return (uint8_t)(cantools_unsigned_from_double(value / 0.125));
 }
 
 double open_actuator_control_status_torque_close_loop_actual_decode(uint8_t value)
@@ -617,7 +626,7 @@ int open_actuator_system_status_init(struct open_actuator_system_status_t *msg_p
 
 uint8_t open_actuator_system_status_crc8_stat2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_system_status_crc8_stat2_decode(uint8_t value)
@@ -639,7 +648,7 @@ bool open_actuator_system_status_crc8_stat2_is_in_phys_range(double value)
 
 uint8_t open_actuator_system_status_counter_stat2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_system_status_counter_stat2_decode(uint8_t value)
@@ -659,7 +668,7 @@ bool open_actuator_system_status_counter_stat2_is_in_phys_range(double value)
 
 uint8_t open_actuator_system_status_chip_temp_encode(double value)
 {
-    return (uint8_t)(value - -60.0);
+    return (uint8_t)(cantools_unsigned_from_double(value - -60.0));
 }
 
 double open_actuator_system_status_chip_temp_decode(uint8_t value)
@@ -737,7 +746,7 @@ int open_actuator_torque_sensor_data_init(struct open_actuator_torque_sensor_dat
 
 uint8_t open_actuator_torque_sensor_data_crc8_data1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_torque_sensor_data_crc8_data1_decode(uint8_t value)
@@ -759,7 +768,7 @@ bool open_actuator_torque_sensor_data_crc8_data1_is_in_phys_range(double value)
 
 uint8_t open_actuator_torque_sensor_data_counter_data1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_torque_sensor_data_counter_data1_decode(uint8_t value)

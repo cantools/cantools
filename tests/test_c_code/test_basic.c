@@ -573,6 +573,30 @@ void test_encode_decode(void) {
     TEST_ASSERT_DOUBLE_WITHIN(ABS_TOL, motohawk_example_message_temperature_decode(100), 251.0);
 }
 
+void test_unsigned_encode_negative(void) {
+    int value;
+
+    /* Check both sides of zero and wraparound boundaries repeatedly. */
+    for (value = -257; value <= 256; value++) {
+        TEST_ASSERT_EQUAL_UINT8((uint8_t)value,
+                                motohawk_example_message_enable_encode((double)value));
+    }
+
+    /* Scaling, rounding and all generated unsigned integer widths. */
+    TEST_ASSERT_EQUAL_UINT8(255u,
+                            motohawk_example_message_average_radius_encode(-0.1));
+    TEST_ASSERT_EQUAL_UINT8(254u,
+                            motohawk_use_round_example_message_average_radius_encode(-0.2));
+    TEST_ASSERT_EQUAL_UINT16(UINT16_MAX,
+                             abs_bremse_33_whlspeed_fr_encode(-0.015625));
+    TEST_ASSERT_EQUAL_UINT32(UINT32_MAX,
+                             vehicle_rt_dl1_mk3_gps_time_gps_time_encode(-0.001));
+    TEST_ASSERT_EQUAL_UINT64(UINT64_MAX,
+                             padding_bit_order_msg3_l_encode(-1.0));
+    TEST_ASSERT_EQUAL_UINT64(0x8000000000000000ull,
+                             padding_bit_order_msg3_l_encode(9223372036854775808.0));
+}
+
 void test_encode_decode_trunc_vs_round(void) {
     /* Scale=0.1 and offset=0. Truncation */
     TEST_ASSERT_EQUAL(motohawk_example_message_average_radius_encode(2.000000), 20);

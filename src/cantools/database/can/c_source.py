@@ -136,7 +136,20 @@ SOURCE_FMT = '''\
 #include "{header}"
 
 {helpers}\
+{unsigned_encode_helper}\
 {definitions}\
+'''
+
+UNSIGNED_ENCODE_HELPER_FMT = '''\
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return (uint64_t)(int64_t)value;
+    }
+
+    return (uint64_t)value;
+}
+
 '''
 
 FUZZER_SOURCE_FMT = '''\
@@ -1597,6 +1610,10 @@ def _generate_definitions(database_name: str,
 
             if floating_point_numbers:
                 if is_sender:
+                    if cg_signal.type_name.startswith('uint'):
+                        # Negative float-to-unsigned conversion is undefined
+                        # in C; the helper converts via a signed integer.
+                        encode = f'cantools_unsigned_from_double({encode})'
                     signal_definition += SIGNAL_DEFINITION_ENCODE_FMT.format(
                         database_name=database_name,
                         message_name=cg_message.snake_name,
@@ -1832,6 +1849,13 @@ def generate(database: "Database",
                                                       node_name,
                                                       use_round)
     helpers = _generate_helpers(helper_kinds)
+    unsigned_encode_helper = ''
+    if floating_point_numbers and any(
+            _is_sender(cg_message, node_name) and any(
+                cg_signal.type_name.startswith('uint')
+                for cg_signal in cg_message.cg_signals)
+            for cg_message in cg_messages):
+        unsigned_encode_helper = UNSIGNED_ENCODE_HELPER_FMT
 
     header = HEADER_FMT.format(file_name=header_name,
                                version=__version__,
@@ -1856,6 +1880,7 @@ def generate(database: "Database",
                                date=date,
                                header=header_name,
                                helpers=helpers,
+                               unsigned_encode_helper=unsigned_encode_helper,
                                definitions=definitions,
                                includes=''.join(includes))
 

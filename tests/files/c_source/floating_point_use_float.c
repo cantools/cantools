@@ -113,6 +113,15 @@ static inline uint64_t unpack_right_shift_u64(
     return (uint64_t)((uint64_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return (uint64_t)(int64_t)value;
+    }
+
+    return (uint64_t)value;
+}
+
 int floating_point_use_float_message1_pack(
     uint8_t *dst_p,
     const struct floating_point_use_float_message1_t *src_p,
@@ -348,7 +357,7 @@ int floating_point_use_float_message3_init(struct floating_point_use_float_messa
 
 uint8_t floating_point_use_float_message3_signal3_encode(float value)
 {
-    return (uint8_t)((value - -0.125f) / 0.001f);
+    return (uint8_t)(cantools_unsigned_from_double((value - -0.125f) / 0.001f));
 }
 
 float floating_point_use_float_message3_signal3_decode(uint8_t value)

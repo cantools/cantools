@@ -6147,6 +6147,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
             break
         self.assert_dbc_dump(db, filename)
 
+    def test_relation_environment_variable_attributes(self):
+        filename = 'tests/files/dbc/BU_EV_REL_.dbc'
+        db = cantools.database.load_file(filename)
+        definition = db.dbc.relation_attribute_definitions[
+            'ControlUnitEnvVarAttr']
+        self.assertEqual(definition.kind, 'BU_EV_REL_')
+        self.assertEqual(definition.type_name, 'STRING')
+        self.assertEqual(definition.default_value, 'MyVar')
+        self.assert_dbc_dump(db, filename)
+
     def test_cache_prune_choices(self):
         filename = 'tests/files/dbc/socialledge.dbc'
         db = cantools.database.load_file(filename, prune_choices=False, cache_dir=self.cache_dir)

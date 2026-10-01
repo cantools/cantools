@@ -348,7 +348,7 @@ class DbcParser(Parser):
 
         relation_attribute_definition = Sequence(
             'BA_DEF_REL_',
-            Optional(choice('BU_SG_REL_', 'BU_BO_REL_')),
+            Optional(choice('BU_SG_REL_', 'BU_BO_REL_', 'BU_EV_REL_')),
             'STRING',
             'WORD',
             Optional(choice(DelimitedList('STRING'), OneOrMore('NUMBER'))),

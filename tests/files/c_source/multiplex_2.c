@@ -113,6 +113,15 @@ static inline uint32_t unpack_right_shift_u32(
     return (uint32_t)((uint32_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return 0;
+    }
+
+    return (uint64_t)value;
+}
+
 int multiplex_2_shared_pack(
     uint8_t *dst_p,
     const struct multiplex_2_shared_t *src_p,
@@ -1003,7 +1012,7 @@ int multiplex_2_extended_types_init(struct multiplex_2_extended_types_t *msg_p)
 
 uint8_t multiplex_2_extended_types_s11_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double multiplex_2_extended_types_s11_decode(uint8_t value)

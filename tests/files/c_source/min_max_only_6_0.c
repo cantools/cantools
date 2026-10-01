@@ -97,6 +97,15 @@ static inline uint16_t unpack_right_shift_u16(
     return (uint16_t)((uint16_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return 0;
+    }
+
+    return (uint64_t)value;
+}
+
 int min_max_only_6_0_symbol1_pack(
     uint8_t *dst_p,
     const struct min_max_only_6_0_symbol1_t *src_p,
@@ -168,7 +177,7 @@ int min_max_only_6_0_symbol1_init(struct min_max_only_6_0_symbol1_t *msg_p)
 
 uint8_t min_max_only_6_0_symbol1_signal1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double min_max_only_6_0_symbol1_signal1_decode(uint8_t value)
@@ -188,7 +197,7 @@ bool min_max_only_6_0_symbol1_signal1_is_in_phys_range(double value)
 
 uint8_t min_max_only_6_0_symbol1_signal2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double min_max_only_6_0_symbol1_signal2_decode(uint8_t value)

@@ -81,6 +81,15 @@ static inline uint16_t unpack_right_shift_u16(
     return (uint16_t)((uint16_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return 0;
+    }
+
+    return (uint64_t)value;
+}
+
 int open_actuator_control_cmd_unpack(
     struct open_actuator_control_cmd_t *dst_p,
     const uint8_t *src_p,
@@ -375,7 +384,7 @@ int open_actuator_control_status_init(struct open_actuator_control_status_t *msg
 
 uint8_t open_actuator_control_status_crc8_stat1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double open_actuator_control_status_crc8_stat1_decode(uint8_t value)
@@ -397,7 +406,7 @@ bool open_actuator_control_status_crc8_stat1_is_in_phys_range(double value)
 
 uint8_t open_actuator_control_status_counter_stat1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 bool open_actuator_control_status_counter_stat1_is_in_range(uint8_t value)
@@ -427,7 +436,7 @@ bool open_actuator_control_status_torque_actual_is_in_phys_range(double value)
 
 uint8_t open_actuator_control_status_torque_close_loop_actual_encode(double value)
 {
-    return (uint8_t)(value / 0.125);
+    return (uint8_t)(cantools_unsigned_from_double(value / 0.125));
 }
 
 bool open_actuator_control_status_torque_close_loop_actual_is_in_range(uint8_t value)
@@ -469,7 +478,7 @@ int open_actuator_system_status_init(struct open_actuator_system_status_t *msg_p
 
 uint8_t open_actuator_system_status_crc8_stat2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 bool open_actuator_system_status_crc8_stat2_is_in_range(uint8_t value)
@@ -486,7 +495,7 @@ bool open_actuator_system_status_crc8_stat2_is_in_phys_range(double value)
 
 uint8_t open_actuator_system_status_counter_stat2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 bool open_actuator_system_status_counter_stat2_is_in_range(uint8_t value)
@@ -501,7 +510,7 @@ bool open_actuator_system_status_counter_stat2_is_in_phys_range(double value)
 
 uint8_t open_actuator_system_status_chip_temp_encode(double value)
 {
-    return (uint8_t)(value - -60.0);
+    return (uint8_t)(cantools_unsigned_from_double(value - -60.0));
 }
 
 bool open_actuator_system_status_chip_temp_is_in_range(uint8_t value)

@@ -113,6 +113,15 @@ static inline uint64_t unpack_right_shift_u64(
     return (uint64_t)((uint64_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return 0;
+    }
+
+    return (uint64_t)value;
+}
+
 int padding_bit_order_msg0_pack(
     uint8_t *dst_p,
     const struct padding_bit_order_msg0_t *src_p,
@@ -164,7 +173,7 @@ int padding_bit_order_msg0_init(struct padding_bit_order_msg0_t *msg_p)
 
 uint8_t padding_bit_order_msg0_b_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg0_b_decode(uint8_t value)
@@ -184,7 +193,7 @@ bool padding_bit_order_msg0_b_is_in_phys_range(double value)
 
 uint16_t padding_bit_order_msg0_a_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg0_a_decode(uint16_t value)
@@ -204,7 +213,7 @@ bool padding_bit_order_msg0_a_is_in_phys_range(double value)
 
 uint8_t padding_bit_order_msg0_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg0_d_decode(uint8_t value)
@@ -224,7 +233,7 @@ bool padding_bit_order_msg0_d_is_in_phys_range(double value)
 
 uint16_t padding_bit_order_msg0_c_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg0_c_decode(uint16_t value)
@@ -293,7 +302,7 @@ int padding_bit_order_msg1_init(struct padding_bit_order_msg1_t *msg_p)
 
 uint8_t padding_bit_order_msg1_e_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg1_e_decode(uint8_t value)
@@ -313,7 +322,7 @@ bool padding_bit_order_msg1_e_is_in_phys_range(double value)
 
 uint16_t padding_bit_order_msg1_f_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg1_f_decode(uint16_t value)
@@ -333,7 +342,7 @@ bool padding_bit_order_msg1_f_is_in_phys_range(double value)
 
 uint8_t padding_bit_order_msg1_g_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg1_g_decode(uint8_t value)
@@ -353,7 +362,7 @@ bool padding_bit_order_msg1_g_is_in_phys_range(double value)
 
 uint16_t padding_bit_order_msg1_h_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg1_h_decode(uint16_t value)
@@ -416,7 +425,7 @@ int padding_bit_order_msg2_init(struct padding_bit_order_msg2_t *msg_p)
 
 uint8_t padding_bit_order_msg2_i_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg2_i_decode(uint8_t value)
@@ -436,7 +445,7 @@ bool padding_bit_order_msg2_i_is_in_phys_range(double value)
 
 uint8_t padding_bit_order_msg2_j_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg2_j_decode(uint8_t value)
@@ -456,7 +465,7 @@ bool padding_bit_order_msg2_j_is_in_phys_range(double value)
 
 uint8_t padding_bit_order_msg2_k_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg2_k_decode(uint8_t value)
@@ -529,7 +538,7 @@ int padding_bit_order_msg3_init(struct padding_bit_order_msg3_t *msg_p)
 
 uint64_t padding_bit_order_msg3_l_encode(double value)
 {
-    return (uint64_t)(value);
+    return (uint64_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg3_l_decode(uint64_t value)
@@ -604,7 +613,7 @@ int padding_bit_order_msg4_init(struct padding_bit_order_msg4_t *msg_p)
 
 uint64_t padding_bit_order_msg4_m_encode(double value)
 {
-    return (uint64_t)(value);
+    return (uint64_t)(cantools_unsigned_from_double(value));
 }
 
 double padding_bit_order_msg4_m_decode(uint64_t value)

@@ -81,6 +81,15 @@ static inline uint16_t unpack_right_shift_u16(
     return (uint16_t)((uint16_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return 0;
+    }
+
+    return (uint64_t)value;
+}
+
 int motohawk_example_message_pack(
     uint8_t *dst_p,
     const struct motohawk_example_message_t *src_p,
@@ -141,7 +150,7 @@ int motohawk_example_message_init(struct motohawk_example_message_t *msg_p)
 
 uint8_t motohawk_example_message_enable_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double motohawk_example_message_enable_decode(uint8_t value)
@@ -163,7 +172,7 @@ bool motohawk_example_message_enable_is_in_phys_range(double value)
 
 uint8_t motohawk_example_message_average_radius_encode(double value)
 {
-    return (uint8_t)(value / 0.1);
+    return (uint8_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double motohawk_example_message_average_radius_decode(uint8_t value)

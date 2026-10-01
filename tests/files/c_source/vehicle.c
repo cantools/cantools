@@ -145,6 +145,15 @@ static inline uint64_t unpack_right_shift_u64(
     return (uint64_t)((uint64_t)(value & mask) >> shift);
 }
 
+static uint64_t cantools_unsigned_from_double(double value)
+{
+    if (value < 0) {
+        return 0;
+    }
+
+    return (uint64_t)value;
+}
+
 int vehicle_rt_sb_ins_vel_body_axes_pack(
     uint8_t *dst_p,
     const struct vehicle_rt_sb_ins_vel_body_axes_t *src_p,
@@ -222,7 +231,7 @@ int vehicle_rt_sb_ins_vel_body_axes_init(struct vehicle_rt_sb_ins_vel_body_axes_
 
 uint8_t vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_decode(uint8_t value)
@@ -242,7 +251,7 @@ bool vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_forwards_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_decode(uint8_t value)
@@ -262,7 +271,7 @@ bool vehicle_rt_sb_ins_vel_body_axes_validity_ins_vel_sideways_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_body_axes_accuracy_ins_vel_body_decode(uint8_t value)
@@ -379,7 +388,7 @@ int vehicle_rt_dl1_mk3_speed_init(struct vehicle_rt_dl1_mk3_speed_t *msg_p)
 
 uint8_t vehicle_rt_dl1_mk3_speed_validity_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_speed_validity_speed_decode(uint8_t value)
@@ -401,7 +410,7 @@ bool vehicle_rt_dl1_mk3_speed_validity_speed_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_dl1_mk3_speed_accuracy_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_speed_accuracy_speed_decode(uint8_t value)
@@ -498,7 +507,7 @@ int vehicle_rt_dl1_mk3_gps_time_init(struct vehicle_rt_dl1_mk3_gps_time_t *msg_p
 
 uint8_t vehicle_rt_dl1_mk3_gps_time_validity_gps_time_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_time_validity_gps_time_decode(uint8_t value)
@@ -518,7 +527,7 @@ bool vehicle_rt_dl1_mk3_gps_time_validity_gps_time_is_in_phys_range(double value
 
 uint8_t vehicle_rt_dl1_mk3_gps_time_validity_gps_week_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_time_validity_gps_week_decode(uint8_t value)
@@ -538,7 +547,7 @@ bool vehicle_rt_dl1_mk3_gps_time_validity_gps_week_is_in_phys_range(double value
 
 uint8_t vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_decode(uint8_t value)
@@ -560,7 +569,7 @@ bool vehicle_rt_dl1_mk3_gps_time_accuracy_gps_time_is_in_phys_range(double value
 
 uint32_t vehicle_rt_dl1_mk3_gps_time_gps_time_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_gps_time_gps_time_decode(uint32_t value)
@@ -580,7 +589,7 @@ bool vehicle_rt_dl1_mk3_gps_time_gps_time_is_in_phys_range(double value)
 
 uint16_t vehicle_rt_dl1_mk3_gps_time_gps_week_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_time_gps_week_decode(uint16_t value)
@@ -768,7 +777,7 @@ int vehicle_rt_dl1_mk3_gps_pos_llh_1_init(struct vehicle_rt_dl1_mk3_gps_pos_llh_
 
 uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_decode(uint8_t value)
@@ -788,7 +797,7 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_latitude_is_in_phys_r
 
 uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_decode(uint8_t value)
@@ -808,7 +817,7 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_longitude_is_in_phys_
 
 uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_decode(uint8_t value)
@@ -828,7 +837,7 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_1_validity_gps_pos_llh_altitude_is_in_phys_r
 
 uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uint8_t value)
@@ -850,7 +859,7 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_is_in_phys_r
 
 uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(uint8_t value)
@@ -872,7 +881,7 @@ bool vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_is_in_phys_
 
 uint8_t vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uint8_t value)
@@ -969,7 +978,7 @@ int vehicle_rt_dl1_mk3_gps_speed_init(struct vehicle_rt_dl1_mk3_gps_speed_t *msg
 
 uint8_t vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_decode(uint8_t value)
@@ -989,7 +998,7 @@ bool vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_2_d_is_in_phys_range(double
 
 uint8_t vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_decode(uint8_t value)
@@ -1009,7 +1018,7 @@ bool vehicle_rt_dl1_mk3_gps_speed_validity_gps_speed_3_d_is_in_phys_range(double
 
 uint8_t vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_decode(uint8_t value)
@@ -1031,7 +1040,7 @@ bool vehicle_rt_dl1_mk3_gps_speed_accuracy_gps_speed_is_in_phys_range(double val
 
 uint32_t vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_encode(double value)
 {
-    return (uint32_t)(value / 0.0001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.0001));
 }
 
 double vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_decode(uint32_t value)
@@ -1051,7 +1060,7 @@ bool vehicle_rt_dl1_mk3_gps_speed_gps_speed_2_d_is_in_phys_range(double value)
 
 uint32_t vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_encode(double value)
 {
-    return (uint32_t)(value / 0.0001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.0001));
 }
 
 double vehicle_rt_dl1_mk3_gps_speed_gps_speed_3_d_decode(uint32_t value)
@@ -4724,7 +4733,7 @@ int vehicle_rt_sb_trig_final_condition_init(struct vehicle_rt_sb_trig_final_cond
 
 uint8_t vehicle_rt_sb_trig_final_condition_validity_final_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_final_condition_validity_final_speed_decode(uint8_t value)
@@ -4744,7 +4753,7 @@ bool vehicle_rt_sb_trig_final_condition_validity_final_speed_is_in_phys_range(do
 
 uint32_t vehicle_rt_sb_trig_final_condition_final_speed_encode(double value)
 {
-    return (uint32_t)(value / 0.0001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.0001));
 }
 
 double vehicle_rt_sb_trig_final_condition_final_speed_decode(uint32_t value)
@@ -4825,7 +4834,7 @@ int vehicle_rt_sb_trig_initial_condition_init(struct vehicle_rt_sb_trig_initial_
 
 uint8_t vehicle_rt_sb_trig_initial_condition_validity_initial_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_initial_condition_validity_initial_speed_decode(uint8_t value)
@@ -4845,7 +4854,7 @@ bool vehicle_rt_sb_trig_initial_condition_validity_initial_speed_is_in_phys_rang
 
 uint8_t vehicle_rt_sb_trig_initial_condition_validity_initial_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_initial_condition_validity_initial_heading_decode(uint8_t value)
@@ -4865,7 +4874,7 @@ bool vehicle_rt_sb_trig_initial_condition_validity_initial_heading_is_in_phys_ra
 
 uint32_t vehicle_rt_sb_trig_initial_condition_initial_speed_encode(double value)
 {
-    return (uint32_t)(value / 0.0001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.0001));
 }
 
 double vehicle_rt_sb_trig_initial_condition_initial_speed_decode(uint32_t value)
@@ -4905,7 +4914,7 @@ bool vehicle_rt_sb_trig_initial_condition_initial_heading_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_decode(uint8_t value)
@@ -4925,7 +4934,7 @@ bool vehicle_rt_sb_trig_initial_condition_mfdd_start_threshold_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_initial_condition_mfdd_end_threshold_decode(uint8_t value)
@@ -4998,7 +5007,7 @@ int vehicle_rt_sb_trig_direct_dist_init(struct vehicle_rt_sb_trig_direct_dist_t 
 
 uint32_t vehicle_rt_sb_trig_direct_dist_direct_distance_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_sb_trig_direct_dist_direct_distance_decode(uint32_t value)
@@ -5018,7 +5027,7 @@ bool vehicle_rt_sb_trig_direct_dist_direct_distance_is_in_phys_range(double valu
 
 uint32_t vehicle_rt_sb_trig_direct_dist_path_distance_2_d_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_sb_trig_direct_dist_path_distance_2_d_decode(uint32_t value)
@@ -5190,7 +5199,7 @@ int vehicle_rt_sb_trig_path_dist_init(struct vehicle_rt_sb_trig_path_dist_t *msg
 
 uint32_t vehicle_rt_sb_trig_path_dist_path_distance_3_d_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_sb_trig_path_dist_path_distance_3_d_decode(uint32_t value)
@@ -5277,7 +5286,7 @@ int vehicle_rt_sb_trig_accel_init(struct vehicle_rt_sb_trig_accel_t *msg_p)
 
 uint8_t vehicle_rt_sb_trig_accel_validity_mfdd_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_accel_validity_mfdd_decode(uint8_t value)
@@ -5299,7 +5308,7 @@ bool vehicle_rt_sb_trig_accel_validity_mfdd_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_trig_accel_validity_average_accel_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_accel_validity_average_accel_decode(uint8_t value)
@@ -5321,7 +5330,7 @@ bool vehicle_rt_sb_trig_accel_validity_average_accel_is_in_phys_range(double val
 
 uint8_t vehicle_rt_sb_trig_accel_validity_triggered_time_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trig_accel_validity_triggered_time_decode(uint8_t value)
@@ -5387,7 +5396,7 @@ bool vehicle_rt_sb_trig_accel_average_accel_is_in_phys_range(double value)
 
 uint32_t vehicle_rt_sb_trig_accel_triggered_time_encode(double value)
 {
-    return (uint32_t)(value / 0.01);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.01));
 }
 
 double vehicle_rt_sb_trig_accel_triggered_time_decode(uint32_t value)
@@ -5450,7 +5459,7 @@ int vehicle_rt_dl1_mk3_measure_time_12_init(struct vehicle_rt_dl1_mk3_measure_ti
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_12_measured_time_12_decode(uint32_t value)
@@ -5515,7 +5524,7 @@ int vehicle_rt_dl1_mk3_measure_time_11_init(struct vehicle_rt_dl1_mk3_measure_ti
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_11_measured_time_11_decode(uint32_t value)
@@ -5580,7 +5589,7 @@ int vehicle_rt_dl1_mk3_measure_time_10_init(struct vehicle_rt_dl1_mk3_measure_ti
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_10_measured_time_10_decode(uint32_t value)
@@ -5645,7 +5654,7 @@ int vehicle_rt_dl1_mk3_measure_time_9_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_9_measured_time_9_decode(uint32_t value)
@@ -5710,7 +5719,7 @@ int vehicle_rt_dl1_mk3_measure_time_8_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_8_measured_time_8_decode(uint32_t value)
@@ -5775,7 +5784,7 @@ int vehicle_rt_dl1_mk3_measure_time_7_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_7_measured_time_7_decode(uint32_t value)
@@ -5840,7 +5849,7 @@ int vehicle_rt_dl1_mk3_measure_time_6_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_6_measured_time_6_decode(uint32_t value)
@@ -5905,7 +5914,7 @@ int vehicle_rt_dl1_mk3_measure_time_5_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_5_measured_time_5_decode(uint32_t value)
@@ -5970,7 +5979,7 @@ int vehicle_rt_dl1_mk3_measure_time_4_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_4_measured_time_4_decode(uint32_t value)
@@ -6035,7 +6044,7 @@ int vehicle_rt_dl1_mk3_measure_time_3_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_3_measured_time_3_decode(uint32_t value)
@@ -6100,7 +6109,7 @@ int vehicle_rt_dl1_mk3_measure_time_2_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_2_measured_time_2_decode(uint32_t value)
@@ -6165,7 +6174,7 @@ int vehicle_rt_dl1_mk3_measure_time_1_init(struct vehicle_rt_dl1_mk3_measure_tim
 
 uint32_t vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_encode(double value)
 {
-    return (uint32_t)(value);
+    return (uint32_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_measure_time_1_measured_time_1_decode(uint32_t value)
@@ -6228,7 +6237,7 @@ int vehicle_rt_dl1_mk3_rpm_init(struct vehicle_rt_dl1_mk3_rpm_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_rpm_rpm_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_rpm_rpm_decode(uint16_t value)
@@ -6293,7 +6302,7 @@ int vehicle_rt_dl1_mk3_freq_4_init(struct vehicle_rt_dl1_mk3_freq_4_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_freq_4_frequency_4_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_freq_4_frequency_4_decode(uint16_t value)
@@ -6358,7 +6367,7 @@ int vehicle_rt_dl1_mk3_freq_3_init(struct vehicle_rt_dl1_mk3_freq_3_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_freq_3_frequency_3_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_freq_3_frequency_3_decode(uint16_t value)
@@ -6423,7 +6432,7 @@ int vehicle_rt_dl1_mk3_freq_2_init(struct vehicle_rt_dl1_mk3_freq_2_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_freq_2_frequency_2_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_freq_2_frequency_2_decode(uint16_t value)
@@ -6488,7 +6497,7 @@ int vehicle_rt_dl1_mk3_misc_3_init(struct vehicle_rt_dl1_mk3_misc_3_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_misc_3_misc_3_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_misc_3_misc_3_decode(uint16_t value)
@@ -6553,7 +6562,7 @@ int vehicle_rt_dl1_mk3_misc_2_init(struct vehicle_rt_dl1_mk3_misc_2_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_misc_2_misc_2_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_misc_2_misc_2_decode(uint16_t value)
@@ -6618,7 +6627,7 @@ int vehicle_rt_dl1_mk3_misc_1_init(struct vehicle_rt_dl1_mk3_misc_1_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_misc_1_misc_1_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_misc_1_misc_1_decode(uint16_t value)
@@ -6683,7 +6692,7 @@ int vehicle_rt_dl1_mk3_aux_31_init(struct vehicle_rt_dl1_mk3_aux_31_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_31_aux_31_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_31_aux_31_decode(uint16_t value)
@@ -6748,7 +6757,7 @@ int vehicle_rt_dl1_mk3_aux_30_init(struct vehicle_rt_dl1_mk3_aux_30_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_30_aux_30_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_30_aux_30_decode(uint16_t value)
@@ -6813,7 +6822,7 @@ int vehicle_rt_dl1_mk3_aux_29_init(struct vehicle_rt_dl1_mk3_aux_29_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_29_aux_29_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_29_aux_29_decode(uint16_t value)
@@ -6878,7 +6887,7 @@ int vehicle_rt_dl1_mk3_aux_28_init(struct vehicle_rt_dl1_mk3_aux_28_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_28_aux_28_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_28_aux_28_decode(uint16_t value)
@@ -6943,7 +6952,7 @@ int vehicle_rt_dl1_mk3_aux_27_init(struct vehicle_rt_dl1_mk3_aux_27_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_27_aux_27_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_27_aux_27_decode(uint16_t value)
@@ -7008,7 +7017,7 @@ int vehicle_rt_dl1_mk3_aux_26_init(struct vehicle_rt_dl1_mk3_aux_26_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_26_aux_26_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_26_aux_26_decode(uint16_t value)
@@ -7073,7 +7082,7 @@ int vehicle_rt_dl1_mk3_aux_25_init(struct vehicle_rt_dl1_mk3_aux_25_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_25_aux_25_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_25_aux_25_decode(uint16_t value)
@@ -7138,7 +7147,7 @@ int vehicle_rt_dl1_mk3_aux_24_init(struct vehicle_rt_dl1_mk3_aux_24_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_24_aux_24_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_24_aux_24_decode(uint16_t value)
@@ -7203,7 +7212,7 @@ int vehicle_rt_dl1_mk3_aux_23_init(struct vehicle_rt_dl1_mk3_aux_23_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_23_aux_23_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_23_aux_23_decode(uint16_t value)
@@ -7268,7 +7277,7 @@ int vehicle_rt_dl1_mk3_aux_22_init(struct vehicle_rt_dl1_mk3_aux_22_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_22_aux_22_encode(double value)
 {
-    return (uint16_t)(value / 10.0);
+    return (uint16_t)(cantools_unsigned_from_double(value / 10.0));
 }
 
 double vehicle_rt_dl1_mk3_aux_22_aux_22_decode(uint16_t value)
@@ -7333,7 +7342,7 @@ int vehicle_rt_dl1_mk3_aux_21_init(struct vehicle_rt_dl1_mk3_aux_21_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_21_aux_21_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_21_aux_21_decode(uint16_t value)
@@ -7398,7 +7407,7 @@ int vehicle_rt_dl1_mk3_aux_20_init(struct vehicle_rt_dl1_mk3_aux_20_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_20_aux_20_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_20_aux_20_decode(uint16_t value)
@@ -7463,7 +7472,7 @@ int vehicle_rt_dl1_mk3_aux_19_init(struct vehicle_rt_dl1_mk3_aux_19_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_19_aux_19_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_19_aux_19_decode(uint16_t value)
@@ -7528,7 +7537,7 @@ int vehicle_rt_dl1_mk3_aux_18_init(struct vehicle_rt_dl1_mk3_aux_18_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_18_aux_18_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_18_aux_18_decode(uint16_t value)
@@ -7593,7 +7602,7 @@ int vehicle_rt_dl1_mk3_aux_17_init(struct vehicle_rt_dl1_mk3_aux_17_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_17_aux_17_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_17_aux_17_decode(uint16_t value)
@@ -7658,7 +7667,7 @@ int vehicle_rt_dl1_mk3_aux_16_init(struct vehicle_rt_dl1_mk3_aux_16_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_16_aux_16_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_16_aux_16_decode(uint16_t value)
@@ -7723,7 +7732,7 @@ int vehicle_rt_dl1_mk3_aux_15_init(struct vehicle_rt_dl1_mk3_aux_15_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_15_aux_15_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_15_aux_15_decode(uint16_t value)
@@ -7788,7 +7797,7 @@ int vehicle_rt_dl1_mk3_aux_14_init(struct vehicle_rt_dl1_mk3_aux_14_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_14_aux_14_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_14_aux_14_decode(uint16_t value)
@@ -7853,7 +7862,7 @@ int vehicle_rt_dl1_mk3_aux_13_init(struct vehicle_rt_dl1_mk3_aux_13_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_13_aux_13_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_13_aux_13_decode(uint16_t value)
@@ -7918,7 +7927,7 @@ int vehicle_rt_dl1_mk3_aux_12_init(struct vehicle_rt_dl1_mk3_aux_12_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_12_aux_12_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_12_aux_12_decode(uint16_t value)
@@ -7983,7 +7992,7 @@ int vehicle_rt_dl1_mk3_aux_11_init(struct vehicle_rt_dl1_mk3_aux_11_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_11_aux_11_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_11_aux_11_decode(uint16_t value)
@@ -8048,7 +8057,7 @@ int vehicle_rt_dl1_mk3_aux_9_init(struct vehicle_rt_dl1_mk3_aux_9_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_9_aux_9_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_9_aux_9_decode(uint16_t value)
@@ -8113,7 +8122,7 @@ int vehicle_rt_dl1_mk3_aux_10_init(struct vehicle_rt_dl1_mk3_aux_10_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_10_aux_10_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_10_aux_10_decode(uint16_t value)
@@ -8178,7 +8187,7 @@ int vehicle_rt_dl1_mk3_aux_8_init(struct vehicle_rt_dl1_mk3_aux_8_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_8_aux_8_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_8_aux_8_decode(uint16_t value)
@@ -8243,7 +8252,7 @@ int vehicle_rt_dl1_mk3_aux_7_init(struct vehicle_rt_dl1_mk3_aux_7_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_7_aux_7_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_7_aux_7_decode(uint16_t value)
@@ -8308,7 +8317,7 @@ int vehicle_rt_dl1_mk3_aux_6_init(struct vehicle_rt_dl1_mk3_aux_6_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_6_aux_6_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_6_aux_6_decode(uint16_t value)
@@ -8373,7 +8382,7 @@ int vehicle_rt_dl1_mk3_aux_5_init(struct vehicle_rt_dl1_mk3_aux_5_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_5_aux_5_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_5_aux_5_decode(uint16_t value)
@@ -8438,7 +8447,7 @@ int vehicle_rt_dl1_mk3_aux_4_init(struct vehicle_rt_dl1_mk3_aux_4_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_4_aux_4_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_4_aux_4_decode(uint16_t value)
@@ -8503,7 +8512,7 @@ int vehicle_rt_dl1_mk3_aux_3_init(struct vehicle_rt_dl1_mk3_aux_3_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_3_aux_3_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_3_aux_3_decode(uint16_t value)
@@ -8568,7 +8577,7 @@ int vehicle_rt_dl1_mk3_aux_2_init(struct vehicle_rt_dl1_mk3_aux_2_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_2_aux_2_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_2_aux_2_decode(uint16_t value)
@@ -8633,7 +8642,7 @@ int vehicle_rt_dl1_mk3_aux_1_init(struct vehicle_rt_dl1_mk3_aux_1_t *msg_p)
 
 uint16_t vehicle_rt_dl1_mk3_aux_1_aux_1_encode(double value)
 {
-    return (uint16_t)(value / 0.1);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_aux_1_aux_1_decode(uint16_t value)
@@ -8700,7 +8709,7 @@ int vehicle_rt_dl1_mk3_pressure_5_init(struct vehicle_rt_dl1_mk3_pressure_5_t *m
 
 uint32_t vehicle_rt_dl1_mk3_pressure_5_pressure_5_encode(double value)
 {
-    return (uint32_t)(value / 0.1);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_pressure_5_pressure_5_decode(uint32_t value)
@@ -8765,7 +8774,7 @@ int vehicle_rt_dl1_mk3_pressure_4_init(struct vehicle_rt_dl1_mk3_pressure_4_t *m
 
 uint32_t vehicle_rt_dl1_mk3_pressure_4_pressure_4_encode(double value)
 {
-    return (uint32_t)(value / 0.1);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_pressure_4_pressure_4_decode(uint32_t value)
@@ -8830,7 +8839,7 @@ int vehicle_rt_dl1_mk3_pressure_3_init(struct vehicle_rt_dl1_mk3_pressure_3_t *m
 
 uint32_t vehicle_rt_dl1_mk3_pressure_3_pressure_3_encode(double value)
 {
-    return (uint32_t)(value / 0.1);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_pressure_3_pressure_3_decode(uint32_t value)
@@ -8895,7 +8904,7 @@ int vehicle_rt_dl1_mk3_pressure_2_init(struct vehicle_rt_dl1_mk3_pressure_2_t *m
 
 uint32_t vehicle_rt_dl1_mk3_pressure_2_pressure_2_encode(double value)
 {
-    return (uint32_t)(value / 0.1);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_pressure_2_pressure_2_decode(uint32_t value)
@@ -8960,7 +8969,7 @@ int vehicle_rt_dl1_mk3_pressure_1_init(struct vehicle_rt_dl1_mk3_pressure_1_t *m
 
 uint32_t vehicle_rt_dl1_mk3_pressure_1_pressure_1_encode(double value)
 {
-    return (uint32_t)(value / 0.1);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.1));
 }
 
 double vehicle_rt_dl1_mk3_pressure_1_pressure_1_decode(uint32_t value)
@@ -11011,7 +11020,7 @@ int vehicle_rt_dl1_mk3_analog_32_init(struct vehicle_rt_dl1_mk3_analog_32_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_32_analog_32_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_32_analog_32_decode(uint16_t value)
@@ -11076,7 +11085,7 @@ int vehicle_rt_dl1_mk3_analog_31_init(struct vehicle_rt_dl1_mk3_analog_31_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_31_analog_31_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_31_analog_31_decode(uint16_t value)
@@ -11141,7 +11150,7 @@ int vehicle_rt_dl1_mk3_analog_30_init(struct vehicle_rt_dl1_mk3_analog_30_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_30_analog_30_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_30_analog_30_decode(uint16_t value)
@@ -11206,7 +11215,7 @@ int vehicle_rt_dl1_mk3_analog_29_init(struct vehicle_rt_dl1_mk3_analog_29_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_29_analog_29_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_29_analog_29_decode(uint16_t value)
@@ -11271,7 +11280,7 @@ int vehicle_rt_dl1_mk3_analog_28_init(struct vehicle_rt_dl1_mk3_analog_28_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_28_analog_28_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_28_analog_28_decode(uint16_t value)
@@ -11336,7 +11345,7 @@ int vehicle_rt_dl1_mk3_analog_27_init(struct vehicle_rt_dl1_mk3_analog_27_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_27_analog_27_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_27_analog_27_decode(uint16_t value)
@@ -11401,7 +11410,7 @@ int vehicle_rt_dl1_mk3_analog_26_init(struct vehicle_rt_dl1_mk3_analog_26_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_26_analog_26_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_26_analog_26_decode(uint16_t value)
@@ -11466,7 +11475,7 @@ int vehicle_rt_dl1_mk3_analog_25_init(struct vehicle_rt_dl1_mk3_analog_25_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_25_analog_25_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_25_analog_25_decode(uint16_t value)
@@ -11531,7 +11540,7 @@ int vehicle_rt_dl1_mk3_analog_15_init(struct vehicle_rt_dl1_mk3_analog_15_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_15_analog_15_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_15_analog_15_decode(uint16_t value)
@@ -11596,7 +11605,7 @@ int vehicle_rt_dl1_mk3_analog_14_init(struct vehicle_rt_dl1_mk3_analog_14_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_14_analog_14_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_14_analog_14_decode(uint16_t value)
@@ -11661,7 +11670,7 @@ int vehicle_rt_dl1_mk3_analog_17_init(struct vehicle_rt_dl1_mk3_analog_17_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_17_analog_17_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_17_analog_17_decode(uint16_t value)
@@ -11726,7 +11735,7 @@ int vehicle_rt_dl1_mk3_analog_24_init(struct vehicle_rt_dl1_mk3_analog_24_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_24_analog_24_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_24_analog_24_decode(uint16_t value)
@@ -11791,7 +11800,7 @@ int vehicle_rt_dl1_mk3_analog_23_init(struct vehicle_rt_dl1_mk3_analog_23_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_23_analog_23_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_23_analog_23_decode(uint16_t value)
@@ -11856,7 +11865,7 @@ int vehicle_rt_dl1_mk3_analog_22_init(struct vehicle_rt_dl1_mk3_analog_22_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_22_analog_22_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_22_analog_22_decode(uint16_t value)
@@ -11921,7 +11930,7 @@ int vehicle_rt_dl1_mk3_analog_21_init(struct vehicle_rt_dl1_mk3_analog_21_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_21_analog_21_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_21_analog_21_decode(uint16_t value)
@@ -11986,7 +11995,7 @@ int vehicle_rt_dl1_mk3_analog_20_init(struct vehicle_rt_dl1_mk3_analog_20_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_20_analog_20_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_20_analog_20_decode(uint16_t value)
@@ -12051,7 +12060,7 @@ int vehicle_rt_dl1_mk3_analog_19_init(struct vehicle_rt_dl1_mk3_analog_19_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_19_analog_19_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_19_analog_19_decode(uint16_t value)
@@ -12116,7 +12125,7 @@ int vehicle_rt_dl1_mk3_analog_16_init(struct vehicle_rt_dl1_mk3_analog_16_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_16_analog_16_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_16_analog_16_decode(uint16_t value)
@@ -12181,7 +12190,7 @@ int vehicle_rt_dl1_mk3_analog_18_init(struct vehicle_rt_dl1_mk3_analog_18_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_18_analog_18_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_18_analog_18_decode(uint16_t value)
@@ -12246,7 +12255,7 @@ int vehicle_rt_dl1_mk3_analog_12_init(struct vehicle_rt_dl1_mk3_analog_12_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_12_analog_12_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_12_analog_12_decode(uint16_t value)
@@ -12311,7 +12320,7 @@ int vehicle_rt_dl1_mk3_analog_11_init(struct vehicle_rt_dl1_mk3_analog_11_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_11_analog_11_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_11_analog_11_decode(uint16_t value)
@@ -12376,7 +12385,7 @@ int vehicle_rt_dl1_mk3_analog_10_init(struct vehicle_rt_dl1_mk3_analog_10_t *msg
 
 uint16_t vehicle_rt_dl1_mk3_analog_10_analog_10_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_10_analog_10_decode(uint16_t value)
@@ -12441,7 +12450,7 @@ int vehicle_rt_dl1_mk3_analog_9_init(struct vehicle_rt_dl1_mk3_analog_9_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_9_analog_9_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_9_analog_9_decode(uint16_t value)
@@ -12506,7 +12515,7 @@ int vehicle_rt_dl1_mk3_analog_8_init(struct vehicle_rt_dl1_mk3_analog_8_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_8_analog_8_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_8_analog_8_decode(uint16_t value)
@@ -12571,7 +12580,7 @@ int vehicle_rt_dl1_mk3_analog_7_init(struct vehicle_rt_dl1_mk3_analog_7_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_7_analog_7_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_7_analog_7_decode(uint16_t value)
@@ -12636,7 +12645,7 @@ int vehicle_rt_dl1_mk3_analog_6_init(struct vehicle_rt_dl1_mk3_analog_6_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_6_analog_6_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_6_analog_6_decode(uint16_t value)
@@ -12701,7 +12710,7 @@ int vehicle_rt_dl1_mk3_analog_5_init(struct vehicle_rt_dl1_mk3_analog_5_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_5_analog_5_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_5_analog_5_decode(uint16_t value)
@@ -12766,7 +12775,7 @@ int vehicle_rt_dl1_mk3_analog_4_init(struct vehicle_rt_dl1_mk3_analog_4_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_4_analog_4_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_4_analog_4_decode(uint16_t value)
@@ -12831,7 +12840,7 @@ int vehicle_rt_dl1_mk3_analog_3_init(struct vehicle_rt_dl1_mk3_analog_3_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_3_analog_3_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_3_analog_3_decode(uint16_t value)
@@ -12896,7 +12905,7 @@ int vehicle_rt_dl1_mk3_analog_2_init(struct vehicle_rt_dl1_mk3_analog_2_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_2_analog_2_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_2_analog_2_decode(uint16_t value)
@@ -12961,7 +12970,7 @@ int vehicle_rt_dl1_mk3_analog_1_init(struct vehicle_rt_dl1_mk3_analog_1_t *msg_p
 
 uint16_t vehicle_rt_dl1_mk3_analog_1_analog_1_encode(double value)
 {
-    return (uint16_t)(value / 0.001);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_dl1_mk3_analog_1_analog_1_decode(uint16_t value)
@@ -13056,7 +13065,7 @@ int vehicle_rt_dl1_mk3_accel_init(struct vehicle_rt_dl1_mk3_accel_t *msg_p)
 
 uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_decode(uint8_t value)
@@ -13078,7 +13087,7 @@ bool vehicle_rt_dl1_mk3_accel_validity_accel_longitudinal_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_lateral_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_accel_validity_accel_lateral_decode(uint8_t value)
@@ -13100,7 +13109,7 @@ bool vehicle_rt_dl1_mk3_accel_validity_accel_lateral_is_in_phys_range(double val
 
 uint8_t vehicle_rt_dl1_mk3_accel_validity_accel_vertical_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_accel_validity_accel_vertical_decode(uint8_t value)
@@ -13122,7 +13131,7 @@ bool vehicle_rt_dl1_mk3_accel_validity_accel_vertical_is_in_phys_range(double va
 
 uint8_t vehicle_rt_dl1_mk3_accel_accuracy_accel_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_dl1_mk3_accel_accuracy_accel_decode(uint8_t value)
@@ -14745,7 +14754,7 @@ int vehicle_rt_sb_ins_slip_init(struct vehicle_rt_sb_ins_slip_t *msg_p)
 
 uint8_t vehicle_rt_sb_ins_slip_validity_ins_slip_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_slip_validity_ins_slip_decode(uint8_t value)
@@ -14765,7 +14774,7 @@ bool vehicle_rt_sb_ins_slip_validity_ins_slip_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_ins_slip_validity_ins_squat_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_slip_validity_ins_squat_decode(uint8_t value)
@@ -14785,7 +14794,7 @@ bool vehicle_rt_sb_ins_slip_validity_ins_squat_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_ins_slip_accuracy_ins_slip_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_slip_accuracy_ins_slip_decode(uint8_t value)
@@ -14829,7 +14838,7 @@ bool vehicle_rt_sb_ins_slip_ins_slip_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_ins_slip_accuracy_ins_squat_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_slip_accuracy_ins_squat_decode(uint8_t value)
@@ -14946,7 +14955,7 @@ int vehicle_rt_sb_ins_vel_ecef_2_init(struct vehicle_rt_sb_ins_vel_ecef_2_t *msg
 
 uint8_t vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_decode(uint8_t value)
@@ -14966,7 +14975,7 @@ bool vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ecef_2_validity_ins_vel_ecef_z_decode(uint8_t value)
@@ -15088,7 +15097,7 @@ int vehicle_rt_sb_ins_vel_ecef_1_init(struct vehicle_rt_sb_ins_vel_ecef_1_t *msg
 
 uint8_t vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_decode(uint8_t value)
@@ -15108,7 +15117,7 @@ bool vehicle_rt_sb_ins_vel_ecef_1_validity_ins_vel_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_decode(uint8_t value)
@@ -15130,7 +15139,7 @@ bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_decode(uint8_t value)
@@ -15152,7 +15161,7 @@ bool vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ecef_1_accuracy_ins_vel_ecef_z_decode(uint8_t value)
@@ -15252,7 +15261,7 @@ int vehicle_rt_sb_ins_vel_ned_2_init(struct vehicle_rt_sb_ins_vel_ned_2_t *msg_p
 
 uint8_t vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_decode(uint8_t value)
@@ -15272,7 +15281,7 @@ bool vehicle_rt_sb_ins_vel_ned_2_validity_ins_vel_ned_d_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ned_2_accuracy_ins_vel_d_decode(uint8_t value)
@@ -15389,7 +15398,7 @@ int vehicle_rt_sb_ins_vel_ned_1_init(struct vehicle_rt_sb_ins_vel_ned_1_t *msg_p
 
 uint8_t vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_decode(uint8_t value)
@@ -15409,7 +15418,7 @@ bool vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_n_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_decode(uint8_t value)
@@ -15429,7 +15438,7 @@ bool vehicle_rt_sb_ins_vel_ned_1_validity_ins_vel_ned_e_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_vel_ned_1_accuracy_ins_vel_ne_decode(uint8_t value)
@@ -15657,7 +15666,7 @@ int vehicle_rt_sb_ins_pos_ecef_1_init(struct vehicle_rt_sb_ins_pos_ecef_1_t *msg
 
 uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_decode(uint8_t value)
@@ -15677,7 +15686,7 @@ bool vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_decode(uint8_t value)
@@ -15697,7 +15706,7 @@ bool vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_decode(uint8_t value)
@@ -15717,7 +15726,7 @@ bool vehicle_rt_sb_ins_pos_ecef_1_validity_ins_pos_ecef_z_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_decode(uint8_t value)
@@ -15739,7 +15748,7 @@ bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_decode(uint8_t value)
@@ -15761,7 +15770,7 @@ bool vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_ecef_1_accuracy_ins_pos_ecef_z_decode(uint8_t value)
@@ -15969,7 +15978,7 @@ int vehicle_rt_sb_ins_pos_llh_1_init(struct vehicle_rt_sb_ins_pos_llh_1_t *msg_p
 
 uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_decode(uint8_t value)
@@ -15989,7 +15998,7 @@ bool vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_latitude_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_decode(uint8_t value)
@@ -16009,7 +16018,7 @@ bool vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_longitude_is_in_phys_range
 
 uint8_t vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_decode(uint8_t value)
@@ -16029,7 +16038,7 @@ bool vehicle_rt_sb_ins_pos_llh_1_validity_ins_pos_llh_altitude_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_decode(uint8_t value)
@@ -16051,7 +16060,7 @@ bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_latitude_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_decode(uint8_t value)
@@ -16073,7 +16082,7 @@ bool vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_longitude_is_in_phys_range
 
 uint8_t vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_pos_llh_1_accuracy_ins_pos_llh_altitude_decode(uint8_t value)
@@ -16174,7 +16183,7 @@ int vehicle_rt_sb_ins_heading_gradient_2_init(struct vehicle_rt_sb_ins_heading_g
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_decode(uint8_t value)
@@ -16194,7 +16203,7 @@ bool vehicle_rt_sb_ins_heading_gradient_2_validity_ins_heading_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_decode(uint8_t value)
@@ -16214,7 +16223,7 @@ bool vehicle_rt_sb_ins_heading_gradient_2_validity_ins_gradient_is_in_phys_range
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_decode(uint8_t value)
@@ -16236,7 +16245,7 @@ bool vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_heading_is_in_phys_range(
 
 uint16_t vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_encode(double value)
 {
-    return (uint16_t)(value / 0.01);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.01));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_decode(uint16_t value)
@@ -16256,7 +16265,7 @@ bool vehicle_rt_sb_ins_heading_gradient_2_ins_heading_2_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_2_accuracy_ins_gradient_decode(uint8_t value)
@@ -16361,7 +16370,7 @@ int vehicle_rt_sb_ins_heading_gradient_init(struct vehicle_rt_sb_ins_heading_gra
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_decode(uint8_t value)
@@ -16381,7 +16390,7 @@ bool vehicle_rt_sb_ins_heading_gradient_validity_ins_heading_is_in_phys_range(do
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_decode(uint8_t value)
@@ -16401,7 +16410,7 @@ bool vehicle_rt_sb_ins_heading_gradient_validity_ins_gradient_is_in_phys_range(d
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_heading_decode(uint8_t value)
@@ -16443,7 +16452,7 @@ bool vehicle_rt_sb_ins_heading_gradient_ins_heading_is_in_phys_range(double valu
 
 uint8_t vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_heading_gradient_accuracy_ins_gradient_decode(uint8_t value)
@@ -16524,7 +16533,7 @@ int vehicle_rt_sb_ins_status_init(struct vehicle_rt_sb_ins_status_t *msg_p)
 
 uint8_t vehicle_rt_sb_ins_status_ins_status_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_status_ins_status_decode(uint8_t value)
@@ -16617,7 +16626,7 @@ int vehicle_rt_sb_ins_attitude_init(struct vehicle_rt_sb_ins_attitude_t *msg_p)
 
 uint8_t vehicle_rt_sb_ins_attitude_validity_yaw_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_attitude_validity_yaw_decode(uint8_t value)
@@ -16637,7 +16646,7 @@ bool vehicle_rt_sb_ins_attitude_validity_yaw_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_ins_attitude_validity_pitch_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_attitude_validity_pitch_decode(uint8_t value)
@@ -16657,7 +16666,7 @@ bool vehicle_rt_sb_ins_attitude_validity_pitch_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_ins_attitude_validity_roll_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_attitude_validity_roll_decode(uint8_t value)
@@ -16677,7 +16686,7 @@ bool vehicle_rt_sb_ins_attitude_validity_roll_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_ins_attitude_accuracy_attitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_ins_attitude_accuracy_attitude_decode(uint8_t value)
@@ -16828,7 +16837,7 @@ int vehicle_rt_sb_output_status_init(struct vehicle_rt_sb_output_status_t *msg_p
 
 uint8_t vehicle_rt_sb_output_status_validity_status_timestamp_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_validity_status_timestamp_decode(uint8_t value)
@@ -16850,7 +16859,7 @@ bool vehicle_rt_sb_output_status_validity_status_timestamp_is_in_phys_range(doub
 
 uint8_t vehicle_rt_sb_output_status_status_analogue_1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_analogue_1_decode(uint8_t value)
@@ -16870,7 +16879,7 @@ bool vehicle_rt_sb_output_status_status_analogue_1_is_in_phys_range(double value
 
 uint8_t vehicle_rt_sb_output_status_status_analogue_2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_analogue_2_decode(uint8_t value)
@@ -16890,7 +16899,7 @@ bool vehicle_rt_sb_output_status_status_analogue_2_is_in_phys_range(double value
 
 uint8_t vehicle_rt_sb_output_status_status_analogue_3_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_analogue_3_decode(uint8_t value)
@@ -16910,7 +16919,7 @@ bool vehicle_rt_sb_output_status_status_analogue_3_is_in_phys_range(double value
 
 uint8_t vehicle_rt_sb_output_status_status_analogue_4_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_analogue_4_decode(uint8_t value)
@@ -16930,7 +16939,7 @@ bool vehicle_rt_sb_output_status_status_analogue_4_is_in_phys_range(double value
 
 uint8_t vehicle_rt_sb_output_status_status_pulse_output_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_pulse_output_decode(uint8_t value)
@@ -16950,7 +16959,7 @@ bool vehicle_rt_sb_output_status_status_pulse_output_is_in_phys_range(double val
 
 uint8_t vehicle_rt_sb_output_status_status_serial_output_1_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_serial_output_1_decode(uint8_t value)
@@ -16970,7 +16979,7 @@ bool vehicle_rt_sb_output_status_status_serial_output_1_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_output_status_status_serial_output_2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_serial_output_2_decode(uint8_t value)
@@ -16990,7 +16999,7 @@ bool vehicle_rt_sb_output_status_status_serial_output_2_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_output_status_status_trigger_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_output_status_status_trigger_decode(uint8_t value)
@@ -17010,7 +17019,7 @@ bool vehicle_rt_sb_output_status_status_trigger_is_in_phys_range(double value)
 
 uint32_t vehicle_rt_sb_output_status_gps_time_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_sb_output_status_gps_time_decode(uint32_t value)
@@ -17089,7 +17098,7 @@ int vehicle_rt_sb_gps_heading_gradient_2_init(struct vehicle_rt_sb_gps_heading_g
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_decode(uint8_t value)
@@ -17109,7 +17118,7 @@ bool vehicle_rt_sb_gps_heading_gradient_2_validity_gps_heading_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_decode(uint8_t value)
@@ -17129,7 +17138,7 @@ bool vehicle_rt_sb_gps_heading_gradient_2_validity_gps_gradient_is_in_phys_range
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_decode(uint8_t value)
@@ -17151,7 +17160,7 @@ bool vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_heading_is_in_phys_range(
 
 uint16_t vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_encode(double value)
 {
-    return (uint16_t)(value / 0.01);
+    return (uint16_t)(cantools_unsigned_from_double(value / 0.01));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_decode(uint16_t value)
@@ -17171,7 +17180,7 @@ bool vehicle_rt_sb_gps_heading_gradient_2_gps_heading_2_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_2_accuracy_gps_gradient_decode(uint8_t value)
@@ -17268,7 +17277,7 @@ int vehicle_rt_sb_cumulative_distance_2_init(struct vehicle_rt_sb_cumulative_dis
 
 uint8_t vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_decode(uint8_t value)
@@ -17290,7 +17299,7 @@ bool vehicle_rt_sb_cumulative_distance_2_validity_cumulative_time_is_in_phys_ran
 
 uint8_t vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_decode(uint8_t value)
@@ -17312,7 +17321,7 @@ bool vehicle_rt_sb_cumulative_distance_2_validity_cumulative_distance_is_in_phys
 
 uint32_t vehicle_rt_sb_cumulative_distance_2_cumulative_time_encode(double value)
 {
-    return (uint32_t)(value / 0.01);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.01));
 }
 
 double vehicle_rt_sb_cumulative_distance_2_cumulative_time_decode(uint32_t value)
@@ -17332,7 +17341,7 @@ bool vehicle_rt_sb_cumulative_distance_2_cumulative_time_is_in_phys_range(double
 
 uint32_t vehicle_rt_sb_cumulative_distance_2_cumulative_distance_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_sb_cumulative_distance_2_cumulative_distance_decode(uint32_t value)
@@ -17407,7 +17416,7 @@ int vehicle_rt_sb_cumulative_distance_1_init(struct vehicle_rt_sb_cumulative_dis
 
 uint8_t vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_decode(uint8_t value)
@@ -17429,7 +17438,7 @@ bool vehicle_rt_sb_cumulative_distance_1_validity_cumulative_time_is_in_phys_ran
 
 uint8_t vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_decode(uint8_t value)
@@ -17451,7 +17460,7 @@ bool vehicle_rt_sb_cumulative_distance_1_validity_cumulative_distance_is_in_phys
 
 uint32_t vehicle_rt_sb_cumulative_distance_1_cumulative_time_encode(double value)
 {
-    return (uint32_t)(value / 0.01);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.01));
 }
 
 double vehicle_rt_sb_cumulative_distance_1_cumulative_time_decode(uint32_t value)
@@ -17471,7 +17480,7 @@ bool vehicle_rt_sb_cumulative_distance_1_cumulative_time_is_in_phys_range(double
 
 uint32_t vehicle_rt_sb_cumulative_distance_1_cumulative_distance_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_sb_cumulative_distance_1_cumulative_distance_decode(uint32_t value)
@@ -17546,7 +17555,7 @@ int vehicle_rt_sb_trigger_timestamp_init(struct vehicle_rt_sb_trigger_timestamp_
 
 uint8_t vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_decode(uint8_t value)
@@ -17568,7 +17577,7 @@ bool vehicle_rt_sb_trigger_timestamp_validity_trigger_timestamp_is_in_phys_range
 
 uint8_t vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_decode(uint8_t value)
@@ -17590,7 +17599,7 @@ bool vehicle_rt_sb_trigger_timestamp_accuracy_trigger_timestamp_is_in_phys_range
 
 uint8_t vehicle_rt_sb_trigger_timestamp_trigger_number_encode(double value)
 {
-    return (uint8_t)(value - 1.0);
+    return (uint8_t)(cantools_unsigned_from_double(value - 1.0));
 }
 
 double vehicle_rt_sb_trigger_timestamp_trigger_number_decode(uint8_t value)
@@ -17610,7 +17619,7 @@ bool vehicle_rt_sb_trigger_timestamp_trigger_number_is_in_phys_range(double valu
 
 uint8_t vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_decode(uint8_t value)
@@ -17630,7 +17639,7 @@ bool vehicle_rt_sb_trigger_timestamp_trigger_timestamp_type_is_in_phys_range(dou
 
 uint64_t vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_encode(double value)
 {
-    return (uint64_t)(value / 1e-06);
+    return (uint64_t)(cantools_unsigned_from_double(value / 1e-06));
 }
 
 double vehicle_rt_sb_trigger_timestamp_gps_high_resolution_time_decode(uint64_t value)
@@ -17721,7 +17730,7 @@ int vehicle_rt_imu06_gyro_rates_init(struct vehicle_rt_imu06_gyro_rates_t *msg_p
 
 uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_decode(uint8_t value)
@@ -17741,7 +17750,7 @@ bool vehicle_rt_imu06_gyro_rates_validity_gyro_rate_yaw_is_in_phys_range(double 
 
 uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_decode(uint8_t value)
@@ -17761,7 +17770,7 @@ bool vehicle_rt_imu06_gyro_rates_validity_gyro_rate_pitch_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_decode(uint8_t value)
@@ -17781,7 +17790,7 @@ bool vehicle_rt_imu06_gyro_rates_validity_gyro_rate_roll_is_in_phys_range(double
 
 uint8_t vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_gyro_rates_accuracy_gyro_rates_decode(uint8_t value)
@@ -17941,7 +17950,7 @@ int vehicle_rt_imu06_accel_init(struct vehicle_rt_imu06_accel_t *msg_p)
 
 uint8_t vehicle_rt_imu06_accel_validity_accel_longitudinal_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_accel_validity_accel_longitudinal_decode(uint8_t value)
@@ -17963,7 +17972,7 @@ bool vehicle_rt_imu06_accel_validity_accel_longitudinal_is_in_phys_range(double 
 
 uint8_t vehicle_rt_imu06_accel_validity_accel_lateral_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_accel_validity_accel_lateral_decode(uint8_t value)
@@ -17985,7 +17994,7 @@ bool vehicle_rt_imu06_accel_validity_accel_lateral_is_in_phys_range(double value
 
 uint8_t vehicle_rt_imu06_accel_validity_accel_vertical_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_accel_validity_accel_vertical_decode(uint8_t value)
@@ -18007,7 +18016,7 @@ bool vehicle_rt_imu06_accel_validity_accel_vertical_is_in_phys_range(double valu
 
 uint8_t vehicle_rt_imu06_accel_accuracy_accel_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_imu06_accel_accuracy_accel_decode(uint8_t value)
@@ -18150,7 +18159,7 @@ int vehicle_rt_sb_speed_init(struct vehicle_rt_sb_speed_t *msg_p)
 
 uint8_t vehicle_rt_sb_speed_validity_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_speed_validity_speed_decode(uint8_t value)
@@ -18172,7 +18181,7 @@ bool vehicle_rt_sb_speed_validity_speed_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_speed_accuracy_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_speed_accuracy_speed_decode(uint8_t value)
@@ -18281,7 +18290,7 @@ int vehicle_rt_sb_rtk_slip_init(struct vehicle_rt_sb_rtk_slip_t *msg_p)
 
 uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_slip_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_slip_validity_rtk_slip_decode(uint8_t value)
@@ -18301,7 +18310,7 @@ bool vehicle_rt_sb_rtk_slip_validity_rtk_slip_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_squat_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_slip_validity_rtk_squat_decode(uint8_t value)
@@ -18321,7 +18330,7 @@ bool vehicle_rt_sb_rtk_slip_validity_rtk_squat_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_rtk_slip_validity_rtk_baseline_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_slip_validity_rtk_baseline_decode(uint8_t value)
@@ -18341,7 +18350,7 @@ bool vehicle_rt_sb_rtk_slip_validity_rtk_baseline_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_slip_accuracy_rtk_baseline_decode(uint8_t value)
@@ -18407,7 +18416,7 @@ bool vehicle_rt_sb_rtk_slip_rtk_squat_is_in_phys_range(double value)
 
 uint16_t vehicle_rt_sb_rtk_slip_rtk_baseline_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_slip_rtk_baseline_decode(uint16_t value)
@@ -18500,7 +18509,7 @@ int vehicle_rt_sb_rtk_attitude_init(struct vehicle_rt_sb_rtk_attitude_t *msg_p)
 
 uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_decode(uint8_t value)
@@ -18520,7 +18529,7 @@ bool vehicle_rt_sb_rtk_attitude_validity_rtk_yaw_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_decode(uint8_t value)
@@ -18540,7 +18549,7 @@ bool vehicle_rt_sb_rtk_attitude_validity_rtk_pitch_is_in_phys_range(double value
 
 uint8_t vehicle_rt_sb_rtk_attitude_validity_rtk_roll_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_attitude_validity_rtk_roll_decode(uint8_t value)
@@ -18560,7 +18569,7 @@ bool vehicle_rt_sb_rtk_attitude_validity_rtk_roll_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_rtk_attitude_accuracy_rtk_attitude_decode(uint8_t value)
@@ -18705,7 +18714,7 @@ int vehicle_rt_sb_gps_mcycle_lean_init(struct vehicle_rt_sb_gps_mcycle_lean_t *m
 
 uint8_t vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_decode(uint8_t value)
@@ -18725,7 +18734,7 @@ bool vehicle_rt_sb_gps_mcycle_lean_validity_gps_lateral_accel_is_in_phys_range(d
 
 uint8_t vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_decode(uint8_t value)
@@ -18745,7 +18754,7 @@ bool vehicle_rt_sb_gps_mcycle_lean_validity_gps_mcycle_lean_is_in_phys_range(dou
 
 uint8_t vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_mcycle_lean_accuracy_gps_lateral_accel_decode(uint8_t value)
@@ -18862,7 +18871,7 @@ int vehicle_rt_sb_gps_status_init(struct vehicle_rt_sb_gps_status_t *msg_p)
 
 uint8_t vehicle_rt_sb_gps_status_gps_status_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_gps_status_decode(uint8_t value)
@@ -18884,7 +18893,7 @@ bool vehicle_rt_sb_gps_status_gps_status_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_gps_status_firmware_version_major_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_firmware_version_major_decode(uint8_t value)
@@ -18906,7 +18915,7 @@ bool vehicle_rt_sb_gps_status_firmware_version_major_is_in_phys_range(double val
 
 uint8_t vehicle_rt_sb_gps_status_firmware_version_intermediate_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_firmware_version_intermediate_decode(uint8_t value)
@@ -18928,7 +18937,7 @@ bool vehicle_rt_sb_gps_status_firmware_version_intermediate_is_in_phys_range(dou
 
 uint8_t vehicle_rt_sb_gps_status_firmware_version_minor_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_firmware_version_minor_decode(uint8_t value)
@@ -18950,7 +18959,7 @@ bool vehicle_rt_sb_gps_status_firmware_version_minor_is_in_phys_range(double val
 
 uint8_t vehicle_rt_sb_gps_status_gps_n_sv_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_gps_n_sv_decode(uint8_t value)
@@ -18970,7 +18979,7 @@ bool vehicle_rt_sb_gps_status_gps_n_sv_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_gps_status_gps_n_sv_2_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_gps_n_sv_2_decode(uint8_t value)
@@ -18990,7 +18999,7 @@ bool vehicle_rt_sb_gps_status_gps_n_sv_2_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_gps_status_gps_n_sv_rtk_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_gps_n_sv_rtk_decode(uint8_t value)
@@ -19010,7 +19019,7 @@ bool vehicle_rt_sb_gps_status_gps_n_sv_rtk_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_gps_status_rtk_status_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_status_rtk_status_decode(uint8_t value)
@@ -19198,7 +19207,7 @@ int vehicle_rt_sb_gps_pos_ecef_1_init(struct vehicle_rt_sb_gps_pos_ecef_1_t *msg
 
 uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_decode(uint8_t value)
@@ -19218,7 +19227,7 @@ bool vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_decode(uint8_t value)
@@ -19238,7 +19247,7 @@ bool vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_decode(uint8_t value)
@@ -19258,7 +19267,7 @@ bool vehicle_rt_sb_gps_pos_ecef_1_validity_gps_pos_ecef_z_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_decode(uint8_t value)
@@ -19280,7 +19289,7 @@ bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_decode(uint8_t value)
@@ -19302,7 +19311,7 @@ bool vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_ecef_1_accuracy_gps_pos_ecef_z_decode(uint8_t value)
@@ -19510,7 +19519,7 @@ int vehicle_rt_sb_gps_pos_llh_1_init(struct vehicle_rt_sb_gps_pos_llh_1_t *msg_p
 
 uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_decode(uint8_t value)
@@ -19530,7 +19539,7 @@ bool vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_latitude_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_decode(uint8_t value)
@@ -19550,7 +19559,7 @@ bool vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_longitude_is_in_phys_range
 
 uint8_t vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_decode(uint8_t value)
@@ -19570,7 +19579,7 @@ bool vehicle_rt_sb_gps_pos_llh_1_validity_gps_pos_llh_altitude_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_decode(uint8_t value)
@@ -19592,7 +19601,7 @@ bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_latitude_is_in_phys_range(
 
 uint8_t vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_decode(uint8_t value)
@@ -19614,7 +19623,7 @@ bool vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_longitude_is_in_phys_range
 
 uint8_t vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_pos_llh_1_accuracy_gps_pos_llh_altitude_decode(uint8_t value)
@@ -19719,7 +19728,7 @@ int vehicle_rt_sb_gps_heading_gradient_init(struct vehicle_rt_sb_gps_heading_gra
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_decode(uint8_t value)
@@ -19739,7 +19748,7 @@ bool vehicle_rt_sb_gps_heading_gradient_validity_gps_heading_is_in_phys_range(do
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_decode(uint8_t value)
@@ -19759,7 +19768,7 @@ bool vehicle_rt_sb_gps_heading_gradient_validity_gps_gradient_is_in_phys_range(d
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_heading_decode(uint8_t value)
@@ -19801,7 +19810,7 @@ bool vehicle_rt_sb_gps_heading_gradient_gps_heading_is_in_phys_range(double valu
 
 uint8_t vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_heading_gradient_accuracy_gps_gradient_decode(uint8_t value)
@@ -19916,7 +19925,7 @@ int vehicle_rt_sb_gps_vel_ecef_2_init(struct vehicle_rt_sb_gps_vel_ecef_2_t *msg
 
 uint8_t vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_decode(uint8_t value)
@@ -19936,7 +19945,7 @@ bool vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ecef_2_validity_gps_vel_ecef_z_decode(uint8_t value)
@@ -20058,7 +20067,7 @@ int vehicle_rt_sb_gps_vel_ecef_1_init(struct vehicle_rt_sb_gps_vel_ecef_1_t *msg
 
 uint8_t vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_decode(uint8_t value)
@@ -20078,7 +20087,7 @@ bool vehicle_rt_sb_gps_vel_ecef_1_validity_gps_vel_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_decode(uint8_t value)
@@ -20100,7 +20109,7 @@ bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_x_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_decode(uint8_t value)
@@ -20122,7 +20131,7 @@ bool vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_y_is_in_phys_range(doubl
 
 uint8_t vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ecef_1_accuracy_gps_vel_ecef_z_decode(uint8_t value)
@@ -20222,7 +20231,7 @@ int vehicle_rt_sb_gps_vel_ned_2_init(struct vehicle_rt_sb_gps_vel_ned_2_t *msg_p
 
 uint8_t vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_decode(uint8_t value)
@@ -20242,7 +20251,7 @@ bool vehicle_rt_sb_gps_vel_ned_2_validity_gps_vel_ned_d_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ned_2_accuracy_gps_vel_d_decode(uint8_t value)
@@ -20359,7 +20368,7 @@ int vehicle_rt_sb_gps_vel_ned_1_init(struct vehicle_rt_sb_gps_vel_ned_1_t *msg_p
 
 uint8_t vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_decode(uint8_t value)
@@ -20379,7 +20388,7 @@ bool vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_n_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_decode(uint8_t value)
@@ -20399,7 +20408,7 @@ bool vehicle_rt_sb_gps_vel_ned_1_validity_gps_vel_ned_e_is_in_phys_range(double 
 
 uint8_t vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_vel_ned_1_accuracy_gps_vel_ne_decode(uint8_t value)
@@ -20516,7 +20525,7 @@ int vehicle_rt_sb_gps_speed_init(struct vehicle_rt_sb_gps_speed_t *msg_p)
 
 uint8_t vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_decode(uint8_t value)
@@ -20536,7 +20545,7 @@ bool vehicle_rt_sb_gps_speed_validity_gps_speed_2_d_is_in_phys_range(double valu
 
 uint8_t vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_decode(uint8_t value)
@@ -20556,7 +20565,7 @@ bool vehicle_rt_sb_gps_speed_validity_gps_speed_3_d_is_in_phys_range(double valu
 
 uint8_t vehicle_rt_sb_gps_speed_accuracy_gps_speed_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_speed_accuracy_gps_speed_decode(uint8_t value)
@@ -20578,7 +20587,7 @@ bool vehicle_rt_sb_gps_speed_accuracy_gps_speed_is_in_phys_range(double value)
 
 uint32_t vehicle_rt_sb_gps_speed_gps_speed_2_d_encode(double value)
 {
-    return (uint32_t)(value / 0.0001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.0001));
 }
 
 double vehicle_rt_sb_gps_speed_gps_speed_2_d_decode(uint32_t value)
@@ -20598,7 +20607,7 @@ bool vehicle_rt_sb_gps_speed_gps_speed_2_d_is_in_phys_range(double value)
 
 uint32_t vehicle_rt_sb_gps_speed_gps_speed_3_d_encode(double value)
 {
-    return (uint32_t)(value / 0.0001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.0001));
 }
 
 double vehicle_rt_sb_gps_speed_gps_speed_3_d_decode(uint32_t value)
@@ -20673,7 +20682,7 @@ int vehicle_rt_sb_gps_time_init(struct vehicle_rt_sb_gps_time_t *msg_p)
 
 uint8_t vehicle_rt_sb_gps_time_validity_gps_time_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_time_validity_gps_time_decode(uint8_t value)
@@ -20693,7 +20702,7 @@ bool vehicle_rt_sb_gps_time_validity_gps_time_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_gps_time_validity_gps_week_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_time_validity_gps_week_decode(uint8_t value)
@@ -20713,7 +20722,7 @@ bool vehicle_rt_sb_gps_time_validity_gps_week_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_gps_time_accuracy_gps_time_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_time_accuracy_gps_time_decode(uint8_t value)
@@ -20735,7 +20744,7 @@ bool vehicle_rt_sb_gps_time_accuracy_gps_time_is_in_phys_range(double value)
 
 uint32_t vehicle_rt_sb_gps_time_gps_time_encode(double value)
 {
-    return (uint32_t)(value / 0.001);
+    return (uint32_t)(cantools_unsigned_from_double(value / 0.001));
 }
 
 double vehicle_rt_sb_gps_time_gps_time_decode(uint32_t value)
@@ -20755,7 +20764,7 @@ bool vehicle_rt_sb_gps_time_gps_time_is_in_phys_range(double value)
 
 uint16_t vehicle_rt_sb_gps_time_gps_week_encode(double value)
 {
-    return (uint16_t)(value);
+    return (uint16_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gps_time_gps_week_decode(uint16_t value)
@@ -20848,7 +20857,7 @@ int vehicle_rt_sb_accel_init(struct vehicle_rt_sb_accel_t *msg_p)
 
 uint8_t vehicle_rt_sb_accel_validity_accel_longitudinal_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_accel_validity_accel_longitudinal_decode(uint8_t value)
@@ -20870,7 +20879,7 @@ bool vehicle_rt_sb_accel_validity_accel_longitudinal_is_in_phys_range(double val
 
 uint8_t vehicle_rt_sb_accel_validity_accel_lateral_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_accel_validity_accel_lateral_decode(uint8_t value)
@@ -20892,7 +20901,7 @@ bool vehicle_rt_sb_accel_validity_accel_lateral_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_accel_validity_accel_vertical_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_accel_validity_accel_vertical_decode(uint8_t value)
@@ -20914,7 +20923,7 @@ bool vehicle_rt_sb_accel_validity_accel_vertical_is_in_phys_range(double value)
 
 uint8_t vehicle_rt_sb_accel_accuracy_accel_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_accel_accuracy_accel_decode(uint8_t value)
@@ -21073,7 +21082,7 @@ int vehicle_rt_sb_gyro_rates_init(struct vehicle_rt_sb_gyro_rates_t *msg_p)
 
 uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_decode(uint8_t value)
@@ -21093,7 +21102,7 @@ bool vehicle_rt_sb_gyro_rates_validity_gyro_rate_yaw_is_in_phys_range(double val
 
 uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_decode(uint8_t value)
@@ -21113,7 +21122,7 @@ bool vehicle_rt_sb_gyro_rates_validity_gyro_rate_pitch_is_in_phys_range(double v
 
 uint8_t vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_decode(uint8_t value)
@@ -21133,7 +21142,7 @@ bool vehicle_rt_sb_gyro_rates_validity_gyro_rate_roll_is_in_phys_range(double va
 
 uint8_t vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_encode(double value)
 {
-    return (uint8_t)(value);
+    return (uint8_t)(cantools_unsigned_from_double(value));
 }
 
 double vehicle_rt_sb_gyro_rates_accuracy_gyro_rates_decode(uint8_t value)

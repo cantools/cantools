@@ -81,7 +81,7 @@ class CandumpBasePattern(BasePattern):
         frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
-        if data in {'remote request', 'R'}:
+        if data == 'remote request' or data.startswith('R'):
             is_remote_frame = True
             data = bytes(0)
         else:
@@ -151,8 +151,9 @@ class CandumpTimestampedPattern(CandumpBasePattern):
 class CandumpDefaultLogPattern(CandumpBasePattern):
     # (1579857014.345944) can2 486#82967A6B006B07F8
     # (1613656104.501098) can2 14C##16A0FFE00606E022400000000000000A0FFFF00FFFF25000600000000000000FE
+    # (1579857014.346087) can2 486#R8
     pattern = re.compile(
-        r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>\S+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>R|([0-9A-Fa-f]{2})*)(\s+[RT])?$')
+        r'^\s*?\((?P<timestamp>[\d.]+?)\)\s+?(?P<channel>\S+)\s+?(?P<can_id>[0-9A-F]+?)#(#[0-9A-F])?(?P<can_data>R[0-8]?|([0-9A-Fa-f]{2})*)(\s+[RT])?$')
 
     def __init__(self, tz: TimezoneType) -> None:
         if tz == TZ_LOCAL:

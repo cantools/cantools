@@ -21,6 +21,7 @@ except ImportError:
 
 import cantools
 import cantools.database
+from cantools.database.can.c_source import generate
 
 
 def with_fake_screen_width(screen_width):
@@ -1339,6 +1340,28 @@ BATTERY_VT(
                                         'tests/files/c_source/' + database_c)
                 self.assertFalse((tmpdir / fuzzer_c).exists())
                 self.assertFalse((tmpdir / fuzzer_mk).exists())
+
+    def test_generate_c_source_comment_delimiters(self):
+        database = cantools.database.load_file('tests/files/dbc/motohawk.dbc')
+        message = database.get_message_by_name('ExampleMessage')
+        message.comment = 'Message /* nested */ and */ at end\nMore /*/ text'
+        message.get_signal_by_name('Enable').comment = (
+            'Signal */ followed by /* and an overlapping /*/ sequence')
+
+        for bit_fields in (False, True):
+            for floating_point_numbers in (False, True):
+                with self.subTest(bit_fields=bit_fields,
+                                  floating_point_numbers=floating_point_numbers):
+                    header, _, _, _ = generate(
+                        database, 'comment_delimiters', 'comment_delimiters.h',
+                        'comment_delimiters.c', 'comment_delimiters_fuzzer.c',
+                        bit_fields=bit_fields,
+                        floating_point_numbers=floating_point_numbers)
+
+                    self.assertIn('Message / * nested * / and * / at end', header)
+                    self.assertIn('More / * / text', header)
+                    self.assertIn('Signal * / followed by / *', header)
+                    self.assertIn('overlapping / * / sequence', header)
 
     def test_generate_c_source_no_signal_encode_decode(self):
         databases = [

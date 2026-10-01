@@ -23,12 +23,12 @@ jobs:
         python-version: ["3.10", "3.14"]
       fail-fast: false
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # 7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # 7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # 6.3.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # 7.0.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -50,12 +50,12 @@ jobs:
             python-version: pypy-3.11
       fail-fast: false
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # 7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # 7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # 6.3.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # 7.0.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -84,12 +84,12 @@ jobs:
   linter:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # 7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # 7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # 6.3.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # 7.0.0
       with:
         python-version: "3.14"
     - name: Install dependencies
@@ -106,12 +106,12 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # 7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # 7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # 6.3.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # 7.0.0
       with:
         python-version: "3.14"
     - name: Install dependencies
@@ -126,12 +126,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # 7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # 7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # 6.3.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # 7.0.0
         with:
           python-version: "3.14"
       - name: Install dependencies
@@ -155,12 +155,12 @@ jobs:
     if: startsWith(github.ref, 'refs/tags')
     steps:
     - name: Checkout
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # 7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # 7.0.1
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # 6.3.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # 7.0.0
       with:
         python-version: "3.14"
     - name: Install dependencies
@@ -171,8 +171,8 @@ jobs:
       run: |
         python -m build
     - name: Generate artifact attestation
-      uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32  # 4.1.0
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # 4.2.2
       with:
         subject-path: 'dist/*'
     - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # 1.14.0
+      uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # 1.14.2

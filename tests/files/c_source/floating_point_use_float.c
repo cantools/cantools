@@ -116,7 +116,7 @@ static inline uint64_t unpack_right_shift_u64(
 static uint64_t cantools_unsigned_from_double(double value)
 {
     if (value < 0) {
-        return (uint64_t)(int64_t)value;
+        return 0;
     }
 
     return (uint64_t)value;

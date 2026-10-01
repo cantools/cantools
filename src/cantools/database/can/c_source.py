@@ -144,7 +144,7 @@ UNSIGNED_ENCODE_HELPER_FMT = '''\
 static uint64_t cantools_unsigned_from_double(double value)
 {
     if (value < 0) {
-        return (uint64_t)(int64_t)value;
+        return 0;
     }
 
     return (uint64_t)value;
@@ -1612,7 +1612,7 @@ def _generate_definitions(database_name: str,
                 if is_sender:
                     if cg_signal.type_name.startswith('uint'):
                         # Negative float-to-unsigned conversion is undefined
-                        # in C; the helper converts via a signed integer.
+                        # in C; clamp a negative raw value to zero.
                         encode = f'cantools_unsigned_from_double({encode})'
                     signal_definition += SIGNAL_DEFINITION_ENCODE_FMT.format(
                         database_name=database_name,

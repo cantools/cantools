@@ -576,23 +576,27 @@ void test_encode_decode(void) {
 void test_unsigned_encode_negative(void) {
     int value;
 
-    /* Check both sides of zero and wraparound boundaries repeatedly. */
+    /* Clamp negative raw values while preserving nonnegative conversions. */
     for (value = -257; value <= 256; value++) {
-        TEST_ASSERT_EQUAL_UINT8((uint8_t)value,
+        TEST_ASSERT_EQUAL_UINT8((value < 0) ? 0u : (uint8_t)value,
                                 motohawk_example_message_enable_encode((double)value));
     }
 
     /* Scaling, rounding and all generated unsigned integer widths. */
-    TEST_ASSERT_EQUAL_UINT8(255u,
+    TEST_ASSERT_EQUAL_UINT8(0u,
                             motohawk_example_message_average_radius_encode(-0.1));
-    TEST_ASSERT_EQUAL_UINT8(254u,
+    TEST_ASSERT_EQUAL_UINT8(0u,
                             motohawk_use_round_example_message_average_radius_encode(-0.2));
-    TEST_ASSERT_EQUAL_UINT16(UINT16_MAX,
+    TEST_ASSERT_EQUAL_UINT16(0u,
                              abs_bremse_33_whlspeed_fr_encode(-0.015625));
-    TEST_ASSERT_EQUAL_UINT32(UINT32_MAX,
+    TEST_ASSERT_EQUAL_UINT32(0u,
                              vehicle_rt_dl1_mk3_gps_time_gps_time_encode(-0.001));
-    TEST_ASSERT_EQUAL_UINT64(UINT64_MAX,
+    TEST_ASSERT_EQUAL_UINT64(0u,
                              padding_bit_order_msg3_l_encode(-1.0));
+    TEST_ASSERT_EQUAL_UINT64(0u,
+                             padding_bit_order_msg3_l_encode(-1.0e100));
+    /* A negative physical value may still produce a positive raw value. */
+    TEST_ASSERT_TRUE(abs_mm5_10_tx1_yaw_rate_encode(-163.0) > 0u);
     TEST_ASSERT_EQUAL_UINT64(0x8000000000000000ull,
                              padding_bit_order_msg3_l_encode(9223372036854775808.0));
 }

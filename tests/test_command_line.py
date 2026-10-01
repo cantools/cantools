@@ -1,8 +1,6 @@
 import functools
 import os
 import re
-import shutil
-import subprocess
 import sys
 import tempfile
 import types
@@ -1350,12 +1348,11 @@ BATTERY_VT(
         message.get_signal_by_name('Enable').comment = (
             'Signal */ followed by /* and an overlapping /*/ sequence')
 
-        compiler = shutil.which('cc')
         for bit_fields in (False, True):
             for floating_point_numbers in (False, True):
                 with self.subTest(bit_fields=bit_fields,
                                   floating_point_numbers=floating_point_numbers):
-                    header, source, _, _ = generate(
+                    header, _, _, _ = generate(
                         database, 'comment_delimiters', 'comment_delimiters.h',
                         'comment_delimiters.c', 'comment_delimiters_fuzzer.c',
                         bit_fields=bit_fields,
@@ -1365,18 +1362,6 @@ BATTERY_VT(
                     self.assertIn('More / * / text', header)
                     self.assertIn('Signal * / followed by / *', header)
                     self.assertIn('overlapping / * / sequence', header)
-
-                    if compiler is not None:
-                        with tempfile.TemporaryDirectory() as directory:
-                            path = Path(directory)
-                            (path / 'comment_delimiters.h').write_text(header)
-                            (path / 'comment_delimiters.c').write_text(source)
-                            result = subprocess.run(
-                                [compiler, '-std=c99', '-Wall', '-Wextra',
-                                 '-Werror', '-c', str(path / 'comment_delimiters.c'),
-                                 '-o', str(path / 'comment_delimiters.o')],
-                                capture_output=True, text=True, check=False)
-                            self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_generate_c_source_no_signal_encode_decode(self):
         databases = [

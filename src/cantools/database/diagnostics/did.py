@@ -1,6 +1,7 @@
 # A DID.
 
 import binascii
+import warnings
 from typing import TypedDict
 
 from cantools.database.diagnostics.data import Data
@@ -17,6 +18,10 @@ class _Codec(TypedDict):
 class Did:
     """A DID with identifier and other information.
 
+    .. deprecated::
+        The diagnostics functionality is deprecated and will be removed in a future version.
+        Export your CDD data to PDX/ODX format and use `odxtools <https://github.com/mercedes-benz/odxtools>`_ instead.
+
     """
 
     def __init__(self,
@@ -24,6 +29,12 @@ class Did:
                  name: str,
                  length: int,
                  datas: list[Data]) -> None:
+        warnings.warn(
+            "cantools.database.diagnostics.Did is deprecated and will be removed in a future version. "
+            "Export your CDD data to PDX/ODX format and use odxtools (https://github.com/mercedes-benz/odxtools) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._identifier = identifier
         self._name = name
         self._length = length

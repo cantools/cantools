@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 try:
     import bitstruct.c  # type: ignore
 except ImportError:
-    import bitstruct  # type: ignore
+    import bitstruct  # type: ignore[import-untyped, unused-ignore]
 
 
 def format_or(items: list[int | str]) -> str:

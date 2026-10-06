@@ -12,6 +12,9 @@ TimezoneType = datetime.tzinfo | Literal['local'] | None
 
 TZ_LOCAL: Literal['local'] = 'local'
 
+# SocketCAN marks an error frame by this bit of the CAN id (linux/can.h)
+CAN_ERR_FLAG = 0x20000000
+
 class TimestampFormat(enum.Enum):
     """Describes a type of timestamp. ABSOLUTE is referring to UNIX time
     (seconds since epoch). RELATIVE is seconds since start of log, or time
@@ -72,13 +75,14 @@ class BasePattern:
 class CandumpBasePattern(BasePattern):
 
     def unpack(self, match_object: re.Match[str]) -> DataFrame | None:
-        if match_object.groupdict().get('error_frame'):
+        frame_id = int(match_object.group('can_id'), 16)
+        if match_object.groupdict().get('error_frame') or frame_id & CAN_ERR_FLAG:
             # Error frames carry no payload. Skip them, mirroring how
-            # PCANTracePatternV11 skips 'Error' rows.
+            # PCANTracePatternV11 skips 'Error' rows. `candump -l` prints no
+            # ERRORFRAME marker, there the flag in the id is the only sign.
             return None
 
         channel = match_object.group('channel')
-        frame_id = int(match_object.group('can_id'), 16)
         is_extended_frame = len(match_object.group('can_id')) > 3
         data = match_object.group('can_data')
         if data == 'remote request' or data.startswith('R'):

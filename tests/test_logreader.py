@@ -41,6 +41,25 @@ class TestLogreaderFormats(unittest.TestCase):
             "00 00 00 00 00 00 00 00   ERRORFRAME")
         self.assertIsNone(outp)
 
+    def test_candump_log_error_frame(self):
+        # `candump -l` writes no ERRORFRAME marker, an error frame is
+        # an eight digit id with CAN_ERR_FLAG (0x20000000) set
+        parser = cantools.logreader.Parser()
+
+        outp = parser.parse(
+            "(1594172461.968006) vcan0 20000004#0000000000000000")
+        self.assertIsNone(outp)
+
+        outp = parser.parse(
+            "(1594172461.968006) vcan0 20000080#0000000000000000 R")
+        self.assertIsNone(outp)
+
+        # the highest extended id is still a data frame
+        outp = parser.parse("(1594172461.968006) vcan0 1FFFFFFF#F0 R")
+        self.assertEqual(outp.frame_id, 0x1fffffff)
+        self.assertEqual(outp.is_extended_frame, True)
+        self.assertEqual(outp.data, b'\xF0')
+
     def test_candump(self):
         parser = cantools.logreader.Parser()
 
@@ -593,6 +612,17 @@ class TestLogreaderStreams(unittest.TestCase):
   vcan0  0C8   [8]  F0 00 00 00 00 00 00 00
   vcan0  20000004   [8]  00 00 00 00 00 00 00 00   ERRORFRAME
   vcan0  064   [2]  F0 01
+"""))
+        frames = list(parser)
+        self.assertEqual(len(frames), 2)
+        self.assertEqual(frames[0].frame_id, 0xc8)
+        self.assertEqual(frames[1].frame_id, 0x64)
+
+    def test_candump_log_error_frame_in_stream(self):
+        parser = cantools.logreader.Parser(io.StringIO("""\
+(1594172461.968006) vcan0 0C8#F000000000000000
+(1594172462.126542) vcan0 20000004#0000000000000000
+(1594172462.127684) vcan0 064#F001
 """))
         frames = list(parser)
         self.assertEqual(len(frames), 2)

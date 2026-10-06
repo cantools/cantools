@@ -1,5 +1,6 @@
 import logging
 import unittest
+from xml.etree import ElementTree
 
 import cantools
 from cantools.database.errors import ParseError
@@ -494,6 +495,24 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
     def test_datarefs(self):
         db = cantools.database.load_file('tests/files/cdd/example-diddatarefs.cdd', encoding = 'iso-8859-1')
         self.assertEqual(len(db.dids[-1].datas), 2)
+
+    def test_struct_data_objects(self):
+        # without its DIDDATAREF, the data objects of Control_Digital_IO
+        # are the ones of its STRUCT
+        root = ElementTree.parse('tests/files/cdd/example-diddatarefs.cdd').getroot()
+
+        for diag_inst in root.iter('DIAGINST'):
+            for comp_cont in diag_inst.findall('SIMPLECOMPCONT'):
+                if comp_cont.find('DIDDATAREF') is not None:
+                    diag_inst.remove(comp_cont)
+
+        db = cantools.database.diagnostics.Database()
+        db.add_cdd_string(ElementTree.tostring(root, encoding='unicode'))
+        did = db.get_did_by_name('Control_Digital_IO')
+        self.assertEqual([(data.name, data.length) for data in did.datas],
+                         [('IO_State', 1), ('Pin_ID', 1)])
+        self.assertEqual(did.decode(did.encode({'IO_State': 'on', 'Pin_ID': 'off'})),
+                         {'IO_State': 'on', 'Pin_ID': 'off'})
 
 
 # This file is not '__main__' when executed via 'python setup.py3

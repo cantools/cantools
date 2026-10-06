@@ -44,10 +44,10 @@ jobs:
     strategy:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
-        python-version: ["3.10", "3.14", "pypy-3.11"]
+        python-version: ["3.10", "3.14", "pypy-3.11-v7.3.x"]
         exclude:
           - os: windows-latest
-            python-version: pypy-3.11
+            python-version: pypy-3.11-v7.3.x
       fail-fast: false
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # 7.0.1

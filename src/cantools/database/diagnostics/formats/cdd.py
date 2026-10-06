@@ -186,8 +186,12 @@ def _load_did_element(did: ElementTree.Element, data_types: dict[str, DataType],
     datas: list[Data] = []
     data_objs = did.findall('SIMPLECOMPCONT/DATAOBJ')
     data_objs += did.findall('SIMPLECOMPCONT/UNION/STRUCT/DATAOBJ')
-    data_objs += did.findall('SIMPLECOMPCONT/STRUCT/DATAOBJ')
     did_data_refs = did.findall('SIMPLECOMPCONT/DIDDATAREF')
+
+    if not did_data_refs:
+        # A STRUCT next to a DIDDATAREF is not part of the DID's data
+        # record, e.g. the control enable mask of an IO control service.
+        data_objs += did.findall('SIMPLECOMPCONT/STRUCT/DATAOBJ')
 
     for data_ref in did_data_refs:
         try:

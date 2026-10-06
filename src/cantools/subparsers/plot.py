@@ -232,6 +232,7 @@ class TimestampParser:
                     # versions). We use 1904 because it is a leap year
                     # and because it should be clear that this is not
                     # the real year of the specified date.
+                    # naive on purpose: matched against naive log timestamps below
                     if '%Y' not in p and '%d' in p:
                         out = datetime.datetime.strptime('1904 ' + user_input, '%Y ' + p)  # noqa: DTZ007
                     else:
@@ -291,10 +292,12 @@ class TimestampParser:
             return linenumber
 
     def parse_absolute_timestamp(self, timestamp):
+        # naive on purpose: matched against naive log timestamps elsewhere
         return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)  # noqa: DTZ007
 
     @staticmethod
     def parse_absolute_seconds(timestamp):
+        # naive on purpose: matched against naive log timestamps elsewhere
         return datetime.datetime.fromtimestamp(float(timestamp))  # noqa: DTZ006
 
     @staticmethod

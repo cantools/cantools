@@ -183,6 +183,7 @@ class CandumpAbsoluteLogPattern(CandumpBasePattern):
         r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|(?:[0-9A-F]{2} *)*)\s*(?P<error_frame>ERRORFRAME)?.*?$')
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
+        # intentionally naive: the log format does not carry timezone information
         timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")  # noqa: DTZ007
         timestamp_format = TimestampFormat.ABSOLUTE
         return timestamp, timestamp_format

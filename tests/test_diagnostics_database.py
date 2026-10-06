@@ -493,7 +493,7 @@ class CanToolsDiagnosticsDatabaseTest(unittest.TestCase):
 
     def test_datarefs(self):
         db = cantools.database.load_file('tests/files/cdd/example-diddatarefs.cdd', encoding = 'iso-8859-1')
-        self.assertEqual(len(db.dids[-1].datas), 2)
+        self.assertEqual(len(db.dids[-1].datas), 4)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

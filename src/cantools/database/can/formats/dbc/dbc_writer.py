@@ -156,6 +156,14 @@ ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE = DbcAttributeDefinition[float](
     minimum=0,
     maximum=100000000000)
 
+ATTRIBUTE_DEFINITION_SPN = DbcAttributeDefinition(
+    name='SPN',
+    default_value=0,
+    kind='SG_',
+    type_name='INT',
+    minimum=0,
+    maximum=524287)
+
 
 class LongNamesConverter:
     def __init__(self, long_names: list[str]) -> None:
@@ -549,6 +557,12 @@ def _need_startval_def(database: InternalDatabase) -> bool:
                for s in m.signals)
 
 
+def _need_spn_def(database: InternalDatabase) -> bool:
+    return any(s.spn is not None
+               for m in database.messages
+               for s in m.signals)
+
+
 def _need_cycletime_def(database: InternalDatabase) -> bool:
     # If the user has added cycle times to a database which didn't start with them,
     # we need to add the global attribute definition so the output DBC is valid
@@ -580,6 +594,8 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
         definitions['GenMsgCycleTime'] = ATTRIBUTE_DEFINITION_GENMSGCYCLETIME
     if 'GenSigStartValue' not in definitions and _need_startval_def(database):
         definitions['GenSigStartValue'] = ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE
+    if 'SPN' not in definitions and _need_spn_def(database):
+        definitions['SPN'] = ATTRIBUTE_DEFINITION_SPN
 
     # create 'Baudrate' attribute definition
     if len(database.buses) == 1 and database.buses[0].baudrate is not None:
@@ -792,6 +808,17 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
                 sig_attributes['GenSigStartValue'] = DbcAttribute[float](
                     value=float(signal.raw_initial),
                     definition=ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE)
+
+            # synchronize the attribute for the J1939 suspect parameter
+            # number with the SPN specified by the signal object
+            spn_def = database.dbc.attribute_definitions.get('SPN')
+            if signal.spn is None:
+                sig_attributes.pop('SPN', None)
+            elif spn_def is not None and ('SPN' in sig_attributes
+                                          or signal.spn != spn_def.default_value):
+                sig_attributes['SPN'] = DbcAttribute(
+                    value=signal.spn,
+                    definition=dbc_assert_type(spn_def, DbcAttributeDefinition))
 
             # output all signal attributes
             for attribute in sig_attributes.values():

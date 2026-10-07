@@ -154,6 +154,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
             actual_db.get_message_by_name('m').get_signal_by_name('s').raw_initial,
             sig.raw_initial)
 
+    def test_dbc_dump_spn(self):
+        sig = Signal(name='s', start=0, length=8, spn=190)
+        msg = Message(frame_id=0x42, name='m', length=8, signals=[sig])
+        expected_db = cantools.database.Database(messages=[msg])
+
+        actual_db = cantools.database.Database()
+        actual_db.add_dbc_string(expected_db.as_dbc_string())
+
+        self.assertEqual(
+            actual_db.get_message_by_name('m').get_signal_by_name('s').spn,
+            sig.spn)
+
+        # changed SPNs of a loaded database are dumped as well
+        db = cantools.database.load_file('tests/files/dbc/j1939.dbc')
+        db.messages[0].signals[0].spn = 1234
+        db.messages[1].signals[0].spn = 4321
+        db = cantools.database.load_string(db.as_dbc_string(), 'dbc')
+        self.assertEqual(db.messages[0].signals[0].spn, 1234)
+        self.assertEqual(db.messages[1].signals[0].spn, 4321)
+
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'
 

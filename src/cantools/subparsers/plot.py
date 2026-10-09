@@ -65,6 +65,7 @@ except ImportError:
 
 from .. import database, errors
 from ..database.namedsignalvalue import NamedSignalValue
+from ..logreader import CAN_ERR_FLAG
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
 
@@ -86,12 +87,14 @@ if plt is not None:
     plt.rcParams["date.autoformatter.microsecond"] = "%H:%M:%S.%f"
 
 
-# Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1".
-RE_CANDUMP = re.compile(r'^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?P<data>[0-9A-F ]*)(?:\s*::.*)?$')
+# Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1",
+# with the ASCII column of 'candump -a' and the ERRORFRAME marker of 'candump -e'.
+RE_CANDUMP = re.compile(r"^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?:remote request|(?P<data>(?:[0-9A-F]{2}(?: *[0-9A-F]{2})*)?))\s*(?:'.*'\s*)?(?:ERRORFRAME)?(?:::.*)?$")
 # Matches 'cantools decode' output, i.e. ")" or "   voltage: 0 V,".
 RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s+[0-9.+-]+(\s+.*)?,?|\)')
-# Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1"
-RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?P<data>[\dA-F]*)(\s+[RT])?$')
+# Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1",
+# CAN FD frames "(1594172461.968006) vcan0 1F0##00000000000001BC1" and remote frames "1F0#R".
+RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?:#[\dA-F])?(?:R[0-8]?|(?P<data>(?:[\dA-Fa-f]{2})*))(\s+[RT])?$')
 
 
 def _mo_unpack(mo):
@@ -101,9 +104,8 @@ def _mo_unpack(mo):
     frame_id = '0' * (8 - len(frame_id)) + frame_id
     frame_id = binascii.unhexlify(frame_id)
     frame_id = struct.unpack('>I', frame_id)[0]
-    data = mo.group('data')
-    data = data.replace(' ', '')
-    data = binascii.unhexlify(data)
+    # A remote frame leaves the data group unmatched and carries no payload.
+    data = binascii.unhexlify((mo.group('data') or '').replace(' ', ''))
 
     return timestamp, frame_id, data
 
@@ -391,6 +393,10 @@ def _do_decode(args):
                 continue
             elif args.stop is not None and timestamp > args.stop:
                 break
+            if frame_id & CAN_ERR_FLAG:
+                # Error frames carry no signals. Skip them, as logreader does.
+                line_number += 1
+                continue
             plotter.add_msg(timestamp, frame_id, data)
         elif RE_DECODE.match(line):
             continue

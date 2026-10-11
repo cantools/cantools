@@ -293,7 +293,8 @@ class DbcParser(Parser):
 
         ns = Sequence('NS_', ':', AnyUntil(Sequence(Any(), ':')))
 
-        bs = Sequence('BS_', ':')
+        bs = Sequence('BS_', ':',
+                      Optional(Sequence('NUMBER', ':', 'NUMBER', ',', 'NUMBER')))
 
         nodes = Sequence('BU_', ':', ZeroOrMore('WORD'))
 

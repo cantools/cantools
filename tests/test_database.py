@@ -498,6 +498,22 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message.signals[2].name, 'no_choice')
         self.assertEqual(message.signals[2].choices, None)
 
+    def test_dbc_load_bs_with_baudrate(self):
+        db = cantools.database.load_string(
+            'VERSION "1.0"\n'
+            '\n'
+            'BS_: 500000 : 0,0\n'
+            '\n'
+            'BU_: Node\n'
+            '\n'
+            'BO_ 341 BMS_1: 8 Node\n'
+            ' SG_ v_c_climit : 7|8@0+ (5,0) [0|35] "A" Node\n',
+            database_format='dbc')
+
+        message = db.get_message_by_frame_id(341)
+        self.assertEqual(message.name, 'BMS_1')
+        self.assertEqual(message.signals[0].name, 'v_c_climit')
+
     def test_dbc_load_choices(self):
         filename = 'tests/files/dbc/choices.dbc'
         db = cantools.database.load_file(filename)

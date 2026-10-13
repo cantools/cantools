@@ -78,6 +78,7 @@ lint.extend-select = [
     "A",    # flake8-builtins
     "B",    # pyflakes-bugbear
     "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimez
     "E",    # pycodestyle Error
     "F",    # pyflakes
     "FURB", # refurb

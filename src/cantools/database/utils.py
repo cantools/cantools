@@ -369,7 +369,7 @@ def prune_signal_choices(signal: "Signal") -> None:
     # that ends with an underscore from all of them provided that the
     # names of the choices stay valid identifiers
     choice_values = [ str(x) for x in signal.choices.values() ]
-    full_prefix = os.path.commonprefix(choice_values)
+    full_prefix = os.path.commonprefix(choice_values)  # noqa: RUF071
     i = full_prefix.rfind('_')
 
     if i >= 0:

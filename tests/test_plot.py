@@ -430,6 +430,80 @@ BREMSE_33(
             self.assertListEqual(plt.mock_calls, expected_calls)
 
 
+    def test_plot_l_fd_remote_and_error_frames(self):
+        argv = ['cantools', 'plot', self.DBC_FILE]
+        input_data = """\
+(1609395080.446193) vcan0 00000343#B504CB04AE04BC04
+(1609395081.447989) vcan0 00000343##1650457045E047404
+(1609395082.449807) vcan0 20000080#0000000000000000
+(1609395083.451020) vcan0 00000343#R
+(1609395084.452815) vcan0 00000343#6903850369037703
+"""
+        plotted_lines = "\n".join(input_data.splitlines()[i] for i in (0, 1, 4))
+
+        xs = self.parse_time(plotted_lines, self.parse_absolute_seconds)
+        ys_whlspeed_fl = [18.828125, 17.578125, 13.640625]
+        ys_whlspeed_fr = [19.171875, 17.359375, 14.078125]
+        ys_whlspeed_rl = [18.71875, 17.46875, 13.640625]
+        ys_whlspeed_rr = [18.9375, 17.8125, 13.859375]
+
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.subplot().plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL [m/s]'),
+            mock.call.subplot().plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR [m/s]'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL [m/s]'),
+            mock.call.subplot().plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR [m/s]'),
+            mock.call.subplot().set_xlabel(self.XLABEL_l % self.parse_start_time(xs[0])),
+            mock.call.show(),
+        ]
+        # The remote frame has no payload and is reported like in 'cantools decode';
+        # the error frame is skipped.
+        expected_output = "Failed to parse data of frame id 835 (0x343): Wrong data size: 0 instead of 8 bytes\n"
+
+        stdout = StringIO()
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), PyplotMock() as plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertEqual(stdout.getvalue(), expected_output)
+
+    def test_plot_candump_ascii_and_error_frames(self):
+        argv = ['cantools', 'plot', self.DBC_FILE]
+        input_data = """\
+ (000.000000)  vcan0  00000343   [8]  B5 04 CB 04 AE 04 BC 04   '........'
+ (000.500000)  vcan0  20000080   [8]  00 00 00 00 00 00 00 00   ERRORFRAME
+ (001.001787)  vcan0  00000343   [8]  65 04 57 04 5E 04 74 04   'e.W.^.t.'
+"""
+        plotted_lines = "\n".join(input_data.splitlines()[i] for i in (0, 2))
+
+        xs = self.parse_time(plotted_lines, self.parse_seconds)
+        ys_whlspeed_fl = [18.828125, 17.578125]
+        ys_whlspeed_fr = [19.171875, 17.359375]
+        ys_whlspeed_rl = [18.71875, 17.46875]
+        ys_whlspeed_rr = [18.9375, 17.8125]
+
+        plt = PyplotMock()
+        subplots = [SubplotMock()]
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            mock.call.plot(xs, ys_whlspeed_fl, '', label='BREMSE_33.whlspeed_FL [m/s]'),
+            mock.call.plot(xs, ys_whlspeed_fr, '', label='BREMSE_33.whlspeed_FR [m/s]'),
+            mock.call.plot(xs, ys_whlspeed_rl, '', label='BREMSE_33.whlspeed_RL [m/s]'),
+            mock.call.plot(xs, ys_whlspeed_rr, '', label='BREMSE_33.whlspeed_RR [m/s]'),
+            mock.call.set_xlabel(self.XLABEL_tz),
+        ]
+
+        stdout = StringIO()
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertListEqual(subplots[0].mock_calls, expected_subplot_calls)
+            self.assertEqual(stdout.getvalue(), "")
+
+
     # ------- test signal command line argument(s) -------
 
     def test_wildcards_caseinsensitive(self):

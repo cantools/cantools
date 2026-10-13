@@ -4080,6 +4080,35 @@ class CanToolsDatabaseTest(unittest.TestCase):
         with open(filename) as fin:
             self.assertEqual(db.as_kcd_string(), fin.read())
 
+    def test_as_kcd_string_undeclared_nodes(self):
+        """Senders and receivers that are not in the node list are
+        declared as nodes in the KCD dump.
+
+        """
+
+        db = cantools.database.load_string(
+            'VERSION ""\n'
+            'BU_: Declared\n'
+            'BO_ 1 M: 8 Undeclared\n'
+            ' SG_ S : 0|8@1+ (1,0) [0|0] "" Declared,OtherRx\n',
+            database_format='dbc')
+
+        db = cantools.database.load_string(db.as_kcd_string(),
+                                           database_format='kcd')
+        self.assertEqual([node.name for node in db.nodes],
+                         ['Declared', 'Undeclared', 'OtherRx'])
+        message = db.get_message_by_name('M')
+        self.assertEqual(message.senders, ['Undeclared'])
+        self.assertEqual(message.get_signal_by_name('S').receivers,
+                         ['Declared', 'OtherRx'])
+
+        # SYM files have no node list.
+        sym = cantools.database.load_file('tests/files/sym/big-endian.sym')
+        kcd = cantools.database.load_string(sym.as_kcd_string(),
+                                            database_format='kcd')
+        self.assertEqual(kcd.get_message_by_name('Msg1').senders,
+                         ['ECU', 'Peripherals'])
+
     def test_issue_62(self):
         """Test issue 62.
 

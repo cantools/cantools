@@ -425,10 +425,25 @@ def _dump_version(version, parent):
         SubElement(parent, 'Document', version=version)
 
 
-def _dump_nodes(nodes, node_refs, parent):
-    for node_id, node in enumerate(nodes, 1):
-        SubElement(parent, 'Node', id=str(node_id), name=node.name)
-        node_refs[node.name] = node_id
+def _dump_nodes(nodes, messages, node_refs, parent):
+    # Senders and receivers need not be in the node list (a SYM file
+    # has none), but KCD refers to nodes by id, so declare them too.
+    # Both are lists, so the node ids follow the order in the database
+    # and do not change from run to run.
+    declared = [node.name for node in nodes]
+    undeclared = []
+
+    for message in messages:
+        for name in [*message.senders,
+                     *(receiver
+                       for signal in message.signals
+                       for receiver in signal.receivers)]:
+            if name not in declared and name not in undeclared:
+                undeclared.append(name)
+
+    for node_id, name in enumerate(declared + undeclared, 1):
+        SubElement(parent, 'Node', id=str(node_id), name=name)
+        node_refs[name] = node_id
 
 
 def _dump_messages(messages, node_refs, parent, sort_signals):
@@ -458,7 +473,7 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
         database.version = ''
 
     _dump_version(database.version, network_definition)
-    _dump_nodes(database.nodes, node_refs, network_definition)
+    _dump_nodes(database.nodes, database.messages, node_refs, network_definition)
     _dump_messages(database.messages, node_refs, network_definition, sort_signals)
 
     _indent_xml(network_definition, '  ')

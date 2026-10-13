@@ -430,6 +430,8 @@ def _dump_nodes(nodes, messages, node_refs, parent):
 
     # Senders and receivers need not be in the node list (a SYM file
     # has none), but KCD refers to nodes by id, so declare them too.
+    # Collect them in a dict, not a set: the dict keeps the first-seen
+    # order, so the node ids do not change from run to run.
     declared = set(names)
     undeclared = dict.fromkeys(
         name

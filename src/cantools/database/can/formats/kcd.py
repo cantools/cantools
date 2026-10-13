@@ -426,23 +426,22 @@ def _dump_version(version, parent):
 
 
 def _dump_nodes(nodes, messages, node_refs, parent):
-    names = [node.name for node in nodes]
-
     # Senders and receivers need not be in the node list (a SYM file
     # has none), but KCD refers to nodes by id, so declare them too.
-    # Collect them in a dict, not a set: the dict keeps the first-seen
-    # order, so the node ids do not change from run to run.
-    declared = set(names)
-    undeclared = dict.fromkeys(
-        name
-        for message in messages
+    # Both are lists, so the node ids follow the order in the database
+    # and do not change from run to run.
+    declared = [node.name for node in nodes]
+    undeclared = []
+
+    for message in messages:
         for name in [*message.senders,
                      *(receiver
                        for signal in message.signals
-                       for receiver in signal.receivers)]
-        if name not in declared)
+                       for receiver in signal.receivers)]:
+            if name not in declared and name not in undeclared:
+                undeclared.append(name)
 
-    for node_id, name in enumerate(names + list(undeclared), 1):
+    for node_id, name in enumerate(declared + undeclared, 1):
         SubElement(parent, 'Node', id=str(node_id), name=name)
         node_refs[name] = node_id
 

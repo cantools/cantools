@@ -826,6 +826,11 @@ def _get_signal_type(signal: Signal) -> str:
 
         return 'unsigned'
 
+def _dump_comment(comment: str) -> str:
+    # A SYM comment ends at the end of its line, so line breaks in a
+    # comment (allowed in DBC, KCD and ARXML) are written as spaces.
+    return ' // ' + re.sub(r'\r\n?|\n', ' ', comment)
+
 def _dump_signal(signal: Signal) -> str:
     # Example:
     # Sig=alt_current unsigned 16 /u:A /f:0.05 /o:-1600 /max:1676.75 /d:0 // Alternator Current
@@ -847,7 +852,7 @@ def _dump_signal(signal: Signal) -> str:
     if signal.choices:
         signal_str += f' /e:{_get_enum_name(signal)}'
     if signal.comment:
-        signal_str += f' // {signal.comment}'
+        signal_str += _dump_comment(signal.comment)
 
     return signal_str
 
@@ -892,7 +897,7 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
             frame_id = f'ID={min_frame_id:03X}h'
         frame_id_newline = '\n'
         if message.comment is not None:
-            comment = f' // {message.comment}'
+            comment = _dump_comment(message.comment)
     frame_id_range = ''
     if max_frame_id is not None:
         if message.is_extended_frame:

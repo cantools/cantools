@@ -2105,6 +2105,33 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(by_name['HasSignals'], ['Speed'])
         self.assertEqual(by_name['NoSignals'], [])
 
+    def test_as_sym_string_multiline_comments(self):
+        # A SYM comment runs to the end of its line. Line breaks in a
+        # message or signal comment must not end it early; the text after
+        # the break would be read as SYM syntax and the file not load.
+        signal = Signal(name='Speed', start=0, length=8,
+                        comment='line one\nline two\r\nline three\rend')
+        message = Message(frame_id=0x100, name='Msg', length=8,
+                          signals=[signal], comment='first\nsecond')
+        db = cantools.database.Database(messages=[message])
+
+        reloaded = cantools.database.load_string(db.as_sym_string(), 'sym')
+        reloaded_message = reloaded.get_message_by_name('Msg')
+        self.assertEqual(reloaded_message.comment, 'first second')
+        self.assertEqual(reloaded_message.get_signal_by_name('Speed').comment,
+                         'line one line two line three end')
+
+    def test_as_sym_string_dbc_multiline_comment(self):
+        db = cantools.database.load_file('tests/files/dbc/abs.dbc')
+
+        reloaded = cantools.database.load_string(db.as_sym_string(), 'sym')
+        diag_fl = reloaded.get_message_by_name(
+            'BREMSE_53').get_signal_by_name('Diag_FL')
+        self.assertEqual(
+            diag_fl.comment,
+            'Value to show faults related to the wheel speed sensor.  '
+            '0 - Signal ok, 1 - Wiring related fault, 2 - Signal related fault')
+
     def test_signal_types_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/signal-types-6.0.sym')
 

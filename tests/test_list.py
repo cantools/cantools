@@ -103,6 +103,78 @@ ExampleMessage:
             actual_output = stdout.getvalue()
             self.assertEqual(actual_output, expected_output)
 
+    def test_val_and_sig_valtype(self):
+        # Prepare mocks.
+        args = Args('tests/files/dbc/good-val-sig_valtype.dbc')
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+msg1
+msg2
+"""
+
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
+        # Prepare mocks.
+        args = Args('tests/files/dbc/good-val-sig_valtype.dbc')
+        args.print_all = True
+
+        stdout = StringIO()
+        with patch('sys.stdout', stdout):
+            # Run the main function of the subparser
+            list_module._do_list(args)
+
+            # check make sure it behaves as expected
+            expected_output = """\
+msg1:
+  Frame ID: 0x1 (1)
+  Size: 1 bytes
+  Is extended frame: False
+  Is CAN-FD frame: False
+  Signal tree:
+
+    -- {root}
+       +-- signal1
+
+  Signal details:
+    signal1:
+      Internal type: Integer
+      Start bit: 0
+      Length: 8 bits
+      Byte order: little_endian
+      Is signed: False
+      Named values:
+        3: High
+        2: Standard
+        1: Low
+        0: Unknown
+msg2:
+  Frame ID: 0x2 (2)
+  Size: 4 bytes
+  Is extended frame: False
+  Is CAN-FD frame: False
+  Signal tree:
+
+    -- {root}
+       +-- signal2
+
+  Signal details:
+    signal2:
+      Internal type: Float
+      Start bit: 0
+      Length: 32 bits
+      Byte order: little_endian
+      Is signed: True
+"""
+            actual_output = stdout.getvalue()
+            self.assertEqual(actual_output, expected_output)
+
     def test_arxml3(self):
         args = Args('tests/files/arxml/system-3.2.3.arxml')
         args.print_buses = True

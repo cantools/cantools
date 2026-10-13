@@ -1,5 +1,7 @@
 # DID data.
 
+import warnings
+
 from cantools.database.conversion import BaseConversion, IdentityConversion
 from cantools.database.namedsignalvalue import NamedSignalValue
 from cantools.typechecking import ByteOrder, Choices, SignalValueType
@@ -8,6 +10,10 @@ from cantools.typechecking import ByteOrder, Choices, SignalValueType
 class Data:
     """A data data with position, size, unit and other information. A data
     is part of a DID.
+
+    .. deprecated::
+        The diagnostics functionality is deprecated and will be removed in a future version.
+        Export your CDD data to PDX/ODX format and use `odxtools <https://github.com/mercedes-benz/odxtools>`_ instead.
 
     """
 
@@ -21,6 +27,12 @@ class Data:
                  maximum: float | None = None,
                  unit: str | None = None,
                  ) -> None:
+        warnings.warn(
+            "cantools.database.diagnostics.Data is deprecated and will be removed in a future version. "
+            "Export your CDD data to PDX/ODX format and use odxtools (https://github.com/mercedes-benz/odxtools) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         #: The data name as a string.
         self.name: str = name
 

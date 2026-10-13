@@ -78,6 +78,11 @@ Functions and classes
 .. autoclass:: cantools.database.conversion.BaseConversion
     :members:
 
+.. deprecated::
+    The diagnostics functionality (CDD format, ``cantools.database.diagnostics``) is
+    deprecated and will be removed in a future version.
+    Export your CDD data to PDX/ODX format and use `odxtools <https://github.com/mercedes-benz/odxtools>`_ instead.
+
 .. autoclass:: cantools.database.diagnostics.Database
     :members:
 

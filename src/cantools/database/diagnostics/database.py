@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import TextIO
 
 from cantools.database.diagnostics.did import Did
@@ -17,9 +18,19 @@ class Database:
     :func:`load_string()<cantools.database.load_string()>` returns
     instances of this class.
 
+    .. deprecated::
+        The diagnostics functionality is deprecated and will be removed in a future version.
+        Export your CDD data to PDX/ODX format and use `odxtools <https://github.com/mercedes-benz/odxtools>`_ instead.
+
     """
 
     def __init__(self, dids: list[Did] | None = None):
+        warnings.warn(
+            "cantools.database.diagnostics.Database is deprecated and will be removed in a future version. "
+            "Export your CDD data to PDX/ODX format and use odxtools (https://github.com/mercedes-benz/odxtools) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._name_to_did: dict[str, Did] = {}
         self._identifier_to_did: dict[int, Did] = {}
         self._dids = dids or []

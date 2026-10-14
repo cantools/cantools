@@ -174,6 +174,26 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(db.messages[0].signals[0].spn, 1234)
         self.assertEqual(db.messages[1].signals[0].spn, 4321)
 
+    def test_dbc_incorrect_val(self):
+        filename = 'tests/files/dbc/incorrect-val.dbc'
+        with self.assertRaises(UnsupportedDatabaseFormatError) as e:
+            _ = cantools.db.load_file(filename)
+        expected_error = """\
+DBC: "unused VAL_ entries in DBC:
+    VAL_ 99 signal1"\
+"""
+        self.assertEqual(str(e.exception), expected_error)
+
+    def test_dbc_incorrect_sig_valtype(self):
+        filename = 'tests/files/dbc/incorrect-sig_valtype.dbc'
+        with self.assertRaises(UnsupportedDatabaseFormatError) as e:
+            _ = cantools.db.load_file(filename)
+        expected_error = """\
+DBC: "unused SIG_VALTYPE_ entries in DBC:
+    SIG_VALTYPE_ 345 signal2"\
+"""
+        self.assertEqual(str(e.exception), expected_error)
+
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'
 

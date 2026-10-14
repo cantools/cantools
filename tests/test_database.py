@@ -2132,6 +2132,43 @@ class CanToolsDatabaseTest(unittest.TestCase):
             'Value to show faults related to the wheel speed sensor.  '
             '0 - Signal ok, 1 - Wiring related fault, 2 - Signal related fault')
 
+    def test_as_sym_string_hex_multiplexer_ids(self):
+        # SYM hex numbers must start with a digit; a multiplexer id
+        # whose hex form starts with A-F (10, 160, ...) needs a leading 0,
+        # after the sign of a negative id.
+        mux_ids = [0, 9, 10, 15, 16, 159, 160, 255, 256, 4095, -1, -10]
+        signals = [Signal(name='Mux', start=0, length=16,
+                          is_multiplexer=True)]
+        signals += [Signal(name=f'Sig{mux_id}', start=16, length=8,
+                           multiplexer_ids=[mux_id],
+                           multiplexer_signal='Mux')
+                    for mux_id in mux_ids]
+        message = Message(frame_id=0x100, name='Msg', length=8,
+                          signals=signals)
+        db = cantools.database.Database(messages=[message])
+
+        sym = db.as_sym_string()
+        self.assertCountEqual(re.findall(r'^Mux=.* (\S+) $', sym, re.MULTILINE),
+                              ['0h', '9h', '0Ah', '0Fh', '10h', '9Fh', '0A0h',
+                               '0FFh', '100h', '0FFFh', '-1h', '-0Ah'])
+
+        reloaded = cantools.database.load_string(sym, 'sym')
+        reloaded_message = reloaded.get_message_by_name('Msg')
+        for mux_id in mux_ids:
+            signal = reloaded_message.get_signal_by_name(f'Sig{mux_id}')
+            self.assertEqual(signal.multiplexer_ids, [mux_id])
+
+    def test_as_sym_string_dbc_hex_multiplexer_ids(self):
+        db = cantools.database.load_file('tests/files/dbc/msxii_system_can.dbc')
+
+        reloaded = cantools.database.load_string(db.as_sym_string(), 'sym')
+        for message in db.messages:
+            reloaded_message = reloaded.get_message_by_name(message.name)
+            for signal in message.signals:
+                reloaded_signal = reloaded_message.get_signal_by_name(signal.name)
+                self.assertEqual(reloaded_signal.multiplexer_ids,
+                                 signal.multiplexer_ids)
+
     def test_signal_types_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/signal-types-6.0.sym')
 

@@ -513,6 +513,33 @@ class CanToolsDatabaseTest(unittest.TestCase):
         message = db.get_message_by_frame_id(341)
         self.assertEqual(message.name, 'BMS_1')
         self.assertEqual(message.signals[0].name, 'v_c_climit')
+        self.assertEqual(db.buses[0].baudrate, 500000)
+        self.assertIsNone(db.buses[0].fd_baudrate)
+
+    def test_dbc_load_bs_baudrate_attribute_wins(self):
+        db = cantools.database.load_string(
+            'VERSION "1.0"\n'
+            '\n'
+            'BS_: 500000 : 0,0\n'
+            '\n'
+            'BU_: Node\n'
+            '\n'
+            'BA_DEF_  "Baudrate" INT 0 1000000;\n'
+            'BA_ "Baudrate" 250000;\n',
+            database_format='dbc')
+
+        self.assertEqual(db.buses[0].baudrate, 250000)
+
+    def test_dbc_load_bs_zero_speed(self):
+        db = cantools.database.load_string(
+            'VERSION "1.0"\n'
+            '\n'
+            'BS_: 0 : 0,0\n'
+            '\n'
+            'BU_: Node\n',
+            database_format='dbc')
+
+        self.assertEqual(db.buses, [])
 
     def test_dbc_load_choices(self):
         filename = 'tests/files/dbc/choices.dbc'

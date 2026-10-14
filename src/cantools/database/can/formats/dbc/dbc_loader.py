@@ -1228,7 +1228,17 @@ def _load_version(tokens: DbcTokens) -> str | None:
     return typing.cast('str | None', dbc_assert_type(version_tokens[0], list)[1])
 
 
-def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
+def _load_bus_speed(tokens: DbcTokens) -> int | None:
+    for bs_tokens in tokens.get('BS_', []):
+        bs_tokens = dbc_assert_type(bs_tokens, list)
+        if len(bs_tokens) > 2 and bs_tokens[2]:
+            speed = int(bs_tokens[2][0][0])
+            if speed:
+                return speed
+    return None
+
+
+def _load_bus(tokens: DbcTokens, attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     bus_name_attr = attributes.database.get('DBName')
     bus_name = ''
     if bus_name_attr is not None:
@@ -1238,6 +1248,8 @@ def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     bus_baudrate = None
     if bus_baudrate_attr is not None:
         bus_baudrate = int(float(bus_baudrate_attr.value))
+    else:
+        bus_baudrate = _load_bus_speed(tokens)
 
     bus_comment = comments.bus
 
@@ -1379,7 +1391,7 @@ def load_string(string: str, strict: bool = True,
     attributes = _load_attributes(tokens, attribute_definitions_dict)
     relation_attribute_definitions = get_relation_definitions_dict(relation_definitions, relation_defaults)
     relation_attributes = _load_relation_attributes(tokens, relation_attribute_definitions)
-    bus = _load_bus(attributes, comments)
+    bus = _load_bus(tokens, attributes, comments)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens, attributes)

@@ -184,6 +184,21 @@ DBC: "unused VAL_ entries in DBC:
 """
         self.assertEqual(str(e.exception), expected_error)
 
+    def test_dbc_vframeformat_without_default(self):
+        # VFrameFormat is defined but has no BA_DEF_DEF_ default, and the
+        # message does not set it. The frame format must fall back to None
+        # instead of raising UnboundLocalError.
+        dbc = '''VERSION ""
+NS_ :
+BS_:
+BU_: Node
+BO_ 100 Msg: 8 Node
+ SG_ S : 0|8@1+ (1,0) [0|255] "" Node
+BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
+'''
+        db = cantools.database.load_string(dbc, database_format='dbc')
+        self.assertFalse(db.messages[0].is_fd)
+
     def test_dbc_incorrect_sig_valtype(self):
         filename = 'tests/files/dbc/incorrect-sig_valtype.dbc'
         with self.assertRaises(UnsupportedDatabaseFormatError) as e:

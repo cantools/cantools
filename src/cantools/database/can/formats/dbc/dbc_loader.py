@@ -1129,7 +1129,7 @@ def _load_messages(tokens: DbcTokens,
 
         ref_definitions = _get_enum_vframeformat_definition(ref_definitions)
 
-        frame_format: str | None
+        frame_format: str | None = None
         if message_attributes is not None and 'VFrameFormat' in message_attributes:
             frame_format_choice = message_attributes['VFrameFormat'].value
             frame_format = ref_definitions.choices[dbc_assert_type(frame_format_choice, int)]

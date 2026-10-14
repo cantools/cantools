@@ -911,7 +911,12 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
         m_flag = ''
         if multiplexer_signal.byte_order == 'big_endian':
             m_flag = '-m'
-        hex_multiplexer_id = format(multiplexer_id, 'x').upper()
+        hex_multiplexer_id = f'{abs(multiplexer_id):X}'
+        if not hex_multiplexer_id[0].isdigit():
+            # SYM hex numbers start with a digit.
+            hex_multiplexer_id = '0' + hex_multiplexer_id
+        if multiplexer_id < 0:
+            hex_multiplexer_id = '-' + hex_multiplexer_id
         multiplexer_signal_name = multiplexer_signal.name
         if not multiplexer_signal_name:
             raise ValueError(f"The name of the multiplexer signal with ID {hex_multiplexer_id} is empty. The database is corrupt.")

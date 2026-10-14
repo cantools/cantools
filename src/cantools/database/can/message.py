@@ -148,11 +148,23 @@ class Message:
     def _create_codec(self,
                       parent_signal: str | None = None,
                       multiplexer_id: int | None = None,
+                      signals_by_parent: dict[str | None, list[tuple[Signal, set[int] | None]]] | None = None,
                       ) -> Codec:
         """Create a codec of all signals with given parent signal. This is a
         recursive function.
 
         """
+
+        # Group signals by multiplexer signal name once, so each recursion
+        # level only visits its own children instead of all signals. The
+        # multiplexer ids are stored as sets, as a signal may be valid
+        # for thousands of ids.
+        if signals_by_parent is None:
+            signals_by_parent = {}
+
+            for s in self._signals:
+                ids = None if s.multiplexer_ids is None else set(s.multiplexer_ids)
+                signals_by_parent.setdefault(s.multiplexer_signal, []).append((s, ids))
 
         signals: list[Signal] = []
         multiplexers: dict[str, dict[int, Codec]] = {}
@@ -160,23 +172,17 @@ class Message:
         # Find all signals matching given parent signal name and given
         # multiplexer id. Root signals' parent and multiplexer id are
         # both None.
-        for signal in self._signals:
-            if signal.multiplexer_signal != parent_signal:
-                continue
-
+        for signal, signal_multiplexer_ids in signals_by_parent.get(parent_signal, []):
             if (
                     multiplexer_id is not None
-                    and (signal.multiplexer_ids is None or multiplexer_id not in signal.multiplexer_ids)
+                    and (signal_multiplexer_ids is None or multiplexer_id not in signal_multiplexer_ids)
             ):
                 continue
 
             if signal.is_multiplexer:
                 children_ids: set[int] = set()
 
-                for s in self._signals:
-                    if s.multiplexer_signal != signal.name:
-                        continue
-
+                for s, _ in signals_by_parent.get(signal.name, []):
                     if s.multiplexer_ids is not None:
                         children_ids.update(s.multiplexer_ids)
 
@@ -190,7 +196,9 @@ class Message:
                     children_ids.update(signal.conversion.choices.keys())
 
                 for child_id in children_ids:
-                    codec = self._create_codec(signal.name, child_id)
+                    codec = self._create_codec(signal.name,
+                                               child_id,
+                                               signals_by_parent)
 
                     if signal.name not in multiplexers:
                         multiplexers[signal.name] = {}

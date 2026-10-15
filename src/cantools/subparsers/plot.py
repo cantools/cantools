@@ -93,8 +93,9 @@ RE_CANDUMP = re.compile(r"^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F
 # Matches 'cantools decode' output, i.e. ")" or "   voltage: 0 V,".
 RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s+[0-9.+-]+(\s+.*)?,?|\)')
 # Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1",
-# CAN FD frames "(1594172461.968006) vcan0 1F0##00000000000001BC1" and remote frames "1F0#R".
-RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?:#[\dA-F])?(?:R[0-8]?|(?P<data>(?:[\dA-Fa-f]{2})*))(\s+[RT])?$')
+# CAN FD frames "(1594172461.968006) vcan0 1F0##00000000000001BC1" and remote frames "1F0#R",
+# with the " :: ..." that 'cantools decode' appends.
+RE_CANDUMP_LOG = re.compile(r'^\((?P<time>\d+\.\d+)\)\s+\S+\s+(?P<frameid>[\dA-F]+)#(?:#[\dA-F])?(?:R[0-8]?|(?P<data>(?:[\dA-Fa-f]{2})*))(\s+[RT])?(?:\s+::.*)?$')
 
 
 def _mo_unpack(mo):

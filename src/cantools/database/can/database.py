@@ -295,7 +295,7 @@ class Database:
         self._version = database.version
         self._dbc = database.dbc
         self._autosar = database.autosar
-        self.refresh()
+        self._refresh(database.messages)
 
     def add_dbc(self, fp: TextIO) -> None:
         """Read and parse DBC data from given file-like object and add the
@@ -342,7 +342,7 @@ class Database:
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self.refresh()
+        self._refresh(database.messages)
 
     def add_kcd(self, fp: TextIO) -> None:
         """Read and parse KCD data from given file-like object and add the
@@ -378,7 +378,7 @@ class Database:
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self.refresh()
+        self._refresh(database.messages)
 
     def add_sym(self, fp: TextIO) -> None:
         """Read and parse SYM data from given file-like object and add the
@@ -414,7 +414,7 @@ class Database:
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self.refresh()
+        self._refresh(database.messages)
 
     def _add_message(self, message: Message) -> None:
         """Add given message to the database.
@@ -643,11 +643,28 @@ class Database:
 
         """
 
+        self._refresh()
+
+    def _refresh(self, already_refreshed: list[Message] | None = None) -> None:
+        """Refresh the internal database state without refreshing the
+        given messages again.
+
+        Loaders create top-level messages with this database's strict
+        flag, so the messages are already refreshed by
+        ``Message.__init__``.
+        Refreshing them again doubles the load time of large
+        multiplexed messages.
+
+        """
+
+        skipped_ids = {id(message) for message in already_refreshed or []}
         self._name_to_message = {}
         self._frame_id_to_message = {}
 
         for message in self._messages:
-            message.refresh(self._strict)
+            if id(message) not in skipped_ids:
+                message.refresh(self._strict)
+
             self._add_message(message)
 
     def __repr__(self) -> str:

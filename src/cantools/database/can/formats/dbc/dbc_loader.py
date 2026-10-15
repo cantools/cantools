@@ -1232,7 +1232,7 @@ def _load_bus_speed(tokens: DbcTokens) -> int | None:
     for bs_tokens in tokens.get('BS_', []):
         bs_tokens = dbc_assert_type(bs_tokens, list)
         if len(bs_tokens) > 2 and bs_tokens[2]:
-            speed = int(bs_tokens[2][0][0])
+            speed = int(typing.cast('typing.Any', bs_tokens[2])[0][0])
             if speed:
                 return speed
     return None

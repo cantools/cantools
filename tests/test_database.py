@@ -518,6 +518,49 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         self.assertEqual(message.signals[2].name, 'no_choice')
         self.assertEqual(message.signals[2].choices, None)
 
+    def test_dbc_load_bs_with_baudrate(self):
+        db = cantools.database.load_string(
+            'VERSION "1.0"\n'
+            '\n'
+            'BS_: 500000 : 0,0\n'
+            '\n'
+            'BU_: Node\n'
+            '\n'
+            'BO_ 341 BMS_1: 8 Node\n'
+            ' SG_ v_c_climit : 7|8@0+ (5,0) [0|35] "A" Node\n',
+            database_format='dbc')
+
+        message = db.get_message_by_frame_id(341)
+        self.assertEqual(message.name, 'BMS_1')
+        self.assertEqual(message.signals[0].name, 'v_c_climit')
+        self.assertEqual(db.buses[0].baudrate, 500000)
+        self.assertIsNone(db.buses[0].fd_baudrate)
+
+    def test_dbc_load_bs_baudrate_attribute_wins(self):
+        db = cantools.database.load_string(
+            'VERSION "1.0"\n'
+            '\n'
+            'BS_: 500000 : 0,0\n'
+            '\n'
+            'BU_: Node\n'
+            '\n'
+            'BA_DEF_  "Baudrate" INT 0 1000000;\n'
+            'BA_ "Baudrate" 250000;\n',
+            database_format='dbc')
+
+        self.assertEqual(db.buses[0].baudrate, 250000)
+
+    def test_dbc_load_bs_zero_speed(self):
+        db = cantools.database.load_string(
+            'VERSION "1.0"\n'
+            '\n'
+            'BS_: 0 : 0,0\n'
+            '\n'
+            'BU_: Node\n',
+            database_format='dbc')
+
+        self.assertEqual(db.buses, [])
+
     def test_dbc_load_choices(self):
         filename = 'tests/files/dbc/choices.dbc'
         db = cantools.database.load_file(filename)

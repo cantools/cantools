@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import MutableSequence, Sequence
-from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
     cast,
@@ -1270,11 +1269,11 @@ class Message:
         signal_name, children = next(iter(mux.items()))
         self._check_signal(message_bits,
                            self.get_signal_by_name(signal_name))
-        children_message_bits = deepcopy(message_bits)
+        children_message_bits = list(message_bits)
 
         for multiplexer_id in sorted(children):
             child_tree = children[multiplexer_id]
-            child_message_bits = deepcopy(children_message_bits)
+            child_message_bits = list(children_message_bits)
             self._check_signal_tree(child_message_bits, child_tree)
 
             for i, child_bit in enumerate(child_message_bits):

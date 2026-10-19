@@ -90,8 +90,8 @@ if plt is not None:
 # Matches 'candump' output, i.e. "vcan0  1F0   [8]  00 00 00 00 00 00 1B C1",
 # with the ASCII column of 'candump -a' and the ERRORFRAME marker of 'candump -e'.
 RE_CANDUMP = re.compile(r"^\s*(?:\((?P<time>.*?)\))?\s*\S+\s+(?P<frameid>[0-9A-F]+)\s*\[\d+\]\s*(?:remote request|(?P<data>(?:[0-9A-F]{2}(?: *[0-9A-F]{2})*)?))\s*(?:'.*'\s*)?(?:ERRORFRAME)?(?:::.*)?$")
-# Matches 'cantools decode' output, i.e. ")" or "   voltage: 0 V,".
-RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s+[0-9.+-]+(\s+.*)?,?|\)')
+# Matches 'cantools decode' output, i.e. ")", "   voltage: 0 V," or "   state: Enabled,".
+RE_DECODE = re.compile(r'\w+\(|\s+\w+:\s.*|\)')
 # Matches 'candump -l' (or -L) output, i.e. "(1594172461.968006) vcan0 1F0#0000000000001BC1",
 # CAN FD frames "(1594172461.968006) vcan0 1F0##00000000000001BC1" and remote frames "1F0#R",
 # with the " :: ..." that 'cantools decode' appends.

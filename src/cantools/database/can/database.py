@@ -289,13 +289,12 @@ class Database:
 
         database = arxml.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
         self._autosar = database.autosar
-        self.refresh()
 
     def add_dbc(self, fp: TextIO) -> None:
         """Read and parse DBC data from given file-like object and add the
@@ -337,12 +336,11 @@ class Database:
 
         database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self.refresh()
 
     def add_kcd(self, fp: TextIO) -> None:
         """Read and parse KCD data from given file-like object and add the
@@ -373,12 +371,11 @@ class Database:
 
         database = kcd.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self.refresh()
 
     def add_sym(self, fp: TextIO) -> None:
         """Read and parse SYM data from given file-like object and add the
@@ -409,12 +406,20 @@ class Database:
 
         database = sym.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self.refresh()
+
+    def _add_messages(self, messages: list[Message]) -> None:
+        """Add given messages to the database.
+
+        """
+
+        for message in messages:
+            self._messages.append(message)
+            self._add_message(message)
 
     def _add_message(self, message: Message) -> None:
         """Add given message to the database.

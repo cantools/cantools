@@ -289,14 +289,12 @@ class Database:
 
         database = arxml.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        old_messages = list(self._messages)
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
         self._autosar = database.autosar
-        self._refresh(old_messages)
 
     def add_dbc(self, fp: TextIO) -> None:
         """Read and parse DBC data from given file-like object and add the
@@ -338,13 +336,11 @@ class Database:
 
         database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        old_messages = list(self._messages)
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self._refresh(old_messages)
 
     def add_kcd(self, fp: TextIO) -> None:
         """Read and parse KCD data from given file-like object and add the
@@ -375,13 +371,11 @@ class Database:
 
         database = kcd.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        old_messages = list(self._messages)
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self._refresh(old_messages)
 
     def add_sym(self, fp: TextIO) -> None:
         """Read and parse SYM data from given file-like object and add the
@@ -412,13 +406,20 @@ class Database:
 
         database = sym.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        old_messages = list(self._messages)
-        self._messages += database.messages
+        self._add_messages(database.messages)
         self._nodes = database.nodes
         self._buses = database.buses
         self._version = database.version
         self._dbc = database.dbc
-        self._refresh(old_messages)
+
+    def _add_messages(self, messages: list[Message]) -> None:
+        """Add given messages to the database.
+
+        """
+
+        for message in messages:
+            self._messages.append(message)
+            self._add_message(message)
 
     def _add_message(self, message: Message) -> None:
         """Add given message to the database.
@@ -647,28 +648,11 @@ class Database:
 
         """
 
-        self._refresh(self._messages)
-
-    def _refresh(self, messages: list[Message]) -> None:
-        """Refresh the given messages and the internal lookup tables of
-        the database.
-
-        Loaders create top-level messages with this database's strict
-        flag, so the messages are already refreshed by
-        ``Message.__init__``.
-        Refreshing them again doubles the load time of large
-        multiplexed messages, so the ``add_*_string()`` methods pass
-        only the messages that were already in the database.
-
-        """
-
-        for message in messages:
-            message.refresh(self._strict)
-
         self._name_to_message = {}
         self._frame_id_to_message = {}
 
         for message in self._messages:
+            message.refresh(self._strict)
             self._add_message(message)
 
     def __repr__(self) -> str:

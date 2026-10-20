@@ -446,6 +446,49 @@ BREMSE_33(
                     self.assertEqual(stdout.getvalue(), expected_output)
                     self.assertListEqual(plt.mock_calls, expected_calls)
 
+    def test_plot_cantools_decode_choices(self):
+        argv = ['cantools', 'plot', '--no-units', self.DBC_FILE_CHOICES, 'Foo:|']
+        # 'cantools decode' writes a decoded choice as its name, not as a number.
+        input_data = """\
+  vcan0  00000000   [8]  01 00 00 00 00 00 00 00 ::
+Foo(
+    Foo: #%=*\xe4'
+)
+  vcan0  00000000   [8]  FB 00 00 00 00 00 00 00 ::
+Foo(
+    Foo: A negative value
+)
+  vcan0  00000000   [8]  06 00 00 00 00 00 00 00 ::
+Foo(
+    Foo: reserved
+)
+"""
+
+        db = cantools.database.load_file(self.DBC_FILE_CHOICES)
+        choices = db.get_message_by_name("Foo").get_signal_by_name("Foo").choices
+
+        xs = [1, 2, 3]
+        ys = [choices[y] for y in (1, -5, 6)]
+
+        subplots = [SubplotMock()]
+        plt = PyplotMock()
+        plt.subplot.side_effect = subplots
+        expected_calls = [
+            mock.call.subplot(1,1,1, sharex=None),
+            mock.call.show(),
+        ]
+        expected_subplot_calls = [
+            mock.call.stem(xs, ys, '', label='Foo.Foo'),
+            mock.call.set_xlabel(self.XLABEL_LINE_NUMBER),
+        ]
+
+        stdout = StringIO()
+        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.stdout', stdout), mock.patch('sys.argv', argv), plt:
+            cantools._main()
+            self.assertEqual(stdout.getvalue(), "")
+            self.assertListEqual(plt.mock_calls, expected_calls)
+            self.assertListEqual(subplots[0].mock_calls, expected_subplot_calls)
+
 
     # ------- test different file formats -------
 

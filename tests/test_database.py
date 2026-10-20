@@ -2167,6 +2167,27 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
             'Value to show faults related to the wheel speed sensor.  '
             '0 - Signal ok, 1 - Wiring related fault, 2 - Signal related fault')
 
+    def test_as_sym_string_multiplexer_comment(self):
+        # The multiplexer signal is written on the Mux line only, so its
+        # comment must be written there too.
+        db = cantools.database.load_file('tests/files/dbc/multiplex.dbc')
+        sym = db.as_sym_string()
+        self.assertIn('Mux="Multiplexor" 2,6 8h'
+                      ' // Defines data content for response messages.\n',
+                      sym)
+
+        reloaded = cantools.database.load_string(sym, 'sym')
+        multiplexor = reloaded.get_message_by_name(
+            'Message1').get_signal_by_name('Multiplexor')
+        self.assertEqual(multiplexor.comment,
+                         'Defines data content for response messages.')
+
+        db = cantools.database.load_file(
+            'tests/files/sym/comments_hex_and_motorola.sym')
+        reloaded = cantools.database.load_string(db.as_sym_string(), 'sym')
+        sig1 = reloaded.get_message_by_name('Msg1').get_signal_by_name('sig1')
+        self.assertEqual(sig1.comment, 'a comment')
+
     def test_as_sym_string_hex_multiplexer_ids(self):
         # SYM hex numbers must start with a digit; a multiplexer id
         # whose hex form starts with A-F (10, 160, ...) needs a leading 0,

@@ -920,7 +920,12 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
         multiplexer_signal_name = multiplexer_signal.name
         if not multiplexer_signal_name:
             raise ValueError(f"The name of the multiplexer signal with ID {hex_multiplexer_id} is empty. The database is corrupt.")
-        message_str += f'Mux="{multiplexer_signal_name}" {_convert_start(multiplexer_signal.start, multiplexer_signal.byte_order)},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}\n'
+        mux_str = f'Mux="{multiplexer_signal_name}" {_convert_start(multiplexer_signal.start, multiplexer_signal.byte_order)},{multiplexer_signal.length} {hex_multiplexer_id}h {m_flag}'
+        if multiplexer_signal.comment:
+            # The loader reads the multiplexer signal's comment from the
+            # Mux line, not from its entry in {SIGNALS}.
+            mux_str = mux_str.rstrip() + _dump_comment(multiplexer_signal.comment)
+        message_str += mux_str + '\n'
     for signal in signals:
         message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
     return message_str

@@ -142,6 +142,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal.raw_initial, 16120)
         self.assertEqual(signal.initial, 16.120)
 
+        # GenSigStartValue is INT in vehicle.dbc, so no float literal
+        self.assertIn('BA_ "GenSigStartValue" SG_ 2303355937 Accuracy_Accel 127;',
+                      db.as_dbc_string())
+
     def test_dbc_gensigstartval_from_raw_initial(self):
         sig = Signal(name='s', start=0, length=8, raw_initial=47)
         msg = Message(frame_id=0x42, name='m', length=8, signals=[sig])

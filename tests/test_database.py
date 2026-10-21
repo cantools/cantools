@@ -151,6 +151,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
         msg = Message(frame_id=0x42, name='m', length=8, signals=[sig])
         expected_db = cantools.database.Database(messages=[msg])
 
+        # without a definition in the database, the FLOAT fallback is used
+        self.assertIn('BA_ "GenSigStartValue" SG_ 66 s 47.0;',
+                      expected_db.as_dbc_string())
+
         actual_db = cantools.database.Database()
         actual_db.add_dbc_string(expected_db.as_dbc_string())
 

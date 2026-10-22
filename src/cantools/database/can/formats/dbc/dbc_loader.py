@@ -42,14 +42,13 @@ from ...message import Message
 from ...node import Node
 from ...signal import Signal
 from ...signal_group import SignalGroup
-from ..utils import num
+from ..utils import num, parse_int
 from .dbc_attribute import DbcAttribute, DbcAttributeType
 from .dbc_attribute_definition import (
     DbcAttributeDefinition,
     DbcAttributeDefinitionType,
     DbcAttributeValue,
 )
-from ..utils import num, parse_int
 from .dbc_environment_variable import DbcEnvironmentVariable
 from .dbc_specifics import DbcSpecifics
 

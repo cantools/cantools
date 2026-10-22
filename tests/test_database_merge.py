@@ -2,9 +2,7 @@ import pickle
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from xml.etree import ElementTree
 
-import textparser  # type: ignore
 from parameterized import parameterized  # type: ignore
 
 import cantools.database
@@ -15,7 +13,7 @@ from cantools.database.can.formats.dbc import (
     DbcAttributeDefinition,
 )
 from cantools.database.can.node import Node
-from cantools.database.errors import Error
+from cantools.database.errors import Error, ParseError
 
 
 def dbc_source(prefix='Original', frame_id=1793, version='first'):
@@ -396,10 +394,10 @@ EV_ AddedEnvironment: 0 [0|50] "" 0 2 DUMMY_NODE_VECTOR0 AddedNode;
                       database.messages[1])
 
     @parameterized.expand([
-        ('dbc', textparser.ParseError),
-        ('kcd', ElementTree.ParseError),
-        ('sym', Error),
-        ('arxml', ElementTree.ParseError),
+        ('dbc', ParseError),
+        ('kcd', ParseError),
+        ('sym', ParseError),
+        ('arxml', ParseError),
     ])
     def test_parse_failure_leaves_database_unchanged(self, database_format,
                                                     exception):

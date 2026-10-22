@@ -805,9 +805,19 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             if signal.raw_initial is None and 'GenSigStartValue' in sig_attributes:
                 del sig_attributes['GenSigStartValue']
             elif signal.raw_initial is not None:
-                sig_attributes['GenSigStartValue'] = DbcAttribute[float](
-                    value=float(signal.raw_initial),
-                    definition=ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE)
+                # the database may define GenSigStartValue as INT, so use its
+                # definition and convert the value to its type like the loader
+                gen_sig_start_value_def = dbc_assert_type(
+                    database.dbc.attribute_definitions.get('GenSigStartValue'),
+                    DbcAttributeDefinition)
+                start_value: int | float
+                if gen_sig_start_value_def.type_name in ('INT', 'HEX', 'ENUM'):
+                    start_value = int(signal.raw_initial)
+                else:
+                    start_value = float(signal.raw_initial)
+                sig_attributes['GenSigStartValue'] = DbcAttribute(
+                    value=start_value,
+                    definition=gen_sig_start_value_def)
 
             # synchronize the attribute for the J1939 suspect parameter
             # number with the SPN specified by the signal object

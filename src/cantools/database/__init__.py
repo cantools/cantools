@@ -25,7 +25,6 @@ from .errors import (
     EncodeError,
     Error,
     UnsupportedDatabaseFormatError,
-    format_load_error,
 )
 
 _UNEXPECTED_PROBE_ERROR = (
@@ -371,18 +370,11 @@ def load_string(string: str,
         try:
             return load_database(fmt)
         except Error as e:
-            # the string cannot be loaded as this format. try the next
-            # one
             errors[fmt] = e
         except NotImplementedError:
-            # the string is in this format, but the loader does not
-            # support this variant of it. trying further formats is
-            # pointless
+            # the loader knows this format but not this variant, so stop here
             raise
         except Exception as e:
-            # loaders are supposed to raise ParseError for everything
-            # that is wrong with the input, so this is a bug. report
-            # it, but do not let it get in the way of the other formats
             _warn_unexpected_probe_error(fmt, e)
             errors[fmt] = e
 
@@ -395,7 +387,5 @@ def load_string(string: str,
     if database_format is None:
         raise exc
 
-    # keep the traceback of the loader's exception usable. this is not
-    # possible when probing because then there is one exception per
-    # format
+    # the traceback is only usable when one format was asked for
     raise exc from errors[database_format]

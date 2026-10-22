@@ -19,7 +19,7 @@ from parameterized import parameterized  # type: ignore
 import cantools.autosar
 import cantools.database
 from cantools.database import Message, Signal
-from cantools.database.can.formats import arxml, kcd, sym
+from cantools.database.can.formats import arxml, dbc, kcd, sym
 from cantools.database.can.formats.dbc import dbc_loader
 from cantools.database.can.formats.dbc.dbc_writer import LongNamesConverter
 from cantools.database.diagnostics.formats import cdd
@@ -2977,8 +2977,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
                   cm.exception.e_cdd]:
             self.assertIsInstance(e, ParseError)
 
-        # NotImplementedError: the string is in this format, do not try
-        # further formats
+        # NotImplementedError: in this format, so do not try the others
         unsupported = '<AUTOSAR xmlns="http://autosar.org/2.1.DAI.0"/>'
 
         with (unittest.mock.patch.object(dbc, 'load_string',
@@ -2993,8 +2992,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         with self.assertRaises(NotImplementedError):
             cantools.database.load_string(unsupported, database_format='arxml')
 
-        # anything else is a bug in a loader: report it and try the next
-        # format anyway
+        # anything else is a bug in a loader: report it and carry on
         kcd_string = (
             '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
             '<Bus name="B"><Message id="0x1" name="M">'
@@ -3005,22 +3003,25 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
 
         with unittest.mock.patch.object(dbc, 'load_string',
                                         side_effect=RuntimeError('boom')):
-            with self.assertLogs('cantools.database', level='WARNING') as logs:
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
                 db = cantools.database.load_string(kcd_string)
 
             self.assertEqual(db.messages[0].name, 'M')
-            self.assertEqual(logs.output, [f'WARNING:cantools.database:{bug}'])
+            reported = [str(w.message) for w in caught
+                        if 'does not say whether' in str(w.message)]
+            self.assertEqual(len(reported), 1)
+            self.assertIn('probing for dbc raised RuntimeError', reported[0])
+            self.assertIn('boom', reported[0])
 
-            with (self.assertLogs('cantools.database', level='WARNING'),
-                  self.assertRaises(UnsupportedDatabaseFormatError) as cm):
+            with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
                 cantools.database.load_string('abc')
 
             self.assertIsInstance(cm.exception.e_dbc, RuntimeError)
             self.assertIsInstance(cm.exception.e_kcd, ParseError)
             self.assertIn(bug, str(cm.exception))
 
-            with (self.assertLogs('cantools.database', level='WARNING'),
-                  self.assertRaises(UnsupportedDatabaseFormatError) as cm):
+            with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
                 cantools.database.load_string('abc', database_format='dbc')
 
             self.assertEqual(str(cm.exception), bug)
@@ -3028,16 +3029,13 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
 
     @pytest.mark.loader_may_raise
     def test_load_string_sort_signals_exception(self):
-        # an exception raised by the sort_signals callback is not a
-        # statement about the input, so it ends up in the same class as
-        # a bug in a loader
+        # a sort_signals exception says nothing about the input
         sentinel = TypeError('raised by sort_signals')
 
         def sort_signals(signals):
             raise sentinel
 
-        with (self.assertLogs('cantools.database', level='WARNING'),
-              self.assertRaises(UnsupportedDatabaseFormatError) as cm):
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
             cantools.database.load_string(
                 'VERSION "1"\nBO_ 1 M: 8 N\n SG_ S : 0|8@1+ (1,0) [0|0] "" N\n',
                 sort_signals=sort_signals)
@@ -3048,10 +3046,6 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
                       str(cm.exception))
 
     def test_malformed_content_raises_parse_error(self):
-        # the string is in the format and tokenizes, but a value in it
-        # cannot be used or a reference cannot be resolved. this is a
-        # statement about the input, so it is a ParseError and not a
-        # bug that load_string() reports
         kcd_string = (
             '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
             '<Node id="1" name="N"/>'
@@ -3151,9 +3145,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
                 self.assertNotIn('bug in cantools', str(cm.exception))
 
     def test_files_raise_only_parse_error(self):
-        # load every file of the test suite as every format. a loader
-        # either succeeds or raises ParseError (or Error in strict
-        # mode); anything else is reported as a bug by load_string()
+        # every file as every format: only cantools errors may escape
         encodings = {'.dbc': 'cp1252', '.sym': 'cp1252', '.cdd': 'iso-8859-1'}
 
         for path in sorted(Path('tests/files').rglob('*')):

@@ -42,14 +42,13 @@ from ...message import Message
 from ...node import Node
 from ...signal import Signal
 from ...signal_group import SignalGroup
-from ..utils import num
+from ..utils import num, parse_int
 from .dbc_attribute import DbcAttribute, DbcAttributeType
 from .dbc_attribute_definition import (
     DbcAttributeDefinition,
     DbcAttributeDefinitionType,
     DbcAttributeValue,
 )
-from ..utils import num, parse_int
 from .dbc_environment_variable import DbcEnvironmentVariable
 from .dbc_specifics import DbcSpecifics
 
@@ -1497,7 +1496,7 @@ def load_string(string: str, strict: bool = True,
             unused_choices.append(f"VAL_ {frame_id} {c}")
     if len(unused_choices) > 0:
         errors = "\n    ".join(unused_choices)
-        raise ValueError(f'unused VAL_ entries in DBC:\n    {errors}')
+        raise ParseError(f'unused VAL_ entries in DBC:\n    {errors}')
 
     # There shouldn't be any SIG_VALTYPE_ signal_type entries left,
     # each one should have been claimed by a Message above.
@@ -1507,7 +1506,7 @@ def load_string(string: str, strict: bool = True,
             unused_signal_types.append(f"SIG_VALTYPE_ {frame_id} {signal_type}")
     if len(unused_signal_types) > 0:
         errors = "\n    ".join(unused_signal_types)
-        raise ValueError(f'unused SIG_VALTYPE_ entries in DBC:\n    {errors}')
+        raise ParseError(f'unused SIG_VALTYPE_ entries in DBC:\n    {errors}')
 
     dbc_specifics = DbcSpecifics(attributes=attributes.database or None,
                                  attribute_definitions=attribute_definitions_dict,

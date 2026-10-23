@@ -343,7 +343,7 @@ class DbcParser(Parser):
                               Sequence('SG_', 'NUMBER', 'WORD'),
                               Sequence('BU_', 'WORD'),
                               Sequence('EV_', 'WORD'))),
-            choice('NUMBER', 'STRING'),
+            choice('NUMBER', 'WORD', 'STRING'),
             ';')
 
         relation_attribute_definition = Sequence(

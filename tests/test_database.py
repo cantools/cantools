@@ -3662,6 +3662,79 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         self.assertEqual(db.messages[0].frame_id, 1234)
         self.assertEqual( db.messages[0].name, 'INV2EventMsg1')
 
+    def test_dbc_unquoted_attributes(self):
+        filename = 'tests/files/dbc/unquoted_attributes.dbc'
+        db = cantools.database.load_file(filename)
+        attributes = [
+            (db.dbc.attributes['DatabaseText'], 'DatabaseValue'),
+            (db.nodes[0].dbc.attributes['NodeText'], '_NodeValue_2'),
+            (db.messages[0].dbc.attributes['MessageText'], 'MessageValue3'),
+            (db.messages[0].signals[0].dbc.attributes['SignalText'],
+             'SignalValue'),
+            (db.dbc.environment_variables['TestEnvironment'].dbc.attributes[
+                'EnvironmentText'], 'EnvironmentValue'),
+        ]
+
+        dumped = db.as_dbc_string()
+        for attribute, expected in attributes:
+            self.assertEqual(attribute.value, expected)
+            self.assertEqual(attribute.definition.type_name, 'STRING')
+            self.assertIn(f'"{expected}";', dumped)
+
+        self.assert_dbc_dump(db, filename)
+
+    @parameterized.expand([
+        ('bare', 'demo', 'demo'),
+        ('underscore', '_demo_2', '_demo_2'),
+        ('quoted', '"demo"', 'demo'),
+        ('empty', '""', ''),
+        ('punctuation', '"two words-a.b"', 'two words-a.b'),
+        ('keyword', '"VERSION"', 'VERSION'),
+        ('number', '123', '123'),
+        ('scientific', '1.25e+2', '1.25e+2'),
+    ])
+    def test_dbc_attribute_string_values(self, _name, literal, expected):
+        db = cantools.database.load_string(
+            f'BA_DEF_ "Text" STRING ;\nBA_ "Text" {literal};\n',
+            database_format='dbc')
+        self.assertEqual(db.dbc.attributes['Text'].value, expected)
+        reloaded = cantools.database.load_string(
+            db.as_dbc_string(), database_format='dbc')
+        self.assertEqual(reloaded.dbc.attributes['Text'].value, expected)
+
+    def test_dbc_attribute_string_values_with_escaped_quote(self):
+        db = cantools.database.load_string(
+            r'BA_DEF_ "Text" STRING ; BA_ "Text" "say \"hello\"";',
+            database_format='dbc')
+        self.assertEqual(db.dbc.attributes['Text'].value, 'say "hello"')
+
+    @parameterized.expand([
+        ('spaces', 'two words'),
+        ('hyphen', 'some-value'),
+        ('dot', 'some.value'),
+        ('digit_prefix', '123abc'),
+        ('keyword', 'VERSION'),
+        ('missing', ''),
+    ])
+    def test_dbc_attribute_rejects_non_word_values(self, _name, literal):
+        with self.assertRaises(UnsupportedDatabaseFormatError):
+            cantools.database.load_string(
+                f'BA_DEF_ "Text" STRING ;\nBA_ "Text" {literal};\n',
+                database_format='dbc')
+
+    @parameterized.expand([
+        ('integer', 'INT 0 10'),
+        ('hex', 'HEX 0 10'),
+        ('float', 'FLOAT 0 10'),
+        ('enum', 'ENUM "one","two"'),
+    ])
+    def test_dbc_numeric_attribute_rejects_word(self, _name, definition):
+        with self.assertRaises(UnsupportedDatabaseFormatError):
+            cantools.database.load_string(
+                f'BA_DEF_ "Numeric" {definition};\n'
+                'BA_ "Numeric" Vendor;\n',
+                database_format='dbc')
+
     def test_attributes(self):
         filename = 'tests/files/dbc/attributes.dbc'
 

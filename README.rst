@@ -355,6 +355,31 @@ See `motohawk_sender_node.h`_ and
 `motohawk_sender_node.c`_ for the contents of the
 generated files.
 
+Use ``--use-unions`` to reduce the storage required by multiplexed messages:
+
+.. code-block:: text
+
+   $ cantools generate_c_source --use-unions tests/files/dbc/multiplex.dbc
+   Successfully generated multiplex.h and multiplex.c.
+
+This optional layout uses named C99 unions and structs for mutually exclusive
+multiplexer branches. For a selector named ``Mode``, a signal named ``Value``
+that is used only when ``Mode`` is 1 is accessed as
+``message.mux_union_mode.m1.value``. The selector remains ``message.mode``.
+Nested selectors add another union at their branch's level; independent
+selectors have separate unions. Common signals and signals used by several
+selector values remain outside that selector's union. Generated union names
+gain trailing underscores if needed to avoid member-name collisions.
+
+Set the selector before filling its branch, and use only the selected branch.
+The generated ``init`` function initializes the default selector and its active
+branch. Switching the selector later requires initializing the new branch's
+fields. The default layout remains flat, and ``use_unions=True`` enables the
+same option in the Python ``c_source.generate()`` API. This changes the in-memory
+layout only: continue using the generated pack and unpack functions for CAN
+payloads. Storage savings depend on the signals and the target compiler's
+alignment rules.
+
 Other C code generators:
 
 - http://www.coderdbc.com

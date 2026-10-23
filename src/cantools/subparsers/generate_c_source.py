@@ -34,7 +34,8 @@ def _do_generate_c_source(args):
         args.bit_fields,
         args.use_float,
         args.node,
-        args.use_round)
+        args.use_round,
+        args.use_unions)
 
     os.makedirs(args.output_directory, exist_ok=True)
 
@@ -86,6 +87,10 @@ def add_subparser(subparsers):
         '--bit-fields',
         action='store_true',
         help='Use bit fields to minimize struct sizes.')
+    generate_c_source_parser.add_argument(
+        '--use-unions',
+        action='store_true',
+        help='Use named unions for mutually exclusive multiplexer branches.')
     generate_c_source_parser.add_argument(
         '-e', '--encoding',
         help='File encoding.')

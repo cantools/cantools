@@ -1,0 +1,90 @@
+VERSION ""
+
+NS_ :
+    SG_MUL_VAL_
+    SIG_VALTYPE_
+    BA_DEF_
+    BA_
+
+BS_:
+BU_: Sender Receiver Other
+
+BO_ 100 Basic: 8 Sender
+ SG_ Mode M : 0|4@1+ (1,0) [0|15] "" Receiver
+ SG_ Common : 8|8@1+ (1,0) [0|255] "" Receiver
+ SG_ SignedValue m0 : 16|16@1- (1,0) [-32768|32767] "" Receiver
+ SG_ BigEndian m0 : 39|16@0+ (1,0) [0|65535] "" Receiver
+ SG_ Floating m1 : 16|32@1+ (1,0) [-100|100] "" Receiver
+ SG_ Wide m2 : 16|32@1+ (1,0) [0|4294967295] "" Other
+
+BO_ 101 Nested: 8 Sender
+ SG_ Mode M : 0|4@1+ (1,0) [0|15] "" Receiver
+ SG_ Inner m1M : 4|4@1+ (1,0) [0|15] "" Receiver
+ SG_ Outer m0 : 8|32@1+ (1,0) [0|4294967295] "" Receiver
+ SG_ InnerSigned m0 : 8|16@1- (1,0) [-32768|32767] "" Receiver
+ SG_ InnerFloat m1 : 8|32@1+ (1,0) [-100|100] "" Receiver
+
+BO_ 102 Independent: 8 Sender
+ SG_ SelectA M : 0|2@1+ (1,0) [0|3] "" Receiver
+ SG_ SelectB M : 2|2@1+ (1,0) [0|3] "" Receiver
+ SG_ Common : 4|4@1+ (1,0) [0|15] "" Receiver
+ SG_ A0 m0 : 8|16@1+ (1,0) [0|65535] "" Receiver
+ SG_ A1 m1 : 8|16@1- (1,0) [-32768|32767] "" Receiver
+ SG_ B0 m0 : 32|32@1+ (1,0) [0|4294967295] "" Receiver
+ SG_ B1 m1 : 32|32@1+ (1,0) [-100|100] "" Receiver
+
+BO_ 103 Shared: 8 Sender
+ SG_ Mode M : 0|4@1+ (1,0) [0|15] "" Receiver
+ SG_ SharedValue m1 : 8|16@1+ (1,0) [0|65535] "" Receiver
+ SG_ First m1 : 24|8@1+ (1,0) [0|255] "" Receiver
+ SG_ Second m2 : 24|8@1+ (1,0) [0|255] "" Receiver
+ SG_ Third m3 : 8|32@1+ (1,0) [0|4294967295] "" Receiver
+
+BO_ 104 Collision: 8 Sender
+ SG_ Mode M : 0|4@1+ (1,0) [0|15] "" Receiver
+ SG_ mux_union_mode : 8|8@1+ (1,0) [0|255] "" Receiver
+ SG_ First m0 : 16|32@1+ (1,0) [0|4294967295] "" Receiver
+ SG_ Second m1 : 16|32@1+ (1,0) [0|4294967295] "" Receiver
+
+BO_ 105 SharedNested: 8 Sender
+ SG_ OuterMode M : 0|4@1+ (1,0) [0|15] "" Receiver
+ SG_ Inner m1M : 4|4@1+ (1,0) [0|15] "" Receiver
+ SG_ OuterValue m0 : 8|32@1+ (1,0) [0|4294967295] "" Receiver
+ SG_ InnerFirst m0 : 8|32@1+ (1,0) [0|4294967295] "" Receiver
+ SG_ InnerSecond m1 : 8|32@1+ (1,0) [0|4294967295] "" Receiver
+
+SIG_VALTYPE_ 100 Floating : 1;
+SIG_VALTYPE_ 101 InnerFloat : 1;
+SIG_VALTYPE_ 102 B1 : 1;
+
+SG_MUL_VAL_ 101 Inner Mode 1-1;
+SG_MUL_VAL_ 101 InnerSigned Inner 0-0;
+SG_MUL_VAL_ 101 InnerFloat Inner 1-1;
+SG_MUL_VAL_ 101 Outer Mode 0-0;
+SG_MUL_VAL_ 102 A0 SelectA 0-0;
+SG_MUL_VAL_ 102 A1 SelectA 1-1;
+SG_MUL_VAL_ 102 B0 SelectB 0-0;
+SG_MUL_VAL_ 102 B1 SelectB 1-1;
+SG_MUL_VAL_ 103 SharedValue Mode 1-2;
+SG_MUL_VAL_ 105 Inner OuterMode 1-2;
+SG_MUL_VAL_ 105 OuterValue OuterMode 0-0;
+SG_MUL_VAL_ 105 InnerFirst Inner 0-0;
+SG_MUL_VAL_ 105 InnerSecond Inner 1-1;
+
+BA_DEF_ SG_ "GenSigStartValue" FLOAT -4294967295 4294967295;
+BA_ "GenSigStartValue" SG_ 100 Mode 1;
+BA_ "GenSigStartValue" SG_ 100 Common 42;
+BA_ "GenSigStartValue" SG_ 100 SignedValue -1234;
+BA_ "GenSigStartValue" SG_ 100 BigEndian 12345;
+BA_ "GenSigStartValue" SG_ 100 Floating -3.25;
+BA_ "GenSigStartValue" SG_ 100 Wide 3735928559;
+BA_ "GenSigStartValue" SG_ 101 Mode 1;
+BA_ "GenSigStartValue" SG_ 101 Inner 1;
+BA_ "GenSigStartValue" SG_ 101 Outer 4294967295;
+BA_ "GenSigStartValue" SG_ 101 InnerSigned -1234;
+BA_ "GenSigStartValue" SG_ 101 InnerFloat 1.5;
+BA_ "GenSigStartValue" SG_ 105 OuterMode 0;
+BA_ "GenSigStartValue" SG_ 105 Inner 1;
+BA_ "GenSigStartValue" SG_ 105 OuterValue 305419896;
+BA_ "GenSigStartValue" SG_ 105 InnerFirst 2882400001;
+BA_ "GenSigStartValue" SG_ 105 InnerSecond 3735928559;

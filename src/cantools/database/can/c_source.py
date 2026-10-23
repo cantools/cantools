@@ -641,6 +641,7 @@ class CodeGenSignal:
     def __init__(self, signal: "Signal") -> None:
         self.signal: Signal = signal
         self.snake_name = camel_to_snake_case(signal.name)
+        self.member_path = self.snake_name
 
     @property
     def unit(self) -> str:
@@ -835,12 +836,97 @@ class CodeGenSignal:
             index += 1
 
 
+class CodeGenLayout:
+
+    def __init__(self, signals: list[CodeGenSignal],
+                 unions: list["CodeGenUnion"]) -> None:
+        self.signals = signals
+        self.unions = unions
+
+
+class CodeGenUnion:
+
+    def __init__(self, multiplexer: CodeGenSignal,
+                 branches: dict[int, CodeGenLayout]) -> None:
+        self.multiplexer = multiplexer
+        self.branches = branches
+        self.name = ''
+
+
+def _multiplexer_branch_name(multiplexer_id: int) -> str:
+    if multiplexer_id < 0:
+        return f'm_minus_{-multiplexer_id}'
+    return f'm{multiplexer_id}'
+
+
 class CodeGenMessage:
 
-    def __init__(self, message: "Message") -> None:
+    def __init__(self, message: "Message", use_unions: bool = False) -> None:
         self.message = message
         self.snake_name = camel_to_snake_case(message.name)
         self.cg_signals = [CodeGenSignal(signal) for signal in message.signals]
+        self.layout = self._create_layout() if use_unions else None
+
+    def _create_layout(self) -> CodeGenLayout:
+        signals_by_parent: dict[str | None, list[CodeGenSignal]] = {}
+        for cg_signal in self.cg_signals:
+            signals_by_parent.setdefault(
+                cg_signal.signal.multiplexer_signal, []).append(cg_signal)
+
+        assigned: set[str] = set()
+
+        def create_level(signals: list[CodeGenSignal]) -> CodeGenLayout:
+            members: list[CodeGenSignal] = []
+            unions: list[CodeGenUnion] = []
+            for cg_signal in signals:
+                members.append(cg_signal)
+                assigned.add(cg_signal.signal.name)
+                if not cg_signal.signal.is_multiplexer:
+                    continue
+
+                shared: list[CodeGenSignal] = []
+                branches: dict[int, list[CodeGenSignal]] = {}
+                for child in signals_by_parent.get(cg_signal.signal.name, []):
+                    ids = child.signal.multiplexer_ids
+                    if ids is not None and len(ids) == 1:
+                        branches.setdefault(ids[0], []).append(child)
+                    else:
+                        # A signal used by several cases needs one stable
+                        # location outside their mutually exclusive storage.
+                        shared.append(child)
+
+                shared_layout = create_level(shared)
+                members.extend(shared_layout.signals)
+                unions.extend(shared_layout.unions)
+                if branches:
+                    unions.append(CodeGenUnion(cg_signal, {
+                        mux_id: create_level(children)
+                        for mux_id, children in sorted(branches.items())
+                    }))
+
+            return CodeGenLayout(members, unions)
+
+        def set_paths(layout: CodeGenLayout, prefix: str) -> None:
+            names = {signal.snake_name for signal in layout.signals}
+            for signal in layout.signals:
+                signal.member_path = prefix + signal.snake_name
+            for union in layout.unions:
+                name = 'mux_union_' + union.multiplexer.snake_name
+                while name in names:
+                    name += '_'
+                names.add(name)
+                union.name = name
+                for mux_id, branch in union.branches.items():
+                    set_paths(branch, prefix + name + '.'
+                              + _multiplexer_branch_name(mux_id) + '.')
+
+        layout = create_level(signals_by_parent.get(None, []))
+        # Preserve fields that the permissive loader keeps but which are not
+        # reachable through its multiplexer tree. They cannot share storage.
+        layout.signals.extend(signal for signal in self.cg_signals
+                              if signal.signal.name not in assigned)
+        set_paths(layout, '')
+        return layout
 
     def get_signal_by_name(self, name: str) -> "CodeGenSignal":
         for cg_signal in self.cg_signals:
@@ -957,7 +1043,7 @@ def _format_pack_code_mux(cg_message: "CodeGenMessage",
                              variable_lines,
                              helper_kinds)
     multiplexed_signals_per_id = sorted(multiplexed_signals.items())
-    signal_name = camel_to_snake_case(signal_name)
+    signal_name = cg_message.get_signal_by_name(signal_name).member_path
 
     lines = [
         '',
@@ -997,9 +1083,9 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
         variable = f'    uint{cg_signal.type_length}_t {cg_signal.snake_name};'
 
         if cg_signal.signal.conversion.is_float:
-            conversion = f'    memcpy(&{cg_signal.snake_name}, &src_p->{cg_signal.snake_name}, sizeof({cg_signal.snake_name}));'
+            conversion = f'    memcpy(&{cg_signal.snake_name}, &src_p->{cg_signal.member_path}, sizeof({cg_signal.snake_name}));'
         else:
-            conversion = f'    {cg_signal.snake_name} = (uint{cg_signal.type_length}_t)src_p->{cg_signal.snake_name};'
+            conversion = f'    {cg_signal.snake_name} = (uint{cg_signal.type_length}_t)src_p->{cg_signal.member_path};'
 
         variable_lines.append(variable)
         body_lines.append(conversion)
@@ -1007,13 +1093,15 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
     for index, shift, shift_direction, mask in cg_signal.segments(invert_shift=False):
         if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}({}, {}u, 0x{:02x}u);'
+            name = cg_signal.snake_name
         else:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
+            name = cg_signal.member_path
 
         line = fmt.format(index,
                           shift_direction,
                           cg_signal.type_length,
-                          cg_signal.snake_name,
+                          name,
                           shift,
                           mask)
         body_lines.append(line)
@@ -1082,7 +1170,7 @@ def _format_unpack_code_mux(cg_message: "CodeGenMessage",
                                variable_lines,
                                helper_kinds)
     multiplexed_signals_per_id = sorted(multiplexed_signals.items())
-    signal_name = camel_to_snake_case(signal_name)
+    signal_name = cg_message.get_signal_by_name(signal_name).member_path
 
     lines = [
         f'switch (dst_p->{signal_name}) {{'
@@ -1125,10 +1213,12 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
     for i, (index, shift, shift_direction, mask) in enumerate(segments):
         if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
             fmt = '    {} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            name = cg_signal.snake_name
         else:
             fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            name = cg_signal.member_path
 
-        line = fmt.format(cg_signal.snake_name,
+        line = fmt.format(name,
                           '=' if i == 0 else '|=',
                           shift_direction,
                           cg_signal.type_length,
@@ -1139,7 +1229,11 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
         helper_kinds.add((shift_direction, cg_signal.type_length))
 
     if cg_signal.signal.conversion.is_float:
-        conversion = f'    memcpy(&dst_p->{cg_signal.snake_name}, &{cg_signal.snake_name}, sizeof(dst_p->{cg_signal.snake_name}));'
+        if '.' in cg_signal.member_path:
+            # Assignment starts the containing union member's lifetime in
+            # C++, before copying the floating-point representation into it.
+            body_lines.append(f'    dst_p->{cg_signal.member_path} = 0.0;')
+        conversion = f'    memcpy(&dst_p->{cg_signal.member_path}, &{cg_signal.snake_name}, sizeof(dst_p->{cg_signal.member_path}));'
         body_lines.append(conversion)
     elif cg_signal.signal.is_signed:
         mask = ((1 << (cg_signal.type_length - cg_signal.signal.length)) - 1)
@@ -1152,7 +1246,7 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
                                                   suffix=cg_signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
 
-        conversion = f'    dst_p->{cg_signal.snake_name} = (int{cg_signal.type_length}_t){cg_signal.snake_name};'
+        conversion = f'    dst_p->{cg_signal.member_path} = (int{cg_signal.type_length}_t){cg_signal.snake_name};'
         body_lines.append(conversion)
 
 
@@ -1221,11 +1315,34 @@ def _format_unpack_code(cg_message: "CodeGenMessage",
     return '\n'.join(variable_lines), '\n'.join(body_lines)
 
 
-def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> tuple[str, list[str]]:
-    members = []
+def _generate_layout_members(layout: CodeGenLayout, bit_fields: bool,
+                             indentation: int = 0) -> list[str]:
+    prefix = ' ' * indentation
+    members = [
+        '\n'.join(prefix + line if line else ''
+                  for line in _generate_signal(signal, bit_fields).splitlines())
+        for signal in layout.signals
+    ]
+    for union in layout.unions:
+        lines = [prefix + '    union {']
+        for mux_id, branch in union.branches.items():
+            lines.append(prefix + '        struct {')
+            lines.append('\n\n'.join(_generate_layout_members(
+                branch, bit_fields, indentation + 8)))
+            lines.append(prefix + '        } '
+                         + _multiplexer_branch_name(mux_id) + ';')
+        lines.append(prefix + '    } ' + union.name + ';')
+        members.append('\n'.join(lines))
 
-    for cg_signal in cg_message.cg_signals:
-        members.append(_generate_signal(cg_signal, bit_fields))
+    return members
+
+
+def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> tuple[str, list[str]]:
+    if cg_message.layout is None:
+        members = [_generate_signal(signal, bit_fields)
+                   for signal in cg_message.cg_signals]
+    else:
+        members = _generate_layout_members(cg_message.layout, bit_fields)
 
     if not members:
         members = [
@@ -1241,6 +1358,41 @@ def _generate_struct(cg_message: "CodeGenMessage", bit_fields: bool) -> tuple[st
         comment = f' * {_escape_c_comment(cg_message.message.comment)}\n *\n'
 
     return comment, members
+
+
+def _format_init_code(cg_message: CodeGenMessage,
+                      signal_names: SignalTreeType) -> list[str]:
+    assignments: list[str] = []
+    multiplexers: list[str] = []
+    for item in signal_names:
+        if isinstance(item, dict):
+            name, branches = next(iter(item.items()))
+        else:
+            name = item
+        cg_signal = cg_message.get_signal_by_name(name)
+        # Explicit assignments also start active union-member lifetimes in
+        # C++; zeroing the representation with memset alone does not do that.
+        assignments.append(INIT_SIGNAL_BODY_TEMPLATE_FMT.format(
+            signal_initial=_get(cg_signal.signal.raw_initial, 0),
+            signal_name=cg_signal.member_path).rstrip())
+
+        if not isinstance(item, dict):
+            continue
+
+        cases = [(mux_id, _format_init_code(cg_message, cast("SignalTreeType", children)))
+                 for mux_id, children in sorted(branches.items())]
+        if not any(body for _, body in cases):
+            continue
+        multiplexers.append(f'    switch (msg_p->{cg_signal.member_path}) {{')
+        for mux_id, body in cases:
+            if not body:
+                continue
+            multiplexers.append(f'    case {mux_id}:')
+            multiplexers.extend('    ' + line for line in body)
+            multiplexers.append('        break;')
+        multiplexers.extend(['    default:', '        break;', '    }'])
+
+    return assignments + multiplexers
 
 
 def _format_choices(cg_signal: "CodeGenSignal", signal_name: str) -> list[str]:
@@ -1658,6 +1810,12 @@ def _generate_definitions(database_name: str,
                 signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(signal_initial=cg_signal.signal.raw_initial,
                                                                           signal_name=cg_signal.snake_name)
 
+        if cg_message.layout is not None:
+            init_lines = _format_init_code(cg_message, cg_message.message.signal_tree)
+            signals_init_body = '\n'.join(init_lines)
+            if signals_init_body:
+                signals_init_body += '\n'
+
         if cg_message.message.length > 0:
             pack_variables, pack_body = _format_pack_code(cg_message,
                                                           pack_helper_kinds)
@@ -1786,6 +1944,7 @@ def generate(database: "Database",
              use_float: bool = False,
              node_name: str | None = None,
              use_round: bool = False,
+             use_unions: bool = False,
              ) -> tuple[str, str, str, str]:
     """Generate C source code from given CAN database `database`.
 
@@ -1816,13 +1975,17 @@ def generate(database: "Database",
     Set `use_round` to ``True`` to round encoded values to the nearest
     integer (instead of truncating).
 
+    Set `use_unions` to ``True`` to share storage between mutually exclusive
+    multiplexer branches. This changes the generated structure member paths;
+    wire encoding and decoding are unchanged.
+
     This function returns a tuple of the C header and source files as
     strings.
 
     """
 
     date = time.ctime()
-    cg_messages = [CodeGenMessage(message) for message in database.messages]
+    cg_messages = [CodeGenMessage(message, use_unions) for message in database.messages]
     include_guard = f'{database_name.upper()}_H'
     frame_id_defines = _generate_frame_id_defines(database_name, cg_messages, node_name)
     frame_length_defines = _generate_frame_length_defines(database_name,

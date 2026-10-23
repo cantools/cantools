@@ -4024,6 +4024,21 @@ BO_ 287 Message01: 1 Vector__XXX
         encoded = message.encode(decoded, strict=False)
         self.assertEqual(encoded, b'\x80')
 
+    def test_overlapping_signals_padding(self):
+        # 'Low' (bits 0-3) and 'Wide' (bits 2-5) end up in different
+        # layers. Only bits 6-7 are unused, so only these may be
+        # filled with the unused bit pattern.
+        low = cantools.database.can.Signal('Low', 0, 4, 'little_endian')
+        wide = cantools.database.can.Signal('Wide', 2, 4, 'little_endian')
+        message = cantools.database.can.Message(
+            1, 'M', 1, [low, wide], strict=False, unused_bit_pattern=0xff)
+
+        encoded = message.encode({'Low': 0, 'Wide': 0},
+                                 strict=False,
+                                 padding=True)
+        self.assertEqual(encoded, b'\xc0')
+        self.assertEqual(message.decode(encoded), {'Low': 0, 'Wide': 0})
+
     def test_overlapping_signals_issue_205_sym(self):
         # Reduced/obfuscated SYM based on a real multiplexed boot-log
         # frame: a 32-bit status word shares its MSB with a 1-bit flag

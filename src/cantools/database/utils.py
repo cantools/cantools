@@ -353,8 +353,12 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
         for layer in _group_non_overlapping_signals(le_signals, lambda signal: signal.start) or [[]]
     ]
 
-    # A bit is padding only if it is not used by any signal of any
-    # layer, i.e., if it is padding in all layers.
+    # The padding mask marks the bits which are not used by any
+    # signal. Message.encode(padding=True) fills these bits with the
+    # unused bit pattern. Each layer only knows about its own signals,
+    # so a bit is padding only if it is padding in all layers. Using
+    # the mask of a single layer would fill bits of signals in other
+    # layers and corrupt their values.
     padding = (1 << format_length) - 1
     for _, layer_padding_mask in be_layers + le_layers:
         padding &= layer_padding_mask

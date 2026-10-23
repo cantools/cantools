@@ -64,7 +64,7 @@ ID=702h
 Len=1
 Var=AddedSignal unsigned 0,8
 '''
-    return Path('tests/files/arxml/system-4.2.arxml').read_text()
+    return Path('tests/files/arxml/system-4.2.arxml').read_text(encoding='utf-8')
 
 
 class DatabaseMetadataMergeTest(unittest.TestCase):
@@ -136,7 +136,7 @@ class DatabaseMetadataMergeTest(unittest.TestCase):
     def test_incoming_arxml_metadata_replaces_previous_specifics(self):
         database = cantools.database.load_string(added_source('arxml'), 'arxml')
         original_specifics = database.autosar
-        source = Path('tests/files/arxml/system-3.2.3.arxml').read_text()
+        source = Path('tests/files/arxml/system-3.2.3.arxml').read_text(encoding='utf-8')
         incoming = cantools.database.load_string(source, 'arxml')
 
         database.add_arxml_string(source)

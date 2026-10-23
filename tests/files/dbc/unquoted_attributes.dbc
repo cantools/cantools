@@ -1,0 +1,25 @@
+VERSION ""
+
+NS_ :
+
+BS_:
+
+BU_: TestNode
+
+BO_ 1 TestMessage: 1 TestNode
+ SG_ TestSignal : 0|8@1+ (1,0) [0|255] "" TestNode
+
+EV_ TestEnvironment: 0 [0|1] "" 0 0 DUMMY_NODE_VECTOR0 TestNode;
+
+BA_DEF_ "DatabaseText" STRING ;
+BA_DEF_ BU_ "NodeText" STRING ;
+BA_DEF_ BO_ "MessageText" STRING ;
+BA_DEF_ SG_ "SignalText" STRING ;
+BA_DEF_ EV_ "EnvironmentText" STRING ;
+BA_DEF_DEF_ "DatabaseText" "Default value";
+
+BA_ "DatabaseText" DatabaseValue;
+BA_ "NodeText" BU_ TestNode _NodeValue_2;
+BA_ "MessageText" BO_ 1 MessageValue3;
+BA_ "SignalText" SG_ 1 TestSignal SignalValue;
+BA_ "EnvironmentText" EV_ TestEnvironment EnvironmentValue;

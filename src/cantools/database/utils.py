@@ -106,26 +106,22 @@ def _encode_signal_values(signals: Sequence[Union["Signal", "Data"]],
 
 
 def _pack_formats(formats: Formats, raw_signal_values: dict[str, int | float]) -> int:
-    """Pack raw signal values into a big-endian integer payload.
+    """Pack raw signal values into the payload, returned as an integer.
 
-    The primary big- and little-endian codecs cover the first
-    internally non-overlapping layer. ``formats.extra_layers`` holds
-    additional (big, little) codecs for overlapping signals that
-    cannot share a bitstruct format string with that first layer, for
-    example bit flags plus a status field on the same bits. Those
-    layers are packed separately and OR-ed together.
+    Each layer is a bitstruct codec for a set of signals that do not
+    overlap each other. Messages without overlapping signals have
+    exactly one big and one little endian layer. Overlapping signals
+    (e.g. bit flags plus a status field covering the same bits) are
+    spread over several layers, which are packed separately and OR-ed
+    together.
     """
-    packed_union = (
-        int.from_bytes(formats.big_endian.pack(raw_signal_values), "big")
-        | int.from_bytes(formats.little_endian.pack(raw_signal_values), "little")
-    )
+    packed_union = 0
 
-    # Overlapping signals: extra codecs OR-ed into the same payload.
-    for big_endian, little_endian in formats.extra_layers:
-        packed_union |= (
-            int.from_bytes(big_endian.pack(raw_signal_values), "big")
-            | int.from_bytes(little_endian.pack(raw_signal_values), "little")
-        )
+    for big_endian in formats.big_endian_layers:
+        packed_union |= int.from_bytes(big_endian.pack(raw_signal_values), "big")
+
+    for little_endian in formats.little_endian_layers:
+        packed_union |= int.from_bytes(little_endian.pack(raw_signal_values), "little")
 
     return packed_union
 
@@ -169,14 +165,14 @@ def decode_data(data: bytes,
                               f"{expected_length} bytes")
 
     try:
-        unpacked = {
-            **formats.big_endian.unpack(data),
-            **formats.little_endian.unpack(data[::-1]),
-        }
-        # Merge overlapping interpretations from extra bitstruct layers.
-        for big_endian, little_endian in formats.extra_layers:
+        # Each layer holds a different subset of the signals (see
+        # _pack_formats()), so merging the results yields all of them.
+        unpacked = {}
+        for big_endian in formats.big_endian_layers:
             unpacked.update(big_endian.unpack(data))
-            unpacked.update(little_endian.unpack(data[::-1]))
+        reversed_data = data[::-1]
+        for little_endian in formats.little_endian_layers:
+            unpacked.update(little_endian.unpack(reversed_data))
     except (bitstruct.Error, ValueError) as e:
         # bitstruct returns different errors in PyPy and cpython
         raise DecodeError("unpacking failed") from e
@@ -242,6 +238,14 @@ def _group_non_overlapping_signals(
 
 
 def _compile_bitstruct(fmt: str, names: list[str]) -> CompiledFormatDict:
+    """Compile a bitstruct format, preferring the C implementation.
+
+    Note that ``import bitstruct.c`` binds the name ``bitstruct`` to
+    the pure Python package, so ``bitstruct.compile()`` is the slow
+    implementation. ``bitstruct.c`` is unavailable on some platforms
+    and does not support every format (e.g. integers wider than 64
+    bits), hence the fallback.
+    """
     try:
         return bitstruct.c.compile(fmt, names)
     except Exception:
@@ -283,7 +287,7 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
         except ValueError:
             return 0
 
-    def create_big(be_signals: Sequence[Union["Data", "Signal"]]) -> tuple[str, int, list[str]]:
+    def compile_be_layer(be_signals: Sequence[Union["Data", "Signal"]]) -> tuple[CompiledFormatDict, int]:
         items: list[tuple[str, str, str | None]] = []
         start = 0
 
@@ -306,9 +310,9 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
             length = format_length - start
             items.append(padding_item(length))
 
-        return fmt(items), padding_mask(items), names(items)
+        return _compile_bitstruct(fmt(items), names(items)), padding_mask(items)
 
-    def create_little(le_signals: Sequence[Union["Data", "Signal"]]) -> tuple[str, int, list[str]]:
+    def compile_le_layer(le_signals: Sequence[Union["Data", "Signal"]]) -> tuple[CompiledFormatDict, int]:
         items: list[tuple[str, str, str | None]] = []
         end = format_length
 
@@ -332,50 +336,32 @@ def create_encode_decode_formats(signals: Sequence[Union["Data", "Signal"]], num
             _packed = bitstruct.pack(f'u{length}', value)
             value = int.from_bytes(_packed, "little")
 
-        return fmt(items), value, names(items)
-
-    def compile_layer(
-            be_signals: Sequence[Union["Data", "Signal"]],
-            le_signals: Sequence[Union["Data", "Signal"]],
-    ) -> Formats:
-        big_fmt, big_padding_mask, big_names = create_big(be_signals)
-        little_fmt, little_padding_mask, little_names = create_little(le_signals)
-        return Formats(
-            _compile_bitstruct(big_fmt, big_names),
-            _compile_bitstruct(little_fmt, little_names),
-            big_padding_mask & little_padding_mask,
-        )
+        return _compile_bitstruct(fmt(items), names(items)), value
 
     be_signals = [signal for signal in signals if signal.byte_order == "big_endian"]
     le_signals = [signal for signal in signals if signal.byte_order != "big_endian"]
-    be_layers = _group_non_overlapping_signals(be_signals, start_bit)
-    le_layers = _group_non_overlapping_signals(le_signals, lambda signal: signal.start)
-    layer_count = max(len(be_layers), len(le_layers), 1)
 
-    compiled_layers = [
-        compile_layer(
-            be_layers[index] if index < len(be_layers) else [],
-            le_layers[index] if index < len(le_layers) else [],
-        )
-        for index in range(layer_count)
+    # Always compile at least one (possibly empty) layer per byte
+    # order. Its format then consists of padding only, which keeps
+    # the length check done by bitstruct when unpacking.
+    be_layers = [
+        compile_be_layer(layer)
+        for layer in _group_non_overlapping_signals(be_signals, start_bit) or [[]]
+    ]
+    le_layers = [
+        compile_le_layer(layer)
+        for layer in _group_non_overlapping_signals(le_signals, lambda signal: signal.start) or [[]]
     ]
 
-    padding = compiled_layers[0].padding_mask
-    for layer in compiled_layers[1:]:
-        padding &= layer.padding_mask
+    # A bit is padding only if it is not used by any signal of any
+    # layer, i.e., if it is padding in all layers.
+    padding = (1 << format_length) - 1
+    for _, layer_padding_mask in be_layers + le_layers:
+        padding &= layer_padding_mask
 
-    # Remaining layers are overlapping signals that did not fit in the
-    # first internally non-overlapping bitstruct format.
-    extra_layers = tuple(
-        (layer.big_endian, layer.little_endian)
-        for layer in compiled_layers[1:]
-    )
-    return Formats(
-        compiled_layers[0].big_endian,
-        compiled_layers[0].little_endian,
-        padding,
-        extra_layers,
-    )
+    return Formats([compiled for compiled, _ in be_layers],
+                   [compiled for compiled, _ in le_layers],
+                   padding)
 
 
 def sawtooth_to_network_bitnum(sawtooth_bitnum: int) -> int:

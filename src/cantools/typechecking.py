@@ -18,12 +18,12 @@ if TYPE_CHECKING:
 
 
 class Formats(NamedTuple):
-    big_endian: CompiledFormatDict
-    little_endian: CompiledFormatDict
+    # One codec per layer of mutually non-overlapping signals. These
+    # lists have exactly one entry if the message does not contain
+    # overlapping signals.
+    big_endian_layers: list[CompiledFormatDict]
+    little_endian_layers: list[CompiledFormatDict]
     padding_mask: int
-    # Additional (big, little) codecs for overlapping signals. Each
-    # layer is internally non-overlapping so bitstruct can unpack it.
-    extra_layers: tuple[tuple[CompiledFormatDict, CompiledFormatDict], ...] = ()
 
 
 StringPathLike = str | os.PathLike[str]

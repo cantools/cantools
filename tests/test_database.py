@@ -4000,6 +4000,16 @@ BO_ 287 Message01: 1 Vector__XXX
         encoded = db.encode_message(287, decoded, strict=False)
         self.assertEqual(encoded, b'\xaa')
 
+        # Overlapping signals survive a dump/load round trip (#763).
+        db_reloaded = cantools.database.load_string(db.as_dbc_string(),
+                                                    strict=False)
+        self.assertEqual(
+            sorted((s.name, s.start, s.length)
+                   for s in db_reloaded.get_message_by_name('Message01').signals),
+            sorted((s.name, s.start, s.length)
+                   for s in db.get_message_by_name('Message01').signals))
+        self.assertEqual(db_reloaded.decode_message(287, b'\xaa'), decoded)
+
     def test_overlapping_big_endian_signals_decode_and_encode(self):
         status = cantools.database.can.Signal(
             'Status', 7, 8, 'big_endian')

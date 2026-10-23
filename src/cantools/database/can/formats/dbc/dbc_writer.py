@@ -1064,7 +1064,8 @@ def dump_string(database: InternalDatabase,
                 sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
                 sort_attributes:type_sort_attributes=None,
                 sort_choices:type_sort_choices=None,
-                shorten_long_names:bool=True) -> str:
+                shorten_long_names:bool=True,
+                file_comment:str | None=None) -> str:
     """Format database in DBC file format.
        sort_signals defines how to sort signals in message definitions
        sort_attribute_signals defines how to sort signals in metadata -
@@ -1091,6 +1092,9 @@ def dump_string(database: InternalDatabase,
     bo = _dump_messages(database, sort_signals)
     bo_tx_bu = _dump_senders(database)
     cm = _dump_comments(database, sort_attribute_signals)
+    if file_comment:
+        escaped_comment = file_comment.replace('"', '\\"')
+        cm.insert(0, f'CM_ "{escaped_comment}";')
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_rel = _dump_relation_attribute_definitions(database)

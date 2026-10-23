@@ -217,7 +217,9 @@ def dump_file(database: can.Database,
               filename: StringPathLike,
               database_format: str | None = None,
               encoding: str | None = None,
-              sort_signals: utils.type_sort_signals = utils.SORT_SIGNALS_DEFAULT) -> None:
+              sort_signals: utils.type_sort_signals = utils.SORT_SIGNALS_DEFAULT,
+              *,
+              file_comment: str | None = None) -> None:
     """Dump given database `database` to given file `filename`.
 
     Depending on the output file format signals may be sorted by default.
@@ -235,6 +237,10 @@ def dump_file(database: can.Database,
     endings (``\\r\\n``). For other database formats the line ending
     depends on the operating system.
 
+    ``file_comment`` is only supported for DBC output. See
+    :meth:`~cantools.database.can.Database.as_dbc_string` for its placement
+    and how it is represented when the file is loaded again.
+
     >>> db = cantools.database.load_file('foo.dbc')
     >>> cantools.database.dump_file(db, 'bar.dbc')
 
@@ -249,8 +255,12 @@ def dump_file(database: can.Database,
 
     newline = None
 
+    if file_comment is not None and database_format != 'dbc':
+        raise Error('file_comment is only supported for DBC output.')
+
     if database_format == 'dbc':
-        output = database.as_dbc_string(sort_signals=sort_signals)
+        output = database.as_dbc_string(sort_signals=sort_signals,
+                                        file_comment=file_comment)
         newline = ''
     elif database_format == 'kcd':
         output = database.as_kcd_string(sort_signals=sort_signals)

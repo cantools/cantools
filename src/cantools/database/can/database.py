@@ -452,11 +452,20 @@ class Database:
                       sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
                       sort_attributes:type_sort_attributes=None,
                       sort_choices:type_sort_choices=None,
-                      shorten_long_names:bool=True) -> str:
+                      shorten_long_names:bool=True,
+                      file_comment:str | None=None) -> str:
         """Return the database as a string formatted as a DBC file.
            sort_signals defines how to sort signals in message definitions
            sort_attribute_signals defines how to sort signals in metadata -
            comments, value table definitions and attributes
+
+        ``file_comment`` optionally adds a global ``CM_`` entry at the start
+        of the comment section, after the message and environment variable
+        definitions. This can contain build information for generated files.
+        ``None`` or an empty string leaves the output unchanged. The database
+        is not modified. When loaded again, global comments are concatenated
+        into :attr:`Bus.comment<cantools.database.can.Bus.comment>`; the file
+        comment is not stored separately from existing bus comments.
 
         """
         if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
@@ -471,7 +480,8 @@ class Database:
                                sort_attribute_signals=sort_attribute_signals,
                                sort_attributes=sort_attributes,
                                sort_choices=sort_choices,
-                               shorten_long_names=shorten_long_names)
+                               shorten_long_names=shorten_long_names,
+                               file_comment=file_comment)
 
     def as_kcd_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
         """Return the database as a string formatted as a KCD file.

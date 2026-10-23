@@ -3637,6 +3637,56 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
 
         self.assertEqual(attribute['BusType'].type_name, "STRING")
 
+    @parameterized.expand([
+        ('empty', '', '""'),
+        ('plain', 'demo_2', '"demo_2"'),
+        ('quotes', 'say "hello"', r'"say \"hello\""'),
+        ('only_quotes', '""', r'"\"\""'),
+        ('backslashes', r'C:\tools\logs', r'"C:\tools\logs"'),
+        ('backslash_before_quote', r'path\"name', r'"path\\"name"'),
+        ('two_backslashes_before_quote', r'path\\"name', r'"path\\\"name"'),
+    ])
+    def test_string_attribute_escaping_dump(self, _, value, formatted_value):
+        db = cantools.database.load_file(
+            'tests/files/dbc/string_attribute_escaping.dbc')
+
+        def attributes(database):
+            return [
+                database.dbc.attributes['DatabaseText'],
+                database.nodes[0].dbc.attributes['NodeText'],
+                database.messages[0].dbc.attributes['MessageText'],
+                database.messages[0].signals[0].dbc.attributes['SignalText'],
+                database.dbc.environment_variables['EnvVar'].dbc.attributes[
+                    'EnvironmentText'],
+                database.dbc.relation_attributes.node_signal_relations[
+                    1]['Signal']['Node']['SignalRelationText'],
+                database.dbc.relation_attributes.node_message_relations[
+                    1]['Node']['MessageRelationText'],
+            ]
+
+        for attribute in attributes(db):
+            self.assertEqual(attribute.value, 'say "hello"')
+            attribute.value = value
+
+        for _round in range(2):
+            dumped = db.as_dbc_string()
+            assignments = [
+                line for line in dumped.splitlines()
+                if line.startswith(('BA_ ', 'BA_REL_ '))
+                and 'Text"' in line
+            ]
+            self.assertEqual(len(assignments), 7)
+            for line in assignments:
+                self.assertTrue(line.endswith(f' {formatted_value};'), line)
+
+            db = cantools.database.load_string(dumped, database_format='dbc')
+            for attribute in attributes(db):
+                self.assertEqual(attribute.value, value)
+                self.assertEqual(attribute.definition.type_name, 'STRING')
+            for name, expected in [('IntegerValue', 7), ('HexValue', 15),
+                                   ('FloatValue', 1.5), ('EnumValue', 1)]:
+                self.assertEqual(db.dbc.attributes[name].value, expected)
+
     def test_extended_id_dump(self):
         db = cantools.database.load_file('tests/files/dbc/test_extended_id_dump.dbc')
         dumped_db = cantools.database.load_string(db.as_dbc_string())

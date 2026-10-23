@@ -43,7 +43,9 @@ class DbcAttribute(Generic[DbcAttributeValueTypeVar]):
 
         """
         if self.definition.type_name == "STRING":
-            return f'"{self._value}"'
+            # The DBC parser only unescapes quotes, not backslashes.
+            value = str(self._value).replace('"', '\\"')
+            return f'"{value}"'
 
         return f'{self._value}'
 

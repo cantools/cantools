@@ -119,6 +119,15 @@ Alternatively, the decoded message can be printed on a single line:
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
 
+When piping decoded output into another program, Python may buffer its standard
+output. Set ``PYTHONUNBUFFERED=1`` on the decoder command to disable this buffering.
+The receiving program may also need line buffering, as shown with ``grep`` here:
+
+.. code-block:: bash
+
+   $ candump vcan0 | PYTHONUNBUFFERED=1 cantools decode --single-line \
+       tests/files/dbc/motohawk.dbc | grep --line-buffered ExampleMessage
+
 The plot subcommand
 ^^^^^^^^^^^^^^^^^^^
 

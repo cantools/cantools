@@ -41,6 +41,16 @@ class Database:
     If you don't want them to be sorted pass `sort_signals = None`.
     If you want the signals to be sorted in another way pass something like
     `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
+
+    Adding files combines their nodes, buses and format-specific metadata.
+    Nodes and buses with the same name retain their position and combine
+    comments by language; incoming comments, node attributes and non-``None``
+    bus properties take precedence. Incoming global attributes, value tables
+    and environment variables replace entries with the same key. DBC attribute
+    definitions, including defaults and relation definitions, must agree;
+    otherwise ``cantools.database.errors.Error`` is raised before adding
+    anything. Messages are appended and duplicate message lookups use the
+    latest message. The version is replaced by the incoming version.
     """
 
     def __init__(self,
@@ -289,12 +299,7 @@ class Database:
 
         database = arxml.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
-        self._version = database.version
-        self._dbc = database.dbc
-        self._autosar = database.autosar
+        self._add_database(database)
 
     def add_dbc(self, fp: TextIO) -> None:
         """Read and parse DBC data from given file-like object and add the
@@ -336,11 +341,7 @@ class Database:
 
         database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
-        self._version = database.version
-        self._dbc = database.dbc
+        self._add_database(database)
 
     def add_kcd(self, fp: TextIO) -> None:
         """Read and parse KCD data from given file-like object and add the
@@ -371,11 +372,7 @@ class Database:
 
         database = kcd.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
-        self._version = database.version
-        self._dbc = database.dbc
+        self._add_database(database)
 
     def add_sym(self, fp: TextIO) -> None:
         """Read and parse SYM data from given file-like object and add the
@@ -406,11 +403,49 @@ class Database:
 
         database = sym.load_string(string, self._strict, sort_signals=self._sort_signals)
 
+        self._add_database(database)
+
+    def _add_database(self, database: InternalDatabase) -> None:
+        # Prepare metadata first so incompatible definitions leave this database
+        # untouched, including its message list and lookup dictionaries.
+        dbc_specifics = self._dbc
+        if database.dbc is not None:
+            dbc_specifics = (database.dbc if dbc_specifics is None
+                             else dbc_specifics._merge(database.dbc))
+
+        nodes: dict[str, Node] = {}
+        for node in [*self._nodes, *database.nodes]:
+            if node.name in nodes:
+                previous_node = nodes[node.name]
+                node = Node(
+                    node.name,
+                    comment={**(previous_node.comments or {}), **(node.comments or {})} or None,
+                    dbc_specifics=previous_node.dbc._merge(node.dbc),
+                    autosar_specifics=node.autosar)
+            nodes[node.name] = node
+
+        buses: dict[str, Bus] = {}
+        for bus in [*self._buses, *database.buses]:
+            if bus.name in buses:
+                previous_bus = buses[bus.name]
+                bus = Bus(
+                    bus.name,
+                    comment={**(previous_bus.comments or {}), **(bus.comments or {})} or None,
+                    baudrate=(bus.baudrate if bus.baudrate is not None
+                              else previous_bus.baudrate),
+                    fd_baudrate=(bus.fd_baudrate if bus.fd_baudrate is not None
+                                 else previous_bus.fd_baudrate),
+                    autosar_specifics=(bus.autosar if bus.autosar is not None
+                                       else previous_bus.autosar))
+            buses[bus.name] = bus
+
         self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
+        self._nodes = list(nodes.values())
+        self._buses = list(buses.values())
         self._version = database.version
-        self._dbc = database.dbc
+        self._dbc = dbc_specifics
+        if database.autosar is not None:
+            self._autosar = database.autosar
 
     def _add_messages(self, messages: list[Message]) -> None:
         """Add given messages to the database.

@@ -2197,9 +2197,8 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         self.assertEqual(sig1.comment, 'a comment')
 
     def test_as_sym_string_hex_multiplexer_ids(self):
-        # SYM hex numbers must start with a digit; a multiplexer id
-        # whose hex form starts with A-F (10, 160, ...) needs a leading 0,
-        # after the sign of a negative id.
+        # Keep the writer's digit prefix for compatibility with other readers
+        # that require it, including after the sign of a negative mux id.
         mux_ids = [0, 9, 10, 15, 16, 159, 160, 255, 256, 4095, -1, -10]
         signals = [Signal(name='Mux', start=0, length=16,
                           is_multiplexer=True)]

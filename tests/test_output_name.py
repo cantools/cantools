@@ -1,5 +1,7 @@
 """Independent output filenames for the C source generator."""
 
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -7,11 +9,18 @@ import pytest
 import cantools
 
 
+@pytest.fixture
+def output_root():
+    # Avoid pytest 7.4 tmp_path requiring a Windows username inside tox.
+    with tempfile.TemporaryDirectory() as directory:
+        yield Path(directory)
+
+
 @pytest.mark.parametrize('namespace', [None, 'vehicle_api'])
 @pytest.mark.parametrize('stem', ['Vehicle-Log', 'bus.v2'])
 @pytest.mark.parametrize('fuzzer', [False, True])
-def test_output_name(tmp_path, namespace, stem, fuzzer):
-    output = tmp_path / 'nested' / 'output'
+def test_output_name(output_root, namespace, stem, fuzzer):
+    output = output_root / 'nested' / 'output'
     argv = ['cantools', 'generate_c_source', '--file-name', stem,
             '-o', str(output), 'tests/files/dbc/motohawk.dbc']
     if namespace is not None:
@@ -45,8 +54,8 @@ def test_output_name(tmp_path, namespace, stem, fuzzer):
 @pytest.mark.parametrize('stem', ['', '.', '..', '../escape', '/absolute',
                                   r'..\escape', 'two words', 'bad"name',
                                   'bad$name', 'bad\nname', '-option'])
-def test_invalid_output_name(tmp_path, capsys, stem):
-    output = tmp_path / 'output'
+def test_invalid_output_name(output_root, capsys, stem):
+    output = output_root / 'output'
     argv = ['cantools', 'generate_c_source', '--file-name=' + stem,
             '-o', str(output), 'missing-input.dbc']
     with patch('sys.argv', argv), pytest.raises(SystemExit) as error:
@@ -56,10 +65,10 @@ def test_invalid_output_name(tmp_path, capsys, stem):
     assert not output.exists()
 
 
-def test_output_directory_abbreviation(tmp_path):
+def test_output_directory_abbreviation(output_root):
     # --output was an accepted abbreviation before the filename option existed.
-    argv = ['cantools', 'generate_c_source', '--output', str(tmp_path),
+    argv = ['cantools', 'generate_c_source', '--output', str(output_root),
             'tests/files/dbc/motohawk.dbc']
     with patch('sys.argv', argv):
         cantools._main()
-    assert sorted(p.name for p in tmp_path.iterdir()) == ['motohawk.c', 'motohawk.h']
+    assert sorted(p.name for p in output_root.iterdir()) == ['motohawk.c', 'motohawk.h']

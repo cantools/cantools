@@ -13,14 +13,16 @@ from io import StringIO
 from pathlib import Path
 from xml.etree import ElementTree
 
-import textparser  # type: ignore
+import pytest
 from parameterized import parameterized  # type: ignore
 
 import cantools.autosar
 import cantools.database
 from cantools.database import Message, Signal
+from cantools.database.can.formats import arxml, dbc, kcd, sym
 from cantools.database.can.formats.dbc import dbc_loader
 from cantools.database.can.formats.dbc.dbc_writer import LongNamesConverter
+from cantools.database.diagnostics.formats import cdd
 from cantools.database.errors import (
     DecodeError,
     EncodeError,
@@ -2604,7 +2606,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
     def test_add_bad_sym_string(self):
         db = cantools.database.Database()
 
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             db.add_sym_string('FormatVersion=6.0\n'
                               'Foo="Jopp"')
 
@@ -2919,10 +2921,255 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
     def test_add_bad_kcd_string(self):
         db = cantools.database.Database()
 
-        with self.assertRaises(ElementTree.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             db.add_kcd_string('not xml')
 
         self.assertEqual(str(cm.exception), 'syntax error: line 1, column 0')
+
+    def test_malformed_string_raises_parse_error(self):
+        cases = [
+            ('dbc', dbc_loader.load_string, 'abc',
+             'Invalid syntax at line 1, column 1: ">>!<<abc"'),
+            ('kcd', kcd.load_string, 'not xml',
+             'syntax error: line 1, column 0'),
+            ('kcd', kcd.load_string, '<WrongRootElement/>',
+             ('Expected root element tag '
+              '{http://kayak.2codeornot2code.org/1.0}NetworkDefinition, but '
+              'got WrongRootElement.')),
+            ('sym', sym.load_string, 'FormatVersion=6.0\nFoo="Jopp"',
+             'Invalid syntax at line 2, column 1: ">>!<<Foo="Jopp""'),
+            ('arxml', arxml.load_string, 'not xml',
+             'syntax error: line 1, column 0'),
+            ('arxml', arxml.load_string, '<AUTOSAR/>',
+             "No XML namespace specified or illegal root tag name 'AUTOSAR'"),
+            ('cdd', cdd.load_string, 'not xml',
+             'syntax error: line 1, column 0'),
+            ('cdd', cdd.load_string, '<ROOT/>',
+             'Could not find ECUDOC root element!'),
+        ]
+
+        for fmt, load, string, message in cases:
+            with self.subTest(fmt=fmt, string=string):
+                with self.assertRaises(ParseError) as cm:
+                    load(string)
+
+                self.assertNotIsInstance(cm.exception, ValueError)
+                self.assertEqual(str(cm.exception), message)
+
+                with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+                    cantools.database.load_string(string, database_format=fmt)
+
+                self.assertIsInstance(getattr(cm.exception, f'e_{fmt}'),
+                                      ParseError)
+                self.assertEqual(str(cm.exception),
+                                 f'{fmt.upper()}: "{message}"')
+
+    def test_load_string_probing(self):
+        # ParseError: the string is not in this format, try the next one
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.database.load_string('abc')
+
+        for e in [cm.exception.e_arxml,
+                  cm.exception.e_dbc,
+                  cm.exception.e_kcd,
+                  cm.exception.e_sym,
+                  cm.exception.e_cdd]:
+            self.assertIsInstance(e, ParseError)
+
+        # NotImplementedError: in this format, so do not try the others
+        unsupported = '<AUTOSAR xmlns="http://autosar.org/2.1.DAI.0"/>'
+
+        with (unittest.mock.patch.object(dbc, 'load_string',
+                                         wraps=dbc.load_string) as load_dbc,
+              self.assertRaises(NotImplementedError) as cm):
+            cantools.database.load_string(unsupported)
+
+        self.assertEqual(str(cm.exception),
+                         'This class only supports AUTOSAR versions 3 and 4')
+        load_dbc.assert_not_called()
+
+        with self.assertRaises(NotImplementedError):
+            cantools.database.load_string(unsupported, database_format='arxml')
+
+        # anything else is a bug in a loader: report it and carry on
+        kcd_string = (
+            '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
+            '<Bus name="B"><Message id="0x1" name="M">'
+            '<Signal name="S" offset="0" length="8"/>'
+            '</Message></Bus></NetworkDefinition>')
+        bug = ('DBC: "RuntimeError: boom" '
+               '(this is a bug in cantools that ought to be fixed)')
+
+        with unittest.mock.patch.object(dbc, 'load_string',
+                                        side_effect=RuntimeError('boom')):
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                db = cantools.database.load_string(kcd_string)
+
+            self.assertEqual(db.messages[0].name, 'M')
+            reported = [str(w.message) for w in caught
+                        if 'does not say whether' in str(w.message)]
+            self.assertEqual(len(reported), 1)
+            self.assertIn('probing for dbc raised RuntimeError', reported[0])
+            self.assertIn('boom', reported[0])
+
+            with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+                cantools.database.load_string('abc')
+
+            self.assertIsInstance(cm.exception.e_dbc, RuntimeError)
+            self.assertIsInstance(cm.exception.e_kcd, ParseError)
+            self.assertIn(bug, str(cm.exception))
+
+            with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+                cantools.database.load_string('abc', database_format='dbc')
+
+            self.assertEqual(str(cm.exception), bug)
+            self.assertIsInstance(cm.exception.__cause__, RuntimeError)
+
+    @pytest.mark.loader_may_raise
+    def test_load_string_sort_signals_exception(self):
+        # a sort_signals exception says nothing about the input
+        sentinel = TypeError('raised by sort_signals')
+
+        def sort_signals(signals):
+            raise sentinel
+
+        with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+            cantools.database.load_string(
+                'VERSION "1"\nBO_ 1 M: 8 N\n SG_ S : 0|8@1+ (1,0) [0|0] "" N\n',
+                sort_signals=sort_signals)
+
+        self.assertIs(cm.exception.e_dbc, sentinel)
+        self.assertIn('DBC: "TypeError: raised by sort_signals" '
+                      '(this is a bug in cantools that ought to be fixed)',
+                      str(cm.exception))
+
+    def test_malformed_content_raises_parse_error(self):
+        kcd_string = (
+            '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
+            '<Node id="1" name="N"/>'
+            '<Bus name="B"><Message id="0x1" name="M">'
+            '<Signal name="S" offset="0" length="8">'
+            '<LabelSet><Label name="L" value="1"/></LabelSet>'
+            '</Signal></Message></Bus></NetworkDefinition>')
+        sym_string = ('FormatVersion=6.0 // Do not edit this line!\n'
+                      '{SIGNALS}\n'
+                      'Sig=S unsigned 8\n'
+                      '{SENDRECEIVE}\n'
+                      '[M]\n'
+                      'ID=001h\n'
+                      'Sig=S 0\n')
+        dbc_string = ('VERSION "1"\n'
+                      'BO_ 1 M: 8 N\n'
+                      ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n')
+        cdd_string = (
+            '<CANDELA><ECUDOC>'
+            '<DATATYPES><IDENT id="t"><NAME><TUV>T</TUV></NAME>'
+            '<CVALUETYPE bl="8" bo="21"/></IDENT></DATATYPES>'
+            '<ECU><VAR><DIAGCLASS><DIAGINST id="d"><SIMPLECOMPCONT>'
+            '<DATAOBJ id="x" dtref="t"><QUAL>Q</QUAL></DATAOBJ>'
+            '</SIMPLECOMPCONT><STATICVALUE v="1"/><QUAL>D</QUAL>'
+            '</DIAGINST></DIAGCLASS></VAR></ECU>'
+            '</ECUDOC></CANDELA>')
+
+        with open('tests/files/arxml/system-4.2.arxml', encoding='utf-8') as fin:
+            arxml_string = fin.read()
+
+        with open('tests/files/arxml/ecu-extract-4.2.arxml',
+                  encoding='utf-8') as fin:
+            ecu_extract_string = fin.read()
+
+        for load, string in [(kcd.load_string, kcd_string),
+                             (sym.load_string, sym_string),
+                             (dbc.load_string, dbc_string),
+                             (cdd.load_string, cdd_string)]:
+            load(string)
+
+        cases = [
+            ('kcd', kcd.load_string,
+             kcd_string.replace('length="8"', 'length=""'),
+             ("Expected an integer for attribute 'length' of Signal 'S', "
+              "but got ''.")),
+            ('kcd', kcd.load_string,
+             kcd_string.replace('value="1"', 'value="x"'),
+             ("Expected an integer for attribute 'value' of Label 'L', "
+              "but got 'x'.")),
+            ('kcd', kcd.load_string,
+             kcd_string.replace(' offset="0"', ''),
+             "Missing attribute 'offset' of Signal 'S'."),
+            ('sym', sym.load_string,
+             sym_string.replace('Sig=S 0', 'Sig=U 0'),
+             "Signal 'U' is not defined."),
+            ('sym', sym.load_string,
+             sym_string.replace('unsigned 8', 'unsigned 8.5'),
+             ("Expected an integer for the length of signal 'S', "
+              "but got '8.5'.")),
+            ('dbc', dbc.load_string,
+             dbc_string.replace('BO_ 1 M', 'BO_ 1.5 M'),
+             "Expected an integer for the frame id of BO_ M, but got '1.5'."),
+            ('dbc', dbc.load_string,
+             dbc_string + 'BA_ "Nope" BO_ 1 1;\n',
+             "Attribute 'Nope' is not defined."),
+            ('arxml', arxml.load_string,
+             arxml_string.replace('<FRAME-LENGTH>2<', '<FRAME-LENGTH>x<', 1),
+             "Expected a number, but got 'x'"),
+            ('arxml', arxml.load_string,
+             re.sub(r'(ComBitPosition</DEFINITION-REF>\s*<VALUE>)4',
+                    r'\1x',
+                    ecu_extract_string,
+                    count=1),
+             ("Expected an integer for parameter 'ComBitPosition', "
+              "but got 'x'.")),
+            ('cdd', cdd.load_string,
+             cdd_string.replace('bl="8"', 'bl="x"'),
+             ("Expected an integer for attribute 'bl' of CVALUETYPE in data "
+              "type T, but got 'x'.")),
+            ('cdd', cdd.load_string,
+             cdd_string.replace('dtref="t"', 'dtref="u"'),
+             'Could not find data type u referenced by data with id=x!'),
+        ]
+
+        for fmt, load, string, message in cases:
+            with self.subTest(fmt=fmt, message=message):
+                with self.assertRaises(ParseError) as cm:
+                    load(string)
+
+                self.assertEqual(str(cm.exception), message)
+
+                with self.assertRaises(UnsupportedDatabaseFormatError) as cm:
+                    cantools.database.load_string(string)
+
+                self.assertIsInstance(getattr(cm.exception, f'e_{fmt}'),
+                                      ParseError)
+                self.assertNotIn('bug in cantools', str(cm.exception))
+
+    def test_files_raise_only_parse_error(self):
+        # every file as every format: only cantools errors may escape
+        encodings = {'.dbc': 'cp1252', '.sym': 'cp1252', '.cdd': 'iso-8859-1'}
+
+        for path in sorted(Path('tests/files').rglob('*')):
+            if not path.is_file():
+                continue
+
+            with open(path,
+                      encoding=encodings.get(path.suffix, 'utf-8'),
+                      errors='replace') as fin:
+                string = fin.read()
+
+            for database_format in ['arxml', 'dbc', 'kcd', 'sym', 'cdd', None]:
+                for strict in [True, False]:
+                    with self.subTest(file=str(path),
+                                      database_format=database_format,
+                                      strict=strict):
+                        try:
+                            cantools.database.load_string(
+                                string,
+                                database_format=database_format,
+                                strict=strict)
+                        except NotImplementedError:
+                            pass
+                        except UnsupportedDatabaseFormatError as e:
+                            self.assertNotIn('bug in cantools', str(e))
 
     def test_bus(self):
         bus = cantools.database.Bus('foo')
@@ -2935,7 +3182,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         self.assertEqual(cantools.database.can.formats.utils.num('1'), 1)
         self.assertEqual(cantools.database.can.formats.utils.num('1.0'), 1.0)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ParseError):
             cantools.database.can.formats.utils.num('x')
 
     def test_timing(self):
@@ -3305,7 +3552,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
 
     def test_dbc_parse_error_messages(self):
         # No valid entry.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
 
             dbc_loader.load_string('abc')
 
@@ -3314,7 +3561,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
             'Invalid syntax at line 1, column 1: ">>!<<abc"')
 
         # Bad message frame id.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc_loader.load_string('VERSION "1.0"\n'
                                    'BO_ dssd\n')
 
@@ -3323,7 +3570,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
             'Invalid syntax at line 2, column 5: "BO_ >>!<<dssd"')
 
         # Bad entry key.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc_loader.load_string('VERSION "1.0"\n'
                                    'dd\n')
 
@@ -3332,7 +3579,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
             'Invalid syntax at line 2, column 1: ">>!<<dd"')
 
         # Missing colon in message.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc_loader.load_string('VERSION "1.0"\n'
                                    'BO_ 546 EMV_Stati 8 EMV_Statusmeldungen\n')
 
@@ -3342,7 +3589,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
             '>>!<<8 EMV_Statusmeldungen"')
 
         # Missing frame id in message comment.
-        with self.assertRaises(textparser.ParseError) as cm:
+        with self.assertRaises(ParseError) as cm:
             dbc_loader.load_string('CM_ BO_ "Foo.";')
 
         self.assertEqual(
@@ -4841,7 +5088,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
             'ARXML: "Unrecognized XML namespace \'http://autosar.org/schema/argh4.0\'"')
 
         root = ElementTree.parse('tests/files/arxml/system-illegal-namespace-4.2.arxml').getroot()
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             cantools.database.can.formats.arxml.SystemLoader(root, strict=False)
 
         self.assertEqual(
@@ -4857,7 +5104,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
             'ARXML: "No XML namespace specified or illegal root tag name \'{http://autosar.org/schema/r4.0}AUTOSARGH\'"')
 
         root = ElementTree.parse('tests/files/arxml/system-illegal-root-4.2.arxml').getroot()
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             cantools.database.can.formats.arxml.SystemLoader(root, strict=False)
 
         self.assertEqual(
@@ -4871,6 +5118,13 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         self.assertEqual(
             str(cm.exception),
             'ARXML: "Could not parse AUTOSAR version \'4.2.2.1.0\'"')
+
+    def test_unsupported_autosar_version_arxml(self):
+        with self.assertRaises(NotImplementedError) as cm:
+            arxml.load_string('<AUTOSAR xmlns="http://autosar.org/2.1.DAI.0"/>')
+
+        self.assertEqual(str(cm.exception),
+                         'This class only supports AUTOSAR versions 3 and 4')
 
     def test_arxml_version(self):
         root = ElementTree.parse('tests/files/arxml/system-4.2.arxml').getroot()
@@ -5713,7 +5967,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         loader = cantools.database.can.formats.arxml.SystemLoader(root, strict=True)
 
         # a base node must always be specified
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             loader._get_arxml_children(None, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "Cannot retrieve a child element of a non-existing node!")
 
@@ -5746,7 +6000,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
                          ])
 
         # test unique location specifier if child nodes exist
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             loader._get_arxml_children(loader._root, ["AR-PACKAGES", "AR-PACKAGE"])
         self.assertEqual(str(cm.exception),
                          "Encountered a a non-unique child node of type AR-PACKAGE which ought to be unique")
@@ -5757,7 +6011,7 @@ DBC: "unused SIG_VALTYPE_ entries in DBC:
         self.assertEqual(foo, bar)
 
         # test non-unique location while assuming that it is unique
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ParseError) as cm:
             loader._get_unique_arxml_child(loader._root, ["AR-PACKAGES", "*AR-PACKAGE"])
         self.assertEqual(str(cm.exception), "['AR-PACKAGES', '*AR-PACKAGE'] does not resolve into a unique node")
 

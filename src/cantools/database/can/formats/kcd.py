@@ -169,7 +169,7 @@ def _load_multiplex_element(mux, nodes):
     return [mux_signal, *_merge_repeated_signals(signals)]
 
 
-def _signal_definition(signal):
+def _signal_definition(signal: Signal) -> tuple[object, ...]:
     """Return everything that defines a KCD signal except its name and
     multiplexer id.
 
@@ -191,7 +191,7 @@ def _signal_definition(signal):
             signal.receivers)
 
 
-def _merge_repeated_signals(signals):
+def _merge_repeated_signals(signals: list[Signal]) -> list[Signal]:
     """A signal sent under several multiplexer ids is listed in the
     MuxGroup of each id. Return the signals with each such signal
     loaded once with all of its ids. A name whose listings differ in
@@ -207,7 +207,9 @@ def _merge_repeated_signals(signals):
     merged_names = set()
 
     for name, listings in signals_by_name.items():
-        multiplexer_ids = [listing.multiplexer_ids[0] for listing in listings]
+        multiplexer_ids = [multiplexer_id
+                           for listing in listings
+                           for multiplexer_id in listing.multiplexer_ids or []]
         definition = _signal_definition(listings[0])
 
         if (len(listings) > 1

@@ -339,6 +339,21 @@ file names are also changed by this option.
 See `my_database_name.h`_ and `my_database_name.c`_ for the contents
 of the generated files.
 
+Use ``--file-name`` to set the output filename stem independently of the
+C namespace. For example, this generates ``Vehicle-Log.h`` and
+``Vehicle-Log.c`` while keeping ``my_database_name`` as the namespace:
+
+.. code-block:: text
+
+   $ python3 -m cantools generate_c_source --database-name my_database_name --file-name Vehicle-Log tests/files/dbc/motohawk.dbc
+   Successfully generated Vehicle-Log.h and Vehicle-Log.c.
+
+The stem also names the ``_fuzzer.c`` and ``_fuzzer.mk`` files when
+``--generate-fuzzer`` is used. It must start with an ASCII letter, digit or
+underscore and contain only ASCII letters, digits, underscores, periods or
+hyphens. Use ``--output-directory`` to choose a directory. Omitting
+``--file-name`` preserves the existing filenames.
+
 In the next example we use ``--no-floating-point-numbers`` to generate
 code without floating point types, i.e. ``float`` and ``double``.
 

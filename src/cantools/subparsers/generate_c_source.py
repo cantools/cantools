@@ -1,9 +1,20 @@
 import argparse
 import os
 import os.path
+import re
 
 from .. import database
 from ..database.can.c_source import camel_to_snake_case, generate
+
+
+def _file_name(value: str) -> str:
+    # The stem is also embedded in C includes and an unquoted Makefile rule.
+    if re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.-]*', value) is None:
+        raise argparse.ArgumentTypeError(
+            'use a filename stem starting with an ASCII letter, digit or '
+            'underscore and containing only ASCII letters, digits, '
+            'underscores, periods or hyphens')
+    return value
 
 
 def _do_generate_c_source(args):
@@ -19,10 +30,11 @@ def _do_generate_c_source(args):
     else:
         database_name = args.database_name
 
-    filename_h = database_name + '.h'
-    filename_c = database_name + '.c'
-    fuzzer_filename_c = database_name + '_fuzzer.c'
-    fuzzer_filename_mk = database_name + '_fuzzer.mk'
+    output_name = args.file_name if args.file_name is not None else database_name
+    filename_h = output_name + '.h'
+    filename_c = output_name + '.c'
+    fuzzer_filename_c = output_name + '_fuzzer.c'
+    fuzzer_filename_mk = output_name + '_fuzzer.mk'
 
     header, source, fuzzer_source, fuzzer_makefile = generate(
         dbase,
@@ -77,6 +89,13 @@ def add_subparser(subparsers):
         '--database-name',
         help=('The database name.  Uses the stem of the input file name if not'
               ' specified.'))
+    generate_c_source_parser.add_argument(
+        '--file-name',
+        type=_file_name,
+        help=('Output filename stem without an extension; defaults to the '
+              'database name. Does not change C identifiers. Use ASCII letters, '
+              'digits, underscores, periods or hyphens, starting with a letter, '
+              'digit or underscore.'))
     generate_c_source_parser.add_argument(
         '--no-floating-point-numbers',
         action='store_true',

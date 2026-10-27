@@ -155,7 +155,7 @@ def _load_multiplex_element(mux, nodes):
 
     mux_signal = _load_signal_element(mux, nodes)
     mux_signal.is_multiplexer = True
-    signals = [mux_signal]
+    signals = []
 
     for mux_group in mux.iterfind('ns:MuxGroup', NAMESPACES):
         multiplexer_id = mux_group.attrib['count']
@@ -166,7 +166,61 @@ def _load_multiplex_element(mux, nodes):
             signal.multiplexer_signal = mux_signal.name
             signals.append(signal)
 
-    return signals
+    return [mux_signal, *_merge_repeated_signals(signals)]
+
+
+def _signal_definition(signal):
+    """Return everything that defines a KCD signal except its name and
+    multiplexer id.
+
+    """
+
+    return (signal.start,
+            signal.length,
+            signal.byte_order,
+            signal.is_signed,
+            type(signal.conversion),
+            signal.scale,
+            signal.offset,
+            signal.is_float,
+            None if signal.choices is None else list(signal.choices.items()),
+            signal.minimum,
+            signal.maximum,
+            signal.unit,
+            signal.comments,
+            signal.receivers)
+
+
+def _merge_repeated_signals(signals):
+    """A signal sent under several multiplexer ids is listed in the
+    MuxGroup of each id. Return the signals with each such signal
+    loaded once with all of its ids. A name whose listings differ in
+    any other way, or repeat an id, is left as it is.
+
+    """
+
+    signals_by_name = defaultdict(list)
+
+    for signal in signals:
+        signals_by_name[signal.name].append(signal)
+
+    merged_names = set()
+
+    for name, listings in signals_by_name.items():
+        multiplexer_ids = [listing.multiplexer_ids[0] for listing in listings]
+        definition = _signal_definition(listings[0])
+
+        if (len(listings) > 1
+                and len(set(multiplexer_ids)) == len(multiplexer_ids)
+                and all(_signal_definition(listing) == definition
+                        for listing in listings[1:])):
+            listings[0].multiplexer_ids = multiplexer_ids
+            merged_names.add(name)
+
+    return [signal
+            for signal in signals
+            if (signal.name not in merged_names
+                or signal is signals_by_name[signal.name][0])]
 
 
 def _load_message_element(message, bus_name, nodes, strict, sort_signals):
@@ -361,8 +415,8 @@ def _dump_mux_groups(multiplexer_name, signals, node_refs, parent):
         if signal.multiplexer_signal != multiplexer_name:
             continue
 
-        multiplexer_id = signal.multiplexer_ids[0]
-        signals_per_count[multiplexer_id].append(signal)
+        for multiplexer_id in signal.multiplexer_ids:
+            signals_per_count[multiplexer_id].append(signal)
 
     for multiplexer_id, multiplexed_signals in signals_per_count.items():
         _dump_mux_group(multiplexer_id,

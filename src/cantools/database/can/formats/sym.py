@@ -945,6 +945,14 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
     return message_str
 
 def _dump_messages(database: InternalDatabase) -> str:
+    # The loader reads one Mux= signal per message, so independent or
+    # nested multiplexers would load back as a different message.
+    for message in database.messages:
+        num_multiplexers = sum(signal.is_multiplexer for signal in message.signals)
+        if num_multiplexers > 1:
+            raise ValueError(f"Message '{message.name}' has {num_multiplexers} multiplexer "
+                             "signals, but only one can be written to SYM.")
+
     send_messages = []
     receive_messages = []
     send_receive_messages = []
